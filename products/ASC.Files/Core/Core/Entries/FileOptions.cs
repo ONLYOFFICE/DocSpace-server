@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,8 +26,18 @@
 
 namespace ASC.Files.Core;
 
+/// <summary>
+/// The generic file options parameters.
+/// </summary>
 public class FileOptions<T>
 {
+    /// <summary>
+    /// Specifies if the file was renamed or not.
+    /// </summary>
     public bool Renamed { get; init; }
+
+    /// <summary>
+    /// The generic file.
+    /// </summary>
     public File<T> File { get; init; }
 }

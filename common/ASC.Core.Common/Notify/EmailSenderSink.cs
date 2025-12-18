@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -98,24 +98,19 @@ public class EmailSenderSinkMessageCreator(TenantManager tenantManager, CoreConf
             catch { }
         }
         m.Sender = from.ToString();
-
-        var to = new List<string>();
-        foreach (var address in message.Recipient.Addresses)
-        {
-            to.Add(MailAddressUtils.Create(address, message.Recipient.Name).ToString());
-        }
-        m.Reciever = string.Join("|", to.ToArray());
+        var to = message.Recipient.Addresses.Select(address => MailAddressUtils.Create(address, message.Recipient.Name).ToString()).ToArray();
+        m.Reciever = string.Join("|", to);
 
         var replyTag = message.Arguments.FirstOrDefault(x => x.Tag == "replyto");
-        if (replyTag is { Value: string value })
+        if (replyTag is { Value: string replyTagValue })
         {
             try
             {
-                m.ReplyTo = MailAddressUtils.Create(value).ToString();
+                m.ReplyTo = MailAddressUtils.Create(replyTagValue).ToString();
             }
             catch (Exception e)
             {
-                _logger.ErrorCreatingTag(replyTag.Value, e);
+                _logger.ErrorCreatingTag(replyTagValue, e);
             }
         }
 
@@ -132,16 +127,9 @@ public class EmailSenderSinkMessageCreator(TenantManager tenantManager, CoreConf
         }
 
         var autoSubmittedTag = message.Arguments.FirstOrDefault(x => x.Tag == "AutoSubmitted");
-        if (autoSubmittedTag is { Value: string })
+        if (autoSubmittedTag is { Value: string autoSubmittedTagValue })
         {
-            try
-            {
-                m.AutoSubmitted = autoSubmittedTag.Value.ToString();
-            }
-            catch (Exception e)
-            {
-                _logger.ErrorCreatingAutoSubmitted(replyTag.Value, e);
-            }
+            m.AutoSubmitted = autoSubmittedTagValue;
         }
 
         return m;

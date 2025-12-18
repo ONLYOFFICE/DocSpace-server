@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -102,244 +102,247 @@ public static class DbFileExtension
 
         return modelBuilder;
     }
-    
-    public static void MySqlAddDbFiles(this ModelBuilder modelBuilder)
+
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbFile>(entity =>
+        public void MySqlAddDbFiles()
         {
-            entity.Ignore(r => r.Folders);
-            entity.Ignore(r => r.IndexName);
-            entity.Ignore(r => r.Document);
+            modelBuilder.Entity<DbFile>(entity =>
+            {
+                entity.Ignore(r => r.Folders);
+                entity.Ignore(r => r.IndexName);
+                entity.Ignore(r => r.Document);
 
-            entity.HasKey(e => new { e.TenantId, e.Id, e.Version })
-                .HasName("PRIMARY");
+                entity.HasKey(e => new { e.TenantId, e.Id, e.Version })
+                    .HasName("PRIMARY");
 
-            entity.ToTable("files_file")
-                .HasCharSet("utf8");
+                entity.ToTable("files_file")
+                    .HasCharSet("utf8");
 
-            entity.HasIndex(e => e.ParentId)
-                .HasDatabaseName("folder_id");
+                entity.HasIndex(e => e.ParentId)
+                    .HasDatabaseName("folder_id");
 
-            entity.HasIndex(e => e.Id)
-                .HasDatabaseName("id");
+                entity.HasIndex(e => e.Id)
+                    .HasDatabaseName("id");
 
-            entity.HasIndex(e => e.ModifiedOn)
-                .HasDatabaseName("modified_on");
+                entity.HasIndex(e => e.ModifiedOn)
+                    .HasDatabaseName("modified_on");
 
-            entity.HasIndex(e => new { e.TenantId, e.ParentId, e.Title })
-                .HasDatabaseName("tenant_id_folder_id_title");
+                entity.HasIndex(e => new { e.TenantId, e.ParentId, e.Title })
+                    .HasDatabaseName("tenant_id_folder_id_title");
 
-            entity.HasIndex(e => new { e.TenantId, e.ParentId, e.ModifiedOn })
-                .HasDatabaseName("tenant_id_folder_id_modified_on");
+                entity.HasIndex(e => new { e.TenantId, e.ParentId, e.ModifiedOn })
+                    .HasDatabaseName("tenant_id_folder_id_modified_on");
 
-            entity.HasIndex(e => new { e.TenantId, e.ParentId, e.ContentLength })
-                .HasDatabaseName("tenant_id_folder_id_content_length");
+                entity.HasIndex(e => new { e.TenantId, e.ParentId, e.ContentLength })
+                    .HasDatabaseName("tenant_id_folder_id_content_length");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+                entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
-            entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.Id).HasColumnName("id");
 
-            entity.Property(e => e.Version).HasColumnName("version");
+                entity.Property(e => e.Version).HasColumnName("version");
 
-            entity.Property(e => e.Category)
-                .HasColumnName("category")
-                .HasDefaultValueSql("'0'");
+                entity.Property(e => e.Category)
+                    .HasColumnName("category")
+                    .HasDefaultValueSql("'0'");
 
-            entity.Property(e => e.Changes)
-                .HasColumnName("changes")
-                .HasColumnType("mediumtext")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Changes)
+                    .HasColumnName("changes")
+                    .HasColumnType("mediumtext")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Comment)
-                .HasColumnName("comment")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Comment)
+                    .HasColumnName("comment")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.ContentLength)
-                .HasColumnName("content_length")
-                .HasDefaultValueSql("'0'");
+                entity.Property(e => e.ContentLength)
+                    .HasColumnName("content_length")
+                    .HasDefaultValueSql("'0'");
 
-            entity.Property(e => e.ConvertedType)
-                .HasColumnName("converted_type")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.ConvertedType)
+                    .HasColumnName("converted_type")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.CreateBy)
-                .IsRequired()
-                .HasColumnName("create_by")
-                .HasColumnType("char(38)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.CreateBy)
+                    .IsRequired()
+                    .HasColumnName("create_by")
+                    .HasColumnType("char(38)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.CreateOn)
-                .HasColumnName("create_on")
-                .HasColumnType("datetime");
+                entity.Property(e => e.CreateOn)
+                    .HasColumnName("create_on")
+                    .HasColumnType("datetime");
 
-            entity.Property(e => e.CurrentVersion)
-                .HasColumnName("current_version")
-                .HasColumnType("tinyint(1)")
-                .HasDefaultValueSql("'0'");
+                entity.Property(e => e.CurrentVersion)
+                    .HasColumnName("current_version")
+                    .HasColumnType("tinyint(1)")
+                    .HasDefaultValueSql("'0'");
 
-            entity.Property(e => e.ThumbnailStatus)
-                .HasColumnName("thumb")
-                .HasDefaultValueSql("'0'");
+                entity.Property(e => e.ThumbnailStatus)
+                    .HasColumnName("thumb")
+                    .HasDefaultValueSql("'0'");
 
-            entity.Property(e => e.Encrypted)
-                .HasColumnType("tinyint(1)")
-                .HasColumnName("encrypted")
-                .HasDefaultValueSql("'0'");
+                entity.Property(e => e.Encrypted)
+                    .HasColumnType("tinyint(1)")
+                    .HasColumnName("encrypted")
+                    .HasDefaultValueSql("'0'");
 
-            entity.Property(e => e.FileStatus)
-                .HasColumnName("file_status")
-                .HasDefaultValueSql("'0'");
+                entity.Property(e => e.FileStatus)
+                    .HasColumnName("file_status")
+                    .HasDefaultValueSql("'0'");
 
-            entity.Property(e => e.ParentId)
-                .HasColumnName("folder_id")
-                .HasDefaultValueSql("'0'");
+                entity.Property(e => e.ParentId)
+                    .HasColumnName("folder_id")
+                    .HasDefaultValueSql("'0'");
 
-            entity.Property(e => e.Forcesave)
-                .HasColumnName("forcesave")
-                .HasDefaultValueSql("'0'");
+                entity.Property(e => e.Forcesave)
+                    .HasColumnName("forcesave")
+                    .HasDefaultValueSql("'0'");
 
-            entity.Property(e => e.ModifiedBy)
-                .IsRequired()
-                .HasColumnName("modified_by")
-                .HasColumnType("char(38)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.ModifiedBy)
+                    .IsRequired()
+                    .HasColumnName("modified_by")
+                    .HasColumnType("char(38)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.ModifiedOn)
-                .HasColumnName("modified_on")
-                .HasColumnType("datetime");
+                entity.Property(e => e.ModifiedOn)
+                    .HasColumnName("modified_on")
+                    .HasColumnType("datetime");
 
-            entity.Property(e => e.Title)
-                .IsRequired()
-                .HasColumnName("title")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Title)
+                    .IsRequired()
+                    .HasColumnName("title")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.VersionGroup)
-                .HasColumnName("version_group")
-                .HasDefaultValueSql("'1'");
-        });
+                entity.Property(e => e.VersionGroup)
+                    .HasColumnName("version_group")
+                    .HasDefaultValueSql("'1'");
+            });
 
-    }
-    
-    public static void PgSqlAddDbFiles(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<DbFile>(entity =>
+        }
+
+        public void PgSqlAddDbFiles()
         {
-            entity.Ignore(r => r.Folders);
-            entity.Ignore(r => r.IndexName);
-            entity.Ignore(r => r.Document);
+            modelBuilder.Entity<DbFile>(entity =>
+            {
+                entity.Ignore(r => r.Folders);
+                entity.Ignore(r => r.IndexName);
+                entity.Ignore(r => r.Document);
 
-            entity.HasKey(e => new { e.TenantId, e.Id, e.Version });
+                entity.HasKey(e => new { e.TenantId, e.Id, e.Version });
 
-            entity.ToTable("files_file");
+                entity.ToTable("files_file");
 
-            entity.HasIndex(e => e.ParentId)
-                .HasDatabaseName("folder_id");
+                entity.HasIndex(e => e.ParentId)
+                    .HasDatabaseName("folder_id");
 
-            entity.HasIndex(e => e.Id)
-                .HasDatabaseName("id");
+                entity.HasIndex(e => e.Id)
+                    .HasDatabaseName("id");
 
-            entity.HasIndex(e => e.ModifiedOn)
-                .HasDatabaseName("modified_on");
+                entity.HasIndex(e => e.ModifiedOn)
+                    .HasDatabaseName("modified_on");
 
-            entity.HasIndex(e => new { e.TenantId, e.ParentId, e.Title })
-                .HasDatabaseName("tenant_id_folder_id_title");
+                entity.HasIndex(e => new { e.TenantId, e.ParentId, e.Title })
+                    .HasDatabaseName("tenant_id_folder_id_title");
 
-            entity.HasIndex(e => new { e.TenantId, e.ParentId, e.ModifiedOn })
-                .HasDatabaseName("tenant_id_folder_id_modified_on");
+                entity.HasIndex(e => new { e.TenantId, e.ParentId, e.ModifiedOn })
+                    .HasDatabaseName("tenant_id_folder_id_modified_on");
 
-            entity.HasIndex(e => new { e.TenantId, e.ParentId, e.ContentLength })
-                .HasDatabaseName("tenant_id_folder_id_content_length");
+                entity.HasIndex(e => new { e.TenantId, e.ParentId, e.ContentLength })
+                    .HasDatabaseName("tenant_id_folder_id_content_length");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+                entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
-            entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.Id).HasColumnName("id");
 
-            entity.Property(e => e.Version).HasColumnName("version");
+                entity.Property(e => e.Version).HasColumnName("version");
 
-            entity.Property(e => e.Category)
-                .HasColumnName("category")
-                .HasDefaultValueSql("0");
+                entity.Property(e => e.Category)
+                    .HasColumnName("category")
+                    .HasDefaultValueSql("0");
 
-            entity.Property(e => e.Changes)
-                .HasColumnName("changes")
-                .HasColumnType("text");
+                entity.Property(e => e.Changes)
+                    .HasColumnName("changes")
+                    .HasColumnType("text");
 
-            entity.Property(e => e.Comment)
-                .HasColumnName("comment")
-                .HasColumnType("character varying")
-                .HasMaxLength(255);
+                entity.Property(e => e.Comment)
+                    .HasColumnName("comment")
+                    .HasColumnType("character varying")
+                    .HasMaxLength(255);
 
-            entity.Property(e => e.ContentLength)
-                .HasColumnName("content_length")
-                .HasDefaultValueSql("0");
+                entity.Property(e => e.ContentLength)
+                    .HasColumnName("content_length")
+                    .HasDefaultValueSql("0");
 
-            entity.Property(e => e.ConvertedType)
-                .HasColumnName("converted_type")
-                .HasColumnType("character varying")
-                .HasMaxLength(10);
+                entity.Property(e => e.ConvertedType)
+                    .HasColumnName("converted_type")
+                    .HasColumnType("character varying")
+                    .HasMaxLength(10);
 
-            entity.Property(e => e.CreateBy)
-                .IsRequired()
-                .HasColumnName("create_by")
-                .HasColumnType("uuid");
+                entity.Property(e => e.CreateBy)
+                    .IsRequired()
+                    .HasColumnName("create_by")
+                    .HasColumnType("uuid");
 
-            entity.Property(e => e.CreateOn)
-                .HasColumnName("create_on")
-                .HasColumnType("timestamptz");
+                entity.Property(e => e.CreateOn)
+                    .HasColumnName("create_on")
+                    .HasColumnType("timestamptz");
 
-            entity.Property(e => e.CurrentVersion)
-                .HasColumnName("current_version")
-                .HasColumnType("boolean")
-                .HasDefaultValueSql("false");
+                entity.Property(e => e.CurrentVersion)
+                    .HasColumnName("current_version")
+                    .HasColumnType("boolean")
+                    .HasDefaultValueSql("false");
 
-            entity.Property(e => e.ThumbnailStatus)
-                .HasColumnName("thumb")
-                .HasDefaultValueSql("0");
+                entity.Property(e => e.ThumbnailStatus)
+                    .HasColumnName("thumb")
+                    .HasDefaultValueSql("0");
 
-            entity.Property(e => e.Encrypted)
-                .HasColumnType("boolean")
-                .HasColumnName("encrypted")
-                .HasDefaultValueSql("false");
+                entity.Property(e => e.Encrypted)
+                    .HasColumnType("boolean")
+                    .HasColumnName("encrypted")
+                    .HasDefaultValueSql("false");
 
-            entity.Property(e => e.FileStatus)
-                .HasColumnName("file_status")
-                .HasDefaultValueSql("0");
+                entity.Property(e => e.FileStatus)
+                    .HasColumnName("file_status")
+                    .HasDefaultValueSql("0");
 
-            entity.Property(e => e.ParentId)
-                .HasColumnName("folder_id")
-                .HasDefaultValueSql("0");
+                entity.Property(e => e.ParentId)
+                    .HasColumnName("folder_id")
+                    .HasDefaultValueSql("0");
 
-            entity.Property(e => e.Forcesave)
-                .HasColumnName("forcesave")
-                .HasDefaultValueSql("0");
+                entity.Property(e => e.Forcesave)
+                    .HasColumnName("forcesave")
+                    .HasDefaultValueSql("0");
 
-            entity.Property(e => e.ModifiedBy)
-                .IsRequired()
-                .HasColumnName("modified_by")
-                .HasColumnType("uuid");
+                entity.Property(e => e.ModifiedBy)
+                    .IsRequired()
+                    .HasColumnName("modified_by")
+                    .HasColumnType("uuid");
 
-            entity.Property(e => e.ModifiedOn)
-                .HasColumnName("modified_on")
-                .HasColumnType("timestamptz");
+                entity.Property(e => e.ModifiedOn)
+                    .HasColumnName("modified_on")
+                    .HasColumnType("timestamptz");
 
-            entity.Property(e => e.Title)
-                .IsRequired()
-                .HasColumnName("title")
-                .HasColumnType("character varying")
-                .HasMaxLength(400);
+                entity.Property(e => e.Title)
+                    .IsRequired()
+                    .HasColumnName("title")
+                    .HasColumnType("character varying")
+                    .HasMaxLength(400);
 
-            entity.Property(e => e.VersionGroup)
-                .HasColumnName("version_group")
-                .HasDefaultValueSql("1");
-        });
+                entity.Property(e => e.VersionGroup)
+                    .HasColumnName("version_group")
+                    .HasDefaultValueSql("1");
+            });
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,7 +33,6 @@ public class OwnerController(
     MessageService messageService,
     CommonLinkUtility commonLinkUtility,
     StudioNotifyService studioNotifyService,
-    ApiContext apiContext,
     UserManager userManager,
     TenantManager tenantManager,
     AuthContext authContext,
@@ -41,10 +40,9 @@ public class OwnerController(
     WebItemManager webItemManager,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     IFusionCache fusionCache,
-    IHttpContextAccessor httpContextAccessor,
     IUrlShortener urlShortener,
     UserManagerWrapper userManagerWrapper)
-    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+    : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <summary>
     /// Sends the instructions to change the DocSpace owner.
@@ -55,9 +53,10 @@ public class OwnerController(
     /// <path>api/2.0/settings/owner</path>
     [Tags("Settings / Owner")]
     [SwaggerResponse(200, "Message about changing the portal owner", typeof(OwnerChangeInstructionsDto))]
+    [SwaggerResponse(400, "Owner's email is not activated")]
     [SwaggerResponse(403, "Collaborator can not be an owner")]
     [HttpPost("")]
-    public async Task<OwnerChangeInstructionsDto> SendOwnerChangeInstructionsAsync(OwnerIdSettingsRequestDto inDto)
+    public async Task<OwnerChangeInstructionsDto> SendOwnerChangeInstructions(OwnerIdSettingsRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -65,13 +64,18 @@ public class OwnerController(
         var owner = await userManager.GetUsersAsync(curTenant.OwnerId);
         var newOwner = await userManager.GetUsersAsync(inDto.OwnerId);
 
+        if (owner.ActivationStatus != EmployeeActivationStatus.Activated)
+        {
+            throw new ArgumentException("Owner's email is not activated");
+        }
+
         if (await userManager.IsGuestAsync(newOwner))
         {
             throw new SecurityException("Collaborator can not be an owner");
         }
 
-        if (!owner.Id.Equals(authContext.CurrentAccount.ID) || 
-            Guid.Empty.Equals(newOwner.Id) || 
+        if (!owner.Id.Equals(authContext.CurrentAccount.ID) ||
+            Guid.Empty.Equals(newOwner.Id) ||
             newOwner.Status != EmployeeStatus.Active)
         {
             return new OwnerChangeInstructionsDto { Status = 0, Message = Resource.ErrorAccessDenied };
@@ -99,7 +103,7 @@ public class OwnerController(
     [SwaggerResponse(409, "")]
     [HttpPut("")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalOwnerChange")]
-    public async Task OwnerAsync(OwnerIdSettingsRequestDto inDto)
+    public async Task UpdatePortalOwner(OwnerIdSettingsRequestDto inDto)
     {
         var newOwner = Constants.LostUser;
         try
@@ -125,7 +129,7 @@ public class OwnerController(
         {
             throw new Exception(Resource.ErrorAccessDenied);
         }
-        
+
         var newOwnerType = await userManager.GetUserTypeAsync(newOwner);
         if (newOwnerType != EmployeeType.DocSpaceAdmin)
         {

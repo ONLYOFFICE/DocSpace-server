@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -79,13 +79,13 @@ public sealed class RedisLockOptionsBuilder
         {
             options = null;
         }
-        
+
         var expiry = options?._expiry ?? _defaultExpiry;
         var timeout = options?._timeout ?? _defaultMinimumTimeout;
 
         var extendInterval = expiry / 3;
-        
-        if (options?._extendInterval is { } optExtendInterval 
+
+        if (options?._extendInterval is { } optExtendInterval
             && optExtendInterval > TimeSpan.Zero && optExtendInterval < expiry)
         {
             extendInterval = optExtendInterval;

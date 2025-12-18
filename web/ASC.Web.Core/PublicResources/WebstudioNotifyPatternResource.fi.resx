@@ -153,37 +153,37 @@ $TrulyYours</value>
     <value>Uusi käyttäjä lisätty ${LetterLogoText} portaaliin</value>
   </data>
   <data name="ActionFileCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; uusi dokumentti luotu: &lt;a href={1}&gt;{2}&lt;/a&gt; huoneessa: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; uusi dokumentti luotu: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; huoneessa: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionNewComment" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; uusi kommentti lisätty dokumentin versioon: &lt;a href={1}&gt;{2}&lt;/a&gt; huoneessa: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; uusi kommentti lisätty dokumentin versioon: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; huoneessa: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileUploaded" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; uusi dokumentti ladattu: &lt;a href={1}&gt;{2}&lt;/a&gt; huoneessa: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; uusi dokumentti ladattu: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; huoneessa: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomRenamed" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; huone nimetty uudelleen: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href={2}&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; huone nimetty uudelleen: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; uusi huone luotu: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; uusi huone luotu: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; poistettu huoneesta: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; poistettu huoneesta: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileEdited" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; muokkasi dokumenttia: &lt;a href={1}&gt;{2}&lt;/a&gt; huoneessa: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; muokkasi dokumenttia: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; huoneessa: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomRemoved" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; huone poistettu: &lt;b&gt;{1}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserAddedToRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; lisättiin huoneeseen: &lt;a href={1}&gt;{2}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; lisättiin huoneeseen: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomArchived" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; siirrettiin huoneeseen: &lt;a href={1}&gt;{2}&lt;/a&gt; to arkisto - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; siirrettiin huoneeseen: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; to arkisto - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomUpdateAccessForUser" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; määrättiin rooliin &lt;b&gt;{1}&lt;/b&gt; huoneessa: &lt;a href={2}&gt;{3}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; määrättiin rooliin &lt;b&gt;{1}&lt;/b&gt; huoneessa: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
     <value>Uusi DocSpace käyttäjä lisätty: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
@@ -597,7 +597,7 @@ $Body</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace on &lt;span style="color: #FF6F3D;"&gt;poistettu käytöstä&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace on &lt;span style="color: #FF6F3D;"&gt;poistettu&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;${LetterLogoText} DocSpacesi on onnistuneesti poistettu käytöstä. Ole hyvä ja huomioi, että kaikki tiedot poistetaan &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Tietosuojakäytäntömme&lt;/a&gt; mukaisesti.&lt;/td&gt;&lt;/tr&gt;
 
@@ -637,17 +637,6 @@ $TrulyYours</value>
 Ole hyvä ja ota huomioon, että armonaika $PaymentDelay päivää ${LetterLogoText} DocSpaceen on aktivoitu.
 
 Varmista, että maksat Yritystilauksesi ennen kuin armonaika päättyy. Näin pystyt jatkamaan kaikkien ${LetterLogoText} DocSpacen etujen käyttöä.
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Hei, $UserName!
-
-Ole hyvä ja ota huomioon, että ${LetterLogoText} DocSpacesi tilaus päättyy kolmen päivän päästä. Sen jälkeen armonaika $PaymentDelay päivää aktivoidaan.
-
-Suosittelemme, että maksat Yritystilauksesi nyt ja voit jatkaa kaikkien ${LetterLogoText} DocSpacen etujen käyttöä.
 
 $OrangeButton
 
@@ -738,7 +727,7 @@ $TrulyYours</value>
     <value>Liity ${LetterLogoText} DocSpaceen</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace on poistettu käytöstä</value>
+    <value>${LetterLogoText} DocSpace on poistettu</value>
   </data>
   <data name="subject_for_sales_notify" xml:space="preserve">
     <value>Pyyntö myyntiosastolle</value>
@@ -775,9 +764,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_user_ldap_activation" xml:space="preserve">
     <value>Sinut on kutsuttu liittymään ${__VirtualRootHost}</value>
-  </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace- tilauksesi on päättymässä</value>
   </data>
   <data name="subject_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>${LetterLogoText} DocSpacesi poistetaan</value>
@@ -963,7 +949,9 @@ ${LetterLogoText}-portaaliin kirjautumiseen käyttämäsi todennussovelluksen as
 
 Ole hyvä ja klikkaa alla olevaa painiketta mennäksesi portaalin sisäänkirjautumissivulle ja määritä todennussovellus:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1. Portaalin "${__VirtualRootPath}":"${__VirtualRootPath}" omistajan muutos
@@ -1657,9 +1645,9 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_activation" xml:space="preserve">
     <value>Hei, $UserName!
 
-ONLY OFFICE DocSpace Developer-lisenssi päättyy 7 päivän päästä.
+${LetterLogoText} DocSpace Developer-lisenssi päättyy 7 päivän päästä.
 
-Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia "${__SalesEmail}":"mailto:${__SalesEmail}.
+Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia "${__SalesEmail}":"mailto:${__SalesEmail}".
 
 Maksuihin liittyvissä kysymyksissä, ota yhteyttä "${__SalesEmail}":"mailto:${__SalesEmail}". Teknisiin ongelmiin liittyvissä kysymyksissä ole yhteydessä "${__SupportLink}":"${__SupportLink}".
 
@@ -1668,9 +1656,9 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_before_expiration" xml:space="preserve">
     <value>Hei, $UserName!
 
-ONLY OFFICE DocSpace Developer-lisenssin lisäaika päättyy 7 päivän päästä.Se tarkoittaa sitä, että DocSpace ei ole enää käytettävissä.
+${LetterLogoText} DocSpace Developer-lisenssin lisäaika päättyy 7 päivän päästä.Se tarkoittaa sitä, että DocSpace ei ole enää käytettävissä.
 
-Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia "${__SalesEmail}":"mailto:${__SalesEmail}.
+Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia "${__SalesEmail}":"mailto:${__SalesEmail}".
 
 Maksuihin liittyvissä kysymyksissä, ota yhteyttä "${__SalesEmail}":"mailto:${__SalesEmail}". Teknisiin ongelmiin liittyvissä kysymyksissä ole yhteydessä "${__SupportLink}":"${__SupportLink}".
 
@@ -1679,9 +1667,9 @@ $TrulyYours</value>
   <data name="pattern_developer_admin_payment_warning_grace_period_expiration" xml:space="preserve">
     <value>Hei, $UserName!
 
-ONLY OFFICE DocSpace Developer-lisenssin lisäaika päättyy tänään. Se tarkoittaa sitä, että DocSpace ei ole enää käytettävissä.
+${LetterLogoText} DocSpace Developer-lisenssin lisäaika päättyy tänään. Se tarkoittaa sitä, että DocSpace ei ole enää käytettävissä.
 
-Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia "${__SalesEmail}":"mailto:${__SalesEmail}.
+Päivittääksesi lisenssin, ole hyvä ja ota yhteyttä myyntijohtajaamme suoraan tai lähetä meille sähköpostia "${__SalesEmail}":"mailto:${__SalesEmail}".
 
 Maksuihin liittyvissä kysymyksissä, ota yhteyttä "${__SalesEmail}":"mailto:${__SalesEmail}". Teknisiin ongelmiin liittyvissä kysymyksissä ole yhteydessä "${__SupportLink}":"${__SupportLink}".
 
@@ -1782,11 +1770,13 @@ $TrulyYours</value>
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Hei, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Olet juuri *luonut ${LetterLogoText} DocSpacen*, asiakirjakeskittymän, jossa voit tehostaa yhteistyötä tiimisi, asiakkaittesi, kumppaneittesi jne kanssa. Sen osoite on &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Olet juuri *luonut ${LetterLogoText} DocSpacen*, asiakirjakeskittymän, jossa voit tehostaa yhteistyötä tiimisi, asiakkaittesi, kumppaneittesi jne kanssa. Sen osoite on &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
+#if($OrangeButton != "")
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Vahvista sähköpostiosoitteesi (linkki on voimassa 7 päivää):&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 44px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
+#end
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;Nykyinen hinnoittelusi on STARTUP. Se on täysin ilmainen ja sisältää:&lt;/td&gt;&lt;/tr&gt;
 
@@ -1892,5 +1882,215 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 26px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Jos tarvitset apua, selaa &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;Help Centeriä&lt;/a&gt; tai kysy &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__SupportLink}"&gt;tuki tiimiltä&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
+  </data>
+  <data name="pattern_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Sinun ${LetterLogoText} DocSpace &lt;span style="color: #FF6F3D;"&gt;poistetaan&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Sinun ${LetterLogoText} DocSpace ${__VirtualRootPath} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; ei ole ollut aktiivinen yli vuoteen.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Koska olet päättänyt olla käyttämättä sitä, sinun ${LetterLogoText} DocSpace ja kaikki tiedot poistetaan &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Tietosuojakäytäntömme &lt;/a&gt; mukaisesti.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;Arvostamme palautettasi. Miksi olet lopettanut ${LetterLogoText} DocSpacen käyttämisen?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Jos haluat jatkaa sinun ${LetterLogoText} DocSpacen käyttöä, kirjoita se ja tee mitä tahansa.&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_role_changed" xml:space="preserve">
+    <value>Hei!
+
+Sinulle on osoitettu uusi rooli DocSpacen huoneessa "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+Lue lisää huoneen rooleista ja oikeuksista "Help Centerissä":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_type_changed" xml:space="preserve">
+    <value>Hei!
+
+Sinulle on annettu uusi käyttäjätyyppi DocSpacessa "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
+
+Lue lisää käyttäjätyypeistä ja oikeuksista "Help Centerissä":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_rooms_activity" xml:space="preserve">
+    <value>Uutta portaalissasi ${__VirtualRootHost} viimeisen tunnin ajalta</value>
+  </data>
+  <data name="subject_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>${LetterLogoText} DocSpacesi poistetaan</value>
+  </data>
+  <data name="subject_user_type_changed" xml:space="preserve">
+    <value>DocSpace käyttäjätyyppisi on muuttunut</value>
+  </data>
+  <data name="subject_user_role_changed" xml:space="preserve">
+    <value>Roolisi Docspace-huoneessa on muuttunut</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Mene Palveluihin</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Mene Lompakon asetuksiin</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Hei, $UserName!
+
+Otamme sinuun yhteyttä ilmoittaaksemme, että ostamasi palvelupaketin automaattista uusimista ei voitu suorittaa.
+
+Pyydämme sinua ystävällisesti uusimaan nykyisen palvelupakettisi manuaalisesti (tai ostamaan uuden).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Hei, $UserName!
+
+Haluamme ilmoittaa, että tilausmaksusi veloitetaan automaattisesti tililtäsi 3 päivän kuluttua.
+
+Varmistaaksesi sujuvan maksutapahtuman, varmista, että maksutavallasi on riittävästi katetta.
+
+Jos sinulla on kysyttävää tai tarvitse apua, ota rohkeasti yhteyttä "tukitiimiimme":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>Salasanasi vaihdettiin onnistuneesti</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>Avaa DocSpace</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Tuleva tilausmaksu ${LetterLogoText} DocSpace -tilistäsi</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Vaadittu toimenpide: ${LetterLogoText} DocSpace -lompakkosi saldon automaattinen täydentäminen ei onnistu</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Tarvittava toimenpide: Palvelusuunnitelmaa ei voi uusia automaattisesti DocSpacessasi ${LetterLogoText}</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.Salasanan vaihto onnistui
+
+Tilisi *$UserName*, *$UserEmail* salasana vaihdettiin onnistuneesti *$Date* DocSpacessa: "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+IP: *$IP*
+Laite: *$Device*
+#if($Location != "")
+Sijainti: *$Location*
+#end
+Selain: *$Browser*
+
+Jos teit tämän toimenpiteen itse, lisätoimenpiteitä ei tarvita. Jos tämä muutos näyttää epäilyttävältä tai et ole valtuuttanut sitä, palauta salasanasi välittömästi ja poista DocSpacen käyttöoikeus tältä laitteelta.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Hei, $UserName!
+
+Otamme sinuun yhteyttä ilmoittaaksemme, että DocSpace-lompakon saldon automaattinen lataus epäonnistui.
+
+Pyydämme sinua ystävällisesti tarkistamaan ja päivittämään lompakkosi saldon manuaalisesti.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="ActionUserRemovedFromAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; poistettiin agentista: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentUpdateAccessForUser" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; määrättiin rooli &lt;b&gt;{1}&lt;/b&gt; agentissa: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserAddedToAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; lisättiin agenttiin: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionAgentRenamed" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; agentti nimetty uudelleen: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRemoved" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; agentti poistettu: &lt;b&gt;{1}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentCreated" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; uusi agentti luotu: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="subject_backup_failed" xml:space="preserve">
+    <value>DocSpacesi varmuuskopiointi epäonnistui</value>
+  </data>
+  <data name="subject_scheduled_backup_failed" xml:space="preserve">
+    <value>DocSpacesi automaattinen varmuuskopiointi epäonnistui</value>
+  </data>
+  <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Sinut on kutsuttu ${LetterLogoText} DocSpace agenttiin</value>
+  </data>
+  <data name="ButtonJoinAgent" xml:space="preserve">
+    <value>Liity agenttiin</value>
+  </data>
+  <data name="subject_saas_agent_invite" xml:space="preserve">
+    <value>Liity ${LetterLogoText} DocSpaceen</value>
+  </data>
+  <data name="pattern_backup_failed_tg" xml:space="preserve">
+    <value>Hei, $UserName,
+
+DocSpacesi  [${__VirtualRootPath}](${__VirtualRootPath}) varmuuskopiointi on epäonnistunut.
+
+Jos sinulla on kysyttävää tai tarvitset apua, älä epäröi ottaa meihin yheyttä [${__SupportLink}](${__SupportLink}) kautta.
+Ystävällisin terveisin,
+${LetterLogoText} Tukitiimi
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="pattern_backup_failed" xml:space="preserve">
+    <value>Hei, $UserName,
+
+DocSpacesi "${__VirtualRootPath}":"${__VirtualRootPath}" varmuuskopiointi on epäonnistunut.
+
+Jos sinulla on kysyttävää tai tarvitset apua, älä epäröi ottaa meihin yhteyttä "${__SupportLink}":"${__SupportLink}" kautta. 
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_agent_invite" xml:space="preserve">
+    <value>Hei!
+
+Sinut on kutsuttu liittymään DocSpace agenttiin "${__VirtualRootPath}":"${__VirtualRootPath}". Hyväksy kutsu klikkaamalla linkkiä:
+
+$OrangeButton
+
+Aseta uusi salasana tilillesi kutsulinkin klikkaamisen jälkeen.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Hei!
+
+$__AuthorName kutsui sinut liittymään agenttiin "$Message":"$InviteLink"  "${__VirtualRootPath}":"${__VirtualRootPath}":ssa.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed" xml:space="preserve">
+    <value>Hei, $UserName,
+
+DocSpacesi "${__VirtualRootPath}":"${__VirtualRootPath}" ajoitettu varmuuskopiointi on epäonnistunut.
+
+Suosittelemme tarkistamaan asetukset "Varmuuskopio":"${__VirtualRootPath}/portal-settings/backup/data-backup" ja "Palvelut":"${__VirtualRootPath}/portal-settings/services".
+
+Jos sinulla on kysyttävää tai tarvitset apua, älä epäröi ottaa meihin yhteyttä "${__SupportLink}":"${__SupportLink}" kautta.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
+    <value>Hei, $UserName,
+
+DocSpacesi [${__VirtualRootPath}](${__VirtualRootPath}) ajoitettu varmuuskopiointi on epäonnistunut.
+
+Suosittelemme tarkistamaan asetukset [Varmuuskopio](${__VirtualRootPath}/portal-settings/backup/data-backup) ja [Palvelut](${__VirtualRootPath}/portal-settings/services).
+
+Jos sinulla on kysyttävää tai tarvitset apua, älä epäröi ottaa meihin yheyttä [${__SupportLink}](${__SupportLink}) kautta.
+Ystävällisin terveisin,
+${LetterLogoText} Tukitiimi
+[${__SiteLink}](${__SiteLink})</value>
   </data>
 </root>

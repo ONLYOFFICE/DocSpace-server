@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -67,14 +67,14 @@ public class CustomTagsService(
         return savedTag;
     }
 
-    public async Task DeleteTagsAsync<T>(IEnumerable<string> names)
+    public async Task DeleteTagsAsync<T>(List<string> names)
     {
         if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
-        if (!names.Any())
+        if (names.Count == 0)
         {
             return;
         }
@@ -82,14 +82,14 @@ public class CustomTagsService(
         var tagDao = daoFactory.GetTagDao<T>();
 
         var tagsInfo = await tagDao.GetTagsInfoAsync(names, TagType.Custom).ToListAsync();
-        var tags = tagsInfo.Select(tagInfo => new Tag { EntryId = tagInfo.EntryId, Id = tagInfo.Id, Owner = tagInfo.Owner, Type = tagInfo.Type, Name = tagInfo.Name, EntryType = tagInfo.EntryType});
+        var tags = tagsInfo.Select(tagInfo => new Tag { EntryId = tagInfo.EntryId, Id = tagInfo.Id, Owner = tagInfo.Owner, Type = tagInfo.Type, Name = tagInfo.Name, EntryType = tagInfo.EntryType }).ToList();
 
         await tagDao.RemoveTagsAsync(tags);
 
         filesMessageService.Send(MessageAction.TagsDeleted, string.Join(',', tags.Select(t => t.Name).ToArray()));
     }
 
-    public async Task<Folder<T>> AddRoomTagsAsync<T>(T folderId, IEnumerable<string> names)
+    public async Task<Folder<T>> AddRoomTagsAsync<T>(T folderId, List<string> names)
     {
         var folder = await daoFactory.GetFolderDao<T>().GetFolderAsync(folderId);
 
@@ -98,7 +98,7 @@ public class CustomTagsService(
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
         }
 
-        if (!names.Any())
+        if (names.Count == 0)
         {
             return folder;
         }
@@ -121,7 +121,7 @@ public class CustomTagsService(
         return folder;
     }
 
-    public async Task<Folder<T>> DeleteRoomTagsAsync<T>(T folderId, IEnumerable<string> names)
+    public async Task<Folder<T>> DeleteRoomTagsAsync<T>(T folderId, List<string> names)
     {
         var folder = await daoFactory.GetFolderDao<T>().GetFolderAsync(folderId);
 
@@ -130,7 +130,7 @@ public class CustomTagsService(
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
         }
 
-        if (!names.Any())
+        if (names.Count == 0)
         {
             return folder;
         }
@@ -157,15 +157,15 @@ public class CustomTagsService(
             if (!string.IsNullOrEmpty(searchText))
             {
                 var lowerText = searchText.ToLower().Trim().Replace("%", "\\%").Replace("_", "\\_");
-                
+
                 tags = tags.Where(r => r.Contains(lowerText, StringComparison.CurrentCultureIgnoreCase));
             }
-            
+
             foreach (var tag in tags.Skip(from).Take(count))
-            { 
+            {
                 yield return tag;
             }
-            
+
             yield break;
         }
 

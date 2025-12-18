@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,14 +30,12 @@ public class FirstEmailConfirmSettings : ISettings<FirstEmailConfirmSettings>
 {
     public bool IsFirst { get; set; }
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{EE139F6C-8821-4011-8444-FD87882CD5F5}"); }
-    }
+    public static Guid ID => new("{EE139F6C-8821-4011-8444-FD87882CD5F5}");
 
     public FirstEmailConfirmSettings GetDefault()
     {
         return new FirstEmailConfirmSettings();
     }
+
+    public DateTime LastModified { get; set; }
 }

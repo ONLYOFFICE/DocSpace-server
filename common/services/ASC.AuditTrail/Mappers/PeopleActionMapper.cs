@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,33 +28,33 @@ namespace ASC.AuditTrail.Mappers;
 
 internal class PeopleActionMapper : IProductActionMapper
 {
-    public List<IModuleActionMapper> Mappers { get; } =
+    public List<ILocationActionMapper> Mappers { get; } =
     [
         new UsersActionMapper(),
         new GroupsActionMapper()
     ];
 
-    public ProductType Product => ProductType.People;
+    public ProductType Product => ProductType.Contacts;
 }
 
-internal class UsersActionMapper : IModuleActionMapper
+internal class UsersActionMapper : ILocationActionMapper
 {
-    public ModuleType Module { get; }
+    public LocationType Location { get; }
     public IDictionary<MessageAction, MessageMaps> Actions { get; }
 
     public UsersActionMapper()
     {
-        Module = ModuleType.Users;
+        Location = LocationType.Contacts;
 
-        Actions = new MessageMapsDictionary(ProductType.People, Module)
+        Actions = new MessageMapsDictionary(ProductType.Contacts, Location)
         {
             {
                 EntryType.User,
                 new Dictionary<ActionType, MessageAction[]>
                 {
-                    { 
+                    {
                         ActionType.Create, [
-                            MessageAction.UserCreated, MessageAction.GuestCreated, 
+                            MessageAction.UserCreated, MessageAction.GuestCreated,
                             MessageAction.UserCreatedViaInvite, MessageAction.GuestCreatedViaInvite,
                             MessageAction.SendJoinInvite
                         ]
@@ -67,7 +67,7 @@ internal class UsersActionMapper : IModuleActionMapper
                             MessageAction.UsersUpdatedStatus, MessageAction.UsersSentActivationInstructions
                         ]
                     },
-                    { 
+                    {
                         ActionType.Delete, [MessageAction.UserDeletedAvatar, MessageAction.UserDeleted, MessageAction.UsersDeleted, MessageAction.UserDataRemoving]
                     },
                     { ActionType.Import, [MessageAction.UserImported, MessageAction.GuestImported] },
@@ -84,24 +84,24 @@ internal class UsersActionMapper : IModuleActionMapper
                 ActionType.Send, [MessageAction.UserSentActivationInstructions, MessageAction.UserSentDeleteInstructions, MessageAction.SentInviteInstructions]
             },
             { MessageAction.UserUpdatedPassword, ActionType.Update },
-            { MessageAction.UserSentEmailChangeInstructions, new MessageMaps("UserSentEmailInstructions", ActionType.Send, ProductType.People, Module, EntryType.User) },
-            { MessageAction.UserSentPasswordChangeInstructions, new MessageMaps("UserSentPasswordInstructions", ActionType.Send, ProductType.People, Module, EntryType.User) },
-            { MessageAction.UserConnectedTfaApp, new MessageMaps("UserTfaGenerateCodes", ActionType.Link, ProductType.People, Module, EntryType.User) },
-            { MessageAction.UserDisconnectedTfaApp, new MessageMaps("UserTfaDisconnected", ActionType.Delete, ProductType.People, Module, EntryType.User) }
+            { MessageAction.UserSentEmailChangeInstructions, new MessageMaps(nameof(AuditReportResource.UserSentEmailInstructions), ActionType.Send, ProductType.Contacts, Location, EntryType.User) },
+            { MessageAction.UserSentPasswordChangeInstructions, new MessageMaps(nameof(AuditReportResource.UserSentPasswordInstructions), ActionType.Send, ProductType.Contacts, Location, EntryType.User) },
+            { MessageAction.UserConnectedTfaApp, new MessageMaps(nameof(AuditReportResource.UserTfaGenerateCodes), ActionType.Link, ProductType.Contacts, Location, EntryType.User) },
+            { MessageAction.UserDisconnectedTfaApp, new MessageMaps(nameof(AuditReportResource.UserTfaDisconnected), ActionType.Delete, ProductType.Contacts, Location, EntryType.User) }
         };
     }
 }
 
-internal class GroupsActionMapper : IModuleActionMapper
+internal class GroupsActionMapper : ILocationActionMapper
 {
-    public ModuleType Module { get; }
+    public LocationType Location { get; }
     public IDictionary<MessageAction, MessageMaps> Actions { get; }
 
     public GroupsActionMapper()
     {
-        Module = ModuleType.Groups;
+        Location = LocationType.Contacts;
 
-        Actions = new MessageMapsDictionary(ProductType.People, Module)
+        Actions = new MessageMapsDictionary(ProductType.Contacts, Location)
         {
             {
                 EntryType.Group, new Dictionary<ActionType, MessageAction>

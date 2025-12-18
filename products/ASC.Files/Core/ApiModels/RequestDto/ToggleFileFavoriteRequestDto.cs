@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,18 +27,18 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// 
+/// The request parameters for changing the file favorite status.
 /// </summary>
 public class ToggleFileFavoriteRequestDto<T>
 {
     /// <summary>
-    /// File ID
+    /// The file ID.
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
+    public required T FileId { get; set; }
 
     /// <summary>
-    /// Specifies if this file is marked as favorite or not
+    /// Specifies if the file is marked as favorite or not.
     /// </summary>
     [FromQuery(Name = "favorite")]
     public bool Favorite { get; set; }

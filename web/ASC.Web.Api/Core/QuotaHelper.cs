@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,17 +34,18 @@ public class QuotaHelper(
     IServiceProvider serviceProvider,
     CoreBaseSettings coreBaseSettings,
     SettingsManager settingsManager,
-    UserManager userManager, 
+    UserManager userManager,
     AuthContext authContext)
 {
-    public async IAsyncEnumerable<QuotaDto> GetQuotasAsync()
+    public async IAsyncEnumerable<QuotaDto> GetQuotasAsync(bool all = false, bool wallet = false)
     {
-        var quotaList = await tenantManager.GetTenantQuotasAsync(false);
+        var quotaList = await tenantManager.GetTenantQuotasAsync(all, wallet);
         var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
-        
+        var enabledWalletServices = coreBaseSettings.Standalone ? null : (await settingsManager.LoadAsync<TenantWalletServiceSettings>()).EnabledServices;
+
         foreach (var quota in quotaList)
         {
-            yield return await ToQuotaDto(quota, userType);
+            yield return await ToQuotaDto(quota, userType, false, enabledWalletServices);
         }
     }
 
@@ -52,14 +53,24 @@ public class QuotaHelper(
     {
         var quota = await tenantManager.GetCurrentTenantQuotaAsync(refresh);
         var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
-        return await ToQuotaDto(quota, userType, getUsed);
+        var enabledWalletServices = coreBaseSettings.Standalone ? null : (await settingsManager.LoadAsync<TenantWalletServiceSettings>()).EnabledServices;
+
+        return await ToQuotaDto(quota, userType, getUsed, enabledWalletServices);
     }
 
-    private async Task<QuotaDto> ToQuotaDto(TenantQuota quota, EmployeeType employeeType, bool getUsed = false)
+    public async Task<QuotaDto> ToQuotaDtoAsync(TenantQuota quota, bool getUsed = true)
     {
-        var features = await GetFeatures(quota, employeeType, getUsed).ToListAsync();
+        var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+        var enabledWalletServices = coreBaseSettings.Standalone ? null : (await settingsManager.LoadAsync<TenantWalletServiceSettings>()).EnabledServices;
 
-        var result =  new QuotaDto
+        return await ToQuotaDto(quota, userType, getUsed, enabledWalletServices);
+    }
+
+    private async Task<QuotaDto> ToQuotaDto(TenantQuota quota, EmployeeType employeeType, bool getUsed = false, List<TenantWalletService> enabledWalletServices = null)
+    {
+        var features = await GetFeatures(quota, employeeType, getUsed, enabledWalletServices).ToListAsync();
+
+        var result = new QuotaDto
         {
             Id = quota.TenantId,
             Title = Resource.ResourceManager.GetString($"Tariffs_{quota.Name}"),
@@ -71,29 +82,33 @@ public class QuotaHelper(
             Price = new PriceDto
             {
                 Value = quota.Price,
-                CurrencySymbol = quota.PriceCurrencySymbol
+                CurrencySymbol = quota.PriceCurrencySymbol,
+                ISOCurrencySymbol = quota.PriceISOCurrencySymbol
             },
 
-            Features = features
+            Features = features,
+            DueDate = quota.DueDate
         };
 
         if (coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Statistic)
         {
             var tenantUserQuotaSettingsTask = settingsManager.LoadAsync<TenantUserQuotaSettings>();
             var tenantRoomQuotaSettingsTask = settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+            var tenantAiAgentQuotaSettingsTask = settingsManager.LoadAsync<TenantAiAgentQuotaSettings>();
             var tenantQuotaSettingsTask = settingsManager.LoadAsync<TenantQuotaSettings>();
 
-            await Task.WhenAll(tenantUserQuotaSettingsTask, tenantRoomQuotaSettingsTask, tenantQuotaSettingsTask);
+            await Task.WhenAll(tenantUserQuotaSettingsTask, tenantRoomQuotaSettingsTask, tenantQuotaSettingsTask, tenantAiAgentQuotaSettingsTask);
 
-            result.UsersQuota = await tenantUserQuotaSettingsTask;
-            result.RoomsQuota = await tenantRoomQuotaSettingsTask;
-            result.TenantCustomQuota = await tenantQuotaSettingsTask;
+            result.UsersQuota = tenantUserQuotaSettingsTask.Result;
+            result.RoomsQuota = tenantRoomQuotaSettingsTask.Result;
+            result.AiAgentsQuota = tenantAiAgentQuotaSettingsTask.Result;
+            result.TenantCustomQuota = tenantQuotaSettingsTask.Result;
         }
 
         return result;
     }
 
-    private async IAsyncEnumerable<TenantQuotaFeatureDto> GetFeatures(TenantQuota quota, EmployeeType employeeType, bool getUsed)
+    private async IAsyncEnumerable<TenantQuotaFeatureDto> GetFeatures(TenantQuota quota, EmployeeType employeeType, bool getUsed, List<TenantWalletService> enabledWalletServices)
     {
         var assembly = GetType().Assembly;
 
@@ -109,27 +124,34 @@ public class QuotaHelper(
                             {
                                 return false;
                             }
-                            
+
+                            if (quota.Wallet && !quota.Features.Contains(r.Name))
+                            {
+                                return false;
+                            }
+
                             return r.Visible;
                         })
                     .OrderBy(r => r.Order))
         {
+            var featureName = $"{feature.Name}{(quota.Wallet ? "_wallet" : "")}";
+
             var result = new TenantQuotaFeatureDto
             {
-                Title = Resource.ResourceManager.GetString($"TariffsFeature_{feature.Name}")
+                Title = Resource.ResourceManager.GetString($"TariffsFeature_{featureName}")
             };
 
             if (feature.Paid)
             {
-                result.PriceTitle = Resource.ResourceManager.GetString($"TariffsFeature_{feature.Name}_price_count");
+                result.PriceTitle = Resource.ResourceManager.GetString($"TariffsFeature_{featureName}_price_count");
             }
 
             result.Id = feature.Name;
 
             object used = null;
             var availableFeature = true;
-            var isUsedAvailable = employeeType != EmployeeType.Guest && 
-                                  (employeeType != EmployeeType.User || 
+            var isUsedAvailable = employeeType != EmployeeType.Guest &&
+                                  (employeeType != EmployeeType.User ||
                                    feature.Name == MaxTotalSizeFeature.MaxTotalSizeFeatureName);
 
             if (feature is TenantQuotaFeatureSize size)
@@ -140,12 +162,27 @@ public class QuotaHelper(
 
                 await GetStat<long>();
             }
+            else if (feature is CountFreeBackupFeature countFreeBackup)
+            {
+                result.Value = coreBaseSettings.Standalone ? -1 : countFreeBackup.Value;
+                result.Type = "count";
+                result.Title = string.Format(result.Title, result.Value);
+
+                await GetStat<int>();
+            }
             else if (feature is TenantQuotaFeatureCount count)
             {
                 result.Value = count.Value == int.MaxValue ? -1 : count.Value;
                 result.Type = "count";
 
                 await GetStat<int>();
+            }
+            else if (feature is WalletFeatureFlag walletFlag)
+            {
+                result.Type = "flag";
+                result.Value = enabledWalletServices != null
+                    && TenantWalletServiceExtensions.TryParse(walletFlag.Name, true, out var service)
+                    && enabledWalletServices.Contains(service);
             }
             else if (feature is TenantQuotaFeatureFlag flag)
             {
@@ -162,13 +199,13 @@ public class QuotaHelper(
                     result.Used = new FeatureUsedDto
                     {
                         Value = isUsedAvailable ? used : null,
-                        Title = Resource.ResourceManager.GetString($"TariffsFeature_used_{feature.Name}")
+                        Title = Resource.ResourceManager.GetString($"TariffsFeature_used_{featureName}")
                     };
                 }
             }
             else
             {
-                var img = assembly.GetManifestResourceStream($"{assembly.GetName().Name}.img.{feature.Name}.svg");
+                var img = assembly.GetManifestResourceStream($"{assembly.GetName().Name}.img.{featureName}.svg");
 
                 if (availableFeature && img != null)
                 {

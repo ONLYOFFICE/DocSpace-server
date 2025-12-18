@@ -1,15 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
-	  <ImplicitUsings>enable</ImplicitUsings>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <NoWarn>1701;1702;NU1701;1591</NoWarn>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DebugType>none</DebugType>
-    <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="ModuleManagement\Module.cs" />
@@ -114,6 +108,9 @@
     <EmbeddedResource Update="PublicResources\NamingPeopleResource.sl.resx">
       <DependentUpon>NamingPeopleResource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="PublicResources\NamingPeopleResource.sq-AL.resx">
+      <DependentUpon>NamingPeopleResource.resx</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Update="PublicResources\NamingPeopleResource.sr-Cyrl-RS.resx">
       <DependentUpon>NamingPeopleResource.resx</DependentUpon>
     </EmbeddedResource>
@@ -209,6 +206,9 @@
       <DependentUpon>Resource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="PublicResources\Resource.sl.resx">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="PublicResources\Resource.sq-AL.resx">
       <DependentUpon>Resource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="PublicResources\Resource.sr-Cyrl-RS.resx">
@@ -308,6 +308,9 @@
     <EmbeddedResource Update="PublicResources\UserControlsCommonResource.sl.resx">
       <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="PublicResources\UserControlsCommonResource.sq-AL.resx">
+      <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Update="PublicResources\UserControlsCommonResource.sr-Cyrl-RS.resx">
       <DependentUpon>UserControlsCommonResource.resx</DependentUpon>
     </EmbeddedResource>
@@ -394,6 +397,9 @@
       <DependentUpon>WebstudioNotifyPatternResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="PublicResources\WebstudioNotifyPatternResource.sk.resx">
+      <DependentUpon>WebstudioNotifyPatternResource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="PublicResources\WebstudioNotifyPatternResource.sq-AL.resx">
       <DependentUpon>WebstudioNotifyPatternResource.resx</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="PublicResources\WebstudioNotifyPatternResource.sr-Cyrl-RS.resx">
@@ -517,6 +523,9 @@
     <EmbeddedResource Update="PublicResources\CustomModeResource.sl.resx">
       <DependentUpon>CustomModeResource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="PublicResources\CustomModeResource.sq-AL.resx">
+      <DependentUpon>CustomModeResource.resx</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Update="PublicResources\CustomModeResource.sr-Cyrl-RS.resx">
       <DependentUpon>CustomModeResource.resx</DependentUpon>
     </EmbeddedResource>
@@ -534,13 +543,13 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.405.34" />
-    <PackageReference Include="GoogleAuthenticator" Version="3.2.0" />
-    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="14.5.0" />
-    <PackageReference Include="SkiaSharp" Version="3.116.1" />
-    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.116.1" />
-    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="3.116.1" />
-    <PackageReference Include="SkiaSharp.Svg" Version="1.60.0" />
-    <PackageReference Include="Twilio" Version="7.8.5" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" />
+    <PackageReference Include="GoogleAuthenticator" />
+    <PackageReference Include="Magick.NET-Q8-AnyCPU" />
+    <PackageReference Include="SkiaSharp" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" />
+    <PackageReference Include="SkiaSharp.Svg" />
+    <PackageReference Include="Twilio" />
   </ItemGroup>
 </Project>

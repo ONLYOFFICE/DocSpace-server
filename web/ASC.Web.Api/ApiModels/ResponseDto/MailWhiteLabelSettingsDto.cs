@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,20 +26,35 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
-public class MailWhiteLabelSettingsDto : IMapFrom<MailWhiteLabelSettings>
+/// <summary>
+/// The mail white label settings parameters.
+/// </summary>
+public class MailWhiteLabelSettingsDto
 {
-    /// <summary>Specifies if the mail footer is enabled or not</summary>
+    ///<summary>
+    /// Specifies if the mail footer is enabled or not.
+    ///</summary>
     public bool FooterEnabled { get; set; }
 
-    /// <summary>Specifies if the footer with social media contacts is enabled or not</summary>
+    ///<summary>
+    /// Specifies if the footer with social media contacts is enabled or not.
+    ///</summary>
     public bool FooterSocialEnabled { get; set; }
 
-    /// <summary>Specifies if these settings are default or not</summary>
+    ///<summary>
+    /// Specifies if the mail white label settings are default or not.
+    ///</summary>
     public bool IsDefault { get; set; }
+}
 
-    public void Mapping(Profile profile)
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class MailWhiteLabelSettingsDtoMapper
+{
+    [MapPropertyFromSource(nameof(MailWhiteLabelSettingsDto.IsDefault), Use = nameof(MapManual))]
+    public static partial MailWhiteLabelSettingsDto MapToDto(this MailWhiteLabelSettings source);
+
+    private static bool MapManual(MailWhiteLabelSettings source)
     {
-        profile.CreateMap<MailWhiteLabelSettings, MailWhiteLabelSettingsDto>()
-            .ConvertUsing<MailWhiteLabelSettingsConverter>();
+        return source.IsDefault();
     }
 }

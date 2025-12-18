@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,11 +28,11 @@ const request = require("../requestManager.js");
 const check = require("./authService.js");
 const portalManager = require("../portalManager.js");
 const logger = require("../log.js");
+const config = require("../../config");
 
 module.exports = (socket, next) => {
   const req = socket.client.request;
   const session = socket.handshake.session;
-
   const cookie = req?.cookies?.authorization || req?.cookies?.asc_auth_key;
   const token = req?.headers?.authorization;
   const share = socket.handshake.query?.share;
@@ -60,8 +60,13 @@ module.exports = (socket, next) => {
     return;
   }
 
-  const basePath = portalManager(req)?.replace(/\/$/g, "");
   let headers = {};
+  var basePath = portalManager(req)?.replace(/\/$/g, "");
+  const basePathFromConfig = config.get("API_HOST");
+  if (basePathFromConfig) {
+    headers.Origin = basePath;
+    basePath = basePathFromConfig;
+  }
 
   const validateExternalLink = () => {
     return request({
@@ -78,7 +83,7 @@ module.exports = (socket, next) => {
     const getUser = () => {
       return request({
         method: "get",
-        url: "/people/@self?fields=id,userName,displayName",
+        url: "/people/@self?fields=id,userName,displayName,isAdmin,isOwner",
         headers,
         basePath,
       });

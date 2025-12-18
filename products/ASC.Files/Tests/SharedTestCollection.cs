@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,13 +27,14 @@
 extern alias ASCWebApi;
 extern alias ASCPeople;
 extern alias ASCFilesService;
+using ASC.Files.Tests.ApiFactories;
 
 namespace ASC.Files.Tests;
 
 [CollectionDefinition("Test Collection")]
 public class SharedTestCollection : 
     ICollectionFixture<FilesApiFactory>, 
-    ICollectionFixture<WebApplicationFactory<WebApiProgram>>, 
-    ICollectionFixture<WebApplicationFactory<PeopleProgram>>,
-    ICollectionFixture<WebApplicationFactory<FilesServiceProgram>>
+    ICollectionFixture<WepApiFactory>, 
+    ICollectionFixture<PeopleFactory>,
+    ICollectionFixture<FilesServiceFactory>
     ;

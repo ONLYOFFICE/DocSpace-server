@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,7 +30,6 @@ namespace ASC.Web.Api.Controllers;
 /// Third-party API.
 ///</summary>
 ///<name>thirdparty</name>
-[ApiExplorerSettings(IgnoreApi = true)]
 [Scope]
 [DefaultRoute]
 [ApiController]
@@ -46,7 +45,7 @@ public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : Contr
     [Tags("ThirdParty")]
     [SwaggerResponse(200, "Code request", typeof(object))]
     [HttpGet("{provider}")]
-    public object Get(ConfirmationCodeUrlRequestDto inDto)
+    public object GetThirdPartyCode(ConfirmationCodeUrlRequestDto inDto)
     {
         var desktop = HttpContext.Request.Query["desktop"] == "true";
         var additionals = new Dictionary<string, string>();
@@ -75,6 +74,7 @@ public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : Contr
                 OneDriveLoginProvider.OneDriveLoginProviderScopes, additionalStateArgs: additionals),
             LoginProvider.Wordpress => oAuth20TokenHelper.RequestCode<WordpressLoginProvider>(
                 additionalStateArgs: additionals),
+            LoginProvider.Github => oAuth20TokenHelper.RequestCode<GithubLoginProvider>(additionalStateArgs: additionals),
             _ => null
         };
     }
@@ -84,11 +84,12 @@ public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : Contr
     /// </summary>
     /// <short>Get the confirmation code</short>
     /// <path>api/2.0/thirdparty/{provider}/code</path>
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("ThirdParty")]
     [SwaggerResponse(200, "Confirmation code", typeof(object))]
     [SwaggerResponse(400, "Error")]
     [HttpGet("{provider}/code")]
-    public object GetCode(ConfirmationCodeRequestDto inDto)
+    public object GetThirdPartyProviderCode(ConfirmationCodeRequestDto inDto)
     {
         try
         {
@@ -129,10 +130,10 @@ public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : Contr
     {
         url += (url.Contains('#') ? "&" : "#")
                 + (string.IsNullOrEmpty(error)
-                        ? (string.IsNullOrEmpty(code)
-                                ? string.Empty
-                                : "code=" + HttpUtility.UrlEncode(code))
-                        : ("error/" + HttpUtility.UrlEncode(error)));
+                        ? string.IsNullOrEmpty(code)
+                            ? string.Empty
+                            : "code=" + HttpUtility.UrlEncode(code)
+                        : "error/" + HttpUtility.UrlEncode(error));
 
         return url;
     }

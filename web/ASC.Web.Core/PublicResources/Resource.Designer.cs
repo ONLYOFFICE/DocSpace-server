@@ -61,6 +61,177 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Vectorization.
+        /// </summary>
+        public static string AccountingAIServiceVectorizationDetails {
+            get {
+                return ResourceManager.GetString("AccountingAIServiceVectorizationDetails", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Contact.
+        /// </summary>
+        public static string AccountingCustomerOperationContact {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationContact", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Credit.
+        /// </summary>
+        public static string AccountingCustomerOperationCredit {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationCredit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Currency.
+        /// </summary>
+        public static string AccountingCustomerOperationCurrency {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationCurrency", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Date.
+        /// </summary>
+        public static string AccountingCustomerOperationDate {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationDate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Debit.
+        /// </summary>
+        public static string AccountingCustomerOperationDebit {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationDebit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Details.
+        /// </summary>
+        public static string AccountingCustomerOperationDetails {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationDetails", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Quantity.
+        /// </summary>
+        public static string AccountingCustomerOperationQuantity {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationQuantity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AI tools.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceDesc_ai_service {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceDesc_ai-service", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Backup.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceDesc_backup {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceDesc_backup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disk space.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceDesc_disk_storage {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceDesc_disk-storage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Balance top-up.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceDesc_top_up {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceDesc_top-up", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unit of Measurement.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceUnit {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceUnit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tokens.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceUOM_ai_service {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceUOM_ai-service", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Backup.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceUOM_backup {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceUOM_backup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to GB.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceUOM_disk_storage {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceUOM_disk-storage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Customer operations report ({0}-{1}).
+        /// </summary>
+        public static string AccountingCustomerOperationsReportName {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationsReportName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Transaction history.
+        /// </summary>
+        public static string AccountingCustomerOperationsReportSheetName {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationsReportSheetName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Type.
+        /// </summary>
+        public static string AccountingCustomerOperationType {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Validation code field cannot be empty.
         /// </summary>
         public static string ActivateMobilePhoneEmptyCode {
@@ -102,6 +273,42 @@ namespace ASC.Web.Core.PublicResources {
         public static string AdminMessageSent {
             get {
                 return ResourceManager.GetString("AdminMessageSent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AI agent space quota exceeded.
+        /// </summary>
+        public static string AiAgentFreeSpaceException {
+            get {
+                return ResourceManager.GetString("AiAgentFreeSpaceException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to set quota per ai agent. The entered value is greater than the total DocSpace storage..
+        /// </summary>
+        public static string AiAgentQuotaGreaterPortalError {
+            get {
+                return ResourceManager.GetString("AiAgentQuotaGreaterPortalError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Automatic renewal.
+        /// </summary>
+        public static string AutoRenewal {
+            get {
+                return ResourceManager.GetString("AutoRenewal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Automatic top up.
+        /// </summary>
+        public static string AutoTopUp {
+            get {
+                return ResourceManager.GetString("AutoTopUp", resourceCulture);
             }
         }
         
@@ -1267,7 +1474,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Twitter.
+        ///   Looks up a localized string similar to X.
         /// </summary>
         public static string ConsumersTwitter {
             get {
@@ -1294,7 +1501,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enable the application to sign in to the portal using a Twitter account..
+        ///   Looks up a localized string similar to Enable the application to sign in to the portal using a X account..
         /// </summary>
         public static string ConsumersTwitterDescription {
             get {
@@ -1303,7 +1510,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enable this app to allow your users to sign in to {LogoText} using their Twitter and link their customers’ Twitter accounts to the CRM module. {0}Go to Twitter Developers Portal and create a new app {LogoText} integration. Insert the data you received below:.
+        ///   Looks up a localized string similar to Enable this app to allow your users to sign in to {LogoText} using their X and link their customers’ X accounts to the CRM module. {0}Go to X Developers Portal and create a new app {LogoText} integration. Insert the data you received below:.
         /// </summary>
         public static string ConsumersTwitterInstruction {
             get {
@@ -1380,6 +1587,51 @@ namespace ASC.Web.Core.PublicResources {
         public static string ConsumersVkInstruction {
             get {
                 return ResourceManager.GetString("ConsumersVkInstruction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WeChat.
+        /// </summary>
+        public static string ConsumersWeixin {
+            get {
+                return ResourceManager.GetString("ConsumersWeixin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Client ID.
+        /// </summary>
+        public static string ConsumersWeixinClientId {
+            get {
+                return ResourceManager.GetString("ConsumersWeixinClientId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Client Secret.
+        /// </summary>
+        public static string ConsumersWeixinClientSecret {
+            get {
+                return ResourceManager.GetString("ConsumersWeixinClientSecret", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enable the application to sign in to the portal using a WeChat account..
+        /// </summary>
+        public static string ConsumersWeixinDescription {
+            get {
+                return ResourceManager.GetString("ConsumersWeixinDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enable the application to sign in to the portal using a WeChat account..
+        /// </summary>
+        public static string ConsumersWeixinInstruction {
+            get {
+                return ResourceManager.GetString("ConsumersWeixinInstruction", resourceCulture);
             }
         }
         
@@ -1591,6 +1843,60 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Date.
+        /// </summary>
+        public static string DocumentServerLicenseQuotaDate {
+            get {
+                return ResourceManager.GetString("DocumentServerLicenseQuotaDate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Email.
+        /// </summary>
+        public static string DocumentServerLicenseQuotaEmail {
+            get {
+                return ResourceManager.GetString("DocumentServerLicenseQuotaEmail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to First name.
+        /// </summary>
+        public static string DocumentServerLicenseQuotaFirstName {
+            get {
+                return ResourceManager.GetString("DocumentServerLicenseQuotaFirstName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Id.
+        /// </summary>
+        public static string DocumentServerLicenseQuotaId {
+            get {
+                return ResourceManager.GetString("DocumentServerLicenseQuotaId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Last name.
+        /// </summary>
+        public static string DocumentServerLicenseQuotaLastName {
+            get {
+                return ResourceManager.GetString("DocumentServerLicenseQuotaLastName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Document Service Quota ({0}).
+        /// </summary>
+        public static string DocumentServerLicenseQuotaReportName {
+            get {
+                return ResourceManager.GetString("DocumentServerLicenseQuotaReportName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Incorrect Instance id..
         /// </summary>
         public static string EmailAndPasswordIncorrectAmiId {
@@ -1731,6 +2037,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string ErrorFileNotImage {
             get {
                 return ResourceManager.GetString("ErrorFileNotImage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The group could not be found.
+        /// </summary>
+        public static string ErrorGroupNotFound {
+            get {
+                return ResourceManager.GetString("ErrorGroupNotFound", resourceCulture);
             }
         }
         
@@ -1888,6 +2203,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Payment required.
+        /// </summary>
+        public static string ErrorPaymentRequired {
+            get {
+                return ResourceManager.GetString("ErrorPaymentRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Request limit is exceeded.
         /// </summary>
         public static string ErrorRequestLimitExceeded {
@@ -1960,7 +2284,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Webhook URL is not avaliable. HEAD request is not responce 200 http status..
+        ///   Looks up a localized string similar to Webhook URL is not available. HEAD request is not response 200 http status..
         /// </summary>
         public static string ErrorWebhookUrlNotAvaliable {
             get {
@@ -2010,6 +2334,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string ErrorWebPluginForbiddenSystem {
             get {
                 return ResourceManager.GetString("ErrorWebPluginForbiddenSystem", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The number of plugins exceeds the limit.
+        /// </summary>
+        public static string ErrorWebPluginMaxCount {
+            get {
+                return ResourceManager.GetString("ErrorWebPluginMaxCount", resourceCulture);
             }
         }
         
@@ -2851,11 +3184,56 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Tracking user logins &amp; action.
+        ///   Looks up a localized string similar to The number of AI agents should not exceed {0}.
+        /// </summary>
+        public static string TariffsFeature_aiagent_exception {
+            get {
+                return ResourceManager.GetString("TariffsFeature_aiagent_exception", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AI tools.
+        /// </summary>
+        public static string TariffsFeature_aitools_wallet {
+            get {
+                return ResourceManager.GetString("TariffsFeature_aitools_wallet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enable AI features in your DocSpace to boost productivity..
+        /// </summary>
+        public static string TariffsFeature_aitools_wallet_price_count {
+            get {
+                return ResourceManager.GetString("TariffsFeature_aitools_wallet_price_count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tracking logins &amp; actions.
         /// </summary>
         public static string TariffsFeature_audit {
             get {
                 return ResourceManager.GetString("TariffsFeature_audit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Backup.
+        /// </summary>
+        public static string TariffsFeature_backup_wallet {
+            get {
+                return ResourceManager.GetString("TariffsFeature_backup_wallet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enable backups for your DocSpace. Costs will be billed automatically..
+        /// </summary>
+        public static string TariffsFeature_backup_wallet_price_count {
+            get {
+                return ResourceManager.GetString("TariffsFeature_backup_wallet_price_count", resourceCulture);
             }
         }
         
@@ -2887,6 +3265,24 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} free backups per month.
+        /// </summary>
+        public static string TariffsFeature_free_backup {
+            get {
+                return ResourceManager.GetString("TariffsFeature_free_backup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The number of free backups should not exceed {0} within a month.
+        /// </summary>
+        public static string TariffsFeature_free_backup_exception {
+            get {
+                return ResourceManager.GetString("TariffsFeature_free_backup_exception", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The number of admins should not exceed {0}.
         /// </summary>
         public static string TariffsFeature_manager_exception {
@@ -2905,7 +3301,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Automatic backup &amp; recovery.
+        ///   Looks up a localized string similar to Data recovery.
         /// </summary>
         public static string TariffsFeature_restore {
             get {
@@ -2950,7 +3346,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Third-party integrations.
+        ///   Looks up a localized string similar to Pro integrations.
         /// </summary>
         public static string TariffsFeature_thirdparty {
             get {
@@ -2986,6 +3382,24 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Additional disk storage.
+        /// </summary>
+        public static string TariffsFeature_total_size_wallet {
+            get {
+                return ResourceManager.GetString("TariffsFeature_total_size_wallet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Adjust the storage to the exact amount you require..
+        /// </summary>
+        public static string TariffsFeature_total_size_wallet_price_count {
+            get {
+                return ResourceManager.GetString("TariffsFeature_total_size_wallet_price_count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Admins added:.
         /// </summary>
         public static string TariffsFeature_used_manager {
@@ -3013,6 +3427,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Storage space used:.
+        /// </summary>
+        public static string TariffsFeature_used_total_size_wallet {
+            get {
+                return ResourceManager.GetString("TariffsFeature_used_total_size_wallet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Users in room:.
         /// </summary>
         public static string TariffsFeature_used_usersInRoom {
@@ -3022,7 +3445,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unlimited number of users.
+        ///   Looks up a localized string similar to Unlimited number of users and guests.
         /// </summary>
         public static string TariffsFeature_users {
             get {
@@ -3063,6 +3486,42 @@ namespace ASC.Web.Core.PublicResources {
         public static string TariffsFeature_usersQuotaExceeds_exception {
             get {
                 return ResourceManager.GetString("TariffsFeature_usersQuotaExceeds_exception", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AI web search.
+        /// </summary>
+        public static string TariffsFeature_websearch_wallet {
+            get {
+                return ResourceManager.GetString("TariffsFeature_websearch_wallet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add funds to your wallet to unlock AI web search..
+        /// </summary>
+        public static string TariffsFeature_websearch_wallet_price_count {
+            get {
+                return ResourceManager.GetString("TariffsFeature_websearch_wallet_price_count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An unexpected error occurred. Please try again..
+        /// </summary>
+        public static string TelegramOnGenericError {
+            get {
+                return ResourceManager.GetString("TelegramOnGenericError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You have been successfully connected Telegram to receive notifications from your DocSpace..
+        /// </summary>
+        public static string TelegramOnSuccessfulLink {
+            get {
+                return ResourceManager.GetString("TelegramOnSuccessfulLink", resourceCulture);
             }
         }
         

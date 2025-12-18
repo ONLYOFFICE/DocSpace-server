@@ -24,21 +24,18 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Socket;
+using ASC.Web.Core.PublicResources;
+
 namespace ASC.TelegramService.Commands;
 
 [Scope]
-public class UserCommands : CommandContext
+public class UserCommands(
+    TelegramDao telegramDao,
+    IDistributedCache distributedCache,
+    UserSocketManager socketManager)
+    : CommandContext
 {
-    private readonly IDistributedCache _distributedCache;
-    private readonly TelegramDao _telegramDao;
-
-    public UserCommands(TelegramDao telegramDao,
-                       IDistributedCache distributedCache)
-    {
-        _telegramDao = telegramDao;
-        _distributedCache = distributedCache;
-    }
-
     [Command("start")]
     public async Task StartCommand(string token)
     {
@@ -52,30 +49,30 @@ public class UserCommands : CommandContext
 
     private async Task InternalStartCommandAsync(string token)
     {
-
-        var user = await _distributedCache.GetStringAsync(token);
+        var user = await distributedCache.GetStringAsync(token);
 
         if (user != null)
         {
-            await _distributedCache.RemoveAsync(token);
-            await _distributedCache.RemoveAsync((string)user);
-            
-            var split = ((string)user).Split(':');
+            await distributedCache.RemoveAsync(token);
+            await distributedCache.RemoveAsync($"tg-token:{user}");
+
+            var split = user.Split(':');
 
             var portalUserId = Guid.Parse(split[0]);
             var tenantId = int.Parse(split[1]);
             var telegramUserId = Context.User.Id;
+            var telegramUsername = Context.User.Username;
 
             if (tenantId == TenantId)
             {
-                await _telegramDao.RegisterUserAsync(portalUserId, tenantId, telegramUserId);
-
-                await ReplyAsync("Ok!");
+                await telegramDao.RegisterUserAsync(portalUserId, tenantId, telegramUserId, telegramUsername);
+                await ReplyAsync(GetResourceString(nameof(Resource.TelegramOnSuccessfulLink)));
+                await socketManager.UpdateTelegram(tenantId, portalUserId, telegramUsername);
 
                 return;
             }
         }
 
-        await ReplyAsync("Error");
+        await ReplyAsync(GetResourceString(nameof(Resource.TelegramOnGenericError)));
     }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -41,7 +41,7 @@ public static partial class FileConverterLogger
 
     [LoggerMessage(LogLevel.Error, "{operationResultError} ConvertUrl: {convertedFileUrl} fromUrl: {fileUri} ConvertedFileType: {convertedFileType}")]
     public static partial void ErrorOperation(this ILogger logger, string operationResultError, string convertedFileUrl, string fileUri, string convertedFileType, Exception exception);
-    
+
     [LoggerMessage(LogLevel.Error, "CheckConvertFilesStatus timeout: {fileId} ({contentLengthString})")]
     public static partial void ErrorCheckConvertFilesStatus(this ILogger logger, string fileId, long contentLengthString);
 

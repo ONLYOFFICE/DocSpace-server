@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -85,8 +85,8 @@ public class NotifyEngine(Context context,
             sendResponces.AddRange(await SendGroupNotify(request, serviceScope));
         }
 
-        var result = sendResponces.Count == 0 ? 
-            new NotifyResult(SendResult.OK, sendResponces) : 
+        var result = sendResponces.Count == 0 ?
+            new NotifyResult(SendResult.OK, sendResponces) :
             new NotifyResult(sendResponces.Aggregate((SendResult)0, (_, r) => r.Result), sendResponces);
         _logger.Debug(result.ToString());
 
@@ -206,7 +206,7 @@ public class NotifyEngine(Context context,
         catch (Exception ex)
         {
             responses.Add(new SendResponse(request.NotifyAction, null, request.Recipient, SendResult.Impossible));
-            _logger.ErrorPrepare(ex, request.NotifyAction, request.Recipient);
+            _logger.ErrorPrepare(ex, request.NotifyAction.ToString(), request.Recipient.ToString());
         }
 
         if (request._senderNames is { Length: > 0 })
@@ -348,7 +348,7 @@ public class NotifyEngine(Context context,
                     _stylers.Add(message.Pattern.Styler, styler);
                 }
             }
-            
+
             await _stylers[message.Pattern.Styler].ApplyFormatingAsync(message);
         }
         catch (Exception exc)
@@ -390,7 +390,7 @@ public class NotifyEngine(Context context,
                 {
                     pattern = apProvider.GetPatternMethod(request.NotifyAction, senderName, request);
                 }
-                
+
                 pattern ??= apProvider.GetPattern(request.NotifyAction, senderName);
 
                 request._patterns[i] = pattern ?? throw new NotifyException($"For action \"{request.NotifyAction.ID}\" by sender \"{senderName}\" no one patterns getted.");

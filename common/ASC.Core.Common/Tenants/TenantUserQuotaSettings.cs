@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,16 +26,21 @@
 
 namespace ASC.Core.Tenants;
 
+/// <summary>
+/// The user quota settings.
+/// </summary>
 public class TenantUserQuotaSettings : TenantEntityQuotaSettings, ISettings<TenantUserQuotaSettings>
 {
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{5FE28053-BCD4-466B-8A4B-71B612F0D6FC}"); }
-    }
+    /// <summary>
+    /// The tenant ID.
+    /// </summary>
+    public static Guid ID => new("{5FE28053-BCD4-466B-8A4B-71B612F0D6FC}");
+
     public TenantUserQuotaSettings GetDefault()
     {
         return new TenantUserQuotaSettings();
     }
+
+    public DateTime LastModified { get; set; }
 }

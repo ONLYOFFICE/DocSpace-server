@@ -126,4 +126,37 @@
   <data name="LargeBackup" xml:space="preserve">
     <value>Il backup è maggiore rispetto alla dimensione totale del portale</value>
   </data>
+  <data name="BackupException" xml:space="preserve">
+    <value>Si è verificato un errore durante la creazione del backup. Riprova o contatta il supporto.</value>
+  </data>
+  <data name="BackupInvalid" xml:space="preserve">
+    <value>Il file di backup non è valido.</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>Si è verificato un errore durante il ripristino del backup. Riprova o contatta il supporto.</value>
+  </data>
+  <data name="AutoBackup" xml:space="preserve">
+    <value>Backup automatico</value>
+  </data>
+  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
+    <value>Custom cloud</value>
+  </data>
+  <data name="BackupStorageTypeDataStore" xml:space="preserve">
+    <value>Archiviazione temporanea</value>
+  </data>
+  <data name="BackupStorageTypeDocuments" xml:space="preserve">
+    <value>Stanza di backup</value>
+  </data>
+  <data name="BackupStorageTypeLocal" xml:space="preserve">
+    <value>File locale</value>
+  </data>
+  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
+    <value>Archiviazione di terze parti</value>
+  </data>
+  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
+    <value>Archiviazione di terze parti</value>
+  </data>
+  <data name="BackupMissingFilesWarning" xml:space="preserve">
+    <value>Alcuni file non sono stati inclusi nel backup. Per maggiori dettagli, controlla {0}</value>
+  </data>
 </root>

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,6 +31,6 @@ public class NLogSettings
     public string Name { get; set; }
     public string Dir { get; set; }
     public string AWSAccessKeyId { get; set; }
-    public string AWSSecretAccessKey {get; set;}
+    public string AWSSecretAccessKey { get; set; }
 
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2023
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,15 +26,50 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The form role parameters.
+/// </summary>
 public class FormRoleDto
 {
-    public string RoleName { get; set; }
+
+    /// <summary>
+    /// The role name.
+    /// </summary>
+    public required string RoleName { get; set; }
+
+    /// <summary>
+    /// The role color.
+    /// </summary>
     public string RoleColor { get; set; }
+
+    /// <summary>
+    /// The user of the role.
+    /// </summary>
     public EmployeeFullDto User { get; set; }
-    public int Sequence { get; set; }
-    public bool Submitted { get; set; }
+
+    /// <summary>
+    /// The role sequence.
+    /// </summary>
+    public required int Sequence { get; set; }
+
+    /// <summary>
+    /// Specifies if the role is submitted.
+    /// </summary>
+    public required bool Submitted { get; set; }
+
+    /// <summary>
+    /// The user who stopped the role.
+    /// </summary>
     public EmployeeFullDto StopedBy { get; set; }
+
+    /// <summary>
+    /// The role history.
+    /// </summary>
     public Dictionary<int, DateTime> History { get; set; }
+
+    /// <summary>
+    /// The role status.
+    /// </summary>
     public FormFillingStatus RoleStatus { get; set; }
 }
 [Scope]
@@ -76,9 +111,17 @@ public class FormRoleDtoHelper(TenantUtil tenantUtil, EmployeeFullDtoHelper empl
     }
 }
 
+/// <summary>
+/// The form role history type.
+/// </summary>
 public enum FormRoleHistory
 {
-    OpenedAtDate = 0 ,
+    [SwaggerEnum("Opened at date")]
+    OpenedAtDate = 0,
+
+    [SwaggerEnum("Submission date")]
     SubmissionDate = 1,
+
+    [SwaggerEnum("Stop date")]
     StopDate = 2
 }

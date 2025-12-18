@@ -27,6 +27,7 @@
 
 package com.asc.registration.messaging.listener;
 
+import com.asc.common.core.domain.entity.Audit;
 import com.asc.common.messaging.mapper.RabbitAuditDataMapper;
 import com.asc.common.service.AuditCreateCommandHandler;
 import com.asc.common.service.transfer.message.AuditMessage;
@@ -37,6 +38,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
@@ -64,10 +66,24 @@ public class AuditMessageListener {
       log.debug("Persisting audit messages");
       MDC.clear();
 
-      auditCreateCommandHandler.createAudits(
+      var tenantAudits =
           messages.stream()
-              .map(s -> auditDataMapper.toAudit(s.getPayload()))
-              .collect(Collectors.toSet()));
+              .map(message -> auditDataMapper.toAudit(message.getPayload()))
+              .collect(Collectors.groupingBy(Audit::getTenantId, Collectors.toSet()));
+
+      tenantAudits.forEach(
+          (tenantId, audits) -> {
+            try {
+              log.debug(
+                  "Processing batch of {} audit records for tenantId: {}", audits.size(), tenantId);
+              auditCreateCommandHandler.createAudits(audits);
+            } catch (DataIntegrityViolationException fke) {
+              log.warn(
+                  "Skipping audit insertion for tenantId: {}. Reason: {}",
+                  tenantId,
+                  fke.getMessage());
+            }
+          });
     }
   }
 }

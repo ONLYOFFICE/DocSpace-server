@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -45,4 +45,3 @@ internal interface IDaoSelector<TFile, TFolder, TItem> : IDaoSelector
     Task RenameProviderAsync(IProviderInfo<TFile, TFolder, TItem> provider, string newTitle);
     Task RenameRoomProviderAsync(IProviderInfo<TFile, TFolder, TItem> provider, string newTitle, string folderId);
 }
-

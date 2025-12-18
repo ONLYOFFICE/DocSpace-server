@@ -100,6 +100,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Изменена цветовая тема</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Контакты</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>Обновлены настройки файлов cookie</value>
   </data>
@@ -135,9 +138,6 @@
   </data>
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Обновлены настройки перезаписи файлов</value>
-  </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Документы</value>
   </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Настройки</value>
@@ -257,7 +257,7 @@
     <value>Папки [{0}]. Перемещены с перезаписью в папку: {1}</value>
   </data>
   <data name="FolderRenamed" xml:space="preserve">
-    <value>Переименована папка: {0}</value>
+    <value>Папка переименована: {0}</value>
   </data>
   <data name="FoldersModule" xml:space="preserve">
     <value>Папки</value>
@@ -271,9 +271,6 @@
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Обновлены настройки Sphinx</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>Общее</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Обновлены настройки страницы приветствия</value>
   </data>
@@ -282,9 +279,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Удалена группа: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Группы</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Обновлена группа: {0}</value>
@@ -344,7 +338,7 @@
     <value>Неудачная попытка входа с помощью API</value>
   </data>
   <data name="LoginFailViaApiSms" xml:space="preserve">
-    <value>Неудачная попытка входа с помощью API и СМС-кода</value>
+    <value>Неудачная попытка входа с помощью API и SMS-кода</value>
   </data>
   <data name="LoginFailViaApiSocialAccount" xml:space="preserve">
     <value>Неудачная попытка входа с помощью API и социальных сетей</value>
@@ -371,16 +365,16 @@
     <value>Успешный вход в систему</value>
   </data>
   <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Успешный вход через аккаунт социальной сети</value>
+    <value>Успешный вход в систему с помощью аккаунта социальной сети: {0}</value>
   </data>
   <data name="LoginSuccessSocialApp" xml:space="preserve">
-    <value>Успешный вход через приложение для социальной сети</value>
+    <value>Успешный вход в систему с помощью приложения для социальной сети</value>
   </data>
   <data name="LoginSuccessViaApi" xml:space="preserve">
     <value>Успешный вход в систему с помощью API</value>
   </data>
   <data name="LoginSuccessViaApiSms" xml:space="preserve">
-    <value>Успешный вход в систему с помощью API и СМС-кода</value>
+    <value>Успешный вход в систему с помощью API и SMS-кода</value>
   </data>
   <data name="LoginSuccessViaApiTfa" xml:space="preserve">
     <value>Успешный вход в систему с помощью API и приложения для аутентификации</value>
@@ -389,13 +383,13 @@
     <value>Успешный вход в систему с помощью SMS</value>
   </data>
   <data name="LoginSuccessViaSocialAccount" xml:space="preserve">
-    <value>Успешный вход с помощью API и социальных сетей</value>
+    <value>Успешный вход в систему с помощью API и социальных сетей</value>
   </data>
   <data name="LoginSuccessViaSSO" xml:space="preserve">
     <value>Успешный вход в систему с помощью SSO</value>
   </data>
   <data name="LoginSuccesViaTfaApp" xml:space="preserve">
-    <value>Успешный вход с помощью приложения для аутентификации</value>
+    <value>Успешный вход в систему с помощью приложения для аутентификации</value>
   </data>
   <data name="Logout" xml:space="preserve">
     <value>Выход из системы</value>
@@ -408,9 +402,6 @@
   </data>
   <data name="MoveActionType" xml:space="preserve">
     <value>Перемещение</value>
-  </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Прочее</value>
   </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Изменен владелец: {0}</value>
@@ -429,9 +420,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>Обновлены настройки надежности пароля</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>Люди</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Платформа</value>
@@ -475,9 +463,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Обновлен список продуктов</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Продукты</value>
-  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Переназначение</value>
   </data>
@@ -493,7 +478,7 @@
   <data name="SessionStarted" xml:space="preserve">
     <value>Сеанс начат</value>
   </data>
-  <data name="SettingsProduct" xml:space="preserve">
+  <data name="SettingsModule" xml:space="preserve">
     <value>Настройки</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
@@ -502,7 +487,7 @@
   <data name="SSOEnabled" xml:space="preserve">
     <value>Включена возможность SSO</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>Начато резервное копирование</value>
   </data>
   <data name="StartStorageDecryption" xml:space="preserve">
@@ -621,9 +606,6 @@
   </data>
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>Пользователи [{0}]. Отправлены инструкции по смене пароля</value>
-  </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>Пользователи</value>
   </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>Пользователи [{0}]. Отправлены инструкции по активации</value>
@@ -841,9 +823,6 @@
   <data name="FileIndexChanged" xml:space="preserve">
     <value>Файл: {0}. Индекс изменен с {1} на {2}</value>
   </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
-  </data>
   <data name="DeleteClient" xml:space="preserve">
     <value>Клиент {0} удален</value>
   </data>
@@ -870,5 +849,227 @@
   </data>
   <data name="ChangeClientActivation" xml:space="preserve">
     <value>Активация клиента {0} изменилась</value>
+  </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Изменены настройки доступа к инструментам разработчика</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>Файлы [{0}]. Удалена версия: {1}</value>
+  </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Пользователи [{0}]. Форма заполнена полностью: {1}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Пользователи [{0}]. Заполнена часть формы: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Пользователи [{0}]. Начато заполнение: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Пользователи [{0}]. Форма остановлена: {1}</value>
+  </data>
+  <data name="WebhookCreated" xml:space="preserve">
+    <value>Вебхук создан: {0}</value>
+  </data>
+  <data name="WebhookDeleted" xml:space="preserve">
+    <value>Вебхук удален: {0}</value>
+  </data>
+  <data name="WebhookUpdated" xml:space="preserve">
+    <value>Вебхук обновлен: {0}</value>
+  </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Создан Api Key пользователя: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Удален Api Key пользователя: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Обновлен Api Key пользователя: {0}</value>
+  </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>Файл: {0}. Пользовательский фильтр отключен</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>Файл: {0}. Пользовательский фильтр включен</value>
+  </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Ссылка авторизации активирована</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>Аутентификация LDAP отключена</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>Аутентификация LDAP включена</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>Синхронизация LDAP выполнена</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Операция клиента выполнена</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Отчет об операциях клиента загружен</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Подписка клиента обновлена: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Кошелек клиента пополнен: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Настройки пополнения кошелька клиента обновлены</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Изменены настройки видимости рекламных баннеров</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Размещение</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Обновлены настройки сервисов, подключенных через кошелек клиента</value>
+  </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Файлы [{0}]. Внешняя ссылка создана: {1}. Роль: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Файлы [{0}]. Внешняя ссылка удалена: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Файлы [{0}]. Внешняя ссылка обновлена: {1}. Роль: {2}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Файл отмечен как избранный: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Файл удален из избранного: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Файл удален из "Доступно для меня": {0}</value>
+  </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Файлы [{0}]. Доступ обновлен для {1}. Роль: {2}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Папка загружена: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Папки [{0}]. Внешняя ссылка создана: {1}. Роль: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Папки [{0}]. Внешняя ссылка удалена: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Папки [{0}]. Внешняя ссылка обновлена: {1}. Роль: {2}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Папка удалена из "Доступно для меня": {0}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Папки [{0}]. Доступ обновлен для {1}. Роль: {2}</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Успешный вход в систему с помощью OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Успешный вход в систему с помощью логина и пароля</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Внешняя ссылка отменена: {1}</value>
+  </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Успешный вход через аккаунт социальной сети</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>Добавлен MCP-сервер {0} к агенту</value>
+  </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>Агент создан</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>Агент удален</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>Агент переименован: {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>Агенты</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>Создан ИИ-провайдер: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>ИИ-провайдер удален: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>ИИ-поставщик обновлен: {0}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>ИИ-агенты [{0}]. Установить пользовательскую квоту хранения для ИИ-агентов: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>ИИ-агенты [{0}]. Установить квоту хранения по умолчанию для ИИ-агентов: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>ИИ-агенты [{0}]. Отключена квота хранения для агентов ИИ</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>MCP-сервер {0} удален из агента</value>
+  </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Установить квоту хранилища по умолчанию для ИИ-агентов: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Отключить квоту хранилища по умолчанию для ИИ-агентов</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>Настройки векторизации сброшены</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>Настройки веб-поиска сброшены</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>MCP-сервер создан: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>MCP-сервер удален: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>MCP-сервер отключен: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>MCP-сервер включен: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>MCP-сервер обновлен: {0}</value>
+  </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>Настройки векторизации сконфигурированы. Провайдер: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>Настройки веб-поиска сконфигурированы. Движок: {0}</value>
+  </data>
+  <data name="BackupCompleted" xml:space="preserve">
+    <value>Резервное копирование завершено</value>
+  </data>
+  <data name="BackupFailed" xml:space="preserve">
+    <value>Резервное копирование не удалось</value>
+  </data>
+  <data name="ScheduledBackupCompleted" xml:space="preserve">
+    <value>Запланированное резервное копирование завершено</value>
+  </data>
+  <data name="ScheduledBackupFailed" xml:space="preserve">
+    <value>Запланированное резервное копирование не удалось</value>
+  </data>
+  <data name="ScheduledBackupStarted" xml:space="preserve">
+    <value>Запланированное резервное копирование началось</value>
+  </data>
+  <data name="WebpluginDeleted" xml:space="preserve">
+    <value>Плагин удален: {0}</value>
+  </data>
+  <data name="WebpluginUpdated" xml:space="preserve">
+    <value>Плагин обновлен: {0}</value>
+  </data>
+  <data name="WebpluginUploaded" xml:space="preserve">
+    <value>Плагин загружен: {0}</value>
   </data>
 </root>

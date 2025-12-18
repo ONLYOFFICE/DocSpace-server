@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -150,7 +150,7 @@ public class SmsKeyStorage
 
         _checkCache.Insert(cacheCheck, counter.ToString(CultureInfo.InvariantCulture), DateTime.UtcNow.Add(StoreInterval));
 
-        try 
+        try
         {
             await _semaphore.WaitAsync();
             var cacheKey = BuildCacheKey(phone);

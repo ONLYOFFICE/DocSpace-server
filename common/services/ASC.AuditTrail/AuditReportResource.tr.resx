@@ -94,6 +94,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Renk Teması Değiştirildi</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Kişiler</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>Çerez Ayarları Güncellendi</value>
   </data>
@@ -123,9 +126,6 @@
   </data>
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Üstüne Yazma Ayarları Güncellendi</value>
-  </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Dökümanlar</value>
   </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Ayarlar</value>
@@ -256,9 +256,6 @@
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Sphinx ayarları güncellendi</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>Genel</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Hoş Geldiniz Sayfası Ayarları Güncellendi</value>
   </data>
@@ -267,9 +264,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Grup Silindi: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Gruplar</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Grup Güncellendi: {0}</value>
@@ -344,7 +338,7 @@
     <value>Giriş Başarılı</value>
   </data>
   <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Sosyal Hesapla Giriş Başarılı</value>
+    <value>Sosyal Hesapla Giriş Başarılı: {0}</value>
   </data>
   <data name="LoginSuccessViaApi" xml:space="preserve">
     <value>API ile başarılı giriş</value>
@@ -373,9 +367,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>Taşı</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Diğerleri</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Sahip Değiştirildi: {0}</value>
   </data>
@@ -393,9 +384,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>Şifre Gücü Ayarları Güncellendi</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>İnsanlar</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Platform</value>
@@ -433,9 +421,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Ürünler Listesi Güncellendi</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Ürünler</value>
-  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Yeniden atamalar</value>
   </data>
@@ -451,7 +436,7 @@
   <data name="SessionStarted" xml:space="preserve">
     <value>Seans Başlatıldı</value>
   </data>
-  <data name="SettingsProduct" xml:space="preserve">
+  <data name="SettingsModule" xml:space="preserve">
     <value>Ayarlar</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
@@ -460,7 +445,7 @@
   <data name="SSOEnabled" xml:space="preserve">
     <value>SSO Etkinleştirildi</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>Yedeklemeyi başlat</value>
   </data>
   <data name="StartTransferSetting" xml:space="preserve">
@@ -558,9 +543,6 @@
   </data>
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>Kullanıcılar [{0}]. Şifre Değiştirme Kılavuzu Gönderildi</value>
-  </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>Kullanıcılar</value>
   </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>Kullanıcılar [{0}]. Aktivasyon Kılavuzu Gönderildi</value>
@@ -808,9 +790,6 @@
   <data name="RoomInviteResend" xml:space="preserve">
     <value>Davetiyeler yeniden gönderildi: {0}</value>
   </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
-  </data>
   <data name="ChangeClientActivation" xml:space="preserve">
     <value>İstemcinin {0} etkinleştirmesi değişti</value>
   </data>
@@ -870,5 +849,203 @@
   </data>
   <data name="UpdateClient" xml:space="preserve">
     <value>İstemci {0} güncellendi</value>
+  </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Geliştirici Araçları erişim ayarları değiştirildi</value>
+  </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>Dosya: {0}. Özel filtre devre dışı</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>Dosya: {0}. Özel filtre etkinleştirildi</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>Dosyalar [{0}]. Sürüm silindi: {1}</value>
+  </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Kullanıcı Api Anahtarı Oluşturuldu: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Kullanıcı Api Anahtarı Silindi: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Kullanıcı Api Anahtarı Güncellendi: {0}</value>
+  </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Kullanıcılar [{0}]. Form tamamen dolduruldu: {1}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Kullanıcılar [{0}]. Formun bir kısmı dolduruldu: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Kullanıcılar [{0}]. Form durduruldu: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Kullanıcılar [{0}]. Form doldurulmaya başlandı: {1}</value>
+  </data>
+  <data name="WebhookCreated" xml:space="preserve">
+    <value>Webhook oluşturuldu: {0}</value>
+  </data>
+  <data name="WebhookDeleted" xml:space="preserve">
+    <value>Webhook silindi: {0}</value>
+  </data>
+  <data name="WebhookUpdated" xml:space="preserve">
+    <value>Webhook güncellendi: {0}</value>
+  </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Yetkilendirme bağlantısı etkinleştirildi</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Müşteri işlemi gerçekleştirildi</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Müşteri işlemleri raporu indirildi</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Müşteri aboneliği güncellendi: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Müşteri cüzdanına para yüklendi: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Müşteri cüzdanına para yükleme ayarları güncellendi</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>LDAP kimlik doğrulaması devre dışı bırakıldı</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>LDAP kimlik doğrulaması etkinleştirildi</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>LDAP senkronizasyonu tamamlandı</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Konum</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Promosyon afişlerinin görünürlük ayarları değiştirildi</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Müşteri cüzdanı etkinleştirilmiş hizmet ayarları güncellendi</value>
+  </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Sosyal Hesapla Giriş Başarılı</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>MCP sunucusu {0} ajana eklendi</value>
+  </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>Ajan oluşturuldu</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>Ajan silindi</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>Ajan yeniden adlandırıldı: {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>Ajanlar</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>Yapay zekâ sağlayıcısı oluşturuldu: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>Yapay zekâ sağlayıcısı silindi: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>Yapay zekâ sağlayıcısı güncellendi: {0}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Yapay zekâ ajanları [{0}]. Özel depolama kotası ayarlandı: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>Yapay zekâ ajanları [{0}]. Varsayılan depolama kotası ayarlandı: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Yapay zekâ ajanları [{0}]. Depolama kotası devre dışı bırakıldı</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>{0} MCP sunucusu ajandan silindi</value>
+  </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Dosyalar [{0}]. Harici bağlantı oluşturuldu: {1}. Rol: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Dosyalar [{0}]. Harici bağlantı silindi: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Dosyalar [{0}]. Harici bağlantı güncellendi: {1}. Rol: {2}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Dosya favorilere eklendi: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Dosya favorilerden kaldırıldı: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Dosya “Benimle paylaşılanlar”dan kaldırıldı: {0}</value>
+  </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Dosyalar [{0}]. {1} için erişim güncellendi. Rol: {2}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Klasör indirildi: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Klasörler [{0}]. Harici bağlantı oluşturuldu: {1}. Rol: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Klasörler [{0}]. Harici bağlantı silindi: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Klasörler [{0}]. Harici bağlantı güncellendi: {1}. Rol: {2}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Klasör “Benimle paylaşılanlar” dan kaldırıldı: {0}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Klasörler [{0}]. {1} için erişim güncellendi. Rol: {2}</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>OAuth 2.0 ile Başarılı Giriş</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Kullanıcı adı ve şifre ile giriş başarılı</value>
+  </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Yapay zekâ ajanları için varsayılan depolama kotası ayarlandı: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Yapay zekâ ajanları için varsayılan depolama kotası devre dışı bırakıldı</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>Vektörleştirme ayarları sıfırlandı</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>Web arama ayarları sıfırlandı</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Harici bağlantı iptal edildi: {1}</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>MCP sunucusu oluşturuldu: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>MCP sunucusu silindi: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>MCP sunucusu devre dışı bırakıldı: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>MCP sunucusu etkinleştirildi: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>MCP sunucusu güncellendi: {0}</value>
+  </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>Vektörleştirme ayarları yapılandırıldı. Sağlayıcı: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>Web arama ayarları yapılandırıldı. Motor: {0}</value>
   </data>
 </root>

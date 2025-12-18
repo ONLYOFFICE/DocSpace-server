@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -153,10 +153,10 @@ public class AWSSender : SmtpSender, IDisposable
         //Check last send and throttle if needed
         if (_sendWindow != TimeSpan.MinValue && DateTime.UtcNow - _lastSend <= _sendWindow)
         {
-                //Possible BUG: at high frequncies maybe bug with to little differences
-                //This means that time passed from last send is less then message per second
-                _logger.DebugSendRate(_sendWindow);
-                Thread.Sleep(_sendWindow);
+            //Possible BUG: at high frequncies maybe bug with to little differences
+            //This means that time passed from last send is less then message per second
+            _logger.DebugSendRate(_sendWindow);
+            Thread.Sleep(_sendWindow);
         }
     }
 
@@ -192,7 +192,7 @@ public class AWSSender : SmtpSender, IDisposable
 
     private bool IsRefreshNeeded()
     {
-        return _quota == null || (DateTime.UtcNow - _lastRefresh) > _refreshTimeout;
+        return _quota == null || DateTime.UtcNow - _lastRefresh > _refreshTimeout;
     }
 
     public void Dispose()

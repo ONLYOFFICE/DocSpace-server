@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -49,7 +49,7 @@ public class FilesControllerInternal(
         hybridCache)
 {
     /// <summary>
-    /// Get the list of actions performed on the file with the specified identifier
+    /// Returns the list of actions performed on the file with the specified identifier.
     /// </summary>
     /// <short>
     /// Get file history
@@ -61,9 +61,9 @@ public class FilesControllerInternal(
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "The required file was not found")]
     [HttpGet("file/{fileId:int}/log")]
-    public IAsyncEnumerable<HistoryDto> GetFileHistoryAsync(HistoryRequestDto inDto)
+    public IAsyncEnumerable<HistoryDto> GetFileHistory(HistoryRequestDto inDto)
     {
-        return historyApiHelper.GetFileHistoryAsync(inDto.FileId, inDto.FromDate, inDto.ToDate);
+        return historyApiHelper.GetFileHistoryAsync(inDto.FileId, inDto.FromDate, inDto.ToDate, inDto.StartIndex, inDto.Count);
     }
 }
 
@@ -109,7 +109,7 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "Updated information about file versions", typeof(IAsyncEnumerable<FileDto<int>>))]
     [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
     [HttpPut("file/{fileId}/history")]
-    public IAsyncEnumerable<FileDto<T>> ChangeHistoryAsync(ChangeHistoryRequestDto<T> inDto)
+    public IAsyncEnumerable<FileDto<T>> ChangeVersionHistory(ChangeHistoryRequestDto<T> inDto)
     {
         return filesControllerHelper.ChangeHistoryAsync(inDto.FileId, inDto.File.Version, inDto.File.ContinueVersion);
     }
@@ -123,20 +123,18 @@ public abstract class FilesController<T>(
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Conversion result", typeof(IAsyncEnumerable<ConversationResultDto>))]
     [HttpGet("file/{fileId}/checkconversion")]
-    public async IAsyncEnumerable<ConversationResultDto> CheckConversionAsync(CheckConversionStatusRequestDto<T> inDto)
+    public IAsyncEnumerable<ConversationResultDto> CheckConversionStatus(CheckConversionStatusRequestDto<T> inDto)
     {
-        await foreach (var r in filesControllerHelper.CheckConversionAsync(new CheckConversionRequestDto<T>
+        return filesControllerHelper.CheckConversionAsync(new CheckConversionRequestDto<T>
         {
             FileId = inDto.FileId,
             StartConvert = inDto.Start
-        }))
-        {
-            yield return r;
-        }
+        });
     }
 
     /// <summary>
-    /// Returns a link to download a file with the ID specified in the request.
+    /// Returns a pre-signed URL to download a file with the specified ID.
+    /// This temporary link provides secure access to the file.
     /// </summary>
     /// <short>Get file download link</short>
     /// <path>api/2.0/files/file/{fileId}/presigneduri</path>
@@ -149,7 +147,7 @@ public abstract class FilesController<T>(
     }
 
     /// <summary>
-    /// Checks if the PDF file is form or not.
+    /// Checks if the PDF file is a form or not.
     /// </summary>
     /// <short>Check the PDF file</short>
     /// <path>api/2.0/files/file/{fileId}/isformpdf</path>
@@ -167,12 +165,12 @@ public abstract class FilesController<T>(
     /// <short>Copy a file</short>
     /// <path>api/2.0/files/file/{fileId}/copyas</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Copied file entry information", typeof(FileEntryDto))]
+    [SwaggerResponse(200, "Copied file entry information", typeof(FileEntryBaseDto))]
     [SwaggerResponse(400, "No file id or folder id toFolderId determine provider")]
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [SwaggerResponse(404, "File not found")]
     [HttpPost("file/{fileId}/copyas")]
-    public async Task<FileEntryDto> CopyFileAs(CopyAsRequestDto<T> inDto)
+    public async Task<FileEntryBaseDto> CopyFileAs(CopyAsRequestDto<T> inDto)
     {
         if (inDto.File.DestFolderId.ValueKind == JsonValueKind.Number)
         {
@@ -196,7 +194,7 @@ public abstract class FilesController<T>(
     [Tags("Files / Files")]
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
     [HttpPost("{folderId}/file")]
-    public async Task<FileDto<T>> CreateFileAsync(CreateFileRequestDto<T> inDto)
+    public async Task<FileDto<T>> CreateFile(CreateFileRequestDto<T> inDto)
     {
         return await filesControllerHelper.CreateFileAsync(inDto.FolderId, inDto.File.Title, inDto.File.TemplateId, inDto.File.FormId, inDto.File.EnableExternalExt);
     }
@@ -210,7 +208,7 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [HttpPost("{folderId}/html")]
-    public async Task<FileDto<T>> CreateHtmlFileAsync(CreateTextOrHtmlFileRequestDto<T> inDto)
+    public async Task<FileDto<T>> CreateHtmlFile(CreateTextOrHtmlFileRequestDto<T> inDto)
     {
         return await filesControllerHelper.CreateHtmlFileAsync(inDto.FolderId, inDto.File.Title, inDto.File.Content, !inDto.File.CreateNewIfExist);
     }
@@ -218,12 +216,12 @@ public abstract class FilesController<T>(
     /// <summary>
     /// Creates a text (.txt) file in the selected folder with the title and contents specified in the request.
     /// </summary>
-    /// <short>Create a txt file</short>
+    /// <short>Create a text file</short>
     /// <path>api/2.0/files/{folderId}/text</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
     [HttpPost("{folderId}/text")]
-    public async Task<FileDto<T>> CreateTextFileAsync(CreateTextOrHtmlFileRequestDto<T> inDto)
+    public async Task<FileDto<T>> CreateTextFile(CreateTextOrHtmlFileRequestDto<T> inDto)
     {
         return await filesControllerHelper.CreateTextFileAsync(inDto.FolderId, inDto.File.Title, inDto.File.Content, !inDto.File.CreateNewIfExist);
     }
@@ -239,8 +237,8 @@ public abstract class FilesController<T>(
     [HttpDelete("file/{fileId}")]
     public async IAsyncEnumerable<FileOperationDto> DeleteFile(DeleteRequestDto<T> inDto)
     {
-        await fileOperationsManager.Publish(new List<T>(), new List<T> { inDto.FileId }, false, !inDto.File.DeleteAfter, inDto.File.Immediately);
-        
+        await fileOperationsManager.Publish([], [inDto.FileId], false, !inDto.File.DeleteAfter, inDto.File.Immediately);
+
         foreach (var e in await fileOperationsManager.GetOperationResults())
         {
             yield return await fileOperationDtoHelper.GetAsync(e);
@@ -248,18 +246,26 @@ public abstract class FilesController<T>(
     }
 
     /// <summary>
-    /// Gets fill result
+    /// Retrieves the result of a form-filling session.
     /// </summary>
+    /// <short>
+    /// Get form-filling result
+    /// </short>
     /// <path>api/2.0/files/file/fillresult</path>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Ok", typeof(FillingFormResultDto<int>))]
     [AllowAnonymous]
     [HttpGet("file/fillresult")]
-    public async Task<FillingFormResultDto<T>> GetFillResultAsync(GetFillResulteRequestDto inDto)
+    public async Task<FillingFormResultDto<T>> GetFillResult(GetFillResultRequestDto inDto)
     {
         var completedFormId = await hybridCache.GetOrDefaultAsync<string>(inDto.FillingSessionId);
 
-        return await filesControllerHelper.GetFillResultAsync((T)Convert.ChangeType(completedFormId, typeof(T)));
+        if (completedFormId != null)
+        {
+            return await filesControllerHelper.GetFillResultAsync((T)Convert.ChangeType(completedFormId, typeof(T)));
+        }
+        throw new ItemNotFoundException();
     }
 
     /// <summary>
@@ -272,7 +278,7 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "File version history data", typeof(EditHistoryDataDto))]
     [AllowAnonymous]
     [HttpGet("file/{fileId}/edit/diff")]
-    public async Task<EditHistoryDataDto> GetEditDiffUrlAsync(EditDiffUrlRequestDto<T> inDto)
+    public async Task<EditHistoryDataDto> GetEditDiffUrl(EditDiffUrlRequestDto<T> inDto)
     {
         return await filesControllerHelper.GetEditDiffUrlAsync(inDto.FileId, inDto.Version);
     }
@@ -288,7 +294,7 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "Version history data", typeof(IAsyncEnumerable<EditHistoryDto>))]
     [AllowAnonymous]
     [HttpGet("file/{fileId}/edit/history")]
-    public IAsyncEnumerable<EditHistoryDto> GetEditHistoryAsync(FileIdRequestDto<T> inDto)
+    public IAsyncEnumerable<EditHistoryDto> GetEditHistory(FileIdRequestDto<T> inDto)
     {
         return filesControllerHelper.GetEditHistoryAsync(inDto.FileId);
     }
@@ -303,7 +309,7 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "File information", typeof(FileDto<int>))]
     [AllowAnonymous]
     [HttpGet("file/{fileId}")]
-    public async Task<FileDto<T>> GetFileInfoAsync(FileInfoRequestDto<T> inDto)
+    public async Task<FileDto<T>> GetFileInfo(FileInfoRequestDto<T> inDto)
     {
         return await filesControllerHelper.GetFileInfoAsync(inDto.FileId, inDto.Version);
     }
@@ -320,7 +326,7 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "Information about file versions: folder ID, version, version group, content length, pure content length, file status, URL to view a file, web URL, file type, file extension, comment, encrypted or not, thumbnail URL, thumbnail status, locked or not, user ID who locked a file, denies file downloading or not, denies file sharing or not, file accessibility", typeof(IAsyncEnumerable<FileDto<int>>))]
     [AllowAnonymous]
     [HttpGet("file/{fileId}/history")]
-    public IAsyncEnumerable<FileDto<T>> GetFileVersionInfoAsync(FileIdRequestDto<T> inDto)
+    public IAsyncEnumerable<FileDto<T>> GetFileVersionInfo(FileIdRequestDto<T> inDto)
     {
         return filesControllerHelper.GetFileVersionInfoAsync(inDto.FileId);
     }
@@ -333,9 +339,24 @@ public abstract class FilesController<T>(
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Locked file information", typeof(FileDto<int>))]
     [HttpPut("file/{fileId}/lock")]
-    public async Task<FileDto<T>> LockFileAsync(LockFileRequestDto<T> inDto)
+    public async Task<FileDto<T>> LockFile(LockFileRequestDto<T> inDto)
     {
         return await filesControllerHelper.LockFileAsync(inDto.FileId, inDto.File.LockFile);
+    }
+
+    /// <summary>
+    /// Sets the Custom Filter editing mode to a file with the ID specified in the request.
+    /// </summary>
+    /// <short>Set the Custom Filter editing mode</short>
+    /// <path>api/2.0/files/file/{fileId}/customfilter</path>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "File information", typeof(FileDto<int>))]
+    [HttpPut("file/{fileId}/customfilter")]
+    public async Task<FileDto<T>> SetCustomFilterTag(FileCustomFilterRequestDto<T> inDto)
+    {
+        var result = await fileStorageService.SetCustomFilterTagAsync(inDto.FileId, inDto.Parameters.Enabled);
+
+        return await _fileDtoHelper.GetAsync(result);
     }
 
     /// <summary>
@@ -350,8 +371,8 @@ public abstract class FilesController<T>(
     [SwaggerResponse(400, "No file id or folder id toFolderId determine provider")]
     [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
     [AllowAnonymous]
-    [HttpGet("file/{fileId}/restoreversion")]
-    public IAsyncEnumerable<EditHistoryDto> RestoreVersionAsync(RestoreVersionRequestDto<T> inDto)
+    [HttpPost("file/{fileId}/restoreversion")]
+    public IAsyncEnumerable<EditHistoryDto> RestoreFileVersion(RestoreVersionRequestDto<T> inDto)
     {
         return filesControllerHelper.RestoreVersionAsync(inDto.FileId, inDto.Version, inDto.Url);
     }
@@ -365,7 +386,7 @@ public abstract class FilesController<T>(
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Conversion result", typeof(IAsyncEnumerable<ConversationResultDto>))]
     [HttpPut("file/{fileId}/checkconversion")]
-    public IAsyncEnumerable<ConversationResultDto> StartConversion(StartConversionRequestDto<T> inDto)
+    public IAsyncEnumerable<ConversationResultDto> StartFileConversion(StartConversionRequestDto<T> inDto)
     {
         inDto.CheckConversion ??= new CheckConversionRequestDto<T>();
         inDto.CheckConversion.FileId = inDto.FileId;
@@ -381,7 +402,7 @@ public abstract class FilesController<T>(
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Updated comment", typeof(string))]
     [HttpPut("file/{fileId}/comment")]
-    public async Task<string> UpdateCommentAsync(UpdateCommentRequestDto<T> inDto)
+    public async Task<string> UpdateFileComment(UpdateCommentRequestDto<T> inDto)
     {
         return await filesControllerHelper.UpdateCommentAsync(inDto.FileId, inDto.File.Version, inDto.File.Comment);
     }
@@ -397,7 +418,7 @@ public abstract class FilesController<T>(
     [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
     [AllowAnonymous]
     [HttpPut("file/{fileId}")]
-    public async Task<FileDto<T>> UpdateFileAsync(UpdateFileRequestDto<T> inDto)
+    public async Task<FileDto<T>> UpdateFile(UpdateFileRequestDto<T> inDto)
     {
         return await filesControllerHelper.UpdateFileAsync(inDto.FileId, inDto.File.Title, inDto.File.LastVersion);
     }
@@ -413,9 +434,12 @@ public abstract class FilesController<T>(
     [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
     [SwaggerResponse(404, "File not found")]
     [HttpPut("{fileId}/update")]
-    public async Task<FileDto<T>> UpdateFileStreamFromFormAsync(FileStreamRequestDto<T> inDto)
+    public async Task<FileDto<T>> UpdateFileStreamFromForm(FileStreamRequestDto<T> inDto)
     {
-        return await filesControllerHelper.UpdateFileStreamAsync(filesControllerHelper.GetFileFromRequest(inDto).OpenReadStream(), inDto.FileId, inDto.FileExtension, inDto.Encrypted, inDto.Forcesave);
+        IEnumerable<IFormFile> files = Request.Form.Files;
+        var file = files.Any() ? files.First() : inDto.File;
+
+        return await filesControllerHelper.UpdateFileStreamAsync(file.OpenReadStream(), inDto.FileId, inDto.FileExtension, inDto.Encrypted, inDto.Forcesave);
     }
 
     /// <summary>
@@ -427,9 +451,18 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "File security information", typeof(FileShareDto))]
     [SwaggerResponse(404, "Not Found")]
     [HttpPost("file/{id}/link")]
-    public async Task<FileShareDto> CreatePrimaryExternalLinkAsync(FileLinkRequestDto<T> inDto)
+    public async Task<FileShareDto> CreateFilePrimaryExternalLink(FileLinkRequestDto<T> inDto)
     {
-        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(inDto.Id, FileEntryType.File, inDto.File.Access, expirationDate: inDto.File.ExpirationDate, requiredAuth: inDto.File.Internal, allowUnlimitedDate: true);
+        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(
+            inDto.Id,
+            FileEntryType.File,
+            inDto.File.Access,
+            expirationDate: inDto.File.ExpirationDate,
+            requiredAuth: inDto.File.Internal,
+            allowUnlimitedDate: true,
+            denyDownload: inDto.File.DenyDownload,
+            password: inDto.File.Password);
+
         return await fileShareDtoHelper.Get(linkAce);
     }
 
@@ -438,50 +471,17 @@ public abstract class FilesController<T>(
     /// </summary>
     /// <short>Get primary external link</short>
     /// <path>api/2.0/files/file/{id}/link</path>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File security information", typeof(FileShareDto))]
     [SwaggerResponse(404, "Not Found")]
     [AllowAnonymous]
     [HttpGet("file/{id}/link")]
-    public async Task<FileShareDto> GetFilePrimaryExternalLinkAsync(FilePrimaryIdRequestDto<T> inDto)
+    public async Task<FileShareDto> GetFilePrimaryExternalLink(FilePrimaryIdRequestDto<T> inDto)
     {
-        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(inDto.Id, FileEntryType.File);
+        var linkAce = await fileStorageService.GetPrimaryExternalLinkAsync(inDto.Id, FileEntryType.File, allowUnlimitedDate: true);
 
         return await fileShareDtoHelper.Get(linkAce);
-    }
-
-    /// <summary>
-    /// Sets order of a file with ID specified in the request
-    /// </summary>
-    /// <path>api/2.0/files/{fileId}/order</path>
-    [Tags("Files / Files")]
-    [SwaggerResponse(200, "Updated file information", typeof(FileDto<int>))]
-    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
-    [SwaggerResponse(404, "Not Found")]
-    [HttpPut("{fileId}/order")]
-    public async Task<FileDto<T>> SetOrderFile(OrderFileRequestDto<T> inDto)
-    {
-        var file = await fileStorageService.SetFileOrder(inDto.FileId, inDto.Order.Order);
-
-        return await _fileDtoHelper.GetAsync(file);
-    }
-
-    /// <summary>
-    /// Sets order
-    /// </summary>
-    /// <path>api/2.0/files/order</path>
-    /// <exception cref="ArgumentOutOfRangeException"></exception>
-    [Tags("Files / Files")]
-    [SwaggerResponse(200, "Updated file entries information", typeof(IAsyncEnumerable<FileDto<int>>))]
-    [HttpPut("order")]
-    public async IAsyncEnumerable<FileEntryDto<T>> SetFilesOrder(OrdersRequestDto<T> inDto)
-    {
-        await foreach (var e in fileStorageService.SetOrderAsync(inDto.Items))
-        {
-            yield return e.FileEntryType == FileEntryType.Folder
-                ? await _folderDtoHelper.GetAsync(e as Folder<T>)
-                : await _fileDtoHelper.GetAsync(e as File<T>);
-        }
     }
 
     /// <summary>
@@ -493,10 +493,10 @@ public abstract class FilesController<T>(
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File security information", typeof(IAsyncEnumerable<FileShareDto>))]
     [HttpGet("file/{id}/links")]
-    public async IAsyncEnumerable<FileShareDto> GetLinksAsync(FilePrimaryIdRequestDto<T> inDto)
+    public async IAsyncEnumerable<FileShareDto> GetFileLinks(FilePrimaryIdRequestDto<T> inDto)
     {
-        var offset = Convert.ToInt32(apiContext.StartIndex);
-        var count = Convert.ToInt32(apiContext.Count);
+        var offset = inDto.StartIndex;
+        var count = inDto.Count;
 
         var totalCount = await fileStorageService.GetPureSharesCountAsync(inDto.Id, FileEntryType.File, ShareFilterType.ExternalLink, null);
 
@@ -516,30 +516,82 @@ public abstract class FilesController<T>(
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File security information", typeof(FileShareDto))]
     [HttpPut("file/{id}/links")]
-    public async Task<FileShareDto> SetExternalLinkAsync(FileLinkRequestDto<T> inDto)
+    public async Task<FileShareDto> SetFileExternalLink(FileLinkRequestDto<T> inDto)
     {
-        var linkAce = await fileStorageService.SetExternalLinkAsync(inDto.Id, FileEntryType.File, inDto.File.LinkId, null, inDto.File.Access, requiredAuth: inDto.File.Internal, 
-            primary: inDto.File.Primary, expirationDate: inDto.File.ExpirationDate);
+        var linkAce = await fileStorageService.SetExternalLinkAsync(
+            inDto.Id,
+            FileEntryType.File,
+            inDto.File.LinkId,
+            inDto.File.Title,
+            inDto.File.Access,
+            inDto.File.ExpirationDate,
+            inDto.File.Password,
+            inDto.File.DenyDownload,
+            inDto.File.Internal,
+            inDto.File.Primary);
 
         return linkAce is not null ? await fileShareDtoHelper.Get(linkAce) : null;
     }
 
     /// <summary>
-    /// Saves a file with the identifier specified in the request as a PDF document
+    /// Sets the order of the file with the ID specified in the request.
     /// </summary>
-    /// <short>Save as pdf</short>
+    /// <short>
+    /// Set file order
+    /// </short>
+    /// <path>api/2.0/files/{fileId}/order</path>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Updated file information", typeof(FileDto<int>))]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
+    [SwaggerResponse(404, "Not Found")]
+    [HttpPut("{fileId}/order")]
+    public async Task<FileDto<T>> SetFileOrder(OrderFileRequestDto<T> inDto)
+    {
+        var file = await fileStorageService.SetFileOrder(inDto.FileId, inDto.Order.Order);
+
+        return await _fileDtoHelper.GetAsync(file);
+    }
+
+    /// <summary>
+    /// Sets the order of the files specified in the request.
+    /// </summary>
+    /// <short>
+    /// Set order of files
+    /// </short>
+    /// <path>api/2.0/files/order</path>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Updated file entries information", typeof(IAsyncEnumerable<FileEntryDto<int>>))]
+    [HttpPut("order")]
+    public IAsyncEnumerable<FileEntryDto<T>> SetFilesOrder(OrdersRequestDto<T> inDto)
+    {
+        return fileStorageService.SetOrderAsync(inDto.Items).Select<FileEntry<T>, FileEntryDto<T>>(
+            async (e, _) => e.FileEntryType == FileEntryType.Folder ?
+                await _folderDtoHelper.GetAsync(e as Folder<T>) :
+                await _fileDtoHelper.GetAsync(e as File<T>));
+    }
+
+    /// <summary>
+    /// Saves a file with the identifier specified in the request as a PDF document.
+    /// </summary>
+    /// <short>Save a file as PDF</short>
     /// <path>api/2.0/files/file/{id}/saveaspdf</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
     [SwaggerResponse(404, "File not found")]
     [HttpPost("file/{id}/saveaspdf")]
-    public async Task<FileDto<T>> SaveAsPdf(SaveAsPdfRequestDto<T> inDto)
+    public async Task<FileDto<T>> SaveFileAsPdf(SaveAsPdfRequestDto<T> inDto)
     {
         return await filesControllerHelper.SaveAsPdf(inDto.Id, inDto.File.FolderId, inDto.File.Title);
     }
 
+    /// <summary>
+    /// Saves the form role mapping.
+    /// </summary>
+    /// <short>Save form role mapping</short>
+    /// <path>api/2.0/files/file/{fileId}/formrolemapping</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Updated information about form role mappings", typeof(FormRole))]
+    [SwaggerResponse(200, "Updated information about form role mappings")]
     [SwaggerResponse(403, "You do not have enough permissions to edit the file")]
     [HttpPost("file/{fileId}/formrolemapping")]
     public async Task SaveFormRoleMapping(SaveFormRoleMappingDto<T> inDto)
@@ -547,8 +599,14 @@ public abstract class FilesController<T>(
         await fileStorageService.SaveFormRoleMapping(inDto.FormId, inDto.Roles);
     }
 
+    /// <summary>
+    /// Returns all roles for the specified form.
+    /// </summary>
+    /// <short>Get form roles</short>
+    /// <path>api/2.0/files/file/{fileId}/formroles</path>
+    /// <collection>list</collection>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Successfully retrieved all roles for the form", typeof(IEnumerable<FormRole>))]
+    [SwaggerResponse(200, "Successfully retrieved all roles for the form", typeof(IEnumerable<FormRoleDto>))]
     [SwaggerResponse(403, "You do not have enough permissions to view the form roles")]
     [HttpGet("file/{fileId}/formroles")]
     public IAsyncEnumerable<FormRoleDto> GetAllFormRoles(FileIdRequestDto<T> inDto)
@@ -556,6 +614,11 @@ public abstract class FilesController<T>(
         return fileStorageService.GetAllFormRoles(inDto.FileId);
     }
 
+    /// <summary>
+    /// Performs the specified form filling action.
+    /// </summary>
+    /// <short>Perform form filling action</short>
+    /// <path>api/2.0/files/file/{fileId}/manageformfilling</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Successfully processed the form filling action")]
     [SwaggerResponse(403, "You do not have enough permissions to perform this action")]
@@ -563,6 +626,20 @@ public abstract class FilesController<T>(
     public async Task ManageFormFilling(ManageFormFillingDto<T> inDto)
     {
         await fileStorageService.ManageFormFilling(inDto.FormId, inDto.Action);
+    }
+
+    /// <summary>
+    /// Returns the results of form submissions.
+    /// </summary>
+    /// <short>Get form submission results</short>
+    /// <path>api/2.0/files/file/{fileId}/submissions</path>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "Form submission results were successfully retrieved")]
+    [SwaggerResponse(403, "You do not have enough permissions to perform this action")]
+    [HttpGet("file/{fileId}/submissions")]
+    public IAsyncEnumerable<FormResultsDto> GetFormSubmissions(FileIdRequestDto<int> inDto)
+    {
+        return fileStorageService.GetSubmissionsByFormId(inDto.FileId);
     }
 }
 
@@ -583,7 +660,7 @@ public class FilesControllerCommon(
     [Tags("Files / Files")]
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
     [HttpPost("@my/file")]
-    public async Task<FileDto<int>> CreateFileMyDocumentsAsync(CreateFile<JsonElement> inDto)
+    public async Task<FileDto<int>> CreateFileInMyDocuments(CreateFile<JsonElement> inDto)
     {
         return await filesControllerHelperInternal.CreateFileAsync(await globalFolderHelper.FolderMyAsync, inDto.Title, inDto.TemplateId, inDto.FormId, inDto.EnableExternalExt);
     }
@@ -598,7 +675,7 @@ public class FilesControllerCommon(
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [HttpPost("@common/html")]
-    public async Task<FileDto<int>> CreateHtmlFileInCommonAsync(CreateTextOrHtmlFile inDto)
+    public async Task<FileDto<int>> CreateHtmlFileInCommon(CreateTextOrHtmlFile inDto)
     {
         return await filesControllerHelperInternal.CreateHtmlFileAsync(await globalFolderHelper.FolderCommonAsync, inDto.Title, inDto.Content, !inDto.CreateNewIfExist);
     }
@@ -612,7 +689,7 @@ public class FilesControllerCommon(
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [HttpPost("@my/html")]
-    public async Task<FileDto<int>> CreateHtmlFileInMyAsync(CreateTextOrHtmlFile inDto)
+    public async Task<FileDto<int>> CreateHtmlFileInMyDocuments(CreateTextOrHtmlFile inDto)
     {
         return await filesControllerHelperInternal.CreateHtmlFileAsync(await globalFolderHelper.FolderMyAsync, inDto.Title, inDto.Content, !inDto.CreateNewIfExist);
     }
@@ -626,7 +703,7 @@ public class FilesControllerCommon(
     [Tags("Files / Files")]
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
     [HttpPost("@common/text")]
-    public async Task<FileDto<int>> CreateTextFileInCommonAsync(CreateTextOrHtmlFile inDto)
+    public async Task<FileDto<int>> CreateTextFileInCommon(CreateTextOrHtmlFile inDto)
     {
         return await filesControllerHelperInternal.CreateTextFileAsync(await globalFolderHelper.FolderCommonAsync, inDto.Title, inDto.Content, !inDto.CreateNewIfExist);
     }
@@ -639,7 +716,7 @@ public class FilesControllerCommon(
     [Tags("Files / Files")]
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
     [HttpPost("@my/text")]
-    public async Task<FileDto<int>> CreateTextFileInMyAsync(CreateTextOrHtmlFile inDto)
+    public async Task<FileDto<int>> CreateTextFileInMyDocuments(CreateTextOrHtmlFile inDto)
     {
         return await filesControllerHelperInternal.CreateTextFileAsync(await globalFolderHelper.FolderMyAsync, inDto.Title, inDto.Content, !inDto.CreateNewIfExist);
     }
@@ -647,7 +724,7 @@ public class FilesControllerCommon(
     /// <summary>
     /// Creates thumbnails for the files with the IDs specified in the request.
     /// </summary>
-    /// <short>Create thumbnails</short>
+    /// <short>Create file thumbnails</short>
     /// <path>api/2.0/files/thumbnails</path>
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
@@ -655,7 +732,7 @@ public class FilesControllerCommon(
     [SwaggerResponse(200, "List of file IDs", typeof(IEnumerable<JsonElement>))]
     [AllowAnonymous]
     [HttpPost("thumbnails")]
-    public async Task<IEnumerable<JsonElement>> CreateThumbnailsAsync(BaseBatchRequestDto inDto)
+    public async Task<IEnumerable<JsonElement>> CreateThumbnails(BaseBatchRequestDto inDto)
     {
         return await fileStorageService.CreateThumbnailsAsync(inDto.FileIds.ToList());
     }

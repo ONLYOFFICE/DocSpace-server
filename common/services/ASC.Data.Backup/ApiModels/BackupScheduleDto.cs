@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,59 +24,61 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Data.Backup.Services;
+
 namespace ASC.Data.Backup.ApiModels;
 
 /// <summary>
-/// Backup schedule parameters
+/// The backup schedule parameters.
 /// </summary>
 public class BackupScheduleDto
 {
     /// <summary>
-    /// Storage type
+    /// The backup storage type.
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public BackupStorageType? StorageType { get; set; }
 
     /// <summary>
-    /// Storage parameters
+    /// The backup storage parameters.
     /// </summary>
     public IEnumerable<ItemKeyValuePair<object, object>> StorageParams { get; set; }
 
     /// <summary>
-    /// Maximum number of the stored backup copies
+    /// The maximum number of the stored backup copies.
     /// </summary>
     public int? BackupsStored { get; set; }
 
     /// <summary>
-    /// Cron parameters
+    /// The backup cron parameters.
     /// </summary>
     public Cron CronParams { get; set; }
 
     /// <summary>
-    /// Specifies if a dump will be created or not
+    /// Specifies if a dump will be created or not.
     /// </summary>
     public bool Dump { get; set; }
 }
 
 /// <summary>
-/// Cron parameters
+/// The backup cron parameters.
 /// </summary>
 public class Cron
 {
     /// <summary>
-    /// Period
+    /// The backup period type.
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public BackupPeriod? Period { get; set; }
 
     /// <summary>
-    /// Hour
+    /// The time of the day to start the backup process.
     /// </summary>
     [SwaggerSchemaCustom(Example = 0)]
     public int Hour { get; set; }
 
     /// <summary>
-    /// Day
+    /// The day of the week to start the backup process.
     /// </summary>
     [SwaggerSchemaCustom(Example = 0)]
     public int? Day { get; set; }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -41,42 +41,52 @@ public static class DbTenantForbidenExtension
             .Add(PgSqlAddDbTenantForbiden, Provider.PostgreSql)
             .HasData(
             new DbTenantForbiden { Address = "controlpanel" },
-            new DbTenantForbiden { Address = "localhost" }
+            new DbTenantForbiden { Address = "localhost" },
+            new DbTenantForbiden { Address = "settings" },
+            new DbTenantForbiden { Address = "api-system-eu-central-1" },
+            new DbTenantForbiden { Address = "api-system-us-east-2" },
+            new DbTenantForbiden { Address = "identity-eu-central-1" },
+            new DbTenantForbiden { Address = "identity-us-east-2" },
+            new DbTenantForbiden { Address = "oauth" }
             );
 
         return modelBuilder;
     }
 
-    public static void MySqlAddDbTenantForbiden(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbTenantForbiden>(entity =>
+        public void MySqlAddDbTenantForbiden()
         {
-            entity.HasKey(e => e.Address)
-                .HasName("PRIMARY");
+            modelBuilder.Entity<DbTenantForbiden>(entity =>
+            {
+                entity.HasKey(e => e.Address)
+                    .HasName("PRIMARY");
 
-            entity.ToTable("tenants_forbiden")
-                .HasCharSet("utf8");
+                entity.ToTable("tenants_forbiden")
+                    .HasCharSet("utf8");
 
-            entity.Property(e => e.Address)
-                .HasColumnName("address")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
-        });
-    }
-    public static void PgSqlAddDbTenantForbiden(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<DbTenantForbiden>(entity =>
+                entity.Property(e => e.Address)
+                    .HasColumnName("address")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
+            });
+        }
+
+        public void PgSqlAddDbTenantForbiden()
         {
-            entity.HasKey(e => e.Address)
-                .HasName("PK_tenants_forbiden");
+            modelBuilder.Entity<DbTenantForbiden>(entity =>
+            {
+                entity.HasKey(e => e.Address)
+                    .HasName("PK_tenants_forbiden");
 
-            entity.ToTable("tenants_forbiden");
+                entity.ToTable("tenants_forbiden");
 
-            entity.Property(e => e.Address)
-                .HasColumnName("address")
-                .HasColumnType("varchar")
-                .IsRequired();
-        });
+                entity.Property(e => e.Address)
+                    .HasColumnName("address")
+                    .HasColumnType("varchar")
+                    .IsRequired();
+            });
+        }
     }
 }

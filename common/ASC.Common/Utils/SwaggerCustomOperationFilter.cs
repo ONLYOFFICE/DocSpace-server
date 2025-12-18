@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,6 +23,8 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -66,6 +68,29 @@ public class ContentTypeOperationFilter : IOperationFilter
 
                 response.Value.Content = content;
             }
+        }
+    }
+}
+
+public class SwaggerOperationIdFilter : IOperationFilter
+{
+    private readonly string _route;
+    private readonly string _newOperationId;
+    private readonly string _shortName;
+
+    public SwaggerOperationIdFilter(string route, string newOperationId, string shortName)
+    {
+        _route = route;
+        _newOperationId = newOperationId;
+        _shortName = shortName;
+    }
+    public void Apply(OpenApiOperation operation, OperationFilterContext context)
+    {
+        if (context.ApiDescription.RelativePath.Equals(_route, StringComparison.OrdinalIgnoreCase) &&
+            context.ApiDescription.HttpMethod.Equals("GET", StringComparison.OrdinalIgnoreCase))
+        {
+            operation.OperationId = _newOperationId;
+            operation.Extensions["x-shortName"] = new OpenApiString(_shortName);
         }
     }
 }

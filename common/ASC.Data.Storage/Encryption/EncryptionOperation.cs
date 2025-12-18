@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,8 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Tenant = ASC.Core.Tenants.Tenant;
 using SocketManager = ASC.Core.Common.Quota.QuotaSocketManager;
+using Tenant = ASC.Core.Tenants.Tenant;
 
 namespace ASC.Data.Storage.Encryption;
 
@@ -45,9 +45,9 @@ public class EncryptionOperation : DistributedTaskProgress
 
     public EncryptionOperation()
     {
-        
+
     }
-    
+
     public EncryptionOperation(IServiceScopeFactory serviceScopeFactory)
     {
         _serviceScopeFactory = serviceScopeFactory;
@@ -72,7 +72,7 @@ public class EncryptionOperation : DistributedTaskProgress
         }
         else
         {
-             await StepDone();
+            await StepDone();
         }
 
         await socketManager.EncryptionProgressAsync((int)Percentage, Exception?.Message);
@@ -83,13 +83,13 @@ public class EncryptionOperation : DistributedTaskProgress
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
         var scopeClass = scope.ServiceProvider.GetService<EncryptionOperationScope>();
-        var (log, storageFactoryConfig, storageFactory, tenantManager, coreBaseSettings, notifyHelper, encryptionSettingsHelper,   configuration) = scopeClass;
+        var (log, storageFactoryConfig, storageFactory, tenantManager, coreBaseSettings, notifyHelper, encryptionSettingsHelper, configuration) = scopeClass;
         notifyHelper.Init(_serverRootPath);
         _tenants = await tenantManager.GetTenantsAsync(false);
         _modules = storageFactoryConfig.GetModuleList(exceptDisabledMigration: true);
         _useProgressFile = Convert.ToBoolean(configuration["storage:encryption:progressfile"] ?? "true");
 
-        StepCount = (_tenants.Count() * _modules.Count()) + 4; // number of calls to the StepDone method
+        StepCount = _tenants.Count() * _modules.Count() + 4; // number of calls to the StepDone method
 
         try
         {
@@ -315,11 +315,11 @@ public class EncryptionOperation : DistributedTaskProgress
                     {
                         if (_isEncryption)
                         {
-                           await notifyHelper.SendStorageEncryptionSuccessAsync(tenant.Id);
+                            await notifyHelper.SendStorageEncryptionSuccessAsync(tenant.Id);
                         }
                         else
                         {
-                           await notifyHelper.SendStorageDecryptionSuccessAsync(tenant.Id);
+                            await notifyHelper.SendStorageDecryptionSuccessAsync(tenant.Id);
                         }
                         log.DebugTenantSendStorageEncryptionSuccess(tenant.Alias);
                     }

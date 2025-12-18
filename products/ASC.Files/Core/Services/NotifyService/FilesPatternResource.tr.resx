@@ -159,7 +159,9 @@ $__AuthorName şu odayı sildi: $RoomTitle</value>
 
 Form gönderen: "$FromUserName":"$FromUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>h1. Formu doldurdunuz $Message
@@ -168,12 +170,73 @@ $OrangeButton</value>
 
 Yönetici: "$ToUserName":"$ToUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
     <value>DocSpace bildirimi. Form dolduruldu</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
     <value>DocSpace bildirimi. Form dolduruldu</value>
+  </data>
+  <data name="pattern_FormSubmitted_push" xml:space="preserve">
+    <value>Form "$DocumentTitle" odasında dolduruldu</value>
+  </data>
+  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
+    <value>"$RoomTitle" odasına davet edildiniz</value>
+  </data>
+  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
+    <value>"$RoomTitle" odasındaki rolünüz "$RoomRole" olarak değiştirildi</value>
+  </data>
+  <data name="subject_YourTurnFormFilling" xml:space="preserve">
+    <value>DocSpace bildirimi.</value>
+  </data>
+  <data name="subject_StoppedFormFilling" xml:space="preserve">
+    <value>DocSpace bildirimi.</value>
+  </data>
+  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
+    <value>DocSpace bildirimi.</value>
+  </data>
+  <data name="subject_FormStartedFilling" xml:space="preserve">
+    <value>DocSpace bildirimi.</value>
+  </data>
+  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
+    <value>"$RoomTitle" odasında "$FolderTitle" adlı yeni bir klasör oluşturuldu</value>
+  </data>
+  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
+    <value>"$RoomTitle" odasına yeni dosyalar yüklendi ($Count)</value>
+  </data>
+  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
+    <value>"$RoomTitle" odasına "$DocumentTitle" adlı yeni bir dosya yüklendi</value>
+  </data>
+  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
+    <value>"$RoomTitle" odasında "$DocumentTitle" adlı yeni bir belge oluşturuldu</value>
+  </data>
+  <data name="pattern_EditorMentions_push" xml:space="preserve">
+    <value>$ToUserName, $DocumentTitle belgesinde sizden bahsetti</value>
+  </data>
+  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
+    <value>$FromUserName, "$RoomTitle" odasını arşive taşıdı</value>
+  </data>
+  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+    <value>
+      Etkinlik bildirimi. "$RoomTitle":"$RoomURL" odasında "$DocumentTitle":"$DocumentURL" formu tamamen dolduruldu — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_FormStartedFilling" xml:space="preserve">
+    <value>
+      Etkinlik bildirimi. "$FromUserName":"$FromUserLink", "$RoomTitle":"$RoomURL" odasında "$DocumentTitle":"$DocumentURL" formunu doldurmaya başladı — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_StoppedFormFilling" xml:space="preserve">
+    <value>
+      Etkinlik bildirimi. "$FromUserName":"$FromUserLink", "$RoomTitle":"$RoomURL" odasında "$DocumentTitle":"$DocumentURL" formunu doldurmayı durdurdu — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_YourTurnFormFilling" xml:space="preserve">
+    <value>
+      Etkinlik bildirimi. Sıra sizde! Form doldurmanız gerekiyor: "$DocumentTitle":"$DocumentURL", oda: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
   </data>
 </root>

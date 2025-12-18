@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,7 +27,7 @@
 namespace ASC.Core.Notify.Senders;
 
 [Singleton]
-public class TelegramSender(ILogger<TelegramSender> logger, IServiceProvider serviceProvider) : INotifySender
+public partial class TelegramSender(ILogger<TelegramSender> logger, IServiceProvider serviceProvider) : INotifySender
 {
     public void Init(IDictionary<string, string> properties) { }
 
@@ -36,7 +36,7 @@ public class TelegramSender(ILogger<TelegramSender> logger, IServiceProvider ser
         if (!string.IsNullOrEmpty(m.Content))
         {
             m.Content = m.Content.Replace("\r\n", "\n").Trim('\n', '\r', ' ');
-            m.Content = Regex.Replace(m.Content, "\n{3,}", "\n\n");
+            m.Content = NewLineRegex().Replace(m.Content, "\n\n");
         }
         try
         {
@@ -51,4 +51,7 @@ public class TelegramSender(ILogger<TelegramSender> logger, IServiceProvider ser
 
         return await Task.FromResult(NoticeSendResult.OK);
     }
+
+    [GeneratedRegex("\n{3,}")]
+    private static partial Regex NewLineRegex();
 }

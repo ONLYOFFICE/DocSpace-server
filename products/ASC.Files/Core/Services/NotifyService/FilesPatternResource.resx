@@ -163,7 +163,9 @@ A new form "$DocumentTitle":"$DocumentURL" is filled out in the room "$RoomTitle
 
 Form submitter: "$FromUserName":"$FromUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>h1. You filled out the form $Message
@@ -172,7 +174,9 @@ You filled out the form "$DocumentTitle":"$DocumentURL" in the room "$RoomTitle"
 
 Manager: "$ToUserName":"$ToUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
     <value>DocSpace notification. The form is filled out</value>
@@ -199,7 +203,7 @@ $OrangeButton</value>
     <value>A new file "$DocumentTitle" has been uploaded to the room "$RoomTitle"</value>
   </data>
   <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
-    <value>A new files have been uploaded to the room "$RoomTitle" ($Count)</value>
+    <value>New files have been uploaded to the room "$RoomTitle" ($Count)</value>
   </data>
   <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
     <value>A new folder "$FolderTitle" has been created to the room "$RoomTitle"</value>
@@ -228,7 +232,7 @@ $OrangeButton</value>
   </data>
   <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
     <value>
-      Activity notification. The form "$DocumentTitle":"$DocumentURL" was completely filled out, finalized, and signed in the room: "$RoomTitle":"$RoomURL" — $__DateTime.
+      Activity notification. The form "$DocumentTitle":"$DocumentURL" was completely filled out in the room: "$RoomTitle":"$RoomURL" — $__DateTime.
     </value>
   </data>
   <data name="subject_StoppedFormFilling" xml:space="preserve">

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -39,7 +39,7 @@ public class ZoomLoginProvider : BaseLoginProvider<ZoomLoginProvider>
     // used in ZoomService
     public const string ApiUrl = "https://api.zoom.us/v2";
     private const string UserProfileUrl = $"{ApiUrl}/users/me";
-    
+
     private readonly RequestHelper _requestHelper;
 
     public ZoomLoginProvider() { }
@@ -52,8 +52,8 @@ public class ZoomLoginProvider : BaseLoginProvider<ZoomLoginProvider>
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
         RequestHelper requestHelper,
-        string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-            : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
+        string name, int order, bool paid, Dictionary<string, string> props, Dictionary<string, string> additional = null)
+            : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, paid, props, additional)
     {
         _requestHelper = requestHelper;
     }
@@ -112,7 +112,7 @@ public class ZoomLoginProvider : BaseLoginProvider<ZoomLoginProvider>
         }
 
         var json = _requestHelper.PerformRequest(AccessTokenUrl, "application/x-www-form-urlencoded", "POST",
-            body: string.Join("&", body.Select(kv => $"{HttpUtility.UrlEncode(kv.Key)}={HttpUtility.UrlEncode(kv.Value)}" )),
+            body: string.Join("&", body.Select(kv => $"{HttpUtility.UrlEncode(kv.Key)}={HttpUtility.UrlEncode(kv.Value)}")),
             headers: new Dictionary<string, string> { { "Authorization", $"Basic {base64ClientPair}" } }
         );
 

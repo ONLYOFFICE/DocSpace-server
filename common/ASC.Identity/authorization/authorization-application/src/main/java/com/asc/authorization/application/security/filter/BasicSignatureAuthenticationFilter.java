@@ -40,6 +40,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
@@ -103,7 +104,7 @@ public class BasicSignatureAuthenticationFilter extends OncePerRequestFilter {
     var cookie =
         new Cookie(
             securityConfigProperties.getRedirectAuthorizationCookie(),
-            httpUtils.getFullURL(request));
+            Base64.getUrlEncoder().encodeToString(httpUtils.getFullURL(request).getBytes()));
     cookie.setPath("/");
     cookie.setMaxAge(60 * 60 * 24 * 365 * 10);
     response.addCookie(cookie);
@@ -113,9 +114,13 @@ public class BasicSignatureAuthenticationFilter extends OncePerRequestFilter {
             .filter(
                 c -> c.getName().equalsIgnoreCase(securityConfigProperties.getSignatureCookie()))
             .findFirst()
-            .orElse(null);
-    if (signature == null || signature.getValue().isBlank()) {
-      log.warn("Missing {} signature cookie", securityConfigProperties.getSignatureCookie());
+            .map(Cookie::getValue)
+            .orElseGet(() -> request.getHeader(securityConfigProperties.getSignatureCookie()));
+
+    if (signature == null || signature.isBlank()) {
+      log.warn(
+          "Missing signature in both cookie and {} header",
+          securityConfigProperties.getSignatureCookie());
       securityUtils.redirectWithError(
           request, response, clientId, AuthenticationError.MISSING_ASC_SIGNATURE.getCode());
       return;

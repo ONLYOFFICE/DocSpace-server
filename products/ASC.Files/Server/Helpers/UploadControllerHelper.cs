@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,7 +42,9 @@ public class UploadControllerHelper(
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     FileChecker fileChecker,
-    WebhookManager webhookManager)
+    WebhookManager webhookManager,
+    IEventBus eventBus,
+    AuthContext authContext)
     : FilesHelperBase(
         filesSettingsHelper,
         fileUploader,
@@ -51,8 +53,12 @@ public class UploadControllerHelper(
         fileStorageService,
         fileChecker,
         httpContextAccessor,
-        webhookManager)
-    {
+        webhookManager,
+        daoFactory,
+        eventBus,
+        tenantManager,
+        authContext)
+{
     public async Task<object> CreateEditSessionAsync<T>(T fileId, long fileSize)
     {
         var file = await _fileUploader.VerifyChunkedUploadForEditing(fileId, fileSize);
@@ -62,8 +68,8 @@ public class UploadControllerHelper(
 
     public async Task<List<string>> CheckUploadAsync<T>(T folderId, IEnumerable<string> filesTitle)
     {
-        var folderDao = daoFactory.GetFolderDao<T>();
-        var fileDao = daoFactory.GetFileDao<T>();
+        var folderDao = _daoFactory.GetFolderDao<T>();
+        var fileDao = _daoFactory.GetFileDao<T>();
         var toFolder = await folderDao.GetFolderAsync(folderId);
         if (toFolder == null)
         {
@@ -72,6 +78,10 @@ public class UploadControllerHelper(
         if (!await fileSecurity.CanCreateAsync(toFolder))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+        }
+        if (toFolder.FolderType == FolderType.FillingFormsRoom && toFolder.RootFolderType == FolderType.RoomTemplates && filesTitle.Any(r => FileUtility.GetFileExtension(r) != ".pdf"))
+        {
+            throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
         }
 
         var result = new List<string>();
@@ -109,7 +119,7 @@ public class UploadControllerHelper(
             };
         }
 
-        var createSessionUrl = await filesLinkUtility.GetInitiateUploadSessionUrlAsync(tenantManager.GetCurrentTenantId(), file.ParentId, file.Id, file.Title, file.ContentLength, encrypted, securityContext);
+        var createSessionUrl = await filesLinkUtility.GetInitiateUploadSessionUrlAsync(_tenantManager.GetCurrentTenantId(), file.ParentId, file.Id, file.Title, file.ContentLength, encrypted, securityContext);
 
         var httpClient = httpClientFactory.CreateClient();
 

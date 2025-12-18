@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,6 +26,7 @@
 
 namespace ASC.FederatedLogin.LoginProviders;
 
+[Scope]
 public class TelegramLoginProvider : Consumer, IValidateKeysProvider, ITelegramLoginProvider
 {
     public string TelegramBotToken => this["telegramBotToken"];
@@ -45,8 +46,8 @@ public class TelegramLoginProvider : Consumer, IValidateKeysProvider, ITelegramL
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
-        string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
+        string name, int order, bool paid, Dictionary<string, string> props, Dictionary<string, string> additional = null)
+        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, paid, props, additional)
     {
         _telegramHelper = telegramHelper;
     }
@@ -60,11 +61,11 @@ public class TelegramLoginProvider : Consumer, IValidateKeysProvider, ITelegramL
     {
         if (TelegramBotToken.Length == 0)
         {
-            await _telegramHelper.DisableClientAsync((TenantManager.GetCurrentTenant()).Id);
+            await _telegramHelper.DisableClientAsync(TenantManager.GetCurrentTenant().Id);
 
             return true;
         }
 
-        return await _telegramHelper.CreateClientAsync((TenantManager.GetCurrentTenant()).Id, TelegramBotToken, TelegramAuthTokenLifespan, TelegramProxy);
+        return await _telegramHelper.CreateClientAsync(TenantManager.GetCurrentTenant().Id, TelegramBotToken, TelegramAuthTokenLifespan, TelegramProxy);
     }
 }

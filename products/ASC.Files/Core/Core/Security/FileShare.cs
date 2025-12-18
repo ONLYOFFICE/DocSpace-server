@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core.Security;
 
+/// <summary>
+/// The access rights type.
+/// </summary>
 [EnumExtensions]
 [JsonConverter(typeof(FileShareConverter))]
 public enum FileShare
@@ -67,7 +70,7 @@ public enum FileShare
     ContentCreator
 }
 
-public class FileShareConverter : System.Text.Json.Serialization.JsonConverter<FileShare>
+public class FileShareConverter : JsonConverter<FileShare>
 {
     public override FileShare Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
@@ -92,23 +95,33 @@ public class FileShareConverter : System.Text.Json.Serialization.JsonConverter<F
 
 public static partial class FileShareExtensions
 {
-    public static string GetAccessString(FileShare fileShare, bool useRoomFormat = false, CultureInfo cultureInfo = null)
+    public static string GetAccessString(
+        FileShare fileShare,
+        bool useRoomFormat = false,
+        bool isAgent = false,
+        CultureInfo cultureInfo = null)
     {
+        if (isAgent && fileShare == FileShare.RoomManager)
+        {
+            return FilesCommonResource.AgentManager;
+        }
+        
+        
         var prefix = useRoomFormat && fileShare != FileShare.ReadWrite ? "RoleEnum_" : "AceStatusEnum_";
 
         return fileShare switch
         {
-            FileShare.Read or 
-            FileShare.ReadWrite or 
-            FileShare.CustomFilter or 
-            FileShare.Review or 
-            FileShare.FillForms or 
-            FileShare.Comment or 
-            FileShare.Restrict or 
-            FileShare.RoomManager or 
-            FileShare.Editing or 
-            FileShare.ContentCreator or 
-            FileShare.Varies or 
+            FileShare.Read or
+            FileShare.ReadWrite or
+            FileShare.CustomFilter or
+            FileShare.Review or
+            FileShare.FillForms or
+            FileShare.Comment or
+            FileShare.Restrict or
+            FileShare.RoomManager or
+            FileShare.Editing or
+            FileShare.ContentCreator or
+            FileShare.Varies or
             FileShare.None => FilesCommonResource.ResourceManager.GetString(prefix + fileShare.ToStringFast(), cultureInfo),
             _ => string.Empty
         };

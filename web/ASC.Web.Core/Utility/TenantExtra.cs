@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -47,25 +47,13 @@ public class TenantExtra(
             && string.IsNullOrEmpty(setupInfo.AmiMetaUrl);
     }
 
-    public bool Saas
-    {
-        get => tenantExtraConfig.Saas;
-    }
+    public bool Saas => tenantExtraConfig.Saas;
 
-    public bool Enterprise
-    {
-        get => tenantExtraConfig.Enterprise;
-    }
+    public bool Enterprise => tenantExtraConfig.Enterprise;
 
-    public bool Developer
-    {
-        get => tenantExtraConfig.Developer;
-    }
+    public bool Developer => tenantExtraConfig.Developer;
 
-    public bool Opensource
-    {
-        get => tenantExtraConfig.Opensource;
-    }
+    public bool Opensource => tenantExtraConfig.Opensource;
 
     private async Task<bool> EnterprisePaidAsync(bool withRequestToPaymentSystem = true)
     {
@@ -106,8 +94,8 @@ public class TenantExtra(
         }
 
         var tariff = await GetCurrentTariffAsync(withRequestToPaymentSystem);
-        
-        return tariff.State >= TariffState.NotPaid || Enterprise && !(await EnterprisePaidAsync(withRequestToPaymentSystem)) && tariff.LicenseDate == DateTime.MaxValue;
+
+        return tariff.State >= TariffState.NotPaid || Enterprise && !await EnterprisePaidAsync(withRequestToPaymentSystem) && tariff.LicenseDate == DateTime.MaxValue;
     }
 
     public async Task DemandAccessSpacePermissionAsync()

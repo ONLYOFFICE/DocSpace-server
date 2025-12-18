@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Microsoft.Net.Http.Headers;
+
 namespace ASC.FederatedLogin.LoginProviders;
 
 [Scope]
@@ -33,16 +35,16 @@ public class AppleIdLoginProvider : BaseLoginProvider<AppleIdLoginProvider>
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly RequestHelper _requestHelper;
 
-    public override string AccessTokenUrl { get { return "https://appleid.apple.com/auth/token"; } }
-    public override string RedirectUri { get { return this["appleIdRedirectUrl"]; } }
-    public override string ClientID { get { return (this["appleIdClientIdMobile"] != null && _httpContextAccessor?.HttpContext != null && _httpContextAccessor.HttpContext.Request.MobileApp()) ? this["appleIdClientIdMobile"] : this["appleIdClientId"]; } }
+    public override string AccessTokenUrl => "https://appleid.apple.com/auth/token";
+    public override string RedirectUri => this["appleIdRedirectUrl"];
+    public override string ClientID => IsApp() ? this["appleIdClientIdMobile"] : this["appleIdClientId"];
     public override string ClientSecret => GenerateSecret();
-    public override string CodeUrl { get { return "https://appleid.apple.com/auth/authorize"; } }
-    public override string Scopes { get { return ""; } }
+    public override string CodeUrl => "https://appleid.apple.com/auth/authorize";
+    public override string Scopes => "";
 
-    private string TeamId { get { return this["appleIdTeamId"]; } }
-    private string KeyId { get { return this["appleIdKeyId"]; } }
-    private string PrivateKey { get { return this["appleIdPrivateKey"]; } }
+    private string TeamId => this["appleIdTeamId"];
+    private string KeyId => this["appleIdKeyId"];
+    private string PrivateKey => this["appleIdPrivateKey"];
 
     public AppleIdLoginProvider() { }
     public AppleIdLoginProvider(
@@ -55,8 +57,8 @@ public class AppleIdLoginProvider : BaseLoginProvider<AppleIdLoginProvider>
         ConsumerFactory consumerFactory,
         IHttpContextAccessor httpContextAccessor,
         RequestHelper requestHelper,
-        string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-            : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
+        string name, int order, bool paid, Dictionary<string, string> props, Dictionary<string, string> additional = null)
+            : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, paid, props, additional)
     {
         _httpContextAccessor = httpContextAccessor;
         _requestHelper = requestHelper;
@@ -174,5 +176,17 @@ public class AppleIdLoginProvider : BaseLoginProvider<AppleIdLoginProvider>
         }
 
         return keys;
+    }
+
+    private bool IsApp()
+    {
+        if (this["appleIdClientIdMobile"] == null || _httpContextAccessor?.HttpContext == null)
+        {
+            return false;
+        }
+
+        var request = _httpContextAccessor.HttpContext.Request;
+        return !string.IsNullOrEmpty(request.Headers[HeaderNames.UserAgent])
+            && request.Headers[HeaderNames.UserAgent].ToString().Contains(this["appleIdClientIdMobile"], StringComparison.InvariantCultureIgnoreCase);
     }
 }

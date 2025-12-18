@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -92,7 +92,7 @@ public class NovellLdapEntryExtension(ILoggerProvider optionMonitor)
         //String rid = "";
         for (var i = 2; i <= 7; i++)
         {
-            authority |= ((long)sid[i]) << (8 * (5 - (i - 2)));
+            authority |= (long)sid[i] << (8 * (5 - (i - 2)));
         }
 
         strSid.Append('-');

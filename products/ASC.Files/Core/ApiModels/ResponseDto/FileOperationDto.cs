@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,61 +26,70 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The file operation information.
+/// </summary>
 public class FileOperationDto
 {
     /// <summary>
-    /// Operation ID
+    /// The file operation ID.
     /// </summary>
-    public string Id { get; set; }
+    public required string Id { get; set; }
 
     /// <summary>
-    /// Operation type
+    /// The file operation type.
     /// </summary>
     [JsonPropertyName("Operation")]
-    public FileOperationType OperationType { get; init; }
+    public required FileOperationType OperationType { get; init; }
 
     /// <summary>
-    /// Operation progress
+    /// The file operation progress in percentage.
     /// </summary>
     [SwaggerSchemaCustom(Example = 100)]
-    public int Progress { get; set; }
+    public required int Progress { get; set; }
 
     /// <summary>
-    /// Error
+    /// The file operation error message.
     /// </summary>
     [SwaggerSchemaCustom(Example = "")]
-    public string Error { get; set; }
+    public required string Error { get; set; }
 
     /// <summary>
-    /// Processing status
+    /// The file operation processing status.
     /// </summary>
     [SwaggerSchemaCustom(Example = "1")]
-    public string Processed { get; set; }
+    public required string Processed { get; set; }
 
     /// <summary>
-    /// Specifies if the operation is finished or not
+    /// Specifies if the file operation is finished or not.
     /// </summary>
-    public bool Finished { get; set; }
+    public required bool Finished { get; set; }
 
     /// <summary>
-    /// URL
+    /// The file operation URL.
     /// </summary>
     [Url]
     public string Url { get; set; }
 
     /// <summary>
-    /// List of files
+    /// The list of files of the file operation.
     /// </summary>
-    public List<FileEntryDto> Files { get; set; }
+    public List<FileEntryBaseDto> Files { get; set; }
 
     /// <summary>
-    /// List of folders
+    /// The list of folders of the file operation.
     /// </summary>
-    public List<FileEntryDto> Folders { get; set; }
+    public List<FileEntryBaseDto> Folders { get; set; }
+
+    /// <summary>
+    /// The status of the distributed task related to the file operation.
+    /// </summary>
+    public DistributedTaskStatus Status { get; set; }
 }
 
 [Scope]
-public class FileOperationDtoHelper(FolderDtoHelper folderWrapperHelper,
+public class FileOperationDtoHelper(
+    FolderDtoHelper folderWrapperHelper,
     FileDtoHelper filesWrapperHelper,
     IDaoFactory daoFactory,
     CommonLinkUtility commonLinkUtility)
@@ -94,7 +103,8 @@ public class FileOperationDtoHelper(FolderDtoHelper folderWrapperHelper,
             Progress = o.Progress,
             Error = o.Error,
             Processed = o.Processed,
-            Finished = o.Finished
+            Finished = o.Finished,
+            Status = o.Status
         };
 
         if (string.IsNullOrEmpty(o.Result) || result.OperationType == FileOperationType.Delete)
@@ -177,7 +187,7 @@ public class FileOperationDtoHelper(FolderDtoHelper folderWrapperHelper,
 
         return result;
 
-        async IAsyncEnumerable<FileEntryDto> GetFoldersAsync<T>(IEnumerable<T> folders)
+        async IAsyncEnumerable<FileEntryBaseDto> GetFoldersAsync<T>(IEnumerable<T> folders)
         {
             var folderDao = daoFactory.GetFolderDao<T>();
 
@@ -187,7 +197,7 @@ public class FileOperationDtoHelper(FolderDtoHelper folderWrapperHelper,
             }
         }
 
-        async IAsyncEnumerable<FileEntryDto> GetFilesAsync<T>(IEnumerable<T> files)
+        async IAsyncEnumerable<FileEntryBaseDto> GetFilesAsync<T>(IEnumerable<T> files)
         {
             var fileDao = daoFactory.GetFileDao<T>();
 

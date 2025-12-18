@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,6 +25,8 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 global using System.Reflection;
+global using System.Text.Json;
+
 global using ASC.Api.Core;
 global using ASC.Api.Core.Extensions;
 global using ASC.Common;
@@ -37,7 +39,6 @@ global using ASC.Core.Common.EF.Context;
 global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.Hosting;
 global using ASC.Core.Common.Notify.IntegrationEvents.Events;
-global using ASC.Core.Common.Settings;
 global using ASC.Core.Notify.Senders;
 global using ASC.EventBus.Abstractions;
 global using ASC.EventBus.Log;
@@ -48,10 +49,10 @@ global using ASC.Notify.IntegrationEvents.EventHandling;
 global using ASC.Notify.Log;
 global using ASC.Notify.Messages;
 global using ASC.Notify.Services;
-global using ASC.Web.Core.WhiteLabel;
 global using ASC.Web.Studio.Core.Notify;
+
 global using Autofac;
-global using AutoMapper;
+
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Hosting.WindowsServices;

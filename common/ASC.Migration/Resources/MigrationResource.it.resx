@@ -210,4 +210,7 @@
   <data name="CanNotShare" xml:space="preserve">
     <value>Impossibile condividere la voce da {0} a {1}</value>
   </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>Il backup è maggiore rispetto alla dimensione totale del portale</value>
+  </data>
 </root>

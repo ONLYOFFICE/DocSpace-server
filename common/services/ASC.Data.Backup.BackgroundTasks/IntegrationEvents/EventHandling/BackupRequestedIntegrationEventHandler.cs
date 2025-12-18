@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,11 +32,11 @@ namespace ASC.Data.Backup.IntegrationEvents.EventHandling;
 
 [Scope]
 public class BackupRequestedIntegrationEventHandler(
-        BackupAjaxHandler backupAjaxHandler,
         ILogger<BackupRequestedIntegrationEventHandler> logger,
         TenantManager tenantManager,
         SecurityContext securityContext,
-        BackupWorker backupWorker)
+        BackupWorker backupWorker,
+        BackupService backupService)
     : IIntegrationEventHandler<BackupRequestIntegrationEvent>
 {
     public async Task Handle(BackupRequestIntegrationEvent @event)
@@ -64,11 +64,11 @@ public class BackupRequestedIntegrationEventHandler(
                     StorageType = @event.StorageType,
                     TenantId = @event.TenantId,
                     Dump = @event.Dump
-                });
+                }, @event.BillingSessionId, @event.BillingSessionExpire);
             }
             else
             {
-                await backupAjaxHandler.StartBackupAsync(@event.StorageType, @event.StorageParams, @event.ServerBaseUri, @event.Dump, true, @event.TaskId);
+                await backupService.StartBackupAsync(@event.StorageType, @event.StorageParams, @event.ServerBaseUri, @event.Dump, true, @event.TaskId, @event.BillingSessionId, @event.BillingSessionExpire, @event.Headers);
             }
         }
     }

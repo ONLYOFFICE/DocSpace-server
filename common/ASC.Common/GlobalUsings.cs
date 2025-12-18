@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,6 +31,7 @@ global using System.Diagnostics;
 global using System.Globalization;
 global using System.Net;
 global using System.Net.Mail;
+global using System.Net.Mime;
 global using System.Reflection;
 global using System.Security.Authentication;
 global using System.Security.Cryptography;
@@ -44,6 +45,7 @@ global using System.Threading.Channels;
 global using System.Web;
 global using System.Xml.Linq;
 global using System.Xml.XPath;
+
 global using ASC.Api.Core.Extensions;
 global using ASC.Common;
 global using ASC.Common.Caching;
@@ -57,13 +59,17 @@ global using ASC.Common.Threading.DistributedLock.Common;
 global using ASC.Common.Threading.DistributedLock.RedisLock.Configuration;
 global using ASC.Common.Utils;
 global using ASC.Security.Cryptography;
+
 global using Autofac;
 global using Autofac.Configuration;
-global using AutoMapper;
+
 global using Confluent.Kafka;
+
 global using JWT;
 global using JWT.Algorithms;
+
 global using Medallion.Threading;
+
 global using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.Http.Extensions;
@@ -78,13 +84,18 @@ global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options;
 global using Microsoft.Extensions.Primitives;
 global using Microsoft.Net.Http.Headers;
+
 global using NetEscapades.EnumGenerators;
+
 global using NVelocity;
 global using NVelocity.App;
 global using NVelocity.Runtime.Resource.Loader;
+
 global using ProtoBuf;
+
 global using RabbitMQ.Client;
 global using RabbitMQ.Client.Events;
+
 global using StackExchange.Redis;
 global using StackExchange.Redis.Extensions.Core;
 global using StackExchange.Redis.Extensions.Core.Abstractions;

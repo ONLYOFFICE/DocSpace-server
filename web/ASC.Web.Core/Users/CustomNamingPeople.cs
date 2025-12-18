@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,11 +28,7 @@ namespace ASC.Web.Core.Users;
 
 public class PeopleNamesSettings : ISettings<PeopleNamesSettings>
 {
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("47F34957-6A70-4236-9681-C8281FB762FA"); }
-    }
+    public static Guid ID => new("47F34957-6A70-4236-9681-C8281FB762FA");
 
     public PeopleNamesItem Item { get; set; }
 
@@ -42,103 +38,79 @@ public class PeopleNamesSettings : ISettings<PeopleNamesSettings>
     {
         return new PeopleNamesSettings { ItemId = PeopleNamesItem.DefaultID };
     }
+
+    public DateTime LastModified { get; set; }
 }
 
 public class PeopleNamesItem
 {
     private static readonly StringComparison _cmp = StringComparison.InvariantCultureIgnoreCase;
 
-    private string _schemaName;
 
-    private readonly string _userCaption;
+    public static string DefaultID => "common";
 
-    private readonly string _usersCaption;
-
-    private readonly string _groupCaption;
-
-    private readonly string _groupsCaption;
-
-    private readonly string _userPostCaption;
-
-    private readonly string _groupHeadCaption;
-
-    private readonly string _regDateCaption;
-
-    private readonly string _guestCaption;
-
-    private readonly string _guestsCaption;
-
-
-    public static string DefaultID
-    {
-        get { return "common"; }
-    }
-
-    public static string CustomID
-    {
-        get { return "custom"; }
-    }
+    public static string CustomID => "custom";
 
     public string Id { get; set; }
 
     public string SchemaName
     {
-        get { return Id.Equals(CustomID, _cmp) ? _schemaName ?? string.Empty : GetResourceValue(_schemaName); }
-        set { _schemaName = value; }
+        get => Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field);
+        set;
     }
 
     public string UserCaption
     {
-        get { return Id.Equals(CustomID, _cmp) ? _userCaption ?? string.Empty : GetResourceValue(_userCaption); }
-        init { _userCaption = value; }
+        get => Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field);
+        init;
     }
 
     public string UsersCaption
     {
-        get { return Id.Equals(CustomID, _cmp) ? _usersCaption ?? string.Empty : GetResourceValue(_usersCaption); }
-        init { _usersCaption = value; }
+        get => Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field);
+        init;
     }
 
     public string GroupCaption
     {
-        get { return Id.Equals(CustomID, _cmp) ? _groupCaption ?? string.Empty : GetResourceValue(_groupCaption); }
-        init { _groupCaption = value; }
+        get => Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field);
+        init;
     }
 
     public string GroupsCaption
     {
-        get { return Id.Equals(CustomID, _cmp) ? _groupsCaption ?? string.Empty : GetResourceValue(_groupsCaption); }
-        init { _groupsCaption = value; }
+        get => Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field);
+        init;
     }
 
     public string UserPostCaption
     {
-        get { return Id.Equals(CustomID, _cmp) ? _userPostCaption ?? string.Empty : GetResourceValue(_userPostCaption); }
-        init { _userPostCaption = value; }
+        get => Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field);
+        init;
     }
 
     public string GroupHeadCaption
     {
-        get { return Id.Equals(CustomID, _cmp) ? _groupHeadCaption ?? string.Empty : GetResourceValue(_groupHeadCaption); }
-        init { _groupHeadCaption = value; }
+        get => Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field);
+        init;
     }
 
     public string RegDateCaption
     {
-        get { return Id.Equals(CustomID, _cmp) ? _regDateCaption ?? string.Empty : GetResourceValue(_regDateCaption); }
-        init { _regDateCaption = value; }
+        get => Id.Equals(CustomID, _cmp) ? field ?? string.Empty : GetResourceValue(field);
+        init;
     }
 
     public string GuestCaption
     {
-        get { return Id.Equals(CustomID, _cmp) ? _guestCaption ?? NamingPeopleResource.CommonGuest : GetResourceValue(_guestCaption); }
-        init { _guestCaption = value; }
+        get => Id.Equals(CustomID, _cmp) ? field ?? NamingPeopleResource.CommonGuest : GetResourceValue(field);
+        init;
     }
 
     public string GuestsCaption
     {
-        get { return Id.Equals(CustomID, _cmp) ? _guestsCaption ?? NamingPeopleResource.CommonGuests : GetResourceValue(_guestsCaption); }
-        init { _guestsCaption = value; }
+        get => Id.Equals(CustomID, _cmp) ? field ?? NamingPeopleResource.CommonGuests : GetResourceValue(field);
+        init;
     }
 
     private static string GetResourceValue(string resourceKey)
@@ -162,8 +134,8 @@ public class CustomNamingPeople(SettingsManager settingsManager)
     public async Task<PeopleNamesItem> GetCurrent()
     {
         var settings = await settingsManager.LoadAsync<PeopleNamesSettings>();
-        return PeopleNamesItem.CustomID.Equals(settings.ItemId, StringComparison.InvariantCultureIgnoreCase) && settings.Item != null ? 
-            settings.Item : 
+        return PeopleNamesItem.CustomID.Equals(settings.ItemId, StringComparison.InvariantCultureIgnoreCase) && settings.Item != null ?
+            settings.Item :
             await GetPeopleNames(settings.ItemId);
     }
 

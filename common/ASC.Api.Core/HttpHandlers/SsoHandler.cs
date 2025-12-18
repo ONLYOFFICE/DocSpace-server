@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -62,6 +62,8 @@ public class SsoHandlerService
     private readonly Action<string> _signatureResolver;
     private readonly CountPaidUserChecker _countPaidUserChecker;
     private readonly UserSocketManager _socketManager;
+    private readonly TfaAppAuthSettingsHelper _tfaAppAuthSettingsHelper;
+    private readonly AuditEventsRepository _auditEventsRepository;
     private const string MOB_PHONE = "mobphone";
     private const string EXT_MOB_PHONE = "extmobphone";
 
@@ -84,7 +86,9 @@ public class SsoHandlerService
         DisplayUserSettingsHelper displayUserSettingsHelper,
         TenantUtil tenantUtil,
         CountPaidUserChecker countPaidUserChecker,
-        UserSocketManager socketManager)
+        UserSocketManager socketManager,
+        TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
+        AuditEventsRepository auditEventsRepository)
     {
         _log = log;
         _coreBaseSettings = coreBaseSettings;
@@ -113,6 +117,8 @@ public class SsoHandlerService
                 lastSignChar--;
             }
         };
+        _tfaAppAuthSettingsHelper = tfaAppAuthSettingsHelper;
+        _auditEventsRepository = auditEventsRepository;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -186,13 +192,13 @@ public class SsoHandlerService
                     if (!Equals(userInfo, authenticatedUserInfo))
                     {
                         var loginName = authenticatedUserInfo.DisplayUserName(false, _displayUserSettingsHelper);
-                        _messageService.Send(loginName, MessageAction.Logout);
+                        _messageService.SendLoginMessage(MessageAction.Logout, loginName);
                         await _cookiesManager.ResetUserCookieAsync();
                         _securityContext.Logout();
                     }
                     else
                     {
-                        _log.DebugUserAlreadyAuthenticated(context.User.Identity);
+                        _log.DebugUserAlreadyAuthenticated(authenticatedUserInfo.Id, authenticatedUserInfo.ToString());
                     }
                 }
                 try
@@ -203,10 +209,30 @@ public class SsoHandlerService
                 {
                     _log.WarningWithException("Failed to save user", ex);
                 }
-               
-                var authKey = await _cookiesManager.AuthenticateMeAndSetCookiesAsync(userInfo.Id, MessageAction.LoginSuccessViaSSO);
 
-                context.Response.Redirect(_commonLinkUtility.GetDefault() + "?token=" + HttpUtility.UrlEncode(authKey), false);
+                if (_tfaAppAuthSettingsHelper.IsVisibleSettings && await _tfaAppAuthSettingsHelper.TfaEnabledForUserAsync(userInfo.Id))
+                {
+                    var tfaExpired = await TfaAppUserSettings.TfaExpiredAndResetAsync(_settingsManager, _auditEventsRepository, userInfo.Id);
+
+                    if (tfaExpired || !await TfaAppUserSettings.EnableForUserAsync(_settingsManager, userInfo.Id))
+                    {
+                        var (urlActivation, keyActivation) = _commonLinkUtility.GetConfirmationUrlAndKey(userInfo.Id, ConfirmType.TfaActivation);
+                        await _cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, keyActivation, true, $"_{ConfirmType.TfaActivation}");
+
+                        context.Response.Redirect(urlActivation + "&key=" + HttpUtility.UrlEncode(keyActivation), false);
+                        return;
+                    }
+
+                    var (urlAuth, keyAuth) = _commonLinkUtility.GetConfirmationUrlAndKey(userInfo.Id, ConfirmType.TfaAuth);
+                    await _cookiesManager.SetCookiesAsync(CookiesType.ConfirmKey, keyAuth, true, $"_{ConfirmType.TfaAuth}");
+
+                    context.Response.Redirect(urlAuth + "&key=" + HttpUtility.UrlEncode(keyAuth), false);
+                }
+                else
+                {
+                    var authKey = await _cookiesManager.AuthenticateMeAndSetCookiesAsync(userInfo.Id, MessageAction.LoginSuccessViaSSO);
+                    context.Response.Redirect(_commonLinkUtility.GetDefault() + "?token=" + HttpUtility.UrlEncode(authKey), false);
+                }
 
             }
             else if (context.Request.Query["logout"] == "true")
@@ -234,7 +260,7 @@ public class SsoHandlerService
                 await _securityContext.AuthenticateMeWithoutCookieAsync(userInfo.Id);
 
                 var loginName = userInfo.DisplayUserName(false, _displayUserSettingsHelper);
-                _messageService.Send(loginName, MessageAction.Logout);
+                _messageService.SendLoginMessage(MessageAction.Logout, loginName);
 
                 await _cookiesManager.ResetUserCookieAsync();
                 _securityContext.Logout();
@@ -485,7 +511,7 @@ public enum MessageKey
 public class SSOException(string message, MessageKey messageKey) : Exception(message)
 {
     public MessageKey MessageKey { get; } = messageKey;
-    }
+}
 
 public static class SsoHandlerExtensions
 {

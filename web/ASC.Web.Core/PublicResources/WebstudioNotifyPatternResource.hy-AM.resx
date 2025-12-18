@@ -118,40 +118,40 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ActionFileCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; ստեղծել է նոր փաստաթուղթ՝ &lt;a href={1}&gt;{2}&lt;/a&gt; սենյակում՝ &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; ստեղծել է նոր փաստաթուղթ՝ &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; սենյակում՝ &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileEdited" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; խմբագրել է փաստաթուղթը՝ &lt;a href={1}&gt;{2}&lt;/a&gt; սենյակում՝ &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; խմբագրել է փաստաթուղթը՝ &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; սենյակում՝ &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionNewComment" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; ավելացրել է նոր մեկնաբանություն փաստաթղթի տարբերակում՝ &lt;a href={1}&gt;{2}&lt;/a&gt; սենյակում՝ &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; ավելացրել է նոր մեկնաբանություն փաստաթղթի տարբերակում՝ &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; սենյակում՝ &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileUploaded" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; վերբեռնել է նոր փաստաթուղթ՝ &lt;a href={1}&gt;{2}&lt;/a&gt; սենյակում՝ &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; վերբեռնել է նոր փաստաթուղթ՝ &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; սենյակում՝ &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomArchived" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; տեղափոխեց սենյակը՝ &lt;a href={1}&gt;{2}&lt;/a&gt; արխիվացնելու համար - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; տեղափոխեց սենյակը՝ &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; արխիվացնելու համար - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; ստեղծել է նոր սենյակ՝ &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; ստեղծել է նոր սենյակ՝ &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomRemoved" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; սենյակը՝ &lt;b&gt;{1}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomRenamed" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; վերանվանեց սենյակը՝ &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href={2}&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; վերանվանեց սենյակը՝ &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomUpdateAccessForUser" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; նշանակվել է &lt;b&gt;{1}&lt;/b&gt; սենյակում՝ &lt;a href={2}&gt;{3}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; նշանակվել է &lt;b&gt;{1}&lt;/b&gt; սենյակում՝ &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserAddedToRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; ավելացվել է սենյակ՝ &lt;a href={1}&gt;{2}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; ավելացվել է սենյակ՝ &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
     <value>DocSpace-ի նոր օգտատեր է ավելացվել՝ &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; հեռացվել է սենյակից՝ &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; հեռացվել է սենյակից՝ &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionUsersUpdatedType" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; փոխել է օգտատերերի մուտքի մակարդակը &lt;b&gt;{1}&lt;/b&gt; դեպի &lt;b&gt;{2}&lt;/b&gt;</value>
@@ -376,7 +376,7 @@
     <value>${__VirtualRootHost} պորտալի ջնջում</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace-ն ապաակտիվացված է</value>
+    <value>${LetterLogoText} DocSpace-ը ջնջված է</value>
   </data>
   <data name="subject_portal_rename" xml:space="preserve">
     <value>${LetterLogoText}: Պորտալի հասցեի փոփոխություն</value>
@@ -425,9 +425,6 @@
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Ձեր ${LetterLogoText} DocSpace-ի համար արտոնյալ ժամանակահատվածն ակտիվացված է</value>
-  </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Ձեր ${LetterLogoText} DocSpace բաժանորդագրության ժամկետը շուտով կլրանա</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Ձեր ${LetterLogoText} DocSpace-ի արտոնյալ ժամկետը սպառվել է</value>
@@ -528,7 +525,9 @@ Authenticator հավելվածի կազմաձևումը, որն օգտագործ
 
 Խնդրում ենք սեղմել ստորև բերված կոճակը՝ պորտալի մուտքի էջ գնալու և իսկորոշիչի հավելվածը կարգավորելու համար.
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_change_password_v115" xml:space="preserve">
     <value>Ցանկանու՞մ եք փոխել ձեր ${LetterLogoText} հաշվի գաղտնաբառը: Հաստատելու համար սեղմեք ստորև բերված կոճակը:
@@ -1073,7 +1072,7 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace-ն &lt;span style="color: #FF6F3D;"&gt;ապաակտիվացված է&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&amp;gt;${LetterLogoText} DocSpace-ը &amp;lt;span style="color: #FF6F3D;"&gt;ջնջվել է&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Ձեր ${LetterLogoText} DocSpace-ը հաջողությամբ ապաակտիվացվել է: Խնդրում ենք նկատի ունենալ, որ ձեր բոլոր տվյալները կջնջվեն մեր &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Գաղտնիության քաղաքականության&lt;/a&gt;:&lt;/td&gt;&lt;/tr&gt;
 
@@ -1438,17 +1437,6 @@ $TrulyYours</value>
 Խնդրում ենք նկատի ունենալ, որ ձեր ${LetterLogoText} DocSpace-ի համար $PaymentDelay‎ օրերի արտոնյալ ժամկետն ակտիվացված է:
 
 Համոզվեք, որ վճարեք ձեր բիզնեսի բաժանորդագրությունը մինչև արտոնյալ ժամկետի ավարտը: Այսպիսով, դուք կկարողանաք հետագայում օգտագործել ձեր ${LetterLogoText} DocSpace-ի բոլոր առավելությունները:
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Բարև, $UserName:
-
-Խնդրում ենք հաշվի առնել, որ ձեր ${LetterLogoText} DocSpace բաժանորդագրության ժամկետը լրանում է երեք օրից: Դրանից հետո կակտիվանա $PaymentDelay օրերի արտոնյալ ժամկետը։
-
-Մենք խորհուրդ ենք տալիս վճարել ձեր Business բաժանորդագրությունը հիմա և շարունակել օգտագործել ձեր ${LetterLogoText} DocSpace-ի բոլոր առավելությունները:
 
 $OrangeButton
 
@@ -1844,11 +1832,13 @@ $OrangeButton
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Ողջույն, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt; Դուք հենց նոր *ստեղծեցիք ${LetterLogoText} DocSpace*-ը՝ փաստաթղթերի կենտրոն, որտեղ կարող եք խթանել համագործակցությունը ձեր թիմի, հաճախորդների, գործընկերների և այլն: Հասցեն է՝ &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt; Դուք հենց նոր *ստեղծեցիք ${LetterLogoText} DocSpace*-ը՝ փաստաթղթերի կենտրոն, որտեղ կարող եք խթանել համագործակցությունը ձեր թիմի, հաճախորդների, գործընկերների և այլն: Հասցեն է՝ &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
+#if($OrangeButton != "")
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt; Խնդրում ենք հաստատել ձեր էլ.փոստը (հղումը վավեր է 7 օր):&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 44px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
+#end
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt; Ձեր ընթացիկ սակագնային պլանը ՄԵԿՆԱՐԿ է: Այն բացարձակապես անվճար է և ներառում է՝&lt;/td&gt;&lt;/tr&gt;
 
@@ -1954,5 +1944,219 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 26px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt; Եթե օգնության կարիք ունեք, այցելեք մեր &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt; Օգնության կենտրոն&lt;/a&gt; կամ հարցրեք մեր &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__SupportLink}"&gt; աջակցության թիմին&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
+  </data>
+  <data name="subject_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>Ձեր ${LetterLogoText} DocSpace-ը կջնջվի</value>
+  </data>
+  <data name="subject_user_role_changed" xml:space="preserve">
+    <value>Ձեր դերը DocSpace սենյակում փոխվել է</value>
+  </data>
+  <data name="subject_user_type_changed" xml:space="preserve">
+    <value>Ձեր օգտատիրոջ տեսակը DocSpace-ում փոխվել է</value>
+  </data>
+  <data name="pattern_user_role_changed" xml:space="preserve">
+    <value>Բարև!
+
+Դուք նշանակվել եք նոր դեր "${RoomTitle}":"${RoomUrl}" Դոկսպեյս սենյակում՝ ${UserRole}:
+
+Կարդացեք սենյակի դերերի և թույլտվությունների մասին "Օգնության կենտրոն":"${HelpCenterUrl}"-ում՝
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_type_changed" xml:space="preserve">
+    <value>Բարև!
+
+Դուք նշանակվել եք նոր օգտատիրոջ տեսակ "${__VirtualRootPath}":"${__VirtualRootPath}" DocSpace-ում՝ ${UserType}:
+
+Կարդացեք օգտատիրոջ տեսակների և թույլտվությունների մասին "Օգնության կենտրոն":"${HelpCenterUrl}"-ում՝
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Ձեր ${LetterLogoText} DocSpace-ը&lt;span style="color: #FF6F3D;"&gt;կջնջվի&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Ձեր ${LetterLogoText} DocSpace ${__VirtualRootPath}-ը&lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; չի գործածվել ավելի քան մեկ տարի։&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Քանի որ դուք որոշել եք այլևս չօգտագործել այն, ձեր ${LetterLogoText} DocSpace-ը և բոլոր տվյալները կջնջվեն մեր &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Գաղտնիության քաղաքականության&lt;/a&gt; համաձայն։&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;Մենք կգնահատենք ձեր կարծիքը։ Ինչու՞ եք որոշել դադարեցնել ${LetterLogoText} DocSpace օգտագործումը։&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Եթե ցանկանում եք շարունակել օգտագործել ձեր ${LetterLogoText} DocSpace-ը, պարզապես մուտք գործեք այն և կատարեք ցանկացած գործողություն։&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Ողջույն, $UserName!
+
+Տեղեկացնում ենք, որ ձեր բաժանորդագրության վճարը ավտոմատ կերպով կգանձվի ձեր հաշվից 3 օրվա ընթացքում։
+
+Գործարքի սահուն ընթացքն ապահովելու համար, խնդրում ենք հաստատել, որ ձեր վճարման հաշվին կան բավարար միջոցներ։
+
+Եթե ունեք որևէ հարց կամ օգնության կարիք, կարող եք կապվել մեր "աջակցության թիմի":"${__SupportLink}" հետ՝:
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Ձեր ${LetterLogoText} DocSpace-ի բաժանորդագրության առաջիկա վճարումը</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Անցնել՝ ծառայություններ</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Անցնել դրամապանակի կարգավորումներ</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Ողջույն, $UserName!
+
+Կապվում ենք ձեզ հետ՝ տեղեկացնելու, որ ձեր գնած ծառայությունների փաթեթի ավտոմատ երկարաձգումը չի կարող ավարտվել։
+
+Խնդրում ենք երկարաձգել ձեր ներկայիս ծառայությունների փաթեթը (կամ գնել նորը)։
+
+$OrangeButton
+ 
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Ողջույն, $UserName!
+
+Տեղեկացնում ենք, որ DocSpace Wallet-ի մնացորդի ավտոմատ լիցքավորումը չի հաջողվել։ 
+
+Խնդրում ենք ստուգել և թարմացնել ձեր դրամապանակի մնացորդը։
+
+$OrangeButton
+ 
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Պահանջվող գործողություն՝ հնարավոր չէ ավտոմատ կերպով երկարաձգել սպասարկման սակագինը ձեր ${LetterLogoText} DocSpace-ում։</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Պահանջվող գործողություն՝ հնարավոր չէ ավտոմատ կերպով լիցքավորել դրամապանակի մնացորդը ձեր ${LetterLogoText} DocSpace-ում։</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.Գաղտնաբառը հաջողությամբ փոխվել է
+
+Ձեր հաշվի գաղտնաբառը *$UserName*, *$UserEmail* հաջողությամբ փոփոխվել է *$Date* in DocSpace-ում: "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+IP: *$IP*
+Device: *$Device*
+#if($Location != "")
+Լոկացիա: *$Location*
+#end
+Բրաուզեր: *$Browser*
+
+Եթե այս գործողությունը կատարվել է ձեր կողմից՝ լրացուցիչ քայլեր անհրաժեշտ չեն։ Եթե այս փոփոխությունը կասկածելի է թվում կամ իրականացված չէ ձեր թույլտվությամբ, խնդրում ենք անմիջապես վերականգնել ձեր գաղտնաբառը և անջատել DocSpace-ի մուտքը այս սարքից։
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>Ձեր գաղտնաբառը հաջողությամբ փոխվել է</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>Բացել DocSpace-ը</value>
+  </data>
+  <data name="subject_scheduled_backup_failed" xml:space="preserve">
+    <value>Ձեր DocSpace-ի ավտոմատ պահուստավորումը ձախողվեց։</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed" xml:space="preserve">
+    <value>Ողջուն, $UserName,
+
+Ձեր DocSpace-ի "${__VirtualRootPath}":"${__VirtualRootPath}" պլանավորված պահուստավորման գործընթացը ձախողվել է։ Խորհուրդ ենք տալիս ստուգել "Պահուստավորում":"${__VirtualRootPath}/portal-settings/backup/data-backup" և "Services":"${__VirtualRootPath}/portal-settings/services" կարգավորումները։ 
+
+Եթե ունեք որևէ հարց կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ "${__SupportLink}":"${__SupportLink}" միջոցով։
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
+    <value>Ողջույն, $UserName,
+
+Ձեր DocSpace [${__VirtualRootPath}](${__VirtualRootPath})-ի համար նախատեսված պահուստավորման գործընթացը ձախողվել է։
+
+Խորհուրդ ենք տալիս ստուգել [Պահուստավորում](${__VirtualRootPath}/portal-settings/backup/data-backup) և [Services](${__VirtualRootPath}/portal-settings/services) կարգավորումները։
+
+Եթե ունեք որևէ հարց կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ [${__SupportLink}](${__SupportLink}) միջոցով։
+
+Հարգանքներով՝
+${LetterLogoText} Աջակցության թիմ
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="ActionAgentCreated" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt;-ը ստեղծեց նոր գործակալ՝ &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRemoved" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; ջնջեց գործակալին՝ &lt;b&gt;{1}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRenamed" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; վերանվանեց գործակալը՝ &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentUpdateAccessForUser" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt;-ին նշանակվել է &lt;b&gt;{1}&lt;/b&gt; դերը հետևյալ գործակալում՝ &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserAddedToAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; Ավելացվել է գործակալին: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserRemovedFromAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt;-ը հեռացվել է գործակալից՝ &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ButtonJoinAgent" xml:space="preserve">
+    <value>Միանալ գործակալին</value>
+  </data>
+  <data name="subject_backup_failed" xml:space="preserve">
+    <value>Ձեր DocSpace-ի պահուստավորումը ձախողվեց</value>
+  </data>
+  <data name="subject_saas_agent_invite" xml:space="preserve">
+    <value>Միացեք ${LetterLogoText} DocSpace-ին</value>
+  </data>
+  <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Դուք հրավիրված եք ${LetterLogoText} DocSpace գործակալին</value>
+  </data>
+  <data name="pattern_backup_failed" xml:space="preserve">
+    <value>Ողջույն, $UserName,
+
+Ձեր DocSpace-ի "${__VirtualRootPath}":"${__VirtualRootPath}" պահուստավորման գործընթացը ձախողվել է։
+
+Եթե ունեք որևէ հարց կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ "${__SupportLink}":"${__SupportLink}"-ի միջոցով՝
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_backup_failed_tg" xml:space="preserve">
+    <value>Ողջուն, $UserName,
+
+Ձեր DocSpace [${__VirtualRootPath}](${__VirtualRootPath})-ի պահուստավորման գործընթացը ձախողվել է։
+
+Եթե ունեք որևէ հարց կամ օգնության կարիք ունեք, խնդրում ենք կապվել մեզ հետ [${__SupportLink}](${__SupportLink}) միջոցով։
+
+Հարգանքներով,
+${LetterLogoText} Աջակցության թիմ
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="pattern_saas_agent_invite" xml:space="preserve">
+    <value>Ողջույն!
+
+Դուք հրավիրված եք միանալու DocSpace գործակալին "${__VirtualRootPath}":"${__VirtualRootPath}"-ում: Ընդունեք հրավերը՝ սեղմելով հղման վրա՝
+
+$OrangeButton
+
+Հրավերի հղմանը սեղմելուց հետո, խնդրում ենք ձեր հաշվի համար նոր գաղտնաբառ սահմանել։
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Ողջույն!
+
+$__AuthorName-ը հրավիրել է ձեզ միանալ "$Message":"$InviteLink" գործակալին "${__VirtualRootPath}":"${__VirtualRootPath}"-ում:
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace-ը ջնջվել է։
+
+*Portal:* ${PortalUrl} *Owner:* ${UserName} ${UserEmail} *Customer:* ${OwnerName} 
+
+Խնդրում ենք համոզվել, որ ավտոմատ հաշվառումն անջատված է։ Ստուգեք ավտոմատ հաշվառման կարգավիճակը հաճախորդի Stripe հաշվում։</value>
   </data>
 </root>

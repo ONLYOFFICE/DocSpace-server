@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,7 +42,7 @@ public class TableFormatterState(TextileFormatter f) : FormatterState(f)
         _attsInfo = m.Groups["atts"].Value;
 
         //TODO: check the state (it could already be a table!)
-        this.Formatter.ChangeState(this);
+        Formatter.ChangeState(this);
 
         return string.Empty;
     }

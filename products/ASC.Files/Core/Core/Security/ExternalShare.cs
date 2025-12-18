@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,23 +27,25 @@
 namespace ASC.Files.Core.Security;
 
 [Scope]
-public class ExternalShare(Global global, 
-    IDaoFactory daoFactory, 
+public class ExternalShare(
+    IDaoFactory daoFactory,
     CookiesManager cookiesManager,
     IHttpContextAccessor httpContextAccessor,
     BaseCommonLinkUtility commonLinkUtility,
     FilesLinkUtility filesLinkUtility,
-    FileUtility fileUtility)
+    FileUtility fileUtility,
+    CoreSettings coreSettings)
 {
     private ExternalSessionSnapshot _snapshot;
     private string _dbKey;
     private const string RoomLinkPattern = "rooms/share?key={0}";
+    private const string PersonalFolderLinkPattern = "rooms/personal/filter?key={0}";
 
-    public async Task<LinkData> GetLinkDataAsync<T>(FileEntry<T> entry, Guid linkId, bool isFile = false)
+    public async Task<LinkData> GetLinkDataAsync<T>(FileEntry<T> entry, Guid linkId)
     {
         var key = await CreateShareKeyAsync(linkId);
         string url = null;
-        
+
         switch (entry)
         {
             case File<T> file:
@@ -62,17 +64,12 @@ public class ExternalShare(Global global,
 
                 url = QueryHelpers.AddQueryString(url, FilesLinkUtility.ShareKey, key);
                 break;
-            case Folder<T> folder when DocSpaceHelper.IsRoom(folder.FolderType):
+            case Folder<T> folder when folder.IsRoom:
                 url = string.Format(RoomLinkPattern, key);
                 break;
-            case Folder<T> { RootFolderType: FolderType.VirtualRooms } folder:
+            case Folder<T> { RootFolderType: FolderType.VirtualRooms or FolderType.USER } folder:
                 url = QueryHelpers.AddQueryString(string.Format(RoomLinkPattern, key), "folder", HttpUtility.UrlEncode(folder.Id.ToString()!));
                 break;
-        }
-
-        if (isFile)
-        {
-            url = QueryHelpers.AddQueryString(url, FilesLinkUtility.IsFile, "true");
         }
 
         return new LinkData
@@ -81,14 +78,14 @@ public class ExternalShare(Global global,
             Token = key
         };
     }
-    
+
     public async Task<Status> ValidateAsync(Guid linkId, bool isAuthenticated)
     {
         var record = await daoFactory.GetSecurityDao<string>().GetSharesAsync([linkId]).FirstOrDefaultAsync();
 
         return record == null ? Status.Invalid : await ValidateRecordAsync(record, null, isAuthenticated);
     }
-    
+
     public async Task<Status> ValidateRecordAsync<T>(FileShareRecord<T> record, string password, bool isAuthenticated, FileEntry entry = null)
     {
         if (record.SubjectType is not (SubjectType.ExternalLink or SubjectType.PrimaryExternalLink) ||
@@ -96,7 +93,7 @@ public class ExternalShare(Global global,
         {
             return Status.Ok;
         }
-        
+
         if (record.Options.IsExpired)
         {
             return Status.Expired;
@@ -131,7 +128,7 @@ public class ExternalShare(Global global,
                 }
             }
         }
-        
+
         if (passwordKey == record.Options.Password)
         {
             return Status.Ok;
@@ -149,10 +146,10 @@ public class ExternalShare(Global global,
         }
 
         cookiesManager.ClearCookies(CookiesType.ShareLink, record.Subject.ToString());
-        
+
         return Status.InvalidPassword;
     }
-    
+
     public async Task<string> CreatePasswordKeyAsync(string password)
     {
         ArgumentException.ThrowIfNullOrEmpty(password);
@@ -175,7 +172,7 @@ public class ExternalShare(Global global,
 
         return string.IsNullOrEmpty(key) ? null : key;
     }
-    
+
     public async Task<TokenData> ParseShareKeyAsync(string key)
     {
         if (string.IsNullOrEmpty(key))
@@ -214,13 +211,13 @@ public class ExternalShare(Global global,
         {
             return _snapshot.LinkId;
         }
-        
+
         var key = GetKey();
         if (string.IsNullOrEmpty(key))
         {
             return Guid.Empty;
         }
-        
+
         var data = await ParseShareKeyAsync(key);
         return data?.Id ?? Guid.Empty;
     }
@@ -229,7 +226,7 @@ public class ExternalShare(Global global,
     {
         return GetSessionIdAsync().Result;
     }
-    
+
     public async Task<Guid> GetSessionIdAsync()
     {
         if (_snapshot != null && _snapshot.SessionId != Guid.Empty)
@@ -241,13 +238,13 @@ public class ExternalShare(Global global,
         {
             return anonymous.SessionId;
         }
-        
+
         var sessionKey = cookiesManager.GetCookies(CookiesType.AnonymousSessionKey);
         if (string.IsNullOrEmpty(sessionKey))
         {
             return Guid.Empty;
         }
-        
+
         var id = Signature.Read<Guid>(sessionKey, await GetDbKeyAsync());
         return id == Guid.Empty ? Guid.Empty : id;
     }
@@ -256,7 +253,7 @@ public class ExternalShare(Global global,
     {
         var linkId = await GetLinkIdAsync();
         var sessionId = await GetSessionIdAsync();
-        
+
         var session = new DownloadSession
         {
             Id = sessionId,
@@ -270,7 +267,7 @@ public class ExternalShare(Global global,
     {
         return Signature.Read<DownloadSession>(sessionKey, await GetDbKeyAsync());
     }
-    
+
     public string GetAnonymousSessionKey()
     {
         return cookiesManager.GetCookies(CookiesType.AnonymousSessionKey);
@@ -280,7 +277,7 @@ public class ExternalShare(Global global,
     {
         await cookiesManager.SetCookiesAsync(CookiesType.AnonymousSessionKey, Signature.Create(Guid.NewGuid(), await GetDbKeyAsync()), true);
     }
-    
+
     public string GetUrlWithShare(string url, string key = null)
     {
         if (string.IsNullOrEmpty(url))
@@ -294,7 +291,14 @@ public class ExternalShare(Global global,
             ? QueryHelpers.AddQueryString(url, FilesLinkUtility.ShareKey, key)
             : url;
     }
-    
+
+    public string GetUrlWithFillingSessionId(string url, string fillingSessionId)
+    {
+        return !string.IsNullOrEmpty(fillingSessionId)
+            ? QueryHelpers.AddQueryString(url, FilesLinkUtility.FillingSessionId, fillingSessionId)
+            : url;
+    }
+
     public async Task<ExternalSessionSnapshot> TakeSessionSnapshotAsync()
     {
         var linkId = await GetLinkIdAsync();
@@ -303,12 +307,12 @@ public class ExternalShare(Global global,
 
         return new ExternalSessionSnapshot(linkId, sessionId, passwordKey);
     }
-    
+
     public void Initialize(ExternalSessionSnapshot snapshot)
     {
         _snapshot = snapshot;
     }
-    
+
     public async Task<string> CreateShareKeyAsync(Guid linkId, string password = null)
     {
         if (string.IsNullOrEmpty(password))
@@ -318,68 +322,109 @@ public class ExternalShare(Global global,
 
         var data = new TokenData
         {
-            Id = linkId, 
+            Id = linkId,
             Password = password
         };
-        
+
         return Signature.Create(JsonSerializer.Serialize(data), await GetDbKeyAsync());
     }
 
     private async Task<string> GetDbKeyAsync()
     {
-        return _dbKey ??= await global.GetDocDbKeyAsync();
+        return _dbKey ??= await coreSettings.GetDocDbKeyAsync();
     }
 }
 
+/// <summary>
+/// The external link data.
+/// </summary>
 public class LinkData
 {
+    /// <summary>
+    /// The link URL address.
+    /// </summary>
     public string Url { get; init; }
+
+    /// <summary>
+    /// The link token.
+    /// </summary>
     public string Token { get; init; }
 }
 
 /// <summary>
+/// The validation parameters of the external data.
 /// </summary>
 public class ValidationInfo
 {
-    /// <summary>External data status</summary>
-    /// <type>ASC.Files.Core.Security.Status, ASC.Files.Core</type>
+    /// <summary>
+    /// The external data status.
+    /// </summary>
     public Status Status { get; set; }
-   
-    /// <summary>External data ID</summary>
-    /// <type>System.String, System</type>
+
+    /// <summary>
+    /// The external data ID.
+    /// </summary>
     public string Id { get; set; }
-   
-    /// <summary>External data title</summary>
-    /// <type>System.String, System</type>
+
+    /// <summary>
+    /// The external data title.
+    /// </summary>
     public string Title { get; set; }
 
-    /// <summary>Entity ID</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The type of the external data.
+    /// </summary>
+    public FileEntryType? Type { get; set; }
+
+    /// <summary>
+    /// The entity ID of the external data.
+    /// </summary>
     public string EntityId { get; set; }
-   
-    /// <summary>Entity title</summary>
-    /// <type>System.String, System</type>
-    public string EntryTitle { get; set; }
-    
-    /// <summary>Sharing rights</summary>
-    /// <type>ASC.Files.Core.Security.FileShare, ASC.Files.Core</type>
+
+    /// <summary>
+    /// The entry title of the external data.
+    /// </summary>
+    public string EntityTitle { get; set; }
+
+    /// <summary>
+    /// The entry type of the external data.
+    /// </summary>
+    public FileEntryType? EntityType { get; set; }
+
+    /// <summary>
+    /// Indicates whether the entity represents a room.
+    /// </summary>
+    public bool? IsRoom { get; set; } //TODO:rename
+
+    /// <summary>
+    /// The access rights type of the external data.
+    /// </summary>
     public FileShare Access { get; set; }
-    
-    /// <summary>Tenant ID</summary>
-    /// <type>System.Int32, System</type>
+
+    /// <summary>
+    /// The tenant ID of the external data.
+    /// </summary>
     public int TenantId { get; set; }
 
-    /// <summary>Specifies whether to share the external data or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether to share the external data or not.
+    /// </summary>
     public bool Shared { get; set; }
-    
-    /// <summary>Link ID</summary>
-    /// <type>System.Guid, System</type>
+
+    /// <summary>
+    /// The link ID of the external data.
+    /// </summary>
     public Guid LinkId { get; set; }
-    
-    /// <summary>Specifies whether the user is authenticated or not</summary>
-    /// <type>System.Boolean, System</type>
+
+    /// <summary>
+    /// Specifies whether the user is authenticated or not.
+    /// </summary>
     public bool IsAuthenticated { get; set; }
+
+    /// <summary>
+    /// The room ID of the external data.
+    /// </summary>
+    public bool IsRoomMember { get; set; }
 }
 
 public record DownloadSession
@@ -393,26 +438,29 @@ public class ExternalSessionSnapshot
 {
     public ExternalSessionSnapshot()
     {
-        
+
     }
-    
+
     public ExternalSessionSnapshot(Guid linkId, Guid sessionId, string passwordKey)
     {
-        this.LinkId = linkId;
-        this.SessionId = sessionId;
-        this.PasswordKey = passwordKey;
+        LinkId = linkId;
+        SessionId = sessionId;
+        PasswordKey = passwordKey;
     }
 
     [ProtoMember(1)]
     public Guid LinkId { get; init; }
-    
+
     [ProtoMember(2)]
     public Guid SessionId { get; init; }
-    
+
     [ProtoMember(3)]
     public string PasswordKey { get; init; }
 }
 
+/// <summary>
+/// The external data status.
+/// </summary>
 public enum Status
 {
     [SwaggerEnum(Description = "Ok")]

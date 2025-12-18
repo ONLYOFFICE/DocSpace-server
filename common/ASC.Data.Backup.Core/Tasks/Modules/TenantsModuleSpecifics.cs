@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -40,21 +40,51 @@ public class TenantsModuleSpecifics(CoreSettings coreSettings, Helpers helpers) 
             {
                 DateColumns = new Dictionary<string, bool> {{"creationdatetime", false}, {"statuschanged", false}, {"version_changed", false}}
             },
-            new("tenants_quotarow", "tenant") {InsertMethod = InsertMethod.Replace},
             new("core_user", "tenant", "id", IdType.Guid)
             {
                 DateColumns = new Dictionary<string, bool> {{"workfromdate", false}, {"terminateddate", false}, {"last_modified", false}},
                 UserIDColumns = ["id"]
             },
             new("core_group", "tenant", "id", IdType.Guid),
+            new("tenants_quotarow", "tenant")
+            {
+                InsertMethod = InsertMethod.Replace,
+                UserIDColumns = ["user_id"]
+            },
             new("tenants_iprestrictions", "tenant", "id")
     ];
 
     private readonly RelationInfo[] _tableRelations =
     [
         new("tenants_tenants", "id", "tenants_quota", "tenant"),
-            new("core_user", "id", "tenants_tenants", "owner_id", null, null, RelationImportance.Low)
+        new("core_user", "id", "tenants_tenants", "owner_id", null, null, RelationImportance.Low),
+        new("core_user", "id", "core_user", "created_by")
     ];
+
+    public override void PrepareData(DataTable data, BackupCorrection backupCorrection)
+    {
+        switch (data.TableName)
+        {
+            case "tenants_quotarow":
+                {
+                    for (var i = 0; i < data.Rows.Count; i++)
+                    {
+                        var path = Convert.ToString(data.Rows[i]["path"]);
+                        var tag = Convert.ToString(data.Rows[i]["tag"]);
+                        var userId = Guid.Parse(Convert.ToString(data.Rows[i]["user_id"]));
+
+                        if (path == backupCorrection.QuotaRowTableDocumentsPath &&
+                            tag == backupCorrection.QuotaRowTableDocumentsTag &&
+                            backupCorrection.QuotaRowTable.TryGetValue(userId, out var correction))
+                        {
+                            data.Rows[i]["counter"] = correction;
+                        }
+                    }
+
+                    break;
+                }
+        }
+    }
 
     protected override async Task<(bool, Dictionary<string, object>)> TryPrepareRow(bool dump, DbConnection connection, ColumnMapper columnMapper,
         TableInfo table, DataRowInfo row)

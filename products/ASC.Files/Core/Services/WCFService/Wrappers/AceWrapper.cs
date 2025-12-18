@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,67 +26,181 @@
 
 namespace ASC.Web.Files.Services.WCFService;
 
+/// <summary>
+/// The collection of the user access rights.
+/// </summary>
 public class AceCollection<T>
 {
+    /// <summary>
+    /// The collection of shared files.
+    /// </summary>
     public IEnumerable<T> Files { get; init; }
+
+    /// <summary>
+    /// The collection of shared folders.
+    /// </summary>
     public IEnumerable<T> Folders { get; init; }
+
+    /// <summary>
+    /// The collection of access rights.
+    /// </summary>
     public List<AceWrapper> Aces { get; init; }
+
+    /// <summary>
+    /// A message to send when notifying about the shared file.
+    /// </summary>
     public string Message { get; init; }
+
+    /// <summary>
+    /// The information about the advanced settings which allow to share the document with other users.
+    /// </summary>
     public AceAdvancedSettingsWrapper AdvancedSettings { get; init; }
 }
 
-public class AceWrapper : IMapFrom<RoomInvitation>
+/// <summary>
+/// The parameters of the access rights.
+/// </summary>
+public class AceWrapper
 {
+    /// <summary>
+    /// The user ID.
+    /// </summary>
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// The user email.
+    /// </summary>
     public string Email { get; init; }
+
+    /// <summary>
+    /// The subject type.
+    /// </summary>
     public SubjectType SubjectType { get; set; }
+
+    /// <summary>
+    /// The parameters of the file shared link.
+    /// </summary>
     public FileShareOptions FileShareOptions { get; init; }
+
+    /// <summary>
+    /// Specifies whether a user with the access rights to a file can edit it or not.
+    /// </summary>
     public bool CanEditAccess { get; set; }
 
+    /// <summary>
+    /// Determines whether internal access can be edited.
+    /// </summary>
+    public bool CanEditInternal { get; set; }
+
+    /// <summary>
+    /// Indicates whether the expiration date of access permissions can be edited.
+    /// </summary>
+    public bool CanEditExpirationDate { get; set; }
+
+    /// <summary>
+    /// Indicates whether the access rights can be revoked.
+    /// </summary>
+    public bool CanRevoke { get; set; }
+
+    /// <summary>
+    /// Determines whether the user has permission to modify the deny download setting for the file share.
+    /// </summary>
+    public bool CanEditDenyDownload { get; set; } = true;
+
+    /// <summary>
+    /// The subject name.
+    /// </summary>
     [JsonPropertyName("title")]
     public string SubjectName { get; set; }
 
+    /// <summary>
+    /// The external or invitation link.
+    /// </summary>
     public string Link { get; set; }
 
+    /// <summary>
+    /// Specifies whether the subject type is a group or not.
+    /// </summary>
     [JsonPropertyName("is_group")]
     public bool SubjectGroup { get; set; }
 
+    /// <summary>
+    /// Specifies whether the access rights subject is the owner or not.
+    /// </summary>
     public bool Owner { get; set; }
 
+    /// <summary>
+    /// The access rights type.
+    /// </summary>
     [JsonPropertyName("ace_status")]
     public FileShare Access { get; set; }
 
+    /// <summary>
+    /// Specifies if the access rights are locked or not.
+    /// </summary>
     [JsonPropertyName("locked")]
     public bool LockedRights { get; set; }
 
+    /// <summary>
+    /// Specifies if the access rights can be removed or not.
+    /// </summary>
     [JsonPropertyName("disable_remove")]
     public bool DisableRemove { get; set; }
+
+    /// <summary>
+    /// The request token of the access rights.
+    /// </summary>
     public string RequestToken { get; set; }
 
-    [JsonIgnore] 
-    public bool IsLink => (SubjectType is SubjectType.InvitationLink or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink) || !string.IsNullOrEmpty(Link);
+    /// <summary>
+    /// Specifies whether the subject type is a link or not.
+    /// </summary>
+    [JsonIgnore]
+    public bool IsLink => SubjectType is SubjectType.InvitationLink or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink || !string.IsNullOrEmpty(Link);
 }
 
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class RoomInvitationMapper
+{
+    public static partial AceWrapper Map(this RoomInvitation source);
+    public static partial List<AceWrapper> Map(this List<RoomInvitation> source);
+
+}
+
+/// <summary>
+/// The information about the settings which allow to share the document with other users.
+/// </summary>
 public class AceShortWrapper(string subjectName, string permission, bool isLink)
 {
     /// <summary>
-    /// User
+    /// The name of the user the document will be shared with.
     /// </summary>
     public string User { get; init; } = subjectName;
 
     /// <summary>
-    /// User access rights to the file
+    /// The access rights for the user with the name above.
+    /// Can be "Full Access", "Read Only", or "Deny Access".
     /// </summary>
     public string Permissions { get; init; } = permission;
 
     /// <summary>
-    /// Is link
+    /// Specifies whether to change the user icon to the link icon.
     /// </summary>
     public bool isLink { get; init; } = isLink;
 }
 
+/// <summary>
+/// The information about the advanced settings which allow to share the document with other users.
+/// </summary>
 public class AceAdvancedSettingsWrapper
 {
+    /// <summary>
+    /// Specifies whether to allow sharing private room or not.
+    /// </summary>
     public bool AllowSharingPrivateRoom { get; set; }
+
+    /// <summary>
+    /// Specifies whether to allow creating an invitation link or not.
+    /// </summary>
     public bool InvitationLink { get; init; }
 }

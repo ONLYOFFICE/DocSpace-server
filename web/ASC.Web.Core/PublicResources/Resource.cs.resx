@@ -368,7 +368,7 @@
     <value>Co je nového</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Sledování přihlášení a akcí uživatelů</value>
+    <value>Sledování přihlášení a akcí</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>Maximální velikost souboru</value>
@@ -383,7 +383,7 @@
     <value>Počet správců</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Automatické zálohování a obnovení</value>
+    <value>Obnova dat</value>
   </data>
   <data name="TariffsFeature_room" xml:space="preserve">
     <value>Neomezený počet aktivních místností</value>
@@ -410,7 +410,7 @@
     <value>Uživatelé v místnosti:</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Neomezený počet uživatelů</value>
+    <value>Neomezený počet uživatelů a hostů</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>Počet uživatelů by neměl překročit {0}</value>
@@ -542,7 +542,7 @@
     <value>Telefonní číslo od společnosti Twilio (vyžadováno pro autorizaci SMS)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Připojte aplikaci k přihlášení do portálu pomocí Twitteru.</value>
+    <value>Připojte aplikaci k přihlášení do portálu pomocí X.</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Povolte aplikaci importovat uživatele ze služby Yahoo.</value>
@@ -611,7 +611,7 @@
     <value>WordPress</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumersYandexClientSecret" xml:space="preserve">
     <value>Heslo</value>
@@ -830,7 +830,7 @@
     <value>ID klienta</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Zapnutím této aplikace umožníte svým uživatelům přihlásit se do {LogoText} pomocí Twitteru a propojit účty Twitter svých zákazníků s modulem CRM. {0}Přejděte na portál Twitter Developers Portal a vytvořte novou integraci aplikace {LogoText}. Vložte údaje, které jste obdrželi níže:</value>
+    <value>Zapnutím této aplikace umožníte svým uživatelům přihlásit se do {LogoText} pomocí X a propojit účty X svých zákazníků s modulem CRM. {0}Přejděte na portál X Developers Portal a vytvořte novou integraci aplikace {LogoText}. Vložte údaje, které jste obdrželi níže:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>Klíč API</value>
@@ -1077,5 +1077,161 @@
   </data>
   <data name="ErrorIpRestriction" xml:space="preserve">
     <value>Přidejte alespoň 1 povolenou IP adresu.</value>
+  </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>Adresa URL webhooku není k dispozici. Požadavek HEAD neodpovídá na stav 200 http.</value>
+  </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Kredit</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Měna</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>Datum</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>Množství</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Místo na disku</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Doplnění zůstatku</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>Měrná jednotka</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>Zpráva o operacích zákazníka ({0}-{1})</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>Skupina nebyla nalezena</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Další úložiště na disku</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Upravte úložiště na přesnou velikost, kterou potřebujete.</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
+    <value>Využitý úložný prostor:</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Automatické obnovení</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Počet bezplatných záloh by neměl v průběhu měsíce překročit {0}</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Povolte zálohování pro váš DocSpace. Náklady budou účtovány automaticky.</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Záloha</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Záloha</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Záloha</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Debet</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Kontakt</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Transakční historie</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Automatické dobíjení</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} bezplatných záloh měsíčně</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Platba je vyžadována</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Typ</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Podrobnosti</value>
+  </data>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Vektorizace</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>Nástroje AI</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Tokeny</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>Překročen limit prostoru pro agenty AI</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Nastavení limitu pro agenty AI se nezdařilo. Zadaná hodnota je větší než celková velikost úložiště DocSpace.</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Povolte aplikaci přihlášení k portálu pomocí účtu WeChat.</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Povolte aplikaci přihlášení k portálu pomocí účtu WeChat.</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Tajný klíč klienta</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>ID klienta</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Datum</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>E-mail</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Jméno</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Příjmení</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Kvóta služby dokumentů ({0})</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>Počet pluginů překračuje limit</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>Počet AI agentů by neměl překročit {0}</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>AI nástroje</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Povolte AI funkce ve vašem DocSpace a zvyšte produktivitu.</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>AI vyhledávání na webu</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>Úspěšně jste se připojili k Telegramu, abyste mohli přijímat oznámení z vašeho DocSpace.</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>Došlo k neočekávané chybě. Zkuste to znovu.</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Přidejte prostředky do své peněženky a odemkněte AI vyhledávání na webu.</value>
   </data>
 </root>

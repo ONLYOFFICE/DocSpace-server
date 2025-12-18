@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,7 +36,7 @@ public static class ArabicNumeralHelper
         {
             return input.ToString(format, Thread.CurrentThread.CurrentCulture);
         }
-        
+
         var result = input.ToString(format, new CultureInfo("ar"));
         return result
             .Replace('0', '\u06f0')

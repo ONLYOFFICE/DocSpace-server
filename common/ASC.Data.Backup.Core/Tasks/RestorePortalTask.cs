@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -171,7 +171,7 @@ public class RestorePortalTask(DbFactory dbFactory,
         }
 
         var stepscount = keys.Count * 2 + upgrades.Count;
-        
+
         foreach (var db in dbs)
         {
             var keys1 = dataReader.GetEntries(db + "/" + keyBase).Select(Path.GetFileName).ToList();
@@ -182,10 +182,10 @@ public class RestorePortalTask(DbFactory dbFactory,
 
         if (ProcessStorage)
         {
-            var storageModules = StorageFactoryConfig.GetModuleList(_region).Where(IsStorageModuleAllowed);
+            var storageModules = StorageFactoryConfig.GetModuleList(_region).Where(IsStorageModuleAllowed).ToList();
             var tenants = await tenantManager.GetTenantsAsync(false);
 
-            stepscount += storageModules.Count() * tenants.Count;
+            stepscount += storageModules.Count * tenants.Count;
 
             SetStepsCount(stepscount + 1);
 
@@ -298,8 +298,6 @@ public class RestorePortalTask(DbFactory dbFactory,
                     {
                         return string.Compare(x, y, StringComparison.Ordinal);
                     }
-
-                    return -1;
                 }
 
                 return -1;
@@ -366,7 +364,7 @@ public class RestorePortalTask(DbFactory dbFactory,
         options.DebugEndRestoreStorage();
     }
 
-    private async Task DoDeleteStorageAsync(IEnumerable<string> storageModules, IEnumerable<Tenant> tenants)
+    private async Task DoDeleteStorageAsync(List<string> storageModules, IEnumerable<Tenant> tenants)
     {
         options.DebugBeginDeleteStorage();
 
@@ -375,7 +373,7 @@ public class RestorePortalTask(DbFactory dbFactory,
             foreach (var module in storageModules)
             {
                 var storage = await StorageFactory.GetStorageAsync(tenant.Id, module, _region);
-                var domains = StorageFactoryConfig.GetDomainList(module, region:_region).ToList();
+                var domains = StorageFactoryConfig.GetDomainList(module, region: _region).ToList();
 
                 domains.Add(string.Empty); //instead storage.DeleteFiles("\\", "*.*", true);
 

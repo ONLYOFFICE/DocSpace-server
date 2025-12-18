@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,51 +32,145 @@ public class FirebaseHelper(AuthContext authContext,
     TenantManager tenantManager,
     IConfiguration configuration,
     ILogger<FirebaseHelper> logger,
-    FirebaseDao firebaseDao)
+    FirebaseDao firebaseDao,
+    CacheFirebaseDao cacheFirebaseDao,
+    IFusionCache cache)
 {
-    protected readonly UserManager _userManager = userManager;
-
     public async Task SendMessageAsync(NotifyMessage msg)
     {
-        var defaultInstance = FirebaseApp.DefaultInstance;
-        if (defaultInstance == null)
+        var receiver = msg.Reciever;
+
+        await InitializeFirebaseAsync();
+
+        if (FirebaseApp.DefaultInstance == null)
         {
-            try
-            {
-                var credentials = JsonSerializer.Serialize(new FirebaseApiKey(configuration)).Replace("\\\\", "\\");
-                FirebaseApp.Create(new AppOptions
-                {
-                    Credential = GoogleCredential.FromJson(credentials)
-                });
-            }
-            catch (Exception e)
-            {
-                logger.ErrorUnexpected(e);
-            }
+            return;
         }
 
         await tenantManager.SetCurrentTenantAsync(msg.TenantId);
 
-        var user = await _userManager.GetUserByUserNameAsync(msg.Reciever);
+        var userId = await cache.GetOrDefaultAsync<Guid>(GetCacheKey(msg.TenantId, receiver));
 
-        var fireBaseUser = new List<FireBaseUser>();
-
-        fireBaseUser = await firebaseDao.GetUserDeviceTokensAsync(user.Id, msg.TenantId, PushConstants.PushDocAppName);
-
-        foreach (var fb in fireBaseUser.Where(fb => fb.IsSubscribed is true))
+        if (Equals(userId, Guid.Empty))
         {
-            var m = new FirebaseAdminMessaging.Message
+            var user = await userManager.GetUserByUserNameAsync(receiver);
+            if (user == null)
             {
-                Data = new Dictionary<string, string>{
-                        { "data", msg.Data }
-                    },
-                Token = fb.FirebaseDeviceToken,
-                Notification = new FirebaseAdminMessaging.Notification
+                return;
+            }
+            userId = user.Id;
+            await cache.SetAsync(GetCacheKey(msg.TenantId, receiver), user.Id);
+        }
+
+        var fireBaseUsers = await cacheFirebaseDao.GetSubscribedUserDeviceTokensAsync(userId, msg.TenantId, PushConstants.PushDocAppName);
+
+        var messages = fireBaseUsers.Select(fb => CreateFirebaseMessage(fb, msg)).ToList();
+        await SendMessagesAsync(userId, msg.TenantId, messages);
+
+    }
+
+    private static readonly SemaphoreSlim _firebaseInitLock = new(initialCount: 1, maxCount: 1);
+    private static bool _firebaseInitialized;
+    private static GoogleCredential _credentials;
+    private async Task InitializeFirebaseAsync()
+    {
+        if (_firebaseInitialized)
+        {
+            return;
+        }
+
+        await _firebaseInitLock.WaitAsync();
+        try
+        {
+            if (FirebaseApp.DefaultInstance == null)
+            {
+                var credential = GetFirebaseCredentials();
+                FirebaseApp.Create(new AppOptions
                 {
-                    Body = msg.Content
+                    Credential = credential
+                });
+                _firebaseInitialized = true;
+            }
+        }
+        catch (Exception e)
+        {
+            logger.ErrorWithException(e);
+            throw;
+        }
+        finally
+        {
+            _firebaseInitLock.Release();
+        }
+    }
+
+    private GoogleCredential GetFirebaseCredentials()
+    {
+        if (_credentials != null)
+        {
+            return _credentials;
+        }
+        var apiKey = new FirebaseApiKey(configuration);
+
+        var serviceCredential = new ServiceAccountCredential(
+            new ServiceAccountCredential.Initializer(apiKey.ClientEmail)
+            {
+                ProjectId = apiKey.ProjectId
+            }
+            .FromPrivateKey(apiKey.PrivateKey.Replace("\\n", "\n"))
+        );
+
+        _credentials = GoogleCredential.FromServiceAccountCredential(serviceCredential);
+
+        return _credentials;
+    }
+
+    private FirebaseAdminMessaging.Message CreateFirebaseMessage(FireBaseUser user, NotifyMessage msg)
+    {
+        return new FirebaseAdminMessaging.Message
+        {
+            Data = new Dictionary<string, string> { { "data", msg.Data } },
+            Token = user.FirebaseDeviceToken,
+            Notification = new FirebaseAdminMessaging.Notification
+            {
+                Body = msg.Content
+            }
+        };
+    }
+    private async Task SendMessagesAsync(Guid userId, int tenantId, List<FirebaseAdminMessaging.Message> messages)
+    {
+
+        var tasks = messages.Select(async message =>
+        {
+            try
+            {
+                await FirebaseAdmin.Messaging.FirebaseMessaging.DefaultInstance.SendAsync(message);
+            }
+            catch (FirebaseAdmin.Messaging.FirebaseMessagingException ex)
+            {
+                if (ex.MessagingErrorCode is FirebaseAdmin.Messaging.MessagingErrorCode.InvalidArgument or FirebaseAdmin.Messaging.MessagingErrorCode.Unregistered)
+                {
+                    await HandleInvalidTokenAsync(userId, tenantId, message.Token);
                 }
-            };
-            await FirebaseAdminMessaging.FirebaseMessaging.DefaultInstance.SendAsync(m);
+                logger.ErrorWithException(ex);
+            }
+            catch (Exception ex)
+            {
+                logger.ErrorWithException(ex);
+            }
+        });
+
+        await Task.WhenAll(tasks);
+    }
+
+    private async Task HandleInvalidTokenAsync(Guid userId, int tenantId, string token)
+    {
+        try
+        {
+            await firebaseDao.DeleteInvalidTokenAsync(userId, tenantId, token);
+        }
+        catch (Exception ex)
+        {
+            logger.ErrorWithException(ex);
         }
     }
 
@@ -94,5 +188,10 @@ public class FirebaseHelper(AuthContext authContext,
         var tenantId = tenantManager.GetCurrentTenantId();
 
         return await firebaseDao.UpdateUserAsync(userId, tenantId, fbDeviceToken, isSubscribed, application);
+    }
+
+    private static string GetCacheKey(int tenantId, string receiver)
+    {
+        return tenantId + receiver;
     }
 }

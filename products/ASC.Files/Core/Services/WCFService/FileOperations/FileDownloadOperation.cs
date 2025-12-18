@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,16 +31,16 @@ public record FileDownloadOperationData<T> : FileOperationData<T>
 {
     public FileDownloadOperationData()
     {
-        
+
     }
-    
-    public FileDownloadOperationData(IEnumerable<T> folders,
-        IEnumerable<FilesDownloadOperationItem<T>> filesDownload,
-        int tenantId,        
+
+    public FileDownloadOperationData(List<T> folders,
+        List<FilesDownloadOperationItem<T>> filesDownload,
+        int tenantId,
         Guid userId,
         IDictionary<string, string> headers,
         ExternalSessionSnapshot sessionSnapshot,
-        string baseUri =  null,
+        string baseUri = null,
         bool holdResult = true) : base(folders, filesDownload.Select(f => f.Id).ToList(), tenantId, userId, headers, sessionSnapshot, holdResult)
     {
         FilesDownload = filesDownload;
@@ -49,7 +49,7 @@ public record FileDownloadOperationData<T> : FileOperationData<T>
 
     [ProtoMember(7)]
     public IEnumerable<FilesDownloadOperationItem<T>> FilesDownload { get; init; }
-    
+
     [ProtoMember(8)]
     public string BaseUri { get; init; }
 }
@@ -61,15 +61,21 @@ public class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationD
 {
     public override FileOperationType FileOperationType { get; set; } = FileOperationType.Download;
     public FileDownloadOperation() { }
-    
+
     public FileDownloadOperation(IServiceProvider serviceProvider) : base(serviceProvider) { }
-    
+
     public override async Task RunJob(CancellationToken cancellationToken)
     {
         DaoOperation = new FileDownloadOperation<int>(_serviceProvider, Data);
         ThirdPartyOperation = new FileDownloadOperation<string>(_serviceProvider, ThirdPartyData);
 
         await base.RunJob(cancellationToken);
+
+        if (!string.IsNullOrEmpty(DaoOperation.Err) || !string.IsNullOrEmpty(ThirdPartyOperation.Err))
+        {
+            await PublishChanges();
+            return;
+        }
 
         await using var scope = await ThirdPartyOperation.CreateScopeAsync();
         var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
@@ -90,20 +96,20 @@ public class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationD
 
         var thirdPartyOperation = ThirdPartyOperation as FileDownloadOperation<string>;
         var daoOperation = DaoOperation as FileDownloadOperation<int>;
-        
-        var thirdPartyFileOnly = thirdPartyOperation.Files.Count == 1 && thirdPartyOperation.Folders.Count == 0;
-        var daoFileOnly = daoOperation.Files.Count == 1 && daoOperation.Folders.Count == 0;
-        var compress = !((thirdPartyFileOnly || daoFileOnly) && (thirdPartyFileOnly != daoFileOnly));
+
+        var thirdPartyFileOnly = thirdPartyOperation?.Files.Count == 1 && thirdPartyOperation.Folders.Count == 0;
+        var daoFileOnly = daoOperation?.Files.Count == 1 && daoOperation.Folders.Count == 0;
+        var compress = !((thirdPartyFileOnly || daoFileOnly) && thirdPartyFileOnly != daoFileOnly);
 
         string archiveExtension;
-        
+
         if (compress)
-        {           
+        {
             using (var zip = scope.ServiceProvider.GetService<CompressToArchive>())
             {
                 archiveExtension = await zip.GetArchiveExtension();
             }
-            
+
             await thirdPartyOperation.CompressToZipAsync(stream, scope);
             await daoOperation.CompressToZipAsync(stream, scope);
         }
@@ -124,9 +130,9 @@ public class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationD
             stream.Position = 0;
             string fileName;
 
-            var thirdPartyFolderOnly = thirdPartyOperation.Folders.Count == 1 && thirdPartyOperation.Files.Count == 0;
-            var daoFolderOnly = daoOperation.Folders.Count == 1 && daoOperation.Files.Count == 0;
-            if ((thirdPartyFolderOnly || daoFolderOnly) && (thirdPartyFolderOnly != daoFolderOnly))
+            var thirdPartyFolderOnly = thirdPartyOperation?.Folders.Count == 1 && thirdPartyOperation.Files.Count == 0;
+            var daoFolderOnly = daoOperation?.Folders.Count == 1 && daoOperation.Files.Count == 0;
+            if ((thirdPartyFolderOnly || daoFolderOnly) && thirdPartyFolderOnly != daoFolderOnly)
             {
                 fileName = $@"{(thirdPartyFolderOnly ?
                     (await daoFactory.GetFolderDao<string>().GetFolderAsync(thirdPartyOperation.Folders[0])).Title :
@@ -138,7 +144,7 @@ public class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationD
             }
             else
             {
-                fileName = $@"{(tenantManager.GetCurrentTenant()).Alias.ToLower()}-{FileConstant.DownloadTitle}-{DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}{archiveExtension}";
+                fileName = $@"{tenantManager.GetCurrentTenant().Alias.ToLower()}-{FileConstant.DownloadTitle}-{DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}{archiveExtension}";
             }
 
             var store = await globalStore.GetStoreAsync();
@@ -223,7 +229,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
     private readonly IDictionary<string, StringValues> _headers;
     private ItemNameValueCollection<T> _entriesPathId;
     public override FileOperationType FileOperationType { get; set; } = FileOperationType.Download;
-    
+
     public FileDownloadOperation(IServiceProvider serviceProvider, FileDownloadOperationData<T> fileDownloadOperationData)
         : base(serviceProvider, fileDownloadOperationData)
     {
@@ -425,6 +431,8 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
                 File<T> file = null;
                 var convertToExt = string.Empty;
                 var password = string.Empty;
+                ThumbnailData thumbnail = null;
+                SpreadsheetLayout spreadsheetLayout = null;
 
                 if (!Equals(entryId, default(T)))
                 {
@@ -441,7 +449,19 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
                     {
                         (convertToExt, password) = convertData;
                         var sourceFileName = Path.GetFileName(path);
-                        var targetFileName = FileUtility.ReplaceFileExtension(sourceFileName, convertToExt);
+                        var targetFileName = string.Empty;
+
+                        if (FileUtility.GetFileTypeByExtention(convertToExt) == FileType.Image)
+                        {
+                            thumbnail = new ThumbnailData { Aspect = 2, First = false };
+                            spreadsheetLayout = new SpreadsheetLayout { IgnorePrintArea = true, Scale = 100 };
+                            targetFileName = FileUtility.ReplaceFileExtension(sourceFileName, CompressToArchive.ZipExt);
+                        }
+                        else
+                        {
+                            targetFileName = FileUtility.ReplaceFileExtension(sourceFileName, convertToExt);
+                        }
+
                         newTitle = path.Replace(sourceFileName, targetFileName);
                     }
                 }
@@ -465,8 +485,8 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
                     await compressTo.CreateEntry(newTitle, file.ModifiedOn);
                     try
                     {
-                        await using var readStream = await fileConverter.EnableConvertAsync(file, convertToExt, true) ? 
-                            await fileConverter.ExecAsync(file, convertToExt, password) : 
+                        await using var readStream = await fileConverter.EnableConvertAsync(file, convertToExt, true) ?
+                            await fileConverter.ExecAsync(file, convertToExt, password, false, thumbnail, spreadsheetLayout) :
                             await fileDao.GetFileStreamAsync(file);
 
                         var t = Task.Run(async () => await compressTo.PutStream(readStream));
@@ -479,7 +499,7 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
 
                         await compressTo.CloseEntry();
                     }
-                    catch (Exception ex) when(ex.InnerException is DocumentServiceException { Code: DocumentServiceException.ErrorCode.ConvertPassword })
+                    catch (Exception ex) when (ex.InnerException is DocumentServiceException { Code: DocumentServiceException.ErrorCode.ConvertPassword })
                     {
                         error += $"{entryId}_password:";
 
@@ -519,9 +539,9 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
             Err = error;
             await PublishChanges();
         }
-        
+
     }
-    
+
     internal async Task<string> GetFileAsync(Stream stream, IServiceScope scope)
     {
         if (_entriesPathId == null)
@@ -550,6 +570,8 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         File<T> file = null;
         var convertToExt = string.Empty;
         var password = string.Empty;
+        ThumbnailData thumbnail = null;
+        SpreadsheetLayout spreadsheetLayout = null;
 
         if (!Equals(entryId, default(T)))
         {
@@ -566,7 +588,19 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
             {
                 (convertToExt, password) = convertData;
                 var sourceFileName = Path.GetFileName(path);
-                var targetFileName = FileUtility.ReplaceFileExtension(sourceFileName, convertToExt);
+                var targetFileName = string.Empty;
+
+                if (FileUtility.GetFileTypeByExtention(convertToExt) == FileType.Image)
+                {
+                    thumbnail = new ThumbnailData { Aspect = 2, First = false };
+                    spreadsheetLayout = new SpreadsheetLayout { IgnorePrintArea = true, Scale = 100 };
+                    targetFileName = FileUtility.ReplaceFileExtension(sourceFileName, CompressToArchive.ZipExt);
+                }
+                else
+                {
+                    targetFileName = FileUtility.ReplaceFileExtension(sourceFileName, convertToExt);
+                }
+
                 newTitle = path.Replace(sourceFileName, targetFileName);
             }
         }
@@ -576,9 +610,9 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
             try
             {
                 await using var readStream = await fileConverter.EnableConvertAsync(file, convertToExt, true) ?
-                    await fileConverter.ExecAsync(file, convertToExt, password) :
+                    await fileConverter.ExecAsync(file, convertToExt, password, false, thumbnail, spreadsheetLayout) :
                     await fileDao.GetFileStreamAsync(file);
-                
+
                 await readStream.CopyToAsync(stream);
             }
             catch (Exception ex)
@@ -598,10 +632,10 @@ class FileDownloadOperation<T> : FileOperation<FileDownloadOperationData<T>, T>
         {
             ProcessedFolder(default);
         }
-        
+
 
         await ProgressStep();
-        
+
 
         return newTitle;
     }

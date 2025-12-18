@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,7 +27,7 @@
 namespace ASC.Core.Data;
 
 [Scope(typeof(ISubscriptionService))]
-public class DbSubscriptionService(IDbContextFactory<UserDbContext> dbContextFactory, IMapper mapper) : ISubscriptionService
+public class DbSubscriptionService(IDbContextFactory<UserDbContext> dbContextFactory) : ISubscriptionService
 {
     public async Task<string[]> GetRecipientsAsync(int tenant, string sourceId, string actionId, string objectId)
     {
@@ -152,7 +152,7 @@ public class DbSubscriptionService(IDbContextFactory<UserDbContext> dbContextFac
 
         foreach (var r in methods)
         {
-            var m = mapper.Map<DbSubscriptionMethod, SubscriptionMethod>(r);
+            var m = r.Map();
             var key = m.Source + m.Action + m.Recipient;
             if (m.Tenant == Tenant.DefaultTenant)
             {
@@ -210,7 +210,7 @@ public class DbSubscriptionService(IDbContextFactory<UserDbContext> dbContextFac
 
         foreach (var r in subs)
         {
-            var s = mapper.Map<Subscription, SubscriptionRecord>(r);
+            var s = r.Map();
             var key = s.SourceId + s.ActionId + s.RecipientId + s.ObjectId;
             if (s.Tenant == Tenant.DefaultTenant)
             {

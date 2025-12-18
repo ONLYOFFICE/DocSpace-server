@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,19 +31,23 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
     protected IConfiguration Configuration { get; } = configuration;
     protected IHostEnvironment HostEnvironment { get; } = hostEnvironment;
     protected DIHelper DIHelper { get; } = new();
-    
+
     private bool OpenTelemetryEnabled { get; } = configuration.GetValue<bool>("openTelemetry:enable");
-    
+
     public virtual async Task ConfigureServices(WebApplicationBuilder builder)
     {
-        var services = builder.Services;
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
             AppContext.SetSwitch("System.Net.Security.UseManagedNtlm", true);
         }
-        
+
+        var services = builder.Services;
         services.AddHttpContextAccessor();
         services.AddCustomHealthCheck(Configuration);
+
+        services.AddExceptionHandler<CustomExceptionHandler>();
+        services.AddProblemDetails();
+
         if (OpenTelemetryEnabled)
         {
             builder.ConfigureOpenTelemetry();
@@ -62,11 +66,10 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
         services.AddBaseDbContextPool<IntegrationEventLogContext>();
         services.AddBaseDbContextPool<MessagesContext>();
         services.AddBaseDbContextPool<WebhooksDbContext>();
+        services.AddBaseDbContextPool<ApiKeysDbContext>();
 
 
         services.RegisterFeature();
-
-        services.AddAutoMapper(GetAutoMapperProfileAssemblies());
 
         if (!HostEnvironment.IsDevelopment())
         {
@@ -74,39 +77,36 @@ public class BaseWorkerStartup(IConfiguration configuration, IHostEnvironment ho
         }
 
         services.AddMemoryCache();
-        
+
         var connectionMultiplexer = await services.GetRedisConnectionMultiplexerAsync(Configuration, GetType().Namespace);
 
         services.AddHybridCache(connectionMultiplexer)
+                .AddMemoryCache(connectionMultiplexer)
                 .AddEventBus(Configuration)
                 .AddDistributedTaskQueue()
                 .AddCacheNotify(Configuration)
                 .AddHttpClient()
-                .AddDistributedLock(Configuration);
-
+                .AddDistributedLock(Configuration)
+                .AddHeartBeat(Configuration);
 
         DIHelper.Configure(services);
         DIHelper.Scan();
-        
-        services.AddSingleton(Channel.CreateUnbounded<NotifyRequest>());
-        services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Reader);
-        services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Writer);
-        services.AddHostedService<NotifySenderService>();
-        
+
+        services.ConfigureNotificationServices();
+
         services.AddSingleton(Channel.CreateUnbounded<SocketData>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Writer);
         services.AddHostedService<SocketService>();
         services.AddTransient<DistributedTaskProgress>();
-    }
 
-    protected IEnumerable<Assembly> GetAutoMapperProfileAssemblies()
-    {
-        return AppDomain.CurrentDomain.GetAssemblies().Where(x => x.GetName().Name.StartsWith("ASC."));
+        services.AddBillingHttpClient();
+        services.AddAccountingHttpClient();
     }
 
     public virtual void Configure(IApplicationBuilder app)
     {
+        app.UseExceptionHandler();
         app.UseRouting();
 
         app.UseEndpoints(endpoints =>

@@ -368,7 +368,7 @@
     <value>Kas Jauns</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Lietotāju pieteikšanās un darbību izsekošana</value>
+    <value>Izsekošana pieteikšanās un darbības</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>Maksimālais faila lielums</value>
@@ -383,7 +383,7 @@
     <value>Administratoru skaits</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Automātiska dublēšana un atkopšana</value>
+    <value>Datu atgūšana</value>
   </data>
   <data name="TariffsFeature_room" xml:space="preserve">
     <value>Neierobežots aktīvo telpu skaits</value>
@@ -410,7 +410,7 @@
     <value>Lietotāji telpā:</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Neierobežots lietotāju skaits</value>
+    <value>Neierobežots lietotāju un viesu skaits</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>Lietotāju skaits nedrīkst pārsniegt {0}</value>
@@ -521,7 +521,7 @@
     <value>Tālruņa numurs no Twilio (nepieciešams SMS autorizācijai)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Pievienojiet lietotni, lai ieietu portālā ar Twitter kontu.</value>
+    <value>Pievienojiet lietotni, lai ieietu portālā ar X kontu.</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Iespējot lietotni Yahoo kontaktu importēšanai.</value>
@@ -575,7 +575,7 @@
     <value>WordPress</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumersYandexClientSecret" xml:space="preserve">
     <value>Parole</value>
@@ -860,7 +860,7 @@
     <value>Klienta noslēpums</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Iespējojiet šo lietotni, lai ļautu saviem lietotājiem pierakstīties {LogoText}, izmantojot viņu Twitter, un saistīt savu klientu Twitter kontus ar CRM moduli. {0}Dodieties uz Twitter izstrādātāju portālu un izveidojiet jaunu lietotnes {LogoText} integrāciju. Tālāk ievadiet saņemtos datus:</value>
+    <value>Iespējojiet šo lietotni, lai ļautu saviem lietotājiem pierakstīties {LogoText}, izmantojot viņu X, un saistīt savu klientu X kontus ar CRM moduli. {0}Dodieties uz X izstrādātāju portālu un izveidojiet jaunu lietotnes {LogoText} integrāciju. Tālāk ievadiet saņemtos datus:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>API atslēga</value>
@@ -1077,5 +1077,161 @@
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
     <value>Neizdevās iestatīt kvotu katram lietotājam. Ievadītā vērtība ir lielāka par kopējo DocSpace krātuves apjomu.</value>
+  </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>Tīmekļa aizķeres URL nav pieejams. HEAD pieprasījumam nav atbildes 200 http statuss.</value>
+  </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Kredīts</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Valūta</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>Datums</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>Daudzums</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Diska vieta</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Atlikuma papildināšana</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>Mērvienība</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>Klienta darbību ziņojums ({0}-{1})</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>Grupa nav atrasta</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Papildu diska vieta</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Pielāgojiet vietu atbilstoši nepieciešamajam apjomam.</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
+    <value>Izmantotā krātuves vieta:</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Dublējums</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Dublējums</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Dublējums</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Debets</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Kontaktinformācija</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Darījumu vēsture</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Automātiska papildināšana</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} bezmaksas dublējumkopijas mēnesī</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Nepieciešams maksājums</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Tips</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Detaļas</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Automātiska atjaunošana</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Bezmaksas dublējumu skaits nedrīkst pārsniegt {0} mēneša laikā</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Iespējojiet savas DocSpace dublējumkopijas. Izmaksas tiks aprēķinātas automātiski.</value>
+  </data>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Vektorizācija</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>MI rīki</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Pilnvaras</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>MI aģenta vietas kvota pārsniegta</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Neizdevās iestatīt kvotu katram MI aģentam. Ievadītā vērtība ir lielāka par kopējo DocSpace krātuves apjomu.</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>Klienta ID</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Klienta privātā atslēga</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Iespējojiet opciju lietojumprogrammai pierakstīties portālā, izmantojot WeChat kontu.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Iespējojiet opciju lietojumprogrammai pierakstīties portālā, izmantojot WeChat kontu.</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Datums</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>E-pasts</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Vārds</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Uzvārds</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Dokumentu pārvaldnieka kvota ({0})</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>Spraudņu skaits pārsniedz ierobežojumu</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>MI aģentu skaits nedrīkst pārsniegt {0}</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>MI rīki</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Iespējojiet MI funkcijas savā DocSpace, lai palielinātu produktivitāti.</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>Meklēšana tīmeklī ar MI</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Papildiniet maku, lai aktivizētu meklēšanu tīmeklī ar MI.</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>Radās neparedzēta kļūda. Lūdzu, mēģiniet vēlreiz.</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>Telegram ir veiksmīgi pievienots paziņojumu saņemšanai no DocSpace.</value>
   </data>
 </root>

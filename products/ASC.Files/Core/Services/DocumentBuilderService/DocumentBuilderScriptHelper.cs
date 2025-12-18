@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,12 +34,12 @@ public class DocumentBuilderScriptHelper
     {
         return $"temp{DateTime.UtcNow.Ticks}{ext}";
     }
-    
+
     public static async Task<string> ReadTemplateFromEmbeddedResource(string templateFileName)
     {
         var templateNamespace = typeof(DocumentBuilderScriptHelper).Namespace;
         var resourceName = $"{templateNamespace}.ScriptTemplates.{templateFileName}";
-        
+
         var assembly = Assembly.GetExecutingAssembly();
         await using var stream = assembly.GetManifestResourceStream(resourceName);
 

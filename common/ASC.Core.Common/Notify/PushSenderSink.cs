@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -72,7 +72,7 @@ public class LowerCaseNamingPolicy : JsonNamingPolicy
         name.ToLower();
 }
 [Scope]
-public class PushSenderSinkMessageCreator(UserManager userManager, TenantManager tenantManager) : SinkMessageCreator
+public class PushSenderSinkMessageCreator(UserManager userManager, TenantManager tenantManager, CoreSettings coreSettings) : SinkMessageCreator
 {
     public override async Task<NotifyMessage> CreateNotifyMessage(INoticeMessage message, string senderName)
     {
@@ -81,7 +81,7 @@ public class PushSenderSinkMessageCreator(UserManager userManager, TenantManager
         {
             await tenantManager.SetCurrentTenantAsync(Tenant.DefaultTenant);
             tenant = tenantManager.GetCurrentTenant(false);
-        }      
+        }
 
         var user = await userManager.GetUsersAsync(new Guid(message.Recipient.ID));
         var username = user.UserName;
@@ -98,7 +98,7 @@ public class PushSenderSinkMessageCreator(UserManager userManager, TenantManager
         var notifyData = new NotifyData
         {
             Email = user.Email,
-            Portal = (tenantManager.GetCurrentTenant()).TrustedDomains.FirstOrDefault(),
+            Portal = tenant.GetTenantDomain(coreSettings),
             OriginalUrl = originalUrl is { Value: not null } ? originalUrl.Value.ToString() : "",
             Folder = new NotifyFolderData
             {

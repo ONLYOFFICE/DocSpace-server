@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -57,7 +57,6 @@ public class InstallerOptionsAction(string region, string nameConnectionString)
         {
             case Provider.MySql:
                 optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-                optionsBuilder.ReplaceService<IMigrationsSqlGenerator, CustomMySqlMigrationsSqlGenerator>();
                 optionsBuilder.UseMySql(connectionString.ConnectionString, ServerVersion.AutoDetect(connectionString.ConnectionString), providerOptions =>
                 {
                     if (!string.IsNullOrEmpty(migrateAssembly))
@@ -155,8 +154,8 @@ public static class BaseDbContextExtension
         b.Entry(existingBlog).State = EntityState.Modified;
         return entity;
     }
-    
-    
+
+
     public static async Task<T> AddOrUpdateAsync<T>(this DbSet<T> dbSet, T entity) where T : BaseEntity
     {
         var existingBlog = await dbSet.FindAsync(entity.GetKeys());
@@ -208,14 +207,14 @@ public class WarmupBaseDbContextStartupTask(IServiceProvider provider, ILogger<W
                 {
                     var @params = q.GetParameters();
                     var paramsAttr = q.GetCustomAttribute<PreCompileQuery>();
-                    
+
                     if (paramsAttr == null || paramsAttr.Data.Length != @params.Length)
                     {
                         continue;
                     }
-                    
+
                     var paramsToInvoke = new List<object>(@params.Length);
-                    
+
                     for (var i = 0; i < @params.Length; i++)
                     {
                         var p = paramsAttr.Data[i];
@@ -238,19 +237,19 @@ public class WarmupBaseDbContextStartupTask(IServiceProvider provider, ILogger<W
                             paramsToInvoke.Add(p);
                         }
                     }
-                    
+
                     var context = createDbContextMethod.Invoke(dbContextFactory, null);
                     if (context == null)
                     {
                         continue;
                     }
-                    
+
                     var res = q.Invoke(context, paramsToInvoke.ToArray());
                     if (res is Task task)
                     {
                         await task.ConfigureAwait(false);
                     }
-                    
+
                     var disposeContext = context.GetType().GetMethod("Dispose");
                     if (disposeContext == null)
                     {

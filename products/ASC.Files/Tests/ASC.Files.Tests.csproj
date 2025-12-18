@@ -1,35 +1,35 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <OutputType>exe</OutputType>
 
-        <IsPackable>false</IsPackable>
-        <IsTestProject>true</IsTestProject>
-        <LangVersion>latestmajor</LangVersion>
+        <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+        <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Bogus" Version="35.6.1" />
-        <PackageReference Include="coverlet.collector" Version="6.0.4">
+        <PackageReference Include="Bogus" />
+        <PackageReference Include="coverlet.collector">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="FluentAssertions" Version="7.0.0" />
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.2" />
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
-        <PackageReference Include="Respawn" Version="6.2.1" />
-        <PackageReference Include="Testcontainers" Version="4.2.0" />
-        <PackageReference Include="Testcontainers.MySql" Version="4.2.0" />
-        <PackageReference Include="Testcontainers.PostgreSql" Version="4.2.0" />
-        <PackageReference Include="Testcontainers.RabbitMq" Version="4.2.0" />
-        <PackageReference Include="Testcontainers.Redis" Version="4.2.0" />
-        <PackageReference Include="xunit" Version="2.9.3" />
-        <PackageReference Include="xunit.runner.visualstudio" Version="3.0.2">
+        <PackageReference Include="DocSpace.API.SDK" />
+        <PackageReference Include="FluentAssertions" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="Respawn" />
+        <PackageReference Include="Testcontainers" />
+        <PackageReference Include="Testcontainers.MySql" />
+        <PackageReference Include="Testcontainers.OpenSearch" />
+        <PackageReference Include="Testcontainers.PostgreSql" />
+        <PackageReference Include="Testcontainers.RabbitMq" />
+        <PackageReference Include="Testcontainers.Redis" />
+        <PackageReference Include="xunit.runner.visualstudio">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
+        <PackageReference Include="xunit.v3" />
     </ItemGroup>
 
     <ItemGroup>
@@ -44,6 +44,12 @@
       <ProjectReference Include="..\..\ASC.People\Server\ASC.People.csproj" Aliases="ASCPeople" />
       <ProjectReference Include="..\Server\ASC.Files.csproj" Aliases="ASCFiles"/>
       <ProjectReference Include="..\Service\ASC.Files.Service.csproj"  Aliases="ASCFilesService"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="appsettings.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>

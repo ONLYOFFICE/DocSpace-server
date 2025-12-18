@@ -359,7 +359,7 @@
     <value>Numero di telefono da Twilio (richiesto per l'autorizzazione SMS)</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
     <value>Client ID</value>
@@ -368,7 +368,7 @@
     <value>Client Secret</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Collega l'applicazione per registrarsi al portale utilizzando l'account Twitter.</value>
+    <value>Collega l'applicazione per registrarsi al portale utilizzando l'account X.</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>API Key</value>
@@ -794,7 +794,7 @@
     <value>Branding e personalizzazione</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Monitoraggio degli accessi e delle azioni degli utenti</value>
+    <value>Tracciamento accessi e azioni</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>Dimensione massima del file</value>
@@ -809,7 +809,7 @@
     <value>Numero di amministratori</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Backup e ripristino automatici</value>
+    <value>Recupero dati</value>
   </data>
   <data name="TariffsFeature_room" xml:space="preserve">
     <value>Backup e ripristino automatici</value>
@@ -836,7 +836,7 @@
     <value>Utenti presenti nella stanza:</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Numero illimitato di utenti</value>
+    <value>Numero illimitato di utenti e ospiti</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>Il numero di utenti non deve superare {0}</value>
@@ -950,7 +950,7 @@
     <value>Abilita questa app per consentire ai tuoi utenti di chiamare i propri contatti dal modulo CRM utilizzando Twilio. {0}Vai a Twilio Console e incolla i seguenti dati qui sotto:</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Abilita questa app per consentire ai tuoi utenti di accedere a {LogoText} usando il loro Twitter e collegare gli account Twitter dei loro clienti al modulo CRM. {0}Vai su Twitter Developers Portal e crea una nuova app per l'integrazione di {LogoText}. Inserisci di seguito i dati che hai ricevuto:</value>
+    <value>Abilita questa app per consentire ai tuoi utenti di accedere a {LogoText} usando il loro X e collegare gli account X dei loro clienti al modulo CRM. {0}Vai su X Developers Portal e crea una nuova app per l'integrazione di {LogoText}. Inserisci di seguito i dati che hai ricevuto:</value>
   </data>
   <data name="ConsumersYahooInstruction" xml:space="preserve">
     <value>Abilita questa app per aggiungere nuovi utenti del portale dal tuo elenco di contatti Yahoo. {0}Vai alla pagina Crea applicazione in Yahoo Developer Network e crea una nuova app per l'integrazione di {LogoText}. Inserisci di seguito i dati che hai ricevuto:</value>
@@ -980,7 +980,7 @@
     <value>Collega il servizio Selectel Cloud Storage per eseguire il backup e archiviare i dati dal tuo portale. {0}Ottieni i dati di accesso per un utente con diritti di lettura/scrittura per i container dove prevedi di archiviare i tuoi backup e incollali di seguito:</value>
   </data>
   <data name="TariffsFeature_thirdparty" xml:space="preserve">
-    <value>Integrazioni di terze parti</value>
+    <value>Integrazioni Pro</value>
   </data>
   <data name="ConsumersZoom" xml:space="preserve">
     <value>Zoom</value>
@@ -1077,5 +1077,161 @@
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
     <value>Impossibile impostare la quota per utente. Il valore inserito è superiore allo spazio di archiviazione totale di DocSpace.</value>
+  </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>L'URL del webhook non è disponibile. La richiesta HEAD non ha restituito lo stato HTTP 200.</value>
+  </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Credito</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Valuta</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>Quantità</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>Unità di misura</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>Report delle operazioni cliente ({0}-{1})</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>Il gruppo non è stato trovato</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Archiviazione disco aggiuntiva</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Regola lo spazio di archiviazione in base alla quantità esatta di cui hai bisogno.</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
+    <value>Spazio di archiviazione utilizzato:</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Spazio su disco</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Ricarica del saldo</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Ricarica automatica</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Pagamento richiesto</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Il numero di backup gratuiti non deve superare {0} in un mese</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} backup gratuiti al mese</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Backup</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Backup</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Backup</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Contatto</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Addebito</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Dettagli</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Tipo</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Cronologia delle transazioni</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Rinnovo automatico</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Abilita i backup per il tuo DocSpace. I costi verranno addebitati automaticamente.</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>ID client</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Segreto client</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Abilita l’applicazione per accedere al portale usando un account WeChat.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Abilita l’applicazione per accedere al portale usando un account WeChat.</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Nome</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Cognome</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Quota servizio documenti ({0})</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>Il numero di plugin supera il limite</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>Si è verificato un errore imprevisto. Riprova.</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>Hai collegato con successo Telegram per ricevere notifiche dal tuo DocSpace.</value>
+  </data>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Vettorizzazione</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>Strumenti AI</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Token</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>Spazio disponibile per gli agenti AI superato</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Impossibile impostare la quota per agente AI. Il valore inserito è superiore allo spazio totale di DocSpace.</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>Il numero di agenti AI non deve superare {0}</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>Strumenti AI</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Attiva le funzioni AI nel tuo DocSpace per aumentare la produttività.</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>Ricerca web AI</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Aggiungi fondi al tuo wallet per sbloccare la ricerca web AI.</value>
   </data>
 </root>

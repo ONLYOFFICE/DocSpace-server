@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -75,7 +75,7 @@ try
     await eventBus.SubscribeAsync<MigrationCancelIntegrationEvent, MigrationIntegrationEventHandler>();
     await eventBus.SubscribeAsync<MigrationClearIntegrationEvent, MigrationIntegrationEventHandler>();
     await eventBus.SubscribeAsync<EventDataIntegrationEvent, EventDataIntegrationEventHandler>();
-    
+
     logger.Info("Starting web host ({applicationContext})...", AppName);
     await app.RunWithTasksAsync();
 }

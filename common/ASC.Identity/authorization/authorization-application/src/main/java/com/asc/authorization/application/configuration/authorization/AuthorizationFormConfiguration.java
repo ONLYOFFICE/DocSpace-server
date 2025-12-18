@@ -28,6 +28,7 @@
 package com.asc.authorization.application.configuration.authorization;
 
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import java.util.List;
 import lombok.Data;
 import lombok.SneakyThrows;
 import org.springframework.context.annotation.Bean;
@@ -36,6 +37,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 /**
  * Configuration class for setting up OAuth2 authorization form endpoints.
@@ -72,7 +76,38 @@ public class AuthorizationFormConfiguration {
             authorizeRequests -> authorizeRequests.anyRequest().permitAll())
         .logout(AbstractHttpConfigurer::disable)
         .csrf(AbstractHttpConfigurer::disable)
-        .cors(AbstractHttpConfigurer::disable)
+        .cors(c -> c.configurationSource(corsConfigurationSource()))
         .build();
+  }
+
+  /**
+   * Creates and configures a CORS (Cross-Origin Resource Sharing) configuration source. This
+   * configuration should be acceptable since we fully rely on signatures
+   *
+   * <p>This method sets up a permissive CORS configuration that allows:
+   *
+   * <ul>
+   *   <li>All origins ({@code "*"}) to access the endpoints
+   *   <li>All HTTP methods ({@code "*"}) including GET, POST, PUT, DELETE, etc.
+   *   <li>All headers ({@code "*"}) in cross-origin requests
+   *   <li>Preflight request caching for 1 hour (3600 seconds)
+   * </ul>
+   *
+   * <p>The configuration is applied to all URL patterns ({@code "/**"}) within the application.
+   *
+   * @return a {@link CorsConfigurationSource} that provides CORS configuration for all endpoints
+   * @see CorsConfiguration
+   * @see UrlBasedCorsConfigurationSource
+   */
+  CorsConfigurationSource corsConfigurationSource() {
+    var configuration = new CorsConfiguration();
+    configuration.setAllowedOrigins(List.of("*"));
+    configuration.setAllowedMethods(List.of("*"));
+    configuration.setAllowedHeaders(List.of("*"));
+    configuration.setMaxAge(3600L);
+
+    var source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", configuration);
+    return source;
   }
 }

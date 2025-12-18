@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,13 +31,13 @@ global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
 
+global using ASC.Api.Core.Socket;
 global using ASC.Common;
 global using ASC.Common.Log;
 global using ASC.Common.Security.Authentication;
 global using ASC.Common.Threading;
 global using ASC.Common.Web;
 global using ASC.Core;
-global using ASC.Api.Core.Socket;
 global using ASC.Core.Common.Core;
 global using ASC.Core.Common.Quota;
 global using ASC.Core.Common.Quota.Features;
@@ -64,7 +64,9 @@ global using ASC.Web.Core.Users;
 global using ASC.Web.Files.Classes;
 global using ASC.Web.Files.Services.WCFService;
 global using ASC.Web.Files.Utils;
+
 global using DotNetOpenAuth.Messaging;
+
 global using HtmlAgilityPack;
 
 global using ImageMagick;
@@ -74,6 +76,7 @@ global using Microsoft.AspNetCore.Http;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
+
 global using ProtoBuf;
 
 global using ZiggyCreatures.Caching.Fusion;

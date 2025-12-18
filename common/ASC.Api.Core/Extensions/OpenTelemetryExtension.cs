@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,7 +26,6 @@
 
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
-using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
 namespace ASC.Api.Core.Extensions;
@@ -47,58 +46,62 @@ public static class OpenTelemetryExtension
         public string Bucket { get; set; }
     }
 
-    public static TBuilder ConfigureOpenTelemetry<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
+    extension<TBuilder>(TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
-        var telemetrySettings = builder.Configuration.GetSection("openTelemetry").Get<OpenTelemetrySettings>();
-        
-        builder.Logging.AddOpenTelemetry(logging =>
+        public TBuilder ConfigureOpenTelemetry()
         {
-            logging.IncludeFormattedMessage = true;
-            logging.IncludeScopes = true;
-        });
-        
-        builder.Services.AddOpenTelemetry()
-            .ConfigureResource(resource => resource.AddService(telemetrySettings.ServiceName))
-            .WithMetrics(metrics =>
-            {
-                metrics.AddAspNetCoreInstrumentation()
-                    .AddHttpClientInstrumentation()
-                    .AddRuntimeInstrumentation()
-                    .AddProcessInstrumentation()
-                    .AddFusionCacheInstrumentation();
+            var telemetrySettings = builder.Configuration.GetSection("openTelemetry").Get<OpenTelemetrySettings>();
 
-                if (telemetrySettings.InfluxDB != null)
-                {
-                    metrics.AddInfluxDBMetricsExporter(options =>
-                    {
-                        options.Endpoint = new Uri(telemetrySettings.InfluxDB.Endpoint);
-                        options.Token = telemetrySettings.InfluxDB.Token;
-                        options.Bucket = telemetrySettings.InfluxDB.Bucket;
-                        options.Org = telemetrySettings.InfluxDB.Org;
-                    });
-                }
-            })
-            .WithTracing(tracing =>
+            builder.Logging.AddOpenTelemetry(logging =>
             {
-                tracing.AddSource(builder.Environment.ApplicationName)
-                    .AddHttpClientInstrumentation()
-                    .AddFusionCacheInstrumentation();
+                logging.IncludeFormattedMessage = true;
+                logging.IncludeScopes = true;
             });
-        
-        builder.AddOpenTelemetryExporters();
-        
-        return builder;
-    }
 
-    private static TBuilder AddOpenTelemetryExporters<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
-    {
-        var useOtlpExporter = !string.IsNullOrWhiteSpace(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]);
+            builder.Services.AddOpenTelemetry()
+                .WithMetrics(metrics =>
+                {
+                    metrics.AddAspNetCoreInstrumentation()
+                        .AddHttpClientInstrumentation()
+                        .AddRuntimeInstrumentation()
+                        .AddFusionCacheInstrumentation();
 
-        if (useOtlpExporter)
-        {
-            builder.Services.AddOpenTelemetry().UseOtlpExporter();
+                    if (telemetrySettings.InfluxDB != null)
+                    {
+                        metrics.AddInfluxDBMetricsExporter(options =>
+                        {
+                            options.Endpoint = new Uri(telemetrySettings.InfluxDB.Endpoint);
+                            options.Token = telemetrySettings.InfluxDB.Token;
+                            options.Bucket = telemetrySettings.InfluxDB.Bucket;
+                            options.Org = telemetrySettings.InfluxDB.Org;
+                        });
+                    }
+
+                    metrics.AddMeter("MySqlConnector");
+                })
+                .WithTracing(tracing =>
+                {
+                    tracing
+                        .AddHttpClientInstrumentation()
+                        .AddAspNetCoreInstrumentation()
+                        .AddFusionCacheInstrumentation();
+                });
+
+            builder.AddOpenTelemetryExporters();
+
+            return builder;
         }
 
-        return builder;
+        private TBuilder AddOpenTelemetryExporters()
+        {
+            var useOtlpExporter = !string.IsNullOrWhiteSpace(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]);
+
+            if (useOtlpExporter)
+            {
+                builder.Services.AddOpenTelemetry().UseOtlpExporter();
+            }
+
+            return builder;
+        }
     }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,161 +26,168 @@
 
 namespace ASC.Core.Users;
 
-public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
+/// <summary>
+/// The user information.
+/// </summary>
+public sealed class UserInfo : IDirectRecipient, ICloneable
 {
     /// <summary>
-    /// ID
+    /// The user ID.
     /// </summary>
     public Guid Id { get; set; }
 
     /// <summary>
-    /// First name
+    /// The user first name.
     /// </summary>
     public string FirstName { get; set; }
 
     /// <summary>
-    /// Last name
+    /// The user last name.
     /// </summary>
     public string LastName { get; set; }
 
     /// <summary>
-    /// Username
+    /// The user username.
     /// </summary>
     public string UserName { get; set; }
 
     /// <summary>
-    /// Birthday
+    /// The user birthday.
     /// </summary>
     public DateTime? BirthDate { get; set; }
 
     /// <summary>
-    /// Sex (male or female)
+    /// The user sex (male or female).
     /// </summary>
     public bool? Sex { get; set; }
 
     /// <summary>
-    /// Status
+    /// The user status.
     /// </summary>
     public EmployeeStatus Status { get; set; } = EmployeeStatus.Active;
 
     /// <summary>
-    /// Activation status
+    /// The user activation status.
     /// </summary>
     public EmployeeActivationStatus ActivationStatus { get; set; } = EmployeeActivationStatus.NotActivated;
 
     /// <summary>
-    /// The date and time when the user account was terminated
+    /// The date and time when the user account was terminated.
     /// </summary>
     public DateTime? TerminatedDate { get; set; }
 
     /// <summary>
-    /// Title
+    /// The user title.
     /// </summary>
     public string Title { get; set; }
 
     /// <summary>
-    /// Registration date
+    /// The user registration date.
     /// </summary>
     public DateTime? WorkFromDate { get; set; }
 
     /// <summary>
-    /// Email
+    /// The user email address.
     /// </summary>
     [EmailAddress]
     public string Email { get; set; }
 
-    private string _contacts;
-
     /// <summary>
-    /// List of contacts in the string format
+    /// The list of user contacts in the string format.
     /// </summary>
     public string Contacts
     {
-        get => _contacts;
+        get;
         set
         {
-            _contacts = value;
-            ContactsFromString(_contacts);
+            field = value;
+            ContactsFromString(field);
         }
     }
 
     /// <summary>
-    /// List of contacts
+    /// The list of user contacts.
     /// </summary>
     public List<string> ContactsList { get; set; }
 
     /// <summary>
-    /// Location
+    /// The user location.
     /// </summary>
     public string Location { get; set; }
 
     /// <summary>
-    /// Notes
+    /// The user notes.
     /// </summary>
     public string Notes { get; set; }
 
     /// <summary>
-    /// Specifies if the user account was removed or not
+    /// Specifies if the user account was removed or not.
     /// </summary>
     public bool Removed { get; set; }
 
     /// <summary>
-    /// Last modified date
+    /// The date and time when the user account was last modified.
     /// </summary>
     public DateTime LastModified { get; set; } = DateTime.UtcNow;
 
     /// <summary>
-    /// Tenant ID
+    /// The tenant ID.
     /// </summary>
     public int TenantId { get; set; }
 
     /// <summary>
-    /// Spceifies if the user is active or not
+    /// Specifies if the user is active or not.
     /// </summary>
     public bool IsActive => ActivationStatus.HasFlag(EmployeeActivationStatus.Activated);
 
     /// <summary>
-    /// Language
+    /// The user culture code.
     /// </summary>
     public string CultureName { get; set; }
 
     /// <summary>
-    /// Mobile phone
+    /// The user mobile phone.
     /// </summary>
     public string MobilePhone { get; set; }
 
     /// <summary>
-    /// Mobile phone activation status
+    /// The user mobile phone activation status.
     /// </summary>
     public MobilePhoneActivationStatus MobilePhoneActivationStatus { get; set; }
 
     /// <summary>
-    /// LDAP user identificator
+    /// The LDAP user identificator.
     /// </summary>
     public string Sid { get; set; } // LDAP user identificator
 
     /// <summary>
-    /// LDAP user quota attribute
+    /// The LDAP user quota attribute.
     /// </summary>
     public long LdapQouta { get; init; } // LDAP user quota attribute
 
     /// <summary>
-    /// SSO SAML user identificator
+    /// The SSO SAML user identificator.
     /// </summary>
     public string SsoNameId { get; set; } // SSO SAML user identificator
 
     /// <summary>
-    /// SSO SAML user session identificator
+    /// The SSO SAML user session identificator.
     /// </summary>
     public string SsoSessionId { get; set; } // SSO SAML user session identificator
 
     /// <summary>
-    /// Creation date
+    /// The date and time when the user account was created.
     /// </summary>
     public DateTime CreateDate { get; set; }
 
+    /// <summary>
+    /// The ID of the user who created the current user account.
+    /// </summary>
     public Guid? CreatedBy { get; set; }
 
+    /// <summary>
+    /// Specifies if tips, updates and offers are allowed to be sent to the user or not.
+    /// </summary>
     public bool? Spam { get; set; }
 
     public override string ToString()
@@ -255,4 +262,13 @@ public sealed class UserInfo : IDirectRecipient, ICloneable, IMapFrom<User>
 
         return this;
     }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class UserInfoMapper
+{
+    public static partial User Map(this UserInfo source);
+    public static partial UserInfo Map(this User source);
+    public static partial List<UserInfo> Map(this List<User> source);
+    public static partial IQueryable<UserInfo> Project(this IQueryable<User> source);
 }

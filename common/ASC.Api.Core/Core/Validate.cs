@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,24 +28,27 @@ namespace ASC.Api.Utils;
 
 public static class Validate
 {
-    public static T If<T>(this T item, Func<T, bool> @if, Func<T> then) where T : class
+    extension<T>(T item) where T : class
     {
-        return @if(item) ? then() : item;
-    }
+        public T If(Func<T, bool> @if, Func<T> then)
+        {
+            return @if(item) ? then() : item;
+        }
 
-    public static T IfNull<T>(this T item, Func<T> func) where T : class
-    {
-        return item.If(x => x == null, func);
-    }
+        public T IfNull(Func<T> func)
+        {
+            return item.If(x => x == null, func);
+        }
 
-    public static T ThrowIfNull<T>(this T item, Exception e) where T : class
-    {
-        return item.IfNull(() => throw e);
-    }
+        public T ThrowIfNull(Exception e)
+        {
+            return item.IfNull(() => throw e);
+        }
 
-    public static T NotFoundIfNull<T>(this T item, string message = "Item not found") where T : class
-    {
-        return item.IfNull(() => throw new ItemNotFoundException(message));
+        public T NotFoundIfNull(string message = "Item not found")
+        {
+            return item.IfNull(() => throw new ItemNotFoundException(message));
+        }
     }
 
     public static T? NullIfDefault<T>(this T item) where T : struct

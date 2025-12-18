@@ -159,7 +159,9 @@ Nowy formularz "$DocumentTitle":"$DocumentURL" został wypełniony w pokoju "Roo
 
 Wypełniający formularz: "$FromUserName":"$FromUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>h1. Wypełniono formularz $Message
@@ -168,12 +170,73 @@ Formularz "$DocumentTitle":"$DocumentURL" w pokoju "$RoomTitle":"$RoomURL" zosta
 
 Menedżer: "$ToUserName":"$ToUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
     <value>Powiadomienie DocSpace. Formularz został wypełniony</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
     <value>Powiadomienie DocSpace. Formularz został wypełniony</value>
+  </data>
+  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
+    <value>Zostałeś zaproszony do pokoju "$RoomTitle"</value>
+  </data>
+  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
+    <value>Twoja rola w pokoju "$RoomTitle" została zmieniona na rolę "$RoomRole"</value>
+  </data>
+  <data name="pattern_FormSubmitted_push" xml:space="preserve">
+    <value>Formularz "$DocumentTitle" został wypełniony w pokoju "$RoomTitle"</value>
+  </data>
+  <data name="subject_YourTurnFormFilling" xml:space="preserve">
+    <value>Powiadomienie DocSpace.</value>
+  </data>
+  <data name="subject_StoppedFormFilling" xml:space="preserve">
+    <value>Powiadomienie DocSpace.</value>
+  </data>
+  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
+    <value>Powiadomienie DocSpace.</value>
+  </data>
+  <data name="subject_FormStartedFilling" xml:space="preserve">
+    <value>Powiadomienie DocSpace.</value>
+  </data>
+  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
+    <value>W pokoju "$RoomTitle" został utworzony nowy katalog "$FolderTitle"</value>
+  </data>
+  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
+    <value>Do pokoju "$RoomTitle" zostały przesłane nowe pliki ($Count)</value>
+  </data>
+  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
+    <value>Do pokoju "$RoomTitle" został przesłany nowy plik "$DocumentTitle"</value>
+  </data>
+  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
+    <value>W pokoju "$RoomTitle" został utworzony nowy dokument "$DocumentTitle"</value>
+  </data>
+  <data name="pattern_EditorMentions_push" xml:space="preserve">
+    <value>Użytkownik $ToUserName wspomniał o Tobie w dokumencie $DocumentTitle</value>
+  </data>
+  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
+    <value>Użytkownik $FromUserName przeniósł pokój "$RoomTitle" do archiwum</value>
+  </data>
+  <data name="pattern_FormStartedFilling" xml:space="preserve">
+    <value>
+      Powiadomienie o aktywności. Użytkownik "$FromUserName":"$FromUserLink” rozpoczął wypełnianie formularza:  "$DocumentTitle":"$DocumentURL"-w pokoju: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_StoppedFormFilling" xml:space="preserve">
+    <value>
+      Powiadomienie o aktywności. Użytkownik "$FromUserName":"$FromUserLink” zatrzymał wypełnianie formularza: "$DocumentTitle":"$DocumentURL"-w pokoju: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_YourTurnFormFilling" xml:space="preserve">
+    <value>
+      Powiadomienie o aktywności. Twoja kolej! Wymagane jest wypełnienie formularza: "$DocumentTitle":"$DocumentURL"-w pokoju: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+    <value>
+      Powiadomienie o aktywności. Formularz "$DocumentTitle":"$DocumentURL” został całkowicie wypełniony w pokoju: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
   </data>
 </root>

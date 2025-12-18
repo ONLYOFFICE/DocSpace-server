@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,7 +36,7 @@ internal class SelectorFactory(IServiceProvider serviceProvider)
     public IDaoSelector GetSelector(string id)
     {
         var selector = Match(id);
-        return GetSelectorInternal(selector);
+        return selector == string.Empty && int.TryParse(id, out _) ? null : GetSelectorInternal(selector);
     }
 
     private IDaoSelector GetSelectorInternal(string selector)
@@ -71,19 +71,14 @@ internal class SelectorFactory(IServiceProvider serviceProvider)
             return serviceProvider.GetService<IDaoSelector<Item, Item, Item>>();
         }
 
-        return null;
+        throw new ItemNotFoundException($"Selector '{selector}' not found");
     }
 
     public Dictionary<IDaoSelector, List<string>> GetSelectors(IEnumerable<string> ids)
     {
         var groups = ids.GroupBy(Match);
         groups = groups.Where(g => g.Key != "");
-        var dict = new Dictionary<IDaoSelector, List<string>>();
-        foreach (var group in groups)
-        {
-            dict.Add(GetSelectorInternal(group.Key), group.ToList());
-        }
-        return dict;
+        return groups.ToDictionary(group => GetSelectorInternal(group.Key), group => group.ToList());
     }
 
     private string Match(string id)

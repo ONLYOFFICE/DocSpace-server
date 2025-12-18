@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,22 +24,24 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Text.Json.Serialization;
-
 namespace ASC.IPSecurity;
 
+/// <summary>
+/// The IP restriction settings.
+/// </summary>
 public class IPRestrictionsSettings : ISettings<IPRestrictionsSettings>
 {
     /// <summary>
-    /// Specifies if the IP restrictions are enabled or not
+    /// Specifies if the IP restrictions are enabled or not.
     /// </summary>
     public bool Enable { get; init; }
 
-    [JsonIgnore]
-    public Guid ID => new("{2EDDDF64-F792-4498-A638-2E3E6EBB13C9}");
+    public static Guid ID => new("{2EDDDF64-F792-4498-A638-2E3E6EBB13C9}");
 
     public IPRestrictionsSettings GetDefault()
     {
         return new IPRestrictionsSettings { Enable = false };
     }
+
+    public DateTime LastModified { get; set; }
 }

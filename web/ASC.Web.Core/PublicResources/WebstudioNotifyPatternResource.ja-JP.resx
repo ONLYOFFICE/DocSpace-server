@@ -59,37 +59,37 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ActionFileCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; さんが新しい文書を作成しました: &lt;a href={1}&gt;{2}&lt;/a&gt; ルーム名: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; さんが新しい文書を作成しました: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; ルーム名: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionNewComment" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; さんが次の文書バージョンに新しいコメントを追加しました: &lt;a href={1}&gt;{2}&lt;/a&gt; ルーム名: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; さんが次の文書バージョンに新しいコメントを追加しました: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; ルーム名: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileUploaded" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; さんが新しい文書をアップロードしました: &lt;a href={1}&gt;{2}&lt;/a&gt; ルーム名: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; さんが新しい文書をアップロードしました: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; ルーム名: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomRenamed" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; さんがルーム名を変更しました: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href={2}&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; さんがルーム名を変更しました: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; さんが新しいルームを作成しました: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; さんが新しいルームを作成しました: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; さんが次のルームから退室されました: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; さんが次のルームから退室されました: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileEdited" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; さんが次の文書を編集しました: &lt;a href={1}&gt;{2}&lt;/a&gt; ルーム名: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; さんが次の文書を編集しました: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; ルーム名: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomRemoved" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; さんが次のルームを削除しました: &lt;b&gt;{1}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserAddedToRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt;  さんが次のルームに追加されました: &lt;a href={1}&gt;{2}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt;  さんが次のルームに追加されました: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomArchived" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; さんが次のルームを移動しました: &lt;a href={1}&gt;{2}&lt;/a&gt; アーカイブ先 - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; さんが次のルームを移動しました: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; アーカイブ先 - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomUpdateAccessForUser" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; さんが次の役割に割り当てられました 「&lt;b&gt;{1}&lt;/b&gt;」 ルーム名: &lt;a href={2}&gt;{3}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; さんが次の役割に割り当てられました 「&lt;b&gt;{1}&lt;/b&gt;」 ルーム名: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
     <value>DocSpaceの新しいユーザーが追加されました: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
@@ -513,7 +513,7 @@ $Body</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpaceが&lt;span style="color: #FF6F3D;"&gt;無効化&lt;/span&gt;されました&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpaceは&lt;span style="color: #FF6F3D;"&gt;削除されました&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;${LetterLogoText} DocSpaceは正常に無効化されました。なお、お客様のデータは、当社の &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;プライバシーポリシー&lt;/a&gt;に従ってすべて削除されます。&lt;/td&gt;&lt;/tr&gt;
 
@@ -544,17 +544,6 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;${LetterLogoText} DocSpaceの&lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;に招待されました。リンクをクリックして、招待を受け入れてください：&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>$UserName 様
-
-${LetterLogoText} DocSpaceの利用期限は3日後となりますので、ご留意ください。その後、$PaymentDelay日数の猶予期間が有効になります。
- 
-${LetterLogoText} DocSpaceのすべての利点を使用し続けるために、今Businessサブスクリプションを購入することをお勧めします。
-
-$OrangeButton
 
 $TrulyYours</value>
   </data>
@@ -758,7 +747,9 @@ ${LetterLogoText}ポータルにログインするために使用している認
 
 以下のボタンをクリックして、ポータルログインページに移動し、認証アプリを設定してください：
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}"ポータル所有者変更
@@ -1037,7 +1028,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}の無料アプリを入手しましょう</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>${LetterLogoText} DocSpaceが無効化&lt;/span&gt;されました</value>
+    <value>${LetterLogoText} DocSpaceが削除されました</value>
   </data>
   <data name="subject_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>${LetterLogoText} DocSpaceが削除されます</value>
@@ -1454,9 +1445,6 @@ $OrangeButton
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>${LetterLogoText} DocSpaceの猶予期限開始</value>
   </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>${LetterLogoText} DocSpaceのサブスクリプションは間も無く終了します</value>
-  </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>${LetterLogoText} DocSpaceの猶予期限終了</value>
   </data>
@@ -1799,11 +1787,13 @@ $OrangeButton
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;$UserName 様&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;社内チーム、顧客、パートナーなどとのコラボレーションを促進するドキュメントハブである${LetterLogoText} DocSpaceでお客様のアカウントを作成いたしました。アカウントのアドレス以下の通りです&lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;。&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;社内チーム、顧客、パートナーなどとのコラボレーションを促進するドキュメントハブである${LetterLogoText} DocSpaceでお客様のアカウントを作成いたしました。アカウントのアドレス以下の通りです&lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;。&lt;/td&gt;&lt;/tr&gt;
 
+#if($OrangeButton != "")
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;メールのご確認をお願いします。リンクの有効期限は7日間です：&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 44px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
+#end
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;現在のプランはSTARTUPです。このプランは完全無料で以下のものが含まれています：&lt;/td&gt;&lt;/tr&gt;
 
@@ -1909,5 +1899,187 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 26px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;ヘルプが必要な場合は、 &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;ヘルプセンター&lt;/a&gt; を閲覧してください。または &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__SupportLink}"&gt;サポートチーム&lt;/a&gt;までご連絡ください。&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
+  </data>
+  <data name="pattern_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;お客様の ${LetterLogoText} DocSpace &lt;span style="color: #FF6F3D;"&gt;は削除されます&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;お客様の ${LetterLogoText} DocSpace &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; は1年以上使用されていません。&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;ご利用を終了されたため、 &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;プライバシーポリシー&lt;/a&gt;に基づき、お客様の ${LetterLogoText} DocSpaceおよびすべてのデータは削除されます。&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;${LetterLogoText} DocSpaceのご利用を終了する理由をお聞かせ願えますか？&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;${LetterLogoText} DocSpaceの利用を継続されたい場合は、ログインして何らかの操作を行ってください。&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_role_changed" xml:space="preserve">
+    <value>こんにちは！
+
+DocSpaceルーム "${RoomTitle}":"${RoomUrl}" で新しい役割（${UserRole}）が割り当てられました。
+
+ルームの役割と権限について詳しくは "ヘルプセンター":"${HelpCenterUrl}" をご覧ください。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_type_changed" xml:space="preserve">
+    <value>こんにちは！
+
+DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" で新しいユーザータイプが割り当てられました：${UserType}。
+
+ユーザータイプと権限について詳しくは "ヘルプセンター":"${HelpCenterUrl}" をご覧ください。
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>${LetterLogoText} DocSpaceが削除されます</value>
+  </data>
+  <data name="subject_user_role_changed" xml:space="preserve">
+    <value>DocSpaceルームでのあなたの役割が変更されました</value>
+  </data>
+  <data name="subject_user_type_changed" xml:space="preserve">
+    <value>あなたのDocSpaceユーザータイプが変更されました</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>サービスへ移動</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>ウォレット設定へ移動</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>$UserName 様
+
+ご購入いただいたサービスプランの自動更新が完了できなかったことをお知らせいたします。
+
+お手数ですが、現在のサービスプランを手動で更新（または新規プランをご購入）いただきますようお願い申し上げます。
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>$UserName 様
+
+ご契約の自動更新に伴い、3日後にご登録いただいている決済方法より料金が自動的に引き落とされますことをお知らせいたします。
+
+スムーズなお支払いのため、決済方法に十分な残高があることをご確認ください。
+
+ご不明な点やお困りのことがございましたら、"サポートチーム":"${__SupportLink}" までお気軽にご連絡ください。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>$UserName 様！
+
+DocSpaceウォレット残高の自動チャージが正常に完了できなかったことをお知らせいたします。
+
+お手数ですが、ウォレット残高をご確認の上、手動での更新をお願い申し上げます。
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>対応必要：${LetterLogoText} DocSpaceのサービスプランを自動更新できません</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>対応必要：${LetterLogoText} DocSpaceのウォレット残高を自動チャージできません</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>${LetterLogoText} DocSpaceの次回サブスクリプション支払いについて</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.パスワードの変更が完了しました
+
+アカウント *$UserName*, *$UserEmail* のパスワードが *$Date* にDocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}" で正常に変更されました。
+
+IP: *$IP*
+デバイス: *$Device*
+#if($Location != "")
+場所: *$Location*
+#end
+ブラウザ: *$Browser*
+
+この操作があなた自身によって行われた場合は、これ以上の対応は必要ありません。この変更が不審に思われる場合や、あなたが許可していない場合は、すぐにパスワードをリセットし、このデバイスからのDocSpaceへのアクセスを無効にしてください。
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>パスワードが正常に変更されました</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>DocSpaceを開く</value>
+  </data>
+  <data name="ActionAgentCreated" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; が新しいエージェントを作成しました: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRemoved" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; がエージェントを削除しました: &lt;b&gt;{1}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRenamed" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; がエージェントの名前を変更しました: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentUpdateAccessForUser" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; がエージェント &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; において &lt;b&gt;{1}&lt;/b&gt; の役割を割り当てられました</value>
+  </data>
+  <data name="ActionUserAddedToAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; がエージェントに追加されました: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserRemovedFromAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; がエージェントから削除されました: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ButtonJoinAgent" xml:space="preserve">
+    <value>エージェントに参加</value>
+  </data>
+  <data name="pattern_backup_failed" xml:space="preserve">
+    <value>$UserName 様、
+
+ お客様のDocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" のバックアップ処理が失敗しました。
+
+ご質問やサポートが必要な場合は、お気軽に "${__SupportLink}":"${__SupportLink}" よりお問い合わせください。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_backup_failed_tg" xml:space="preserve">
+    <value>$UserName 様、
+
+お客様のDocSpace [${__VirtualRootPath}](${__VirtualRootPath}) のバックアップ処理が失敗しました。
+
+ご質問やサポートが必要な場合は、[${__SupportLink}](${__SupportLink}) よりお気軽にお問い合わせください。
+
+いつもONLYOFFICEをご利用いただきありがとうございます！
+${LetterLogoText} サポートチーム
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="pattern_saas_agent_invite" xml:space="preserve">
+    <value>こんにちは！
+
+DocSpaceエージェントとのセッションにご招待します。招待先は "${__VirtualRootPath}":"${__VirtualRootPath}" です。以下のリンクをクリックして招待を受け入れてください：
+
+$OrangeButton
+
+招待リンクをクリック後、アカウントの新しいパスワードを設定してください。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>こんにちは！
+
+$__AuthorName が、エージェント "$Message":"$InviteLink" に "${__VirtualRootPath}":"${__VirtualRootPath}" で参加するよう招待しました。
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_backup_failed" xml:space="preserve">
+    <value>DocSpaceのバックアップに失敗しました</value>
+  </data>
+  <data name="subject_saas_agent_invite" xml:space="preserve">
+    <value>${LetterLogoText} DocSpaceに参加</value>
+  </data>
+  <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>${LetterLogoText} DocSpaceエージェントに招待されています</value>
   </data>
 </root>

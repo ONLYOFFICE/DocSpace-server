@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -65,7 +65,7 @@ public class S3TarWriteOperator : IDataWriteOperator
 
     public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store, Func<Task> action)
     {
-        if (store is S3Storage s3Store) 
+        if (store is S3Storage s3Store)
         {
             if (CancellationToken.IsCancellationRequested)
             {
@@ -96,14 +96,14 @@ public class S3TarWriteOperator : IDataWriteOperator
                     throw;
                 }
             });
-             _ = task.ContinueWith(async _ => await action());
+            _ = task.ContinueWith(async _ => await action());
             _tasks.Add(task);
             task.Start(_scheduler);
         }
         else
         {
             var fileStream = await store.GetReadStreamAsync(domain, path);
-            
+
             if (fileStream != null)
             {
                 await WriteEntryAsync(tarKey, fileStream, action);
@@ -137,7 +137,7 @@ public class S3TarWriteOperator : IDataWriteOperator
                 return;
             }
             try
-            { 
+            {
                 _store.ConcatFileStreamAsync(tStream, tarKey, _domain, _key, _queue, _cts.Token).Wait();
             }
             catch
@@ -146,7 +146,7 @@ public class S3TarWriteOperator : IDataWriteOperator
                 throw;
             }
         });
-        
+
         _ = task.ContinueWith(async _ => await action());
         _tasks.Add(task);
         task.Start(_scheduler);

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,13 +26,19 @@
 
 global using System.Collections.Concurrent;
 global using System.Net.Sockets;
+
 global using Apache.NMS;
+
 global using ASC.EventBus.Abstractions;
 global using ASC.EventBus.ActiveMQ.Log;
 global using ASC.EventBus.Events;
 global using ASC.EventBus.Exceptions;
 global using ASC.EventBus.Extensions;
 global using ASC.EventBus.Serializers;
+
 global using Autofac;
+
 global using Microsoft.Extensions.Logging;
+
 global using Polly;
+global using Polly.Retry;

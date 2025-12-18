@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,7 +34,7 @@ public class RoomNotifyIntegrationEventHandler(
     IServiceScopeFactory serviceScopeFactory)
     : IIntegrationEventHandler<RoomNotifyIntegrationEvent>
 {
-    
+
     public async Task Handle(RoomNotifyIntegrationEvent @event)
     {
         CustomSynchronizationContext.CreateContext();

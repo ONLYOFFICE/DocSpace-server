@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,10 +29,7 @@ namespace ASC.Web.Studio.Core;
 [Scope]
 public class FileSizeComment(SetupInfo setupInfo)
 {
-    public string FileImageSizeExceptionString
-    {
-        get { return GetFileSizeExceptionString(setupInfo.MaxImageUploadSize); }
-    }
+    public string FileImageSizeExceptionString => GetFileSizeExceptionString(setupInfo.MaxImageUploadSize);
 
     public static string GetFileSizeExceptionString(long size)
     {
@@ -42,6 +39,10 @@ public class FileSizeComment(SetupInfo setupInfo)
     private static string GetRoomFreeSpaceExceptionString(long size)
     {
         return $"{Resource.RoomFreeSpaceException} ({FilesSizeToString(size)}).";
+    }
+    private static string GetAiAgentFreeSpaceExceptionString(long size)
+    {
+        return $"{Resource.AiAgentFreeSpaceException} ({FilesSizeToString(size)}).";
     }
 
     private static string GetUserFreeSpaceExceptionString(long size)
@@ -54,16 +55,16 @@ public class FileSizeComment(SetupInfo setupInfo)
         return new TenantQuotaException(GetFileSizeExceptionString(size));
     }
 
-    public static Exception GetRoomFreeSpaceException(long size)
+    public static Exception GetRoomFreeSpaceException(long size, bool isAiAgetn = false)
     {
-        return new TenantQuotaException(GetRoomFreeSpaceExceptionString(size));
+        return new TenantQuotaException(isAiAgetn ? GetAiAgentFreeSpaceExceptionString(size) : GetRoomFreeSpaceExceptionString(size));
     }
 
     public static Exception GetUserFreeSpaceException(long size)
     {
         return new TenantQuotaException(GetUserFreeSpaceExceptionString(size));
     }
-    
+
 
     /// <summary>
     /// Generates a string the file size

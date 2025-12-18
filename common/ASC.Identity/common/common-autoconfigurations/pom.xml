@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.asc</groupId>
         <artifactId>common</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.3</version>
     </parent>
 
     <artifactId>common-autoconfigurations</artifactId>
@@ -44,6 +44,19 @@
             <groupId>io.lettuce</groupId>
             <artifactId>lettuce-core</artifactId>
             <version>${lettuce.version}</version>
+        </dependency>
+
+        <!-- AWS SDK for CloudWatch Logs -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>cloudwatchlogs</artifactId>
+            <version>${aws.cloudwatch.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 </project>

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,12 +28,12 @@ namespace ASC.Data.Backup.Core.IntegrationEvents.Events;
 
 [ProtoContract]
 public record BackupRestoreRequestIntegrationEvent : IntegrationEvent
-{    
+{
     private BackupRestoreRequestIntegrationEvent()
     {
         StorageParams = new Dictionary<string, string>();
     }
-    
+
     public BackupRestoreRequestIntegrationEvent(BackupStorageType storageType,
                                   int tenantId,
                                   Guid createBy,
@@ -68,11 +68,10 @@ public record BackupRestoreRequestIntegrationEvent : IntegrationEvent
 
     [ProtoMember(5)]
     public string ServerBaseUri { get; set; }
-    
+
     [ProtoMember(6)]
     public bool Dump { get; set; }
-    
+
     [ProtoMember(7)]
     public string TaskId { get; set; }
 }
-

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,10 +30,7 @@ public static class DataExtensions
 {
     public static DbCommand WithTimeout(this DbCommand command, int timeout)
     {
-        if (command != null)
-        {
-            command.CommandTimeout = timeout;
-        }
+        command?.CommandTimeout = timeout;
 
         return command;
     }

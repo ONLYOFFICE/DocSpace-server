@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,54 +28,56 @@ namespace ASC.Web.Core;
 
 public static class WebItemExtension
 {
-    public static string GetSysName(this IWebItem webItem)
+    extension(IWebItem webItem)
     {
-        if (string.IsNullOrEmpty(webItem.StartURL))
+        public string GetSysName()
         {
-            return string.Empty;
-        }
+            if (string.IsNullOrEmpty(webItem.StartURL))
+            {
+                return string.Empty;
+            }
 
-        var sysName = string.Empty;
-        var parts = webItem.StartURL.ToLower().Split('/', '\\').ToList();
+            var sysName = string.Empty;
+            var parts = webItem.StartURL.ToLower().Split('/', '\\').ToList();
 
-        var index = parts.FindIndex(s => "products".Equals(s));
-        if (0 <= index && index < parts.Count - 1)
-        {
-            sysName = parts[index + 1];
-            index = parts.FindIndex(s => "modules".Equals(s));
+            var index = parts.FindIndex(s => "products".Equals(s));
             if (0 <= index && index < parts.Count - 1)
             {
-                sysName += "-" + parts[index + 1];
+                sysName = parts[index + 1];
+                index = parts.FindIndex(s => "modules".Equals(s));
+                if (0 <= index && index < parts.Count - 1)
+                {
+                    sysName += "-" + parts[index + 1];
+                }
+                else if (index == parts.Count - 1)
+                {
+                    sysName = parts[index].Split('.')[0];
+                }
+                return sysName;
             }
-            else if (index == parts.Count - 1)
+
+            index = parts.FindIndex(s => "addons".Equals(s));
+            if (0 <= index && index < parts.Count - 1)
             {
-                sysName = parts[index].Split('.')[0];
+                sysName = parts[index + 1];
             }
+
             return sysName;
         }
 
-        index = parts.FindIndex(s => "addons".Equals(s));
-        if (0 <= index && index < parts.Count - 1)
+        public async Task<bool> IsDisabledAsync(WebItemSecurity webItemSecurity, AuthContext authContext)
         {
-            sysName = parts[index + 1];
+            return await webItem.IsDisabledAsync(authContext.CurrentAccount.ID, webItemSecurity);
         }
 
-        return sysName;
-    }
+        public async Task<bool> IsDisabledAsync(Guid userID, WebItemSecurity webItemSecurity)
+        {
+            return webItem != null && (!await webItemSecurity.IsAvailableForUserAsync(webItem.ID, userID) || !webItem.Visible);
+        }
 
-
-    public static async Task<bool> IsDisabledAsync(this IWebItem item, WebItemSecurity webItemSecurity, AuthContext authContext)
-    {
-        return await item.IsDisabledAsync(authContext.CurrentAccount.ID, webItemSecurity);
-    }
-
-    public static async Task<bool> IsDisabledAsync(this IWebItem item, Guid userID, WebItemSecurity webItemSecurity)
-    {
-        return item != null && (!await webItemSecurity.IsAvailableForUserAsync(item.ID, userID) || !item.Visible);
-    }
-
-    public static bool IsSubItem(this IWebItem item)
-    {
-        return item is IModule and not IProduct;
+        public bool IsSubItem()
+        {
+            return webItem is IModule and not IProduct;
+        }
     }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,6 +26,9 @@
 
 namespace ASC.Files.Core;
 
+/// <summary>
+/// The parameters by which the files will be sorted.
+/// </summary>
 [EnumExtensions]
 public enum SortedByType
 {
@@ -69,17 +72,20 @@ public enum SortedByType
     UsedSpace
 }
 
+/// <summary>
+/// The sorting parameters.
+/// </summary>
 [DebuggerDisplay("{SortedBy} {IsAsc}")]
 public class OrderBy(SortedByType sortedByType, bool isAsc)
 {
     /// <summary>
-    /// Is asc
+    /// Specifies if the order is ascending.
     /// </summary>
     [JsonPropertyName("is_asc")]
     public bool IsAsc { get; init; } = isAsc;
 
     /// <summary>
-    /// Sorted by
+    /// The parameters by which the files will be sorted.
     /// </summary>
     [JsonPropertyName("property")]
     public SortedByType SortedBy { get; set; } = sortedByType;

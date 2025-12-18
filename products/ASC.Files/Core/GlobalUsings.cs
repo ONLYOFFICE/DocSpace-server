@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,17 +27,18 @@
 global using System.Collections.Concurrent;
 global using System.Collections.Frozen;
 global using System.Collections.Immutable;
+global using System.ClientModel;
+global using System.ClientModel.Primitives;
 global using System.ComponentModel.DataAnnotations;
 global using System.Diagnostics;
 global using System.Extensions;
 global using System.Globalization;
-global using ASC.Common.protos;
 global using System.Linq.Expressions;
 global using System.Net;
 global using System.Net.Http.Headers;
 global using System.Net.Mime;
+global using System.Net.Http.Json;
 global using System.Net.Sockets;
-global using ASC.Core.Common.Quota.Custom;
 global using System.Runtime.Serialization;
 global using System.Security;
 global using System.Security.Cryptography;
@@ -55,6 +56,7 @@ global using ASC.Api.Core;
 global using ASC.Api.Core.Extensions;
 global using ASC.Api.Core.Model;
 global using ASC.Api.Core.Security;
+global using ASC.Api.Core.Socket;
 global using ASC.Api.Utils;
 global using ASC.AuditTrail;
 global using ASC.AuditTrail.Models;
@@ -62,20 +64,21 @@ global using ASC.AuditTrail.Repositories;
 global using ASC.Common;
 global using ASC.Common.Caching;
 global using ASC.Common.Log;
-global using ASC.Common.Mapping;
+global using ASC.Common.protos;
 global using ASC.Common.Security.Authentication;
 global using ASC.Common.Security.Authorizing;
 global using ASC.Common.Threading;
 global using ASC.Common.Threading.DistributedLock.Abstractions;
+global using ASC.Common.Threading.HeartBeat.Abstractions;
 global using ASC.Common.Utils;
 global using ASC.Common.Web;
 global using ASC.Core;
+global using ASC.Core.Billing;
 global using ASC.Core.ChunkedUploader;
 global using ASC.Core.Common;
+global using ASC.Core.Common.AI;
 global using ASC.Core.Common.Configuration;
-global using ASC.Files.Core.RoomTemplates.Events;
-
-global using ASC.Files.Core.RoomTemplates.Operations;
+global using ASC.Core.Common.EF.Model.Ai;
 global using ASC.Core.Common.Core;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Context;
@@ -83,6 +86,7 @@ global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.Hosting;
 global using ASC.Core.Common.Messaging;
 global using ASC.Core.Common.Quota;
+global using ASC.Core.Common.Quota.Custom;
 global using ASC.Core.Common.Quota.Features;
 global using ASC.Core.Common.Security;
 global using ASC.Core.Common.Settings;
@@ -97,7 +101,7 @@ global using ASC.Data.Storage.S3;
 global using ASC.ElasticSearch;
 global using ASC.ElasticSearch.Core;
 global using ASC.ElasticSearch.Service;
-global using ASC.Api.Core.Socket;
+global using ASC.ElasticSearch.VectorData;
 global using ASC.EventBus.Abstractions;
 global using ASC.EventBus.Events;
 global using ASC.FederatedLogin;
@@ -122,12 +126,20 @@ global using ASC.Files.Core.Helpers;
 global using ASC.Files.Core.IntegrationEvents.Events;
 global using ASC.Files.Core.Log;
 global using ASC.Files.Core.Resources;
+global using ASC.Files.Core.RoomTemplates.Events;
+global using ASC.Files.Core.RoomTemplates.Operations;
 global using ASC.Files.Core.Security;
 global using ASC.Files.Core.Services.NotifyService;
 global using ASC.Files.Core.Services.OFormService;
 global using ASC.Files.Core.Services.WCFService.Wrappers;
+global using ASC.Files.Core.Text;
 global using ASC.Files.Core.Thirdparty;
+global using ASC.Files.Core.Vectorization;
+global using ASC.Files.Core.Vectorization.Events;
+global using ASC.Files.Core.Vectorization.Embedding;
+global using ASC.Files.Core.Vectorization.Settings;
 global using ASC.Files.Core.VirtualRooms;
+global using ASC.Files.Core.Utils;
 global using ASC.Files.Thirdparty;
 global using ASC.Files.Thirdparty.Box;
 global using ASC.Files.Thirdparty.Dropbox;
@@ -174,8 +186,6 @@ global using ASC.Web.Studio.Core.Notify;
 global using ASC.Web.Studio.Utility;
 global using ASC.Webhooks.Core;
 
-global using AutoMapper;
-
 global using Box.V2;
 global using Box.V2.Auth;
 global using Box.V2.Config;
@@ -210,6 +220,7 @@ global using Microsoft.AspNetCore.Mvc.ModelBinding;
 global using Microsoft.AspNetCore.WebUtilities;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore.Storage;
+global using Microsoft.Extensions.AI;
 global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
@@ -225,7 +236,17 @@ global using Newtonsoft.Json.Linq;
 
 global using OpenSearch.Client;
 
+global using OpenAI;
+
+global using Polly;
+global using Polly.Contrib.WaitAndRetry;
+global using Polly.Registry;
+global using Polly.Retry;
+global using Polly.Timeout;
+
 global using ProtoBuf;
+
+global using Riok.Mapperly.Abstractions;
 
 global using WebDav;
 
@@ -250,9 +271,11 @@ global using JsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttr
 global using JsonSerializer = System.Text.Json.JsonSerializer;
 global using JsonTokenType = System.Text.Json.JsonTokenType;
 global using License = ASC.Core.Billing.License;
+global using Location = ASC.Files.Core.Core.Entries.Location;
 global using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 global using SecurityContext = ASC.Core.SecurityContext;
 global using SocketManager = ASC.Web.Files.Utils.SocketManager;
+global using SortOrder = ASC.Api.Core.Core.SortOrder;
 global using Tag = ASC.Files.Core.Tag;
 global using Thumbnail = ASC.Files.Core.Thumbnail;
 global using Token = ASC.Web.Files.ThirdPartyApp.Token;

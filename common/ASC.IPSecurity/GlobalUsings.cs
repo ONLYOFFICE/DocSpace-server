@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,9 +26,9 @@
 
 global using System.Net;
 global using System.Net.Sockets;
+global using System.Security.Cryptography;
 
 global using ASC.Common;
-global using ASC.Common.Caching;
 global using ASC.Common.Mapping;
 global using ASC.Core;
 global using ASC.Core.Common.EF.Context;
@@ -36,10 +36,13 @@ global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.Settings;
 global using ASC.Core.Tenants;
 global using ASC.IPSecurity.Log;
-global using AutoMapper;
-global using AutoMapper.QueryableExtensions;
+
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.Http.Extensions;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.Logging;
+
+global using Riok.Mapperly.Abstractions;
+
+global using ZiggyCreatures.Caching.Fusion;

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,14 +30,12 @@ public class StudioAdminMessageSettings : ISettings<StudioAdminMessageSettings>
 {
     public bool Enable { get; init; }
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{28902650-58A9-11E1-B6A9-0F194924019B}"); }
-    }
+    public static Guid ID => new("{28902650-58A9-11E1-B6A9-0F194924019B}");
 
     public StudioAdminMessageSettings GetDefault()
     {
         return new StudioAdminMessageSettings { Enable = false };
     }
+
+    public DateTime LastModified { get; set; }
 }

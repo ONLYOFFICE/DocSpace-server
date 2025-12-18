@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,23 +27,18 @@
 namespace ASC.FederatedLogin.LoginProviders;
 
 [Scope]
-public class BoxLoginProvider : Consumer, IOAuthProvider
+public class BoxLoginProvider : OauthProvider
 {
-    public string Scopes => string.Empty;
-    public string CodeUrl => "https://app.box.com/api/oauth2/authorize";
-    public string AccessTokenUrl => "https://app.box.com/api/oauth2/token";
-    public string RedirectUri => this["boxRedirectUrl"];
-    public string ClientID => this["boxClientId"];
-    public string ClientSecret => this["boxClientSecret"];
-    public bool IsEnabled
-    {
-        get
-        {
-            return !string.IsNullOrEmpty(ClientID) &&
-                   !string.IsNullOrEmpty(ClientSecret) &&
-                   !string.IsNullOrEmpty(RedirectUri);
-        }
-    }
+    public override string Scopes => string.Empty;
+    public override string CodeUrl => "https://app.box.com/api/oauth2/authorize";
+    public override string AccessTokenUrl => "https://app.box.com/api/oauth2/token";
+    public override string RedirectUri => this["boxRedirectUrl"];
+    public override string ClientID => this["boxClientId"];
+    public override string ClientSecret => this["boxClientSecret"];
+    public override bool IsEnabled =>
+        !string.IsNullOrEmpty(ClientID) &&
+        !string.IsNullOrEmpty(ClientSecret) &&
+        !string.IsNullOrEmpty(RedirectUri);
 
     public BoxLoginProvider() { }
 
@@ -54,8 +49,8 @@ public class BoxLoginProvider : Consumer, IOAuthProvider
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
-        string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
+        string name, int order, bool paid, Dictionary<string, string> props, Dictionary<string, string> additional = null)
+        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, paid, props, additional)
     {
     }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,12 +32,12 @@ namespace ASC.Core.Security.Authorizing;
 class PermissionResolver(AzManager azManager) : IPermissionResolver
 {
     private readonly AzManager _azManager = azManager ?? throw new ArgumentNullException(nameof(azManager));
-    
+
     public async Task<bool> CheckAsync(ISubject subject, IAction action)
     {
         return await CheckAsync(subject, null, null, action);
     }
-    
+
     public async Task<bool> CheckAsync(ISubject subject, ISecurityObjectId objectId, ISecurityObjectProvider securityObjProvider, IAction action)
     {
         var denyActions = await GetDenyActionsAsync(subject, action, objectId, securityObjProvider);
@@ -52,7 +52,7 @@ class PermissionResolver(AzManager azManager) : IPermissionResolver
     public async Task DemandAsync(ISubject subject, IAction action1, IAction action2)
     {
         IAction[] actions = [action1, action2];
-        
+
         var denyActions = await GetDenyActionsAsync(subject, actions, null, null);
         if (denyActions.Length > 0)
         {
@@ -76,7 +76,7 @@ class PermissionResolver(AzManager azManager) : IPermissionResolver
                 denyActions.Acl?.DenyAction);
         }
     }
-    
+
     private async Task<DenyResult[]> GetDenyActionsAsync(ISubject subject, IAction[] actions, ISecurityObjectId objectId, ISecurityObjectProvider securityObjProvider)
     {
         actions ??= [];
@@ -90,7 +90,7 @@ class PermissionResolver(AzManager azManager) : IPermissionResolver
         {
             return [];
         }
-        
+
         var denyActions = new List<DenyResult>();
         foreach (var action in actions)
         {
@@ -106,7 +106,7 @@ class PermissionResolver(AzManager azManager) : IPermissionResolver
 
         return denyActions.ToArray();
     }
-    
+
     private async Task<DenyResult> GetDenyActionsAsync(ISubject subject, IAction action, ISecurityObjectId objectId, ISecurityObjectProvider securityObjProvider)
     {
         if (subject == null)

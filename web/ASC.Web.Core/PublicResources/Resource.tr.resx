@@ -368,7 +368,7 @@
     <value>Neler Yeni</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Kullanıcı girişlerini ve eylemlerini izleme</value>
+    <value>Oturum açma ve eylemleri izleme</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>Maks. Dosya Boyutu</value>
@@ -383,7 +383,7 @@
     <value>Yönetici sayısı</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Otomatik yedekleme ve kurtarma</value>
+    <value>Veri kurtarma</value>
   </data>
   <data name="TariffsFeature_room" xml:space="preserve">
     <value>Sınırsız sayıda aktif oda</value>
@@ -410,7 +410,7 @@
     <value>Odadaki kullanıcılar:</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Sınırsız sayıda kullanıcı</value>
+    <value>Sınırsız sayıda kullanıcı ve misafir</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>Kullanıcı sayısı {0} değerini geçmemelidir</value>
@@ -527,7 +527,7 @@
     <value>Twilio telefon numarası (SMS yetkilendirme için gereklidir)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Twitter hesabı kullanarak uygulamaya bağlan.</value>
+    <value>X hesabı kullanarak uygulamaya bağlan.</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Yahoo kişi aktarımı uygulamasını etkinleştir.</value>
@@ -590,7 +590,7 @@
     <value>WordPress</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumersYandexClientSecret" xml:space="preserve">
     <value>Şifre</value>
@@ -869,7 +869,7 @@
     <value>Müşteri Kimliği</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Kullanıcılarınızın, Twitter'larını kullanarak {LogoText}'te oturum açmalarına ve müşterilerinin Twitter hesaplarını CRM modülüne bağlamalarına izin vermek için bu uygulamayı etkinleştirin. {0}Twitter Developers Portal'a gidin ve yeni bir uygulama {LogoText} entegrasyonu oluşturun. Aldığınız verileri aşağıya girin:</value>
+    <value>Kullanıcılarınızın, X'larını kullanarak {LogoText}'te oturum açmalarına ve müşterilerinin X hesaplarını CRM modülüne bağlamalarına izin vermek için bu uygulamayı etkinleştirin. {0}X Developers Portal'a gidin ve yeni bir uygulama {LogoText} entegrasyonu oluşturun. Aldığınız verileri aşağıya girin:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>API Anahtarı</value>
@@ -1077,5 +1077,161 @@
   </data>
   <data name="ErrorIpRestriction" xml:space="preserve">
     <value>En az 1 izin verilen IP adresi ekleyin.</value>
+  </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>Webhook URL’si uygun değil. HEAD isteği, bir 200 HTTP yanıtı durumu değil.</value>
+  </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Kredi</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Para birimi</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>Tarih</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>Miktar</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Disk alanı</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Bakiye yükleme</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>Ölçü birimi</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>Müşteri işlem raporu ({0}-{1})</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>Grup bulunamadı</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Ek disk depolama alanı</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Depolamayı tam olarak ihtiyaç duyduğunuz miktara ayarlayın.</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
+    <value>Kullanılan depolama alanı:</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Otomatik yenileme</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Ücretsiz yedekleme sayısı bir ay içinde {0}'ı geçmemelidir</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>DocSpace'iniz için yedeklemeleri etkinleştirin. Ücretler otomatik olarak faturalandırılacaktır.</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Borç</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Temas etmek</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>İşlem geçmişi</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Otomatik yükleme</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>Ayda {0} ücretsiz yedekleme</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Ödeme gerekli</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Tip</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Detaylar</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Yedekleme</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Yedekleme</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Yedekleme</value>
+  </data>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Vektörleştirme</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>Yapay zekâ araçları</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Belirteçler</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>Yapay zekâ ajanı alan kotası aşıldı</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Yapay zekâ ajanı başına kota ayarlanamadı. Girilen değer, toplam DocSpace depolamasından daha büyük.</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>İstemci Kimliği</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>İstemci Gizli Anahtarı</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Uygulamanın WeChat hesabı kullanarak portala giriş yapmasını etkinleştir.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Uygulamanın WeChat hesabı kullanarak portala giriş yapmasını etkinleştir.</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Tarih</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>E-posta</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Ad</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>Kimlik</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Soyadı</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Belge Hizmeti Kotası ({0})</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>Eklenti sayısı sınırı aşıldı</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>Yapay zekâ ajanı sayısı {0} değerini aşmamalı</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>Yapay zekâ araçları</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Verimliliği artırmak için DocSpace üzerinde yapay zekâ özelliklerini etkinleştirin.</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>Yapay zekâ web araması</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Cüzdanınıza bakiye ekleyerek yapay zekâ web aramasının kilidini açın.</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>DocSpace’inizden bildirim almak için Telegram bağlantınız başarıyla tamamlandı.</value>
   </data>
 </root>

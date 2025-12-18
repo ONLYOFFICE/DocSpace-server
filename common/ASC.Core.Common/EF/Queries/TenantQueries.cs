@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,61 +33,61 @@ public partial class TenantDbContext
     {
         return Queries.TenantByDomainAsync(this, domain);
     }
-    
+
     [PreCompileQuery([])]
     public Task<int> VersionIdAsync()
     {
         return Queries.VersionIdAsync(this);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
     public Task<DbTenant> TenantAsync(int tenantId)
     {
         return Queries.TenantAsync(this, tenantId);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
     public Task<string> GetAliasAsync(int tenantId)
     {
         return Queries.GetAliasAsync(this, tenantId);
     }
-    
+
     [PreCompileQuery([null])]
     public Task<int> TenantsCountAsync(string startAlias)
     {
         return Queries.TenantsCountAsync(this, startAlias);
     }
-    
+
     [PreCompileQuery([])]
     public IAsyncEnumerable<TenantVersion> TenantVersionsAsync()
     {
         return Queries.TenantVersionsAsync(this);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public Task<byte[]> SettingValueAsync(int tenantId, string id)
     {
         return Queries.SettingValueAsync(this, tenantId, id);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public byte[] SettingValue(int tenantId, string id)
     {
         return Queries.SettingValue(this, tenantId, id);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public Task<DbCoreSettings> CoreSettingsAsync(int tenantId, string id)
     {
         return Queries.CoreSettingsAsync(this, tenantId, id);
     }
-    
+
     [PreCompileQuery([])]
     public IAsyncEnumerable<string> AddressAsync()
     {
         return Queries.AddressAsync(this);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public Task<bool> AnyTenantsAsync(int tenantId, string domain)
     {
@@ -105,8 +105,8 @@ static file class Queries
                     .OrderBy(a => a.Status == TenantStatus.Restoring ? TenantStatus.Active : a.Status)
                     .ThenByDescending(a => a.Status == TenantStatus.Restoring ? 0 : a.Id)
                     .FirstOrDefault());
-    
-    
+
+
     public static readonly Func<TenantDbContext, Task<int>> VersionIdAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (TenantDbContext ctx) =>
@@ -119,7 +119,7 @@ static file class Queries
     public static readonly Func<TenantDbContext, int, Task<DbTenant>> TenantAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (TenantDbContext ctx, int tenantId) =>
-                ctx.Tenants.FirstOrDefault(r => r.Id == tenantId));
+                ctx.Tenants.AsTracking().FirstOrDefault(r => r.Id == tenantId));
 
     public static readonly Func<TenantDbContext, int, Task<string>> GetAliasAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -129,7 +129,7 @@ static file class Queries
                     .Select(r => r.Alias)
                     .FirstOrDefault());
 
-    public static readonly Func<TenantDbContext, string, Task<int>> TenantsCountAsync = 
+    public static readonly Func<TenantDbContext, string, Task<int>> TenantsCountAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
     (TenantDbContext ctx, string startAlias) =>
         ctx.Tenants

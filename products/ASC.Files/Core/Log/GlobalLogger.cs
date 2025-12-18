@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,8 +34,8 @@ internal static partial class GlobalLogger
     public static partial void CriticalClearCacheSubscribe(this ILogger logger, Exception exception);
 
     [LoggerMessage(LogLevel.Error, "CreateSampleDocuments")]
-    public static partial void ErrorCreateSampleDocuments(this ILogger logger, Exception exception); 
-    
+    public static partial void ErrorCreateSampleDocuments(this ILogger logger, Exception exception);
+
     [LoggerMessage(LogLevel.Error, "SaveSampleFile")]
     public static partial void ErrorSaveSampleFile(this ILogger logger, Exception exception);
 

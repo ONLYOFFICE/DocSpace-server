@@ -73,7 +73,7 @@
 
 此电邮通知旨在告知您：您已请求发送$MailsCount信息，且该流程现已完成。 $Message
 
-成功发送的邮件信息可在您的“邮件”模块的"Sent":"$__VirtualRootPath/addons/mail/#sent"文件夹中查找。</value>
+成功发送的邮件信息可在您的"邮件"模块的"Sent":"$__VirtualRootPath/addons/mail/#sent"文件夹中查找。</value>
   </data>
   <data name="pattern_ShareDocument" xml:space="preserve">
     <value>h1.获得文档访问权限: "$DocumentTitle":"$DocumentURL"
@@ -159,7 +159,9 @@ $__AuthorName 删除了房间： $RoomTitle</value>
 
 表单提交者："$FromUserName":"$FromUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>h1. 您已填写表单 $Message
@@ -168,12 +170,73 @@ $OrangeButton</value>
 
 经理："$ToUserName":"$ToUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
     <value>协作空间通知。表单已填写完毕</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
     <value>协作空间通知。表单已填写完毕</value>
+  </data>
+  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
+    <value>已在房间"$RoomTitle"中创建了新文档"$DocumentTitle"</value>
+  </data>
+  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
+    <value>新文件已上传至房间"$RoomTitle" ($Count)</value>
+  </data>
+  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
+    <value>新文件"$DocumentTitle"已上传至房间"$RoomTitle"</value>
+  </data>
+  <data name="pattern_EditorMentions_push" xml:space="preserve">
+    <value>$ToUserName在文档$DocumentTitle中提及了您</value>
+  </data>
+  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
+    <value>已在房间"$RoomTitle"中创建了新文件夹"$FolderTitle"</value>
+  </data>
+  <data name="pattern_FormStartedFilling" xml:space="preserve">
+    <value>
+      活动通知。"$FromUserName":"$FromUserLink" 已启动表单填写进程："$DocumentTitle":"$DocumentURL"，位于房间："$RoomTitle":"$RoomURL" — $__DateTime。
+</value>
+  </data>
+  <data name="pattern_FormSubmitted_push" xml:space="preserve">
+    <value>已在房间"$RoomTitle"中填写表单"$DocumentTitle"</value>
+  </data>
+  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+    <value>
+      活动通知。表单 "$DocumentTitle":"$DocumentURL" 已在房间  "$RoomTitle":"$RoomURL" — $__DateTime中完成填写。
+</value>
+  </data>
+  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
+    <value>$FromUserName已将房间"$RoomTitle"移至归档</value>
+  </data>
+  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
+    <value>您在房间"$RoomTitle"中的权限已更改为"$RoomRole"</value>
+  </data>
+  <data name="pattern_StoppedFormFilling" xml:space="preserve">
+    <value>
+      活动通知。"$FromUserName":"$FromUserLink" 已停止房间  "$RoomTitle":"$RoomURL" — $__DateTime中的表单填写："$DocumentTitle":"$DocumentURL"。
+    </value>
+  </data>
+  <data name="pattern_YourTurnFormFilling" xml:space="preserve">
+    <value>
+      活动通知。轮到您填写房间 "$RoomTitle":"$RoomURL" — $__DateTime 中的表单："$DocumentTitle":"$DocumentURL"。
+</value>
+  </data>
+  <data name="subject_FormStartedFilling" xml:space="preserve">
+    <value>协作空间通知。</value>
+  </data>
+  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
+    <value>协作空间通知。</value>
+  </data>
+  <data name="subject_StoppedFormFilling" xml:space="preserve">
+    <value>协作空间通知。</value>
+  </data>
+  <data name="subject_YourTurnFormFilling" xml:space="preserve">
+    <value>协作空间通知。</value>
+  </data>
+  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
+    <value>您已被邀请加入房间"$RoomTitle"</value>
   </data>
 </root>

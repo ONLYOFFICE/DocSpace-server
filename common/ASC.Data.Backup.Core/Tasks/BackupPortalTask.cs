@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,13 +29,15 @@ using Newtonsoft.Json;
 namespace ASC.Data.Backup.Tasks;
 
 [Scope]
-public class BackupPortalTask(
+public partial class BackupPortalTask(
     DbFactory dbFactory,
     IDbContextFactory<BackupsContext> dbContextFactory,
     ILogger<BackupPortalTask> logger,
     TenantManager tenantManager,
     CoreBaseSettings coreBaseSettings,
     StorageFactory storageFactory,
+    IDaoFactory daoFactory,
+    IQuotaService quotaService,
     StorageFactoryConfig storageFactoryConfig,
     ModuleProvider moduleProvider,
     TempStream tempStream)
@@ -48,6 +50,8 @@ public class BackupPortalTask(
     private const int BatchLimit = 5000;
 
     private bool _dump = coreBaseSettings.Standalone;
+
+    private string _missingFilesInfo;
 
     public void Init(int tenantId, string toFilePath, int limit, IDataWriteOperator writeOperator, bool dump)
     {
@@ -76,24 +80,33 @@ public class BackupPortalTask(
                 var modulesToProcess = GetModulesToProcess().ToList();
                 SetStepsCount(1);
                 var count = modulesToProcess.Select(m => m.Tables.Count(t => !_ignoredTables.Contains(t.Name) && t.InsertMethod != InsertMethod.None)).Sum();
-                IAsyncEnumerable<BackupFileInfo> files = null;
+                List<BackupFileInfo> files = null;
                 if (ProcessStorage)
                 {
-                    files = GetFiles();
-                    count += await files.CountAsync();
+                    files = await GetFiles();
+                    count += files.Count;
                 }
 
-                var completedCount = await DoBackupModule(WriteOperator, modulesToProcess, count);
+                var completedCount = 0;
+
+                async Task SetProgress()
+                {
+                    await SetCurrentStepProgress((int)(++completedCount * 100 / (double)count));
+                }
+
+                await DoBackupModule(WriteOperator, modulesToProcess, SetProgress);
 
                 if (ProcessStorage)
                 {
-                    await DoBackupStorageAsync(WriteOperator, files, completedCount, count);
+                    await DoBackupStorageAsync(WriteOperator, files, SetProgress);
                 }
             }
         }
 
         logger.DebugEndBackup(TenantId);
     }
+
+    public string GetMissingFilesInfo() => _missingFilesInfo;
 
     private List<object[]> ExecuteList(DbCommand command)
     {
@@ -126,17 +139,17 @@ public class BackupPortalTask(
             await writer.WriteEntryAsync(KeyHelper.GetDumpKey(), stream, () => Task.CompletedTask);
         }
 
-        IAsyncEnumerable<BackupFileInfo> files = null;
-        
+        List<BackupFileInfo> files = null;
+
         var count = databases.Select(d => d.Value.Count * 4).Sum(); // (schema + data) * (dump + zip)
         var completedCount = count;
 
         if (ProcessStorage)
         {
             var tenants = (await tenantManager.GetTenantsAsync(false)).Select(r => r.Id);
-            files = GetFilesTenants(tenants);
+            files = await GetFilesTenants(tenants);
             logger.DebugFilesCount(count);
-            count += await files.CountAsync();
+            count += files.Count;
         }
         SetStepsCount(1);
 
@@ -153,7 +166,12 @@ public class BackupPortalTask(
 
         if (ProcessStorage)
         {
-            await DoBackupStorageAsync(writer, files, completedCount, count, true);
+            await DoBackupStorageAsync(writer, files, SetProgress, true);
+        }
+
+        async Task SetProgress()
+        {
+            await SetCurrentStepProgress((int)(++completedCount * 100 / (double)count));
         }
     }
 
@@ -488,24 +506,22 @@ public class BackupPortalTask(
         logger.DebugArchiveDirEnd(subDir);
     }
 
-    private IAsyncEnumerable<BackupFileInfo> GetFiles()
+    private Task<List<BackupFileInfo>> GetFiles()
     {
         return GetFiles(TenantId);
     }
 
-    private async IAsyncEnumerable<BackupFileInfo> GetFilesTenants(IEnumerable<int> tenantIds)
+    private async Task<List<BackupFileInfo>> GetFilesTenants(IEnumerable<int> tenantIds)
     {
-        foreach(var tenantId in tenantIds)
+        var result = new List<BackupFileInfo>();
+        foreach (var tenantId in tenantIds)
         {
-            var files = GetFiles(tenantId);
-            await foreach(var file in files)
-            {
-                yield return file;
-            }
+            result.AddRange(await GetFiles(tenantId));
         }
+        return result;
     }
 
-    private async IAsyncEnumerable<BackupFileInfo> GetFiles(int tenantId)
+    private async Task<List<BackupFileInfo>> GetFiles(int tenantId)
     {
         var files = GetFilesToProcess(tenantId).Distinct();
 
@@ -515,15 +531,13 @@ public class BackupPortalTask(
         files = files.Where(f => !exclude.Exists(e => f.Path.Replace('\\', '/').Contains($"/file_{e.StoragePath}/")));
         files = files.Where(f => !f.Path.Contains("/thumb."));
 
-        await foreach (var file in files)
-        {
-            yield return file;
-        }
+        return await files.ToListAsync();
     }
 
-    private async Task<int> DoBackupModule(IDataWriteOperator writer, List<IModuleSpecifics> modules, int count)
+    private async Task DoBackupModule(IDataWriteOperator writer, List<IModuleSpecifics> modules, Func<Task> progressAction)
     {
-        var tablesProcessed = 0;
+        var backupCorrection = await GetBackupCorrection(TenantId);
+
         foreach (var module in modules)
         {
             logger.DebugBeginSavingDataForModule(module.ModuleName);
@@ -560,7 +574,7 @@ public class BackupPortalTask(
                         col.DateTimeMode = DataSetDateTime.Unspecified;
                     }
 
-                    module.PrepareData(data);
+                    module.PrepareData(data, backupCorrection);
 
                     logger.DebugEndLoadTable(table.Name);
 
@@ -571,12 +585,7 @@ public class BackupPortalTask(
                         data.WriteXml(file, XmlWriteMode.WriteSchema);
                         data.Clear();
 
-                        await writer.WriteEntryAsync(KeyHelper.GetTableZipKey(module, data.TableName), file, SetProgress);
-                    }
-
-                    async Task SetProgress()
-                    {
-                        await SetCurrentStepProgress((int)(++tablesProcessed * 100 / (double)count));
+                        await writer.WriteEntryAsync(KeyHelper.GetTableZipKey(module, data.TableName), file, progressAction);
                     }
 
                     logger.DebugEndSavingTable(table.Name);
@@ -585,25 +594,24 @@ public class BackupPortalTask(
 
             logger.DebugEndSavingDataForModule(module.ModuleName);
         }
-        return tablesProcessed;
     }
 
-    private async Task DoBackupStorageAsync(IDataWriteOperator writer, IAsyncEnumerable<BackupFileInfo> files, int completedCount, int count, bool dump = false)
+    private async Task DoBackupStorageAsync(IDataWriteOperator writer, List<BackupFileInfo> files, Func<Task> progressAction, bool dump = false)
     {
         logger.DebugBeginBackupStorage();
-
-        var filesProcessed = completedCount;
-
-        async Task SetProgress()
-        {
-            await SetCurrentStepProgress((int)(++filesProcessed * 100 / (double)count));
-        }
 
         await using var tmpFile = tempStream.Create();
         var bytes = "<storage_restore>"u8.ToArray();
         await tmpFile.WriteAsync(bytes);
+
+        await using var tmpErrorsFile = tempStream.Create();
+        bytes = "<storage_missing>"u8.ToArray();
+        await tmpErrorsFile.WriteAsync(bytes);
+        var hasMissingFiles = false;
+
         var storages = new Dictionary<string, IDataStore>();
-        await foreach (var file in files)
+
+        foreach (var file in files)
         {
             if (!storages.TryGetValue(file.Module + file.Tenant, out var storage))
             {
@@ -611,21 +619,133 @@ public class BackupPortalTask(
                 storages.Add(file.Module + file.Tenant, storage);
             }
             var path = file.GetZipKey();
-            if (dump) 
+            if (dump)
             {
                 path = Path.Combine("storage", path);
             }
-            await writer.WriteEntryAsync(path, file.Domain, file.Path, storage, SetProgress);
 
             var restoreInfoXml = file.ToXElement();
-            await restoreInfoXml.WriteToAsync(tmpFile);
+
+            try
+            {
+                await writer.WriteEntryAsync(path, file.Domain, file.Path, storage, progressAction);
+                await restoreInfoXml.WriteToAsync(tmpFile);
+            }
+            catch (FileNotFoundException ex)
+            {
+                var match = FileIdRegex().Match(file.Path);
+                if (match.Success && match.Groups.Count > 1 && int.TryParse(match.Groups[1].Value, out var fileId))
+                {
+                    await using var backupContext = await dbContextFactory.CreateDbContextAsync();
+                    var exist = await Queries.CheckFileExistenceAsync(backupContext, file.Tenant, fileId);
+                    if (exist)
+                    {
+                        throw;
+                    }
+                }
+
+                restoreInfoXml.Add(new XElement("error", ex.Message));
+                await restoreInfoXml.WriteToAsync(tmpErrorsFile);
+                hasMissingFiles = true;
+            }
         }
 
         bytes = "</storage_restore>"u8.ToArray();
         await tmpFile.WriteAsync(bytes);
         await writer.WriteEntryAsync(KeyHelper.GetStorageRestoreInfoZipKey(), tmpFile, () => Task.CompletedTask);
 
+        if (hasMissingFiles)
+        {
+            _missingFilesInfo = KeyHelper.GetStoragestoraMissingZipKey();
+            bytes = "</storage_missing>"u8.ToArray();
+            await tmpErrorsFile.WriteAsync(bytes);
+            await writer.WriteEntryAsync(_missingFilesInfo, tmpErrorsFile, () => Task.CompletedTask);
+        }
+
         logger.DebugEndBackupStorage();
+    }
+
+    [GeneratedRegex(@"\\file_(\d+)\\")]
+    private static partial Regex FileIdRegex();
+
+    /// <summary>
+    /// Recalculating quota when excluding old backup files.
+    /// </summary>
+    private async Task<BackupCorrection> GetBackupCorrection(int tenantId)
+    {
+        await tenantManager.SetCurrentTenantAsync(tenantId);
+
+        var correction = new BackupCorrection();
+
+        await using var backupRecordContext = await dbContextFactory.CreateDbContextAsync();
+        var backupRecords = await Queries.BackupRecordsAsync(backupRecordContext, tenantId).ToListAsync();
+
+        if (backupRecords.Count == 0)
+        {
+            return correction;
+        }
+
+        var fileDao = daoFactory.GetFileDao<int>();
+        var folderDao = daoFactory.GetFolderDao<int>();
+
+        foreach (var backupRecord in backupRecords)
+        {
+            if (!int.TryParse(backupRecord.StoragePath, out var fileId))
+            {
+                continue;
+            }
+
+            var backupFile = await fileDao.GetFileAsync(fileId);
+
+            if (backupFile == null)
+            {
+                continue;
+            }
+
+            var backupFileParents = await folderDao.GetParentFoldersAsync(backupFile.ParentId).ToListAsync();
+
+            foreach (var backupFileParent in backupFileParents)
+            {
+                if (!correction.FoldersTable.TryGetValue(backupFileParent.Id, out var folderSize))
+                {
+                    folderSize = backupFileParent.Counter;
+                    correction.FoldersTable.Add(backupFileParent.Id, folderSize);
+                }
+
+                correction.FoldersTable[backupFileParent.Id] = Math.Max(0, folderSize - backupFile.ContentLength);
+            }
+
+            if (!correction.QuotaRowTable.TryGetValue(Guid.Empty, out var fullSize))
+            {
+                var tenantQuotaRow = (await quotaService.FindUserQuotaRowsAsync(TenantId, Guid.Empty))
+                    .Where(r => string.Equals(r.Path, correction.QuotaRowTableDocumentsPath) &&
+                                string.Equals(r.Tag, correction.QuotaRowTableDocumentsTag))
+                    .FirstOrDefault();
+
+                fullSize = tenantQuotaRow?.Counter ?? 0;
+                correction.QuotaRowTable.Add(Guid.Empty, fullSize);
+            }
+
+            correction.QuotaRowTable[Guid.Empty] = Math.Max(0, fullSize - backupFile.ContentLength);
+
+            if (backupFile.RootFolderType == FolderType.USER)
+            {
+                if (!correction.QuotaRowTable.TryGetValue(backupFile.RootCreateBy, out var userSize))
+                {
+                    var userQuotaRow = (await quotaService.FindUserQuotaRowsAsync(TenantId, backupFile.RootCreateBy))
+                        .Where(r => string.Equals(r.Path, correction.QuotaRowTableDocumentsPath) &&
+                                    string.Equals(r.Tag, correction.QuotaRowTableDocumentsTag))
+                        .FirstOrDefault();
+
+                    userSize = userQuotaRow?.Counter ?? 0;
+                    correction.QuotaRowTable.Add(backupFile.RootCreateBy, userSize);
+                }
+
+                correction.QuotaRowTable[backupFile.RootCreateBy] = Math.Max(0, userSize - backupFile.ContentLength);
+            }
+        }
+
+        return correction;
     }
 }
 
@@ -636,4 +756,8 @@ static file class Queries
             ctx.Backups.Where(b => b.TenantId == tenantId
                                    && b.StorageType == 0
                                    && b.StoragePath != null));
+
+    public static readonly Func<BackupsContext, int, int, Task<bool>> CheckFileExistenceAsync = Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+        (BackupsContext ctx, int tenantId, int fileId) =>
+            ctx.Files.Any(f => f.TenantId == tenantId && f.Id == fileId));
 }

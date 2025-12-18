@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -53,49 +53,49 @@ public class EventMessageProto
 {
     [ProtoMember(1)]
     public int Id { get; set; }
-    
+
     [ProtoMember(2)]
     public string Ip { get; set; }
-    
+
     [ProtoMember(3)]
     public string Initiator { get; init; }
-    
+
     [ProtoMember(4)]
     public string Browser { get; set; }
-    
+
     [ProtoMember(5)]
     public string Platform { get; set; }
-    
+
     [ProtoMember(6)]
     public DateTime Date { get; set; }
-    
+
     [ProtoMember(7)]
     public int TenantId { get; init; }
-    
+
     [ProtoMember(8)]
     public Guid UserId { get; init; }
-    
+
     [ProtoMember(9)]
     public string Page { get; set; }
-    
+
     [ProtoMember(10)]
     public MessageAction Action { get; init; }
-    
+
     [ProtoMember(11)]
     public IList<string> Description { get; init; }
-    
+
     [ProtoMember(12)]
     public IEnumerable<string> Target { get; init; }
-    
+
     [ProtoMember(13)]
     public string UaHeader { get; set; }
-    
+
     [ProtoMember(14)]
     public bool Active { get; init; }
-    
+
     [ProtoMember(15)]
     public IEnumerable<FilesAuditReference> References { get; init; }
-    
+
     public static implicit operator EventMessageProto(EventMessage message)
     {
         return new EventMessageProto
@@ -119,7 +119,7 @@ public class EventMessageProto
     }
 
     public static implicit operator EventMessage(EventMessageProto messageProto)
-    {        
+    {
         return new EventMessage
         {
             Id = messageProto.Id,

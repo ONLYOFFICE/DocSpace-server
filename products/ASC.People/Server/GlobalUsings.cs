@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,6 +32,7 @@ global using System.Text.Json;
 global using System.Web;
 
 global using ASC.Api.Core;
+global using ASC.Api.Core.Auth;
 global using ASC.Api.Core.Convention;
 global using ASC.Api.Core.Core;
 global using ASC.Api.Core.Extensions;
@@ -45,6 +46,7 @@ global using ASC.AuditTrail.Repositories;
 global using ASC.AuditTrail.Types;
 global using ASC.Common;
 global using ASC.Common.Caching;
+global using ASC.Common.Security.Authorizing;
 global using ASC.Common.Threading;
 global using ASC.Common.Threading.DistributedLock.Abstractions;
 global using ASC.Common.Utils;
@@ -54,6 +56,7 @@ global using ASC.Core.Billing;
 global using ASC.Core.Common;
 global using ASC.Core.Common.Core;
 global using ASC.Core.Common.EF;
+global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.Quota;
 global using ASC.Core.Common.Quota.Custom;
 global using ASC.Core.Common.Quota.Features;
@@ -72,6 +75,7 @@ global using ASC.Files.Core.EF;
 global using ASC.Files.Core.Resources;
 global using ASC.Files.Core.Security;
 global using ASC.Files.Core.VirtualRooms;
+global using ASC.Geolocation;
 global using ASC.MessagingSystem.Core;
 global using ASC.MessagingSystem.EF.Model;
 global using ASC.People;
@@ -98,12 +102,15 @@ global using ASC.Web.Studio.Core.Notify;
 global using ASC.Web.Studio.Utility;
 
 global using ASC.Webhooks.Core;
+
 global using Autofac;
 
 global using Microsoft.AspNetCore.Http.Extensions;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.RateLimiting;
 global using Microsoft.Extensions.Hosting.WindowsServices;
+
+global using Riok.Mapperly.Abstractions;
 
 global using Swashbuckle.AspNetCore.Annotations;
 

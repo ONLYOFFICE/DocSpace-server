@@ -65,7 +65,7 @@
     <value>Společné dokumenty</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>Dokumenty</value>
+    <value>Moje dokumenty</value>
   </data>
   <data name="ProjectFiles" xml:space="preserve">
     <value>Dokumenty projektu</value>
@@ -102,5 +102,11 @@
   </data>
   <data name="ReadyFormFolder" xml:space="preserve">
     <value>Vyplněné</value>
+  </data>
+  <data name="RoomTemplates" xml:space="preserve">
+    <value>Šablony</value>
+  </data>
+  <data name="AiAgents" xml:space="preserve">
+    <value>AI agenti</value>
   </data>
 </root>

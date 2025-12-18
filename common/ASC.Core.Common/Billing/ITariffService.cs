@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,15 +28,30 @@ namespace ASC.Core.Billing;
 
 public interface ITariffService
 {
-    Task<IDictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, params string[] productIds);
+    Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, bool wallet, List<string> productIds);
     Task<IEnumerable<PaymentInfo>> GetPaymentsAsync(int tenantId);
     Task<Tariff> GetTariffAsync(int tenantId, bool withRequestToPaymentSystem = true, bool refresh = false);
-    Task<Uri> GetShoppingUriAsync(int tenant, string affiliateId, string partnerId, string currency = null, string language = null, string customerEmail = null, Dictionary<string, int> quantity = null, string backUrl = null);
+    Task<Uri> GetShoppingUriAsync(int tenant, string affiliateId, string partnerId, string currency = null, string language = null, string customerEmail = null, Dictionary<string, int> quantity = null, string backUrl = null, bool checkoutSetup = false);
+    Task<bool> UpdateNextQuantityAsync(int tenant, Tariff tariffInfo, int quotaId, int? nextQuantity);
     Task DeleteDefaultBillingInfoAsync();
     Task SetTariffAsync(int tenantId, Tariff tariff, List<TenantQuota> quotas = null);
     Task<Uri> GetAccountLinkAsync(int tenant, string backUrl);
-    Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity);
+    Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency, bool checkQuota, string customerParticipantName, Dictionary<string, string> metadata = null);
+    Task<PaymentCalculation> PaymentCalculateAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency);
     int GetPaymentDelay();
     Task<Tariff> GetBillingInfoAsync(int? tenant = null, int? id = null);
     bool IsConfigured();
+    Task<CustomerInfo> GetCustomerInfoAsync(int tenantId, bool refresh = false);
+    Task<bool> TopUpDepositAsync(int tenantId, decimal amount, string currency, string customerParticipantName, string siteName, Dictionary<string, string> metadata = null, bool waitForChanges = false);
+
+    Task<Balance> GetCustomerBalanceAsync(int tenantId, bool refresh = false);
+    Task<Session> OpenCustomerSessionAsync(int tenantId, string serviceName, string externalRef, int quantity, int duration);
+    Task<bool> CloseCustomerSessionAsync(int tenantId, int sessionId);
+    Task<Session> ExtendCustomerSessionAsync(int tenantId, int sessionId, int duration);
+    Task<bool> CompleteCustomerSessionAsync(int tenantId, string serviceName, int sessionId, int quantity, string customerParticipantName, Dictionary<string, string> metadata = null);
+    Task<Report> GetCustomerOperationsAsync(int tenantId, DateTime utcStartDate, DateTime utcEndDate, string participantName, bool? credit, bool? debit, int? offset, int? limit);
+    Task<List<Currency>> GetAllAccountingCurrenciesAsync();
+    List<string> GetSupportedAccountingCurrencies();
+
+    Task<bool> IsFreeTariffAsync(Tariff tariff);
 }

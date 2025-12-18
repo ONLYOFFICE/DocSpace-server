@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,12 +27,12 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// Request parameters to retry webhooks
+/// The parameters for requesting the webhook delivery retries.
 /// </summary>
 public class WebhookRetryRequestsDto
 {
     /// <summary>
-    /// List of webhook IDs
+    /// The list of webhook delivery IDs to retry.
     /// </summary>
     public List<int> Ids { get; set; }
 }

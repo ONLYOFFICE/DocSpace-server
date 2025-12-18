@@ -29,30 +29,45 @@ package com.asc.authorization.application.configuration.authorization;
 
 import com.asc.authorization.application.security.filter.BasicSignatureAuthenticationFilter;
 import com.asc.authorization.application.security.filter.RateLimiterFilter;
+import com.asc.authorization.application.security.oauth.converter.FallbackScopeAuthorizationCodeRequestConverter;
 import com.asc.authorization.application.security.oauth.converter.PersonalAccessTokenAuthenticationConverter;
+import com.asc.authorization.application.security.oauth.generator.PrefixedAuthorizationCodeGenerator;
 import com.asc.authorization.application.security.oauth.provider.PersonalAccessTokenAuthenticationProvider;
 import com.asc.authorization.application.security.oauth.provider.TokenIntrospectionAuthenticationProvider;
 import com.asc.authorization.application.security.provider.SignatureAuthenticationProvider;
 import jakarta.servlet.RequestDispatcher;
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.Environment;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationCodeRequestAuthenticationProvider;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationConsentAuthenticationProvider;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
+import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 /**
  * Configuration class for setting up the OAuth2 Authorization Server.
@@ -63,11 +78,25 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @Configuration
 @RequiredArgsConstructor
 public class AuthorizationServerConfiguration {
+  @Value("${spring.application.region}")
+  private String region;
+
+  @Autowired private Environment environment;
+
+  private static final String CLIENT_SECRET_BASIC = "client_secret_basic";
+  private static final String CLIENT_SECRET_POST = "client_secret_post";
+
+  private static final String AUTHORIZATION_CODE = "authorization_code";
+  private static final String PERSONAL_ACCESS_TOKEN = "personal_access_token";
+  private static final String REFRESH_TOKEN = "refresh_token";
+
   private final AuthorizationFormConfiguration formConfiguration;
 
   private final RateLimiterFilter rateLimiterFilter;
   private final BasicSignatureAuthenticationFilter authenticationFilter;
 
+  private final FallbackScopeAuthorizationCodeRequestConverter
+      fallbackScopeAuthorizationCodeRequestConverter;
   private final PersonalAccessTokenAuthenticationConverter
       personalAccessTokenAuthenticationConverter;
 
@@ -91,13 +120,20 @@ public class AuthorizationServerConfiguration {
   @Order(Ordered.HIGHEST_PRECEDENCE)
   @SneakyThrows
   public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) {
+    var prefixedCodeGenerator = new PrefixedAuthorizationCodeGenerator(environment, region);
     var authorizationServerConfigurer = new OAuth2AuthorizationServerConfigurer();
     var endpointsMatcher = authorizationServerConfigurer.getEndpointsMatcher();
+    var supportedScopes =
+        List.of(
+            "accounts:read", "accounts:write",
+            "rooms:read", "rooms:write",
+            "accounts.self:read", "accounts.self:write",
+            "files:read", "files:write");
 
     http.securityMatcher(endpointsMatcher)
         .authorizeHttpRequests(
             authorize -> {
-              authorize.requestMatchers("oauth2/introspect").permitAll();
+              authorize.requestMatchers("/oauth2/introspect").permitAll();
               authorize.anyRequest().authenticated();
             })
         .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
@@ -105,7 +141,73 @@ public class AuthorizationServerConfiguration {
         .apply(authorizationServerConfigurer);
 
     http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
-        .oidc(Customizer.withDefaults())
+        .authorizationServerMetadataEndpoint(
+            authorizationMetadataEndpoint ->
+                authorizationMetadataEndpoint.authorizationServerMetadataCustomizer(
+                    metadataConfigurer ->
+                        metadataConfigurer
+                            .grantTypes(
+                                types -> {
+                                  types.retainAll(List.of(AUTHORIZATION_CODE, REFRESH_TOKEN));
+                                  types.add(PERSONAL_ACCESS_TOKEN);
+                                })
+                            .scopes(scopes -> scopes.addAll(supportedScopes))
+                            .tokenEndpointAuthenticationMethods(
+                                methods -> {
+                                  methods.clear();
+                                  methods.add(CLIENT_SECRET_POST);
+                                })
+                            .tokenIntrospectionEndpointAuthenticationMethods(
+                                methods -> {
+                                  methods.clear();
+                                  methods.add(CLIENT_SECRET_POST);
+                                })
+                            .tokenRevocationEndpointAuthenticationMethods(
+                                methods -> {
+                                  methods.clear();
+                                  methods.add(CLIENT_SECRET_POST);
+                                })))
+        .oidc(
+            oidcConfigurer ->
+                oidcConfigurer
+                    .providerConfigurationEndpoint(
+                        providerConfigurationEndpoint ->
+                            providerConfigurationEndpoint.providerConfigurationCustomizer(
+                                builder ->
+                                    builder
+                                        .grantTypes(
+                                            types -> {
+                                              types.retainAll(
+                                                  List.of(AUTHORIZATION_CODE, REFRESH_TOKEN));
+                                              types.add(PERSONAL_ACCESS_TOKEN);
+                                            })
+                                        .scopes(scopes -> scopes.addAll(supportedScopes))
+                                        .tokenEndpointAuthenticationMethods(
+                                            methods -> {
+                                              methods.clear();
+                                              methods.add(CLIENT_SECRET_POST);
+                                            })
+                                        .tokenIntrospectionEndpointAuthenticationMethods(
+                                            methods -> {
+                                              methods.clear();
+                                              methods.add(CLIENT_SECRET_POST);
+                                            })
+                                        .tokenRevocationEndpointAuthenticationMethods(
+                                            methods -> {
+                                              methods.clear();
+                                              methods.add(CLIENT_SECRET_POST);
+                                            })
+                                        .build()))
+                    .userInfoEndpoint(
+                        uinfoConfigurer ->
+                            uinfoConfigurer.userInfoMapper(
+                                (context) -> {
+                                  var authentication = context.getAuthentication();
+                                  var principal = authentication.getPrincipal();
+                                  if (principal instanceof JwtAuthenticationToken jwtPrincipal)
+                                    return new OidcUserInfo(jwtPrincipal.getToken().getClaims());
+                                  return new OidcUserInfo(Map.of("sub", authentication.getName()));
+                                })))
         .tokenEndpoint(
             t ->
                 t.accessTokenRequestConverters(
@@ -115,7 +217,21 @@ public class AuthorizationServerConfiguration {
         .authorizationEndpoint(
             e -> {
               e.consentPage(formConfiguration.getConsent());
+              e.authorizationRequestConverter(fallbackScopeAuthorizationCodeRequestConverter);
               e.authenticationProvider(codeAuthenticationProvider);
+              e.authenticationProviders(
+                  providers -> {
+                    for (var provider : providers) {
+                      if (provider
+                          instanceof
+                          OAuth2AuthorizationCodeRequestAuthenticationProvider codeProvider)
+                        codeProvider.setAuthorizationCodeGenerator(prefixedCodeGenerator);
+                      if (provider
+                          instanceof
+                          OAuth2AuthorizationConsentAuthenticationProvider consentProvider)
+                        consentProvider.setAuthorizationCodeGenerator(prefixedCodeGenerator);
+                    }
+                  });
               e.authorizationResponseHandler(authenticationSuccessHandler);
               e.errorResponseHandler(authenticationFailureHandler);
             })
@@ -130,14 +246,66 @@ public class AuthorizationServerConfiguration {
                       request.getRequestDispatcher(formConfiguration.getLogin());
                   dispatcher.forward(request, response);
                 },
-                new AntPathRequestMatcher(formConfiguration.getLogin())));
+                PathPatternRequestMatcher.withDefaults().matcher(formConfiguration.getLogin())));
     http.addFilterBefore(rateLimiterFilter, ChannelProcessingFilter.class);
     http.addFilterBefore(authenticationFilter, LogoutFilter.class);
 
-    http.cors(AbstractHttpConfigurer::disable);
+    http.cors(c -> c.configurationSource(corsConfigurationSource()));
     http.csrf(AbstractHttpConfigurer::disable);
 
     return http.build();
+  }
+
+  /**
+   * Creates and configures a CORS (Cross-Origin Resource Sharing) configuration source. This
+   * configuration should be acceptable since we fully rely on signatures
+   *
+   * <p>This method sets up a permissive CORS configuration that allows:
+   *
+   * <ul>
+   *   <li>All origins ({@code "*"}) to access the endpoints
+   *   <li>All HTTP methods ({@code "*"}) including GET, POST, PUT, DELETE, etc.
+   *   <li>All headers ({@code "*"}) in cross-origin requests
+   *   <li>Preflight request caching for 1 hour (3600 seconds)
+   * </ul>
+   *
+   * <p>The configuration is applied to all URL patterns ({@code "/**"}) within the application.
+   *
+   * @return a {@link CorsConfigurationSource} that provides CORS configuration for all endpoints
+   * @see CorsConfiguration
+   * @see UrlBasedCorsConfigurationSource
+   */
+  CorsConfigurationSource corsConfigurationSource() {
+    var configuration = new CorsConfiguration();
+    configuration.setAllowedOrigins(List.of("*"));
+    configuration.setAllowedMethods(List.of("*"));
+    configuration.setAllowedHeaders(List.of("*"));
+    configuration.setMaxAge(3600L);
+
+    var source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", configuration);
+    return source;
+  }
+
+  /**
+   * Configures the settings for the OAuth2 Authorization Server endpoints.
+   *
+   * <p>This method defines the URI paths for all OAuth2 protocol endpoints including authorization,
+   * token issuance, introspection, revocation, JWK set, and OpenID Connect specific endpoints.
+   * These settings determine how clients interact with the authorization server.
+   *
+   * @return the configured {@link AuthorizationServerSettings} bean with customized endpoint paths.
+   */
+  @Bean
+  public AuthorizationServerSettings authorizationServerSettings() {
+    return AuthorizationServerSettings.builder()
+        .authorizationEndpoint("/oauth2/authorize")
+        .tokenEndpoint("/oauth2/token")
+        .tokenIntrospectionEndpoint("/oauth2/introspect")
+        .tokenRevocationEndpoint("/oauth2/revoke")
+        .jwkSetEndpoint("/oauth2/jwks")
+        .oidcUserInfoEndpoint("/oauth2/userinfo")
+        .build();
   }
 
   /**

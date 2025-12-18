@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,14 +26,39 @@
 
 namespace ASC.Files.Core.Security;
 
+/// <summary>
+/// The parameters of the file shared link.
+/// </summary>
 public class FileShareOptions
 {
+    /// <summary>
+    /// The shared link title.
+    /// </summary>
     public string Title { get; set; }
+
+    /// <summary>
+    /// The shared link expiration date.
+    /// </summary>
     public DateTime ExpirationDate { get; set; }
+
+    /// <summary>
+    /// The shared link password.
+    /// </summary>
     public string Password { get; set; }
+
+    /// <summary>
+    /// Specifies if the file can be downloaded via the shared link or not.
+    /// </summary>
     public bool DenyDownload { get; set; }
+
+    /// <summary>
+    /// Specifies if the shared link is internal or not.
+    /// </summary>
     public bool Internal { get; set; }
 
+    /// <summary>
+    /// Specifies if the shared link is expired or not.
+    /// </summary>
     [JsonIgnore]
     public bool IsExpired => ExpirationDate != DateTime.MinValue && ExpirationDate < DateTime.UtcNow;
 }

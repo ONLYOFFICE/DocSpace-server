@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,15 +36,15 @@ public abstract class FileOperation : DistributedTaskProgress
     public abstract FileOperationType FileOperationType { get; set; }
     public string Err { get; set; }
     public int Process { get; set; }
-    
+
     public string Src { get; set; }
     public int Progress { get; set; }
-    
+
     public string Result { get; set; }
-    
+
     public bool Finish { get; set; }
     public bool Hold { get; set; }
-
+    
     protected readonly IPrincipal _principal;
     protected readonly string _culture;
 
@@ -53,9 +53,9 @@ public abstract class FileOperation : DistributedTaskProgress
 
     public FileOperation()
     {
-        
+
     }
-    
+
     protected FileOperation(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
@@ -96,18 +96,18 @@ public abstract class ComposeFileOperation<T1, T2> : FileOperation
 {
     public ComposeFileOperation()
     {
-        
+
     }
 
     protected ComposeFileOperation(IServiceProvider serviceProvider) : base(serviceProvider)
     {
     }
-    
+
     protected FileOperation<T1, string> ThirdPartyOperation { get; set; }
     protected FileOperation<T2, int> DaoOperation { get; set; }
-    
-    protected  T1 ThirdPartyData { get; set; }
-    protected  T2 Data { get; set; }
+
+    protected T1 ThirdPartyData { get; set; }
+    protected T2 Data { get; set; }
 
 
     public void Init(bool holdResult)
@@ -223,28 +223,28 @@ public record FileOperationData<T>
 {
     [ProtoMember(1)]
     public IEnumerable<T> Folders { get; set; }
-    
+
     [ProtoMember(2)]
     public IEnumerable<T> Files { get; set; }
-    
+
     [ProtoMember(3)]
     public int TenantId { get; set; }
-    
+
     [ProtoMember(4)]
     public IDictionary<string, string> Headers { get; set; } = new Dictionary<string, string>();
-    
+
     [ProtoMember(5)]
     public ExternalSessionSnapshot SessionSnapshot { get; set; }
-    
+
     [ProtoMember(6)]
     public bool HoldResult { get; set; }
 
     [ProtoMember(7)]
     public Guid UserId { get; set; }
-    
+
     public FileOperationData()
     {
-        
+
     }
 
     public FileOperationData(IEnumerable<T> folders, IEnumerable<T> files, int tenantId, Guid userId, IDictionary<string, string> headers, ExternalSessionSnapshot sessionSnapshot, bool holdResult = true)
@@ -272,7 +272,7 @@ public abstract class FileOperation<T, TId> : FileOperation where T : FileOperat
     protected ILogger Logger { get; private set; }
     protected internal List<TId> Folders { get; }
     protected internal List<TId> Files { get; }
-    protected IDictionary<string, StringValues> Headers { get; } = new Dictionary<string, StringValues>();  
+    protected IDictionary<string, StringValues> Headers { get; } = new Dictionary<string, StringValues>();
     protected ExternalSessionSnapshot SessionSnapshot { get; }
 
     protected FileOperation(IServiceProvider serviceProvider, T fileOperationData) : base(serviceProvider)
@@ -305,19 +305,9 @@ public abstract class FileOperation<T, TId> : FileOperation where T : FileOperat
         {
             CancellationToken = cancellationToken;
 
-            await using var scope = _serviceProvider.CreateAsyncScope();
+            await using var scope = await CreateScopeAsync();
             var scopeClass = scope.ServiceProvider.GetService<FileOperationScope>();
-            var (tenantManager, daoFactory, fileSecurity, logger) = scopeClass;
-            await tenantManager.SetCurrentTenantAsync(CurrentTenantId);
-
-            if (CurrentUserId != ASC.Core.Configuration.Constants.Guest.ID)
-            {
-                var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
-                await securityContext.AuthenticateMeWithoutCookieAsync(CurrentUserId);
-            }
-
-            var externalShare = scope.ServiceProvider.GetRequiredService<ExternalShare>();
-            externalShare.Initialize(SessionSnapshot);
+            var (daoFactory, fileSecurity, logger) = scopeClass;
 
             CustomSynchronizationContext.CurrentContext.CurrentPrincipal = _principal;
             CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo(_culture);
@@ -334,10 +324,10 @@ public abstract class FileOperation<T, TId> : FileOperation where T : FileOperat
 
             await DoJob(scope);
         }
-        catch (AuthorizingException authError)
+        catch (Exception e) when (e is AuthorizingException or FileNotFoundException or DirectoryNotFoundException)
         {
             Err = FilesCommonResource.ErrorMessage_SecurityException;
-            Logger.ErrorWithException(new SecurityException(Err, authError));
+            Logger.ErrorWithException(new SecurityException(Err, e));
         }
         catch (AggregateException ae)
         {
@@ -364,8 +354,22 @@ public abstract class FileOperation<T, TId> : FileOperation where T : FileOperat
     public async Task<AsyncServiceScope> CreateScopeAsync()
     {
         var scope = _serviceProvider.CreateAsyncScope();
-        var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
+
+        var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
         await tenantManager.SetCurrentTenantAsync(CurrentTenantId);
+
+        var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
+        if (CurrentUserId != ASC.Core.Configuration.Constants.Guest.ID)
+        {
+            await securityContext.AuthenticateMeWithoutCookieAsync(CurrentTenantId, CurrentUserId);
+        }
+        else if (SessionSnapshot.SessionId != Guid.Empty)
+        {
+            var authManager = scope.ServiceProvider.GetRequiredService<AuthManager>();
+            var account = await authManager.GetAccountByIDAsync(CurrentTenantId, CurrentUserId);
+            await securityContext.AuthenticateMeWithoutCookieAsync(account, session: SessionSnapshot.SessionId);
+        }
+
         var externalShare = scope.ServiceProvider.GetRequiredService<ExternalShare>();
         externalShare.Initialize(SessionSnapshot);
 
@@ -420,7 +424,18 @@ public abstract class FileOperation<T, TId> : FileOperation where T : FileOperat
 
 [Scope]
 public record FileOperationScope(
-    TenantManager TenantManager,
     IDaoFactory DaoFactory,
     FileSecurity FileSecurity,
     ILogger<FileOperationScope> Options);
+
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "operationType")]
+[JsonDerivedType(typeof(VectorizationSpawnedOperation), "vectorization")]
+public class SpawnedOperation
+{
+    public string Id { get; init; }
+}
+
+public class VectorizationSpawnedOperation : SpawnedOperation
+{
+    public int FileId { get; init; }
+}

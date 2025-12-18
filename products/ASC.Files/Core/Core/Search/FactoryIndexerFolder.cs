@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -122,18 +122,18 @@ public class FactoryIndexerFolder(ILoggerProvider options,
         }
 
         (int, int, int) GetCount(DateTime lastIndexed)
-            {
-                using var filesDbContext = dbContextFactory.CreateDbContext();
+        {
+            using var filesDbContext = dbContextFactory.CreateDbContext();
 
-                var minId = Queries.FolderMinId(filesDbContext, lastIndexed);
+            var minId = Queries.FolderMinId(filesDbContext, lastIndexed);
 
-                var maxId = Queries.FolderMaxId(filesDbContext, lastIndexed);
+            var maxId = Queries.FolderMaxId(filesDbContext, lastIndexed);
 
-                var count = Queries.FoldersCount(filesDbContext, lastIndexed);
+            var count = Queries.FoldersCount(filesDbContext, lastIndexed);
 
-                return new ValueTuple<int, int, int>(count, maxId, minId);
-            }
+            return new ValueTuple<int, int, int>(count, maxId, minId);
         }
+    }
 }
 
 class FolderTenant

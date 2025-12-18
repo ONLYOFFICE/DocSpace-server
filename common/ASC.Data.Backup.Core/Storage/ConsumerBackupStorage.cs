@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -37,7 +37,7 @@ public class ConsumerBackupStorage(
     private IDataStore _store;
 
     private bool _isTemporary;
-    private string Domain { get => _isTemporary ? "" : "backup"; }
+    private string Domain => _isTemporary ? "" : "backup";
     private CommonChunkedUploadSessionHolder _sessionHolder;
 
     public async Task InitAsync(IReadOnlyDictionary<string, string> storageParams)

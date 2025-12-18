@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,26 +26,62 @@
 
 namespace ASC.Files.Core.Services.OFormService;
 
+/// <summary>
+/// The form data attributes.
+/// </summary>
 public class OFormDataAttributes
 {
+    /// <summary>
+    /// The form file.
+    /// </summary>
     [JsonPropertyName("file_oform")]
     public OFromFile File { get; set; }
 }
 
+/// <summary>
+/// The form file.
+/// </summary>
 public class OFromFile
 {
+    /// <summary>
+    /// The form file data.
+    /// </summary>
     public IEnumerable<OFromFileData> Data { get; set; }
 }
 
+/// <summary>
+/// The form file data.
+/// </summary>
 public class OFromFileData
 {
+    /// <summary>
+    /// The form file ID.
+    /// </summary>
     public int Id { get; set; }
+
+    /// <summary>
+    /// The form file attributes.
+    /// </summary>
     public OFromFileAttribute Attributes { get; set; }
 }
 
+/// <summary>
+/// The form file attributes.
+/// </summary>
 public class OFromFileAttribute
 {
+    /// <summary>
+    /// The form file name.
+    /// </summary>
     public string Name { get; set; }
+
+    /// <summary>
+    /// The form file URL.
+    /// </summary>
     public string Url { get; set; }
+
+    /// <summary>
+    /// The form file extension.
+    /// </summary>
     public string Ext { get; set; }
 }

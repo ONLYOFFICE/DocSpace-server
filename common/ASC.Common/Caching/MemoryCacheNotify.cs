@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,15 +30,19 @@ namespace ASC.Common.Caching;
 public class MemoryCacheNotify<T> : ICacheNotify<T> where T : new()
 {
     private readonly ConcurrentDictionary<string, List<Action<T>>> _actions = new();
-    
-    public Task PublishAsync(T obj, CacheNotifyAction action)
+    private readonly ConcurrentDictionary<string, List<Func<T, Task>>> _funcs = new();
+
+    public async Task PublishAsync(T obj, CacheNotifyAction action)
     {
         if (_actions.TryGetValue(GetKey(action), out var onchange) && onchange != null)
         {
             Parallel.ForEach(onchange, a => a(obj));
         }
-
-        return Task.CompletedTask;
+        
+        if (_funcs.TryGetValue(GetKey(action), out var onchangeFunc) && onchangeFunc != null)
+        {
+            await Task.WhenAll(onchangeFunc.Select(a => a(obj)));
+        }
     }
 
     public void Subscribe(Action<T> onchange, CacheNotifyAction notifyAction)
@@ -49,9 +53,18 @@ public class MemoryCacheNotify<T> : ICacheNotify<T> where T : new()
         }
     }
 
+    public void Subscribe(Func<T, Task> onchange, CacheNotifyAction action)
+    {
+        if (onchange != null)
+        {
+            _funcs.GetOrAdd(GetKey(action), []).Add(onchange);
+        }
+    }
+
     public void Unsubscribe(CacheNotifyAction notifyAction)
     {
         _actions.TryRemove(GetKey(notifyAction), out _);
+        _funcs.TryRemove(GetKey(notifyAction), out _);
     }
 
     private string GetKey(CacheNotifyAction notifyAction)

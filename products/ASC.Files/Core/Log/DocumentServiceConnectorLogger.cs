@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,6 +38,9 @@ internal static partial class DocumentServiceConnectorLogger
 
     [LoggerMessage(LogLevel.Debug, "DocService request version")]
     public static partial void DebugDocServiceRequestVersion(this ILogger<DocumentServiceConnector> logger);
+
+    [LoggerMessage(LogLevel.Information, "DocService command response: '{error}' {errorString}")]
+    public static partial void InfoDocServiceCommandResponse(this ILogger<DocumentServiceConnector> logger, ErrorTypes error, string errorString);
 
     [LoggerMessage(LogLevel.Error, "DocService command error")]
     public static partial void ErrorDocServiceCommandError(this ILogger<DocumentServiceConnector> logger, Exception exception);

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,17 +27,17 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Auto-clearing request parameters
+/// The request parameters for updating the trash bin auto-clearing setting.
 /// </summary>
 public class AutoCleanupRequestDto
 {
     /// <summary>
-    /// Enables the auto-clearing or not
+    /// Specifies whether to enable the auto-clearing or not.
     /// </summary>
     public bool Set { get; set; }
 
     /// <summary>
-    /// A time interval when the auto-clearing will be performed
+    /// The time interval when the auto-clearing will be performed.
     /// </summary>
     public DateToAutoCleanUp Gap { get; set; }
 }

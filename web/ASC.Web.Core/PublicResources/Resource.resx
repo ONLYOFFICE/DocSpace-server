@@ -520,7 +520,7 @@
     <value>Phone number from Twilio (required for SMS authorization)</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
     <value>Client ID</value>
@@ -529,10 +529,10 @@
     <value>Client Secret</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Enable the application to sign in to the portal using a Twitter account.</value>
+    <value>Enable the application to sign in to the portal using a X account.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Enable this app to allow your users to sign in to {LogoText} using their Twitter and link their customers’ Twitter accounts to the CRM module. {0}Go to Twitter Developers Portal and create a new app {LogoText} integration. Insert the data you received below:</value>
+    <value>Enable this app to allow your users to sign in to {LogoText} using their X and link their customers’ X accounts to the CRM module. {0}Go to X Developers Portal and create a new app {LogoText} integration. Insert the data you received below:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>API Key</value>
@@ -964,7 +964,7 @@
     <value>Startup</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Tracking user logins &amp; action</value>
+    <value>Tracking logins &amp; actions</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>Max file size</value>
@@ -979,7 +979,7 @@
     <value>Number of admins</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Automatic backup &amp; recovery</value>
+    <value>Data recovery</value>
   </data>
   <data name="TariffsFeature_room" xml:space="preserve">
     <value>Unlimited number of active rooms</value>
@@ -1012,7 +1012,7 @@
     <value>Users in room:</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Unlimited number of users</value>
+    <value>Unlimited number of users and guests</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>The number of users should not exceed {0}</value>
@@ -1042,7 +1042,7 @@
     <value>What's New</value>
   </data>
   <data name="TariffsFeature_thirdparty" xml:space="preserve">
-    <value>Third-party integrations</value>
+    <value>Pro integrations</value>
   </data>
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>Too many login attempts. Please try again later</value>
@@ -1138,6 +1138,159 @@
     <value>Business</value>
   </data>
   <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
-    <value>Webhook URL is not avaliable. HEAD request is not responce 200 http status.</value>
+    <value>Webhook URL is not available. HEAD request is not response 200 http status.</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Currency</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>Date</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>Quantity</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>Unit of Measurement</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>Customer operations report ({0}-{1})</value>
+  </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Credit</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Additional disk storage</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Adjust the storage to the exact amount you require.</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
+    <value>Storage space used:</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>The group could not be found</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Disk space</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Balance top-up</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Backup</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Automatic renewal</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Backup</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Enable backups for your DocSpace. Costs will be billed automatically.</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>The number of free backups should not exceed {0} within a month</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Payment required</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} free backups per month</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Automatic top up</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Transaction history</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Contact</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Debit</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Backup</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>The number of plugins exceeds the limit</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Enable the application to sign in to the portal using a WeChat account.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Enable the application to sign in to the portal using a WeChat account.</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>Client ID</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Client Secret</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Date</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>First name</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>Id</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Last name</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Document Service Quota ({0})</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>You have been successfully connected Telegram to receive notifications from your DocSpace.</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>An unexpected error occurred. Please try again.</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>AI tools</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Tokens</value>
+  </data>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Vectorization</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>AI tools</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Enable AI features in your DocSpace to boost productivity.</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>AI web search</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Add funds to your wallet to unlock AI web search.</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Failed to set quota per ai agent. The entered value is greater than the total DocSpace storage.</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>AI agent space quota exceeded</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>The number of AI agents should not exceed {0}</value>
   </data>
 </root>

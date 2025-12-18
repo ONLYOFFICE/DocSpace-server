@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -45,10 +45,10 @@ public class DbFolder : IDbFile, IDbSearch, ISearchItem
     public int FoldersCount { get; set; }
     public int FilesCount { get; set; }
     public long Counter { get; set; }
-    
+
     [Ignore]
     public DbRoomSettings Settings { get; set; }
-    
+
     [Ignore]
     public DbTenant Tenant { get; set; }
 
@@ -74,150 +74,154 @@ public static class DbFolderExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddDbFolder(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbFolder>(entity =>
+        public void MySqlAddDbFolder()
         {
-            entity.ToTable("files_folder")
-                .HasCharSet("utf8");
+            modelBuilder.Entity<DbFolder>(entity =>
+            {
+                entity.ToTable("files_folder")
+                    .HasCharSet("utf8");
 
-            entity.Ignore(r => r.IndexName);
+                entity.Ignore(r => r.IndexName);
 
-            entity.HasIndex(e => e.ModifiedOn)
-                .HasDatabaseName("modified_on");
+                entity.HasIndex(e => e.ModifiedOn)
+                    .HasDatabaseName("modified_on");
 
-            entity.HasIndex(e => new { e.TenantId, e.ParentId })
-                .HasDatabaseName("parent_id");
+                entity.HasIndex(e => new { e.TenantId, e.ParentId })
+                    .HasDatabaseName("parent_id");
 
-            entity.HasIndex(e => new { e.TenantId, e.ParentId, e.Title })
-                .HasDatabaseName("tenant_id_parent_id_title");
+                entity.HasIndex(e => new { e.TenantId, e.ParentId, e.Title })
+                    .HasDatabaseName("tenant_id_parent_id_title");
 
-            entity.HasIndex(e => new { e.TenantId, e.ParentId, e.ModifiedOn })
-                .HasDatabaseName("tenant_id_parent_id_modified_on");
+                entity.HasIndex(e => new { e.TenantId, e.ParentId, e.ModifiedOn })
+                    .HasDatabaseName("tenant_id_parent_id_modified_on");
 
-            entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.Id).HasColumnName("id");
 
-            entity.Property(e => e.CreateBy)
-                .IsRequired()
-                .HasColumnName("create_by")
-                .HasColumnType("char(38)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.CreateBy)
+                    .IsRequired()
+                    .HasColumnName("create_by")
+                    .HasColumnType("char(38)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.CreateOn)
-                .HasColumnName("create_on")
-                .HasColumnType("datetime");
+                entity.Property(e => e.CreateOn)
+                    .HasColumnName("create_on")
+                    .HasColumnType("datetime");
 
-            entity.Property(e => e.FilesCount)
-                .HasColumnName("filesCount")
-                .HasDefaultValueSql("'0'");
+                entity.Property(e => e.FilesCount)
+                    .HasColumnName("filesCount")
+                    .HasDefaultValueSql("'0'");
 
-            entity.Property(e => e.FolderType)
-                .HasColumnName("folder_type")
-                .HasDefaultValueSql("'0'");
+                entity.Property(e => e.FolderType)
+                    .HasColumnName("folder_type")
+                    .HasDefaultValueSql("'0'");
 
-            entity.Property(e => e.FoldersCount)
-                .HasColumnName("foldersCount")
-                .HasDefaultValueSql("'0'");
+                entity.Property(e => e.FoldersCount)
+                    .HasColumnName("foldersCount")
+                    .HasDefaultValueSql("'0'");
 
-            entity.Property(e => e.ModifiedBy)
-                .IsRequired()
-                .HasColumnName("modified_by")
-                .HasColumnType("char(38)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.ModifiedBy)
+                    .IsRequired()
+                    .HasColumnName("modified_by")
+                    .HasColumnType("char(38)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.ModifiedOn)
-                .HasColumnName("modified_on")
-                .HasColumnType("datetime");
+                entity.Property(e => e.ModifiedOn)
+                    .HasColumnName("modified_on")
+                    .HasColumnType("datetime");
 
-            entity.Property(e => e.ParentId)
-                .HasColumnName("parent_id")
-                .HasDefaultValueSql("'0'");
+                entity.Property(e => e.ParentId)
+                    .HasColumnName("parent_id")
+                    .HasDefaultValueSql("'0'");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+                entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
-            entity.Property(e => e.Title)
-                .IsRequired()
-                .HasColumnName("title")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Title)
+                    .IsRequired()
+                    .HasColumnName("title")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Counter)
-                .HasColumnName("counter")
-                .HasDefaultValueSql("'0'");
-        });
-    }
-    public static void PgSqlAddDbFolder(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<DbFolder>(entity =>
+                entity.Property(e => e.Counter)
+                    .HasColumnName("counter")
+                    .HasDefaultValueSql("'0'");
+            });
+        }
+
+        public void PgSqlAddDbFolder()
         {
-            entity.ToTable("files_folder");
+            modelBuilder.Entity<DbFolder>(entity =>
+            {
+                entity.ToTable("files_folder");
 
-            entity.HasKey(e => e.Id)
-                .HasName("PK_files_folder");
-            
-            entity.Ignore(r => r.IndexName);
+                entity.HasKey(e => e.Id)
+                    .HasName("PK_files_folder");
 
-            entity.HasIndex(e => e.ModifiedOn)
-                .HasDatabaseName("IX_files_folder_modified_on");
+                entity.Ignore(r => r.IndexName);
 
-            entity.HasIndex(e => new { e.TenantId, e.ParentId })
-                .HasDatabaseName("parent_id");
+                entity.HasIndex(e => e.ModifiedOn)
+                    .HasDatabaseName("IX_files_folder_modified_on");
 
-            entity.HasIndex(e => new { e.TenantId, e.ParentId, e.Title })
-                .HasDatabaseName("tenant_id_parent_id_title");
+                entity.HasIndex(e => new { e.TenantId, e.ParentId })
+                    .HasDatabaseName("parent_id");
 
-            entity.HasIndex(e => new { e.TenantId, e.ParentId, e.ModifiedOn })
-                .HasDatabaseName("tenant_id_parent_id_modified_on");
+                entity.HasIndex(e => new { e.TenantId, e.ParentId, e.Title })
+                    .HasDatabaseName("tenant_id_parent_id_title");
 
-            entity.Property(e => e.Id).HasColumnName("id");
+                entity.HasIndex(e => new { e.TenantId, e.ParentId, e.ModifiedOn })
+                    .HasDatabaseName("tenant_id_parent_id_modified_on");
 
-            entity.Property(e => e.CreateBy)
-                .IsRequired()
-                .HasColumnName("create_by")
-                .HasColumnType("uuid");
+                entity.Property(e => e.Id).HasColumnName("id");
 
-            entity.Property(e => e.CreateOn)
-                .HasColumnName("create_on")
-                .HasColumnType("timestamptz");
+                entity.Property(e => e.CreateBy)
+                    .IsRequired()
+                    .HasColumnName("create_by")
+                    .HasColumnType("uuid");
 
-            entity.Property(e => e.FilesCount)
-                .HasColumnName("filesCount")
-                .HasDefaultValueSql("0");
+                entity.Property(e => e.CreateOn)
+                    .HasColumnName("create_on")
+                    .HasColumnType("timestamptz");
 
-            entity.Property(e => e.FolderType)
-                .HasColumnName("folder_type")
-                .HasDefaultValueSql("0");
+                entity.Property(e => e.FilesCount)
+                    .HasColumnName("filesCount")
+                    .HasDefaultValueSql("0");
 
-            entity.Property(e => e.FoldersCount)
-                .HasColumnName("foldersCount")
-                .HasDefaultValueSql("0");
+                entity.Property(e => e.FolderType)
+                    .HasColumnName("folder_type")
+                    .HasDefaultValueSql("0");
 
-            entity.Property(e => e.ModifiedBy)
-                .IsRequired()
-                .HasColumnName("modified_by")
-                .HasColumnType("uuid");
+                entity.Property(e => e.FoldersCount)
+                    .HasColumnName("foldersCount")
+                    .HasDefaultValueSql("0");
 
-            entity.Property(e => e.ModifiedOn)
-                .HasColumnName("modified_on")
-                .HasColumnType("timestamptz");
+                entity.Property(e => e.ModifiedBy)
+                    .IsRequired()
+                    .HasColumnName("modified_by")
+                    .HasColumnType("uuid");
 
-            entity.Property(e => e.ParentId)
-                .HasColumnName("parent_id")
-                .HasDefaultValueSql("0");
+                entity.Property(e => e.ModifiedOn)
+                    .HasColumnName("modified_on")
+                    .HasColumnType("timestamptz");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+                entity.Property(e => e.ParentId)
+                    .HasColumnName("parent_id")
+                    .HasDefaultValueSql("0");
 
-            entity.Property(e => e.Title)
-                .IsRequired()
-                .HasColumnName("title")
-                .HasColumnType("character varying");
+                entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
-            entity.Property(e => e.Counter)
-                .HasColumnName("counter")
-                .HasDefaultValueSql("0");
-        });
+                entity.Property(e => e.Title)
+                    .IsRequired()
+                    .HasColumnName("title")
+                    .HasColumnType("character varying");
+
+                entity.Property(e => e.Counter)
+                    .HasColumnName("counter")
+                    .HasDefaultValueSql("0");
+            });
+        }
     }
 }

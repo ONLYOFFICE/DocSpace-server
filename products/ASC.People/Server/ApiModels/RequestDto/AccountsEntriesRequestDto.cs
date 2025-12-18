@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,54 +27,86 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
+/// The request parameters for getting accounts.
 /// </summary>
 public class AccountsEntriesRequestDto<T>
 {
     /// <summary>
-    /// ID
+    /// The user ID.
     /// </summary>
     [FromRoute(Name = "id")]
-    public T Id { get; set; }
+    public required T Id { get; set; }
 
     /// <summary>
-    /// Employee status
+    /// The user status.
     /// </summary>
     [FromQuery(Name = "employeeStatus")]
     public EmployeeStatus? EmployeeStatus { get; set; }
 
     /// <summary>
-    /// Activation status
+    /// The user activation status.
     /// </summary>
     [FromQuery(Name = "activationStatus")]
     public EmployeeActivationStatus? ActivationStatus { get; set; }
 
     /// <summary>
-    /// Exclude shared
+    /// Specifies whether to exclude the account sharing settings from the response.
     /// </summary>
     [FromQuery(Name = "excludeShared")]
-    public bool? ExcludeShared {  get; set; }
+    public bool? ExcludeShared { get; set; }
 
     /// <summary>
-    /// Invited by me
+    /// Specifies whether to include the account sharing settings in the response.
+    /// </summary>
+    [FromQuery(Name = "includeShared")]
+    public bool? IncludeShared { get; set; }
+
+    /// <summary>
+    /// Specifies whether the user is invited by the current user or not.
     /// </summary>
     [FromQuery(Name = "invitedByMe")]
     public bool? InvitedByMe { get; set; }
 
     /// <summary>
-    /// Inviter Id
+    /// The inviter ID.
     /// </summary>
     [FromQuery(Name = "inviterId")]
     public Guid? InviterId { get; set; }
 
     /// <summary>
-    /// Area
+    /// The area of the account entries.
     /// </summary>
     [FromQuery(Name = "area")]
     public Area Area { get; set; } = Area.All;
 
     /// <summary>
-    /// Employee Types
+    /// The list of the user types.
     /// </summary>
     [FromQuery(Name = "employeeTypes")]
     public IEnumerable<EmployeeType> EmployeeTypes { get; set; } = new List<EmployeeType>();
+
+    /// <summary>
+    /// The number of items to retrieve in a request.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
+
+    /// <summary>
+    /// The starting index for the query results.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
+
+    /// <summary>
+    /// Specifies the separator used in filter expressions.
+    /// </summary>
+    [FromQuery(Name = "filterSeparator")]
+    public string FilterSeparator { get; set; }
+
+    /// <summary>
+    /// The text filter applied to the accounts search query.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }

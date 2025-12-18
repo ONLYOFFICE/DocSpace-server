@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -45,7 +45,7 @@ global using ASC.MessagingSystem.EF.Context;
 global using ASC.MessagingSystem.EF.Model;
 global using ASC.MessagingSystem.Log;
 global using ASC.Security.Cryptography;
-global using AutoMapper;
+
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Configuration;

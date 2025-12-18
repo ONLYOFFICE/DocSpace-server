@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,11 +28,7 @@ namespace ASC.Web.Core.Users;
 
 public class UserHelpTourSettings : ISettings<UserHelpTourSettings>
 {
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{DF4B94B7-42C8-4fce-AAE2-D479F3B39BDD}"); }
-    }
+    public static Guid ID => new("{DF4B94B7-42C8-4fce-AAE2-D479F3B39BDD}");
 
     public Dictionary<Guid, int> ModuleHelpTour { get; set; }
 
@@ -46,6 +42,8 @@ public class UserHelpTourSettings : ISettings<UserHelpTourSettings>
             IsNewUser = false
         };
     }
+
+    public DateTime LastModified { get; set; }
 }
 
 [Scope]

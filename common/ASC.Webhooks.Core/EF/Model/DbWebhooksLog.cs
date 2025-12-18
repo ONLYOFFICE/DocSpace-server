@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -58,151 +58,154 @@ public static class WebhooksPayloadExtension
         return modelBuilder;
     }
 
-    private static void MySqlAddWebhooksLog(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbWebhooksLog>(entity =>
+        private void MySqlAddWebhooksLog()
         {
-            entity.HasKey(e => new { e.Id })
-                .HasName("PRIMARY");
+            modelBuilder.Entity<DbWebhooksLog>(entity =>
+            {
+                entity.HasKey(e => new { e.Id })
+                    .HasName("PRIMARY");
 
-            entity.ToTable("webhooks_logs")
-                .HasCharSet("utf8");
+                entity.ToTable("webhooks_logs")
+                    .HasCharSet("utf8");
 
-            entity.HasIndex(e => e.TenantId)
-                .HasDatabaseName("tenant_id");
+                entity.HasIndex(e => e.TenantId)
+                    .HasDatabaseName("tenant_id");
 
-            entity.Property(e => e.Id)
-                .HasColumnType("int")
-                .HasColumnName("id")
-                .ValueGeneratedOnAdd();
+                entity.Property(e => e.Id)
+                    .HasColumnType("int")
+                    .HasColumnName("id")
+                    .ValueGeneratedOnAdd();
 
-            entity.Property(e => e.ConfigId)
-                .HasColumnType("int")
-                .HasColumnName("config_id");
+                entity.Property(e => e.ConfigId)
+                    .HasColumnType("int")
+                    .HasColumnName("config_id");
 
-            entity.Property(e => e.Trigger)
-                .HasColumnName("trigger")
-                .IsRequired();
+                entity.Property(e => e.Trigger)
+                    .HasColumnName("trigger")
+                    .IsRequired();
 
-            entity.Property(e => e.Uid)
-                .HasColumnName("uid")
-                .HasColumnType("varchar(36)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Uid)
+                    .HasColumnName("uid")
+                    .HasColumnType("varchar(36)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.TenantId)
-                .HasColumnName("tenant_id");
+                entity.Property(e => e.TenantId)
+                    .HasColumnName("tenant_id");
 
-            entity.Property(e => e.RequestPayload)
-                .IsRequired()
-                .HasColumnName("request_payload")
-                .HasColumnType("text")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.RequestPayload)
+                    .IsRequired()
+                    .HasColumnName("request_payload")
+                    .HasColumnType("text")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.RequestHeaders)
-                .HasColumnName("request_headers")
-                .HasColumnType("json");
+                entity.Property(e => e.RequestHeaders)
+                    .HasColumnName("request_headers")
+                    .HasColumnType("json");
 
-            entity.Property(e => e.ResponsePayload)
-                .HasColumnName("response_payload")
-                .HasColumnType("text")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.ResponsePayload)
+                    .HasColumnName("response_payload")
+                    .HasColumnType("text")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.ResponseHeaders)
-                .HasColumnName("response_headers")
-                .HasColumnType("json");
+                entity.Property(e => e.ResponseHeaders)
+                    .HasColumnName("response_headers")
+                    .HasColumnType("json");
 
-            entity.Property(e => e.WebhookId)
-                .HasColumnType("int")
-                .HasColumnName("webhook_id")
-                .IsRequired();
+                entity.Property(e => e.WebhookId)
+                    .HasColumnType("int")
+                    .HasColumnName("webhook_id")
+                    .IsRequired();
 
-            entity.Property(e => e.CreationTime)
-                .HasColumnType("datetime")
-                .HasColumnName("creation_time");
+                entity.Property(e => e.CreationTime)
+                    .HasColumnType("datetime")
+                    .HasColumnName("creation_time");
 
-            entity.Property(e => e.Delivery)
-                .HasColumnType("datetime")
-                .HasColumnName("delivery");
+                entity.Property(e => e.Delivery)
+                    .HasColumnType("datetime")
+                    .HasColumnName("delivery");
 
-            entity.Property(e => e.Status)
-                .HasColumnType("int")
-                .HasColumnName("status");
-        });
-    }
+                entity.Property(e => e.Status)
+                    .HasColumnType("int")
+                    .HasColumnName("status");
+            });
+        }
 
-    private static void PgSqlAddWebhooksLog(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<DbWebhooksLog>(entity =>
+        private void PgSqlAddWebhooksLog()
         {
-            entity.HasKey(e => e.Id)
-                .HasName("pk_webhooks_logs");
+            modelBuilder.Entity<DbWebhooksLog>(entity =>
+            {
+                entity.HasKey(e => e.Id)
+                    .HasName("pk_webhooks_logs");
 
-            entity.ToTable("webhooks_logs");
+                entity.ToTable("webhooks_logs");
 
-            // Specify the columns and their mappings
-            entity.Property(e => e.Id)
-                .HasColumnName("id")
-                .ValueGeneratedOnAdd();
+                // Specify the columns and their mappings
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .ValueGeneratedOnAdd();
 
-            entity.Property(e => e.ConfigId)
-                .HasColumnName("config_id");
+                entity.Property(e => e.ConfigId)
+                    .HasColumnName("config_id");
 
-            entity.Property(e => e.Trigger)
-                .HasColumnName("trigger")
-                .IsRequired();
+                entity.Property(e => e.Trigger)
+                    .HasColumnName("trigger")
+                    .IsRequired();
 
-            entity.Property(e => e.Uid)
-                .HasColumnName("uid");
+                entity.Property(e => e.Uid)
+                    .HasColumnName("uid");
 
-            entity.Property(e => e.TenantId)
-                .HasColumnName("tenant_id");
+                entity.Property(e => e.TenantId)
+                    .HasColumnName("tenant_id");
 
-            entity.Property(e => e.RequestPayload)
-                .HasColumnName("request_payload")
-                .HasColumnType("text");
+                entity.Property(e => e.RequestPayload)
+                    .HasColumnName("request_payload")
+                    .HasColumnType("text");
 
-            entity.Property(e => e.RequestHeaders)
-                .HasColumnName("request_headers")
-                .HasColumnType("json");
+                entity.Property(e => e.RequestHeaders)
+                    .HasColumnName("request_headers")
+                    .HasColumnType("json");
 
-            entity.Property(e => e.ResponsePayload)
-                .HasColumnName("response_payload")
-                .HasColumnType("text");
+                entity.Property(e => e.ResponsePayload)
+                    .HasColumnName("response_payload")
+                    .HasColumnType("text");
 
-            entity.Property(e => e.ResponseHeaders)
-                .HasColumnName("response_headers")
-                .HasColumnType("json");
+                entity.Property(e => e.ResponseHeaders)
+                    .HasColumnName("response_headers")
+                    .HasColumnType("json");
 
-            entity.Property(e => e.WebhookId)
-                .IsRequired()
-                .HasColumnName("webhook_id");
+                entity.Property(e => e.WebhookId)
+                    .IsRequired()
+                    .HasColumnName("webhook_id");
 
-            entity.Property(e => e.CreationTime)
-                .HasColumnName("creation_time");
+                entity.Property(e => e.CreationTime)
+                    .HasColumnName("creation_time");
 
-            entity.Property(e => e.Delivery)
-                .HasColumnName("delivery");
+                entity.Property(e => e.Delivery)
+                    .HasColumnName("delivery");
 
-            entity.Property(e => e.Status)
-                .HasColumnName("status");
+                entity.Property(e => e.Status)
+                    .HasColumnName("status");
 
-            // Add indexes (PostgreSQL-specific naming)
-            entity.HasIndex(e => e.TenantId)
-                .HasDatabaseName("ix_webhooks_logs_tenant_id");
+                // Add indexes (PostgreSQL-specific naming)
+                entity.HasIndex(e => e.TenantId)
+                    .HasDatabaseName("ix_webhooks_logs_tenant_id");
 
-            // Relationships (optional depending upon requirements)
-            entity.HasOne(e => e.Config)
-                .WithMany()
-                .HasForeignKey(e => e.ConfigId)
-                .OnDelete(DeleteBehavior.Restrict);
+                // Relationships (optional depending upon requirements)
+                entity.HasOne(e => e.Config)
+                    .WithMany()
+                    .HasForeignKey(e => e.ConfigId)
+                    .OnDelete(DeleteBehavior.Restrict);
 
-            entity.HasOne(e => e.Tenant)
-                .WithMany()
-                .HasForeignKey(e => e.TenantId)
-                .OnDelete(DeleteBehavior.Restrict);
-        });
+                entity.HasOne(e => e.Tenant)
+                    .WithMany()
+                    .HasForeignKey(e => e.TenantId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+        }
     }
 }

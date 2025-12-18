@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,7 +29,7 @@ internal static partial class MessagesRepositoryLogger
 {
     [LoggerMessage(LogLevel.Error, "FlushCache {id}")]
     public static partial void ErrorFlushCache(this ILogger<MessagesRepository> logger, int id, Exception exception);
-    
+
     [LoggerMessage(LogLevel.Error, "Send Message")]
     public static partial void ErrorSendMassage(this ILogger<MessagesRepository> logger, Exception exception);
 }

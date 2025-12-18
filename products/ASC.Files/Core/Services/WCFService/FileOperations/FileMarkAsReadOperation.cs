@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,7 +31,7 @@ public record FileMarkAsReadOperationData<T> : FileOperationData<T>
 {
     public FileMarkAsReadOperationData()
     {
-        
+
     }
 
     public FileMarkAsReadOperationData(IEnumerable<T> Folders,
@@ -49,11 +49,11 @@ public record FileMarkAsReadOperationData<T> : FileOperationData<T>
 public class FileMarkAsReadOperation : ComposeFileOperation<FileMarkAsReadOperationData<string>, FileMarkAsReadOperationData<int>>
 {
     public override FileOperationType FileOperationType { get; set; } = FileOperationType.MarkAsRead;
-    
+
     public FileMarkAsReadOperation() { }
-    
+
     public FileMarkAsReadOperation(IServiceProvider serviceProvider) : base(serviceProvider) { }
-    
+
     public override Task RunJob(CancellationToken cancellationToken)
     {
         DaoOperation = new FileMarkAsReadOperation<int>(_serviceProvider, Data);
@@ -68,7 +68,7 @@ class FileMarkAsReadOperation<T> : FileOperation<FileMarkAsReadOperationData<T>,
 {
     private readonly IDictionary<string, StringValues> _headers;
     public override FileOperationType FileOperationType { get; set; } = FileOperationType.MarkAsRead;
-    
+
     public FileMarkAsReadOperation(IServiceProvider serviceProvider, FileMarkAsReadOperationData<T> fileOperationData)
         : base(serviceProvider, fileOperationData)
     {
@@ -100,7 +100,7 @@ class FileMarkAsReadOperation<T> : FileOperation<FileMarkAsReadOperationData<T>,
         {
             CancellationToken.ThrowIfCancellationRequested();
 
-            await fileMarker.RemoveMarkAsNewAsync(entry, ((IAccount)(_principal ?? CustomSynchronizationContext.CurrentContext.CurrentPrincipal).Identity).ID);
+            await fileMarker.RemoveMarkAsNewAsync(entry, CurrentUserId);
 
             if (entry.FileEntryType == FileEntryType.File)
             {

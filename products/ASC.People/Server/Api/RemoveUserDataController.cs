@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,6 +26,9 @@
 
 namespace ASC.People.Api;
 
+///<summary>
+/// Remove user data API.
+///</summary>
 public class RemoveUserDataController(PermissionContext permissionContext,
         UserManager userManager,
         QueueWorkerRemove queueWorkerRemove,
@@ -36,7 +39,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
         AuthContext authContext,
         TenantManager tenantManager)
     : ApiControllerBase
-    {
+{
     /// <summary>
     /// Returns the progress of the started data deletion for the user with the ID specified in the request.
     /// </summary>
@@ -45,7 +48,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     [Tags("People / User data")]
     [SwaggerResponse(200, "Deletion progress", typeof(TaskProgressResponseDto))]
     [HttpGet("remove/progress/{userid:guid}")]
-    public async Task<TaskProgressResponseDto> GetRemoveProgressAsync(UserIdRequestDto inDto)
+    public async Task<TaskProgressResponseDto> GetRemoveProgress(UserIdRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
@@ -56,7 +59,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     }
 
     /// <summary>
-    /// Sends instructions for deleting a user profile.
+    /// Sends the instructions for deleting a user profile.
     /// </summary>
     /// <short>
     /// Send the deletion instructions
@@ -67,11 +70,11 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("self/delete")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
-    public async Task<string> SendInstructionsToDeleteAsync()
+    public async Task<string> SendInstructionsToDelete()
     {
         var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
         var tenant = tenantManager.GetCurrentTenant();
-        
+
         if (user.IsLDAP() || user.IsOwner(tenant))
         {
             throw new SecurityException();
@@ -94,7 +97,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "User not found")]
     [HttpPost("remove/start")]
-    public async Task<TaskProgressResponseDto> StartRemoveAsync(TerminateRequestDto inDto)
+    public async Task<TaskProgressResponseDto> StartRemove(TerminateRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
@@ -106,15 +109,15 @@ public class RemoveUserDataController(PermissionContext permissionContext,
         }
 
         var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
-        var currentUserType = await userManager.GetUserTypeAsync(currentUser.Id); 
-        
+        var currentUserType = await userManager.GetUserTypeAsync(currentUser.Id);
+
         var tenant = tenantManager.GetCurrentTenant();
         if (user.IsOwner(tenant) || user.IsMe(authContext) || user.Status != EmployeeStatus.Terminated)
         {
             throw new ArgumentException("Can not delete user with id = " + inDto.UserId);
         }
-        
-        var userType = await userManager.GetUserTypeAsync(user); 
+
+        var userType = await userManager.GetUserTypeAsync(user);
 
         switch (userType)
         {
@@ -122,8 +125,8 @@ public class RemoveUserDataController(PermissionContext permissionContext,
             case EmployeeType.DocSpaceAdmin when !currentUser.IsOwner(tenant):
                 throw new SecurityException(Resource.ErrorAccessDenied);
         }
-        
-        var isGuest = await userManager.IsGuestAsync(user);
+
+        var isGuest = await userManager.IsGuestAsync(user.Id);
 
         var progressItem = await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, true, true, isGuest);
 
@@ -137,7 +140,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// <path>api/2.0/people/remove/terminate</path>
     [Tags("People / User data")]
     [HttpPut("remove/terminate")]
-    public async Task TerminateRemoveAsync(TerminateRequestDto inDto)
+    public async Task TerminateRemove(TerminateRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
@@ -146,15 +149,15 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     }
 
     /// <summary>
-    /// Start delete personal folder.
+    /// Starts deleting the personal folder.
     /// </summary>
-    /// <short>Start the data deletion</short>
+    /// <short>Delete the personal folder</short>
     /// <path>api/2.0/people/delete/personal/start</path>
     [Tags("People / User data")]
     [SwaggerResponse(200, "delete personal progress", typeof(TaskProgressResponseDto))]
     [SwaggerResponse(400, "Access denied")]
     [HttpPost("delete/personal/start")]
-    public async Task<TaskProgressResponseDto> StartDeletePersonalFolderAsync()
+    public async Task<TaskProgressResponseDto> StartDeletePersonalFolder()
     {
         var currentUser = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
         var userType = await userManager.GetUserTypeAsync(currentUser);
@@ -172,14 +175,14 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     }
 
     /// <summary>
-    /// Returns the progress of the delete personal folder.
+    /// Returns the progress of deleting the personal folder.
     /// </summary>
-    /// <short>Get the deletion progress</short>
+    /// <short>Get the progress of deleting the personal folder</short>
     /// <path>api/2.0/people/delete/personal/progress</path>
     [Tags("People / User data")]
     [SwaggerResponse(200, "Deletion progress", typeof(TaskProgressResponseDto))]
     [HttpGet("delete/personal/progress")]
-    public async Task<TaskProgressResponseDto> GetDeletePersonalFolderProgressAsync()
+    public async Task<TaskProgressResponseDto> GetDeletePersonalFolderProgress()
     {
         var tenant = tenantManager.GetCurrentTenant();
         var progressItem = await queueDeletePersonalFolder.GetProgressItemStatus(tenant.Id, securityContext.CurrentAccount.ID);

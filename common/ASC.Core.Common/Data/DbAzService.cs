@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,7 +27,7 @@
 namespace ASC.Core.Data;
 
 [Scope(typeof(IAzService), typeof(CachedAzService))]
-class DbAzService(IDbContextFactory<UserDbContext> dbContextFactory, IMapper mapper) : IAzService
+class DbAzService(IDbContextFactory<UserDbContext> dbContextFactory) : IAzService
 {
     public async Task<IEnumerable<AzRecord>> GetAcesAsync(int tenant, DateTime from)
     {
@@ -35,13 +35,13 @@ class DbAzService(IDbContextFactory<UserDbContext> dbContextFactory, IMapper map
 
         // row with tenant = -1 - common for all tenants, but equal row with tenant != -1 escape common row for the portal
         var commonAces = await userDbContext.AzRecordAsync()
-            .Select(mapper.Map<Acl, AzRecord>)
+            .Select(r => r.Map())
             .ToDictionaryAsync(a => string.Concat(a.TenantId.ToString(), a.Subject.ToString(), a.Action.ToString(), a.Object));
 
         var tenantAces = await
             userDbContext.Acl
             .Where(r => r.TenantId == tenant)
-            .ProjectTo<AzRecord>(mapper.ConfigurationProvider)
+            .Project()
             .ToListAsync();
 
         // remove excaped rows
@@ -115,7 +115,7 @@ class DbAzService(IDbContextFactory<UserDbContext> dbContextFactory, IMapper map
     private async Task InsertRecordAsync(AzRecord r)
     {
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
-        await userDbContext.AddOrUpdateAsync(q => q.Acl, mapper.Map<AzRecord, Acl>(r));
+        await userDbContext.AddOrUpdateAsync(q => q.Acl, r.Map());
         await userDbContext.SaveChangesAsync();
     }
 }

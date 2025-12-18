@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -71,38 +71,44 @@ public class BaseStorageSettingsListener(IServiceProvider serviceProvider, ICach
 }
 
 /// <summary>
+/// The base storage settings.
 /// </summary>
-/// <typeparam name="T"></typeparam>
 public abstract class BaseStorageSettings<T> : ISettings<BaseStorageSettings<T>> where T : class, ISettings<T>, new()
 {
     /// <summary>
-    /// Storage name
+    /// The storage name.
     /// </summary>
     public string Module { get; set; }
 
     /// <summary>
-    /// Storage properties
+    /// The storage properties.
     /// </summary>
     public Dictionary<string, string> Props { get; set; }
-    
+
     [JsonIgnore]
     public virtual Func<DataStoreConsumer, DataStoreConsumer> Switch => d => d;
-    public abstract Guid ID { get; }
-    
+
     internal ICacheNotify<DataStoreCacheItem> Cache { get; set; }
+
+    public static Guid ID { get; }
 
     public BaseStorageSettings<T> GetDefault()
     {
         throw new NotImplementedException();
     }
+
+    public DateTime LastModified { get; set; }
 }
 
 /// <summary>
+/// The storage settings.
 /// </summary>
 public class StorageSettings : BaseStorageSettings<StorageSettings>, ISettings<StorageSettings>
 {
-    [JsonIgnore]
-    public override Guid ID => new("F13EAF2D-FA53-44F1-A6D6-A5AEDA46FA2B");
+    /// <summary>
+    /// The storage ID.
+    /// </summary>
+    public static new Guid ID => new("F13EAF2D-FA53-44F1-A6D6-A5AEDA46FA2B");
 
     StorageSettings ISettings<StorageSettings>.GetDefault()
     {
@@ -111,13 +117,17 @@ public class StorageSettings : BaseStorageSettings<StorageSettings>, ISettings<S
 }
 
 /// <summary>
+/// The CDN storage settings.
 /// </summary>
 [Scope]
 public class CdnStorageSettings : BaseStorageSettings<CdnStorageSettings>, ISettings<CdnStorageSettings>
 {
-    [JsonIgnore]
-    public override Guid ID => new("0E9AE034-F398-42FE-B5EE-F86D954E9FB2");
+    /// <summary>
+    /// The CDN storage ID.
+    /// </summary>
+    public static new Guid ID => new("0E9AE034-F398-42FE-B5EE-F86D954E9FB2");
 
+    [JsonIgnore]
     public override Func<DataStoreConsumer, DataStoreConsumer> Switch => d => d.Cdn;
 
     CdnStorageSettings ISettings<CdnStorageSettings>.GetDefault()
@@ -208,7 +218,7 @@ public class StorageSettingsHelper
         }
 
         return _dataStore = await ((IDataStore)_serviceProvider.GetService(handlerType))
-            .ConfigureAsync((_tenantManager.GetCurrentTenantId()).ToString(), null, null, dataStoreConsumer, null);
+            .ConfigureAsync(_tenantManager.GetCurrentTenantId().ToString(), null, null, dataStoreConsumer, null);
     }
 
     internal async Task ClearDataStoreCacheAsync()

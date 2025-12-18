@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,40 +24,42 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The parameters of the form filling result.
+/// </summary>
 public class FillingFormResultDto<T>
 {
     /// <summary>
-    /// Form number
+    /// The filling form number.
     /// </summary>
-    public int FormNumber { get; set; }
+    public required int FormNumber { get; set; }
 
     /// <summary>
-    /// Completed form
+    /// The file with the completed forms.
     /// </summary>
     public FileDto<T> CompletedForm { get; set; }
 
     /// <summary>
-    /// Original form
+    /// The file with the original forms.
     /// </summary>
     public FileDto<T> OriginalForm { get; set; }
 
     /// <summary>
-    /// Manager
+    /// The manager who is filling the form.
     /// </summary>
     public EmployeeFullDto Manager { get; set; }
 
     /// <summary>
-    /// Room Id
+    /// The room ID where filling the form.
     /// </summary>
-    public T RoomId { get; set; }
+    public required T RoomId { get; set; }
 
     /// <summary>
-    /// Is room member
+    /// Specifies if the manager who fills the form is a room member or not.
     /// </summary>
-    public bool isRoomMember { get; set; }
+    public bool IsRoomMember { get; set; }
 
 }
 
@@ -107,7 +109,7 @@ public class FillingFormResultDtoHelper(
                     FormNumber = properties.FormFilling.ResultFormNumber,
                     Manager = await employeeFullDtoHelper.GetSimpleWithEmail(manager),
                     RoomId = record == null || record.EntryType == FileEntryType.Folder ? properties.FormFilling.RoomId : default,
-                    isRoomMember = currentType == EmployeeType.DocSpaceAdmin || aces.Exists(u => u.Id == authContext.CurrentAccount.ID)
+                    IsRoomMember = currentType == EmployeeType.DocSpaceAdmin || aces.Exists(u => u.Id == authContext.CurrentAccount.ID)
                 };
                 return result;
             }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,7 +26,9 @@
 
 using System.Threading.Channels;
 
+using ASC.Common.Threading;
 using ASC.MessagingSystem.Data;
+using ASC.Web.Studio.Wallet;
 
 namespace ASC.Web.Studio;
 
@@ -43,14 +45,13 @@ public class Startup : BaseStartup
     public override void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
         base.Configure(app, env);
-        
+
         if (OpenApiEnabled && _configuration.GetValue<bool>("openApi:enableUI"))
         {
-            var endpoints = new Dictionary<string,string>();
+            var endpoints = new Dictionary<string, string>();
             _configuration.Bind("openApi:endpoints", endpoints);
             app.UseOpenApiUI(endpoints);
         }
-
 
         app.UseRouting();
 
@@ -78,9 +79,9 @@ public class Startup : BaseStartup
 
     public override async Task ConfigureServices(WebApplicationBuilder builder)
     {
-        var services = builder.Services;
         await base.ConfigureServices(builder);
 
+        var services = builder.Services;
         services.AddMemoryCache();
         services.AddBaseDbContextPool<FilesDbContext>();
         services.RegisterQuotaFeature();
@@ -94,20 +95,13 @@ public class Startup : BaseStartup
         services.AddScoped<EventDataIntegrationEventHandler>();
         services.AddSingleton<MessageSenderService>();
         services.AddHostedService<MessageSenderService>();
-        
-        var lifeTime = TimeSpan.FromMinutes(5);
 
-        services.AddHttpClient(WebhookSender.WEBHOOK)
-                .SetHandlerLifetime(lifeTime);
-             
-        services.AddHttpClient(WebhookSender.WEBHOOK_SKIP_SSL)
-                .SetHandlerLifetime(lifeTime)
-                .ConfigurePrimaryHttpMessageHandler(_ =>
-                {
-                    return new HttpClientHandler
-                    {
-                        ServerCertificateCustomValidationCallback = (_, _, _, _) => true
-                    };
-                });
+        services.RegisterQueue<RemovePortalOperation>();
+        services.RegisterQueue<MigrationOperation>(timeUntilUnregisterInSeconds: 60 * 60 * 24);
+
+        services.AddActivePassiveHostedService<TopUpWalletService>(_configuration);
+        services.AddActivePassiveHostedService<RenewSubscriptionService>(_configuration);
+
+        services.AddWebhookSenderHttpClient(_configuration);
     }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Common.Security.Authorizing;
 using ASC.Core.Users;
 using ASC.Web.Files.Services.WCFService;
 
@@ -92,14 +93,13 @@ public class AutoDeletePersonalFolderService(
                 return;
             }
 
-            if (!(await userManager.IsGuestAsync(tenantUser.UserId)))
+            if (!await userManager.IsGuestAsync(tenantUser.UserId))
             {
                 return;
             }
 
             await securityContext.AuthenticateMeWithoutCookieAsync(userAccount);
 
-            var fileDao = daoFactory.GetFileDao<int>();
             var folderDao = daoFactory.GetFolderDao<int>();
             var now = DateTime.UtcNow;
 
@@ -124,7 +124,7 @@ public class AutoDeletePersonalFolderService(
                 userTo = tenantManager.GetCurrentTenant().OwnerId;
             }
 
-            await fileStorageService.MoveSharedFilesAsync(tenantUser.UserId, userTo);
+            await fileStorageService.MoveSharedEntriesAsync(tenantUser.UserId, userTo);
             await fileStorageService.DeletePersonalFolderAsync(tenantUser.UserId);
 
             logger.InfoCleanUpFinish(myId);
@@ -143,7 +143,9 @@ static file class Queries
             (UserDbContext ctx) =>
                 ctx.Users
                    .Join(ctx.Tenants, x => x.TenantId, y => y.Id, (users, tenants) => new { users, tenants })
+                   .Join(ctx.UserGroups, x => x.users.Id, y => y.Userid, (x, y) => new { x.users, x.tenants, userGroups = y })
                    .Where(x => x.tenants.Status == TenantStatus.Active)
+                   .Where(x => x.userGroups.UserGroupId == AuthConstants.Guest.ID && !x.userGroups.Removed)
                    .Select(r => new TenantUserSettings
                    {
                        TenantId = r.tenants.Id,
@@ -152,4 +154,3 @@ static file class Queries
                    }));
 
 }
-

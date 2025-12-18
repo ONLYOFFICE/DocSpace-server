@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,8 +28,7 @@ namespace ASC.Web.Core.Users;
 
 public class DisplayUserSettings : ISettings<DisplayUserSettings>
 {
-    [JsonIgnore]
-    public Guid ID => new("2EF59652-E1A7-4814-BF71-FEB990149428");
+    public static Guid ID => new("2EF59652-E1A7-4814-BF71-FEB990149428");
 
     public bool IsDisableGettingStarted { get; set; }
 
@@ -40,6 +39,8 @@ public class DisplayUserSettings : ISettings<DisplayUserSettings>
             IsDisableGettingStarted = false
         };
     }
+
+    public DateTime LastModified { get; set; }
 }
 
 [Scope]
@@ -47,9 +48,9 @@ public class DisplayUserSettingsHelper(UserManager userManager, UserFormatter us
 {
     private string RemovedProfileName => configuration["web:removed-profile-name"] ?? "profile removed";
 
-    public async Task<string> GetFullUserNameAsync(Guid userID, bool withHtmlEncode = true)
+    public async Task<string> GetFullUserNameAsync(Guid userID, bool withHtmlEncode = true, bool returnLostUserIfRemoved = true)
     {
-        return GetFullUserName(await userManager.GetUsersAsync(userID), withHtmlEncode);
+        return GetFullUserName(await userManager.GetUsersAsync(userID, returnLostUserIfRemoved), withHtmlEncode);
     }
 
     public string GetFullUserName(UserInfo userInfo, bool withHtmlEncode = true)

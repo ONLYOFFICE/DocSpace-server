@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -40,15 +40,15 @@ public class SocketServiceClient(
 {
     protected readonly TenantManager _tenantManager = tenantManager;
     private byte[] SKey => machinePseudoKeys.GetMachineConstant();
-    private string Url =>  configuration["web:hub:internal"];
+    private string Url => configuration["web:hub:internal"];
 
     private static readonly JsonSerializerOptions _options = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
-    
-    protected virtual string Hub { get => "default"; }
-    
+
+    protected virtual string Hub => "default";
+
     public async Task MakeRequest(string method, object data, int? tenantId = null)
     {
         if (string.IsNullOrEmpty(Url))
@@ -60,22 +60,22 @@ public class SocketServiceClient(
         if (await channelWriter.WaitToWriteAsync())
         {
             var tenant = tenantId ?? _tenantManager.GetCurrentTenantId();
-            
+
             var tariff = await tariffService.GetTariffAsync(tenant);
             await channelWriter.WriteAsync(new SocketData(request, tariff.State));
         }
     }
-    
+
     private HttpRequestMessage GenerateRequest(string method, object data)
-    {        
+    {
         var jsonData = JsonSerializer.Serialize(data, _options);
         var request = new HttpRequestMessage
         {
-            Method = HttpMethod.Post, 
+            Method = HttpMethod.Post,
             RequestUri = new Uri(Method(method)),
             Content = new StringContent(jsonData, Encoding.UTF8, "application/json")
         };
-        
+
         request.Headers.Add("Authorization", CreateAuthToken());
         return request;
     }
@@ -111,7 +111,7 @@ public class SocketService(
 
         List<ChannelReader<SocketData>> readers = [channelReader];
 
-        if (((int)(maxDegreeOfParallelism * 0.3)) > 0)
+        if ((int)(maxDegreeOfParallelism * 0.3) > 0)
         {
             var splitter = channelReader.Split(2, (_, _, p) => p.TariffState == TariffState.Paid ? 0 : 1, stoppingToken);
             var premiumChannels = splitter[0].Split((int)(maxDegreeOfParallelism * 0.7), null, stoppingToken);
@@ -122,7 +122,7 @@ public class SocketService(
         var tasks = readers.Select(reader1 => Task.Run(async () =>
             {
                 await foreach (var socketData in reader1.ReadAllAsync(stoppingToken))
-                {        
+                {
                     try
                     {
 

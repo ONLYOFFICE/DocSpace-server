@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,28 +27,29 @@
 namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("license")]
-public class LicenseController(ILoggerProvider option,
-        MessageService messageService,
-        ApiContext apiContext,
-        UserManager userManager,
-        TenantManager tenantManager,
-        TenantExtra tenantExtra,
-        AuthContext authContext,
-        LicenseReader licenseReader,
-        SettingsManager settingsManager,
-        WebItemManager webItemManager,
-        CoreBaseSettings coreBaseSettings,
-        IFusionCache fusionCache,
-        FirstTimeTenantSettings firstTimeTenantSettings,
-        ITariffService tariffService,
-        IHttpContextAccessor httpContextAccessor,
-        DocumentServiceLicense documentServiceLicense)
-    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+public class LicenseController(
+    ILoggerProvider option,
+    MessageService messageService,
+    SecurityContext securityContext,
+    UserManager userManager,
+    TenantManager tenantManager,
+    TenantLogoManager tenantLogoManager,
+    TenantExtra tenantExtra,
+    AuthContext authContext,
+    LicenseReader licenseReader,
+    SettingsManager settingsManager,
+    WebItemManager webItemManager,
+    CoreBaseSettings coreBaseSettings,
+    IFusionCache fusionCache,
+    FirstTimeTenantSettings firstTimeTenantSettings,
+    ITariffService tariffService,
+    DocumentServiceLicense documentServiceLicense)
+    : BaseSettingsController(fusionCache, webItemManager)
 {
     private readonly ILogger _log = option.CreateLogger("ASC.Api");
 
     /// <summary>
-    /// Refreshes the license.
+    /// Refreshes the portal license.
     /// </summary>
     /// <short>Refresh the license</short>
     /// <path>api/2.0/settings/license/refresh</path>
@@ -56,7 +57,7 @@ public class LicenseController(ILoggerProvider option,
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpGet("refresh")]
     [AllowNotPayment]
-    public async Task<bool> RefreshLicenseAsync()
+    public async Task<bool> RefreshLicense()
     {
         if (!tenantExtra.Enterprise)
         {
@@ -78,7 +79,7 @@ public class LicenseController(ILoggerProvider option,
     [SwaggerResponse(200, "Message about the result of activating license", typeof(string))]
     [AllowNotPayment]
     [HttpPost("accept")]
-    public async Task<string> AcceptLicenseAsync()
+    public async Task<string> AcceptLicense()
     {
         if (!tenantExtra.Enterprise)
         {
@@ -96,9 +97,15 @@ public class LicenseController(ILoggerProvider option,
         {
             return UserControlsCommonResource.LicenseKeyNotFound;
         }
-        catch (BillingNotConfiguredException)
+        catch (BillingNotConfiguredException ex)
         {
+            _log.ErrorWithException(ex);
             return UserControlsCommonResource.LicenseKeyNotCorrect;
+        }
+        catch (BillingLicenseTypeException)
+        {
+            var logoText = await tenantLogoManager.GetLogoTextAsync();
+            return string.Format(UserControlsCommonResource.LicenseTypeNotCorrect, logoText);
         }
         catch (BillingException)
         {
@@ -124,7 +131,7 @@ public class LicenseController(ILoggerProvider option,
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("trial")]
-    public async Task<bool> ActivateTrialAsync()
+    public async Task<bool> ActivateTrialLicense()
     {
         if (!coreBaseSettings.Standalone)
         {
@@ -193,7 +200,7 @@ public class LicenseController(ILoggerProvider option,
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("required")]
-    public async Task<bool> RequestLicense()
+    public async Task<bool> GetIsLicenseRequired()
     {
         return await firstTimeTenantSettings.GetRequestLicense();
     }
@@ -214,11 +221,11 @@ public class LicenseController(ILoggerProvider option,
     [AllowNotPayment]
     [HttpPost("")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard, Administrators")]
-    public async Task<string> UploadLicenseAsync([FromForm] UploadLicenseRequestsDto inDto)
+    public async Task<string> UploadLicense([FromForm] UploadLicenseRequestsDto inDto)
     {
         try
         {
-            await ApiContext.AuthByClaimAsync();
+            await securityContext.AuthByClaimAsync();
             if (!authContext.IsAuthenticated && (await settingsManager.LoadAsync<WizardSettings>()).Completed)
             {
                 throw new SecurityException(Resource.PortalSecurity);
@@ -231,7 +238,7 @@ public class LicenseController(ILoggerProvider option,
 
             if (!inDto.Files.Any())
             {
-                throw new Exception(Resource.ErrorEmptyUploadFileSelected);
+                throw new ArgumentException(Resource.ErrorEmptyUploadFileSelected);
             }
 
             var licenseFile = inDto.Files.First();
@@ -257,6 +264,11 @@ public class LicenseController(ILoggerProvider option,
             _log.ErrorLicenseUpload(ex);
             throw;
         }
+        catch (ArgumentException ex)
+        {
+            _log.ErrorLicenseUpload(ex);
+            throw;
+        }
         catch (LicenseExpiredException ex)
         {
             _log.ErrorLicenseUpload(ex);
@@ -271,6 +283,12 @@ public class LicenseController(ILoggerProvider option,
         {
             _log.ErrorLicenseUpload(ex);
             throw new Exception(Resource.LicenseErrorPortal);
+        }
+        catch (BillingLicenseTypeException ex)
+        {
+            _log.ErrorLicenseUpload(ex);
+            var logoText = await tenantLogoManager.GetLogoTextAsync();
+            throw new Exception(string.Format(UserControlsCommonResource.LicenseTypeNotCorrect, logoText));
         }
         catch (Exception ex)
         {

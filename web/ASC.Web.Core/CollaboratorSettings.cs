@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,11 +30,7 @@ public class CollaboratorSettings : ISettings<CollaboratorSettings>
 {
     public bool FirstVisit { get; set; }
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{73537E08-17F6-4706-BFDA-1414108AA7D2}"); }
-    }
+    public static Guid ID => new("{73537E08-17F6-4706-BFDA-1414108AA7D2}");
 
     public CollaboratorSettings GetDefault()
     {
@@ -43,4 +39,6 @@ public class CollaboratorSettings : ISettings<CollaboratorSettings>
             FirstVisit = true
         };
     }
+
+    public DateTime LastModified { get; set; }
 }

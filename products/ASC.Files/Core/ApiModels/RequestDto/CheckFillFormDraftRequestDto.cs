@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,46 +27,46 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Parameters for checking a form draft
+/// The parameters for checking the form draft filling.
 /// </summary>
 public class CheckFillFormDraft
 {
     /// <summary>
-    /// File version
+    /// The file version of the form draft.
     /// </summary>
-    public int Version { get; set; }
+    public required int Version { get; set; }
 
     /// <summary>
-    /// Action with a form
+    /// The action with the form draft.
     /// </summary>
     public string Action { get; set; }
 
     /// <summary>
-    /// Specifies whether to request a form for viewing or not
+    /// Specifies whether to request the form for viewing or not.
     /// </summary>
     public bool RequestView => (Action ?? "").Equals("view", StringComparison.InvariantCultureIgnoreCase);
 
     /// <summary>
-    /// Specifies whether to request an embedded form or not
+    /// Specifies whether to request an embedded form or not.
     /// </summary>
     public bool RequestEmbedded => (Action ?? "").Equals("embedded", StringComparison.InvariantCultureIgnoreCase);
 }
 
 
 /// <summary>
-/// Request parameters for checking a form draft
+/// The request parameters for checking the form draft filling.
 /// </summary>
 public class CheckFillFormDraftRequestDto<T>
 {
     /// <summary>
-    /// File ID
+    /// The file ID of the form draft.
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
+    public required T FileId { get; set; }
 
     /// <summary>
-    /// File
+    /// The parameters for checking the form draft filling.
     /// </summary>
     [FromBody]
-    public CheckFillFormDraft File {  get; set; }
+    public required CheckFillFormDraft File { get; set; }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,14 +27,14 @@
 namespace ASC.Files.Core.Mapping;
 
 [Scope]
-public class TenantDateTimeConverter(TenantUtil tenantUtil) : IValueConverter<DateTime, DateTime>, IValueConverter<DateTime?, DateTime?>
+public class TenantDateTimeConverter(TenantUtil tenantUtil)
 {
-    public DateTime Convert(DateTime sourceMember, ResolutionContext context)
+    public DateTime Convert(DateTime source)
     {
-        return tenantUtil.DateTimeFromUtc(sourceMember);
+        return tenantUtil.DateTimeFromUtc(source);
     }
-    
-    public DateTime? Convert(DateTime? sourceMember, ResolutionContext context)
+
+    public DateTime? Convert(DateTime? sourceMember)
     {
         return sourceMember.HasValue ? tenantUtil.DateTimeFromUtc(sourceMember.Value) : null;
     }

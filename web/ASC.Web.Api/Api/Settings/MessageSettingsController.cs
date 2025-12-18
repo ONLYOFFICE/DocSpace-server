@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,25 +24,30 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Microsoft.AspNetCore.RateLimiting;
+
 using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-public class MessageSettingsController(MessageService messageService,
-        StudioNotifyService studioNotifyService,
-        ApiContext apiContext,
-        UserManager userManager,
-        TenantExtra tenantExtra,
-        PermissionContext permissionContext,
-        SettingsManager settingsManager,
-        WebItemManager webItemManager,
-        CustomNamingPeople customNamingPeople,
-        IFusionCache fusionCache,
-        IHttpContextAccessor httpContextAccessor,
-        TenantManager tenantManager,
-        CookiesManager cookiesManager,
-        CountPaidUserChecker countPaidUserChecker)
-    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+public class MessageSettingsController(
+    AuthContext authContext,
+    SetupInfo setupInfo,
+    MessageService messageService,
+    StudioNotifyService studioNotifyService,
+    UserManager userManager,
+    TenantExtra tenantExtra,
+    PermissionContext permissionContext,
+    SettingsManager settingsManager,
+    WebItemManager webItemManager,
+    CustomNamingPeople customNamingPeople,
+    IFusionCache fusionCache,
+    IHttpContextAccessor httpContextAccessor,
+    TenantManager tenantManager,
+    CookiesManager cookiesManager,
+    BruteForceLoginManager bruteForceLoginManager,
+    CountPaidUserChecker countPaidUserChecker)
+    : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <summary>
     /// Displays the contact form on the "Sign In" page, allowing users to send a message to the DocSpace administrator in case they encounter any issues while accessing DocSpace.
@@ -54,7 +59,7 @@ public class MessageSettingsController(MessageService messageService,
     [Tags("Settings / Messages")]
     [SwaggerResponse(200, "Message about the result of saving new settings", typeof(string))]
     [HttpPost("messagesettings")]
-    public async Task<string> EnableAdminMessageSettingsAsync(TurnOnAdminMessageSettingsRequestDto inDto)
+    public async Task<string> EnableAdminMessageSettings(TurnOnAdminMessageSettingsRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -76,7 +81,7 @@ public class MessageSettingsController(MessageService messageService,
     [SwaggerResponse(200, "Lifetime value in minutes", typeof(CookieSettingsDto))]
     [HttpGet("cookiesettings")]
     public async Task<CookieSettingsDto> GetCookieSettings()
-    {        
+    {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var result = await cookiesManager.GetLifeTimeAsync();
         return new CookieSettingsDto
@@ -103,7 +108,7 @@ public class MessageSettingsController(MessageService messageService,
 
         if (!SetupInfo.IsVisibleSettings("CookieSettings"))
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "CookieSettings");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
 
         await cookiesManager.SetLifeTimeAsync(inDto.LifeTime, inDto.Enabled);
@@ -127,10 +132,11 @@ public class MessageSettingsController(MessageService messageService,
     [SwaggerResponse(429, "Request limit is exceeded")]
     [AllowAnonymous, AllowNotPayment]
     [HttpPost("sendadmmail")]
-    public async Task<string> SendAdmMailAsync(AdminMessageSettingsRequestsDto inDto)
+    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
+    public async Task<string> SendAdminMail(AdminMessageSettingsRequestsDto inDto)
     {
         var studioAdminMessageSettings = await settingsManager.LoadAsync<StudioAdminMessageSettings>();
-        var enableAdmMess = studioAdminMessageSettings.Enable || (await tenantExtra.IsNotPaidAsync());
+        var enableAdmMess = studioAdminMessageSettings.Enable || await tenantExtra.IsNotPaidAsync();
 
         if (!enableAdmMess)
         {
@@ -139,17 +145,28 @@ public class MessageSettingsController(MessageService messageService,
 
         if (!inDto.Email.TestEmailRegex())
         {
-            throw new Exception(Resource.ErrorNotCorrectEmail);
+            throw new ArgumentException(Resource.ErrorNotCorrectEmail);
         }
 
         var message = HtmlUtil.ToPlainText(inDto.Message);
 
         if (string.IsNullOrEmpty(message))
         {
-            throw new Exception(Resource.ErrorEmptyMessage);
+            throw new ArgumentException(Resource.ErrorEmptyMessage);
         }
 
-        await CheckCache("sendadmmail");
+        if (!authContext.IsAuthenticated && (!string.IsNullOrEmpty(setupInfo.HcaptchaPublicKey) || !string.IsNullOrEmpty(setupInfo.RecaptchaPublicKey)))
+        {
+            var requestIp = MessageSettings.GetIP(httpContextAccessor.HttpContext?.Request);
+            var secretEmail = SetupInfo.IsSecretEmail(inDto.Email);
+
+            var recaptchaPassed = secretEmail || await bruteForceLoginManager.CheckRecaptchaAsync(inDto.RecaptchaType, inDto.RecaptchaResponse, requestIp);
+
+            if (!recaptchaPassed)
+            {
+                throw new RecaptchaException(Resource.RecaptchaInvalid);
+            }
+        }
 
         await studioNotifyService.SendMsgToAdminFromNotAuthUserAsync(inDto.Email, message, inDto.Culture);
         messageService.Send(MessageAction.ContactAdminMailSent);
@@ -188,15 +205,15 @@ public class MessageSettingsController(MessageService messageService,
 
             if (!email.TestEmailRegex() || email.TestEmailPunyCode())
             {
-                throw new Exception(Resource.ErrorNotCorrectEmail);
+                throw new ArgumentException(Resource.ErrorNotCorrectEmail);
             }
-            
+
             await CheckCache("sendjoininvite");
 
             var user = await userManager.GetUserByEmailAsync(email);
             if (!user.Id.Equals(Constants.LostUser.Id))
             {
-                throw new Exception(await customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
+                throw new ArgumentException(await customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
             }
 
             var trustedDomainSettings = await settingsManager.LoadAsync<StudioTrustedDomainSettings>();
@@ -228,7 +245,7 @@ public class MessageSettingsController(MessageService messageService,
                             return Resource.FinishInviteJoinEmailMessage;
                         }
 
-                        throw new Exception(Resource.ErrorEmailDomainNotAllowed);
+                        throw new ArgumentException(Resource.ErrorEmailDomainNotAllowed);
                     }
                 case TenantTrustedDomainsType.All:
                     {
@@ -237,12 +254,12 @@ public class MessageSettingsController(MessageService messageService,
                         return Resource.FinishInviteJoinEmailMessage;
                     }
                 default:
-                    throw new Exception(Resource.ErrorNotCorrectEmail);
+                    throw new ArgumentException(Resource.ErrorNotCorrectEmail);
             }
         }
         catch (FormatException)
         {
-            throw new Exception(Resource.ErrorNotCorrectEmail);
+            throw new ArgumentException(Resource.ErrorNotCorrectEmail);
         }
     }
 }

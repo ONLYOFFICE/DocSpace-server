@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -58,6 +58,7 @@ global using ASC.Files.Core.VirtualRooms;
 global using ASC.Files.Service;
 global using ASC.Files.Service.Extension;
 global using ASC.Files.Service.Log;
+global using ASC.Files.Service.Services.Thumbnail;
 global using ASC.Files.ThumbnailBuilder;
 global using ASC.Web.Core;
 global using ASC.Web.Files.Classes;
@@ -68,8 +69,6 @@ global using ASC.Web.Files.Utils;
 global using ASC.Web.Studio.Utility;
 
 global using Autofac;
-
-global using AutoMapper;
 
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.EntityFrameworkCore;

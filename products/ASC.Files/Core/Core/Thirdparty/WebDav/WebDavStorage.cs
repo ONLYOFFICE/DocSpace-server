@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,12 +27,12 @@
 namespace ASC.Files.Core.Core.Thirdparty.WebDav;
 
 [Transient(typeof(IThirdPartyStorage<WebDavEntry, WebDavEntry, WebDavEntry>))]
-public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientFactory, SetupInfo setupInfo) 
+public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientFactory, SetupInfo setupInfo)
     : IThirdPartyStorage<WebDavEntry, WebDavEntry, WebDavEntry>, IDisposable
 {
     public bool IsOpened => _client != null;
     public AuthScheme AuthScheme => AuthScheme.Basic;
-    
+
     private const string DepthHeader = "Depth";
     private WebDavClient _client;
     private Uri _baseUri;
@@ -45,18 +45,18 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
         {
             return;
         }
-        
+
         ArgumentException.ThrowIfNullOrEmpty(authData.Url);
-        
+
         var uri = new Uri(authData.Url);
         _baseUri = new UriBuilder(uri.Scheme, uri.Host, uri.Port).Uri;
         _absolutePath = HttpUtility.UrlDecode(uri.AbsolutePath).Trim('/');
 
         var httpClient = httpClientFactory.CreateClient();
-        
+
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic",
             Convert.ToBase64String(Encoding.ASCII.GetBytes($"{authData.Login}:{authData.Password}")));
-        
+
         _client = new WebDavClient(httpClient);
         _authData = authData;
     }
@@ -92,7 +92,7 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
     {
         var path = CombinePath(parentId, title);
         var resourceUrl = BuildResourceUrl(path);
-        
+
         var response = await PutStreamAsync(resourceUrl, fileStream);
         if (!response.IsSuccessful)
         {
@@ -105,7 +105,7 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
     public async Task<Stream> DownloadStreamAsync(WebDavEntry file, int offset = 0)
     {
         var resourceUrl = BuildResourceUrl(file.Id);
-        
+
         var response = await SendAsync(() => _client.GetProcessedFile(resourceUrl));
         if (!response.IsSuccessful)
         {
@@ -142,12 +142,12 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
     {
         var newPath = CombinePath(toFolderId, newFileName);
         var toResourceUrl = BuildResourceUrl(newPath);
-        
+
         if (!await MoveEntryAsync(BuildResourceUrl(fileId), toResourceUrl))
         {
             return null;
         }
-        
+
         return await GetEntryAsync(toResourceUrl);
     }
 
@@ -155,12 +155,12 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
     {
         var path = CombinePath(toFolderId, newFileName);
         var toResourceUrl = BuildResourceUrl(path);
-        
+
         if (!await CopyEntryAsync(BuildResourceUrl(fileId), toResourceUrl))
         {
             return null;
         }
-        
+
         return await GetEntryAsync(toResourceUrl);
     }
 
@@ -169,19 +169,19 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
         var parentPath = GetParentPath(fileId);
         var newPath = CombinePath(parentPath, newName);
         var toResourceUrl = BuildResourceUrl(newPath);
-        
+
         if (!await MoveEntryAsync(BuildResourceUrl(fileId), toResourceUrl))
         {
             return null;
         }
-        
+
         return await GetEntryAsync(toResourceUrl);
     }
 
     public async Task<WebDavEntry> SaveStreamAsync(string fileId, Stream fileStream)
     {
         var resourceUrl = BuildResourceUrl(fileId);
-        
+
         var response = await PutStreamAsync(resourceUrl, fileStream);
         return !response.IsSuccessful ? null : await GetEntryAsync(resourceUrl);
     }
@@ -215,7 +215,7 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
     {
         var newPath = CombinePath(toFolderId, newFolderName);
         var toResourceUrl = BuildResourceUrl(newPath, true);
-        
+
         if (!await MoveEntryAsync(BuildResourceUrl(folderId), toResourceUrl))
         {
             return null;
@@ -228,12 +228,12 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
     {
         var newPath = CombinePath(toFolderId, newFolderName);
         var toResourceUrl = BuildResourceUrl(newPath, true);
-        
+
         if (!await CopyEntryAsync(BuildResourceUrl(folderId), toResourceUrl))
         {
             return null;
         }
-        
+
         return await GetEntryAsync(toResourceUrl);
     }
 
@@ -262,7 +262,7 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
             ? []
             : response.Resources.Skip(1).Select(ToEntry).ToList(); // Skip the folder itself
     }
-    
+
     public Task DeleteItemAsync(WebDavEntry item)
     {
         return SendAsync(() => _client.Delete(BuildResourceUrl(item.Id, item.IsCollection)));
@@ -273,17 +273,17 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
         _client?.Dispose();
         _client = null;
     }
-    
+
     private async Task<WebDavResponse> PutStreamAsync(string url, Stream fileStream)
     {
         var parentPath = GetParentPath(url);
         var parentResource = await GetEntryAsync(parentPath);
-        
+
         if (parentResource is not { IsCollection: true })
         {
             return null;
         }
-        
+
         if (fileStream.CanSeek)
         {
             return await SendAsync(() => _client.PutFile(url, fileStream));
@@ -293,10 +293,10 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
         await fileStream.CopyToAsync(tempBuffer);
         await tempBuffer.FlushAsync();
         tempBuffer.Seek(0, SeekOrigin.Begin);
-        
+
         return await SendAsync(() => _client.PutFile(url, tempBuffer));
     }
-    
+
     private async Task<WebDavEntry> GetEntryAsync(string url)
     {
         var response = await SendAsync(() => _client.Propfind(url, new PropfindParameters
@@ -317,10 +317,10 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
     private async Task<bool> CopyEntryAsync(string fromPath, string toPath)
     {
         var response = await SendAsync(() => _client.Copy(fromPath, toPath));
-        
+
         return response.IsSuccessful;
     }
-    
+
     private string BuildResourceUrl(string path, bool isDirectory = false)
     {
         var url = _baseUri + HttpUtility.UrlPathEncode(CombinePath(_absolutePath, path)).TrimStart('/');
@@ -328,24 +328,24 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
         {
             url += '/';
         }
-        
+
         return url;
     }
-    
+
     private WebDavEntry ToEntry(WebDavResource resource)
     {
         var entry = new WebDavEntry();
 
         var uri = HttpUtility.UrlDecode(resource.Uri.Trim('/'));
         var baseUrl = _baseUri.ToString().Trim('/');
-        
+
         if (uri.StartsWith(baseUrl))
         {
             uri = uri.Replace(baseUrl, string.Empty);
         }
-        
+
         if (!string.IsNullOrEmpty(_absolutePath))
-        { 
+        {
             var index = uri.IndexOf(_absolutePath, StringComparison.Ordinal);
             var id = index == -1 ? uri : uri.Remove(index, _absolutePath.Length);
 
@@ -372,32 +372,32 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
 
         return right.Length == 0 ? left : left + '/' + right;
     }
-    
+
     private static string GetParentPath(string path)
     {
         var index = path.LastIndexOf('/');
         return index <= 0 ? string.Empty : path[..index];
     }
-    
-    private async Task<T> SendAsync<T>(Func<Task<T>> action) where T: WebDavResponse
+
+    private async Task<T> SendAsync<T>(Func<Task<T>> action) where T : WebDavResponse
     {
         var response = await action();
         if (response.StatusCode != (int)HttpStatusCode.Unauthorized)
         {
             return response;
         }
-        
+
         var client = new HttpClient(
-            new HttpClientHandler 
+            new HttpClientHandler
             {
-                Credentials = new NetworkCredential(_authData.Login, _authData.Password) 
+                Credentials = new NetworkCredential(_authData.Login, _authData.Password)
             });
-        
+
         _client = new WebDavClient(client);
-        
+
         return await action();
     }
-    
+
     public IDataWriteOperator CreateDataWriteOperator(CommonChunkedUploadSession chunkedUploadSession, CommonChunkedUploadSessionHolder sessionHolder)
     {
         return new ChunkZipWriteOperator(tempStream, chunkedUploadSession, sessionHolder);

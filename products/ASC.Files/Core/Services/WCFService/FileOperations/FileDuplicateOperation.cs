@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,11 +28,11 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
 [Transient]
 public class FileDuplicateOperation : ComposeFileOperation<FileOperationData<string>, FileOperationData<int>>
-{    
+{
     public override FileOperationType FileOperationType { get; set; } = FileOperationType.Duplicate;
     public FileDuplicateOperation() { }
     public FileDuplicateOperation(IServiceProvider serviceProvider) : base(serviceProvider) { }
-    
+
     public override Task RunJob(CancellationToken cancellationToken)
     {
         DaoOperation = new FileDuplicateOperation<int>(_serviceProvider, Data);
@@ -48,7 +48,7 @@ class FileDuplicateOperation<T>(IServiceProvider serviceProvider, FileOperationD
     private readonly IDictionary<string, string> _headers = data.Headers;
     private CancellationToken _cancellationToken;
     public override FileOperationType FileOperationType { get; set; } = FileOperationType.Duplicate;
-    
+
     public override Task RunJob(CancellationToken cancellationToken)
     {
         _cancellationToken = cancellationToken;
@@ -71,21 +71,21 @@ class FileDuplicateOperation<T>(IServiceProvider serviceProvider, FileOperationD
     {
         var fileDao = scope.ServiceProvider.GetService<IFileDao<T>>();
         var file = await fileDao.GetFilesAsync([id]).FirstOrDefaultAsync(cancellationToken: _cancellationToken);
-        var copyOperationData = new FileMoveCopyOperationData<T>([], [id], CurrentTenantId, CurrentUserId, JsonSerializer.SerializeToElement(file.ParentId), true, FileConflictResolveType.Duplicate, true, _headers, SessionSnapshot);
-        var copyOperation = new FileMoveCopyOperation<T>(scope.ServiceProvider, copyOperationData) 
-        { 
+        var copyOperationData = new FileMoveCopyOperationData<T>([], [id], CurrentTenantId, CurrentUserId, JsonSerializer.SerializeToElement(file.ParentId), true, FileConflictResolveType.Duplicate, false, true, _headers, SessionSnapshot);
+        var copyOperation = new FileMoveCopyOperation<T>(scope.ServiceProvider, copyOperationData)
+        {
             Publication = FileMoveCopyOperationPublishChanges
         };
         await copyOperation.RunJob(_cancellationToken);
     }
 
     private async Task DoFolderAsync(AsyncServiceScope scope, T id)
-    {             
-        var folderDao = scope.ServiceProvider.GetService<IFolderDao<T>>();   
+    {
+        var folderDao = scope.ServiceProvider.GetService<IFolderDao<T>>();
         var folder = await folderDao.GetFolderAsync(id);
-        var copyOperationData = new FileMoveCopyOperationData<T>([id], [], CurrentTenantId, CurrentUserId, JsonSerializer.SerializeToElement(folder.ParentId), true, FileConflictResolveType.Duplicate, true, _headers, SessionSnapshot);
-        var copyOperation = new FileMoveCopyOperation<T>(scope.ServiceProvider, copyOperationData)        
-        { 
+        var copyOperationData = new FileMoveCopyOperationData<T>([id], [], CurrentTenantId, CurrentUserId, JsonSerializer.SerializeToElement(folder.ParentId), true, FileConflictResolveType.Duplicate, false, true, _headers, SessionSnapshot);
+        var copyOperation = new FileMoveCopyOperation<T>(scope.ServiceProvider, copyOperationData)
+        {
             Publication = FileMoveCopyOperationPublishChanges
         };
         await copyOperation.RunJob(_cancellationToken);
@@ -95,10 +95,10 @@ class FileDuplicateOperation<T>(IServiceProvider serviceProvider, FileOperationD
     private async Task FileMoveCopyOperationPublishChanges(DistributedTask task)
     {
         _tasksProps[task.Id] = (FileOperation)task;
-        
+
         Process = 0;
         Result = "";
-        
+
         foreach (var data in _tasksProps)
         {
             Process += data.Value.Process;
@@ -109,13 +109,13 @@ class FileDuplicateOperation<T>(IServiceProvider serviceProvider, FileOperationD
                 Err = err;
             }
         }
-        
+
         var progressSteps = Total;
 
         var progress = (int)(Process / (double)progressSteps * 100);
 
         Progress = progress < 100 ? progress : 100;
-        
+
         await PublishChanges();
     }
 }

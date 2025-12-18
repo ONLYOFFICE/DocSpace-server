@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.Notify.Model;
+
 namespace ASC.Notify.Services;
 
 [Singleton]
@@ -48,16 +50,24 @@ public class NotifySenderService(
 
         await ThreadManagerWorkAsync(stoppingToken);
     }
-       
+
     private void InitializeNotifySchedulers()
     {
         notifyConfiguration.Configure();
 
         foreach (var pair in _notifyServiceCfg.Schedulers.Where(r => r.MethodInfo != null))
         {
-            logger.DebugStartScheduler(pair.Name, pair.MethodInfo);
+            logger.DebugStartScheduler(pair.Name, FormatMethodSignature(pair.MethodInfo));
             pair.MethodInfo.Invoke(null, null);
         }
+    }
+
+    private static string FormatMethodSignature(MethodInfo method)
+    {
+        var parameters = method.GetParameters() ?? [];
+        var paramList = string.Join(", ", parameters.Select(p => $"{p.ParameterType.Name} {p.Name}"));
+
+        return $"{method.DeclaringType?.FullName}.{method.Name}({paramList})";
     }
 
     private async Task ThreadManagerWorkAsync(CancellationToken stoppingToken)

@@ -67,4 +67,37 @@
   <data name="LargeBackup" xml:space="preserve">
     <value>Το αντίγραφο ασφαλείας είναι μεγαλύτερο από το συνολικό μέγεθος της πύλης</value>
   </data>
+  <data name="BackupException" xml:space="preserve">
+    <value>Κάτι πήγε στραβά κατά τη δημιουργία του αντιγράφου ασφαλείας. Προσπαθήστε να το δημιουργήσετε ξανά ή επικοινωνήστε με την υποστήριξη.</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>Κάτι πήγε στραβά κατά την επαναφορά του αντιγράφου ασφαλείας. Δοκιμάστε να το επαναφέρετε ξανά ή επικοινωνήστε με την υποστήριξη.</value>
+  </data>
+  <data name="BackupInvalid" xml:space="preserve">
+    <value>Το αρχείο αντιγράφου ασφαλείας δεν είναι έγκυρο.</value>
+  </data>
+  <data name="AutoBackup" xml:space="preserve">
+    <value>Αυτόματα αντίγραφα ασφαλείας</value>
+  </data>
+  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
+    <value>Custom cloud</value>
+  </data>
+  <data name="BackupStorageTypeDataStore" xml:space="preserve">
+    <value>Προσωρινή αποθήκευση</value>
+  </data>
+  <data name="BackupStorageTypeDocuments" xml:space="preserve">
+    <value>Δημιουργία αντιγράφου ασφαλείας δωματίου</value>
+  </data>
+  <data name="BackupStorageTypeLocal" xml:space="preserve">
+    <value>Τοπικό αρχείο</value>
+  </data>
+  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
+    <value>Αποθήκευση τρίτων</value>
+  </data>
+  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
+    <value>Πόρος τρίτου μέρους</value>
+  </data>
+  <data name="BackupMissingFilesWarning" xml:space="preserve">
+    <value>Ορισμένα αρχεία δεν συμπεριλήφθηκαν στο αντίγραφο ασφαλείας. Για περισσότερες λεπτομέρειες, δείτε {0}</value>
+  </data>
 </root>

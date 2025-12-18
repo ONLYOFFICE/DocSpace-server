@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,31 +27,31 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Parameters for creating a folder: Title (string) - new folder title
+/// The parameters for creating a folder.
 /// </summary>
 public class CreateFolder
 {
     /// <summary>
-    /// Folder title
+    /// The folder title to create.
     /// </summary>
     [StringLength(165)]
-    public string Title { get; set; }
+    public required string Title { get; set; }
 }
 
 /// <summary>
-/// Request parameters for creating a folder: Title (string) - new folder title
+/// The request parameters for creating a folder.
 /// </summary>
 public class CreateFolderRequestDto<T>
 {
     /// <summary>
-    /// Folder ID
+    /// The folder ID for the folder creation.
     /// </summary>
     [FromRoute(Name = "folderId")]
-    public T FolderId { get; set; }
+    public required T FolderId { get; set; }
 
     /// <summary>
-    /// Folder
+    /// The parameters for creating a folder.
     /// </summary>
     [FromBody]
-    public CreateFolder Folder { get; set; }
+    public required CreateFolder Folder { get; set; }
 }

@@ -187,7 +187,7 @@
     <value>Utilizator cu autentificare</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Copiere de rezervă și recuperare automată</value>
+    <value>Recuperare date</value>
   </data>
   <data name="ErrorBadKeys" xml:space="preserve">
     <value>Chei nepotrivite</value>
@@ -400,7 +400,7 @@
     <value>Permiteți aplicației conectarea la portalul folosind contul Microsoft.</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Permiteţi aplicaţiei conectarea la portalul folosind contul Twitter.</value>
+    <value>Permiteţi aplicaţiei conectarea la portalul folosind contul X.</value>
   </data>
   <data name="ConsumersVkDescription" xml:space="preserve">
     <value>Permiteți aplicației conectarea la portalul folosind contul VK.</value>
@@ -436,7 +436,7 @@
     <value>Autorizați aplicația să permite utilizatorilor să se conecteze la {LogoText} utilizând contul LinkedIn. {0}Accesați site-ul pentru dezvoltatori LinkedIn și creați o soluție nouă pentru integrarea cu {LogoText}. Mai jos, inserați datele pe care l-ați primit:</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Autorizaţi aplicaţia să permite utilizatorilor să se conecteze la {LogoText} utilizând Twitter și să conecteze conturile de Twitter ale clienţilor la modulul CRM. {0}Accesați Portalul pentru dezvoltatori Twitter și creați o aplicație nouă pentru integrarea cu {LogoText}. Mai jos, inserați datele pe care l-ați primit:</value>
+    <value>Autorizaţi aplicaţia să permite utilizatorilor să se conecteze la {LogoText} utilizând X și să conecteze conturile de X ale clienţilor la modulul CRM. {0}Accesați Portalul pentru dezvoltatori X și creați o aplicație nouă pentru integrarea cu {LogoText}. Mai jos, inserați datele pe care l-ați primit:</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>Autorizați aplicația să permite utilizatorilor să se conecteze la {LogoText} utilizând contul Zoom. {0}Accesați site-ul pentru dezvoltatori Zoom și creați o soluție nouă pentru integrarea cu {LogoText}. Mai jos, inserați datele pe care l-ați primit:</value>
@@ -928,13 +928,13 @@
     <value>Prea multe încercări de conectare. Încercați din nou mai târziu</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Urmărire conectări și acțiuni efectuate de utilizatori</value>
+    <value>Urmărire conectări și acțiuni</value>
   </data>
   <data name="ConsumersTwilio" xml:space="preserve">
     <value>Twilio</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="LdapSettingsErrorWrongServerOrPort" xml:space="preserve">
     <value>Imposibil de conectat la serverul LDAP. Verificaţi dacă adresa serverului și numărul de port sunt corecte.</value>
@@ -952,7 +952,7 @@
     <value>Un număr nelimitat de săli active</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Un număr nelimitat de utilizatori</value>
+    <value>Numărul nelimitat de utilizatori și invitați</value>
   </data>
   <data name="LdapSettingsStatusUpdatingUserPhotos" xml:space="preserve">
     <value>Actualizare fotografii ale utilizatorilor</value>
@@ -1136,5 +1136,161 @@
   </data>
   <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
     <value>Numărul de administratori depășește limita permisă: {0}/{1}.</value>
+  </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>Adresa URL a Webhook-ului nu este disponibilă. Lipsește codul 200 de răspuns de stare HTTP la solicitarea HEAD.</value>
+  </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Sold de credit</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Monedă</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>Cantitate</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>Unitate de măsură</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>Raportul privind operaţiunile de client  ({0}-{1})</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>Imposibil de găsit grupul</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Spațiu de stocare suplimentar</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Setați cantitatea de spaţiu de stocare de care aveţi nevoie.</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
+    <value>Spaţiul de stocare utilizat:</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Spațiu disc</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Alimentare cont</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Copiere de rezervă</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Reînnoire automată</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Activați copierea de rezervă a spaţiului dvs DocSpace. Prețul serviciilor va fi facturat automat.</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Puteți crea maxim {0} copii de rezervă gratuite lunar</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Efectuati plata</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} copii de rezervă gratuite lunar</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Copiere de rezervă</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Istoricul operațiilor</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Contact</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Debit</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Detalii</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Tip</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Copiere de rezervă</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Alimenarea automată</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GO</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>ID de Client</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Secret client</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Permiteți aplicației conectarea la portalul folosind contul WeChat.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Permiteți aplicației conectarea la portalul folosind contul WeChat.</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Dată</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Prenume</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Nume</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Cota Serviciu Documente ({0})</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>Numărul de plugin-uri depășește limita permisă</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>A intervenit o eroare neaşteptată. Încercaţi din nou.</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>Ați conectat cu succes contul Telegram pentru a primi notificări de DocSpace.</value>
+  </data>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Vectorizare</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>Instrumente de IA</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Token-uri</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>Spațiu de stocare pentru agenți de IA a fost depășit</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Definirea cotei de stocare per agent nu a reușit. Valoarea introdusă depășește  cota spațiului de stocare DocSpace.</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>Numărul de agenți de IA nu trebuie să depășească {0}</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>Instrumente de IA</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Activați funcțiile de IA în spațiul dvs DocSpace pentru a crește productivitatea.</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>Căutare pe web pentru IA</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Depuneți banii în portofelul dvs pentru a activa funcția de căutare pe web pentru IA.</value>
   </data>
 </root>

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -37,11 +37,11 @@ public class CspStartupTask(IServiceProvider provider, IDistributedCache distrib
         await using var scope = provider.CreateAsyncScope();
         var serviceProvider = scope.ServiceProvider;
         var helper = serviceProvider.GetService<CspSettingsHelper>();
-        
-        
+
+
         string oldHeaderValue;
         var oldScheme = false;
-        
+
         try
         {
             oldHeaderValue = await cache.GetOrDefaultAsync<string>(HeaderKey, token: cancellationToken);
@@ -51,11 +51,11 @@ public class CspStartupTask(IServiceProvider provider, IDistributedCache distrib
             oldHeaderValue = await distributedCache.GetStringAsync(HeaderKey, token: cancellationToken);
             oldScheme = true;
         }
-        
+
         var currentHeaderValue = await helper.CreateHeaderAsync(null, false);
 
         if (oldHeaderValue != currentHeaderValue || oldScheme)
-        {        
+        {
             var tenantService = provider.GetService<ITenantService>();
             var tenants = await tenantService.GetTenantsAsync((DateTime)default);
             var t = Task.Run(async () =>
@@ -69,14 +69,14 @@ public class CspStartupTask(IServiceProvider provider, IDistributedCache distrib
     private async Task Update(IEnumerable<Tenant> tenants, string currentHeaderValue, CancellationToken cancellationToken)
     {
         foreach (var t in tenants)
-        {        
+        {
             await using var tenantScope = provider.CreateAsyncScope();
             var tenantServiceProvider = tenantScope.ServiceProvider;
-            
+
             var helper = tenantServiceProvider.GetService<CspSettingsHelper>();
             var tenantManager = tenantServiceProvider.GetService<TenantManager>();
             var settingsManager = tenantServiceProvider.GetService<SettingsManager>();
-            
+
             tenantManager.SetCurrentTenant(t);
             var current = await settingsManager.LoadAsync<CspSettings>();
             await helper.SaveAsync(current.Domains, false);

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -37,7 +37,7 @@ public class UnhandledExceptionMiddleware(RequestDelegate next)
         }
         catch (Exception ex) when (LogError(ex))
         {
-           await OnException(context, ex);
+            await OnException(context, ex);
         }
 
         bool LogError(Exception ex)
@@ -60,7 +60,7 @@ public class UnhandledExceptionMiddleware(RequestDelegate next)
         }
 
         var withStackTrace = true;
-                
+
         switch (exception)
         {
             case ItemNotFoundException:
@@ -83,12 +83,12 @@ public class UnhandledExceptionMiddleware(RequestDelegate next)
                 status = HttpStatusCode.Forbidden;
                 break;
             case TenantQuotaException:
-            case BillingNotFoundException:
+            case BillingException:
                 status = HttpStatusCode.PaymentRequired;
                 break;
         }
 
-        var result = new ErrorApiResponse(status, exception, message, withStackTrace);      
+        var result = new ErrorApiResponse(status, exception, message, withStackTrace);
 
         context.Response.StatusCode = (int)status;
 

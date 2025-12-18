@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,23 +35,37 @@ public class LdapCertificateConfirmRequest
     private volatile string _hash;
     private volatile int[] _certificateErrors;
 
-    public bool Approved { get { return _approved; } set { _approved = value; } }
+    public bool Approved { get => _approved;
+        set => _approved = value;
+    }
 
-    public bool Requested { get { return _requested; } set { _requested = value; } }
+    public bool Requested { get => _requested;
+        set => _requested = value;
+    }
 
-    public string SerialNumber { get { return _serialNumber; } set { _serialNumber = value; } }
+    public string SerialNumber { get => _serialNumber;
+        set => _serialNumber = value;
+    }
 
-    public string IssuerName { get { return _issuerName; } set { _issuerName = value; } }
+    public string IssuerName { get => _issuerName;
+        set => _issuerName = value;
+    }
 
-    public string SubjectName { get { return _subjectName; } set { _subjectName = value; } }
+    public string SubjectName { get => _subjectName;
+        set => _subjectName = value;
+    }
 
     public DateTime ValidFrom { get; set; }
 
     public DateTime ValidUntil { get; set; }
 
-    public string Hash { get { return _hash; } set { _hash = value; } }
+    public string Hash { get => _hash;
+        set => _hash = value;
+    }
 
-    public int[] CertificateErrors { get { return _certificateErrors; } set { _certificateErrors = value; } }
+    public int[] CertificateErrors { get => _certificateErrors;
+        set => _certificateErrors = value;
+    }
 
     private enum LdapCertificateProblem
     {

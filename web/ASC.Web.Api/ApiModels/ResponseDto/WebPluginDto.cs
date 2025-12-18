@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,88 +24,122 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using EnumMappingStrategy = Riok.Mapperly.Abstractions.EnumMappingStrategy;
+
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
-public class WebPluginDto: IMapFrom<WebPlugin>
+/// <summary>
+/// The web plugin information.
+/// </summary>
+public class WebPluginDto
 {
     /// <summary>
-    /// Name
+    /// The web plugin name.
     /// </summary>
-    public string Name { get; set; }
+    public required string Name { get; set; }
 
     /// <summary>
-    /// Version
+    /// The web plugin version.
     /// </summary>
-    public string Version { get; set; }
+    public required string Version { get; set; }
 
     /// <summary>
-    /// Description
+    /// The minimum version of DocSpace with which the plugin is guaranteed to work.
     /// </summary>
-    public string Description { get; set; }
+    public string MinDocSpaceVersion { get; set; }
 
     /// <summary>
-    /// License
+    /// The web plugin description.
     /// </summary>
-    public string License { get; set; }
+    public required string Description { get; set; }
 
     /// <summary>
-    /// Author
+    /// The web plugin license.
     /// </summary>
-    public string Author { get; set; }
+    public required string License { get; set; }
 
     /// <summary>
-    /// Home page
+    /// The web plugin author.
     /// </summary>
-    public string HomePage { get; set; }
+    public required string Author { get; set; }
 
     /// <summary>
-    /// PluginName
+    /// The web plugin home page URL.
     /// </summary>
-    public string PluginName { get; set; }
+    public required string HomePage { get; set; }
 
     /// <summary>
-    /// Scopes
+    /// The name by which the web plugin is registered in the window object. 
     /// </summary>
-    public string Scopes { get; set; }
+    public required string PluginName { get; set; }
 
     /// <summary>
-    /// Image
+    /// The web plugin scopes.
     /// </summary>
-    public string Image { get; set; }
+    public required string Scopes { get; set; }
 
     /// <summary>
-    /// Create by
+    /// The web plugin image.
     /// </summary>
-    public EmployeeDto CreateBy { get; set; }
+    public required string Image { get; set; }
 
     /// <summary>
-    /// Create on
+    /// The user who created the web plugin.
     /// </summary>
-    public DateTime CreateOn { get; set; }
+    public required EmployeeDto CreateBy { get; set; }
 
     /// <summary>
-    /// Enabled
+    /// The date and time when the web plugin was created.
     /// </summary>
-    public bool Enabled { get; set; }
+    public required DateTime CreateOn { get; set; }
 
     /// <summary>
-    /// System
+    /// Specifies if the web plugin is enabled or not.
     /// </summary>
-    public bool System { get; set; }
+    public required bool Enabled { get; set; }
 
     /// <summary>
-    /// Url
+    /// Specifies if the web plugin is system or not.
     /// </summary>
-    public string Url { get; set; }
+    public required bool System { get; set; }
 
     /// <summary>
-    /// Settings
+    /// The web plugin URL.
     /// </summary>
-    public string Settings { get; set; }
+    public required string Url { get; set; }
 
-    public void Mapping(Profile profile)
+    /// <summary>
+    /// The web plugin settings.
+    /// </summary>
+    public required string Settings { get; set; }
+
+    /// <summary>
+    /// The web plugin localized name.
+    /// </summary>
+    public Dictionary<string, string> NameLocale { get; set; }
+
+    /// <summary>
+    /// The web plugin localized description.
+    /// </summary>
+    public Dictionary<string, string> DescriptionLocale { get; set; }
+}
+
+[Scope]
+[Mapper(EnumMappingStrategy = EnumMappingStrategy.ByName, EnumMappingIgnoreCase = true)]
+public partial class WebPluginMapper(EmployeeDtoHelper employeeDtoHelper)
+{
+    [MapperIgnoreSource(nameof(WebPlugin.CspDomains))]
+    [MapProperty(nameof(WebPluginDto.CreateBy), nameof(WebPlugin.CreateBy), Use = nameof(MapCreateBy))]
+    private partial WebPluginDto ToDto(WebPlugin webPlugin);
+
+    [UserMapping(Default = false)]
+    private static EmployeeDto MapCreateBy(Guid _) => new();
+
+    public async Task<WebPluginDto> ToDtoManual(WebPlugin source)
     {
-        profile.CreateMap<Guid, EmployeeDto>().ConvertUsing<WebPluginMappingConverter>();
-        profile.CreateMap<WebPlugin, WebPluginDto>();
+        var dto = ToDto(source);
+        dto.CreateBy = await employeeDtoHelper.GetAsync(source.CreateBy);
+
+        return dto;
     }
 }

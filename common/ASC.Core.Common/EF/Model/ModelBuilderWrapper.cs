@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -107,7 +107,7 @@ public class ModelBuilderWrapper
 
                             if (list[1] is SqlConstantExpression val)
                             {
-                                res.Add(new SqlConstantExpression(Expression.Constant($"$.{val.Value}"), val.TypeMapping));
+                                res.Add(new SqlConstantExpression($"$.{val.Value}", val.TypeMapping));
                             }
                         }
 
@@ -133,7 +133,7 @@ public class ModelBuilderWrapper
 
                             if (list[1] is SqlConstantExpression val)
                             {
-                                res.Add(new SqlConstantExpression(Expression.Constant($"{val.Value}"), val.TypeMapping));
+                                res.Add(new SqlConstantExpression($"{val.Value}", val.TypeMapping));
                             }
                         }
 
@@ -143,12 +143,12 @@ public class ModelBuilderWrapper
             default:
                 throw new InvalidOperationException();
         }
-        
+
         ModelBuilder.HasDbFunction(typeof(DbFunctionsExtension).GetMethod(nameof(DbFunctionsExtension.JsonValue))!)
             .HasTranslation(expressions =>
             {
                 var result = new List<SqlExpression>();
-                
+
                 var jsonDoc = expressions[0];
                 switch (jsonDoc)
                 {
@@ -161,19 +161,19 @@ public class ModelBuilderWrapper
                     default:
                         throw new InvalidOperationException();
                 }
-                
+
                 var path = expressions[1];
                 if (path is SqlConstantExpression value)
                 {
                     var strValue = value.Value?.ToString();
-                    
+
                     if (strValue != null && strValue.StartsWith('[') && strValue.EndsWith(']'))
                     {
-                        result.Add(new SqlConstantExpression(Expression.Constant($"${strValue}"), value.TypeMapping));
+                        result.Add(new SqlConstantExpression($"${strValue}", value.TypeMapping));
                     }
                     else
                     {
-                        result.Add(new SqlConstantExpression(Expression.Constant($"$.{strValue}"), value.TypeMapping));
+                        result.Add(new SqlConstantExpression($"$.{strValue}", value.TypeMapping));
                     }
                 }
                 else

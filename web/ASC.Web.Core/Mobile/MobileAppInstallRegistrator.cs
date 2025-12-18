@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,6 +31,12 @@ public class MobileAppInstallRegistrator(IDbContextFactory<CustomDbContext> dbCo
 {
     public async Task RegisterInstallAsync(string userEmail, MobileAppType appType)
     {
+        var isRegistered = await IsInstallRegisteredAsync(userEmail, appType);
+        if (isRegistered)
+        {
+            return;
+        }
+
         var mai = new MobileAppInstall
         {
             AppType = (int)appType,

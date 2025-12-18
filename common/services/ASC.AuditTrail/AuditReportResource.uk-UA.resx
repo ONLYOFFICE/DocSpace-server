@@ -94,6 +94,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Змінено колорову тему</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Контакти</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>Налаштування файлів cookie оновлено</value>
   </data>
@@ -123,9 +126,6 @@
   </data>
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Налаштування перезапису оновлено</value>
-  </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Документи</value>
   </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Налаштування</value>
@@ -256,9 +256,6 @@
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Налаштування Сфінкса оновлено</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>Загальні</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Налаштування Welcome Page оновлено</value>
   </data>
@@ -267,9 +264,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Група видалена: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Групи</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Група оновлена: {0}</value>
@@ -344,7 +338,7 @@
     <value>Вхід виконано успішно</value>
   </data>
   <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Вхід за допомогою соціального аккаунта успішний</value>
+    <value>Вхід за допомогою соціального аккаунта успішний: {0}</value>
   </data>
   <data name="LoginSuccessViaApi" xml:space="preserve">
     <value>Успішний вхід за допомогою API</value>
@@ -373,9 +367,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>Переміщення</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Інші</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Власник змінився: {0}</value>
   </data>
@@ -393,9 +384,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>Налаштування надійності паролів оновлено</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>Користувачі</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Платформа</value>
@@ -433,9 +421,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Список продуктів оновлено</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Продукти</value>
-  </data>
   <data name="SendActionType" xml:space="preserve">
     <value>Надіслати</value>
   </data>
@@ -448,7 +433,7 @@
   <data name="SessionStarted" xml:space="preserve">
     <value>Сесія розпочалася</value>
   </data>
-  <data name="SettingsProduct" xml:space="preserve">
+  <data name="SettingsModule" xml:space="preserve">
     <value>Налаштування</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
@@ -457,7 +442,7 @@
   <data name="SSOEnabled" xml:space="preserve">
     <value>SSO ввімкнено</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>Почати резервне копіювання</value>
   </data>
   <data name="StartTransferSetting" xml:space="preserve">
@@ -552,9 +537,6 @@
   </data>
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>Користувачі [{0}]. Надіслані інструкції щодо зміни пароля</value>
-  </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>Користувачі</value>
   </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>Користувачі [{0}]. Надіслано інструкції з активації</value>
@@ -808,10 +790,262 @@
   <data name="RoomInviteResend" xml:space="preserve">
     <value>Запрошення надіслані повторно: {0}</value>
   </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
-  </data>
   <data name="UpdateClient" xml:space="preserve">
     <value>Клієнта {0} оновлено</value>
+  </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Параметри доступу до інструментів розробника змінено</value>
+  </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Клієнта {0} видалено</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Змінено активацію {0} для клієнта</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Змінено видимість {0} для клієнта</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Клієнт створено</value>
+  </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Файл: {0}. Індекс змінено з {1} на {2}</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>Файли [{0}]. Видалена версія: {1}</value>
+  </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Користувачі [{0}]. Форму повністю заповнено: {1}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Користувачі [{0}]. Заповнено частину форми: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Користувачі [{0}]. Заповнення розпочато: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Користувачі [{0}]. Форму зупинено: {1}</value>
+  </data>
+  <data name="WebhookCreated" xml:space="preserve">
+    <value>Вебхук створено: {0}</value>
+  </data>
+  <data name="WebhookDeleted" xml:space="preserve">
+    <value>Вебхук видалено: {0}</value>
+  </data>
+  <data name="WebhookUpdated" xml:space="preserve">
+    <value>Вебхук оновлено: {0}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Папка: {0}. Індекс змінено з {1} на {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Папка: {0}. Порядок індексів змінено</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Створено код авторизації для клієнта {0}</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Створено маркер персонального доступу для клієнта {0}</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Секрет клієнта {0} повторно створено</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Скасовано доступ клієнта {0}</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Кімната: {0}. Заборону завантаження вимкнено</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Кімната: {0}. Заборону завантаження ввімкнено</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Індексування кімнат вимкнено</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Увімкнено індексування кімнати</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>Період існування вимкнено</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Період існування налаштовано. Значення: {0}. Період: {1}. Видалити назавжди: {2}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Кімната: {0}. Водяний знак вимкнено</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Кімната: {0}. Водяний знак ввімкнено</value>
+  </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>Файл: {0}. Користувацькі фільтри вимкнено</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>Файл: {0}. Користувацький фільтр увімкнуто</value>
+  </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Створено ключ API користувача: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Ключ API користувача видалено: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Оновлено ключ API користувача: {0}</value>
+  </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Авторизаційне посилання активовано</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Клієнтську операцію виконано</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Звіт про клієнтські операції завантажено</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Підписку клієнта оновлено: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Гаманець клієнта поповнено: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Параметри поповнення гаманця клієнта оновлено</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>Автентифікація LDAP вимкнена</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>Автентифікація LDAP увімкнена</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>Синхронізацію LDAP завершено</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Розташування</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Змінено налаштування видимості рекламних банерів</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Оновлено параметри служб, увімкнутих гаманець клієнта</value>
+  </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Вхід за допомогою соціального аккаунта успішний</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>Сервер MCP {0} додано до агента</value>
+  </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>Агента створено</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>Агента видалено</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>Агента перейменовано: {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>Агенти</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>Постачальника ШІ створено: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>Постачальника ШІ видалено: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>Постачальника ШІ оновлено: {0}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Агенти ШІ [{0}]. Установлена квота пам'яті для агентів ШІ: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>Агенти ШІ [{0}]. Установлена квота пам'яті за замовчуванням для агентів ШІ: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Агенти ШІ [{0}]. Вимкнута квота пам'яті для агентів ШІ</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>Сервер MCP {0} видалено з агента</value>
+  </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Файли [{0}]. Зовнішнє посилання створено: {1}. Роль: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Файли [{0}]. Зовнішнє посилання видалено: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Файли [{0}]. Зовнішнє посилання оновлено: {1}. Роль: {2}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Файл позначено як вибраний: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Файл видалено з вибраного: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Файл видалено з розділу «Поділились зі мною»: {0}</value>
+  </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Файли [{0}]. Доступ оновлено для {1}. Роль: {2}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Папку завантажено: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Папки [{0}]. Зовнішнє посилання створено: {1}. Роль: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Папки [{0}]. Зовнішнє посилання видалено: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Папки [{0}]. Зовнішнє посилання оновлено: {1}. Роль: {2}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Папку видалено з розділу «Поділились зі мною»: {0}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Папки [{0}]. Доступ оновлено для {1}. Роль: {2}</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Успішний вхід за допомогою OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Успішний вхід за допомогою логіна й пароля</value>
+  </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Установлена квота пам'яті для агентів ШІ: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Вимкнута квота пам'яті за замовчуванням для агентів ШІ</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>Параметри векторизації скинуто</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>Параметри вебпошуку скинуто</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Зовнішнє посилання скасовано: {1}</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>Сервер MCP створено: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>Сервер MCP видалено: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>Сервер MCP вимкнено: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>Сервер MCP увімкнено: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>Сервер MCP оновлено: {0}</value>
+  </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>Параметри векторизації налаштовано. Постачальник: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>Параметри вебпошуку налаштовано. Рушій: {0}</value>
   </data>
 </root>

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,7 +30,10 @@ namespace ASC.Api.Core.Middleware;
 public class TenantStatusFilter(ILogger<TenantStatusFilter> logger, TenantManager tenantManager)
     : IAsyncResourceFilter
 {
-    private readonly string[] _passthroughtRequestEndings = ["preparation-portal", "portal", "getrestoreprogress", "cancelrestore", "settings", "settings.json", "colortheme", "colortheme.json", "logos", "logos.json", "build", "build.json", "@self", "@self.json", "encryption/progress"
+    private readonly string[] _passthroughtRequestEndings = [
+        "preparation-portal", "portal", "getrestoreprogress", "cancelrestore", "settings", "settings.json",
+        "colortheme", "colortheme.json", "logos", "logos.json", "build", "build.json", "@self", "@self.json",
+        "encryption/progress", "rebranding/additional", "rebranding/company"
     ]; //TODO add or update when "preparation-portal" will be done
 
 

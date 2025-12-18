@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,31 +28,37 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace ASC.Core.Common.EF.Model;
 
+/// <summary>
+/// The database tenant partner parameters.
+/// </summary>
 public class DbTenantPartner : BaseEntity
 {
     /// <summary>
-    /// Tenant id
+    /// The tenant ID.
     /// </summary>
     public int TenantId { get; set; }
 
     /// <summary>
-    /// Partner id
+    /// The partner ID.
     /// </summary>
     [MaxLength(36)]
     public string PartnerId { get; set; }
 
     /// <summary>
-    /// Affiliate id
+    /// The affiliate ID.
     /// </summary>
     [MaxLength(50)]
     public string AffiliateId { get; set; }
 
     /// <summary>
-    /// Campaign
+    /// The tenant partner campaign.
     /// </summary>
     [MaxLength(50)]
     public string Campaign { get; set; }
 
+    /// <summary>
+    /// The database tenant parameters.
+    /// </summary>
     [SwaggerIgnore]
     public DbTenant Tenant { get; set; }
 
@@ -73,70 +79,74 @@ public static class DbTenantPartnerExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddDbTenantPartner(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbTenantPartner>().Navigation(e => e.Tenant).AutoInclude(false);
-
-        modelBuilder.Entity<DbTenantPartner>(entity =>
+        public void MySqlAddDbTenantPartner()
         {
-            entity.HasKey(e => new { e.TenantId })
-                .HasName("PRIMARY");
+            modelBuilder.Entity<DbTenantPartner>().Navigation(e => e.Tenant).AutoInclude(false);
 
-            entity.ToTable("tenants_partners")
-                .HasCharSet("utf8");
+            modelBuilder.Entity<DbTenantPartner>(entity =>
+            {
+                entity.HasKey(e => new { e.TenantId })
+                    .HasName("PRIMARY");
 
-            entity.Property(e => e.TenantId)
-                .HasColumnName("tenant_id")
-                .ValueGeneratedNever();
+                entity.ToTable("tenants_partners")
+                    .HasCharSet("utf8");
 
-            entity.Property(e => e.AffiliateId)
-                .HasColumnName("affiliate_id")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.TenantId)
+                    .HasColumnName("tenant_id")
+                    .ValueGeneratedNever();
 
-            entity.Property(e => e.Campaign)
-                .HasColumnName("campaign")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.AffiliateId)
+                    .HasColumnName("affiliate_id")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.PartnerId)
-                .HasColumnName("partner_id")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
-        });
+                entity.Property(e => e.Campaign)
+                    .HasColumnName("campaign")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-    }
-    public static void PgSqlAddDbTenantPartner(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<DbTenantPartner>(entity =>
+                entity.Property(e => e.PartnerId)
+                    .HasColumnName("partner_id")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
+            });
+
+        }
+
+        public void PgSqlAddDbTenantPartner()
         {
-            entity.HasKey(e => e.TenantId)
-                .HasName("tenant_partner_pkey");
+            modelBuilder.Entity<DbTenantPartner>(entity =>
+            {
+                entity.HasKey(e => e.TenantId)
+                    .HasName("tenant_partner_pkey");
 
-            entity.ToTable("tenants_partners");
+                entity.ToTable("tenants_partners");
 
-            entity.Property(e => e.TenantId)
-                .HasColumnName("tenant_id")
-                .ValueGeneratedNever();
+                entity.Property(e => e.TenantId)
+                    .HasColumnName("tenant_id")
+                    .ValueGeneratedNever();
 
-            entity.Property(e => e.AffiliateId)
-                .HasColumnName("affiliate_id")
-                .HasColumnType("character varying")
-                .HasMaxLength(50);
+                entity.Property(e => e.AffiliateId)
+                    .HasColumnName("affiliate_id")
+                    .HasColumnType("character varying")
+                    .HasMaxLength(50);
 
-            entity.Property(e => e.Campaign)
-                .HasColumnName("campaign")
-                .HasColumnType("character varying")
-                .HasMaxLength(50);
+                entity.Property(e => e.Campaign)
+                    .HasColumnName("campaign")
+                    .HasColumnType("character varying")
+                    .HasMaxLength(50);
 
-            entity.Property(e => e.PartnerId)
-                .HasColumnName("partner_id")
-                .HasColumnType("character varying")
-                .HasMaxLength(36);
-        });
-        
+                entity.Property(e => e.PartnerId)
+                    .HasColumnName("partner_id")
+                    .HasColumnType("character varying")
+                    .HasMaxLength(36);
+            });
+
+        }
     }
 }

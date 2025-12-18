@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,17 +26,22 @@
 
 namespace ASC.Core.Tenants;
 
+/// <summary>
+/// The Developer Tools access settings.
+/// </summary>
 [Scope]
 [Serializable]
 public class TenantDevToolsAccessSettings : ISettings<TenantDevToolsAccessSettings>
 {
+    /// <summary>
+    /// Specifies if the Developer Tools access are limited for users or not.
+    /// </summary>
     public bool LimitedAccessForUsers { get; set; }
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{739F1C35-1688-4EEB-B46B-6E413FBCE834}"); }
-    }
+    /// <summary>
+    /// The settings ID.
+    /// </summary>
+    public static Guid ID => new("{739F1C35-1688-4EEB-B46B-6E413FBCE834}");
 
     public TenantDevToolsAccessSettings GetDefault()
     {
@@ -45,4 +50,6 @@ public class TenantDevToolsAccessSettings : ISettings<TenantDevToolsAccessSettin
             LimitedAccessForUsers = false
         };
     }
+
+    public DateTime LastModified { get; set; }
 }

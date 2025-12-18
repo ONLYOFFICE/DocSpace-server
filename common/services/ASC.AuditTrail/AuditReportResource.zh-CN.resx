@@ -97,6 +97,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>颜色主题已修改</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>联系人信息</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>Cookie设置已更新</value>
   </data>
@@ -126,9 +129,6 @@
   </data>
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>更新配置文件覆盖</value>
-  </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>文档</value>
   </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>设置</value>
@@ -262,9 +262,6 @@
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Sphinx设置已更新</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>常规</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>欢迎页面设置已更新</value>
   </data>
@@ -273,9 +270,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>小组已删除：{0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>小组</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>小组已更新：{0}</value>
@@ -388,9 +382,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>移动</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>其他人</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>所有者已更改：{0}</value>
   </data>
@@ -408,9 +399,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>密码强度设置已更新</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>成员</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>平台</value>
@@ -448,9 +436,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>产品列表已更新</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>产品</value>
-  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>重新分配</value>
   </data>
@@ -466,7 +451,7 @@
   <data name="SessionStarted" xml:space="preserve">
     <value>会话已开始</value>
   </data>
-  <data name="SettingsProduct" xml:space="preserve">
+  <data name="SettingsModule" xml:space="preserve">
     <value>设置</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
@@ -475,7 +460,7 @@
   <data name="SSOEnabled" xml:space="preserve">
     <value>SSO已启用</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>开始备份</value>
   </data>
   <data name="StartTransferSetting" xml:space="preserve">
@@ -579,9 +564,6 @@
   </data>
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>户[{0}]。 发送密码更改说明</value>
-  </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>用户</value>
   </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>用户[{0}]。 激活说明已发送</value>
@@ -734,7 +716,7 @@
     <value>打开以进行更改的文件：{0}</value>
   </data>
   <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>通过社交账号登录成功</value>
+    <value>通过社交帐户登录成功：{0}</value>
   </data>
   <data name="PortalRenamed" xml:space="preserve">
     <value>门户已被重命名</value>
@@ -835,9 +817,6 @@
   <data name="GeneratePersonalAccessToken" xml:space="preserve">
     <value>为客户端 {0} 生成的个人访问令牌</value>
   </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
-  </data>
   <data name="RegenerateSecret" xml:space="preserve">
     <value>客户端 {0} 密钥已重新生成</value>
   </data>
@@ -870,5 +849,227 @@
   </data>
   <data name="UpdateClient" xml:space="preserve">
     <value>客户端 {0} 已更新</value>
+  </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>已更改开发者工具访问权限设置</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>文件[{0}]的版本{1}已删除</value>
+  </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>用户[{0}]已全部完成表单填写：{1}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>用户[{0}]已部分完成表单填写：{1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>用户[{0}]已开始填写：{1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>用户[{0}]已停止表单：{1}</value>
+  </data>
+  <data name="WebhookCreated" xml:space="preserve">
+    <value>Webhook 已创建：{0}</value>
+  </data>
+  <data name="WebhookDeleted" xml:space="preserve">
+    <value>Webhook 已删除：{0}</value>
+  </data>
+  <data name="WebhookUpdated" xml:space="preserve">
+    <value>Webhook 已更新：{0}</value>
+  </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>用户 Api 密钥已创建：{0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>用户 Api 密钥已删除：{0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>用户 Api 密钥已更新：{0}</value>
+  </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>文件：{0}。自定义过滤器已禁用</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>文件：{0}。自定义过滤器已启用</value>
+  </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>授权链接已激活</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>LDAP 认证已禁用</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>LDAP 认证已启用</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>LDAP 同步已完成</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>客户操作已执行</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>客户操作报告已下载</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>客户订阅已更新: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>客户钱包已充值: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>客户钱包充值设置已更新</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>促销横幅的可见性设置已变更</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>客户钱包已启用服务的设置已更新</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>位置</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>通过 OAuth 2.0 成功登录</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>通过登录名和密码成功登录</value>
+  </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>文件[{0}]。外部链接已创建：{1}。角色：{2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>文件[{0}]。外部链接已删除：{1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>文件[{0}]。外部链接已更新：{1}。角色：{2}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>文件已标记为收藏：{0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>文件已从“共享”中移除：{0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>文件已从“共享”中移除：{0}</value>
+  </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>文件[{0}]。{1}的访问权限已更新。角色：{2}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>文件夹已下载：{0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>文件夹[{0}]。外部链接已创建：{1}。角色：{2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>文件夹[{0}]。外部链接已删除：{1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>文件夹[{0}]。外部链接已更新：{1}。角色：{2}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>文件夹已从“共享”中移除：{0}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>文件夹[{0}]。外部链接已更新：{1}。角色：{2}</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>外部链接已撤销：{1}</value>
+  </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>通过社交账户登录成功</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>已将 MCP 服务器 {0} 添加到智能体</value>
+  </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>已创建智能体</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>已删除智能体</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>已重命名智能体：{0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>智能体</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>已创建 AI 提供商：{0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>已删除 AI 提供商：{0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>已更新 AI 提供商：{0}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>AI 智能体 [{0}]。为 AI 智能体设置自定义存储配额：{1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>AI 智能体 [{0}]。为 AI 智能体设置默认存储配额：{1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>AI 智能体 [{0}]。已禁用 AI 智能体的存储配额</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>已从智能体中删除 MCP 服务器 {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>为 AI 智能体设置默认存储配额：{0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>已禁用 AI 智能体的默认存储配额</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>已重置向量化设置</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>已重置联网搜索设置</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>已创建 MCP 服务器：{0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>已删除 MCP 服务器：{0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>已禁用 MCP 服务器：{0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>已启用 MCP 服务器：{0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>已更新 MCP 服务器：{0}</value>
+  </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>已配置向量化设置。提供者：{0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>已配置联网搜索设置。引擎：{0}</value>
+  </data>
+  <data name="BackupCompleted" xml:space="preserve">
+    <value>备份完成</value>
+  </data>
+  <data name="BackupFailed" xml:space="preserve">
+    <value>备份失败</value>
+  </data>
+  <data name="ScheduledBackupCompleted" xml:space="preserve">
+    <value>计划备份完成</value>
+  </data>
+  <data name="ScheduledBackupFailed" xml:space="preserve">
+    <value>计划备份失败</value>
+  </data>
+  <data name="ScheduledBackupStarted" xml:space="preserve">
+    <value>计划备份开始</value>
+  </data>
+  <data name="WebpluginDeleted" xml:space="preserve">
+    <value>插件已删除：{0}</value>
+  </data>
+  <data name="WebpluginUpdated" xml:space="preserve">
+    <value>插件已更新：{0}</value>
+  </data>
+  <data name="WebpluginUploaded" xml:space="preserve">
+    <value>插件已上传：{0}</value>
   </data>
 </root>

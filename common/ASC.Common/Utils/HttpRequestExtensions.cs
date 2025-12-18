@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,105 +30,111 @@ public static class HttpRequestExtensions
 {
     public const string RequestTokenHeader = "Request-Token";
 
-    public static Uri Url(this HttpRequest request)
+    extension(HttpContext context)
     {
-        var url = request != null ? new Uri(request.GetDisplayUrl()) : null;
-
-        if (!string.IsNullOrEmpty(url?.Query))
+        public Uri PushRewritenUri()
         {
-            var queryParams = HttpUtility.ParseQueryString(url.Query);
-            var origin = queryParams[HeaderNames.Origin.ToLower()];
-            if (Uri.TryCreate(origin, UriKind.Absolute, out var urlOrigin))
-            {
-                var result = new UriBuilder(url)
-                {
-                    Scheme = urlOrigin.Scheme,
-                    Host = urlOrigin.Host,
-                    Port = urlOrigin.Port
-                };
-                return result.Uri;
-            }
+            return context != null ? PushRewritenUri(context, context.Request.Url()) : null;
         }
 
-        return url;
-    }
-
-    public static Uri PushRewritenUri(this HttpContext context)
-    {
-        return context != null ? PushRewritenUri(context, context.Request.Url()) : null;
-    }
-
-    private static Uri PushRewritenUri(this HttpContext context, Uri rewrittenUri)
-    {
-        Uri oldUri = null;
-
-        if (context != null)
+        private Uri PushRewritenUri(Uri rewrittenUri)
         {
-            var request = context.Request;
+            Uri oldUri = null;
 
-            var url = new Uri(request.GetDisplayUrl());
-
-            if (url != rewrittenUri)
+            if (context != null)
             {
-                try
+                var request = context.Request;
+
+                var url = new Uri(request.GetDisplayUrl());
+
+                if (url != rewrittenUri)
                 {
-                    //Push it
-                    request.Headers.SetCommaSeparatedValues("HTTPS", rewrittenUri.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase) ? "on" : "off");
-                    request.Headers.SetCommaSeparatedValues("SERVER_NAME", rewrittenUri.Host);
-                    request.Headers.SetCommaSeparatedValues("SERVER_PORT",
-                                                rewrittenUri.Port.ToString(CultureInfo.InvariantCulture));
-
-                    if (rewrittenUri.IsDefaultPort)
+                    try
                     {
-                        request.Headers.SetCommaSeparatedValues("HTTP_HOST",
-                                                    rewrittenUri.Host);
-                    }
-                    else
-                    {
-                        request.Headers.SetCommaSeparatedValues("HTTP_HOST",
-                                                    rewrittenUri.Host + ":" + url.Port);
-                    }
-                    //Hack:
-                    typeof(HttpRequest).InvokeMember("_url",
-                                                      BindingFlags.NonPublic | BindingFlags.SetField |
-                                                      BindingFlags.Instance,
-                                                      null, request,
-                                                      [null]);
-                    oldUri = url;
-                    context.Items["oldUri"] = oldUri;
+                        //Push it
+                        request.Headers.SetCommaSeparatedValues("HTTPS", rewrittenUri.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase) ? "on" : "off");
+                        request.Headers.SetCommaSeparatedValues("SERVER_NAME", rewrittenUri.Host);
+                        request.Headers.SetCommaSeparatedValues("SERVER_PORT",
+                            rewrittenUri.Port.ToString(CultureInfo.InvariantCulture));
 
+                        if (rewrittenUri.IsDefaultPort)
+                        {
+                            request.Headers.SetCommaSeparatedValues("HTTP_HOST",
+                                rewrittenUri.Host);
+                        }
+                        else
+                        {
+                            request.Headers.SetCommaSeparatedValues("HTTP_HOST",
+                                rewrittenUri.Host + ":" + url.Port);
+                        }
+                        //Hack:
+                        typeof(HttpRequest).InvokeMember("_url",
+                            BindingFlags.NonPublic | BindingFlags.SetField |
+                            BindingFlags.Instance,
+                            null, request,
+                            [null]);
+                        oldUri = url;
+                        context.Items["oldUri"] = oldUri;
+
+                    }
+                    catch (Exception) { }
                 }
-                catch (Exception) { }
             }
+
+            return oldUri;
         }
 
-        return oldUri;
-    }
-
-    public static Uri PopRewritenUri(this HttpContext context)
-    {
-        if (context?.Items["oldUri"] != null)
+        public Uri PopRewritenUri()
         {
-            var rewriteTo = context.Items["oldUri"] as Uri;
-
-            if (rewriteTo != null)
+            if (context?.Items["oldUri"] != null)
             {
-                return PushRewritenUri(context, rewriteTo);
+                var rewriteTo = context.Items["oldUri"] as Uri;
+
+                if (rewriteTo != null)
+                {
+                    return PushRewritenUri(context, rewriteTo);
+                }
             }
+
+            return null;
+        }
+    }
+
+    extension(HttpRequest request)
+    {
+        public bool DesktopApp()
+        {
+            return request != null
+                   && (!string.IsNullOrEmpty(request.Query["desktop"])
+                       || !string.IsNullOrEmpty(request.Headers[HeaderNames.UserAgent]) && request.Headers[HeaderNames.UserAgent].ToString().Contains("AscDesktopEditor"));
         }
 
-        return null;
-    }
+        public bool MobileApp()
+        {
+            return !string.IsNullOrEmpty(request.Headers[HeaderNames.UserAgent]) && (request.Headers[HeaderNames.UserAgent].ToString().Contains("iPhone") || request.Headers[HeaderNames.UserAgent].ToString().Contains("iOS") || request.Headers[HeaderNames.UserAgent].ToString().Contains("Android"));
+        }
 
-    public static bool DesktopApp(this HttpRequest request)
-    {
-        return request != null
-            && (!string.IsNullOrEmpty(request.Query["desktop"])
-                || !string.IsNullOrEmpty(request.Headers[HeaderNames.UserAgent]) && request.Headers[HeaderNames.UserAgent].ToString().Contains("AscDesktopEditor"));
-    }
+        public Uri Url()
+        {
+            var url = request != null ? new Uri(request.GetDisplayUrl()) : null;
 
-    public static bool MobileApp(this HttpRequest request)
-    {
-        return !string.IsNullOrEmpty(request.Headers[HeaderNames.UserAgent]) && (request.Headers[HeaderNames.UserAgent].ToString().Contains("iPhone") || request.Headers[HeaderNames.UserAgent].ToString().Contains("iOS") || request.Headers[HeaderNames.UserAgent].ToString().Contains("Android"));
+            if (!string.IsNullOrEmpty(url?.Query))
+            {
+                var queryParams = HttpUtility.ParseQueryString(url.Query);
+                var origin = queryParams[HeaderNames.Origin.ToLower()];
+                if (Uri.TryCreate(origin, UriKind.Absolute, out var urlOrigin))
+                {
+                    var result = new UriBuilder(url)
+                    {
+                        Scheme = urlOrigin.Scheme,
+                        Host = urlOrigin.Host,
+                        Port = urlOrigin.Port
+                    };
+                    return result.Uri;
+                }
+            }
+
+            return url;
+        }
     }
 }

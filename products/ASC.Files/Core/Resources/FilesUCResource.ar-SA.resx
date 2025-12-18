@@ -133,7 +133,7 @@
     <value>الملفات سيتم ضغطها في {0}.zip ملف{1}</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>المستندات</value>
+    <value>ملفاتي</value>
   </data>
   <data name="Personal" xml:space="preserve">
     <value>شخصي</value>
@@ -161,5 +161,11 @@
   </data>
   <data name="ReadyFormFolder" xml:space="preserve">
     <value>أكمل</value>
+  </data>
+  <data name="RoomTemplates" xml:space="preserve">
+    <value>قوالب</value>
+  </data>
+  <data name="AiAgents" xml:space="preserve">
+    <value>وكلاء الذكاء الاصطناعي</value>
   </data>
 </root>

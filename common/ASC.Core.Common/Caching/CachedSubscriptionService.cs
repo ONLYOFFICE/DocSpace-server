@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -222,7 +222,7 @@ internal class SubscriptionsStore
     {
         var objId = objectId ?? string.Empty;
         return recipientId != null ?
-            _recordsByRec.TryGetValue(recipientId, out var value) ? value.ToList() : [] : 
+            _recordsByRec.TryGetValue(recipientId, out var value) ? value.ToList() : [] :
             _recordsByObj.TryGetValue(objId, out var value1) ? value1.ToList() : [];
     }
 

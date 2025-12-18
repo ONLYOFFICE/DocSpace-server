@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,25 +27,27 @@
 namespace ASC.Core.Common.EF;
 public static class PredicateBuilder
 {
-    public static Expression<Func<T, bool>> And<T>(this Expression<Func<T, bool>> a, Expression<Func<T, bool>> b)
+    extension<T>(Expression<Func<T, bool>> a)
     {
+        public Expression<Func<T, bool>> And(Expression<Func<T, bool>> b)
+        {
+            var p = a.Parameters[0];
 
-        var p = a.Parameters[0];
+            var visitor = new SubstExpressionVisitor { Subst = { [b.Parameters[0]] = p } };
 
-        var visitor = new SubstExpressionVisitor { Subst = { [b.Parameters[0]] = p } };
+            Expression body = Expression.AndAlso(a.Body, visitor.Visit(b.Body));
+            return Expression.Lambda<Func<T, bool>>(body, p);
+        }
 
-        Expression body = Expression.AndAlso(a.Body, visitor.Visit(b.Body));
-        return Expression.Lambda<Func<T, bool>>(body, p);
-    }
+        public Expression<Func<T, bool>> Or(Expression<Func<T, bool>> b)
+        {
+            var p = a.Parameters[0];
 
-    public static Expression<Func<T, bool>> Or<T>(this Expression<Func<T, bool>> a, Expression<Func<T, bool>> b)
-    {
-        var p = a.Parameters[0];
+            var visitor = new SubstExpressionVisitor { Subst = { [b.Parameters[0]] = p } };
 
-        var visitor = new SubstExpressionVisitor { Subst = { [b.Parameters[0]] = p } };
-
-        Expression body = Expression.OrElse(a.Body, visitor.Visit(b.Body));
-        return Expression.Lambda<Func<T, bool>>(body, p);
+            Expression body = Expression.OrElse(a.Body, visitor.Visit(b.Body));
+            return Expression.Lambda<Func<T, bool>>(body, p);
+        }
     }
 }
 

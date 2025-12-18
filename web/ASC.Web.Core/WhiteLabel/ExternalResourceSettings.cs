@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -48,15 +48,53 @@ public class ExternalResourceSettings(ExternalResourceSettingsHelper helper)
     }
 }
 
+/// <summary>
+/// The external resources settings.
+/// </summary>
 public class CultureSpecificExternalResources
 {
+    /// <summary>
+    /// The link to the product API.
+    /// </summary>
     public CultureSpecificExternalResource Api { get; set; }
+
+    /// <summary>
+    /// The link to the common product information.
+    /// </summary>
     public CultureSpecificExternalResource Common { get; set; }
+
+    /// <summary>
+    /// The link to the forum.
+    /// </summary>
     public CultureSpecificExternalResource Forum { get; set; }
+
+    /// <summary>
+    /// The link to the Help Center.
+    /// </summary>
     public CultureSpecificExternalResource Helpcenter { get; set; }
+
+    /// <summary>
+    /// The link to the product integrations.
+    /// </summary>
     public CultureSpecificExternalResource Integrations { get; set; }
+
+    /// <summary>
+    /// The link to the product website.
+    /// </summary>
     public CultureSpecificExternalResource Site { get; set; }
+
+    /// <summary>
+    /// The link to the product social nerworks.
+    /// </summary>
     public CultureSpecificExternalResource SocialNetworks { get; set; }
+
+    /// <summary>
+    /// The link to the product support.
+    /// </summary>
     public CultureSpecificExternalResource Support { get; set; }
+
+    /// <summary>
+    /// The link to the video guides.
+    /// </summary>
     public CultureSpecificExternalResource Videoguides { get; set; }
 }

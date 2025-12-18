@@ -118,40 +118,40 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ActionFileCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; je napravio novi dokument: &lt;a href={1}&gt;{2}&lt;/a&gt; u sobi: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; je napravio novi dokument: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; u sobi: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileEdited" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; je izmenio/la dokument: &lt;a href={1}&gt;{2}&lt;/a&gt; u sobi: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; je izmenio/la dokument: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; u sobi: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionFileUploaded" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; je otpremio novi dokument: &lt;a href={1}&gt;{2}&lt;/a&gt; u sobi: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; je otpremio novi dokument: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; u sobi: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionNewComment" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; je dodao novi komentar u verziju dokumenta: &lt;a href={1}&gt;{2}&lt;/a&gt; u sobi: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; je dodao novi komentar u verziju dokumenta: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; u sobi: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomArchived" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; je premestio/la sobu: &lt;a href={1}&gt;{2}&lt;/a&gt; u arhivu - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; je premestio/la sobu: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; u arhivu - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; je napravio/la novu sobu: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; je napravio/la novu sobu: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomRemoved" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; je izbrisao/la sobu: &lt;b&gt;{1}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomRenamed" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; je preimenovao sobu: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href={2}&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; je preimenovao sobu: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomUpdateAccessForUser" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; je dodeljena uloga &lt;b&gt;{1}&lt;/b&gt; u sobi: &lt;a href={2}&gt;{3}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; je dodeljena uloga &lt;b&gt;{1}&lt;/b&gt; u sobi: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserAddedToRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; je dodat u sobu: &lt;a href={1}&gt;{2}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; je dodat u sobu: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
     <value>Dodat je novi DocSpace korisnik: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; je uklonjen iz sobe: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; je uklonjen iz sobe: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionUsersUpdatedType" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; je promenio nivo pristupa korisnika &lt;b&gt;{1}&lt;/b&gt; u &lt;b&gt;{2}&lt;/b&gt;</value>
@@ -355,7 +355,7 @@
     <value>Brisanje portala ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace je deaktiviran</value>
+    <value>${LetterLogoText} DocSpace je obrisan</value>
   </data>
   <data name="subject_portal_rename" xml:space="preserve">
     <value>${LetterLogoText}. Promena adrese portala</value>
@@ -425,9 +425,6 @@
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Grejs period za vaš ${LetterLogoText} DocSpace aktiviran</value>
-  </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Vaša ${LetterLogoText} DocSpace pretplata uskoro ističe</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Grejs period za vaš ${LetterLogoText} DocSpace je istekao</value>
@@ -561,7 +558,9 @@ Konfiguracija aplikacije za autentifikaciju koju koristite za ulazak na portal $
 
 Kliknite na dugme ispod da biste otišli na stranicu za prijavu na portal i konfigurisali aplikaciju za autentifikaciju:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Promena "${__VirtualRootPath}":"${__VirtualRootPath}" vlasnika portala
@@ -906,18 +905,6 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Zdravo, $UserName!
-
-Imajte u vidu da vaša ${LetterLogoText} DocSpace pretplata ističe za tri dana. Nakon toga, grejs period od $PaymentDelay dana će biti aktiviran.
-
-Preporučujemo da sada platite svoju Poslovnu pretplatu i nastavite da koristite sve prednosti svog ${LetterLogoText} DocSpace-a.
-
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Zdravo, $UserName!
 
@@ -1207,7 +1194,7 @@ Ako imate bilo kakvih pitanja ili vam je potrebna pomoć, slobodno nas kontakti
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace je &lt;span style="color: #FF6F3D;"&gt;deaktiviran&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace je &lt;span style="color: #FF6F3D;"&gt;obrisan&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Vaš ${LetterLogoText} DocSpace je uspešno deaktiviran. Imajte na umu da će svi vaši podaci biti izbrisani u skladu sa našom &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Politikom privatnosti&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
@@ -1943,11 +1930,13 @@ $TrulyYours</value>
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Zdravo, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Upravo ste *kreirali ${LetterLogoText} DocSpace*, centar za dokumente gde možete da poboljšate saradnju sa svojim timom, klijentima, partnerima i još mnogo toga. Njegova adresa je &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Upravo ste *kreirali ${LetterLogoText} DocSpace*, centar za dokumente gde možete da poboljšate saradnju sa svojim timom, klijentima, partnerima i još mnogo toga. Njegova adresa je &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
+#if($OrangeButton != "")
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Molimo potvrdite svoj email (link važi 7 dana):&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 44px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
+#end
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;Vaš trenutni tarifni plan je STARTUP. Potpuno je besplatan i uključuje:&lt;/td&gt;&lt;/tr&gt;
 
@@ -1956,5 +1945,226 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding: 0px 40px 24px; vertical-align: top; text-align: center;"&gt; Uživajte u novom načinu saradnje sa dokumentima!&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
+  </data>
+  <data name="pattern_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Vaš ${LetterLogoText} DocSpace će biti &lt;span style="color: #FF6F3D;"&gt;obrisan&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Vaš ${LetterLogoText} DocSpace &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; je bio neaktivan duže od godinu dana.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Pošto ste odlučili da ga više ne koristite, vaš ${LetterLogoText} DocSpace i svi podaci će biti obrisani u skladu sa našom &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Politikom privatnosti&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;Bilo bi nam drago da čujemo vaše mišljenje. Zašto ste odlučili da prestanete da koristite ${LetterLogoText} DocSpace?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Ako želite da nastavite sa korišćenjem vašeg ${LetterLogoText} DocSpace-a, jednostavno ga otvorite i izvršite bilo koju radnju.&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_type_changed" xml:space="preserve">
+    <value>Zdravo!
+
+Dodeljen vam je novi tip korisnika u DocSpace-u "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
+
+Više o tipovima korisnika i dozvolama možete saznati u "Centru za pomoć":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_role_changed" xml:space="preserve">
+    <value>Zdravo!
+
+Dodeljena vam je nova uloga u prostoriji DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+Više o ulogama i dozvolama u prostorijama možete saznati u "Centru za pomoć":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>Vaš ${LetterLogoText} DocSpace će biti izbrisan</value>
+  </data>
+  <data name="subject_user_role_changed" xml:space="preserve">
+    <value>Vaša uloga u prostoriji DocSpace je promenjena</value>
+  </data>
+  <data name="subject_user_type_changed" xml:space="preserve">
+    <value>Vaš tip korisnika u DocSpace-u je promenjen</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Zdravo, $UserName!
+
+Obaveštavamo vas da će uplata za vašu pretplatu biti automatski naplaćena sa vašeg računa za 3 dana.
+
+Kako bi transakcija protekla bez problema, molimo vas da proverite da li na odabranoj platnoj metodi imate dovoljno sredstava.
+
+Ukoliko imate bilo kakva pitanja ili vam je potrebna pomoć, slobodno kontaktirajte naš "tim za podršku":"${__SupportLink}.
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Predstojeća uplata pretplate za vaš ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Idi na usluge</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Idi na podešavanje novčanika</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Zdravo, $UserName!
+
+Obaveštavamo vas da automatska obnova vaše kupljene usluge nije uspešno izvršena.
+
+Ljubazno vas molimo da ručno obnovite trenutni plan usluge (ili kupite novi).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Zdravo, $UserName!
+
+Obaveštavamo vas da automatska dopuna stanja u vašem DocSpace novčaniku nije uspela.
+
+Ljubazno vas molimo da ručno proverite i ažurirate stanje u novčaniku.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Potrebna akcija: Nije moguće automatski obnoviti plan usluge u vašem ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Potrebna akcija: Nije moguće automatski dopuniti stanje novčanika u vašem ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.Lozinka je uspešno promenjena
+
+Vaša lozinka za nalog *$UserName*, *$UserEmail* je uspešno promenjena dana *$Date* u DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+IP: *$IP*
+Uređaj: *$Device*
+#if($Location != "")
+Lokacija: *$Location*
+#end
+Pregledač: *$Browser*
+
+Ako ste vi izvršili ovu radnju — nisu potrebni dalji koraci. Ako ova promena izgleda sumnjivo ili nije bila ovlašćena od strane vas, odmah resetujte lozinku i onemogućite pristup DocSpace-u za ovaj uređaj.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>Vaša lozinka je uspešno promenjena</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>Otvori DocSpace</value>
+  </data>
+  <data name="subject_scheduled_backup_failed" xml:space="preserve">
+    <value>Automatska rezervna kopija za vaš DocSpace nije uspela</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed" xml:space="preserve">
+    <value>Zdravo, $UserName,
+
+Planirani proces pravljenja rezervne kopije za vaš DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" nije uspeo.
+
+Preporučujemo da proverite podešavanja "Backup":"${__VirtualRootPath}/portal-settings/backup/data-backup" i "Services":"${__VirtualRootPath}/portal-settings/services".
+
+Ako imate bilo kakva pitanja ili vam je potrebna pomoć, slobodno nas kontaktirajte putem "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
+    <value>Zdravo, $UserName,
+
+Planirani proces pravljenja rezervne kopije za vaš DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) nije uspeo.
+
+Preporučujemo da proverite [Backup](${__VirtualRootPath}/portal-settings/backup/data-backup) i [Services](${__VirtualRootPath}/portal-settings/services) podešavanja.
+
+Ako imate bilo kakva pitanja ili vam je potrebna pomoć, slobodno nas kontaktirajte putem [${__SupportLink}](${__SupportLink})
+
+Srdačan pozdrav,
+${LetterLogoText} tim za podršku
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="ActionAgentCreated" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; je kreirao novog agenta: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRemoved" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; je obrisao agenta: &lt;b&gt;{1}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRenamed" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; je preimenovao agenta: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentUpdateAccessForUser" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; je dobio ulogu &lt;b&gt;{1}&lt;/b&gt; u agentu: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserAddedToAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; je dodat agentu: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserRemovedFromAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; je uklonjen iz agenta: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ButtonJoinAgent" xml:space="preserve">
+    <value>Pridruži se agentu</value>
+  </data>
+  <data name="pattern_backup_failed" xml:space="preserve">
+    <value>Zdravo, $UserName,
+
+Proces izrade rezervne kopije za vaš DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" nije uspeo.
+
+Ako imate bilo kakva pitanja ili vam je potrebna pomoć, slobodno nas kontaktirajte putem "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_backup_failed_tg" xml:space="preserve">
+    <value>Zdravo, $UserName,
+
+Proces izrade rezervne kopije za vaš DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) nije uspeo.
+
+Ako imate bilo kakva pitanja ili vam je potrebna pomoć, slobodno nas kontaktirajte putem [${__SupportLink}](${__SupportLink})
+
+Srdačan pozdrav,
+${LetterLogoText} tim za podršku
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="pattern_saas_agent_invite" xml:space="preserve">
+    <value>Zdravo!
+
+Pozvani ste da se pridružite DocSpace agentu na "${__VirtualRootPath}":"${__VirtualRootPath}". Prihvatite poziv klikom na link:
+
+$OrangeButton
+
+Nakon klika na pozivni link, molimo vas da postavite novu lozinku za vaš nalog.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Zdravo!
+
+$__AuthorName vas je pozvao da se pridružite agentu "$Message":"$InviteLink" na "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_backup_failed" xml:space="preserve">
+    <value>Rezervna kopija za vaš DocSpace nije uspela</value>
+  </data>
+  <data name="subject_saas_agent_invite" xml:space="preserve">
+    <value>Pridružite se ${LetterLogoText} DocSpace-u</value>
+  </data>
+  <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Pozvani ste u ${LetterLogoText} DocSpace agent</value>
+  </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace je obrisan</value>
+  </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace je obrisan.
+
+*Portal:* ${PortalUrl}
+*Vlasnik:* ${UserName} ${UserEmail}
+*Kupac:* ${OwnerName}
+
+Molimo vas da proverite da je automatska naplata isključena. Proverite status automatske naplate u Stripe nalogu kupca.</value>
   </data>
 </root>

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,19 +33,19 @@ public record FileDeleteOperationData<T> : FileOperationData<T>
 {
     [ProtoMember(7)]
     public bool IgnoreException { get; set; }
-    
+
     [ProtoMember(8)]
     public bool Immediately { get; set; }
-    
+
     [ProtoMember(9)]
     public bool IsEmptyTrash { get; set; }
 
     [ProtoMember(10)]
     public IEnumerable<int> FilesVersions { get; set; }
-    
+
     public FileDeleteOperationData()
     {
-        
+
     }
 
     public FileDeleteOperationData(
@@ -72,7 +72,7 @@ public record FileDeleteOperationData<T> : FileOperationData<T>
 public class FileDeleteOperation : ComposeFileOperation<FileDeleteOperationData<string>, FileDeleteOperationData<int>>
 {
     public FileDeleteOperation() { }
-    
+
     public FileDeleteOperation(IServiceProvider serviceProvider) : base(serviceProvider) { }
 
     public override FileOperationType FileOperationType { get; set; } = FileOperationType.Delete;
@@ -94,9 +94,9 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
     private readonly bool _isEmptyTrash;
     private readonly Dictionary<string, StringValues> _headers;
     private readonly IEnumerable<int> _filesVersions;
-    
+
     public override FileOperationType FileOperationType { get; set; } = FileOperationType.Delete;
-    
+
     public FileDeleteOperation(IServiceProvider serviceProvider, FileDeleteOperationData<T> fileOperationData)
     : base(serviceProvider, fileOperationData)
     {
@@ -106,17 +106,17 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         _isEmptyTrash = fileOperationData.IsEmptyTrash;
         _filesVersions = fileOperationData.FilesVersions;
     }
-    
+
     protected override int InitTotalProgressSteps()
     {
         if (_filesVersions != null && _filesVersions.Any() && Files.Count > 0)
         {
             return _filesVersions.Count();
         }
-        
+
         return base.InitTotalProgressSteps();
     }
-    
+
     protected override async Task DoJob(AsyncServiceScope serviceScope)
     {
         var folderDao = serviceScope.ServiceProvider.GetService<IFolderDao<int>>();
@@ -185,7 +185,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             CancellationToken.ThrowIfCancellationRequested();
 
             var folder = await FolderDao.GetFolderAsync(folderId);
-            var isRoom = DocSpaceHelper.IsRoom(folder.FolderType);
+            var isRoom = folder.IsRoom;
 
             var canDelete = await FilesSecurity.CanDeleteAsync(folder);
             checkPermissions = isRoom ? !canDelete : checkPermissions;
@@ -195,9 +195,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             {
                 Err = FilesCommonResource.ErrorMessage_FolderNotFound;
             }
-            else if (folder.FolderType != FolderType.DEFAULT && folder.FolderType != FolderType.BUNCH
-                && !DocSpaceHelper.IsRoom(folder.FolderType)
-                && (folder.FolderType is FolderType.InProcessFormFolder or FolderType.ReadyFormFolder && (folder.RootFolderType != FolderType.Archive && folder.RootFolderType != FolderType.RoomTemplates)))
+            else if (!_immediately && folder.IsRoom)
             {
                 Err = FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder;
             }
@@ -212,7 +210,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                 canCalculate = FolderDao.CanCalculateSubitems(folderId) ? default : folderId;
                 await fileMarker.RemoveMarkAsNewForAllAsync(folder);
 
-                if (folder.ProviderEntry && ((folder.Id.Equals(folder.RootId) || isRoom)))
+                if (folder.ProviderEntry && (folder.Id.Equals(folder.RootId) || isRoom))
                 {
                     if (ProviderDao != null)
                     {
@@ -244,7 +242,13 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
 
                         if (isNeedSendActions)
                         {
-                            await filesMessageService.SendAsync(isRoom ? MessageAction.RoomDeleted : MessageAction.ThirdPartyDeleted, folder, _headers, folder.Id.ToString(), folder.ProviderKey);
+                            var action = isRoom 
+                                ? folder.FolderType == FolderType.AiRoom 
+                                    ? MessageAction.AgentDeleted 
+                                    : MessageAction.RoomDeleted 
+                                : MessageAction.ThirdPartyDeleted;
+                            
+                            await filesMessageService.SendAsync(action, folder, _headers, folder.Id.ToString(), folder.ProviderKey);
                             await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, folder);
                         }
                     }
@@ -285,14 +289,18 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                                 if (isRoom)
                                 {
                                     await notifyClient.SendRoomRemovedAsync(folder, aces, authContext.CurrentAccount.ID);
-                                    await filesMessageService.SendAsync(MessageAction.RoomDeleted, folder, _headers, folder.Title);
-                                    await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, folder);
+                                    await filesMessageService.SendAsync(
+                                        folder.FolderType == FolderType.AiRoom ? MessageAction.AgentDeleted : MessageAction.RoomDeleted, 
+                                        folder, 
+                                        _headers, 
+                                        folder.Title);
                                 }
                                 else
                                 {
                                     await filesMessageService.SendAsync(MessageAction.FolderDeleted, folder, _headers, folder.Title);
-                                    await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, folder);
                                 }
+
+                                await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, folder);
                             }
 
                             ProcessedFolder(folderId);
@@ -314,7 +322,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
 
                             await Task.WhenAll(tasks);
                         }
-                       
+
                         if (folder.ParentRoomType == FolderType.VirtualDataRoom)
                         {
                             var tasks = files.Where(file => file.IsForm).Select(async file =>
@@ -356,14 +364,18 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                                     if (isRoom)
                                     {
                                         await notifyClient.SendRoomRemovedAsync(folder, aces, authContext.CurrentAccount.ID);
-                                        await filesMessageService.SendAsync(MessageAction.RoomDeleted, folder, _headers, folder.Title);
-                                        await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, folder);
+                                        await filesMessageService.SendAsync(
+                                            folder.FolderType == FolderType.AiRoom ? MessageAction.AgentDeleted : MessageAction.RoomDeleted, 
+                                            folder, 
+                                            _headers, 
+                                            folder.Title);
                                     }
                                     else
                                     {
                                         await filesMessageService.SendAsync(MessageAction.FolderDeleted, folder, _headers, folder.Title);
-                                        await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, folder);
                                     }
+
+                                    await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, folder);
                                 }
                             }
                             else
@@ -479,11 +491,11 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                         if (file.RootFolderType == FolderType.Archive)
                         {
                             var archiveId = await folderDao.GetFolderIDArchive(false);
-                            await folderDao.ChangeTreeFolderSizeAsync(archiveId, (-1) * file.ContentLength);
+                            await folderDao.ChangeTreeFolderSizeAsync(archiveId, -1 * file.ContentLength);
                         }
                         else if (file.RootFolderType == FolderType.TRASH)
                         {
-                            await folderDao.ChangeTreeFolderSizeAsync(_trashId, (-1) * file.ContentLength);
+                            await folderDao.ChangeTreeFolderSizeAsync(_trashId, -1 * file.ContentLength);
                         }
 
                         if (hasHeaders)
@@ -594,7 +606,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
 
                 return (true, error);
             }
-            if (await fileTracker.IsEditingAsync(file.Id))
+            if (await fileTracker.IsEditingAsync(file.Id, false))
             {
                 error = folder ? FilesCommonResource.ErrorMessage_SecurityException_DeleteEditingFolder : FilesCommonResource.ErrorMessage_SecurityException_DeleteEditingFile;
 

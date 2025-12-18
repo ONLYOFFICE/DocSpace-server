@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,15 +24,23 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ZiggyCreatures.Caching.Fusion;
+
 namespace ASC.Webhooks.Core;
 
 [Scope]
 public class DbWorker(
     IDbContextFactory<WebhooksDbContext> dbContextFactory,
     TenantManager tenantManager,
-    AuthContext authContext)
+    AuthContext authContext,
+    WebhookCache webhookCache)
 {
-    public async Task<DbWebhooksConfig> AddWebhookConfig(string name, string uri, string secretKey, bool enabled, bool ssl, WebhookTrigger triggers)
+    private static string GetCacheKey(int tenantId)
+    {
+        return $"webhooks_configs_{tenantId}";
+    }
+
+    public async Task<DbWebhooksConfig> AddWebhookConfig(string name, string uri, string secretKey, bool enabled, bool ssl, WebhookTrigger triggers, string targetId)
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
@@ -41,7 +49,7 @@ public class DbWorker(
 
         if (existingConfig != null)
         {
-            return existingConfig;
+            throw new ArgumentException("Webhook with the same name and payload URL already exists");
         }
 
         var toAdd = new DbWebhooksConfig
@@ -53,12 +61,15 @@ public class DbWorker(
             Enabled = enabled,
             SSL = ssl,
             Triggers = triggers,
+            TargetId = targetId,
             CreatedBy = authContext.CurrentAccount.ID,
             CreatedOn = DateTime.UtcNow
         };
 
         toAdd = await webhooksDbContext.AddOrUpdateAsync(r => r.WebhooksConfigs, toAdd);
         await webhooksDbContext.SaveChangesAsync();
+
+        await webhookCache.ClearAsync(GetCacheKey(tenantId));
 
         return toAdd;
     }
@@ -86,6 +97,25 @@ public class DbWorker(
         return result;
     }
 
+    public async Task<List<DbWebhooksConfig>> GetActiveWebhookConfigsFromCache()
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var key = GetCacheKey(tenantId);
+
+        var result = await webhookCache.GetAsync<List<DbWebhooksConfig>>(key);
+
+        if (result != null)
+        {
+            return result;
+        }
+
+        result = await GetWebhookConfigs(true).ToListAsync();
+
+        await webhookCache.InsertAsync(key, result);
+
+        return result;
+    }
+
     public async IAsyncEnumerable<DbWebhooksConfig> GetWebhookConfigs(bool? enabled)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
@@ -100,7 +130,7 @@ public class DbWorker(
         }
     }
 
-    public async Task<DbWebhooksConfig> UpdateWebhookConfig(DbWebhooksConfig dbWebhooksConfig)
+    public async Task<DbWebhooksConfig> UpdateWebhookConfig(DbWebhooksConfig dbWebhooksConfig, bool clearCache)
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
@@ -112,18 +142,24 @@ public class DbWorker(
         updateObj.Enabled = dbWebhooksConfig.Enabled;
         updateObj.SSL = dbWebhooksConfig.SSL;
         updateObj.Triggers = dbWebhooksConfig.Triggers;
+        updateObj.TargetId = dbWebhooksConfig.TargetId;
 
         updateObj.ModifiedBy = dbWebhooksConfig.ModifiedBy ?? authContext.CurrentAccount.ID;
         updateObj.ModifiedOn = DateTime.UtcNow;
 
-        updateObj.LastFailureOn =  dbWebhooksConfig.LastFailureOn;
+        updateObj.LastFailureOn = dbWebhooksConfig.LastFailureOn;
         updateObj.LastFailureContent = dbWebhooksConfig.LastFailureContent;
         updateObj.LastSuccessOn = dbWebhooksConfig.LastSuccessOn;
 
         webhooksDbContext.WebhooksConfigs.Update(updateObj);
 
         await webhooksDbContext.SaveChangesAsync();
-    
+
+        if (clearCache)
+        {
+            await webhookCache.ClearAsync(GetCacheKey(updateObj.TenantId));
+        }
+
         return updateObj;
     }
 
@@ -139,6 +175,8 @@ public class DbWorker(
         {
             webhooksDbContext.WebhooksConfigs.Remove(removeObj);
             await webhooksDbContext.SaveChangesAsync();
+
+            await webhookCache.ClearAsync(GetCacheKey(tenantId));
         }
 
         return removeObj;
@@ -187,16 +225,13 @@ public class DbWorker(
         return await (await GetQueryForJournal(deliveryFrom, deliveryTo, hookUri, configId, eventId, webhookGroupStatus, userId, trigger)).CountAsync();
     }
 
-    public async Task<DbWebhooksLog> ReadJournal(int id)
+    public async Task<DbWebhooksLog> ReadJournal(int tenantId, int id)
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        var fromDb = await webhooksDbContext.WebhooksLogAsync(id);
+        var fromDb = await webhooksDbContext.WebhooksLogAsync(tenantId, id);
 
-        if (fromDb != null)
-        {
-            fromDb.Log.Config = fromDb.Config;
-        }
+        fromDb?.Log.Config = fromDb.Config;
 
         return fromDb?.Log;
     }
@@ -213,8 +248,9 @@ public class DbWorker(
 
     public async Task<DbWebhooksLog> UpdateWebhookJournal(
         int id,
+        int tenantId,
         int status,
-        DateTime delivery,
+        DateTime? delivery,
         string requestPayload,
         string requestHeaders,
         string responsePayload,
@@ -222,7 +258,7 @@ public class DbWorker(
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        var webhook = (await webhooksDbContext.WebhooksLogAsync(id))?.Log;
+        var webhook = (await webhooksDbContext.WebhooksLogAsync(tenantId, id))?.Log;
 
         if (webhook != null)
         {
@@ -329,6 +365,9 @@ public class DbWebhooks
     public DbWebhooksConfig Config { get; init; }
 }
 
+/// <summary>
+/// The status of the webhook delivery group.
+/// </summary>
 [Flags]
 public enum WebhookGroupStatus
 {
@@ -349,4 +388,26 @@ public enum WebhookGroupStatus
 
     [SwaggerEnum("Status5xx")]
     Status5xx = 16
+}
+
+[Singleton]
+public class WebhookCache(IFusionCacheProvider cacheProvider)
+{
+    private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
+    private readonly TimeSpan _cacheExpiration = TimeSpan.FromHours(1);
+
+    public async Task<T> GetAsync<T>(string key) where T : class
+    {
+        return await _cache.GetOrDefaultAsync<T>(key);
+    }
+
+    public async Task InsertAsync<T>(string key, T value) where T : class
+    {
+        await _cache.SetAsync(key, value, _cacheExpiration);
+    }
+
+    public async Task ClearAsync(string key)
+    {
+        await _cache.RemoveAsync(key);
+    }
 }

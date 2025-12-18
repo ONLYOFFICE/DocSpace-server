@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,33 +27,21 @@
 namespace ASC.MessagingSystem.Mapping;
 
 [Scope]
-public class EventTypeConverter : ITypeConverter<EventMessage, DbLoginEvent>, ITypeConverter<EventMessage, DbAuditEvent>
+public class EventTypeConverter
 {
-    public DbLoginEvent Convert(EventMessage source, DbLoginEvent destination, ResolutionContext context)
+    public void Convert(EventMessage source, DbLoginEvent dst)
     {
-        var messageEvent = context.Mapper.Map<EventMessage, MessageEvent>(source);
-        var loginEvent = context.Mapper.Map<MessageEvent, DbLoginEvent>(messageEvent);
-
-        loginEvent.Login = source.Initiator;
-        loginEvent.Active = source.Active;
+        dst.Login = source.Initiator;
 
         if (source.Description is { Count: > 0 })
         {
-            loginEvent.DescriptionRaw = JsonSerializer.Serialize(source.Description);
+            dst.DescriptionRaw = JsonSerializer.Serialize(source.Description);
         }
-
-        return loginEvent;
     }
 
-    public DbAuditEvent Convert(EventMessage source, DbAuditEvent destination, ResolutionContext context)
+    public void Convert(EventMessage source, DbAuditEvent destination)
     {
-        var messageEvent = context.Mapper.Map<EventMessage, MessageEvent>(source);
-        var auditEvent = context.Mapper.Map<MessageEvent, DbAuditEvent>(messageEvent);
-
-        auditEvent.Initiator = source.Initiator;
-        auditEvent.Target = source.Target?.ToString();
-        
-        auditEvent.FilesReferences = source.References?.Select(x => new DbFilesAuditReference
+        destination.FilesReferences = source.References?.Select(x => new DbFilesAuditReference
         {
             EntryId = x.EntryId,
             EntryType = x.EntryType
@@ -61,10 +49,8 @@ public class EventTypeConverter : ITypeConverter<EventMessage, DbLoginEvent>, IT
 
         if (source.Description is { Count: > 0 })
         {
-            auditEvent.DescriptionRaw = JsonSerializer.Serialize(GetSafeDescription(source.Description));
+            destination.DescriptionRaw = JsonSerializer.Serialize(GetSafeDescription(source.Description));
         }
-
-        return auditEvent;
     }
 
     private static List<string> GetSafeDescription(IEnumerable<string> description)

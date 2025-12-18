@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -49,9 +49,9 @@ public class ErrorApiResponse : CommonApiResponse
 
     public ErrorApiResponse()
     {
-        
+
     }
-    
+
     protected internal ErrorApiResponse(HttpStatusCode statusCode, Exception error, string message, bool withStackTrace) : base(statusCode)
     {
         Status = 1;
@@ -139,9 +139,9 @@ public class CommonApiError
 
     public CommonApiError()
     {
-        
+
     }
-    
+
     public static CommonApiError FromException(Exception exception, string message, bool withStackTrace)
     {
         var result = new CommonApiError

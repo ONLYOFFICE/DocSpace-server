@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -55,70 +55,73 @@ public static class DbFilesLinkExtension
 
         return modelBuilder;
     }
-    public static void MySqlAddDbFilesLink(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbFilesLink>(entity =>
+        public void MySqlAddDbFilesLink()
         {
-            entity.HasKey(e => new { e.TenantId, e.SourceId, e.LinkedId })
-                .HasName("PRIMARY");
+            modelBuilder.Entity<DbFilesLink>(entity =>
+            {
+                entity.HasKey(e => new { e.TenantId, e.SourceId, e.LinkedId })
+                    .HasName("PRIMARY");
 
-            entity.ToTable("files_link")
-                .HasCharSet("utf8");
+                entity.ToTable("files_link")
+                    .HasCharSet("utf8");
 
-            entity.HasIndex(e => new { e.TenantId, e.SourceId, e.LinkedId, e.LinkedFor })
-                .HasDatabaseName("linked_for");
+                entity.HasIndex(e => new { e.TenantId, e.SourceId, e.LinkedId, e.LinkedFor })
+                    .HasDatabaseName("linked_for");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+                entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
-            entity.Property(e => e.SourceId)
-                .HasColumnName("source_id")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.SourceId)
+                    .HasColumnName("source_id")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.LinkedId)
-                .HasColumnName("linked_id")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.LinkedId)
+                    .HasColumnName("linked_id")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.LinkedFor)
-                .HasColumnName("linked_for")
-                .HasColumnType("char(38)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
-        });
-    }
+                entity.Property(e => e.LinkedFor)
+                    .HasColumnName("linked_for")
+                    .HasColumnType("char(38)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
+            });
+        }
 
-    public static void PgSqlAddDbFilesLink(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<DbFilesLink>(entity =>
+        public void PgSqlAddDbFilesLink()
         {
-            // Define composite primary key
-            entity.HasKey(e => new { e.TenantId, e.SourceId, e.LinkedId })
-                .HasName("PK_files_link");
+            modelBuilder.Entity<DbFilesLink>(entity =>
+            {
+                // Define composite primary key
+                entity.HasKey(e => new { e.TenantId, e.SourceId, e.LinkedId })
+                    .HasName("PK_files_link");
 
-            // Map entity to "files_link" table
-            entity.ToTable("files_link");
+                // Map entity to "files_link" table
+                entity.ToTable("files_link");
 
-            // Define index for PostgreSQL
-            entity.HasIndex(e => new { e.TenantId, e.SourceId, e.LinkedId, e.LinkedFor })
-                .HasDatabaseName("linked_for");
+                // Define index for PostgreSQL
+                entity.HasIndex(e => new { e.TenantId, e.SourceId, e.LinkedId, e.LinkedFor })
+                    .HasDatabaseName("linked_for");
 
-            // Define column configurations
-            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+                // Define column configurations
+                entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
-            entity.Property(e => e.SourceId)
-                .HasColumnName("source_id")
-                .HasColumnType("varchar(32)");
+                entity.Property(e => e.SourceId)
+                    .HasColumnName("source_id")
+                    .HasColumnType("varchar(32)");
 
-            entity.Property(e => e.LinkedId)
-                .HasColumnName("linked_id")
-                .HasColumnType("varchar(32)");
+                entity.Property(e => e.LinkedId)
+                    .HasColumnName("linked_id")
+                    .HasColumnType("varchar(32)");
 
-            entity.Property(e => e.LinkedFor)
-                .HasColumnName("linked_for")
-                .HasColumnType("uuid"); // Guid in PostgreSQL is stored as UUID
-        });
+                entity.Property(e => e.LinkedFor)
+                    .HasColumnName("linked_for")
+                    .HasColumnType("uuid"); // Guid in PostgreSQL is stored as UUID
+            });
+        }
     }
 }

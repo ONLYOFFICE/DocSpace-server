@@ -65,7 +65,7 @@
     <value>Pogosti dokumenti</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>Dokumenti</value>
+    <value>Moji Dokumenti</value>
   </data>
   <data name="ProjectFiles" xml:space="preserve">
     <value>Dokumenti projekta</value>
@@ -102,5 +102,11 @@
   </data>
   <data name="ReadyFormFolder" xml:space="preserve">
     <value>Dokončano</value>
+  </data>
+  <data name="RoomTemplates" xml:space="preserve">
+    <value>Predloge</value>
+  </data>
+  <data name="AiAgents" xml:space="preserve">
+    <value>AI agenti</value>
   </data>
 </root>

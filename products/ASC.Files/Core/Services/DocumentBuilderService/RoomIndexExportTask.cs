@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,18 +28,18 @@ namespace ASC.Files.Core.Services.DocumentBuilderService;
 
 [Transient]
 public class RoomIndexExportTask : DocumentBuilderTask<int, RoomIndexExportTaskData>
-{    
+{
     private const string ScriptName = "RoomIndexExport.docbuilder";
-    
+
     public RoomIndexExportTask()
     {
-        
+
     }
-    
+
     public RoomIndexExportTask(IServiceScopeFactory serviceProvider) : base(serviceProvider)
     {
     }
-    
+
     protected override async Task<DocumentBuilderInputData> GetDocumentBuilderInputDataAsync(IServiceProvider serviceProvider)
     {
         var (scriptFilePath, tempFileName, outputFileName) = await GetRoomIndexExportData(serviceProvider, _userId, _data.RoomId);
@@ -55,6 +55,7 @@ public class RoomIndexExportTask : DocumentBuilderTask<int, RoomIndexExportTaskD
 
         var file = serviceProvider.GetService<File<int>>();
 
+        file.CreateBy = _userId;
         file.ParentId = await daoFactory.GetFolderDao<int>().GetFolderIDUserAsync(false, _userId);
         file.Title = inputData.OutputFileName;
 
@@ -64,7 +65,7 @@ public class RoomIndexExportTask : DocumentBuilderTask<int, RoomIndexExportTaskD
         using var httpClient = clientFactory.CreateClient();
         using var response = await httpClient.SendAsync(request);
         await using var stream = await response.Content.ReadAsStreamAsync();
-        
+
         var fileDao = daoFactory.GetFileDao<int>();
 
         file.ContentLength = stream.Length;
@@ -74,8 +75,8 @@ public class RoomIndexExportTask : DocumentBuilderTask<int, RoomIndexExportTaskD
 
         var filesMessageService = serviceProvider.GetService<FilesMessageService>();
 
-        var headers = _data.Headers != null 
-            ? _data.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value)) 
+        var headers = _data.Headers != null
+            ? _data.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value))
             : [];
 
         var room = await daoFactory.GetFolderDao<int>().GetFolderAsync(_data.RoomId);
@@ -218,7 +219,7 @@ public class RoomIndexExportTask : DocumentBuilderTask<int, RoomIndexExportTaskD
 
         while (true)
         {
-            var (entries, _) = await entryManager.GetEntriesAsync(room, room, from, count, [filterType], false, Guid.Empty, null, null, false, true, new OrderBy(SortedByType.CustomOrder, true));
+            var (entries, _) = await entryManager.GetEntriesAsync(room, room, from, count, [filterType], false, Guid.Empty, Guid.Empty, null, null, false, true, new OrderBy(SortedByType.CustomOrder, true));
             var typedEntries = entries.OfType<FileEntry<T>>().ToList();
 
             if (filterType == FilterType.FoldersOnly)
@@ -296,23 +297,7 @@ public class RoomIndexExportTask : DocumentBuilderTask<int, RoomIndexExportTaskD
         }
     }
 
-    private record FolderIndex
-    {
-        public FolderIndex(int ChildFoldersCount, string Order)
-        {
-            this.ChildFoldersCount = ChildFoldersCount;
-            this.Order = Order;
-        }
-
-        public int ChildFoldersCount { get; init; }
-        public string Order { get; init; }
-
-        public void Deconstruct(out int ChildFoldersCount, out string Order)
-        {
-            ChildFoldersCount = this.ChildFoldersCount;
-            Order = this.Order;
-        }
-    }
+    private record FolderIndex(int ChildFoldersCount, string Order);
 }
 
 public record RoomIndexExportTaskData(int RoomId, IDictionary<string, string> Headers);

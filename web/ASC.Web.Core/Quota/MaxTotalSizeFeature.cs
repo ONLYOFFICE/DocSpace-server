@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,7 +42,7 @@ public class MaxTotalSizeStatistic(IServiceProvider serviceProvider) : ITenantQu
     public async Task<long> GetValueAsync()
     {
         var tenantManager = serviceProvider.GetService<TenantManager>();
-        var tenant = (tenantManager.GetCurrentTenant()).Id;
+        var tenant = tenantManager.GetCurrentTenant().Id;
 
         return (await tenantManager.FindTenantQuotaRowsAsync(tenant))
             .Where(r => !string.IsNullOrEmpty(r.Tag) && new Guid(r.Tag) != Guid.Empty)

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -57,6 +57,11 @@ internal class DropboxDaoBase(
         }
 
         return path;
+    }
+
+    public bool IsFile(Metadata dropboxItem)
+    {
+        return dropboxItem.AsFolder == null;
     }
 
     public string GetName(Metadata dropboxItem)
@@ -158,6 +163,8 @@ internal class DropboxDaoBase(
         folder.SettingsPrivate = ProviderInfo.Private;
         folder.SettingsHasLogo = ProviderInfo.HasLogo;
         folder.SettingsColor = ProviderInfo.Color;
+        folder.SettingsCover = ProviderInfo.Cover;
+        
         ProcessFolderAsRoom(folder);
 
         if (folder.CreateOn != DateTime.MinValue && folder.CreateOn.Kind == DateTimeKind.Utc)
@@ -169,8 +176,6 @@ internal class DropboxDaoBase(
         {
             folder.ModifiedOn = _tenantUtil.DateTimeFromUtc(folder.ModifiedOn);
         }
-        
-        folder.Shared = ProviderInfo.FolderType is FolderType.PublicRoom;
 
         return folder;
     }
@@ -228,7 +233,6 @@ internal class DropboxDaoBase(
         file.Title = MakeFileTitle(dropboxFile);
         file.ThumbnailStatus = Thumbnail.Created;
         file.Encrypted = ProviderInfo.Private;
-        file.Shared = ProviderInfo.FolderType is FolderType.PublicRoom;
 
         return file;
     }
@@ -237,7 +241,7 @@ internal class DropboxDaoBase(
     {
         return ToFolder(await GetFolderAsync(string.Empty));
     }
-    
+
     public async Task<FolderMetadata> CreateFolderAsync(string title, string folderId)
     {
         return await _providerInfo.CreateFolderAsync(title, MakeThirdId(folderId), GetId);
@@ -280,7 +284,7 @@ internal class DropboxDaoBase(
     public async Task<List<Metadata>> GetItemsAsync(string parentId, bool? folder = null)
     {
         var dropboxFolderId = MakeThirdId(parentId);
-        var items = await _providerInfo.GetItemsAsync(dropboxFolderId);
+        var items = await _providerInfo.GetItemsAsync(dropboxFolderId, GetId, IsFile);
 
         if (!folder.HasValue)
         {

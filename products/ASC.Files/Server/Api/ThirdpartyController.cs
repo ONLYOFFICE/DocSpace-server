@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Data.Backup.Storage;
+
 namespace ASC.Files.Api;
 
 public class ThirdpartyController(
@@ -38,11 +40,13 @@ public class ThirdpartyController(
         RequestHelper requestHelper,
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper,
-        FileSecurityCommon fileSecurityCommon)
+        FileSecurityCommon fileSecurityCommon,
+        BackupRepository backupRepository,
+        TenantManager tenantManager)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
-    /// Returns a list of the available providers.
+    /// Returns the list of the available providers.
     /// </summary>
     /// <short>Get providers</short>
     /// <remarks>Available provider keys: DropboxV2, Box, WebDav, Yandex, OneDrive, SharePoint, GoogleDrive, kDrive.</remarks>
@@ -51,7 +55,7 @@ public class ThirdpartyController(
     [Tags("Files / Third-party integration")]
     [SwaggerResponse(200, "List of provider keys", typeof(List<List<string>>))]
     [HttpGet("thirdparty/capabilities")]
-    public async Task<List<List<string>>> CapabilitiesAsync()
+    public async Task<List<List<string>>> GetCapabilities()
     {
         if (!await CheckAccessAsync())
         {
@@ -70,7 +74,7 @@ public class ThirdpartyController(
     [Tags("Files / WordPress")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPost("wordpress")]
-    public async Task<bool> CreateWordpressPostAsync(CreateWordpressPostRequestDto inDto)
+    public async Task<bool> CreateWordpressPost(CreateWordpressPostRequestDto inDto)
     {
         try
         {
@@ -101,9 +105,16 @@ public class ThirdpartyController(
     [Tags("Files / Third-party integration")]
     [SwaggerResponse(200, "Third-party folder ID", typeof(string))]
     [HttpDelete("thirdparty/{providerId:int}")]
-    public async Task<string> DeleteThirdPartyAsync(ProviderIdRequestDto inDto)
+    public async Task<string> DeleteThirdParty(ProviderIdRequestDto inDto)
     {
-        return await fileStorageService.DeleteThirdPartyAsync(inDto.ProviderId.ToString(CultureInfo.InvariantCulture));
+        var providerInfo = await fileStorageService.DeleteThirdPartyAsync(inDto.ProviderId.ToString(CultureInfo.InvariantCulture));
+
+        if (providerInfo.RootFolderType == FolderType.ThirdpartyBackup)
+        {
+            await backupRepository.DeleteBackupScheduleAsync(tenantManager.GetCurrentTenantId(), providerInfo.RootFolderId);
+        }
+
+        return providerInfo.RootFolderId;
     }
 
     /// <summary>
@@ -115,7 +126,7 @@ public class ThirdpartyController(
     [Tags("Files / WordPress")]
     [SwaggerResponse(200, "Object with the \"success\" field: true if the operation is successful", typeof(DeleteWordpressInfoResponse))]
     [HttpGet("wordpress-delete")]
-    public async Task<DeleteWordpressInfoResponse> DeleteWordpressInfoAsync()
+    public async Task<DeleteWordpressInfoResponse> DeleteWordpressInfo()
     {
         var token = await wordpressToken.GetTokenAsync();
         if (token != null)
@@ -130,13 +141,13 @@ public class ThirdpartyController(
     /// <summary>
     /// Returns a list of the third-party services connected to the "Common" section.
     /// </summary>
-    /// <short>Get common third-party services</short>
+    /// <short>Get the common third-party services</short>
     /// <path>api/2.0/files/thirdparty/common</path>
     /// <collection>list</collection>
     [Tags("Files / Third-party integration")]
     [SwaggerResponse(200, "List of common third-party folderst", typeof(IAsyncEnumerable<FolderDto<string>>))]
     [HttpGet("thirdparty/common")]
-    public async IAsyncEnumerable<FolderDto<string>> GetCommonThirdPartyFoldersAsync([FromServices] EntryManager entryManager)
+    public async IAsyncEnumerable<FolderDto<string>> GetCommonThirdPartyFolders([FromServices] EntryManager entryManager)
     {
         var parent = await fileStorageService.GetFolderAsync(await globalFolderHelper.FolderCommonAsync);
         var thirdpartyFolders = entryManager.GetThirdPartyFoldersAsync(parent);
@@ -150,26 +161,26 @@ public class ThirdpartyController(
     /// <summary>
     /// Returns a list of all the connected third-party accounts.
     /// </summary>
-    /// <short>Get third-party accounts</short>
+    /// <short>Get the third-party accounts</short>
     /// <path>api/2.0/files/thirdparty</path>
     /// <collection>list</collection>
     [Tags("Files / Third-party integration")]
     [SwaggerResponse(200, "List of connected providers information", typeof(IAsyncEnumerable<ThirdPartyParams>))]
     [HttpGet("thirdparty")]
-    public IAsyncEnumerable<ThirdPartyParams> GetThirdPartyAccountsAsync()
+    public IAsyncEnumerable<ThirdPartyParams> GetThirdPartyAccounts()
     {
         return fileStorageService.GetThirdPartyAsync();
     }
 
     /// <summary>
-    /// Return a backup of the connected third-party account.
+    /// Returns a backup of the connected third-party account.
     /// </summary>
     /// <short>Get a third-party account backup</short>
     /// <path>api/2.0/files/thirdparty/backup</path>
     [Tags("Files / Third-party integration")]
     [SwaggerResponse(200, "Folder for the third-party account backup", typeof(FolderDto<string>))]
     [HttpGet("thirdparty/backup")]
-    public async Task<FolderDto<string>> GetBackupThirdPartyAccountAsync()
+    public async Task<FolderDto<string>> GetBackupThirdPartyAccount()
     {
         var folder = await fileStorageService.GetBackupThirdPartyAsync();
         if (folder != null)
@@ -190,7 +201,7 @@ public class ThirdpartyController(
     [Tags("Files / WordPress")]
     [SwaggerResponse(200, "Object with the following parameters: \"success\" - specifies if the operation is successful or not, \"data\" - blog information", typeof(WordpressInfoResponse))]
     [HttpGet("wordpress-info")]
-    public async Task<WordpressInfoResponse> GetWordpressInfoAsync()
+    public async Task<WordpressInfoResponse> GetWordpressInfo()
     {
         var token = await wordpressToken.GetTokenAsync();
         if (token != null)
@@ -219,7 +230,7 @@ public class ThirdpartyController(
     [Tags("Files / Third-party integration")]
     [SwaggerResponse(200, "Connected provider folder", typeof(FolderDto<string>))]
     [HttpPost("thirdparty")]
-    public async Task<FolderDto<string>> SaveThirdPartyAsync(ThirdPartyRequestDto inDto)
+    public async Task<FolderDto<string>> SaveThirdParty(ThirdPartyRequestDto inDto)
     {
         var thirdPartyParams = new ThirdPartyParams
         {
@@ -239,13 +250,13 @@ public class ThirdpartyController(
     /// Saves a backup of the connected third-party account.
     /// </summary>
     /// <short>Save a third-party account backup</short>
-    /// <remarks>List of provider key: DropboxV2, Box, WebDav, Yandex, OneDrive, SharePoint, GoogleDrive, kDrive</remarks>
+    /// <remarks>List of provider keys: DropboxV2, Box, WebDav, Yandex, OneDrive, SharePoint, GoogleDrive, kDrive.</remarks>
     /// <path>api/2.0/files/thirdparty/backup</path>
     /// <exception cref="ArgumentException"></exception>
     [Tags("Files / Third-party integration")]
     [SwaggerResponse(200, "Folder for the third-party account backup", typeof(FolderDto<string>))]
     [HttpPost("thirdparty/backup")]
-    public async Task<FolderDto<string>> SaveThirdPartyBackupAsync(ThirdPartyBackupRequestDto inDto)
+    public async Task<FolderDto<string>> SaveThirdPartyBackup(ThirdPartyBackupRequestDto inDto)
     {
         if (!await fileSecurityCommon.IsDocSpaceAdministratorAsync(securityContext.CurrentAccount.ID))
         {
@@ -273,7 +284,7 @@ public class ThirdpartyController(
     [Tags("Files / WordPress")]
     [SwaggerResponse(200, "Object with the following parameters: \"success\" - specifies if the operation is successful or not, \"data\" - blog information", typeof(WordpressInfoResponse))]
     [HttpPost("wordpress-save")]
-    public async Task<WordpressInfoResponse> WordpressSaveAsync(WordpressSaveRequestDto inDto)
+    public async Task<WordpressInfoResponse> WordpressSave(WordpressSaveRequestDto inDto)
     {
         if (inDto.Code.Length == 0)
         {
@@ -305,25 +316,25 @@ public class ThirdpartyController(
     }
 
     /// <summary>
-    /// Returns a list of the all providers.
+    /// Returns a list of all providers.
     /// </summary>
     /// <short>Get all providers</short>
-    /// <remarks>Available provider keys: Dropbox, Box, WebDav, OneDrive, GoogleDrive, kDrive, ownCloud, Nextcloud</remarks>
+    /// <remarks>Available provider keys: Dropbox, Box, WebDav, OneDrive, GoogleDrive, kDrive, ownCloud, Nextcloud.</remarks>
     /// <path>api/2.0/files/thirdparty/providers</path>
     /// <collection>list</collection>
     [Tags("Files / Third-party integration")]
     [SwaggerResponse(200, "List of provider", typeof(List<ProviderDto>))]
     [HttpGet("thirdparty/providers")]
-    public async Task<List<ProviderDto>> GetAllProvidersAsync()
+    public async Task<List<ProviderDto>> GetAllProviders(GetProvidersRequestDto inDto)
     {
         if (!await CheckAccessAsync())
         {
             return [];
         }
-        
-        return thirdPartyConfiguration.GetAllProviders();
+
+        return thirdPartyConfiguration.GetAllProviders(inDto.ExcludeWebDav);
     }
-    
+
     private async Task<bool> CheckAccessAsync()
     {
         return !await userManager.IsGuestAsync(securityContext.CurrentAccount.ID) && await filesSettingsHelper.GetEnableThirdParty();

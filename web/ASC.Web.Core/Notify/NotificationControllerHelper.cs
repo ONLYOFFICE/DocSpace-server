@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,9 +29,15 @@ namespace ASC.Web.Core.Notify;
 public class NotificationControllerHelper(
     StudioNotifyHelper studioNotifyHelper,
     AuthContext authContext,
-    BadgesSettingsHelper badgesSettingsHelper)
+    BadgesSettingsHelper badgesSettingsHelper,
+    NotificationChannelsHelper notificationChannelsHelper)
 {
     private readonly Guid _userId = authContext.CurrentAccount.ID;
+
+    public IEnumerable<NotificationChannelStatus> GetNotificationChannels()
+    {
+        return notificationChannelsHelper.GetNotificationChannels().Select(c => new NotificationChannelStatus { Name = c.Name, IsEnabled = c.IsEnabled });
+    }
 
     public async Task<bool> GetNotificationStatusAsync(NotificationType notificationType)
     {
@@ -75,6 +81,9 @@ public class NotificationControllerHelper(
     }
 }
 
+/// <summary>
+/// The notification type.
+/// </summary>
 public enum NotificationType
 {
     [SwaggerEnum("Badges")]

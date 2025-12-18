@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -44,7 +44,7 @@ public class TenantManager(
     private const string CurrentTenant = "CURRENT_TENANT";
 
     private static readonly List<string> _thisCompAddresses = [];
-    
+
 
     static TenantManager()
     {
@@ -66,7 +66,7 @@ public class TenantManager(
     {
         return (await tenantService.GetTenantsAsync(default, active)).ToList();
     }
-    
+
     public Task<IEnumerable<Tenant>> GetTenantsAsync(List<int> ids)
     {
         return tenantService.GetTenantsAsync(ids);
@@ -77,7 +77,7 @@ public class TenantManager(
         return tenantService.GetTenantAsync(tenantId);
     }
 
-    public async Task<Tenant> GetTenantAsync(string domain)
+    public async Task<Tenant> GetTenantAsync(string domain, bool firstIfNotFoundForStandalone = true)
     {
         if (string.IsNullOrEmpty(domain))
         {
@@ -99,17 +99,17 @@ public class TenantManager(
                 t = await tenantService.GetTenantAsync(domain[..(domain.Length - baseUrl.Length - 1)]);
             }
         }
-        
+
         t ??= await tenantService.GetTenantAsync(domain);
-        
-        if (t == null && coreBaseSettings.Standalone && !isAlias)
+
+        if (t == null && coreBaseSettings.Standalone && !isAlias && firstIfNotFoundForStandalone)
         {
             t = await tenantService.GetTenantForStandaloneWithoutAliasAsync(domain);
         }
 
         return t;
     }
-    
+
 
     public async Task SetTenantVersionAsync(Tenant tenant, int version)
     {
@@ -136,24 +136,24 @@ public class TenantManager(
 
         return newTenant;
     }
-    
-    public async Task<Tenant> RestoreTenantAsync(int oldId, Tenant newTenant)
+
+    public async Task<Tenant> RestoreTenantAsync(Tenant oldTenant, Tenant newTenant)
     {
-        newTenant = await tenantService.RestoreTenantAsync(oldId, newTenant, coreSettings);
+        newTenant = await tenantService.RestoreTenantAsync(oldTenant, newTenant, coreSettings);
         SetCurrentTenant(newTenant);
 
         return newTenant;
     }
 
-    public async Task RemoveTenantAsync(int tenantId, bool auto = false)
+    public async Task RemoveTenantAsync(Tenant tenant, bool auto = false)
     {
-        await tenantService.RemoveTenantAsync(tenantId, auto);
+        await tenantService.RemoveTenantAsync(tenant, auto);
     }
 
     public Task<Tenant> GetCurrentTenantAsync(bool throwIfNotFound, HttpContext context)
     {
-        return _currentTenant != null ? 
-            Task.FromResult(_currentTenant) : 
+        return _currentTenant != null ?
+            Task.FromResult(_currentTenant) :
             GetCurrentTenantFromDbAsync(throwIfNotFound, context);
     }
 
@@ -203,8 +203,8 @@ public class TenantManager(
     {
         return GetCurrentTenant().Id;
     }
-    
-    
+
+
     public Tenant GetCurrentTenant(bool throwIfNotFound = true)
     {
         if (_currentTenant != null)
@@ -220,42 +220,52 @@ public class TenantManager(
         return null;
     }
 
+    private async Task<Tenant> GetTenantByOrigin(HttpContext context)
+    {
+        Tenant tenant = null;
+
+        string origin = context.Request.Headers.Origin;
+
+        if (!string.IsNullOrEmpty(origin))
+        {
+            var originUri = new Uri(origin);
+            tenant = await GetTenantAsync(originUri.Host, firstIfNotFoundForStandalone: false);
+        }
+
+        return tenant;
+    }
+
     public void SetCurrentTenant(Tenant tenant)
     {
         if (tenant != null)
         {
             _currentTenant = tenant;
-            if (httpContextAccessor?.HttpContext != null)
-            {
-                httpContextAccessor.HttpContext.Items[CurrentTenant] = tenant;
-            }
+            httpContextAccessor?.HttpContext?.Items[CurrentTenant] = tenant;
 
             CultureInfo.CurrentCulture = tenant.GetCulture();
             CultureInfo.CurrentUICulture = tenant.GetCulture();
         }
     }
-    
+
     public async Task SetCurrentTenantAsync()
     {
         var context = httpContextAccessor?.HttpContext;
         Tenant tenant = null;
         if (context != null)
         {
-
-            tenant = await GetTenantAsync(context.Request.Url().Host);
-
-            if (tenant == null)
+            if (coreBaseSettings.Standalone)
             {
-                string origin = context.Request.Headers.Origin;
+                tenant = await GetTenantByOrigin(context);
+            }
 
-                if (!string.IsNullOrEmpty(origin))
-                {
-                    var originUri = new Uri(origin);
-                    tenant = await GetTenantAsync(originUri.Host);
-                }
+            tenant = tenant ?? await GetTenantAsync(context.Request.Url().Host);
+
+            if (tenant == null && !coreBaseSettings.Standalone)
+            {
+                tenant = await GetTenantByOrigin(context);
             }
         }
-        
+
         SetCurrentTenant(tenant);
     }
 
@@ -284,14 +294,14 @@ public class TenantManager(
     }
 
 
-    public async Task<IEnumerable<TenantQuota>> GetTenantQuotasAsync()
+    public async Task<List<TenantQuota>> GetTenantQuotasAsync()
     {
-        return await GetTenantQuotasAsync(false);
+        return await GetTenantQuotasAsync(false, false);
     }
 
-    public async Task<IEnumerable<TenantQuota>> GetTenantQuotasAsync(bool all)
+    public async Task<List<TenantQuota>> GetTenantQuotasAsync(bool all, bool wallet)
     {
-        return (await quotaService.GetTenantQuotasAsync()).Where(q => q.TenantId < 0 && (all || q.Visible)).OrderByDescending(q => q.TenantId).ToList();
+        return (await quotaService.GetTenantQuotasAsync()).Where(q => q.TenantId < 0 && (all || q.Visible) && q.Wallet == wallet).OrderByDescending(q => q.TenantId).ToList();
     }
 
     public async Task<TenantQuota> GetCurrentTenantQuotaAsync(bool refresh = false)
@@ -309,11 +319,12 @@ public class TenantManager(
             TenantQuota currentQuota = null;
             foreach (var tariffRow in tariff.Quotas)
             {
-                var qty = tariffRow.Quantity;
-
                 var quota = await quotaService.GetTenantQuotaAsync(tariffRow.Id);
 
-                quota *= qty;
+                quota *= tariffRow.Quantity;
+
+                quota.DueDate = tariffRow.DueDate;
+
                 currentQuota += quota;
             }
 
@@ -323,22 +334,21 @@ public class TenantManager(
         return defaultQuota;
     }
 
-    public async Task<IDictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync()
+    public async Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(bool all = false, bool wallet = false)
     {
-        var quotas = await GetTenantQuotasAsync(false);
-        var productIds = quotas
-            .Select(p => p.ProductId)
-            .Where(id => !string.IsNullOrEmpty(id))
-            .Distinct()
-            .ToArray();
-        
+        var quotas = (await GetTenantQuotasAsync(all, wallet))
+            .Where(q => !string.IsNullOrEmpty(q.ProductId + q.ServiceName))
+            .ToDictionary(q => q.GetPaymentId(), q => q.Name);
+
         var tenant = GetCurrentTenant(false);
-        var prices = await tariffService.GetProductPriceInfoAsync(tenant?.PartnerId, productIds);
-        var result = prices.ToDictionary(price => quotas.First(quota => quota.ProductId == price.Key).Name, price => price.Value);
+
+        var prices = await tariffService.GetProductPriceInfoAsync(tenant?.PartnerId, wallet, [.. quotas.Keys]);
+        var result = prices.ToDictionary(price => quotas.GetValueOrDefault(price.Key), price => price.Value);
+
         return result;
     }
 
-    public Dictionary<string, decimal> GetProductPriceInfo(string productId)
+    public Dictionary<string, decimal> GetProductPriceInfo(string productId, bool wallet)
     {
         if (string.IsNullOrEmpty(productId))
         {
@@ -346,7 +356,7 @@ public class TenantManager(
         }
 
         var tenant = GetCurrentTenant(false);
-        var prices = tariffService.GetProductPriceInfoAsync(tenant?.PartnerId, productId).Result;
+        var prices = tariffService.GetProductPriceInfoAsync(tenant?.PartnerId, wallet, [productId]).Result;
         return prices.TryGetValue(productId, out var price) ? price : null;
     }
 
@@ -373,6 +383,11 @@ public class TenantManager(
     public void ValidateTenantName(string name)
     {
         tenantService.ValidateTenantName(name);
+    }
+
+    public async Task<bool> IsForbiddenDomainAsync(string domain)
+    {
+        return await tenantService.IsForbiddenDomainAsync(domain);
     }
 }
 

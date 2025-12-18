@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -50,10 +50,7 @@ public class NovellLdapSearcher(IConfiguration configuration,
 
     private Dictionary<string, string[]> _capabilities;
 
-    public bool IsConnected
-    {
-        get { return _ldapConnection is { Connected: true }; }
-    }
+    public bool IsConnected => _ldapConnection is { Connected: true };
 
     public void Init(string login,
         string password,
@@ -300,7 +297,7 @@ public class NovellLdapSearcher(IConfiguration configuration,
                     break;
                 }
 
-                _logger.ErrorSearch( searchFilter, ex);
+                _logger.ErrorSearch(searchFilter, ex);
                 continue;
             }
 

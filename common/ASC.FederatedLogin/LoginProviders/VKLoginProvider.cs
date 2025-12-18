@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,7 +34,7 @@ public class VKLoginProvider : BaseLoginProvider<VKLoginProvider>
     public override string ClientID => this["vkClientId"];
     public override string ClientSecret => this["vkClientSecret"];
     public override string RedirectUri => this["vkRedirectUrl"];
-    public override string Scopes => (new[] { 4194304 }).Sum().ToString();
+    public override string Scopes => new[] { 4194304 }.Sum().ToString();
 
     private readonly RequestHelper _requestHelper;
     private const string VKProfileUrl = "https://api.vk.com/method/users.get?v=5.103";
@@ -50,8 +50,8 @@ public class VKLoginProvider : BaseLoginProvider<VKLoginProvider>
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
         RequestHelper requestHelper,
-        string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-        : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
+        string name, int order, bool paid, Dictionary<string, string> props, Dictionary<string, string> additional = null)
+        : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, paid, props, additional)
     {
         _requestHelper = requestHelper;
     }

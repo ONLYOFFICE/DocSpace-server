@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,18 +27,20 @@
 namespace ASC.AuditTrail.Repositories;
 
 [Scope]
-public class LoginEventsRepository(TenantManager tenantManager,
+public class LoginEventsRepository(
+    TenantManager tenantManager,
     IDbContextFactory<MessagesContext> dbContextFactory,
-    IMapper mapper,
-    GeolocationHelper geolocationHelper)
+    GeolocationHelper geolocationHelper,
+    LoginEventMapper eventMapper)
 {
-    public async Task<IEnumerable<LoginEvent>> GetByFilterAsync(
+    public async Task<List<LoginEvent>> GetByFilterAsync(
         Guid? login = null,
         MessageAction? action = null,
         DateTime? fromDate = null,
         DateTime? to = null,
         int startIndex = 0,
-        int limit = 0)
+        int limit = 0,
+        bool limitedActionText = false)
     {
         var tenant = tenantManager.GetCurrentTenantId();
         await using var messagesContext = await dbContextFactory.CreateDbContextAsync();
@@ -75,15 +77,15 @@ public class LoginEventsRepository(TenantManager tenantManager,
             query = query.Where(r => r.Event.Action == (int)action);
         }
 
-        var hasFromFilter = (fromDate.HasValue && fromDate.Value != DateTime.MinValue);
-        var hasToFilter = (to.HasValue && to.Value != DateTime.MinValue);
+        var hasFromFilter = fromDate.HasValue && fromDate.Value != DateTime.MinValue;
+        var hasToFilter = to.HasValue && to.Value != DateTime.MinValue;
 
         if (hasFromFilter || hasToFilter)
         {
             if (hasFromFilter)
             {
-                query = hasToFilter ? 
-                    query.Where(q => q.Event.Date >= fromDate.Value & q.Event.Date <= to.Value) : 
+                query = hasToFilter ?
+                    query.Where(q => q.Event.Date >= fromDate.Value & q.Event.Date <= to.Value) :
                     query.Where(q => q.Event.Date >= fromDate.Value);
             }
             else
@@ -92,12 +94,14 @@ public class LoginEventsRepository(TenantManager tenantManager,
             }
         }
 
-        var events = mapper.Map<List<LoginEventQuery>, IEnumerable<LoginEvent>>(await query.ToListAsync());
+        var eventQueryList = await query.ToListAsync();
+        var events = limitedActionText ? eventMapper.ToLimitedLoginEvents(eventQueryList) : eventMapper.ToLoginEvents(eventQueryList);
 
         foreach (var e in events)
         {
             await geolocationHelper.AddGeolocationAsync(e);
         }
+
         return events;
     }
 
@@ -105,7 +109,7 @@ public class LoginEventsRepository(TenantManager tenantManager,
     {
         await using var auditTrailContext = await dbContextFactory.CreateDbContextAsync();
 
-        var successLoginEvents = new List<int>() {
+        var successLoginEvents = new List<int> {
             (int)MessageAction.LoginSuccess,
             (int)MessageAction.LoginSuccessViaSocialAccount,
             (int)MessageAction.LoginSuccessViaSms,
@@ -116,6 +120,10 @@ public class LoginEventsRepository(TenantManager tenantManager,
             (int)MessageAction.LoginSuccessViaApiSocialAccount,
             (int)MessageAction.LoginSuccesViaTfaApp,
             (int)MessageAction.LoginSuccessViaApiTfa,
+            (int)MessageAction.LoginSuccessViaOAuth,
+            (int)MessageAction.LoginSuccessViaPassword,
+
+            (int)MessageAction.AuthLinkActivated,
 
             (int)MessageAction.Logout
         };

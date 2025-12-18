@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.Identity;
 using ASC.Web.Core.WebZones;
 
 using SecurityContext = ASC.Core.SecurityContext;
@@ -42,7 +43,7 @@ public class RemoveProgressItem : DistributedTaskProgress
     /// <summary>The user whose data is deleted</summary>
     /// <type>ASC.Core.Users.UserInfo, ASC.Core.Common</type>
     public UserInfo User { get; private set; }
-    
+
     public bool IsGuest { get; private set; }
 
     //private readonly IFileStorageService _docService;
@@ -57,9 +58,9 @@ public class RemoveProgressItem : DistributedTaskProgress
 
     public RemoveProgressItem()
     {
-        
+
     }
-    
+
     /// <summary>
     /// </summary>
     public RemoveProgressItem(IServiceScopeFactory serviceScopeFactory)
@@ -91,7 +92,7 @@ public class RemoveProgressItem : DistributedTaskProgress
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<RemoveProgressItemScope>();
-        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, webItemManagerSecurity,  userFormatter, options) = scopeClass;
+        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, webItemManagerSecurity, userFormatter, options, client) = scopeClass;
         var logger = options.CreateLogger("ASC.Web");
         await tenantManager.SetCurrentTenantAsync(_tenantId);
         var userName = userFormatter.GetUserName(User);
@@ -113,23 +114,26 @@ public class RemoveProgressItem : DistributedTaskProgress
 
             var wrapper = await GetUsageSpace(webItemManagerSecurity);
 
-            if (!IsGuest)
-            {
-                await fileStorageService.MoveSharedFilesAsync(UserId, _currentUserId);
-                Percentage = 30;
-                await PublishChanges();
-            }
+            await fileStorageService.MoveSharedEntriesAsync(UserId, _currentUserId);
+
+            Percentage = 30;
+            await PublishChanges();
 
             await fileStorageService.DeletePersonalDataAsync(UserId);
 
-            Percentage = 50;
+            Percentage = 45;
+            await PublishChanges();
+
+            await fileStorageService.ReassignProvidersAsync(UserId, _currentUserId);
+
+            Percentage = 60;
             await PublishChanges();
 
             await fileStorageService.ReassignRoomsFilesAsync(UserId);
-                
+
             Percentage = 70;
             await PublishChanges();
-                
+
             await fileStorageService.ReassignRoomsFoldersAsync(UserId);
 
             Percentage = 95;
@@ -140,6 +144,7 @@ public class RemoveProgressItem : DistributedTaskProgress
 
             if (_deleteProfile)
             {
+                await client.DeleteClientsAsync(UserId);
                 await DeleteUserProfile(userManager, userPhotoManager, messageService, userName);
             }
 
@@ -268,7 +273,8 @@ public record RemoveProgressItemScope(
     UserPhotoManager UserPhotoManager,
     WebItemManagerSecurity WebItemManagerSecurity,
     UserFormatter UserFormatter,
-    ILoggerProvider Options);
+    ILoggerProvider Options,
+    IdentityClient Client);
 
 class UsageSpaceWrapper
 {

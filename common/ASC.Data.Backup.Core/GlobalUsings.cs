@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,6 +38,7 @@ global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
 global using System.Xml;
 global using System.Xml.Linq;
+
 global using ASC.Api.Core.Extensions;
 global using ASC.Api.Utils;
 global using ASC.Common;
@@ -49,12 +50,10 @@ global using ASC.Common.Utils;
 global using ASC.Core;
 global using ASC.Core.Billing;
 global using ASC.Core.ChunkedUploader;
-global using ASC.Core.Common.Configuration;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
-global using ASC.Data.Backup;
 global using ASC.Data.Backup.Contracts;
 global using ASC.Data.Backup.Core;
 global using ASC.Data.Backup.Core.Log;
@@ -88,13 +87,16 @@ global using ASC.Web.Files.Utils;
 global using ASC.Web.Studio.Core;
 global using ASC.Web.Studio.Core.Notify;
 global using ASC.Web.Studio.Utility;
+
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
+
 global using MySql.Data.MySqlClient;
+
 global using ProtoBuf;
 
 global using ZiggyCreatures.Caching.Fusion;

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -44,8 +44,8 @@ public class BitlyLoginProvider : Consumer, IValidateKeysProvider
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
         RequestHelper requestHelper,
-        string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
+        string name, int order, bool paid, Dictionary<string, string> props, Dictionary<string, string> additional = null)
+        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, paid, props, additional)
     {
         _requestHelper = requestHelper;
     }
@@ -62,13 +62,7 @@ public class BitlyLoginProvider : Consumer, IValidateKeysProvider
         }
     }
 
-    public bool Enabled
-    {
-        get
-        {
-            return !string.IsNullOrEmpty(BitlyToken);
-        }
-    }
+    public bool Enabled => !string.IsNullOrEmpty(BitlyToken);
 
     public string GetShortenLink(string shareLink)
     {

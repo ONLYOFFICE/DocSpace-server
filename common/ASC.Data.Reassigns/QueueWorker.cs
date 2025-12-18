@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,7 +35,7 @@ public class QueueWorker<T>(
 {
     protected readonly IServiceProvider _serviceProvider = serviceProvider;
     private readonly DistributedTaskQueue<T> _queue = queueFactory.CreateQueue<T>();
-    protected readonly IDictionary<string, StringValues> _httpHeaders = httpContextAccessor.HttpContext?.Request.Headers;
+    protected readonly IDictionary<string, StringValues> _httpHeaders = MessagingSystem.MessageSettings.GetHttpHeaders(httpContextAccessor.HttpContext?.Request);
 
     public static string GetProgressItemId(int tenantId, Guid userId)
     {
@@ -87,7 +87,7 @@ public class QueueWorkerReassign(IHttpContextAccessor httpContextAccessor,
         IServiceProvider serviceProvider,
         IDistributedTaskQueueFactory queueFactory,
         IDistributedLockProvider distributedLockProvider)
-    : QueueWorker<ReassignProgressItem>(httpContextAccessor, serviceProvider, queueFactory,  distributedLockProvider)
+    : QueueWorker<ReassignProgressItem>(httpContextAccessor, serviceProvider, queueFactory, distributedLockProvider)
 {
     public async Task<ReassignProgressItem> StartAsync(int tenantId, Guid fromUserId, Guid toUserId, Guid currentUserId, bool notify, bool deleteProfile)
     {
@@ -110,7 +110,7 @@ public class QueueWorkerUpdateUserType(IHttpContextAccessor httpContextAccessor,
     {
         var result = _serviceProvider.GetService<UpdateUserTypeProgressItem>();
 
-        result.Init(tenantId, userId, toUserId, currentUserId, employeeType);
+        result.Init(tenantId, userId, toUserId, currentUserId, employeeType, _httpHeaders);
 
         return await StartAsync(tenantId, userId, result);
     }

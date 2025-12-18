@@ -126,4 +126,37 @@
   <data name="LargeBackup" xml:space="preserve">
     <value>O backup é maior que o tamanho total do portal</value>
   </data>
+  <data name="BackupException" xml:space="preserve">
+    <value>Algo correu mal durante a criação da cópia de segurança. Tente criá-lo novamente ou contacte o suporte.</value>
+  </data>
+  <data name="BackupInvalid" xml:space="preserve">
+    <value>O ficheiro de cópia de segurança é inválido.</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>Algo correu mal durante o restauro da cópia de segurança. Por favor, tente restaurá-lo novamente ou contacte o suporte.</value>
+  </data>
+  <data name="AutoBackup" xml:space="preserve">
+    <value>Cópia de segurança automática</value>
+  </data>
+  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
+    <value>Custom cloud</value>
+  </data>
+  <data name="BackupStorageTypeDataStore" xml:space="preserve">
+    <value>Armazenamento temporário</value>
+  </data>
+  <data name="BackupStorageTypeDocuments" xml:space="preserve">
+    <value>Sala de Apoio</value>
+  </data>
+  <data name="BackupStorageTypeLocal" xml:space="preserve">
+    <value>Ficheiro local</value>
+  </data>
+  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
+    <value>Armazenamento Proveniente de Terceiros</value>
+  </data>
+  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
+    <value>Recurso de terceiros</value>
+  </data>
+  <data name="BackupMissingFilesWarning" xml:space="preserve">
+    <value>Alguns ficheiros não foram incluídos na cópia de segurança. Para mais detalhes, verifique {0}</value>
+  </data>
 </root>

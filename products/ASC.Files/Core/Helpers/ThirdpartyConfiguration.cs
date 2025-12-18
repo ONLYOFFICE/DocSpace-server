@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,8 +29,7 @@ namespace ASC.Web.Files.Helpers;
 [Singleton]
 public class ThirdpartyConfigurationData(IConfiguration configuration)
 {
-    private HashSet<string> _thirdPartyProviders;
-    public HashSet<string> ThirdPartyProviders => _thirdPartyProviders ??= 
+    public HashSet<string> ThirdPartyProviders => field ??=
         configuration.GetSection("files:thirdparty:enable").Get<HashSet<string>>() ?? [];
 }
 
@@ -39,18 +38,14 @@ public class ThirdpartyConfiguration(ThirdpartyConfigurationData configuration, 
 {
     private BoxLoginProvider _boxLoginProvider;
     private BoxLoginProvider BoxLoginProvider => _boxLoginProvider ??= consumerFactory.Get<BoxLoginProvider>();
-    
-    private DropboxLoginProvider _dropboxLoginProvider;
-    private DropboxLoginProvider DropboxLoginProvider =>  _dropboxLoginProvider ??= consumerFactory.Get<DropboxLoginProvider>();
-    
-    private OneDriveLoginProvider _oneDriveLoginProvider;
-    private OneDriveLoginProvider OneDriveLoginProvider =>  _oneDriveLoginProvider ??= consumerFactory.Get<OneDriveLoginProvider>();
-    
-    private DocuSignLoginProvider _docuSignLoginProvider;
-    private DocuSignLoginProvider DocuSignLoginProvider =>  _docuSignLoginProvider ??= consumerFactory.Get<DocuSignLoginProvider>();
-    
-    private GoogleLoginProvider _googleLoginProvider;
-    private GoogleLoginProvider GoogleLoginProvider =>  _googleLoginProvider ??= consumerFactory.Get<GoogleLoginProvider>();
+
+    private DropboxLoginProvider DropboxLoginProvider => field ??= consumerFactory.Get<DropboxLoginProvider>();
+
+    private OneDriveLoginProvider OneDriveLoginProvider => field ??= consumerFactory.Get<OneDriveLoginProvider>();
+
+    private DocuSignLoginProvider DocuSignLoginProvider => field ??= consumerFactory.Get<DocuSignLoginProvider>();
+
+    private GoogleLoginProvider GoogleLoginProvider => field ??= consumerFactory.Get<GoogleLoginProvider>();
 
     private HashSet<string> ThirdPartyProviders => configuration.ThirdPartyProviders;
 
@@ -82,7 +77,7 @@ public class ThirdpartyConfiguration(ThirdpartyConfigurationData configuration, 
     public bool SupportkDriveInclusion => ThirdPartyProviders.Contains(KDriveKey);
 
     public bool SupportYandexInclusion => ThirdPartyProviders.Contains(YandexKey);
-    
+
     public bool SupportDocuSignInclusion => ThirdPartyProviders.Contains(DocuSignKey) && DocuSignLoginProvider.IsEnabled;
 
     public bool SupportGoogleDriveInclusion => ThirdPartyProviders.Contains(GoogleDriveKey) && GoogleLoginProvider.IsEnabled;
@@ -98,8 +93,8 @@ public class ThirdpartyConfiguration(ThirdpartyConfigurationData configuration, 
     private static string KDriveKey => "kdrive";
     private static string YandexKey => "yandex";
     private static string DocuSignKey => "docusign";
-    
-    public List<ProviderDto> GetAllProviders()
+
+    public List<ProviderDto> GetAllProviders(bool excludeWebDav)
     {
         var webDavKey = ProviderTypes.WebDav.ToStringFast();
 
@@ -107,48 +102,53 @@ public class ThirdpartyConfiguration(ThirdpartyConfigurationData configuration, 
 
         if (ThirdPartyProviders.Contains(BoxKey))
         {
-            providers.Add(new ProviderDto("Box", ProviderTypes.Box.ToStringFast(), BoxLoginProvider.IsEnabled, true, BoxLoginProvider.RedirectUri, 
+            providers.Add(new ProviderDto("Box", ProviderTypes.Box.ToStringFast(), BoxLoginProvider.IsEnabled, true, BoxLoginProvider.RedirectUri,
                 ClientId: BoxLoginProvider.ClientID));
         }
-        
+
         if (ThirdPartyProviders.Contains(DropboxKey))
         {
-            providers.Add(new ProviderDto("Dropbox", ProviderTypes.DropboxV2.ToStringFast(), DropboxLoginProvider.IsEnabled, true, DropboxLoginProvider.RedirectUri, 
+            providers.Add(new ProviderDto("Dropbox", ProviderTypes.DropboxV2.ToStringFast(), DropboxLoginProvider.IsEnabled, true, DropboxLoginProvider.RedirectUri,
                 ClientId: DropboxLoginProvider.ClientID));
         }
-        
+
         if (ThirdPartyProviders.Contains(GoogleDriveKey))
         {
-            providers.Add(new ProviderDto("GoogleDrive", ProviderTypes.GoogleDrive.ToStringFast(), GoogleLoginProvider.IsEnabled, true, GoogleLoginProvider.RedirectUri, 
+            providers.Add(new ProviderDto("GoogleDrive", ProviderTypes.GoogleDrive.ToStringFast(), GoogleLoginProvider.IsEnabled, true, GoogleLoginProvider.RedirectUri,
                 ClientId: GoogleLoginProvider.ClientID));
         }
-        
+
         if (ThirdPartyProviders.Contains(OneDriveKey))
         {
-            providers.Add(new ProviderDto("OneDrive", ProviderTypes.OneDrive.ToStringFast(), OneDriveLoginProvider.IsEnabled, true, OneDriveLoginProvider.RedirectUri, 
+            providers.Add(new ProviderDto("OneDrive", ProviderTypes.OneDrive.ToStringFast(), OneDriveLoginProvider.IsEnabled, true, OneDriveLoginProvider.RedirectUri,
                 ClientId: OneDriveLoginProvider.ClientID));
         }
-        
+
+        if (excludeWebDav)
+        {
+            return providers;
+        }
+
         if (ThirdPartyProviders.Contains(KDriveKey))
         {
             providers.Add(new ProviderDto("kDrive", webDavKey, true));
         }
-        
+
         if (ThirdPartyProviders.Contains(YandexKey))
         {
             providers.Add(new ProviderDto("Yandex", webDavKey, true));
         }
-        
+
         if (ThirdPartyProviders.Contains(WebDavKey))
         {
             providers.Add(new ProviderDto("WebDav", webDavKey, true, RequiredConnectionUrl: true));
         }
-        
+
         if (ThirdPartyProviders.Contains(NextcloudKey))
         {
             providers.Add(new ProviderDto("Nextcloud", webDavKey, true, RequiredConnectionUrl: true));
         }
-        
+
         if (ThirdPartyProviders.Contains(OwncloudKey))
         {
             providers.Add(new ProviderDto("ownCloud", webDavKey, true, RequiredConnectionUrl: true));
@@ -156,7 +156,7 @@ public class ThirdpartyConfiguration(ThirdpartyConfigurationData configuration, 
 
         return providers;
     }
-    
+
     public List<List<string>> GetProviders()
     {
         var result = new List<List<string>>();

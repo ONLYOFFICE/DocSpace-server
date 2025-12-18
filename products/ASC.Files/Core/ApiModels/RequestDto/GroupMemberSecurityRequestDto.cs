@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,17 +26,75 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-public class GroupMemberSecurityRequestDto<T>
+/// <summary>
+/// The request parameters for getting the group member security information.
+/// </summary>
+public class GroupMemberSecurityFolderRequestDto<T>
 {
     /// <summary>
-    /// Folder Id
+    /// The folder ID.
     /// </summary>
     [FromRoute(Name = "folderId")]
-    public T FolderId { get; set; }
+    public required T FolderId { get; set; }
 
     /// <summary>
-    /// Group Id
+    /// The group ID.
     /// </summary>
     [FromRoute(Name = "groupId")]
-    public Guid GroupId { get; set; }
+    public required Guid GroupId { get; set; }
+
+    /// <summary>
+    /// The number of items to be retrieved in the current query.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
+
+    /// <summary>
+    /// The starting index for the query result set.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
+
+    /// <summary>
+    /// The filter value used for searching or querying group members based on text input.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
+}
+/// <summary>
+/// The group member security request generic parameters.
+/// </summary>
+public class GroupMemberSecurityFileRequestDto<T>
+{
+    /// <summary>
+    /// The file ID.
+    /// </summary>
+    [FromRoute(Name = "fileId")]
+    public required T FileId { get; set; }
+
+    /// <summary>
+    /// The group ID.
+    /// </summary>
+    [FromRoute(Name = "groupId")]
+    public required Guid GroupId { get; set; }
+
+    /// <summary>
+    /// The number of items to be retrieved in the current query.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
+
+    /// <summary>
+    /// The starting index for the query result set.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
+
+    /// <summary>
+    /// The filter value used for searching or querying group members based on text input.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }

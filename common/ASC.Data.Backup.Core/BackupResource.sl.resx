@@ -126,4 +126,37 @@
   <data name="LargeBackup" xml:space="preserve">
     <value>Varnostna kopija je večja od celotne velikosti portala</value>
   </data>
+  <data name="BackupException" xml:space="preserve">
+    <value>Med ustvarjanjem varnostne kopije je šlo nekaj narobe. Poskusite jo znova ustvariti ali se obrnite na podporo.</value>
+  </data>
+  <data name="BackupInvalid" xml:space="preserve">
+    <value>Varnostna datoteka ni veljavna.</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>Med obnavljanjem varnostne kopije je šlo nekaj narobe. Poskusite jo znova obnoviti ali se obrnite na podporo.</value>
+  </data>
+  <data name="AutoBackup" xml:space="preserve">
+    <value>Samodejno varnostno kopiranje</value>
+  </data>
+  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
+    <value>Custom cloud</value>
+  </data>
+  <data name="BackupStorageTypeDataStore" xml:space="preserve">
+    <value>Začasno shranjevanje</value>
+  </data>
+  <data name="BackupStorageTypeDocuments" xml:space="preserve">
+    <value>Varnostno kopiranje sobe</value>
+  </data>
+  <data name="BackupStorageTypeLocal" xml:space="preserve">
+    <value>Lokalna datoteka</value>
+  </data>
+  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
+    <value>Shranjevanje pri zunanjem ponudniku</value>
+  </data>
+  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
+    <value>Shranjevanje pri zunanjem ponudniku</value>
+  </data>
+  <data name="BackupMissingFilesWarning" xml:space="preserve">
+    <value>Nekatere datoteke niso bile vključene v varnostno kopijo. Za več podrobnosti preverite {0}</value>
+  </data>
 </root>

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,6 +36,7 @@ const os = require("os");
 const { randomUUID } = require('crypto');
 const date = require('date-and-time');
 
+let logConsole = config.get("logConsole");
 let logpath = config.get("logPath");
 let logLevel = config.get("logLevel") || "debug";
 if(logpath != null)
@@ -76,12 +77,6 @@ var options = {
     maxFiles: "30d",
     json: true,
   },
-  console: {
-    level: logLevel,
-    handleExceptions: true,
-    json: false,
-    colorize: true,
-  },
   cloudWatch: {
     name: 'aws',
     level: logLevel,
@@ -99,13 +94,21 @@ var options = {
 };
 
 let transports = [
-  new winston.transports.Console(options.console),
   new winston.transports.DailyRotateFile(options.file)  
 ];
 
 if (aws != null && aws.accessKeyId !== '')
 {
   transports.push(new WinstonCloudWatch(options.cloudWatch));
+}
+
+if(logConsole) {
+  transports.push(new winston.transports.Console({
+    level: logLevel,
+    handleExceptions: true,
+    json: false,
+    colorize: true,
+  }));
 }
 
 const customFormat = winston.format(info => {

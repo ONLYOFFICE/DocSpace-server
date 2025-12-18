@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,47 +26,62 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
-public class CompanyWhiteLabelSettingsDto: IMapFrom<CompanyWhiteLabelSettings>
+/// <summary>
+/// The company white label settings.
+/// </summary>
+public class CompanyWhiteLabelSettingsDto
 {
     /// <summary>
-    /// Company name
+    /// The company name.
     /// </summary>
-    public string CompanyName { get; set; }
+    public required string CompanyName { get; set; }
 
     /// <summary>
-    /// Site
+    /// The company site.
     /// </summary>
-    public string Site { get; set; }
+    public required string Site { get; set; }
 
     /// <summary>
-    /// Email
+    /// The company email address.
     /// </summary>
     [EmailAddress]
-    public string Email { get; set; }
+    public required string Email { get; set; }
 
     /// <summary>
-    /// Address
+    /// The company address.
     /// </summary>
-    public string Address { get; set; }
+    public required string Address { get; set; }
 
     /// <summary>
-    /// Phone number
+    /// The company phone number.
     /// </summary>
-    public string Phone { get; set; }
+    public required string Phone { get; set; }
 
     /// <summary>
-    /// Specifies if a company is a licensor or not
+    /// Specifies if a company is a licensor or not.
     /// </summary>
-    public bool IsLicensor { get; set; }
+    public required bool IsLicensor { get; set; }
 
     /// <summary>
-    /// Specifies if these settings are default or not
+    /// Specifies if the About page is visible or not.
     /// </summary>
-    public bool IsDefault { get; set; }
+    public required bool HideAbout { get; set; }
 
-    public void Mapping(Profile profile)
+    /// <summary>
+    /// Specifies if these settings are default or not.
+    /// </summary>
+    public required bool IsDefault { get; set; }
+}
+
+[Scope]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public partial class CompanyWhiteLabelSettingsDtoMapper(CompanyWhiteLabelSettingsHelper companyWhiteLabelSettingsHelper)
+{
+    [MapPropertyFromSource(nameof(CompanyWhiteLabelSettingsDto.IsDefault), Use = nameof(GetIsDefault))]
+    public partial CompanyWhiteLabelSettingsDto Map(CompanyWhiteLabelSettings source);
+
+    private bool GetIsDefault(CompanyWhiteLabelSettings source)
     {
-        profile.CreateMap<CompanyWhiteLabelSettings, CompanyWhiteLabelSettingsDto>()
-            .ConvertUsing<CompanyWhiteLabelSettingsConverter>();
+        return companyWhiteLabelSettingsHelper.IsDefault(source);
     }
 }

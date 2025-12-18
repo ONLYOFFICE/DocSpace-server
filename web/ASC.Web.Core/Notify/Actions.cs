@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,6 +42,8 @@ public static class Actions
     public static readonly INotifyAction JoinUsers = new NotifyAction("join", "join users");
     public static readonly INotifyAction SendWhatsNew = new NotifyAction("send_whats_new", "send whats new");
     public static readonly INotifyAction BackupCreated = new NotifyAction("backup_created", "backup created");
+    public static readonly INotifyAction BackupFailed = new NotifyAction("backup_failed", "backup failed");
+    public static readonly INotifyAction ScheduledBackupFailed = new NotifyAction("scheduled_backup_failed", "scheduled backup failed");
     public static readonly INotifyAction RestoreStarted = new NotifyAction("restore_started", "restore_started");
     public static readonly INotifyAction RestoreCompletedV115 = new NotifyAction("restore_completed_v115");
     public static readonly INotifyAction PortalDeactivate = new NotifyAction("portal_deactivate", "portal deactivate");
@@ -59,6 +61,7 @@ public static class Actions
     public static readonly INotifyAction ActivateEmail = new NotifyAction("activate_email", "activate_email");
     public static readonly INotifyAction EmailChangeV115 = new NotifyAction("change_email_v115", "change_email_v115");
     public static readonly INotifyAction PasswordChangeV115 = new NotifyAction("change_password_v115", "change_password_v115");
+    public static readonly INotifyAction PasswordChanged = new NotifyAction("password_changed", "password_changed");
     public static readonly INotifyAction PasswordSet = new NotifyAction("set_password", "set_password");
     public static readonly INotifyAction PhoneChange = new NotifyAction("change_phone", "change_phone");
     public static readonly INotifyAction TfaChange = new NotifyAction("change_tfa", "change_tfa");
@@ -92,7 +95,9 @@ public static class Actions
     public static readonly INotifyAction StorageDecryptionError = new NotifyAction("storage_decryption_error");
 
     public static readonly INotifyAction SaasRoomInvite = new NotifyAction("saas_room_invite");
+    public static readonly INotifyAction SaasAgentInvite = new NotifyAction("saas_agent_invite");
     public static readonly INotifyAction SaasRoomInviteExistingUser = new NotifyAction("saas_room_invite_existing_user");
+    public static readonly INotifyAction SaasAgentInviteExistingUser = new NotifyAction("saas_agent_invite_existing_user");
     public static readonly INotifyAction SaasDocSpaceInvite = new NotifyAction("saas_docspace_invite");
     public static readonly INotifyAction SaasDocSpaceRegistration = new NotifyAction("saas_docspace_registration");
 
@@ -112,6 +117,7 @@ public static class Actions
     public static readonly INotifyAction SaasAdminStartupWarningAfterYearV1 = new NotifyAction("saas_admin_startup_warning_after_year_v1");
 
     public static readonly INotifyAction PortalDeleteSuccessV1 = new NotifyAction("portal_delete_success_v1");
+    public static readonly INotifyAction PortalDeletedToSupport = new NotifyAction("portal_deleted_to_support");
 
     public static readonly INotifyAction SaasUserWelcomeV1 = new NotifyAction("saas_user_welcome_v1");
     public static readonly INotifyAction EnterpriseUserWelcomeV1 = new NotifyAction("enterprise_user_welcome_v1");
@@ -155,4 +161,10 @@ public static class Actions
     public static readonly INotifyAction DeveloperAdminPaymentWarningGracePeriodActivation = new NotifyAction("developer_admin_payment_warning_grace_period_activation");
     public static readonly INotifyAction DeveloperAdminPaymentWarningGracePeriodBeforeExpiration = new NotifyAction("developer_admin_payment_warning_grace_period_before_expiration");
     public static readonly INotifyAction DeveloperAdminPaymentWarningGracePeriodExpiration = new NotifyAction("developer_admin_payment_warning_grace_period_expiration");
+
+    public static readonly INotifyAction UserTypeChanged = new NotifyAction("user_type_changed");
+    public static readonly INotifyAction UserRoleChanged = new NotifyAction("user_role_changed");
+
+    public static readonly INotifyAction TopUpWalletError = new NotifyAction("top_up_wallet_error");
+    public static readonly INotifyAction RenewSubscriptionError = new NotifyAction("renew_subscription_error");
 }

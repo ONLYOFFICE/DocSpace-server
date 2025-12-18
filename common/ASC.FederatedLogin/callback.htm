@@ -1,10 +1,10 @@
 ﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html>
+<html lang="en">
 <head>
     <script language="javascript" type="text/javascript">
         if (%DESKTOP%) {
-			localStorage.setItem("profile", %PROFILE%);
-			window.location.href = "/";
+            localStorage.setItem("profile", %PROFILE%);
+            window.location.href = %RETURNURL%;
         } else {
             try {
                 window.opener.%CALLBACK%(%PROFILE%);
@@ -14,6 +14,7 @@
             window.close();
         }
     </script>
+    <title></title>
 </head>
 <body></body>
 </html>

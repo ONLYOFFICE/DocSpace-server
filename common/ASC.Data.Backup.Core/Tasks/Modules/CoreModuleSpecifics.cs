@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,13 +36,13 @@ public class CoreModuleSpecifics : ModuleSpecificsBase
     private readonly Helpers _helpers;
     private readonly TableInfo[] _tables =
     [
-        new("core_acl", "tenant") {InsertMethod = InsertMethod.Ignore}, 
-        new("core_subscription", "tenant"), 
-        new("core_subscriptionmethod", "tenant"), 
-        new("core_userphoto", "tenant") {UserIDColumns = ["userid"] }, 
-        new("core_usersecurity", "tenant") {UserIDColumns = ["userid"] }, 
-        new("core_usergroup", "tenant") {UserIDColumns = ["userid"] }, 
-        new("backup_schedule", "tenant_id"), 
+        new("core_acl", "tenant") {InsertMethod = InsertMethod.Ignore},
+        new("core_subscription", "tenant"),
+        new("core_subscriptionmethod", "tenant"),
+        new("core_userphoto", "tenant") {UserIDColumns = ["userid"] },
+        new("core_usersecurity", "tenant") {UserIDColumns = ["userid"] },
+        new("core_usergroup", "tenant") {UserIDColumns = ["userid"] },
+        new("backup_schedule", "tenant_id"),
         new("core_settings", "tenant"),
         new("core_user_relations", "tenant") { UserIDColumns = ["source_user_id", "target_user_id"] }
     ];
@@ -97,7 +97,7 @@ public class CoreModuleSpecifics : ModuleSpecificsBase
 
         return base.TryPrepareValue(connection, columnMapper, table, columnName, ref value);
     }
-    
+
     protected override bool TryPrepareValue(DbConnection connection, ColumnMapper columnMapper, RelationInfo relation, ref object value)
     {
         if (relation.ChildTable == "core_acl" && relation.ChildColumn == "object")

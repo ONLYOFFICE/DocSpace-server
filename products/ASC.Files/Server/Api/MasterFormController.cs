@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -41,11 +41,11 @@ public abstract class MasterFormController<T>(FileStorageService fileStorageServ
         FolderDtoHelper folderDtoHelper,
         FileDtoHelper fileDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
-    {
+{
     /// <summary>
     /// Checks if the current file is a form draft which can be filled out.
     /// </summary>
-    /// <short>Check the form draft</short>
+    /// <short>Check the form draft filling</short>
     /// <path>api/2.0/files/masterform/{fileId}/checkfillformdraft</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
@@ -53,8 +53,8 @@ public abstract class MasterFormController<T>(FileStorageService fileStorageServ
     [SwaggerResponse(403, "You don't have enough permission to view the file")]
     [AllowAnonymous]
     [HttpPost("masterform/{fileId}/checkfillformdraft")]
-    public async Task<string> CheckFillFormDraftAsync(CheckFillFormDraftRequestDto<T> inDto)
+    public async Task<string> CheckFillFormDraft(CheckFillFormDraftRequestDto<T> inDto)
     {
-        return await fileStorageService.CheckFillFormDraftAsync(inDto.FileId, inDto.File.Version,!inDto.File.RequestEmbedded, inDto.File.RequestView);
+        return await fileStorageService.CheckFillFormDraftAsync(inDto.FileId, inDto.File.Version, !inDto.File.RequestEmbedded, inDto.File.RequestView);
     }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -50,56 +50,59 @@ public static class TenantIpRestrictionsExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddTenantIpRestrictions(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<TenantIpRestrictions>(entity =>
+        public void MySqlAddTenantIpRestrictions()
         {
-            entity.ToTable("tenants_iprestrictions")
-                .HasCharSet("utf8");
+            modelBuilder.Entity<TenantIpRestrictions>(entity =>
+            {
+                entity.ToTable("tenants_iprestrictions")
+                    .HasCharSet("utf8");
 
-            entity.HasIndex(e => e.TenantId)
-                .HasDatabaseName("tenant");
+                entity.HasIndex(e => e.TenantId)
+                    .HasDatabaseName("tenant");
 
-            entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.Id).HasColumnName("id");
 
-            entity.Property(e => e.Ip)
-                .IsRequired()
-                .HasColumnName("ip")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Ip)
+                    .IsRequired()
+                    .HasColumnName("ip")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.ForAdmin)
-                .IsRequired()
-                .HasColumnName("for_admin")
-                .HasColumnType("TINYINT(1)");
+                entity.Property(e => e.ForAdmin)
+                    .IsRequired()
+                    .HasColumnName("for_admin")
+                    .HasColumnType("TINYINT(1)");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant");
-        });
-    }
+                entity.Property(e => e.TenantId).HasColumnName("tenant");
+            });
+        }
 
-    public static void PgSqlAddTenantIpRestrictions(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<TenantIpRestrictions>(entity =>
+        public void PgSqlAddTenantIpRestrictions()
         {
-            entity.ToTable("tenants_iprestrictions");
+            modelBuilder.Entity<TenantIpRestrictions>(entity =>
+            {
+                entity.ToTable("tenants_iprestrictions");
 
-            entity.HasIndex(e => e.TenantId)
-                .HasDatabaseName("tenant");
+                entity.HasIndex(e => e.TenantId)
+                    .HasDatabaseName("tenant");
 
-            entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.Id).HasColumnName("id");
 
-            entity.Property(e => e.Ip)
-                .IsRequired()
-                .HasColumnName("ip")
-                .HasColumnType("varchar(50)");
+                entity.Property(e => e.Ip)
+                    .IsRequired()
+                    .HasColumnName("ip")
+                    .HasColumnType("varchar(50)");
 
-            entity.Property(e => e.ForAdmin)
-                .IsRequired()
-                .HasColumnName("for_admin")
-                .HasColumnType("boolean");
+                entity.Property(e => e.ForAdmin)
+                    .IsRequired()
+                    .HasColumnName("for_admin")
+                    .HasColumnType("boolean");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant");
-        });
+                entity.Property(e => e.TenantId).HasColumnName("tenant");
+            });
+        }
     }
 }

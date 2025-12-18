@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,13 +26,18 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-public class DuplicateRequestDto
+/// <summary>
+/// The request parameters for duplicating files and fodlers.
+/// </summary>
+public class DuplicateRequestDto : FileOperationRequestBaseDto
 {
-    /// <summary>List of folder IDs</summary>
-    /// <type>System.Collections.Generic.IEnumerable{System.Text.Json.JsonElement}, System.Collections.Generic</type>
-    public IEnumerable<JsonElement> FolderIds { get; set; } = new List<JsonElement>();
+    /// <summary>
+    /// The list of folder IDs.
+    /// </summary>
+    public List<JsonElement> FolderIds { get; set; } = [];
 
-    /// <summary>List of file IDs</summary>
-    /// <type>System.Collections.Generic.IEnumerable{System.Text.Json.JsonElement}, System.Collections.Generic</type>
-    public IEnumerable<JsonElement> FileIds { get; set; } = new List<JsonElement>();
+    /// <summary>
+    /// The list of file IDs.
+    /// </summary>
+    public List<JsonElement> FileIds { get; set; } = [];
 }

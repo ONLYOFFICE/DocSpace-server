@@ -24,7 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-global using System.Net;
 global using System.Reflection;
 global using System.Text.RegularExpressions;
 
@@ -44,6 +43,7 @@ global using ASC.FederatedLogin.LoginProviders;
 global using ASC.Notify.Messages;
 global using ASC.TelegramService;
 global using ASC.TelegramService.Core;
+global using ASC.TelegramService.Extension;
 global using ASC.TelegramService.IntegrationEvents.EventHandling;
 global using ASC.TelegramService.Log;
 
@@ -58,4 +58,3 @@ global using Telegram.Bot;
 global using Telegram.Bot.Exceptions;
 global using Telegram.Bot.Types;
 global using Telegram.Bot.Types.Enums;
-global using ASC.TelegramService.Extension;

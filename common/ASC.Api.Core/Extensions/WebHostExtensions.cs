@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,9 +31,9 @@ public static class WebHostExtensions
     public static IWebHostBuilder ConfigureDefaultKestrel(this IWebHostBuilder webHostBuilder, Action<WebHostBuilderContext, KestrelServerOptions> configureDelegate = null)
     {
         webHostBuilder.ConfigureKestrel((hostingContext, serverOptions) =>
-        {            
+        {
             configureDelegate?.Invoke(hostingContext, serverOptions);
-            
+
             var kestrelConfig = hostingContext.Configuration.GetSection("Kestrel");
 
             if (!kestrelConfig.Exists())

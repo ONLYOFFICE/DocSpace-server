@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,50 +28,58 @@ using GroupInfo = ASC.Core.Users.GroupInfo;
 
 namespace ASC.People.ApiModels.ResponseDto;
 
+/// <summary>
+/// The group parameters.
+/// </summary>
 public class GroupDto
 {
     /// <summary>
-    /// Name
+    /// The group name.
     /// </summary>
-    public string Name { get; set; }
+    public required string Name { get; set; }
 
     /// <summary>
-    /// Parent
+    /// The parent group ID.
     /// </summary>
     public Guid? Parent { get; set; }
 
     /// <summary>
-    /// Category
+    /// The group category ID.
     /// </summary>
-    public Guid Category { get; set; }
+    public required Guid Category { get; set; }
 
     /// <summary>
-    /// ID
+    /// The group ID.
     /// </summary>
-    public Guid Id { get; set; }
+    public required Guid Id { get; set; }
 
     /// <summary>
-    /// Specifies if the LDAP settings are enabled for the group or not
+    /// Specifies if the LDAP settings are enabled for the group or not.
     /// </summary>
-    public bool IsLDAP { get; set; }
+    public required bool IsLDAP { get; set; }
 
     /// <summary>
-    /// Manager
+    /// Indicates whether the group is a system group.
+    /// </summary>
+    public bool? IsSystem { get; set; }
+
+    /// <summary>
+    /// The group manager full information.
     /// </summary>
     public EmployeeFullDto Manager { get; set; }
 
     /// <summary>
-    /// List of members
+    /// The list of group members.
     /// </summary>
     public List<EmployeeFullDto> Members { get; set; }
 
     /// <summary>
-    /// Shared
+    /// Specifies whether the group can be shared or not.
     /// </summary>
     public bool? Shared { get; set; }
 
     /// <summary>
-    /// Members count
+    /// The number of group members.
     /// </summary>
     public int MembersCount { get; set; }
 }
@@ -88,9 +96,10 @@ public class GroupFullDtoHelper(UserManager userManager, EmployeeFullDtoHelper e
             Parent = group.Parent?.ID ?? Guid.Empty,
             Name = group.Name,
             Shared = shared,
-            IsLDAP = !string.IsNullOrEmpty(group.Sid)
+            IsLDAP = !string.IsNullOrEmpty(group.Sid),
+            IsSystem = await userManager.IsSystemGroup(group.ID) ? true : null
         };
-        
+
         var manager = await userManager.GetUsersAsync(await userManager.GetDepartmentManagerAsync(group.ID));
         if (manager != null && !manager.Equals(Constants.LostUser))
         {
@@ -107,7 +116,7 @@ public class GroupFullDtoHelper(UserManager userManager, EmployeeFullDtoHelper e
 
         result.Members = [];
         foreach (var m in members)
-        { 
+        {
             result.Members.Add(await employeeFullDtoHelper.GetFullAsync(m));
         }
 

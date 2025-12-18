@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -57,72 +57,76 @@ public static class DbTariffExtension
 
         return modelBuilder;
     }
-    public static void MySqlAddDbTariff(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbTariff>(entity =>
+        public void MySqlAddDbTariff()
         {
-            entity.ToTable("tenants_tariff")
-                .HasCharSet("utf8");
+            modelBuilder.Entity<DbTariff>(entity =>
+            {
+                entity.ToTable("tenants_tariff")
+                    .HasCharSet("utf8");
 
-            entity.HasIndex(e => e.TenantId)
-                .HasDatabaseName("tenant");
+                entity.HasIndex(e => e.TenantId)
+                    .HasDatabaseName("tenant");
 
-            entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.Id).HasColumnName("id");
 
-            entity.Property(e => e.Comment)
-                .HasColumnName("comment")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Comment)
+                    .HasColumnName("comment")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.CreateOn)
-                .HasColumnName("create_on")
-                .HasColumnType("timestamp");
+                entity.Property(e => e.CreateOn)
+                    .HasColumnName("create_on")
+                    .HasColumnType("timestamp");
 
-            entity.Property(e => e.Stamp)
-                .HasColumnName("stamp")
-                .HasColumnType("datetime");
+                entity.Property(e => e.Stamp)
+                    .HasColumnName("stamp")
+                    .HasColumnType("datetime");
 
-            entity.Property(e => e.CustomerId)
-                .IsRequired()
-                .HasColumnName("customer_id")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.CustomerId)
+                    .IsRequired()
+                    .HasColumnName("customer_id")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant");
-        });
-    }
-    public static void PgSqlAddDbTariff(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<DbTariff>(entity =>
+                entity.Property(e => e.TenantId).HasColumnName("tenant");
+            });
+        }
+
+        public void PgSqlAddDbTariff()
         {
-            entity.ToTable("tenants_tariff");
+            modelBuilder.Entity<DbTariff>(entity =>
+            {
+                entity.ToTable("tenants_tariff");
 
-            entity.HasIndex(e => e.TenantId)
-                .HasDatabaseName("IX_tenants_tariff_tenant");
+                entity.HasIndex(e => e.TenantId)
+                    .HasDatabaseName("IX_tenants_tariff_tenant");
 
-            entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.Id).HasColumnName("id");
 
-            entity.Property(e => e.Comment)
-                .HasColumnName("comment")
-                .HasColumnType("varchar");
+                entity.Property(e => e.Comment)
+                    .HasColumnName("comment")
+                    .HasColumnType("varchar");
 
-            entity.Property(e => e.CreateOn)
-                .HasColumnName("create_on")
-                .HasColumnType("timestamptz");
+                entity.Property(e => e.CreateOn)
+                    .HasColumnName("create_on")
+                    .HasColumnType("timestamptz");
 
-            entity.Property(e => e.Stamp)
-                .HasColumnName("stamp")
-                .HasColumnType("timestamptz");
+                entity.Property(e => e.Stamp)
+                    .HasColumnName("stamp")
+                    .HasColumnType("timestamptz");
 
-            entity.Property(e => e.CustomerId)
-                .IsRequired()
-                .HasColumnName("customer_id")
-                .HasColumnType("varchar");
+                entity.Property(e => e.CustomerId)
+                    .IsRequired()
+                    .HasColumnName("customer_id")
+                    .HasColumnType("varchar");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant");
-        });
-        
+                entity.Property(e => e.TenantId).HasColumnName("tenant");
+            });
+
+        }
     }
 }

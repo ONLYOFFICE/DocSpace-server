@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,25 +33,25 @@ public partial class FilesDbContext
     {
         return LinkQueries.SourceIdAsync(this, tenantId, linkedId, id);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultGuid])]
     public Task<string> LinkedIdAsync(int tenantId, string sourceId, Guid id)
     {
         return LinkQueries.LinkedIdAsync(this, tenantId, sourceId, id);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultGuid])]
     public IAsyncEnumerable<DbFilesLink> FilesLinksAsync(int tenantId, IEnumerable<string> sourceIds, Guid id)
     {
         return LinkQueries.FilesLinksAsync(this, tenantId, sourceIds, id);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null, PreCompileQuery.DefaultGuid])]
     public Task<DbFilesLink> FileLinkAsync(int tenantId, string sourceId, Guid id)
     {
         return LinkQueries.FileLinkAsync(this, tenantId, sourceId, id);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public Task<int> DeleteFileLinks(int tenantId, string fileId)
     {

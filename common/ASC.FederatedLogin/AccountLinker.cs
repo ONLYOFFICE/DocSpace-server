@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,45 +24,18 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ZiggyCreatures.Caching.Fusion;
+
 namespace ASC.FederatedLogin;
-
-[Singleton]
-public class AccountLinkerStorage
-{
-    private readonly ICache _cache;
-    private readonly ICacheNotify<LinkerCacheItem> _notify;
-
-    public AccountLinkerStorage(ICacheNotify<LinkerCacheItem> notify, ICache cache)
-    {
-        _cache = cache;
-        _notify = notify;
-        notify.Subscribe(c => cache.Remove(c.Obj), CacheNotifyAction.Remove);
-    }
-
-    public async Task RemoveFromCacheAsync(string obj)
-    {
-        await _notify.PublishAsync(new LinkerCacheItem { Obj = obj }, CacheNotifyAction.Remove);
-    }
-
-    public async Task<List<LoginProfile>> GetFromCacheAsync(string obj, Func<string, Task<List<LoginProfile>>> fromDb)
-    {
-        var profiles = _cache.Get<List<LoginProfile>>(obj);
-        if (profiles == null)
-        {
-            profiles = await fromDb(obj);
-            _cache.Insert(obj, profiles, DateTime.UtcNow + TimeSpan.FromMinutes(10));
-        }
-
-        return profiles;
-    }
-}
 
 [Scope]
 public class AccountLinker(
-    AccountLinkerStorage accountLinkerStorage,
     IDbContextFactory<AccountLinkContext> accountLinkContextManager,
-    TenantManager tenantManager)
+    TenantManager tenantManager,
+    IFusionCacheProvider cacheProvider)
 {
+    private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
+
     public async Task<IEnumerable<string>> GetLinkedObjectsByHashIdAsync(string hashId)
     {
         await using var accountLinkContext = await accountLinkContextManager.CreateDbContextAsync();
@@ -81,22 +54,22 @@ public class AccountLinker(
 
     public async Task<List<LoginProfile>> GetLinkedProfilesAsync(string obj)
     {
-        return await accountLinkerStorage.GetFromCacheAsync(obj, GetLinkedProfilesFromDBAsync);
+        return await GetFromCacheAsync(obj, GetLinkedProfilesFromDBAsync);
     }
 
     public async Task<IEnumerable<LoginProfile>> GetLinkedProfilesAsync()
     {
         var tenant = tenantManager.GetCurrentTenantId();
         var cacheKey = CacheKey(tenant);
-        
-        var profiles = await accountLinkerStorage.GetFromCacheAsync(cacheKey, async _ =>
+
+        var profiles = await GetFromCacheAsync(cacheKey, async _ =>
         {
             await using var accountLinkContext = await accountLinkContextManager.CreateDbContextAsync();
             return await Queries.AccountLinksByTenantAsync(accountLinkContext, tenant)
                 .Select(x => new LoginProfile(x.Profile, x.Id))
                 .ToListAsync();
         });
-        
+
         return profiles;
     }
 
@@ -116,18 +89,13 @@ public class AccountLinker(
 
         if (await Queries.ExistAccountAsync(accountLinkContext, tenant, profile.HashId))
         {
-            throw new Exception("ErrorAccountAlreadyUse");
+            throw new ArgumentException("The account is already in use");
         }
         await accountLinkContext.AddOrUpdateAsync(a => a.AccountLinks, accountLink);
         await accountLinkContext.SaveChangesAsync();
 
-        await accountLinkerStorage.RemoveFromCacheAsync(obj.ToString());
-        await accountLinkerStorage.RemoveFromCacheAsync(CacheKey(tenant));
-    }
-
-    public async Task AddLinkAsync(Guid obj, string id, string provider)
-    {
-        await AddLinkAsync(obj, new LoginProfile { Id = id, Provider = provider });
+        await RemoveFromCacheAsync(obj.ToString());
+        await RemoveFromCacheAsync(CacheKey(tenant));
     }
 
     public async Task RemoveProviderAsync(string obj, string provider = null, string hashId = null)
@@ -140,8 +108,8 @@ public class AccountLinker(
         accountLinkContext.AccountLinks.Remove(accountLink);
         await accountLinkContext.SaveChangesAsync();
 
-        await accountLinkerStorage.RemoveFromCacheAsync(obj);
-        await accountLinkerStorage.RemoveFromCacheAsync(CacheKey(tenant));
+        await RemoveFromCacheAsync(obj);
+        await RemoveFromCacheAsync(CacheKey(tenant));
     }
 
     private async Task<List<LoginProfile>> GetLinkedProfilesFromDBAsync(string obj)
@@ -158,10 +126,27 @@ public class AccountLinker(
 
         return await accountLinkContext.AccountLinks.Where(r => objects.Contains(r.Id))
             .Select(r => new { r.Id, r.Profile })
-            .ToDictionaryAsync(k => k.Id, v =>  new LoginProfile(v.Profile));
+            .ToDictionaryAsync(k => k.Id, v => new LoginProfile(v.Profile));
     }
-    
+
     private static string CacheKey(int tenantId) => $"tenant_profiles_{tenantId}";
+
+    public async Task RemoveFromCacheAsync(string obj)
+    {
+        await _cache.RemoveAsync(obj);
+    }
+
+    public async Task<List<LoginProfile>> GetFromCacheAsync(string obj, Func<string, Task<List<LoginProfile>>> fromDb)
+    {
+        var profiles = await _cache.GetOrSetAsync<List<LoginProfile>>(obj, async (ctx, token) =>
+        {
+            var profiles = await fromDb(obj);
+
+            return ctx.Modified(profiles);
+        }, TimeSpan.FromMinutes(10));
+
+        return profiles;
+    }
 }
 
 static file class Queries
@@ -195,11 +180,11 @@ static file class Queries
                 ctx.AccountLinks.Join(ctx.Users, a => a.Id, u => u.Id.ToString(),
                         (accountLink, user) => new { accountLink, user })
                         .Any(q => q.accountLink.UId == hashId && q.user.TenantId == tenant));
-    
+
     public static readonly Func<AccountLinkContext, int, IAsyncEnumerable<AccountLinks>> AccountLinksByTenantAsync =
         EF.CompileAsyncQuery(
             (AccountLinkContext ctx, int tenant) =>
-                ctx.AccountLinks.Join(ctx.Users, a => a.Id, u => u.Id.ToString(), 
+                ctx.AccountLinks.Join(ctx.Users, a => a.Id, u => u.Id.ToString(),
                         (accountLink, user) => new { accountLink, user })
                         .Where(x => x.user.TenantId == tenant)
                         .Select(x => x.accountLink));

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using System.Extensions;
+using System.Globalization;
 
 namespace ASC.Migration.Core;
 
@@ -47,9 +48,9 @@ public class MigrationOperation : DistributedTaskProgress
 
     public MigrationOperation()
     {
-        
+
     }
-    
+
     public MigrationOperation(ILogger<MigrationOperation> logger,
         MigrationCore migrationCore,
         TenantManager tenantManager,
@@ -92,10 +93,14 @@ public class MigrationOperation : DistributedTaskProgress
             }
             CustomSynchronizationContext.CreateContext();
 
-            await _tenantManager.SetCurrentTenantAsync(TenantId);
+            var tenant = await _tenantManager.SetCurrentTenantAsync(TenantId);
             await _securityContext.AuthenticateMeWithoutCookieAsync(_userId);
             migrator = _migrationCore.GetMigrator(_migratorName);
             migrator.OnProgressUpdateAsync = Migrator_OnProgressUpdateAsync;
+
+            var culture = tenant.GetCulture();
+            CultureInfo.CurrentCulture = culture;
+            CultureInfo.CurrentUICulture = culture;
 
             if (migrator == null)
             {
@@ -104,6 +109,21 @@ public class MigrationOperation : DistributedTaskProgress
 
             var folder = await _hybridCache.GetOrDefaultAsync<string>($"migration folder - {TenantId}");
             await migrator.InitAsync(folder, onlyParse ? OperationType.Parse : OperationType.Migration, CancellationToken);
+
+            var tenantQuota = await _tenantManager.GetTenantQuotaAsync(TenantId);
+            var maxTotalSize = tenantQuota?.MaxTotalSize ?? long.MaxValue;
+
+            if (maxTotalSize > 0 && maxTotalSize != long.MaxValue)
+            {
+                var size = Directory
+                    .EnumerateFiles(folder, "*", SearchOption.AllDirectories)
+                    .Sum(file => new FileInfo(file).Length);
+
+                if (size > maxTotalSize)
+                {
+                    throw new Exception(MigrationResource.LargeBackup);
+                }
+            }
 
             await migrator.ParseAsync(onlyParse);
             if (!onlyParse)

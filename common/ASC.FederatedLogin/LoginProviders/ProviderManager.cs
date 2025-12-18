@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -47,14 +47,27 @@ public class ProviderManager(ConsumerFactory consumerFactory)
         ProviderConstants.Facebook,
         ProviderConstants.Twitter,
         ProviderConstants.Microsoft,
-        ProviderConstants.AppleId
+        ProviderConstants.AppleId,
+        ProviderConstants.Weixin
     ];
 
     public static readonly List<string> InviteExceptProviders =
     [
         ProviderConstants.Twitter,
-        ProviderConstants.AppleId
+        ProviderConstants.AppleId,
+        ProviderConstants.Weixin
     ];
+
+    public static List<string> GetSortedAuthProviders(string geoInfoKey)
+    {
+        if (geoInfoKey == "CN")
+        {
+            var result = new List<string> { ProviderConstants.Weixin };
+            result.AddRange(AuthProviders.Where(x => x != ProviderConstants.Weixin));
+            return result;
+        }
+        return AuthProviders;
+    }
 
     public ILoginProvider GetLoginProvider(string providerType)
     {

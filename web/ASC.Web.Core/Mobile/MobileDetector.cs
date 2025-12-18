@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -41,7 +41,7 @@ public class MobileDetector
 
     public MobileDetector(IHttpContextAccessor httpContextAccessor, IConfiguration configuration, ICache cache)
     {
-        this._cache = cache;
+        _cache = cache;
         if (!string.IsNullOrEmpty(configuration["mobile:regex"]))
         {
             _uaMobileRegex = new Regex(configuration["mobile:regex"], RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);

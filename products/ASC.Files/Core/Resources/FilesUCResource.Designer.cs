@@ -61,6 +61,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to AI agents.
+        /// </summary>
+        public static string AiAgents {
+            get {
+                return ResourceManager.GetString("AiAgents", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Archive.
         /// </summary>
         public static string Archive {
@@ -115,7 +124,7 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Documents.
+        ///   Looks up a localized string similar to My documents.
         /// </summary>
         public static string MyFiles {
             get {

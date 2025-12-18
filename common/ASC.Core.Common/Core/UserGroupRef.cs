@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,29 +24,27 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Profile = AutoMapper.Profile;
-
 namespace ASC.Core;
 
 [DebuggerDisplay("{UserId} - {GroupId}")]
 [ProtoContract]
-public class UserGroupRef : IMapFrom<UserGroup>
+public class UserGroupRef
 {
     [ProtoMember(1)]
     public Guid UserId { get; set; }
-    
+
     [ProtoMember(2)]
     public Guid GroupId { get; set; }
-    
+
     [ProtoMember(3)]
     public bool Removed { get; set; }
-    
+
     [ProtoMember(4)]
     public DateTime LastModified { get; set; }
-    
+
     [ProtoMember(5)]
     public UserGroupRefType RefType { get; set; }
-    
+
     [ProtoMember(6)]
     public int TenantId { get; set; }
 
@@ -61,7 +59,7 @@ public class UserGroupRef : IMapFrom<UserGroup>
 
     public static string CreateKey(int tenant, Guid userId, Guid groupId, UserGroupRefType refType)
     {
-        return tenant + userId.ToString("N") + groupId.ToString("N") + ((int)refType);
+        return tenant + userId.ToString("N") + groupId.ToString("N") + (int)refType;
     }
 
     public string CreateKey()
@@ -78,43 +76,14 @@ public class UserGroupRef : IMapFrom<UserGroup>
     {
         return obj is UserGroupRef r && r.TenantId == TenantId && r.UserId == UserId && r.GroupId == GroupId && r.RefType == RefType;
     }
+}
 
-    public void Mapping(Profile profile)
-    {
-        profile.CreateMap<UserGroup, UserGroupRef>()
-            .ForMember(dest => dest.GroupId, opt => opt.MapFrom(src => src.UserGroupId));
-    }
-
-    public static implicit operator UserGroupRef(UserGroupRefCacheItem cache)
-    {
-        var result = new UserGroupRef
-        {
-            UserId = new Guid(cache.UserId),
-            GroupId = new Guid(cache.GroupId)
-        };
-
-        if (UserGroupRefTypeExtensions.TryParse(cache.RefType, out var refType))
-        {
-            result.RefType = refType;
-        }
-
-        result.TenantId = cache.Tenant;
-        result.LastModified = new DateTime(cache.LastModified);
-        result.Removed = cache.Removed;
-
-        return result;
-    }
-
-    public static implicit operator UserGroupRefCacheItem(UserGroupRef cache)
-    {
-        return new UserGroupRefCacheItem
-        {
-            GroupId = cache.GroupId.ToString(),
-            UserId = cache.UserId.ToString(),
-            RefType = cache.RefType.ToString(),
-            LastModified = cache.LastModified.Ticks,
-            Removed = cache.Removed,
-            Tenant = cache.TenantId
-        };
-    }
+[Mapper(PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class UserGroupRefMapper
+{
+    [MapperIgnoreSource(nameof(UserGroup.Tenant))]
+    [MapProperty(nameof(UserGroup.UserGroupId), nameof(UserGroupRef.GroupId))]
+    public static partial UserGroupRef Map(this UserGroup source);
+    public static partial IQueryable<UserGroupRef> Project(this IQueryable<UserGroup> source);
+    public static partial List<UserGroupRef> Map(this List<UserGroup> source);
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -63,13 +63,13 @@ public class FilesSpaceUsageStatManager(IDbContextFactory<FilesDbContext> dbCont
 
         return await myFiles.Union(commonFiles)
             .AsAsyncEnumerable()
-            .GroupByAwait(
-            async r => await Task.FromResult(r.CreateBy),
-            async r => await Task.FromResult(r.Size),
-            async (userId, items) =>
+            .GroupBy(
+            async (r, _) => await Task.FromResult(r.CreateBy),
+            async (r, _) => await Task.FromResult(r.Size),
+            async (userId, items, _) =>
             {
                 var user = await userManager.GetUsersAsync(userId);
-                var item = new UsageSpaceStatItem { SpaceUsage = await items.SumAsync() };
+                var item = new UsageSpaceStatItem { SpaceUsage = items.Sum() };
                 if (user.Equals(Constants.LostUser))
                 {
                     item.Name = FilesUCResource.CorporateFiles;
@@ -80,7 +80,7 @@ public class FilesSpaceUsageStatManager(IDbContextFactory<FilesDbContext> dbCont
                 {
                     item.Name = user.DisplayUserName(false, displayUserSettingsHelper);
                     item.ImgUrl = await user.GetSmallPhotoURL(userPhotoManager);
-                    item.Url =await user.GetUserProfilePageUrl(commonLinkUtility);
+                    item.Url = await user.GetUserProfilePageUrl(commonLinkUtility);
                     item.Disabled = user.Status == EmployeeStatus.Terminated;
                 }
                 return item;

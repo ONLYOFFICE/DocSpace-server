@@ -1,20 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
     <ApplicationIcon />
     <OutputType>Exe</OutputType>
     <RazorCompileOnBuild>false</RazorCompileOnBuild>
     <GenerateMvcApplicationPartsAssemblyAttributes>false</GenerateMvcApplicationPartsAssemblyAttributes>
     <DisableImplicitComponentsAnalyzers>true</DisableImplicitComponentsAnalyzers>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <ImplicitUsings>enable</ImplicitUsings>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<DebugType>none</DebugType>
-		<DebugSymbols>false</DebugSymbols>
-	</PropertyGroup>
 	<Target Name="ChangeAliasesOfStrongNameAssemblies" BeforeTargets="FindReferenceAssembliesForReferences;ResolveReferences">
 		<ItemGroup>
 			<ReferencePath Condition="'%(FileName)' == 'MySqlConnector'">
@@ -24,10 +18,15 @@
 
 	</Target>
 	<ItemGroup>
-	  <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />
+	  <PackageReference Include="Autofac.Extensions.DependencyInjection" />
 	</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\..\ASC.Data.Backup.Core\ASC.Data.Backup.Core.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Content Include="..\..\..\.dockerignore">
+	    <Link>.dockerignore</Link>
+	  </Content>
 	</ItemGroup>
 
 </Project>

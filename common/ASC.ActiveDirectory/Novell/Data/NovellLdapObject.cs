@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -69,20 +69,11 @@ public class NovellLdapObject : LdapObject
 
     #region .Public
 
-    public override string DistinguishedName
-    {
-        get { return _ldapEntry.Dn; }
-    }
+    public override string DistinguishedName => _ldapEntry.Dn;
 
-    public override string Sid
-    {
-        get { return _sid; }
-    }
+    public override string Sid => _sid;
 
-    public override string SidAttribute
-    {
-        get { return _sidAttribute; }
-    }
+    public override string SidAttribute => _sidAttribute;
 
     public override bool IsDisabled
     {

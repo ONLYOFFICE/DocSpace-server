@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,45 +26,54 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The document service URL parameters.
+/// </summary>
 public class DocServiceUrlDto
 {
     /// <summary>
-    /// Version
+    /// The version of the document service.
     /// </summary>
     public required string Version { get; set; }
 
     /// <summary>
-    /// Doc service url api
+    /// The document service URL API.
     /// </summary>
     public required string DocServiceUrlApi { get; set; }
 
     /// <summary>
-    /// Doc service url
+    /// The document service URL.
     /// </summary>
     public required string DocServiceUrl { get; set; }
 
+
     /// <summary>
-    /// Doc service url internal
+    /// The URL used to preload the document service scripts.
+    /// </summary>
+    public required string DocServicePreloadUrl { get; set; }
+
+    /// <summary>
+    /// The internal document service URL.
     /// </summary>
     public required string DocServiceUrlInternal { get; set; }
 
     /// <summary>
-    /// Doc service portal url
+    /// The document service portal URL.
     /// </summary>
     public required string DocServicePortalUrl { get; set; }
 
     /// <summary>
-    /// Doc service signature header
+    /// The document service signature header.
     /// </summary>
-    public string DocServiceSignatureHeader { get; set; }
+    public required string DocServiceSignatureHeader { get; set; }
 
     /// <summary>
-    /// Enable SSL verification
+    /// Specifies if the document service SSL verification is enabled.
     /// </summary>
-    public bool DocServiceSslVerification { get; set; }
+    public required bool DocServiceSslVerification { get; set; }
 
     /// <summary>
-    /// Is default
+    /// Specifies if the document service is default.
     /// </summary>
     public required bool IsDefault { get; set; }
 }

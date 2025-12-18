@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,23 +26,26 @@
 
 namespace ASC.Migration.Core.Models.Api;
 
+/// <summary>
+/// The parameters of the migrating files.
+/// </summary>
 [ProtoContract]
 public class MigratingApiFiles
 {
     /// <summary>
-    /// Folders Count
+    /// The number of folders.
     /// </summary>
     [ProtoMember(1)]
     public int FoldersCount { get; set; }
 
     /// <summary>
-    /// Files Count
+    /// The number of files.
     /// </summary>
     [ProtoMember(2)]
     public int FilesCount { get; set; }
 
     /// <summary>
-    /// Bytes Total
+    /// The total number of bytes.
     /// </summary>
     [ProtoMember(3)]
     public long BytesTotal { get; set; }

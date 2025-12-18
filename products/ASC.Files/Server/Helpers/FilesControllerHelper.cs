@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,7 +42,11 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         PathProvider pathProvider,
         FileChecker fileChecker,
         FillingFormResultDtoHelper fillingFormResultDtoHelper,
-        WebhookManager webhookManager)
+        WebhookManager webhookManager,
+        IDaoFactory daoFactory,
+        IEventBus eventBus,
+        TenantManager tenantManager,
+        AuthContext authContext)
     : FilesHelperBase(filesSettingsHelper,
             fileUploader,
             socketManager,
@@ -50,8 +54,12 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
             fileStorageService,
             fileChecker,
             httpContextAccessor,
-            webhookManager)
-    {
+            webhookManager,
+            daoFactory,
+            eventBus,
+            tenantManager,
+            authContext)
+{
     private readonly ILogger _logger = logger;
 
     public async IAsyncEnumerable<FileDto<T>> ChangeHistoryAsync<T>(T fileId, int version, bool continueVersion)
@@ -154,7 +162,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         var extension = ".txt";
         if (!string.IsNullOrEmpty(content) && Regex.IsMatch(content, @"<([^\s>]*)(\s[^<]*)>"))
         {
-                extension = ".html";
+            extension = ".html";
         }
 
         return await CreateFileAsync(folderId, title, content, extension, updateIfExist);
@@ -164,7 +172,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
     {
         using var memStream = new MemoryStream(Encoding.UTF8.GetBytes(content));
         var file = await _fileUploader.ExecAsync(folderId,
-                          title.EndsWith(extension, StringComparison.OrdinalIgnoreCase) ? title : (title + extension),
+                          title.EndsWith(extension, StringComparison.OrdinalIgnoreCase) ? title : title + extension,
                           memStream.Length, memStream, updateIfExist);
 
         return await _fileDtoHelper.GetAsync(file);
@@ -184,20 +192,14 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         return null;
     }
 
-    public async IAsyncEnumerable<EditHistoryDto> GetEditHistoryAsync<T>(T fileId)
+    public IAsyncEnumerable<EditHistoryDto> GetEditHistoryAsync<T>(T fileId)
     {
-        await foreach (var f in _fileStorageService.GetEditHistoryAsync(fileId))
-        {
-            yield return new EditHistoryDto(f, apiDateTimeHelper, userManager, displayUserSettingsHelper);
-        }
+        return _fileStorageService.GetEditHistoryAsync(fileId).Select(f => new EditHistoryDto(f, apiDateTimeHelper, userManager, displayUserSettingsHelper));
     }
 
-    public async IAsyncEnumerable<FileDto<T>> GetFileVersionInfoAsync<T>(T fileId)
+    public IAsyncEnumerable<FileDto<T>> GetFileVersionInfoAsync<T>(T fileId)
     {
-        await foreach (var e in _fileStorageService.GetFileHistoryAsync(fileId))
-        {
-            yield return await _fileDtoHelper.GetAsync(e);
-        }
+        return _fileStorageService.GetFileHistoryAsync(fileId).Select(async (File<T> e, CancellationToken _) => await _fileDtoHelper.GetAsync(e));
     }
 
     public async Task<FileDto<T>> LockFileAsync<T>(T fileId, bool lockFile)
@@ -207,12 +209,11 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         return await _fileDtoHelper.GetAsync(result);
     }
 
-    public async IAsyncEnumerable<EditHistoryDto> RestoreVersionAsync<T>(T fileId, int version = 0, string url = null)
+
+    public IAsyncEnumerable<EditHistoryDto> RestoreVersionAsync<T>(T fileId, int version = 0, string url = null)
     {
-        await foreach (var e in _fileStorageService.RestoreVersionAsync(fileId, version, url))
-        {
-            yield return new EditHistoryDto(e, apiDateTimeHelper, userManager, displayUserSettingsHelper);
-        }
+        return _fileStorageService.RestoreVersionAsync(fileId, version, url)
+            .Select(e => new EditHistoryDto(e, apiDateTimeHelper, userManager, displayUserSettingsHelper));
     }
 
     public IAsyncEnumerable<ConversationResultDto> StartConversionAsync<T>(CheckConversionRequestDto<T> cheqConversionRequestDto)
@@ -229,20 +230,20 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
 
     public async Task<FileDto<T>> UpdateFileAsync<T>(T fileId, string title, int lastVersion)
     {
-        File<T> file = null;
+        title = title?.Trim();
 
         if (!string.IsNullOrEmpty(title))
         {
-            file = await _fileStorageService.FileRenameAsync(fileId, title);
+            await _fileStorageService.FileRenameAsync(fileId, title);
         }
 
         if (lastVersion <= 0)
         {
-            return await GetFileInfoAsync(file!.Id);
+            return await GetFileInfoAsync(fileId);
         }
 
         var result = await _fileStorageService.UpdateToVersionAsync(fileId, lastVersion);
-        file = result.Key;
+        var file = result.Key;
 
         return await GetFileInfoAsync(file.Id);
     }
@@ -256,7 +257,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         }
         catch (FileNotFoundException e)
         {
-            throw new ItemNotFoundException("File not found", e);
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound, e);
         }
     }
 
@@ -270,7 +271,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         }
         catch (FileNotFoundException e)
         {
-            throw new ItemNotFoundException("File not found", e);
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound, e);
         }
     }
 

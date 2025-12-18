@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,203 +24,217 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Studio.Core.TFA;
+
 namespace ASC.Web.Api.Models;
 
+/// <summary>
+/// The full list of user parameters.
+/// </summary>
 public class EmployeeFullDto : EmployeeDto
 {
     /// <summary>
-    /// First name
+    /// The user first name.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Mike")]
     public string FirstName { get; set; }
 
     /// <summary>
-    /// Last name
+    /// The user last name.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Zanyatski")]
     public string LastName { get; set; }
 
     /// <summary>
-    /// Username
+    /// The user username.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Mike.Zanyatski")]
     public string UserName { get; set; }
 
     /// <summary>
-    /// Email
+    /// The user email.
     /// </summary>
     [SwaggerSchemaCustom(Example = "my@gmail.com")]
     [EmailAddress]
     public string Email { get; set; }
 
     /// <summary>
-    /// List of contacts
+    /// The list of user contacts.
     /// </summary>
     public List<Contact> Contacts { get; set; }
 
     /// <summary>
-    /// Birthday
+    /// The user birthday.
     /// </summary>
     public ApiDateTime Birthday { get; set; }
 
     /// <summary>
-    /// Sex
+    /// The user sex.
     /// </summary>
     [SwaggerSchemaCustom(Example = "male")]
     public string Sex { get; set; }
 
     /// <summary>
-    /// Employee status
+    /// The user status.
     /// </summary>
     public EmployeeStatus Status { get; set; }
 
     /// <summary>
-    /// Employee activation status
+    /// The user activation status.
     /// </summary>
     public EmployeeActivationStatus ActivationStatus { get; set; }
 
     /// <summary>
-    /// The date when the user account was terminated
+    /// The date when the user account was terminated.
     /// </summary>
     public ApiDateTime Terminated { get; set; }
 
     /// <summary>
-    /// Department
+    /// The user department.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Marketing")]
     public string Department { get; set; }
 
     /// <summary>
-    /// Registration date
+    /// The user registration date.
     /// </summary>
     public ApiDateTime WorkFrom { get; set; }
 
     /// <summary>
-    /// List of groups
+    /// The list of user groups.
     /// </summary>
     public List<GroupSummaryDto> Groups { get; set; }
 
     /// <summary>
-    /// Location
+    /// The user location.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Palo Alto")]
     public string Location { get; set; }
 
     /// <summary>
-    /// Notes
+    /// The user notes.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Notes to worker")]
     public string Notes { get; set; }
 
     /// <summary>
-    /// Specifies if the user is an administrator or not
+    /// Specifies if the user is an administrator or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool IsAdmin { get; set; }
 
     /// <summary>
-    /// Specifies if the user is a room administrator or not
+    /// Specifies if the user is a room administrator or not.
     /// </summary>
     public bool IsRoomAdmin { get; set; }
 
     /// <summary>
-    /// Specifies if the LDAP settings are enabled for the user or not
+    /// Specifies if the LDAP settings are enabled for the user or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool IsLDAP { get; set; }
 
     /// <summary>
-    /// List of administrator modules
+    /// The list of the administrator modules.
     /// </summary>
     [SwaggerSchemaCustom(Example = "[\"projects\", \"crm\"]")]
     public List<string> ListAdminModules { get; set; }
 
     /// <summary>
-    /// Specifies if the user is a portal owner or not
+    /// Specifies if the user is a portal owner or not.
     /// </summary>
     public bool IsOwner { get; set; }
 
     /// <summary>
-    /// Specifies if the user is a portal visitor or not
+    /// Specifies if the user is a portal visitor or not.
     /// </summary>
     public bool IsVisitor { get; set; }
 
     /// <summary>
-    /// Specifies if the user is a portal collaborator or not
+    /// Specifies if the user is a portal collaborator or not.
     /// </summary>
     public bool IsCollaborator { get; set; }
 
     /// <summary>
-    /// Language
+    /// The user culture code.
     /// </summary>
     [SwaggerSchemaCustom(Example = "en-EN")]
     public string CultureName { get; set; }
 
     /// <summary>
-    /// Mobile phone number
+    /// The user mobile phone number.
     /// </summary>
     public string MobilePhone { get; set; }
 
     /// <summary>
-    /// Mobile phone activation status
+    /// The mobile phone activation status.
     /// </summary>
     public MobilePhoneActivationStatus MobilePhoneActivationStatus { get; set; }
 
     /// <summary>
-    /// Specifies if the SSO settings are enabled for the user or not
+    /// Specifies if the SSO settings are enabled for the user or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool IsSSO { get; set; }
 
     /// <summary>
-    /// Theme
+    /// The user theme settings.
     /// </summary>
     public DarkThemeSettingsType? Theme { get; set; }
 
     /// <summary>
-    /// Quota limit
+    /// The user quota limit.
     /// </summary>
     public long? QuotaLimit { get; set; }
 
     /// <summary>
-    /// Portal used space
+    /// The portal used space of the user.
     /// </summary>
     [SwaggerSchemaCustom(Example = 12345)]
     public double? UsedSpace { get; set; }
 
     /// <summary>
-    /// Shared
+    /// Specifies if the user has access rights.
     /// </summary>
     public bool? Shared { get; set; }
 
     /// <summary>
-    /// Specifies if the user has a custom quota or not
+    /// Specifies if the user has a custom quota or not.
     /// </summary>
     public bool? IsCustomQuota { get; set; }
 
     /// <summary>
-    /// Current login event ID
+    /// The current login event ID.
     /// </summary>
     public int? LoginEventId { get; set; }
 
     /// <summary>
-    /// Created by
+    /// The auth cookie lifetime in seconds.
+    /// </summary>
+    public double? AuthCookieLifetime { get; set; }
+
+    /// <summary>
+    /// The user who created the current user.
     /// </summary>
     public EmployeeDto CreatedBy { get; set; }
 
     /// <summary>
-    /// Registration date
+    /// The user registration date.
     /// </summary>
     public ApiDateTime RegistrationDate { get; set; }
 
     /// <summary>
-    /// Specifies if the user has an personal folder or not
+    /// Specifies if the user has a personal folder or not.
     /// </summary>
     public bool HasPersonalFolder { get; set; }
+
+    /// <summary>
+    /// Indicates whether the user has enabled two-factor authentication (TFA) using an authentication app.
+    /// </summary>
+    public bool? TfaAppEnabled { get; set; }
 }
 [Scope]
 public class EmployeeFullDtoHelper(
-        ApiContext httpContext,
         UserManager userManager,
         AuthContext authContext,
         UserPhotoManager userPhotoManager,
@@ -234,44 +248,45 @@ public class EmployeeFullDtoHelper(
         TenantManager tenantManager,
         CoreBaseSettings coreBaseSettings,
         GroupSummaryDtoHelper groupSummaryDtoHelper,
+        TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
         ILogger<EmployeeDtoHelper> logger)
-    : EmployeeDtoHelper(httpContext, displayUserSettingsHelper, userPhotoManager, commonLinkUtility, userManager, authContext, logger)
+    : EmployeeDtoHelper(displayUserSettingsHelper, userPhotoManager, commonLinkUtility, userManager, authContext, logger)
 {
-    public static Expression<Func<User, UserInfo>> GetExpression(ApiContext apiContext)
-    {
-        if (apiContext?.Fields == null)
-        {
-            return null;
-        }
+    // public static Expression<Func<User, UserInfo>> GetExpression(ApiContext apiContext)
+    // {
+    //     if (apiContext?.Fields == null)
+    //     {
+    //         return null;
+    //     }
+    //
+    //     var newExpr = Expression.New(typeof(UserInfo));
+    //
+    //     //i => new UserInfo { ID = i.id } 
+    //     var parameter = Expression.Parameter(typeof(User), "i");
+    //     var bindExprs = new List<MemberAssignment>();
+    //
+    //     //foreach (var field in apiContext.Fields)
+    //     //{
+    //     //    var userInfoProp = typeof(UserInfo).GetProperty(field);
+    //     //    var userProp = typeof(User).GetProperty(field);
+    //     //    if (userInfoProp != null && userProp != null)
+    //     //    {
+    //     //        bindExprs.Add(Expression.Bind(userInfoProp, Expression.Property(parameter, userProp)));
+    //     //    }
+    //     //}
+    //
+    //     if (apiContext.Check("Id"))
+    //     {
+    //         bindExprs.Add(Expression.Bind(typeof(UserInfo).GetProperty("Id"),
+    //             Expression.Property(parameter, typeof(User).GetProperty("Id"))));
+    //     }
+    //
+    //     var body = Expression.MemberInit(newExpr, bindExprs);
+    //     var lambda = Expression.Lambda<Func<User, UserInfo>>(body, parameter);
+    //
+    //     return lambda;
+    // }
 
-        var newExpr = Expression.New(typeof(UserInfo));
-
-        //i => new UserInfo { ID = i.id } 
-        var parameter = Expression.Parameter(typeof(User), "i");
-        var bindExprs = new List<MemberAssignment>();
-
-        //foreach (var field in apiContext.Fields)
-        //{
-        //    var userInfoProp = typeof(UserInfo).GetProperty(field);
-        //    var userProp = typeof(User).GetProperty(field);
-        //    if (userInfoProp != null && userProp != null)
-        //    {
-        //        bindExprs.Add(Expression.Bind(userInfoProp, Expression.Property(parameter, userProp)));
-        //    }
-        //}
-
-        if (apiContext.Check("Id"))
-        {
-            bindExprs.Add(Expression.Bind(typeof(UserInfo).GetProperty("Id"),
-                Expression.Property(parameter, typeof(User).GetProperty("Id"))));
-        }
-
-        var body = Expression.MemberInit(newExpr, bindExprs);
-        var lambda = Expression.Lambda<Func<User, UserInfo>>(body, parameter);
-
-        return lambda;
-    }
-    
     public async Task<EmployeeFullDto> GetSimple(UserInfo userInfo, bool withGroups = true)
     {
         var result = new EmployeeFullDto
@@ -383,34 +398,17 @@ public class EmployeeFullDtoHelper(
 
         var cacheKey = Math.Abs(userInfo.LastModified.GetHashCode());
 
-        if (_httpContext.Check("avatarOriginal"))
+        result.AvatarOriginal = await _userPhotoManager.GetPhotoAbsoluteWebPath(userInfo.Id) + $"?hash={cacheKey}";
+        result.AvatarMax = await _userPhotoManager.GetMaxPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
+        result.AvatarMedium = await _userPhotoManager.GetMediumPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
+        result.Avatar = await _userPhotoManager.GetBigPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
+        var listAdminModules = await userInfo.GetListAdminModulesAsync(webItemSecurity, webItemManager);
+        if (listAdminModules.Count > 0)
         {
-            result.AvatarOriginal = await _userPhotoManager.GetPhotoAbsoluteWebPath(userInfo.Id) + $"?hash={cacheKey}";
+            result.ListAdminModules = listAdminModules;
         }
 
-        if (_httpContext.Check("avatarMax"))
-        {
-            result.AvatarMax = await _userPhotoManager.GetMaxPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
-        }
-
-        if (_httpContext.Check("avatarMedium"))
-        {
-            result.AvatarMedium = await _userPhotoManager.GetMediumPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
-        }
-
-        if (_httpContext.Check("avatar"))
-        {
-            result.Avatar = await _userPhotoManager.GetBigPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
-        }
-
-        if (_httpContext.Check("listAdminModules"))
-        {
-            var listAdminModules = await userInfo.GetListAdminModulesAsync(webItemSecurity, webItemManager);
-            if (listAdminModules.Count > 0)
-            {
-                result.ListAdminModules = listAdminModules;
-            }
-        }
+        result.RegistrationDate = apiDateTimeHelper.Get(userInfo.CreateDate);
 
         if (!isDocSpaceAdmin)
         {
@@ -421,27 +419,30 @@ public class EmployeeFullDtoHelper(
         {
             result.CreatedBy = await GetAsync(await _userManager.GetUsersAsync(userInfo.CreatedBy.Value));
         }
-            
-        result.RegistrationDate = apiDateTimeHelper.Get(userInfo.CreateDate);
+
+        if (await tfaAppAuthSettingsHelper.GetEnable())
+        {
+            result.TfaAppEnabled = await TfaAppUserSettings.EnableForUserAsync(settingsManager, userInfo.Id);
+        }
 
         return result;
     }
 
     private async Task FillGroupsAsync(EmployeeFullDto result, UserInfo userInfo)
     {
-        if (!_httpContext.Check("groups") && !_httpContext.Check("department"))
+        if (await _userManager.IsUserAsync(_authContext.CurrentAccount.ID) && _authContext.CurrentAccount.ID != userInfo.Id)
         {
             return;
         }
-
-        var groupsFromDb = (await _userManager.GetUserGroupsAsync(userInfo.Id));
+        
+        var groupsFromDb = await _userManager.GetUserGroupsAsync(userInfo.Id);
         List<GroupSummaryDto> groups = [];
 
         foreach (var g in groupsFromDb)
         {
             groups.Add(await groupSummaryDtoHelper.GetAsync(g));
         }
-        
+
 
         if (groups.Count > 0)
         {

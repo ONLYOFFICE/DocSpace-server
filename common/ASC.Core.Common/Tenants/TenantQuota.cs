@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,12 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Profile = AutoMapper.Profile;
-
 namespace ASC.Core.Tenants;
 
+/// <summary>
+/// The current tenant quota.
+/// </summary>
 [DebuggerDisplay("{TenantId} {Name}")]
-public class TenantQuota : IMapFrom<DbQuota>
+public class TenantQuota
 {
     public static readonly TenantQuota Default = new(Tenant.DefaultTenant)
     {
@@ -42,36 +43,56 @@ public class TenantQuota : IMapFrom<DbQuota>
     };
 
     /// <summary>
-    /// Tenant ID
+    /// The tenant ID.
     /// </summary>
     public int TenantId { get; set; }
 
     /// <summary>
-    /// Name
+    /// The tenant name.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Default")]
     public string Name { get; set; }
 
     /// <summary>
-    /// Price
+    /// The tenant price.
     /// </summary>
     [SwaggerSchemaCustom(Example = 10.0)]
     public decimal Price { get; set; }
 
     /// <summary>
-    /// Price currency symbol
+    /// The tenant price currency symbol.
     /// </summary>
     public string PriceCurrencySymbol { get; set; }
 
     /// <summary>
-    /// Product ID
+    /// The tenant price three-character ISO 4217 currency symbol.
+    /// </summary>
+    public string PriceISOCurrencySymbol { get; set; }
+
+    /// <summary>
+    /// The tenant product ID.
     /// </summary>
     public string ProductId { get; set; }
 
     /// <summary>
-    /// Specifies if the tenant quota is visible or not
+    /// The service name.
+    /// </summary>
+    public string ServiceName { get; set; }
+
+    /// <summary>
+    /// Specifies if the tenant quota is visible or not.
     /// </summary>
     public bool Visible { get; set; }
+
+    /// <summary>
+    /// Specifies if the tenant quota applies to the wallet or not
+    /// </summary>
+    public bool Wallet { get; set; }
+
+    /// <summary>
+    /// The quota due date.
+    /// </summary>
+    public DateTime? DueDate { get; set; }
 
     [JsonIgnore]
     public IReadOnlyList<TenantQuotaFeature> TenantQuotaFeatures { get; private set; }
@@ -79,24 +100,18 @@ public class TenantQuota : IMapFrom<DbQuota>
     private List<string> _featuresList;
 
     /// <summary>
-    /// Tenant quota features
+    /// The tenant quota features.
     /// </summary>
     public string Features
     {
-        get
-        {
-            return string.Join(",", _featuresList);
-        }
-        set
-        {
-            _featuresList = value != null ? value.Split(' ', ',', ';').ToList() : [];
-        }
+        get => string.Join(",", _featuresList);
+        set => _featuresList = value != null ? value.Split(' ', ',', ';').ToList() : [];
     }
 
     private readonly MaxFileSizeFeature _maxFileSizeFeature;
 
     /// <summary>
-    /// Maximum file size
+    /// The tenant maximum file size.
     /// </summary>
     [SwaggerSchemaCustom(Example = 25 * 1024 * 1024)]
     public long MaxFileSize
@@ -108,7 +123,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly MaxTotalSizeFeature _maxTotalSizeFeature;
 
     /// <summary>
-    /// Maximum total size
+    /// The tenant maximum total size.
     /// </summary>
     [SwaggerSchemaCustom(Example = long.MaxValue)]
     public long MaxTotalSize
@@ -120,7 +135,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly CountUserFeature _countUserFeature;
 
     /// <summary>
-    /// Number of portal users
+    /// The number of portal users.
     /// </summary>
     public int CountUser
     {
@@ -131,7 +146,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly CountPaidUserFeature _countPaidUserFeature;
 
     /// <summary>
-    /// Number of portal room administrators
+    /// The number of portal room administrators.
     /// </summary>
     public int CountRoomAdmin
     {
@@ -142,7 +157,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly UsersInRoomFeature _usersInRoomFeature;
 
     /// <summary>
-    /// Number of room users
+    /// The number of room users.
     /// </summary>
     public int UsersInRoom
     {
@@ -153,7 +168,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly CountRoomFeature _countRoomFeature;
 
     /// <summary>
-    /// Number of rooms
+    /// The number of rooms.
     /// </summary>
     public int CountRoom
     {
@@ -164,7 +179,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly TenantQuotaFeatureFlag _nonProfitFeature;
 
     /// <summary>
-    /// Specifies if the tenant quota is nonprofit or not
+    /// Specifies if the tenant quota is nonprofit or not.
     /// </summary>
     public bool NonProfit
     {
@@ -175,7 +190,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly TenantQuotaFeatureFlag _trialFeature;
 
     /// <summary>
-    /// Specifies if the tenant quota is trial or not
+    /// Specifies if the tenant quota is trial or not.
     /// </summary>
     public bool Trial
     {
@@ -186,7 +201,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly FreeFeature _freeFeature;
 
     /// <summary>
-    /// Specifies if the tenant quota is free or not
+    /// Specifies if the tenant quota is free or not.
     /// </summary>
     public bool Free
     {
@@ -197,7 +212,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly TenantQuotaFeatureFlag _updateFeature;
 
     /// <summary>
-    /// Specifies if the tenant quota is updated or not
+    /// Specifies if the tenant quota is updated or not.
     /// </summary>
     public bool Update
     {
@@ -208,7 +223,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly TenantQuotaFeatureFlag _auditFeature;
 
     /// <summary>
-    /// Specifies if the audit trail is available or not
+    /// Specifies if the audit trail is available or not.
     /// </summary>
     public bool Audit
     {
@@ -219,7 +234,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly TenantQuotaFeatureFlag _docsEditionFeature;
 
     /// <summary>
-    /// Specifies if this tenant quota is Docs edition or not
+    /// Specifies if ONLYOFFICE Docs is included in the tenant quota or not.
     /// </summary>
     public bool DocsEdition
     {
@@ -230,7 +245,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly TenantQuotaFeatureFlag _ldapFeature;
 
     /// <summary>
-    /// Specifies if the LDAP settings are available or not
+    /// Specifies if the LDAP settings are available or not.
     /// </summary>
     public bool Ldap
     {
@@ -241,7 +256,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly TenantQuotaFeatureFlag _ssoFeature;
 
     /// <summary>
-    /// Specifies if the SSO settings are available or not
+    /// Specifies if the SSO settings are available or not.
     /// </summary>
     public bool Sso
     {
@@ -252,7 +267,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly TenantQuotaFeatureFlag _statisticFeature;
 
     /// <summary>
-    /// Specifies if the statistic settings are available or not
+    /// Specifies if the statistics settings are available or not.
     /// </summary>
     public bool Statistic
     {
@@ -262,8 +277,9 @@ public class TenantQuota : IMapFrom<DbQuota>
 
     private readonly TenantQuotaFeatureFlag _brandingFeature;
 
-    /// <summary>Specifies if the branding settings are available or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the branding settings are available or not.
+    /// </summary>
     public bool Branding
     {
         get => _brandingFeature.Value;
@@ -273,7 +289,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly TenantQuotaFeatureFlag _customizationFeature;
 
     /// <summary>
-    /// Specifies if the customization settings are available or not
+    /// Specifies if the customization settings are available or not.
     /// </summary>
     public bool Customization
     {
@@ -283,8 +299,9 @@ public class TenantQuota : IMapFrom<DbQuota>
 
     private readonly TenantQuotaFeatureFlag _lifetimeFeature;
 
-    /// <summary>Specifies if the license is lifetime or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the license has the lifetime settings or not.
+    /// </summary>
     public bool Lifetime
     {
         get => _lifetimeFeature.Value;
@@ -294,7 +311,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly TenantQuotaFeatureFlag _customFeature;
 
     /// <summary>
-    /// Specifies if the custom domain URL is available or not
+    /// Specifies if the custom domain URL is available or not.
     /// </summary>
     public bool Custom
     {
@@ -302,21 +319,21 @@ public class TenantQuota : IMapFrom<DbQuota>
         set => _customFeature.Value = value;
     }
 
-    private readonly TenantQuotaFeatureFlag _autoBackupRestoreFeature;
+    private readonly TenantQuotaFeatureFlag _restoreFeature;
 
     /// <summary>
-    /// Specifies if the automatic Backup&amp;Restore feature is available or not
+    /// Specifies if the restore is enabled or not.
     /// </summary>
-    public bool AutoBackupRestore
+    public bool Restore
     {
-        get => _autoBackupRestoreFeature.Value;
-        set => _autoBackupRestoreFeature.Value = value;
+        get => _restoreFeature.Value;
+        set => _restoreFeature.Value = value;
     }
 
     private readonly TenantQuotaFeatureFlag _oauthFeature;
 
     /// <summary>
-    /// Specifies if Oauth is available or not
+    /// Specifies if Oauth is available or not.
     /// </summary>
     public bool Oauth
     {
@@ -327,7 +344,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly TenantQuotaFeatureFlag _contentSearchFeature;
 
     /// <summary>
-    /// Specifies if the content search is available or not
+    /// Specifies if the content search is available or not.
     /// </summary>
     public bool ContentSearch
     {
@@ -338,7 +355,7 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly TenantQuotaFeatureFlag _thirdPartyFeature;
 
     /// <summary>
-    /// Specifies if the third-party accounts linking is available or not
+    /// Specifies if the third-party accounts linking is available or not.
     /// </summary>
     public bool ThirdParty
     {
@@ -349,12 +366,45 @@ public class TenantQuota : IMapFrom<DbQuota>
     private readonly TenantQuotaFeatureFlag _yearFeature;
 
     /// <summary>
-    /// Specifies if the tenant quota is yearly subscription or not
+    /// Specifies if the tenant quota is yearly subscription or not.
     /// </summary>
     public bool Year
     {
         get => _yearFeature.Value;
         set => _yearFeature.Value = value;
+    }
+
+    private readonly CountFreeBackupFeature _countFreeBackup;
+
+    /// <summary>
+    /// The number of free backups within a month.
+    /// </summary>
+    public int CountFreeBackup
+    {
+        get => _countFreeBackup.Value;
+        set => _countFreeBackup.Value = value;
+    }
+
+    private readonly WalletFeatureFlag _backup;
+
+    /// <summary>
+    /// Specifies if the backup anabled as a wallet service or not.
+    /// </summary>
+    public bool Backup
+    {
+        get => _backup.Value;
+        set => _backup.Value = value;
+    }
+
+    private readonly CountAIAgentFeature _countAIAgentFeature;
+
+    /// <summary>
+    /// The number of AI agents.
+    /// </summary>
+    public int CountAIAgent
+    {
+        get => _countAIAgentFeature.Value;
+        set => _countAIAgentFeature.Value = value;
     }
 
     public TenantQuota()
@@ -363,28 +413,31 @@ public class TenantQuota : IMapFrom<DbQuota>
 
         _countUserFeature = new CountUserFeature(this) { Order = 1 };
         _countPaidUserFeature = new CountPaidUserFeature(this);
-        _usersInRoomFeature = new UsersInRoomFeature(this) { Order = 8, Visible = false };
+        _usersInRoomFeature = new UsersInRoomFeature(this) { Visible = false };
         _countRoomFeature = new CountRoomFeature(this) { Order = 2 };
         _maxTotalSizeFeature = new MaxTotalSizeFeature(this);
         _maxFileSizeFeature = new MaxFileSizeFeature(this);
-        _nonProfitFeature = new TenantQuotaFeatureFlag(this) { Name = "non-profit", Visible = false };
-        _trialFeature = new TenantQuotaFeatureFlag(this) { Name = "trial", Visible = false };
+        _nonProfitFeature = new TenantQuotaFeatureFlag(this, "non-profit") { Visible = false };
+        _trialFeature = new TenantQuotaFeatureFlag(this, "trial") {  Visible = false };
         _freeFeature = new FreeFeature(this) { Visible = false };
-        _updateFeature = new TenantQuotaFeatureFlag(this) { Name = "update", Standalone = true };
-        _auditFeature = new TenantQuotaFeatureFlag(this) { Name = "audit", Order = 7, EmployeeType = EmployeeType.DocSpaceAdmin };
-        _docsEditionFeature = new TenantQuotaFeatureFlag(this) { Name = "docs", Visible = false };
-        _ldapFeature = new TenantQuotaFeatureFlag(this) { Name = "ldap", Order = 3, EmployeeType = EmployeeType.DocSpaceAdmin };
-        _ssoFeature = new TenantQuotaFeatureFlag(this) { Name = "sso", Order = 5, EmployeeType = EmployeeType.DocSpaceAdmin };
-        _brandingFeature = new TenantQuotaFeatureFlag(this) { Name = "branding", Visible = false };
-        _customizationFeature = new TenantQuotaFeatureFlag(this) { Name = "customization", Order = 4, EmployeeType = EmployeeType.DocSpaceAdmin };
-        _lifetimeFeature = new TenantQuotaFeatureFlag(this) { Name = "lifetime", Standalone = true };
-        _customFeature = new TenantQuotaFeatureFlag(this) { Name = "custom", Visible = false };
-        _autoBackupRestoreFeature = new TenantQuotaFeatureFlag(this) { Name = "restore", Order = 6, EmployeeType = EmployeeType.DocSpaceAdmin };
-        _oauthFeature = new TenantQuotaFeatureFlag(this) { Name = "oauth" };
-        _contentSearchFeature = new TenantQuotaFeatureFlag(this) { Name = "contentsearch", Visible = false };
-        _thirdPartyFeature = new TenantQuotaFeatureFlag(this) { Name = "thirdparty", Order = 9, EmployeeType = EmployeeType.DocSpaceAdmin };
-        _statisticFeature = new TenantQuotaFeatureFlag(this) { Name = "statistic", Order = 10 };
-        _yearFeature = new TenantQuotaFeatureFlag(this) { Name = "year", Order = 11, EmployeeType = EmployeeType.DocSpaceAdmin };
+        _updateFeature = new TenantQuotaFeatureFlag(this, "update") { Standalone = true };
+        _auditFeature = new TenantQuotaFeatureFlag(this, "audit") { Order = 8, EmployeeType = EmployeeType.DocSpaceAdmin };
+        _docsEditionFeature = new TenantQuotaFeatureFlag(this, "docs") { Visible = false };
+        _ldapFeature = new TenantQuotaFeatureFlag(this, "ldap") { Order = 4, EmployeeType = EmployeeType.DocSpaceAdmin };
+        _ssoFeature = new TenantQuotaFeatureFlag(this, "sso") { Order = 5, EmployeeType = EmployeeType.DocSpaceAdmin };
+        _brandingFeature = new TenantQuotaFeatureFlag(this, "branding") { EmployeeType = EmployeeType.DocSpaceAdmin };
+        _customizationFeature = new TenantQuotaFeatureFlag(this, "customization") { Order = 3, EmployeeType = EmployeeType.DocSpaceAdmin };
+        _lifetimeFeature = new TenantQuotaFeatureFlag(this, "lifetime") { Standalone = true };
+        _customFeature = new TenantQuotaFeatureFlag(this, "custom") { Visible = false };
+        _restoreFeature = new TenantQuotaFeatureFlag(this, "restore") { Order = 7, EmployeeType = EmployeeType.DocSpaceAdmin };
+        _oauthFeature = new TenantQuotaFeatureFlag(this, "oauth");
+        _contentSearchFeature = new TenantQuotaFeatureFlag(this, "contentsearch") { Visible = false };
+        _thirdPartyFeature = new TenantQuotaFeatureFlag(this, "thirdparty") { Order = 9, EmployeeType = EmployeeType.DocSpaceAdmin };
+        _statisticFeature = new TenantQuotaFeatureFlag(this, "statistic") { Order = 10 };
+        _yearFeature = new TenantQuotaFeatureFlag(this, "year") { EmployeeType = EmployeeType.DocSpaceAdmin };
+        _countFreeBackup = new CountFreeBackupFeature(this) { Order = 6, EmployeeType = EmployeeType.DocSpaceAdmin };
+        _backup = new WalletFeatureFlag(this, "backup") { EmployeeType = EmployeeType.DocSpaceAdmin };
+        _countAIAgentFeature = new CountAIAgentFeature(this) { Order = 11 };
 
         TenantQuotaFeatures = new List<TenantQuotaFeature>
         {
@@ -406,12 +459,15 @@ public class TenantQuota : IMapFrom<DbQuota>
             _customizationFeature,
             _lifetimeFeature,
             _customFeature,
-            _autoBackupRestoreFeature,
+            _restoreFeature,
             _oauthFeature,
             _contentSearchFeature,
             _thirdPartyFeature,
             _statisticFeature,
-            _yearFeature
+            _yearFeature,
+            _countFreeBackup,
+            _backup,
+            _countAIAgentFeature
         };
     }
 
@@ -426,9 +482,12 @@ public class TenantQuota : IMapFrom<DbQuota>
         Name = quota.Name;
         Price = quota.Price;
         ProductId = quota.ProductId;
+        ServiceName = quota.ServiceName;
         Visible = quota.Visible;
         MaxFileSize = quota.MaxFileSize;
         Features = quota.Features;
+        Wallet = quota.Wallet;
+        DueDate = quota.DueDate;
     }
 
     public override int GetHashCode()
@@ -470,10 +529,28 @@ public class TenantQuota : IMapFrom<DbQuota>
             return quota;
         }
 
+        if (quota.Wallet && quota.DueDate.HasValue && quota.DueDate.Value < DateTime.UtcNow)
+        {
+            return old;
+        }
+
         var newQuota = new TenantQuota(old);
-        newQuota.Price += quota.Price;
-        newQuota.Visible &= quota.Visible;
         newQuota.ProductId = "";
+
+        if (quota.Wallet)
+        {
+            if (quota.DueDate.HasValue)
+            {
+                newQuota.DueDate = newQuota.DueDate.HasValue
+                    ? DateTime.Compare(newQuota.DueDate.Value, quota.DueDate.Value) < 0 ? newQuota.DueDate.Value : quota.DueDate.Value
+                    : quota.DueDate.Value;
+            }
+        }
+        else
+        {
+            newQuota.Price += quota.Price;
+            newQuota.Visible &= quota.Visible;
+        }
 
         foreach (var f in newQuota.TenantQuotaFeatures)
         {
@@ -541,12 +618,6 @@ public class TenantQuota : IMapFrom<DbQuota>
         return newQuota;
     }
 
-    public void Mapping(Profile profile)
-    {
-        profile.CreateMap<DbQuota, TenantQuota>()
-            .ForMember(dest => dest.Price, o => o.MapFrom<TenantQuotaPriceResolver>());
-    }
-
     public TenantQuotaFeature<T> GetFeature<T>(string name)
     {
         return TenantQuotaFeatures.OfType<TenantQuotaFeature<T>>().FirstOrDefault(f => string.Equals(f.Name.Split(':')[0], $"{name}", StringComparison.OrdinalIgnoreCase));
@@ -555,6 +626,10 @@ public class TenantQuota : IMapFrom<DbQuota>
     public T GetFeature<T>() where T : TenantQuotaFeature
     {
         return TenantQuotaFeatures.OfType<T>().FirstOrDefault();
+    }
+    public string GetPaymentId()
+    {
+        return Wallet && !string.IsNullOrEmpty(ServiceName) ? ServiceName : ProductId;
     }
 
     internal string GetFeature(string name)
@@ -571,5 +646,44 @@ public class TenantQuota : IMapFrom<DbQuota>
         {
             _featuresList.Add(value is bool ? $"{name}" : $"{name}:{value}");
         }
+    }
+}
+
+[Scope]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public partial class TenantQuotaMapper(IServiceProvider provider)
+{
+    private partial TenantQuota Map(DbQuota source);
+    public partial List<TenantQuota> Map(List<DbQuota> source);
+    public partial DbQuota Map(TenantQuota source);
+
+    [UserMapping(Default = true)]
+    public TenantQuota MapDbQuotaToTenantQuota(DbQuota quota)
+    {
+        var dto = Map(quota);
+        (dto.Price, dto.PriceCurrencySymbol, dto.PriceISOCurrencySymbol) = Resolve(quota);
+        return dto;
+    }
+
+    private (decimal, string, string) Resolve(DbQuota source)
+    {
+        var tenantManager = provider.GetService<TenantManager>();
+        var regionHelper = provider.GetService<RegionHelper>();
+
+        var productPaymentId = source.GetPaymentId();
+        var priceInfo = tenantManager.GetProductPriceInfo(productPaymentId, source.Wallet);
+
+        if (priceInfo != null)
+        {
+            var currentRegion = regionHelper.GetCurrentRegionInfoAsync(new Dictionary<string, Dictionary<string, decimal>> { { productPaymentId, priceInfo } }).Result;
+
+            if (priceInfo.TryGetValue(currentRegion.ISOCurrencySymbol, out var resolve))
+            {
+                return (resolve, currentRegion.CurrencySymbol, currentRegion.ISOCurrencySymbol);
+            }
+        }
+
+        var defaultRegion = regionHelper.GetDefaultRegionInfo();
+        return (source.Price, defaultRegion.CurrencySymbol, defaultRegion.ISOCurrencySymbol);
     }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,19 +28,19 @@ namespace ASC.People.ApiModels.RequestDto;
 
 
 /// <summary>
-/// 
+/// The request parameters for moving members from one group to another.
 /// </summary>
 public class MoveGroupMemebersRequestDto
 {
     /// <summary>
-    /// Group ID to move from
+    /// The group ID to move from.
     /// </summary>
     [FromRoute(Name = "fromId")]
-    public Guid FromId { get; set; }
+    public required Guid FromId { get; set; }
 
     /// <summary>
-    /// Group ID to move to
+    /// The group ID to move to.
     /// </summary>
     [FromRoute(Name = "toId")]
-    public Guid ToId { get; set; }
+    public required Guid ToId { get; set; }
 }

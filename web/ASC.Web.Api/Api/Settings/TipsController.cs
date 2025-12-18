@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,30 +27,30 @@
 namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("tips")]
-public class TipsController(ILoggerProvider option,
-        ApiContext apiContext,
-        AuthContext authContext,
-        StudioNotifyHelper studioNotifyHelper,
-        SettingsManager settingsManager,
-        WebItemManager webItemManager,
-        SetupInfo setupInfo,
-        IFusionCache fusionCache,
-        IHttpClientFactory clientFactory,
-        TenantManager tenantManager,
-        IHttpContextAccessor httpContextAccessor)
-    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+[ApiExplorerSettings(IgnoreApi = true)]
+public class TipsController(
+    ILoggerProvider option,
+    AuthContext authContext,
+    StudioNotifyHelper studioNotifyHelper,
+    SettingsManager settingsManager,
+    WebItemManager webItemManager,
+    SetupInfo setupInfo,
+    IFusionCache fusionCache,
+    IHttpClientFactory clientFactory,
+    TenantManager tenantManager)
+    : BaseSettingsController(fusionCache, webItemManager)
 {
     private readonly ILogger _log = option.CreateLogger("ASC.Api");
 
     /// <summary>
-    /// Updates the tip settings with a parameter specified in the request.
+    /// Updates the user interface tip settings with the parameters specified in the request.
     /// </summary>
     /// <short>Update the tip settings</short>
     /// <path>api/2.0/settings/tips</path>
     [Tags("Settings / Tips")]
     [SwaggerResponse(200, "Updated tip settings", typeof(TipsSettings))]
     [HttpPut("")]
-    public async Task<TipsSettings> UpdateTipsSettingsAsync(TipsRequestDto inDto)
+    public async Task<TipsSettings> UpdateTipsSettings(TipsRequestDto inDto)
     {
         var settings = new TipsSettings { Show = inDto.Show };
         await settingsManager.SaveForCurrentUserAsync(settings);
@@ -94,7 +94,7 @@ public class TipsController(ILoggerProvider option,
     [Tags("Settings / Tips")]
     [SwaggerResponse(200, "Boolean value: true if the user is subscribed to the tips", typeof(bool))]
     [HttpPut("change/subscription")]
-    public async Task<bool> UpdateTipsSubscriptionAsync()
+    public async Task<bool> UpdateTipsSubscription()
     {
         return await StudioPeriodicNotify.ChangeSubscriptionAsync(authContext.CurrentAccount.ID, studioNotifyHelper);
     }
@@ -107,7 +107,7 @@ public class TipsController(ILoggerProvider option,
     [Tags("Settings / Tips")]
     [SwaggerResponse(200, "Boolean value: true if the user is subscribed to the tips", typeof(bool))]
     [HttpGet("subscription")]
-    public async Task<bool> GetTipsSubscriptionAsync()
+    public async Task<bool> GetTipsSubscription()
     {
         return await studioNotifyHelper.IsSubscribedToNotifyAsync(authContext.CurrentAccount.ID, Actions.PeriodicNotify);
     }

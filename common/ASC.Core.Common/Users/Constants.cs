@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,19 +31,6 @@ namespace ASC.Core.Users;
 [Singleton]
 public sealed class Constants(IConfiguration configuration)
 {
-    public int MaxEveryoneCount
-    {
-        get
-        {
-            if (!int.TryParse(configuration["core:users"], out var count))
-            {
-                count = 10000;
-            }
-
-            return count;
-        }
-    }
-
     #region system group and category groups
 
     public static readonly Guid SysGroupCategoryId = new("{7717039D-FBE9-45ad-81C1-68A1AA10CE1F}");
@@ -74,16 +61,16 @@ public sealed class Constants(IConfiguration configuration)
 
     public static readonly GroupInfo GroupUser = new(SysGroupCategoryId)
     {
-        ID = AuthConstants.User.ID, 
+        ID = AuthConstants.User.ID,
         Name = AuthConstants.User.Name
     };
 
     public static readonly GroupInfo[] SystemGroups =
     [
-        GroupEveryone, 
-        GroupGuest, 
-        GroupRoomAdmin, 
-        GroupAdmin, 
+        GroupEveryone,
+        GroupGuest,
+        GroupRoomAdmin,
+        GroupAdmin,
         GroupUser
     ];
 

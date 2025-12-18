@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,16 +26,13 @@
 
 using System.Text.Json;
 
+using Microsoft.Extensions.Primitives;
+
 namespace ASC.Data.Backup.Services;
 
 [Transient]
-public class BackupProgressItem : BaseBackupProgressItem
+public class BackupProgressItem : BaseBackupProgressItem, IDisposable
 {
-    public BackupProgressItem()
-    {
-        
-    }
-    
     private Dictionary<string, string> _storageParams;
     private string _tempFolder;
 
@@ -45,10 +42,18 @@ public class BackupProgressItem : BaseBackupProgressItem
     private string _storageBasePath;
     private int _limit;
     private string _serverBaseUri;
-    private bool _dump;
+    private int _billingSessionId;
+    private DateTime _billingSessionExpire;
+    private IDictionary<string, StringValues> _httpHeaders;
+    private readonly SemaphoreSlim _billingSessionSemaphore = new(1, 1);
     private readonly ILogger<BackupProgressItem> _logger;
     private readonly CoreBaseSettings _coreBaseSettings;
     private readonly NotifyHelper _notifyHelper;
+
+    public BackupProgressItem()
+    {
+
+    }
 
     public BackupProgressItem(ILogger<BackupProgressItem> logger,
         IServiceScopeFactory serviceProvider,
@@ -60,7 +65,7 @@ public class BackupProgressItem : BaseBackupProgressItem
         _notifyHelper = notifyHelper;
     }
 
-    public void Init(BackupSchedule schedule, bool isScheduled, string tempFolder, int limit)
+    public void Init(BackupSchedule schedule, bool isScheduled, string tempFolder, int limit, int billingSessionId, DateTime billingSessionExpire)
     {
         Init();
         BackupProgressItemType = BackupProgressItemType.Backup;
@@ -72,10 +77,12 @@ public class BackupProgressItem : BaseBackupProgressItem
         _isScheduled = isScheduled;
         _tempFolder = tempFolder;
         _limit = limit;
-        _dump = schedule.Dump;
+        Dump = schedule.Dump;
+        _billingSessionId = billingSessionId;
+        _billingSessionExpire = billingSessionExpire;
     }
 
-    public void Init(StartBackupRequest request, bool isScheduled, string tempFolder, int limit)
+    public void Init(StartBackupRequest request, bool isScheduled, string tempFolder, int limit, int billingSessionId, DateTime billingSessionExpire)
     {
         Init();
         BackupProgressItemType = BackupProgressItemType.Backup;
@@ -87,8 +94,11 @@ public class BackupProgressItem : BaseBackupProgressItem
         _isScheduled = isScheduled;
         _tempFolder = tempFolder;
         _limit = limit;
-        _dump = request.Dump;
+        Dump = request.Dump;
         _serverBaseUri = request.ServerBaseUri;
+        _billingSessionId = billingSessionId;
+        _billingSessionExpire = billingSessionExpire;
+        _httpHeaders = request.Headers?.ToDictionary(x => x.Key, x => new StringValues(x.Value));
     }
 
     protected override async Task DoJob()
@@ -97,12 +107,25 @@ public class BackupProgressItem : BaseBackupProgressItem
 
         var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
         var backupStorageFactory = scope.ServiceProvider.GetService<BackupStorageFactory>();
+        var backupService = scope.ServiceProvider.GetService<BackupService>();
         var backupRepository = scope.ServiceProvider.GetService<BackupRepository>();
         var backupPortalTask = scope.ServiceProvider.GetService<BackupPortalTask>();
         var tempStream = scope.ServiceProvider.GetService<TempStream>();
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
+        var messageService = scope.ServiceProvider.GetService<MessageService>();
+        var securityContext = scope.ServiceProvider.GetService<SecurityContext>();
         await tenantManager.SetCurrentTenantAsync(TenantId);
-        await socketManager.BackupProgressAsync(0);
+        await socketManager.BackupProgressAsync(0, Dump);
+
+        if (!_userId.Equals(Guid.Empty))
+        {
+            await securityContext.AuthenticateMeWithoutCookieAsync(_userId);
+        }
+        else
+        {
+            var tenant = await tenantManager.GetTenantAsync(TenantId);
+            await securityContext.AuthenticateMeWithoutCookieAsync(tenant.OwnerId);
+        }
 
         var dateTime = _coreBaseSettings.Standalone ? DateTime.Now : DateTime.UtcNow;
         var tempFile = "";
@@ -110,10 +133,12 @@ public class BackupProgressItem : BaseBackupProgressItem
 
         try
         {
+            SaveAuditEvent(messageService, _isScheduled ? MessageAction.ScheduledBackupStarted : MessageAction.BackupStarted);
+
             var backupStorage = await backupStorageFactory.GetBackupStorageAsync(_storageType, TenantId, _storageParams);
 
             var getter = backupStorage as IGetterWriteOperator;
-            var name = _dump ? "workspace" : (await tenantManager.GetTenantAsync(TenantId)).Alias;
+            var name = Dump ? "workspace" : (await tenantManager.GetTenantAsync(TenantId)).Alias;
             var backupName = string.Format("{0}_{1:yyyy-MM-dd_HH-mm-ss}.{2}", name, dateTime, await getter.GetBackupExtensionAsync(_storageBasePath));
 
             tempFile = CrossPlatform.PathCombine(_tempFolder, backupName);
@@ -121,7 +146,7 @@ public class BackupProgressItem : BaseBackupProgressItem
 
             var writer = await DataOperatorFactory.GetWriteOperatorAsync(tempStream, _storageBasePath, backupName, _tempFolder, _userId, CancellationToken, getter);
 
-            backupPortalTask.Init(TenantId, tempFile, _limit, writer, _dump);
+            backupPortalTask.Init(TenantId, tempFile, _limit, writer, Dump);
 
             backupPortalTask.ProgressChanged = async args =>
             {
@@ -130,8 +155,25 @@ public class BackupProgressItem : BaseBackupProgressItem
                     return;
                 }
                 Percentage = 0.9 * args.Progress;
-                await socketManager.BackupProgressAsync((int)Percentage);
+                await socketManager.BackupProgressAsync((int)Percentage, Dump);
                 await PublishChanges();
+
+                if (_billingSessionId > 0 && _billingSessionExpire.Subtract(DateTime.UtcNow) < TimeSpan.FromHours(1))
+                {
+                    await _billingSessionSemaphore.WaitAsync();
+                    try
+                    {
+                        if (_billingSessionExpire.Subtract(DateTime.UtcNow) < TimeSpan.FromHours(1))
+                        {
+                            var extensedSession = await backupService.ExtendCustomerSessionForBackupAsync(TenantId, _billingSessionId);
+                            _billingSessionExpire = extensedSession.Expire;
+                        }
+                    }
+                    finally
+                    {
+                        _billingSessionSemaphore.Release();
+                    }
+                }
             };
 
             await backupPortalTask.RunJob();
@@ -157,11 +199,17 @@ public class BackupProgressItem : BaseBackupProgressItem
             }
             Link = await backupStorage.GetPublicLinkAsync(storagePath);
 
+            var backupTenant = TenantId;
+            if (Dump)
+            {
+                backupTenant = -1;
+                _storageParams.TryAdd("tenantId", TenantId.ToString());
+            }
             await backupRepository.SaveBackupRecordAsync(
                 new BackupRecord
                 {
                     Id = Guid.Parse(Id),
-                    TenantId = TenantId,
+                    TenantId = backupTenant,
                     IsScheduled = _isScheduled,
                     Name = Path.GetFileName(tempFile),
                     StorageType = _storageType,
@@ -171,7 +219,8 @@ public class BackupProgressItem : BaseBackupProgressItem
                     ExpiresOn = _storageType == BackupStorageType.DataStore ? DateTime.UtcNow.AddDays(1) : DateTime.MinValue,
                     StorageParams = JsonSerializer.Serialize(_storageParams),
                     Hash = hash,
-                    Removed = false
+                    Removed = false,
+                    Paid = _billingSessionId > 0
                 });
 
             Percentage = 100;
@@ -183,9 +232,40 @@ public class BackupProgressItem : BaseBackupProgressItem
                 await _notifyHelper.SendAboutBackupCompletedAsync(TenantId, _userId);
             }
 
+            var missingFilesInfo = backupPortalTask.GetMissingFilesInfo();
+            if (!string.IsNullOrEmpty(missingFilesInfo))
+            {
+                Warning = string.Format(BackupResource.BackupMissingFilesWarning, missingFilesInfo);
+            }
 
             IsCompleted = true;
+            await socketManager.BackupProgressAsync((int)Percentage, Dump);
             await PublishChanges();
+
+            SaveAuditEvent(messageService, _isScheduled ? MessageAction.ScheduledBackupCompleted : MessageAction.BackupCompleted);
+
+            var customerParticipantName = _isScheduled ? null : _userId.ToString();
+            var details = _isScheduled ? BackupResource.AutoBackup : BackupResource.ResourceManager.GetString($"BackupStorageType{_storageType}");
+            var metadata = new Dictionary<string, string> { { BillingClient.MetadataDetails, details } };
+
+            var completeCustomerSessionResult = await backupService.CompleteCustomerSessionForBackupAsync(TenantId, _billingSessionId, customerParticipantName, metadata);
+            if (completeCustomerSessionResult)
+            {
+                SaveAuditEvent(messageService, MessageAction.CustomerOperationPerformed);
+            }
+
+            if (backupStorage is DocumentsBackupStorage documentsBackupStorage)
+            {
+                var fileMarker = scope.ServiceProvider.GetService<FileMarker>();
+                if (int.TryParse(storagePath, out var fileId))
+                {
+                    await SentDocumentsStorageNotification(documentsBackupStorage, socketManager, fileMarker, fileId);
+                }
+                else
+                {
+                    await SentDocumentsStorageNotification(documentsBackupStorage, socketManager, fileMarker, storagePath);
+                }
+            }
         }
         catch (Exception error)
         {
@@ -195,12 +275,33 @@ public class BackupProgressItem : BaseBackupProgressItem
             }
             Exception = error;
             IsCompleted = true;
+
+            SaveAuditEvent(messageService, _isScheduled ? MessageAction.ScheduledBackupFailed : MessageAction.BackupFailed);
+
+            try
+            {
+                await backupService.CloseCustomerSessionForBackupAsync(TenantId, _billingSessionId);
+            }
+            catch (Exception closeCustomerSessionError)
+            {
+                _logger.ErrorWithException(closeCustomerSessionError);
+            }
+
+            try
+            {
+                _notifyHelper.SetServerBaseUri(_serverBaseUri);
+                await _notifyHelper.SendAboutBackupFailedAsync(TenantId, _userId, error.Message);
+            }
+            catch (Exception notifyError)
+            {
+                _logger.ErrorWithException(notifyError);
+            }
         }
         finally
         {
             try
             {
-                await socketManager.EndBackupAsync(ToBackupProgress());
+                await socketManager.EndBackupAsync(ToBackupProgress(), Dump);
                 await PublishChanges();
             }
             catch (Exception error)
@@ -221,8 +322,32 @@ public class BackupProgressItem : BaseBackupProgressItem
         }
     }
 
+    private void SaveAuditEvent(MessageService messageService, MessageAction messageAction)
+    {
+        if (_isScheduled)
+        {
+            messageService.Send(MessageInitiator.BackupService, messageAction);
+        }
+        else
+        {
+            messageService.SendHeadersMessage(messageAction, target: null, _httpHeaders, null);
+        }
+    }
+
+    private async Task SentDocumentsStorageNotification<T>(DocumentsBackupStorage documentsBackupStorage, SocketManager socketManager, FileMarker fileMarker, T fileId)
+    {
+        var file = await documentsBackupStorage.GetAsync(fileId);
+        await socketManager.CreateFileAsync(file);
+        await fileMarker.MarkAsNewAsync(file);
+    }
+
     public override object Clone()
     {
         return MemberwiseClone();
+    }
+
+    public void Dispose()
+    {
+        _billingSessionSemaphore.Dispose();
     }
 }

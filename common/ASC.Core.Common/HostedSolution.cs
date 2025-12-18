@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -68,6 +68,11 @@ public class HostedSolution(ITenantService tenantService,
     public async Task CheckTenantAddressAsync(string address)
     {
         await tenantService.ValidateDomainAsync(address);
+    }
+
+    public async Task<bool> IsForbiddenDomainAsync(string domain)
+    {
+        return await tenantService.IsForbiddenDomainAsync(domain);
     }
 
     public async Task<Tenant> RegisterTenantAsync(TenantRegistrationInfo registrationInfo)
@@ -152,7 +157,7 @@ public class HostedSolution(ITenantService tenantService,
 
     public async Task RemoveTenantAsync(Tenant tenant)
     {
-        await tenantService.RemoveTenantAsync(tenant.Id);
+        await tenantService.RemoveTenantAsync(tenant);
     }
 
     public async Task<string> CreateAuthenticationCookieAsync(CookieStorage cookieStorage, int tenantId, Guid userId)

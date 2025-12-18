@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,6 +38,7 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
 
     private readonly ILogger _logger;
     private readonly ConcurrentDictionary<string, List<Action<T>>> _actions;
+    private readonly ConcurrentDictionary<string, List<Func<T, Task>>> _funcs = new();
     private bool _disposed;
 
     private readonly Task _initializeTask;
@@ -51,7 +52,6 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
         _actions = new ConcurrentDictionary<string, List<Action<T>>>();
 
         var rabbitMQConfiguration = configuration.GetSection("rabbitmq").Get<RabbitMQSettings>();
-
         _factory = rabbitMQConfiguration.GetConnectionFactory();
         _initializeTask = InitializeAsync();
     }
@@ -130,7 +130,7 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
 
         _connection = await _factory.CreateConnectionAsync();
         _connection.ConnectionShutdownAsync += async (_, _) => await TryConnect();
-        _connection.CallbackExceptionAsync += async (_, _) =>  await TryConnect();
+        _connection.CallbackExceptionAsync += async (_, _) => await TryConnect();
         _connection.ConnectionBlockedAsync += async (_, _) => await TryConnect();
 
     }
@@ -152,7 +152,12 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
         {
             Parallel.ForEach(onchange, a => a(obj));
         }
-
+        
+        if (_funcs.TryGetValue(GetKey(action), out var onchangeFunc) && onchangeFunc != null)
+        {
+            await Task.WhenAll(onchangeFunc.Select(a => a(obj)));
+        }
+        
         await Task.CompletedTask;
     }
 
@@ -167,7 +172,7 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
         objAsByteArray.CopyTo(body, 0);
 
         body[^1] = (byte)action;
-     
+
         await _consumerChannel.BasicPublishAsync(
                              exchange: _exchangeName,
                              routingKey: string.Empty,
@@ -182,9 +187,15 @@ public class RabbitMQCache<T> : IDisposable, ICacheNotify<T> where T : new()
         _actions.GetOrAdd(GetKey(action), []).Add(onchange);
     }
 
+    public void Subscribe(Func<T, Task> onchange, CacheNotifyAction action)
+    {
+        _funcs.GetOrAdd(GetKey(action), []).Add(onchange);
+    }
+
     public void Unsubscribe(CacheNotifyAction action)
     {
         _actions.TryRemove(GetKey(action), out _);
+        _funcs.TryRemove(GetKey(action), out _);
     }
 
     private string GetKey(CacheNotifyAction cacheNotifyAction)

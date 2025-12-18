@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,29 +26,51 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The request parameters for accessing a file by its ID.
+/// </summary>
 public class FileIdRequestDto<T>
 {
     /// <summary>
-    /// File ID
+    /// The file unique identifier.
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
+    public required T FileId { get; set; }
 }
 
+/// <summary>
+/// The request parameters for accessing a file by its primary ID, with optional pagination settings.
+/// </summary>
 public class FilePrimaryIdRequestDto<T>
 {
     /// <summary>
-    /// File ID
+    /// The file unique identifier.
     /// </summary>
     [FromRoute(Name = "id")]
-    public T Id { get; set; }
+    public required T Id { get; set; }
+
+    /// <summary>
+    /// The number of items to retrieve in the request.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
+
+    /// <summary>
+    /// The starting index for the query results.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
 }
 
+/// <summary>
+/// The request parameters for accessing an operation by its ID.
+/// </summary>
 public class OperationIdRequestDto
 {
     /// <summary>
-    /// Operation ID
+    /// The operation unique identifier.
     /// </summary>
     [FromRoute(Name = "id")]
-    public string Id { get; set; } = null;
+    public required string Id { get; set; } = null;
 }

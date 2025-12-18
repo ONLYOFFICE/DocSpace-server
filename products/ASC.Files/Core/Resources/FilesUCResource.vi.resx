@@ -65,7 +65,7 @@
     <value>Tài liệu Cộng tác</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>Tài liệu</value>
+    <value>Tài liệu của tôi</value>
   </data>
   <data name="ProjectFiles" xml:space="preserve">
     <value>Tài liệu Dự án</value>
@@ -102,5 +102,11 @@
   </data>
   <data name="ReadyFormFolder" xml:space="preserve">
     <value>Hoàn thành</value>
+  </data>
+  <data name="RoomTemplates" xml:space="preserve">
+    <value>Mẫu</value>
+  </data>
+  <data name="AiAgents" xml:space="preserve">
+    <value>AI agent</value>
   </data>
 </root>

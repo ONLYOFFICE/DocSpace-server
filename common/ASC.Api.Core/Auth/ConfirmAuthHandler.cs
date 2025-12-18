@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -50,9 +50,10 @@ public class ConfirmAuthHandler(
         }
 
         EmailValidationKeyProvider.ValidationResult checkKeyResult;
+        string email = null;
         try
         {
-            checkKeyResult = await emailValidationKeyModelHelper.ValidateAsync(emailValidationKeyModel);
+            (checkKeyResult, email) = await emailValidationKeyModelHelper.ValidateAsync(emailValidationKeyModel);
         }
         catch (ArgumentNullException)
         {
@@ -61,9 +62,9 @@ public class ConfirmAuthHandler(
 
         var claims = new List<Claim>
         {
-            new(ClaimTypes.Role, emailValidationKeyModel.Type.Value.ToStringFast()),AuthConstants.Claim_ScopeRootWrite
+            new(ClaimTypes.Role, emailValidationKeyModel.Type.Value.ToStringFast()),AuthConstants.Claim_ScopeGlobalWrite
         };
-        
+
         if (checkKeyResult == EmailValidationKeyProvider.ValidationResult.Ok)
         {
             Guid userId;
@@ -75,9 +76,9 @@ public class ConfirmAuthHandler(
                 }
                 else
                 {
-                    userId = emailValidationKeyModel.Type is ConfirmType.EmailActivation or ConfirmType.EmpInvite or ConfirmType.LinkInvite ? 
-                        Constants.CoreSystem.ID : 
-                        (await userManager.GetUserByEmailAsync(emailValidationKeyModel.Email)).Id;
+                    userId = emailValidationKeyModel.Type is ConfirmType.EmailActivation or ConfirmType.EmpInvite or ConfirmType.LinkInvite
+                        ? Constants.CoreSystem.ID
+                        : (await userManager.GetUserByEmailAsync(email)).Id;
                 }
             }
             else

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -52,8 +52,8 @@ internal static partial class BackupSchedulerServiceLogger
     [LoggerMessage(LogLevel.Debug, "Skip portal {tenantId} not paid")]
     public static partial void DebugNotPaid(this ILogger<BackupSchedulerService> logger, int tenantId);
 
-    [LoggerMessage(LogLevel.Debug, "Skip portal {tenantId} haven't access")]
-    public static partial void DebugHaveNotAccess(this ILogger<BackupSchedulerService> logger, int tenantId);
+    [LoggerMessage(LogLevel.Debug, "Skip portal {tenantId} haven't access cause {reason}")]
+    public static partial void DebugHaveNotAccess(this ILogger<BackupSchedulerService> logger, int tenantId, string reason);
 
     [LoggerMessage(LogLevel.Error, "error while scheduling backups")]
     public static partial void ErrorBackups(this ILogger<BackupSchedulerService> logger, Exception exception);

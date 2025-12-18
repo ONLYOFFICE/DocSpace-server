@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -46,5 +46,15 @@ public static class LockKeyHelper
     public static string GetUsersInRoomCountCheckKey(int tenantId)
     {
         return $"users_in_room_count_check_{tenantId}";
+    }
+
+    public static string GetFreeBackupsCountCheckKey(int tenantId)
+    {
+        return $"free_backups_count_check_{tenantId}";
+    }
+
+    public static string GetAIAgentsCountCheckKey(int tenantId)
+    {
+        return $"aiagents_count_check_{tenantId}";
     }
 }

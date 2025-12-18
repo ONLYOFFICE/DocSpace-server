@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -39,14 +39,14 @@ public class RoomLogosModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(hel
         {
             var split = filePath.Split('_');
             var roomId = columnMapper.GetMapping("files_folder", "id", split[0]);
-            if (roomId != null) 
+            if (roomId != null)
             {
                 filePath = roomId + "_" + split[1];
                 return true;
             }
 
             split = filePath.Split('-');
-            if (split.Length > 1) 
+            if (split.Length > 1)
             {
                 roomId = columnMapper.GetMapping("files_thirdparty_account", "id", split[1]);
                 if (roomId != null)

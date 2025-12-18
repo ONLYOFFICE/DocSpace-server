@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -77,7 +77,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
             DomainsExpires.Add(string.Empty, moduleConfig.Expires);
 
             DomainsContentAsAttachment = moduleConfig.Domain.Where(x => x.ContentAsAttachment.HasValue).ToDictionary(x => x.Name, y => y.ContentAsAttachment.Value);
-            DomainsContentAsAttachment.Add(string.Empty, moduleConfig.ContentAsAttachment.HasValue ? moduleConfig.ContentAsAttachment.Value : false);
+            DomainsContentAsAttachment.Add(string.Empty, moduleConfig.ContentAsAttachment ?? false);
 
             _domainsAcl = moduleConfig.Domain.ToDictionary(x => x.Name, y => y.Acl);
             _moduleAcl = moduleConfig.Acl;
@@ -128,7 +128,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
                              : new Uri(cdnHeaders.CDNSslUri);
 
         DataStoreValidator = dataStoreValidator;
-        
+
         return Task.FromResult<IDataStore>(this);
     }
 
@@ -194,7 +194,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
 
     public override Task<Uri> SaveAsync(string domain, string path, Stream stream)
     {
-        return SaveAsync(domain, path, Guid.Empty,stream, string.Empty, string.Empty);
+        return SaveAsync(domain, path, Guid.Empty, stream, string.Empty, string.Empty);
     }
     
     public override Task<Uri> SaveAsync(string domain, string path, Stream stream, CancellationToken token)
@@ -244,7 +244,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
 
     private bool EnableQuotaCheck(string domain)
     {
-        return (QuotaController != null) && !domain.EndsWith("_temp");
+        return QuotaController != null && !domain.EndsWith("_temp");
     }
 
     public async Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType,
@@ -519,7 +519,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
 
     public override async Task<(Uri, string)> SaveTempAsync(string domain, Stream stream)
     {
-       var assignedPath = Guid.NewGuid().ToString();
+        var assignedPath = Guid.NewGuid().ToString();
 
         return (await SaveAsync(domain, assignedPath, stream), assignedPath);
     }
@@ -604,12 +604,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
         var objToDel = client
                       .ListObjects(_private_container, null, null, null, MakePath(domain, path));
 
-        long result = 0;
-
-        foreach (var obj in objToDel)
-        {
-            result += obj.Bytes;
-        }
+        var result = objToDel.Sum(obj => obj.Bytes);
 
         return Task.FromResult(result);
     }
@@ -623,12 +618,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
 
         if (QuotaController != null)
         {
-            long size = 0;
-
-            foreach (var obj in objects)
-            {
-                size += obj.Bytes;
-            }
+            var size = objects.Sum(obj => obj.Bytes);
 
             await QuotaController.QuotaUsedSetAsync(Modulename, domain, DataList.GetData(domain), size);
 
@@ -645,12 +635,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
         var objects = client
                       .ListObjects(_private_container, null, null, null, MakePath(domain, string.Empty), _region);
 
-        long result = 0;
-
-        foreach (var obj in objects)
-        {
-            result += obj.Bytes;
-        }
+        var result = objects.Sum(obj => obj.Bytes);
 
         return Task.FromResult(result);
     }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,13 +33,13 @@ public partial class UserDbContext
     {
         return Queries.AnyAclAsync(this, tenantId, subject, action, obj, aceType);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid, null, AceType.Allow])]
     public Task<Acl> AclAsync(int tenantId, Guid subject, Guid action, string obj, AceType aceType)
     {
         return Queries.AclAsync(this, tenantId, subject, action, obj, aceType);
     }
-    
+
     [PreCompileQuery([])]
     public IAsyncEnumerable<Acl> AzRecordAsync()
     {

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,7 +35,8 @@ public enum ModuleName
     Tenants,
     WebStudio,
     RoomLogos,
-    Identity
+    Identity,
+    Ai
 }
 
 public interface IModuleSpecifics
@@ -52,5 +53,5 @@ public interface IModuleSpecifics
     DbCommand CreateSelectCommand(DbConnection connection, int tenantId, TableInfo table, int limit, int offset, Guid id);
     IEnumerable<TableInfo> GetTablesOrdered();
     Stream PrepareData(string key, Stream data, ColumnMapper columnMapper);
-    void PrepareData(DataTable data);
+    void PrepareData(DataTable data, BackupCorrection backupCorrection);
 }

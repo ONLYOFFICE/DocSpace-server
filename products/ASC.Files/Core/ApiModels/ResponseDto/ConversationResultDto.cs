@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,45 +27,45 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// Result of file conversation operation.
+/// The result of file convertion operation.
 /// </summary>
 public class ConversationResultDto
 {
     /// <summary>
-    /// Operation ID
+    /// The conversion operation ID.
     /// </summary>
-    public string Id { get; set; }
+    public required string Id { get; set; }
 
     /// <summary>
-    /// Operation type
+    /// The conversion operation type.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Move")]
     [JsonPropertyName("Operation")]
-    public FileOperationType OperationType { get; set; }
+    public required FileOperationType OperationType { get; set; }
 
     /// <summary>
-    /// Operation progress
+    /// The conversion operation progress.
     /// </summary>
-    public int Progress { get; set; }
+    public required int Progress { get; set; }
 
     /// <summary>
-    /// Source file
+    /// The source file for the conversion.
     /// </summary>
     public string Source { get; set; }
 
     /// <summary>
-    /// Resulting file
+    /// The resulting file after the conversion.
     /// </summary>
     [JsonPropertyName("result")]
     public object File { get; set; }
 
     /// <summary>
-    /// Error
+    /// The conversion operation error message.
     /// </summary>
     public string Error { get; set; }
 
     /// <summary>
-    /// Specifies if the operation is processed or not
+    /// Specifies if the conversion operation is processed or not.
     /// </summary>
     public string Processed { get; set; }
 }

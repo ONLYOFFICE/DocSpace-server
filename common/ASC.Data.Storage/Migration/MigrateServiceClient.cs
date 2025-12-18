@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -82,7 +82,7 @@ public class ServiceClient(ServiceClientListener serviceClientListener,
 
     public async Task MigrateAsync(int tenant, StorageSettings storageSettings)
     {
-        var storSettings = new StorSettings { Id = storageSettings.ID.ToString(), Module = storageSettings.Module };
+        var storSettings = new StorSettings { Id = StorageSettings.ID.ToString(), Module = storageSettings.Module };
 
         await CacheMigrationNotify.PublishAsync(new MigrationCache
         {
@@ -93,7 +93,7 @@ public class ServiceClient(ServiceClientListener serviceClientListener,
 
     public async Task UploadCdnAsync(int tenantId, string relativePath, string mappedPath, CdnStorageSettings settings = null)
     {
-        var cdnStorSettings = new CdnStorSettings { Id = settings.ID.ToString(), Module = settings.Module };
+        var cdnStorSettings = new CdnStorSettings { Id = CdnStorageSettings.ID.ToString(), Module = settings.Module };
 
         await UploadCdnMigrationNotify.PublishAsync(new MigrationUploadCdn
         {

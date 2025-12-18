@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,70 +26,73 @@
 
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
+/// <summary>
+/// The login event parameters.
+/// </summary>
 public class LoginEventDto(LoginEvent loginEvent, ApiDateTimeHelper apiDateTimeHelper)
 {
     /// <summary>
-    /// ID
+    /// The login event ID.
     /// </summary>
     public int Id { get; set; } = loginEvent.Id;
 
     /// <summary>
-    /// Date
+    /// The login event date.
     /// </summary>
     public ApiDateTime Date { get; set; } = apiDateTimeHelper.Get(loginEvent.Date);
 
     /// <summary>
-    /// User
+    /// The user name of the login event.
     /// </summary>
     public string User { get; set; } = loginEvent.UserName;
 
     /// <summary>
-    /// User ID
+    /// The user ID of the login event.
     /// </summary>
     public Guid UserId { get; set; } = loginEvent.UserId;
 
     /// <summary>
-    /// Login
+    /// The user login of the login event.
     /// </summary>
     public string Login { get; set; } = loginEvent.Login;
 
     /// <summary>
-    /// Action
+    /// The login event action.
     /// </summary>
     public string Action { get; set; } = loginEvent.ActionText;
 
     /// <summary>
-    /// Action ID
+    /// The login-related action to filter events by.
     /// </summary>
     public MessageAction ActionId { get; set; } = (MessageAction)loginEvent.Action;
 
     /// <summary>
-    /// IP
+    /// The login event IP.
     /// </summary>
     public string IP { get; set; } = loginEvent.IP;
 
     /// <summary>
-    /// Country
+    /// The login event country.
     /// </summary>
     public string Country { get; set; } = loginEvent.Country;
 
     /// <summary>
-    /// City
+    /// The login event city.
     /// </summary>
     public string City { get; set; } = loginEvent.City;
 
     /// <summary>
-    /// Browser
+    /// The login event browser.
     /// </summary>
     public string Browser { get; set; } = loginEvent.Browser;
 
     /// <summary>
-    /// Platform
+    /// The login event platform.
     /// </summary>
     public string Platform { get; set; } = loginEvent.Platform;
 
     /// <summary>
-    /// Page
+    /// The login event page.
     /// </summary>
     public string Page { get; set; } = loginEvent.Page;
 }

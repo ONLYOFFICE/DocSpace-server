@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,168 +26,343 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The request parameters for getting a folder.
+/// </summary>
 public class GetFolderRequestDto<T>
 {
     /// <summary>
-    /// Folder ID
+    /// The folder ID.
     /// </summary>
     [FromRoute(Name = "folderId")]
-    public T FolderId { get; set; }
+    public required T FolderId { get; set; }
 
     /// <summary>
-    /// User or group ID
+    /// The user or group ID.
     /// </summary>
     [FromQuery(Name = "userIdOrGroupId")]
     public Guid? UserIdOrGroupId { get; set; }
 
     /// <summary>
-    /// Filter type
+    /// The identifier of the user who shared the folder or file.
+    /// </summary>
+    [FromQuery(Name = "sharedBy")]
+    public Guid? SharedBy { get; set; }
+
+    /// <summary>
+    /// The filter type.
     /// </summary>
     [FromQuery(Name = "filterType")]
     public FilterType? FilterType { get; set; }
 
     /// <summary>
-    /// Room ID
+    /// The room ID.
     /// </summary>
     [FromQuery(Name = "roomId")]
     public T RoomId { get; set; }
-    
+
     /// <summary>
-    /// Specifies whether to exclude a subject or not
+    /// Specifies whether to exclude search by user or group ID.
     /// </summary>
     [FromQuery(Name = "excludeSubject")]
     public bool? ExcludeSubject { get; set; }
 
     /// <summary>
-    /// Specifies whether to return only files, only folders or all elements from the specified folder
+    /// Specifies whether to return only files, only folders, or all elements from the specified folder.
     /// </summary>
     [FromQuery(Name = "applyFilterOption")]
     public ApplyFilterOption? ApplyFilterOption { get; set; }
 
     /// <summary>
-    /// Specifies whether to search for a specific file extension
+    /// Specifies whether to search for the specific file extension.
     /// </summary>
     [FromQuery(Name = "extension")]
     public string Extension { get; set; }
 
     /// <summary>
-    /// Search area
+    /// The search area.
     /// </summary>
     [FromQuery(Name = "searchArea")]
     public SearchArea SearchArea { get; set; }
 
-
+    /// <summary>
+    /// The forms item key.
+    /// </summary>
     [FromQuery(Name = "formsItemKey")]
     public string FormsItemKey { get; set; }
-    
+
+    /// <summary>
+    /// The forms item type.
+    /// </summary>
     [FromQuery(Name = "formsItemType")]
-    public string FormsItemType{ get; set; }
+    public string FormsItemType { get; set; }
+
+    /// <summary>
+    /// The maximum number of items to retrieve in the request.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
+
+    /// <summary>
+    /// The zero-based index of the first item to retrieve in a paginated request.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
+
+    /// <summary>
+    /// The property used for sorting the folder request results.
+    /// </summary>
+    [FromQuery(Name = "sortBy")]
+    public string SortBy { get; set; }
+
+    /// <summary>
+    /// The order in which the results are sorted.
+    /// </summary>
+    [FromQuery(Name = "sortOrder")]
+    public SortOrder SortOrder { get; set; }
+
+    /// <summary>
+    /// The text value used as a filter parameter for folder content queries.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
+
+    /// <summary>
+    /// The location context of the request, specifying the area
+    /// where the operation is performed, such as a room, documents, or a link.
+    /// </summary>
+    public Location? Location { get; set; }
 }
 
 /// <summary>
-/// 
+/// The request parameters for getting the "Common" folder.
 /// </summary>
 public class GetCommonFolderRequestDto
 {
     /// <summary>
-    /// User or group ID
+    /// The user or group ID.
     /// </summary>
     [FromQuery(Name = "userIdOrGroupId")]
     public Guid? UserIdOrGroupId { get; set; }
 
     /// <summary>
-    /// Filter type
+    /// The filter type.
     /// </summary>
     [FromQuery(Name = "filterType")]
     public FilterType? FilterType { get; set; }
+
+    /// <summary>
+    /// The maximum number of items to retrieve in the request.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
+
+    /// <summary>
+    /// The zero-based index of the first item to retrieve in a paginated list.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
+
+    /// <summary>
+    /// Specifies the field by which the folder content should be sorted.
+    /// </summary>
+    [FromQuery(Name = "sortBy")]
+    public string SortBy { get; set; }
+
+    /// <summary>
+    /// The order in which the results are sorted.
+    /// </summary>
+    [FromQuery(Name = "sortOrder")]
+    public SortOrder SortOrder { get; set; }
+
+    /// <summary>
+    /// The text used as a filter or search criterion for folder content queries.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }
 
 /// <summary>
-/// 
+/// The request parameters for getting the "My trash" folder.
 /// </summary>
 public class GetMyTrashFolderRequestDto
 {
     /// <summary>
-    /// User or group ID
+    /// The user or group ID.
     /// </summary>
     [FromQuery(Name = "userIdOrGroupId")]
     public Guid? UserIdOrGroupId { get; set; }
 
     /// <summary>
-    /// Filter type
+    /// The filter type.
     /// </summary>
     [FromQuery(Name = "filterType")]
     public FilterType? FilterType { get; set; }
-    
+
     /// <summary>
-    /// Specifies whether to return only files, only folders or all elements from the specified folder
+    /// Specifies whether to return only files, only folders or all elements.
     /// </summary>
     [FromQuery(Name = "applyFilterOption")]
     public ApplyFilterOption? ApplyFilterOption { get; set; }
+
+    /// <summary>
+    /// The maximum number of items to retrieve in the response.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
+
+    /// <summary>
+    /// The starting position of the items to be retrieved.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
+
+    /// <summary>
+    /// The property used to specify the sorting criteria for folder contents.
+    /// </summary>
+    [FromQuery(Name = "sortBy")]
+    public string SortBy { get; set; }
+
+    /// <summary>
+    /// The order in which the results are sorted.
+    /// </summary>
+    [FromQuery(Name = "sortOrder")]
+    public SortOrder SortOrder { get; set; }
+
+    /// <summary>
+    /// The text used for filtering or searching folder contents.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }
 
 /// <summary>
-/// 
+/// The request parameters for getting the root folder.
 /// </summary>
 public class GetRootFolderRequestDto
 {
     /// <summary>
-    /// User or group ID
+    /// The user or group ID.
     /// </summary>
     [FromQuery(Name = "userIdOrGroupId")]
     public Guid? UserIdOrGroupId { get; set; }
 
     /// <summary>
-    /// Filter type
+    /// The filter type.
     /// </summary>
     [FromQuery(Name = "filterType")]
     public FilterType? FilterType { get; set; }
-    
+
     /// <summary>
-    /// Specifies whether to return the "Trash" section or not
+    /// Specifies whether to return the "Trash" section or not.
     /// </summary>
     [FromQuery(Name = "withoutTrash")]
     public bool? WithoutTrash { get; set; }
+
+    /// <summary>
+    /// The maximum number of items to retrieve in the response.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
+
+    /// <summary>
+    /// The starting position of the items to be retrieved.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
+
+    /// <summary>
+    /// Specifies the field by which the folder content should be sorted.
+    /// </summary>
+    [FromQuery(Name = "sortBy")]
+    public string SortBy { get; set; }
+
+    /// <summary>
+    /// The order in which the results are sorted.
+    /// </summary>
+    [FromQuery(Name = "sortOrder")]
+    public SortOrder SortOrder { get; set; }
+
+    /// <summary>
+    /// The text used as a filter for searching or retrieving folder contents.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }
 
 /// <summary>
-/// 
+/// The request parameters for getting the "Recent" folder request parameters.
 /// </summary>
 public class GetRecentFolderRequestDto
 {
     /// <summary>
-    /// User or group ID
+    /// The user or group ID.
     /// </summary>
     [FromQuery(Name = "userIdOrGroupId")]
     public Guid? UserIdOrGroupId { get; set; }
 
     /// <summary>
-    /// Filter type
+    /// The filter type.
     /// </summary>
     [FromQuery(Name = "filterType")]
     public FilterType? FilterType { get; set; }
 
     /// <summary>
-    /// Exclude a subject from the search
+    /// Specifies whether to exclude search by user or group ID.
     /// </summary>
     [FromQuery(Name = "excludeSubject")]
     public bool? ExcludeSubject { get; set; }
 
     /// <summary>
-    /// Scope of filters
+    /// Specifies whether to return only files, only folders or all elements.
     /// </summary>
     [FromQuery(Name = "applyFilterOption")]
     public ApplyFilterOption? ApplyFilterOption { get; set; }
 
     /// <summary>
-    /// Search area
+    /// The search area.
     /// </summary>
     [FromQuery(Name = "searchArea")]
     public SearchArea? SearchArea { get; set; }
 
     /// <summary>
-    /// Specifies whether to search for a specific file extension
+    /// Specifies whether to search for a specific file extension in the "Recent" folder.
     /// </summary>
     [FromQuery(Name = "extension")]
     public string[] Extension { get; set; }
+
+    /// <summary>
+    /// The maximum number of items to return.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
+
+    /// <summary>
+    /// The starting position of the results to be returned in the query response.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
+
+    /// <summary>
+    /// Specifies the sorting criteria for the folder request.
+    /// </summary>
+    [FromQuery(Name = "sortBy")]
+    public string SortBy { get; set; }
+
+    /// <summary>
+    /// The order in which the results are sorted.
+    /// </summary>
+    [FromQuery(Name = "sortOrder")]
+    public SortOrder SortOrder { get; set; }
+
+    /// <summary>
+    /// The text used for filtering or searching folder contents.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }

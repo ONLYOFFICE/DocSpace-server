@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,19 +26,64 @@
 
 namespace ASC.Files.Core.Security;
 
+/// <summary>
+/// The record of the file entry sharing settings.
+/// </summary>
 public class FileShareRecord<T>
 {
+    /// <summary>
+    /// The ID of the user/group who hasthe access rights to the  file entry.
+    /// </summary>
     public int TenantId { get; set; }
+
+    /// <summary>
+    /// The file entry ID.
+    /// </summary>
     public T EntryId { get; set; }
+
+    /// <summary>
+    /// The file entry type.
+    /// </summary>
     public FileEntryType EntryType { get; set; }
+
+    /// <summary>
+    /// The subject type of the access right.
+    /// </summary>
     public SubjectType SubjectType { get; set; }
+
+    /// <summary>
+    /// The subject ID.
+    /// </summary>
     public Guid Subject { get; set; }
+
+    /// <summary>
+    /// The ID of the file entry owner.
+    /// </summary>
     public Guid Owner { get; set; }
+
+    /// <summary>
+    /// The access rights type.
+    /// </summary>
     public FileShare Share { get; set; }
+
+    /// <summary>
+    /// The parameters of the file shared link.
+    /// </summary>
     public FileShareOptions Options { get; set; }
+
+    /// <summary>
+    /// The parent ID of the file entry.
+    /// </summary>
     public T ParentId { get; set; }
-    
+
+    /// <summary>
+    /// The level of the file entry access right.
+    /// </summary>
     public int Level { get; set; }
+
+    /// <summary>
+    /// Specifies if the sharing settings recird is a shared link or not.
+    /// </summary>
     public bool IsLink => SubjectType is SubjectType.InvitationLink or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink;
 
     public class ShareComparer(FolderType rootFolderType) : IComparer<FileShare>
@@ -61,7 +106,7 @@ public class FileShareRecord<T>
             (int)FileShare.Varies,
             (int)FileShare.Restrict
         ];
-        
+
         private static readonly int[] _filesShareOrder =
         [
             (int)FileShare.None,
@@ -79,7 +124,7 @@ public class FileShareRecord<T>
             (int)FileShare.ContentCreator,
             (int)FileShare.Varies
         ];
-        
+
         private readonly int[] _shareOrder = rootFolderType is FolderType.VirtualRooms or FolderType.Archive
             ? _roomShareOrder
             : _filesShareOrder;
@@ -91,13 +136,39 @@ public class FileShareRecord<T>
     }
 }
 
+/// <summary>
+/// The short record of the file entry sharing settings.
+/// </summary>
 public class SmallShareRecord
 {
+    /// <summary>
+    /// The subject ID.
+    /// </summary>
     public Guid Subject { get; set; }
+
+    /// <summary>
+    /// The ID of the file entry parent.
+    /// </summary>
     public Guid ShareParentTo { get; set; }
+
+    /// <summary>
+    /// The ID of the file entry owner.
+    /// </summary>
     public Guid Owner { get; set; }
+
+    /// <summary>
+    /// The date and time when the sharing setting record was created.
+    /// </summary>
     public DateTime TimeStamp { get; set; }
+
+    /// <summary>
+    /// The access rights type.
+    /// </summary>
     public FileShare Share { get; set; }
+
+    /// <summary>
+    /// The subject type of the access right.
+    /// </summary>
     public SubjectType SubjectType { get; set; }
 }
 
@@ -105,11 +176,11 @@ public class SmallShareRecord
 public static class ShareCompareHelper
 {
     private static readonly ConcurrentDictionary<string, Expression> _predicates = new();
-    
+
     public static Expression<Func<TType, int>> GetCompareExpression<TType>(Expression<Func<TType, FileShare>> memberExpression, FolderType rootFolderType)
     {
         var key = $"{typeof(TType)}-{rootFolderType}";
-        
+
         if (_predicates.TryGetValue(key, out var value))
         {
             return (Expression<Func<TType, int>>)value;
@@ -124,14 +195,20 @@ public static class ShareCompareHelper
         for (var i = shares.Count - 1; i >= 0; i--)
         {
             expression = Expression.Condition(
-                Expression.Equal(memberExpression.Body, Expression.Constant(shares[i])), Expression.Constant(i), 
+                Expression.Equal(memberExpression.Body, Expression.Constant(shares[i])), Expression.Constant(i),
                 expression != null ? expression : Expression.Constant(i + 1));
         }
-        
+
         var predicate = Expression.Lambda<Func<TType, int>>(expression!, memberExpression.Parameters[0]);
 
         _predicates.TryAdd(key, predicate);
 
         return predicate;
     }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class FileShareRecordMapper
+{
+    public static partial FileShareRecord<int> MapToFileShareRecordInternal(this FileShareRecord<string> source);
 }

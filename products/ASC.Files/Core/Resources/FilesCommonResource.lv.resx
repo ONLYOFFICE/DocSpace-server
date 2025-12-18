@@ -61,6 +61,15 @@
   <data name="AceShareLink" xml:space="preserve">
     <value>Āra portāls</value>
   </data>
+  <data name="AceStatusEnum_Comment" xml:space="preserve">
+    <value>Komentēt</value>
+  </data>
+  <data name="AceStatusEnum_CustomFilter" xml:space="preserve">
+    <value>Pielāgots filtrs</value>
+  </data>
+  <data name="AceStatusEnum_FillForms" xml:space="preserve">
+    <value>Veidlapas aizpildīšana</value>
+  </data>
   <data name="AceStatusEnum_Read" xml:space="preserve">
     <value>Tikai lasīšana</value>
   </data>
@@ -82,6 +91,9 @@
   <data name="Author_Me" xml:space="preserve">
     <value>Es</value>
   </data>
+  <data name="CommentAutosave" xml:space="preserve">
+    <value>Automātiski saglabāts</value>
+  </data>
   <data name="CommentChangeOwner" xml:space="preserve">
     <value>Mainīts īpašnieks</value>
   </data>
@@ -97,8 +109,20 @@
   <data name="CommentCreateByDocuSign" xml:space="preserve">
     <value>Izveidots ar DocuSign</value>
   </data>
+  <data name="CommentCreateFillFormDraft" xml:space="preserve">
+    <value>Izveidots, lai aizpildītu veidlapu</value>
+  </data>
   <data name="CommentEdit" xml:space="preserve">
     <value>Rediģēts</value>
+  </data>
+  <data name="CommentEditEncrypt" xml:space="preserve">
+    <value>Rediģēts ar šifrēšanu</value>
+  </data>
+  <data name="CommentEncrypted" xml:space="preserve">
+    <value>Šifrēts</value>
+  </data>
+  <data name="CommentForcesave" xml:space="preserve">
+    <value>Saglabāts</value>
   </data>
   <data name="CommentOverwrite" xml:space="preserve">
     <value>Pārrakstīts</value>
@@ -108,6 +132,9 @@
   </data>
   <data name="CommentRevertChanges" xml:space="preserve">
     <value>Atjaunots no dokumenta izmaiņām {0}</value>
+  </data>
+  <data name="CommentSubmitFillForm" xml:space="preserve">
+    <value>Iesniegta veidlapa</value>
   </data>
   <data name="CommentUpload" xml:space="preserve">
     <value>Augšupielādēts</value>
@@ -139,9 +166,6 @@
   <data name="ErrorMessage_DocServiceException" xml:space="preserve">
     <value>Kļūda attiecībā uz dokumentu izsniegšanu</value>
   </data>
-  <data name="ErrorMessage_EditingCoauth" xml:space="preserve">
-    <value>Fails ir atvērts rediģēšanai lietotāji {0}. Šobrīd šis faila formāts neatbalsta kopējās rediģēšanas iespēju.</value>
-  </data>
   <data name="ErrorMessage_EditingMobile" xml:space="preserve">
     <value>Fails ir atvērts rediģēšanai mobilajā lietotnē lietotājiem {0}</value>
   </data>
@@ -156,6 +180,9 @@
   </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Faili, kas pārsniedz {0}, netiks pārvietoti</value>
+  </data>
+  <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
+    <value>Jaunā versija nevar būt tāda pati kā pašreizējā versija</value>
   </data>
   <data name="ErrorMessage_FolderCopyError" xml:space="preserve">
     <value>Direktoriju nevar kopēt viņa zem-direktorijā</value>
@@ -193,6 +220,12 @@
   <data name="ErrorMessage_SecurityException_Auth" xml:space="preserve">
     <value>Nevar atļaut pie {0} sniedzējam dotas pilnvaras.</value>
   </data>
+  <data name="ErrorMessage_SecurityException_CopyFile" xml:space="preserve">
+    <value>Jums nepietiek tiesību, lai kopētu failu</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
+    <value>Jums nepietiek tiesību, lai kopētu mapi</value>
+  </data>
   <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
     <value>Jums nav pietiekami daudz atļauju, lai izveidotu</value>
   </data>
@@ -213,6 +246,12 @@
   </data>
   <data name="ErrorMessage_SecurityException_EditFileTwice" xml:space="preserve">
     <value>Jūs jau rediģējat šo dokumentu citā cilnē</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_MoveFile" xml:space="preserve">
+    <value>Jums nepietiek tiesību, lai pārvietotu failu</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_MoveFolder" xml:space="preserve">
+    <value>Jums nepietiek tiesību, lai pārvietotu mapi</value>
   </data>
   <data name="ErrorMessage_SecurityException_ReadFile" xml:space="preserve">
     <value>Nepietiek tiesību faila pārlūkošanai</value>
@@ -247,14 +286,56 @@
   <data name="ErrorMessage_ViewTrashItem" xml:space="preserve">
     <value>Aizliegts pārlūkot atkritnes elemenuts</value>
   </data>
+  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
+    <value>Nederīgs pakalpojuma sniedzējs</value>
+  </data>
+  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
+    <value>Šo mapi nevar izmantot telpas uzglabāšanai</value>
+  </data>
+  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
+    <value>Uzaicinājuma saite nav derīga vai tās derīguma termiņš ir beidzies</value>
+  </data>
+  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
+    <value>Šim lietotāja tipam nav pieejama loma</value>
+  </data>
+  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
+    <value>Šis pakalpojuma sniedzējs jau ir savienots ar telpu</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
+    <value>Jums nav atļaujas kopēt šajā mapē</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
+    <value>Jums nav atļaujas pārvietot šajā mapē</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
+    <value>Jums nepietiek tiesību, lai atarhivētu telpu</value>
+  </data>
+  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
+    <value>Jūs nevarat rediģēt arhivētās telpas</value>
+  </data>
+  <data name="ErrorrMessage_PinRoom" xml:space="preserve">
+    <value>Jūs nevarat piespraust telpu</value>
+  </data>
   <data name="Everyone" xml:space="preserve">
     <value>Visi</value>
   </data>
   <data name="Guest" xml:space="preserve">
     <value>Anonīms lietotājs</value>
   </data>
+  <data name="IndexTitle" xml:space="preserve">
+    <value>Meklēt dokumentu saturā</value>
+  </data>
   <data name="MessageFileCreated" xml:space="preserve">
     <value>Izveidots fails mapē "{0}"</value>
+  </data>
+  <data name="MessageFileCreatedForm" xml:space="preserve">
+    <value>Aizpildāmais PDF dokuments ir gatavs. Tas ir saglabāts {0}</value>
+  </data>
+  <data name="MessageFillFormDraftCreated" xml:space="preserve">
+    <value>PDF kopija tiek izveidota mapē {0}. Aizpildiet veidlapu un lejupielādējiet rezultātu kā PDF vai DOCX failu.</value>
+  </data>
+  <data name="MessageFillFormDraftDiscard" xml:space="preserve">
+    <value>Fails vairs nav melnraksts, kas jāaizpilda veidlapā.</value>
   </data>
   <data name="ProductAdminOpportunities" xml:space="preserve">
     <value>Dariet to pašu ka lietotājs|Saistīt Dropbox, Box un citus kontus ar 'Kopējiem dokumentiem'|Iestatīt piekļuves tiesības, dokumentiem un mapem sadaļā "Kopēji dokumenti"</value>
@@ -265,6 +346,9 @@
   <data name="ProductDescriptionEx" xml:space="preserve">
     <value>Rediģējiet, kopīgojiet biroja dokumentus un sadarbojieties ar tiem reāllaikā. Izveidojiet un pārvaldiet kopīgus dokumentus, kuriem var piekļūt visa komanda. 
 Visaugstākā saderība ar docx, xlsx, pptx.</value>
+  </data>
+  <data name="ProductDescriptionShort" xml:space="preserve">
+    <value>Skatiet un lejupielādējiet kopīgotos dokumentus. Augšupielādējiet failus koplietotajās mapēs. Visaugstākā saderība ar docx, xlsx, pptx garantēta.</value>
   </data>
   <data name="ProductName" xml:space="preserve">
     <value>Dokumenti</value>
@@ -280,6 +364,12 @@ Visaugstākā saderība ar docx, xlsx, pptx.</value>
   </data>
   <data name="UnlockComment" xml:space="preserve">
     <value>Fails ir atbloķēts</value>
+  </data>
+  <data name="AceStatusEnum_Editing" xml:space="preserve">
+    <value>Redaktors</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
+    <value>Jums nav atļaujas rediģēt telpu</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
     <value>DocSpace administrators</value>
@@ -305,116 +395,23 @@ Visaugstākā saderība ar docx, xlsx, pptx.</value>
   <data name="RoleEnum_Collaborator" xml:space="preserve">
     <value>Līdzstrādnieks</value>
   </data>
-  <data name="CommentSubmitFillForm" xml:space="preserve">
-    <value>Iesniegta veidlapa</value>
-  </data>
-  <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
-    <value>Jaunā versija nevar būt tāda pati kā pašreizējā versija</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_CopyFile" xml:space="preserve">
-    <value>Jums nepietiek tiesību, lai kopētu failu</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
-    <value>Jums nepietiek tiesību, lai kopētu mapi</value>
-  </data>
-  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
-    <value>Nederīgs pakalpojuma sniedzējs</value>
-  </data>
-  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
-    <value>Šo mapi nevar izmantot telpas uzglabāšanai</value>
-  </data>
-  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
-    <value>Uzaicinājuma saite nav derīga vai tās derīguma termiņš ir beidzies</value>
-  </data>
-  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
-    <value>Šis pakalpojuma sniedzējs jau ir savienots ar telpu</value>
-  </data>
-  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
-    <value>Šim lietotāja tipam nav pieejama loma</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
-    <value>Jums nepietiek tiesību, lai arhivētu telpu</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
-    <value>Jums nav atļaujas kopēt šajā mapē</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
-    <value>Jums nav atļaujas rediģēt telpu</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
-    <value>Jums nav atļaujas pārvietot šajā mapē</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
-    <value>Jums nepietiek tiesību, lai atarhivētu telpu</value>
-  </data>
-  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
-    <value>Jūs nevarat rediģēt arhivētās telpas</value>
-  </data>
-  <data name="ErrorrMessage_PinRoom" xml:space="preserve">
-    <value>Jūs nevarat piespraust telpu</value>
-  </data>
   <data name="AceStatusEnum_Collaborator" xml:space="preserve">
     <value>Līdzstrādnieks</value>
   </data>
-  <data name="AceStatusEnum_Editing" xml:space="preserve">
-    <value>Redaktors</value>
-  </data>
-  <data name="AceStatusEnum_Comment" xml:space="preserve">
-    <value>Komentēt</value>
-  </data>
-  <data name="AceStatusEnum_CustomFilter" xml:space="preserve">
-    <value>Pielāgots filtrs</value>
-  </data>
-  <data name="AceStatusEnum_FillForms" xml:space="preserve">
-    <value>Veidlapas aizpildīšana</value>
-  </data>
-  <data name="CommentAutosave" xml:space="preserve">
-    <value>Automātiski saglabāts</value>
-  </data>
-  <data name="CommentCreateFillFormDraft" xml:space="preserve">
-    <value>Izveidots, lai aizpildītu veidlapu</value>
-  </data>
-  <data name="CommentEditEncrypt" xml:space="preserve">
-    <value>Rediģēts ar šifrēšanu</value>
-  </data>
-  <data name="CommentEncrypted" xml:space="preserve">
-    <value>Šifrēts</value>
-  </data>
-  <data name="CommentForcesave" xml:space="preserve">
-    <value>Saglabāts</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_MoveFile" xml:space="preserve">
-    <value>Jums nepietiek tiesību, lai pārvietotu failu</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_MoveFolder" xml:space="preserve">
-    <value>Jums nepietiek tiesību, lai pārvietotu mapi</value>
-  </data>
-  <data name="IndexTitle" xml:space="preserve">
-    <value>Meklēt dokumentu saturā</value>
-  </data>
-  <data name="MessageFileCreatedForm" xml:space="preserve">
-    <value>Aizpildāmais PDF dokuments ir gatavs. Tas ir saglabāts {0}</value>
-  </data>
-  <data name="MessageFillFormDraftCreated" xml:space="preserve">
-    <value>PDF kopija tiek izveidota mapē {0}. Aizpildiet veidlapu un lejupielādējiet rezultātu kā PDF vai DOCX failu.</value>
-  </data>
-  <data name="MessageFillFormDraftDiscard" xml:space="preserve">
-    <value>Fails vairs nav melnraksts, kas jāaizpilda veidlapā.</value>
-  </data>
-  <data name="ProductDescriptionShort" xml:space="preserve">
-    <value>Skatiet un lejupielādējiet kopīgotos dokumentus. Augšupielādējiet failus koplietotajās mapēs. Visaugstākā saderība ar docx, xlsx, pptx garantēta.</value>
-  </data>
-  <data name="DefaultExternalLinkTitle" xml:space="preserve">
-    <value>Koplietotā saite</value>
-  </data>
-  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
-    <value>Ielūguma saite</value>
+  <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
+    <value>Jums nepietiek tiesību, lai arhivētu telpu</value>
   </data>
   <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
     <value>Maksimālais saišu skaits nedrīkst pārsniegt {0}</value>
   </data>
   <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
     <value>Jūs pārāk daudz reižu mēģinājāt ievadīt savu paroli. Mēģiniet vēlreiz vēlāk</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Ielūguma saite</value>
+  </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>Koplietotā saite</value>
   </data>
   <data name="RoomIndex_Author" xml:space="preserve">
     <value>Autors</value>
@@ -430,9 +427,6 @@ Visaugstākā saderība ar docx, xlsx, pptx.</value>
   </data>
   <data name="RoomIndex_ExportAuthor" xml:space="preserve">
     <value>Eksportēt autoru</value>
-  </data>
-  <data name="RoomIndex_Folder" xml:space="preserve">
-    <value>Mape</value>
   </data>
   <data name="RoomIndex_Index" xml:space="preserve">
     <value>Indekss</value>
@@ -458,32 +452,47 @@ Visaugstākā saderība ar docx, xlsx, pptx.</value>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Tips</value>
   </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Mape</value>
+  </data>
   <data name="Date" xml:space="preserve">
     <value>Datums</value>
   </data>
   <data name="User" xml:space="preserve">
     <value>Lietotājs</value>
   </data>
-  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Vairāku failu pārvietošana uz veidlapu aizpildīšanas telpu netiek atbalstīta. Pārvietojiet pa vienai {0} PDF veidlapai.</value>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Saite uz veidlapu</value>
   </data>
-  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Mapju pārvietošana uz veidlapu aizpildīšanas telpu netiek atbalstīta. Pārvietojiet pa vienai {0} PDF veidlapai.</value>
-  </data>
-  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Failu nevar pārvietot uz šo telpu. Mēģiniet pārvietot {0} PDF veidlapu.</value>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Atvērt failu</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Failu nevar augšupielādēt šajā telpā. Mēģiniet augšupielādēt {0} PDF veidlapu.</value>
+    <value>Failu nevar augšupielādēt šajā telpā. Mēģiniet augšupielādēt ONLYOFFICE PDF veidlapu.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Aizpildāmā saite</value>
   </data>
-  <data name="LinkToForm" xml:space="preserve">
-    <value>Saite uz veidlapu</value>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Vairāku failu pārvietošana uz veidlapu aizpildīšanas telpu netiek atbalstīta. Pārvietojiet pa vienai ONLYOFFICE PDF veidlapai.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Mapju pārvietošana uz veidlapu aizpildīšanas telpu netiek atbalstīta. Pārvietojiet pa vienai ONLYOFFICE PDF veidlapai.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Failu nevar pārvietot uz šo telpu. Mēģiniet pārvietot ONLYOFFICE PDF veidlapu.</value>
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Veidlapas numurs</value>
+  </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Ārējais lietotājs</value>
+  </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Telpas pārvaldnieks</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Telpas pārvaldnieks</value>
   </data>
   <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
     <value>Satura veidotājs</value>
@@ -491,16 +500,31 @@ Visaugstākā saderība ar docx, xlsx, pptx.</value>
   <data name="RoleEnum_ContentCreator" xml:space="preserve">
     <value>Satura veidotājs</value>
   </data>
-  <data name="RoleEnum_RoomManager" xml:space="preserve">
-    <value>Telpas pārvaldnieks</value>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Nevar dzēst pašreizējo faila versiju</value>
   </data>
-  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
-    <value>Telpas pārvaldnieks</value>
+  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
+    <value>Dalīties, lai aizpildītu</value>
   </data>
-  <data name="ExternalUser" xml:space="preserve">
-    <value>Ārējais lietotājs</value>
+  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
+    <value>Sākt aizpildīšanu</value>
   </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Atvērt failu</value>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Telpas administrators</value>
+  </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>Viesis</value>
+  </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>Aģentu pārvaldnieks</value>
+  </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>Lietotāja {0} {1} dokumenti</value>
+  </data>
+  <data name="KnowledgeFolder" xml:space="preserve">
+    <value>Zināšanas</value>
+  </data>
+  <data name="ResultStorageFolder" xml:space="preserve">
+    <value>Rezultātu krātuve</value>
   </data>
 </root>

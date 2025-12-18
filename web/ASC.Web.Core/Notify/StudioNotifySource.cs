@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -45,6 +45,8 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
                 Actions.JoinUsers,
                 Actions.SendWhatsNew,
                 Actions.BackupCreated,
+                Actions.BackupFailed,
+                Actions.ScheduledBackupFailed,
                 Actions.RestoreStarted,
                 Actions.RestoreCompletedV115,
                 Actions.PortalDeactivate,
@@ -63,6 +65,7 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
                 Actions.EmailChangeV115,
                 Actions.PasswordChangeV115,
                 Actions.PasswordSet,
+                Actions.PasswordChanged,
                 Actions.PhoneChange,
                 Actions.TfaChange,
                 Actions.MigrationPortalStart,
@@ -115,6 +118,7 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
                 Actions.SaasAdminStartupWarningAfterYearV1,
 
                 Actions.PortalDeleteSuccessV1,
+                Actions.PortalDeletedToSupport,
 
                 Actions.SaasUserWelcomeV1,
                 Actions.EnterpriseUserWelcomeV1,
@@ -155,7 +159,13 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
                 Actions.DeveloperAdminPaymentWarningGracePeriodBeforeActivation,
                 Actions.DeveloperAdminPaymentWarningGracePeriodActivation,
                 Actions.DeveloperAdminPaymentWarningGracePeriodBeforeExpiration,
-                Actions.DeveloperAdminPaymentWarningGracePeriodExpiration
+                Actions.DeveloperAdminPaymentWarningGracePeriodExpiration,
+
+                Actions.UserTypeChanged,
+                Actions.UserRoleChanged,
+
+                Actions.TopUpWalletError,
+                Actions.RenewSubscriptionError
             );
     }
 

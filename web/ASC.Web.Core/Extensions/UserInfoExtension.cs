@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,23 +28,26 @@ namespace ASC.Core.Users;
 
 public static class UserInfoExtension
 {
-    public static string DisplayUserName(this UserInfo userInfo, DisplayUserSettingsHelper displayUserSettingsHelper)
+    extension(UserInfo userInfo)
     {
-        return DisplayUserName(userInfo, true, displayUserSettingsHelper);
-    }
+        public string DisplayUserName(DisplayUserSettingsHelper displayUserSettingsHelper)
+        {
+            return DisplayUserName(userInfo, true, displayUserSettingsHelper);
+        }
 
-    public static string DisplayUserName(this UserInfo userInfo, bool withHtmlEncode, DisplayUserSettingsHelper displayUserSettingsHelper)
-    {
-        return displayUserSettingsHelper.GetFullUserName(userInfo, withHtmlEncode);
-    }
+        public string DisplayUserName(bool withHtmlEncode, DisplayUserSettingsHelper displayUserSettingsHelper)
+        {
+            return displayUserSettingsHelper.GetFullUserName(userInfo, withHtmlEncode);
+        }
 
-    public static async Task<string> GetSmallPhotoURL(this UserInfo userInfo, UserPhotoManager UserPhotoManager)
-    {
-        return await UserPhotoManager.GetSmallPhotoURL(userInfo.Id);
-    }
+        public async Task<string> GetSmallPhotoURL(UserPhotoManager UserPhotoManager)
+        {
+            return await UserPhotoManager.GetSmallPhotoURL(userInfo.Id);
+        }
 
-    public static async Task<string> GetMediumPhotoURLAsync(this UserInfo userInfo, UserPhotoManager UserPhotoManager)
-    {
-        return await UserPhotoManager.GetMediumPhotoURL(userInfo.Id);
+        public async Task<string> GetMediumPhotoURLAsync(UserPhotoManager UserPhotoManager)
+        {
+            return await UserPhotoManager.GetMediumPhotoURL(userInfo.Id);
+        }
     }
 }

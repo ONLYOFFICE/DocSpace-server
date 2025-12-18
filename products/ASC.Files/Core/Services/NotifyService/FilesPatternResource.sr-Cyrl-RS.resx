@@ -218,7 +218,9 @@ $Message</value>
 
 Подносилац формулара: "$FromUserName":"$FromUserLink"
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>h1. Попунили сте формулар $Message
@@ -227,12 +229,73 @@ $OrangeButton</value>
 
 Менаџер: "$ToUserName":"$ToUserLink"
  
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
     <value>DocSpace нотификација. Формулар је попуњен</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
     <value>DocSpace нотификација. Формулар је попуњен</value>
+  </data>
+  <data name="subject_FormStartedFilling" xml:space="preserve">
+    <value>Обавештење из DocSpace-а.</value>
+  </data>
+  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
+    <value>Обавештење из DocSpace-а.</value>
+  </data>
+  <data name="subject_StoppedFormFilling" xml:space="preserve">
+    <value>Обавештење из DocSpace-а.</value>
+  </data>
+  <data name="subject_YourTurnFormFilling" xml:space="preserve">
+    <value>Обавештење из DocSpace-а.</value>
+  </data>
+  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
+    <value>Нови документ "$DocumentTitle" је креиран у просторији "$RoomTitle"</value>
+  </data>
+  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
+    <value>Нове датотеке су отпремљене у просторију "$RoomTitle" ($Count)</value>
+  </data>
+  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
+    <value>Нова датотека "$DocumentTitle" је отпремљена у просторију "$RoomTitle"</value>
+  </data>
+  <data name="pattern_EditorMentions_push" xml:space="preserve">
+    <value>$ToUserName вас је поменуо у документу $DocumentTitle</value>
+  </data>
+  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
+    <value>Нова фасцикла "$FolderTitle" је креирана у просторији "$RoomTitle"</value>
+  </data>
+  <data name="pattern_FormStartedFilling" xml:space="preserve">
+    <value>
+      Обавештење о активности. "$FromUserName":"$FromUserLink" је започео попуњавање обрасца: "$DocumentTitle":"$DocumentURL" у просторији: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_FormSubmitted_push" xml:space="preserve">
+    <value>Образац "$DocumentTitle" је попуњен у просторији "$RoomTitle"</value>
+  </data>
+  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+    <value>
+      Обавештење о активности. Образац "$DocumentTitle":"$DocumentURL" је потпуно попуњен у просторији: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
+    <value>$FromUserName је преместио просторију "$RoomTitle" у архиву</value>
+  </data>
+  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
+    <value>Ваша улога у просторији "$RoomTitle" је промењена у "$RoomRole"</value>
+  </data>
+  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
+    <value>Позвани сте у собу "$RoomTitle"</value>
+  </data>
+  <data name="pattern_StoppedFormFilling" xml:space="preserve">
+    <value>
+      Обавештење о активности. "$FromUserName":"$FromUserLink" је прекинуо попуњавање обрасца: "$DocumentTitle":"$DocumentURL" у просторији: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_YourTurnFormFilling" xml:space="preserve">
+    <value>
+       Обавештење о активности. На вама је ред! Потребно је попуњавање обрасца: "$DocumentTitle":"$DocumentURL" у просторији: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
   </data>
 </root>

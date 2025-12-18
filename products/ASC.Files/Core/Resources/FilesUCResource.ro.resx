@@ -83,7 +83,7 @@
     <value>Fișiere vor fi comprimate în format de fișier {0}.zip{1}</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>Documentele</value>
+    <value>Documentele mele</value>
   </data>
   <data name="PrivacyRoom" xml:space="preserve">
     <value>Sala privată</value>
@@ -102,5 +102,11 @@
   </data>
   <data name="ReadyFormFolder" xml:space="preserve">
     <value>Completare</value>
+  </data>
+  <data name="RoomTemplates" xml:space="preserve">
+    <value>Șabloane</value>
+  </data>
+  <data name="AiAgents" xml:space="preserve">
+    <value>Agenți de IA</value>
   </data>
 </root>

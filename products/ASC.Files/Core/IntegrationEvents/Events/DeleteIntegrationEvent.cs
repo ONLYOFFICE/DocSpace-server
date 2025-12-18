@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,17 +31,17 @@ public record DeleteIntegrationEvent : IntegrationEvent
 {
     private DeleteIntegrationEvent() : base() { }
 
-    public  DeleteIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId)
+    public DeleteIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId)
     {
 
     }
 
     [ProtoMember(1)]
     public string TaskId { get; set; }
-    
+
     [ProtoMember(2)]
     public FileDeleteOperationData<int> Data { get; set; }
-    
+
     [ProtoMember(3)]
     public FileDeleteOperationData<string> ThirdPartyData { get; set; }
 }

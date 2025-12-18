@@ -36,12 +36,10 @@ import com.asc.common.core.domain.value.enums.ClientStatus;
 import com.asc.common.core.domain.value.enums.ClientVisibility;
 import com.asc.registration.core.domain.exception.ClientDomainException;
 import com.asc.registration.core.domain.value.*;
+import java.security.SecureRandom;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 
 /**
@@ -49,6 +47,7 @@ import java.util.function.Function;
  * client-specific information and behaviors, managing the lifecycle and state of a client.
  */
 public class Client extends AggregateRoot<ClientId> {
+  private static final int CLIENT_SECRET_LENGTH = 36;
   private static final String UTC = "UTC";
   private ClientId id;
   private ClientSecret secret;
@@ -88,6 +87,25 @@ public class Client extends AggregateRoot<ClientId> {
   }
 
   /**
+   * Generates a cryptographically secure random client secret.
+   *
+   * <p>The generated secret consists of alphanumeric characters (A-Z, a-z, 0-9) and uses {@link
+   * SecureRandom} to ensure cryptographic strength suitable for authentication and authorization
+   * purposes.
+   *
+   * @return a randomly generated client secret string of length {@code CLIENT_SECRET_LENGTH}
+   *     containing only alphanumeric characters
+   */
+  private String generateClientSecret() {
+    var validChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    var random = new SecureRandom();
+    var sb = new StringBuilder(CLIENT_SECRET_LENGTH);
+    for (int i = 0; i < CLIENT_SECRET_LENGTH; i++)
+      sb.append(validChars.charAt(random.nextInt(validChars.length())));
+    return sb.toString();
+  }
+
+  /**
    * Initializes the client with the specified creator.
    *
    * @param createdBy the identifier of the creator
@@ -97,7 +115,7 @@ public class Client extends AggregateRoot<ClientId> {
     if (clientStatus != null)
       throw new ClientDomainException("Client has already been initialized");
     this.id = new ClientId(UUID.randomUUID());
-    this.secret = new ClientSecret(UUID.randomUUID().toString());
+    this.secret = new ClientSecret(this.generateClientSecret());
     this.clientCreationInfo =
         ClientCreationInfo.Builder.builder()
             .createdBy(createdBy)
@@ -145,7 +163,7 @@ public class Client extends AggregateRoot<ClientId> {
    */
   public void regenerateSecret(UserId modifiedBy) {
     validateStatus();
-    this.secret = new ClientSecret(UUID.randomUUID().toString());
+    this.secret = new ClientSecret(this.generateClientSecret());
     updateModificationInfo(modifiedBy);
     validate();
   }

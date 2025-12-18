@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,10 +29,11 @@ using System.Threading.Channels;
 namespace ASC.Core.Common.Notify.Engine;
 
 [Singleton]
-public class NotifySenderService(NotifyEngine notifyEngine,
-        ChannelReader<NotifyRequest> channelReader,
-        IServiceScopeFactory serviceScopeFactory,
-        ILogger<NotifySenderService> logger)
+public class NotifySenderService(
+    NotifyEngine notifyEngine,
+    ChannelReader<NotifyRequest> channelReader,
+    IServiceScopeFactory serviceScopeFactory,
+    ILogger<NotifySenderService> logger)
     : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -54,5 +55,16 @@ public class NotifySenderService(NotifyEngine notifyEngine,
                 logger.ErrorSendNotify(e);
             }
         }
+    }
+}
+
+public static class NotifySenderServiceConfigurator
+{
+    public static void ConfigureNotificationServices(this IServiceCollection services)
+    {
+        services.AddSingleton(Channel.CreateUnbounded<NotifyRequest>());
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Reader);
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Writer);
+        services.AddHostedService<NotifySenderService>();
     }
 }

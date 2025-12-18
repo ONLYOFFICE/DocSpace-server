@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -82,12 +82,8 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
         foreach (var module in StorageFactoryConfig.GetModuleList().Where(IsStorageModuleAllowed))
         {
             var store = await StorageFactory.GetStorageAsync(tenantId, module);
-            var domainFolders = new List<string>();
+            var domainFolders = StorageFactoryConfig.GetDomainList(module, false).Select(domain => store.GetRootDirectory(domain)).ToList();
 
-            foreach(var domain in StorageFactoryConfig.GetDomainList(module, false))
-            {
-                domainFolders.Add(store.GetRootDirectory(domain));
-            }
             var files = store.ListFilesRelativeAsync(string.Empty, "\\", "*", true)
                           .Where(path => domainFolders.All(domain => !path.Contains(domain + "/") && !path.Contains(domain + "\\")))
                          .Select(path => new BackupFileInfo(string.Empty, module, path, tenantId));
@@ -128,7 +124,8 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
                     "whitelabel",
                     "customnavigation",
                     "room_logos",
-                    "webplugins"
+                    "webplugins",
+                    "mcp_icons"
                 };
 
         if (!allowedStorageModules.Contains(storageModuleName))
@@ -151,7 +148,7 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
     protected void SetStepsCount(int value)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(value);
-        
+
         _stepsCount = value;
         Logger.DebugCountSteps(+_stepsCount);
     }
@@ -178,6 +175,7 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
                 throw new ArgumentOutOfRangeException(nameof(value));
             case 100:
                 await SetStepCompleted();
+                await SetProgress(100);
                 break;
             default:
                 await SetProgress((100 * _stepsCompleted + value) / _stepsCount);
@@ -315,7 +313,7 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
                     }
                     catch (Exception ex)
                     {
-                        if (attempt == 5) 
+                        if (attempt == 5)
                         {
                             Logger.ErrorRestore(ex);
                         }

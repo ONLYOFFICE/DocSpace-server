@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -44,13 +44,7 @@ public class S3ZipWriteOperator : IDataWriteOperator
     public string Hash { get; private set; }
     public CancellationToken CancellationToken { get; set; }
     public string StoragePath { get; private set; }
-    public bool NeedUpload
-    {
-        get
-        {
-            return false;
-        }
-    }
+    public bool NeedUpload => false;
 
     public S3ZipWriteOperator(TempStream tempStream,
         CommonChunkedUploadSession chunkedUploadSession,
@@ -77,7 +71,7 @@ public class S3ZipWriteOperator : IDataWriteOperator
             throw new OperationCanceledException();
         }
         var fileStream = await ActionInvoker.TryAsync(async () => await store.GetReadStreamAsync(domain, path), 5, error => throw error);
-        
+
         if (fileStream != null)
         {
             await WriteEntryAsync(tarKey, fileStream, action);
@@ -157,7 +151,7 @@ public class S3ZipWriteOperator : IDataWriteOperator
                 }
             }
         }
-        
+
         await stream.DisposeAsync();
     }
 
@@ -195,7 +189,7 @@ public class S3ZipWriteOperator : IDataWriteOperator
         _streams.Add(stream);
         _tasks.Add(InternalUploadAsync(_chunkedUploadSession, stream, stream.Length, _chunkNumber++));
     }
-    
+
     private async Task InternalUploadAsync(CommonChunkedUploadSession uploadSession, Stream stream, long length, int number)
     {
         await _sessionHolder.UploadChunkAsync(uploadSession, stream, length, number);

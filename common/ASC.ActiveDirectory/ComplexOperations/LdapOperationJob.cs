@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -60,6 +60,7 @@ public class LdapOperationJob : DistributedTaskProgress
     private DisplayUserSettingsHelper _displayUserSettingsHelper;
     private NovellLdapSettingsChecker _novellLdapSettingsChecker;
     private ILogger<LdapOperationJob> _logger;
+    private MessageService _messageService;
 
     private UserInfo _currentUser;
     private TenantManager _tenantManager;
@@ -67,9 +68,9 @@ public class LdapOperationJob : DistributedTaskProgress
 
     public LdapOperationJob()
     {
-        
+
     }
-    
+
     public LdapOperationJob(LdapUserManager ldapUserManager,
         UserManager userManager,
         TenantManager tenantManager,
@@ -130,6 +131,8 @@ public class LdapOperationJob : DistributedTaskProgress
         _displayUserSettingsHelper = scope.ServiceProvider.GetRequiredService<DisplayUserSettingsHelper>();
         _novellLdapSettingsChecker = scope.ServiceProvider.GetRequiredService<NovellLdapSettingsChecker>();
         _logger = scope.ServiceProvider.GetRequiredService<ILogger<LdapOperationJob>>();
+
+        _messageService = scope.ServiceProvider.GetRequiredService<MessageService>();
 
         _tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
         _serviceScopeFactory = scope.ServiceProvider.GetRequiredService<IServiceScopeFactory>();
@@ -237,6 +240,22 @@ public class LdapOperationJob : DistributedTaskProgress
             {
                 Finished = true;
                 await PublishChanges();
+                switch (OperationType)
+                {
+                    case LdapOperationType.Save:
+                        if (_ldapSettings.EnableLdapAuthentication)
+                        {
+                            _messageService.Send(MessageInitiator.System, MessageAction.LdapEnabled);
+                        }
+                        else
+                        {
+                            _messageService.Send(MessageInitiator.System, MessageAction.LdapDisabled);
+                        }
+                        break;
+                    case LdapOperationType.Sync:
+                        _messageService.Send(MessageInitiator.System, MessageAction.LdapSync);
+                        break;
+                }
                 _securityContext.Logout();
             }
             catch (Exception ex)
@@ -755,7 +774,9 @@ public class LdapOperationJob : DistributedTaskProgress
             return;
         }
 
-        var groupMembersToAdd = await ldapGroupUsers.ToAsyncEnumerable().SelectAwait(async ldapGroupUser => await SearchDbUserBySidAsync(ldapGroupUser.Sid))
+        var groupMembersToAdd = await ldapGroupUsers
+            .ToAsyncEnumerable()
+            .Select(async (UserInfo ldapGroupUser, CancellationToken _) => await SearchDbUserBySidAsync(ldapGroupUser.Sid))
             .Where(userBySid => !Equals(userBySid, Core.Users.Constants.LostUser))
             .ToListAsync();
 
@@ -816,8 +837,11 @@ public class LdapOperationJob : DistributedTaskProgress
 
         var groupMembersToRemove = dbGroupMembers.Where(dbUser => ldapGroupUsers.FirstOrDefault(lu => dbUser.Sid.Equals(lu.Sid)) == null).ToList();
 
-        var groupMembersToAdd = await ldapGroupUsers.ToAsyncEnumerable().Where(q => dbGroupMembers.FirstOrDefault(u => u.Sid.Equals(q.Sid)) == null)
-            .SelectAwait(async q => await SearchDbUserBySidAsync(q.Sid)).Where(q => !Equals(q, Core.Users.Constants.LostUser)).ToListAsync();
+        var groupMembersToAdd = await ldapGroupUsers.ToAsyncEnumerable()
+            .Where(q => dbGroupMembers.FirstOrDefault(u => u.Sid.Equals(q.Sid)) == null)
+            .Select(async (UserInfo q, CancellationToken _) => await SearchDbUserBySidAsync(q.Sid))
+            .Where(q => !Equals(q, Core.Users.Constants.LostUser))
+            .ToListAsync();
 
 
         switch (OperationType)

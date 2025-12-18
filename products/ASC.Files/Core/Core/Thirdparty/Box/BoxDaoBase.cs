@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -52,10 +52,15 @@ internal class BoxDaoBase(
     {
         return item.Name;
     }
-    
+
     public string GetId(BoxItem item)
     {
         return item.Id;
+    }
+
+    public bool IsFile(BoxItem item)
+    {
+        return item is BoxFile;
     }
 
     public string MakeThirdId(object entryId)
@@ -85,7 +90,7 @@ internal class BoxDaoBase(
 
     public override string MakeId(string path = null)
     {
-        var p = string.IsNullOrEmpty(path) || path == "0" ? "" : ("-|" + path.TrimStart('/'));
+        var p = string.IsNullOrEmpty(path) || path == "0" ? "" : "-|" + path.TrimStart('/');
 
         return $"{PathPrefix}{p}";
     }
@@ -126,8 +131,8 @@ internal class BoxDaoBase(
 
         folder.Id = MakeId(boxFolder.Id);
         folder.ParentId = isRoot ? null : MakeId(GetParentFolderId(boxFolder));
-        folder.CreateOn = isRoot ? ProviderInfo.CreateOn : (boxFolder.CreatedAt?.UtcDateTime ?? default);
-        folder.ModifiedOn = isRoot ? ProviderInfo.ModifiedOn : (boxFolder.ModifiedAt?.UtcDateTime ?? default);
+        folder.CreateOn = isRoot ? ProviderInfo.CreateOn : boxFolder.CreatedAt?.UtcDateTime ?? default;
+        folder.ModifiedOn = isRoot ? ProviderInfo.ModifiedOn : boxFolder.ModifiedAt?.UtcDateTime ?? default;
 
         folder.Title = MakeFolderTitle(boxFolder);
         folder.FilesCount = boxFolder.ItemCollection != null ? boxFolder.ItemCollection.Entries.Count(item => item is BoxFile) : 0;
@@ -135,6 +140,8 @@ internal class BoxDaoBase(
         folder.SettingsPrivate = ProviderInfo.Private;
         folder.SettingsHasLogo = ProviderInfo.HasLogo;
         folder.SettingsColor = ProviderInfo.Color;
+        folder.SettingsCover = ProviderInfo.Cover;
+        
         ProcessFolderAsRoom(folder);
 
         if (folder.CreateOn != DateTime.MinValue && folder.CreateOn.Kind == DateTimeKind.Utc)
@@ -146,8 +153,6 @@ internal class BoxDaoBase(
         {
             folder.ModifiedOn = _tenantUtil.DateTimeFromUtc(folder.ModifiedOn);
         }
-        
-        folder.Shared = ProviderInfo.FolderType is FolderType.PublicRoom;
 
         return folder;
     }
@@ -205,7 +210,6 @@ internal class BoxDaoBase(
         file.Title = MakeFileTitle(boxFile);
         file.ThumbnailStatus = Thumbnail.Created;
         file.Encrypted = ProviderInfo.Private;
-        file.Shared = ProviderInfo.FolderType is FolderType.PublicRoom;
 
         return file;
     }
@@ -214,7 +218,7 @@ internal class BoxDaoBase(
     {
         return ToFolder(await GetFolderAsync("0"));
     }
-    
+
     public async Task<BoxFolder> CreateFolderAsync(string title, string folderId)
     {
         return await _providerInfo.CreateFolderAsync(title, MakeThirdId(folderId), GetId);
@@ -260,7 +264,7 @@ internal class BoxDaoBase(
     public async Task<List<BoxItem>> GetItemsAsync(string parentId, bool? folder = null)
     {
         var boxFolderId = MakeThirdId(parentId);
-        var items = await _providerInfo.GetItemsAsync(boxFolderId);
+        var items = await _providerInfo.GetItemsAsync(boxFolderId, GetId, IsFile);
 
         if (!folder.HasValue)
         {

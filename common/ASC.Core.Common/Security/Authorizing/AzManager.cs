@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,13 +31,13 @@ public class AzManager(IRoleProvider roleProvider, IPermissionProvider permissio
 {
     private readonly IPermissionProvider _permissionProvider = permissionProvider ?? throw new ArgumentNullException(nameof(permissionProvider));
     private readonly IRoleProvider _roleProvider = roleProvider ?? throw new ArgumentNullException(nameof(roleProvider));
-    
+
     internal async Task<AzManagerAcl> CheckPermissionAsync(ISubject subject, IAction action, ISecurityObjectId objectId, ISecurityObjectProvider securityObjProvider)
     {
         ArgumentNullException.ThrowIfNull(action);
         ArgumentNullException.ThrowIfNull(subject);
-        
-        if (action.AdministratorAlwaysAllow && (AuthConstants.DocSpaceAdmin.ID == subject.ID || await _roleProvider.IsSubjectInRoleAsync(subject, AuthConstants.DocSpaceAdmin) 
+
+        if (action.AdministratorAlwaysAllow && (AuthConstants.DocSpaceAdmin.ID == subject.ID || await _roleProvider.IsSubjectInRoleAsync(subject, AuthConstants.DocSpaceAdmin)
             || (objectId is SecurityObject obj && await obj.IsMatchDefaultRulesAsync(subject, action, _roleProvider))))
         {
             return AzManagerAcl.Allow;
@@ -49,7 +49,7 @@ public class AzManager(IRoleProvider roleProvider, IPermissionProvider permissio
         foreach (var s in await GetSubjectsAsync(subject, objectId, securityObjProvider))
         {
             var aceList = await _permissionProvider.GetAclAsync(s, action, objectId, securityObjProvider);
-            foreach (var reaction in aceList.Select(r=> r.Reaction))
+            foreach (var reaction in aceList.Select(r => r.Reaction))
             {
                 if (reaction == AceType.Deny)
                 {

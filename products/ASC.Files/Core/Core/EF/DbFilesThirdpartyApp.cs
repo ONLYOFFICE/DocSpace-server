@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -56,76 +56,79 @@ public static class DbFilesThirdpartyAppExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddDbFilesThirdpartyApp(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbFilesThirdpartyApp>(entity =>
+        public void MySqlAddDbFilesThirdpartyApp()
         {
-            entity.HasKey(e => new { e.UserId, e.App })
-                .HasName("PRIMARY");
+            modelBuilder.Entity<DbFilesThirdpartyApp>(entity =>
+            {
+                entity.HasKey(e => new { e.UserId, e.App })
+                    .HasName("PRIMARY");
 
-            entity.ToTable("files_thirdparty_app")
-                .HasCharSet("utf8");
+                entity.ToTable("files_thirdparty_app")
+                    .HasCharSet("utf8");
 
-            entity.Property(e => e.UserId)
-                .HasColumnName("user_id")
-                .HasColumnType("varchar(38)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.UserId)
+                    .HasColumnName("user_id")
+                    .HasColumnType("varchar(38)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.App)
-                .HasColumnName("app")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.App)
+                    .HasColumnName("app")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.ModifiedOn)
-                .HasColumnName("modified_on")
-                .HasColumnType("timestamp");
+                entity.Property(e => e.ModifiedOn)
+                    .HasColumnName("modified_on")
+                    .HasColumnType("timestamp");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+                entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
-            entity.Property(e => e.Token)
-                .HasColumnName("token")
-                .HasColumnType("text")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
-        });
-    }
-    
-    public static void PgSqlAddDbFilesThirdpartyApp(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<DbFilesThirdpartyApp>(entity =>
+                entity.Property(e => e.Token)
+                    .HasColumnName("token")
+                    .HasColumnType("text")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
+            });
+        }
+
+        public void PgSqlAddDbFilesThirdpartyApp()
         {
-            // Define the composite key for PostgreSQL
-            entity.HasKey(e => new { e.UserId, e.App })
-                .HasName("pk_files_thirdparty_app");
+            modelBuilder.Entity<DbFilesThirdpartyApp>(entity =>
+            {
+                // Define the composite key for PostgreSQL
+                entity.HasKey(e => new { e.UserId, e.App })
+                    .HasName("pk_files_thirdparty_app");
 
-            // Map the table name
-            entity.ToTable("files_thirdparty_app");
+                // Map the table name
+                entity.ToTable("files_thirdparty_app");
 
-            // Map the UserId property
-            entity.Property(e => e.UserId)
-                .HasColumnName("user_id")
-                .HasColumnType("uuid"); // PostgreSQL uses 'uuid' for GUIDs
+                // Map the UserId property
+                entity.Property(e => e.UserId)
+                    .HasColumnName("user_id")
+                    .HasColumnType("uuid"); // PostgreSQL uses 'uuid' for GUIDs
 
-            // Map the App property
-            entity.Property(e => e.App)
-                .HasColumnName("app")
-                .HasColumnType("character varying (50)"); // VARCHAR with max length 50
+                // Map the App property
+                entity.Property(e => e.App)
+                    .HasColumnName("app")
+                    .HasColumnType("character varying (50)"); // VARCHAR with max length 50
 
-            // Map the Token property
-            entity.Property(e => e.Token)
-                .HasColumnName("token")
-                .HasColumnType("text"); // TEXT type in PostgreSQL
+                // Map the Token property
+                entity.Property(e => e.Token)
+                    .HasColumnName("token")
+                    .HasColumnType("text"); // TEXT type in PostgreSQL
 
-            // Map the TenantId property
-            entity.Property(e => e.TenantId)
-                .HasColumnName("tenant_id");
+                // Map the TenantId property
+                entity.Property(e => e.TenantId)
+                    .HasColumnName("tenant_id");
 
-            // Map the ModifiedOn property
-            entity.Property(e => e.ModifiedOn)
-                .HasColumnName("modified_on")
-                .HasColumnType("timestamptz"); // TIMESTAMP type in PostgreSQL
-        });
+                // Map the ModifiedOn property
+                entity.Property(e => e.ModifiedOn)
+                    .HasColumnName("modified_on")
+                    .HasColumnType("timestamptz"); // TIMESTAMP type in PostgreSQL
+            });
+        }
     }
 }

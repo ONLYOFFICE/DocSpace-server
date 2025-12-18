@@ -1,0 +1,625 @@
+// (c) Copyright Ascensio System SIA 2009-2025
+// 
+// This program is a free software product.
+// You can redistribute it and/or modify it under the terms
+// of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
+// Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
+// to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
+// any third-party rights.
+// 
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
+// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
+// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// 
+// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
+// 
+// The  interactive user interfaces in modified source and object code versions of the Program must
+// display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
+// 
+// Pursuant to Section 7(b) of the License you must retain the original Product logo when
+// distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
+// trademark law for use of our trademarks.
+// 
+// All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
+// content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
+// International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+using System.Collections.Specialized;
+
+using ASC.Web.Core.Users;
+
+namespace ASC.Core.Billing;
+
+[Singleton]
+public class AccountingClient
+{
+    public readonly bool Configured;
+
+    private readonly AccountingConfiguration _configuration;
+    private readonly ICache _cache;
+    private readonly IHttpClientFactory _httpClientFactory;
+
+    internal const string HttpClientName = "accountingHttpClient";
+    internal const string ResiliencePipelineName = "accountingResiliencePipeline";
+    internal const string BalanceResiliencePipelineName = "balanceResiliencePipeline";
+
+    private readonly JsonSerializerOptions _deserializationOptions = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
+
+    private readonly JsonSerializerOptions _serializationOptions = new()
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
+
+    public AccountingClient(IConfiguration configuration, ICache cache, IHttpClientFactory httpClientFactory)
+    {
+        _configuration = configuration.GetSection("core:accounting").Get<AccountingConfiguration>() ?? new AccountingConfiguration();
+        _cache = cache;
+        _httpClientFactory = httpClientFactory;
+
+        _configuration.Url = (_configuration.Url ?? "").Trim().TrimEnd('/');
+
+        _configuration.Currencies = _configuration.Currencies == null || _configuration.Currencies.Count == 0 ? ["USD"] : _configuration.Currencies;
+
+        if (!string.IsNullOrEmpty(_configuration.Url))
+        {
+            Configured = true;
+        }
+    }
+
+
+    public async Task<Balance> GetCustomerBalanceAsync(string portalId, bool addPolicy = false)
+    {
+        return await RequestAsync<Balance>(HttpMethod.Get, $"/customer/balance/{portalId}", addPolicy: addPolicy);
+    }
+
+    public async Task<Session> OpenCustomerSessionAsync(string portalId, string serviceName, string externalRef, int quantity, int duration)
+    {
+        var data = new
+        {
+            CustomerName = portalId,
+            ServiceName = serviceName,
+            ExternalRef = externalRef,
+            Quantity = quantity,
+            Duration = duration
+        };
+
+        return await RequestAsync<Session>(HttpMethod.Post, "/session/open", data: data);
+    }
+
+    public async Task CloseCustomerSessionAsync(int sessionId)
+    {
+        var queryParams = new NameValueCollection
+        {
+            { "sessionId", sessionId.ToString() }
+        };
+
+        _ = await RequestAsync<string>(HttpMethod.Put, $"/session/close", queryParams);
+    }
+
+    public async Task<Session> ExtendCustomerSessionAsync(int sessionId, int duration)
+    {
+        var queryParams = new NameValueCollection
+        {
+            { "sessionId", sessionId.ToString() },
+            { "duration", duration.ToString() }
+        };
+
+        return await RequestAsync<Session>(HttpMethod.Put, $"/session/extend", queryParams);
+    }
+
+    public async Task CompleteCustomerSessionAsync(string portalId, string serviceName, int sessionId, int quantity, string customerParticipantName, Dictionary<string, string> metadata = null)
+    {
+        var data = new
+        {
+            CustomerName = portalId,
+            ServiceName = serviceName,
+            SessionId = sessionId,
+            Quantity = quantity,
+            CustomerParticipantName = customerParticipantName,
+            Metadata = metadata
+        };
+
+        _ = await RequestAsync<string>(HttpMethod.Post, "/operation/sessionComplete", data: data);
+    }
+
+    public async Task<Report> GetCustomerOperationsAsync(string portalId, DateTime utcStartDate, DateTime utcEndDate, string participantName, bool? credit, bool? debit, int? offset, int? limit)
+    {
+        var queryParams = new NameValueCollection
+        {
+            { "startDate", utcStartDate.ToString("o") },
+            { "endDate", utcEndDate.ToString("o") }
+        };
+
+        if (!string.IsNullOrEmpty(participantName))
+        {
+            queryParams.Add("participantName", participantName.Trim());
+        }
+
+        if (credit.HasValue)
+        {
+            queryParams.Add("credit", credit.Value.ToString().ToLowerInvariant());
+        }
+
+        if (debit.HasValue)
+        {
+            queryParams.Add("debit", debit.Value.ToString().ToLowerInvariant());
+        }
+
+        if (offset.HasValue)
+        {
+            queryParams.Add("offset", offset.Value.ToString());
+        }
+
+        if (limit.HasValue)
+        {
+            queryParams.Add("limit", limit.Value.ToString());
+        }
+
+        return await RequestAsync<Report>(HttpMethod.Get, $"/customer/operations/{portalId}", queryParams);
+    }
+
+    public async Task<List<Currency>> GetAllCurrenciesAsync()
+    {
+        var key = "accounting-currencies";
+        var result = _cache.Get<List<Currency>>(key);
+        if (result == null)
+        {
+            result = await RequestAsync<List<Currency>>(HttpMethod.Get, "/currency/all");
+            _cache.Insert(key, result, DateTime.Now.AddDays(1));
+        }
+        return result;
+    }
+
+    public List<string> GetSupportedCurrencies()
+    {
+        return _configuration.Currencies;
+    }
+
+    public async Task<ServiceInfo> GetServiceInfoAsync(string serviceName)
+    {
+        return await RequestAsync<ServiceInfo>(HttpMethod.Get, $"/service/name/{serviceName}");
+    }
+
+    public async Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, List<string> serviceNames)
+    {
+        var key = $"accounting-prices-{partnerId}-{string.Join(",", serviceNames)}";
+        var result = _cache.Get<Dictionary<string, Dictionary<string, decimal>>>(key);
+
+        if (result != null)
+        {
+            return result;
+        }
+
+        var currencies = await GetAllCurrenciesAsync();
+
+        result = [];
+        foreach (var serviceName in serviceNames)
+        {
+            var serviceInfo = await GetServiceInfoAsync(serviceName);
+            if (serviceInfo == null)
+            {
+                continue;
+            }
+
+            var currency = currencies.FirstOrDefault(c => c.Id == serviceInfo.CurrencyId);
+            var currencyCode = currency?.Code ?? "USD";
+
+            result.Add(serviceName, new Dictionary<string, decimal>
+            {
+                { currencyCode, serviceInfo.PriceValue }
+            });
+        }
+
+        _cache.Insert(key, result, DateTime.Now.AddDays(1));
+
+        return result;
+    }
+
+    private async Task<T> RequestAsync<T>(HttpMethod httpMethod, string path, NameValueCollection queryParams = null, object data = null, bool addPolicy = false)
+    {
+        if (!Configured)
+        {
+            throw new AccountingNotConfiguredException();
+        }
+
+        var uriBuilder = new UriBuilder(_configuration.Url + path);
+
+        if (queryParams != null)
+        {
+            var query = HttpUtility.ParseQueryString(string.Empty);
+
+            foreach (string key in queryParams)
+            {
+                query[key] = queryParams[key];
+            }
+
+            uriBuilder.Query = query.ToString();
+        }
+
+        var request = new HttpRequestMessage
+        {
+            RequestUri = uriBuilder.Uri,
+            Method = httpMethod
+        };
+
+        if (!string.IsNullOrEmpty(_configuration.Key))
+        {
+            request.Headers.Add("Authorization", CreateAuthToken(_configuration.Key, _configuration.Secret));
+        }
+
+        var httpClient = _httpClientFactory.CreateClient(addPolicy ? HttpClientName : "");
+        httpClient.Timeout = TimeSpan.FromMilliseconds(60000);
+
+        if (data != null)
+        {
+            var body = JsonSerializer.Serialize(data, _serializationOptions);
+
+            request.Content = new StringContent(body, Encoding.UTF8, "application/json");
+        }
+
+        try
+        {
+            using var response = await httpClient.SendAsync(request);
+
+            var responseString = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                if (response.StatusCode == HttpStatusCode.PaymentRequired)
+                {
+                    throw new AccountingPaymentRequiredException();
+                }
+
+                if (response.StatusCode == HttpStatusCode.BadRequest && Regex.IsMatch(responseString, @"Customer account '.*?' not found"))
+                {
+                    throw new AccountingCustomerNotFoundException();
+                }
+
+                throw new Exception($"Accounting request failed with status code {response.StatusCode} {responseString}");
+            }
+
+            if (typeof(T) == typeof(string))
+            {
+                return (T)(object)responseString;
+            }
+
+            if (string.IsNullOrEmpty(responseString))
+            {
+                throw new Exception("Accounting responseString is null or empty");
+            }
+
+            var result = JsonSerializer.Deserialize<T>(responseString, _deserializationOptions);
+
+            return result;
+        }
+        catch (AccountingPaymentRequiredException)
+        {
+            throw;
+        }
+        catch (AccountingCustomerNotFoundException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw new AccountingException(ex.Message, ex);
+        }
+    }
+
+    private static string CreateAuthToken(string pkey, string machinekey)
+    {
+        using var hasher = new HMACSHA1(Encoding.UTF8.GetBytes(machinekey));
+        var now = DateTime.UtcNow.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+        var hash = WebEncoders.Base64UrlEncode(hasher.ComputeHash(Encoding.UTF8.GetBytes(string.Join("\n", now, pkey))));
+
+        return $"ASC {pkey}:{now}:{hash}";
+    }
+}
+
+/// <summary>
+/// The payment method status.
+/// </summary>
+public enum PaymentMethodStatus
+{
+    [SwaggerEnum("None")]
+    None,
+    [SwaggerEnum("Set")]
+    Set,
+    [SwaggerEnum("Expired")]
+    Expired
+}
+
+/// <summary>
+/// The customer information.
+/// </summary>
+public class CustomerInfo
+{
+    /// <summary>
+    /// The portal ID.
+    /// </summary>
+    public string PortalId { get; init; }
+
+    /// <summary>
+    /// The customer's payment method.
+    /// </summary>
+    public PaymentMethodStatus PaymentMethodStatus { get; init; }
+
+    /// <summary>
+    /// The email address of the customer.
+    /// </summary>
+    public string Email { get; init; }
+
+    public bool IsDefault()
+    {
+        return PortalId == null && PaymentMethodStatus == PaymentMethodStatus.None && Email == null;
+    }
+}
+
+/// <summary>
+/// Represents a balance with an account number and a list of sub-accounts.
+/// </summary>
+public class Balance
+{
+    /// <summary>
+    /// The account number.
+    /// </summary>
+    public int AccountNumber { get; init; }
+    /// <summary>
+    /// A list of sub-accounts.
+    /// </summary>
+    public List<SubAccount> SubAccounts { get; init; }
+
+    public bool IsDefault()
+    {
+        return AccountNumber == 0 && SubAccounts == null;
+    }
+}
+
+/// <summary>
+/// Represents a sub-account with a specific currency and balance.
+/// </summary>
+public class SubAccount
+{
+    /// <summary>
+    /// The three-character ISO 4217 currency symbol of the sub-account.
+    /// </summary>
+    public string Currency { get; init; }
+    /// <summary>
+    /// The balance of the sub-account in the specified currency.
+    /// </summary>
+    public decimal Amount { get; init; }
+}
+
+/// <summary>
+/// Represents a session with reserved amount and currency.
+/// </summary>
+public class Session
+{
+    /// <summary>
+    /// Unique identifier of the session.
+    /// </summary>
+    public int SessionId { get; init; }
+
+    /// <summary>
+    /// Amount reserved for the session.
+    /// </summary>
+    public decimal ReservedAmount { get; init; }
+
+    /// <summary>
+    /// The three-character ISO 4217 currency symbol of the reserved amount.
+    /// </summary>
+    public string Currency { get; init; }
+
+    /// <summary>
+    /// The expiration date of the session.
+    /// </summary>
+    public DateTime Expire { get; init; }
+}
+
+/// <summary>
+/// Represents a service information.
+/// </summary>
+public class ServiceInfo
+{
+    /// <summary>
+    /// The service ID.
+    /// </summary>
+    public int Id { get; init; }
+
+    /// <summary>
+    /// The price value.
+    /// </summary>
+    public decimal PriceValue { get; init; }
+
+    /// <summary>
+    /// The currency ID.
+    /// </summary>
+    public int CurrencyId { get; init; }
+
+    /// <summary>
+    /// The name.
+    /// </summary>
+    public string Name { get; init; }
+
+    /// <summary>
+    /// The account number.
+    /// </summary>
+    public int AccountNumber { get; init; }
+}
+
+/// <summary>
+/// Represents a report containing a collection of operations.
+/// </summary>
+public class Report
+{
+    /// <summary>
+    /// Collection of operations.
+    /// </summary>
+    public List<Operation> Collection { get; set; }
+    /// <summary>
+    /// Offset of the report data.
+    /// </summary>
+    public int Offset { get; set; }
+    /// <summary>
+    /// Limit of the report data.
+    /// </summary>
+    public int Limit { get; set; }
+    /// <summary>
+    /// Total quantity of operations in the report.
+    /// </summary>
+    public int TotalQuantity { get; set; }
+    /// <summary>
+    /// Total number of pages in the report.
+    /// </summary>
+    public int TotalPage { get; set; }
+    /// <summary>
+    /// Current page number of the report.
+    /// </summary>
+    public int CurrentPage { get; set; }
+
+    public async Task<Dictionary<string, string>> GetParticipantDisplayNamesAsync(DisplayUserSettingsHelper displayUserSettingsHelper)
+    {
+        var participantDisplayNames = new Dictionary<string, string>();
+
+        foreach (var operation in Collection)
+        {
+            if (string.IsNullOrEmpty(operation.ParticipantName) || participantDisplayNames.ContainsKey(operation.ParticipantName))
+            {
+                continue;
+            }
+
+            if (Guid.TryParse(operation.ParticipantName, out var userId))
+            {
+                var participantDisplayName = await displayUserSettingsHelper.GetFullUserNameAsync(userId, true, false);
+                participantDisplayNames.Add(operation.ParticipantName, participantDisplayName);
+            }
+        }
+
+        return participantDisplayNames;
+    }
+}
+
+/// <summary>
+/// Represents an operation.
+/// </summary>
+public class Operation
+{
+    /// <summary>
+    /// Date of the operation.
+    /// </summary>
+    public DateTime Date { get; set; }
+    /// <summary>
+    /// Service related to the operation.
+    /// </summary>
+    public string Service { get; set; }
+    /// <summary>
+    /// Brief description of the operation.
+    /// </summary>
+    public string Description { get; set; }
+    /// <summary>
+    /// Brief details of the operation.
+    /// </summary>
+    public string Details { get; set; }
+    /// <summary>
+    /// Unit of the service.
+    /// </summary>
+    public string ServiceUnit { get; set; }
+    /// <summary>
+    /// Quantity of the service used.
+    /// </summary>
+    public int Quantity { get; set; }
+    /// <summary>
+    /// The three-character ISO 4217 currency symbol of the operation.
+    /// </summary>
+    public string Currency { get; set; }
+    /// <summary>
+    /// Credit amount of the operation.
+    /// </summary>
+    public decimal Credit { get; set; }
+    /// <summary>
+    /// Debit amount of the operation.
+    /// </summary>
+    public decimal Debit { get; set; }
+    /// <summary>
+    /// Original name of the participant.
+    /// </summary>
+    public string ParticipantName { get; set; }
+    /// <summary>
+    /// Display name of the participant.
+    /// </summary>
+    public string ParticipantDisplayName { get; set; }
+    /// <summary>
+    /// Metadata of the operation.
+    /// </summary>
+    public Dictionary<string, string> Metadata { get; set; }
+}
+
+/// <summary>
+/// Represents a currency.
+/// </summary>
+public class Currency
+{
+    /// <summary>
+    /// The currency unique identifier.
+    /// </summary>
+    public int Id { get; init; }
+
+    /// <summary>
+    /// The three-character ISO 4217 currency symbol.
+    /// </summary>
+    public string Code { get; init; }
+}
+
+public static class AccountingHttpClientExtension
+{
+    public static void AddAccountingHttpClient(this IServiceCollection services)
+    {
+        services.AddHttpClient(AccountingClient.HttpClientName)
+            .SetHandlerLifetime(TimeSpan.FromMinutes(5))
+            .AddResilienceHandler(AccountingClient.ResiliencePipelineName, builder =>
+            {
+                builder.AddRetry(new RetryStrategyOptions<HttpResponseMessage>
+                {
+                    MaxRetryAttempts = 2,
+                    Delay = TimeSpan.FromSeconds(1),
+                    BackoffType = DelayBackoffType.Exponential,
+                    ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
+                        .Handle<HttpRequestException>()
+                        .Handle<TaskCanceledException>()
+                        .HandleResult(response => !response.IsSuccessStatusCode)
+                });
+            });
+
+        services.AddResiliencePipeline<string, bool>(AccountingClient.BalanceResiliencePipelineName, pipelineBuilder =>
+        {
+            pipelineBuilder.AddRetry(new RetryStrategyOptions<bool>
+            {
+                MaxRetryAttempts = 15,
+                Delay = TimeSpan.FromSeconds(1),
+                BackoffType = DelayBackoffType.Constant,
+                ShouldHandle = new PredicateBuilder<bool>().HandleResult(result => !result)
+            });
+        });
+    }
+}
+
+public class AccountingException : Exception
+{
+    public AccountingException(string message) : base(message)
+    {
+    }
+
+    public AccountingException(string message, Exception inner) : base(message, inner)
+    {
+    }
+}
+
+public class AccountingNotConfiguredException(string message = "Accounting service is not configured") : AccountingException(message);
+
+public class AccountingPaymentRequiredException(string message = "Payment required") : AccountingException(message);
+
+public class AccountingCustomerNotFoundException(string message = "Customer not found") : AccountingException(message);

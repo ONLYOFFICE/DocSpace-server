@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -118,7 +118,7 @@ public abstract class BaseStorage(TempStream tempStream,
                 currentTenantId = 0;
             }
 
-            var auth = emailValidationKeyProvider.GetEmailKey(currentTenantId, path.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar) + "." + headerAttr + "." + expireString);
+            var auth = emailValidationKeyProvider.GetEmailKey(path.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar) + "." + headerAttr + "." + expireString, currentTenantId);
             query = $"{(path.Contains('?') ? "&" : "?")}{Constants.QueryExpire}={expireString}&{Constants.QueryAuth}={auth}";
         }
 
@@ -132,6 +132,13 @@ public abstract class BaseStorage(TempStream tempStream,
         vpath = _pathUtils.ResolveVirtualPath(vpath, false);
         vpath = string.Format(vpath, tenant);
         var virtualPath = new Uri(vpath + "/", UriKind.RelativeOrAbsolute);
+
+        var fileName = Path.GetFileName(path);
+
+        if (!string.IsNullOrEmpty(fileName))
+        {
+            path = path.Replace(fileName, Uri.EscapeDataString(fileName));
+        }
 
         var uri = virtualPath.IsAbsoluteUri ?
                       new MonoUri(virtualPath, virtualPath.LocalPath.TrimEnd('/') + EnsureLeadingSlash(path.Replace('\\', '/')) + query) :
@@ -155,7 +162,7 @@ public abstract class BaseStorage(TempStream tempStream,
     public abstract Task<Stream> GetReadStreamAsync(string domain, string path, long offset);
 
     public abstract Task<Stream> GetReadStreamAsync(string domain, string path, long offset, long length);
-    
+
     public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream);
     public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream, CancellationToken token);
     public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream, Guid ownerId);
@@ -194,7 +201,7 @@ public abstract class BaseStorage(TempStream tempStream,
     public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType,
                             string contentDisposition, CancellationToken token);
 
-    public abstract Task<Uri> SaveAsync(string domain, string path,Guid ownerId, Stream stream, string contentType,
+    public abstract Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType,
                             string contentDisposition);
     
     public abstract Task<Uri> SaveAsync(string domain, string path,Guid ownerId, Stream stream, string contentType,
@@ -216,7 +223,7 @@ public abstract class BaseStorage(TempStream tempStream,
     {
         return await SaveAsync(string.Empty, path, stream);
     }
-    
+
     public async Task<Uri> SaveAsync(string path, Stream stream, CancellationToken token)
     {
         return await SaveAsync(string.Empty, path, stream, token);
@@ -402,10 +409,10 @@ public abstract class BaseStorage(TempStream tempStream,
     {
         if (QuotaController != null)
         {
-            ownerId = ownerId == Guid.Empty && Modulename != "files" ? Core.Configuration.Constants.CoreSystem.ID : ownerId;
+            ownerId = ownerId == Guid.Empty ? Core.Configuration.Constants.CoreSystem.ID : ownerId;
 
             await QuotaController.QuotaUsedAddAsync(Modulename, domain, DataList.GetData(domain), size, ownerId, quotaCheckFileSize);
-            var(name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<MaxTotalSizeFeature, long>();
+            var (name, value) = await tenantQuotaFeatureStatHelper.GetStatAsync<MaxTotalSizeFeature, long>();
             _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
             await NotifyChangeUserQuota(ownerId);
         }

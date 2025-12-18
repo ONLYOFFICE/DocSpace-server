@@ -67,4 +67,37 @@
   <data name="LargeBackup" xml:space="preserve">
     <value>La sauvegarde est plus grande que la taille totale du portail</value>
   </data>
+  <data name="BackupException" xml:space="preserve">
+    <value>Un problème s'est produit lors de la création de la sauvegarde. Essayez de la créer à nouveau ou contactez l'assistance.</value>
+  </data>
+  <data name="BackupInvalid" xml:space="preserve">
+    <value>Le fichier de sauvegarde n'est pas valide.</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>Un problème s'est produit lors de la restauration de la sauvegarde. Veuillez essayer de la restaurer à nouveau ou contacter l'assistance.</value>
+  </data>
+  <data name="AutoBackup" xml:space="preserve">
+    <value>Sauvegarde automatique</value>
+  </data>
+  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
+    <value>Custom cloud</value>
+  </data>
+  <data name="BackupStorageTypeDataStore" xml:space="preserve">
+    <value>Stockage temporaire</value>
+  </data>
+  <data name="BackupStorageTypeDocuments" xml:space="preserve">
+    <value>Salle de sauvegarde</value>
+  </data>
+  <data name="BackupStorageTypeLocal" xml:space="preserve">
+    <value>Fichier local</value>
+  </data>
+  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
+    <value>Moteur de stockage tiers</value>
+  </data>
+  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
+    <value>Ressource tierce</value>
+  </data>
+  <data name="BackupMissingFilesWarning" xml:space="preserve">
+    <value>Certains fichiers n'ont pas été inclus dans la sauvegarde. Pour plus de détails, veuillez consulter {0}</value>
+  </data>
 </root>

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,18 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using AutoMapper.Internal;
 
 namespace ASC.Web.Core.Notify;
 public class RoomsNotificationSettings : ISettings<RoomsNotificationSettings>
 {
     public List<object> DisabledRooms { get; init; }
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("D69680EC-58DA-40D1-8CB3-424D2F402A83"); }
-    }
+    public static Guid ID => new("D69680EC-58DA-40D1-8CB3-424D2F402A83");
 
     public RoomsNotificationSettings GetDefault()
     {
@@ -44,6 +39,8 @@ public class RoomsNotificationSettings : ISettings<RoomsNotificationSettings>
             DisabledRooms = []
         };
     }
+
+    public DateTime LastModified { get; set; }
 }
 
 [Scope]
@@ -64,9 +61,9 @@ public class RoomsNotificationSettingsHelper(SettingsManager settingsManager, Au
     {
         return CheckMuteForRoomAsync(roomsId, authContext.CurrentAccount.ID);
     }
-    
+
     public async Task<bool> CheckMuteForRoomAsync(object roomsId, Guid userId)
-    {        
+    {
         var settings = await settingsManager.LoadAsync<RoomsNotificationSettings>(userId);
         return settings.DisabledRooms.Select(r => r.ToString()).Contains(roomsId.ToString());
     }
@@ -75,7 +72,7 @@ public class RoomsNotificationSettingsHelper(SettingsManager settingsManager, Au
     {
         var disabledRooms = (await GetDisabledRoomsForCurrentUserAsync()).ToList();
         var id = roomsId.ToString();
-        
+
         if (disabledRooms.Contains(id))
         {
             if (!mute)
@@ -87,12 +84,12 @@ public class RoomsNotificationSettingsHelper(SettingsManager settingsManager, Au
         {
             if (mute)
             {
-                disabledRooms.TryAdd(id);
+                disabledRooms.Add(id);
             }
         }
 
         var newSettings = new RoomsNotificationSettings { DisabledRooms = disabledRooms.Select(object (r) => r).ToList() };
-        
+
         await settingsManager.SaveForCurrentUserAsync(newSettings);
 
         return newSettings;

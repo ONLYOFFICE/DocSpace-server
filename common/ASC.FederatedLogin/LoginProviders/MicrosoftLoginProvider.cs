@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,12 +30,12 @@ public class MicrosoftLoginProvider : BaseLoginProvider<MicrosoftLoginProvider>
 {
     private const string MicrosoftProfileUrl = "https://graph.microsoft.com/oidc/userinfo";
 
-    public override string AccessTokenUrl { get { return "https://login.microsoftonline.com/consumers/oauth2/v2.0/token"; } }
-    public override string RedirectUri { get { return this["microsoftRedirectUrl"]; } }
-    public override string ClientID { get { return this["microsoftClientId"]; } }
-    public override string ClientSecret { get { return this["microsoftClientSecret"]; } }
-    public override string CodeUrl { get { return "https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize"; } }
-    public override string Scopes { get { return "openid,email,profile"; } }
+    public override string AccessTokenUrl => "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
+    public override string RedirectUri => this["microsoftRedirectUrl"];
+    public override string ClientID => this["microsoftClientId"];
+    public override string ClientSecret => this["microsoftClientSecret"];
+    public override string CodeUrl => "https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize";
+    public override string Scopes => "openid,email,profile";
 
     private readonly RequestHelper _requestHelper;
 
@@ -49,8 +49,8 @@ public class MicrosoftLoginProvider : BaseLoginProvider<MicrosoftLoginProvider>
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
         RequestHelper requestHelper,
-        string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-            : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
+        string name, int order, bool paid, Dictionary<string, string> props, Dictionary<string, string> additional = null)
+            : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, paid, props, additional)
     {
         _requestHelper = requestHelper;
     }

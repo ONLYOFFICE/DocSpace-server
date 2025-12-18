@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,12 +28,12 @@ namespace ASC.Data.Backup.Core.IntegrationEvents.Events;
 
 [ProtoContract]
 public record BackupRequestIntegrationEvent : IntegrationEvent
-{    
+{
     private BackupRequestIntegrationEvent()
     {
         StorageParams = new Dictionary<string, string>();
     }
-    
+
     public BackupRequestIntegrationEvent(BackupStorageType storageType,
                                   int tenantId,
                                   Guid createBy,
@@ -43,7 +43,10 @@ public record BackupRequestIntegrationEvent : IntegrationEvent
                                   string storageBasePath = "",
                                   string serverBaseUri = null,
                                   bool dump = false,
-                                  string taskId = null) : base(createBy, tenantId)
+                                  string taskId = null,
+                                  int billingSessionId = 0,
+                                  DateTime billingSessionExpire = default,
+                                  IDictionary<string, string> headers = null) : base(createBy, tenantId)
     {
         StorageType = storageType;
         StorageParams = storageParams;
@@ -53,6 +56,9 @@ public record BackupRequestIntegrationEvent : IntegrationEvent
         ServerBaseUri = serverBaseUri;
         Dump = dump;
         TaskId = taskId;
+        BillingSessionId = billingSessionId;
+        BillingSessionExpire = billingSessionExpire;
+        Headers = headers;
     }
 
     [ProtoMember(1)]
@@ -78,5 +84,13 @@ public record BackupRequestIntegrationEvent : IntegrationEvent
 
     [ProtoMember(9)]
     public string TaskId { get; private init; }
-}
 
+    [ProtoMember(10)]
+    public int BillingSessionId { get; private init; }
+
+    [ProtoMember(11)]
+    public DateTime BillingSessionExpire { get; private init; }
+
+    [ProtoMember(12)]
+    public IDictionary<string, string> Headers { get; private init; }
+}

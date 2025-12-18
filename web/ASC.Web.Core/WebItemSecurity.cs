@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,49 +30,32 @@ using SecurityAction = ASC.Common.Security.Authorizing.Action;
 namespace ASC.Web.Core;
 
 [Singleton]
-public class WebItemSecurityCache
+public class WebItemSecurityCache(IFusionCacheProvider cacheProvider)
 {
-    private readonly ICache _cache;
-    private readonly ICacheNotify<WebItemSecurityNotifier> _cacheNotify;
+    private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
 
-    public WebItemSecurityCache(ICacheNotify<WebItemSecurityNotifier> cacheNotify, ICache cache)
-    {
-        _cache = cache;
-        _cacheNotify = cacheNotify;
-        _cacheNotify.Subscribe(r =>
-        {
-            ClearCache(r.Tenant);
-        }, CacheNotifyAction.Any);
-    }
-
-    public void ClearCache(int tenantId)
-    {
-        _cache.Remove(GetCacheKey(tenantId));
-    }
-
-    private string GetCacheKey(int tenantId)
+    private static string GetCacheKey(int tenantId)
     {
         return $"{tenantId}:webitemsecurity";
     }
 
-    public async Task PublishAsync(int tenantId)
+    public async Task ClearCacheAsync(int tenantId)
     {
-        await _cacheNotify.PublishAsync(new WebItemSecurityNotifier { Tenant = tenantId }, CacheNotifyAction.Any);
+        await _cache.RemoveByTagAsync(CacheExtention.GetWebItemSecurityTag(tenantId));
     }
 
-    public Dictionary<string, bool> Get(int tenantId)
+    public async Task<Dictionary<string, bool>> GetAsync(int tenantId)
     {
-        return _cache.Get<Dictionary<string, bool>>(GetCacheKey(tenantId));
+        return await _cache.GetOrDefaultAsync<Dictionary<string, bool>>(GetCacheKey(tenantId));
     }
 
-    public Dictionary<string, bool> GetOrInsert(int tenantId)
+    public async Task<Dictionary<string, bool>> GetOrInsertAsync(int tenantId)
     {
-
-        var dic = Get(tenantId);
+        var dic = await GetAsync(tenantId);
         if (dic == null)
         {
             dic = new Dictionary<string, bool>();
-            _cache.Insert(GetCacheKey(tenantId), dic, DateTime.UtcNow.Add(TimeSpan.FromMinutes(1)));
+            await _cache.SetAsync(GetCacheKey(tenantId), dic, TimeSpan.FromMinutes(1), [CacheExtention.GetWebItemSecurityTag(tenantId)]);
         }
 
         return dic;
@@ -80,19 +63,20 @@ public class WebItemSecurityCache
 }
 
 [Scope]
-public class WebItemSecurity(UserManager userManager,
-        AuthContext authContext,
-        PermissionContext permissionContext,
-        AuthManager authentication,
-        WebItemManager webItemManager,
-        TenantManager tenantManager,
-        AuthorizationManager authorizationManager,
-        WebItemSecurityCache webItemSecurityCache,
-        SettingsManager settingsManager,
-        CountPaidUserChecker countPaidUserChecker, 
-        IDistributedLockProvider distributedLockProvider)
-    {
-    
+public class WebItemSecurity(
+    UserManager userManager,
+    AuthContext authContext,
+    PermissionContext permissionContext,
+    AuthManager authentication,
+    WebItemManager webItemManager,
+    TenantManager tenantManager,
+    AuthorizationManager authorizationManager,
+    WebItemSecurityCache webItemSecurityCache,
+    SettingsManager settingsManager,
+    CountPaidUserChecker countPaidUserChecker,
+    IDistributedLockProvider distributedLockProvider)
+{
+
     private static readonly SecurityAction _read = new(new Guid("77777777-32ae-425f-99b5-83176061d1ae"), "ReadWebItem", false);
 
     //
@@ -107,7 +91,7 @@ public class WebItemSecurity(UserManager userManager,
 
         var id = itemId.ToString();
         bool result;
-        var dic = webItemSecurityCache.GetOrInsert(tenant.Id);
+        var dic = await webItemSecurityCache.GetOrInsertAsync(tenant.Id);
         if (dic != null)
         {
             lock (dic)
@@ -151,7 +135,7 @@ public class WebItemSecurity(UserManager userManager,
             result = false;
         }
 
-        dic = webItemSecurityCache.Get(tenant.Id);
+        dic = await webItemSecurityCache.GetAsync(tenant.Id);
         if (dic != null)
         {
             lock (dic)
@@ -192,14 +176,14 @@ public class WebItemSecurity(UserManager userManager,
             await authorizationManager.AddAceAsync(a);
         }
 
-        await webItemSecurityCache.PublishAsync(tenantManager.GetCurrentTenantId());
+        await webItemSecurityCache.ClearCacheAsync(tenantManager.GetCurrentTenantId());
     }
 
     public async Task<WebItemSecurityInfo> GetSecurityInfoAsync(string id)
     {
         var info = (await GetSecurityAsync(id)).ToList();
         var module = webItemManager.GetParentItemId(new Guid(id)) != Guid.Empty;
-        
+
         return new WebItemSecurityInfo
         {
             WebItemId = id,
@@ -208,12 +192,13 @@ public class WebItemSecurity(UserManager userManager,
 
             Users = await info
                            .ToAsyncEnumerable()
-                           .SelectAwait(async i => await userManager.GetUsersAsync(i.Item1))
-                           .Where(u => u.Id != Constants.LostUser.Id).ToListAsync(),
+                           .Select(async (Tuple<Guid, bool> i, CancellationToken _) => await userManager.GetUsersAsync(i.Item1))
+                           .Where(u => u.Id != Constants.LostUser.Id)
+                           .ToListAsync(),
 
             Groups = await info
                            .ToAsyncEnumerable()
-                           .SelectAwait(async i => await userManager.GetGroupInfoAsync(i.Item1))
+                           .Select(async (Tuple<Guid, bool> i, CancellationToken _) => await userManager.GetGroupInfoAsync(i.Item1))
                            .Where(g => g.ID != Constants.LostGroupInfo.ID && g.CategoryID != Constants.SysGroupCategoryId).ToListAsync()
         };
     }
@@ -243,7 +228,13 @@ public class WebItemSecurity(UserManager userManager,
 
         if (administrator)
         {
-            var tenantId = tenantManager.GetCurrentTenantId();
+            var tenant = tenantManager.GetCurrentTenant();
+            var tenantId = tenant.Id;
+
+            if (productId == Constants.GroupAdmin.ID && tenant.OwnerId != authContext.CurrentAccount.ID)
+            {
+                throw new SecurityException(Resource.ErrorAccessDenied);
+            }
 
             await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenantId)))
             {
@@ -295,7 +286,7 @@ public class WebItemSecurity(UserManager userManager,
             await userManager.RemoveUserFromGroupAsync(userid, productId);
         }
 
-        await webItemSecurityCache.PublishAsync(tenantManager.GetCurrentTenantId());
+        await webItemSecurityCache.ClearCacheAsync(tenantManager.GetCurrentTenantId());
     }
 
     public async Task<bool> IsProductAdministratorAsync(Guid productId, Guid userid)
@@ -340,27 +331,15 @@ public class WebItemSecurity(UserManager userManager,
         public Guid WebItemId { get; }
         private readonly WebItemManager _webItemManager;
 
-        public Type ObjectType
-        {
-            get { return GetType(); }
-        }
+        public Type ObjectType => GetType();
 
-        public object SecurityId
-        {
-            get { return WebItemId.ToString("N"); }
-        }
+        public object SecurityId => WebItemId.ToString("N");
 
         public string FullId => AzObjectIdHelper.GetFullObjectId(this);
 
-        public bool InheritSupported
-        {
-            get { return true; }
-        }
+        public bool InheritSupported => true;
 
-        public bool ObjectRolesSupported
-        {
-            get { return false; }
-        }
+        public bool ObjectRolesSupported => false;
 
         public static WebItemSecurityObject Create(string id, WebItemManager webItemManager)
         {

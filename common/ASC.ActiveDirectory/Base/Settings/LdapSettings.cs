@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,17 +29,19 @@ using System.Runtime.InteropServices;
 namespace ASC.ActiveDirectory.Base.Settings;
 
 /// <summary>
+/// The LDAP settings parameters.
 /// </summary>
 [Scope]
 public class LdapSettings : ISettings<LdapSettings>, ICloneable
 {
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{197149b3-fbc9-44c2-b42a-232f7e729c16}"); }
-    }
+    /// <summary>
+    /// The LDAP settings ID.
+    /// </summary>
+    public static Guid ID => new("{197149b3-fbc9-44c2-b42a-232f7e729c16}");
 
-    /// <summary>LDAP settings mapping</summary>
+    ///<summary>
+    /// The mapping fields of LDAP settings.
+    /// </summary>
     public enum MappingFields
     {
         FirstNameAttribute,
@@ -60,7 +62,7 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
         UserQuotaLimit
     }
 
-    /// <summary>Accecss rights</summary>
+    /// <summary>The access rights type.</summary>
     public enum AccessRight
     {
         FullAccess,
@@ -128,6 +130,11 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
         return settings;
     }
 
+    /// <summary>
+    /// The data and time when the LDAP settings were last modified.
+    /// </summary>
+    public DateTime LastModified { get; set; }
+
     public override bool Equals(object obj)
     {
         var settings = obj as LdapSettings;
@@ -169,33 +176,33 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
     public override int GetHashCode()
     {
         var hash = 3;
-        hash = (hash * 2) + EnableLdapAuthentication.GetHashCode();
-        hash = (hash * 2) + StartTls.GetHashCode();
-        hash = (hash * 2) + Ssl.GetHashCode();
-        hash = (hash * 2) + SendWelcomeEmail.GetHashCode();
-        hash = (hash * 2) + DisableEmailVerification.GetHashCode();
-        hash = (hash * 2) + Server.GetHashCode();
-        hash = (hash * 2) + UserDN.GetHashCode();
-        hash = (hash * 2) + PortNumber.GetHashCode();
-        hash = (hash * 2) + UserFilter.GetHashCode();
-        hash = (hash * 2) + LoginAttribute.GetHashCode();
-        hash = (hash * 2) + GroupMembership.GetHashCode();
-        hash = (hash * 2) + GroupDN.GetHashCode();
-        hash = (hash * 2) + GroupNameAttribute.GetHashCode();
-        hash = (hash * 2) + GroupFilter.GetHashCode();
-        hash = (hash * 2) + UserAttribute.GetHashCode();
-        hash = (hash * 2) + GroupAttribute.GetHashCode();
-        hash = (hash * 2) + Authentication.GetHashCode();
-        hash = (hash * 2) + Login.GetHashCode();
+        hash = hash * 2 + EnableLdapAuthentication.GetHashCode();
+        hash = hash * 2 + StartTls.GetHashCode();
+        hash = hash * 2 + Ssl.GetHashCode();
+        hash = hash * 2 + SendWelcomeEmail.GetHashCode();
+        hash = hash * 2 + DisableEmailVerification.GetHashCode();
+        hash = hash * 2 + Server.GetHashCode();
+        hash = hash * 2 + UserDN.GetHashCode();
+        hash = hash * 2 + PortNumber.GetHashCode();
+        hash = hash * 2 + UserFilter.GetHashCode();
+        hash = hash * 2 + LoginAttribute.GetHashCode();
+        hash = hash * 2 + GroupMembership.GetHashCode();
+        hash = hash * 2 + GroupDN.GetHashCode();
+        hash = hash * 2 + GroupNameAttribute.GetHashCode();
+        hash = hash * 2 + GroupFilter.GetHashCode();
+        hash = hash * 2 + UserAttribute.GetHashCode();
+        hash = hash * 2 + GroupAttribute.GetHashCode();
+        hash = hash * 2 + Authentication.GetHashCode();
+        hash = hash * 2 + Login.GetHashCode();
 
         foreach (var pair in LdapMapping)
         {
-            hash = (hash * 2) + pair.Value.GetHashCode();
+            hash = hash * 2 + pair.Value.GetHashCode();
         }
 
         foreach (var pair in AccessRights)
         {
-            hash = (hash * 2) + pair.Value.GetHashCode();
+            hash = hash * 2 + pair.Value.GetHashCode();
         }
 
         return hash;
@@ -206,202 +213,198 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
         return MemberwiseClone();
     }
 
-    /// <summary>Specifies if the LDAP authentication is enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether the LDAP authentication is active in the system.
+    /// </summary>
     public bool EnableLdapAuthentication { get; set; }
 
-    /// <summary>Specifies if the StartTLS is enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether the StartTLS (Transport Layer Security) protocol for secure LDAP communication is enabled or not.
+    ///  </summary>
     public bool StartTls { get; set; }
 
-    /// <summary>Specifies if the SSL is enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether the SSL (Secure Sockets Layer) encryption is enabled for the LDAP communication or not.
+    /// </summary>
     public bool Ssl { get; set; }
 
-    /// <summary>Specifies if the welcome email is sent or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether the automatic welcome email dispatch to the new LDAP users is enabled or not.
+    /// </summary>
     public bool SendWelcomeEmail { get; set; }
 
-    /// <summary>Specifies if the email verification is disabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the email verification requirement is enabled for the LDAP users or not.
+    /// </summary>
     public bool DisableEmailVerification { get; set; }
 
-    /// <summary>LDAP server URL address</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The LDAP server's hostname or IP address.
+    /// </summary>
     public string Server { get; set; }
 
-    /// <summary>Absolute path to the top level directory containing users for the import</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The absolute path to the top level directory containing users for the import.
+    /// </summary>
     // ReSharper disable once InconsistentNaming
     public string UserDN { get; set; }
 
-    /// <summary>Port number</summary>
-    /// <type>System.Int32, System</type>
+    /// <summary>
+    /// The network port number for the LDAP server connection.
+    /// </summary>
     [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
     public int PortNumber { get; set; }
 
-    /// <summary>User filter value to import the users who correspond to the specified search criteria. The default filter value (uid=*) allows importing all users</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The user filter value to import the users who correspond to the specified search criteria. The default filter value (uid=*) allows importing all users.
+    /// </summary>
     public string UserFilter { get; set; }
 
-    /// <summary>Attribute in a user record that corresponds to the login that LDAP server users will use to log in to ONLYOFFICE</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The attribute in a user record that corresponds to the login that LDAP server users will use to log in to ONLYOFFICE.
+    /// </summary>
     public string LoginAttribute { get; set; }
 
-    /// <summary>Correspondence between the user data fields on the portal and the attributes in the LDAP server user record</summary>
-    /// <type>System.Collections.Generic.Dictionary{ASC.ActiveDirectory.Base.Settings.MappingFields, System.String}, System.Collections.Generic</type>
+    /// <summary>
+    /// The correspondence between the user data fields on the portal and the attributes in the LDAP server user record.
+    /// </summary>
     public Dictionary<MappingFields, string> LdapMapping { get; set; } = new();
 
-    /// <summary>Group access rights</summary>
-    /// <type>System.Collections.Generic.Dictionary{ASC.ActiveDirectory.Base.Settings.AccessRight, System.String}, System.Collections.Generic</type>
+    /// <summary>
+    /// The group access rights.
+    /// </summary>
     //ToDo: use SId instead of group name
     public Dictionary<AccessRight, string> AccessRights { get; set; } = new();
 
-    /// <summary>Attribute in a user record that corresponds to the user's first name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The attribute in a user record that corresponds to the user's first name.
+    /// </summary>
     public string FirstNameAttribute
     {
-        get
-        {
-            return GetOldSetting(MappingFields.FirstNameAttribute);
-        }
+        get => GetOldSetting(MappingFields.FirstNameAttribute);
 
-        set
-        {
-            SetOldSetting(MappingFields.FirstNameAttribute, value);
-        }
+        set => SetOldSetting(MappingFields.FirstNameAttribute, value);
     }
 
-    /// <summary>Attribute in a user record that corresponds to the user's second name</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The attribute in a user record that corresponds to the user's second name.
+    /// </summary>
     public string SecondNameAttribute
     {
-        get
-        {
-            return GetOldSetting(MappingFields.SecondNameAttribute);
-        }
+        get => GetOldSetting(MappingFields.SecondNameAttribute);
 
-        set
-        {
-            SetOldSetting(MappingFields.SecondNameAttribute, value);
-        }
+        set => SetOldSetting(MappingFields.SecondNameAttribute, value);
     }
 
-    /// <summary>Attribute in a user record that corresponds to the user's email address</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The attribute in a user record that corresponds to the user's mail address.
+    /// </summary>
     public string MailAttribute
     {
-        get
-        {
-            return GetOldSetting(MappingFields.MailAttribute);
-        }
+        get => GetOldSetting(MappingFields.MailAttribute);
 
-        set
-        {
-            SetOldSetting(MappingFields.MailAttribute, value);
-        }
+        set => SetOldSetting(MappingFields.MailAttribute, value);
     }
 
-    /// <summary>Attribute in a user record that corresponds to the user's title</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The attribute in a user record that corresponds to the user's title.
+    /// </summary>
     public string TitleAttribute
     {
-        get
-        {
-            return GetOldSetting(MappingFields.TitleAttribute);
-        }
+        get => GetOldSetting(MappingFields.TitleAttribute);
 
-        set
-        {
-            SetOldSetting(MappingFields.TitleAttribute, value);
-        }
+        set => SetOldSetting(MappingFields.TitleAttribute, value);
     }
 
-    /// <summary>Attribute in a user record that corresponds to the user's mobile phone number</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The attribute in a user record that corresponds to the user's mobile phone number.
+    /// </summary>
     public string MobilePhoneAttribute
     {
-        get
-        {
-            return GetOldSetting(MappingFields.MobilePhoneAttribute);
-        }
+        get => GetOldSetting(MappingFields.MobilePhoneAttribute);
 
-        set
-        {
-            SetOldSetting(MappingFields.MobilePhoneAttribute, value);
-        }
+        set => SetOldSetting(MappingFields.MobilePhoneAttribute, value);
     }
 
-    /// <summary>Attribute in a user record that corresponds to the user's location</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The attribute in a user record that corresponds to the user's location.
+    /// </summary>
     public string LocationAttribute
     {
-        get
-        {
-            return GetOldSetting(MappingFields.LocationAttribute);
-        }
+        get => GetOldSetting(MappingFields.LocationAttribute);
 
-        set
-        {
-            SetOldSetting(MappingFields.LocationAttribute, value);
-        }
+        set => SetOldSetting(MappingFields.LocationAttribute, value);
     }
 
-    /// <summary>Specifies if the groups from the LDAP server are added to the portal or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the groups from the LDAP server are added to the portal or not.
+    /// </summary>
     public bool GroupMembership { get; set; }
 
-    /// <summary>The absolute path to the top level directory containing groups for the import</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The absolute path to the top level directory containing groups for the import.
+    /// </summary>
     // ReSharper disable once InconsistentNaming
     public string GroupDN { get; set; }
 
-    /// <summary>Attribute that corresponds to a name of the group where the user is included</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The attribute that corresponds to a name of the group where the user is included.
+    /// </summary>
     public string GroupNameAttribute { get; set; }
 
-    /// <summary>Group filter value to import the groups who correspond to the specified search criteria. The default filter value (objectClass=posixGroup) allows importing all users</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The group filter value to import the groups who correspond to the specified search criteria. The default filter value (objectClass=posixGroup) allows importing all groups.
+    /// </summary>
     public string GroupFilter { get; set; }
 
-    /// <summary>Attribute that determines whether this user is a member of the groups</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The attribute that determines whether the user is a member of the groups.
+    /// </summary>
     public string UserAttribute { get; set; }
 
-    /// <summary>Attribute that specifies the users that the group includes</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The attribute that specifies the users that the group includes.
+    /// </summary>
     public string GroupAttribute { get; set; }
 
-    /// <summary>Specifies if the user has rights to read data from LDAP server or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the user has rights to read data from the LDAP server or not.
+    /// </summary>
     public bool Authentication { get; set; }
 
-    /// <summary>Login</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The username for the LDAP server authentication.
+    /// </summary>
     public string Login { get; set; }
 
-    /// <summary>Password</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The password for the LDAP server authentication.
+    /// </summary>
     public string Password { get; set; }
 
-    /// <summary>Password bytes</summary>
-    /// <type>System.Byte[], System</type>
+    /// <summary>
+    /// The password for the LDAP server in bytes.
+    /// </summary>
     public byte[] PasswordBytes { get; set; }
 
-    /// <summary>Specifies if the default LDAP settings are used or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the default LDAP settings are used or not.
+    /// </summary>
     public bool IsDefault { get; set; }
 
-    /// <summary>Specifies if the certificate is accepted or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether the SSL certificate is accepted or not.
+    /// </summary>
     public bool AcceptCertificate { get; set; }
 
-    /// <summary>Hash that is used to accept a certificate</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The hash that is used to accept the SSL certificate.
+    /// </summary>
     public string AcceptCertificateHash { get; set; }
 
-    /// <summary>Users type (All, RoomAdmin, Guest, DocSpaceAdmin, User)</summary>
-    /// <type>ASC.Core.Users.EmployeeType, ASC.Core.Common</type>
+    /// <summary>
+    /// The default user type assigned to the imported LDAP users.
+    /// </summary>
     public EmployeeType UsersType { get; set; }
 
     private string GetOldSetting(MappingFields field)
@@ -430,11 +433,7 @@ public class LdapSettings : ISettings<LdapSettings>, ICloneable
 [Scope]
 public class LdapCronSettings : ISettings<LdapCronSettings>
 {
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{58C42C54-56CD-4BEF-A3ED-C60ACCF6E975}"); }
-    }
+    public static Guid ID => new("{58C42C54-56CD-4BEF-A3ED-C60ACCF6E975}");
 
     public LdapCronSettings GetDefault()
     {
@@ -444,53 +443,49 @@ public class LdapCronSettings : ISettings<LdapCronSettings>
         };
     }
 
+    public DateTime LastModified { get; set; }
+
     public string Cron { get; set; }
 }
 
 public class LdapCurrentAcccessSettings : ISettings<LdapCurrentAcccessSettings>
 {
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{134B5EAA-F612-4834-AEAB-34C90515EA4E}"); }
-    }
+    public static Guid ID => new("{134B5EAA-F612-4834-AEAB-34C90515EA4E}");
 
     public LdapCurrentAcccessSettings GetDefault()
     {
         return new LdapCurrentAcccessSettings { CurrentAccessRights = null };
     }
 
+    public DateTime LastModified { get; set; }
+
     public Dictionary<LdapSettings.AccessRight, List<string>> CurrentAccessRights { get; set; } = new();
 }
 
 public class LdapCurrentUserPhotos : ISettings<LdapCurrentUserPhotos>
 {
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{50AE3C2B-0783-480F-AF30-679D0F0A2D3E}"); }
-    }
+    public static Guid ID => new("{50AE3C2B-0783-480F-AF30-679D0F0A2D3E}");
 
     public LdapCurrentUserPhotos GetDefault()
     {
         return new LdapCurrentUserPhotos { CurrentPhotos = null };
     }
 
+    public DateTime LastModified { get; set; }
+
     public Dictionary<Guid, string> CurrentPhotos { get; set; } = new();
 }
 
 public class LdapCurrentDomain : ISettings<LdapCurrentDomain>
 {
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{75A5F745-F697-4418-B38D-0FE0D277E258}"); }
-    }
+    public static Guid ID => new("{75A5F745-F697-4418-B38D-0FE0D277E258}");
 
     public LdapCurrentDomain GetDefault()
     {
         return new LdapCurrentDomain { CurrentDomain = null };
     }
+
+    public DateTime LastModified { get; set; }
 
     public string CurrentDomain { get; set; }
 }

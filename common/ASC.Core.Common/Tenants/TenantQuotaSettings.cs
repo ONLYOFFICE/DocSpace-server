@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,27 +26,29 @@
 
 namespace ASC.Core.Tenants;
 
+/// <summary>
+/// The tenant quota settings.
+/// </summary>
 [Serializable]
 public class TenantQuotaSettings : ISettings<TenantQuotaSettings>
 {
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{62609D95-35D3-4F14-A6BA-2118979E04EA}"); }
-    }
+    /// <summary>
+    /// The tenant ID.
+    /// </summary>
+    public static Guid ID => new("{62609D95-35D3-4F14-A6BA-2118979E04EA}");
 
     /// <summary>
-    /// Specifies if the quota is enabled or not
+    /// Specifies if the tenant quota is enabled or not.
     /// </summary>
     public bool EnableQuota { get; set; }
 
     /// <summary>
-    /// Quota
+    /// The tenant quota.
     /// </summary>
     public long Quota { get; set; }
 
     /// <summary>
-    /// Date of the last quota recalculation
+    /// The date of the last tenant quota recalculation.
     /// </summary>
     public DateTime? LastRecalculateDate { get; set; }
 
@@ -58,4 +60,6 @@ public class TenantQuotaSettings : ISettings<TenantQuotaSettings>
             Quota = -1
         };
     }
+
+    public DateTime LastModified { get; set; }
 }

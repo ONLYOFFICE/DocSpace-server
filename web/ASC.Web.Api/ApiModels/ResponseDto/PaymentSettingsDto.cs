@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,18 +26,54 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
+/// <summary>
+/// The payment settings parameters.
+/// </summary>
 public class PaymentSettingsDto
 {
-    public string SalesEmail { get; set; }
+    /// <summary>
+    /// The email address for sales inquiries and support.
+    /// </summary>
+    public required string SalesEmail { get; set; }
+
+    /// <summary>
+    /// The URL for accessing the feedback and support resources.
+    /// </summary>
     public string FeedbackAndSupportUrl { get; set; }
-    public string BuyUrl { get; set; }
-    public bool Standalone { get; set; }
-    public CurrentLicenseInfo CurrentLicense { get; set; }
-    public int Max { get; set; }
+
+    /// <summary>
+    /// The URL for purchasing or upgrading the product.
+    /// </summary>
+    public required string BuyUrl { get; set; }
+
+    /// <summary>
+    /// Indicates whether the system is running in standalone mode.
+    /// </summary>
+    public required bool Standalone { get; set; }
+
+    /// <summary>
+    /// The current license information.
+    /// </summary>
+    public required CurrentLicenseInfo CurrentLicense { get; set; }
+
+    /// <summary>
+    /// The maximum quota quantity.
+    /// </summary>
+    public required int Max { get; set; }
 }
 
+/// <summary>
+/// The current license information.
+/// </summary>
 public class CurrentLicenseInfo
 {
-    public bool Trial { get; set; }
-    public DateTime DueDate { get; set; }
+    /// <summary>
+    /// Specifies whether the license is trial or not.
+    /// </summary>
+    public required bool Trial { get; set; }
+
+    /// <summary>
+    /// The date when the license expires.
+    /// </summary>
+    public required DateTime DueDate { get; set; }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -120,7 +120,7 @@ public class TextFileUserImporter(Stream stream) : IUserImporter
         return result;
     }
 
-    private int GetFieldsMapping(string firstLine, IEnumerable<PropertyInfo> infos, Dictionary<int, PropertyInfo> mappedProperties)
+    private int GetFieldsMapping(string firstLine, PropertyInfo[] infos, Dictionary<int, PropertyInfo> mappedProperties)
     {
         var fields = firstLine.Split([Separator], StringSplitOptions.RemoveEmptyEntries);
         for (var i = 0; i < fields.Length; i++)

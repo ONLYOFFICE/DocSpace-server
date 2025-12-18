@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,6 +28,7 @@ namespace ASC.Files.Core.Helpers;
 
 [Scope]
 public class DocumentServiceLicense(ICache cache,
+    ResiliencePipelineProvider<string> resiliencePipelineProvider,
     CoreBaseSettings coreBaseSettings,
     FilesLinkUtility filesLinkUtility,
     IHttpClientFactory clientFactory)
@@ -73,22 +74,30 @@ public class DocumentServiceLicense(ICache cache,
         return commandResponse;
     }
 
-    public async Task<(bool, string)> ValidateLicense(License license)
+    public async Task<LicenseValidationResult> ValidateLicense(License license)
     {
-        var attempt = 0;
+        var pipeline = resiliencePipelineProvider.GetPipeline<LicenseValidationResult>(LicenseResiliencePipelineName);
 
-        while (attempt < 3)
+        var errorMsg = string.Empty;
+
+        var response = await pipeline.ExecuteAsync(async _ =>
         {
             var commandResponse = await GetDocumentServiceLicenseAsync(false);
 
             if (commandResponse == null)
             {
-                return (true, null);
+                return new LicenseValidationResult(true, null);
+            }
+
+            if (commandResponse.Error == ErrorTypes.ParseError)
+            {
+                errorMsg = commandResponse.ErrorString;
+                return null; // Possible DocumentService behavior without a license when the response contains "end_date":null
             }
 
             if (commandResponse.Error != ErrorTypes.NoError)
             {
-                return (false, commandResponse.ErrorString);
+                return new LicenseValidationResult(false, commandResponse.ErrorString);
             }
 
             if (commandResponse.License.ResourceKey == license.ResourceKey ||
@@ -96,29 +105,25 @@ public class DocumentServiceLicense(ICache cache,
             {
                 if (commandResponse.Server == null)
                 {
-                    return (false, "Server is null");
+                    return new LicenseValidationResult(false, "Server is null");
                 }
 
-                return commandResponse.Server.ResultType == CommandResponse.ServerInfo.ResultTypes.Success ||
-                    commandResponse.Server.ResultType == CommandResponse.ServerInfo.ResultTypes.SuccessLimit
-                    ? (true, null)
-                    : (false, $"ResultType is {commandResponse.Server.ResultType}");
+                return commandResponse.Server.ResultType is CommandResponse.ServerInfo.ResultTypes.Success or CommandResponse.ServerInfo.ResultTypes.SuccessLimit
+                    ? new LicenseValidationResult(true, null)
+                    : new LicenseValidationResult(false, $"ResultType is {commandResponse.Server.ResultType}");
             }
-            else
-            {
-                await Task.Delay(1000);
-                attempt += 1;
-            }
-        }
 
-        return (false,  $"{attempt} failed attempts");
+            return null;
+        });
+
+        return response ?? new LicenseValidationResult(false, $"Failure after several attempts. {errorMsg}");
     }
 
-    public async Task<(Dictionary<string, DateTime>, License)> GetLicenseQuotaAsync()
+    public async Task<(Dictionary<string, DateTime>, License)> GetLicenseQuotaAsync(bool useCache = true)
     {
-        var commandResponse = await GetDocumentServiceLicenseAsync(true);
-        return commandResponse == null ? 
-            (null, null) : 
-            (commandResponse.Quota?.Users?.ToDictionary(r=> r.UserId, r=> r.Expire), commandResponse.License);
+        var commandResponse = await GetDocumentServiceLicenseAsync(useCache);
+        return commandResponse == null ?
+            (null, null) :
+            (commandResponse.Quota?.Users?.ToDictionary(r => r.UserId, r => r.Expire), commandResponse.License);
     }
 }

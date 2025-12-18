@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,8 +26,18 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
+/// <summary>
+/// The owner change instructions parameters.
+/// </summary>
 public class OwnerChangeInstructionsDto
 {
+    /// <summary>
+    /// The owner change instructions status.
+    /// </summary>
     public int Status { get; set; }
+
+    /// <summary>
+    /// The owner change instructions message.
+    /// </summary>
     public string Message { get; set; }
 }

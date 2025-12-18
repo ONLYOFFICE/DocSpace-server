@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,23 +27,24 @@
 namespace ASC.Web.Studio.Core;
 
 /// <summary>
-/// Email activation settings
+/// The email activation settings.
 /// </summary>
 public class EmailActivationSettings : ISettings<EmailActivationSettings>
 {
     /// <summary>
-    /// Shown or hidden
+    /// Specifies whether the email activation settings are shown or hidden.
     /// </summary>
     public bool Show { get; set; }
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{85987929-1339-48EB-B06D-B9D097BDACF6}"); }
-    }
+    /// <summary>
+    /// The tenant ID.
+    /// </summary>
+    public static Guid ID => new("{85987929-1339-48EB-B06D-B9D097BDACF6}");
 
     public EmailActivationSettings GetDefault()
     {
         return new EmailActivationSettings { Show = true };
     }
+
+    public DateTime LastModified { get; set; }
 }

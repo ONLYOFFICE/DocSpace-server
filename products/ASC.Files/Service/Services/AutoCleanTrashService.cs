@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -57,9 +57,10 @@ public class AutoCleanTrashService(
 
             logger.InfoFoundUsers(activeTenantsUsers.Count);
 
-            await Parallel.ForEachAsync(activeTenantsUsers,
-                new ParallelOptions { MaxDegreeOfParallelism = 3, CancellationToken = stoppingToken }, //System.Environment.ProcessorCount
-                DeleteFilesAndFoldersAsync);
+            foreach (var tenantsUser in activeTenantsUsers)
+            {
+                await DeleteFilesAndFoldersAsync(tenantsUser, stoppingToken);
+            }
         }
         catch (Exception e)
         {
@@ -73,7 +74,7 @@ public class AutoCleanTrashService(
         {
             await using var scope = _scopeFactory.CreateAsyncScope();
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
-            await tenantManager.SetCurrentTenantAsync(tenantUser.TenantId);
+            tenantManager.SetCurrentTenant(new Tenant(tenantUser.TenantId, String.Empty));
 
             var authManager = scope.ServiceProvider.GetRequiredService<AuthManager>();
             var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
@@ -95,7 +96,7 @@ public class AutoCleanTrashService(
             var now = DateTime.UtcNow;
 
             var trashId = await folderDao.GetFolderIDTrashAsync(false, tenantUser.UserId);
-            if(trashId == 0)
+            if (trashId == 0)
             {
                 return;
             }

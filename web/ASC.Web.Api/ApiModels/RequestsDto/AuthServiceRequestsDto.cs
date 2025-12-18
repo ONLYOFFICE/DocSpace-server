@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,50 +27,56 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// Request parameters for authorization service
+/// The request parameters for handling the authorization service.
 /// </summary>
 public class AuthServiceRequestsDto
 {
     /// <summary>
-    /// Name
+    /// The name of the authorization service.
     /// </summary>
     public string Name { get; set; }
 
     /// <summary>
-    /// Title
+    /// The user-friendly display title of the authorization service.
     /// </summary>
     public string Title { get; set; }
 
     /// <summary>
-    /// Description
+    /// The brief description of the authorization service.
     /// </summary>
     public string Description { get; set; }
 
     /// <summary>
-    /// Instruction
+    /// The detailed instructions for configuring or using the authorization service.
     /// </summary>
     public string Instruction { get; set; }
 
     /// <summary>
-    /// Specifies if the authentication service can be set or not
+    /// Specifies whether the authorization service can be configured by the user.
     /// </summary>
     public bool CanSet { get; set; }
 
     /// <summary>
-    /// List of authorization keys
+    /// Specifies whether the authorization service is paid or not.
+    /// </summary>
+    public bool Paid { get; set; }
+
+    /// <summary>
+    /// The collection of authorization keys associated with the authorization service.
     /// </summary>
     public List<AuthKey> Props { get; set; }
 
     public static async Task<AuthServiceRequestsDto> From(Consumer consumer, string logoText)
     {
         var authService = await AuthService.From(consumer, logoText);
-        var result = new AuthServiceRequestsDto 
-        { 
-            Name = authService.Name, 
-            Title = authService.Title, 
-            Description = authService.Description, 
+        var result = new AuthServiceRequestsDto
+        {
+            Name = authService.Name,
+            Title = authService.Title,
+            Description = authService.Description,
             Instruction = authService.Instruction,
-            CanSet = authService.CanSet
+            CanSet = authService.CanSet,
+            Paid = authService.Paid
         };
 
         if (consumer.CanSet)

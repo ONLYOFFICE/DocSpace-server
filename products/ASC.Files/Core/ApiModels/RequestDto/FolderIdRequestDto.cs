@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,23 +27,38 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// 
+/// The request parameters for accessing a folder by its ID.
 /// </summary>
 public class FolderIdRequestDto<T>
 {
     /// <summary>
-    /// Folder ID
+    /// The folder unique identifier.
     /// </summary>
     [FromRoute(Name = "folderId")]
-    public T FolderId { get; set; }
+    public required T FolderId { get; set; }
 }
 
-
+/// <summary>
+/// The request parameters for accessing a folder by its primary ID.
+/// </summary>
 public class FolderPrimaryIdRequestDto<T>
 {
     /// <summary>
-    /// Folder Id
+    /// The folder unique identifier.
     /// </summary>
     [FromRoute(Name = "id")]
-    public T Id { get; set; }
+    public required T Id { get; set; }
+
+    /// <summary>
+    /// The number of items to retrieve in the request.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
+
+    /// <summary>
+    /// The starting index for the query results.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
 }

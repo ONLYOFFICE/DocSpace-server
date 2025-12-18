@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,7 +31,8 @@ internal class CrossDao //Additional SharpBox
 (IServiceProvider serviceProvider,
         SetupInfo setupInfo,
         FileConverter fileConverter,
-        SocketManager socketManager)
+        SocketManager socketManager,
+        Global global)
 {
     public async Task<File<TTo>> PerformCrossDaoFileCopyAsync<TFrom, TTo>(
         TFrom fromFileId, IFileDao<TFrom> fromFileDao, Func<TFrom, TFrom> fromConverter,
@@ -43,10 +44,13 @@ internal class CrossDao //Additional SharpBox
 
         if (fromFile.ContentLength > setupInfo.AvailableFileSize)
         {
-            throw new Exception(string.Format(deleteSourceFile ? FilesCommonResource.ErrorMessage_FileSizeMove : FilesCommonResource.ErrorMessage_FileSizeCopy,
-                                              FileSizeComment.FilesSizeToString(setupInfo.AvailableFileSize)));
+            throw new Exception(string.Format(
+                deleteSourceFile 
+                    ? FilesCommonResource.ErrorMessage_FileSizeMove 
+                    : FilesCommonResource.ErrorMessage_FileSizeCopy, 
+                FileSizeComment.FilesSizeToString(setupInfo.AvailableFileSize)));
         }
-        
+
         var securityDao = serviceProvider.GetService<ISecurityDao<TFrom>>();
         var securityDaoTo = serviceProvider.GetService<ISecurityDao<TTo>>();
         var tagDao = serviceProvider.GetService<ITagDao<TFrom>>();
@@ -55,13 +59,14 @@ internal class CrossDao //Additional SharpBox
         
         var fromFileShareRecords = securityDao.GetPureShareRecordsAsync(fromFileCopy);
         var fromFileNewTags = tagDao.GetNewTagsAsync(Guid.Empty, fromFileCopy);
-        var fromFileLockTag = await tagDao.GetTagsAsync(fromFileId, FileEntryType.File, TagType.Locked).FirstOrDefaultAsync();
+        var fromFileLockTag = await tagDao.GetTagsAsync(fromFile.Id, FileEntryType.File, TagType.Locked).FirstOrDefaultAsync();
+        var fromFileCustomFilterTag = await tagDao.GetTagsAsync(fromFile.Id, FileEntryType.File, TagType.CustomFilter).FirstOrDefaultAsync();
         var fromFileFavoriteTag = await tagDao.GetTagsAsync(fromFile.Id, FileEntryType.File, TagType.Favorite).ToListAsync();
         var fromFileTemplateTag = await tagDao.GetTagsAsync(fromFile.Id, FileEntryType.File, TagType.Template).ToListAsync();
 
         var toFile = serviceProvider.GetService<File<TTo>>();
 
-        toFile.Title = fromFile.Title;
+        toFile.Title = await global.GetAvailableTitleAsync(fromFile.Title, toFolderId, toFileDao.IsExistAsync, FileEntryType.File);
         toFile.Encrypted = fromFile.Encrypted;
         toFile.ParentId = toConverter(toFolderId);
         toFile.ThumbnailStatus = Thumbnail.Waiting;
@@ -96,7 +101,7 @@ internal class CrossDao //Additional SharpBox
                 Options = record.Options,
                 Level = record.Level
             };
-            
+
             await securityDaoTo.SetShareAsync(toRecord);
         }
 
@@ -104,6 +109,10 @@ internal class CrossDao //Additional SharpBox
         if (fromFileLockTag != null)
         {
             fromFileTags.Add(fromFileLockTag);
+        }
+        if (fromFileCustomFilterTag != null)
+        {
+            fromFileTags.Add(fromFileCustomFilterTag);
         }
 
         fromFileTags.AddRange(fromFileFavoriteTag);
@@ -131,7 +140,7 @@ internal class CrossDao //Additional SharpBox
         var fromFolder = await fromFolderDao.GetFolderAsync(fromConverter(fromFolderId));
 
         var toFolder1 = serviceProvider.GetService<Folder<TTo>>();
-        toFolder1.Title = fromFolder.Title;
+        toFolder1.Title = await global.GetAvailableTitleAsync(fromFolder.Title, toRootFolderId, toFolderDao.IsExistAsync, FileEntryType.File);
         toFolder1.ParentId = toConverter(toRootFolderId);
 
         var toFolder = await toFolderDao.GetFolderAsync(fromFolder.Title, toConverter(toRootFolderId));
@@ -147,7 +156,7 @@ internal class CrossDao //Additional SharpBox
         var foldersToCopy = await fromFolderDao.GetFoldersAsync(fromConverter(fromFolderId)).ToListAsync();
         var fileIdsToCopy = await fromFileDao.GetFilesAsync(fromConverter(fromFolderId)).ToListAsync();
         Exception copyException = null;
-        
+
         //Copy files first
         foreach (var fileId in fileIdsToCopy)
         {
@@ -164,7 +173,7 @@ internal class CrossDao //Additional SharpBox
                 copyException = ex;
             }
         }
-        
+
         foreach (var folder in foldersToCopy)
         {
             cancellationToken?.ThrowIfCancellationRequested();
@@ -201,7 +210,7 @@ internal class CrossDao //Additional SharpBox
                     Options = record.Options,
                     Level = record.Level
                 };
-                
+
                 await securityDaoTo.SetShareAsync(toRecord);
             }
 

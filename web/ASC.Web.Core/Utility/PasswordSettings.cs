@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,14 +30,10 @@ namespace ASC.Web.Core.Utility;
 /// </summary>
 public sealed class PasswordSettings : ISettings<PasswordSettings>
 {
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("aa93a4d1-012d-4ccd-895a-e094e809c840"); }
-    }
+    public static Guid ID => new("aa93a4d1-012d-4ccd-895a-e094e809c840");
 
     private readonly IConfiguration _configuration;
-    
+
 
     /// <summary>Minimum password length</summary>
     /// <type>System.Int32, System</type>
@@ -50,12 +46,12 @@ public sealed class PasswordSettings : ISettings<PasswordSettings>
     /// <summary>Specifies if the password must include the digits or not</summary>
     /// <type>System.Boolean, System</type>
     public bool Digits { get; set; }
-    
+
 
     /// <summary>Specifies if the password must include the special symbols or not</summary>
     /// <type>System.Boolean, System</type>
     public bool SpecSymbols { get; set; }
-    
+
     public PasswordSettings(IConfiguration configuration)
     {
         _configuration = configuration;
@@ -76,6 +72,8 @@ public sealed class PasswordSettings : ISettings<PasswordSettings>
 
         return def;
     }
+
+    public DateTime LastModified { get; set; }
 }
 
 [Singleton]
@@ -102,41 +100,23 @@ public sealed class PasswordSettingsManager(IConfiguration configuration)
             return _printableASCII.Value;
         }
     }
-    
+
 
     /// <summary>Allowed characters for the password in the regex string format</summary>
     /// <type>System.String, System</type>
-    public string AllowedCharactersRegexStr
-    {
-        get
-        {
-            return PrintableASCII ? @"[\x21-\x7E]" : @"[0-9a-zA-Z!""#$%&()*+,.:;<>?@^_{}~]"; // excluding SPACE or (SPACE and '-/=[\]`|)
-        }
-    }
+    public string AllowedCharactersRegexStr => PrintableASCII ? @"[\x21-\x7E]" : @"[0-9a-zA-Z!""#$%&()*+,.:;<>?@^_{}~]"; // excluding SPACE or (SPACE and '-/=[\]`|)
 
     /// <summary>Allowed digits for the password in the regex string format</summary>
     /// <type>System.String, System</type>
-    public string DigitsRegexStr
-    {
-        get => @"(?=.*\d)";
-    }
+    public string DigitsRegexStr => @"(?=.*\d)";
 
     /// <summary>Allowed uppercase letters for the password in the regex string format</summary>
     /// <type>System.String, System</type>
-    public string UpperCaseRegexStr
-    {
-        get => @"(?=.*[A-Z])";
-    }
+    public string UpperCaseRegexStr => @"(?=.*[A-Z])";
 
     /// <summary>Allowed special symbols for the password in the regex string format</summary>
     /// <type>System.String, System</type>
-    public string SpecSymbolsRegexStr
-    {
-        get
-        {
-            return PrintableASCII ? @"(?=.*[\x21-\x2F\x3A-\x40\x5B-\x60\x7B-\x7E])" : @"(?=.*[!""#$%&()*+,.:;<>?@^_{}~])";
-        }
-    }
+    public string SpecSymbolsRegexStr => PrintableASCII ? @"(?=.*[\x21-\x2F\x3A-\x40\x5B-\x60\x7B-\x7E])" : @"(?=.*[!""#$%&()*+,.:;<>?@^_{}~])";
 
     public void CheckPassword(string password, PasswordSettings passwordSettings)
     {
@@ -162,7 +142,7 @@ public sealed class PasswordSettingsManager(IConfiguration configuration)
 
         return length >= defaultMinLength && length <= MaxLength;
     }
-    
+
     private string GetPasswordRegex(PasswordSettings passwordSettings)
     {
         var pwdBuilder = new StringBuilder("^");

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,10 +36,10 @@ internal class GoogleDriveProviderInfo(DisposableWrapper wrapper, ProviderInfoHe
     public override Selector Selector => Selectors.GoogleDrive;
     public override ProviderFilter ProviderFilter => ProviderFilter.GoogleDrive;
 
-    public async Task<List<DriveFile>> GetItemsAsync(string folderId, bool? folder)
+    public async Task<List<DriveFile>> GetItemsAsync(string folderId, bool? folder, Func<DriveFile, string> getId, Func<DriveFile, bool> isFile)
     {
         var storage = await StorageAsync;
 
-        return await ProviderInfoHelper.GetItemsAsync(storage, ProviderId, folderId, Selector.Id, folder);
+        return await ProviderInfoHelper.GetItemsAsync(storage, ProviderId, folderId, Selector.Id, getId, isFile, folder);
     }
 }

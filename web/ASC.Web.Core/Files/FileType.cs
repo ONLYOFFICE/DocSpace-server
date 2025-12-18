@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,6 +28,9 @@ using NetEscapades.EnumGenerators;
 
 namespace ASC.Web.Core.Files;
 
+/// <summary>
+/// The file type.
+/// </summary>
 [EnumExtensions]
 public enum FileType
 {
@@ -56,5 +59,8 @@ public enum FileType
     Document = 7,
 
     [SwaggerEnum("Pdf")]
-    Pdf = 10
+    Pdf = 10,
+
+    [SwaggerEnum("Diagram")]
+    Diagram = 11
 }

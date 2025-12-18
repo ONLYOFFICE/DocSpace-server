@@ -25,59 +25,62 @@ public static class IdentityCertExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddIdentityCert(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<IdentityCert>(entity =>
+        public void MySqlAddIdentityCert()
         {
-            entity.HasKey(e => e.Id).HasName("PRIMARY");
+            modelBuilder.Entity<IdentityCert>(entity =>
+            {
+                entity.HasKey(e => e.Id).HasName("PRIMARY");
 
-            entity.ToTable("identity_certs");
+                entity.ToTable("identity_certs");
 
-            entity.Property(e => e.Id)
-                .HasColumnName("id")
-                .HasMaxLength(36);
-            entity.Property(e => e.CreatedAt)
-                .HasMaxLength(6)
-                .HasColumnName("created_at");
-            entity.Property(e => e.PairType).HasColumnName("pair_type");
-            entity.Property(e => e.PrivateKey)
-                .HasColumnType("text")
-                .HasColumnName("private_key")
-                .IsRequired();
-            entity.Property(e => e.PublicKey)
-                .HasColumnType("text")
-                .HasColumnName("public_key")
-                .IsRequired();
-        });
-    }
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasMaxLength(36);
+                entity.Property(e => e.CreatedAt)
+                    .HasMaxLength(6)
+                    .HasColumnName("created_at");
+                entity.Property(e => e.PairType).HasColumnName("pair_type");
+                entity.Property(e => e.PrivateKey)
+                    .HasColumnType("text")
+                    .HasColumnName("private_key")
+                    .IsRequired();
+                entity.Property(e => e.PublicKey)
+                    .HasColumnType("text")
+                    .HasColumnName("public_key")
+                    .IsRequired();
+            });
+        }
 
-    public static void PgSqlAddIdentityCert(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<IdentityCert>(entity =>
+        public void PgSqlAddIdentityCert()
         {
-            entity.HasKey(e => e.Id).HasName("PK_identity_certs");
+            modelBuilder.Entity<IdentityCert>(entity =>
+            {
+                entity.HasKey(e => e.Id).HasName("PK_identity_certs");
 
-            entity.ToTable("identity_certs");
+                entity.ToTable("identity_certs");
 
-            entity.Property(e => e.Id)
-                .HasColumnName("id")
-                .HasMaxLength(36);
-            
-            entity.Property(e => e.CreatedAt)
-                .HasColumnName("created_at");
-            
-            entity.Property(e => e.PairType)
-                .HasColumnName("pair_type");
-            
-            entity.Property(e => e.PrivateKey)
-                .HasColumnType("text")
-                .HasColumnName("private_key")
-                .IsRequired();
-            
-            entity.Property(e => e.PublicKey)
-                .HasColumnType("text")
-                .HasColumnName("public_key")
-                .IsRequired();
-        });
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasMaxLength(36);
+
+                entity.Property(e => e.CreatedAt)
+                    .HasColumnName("created_at");
+
+                entity.Property(e => e.PairType)
+                    .HasColumnName("pair_type");
+
+                entity.Property(e => e.PrivateKey)
+                    .HasColumnType("text")
+                    .HasColumnName("private_key")
+                    .IsRequired();
+
+                entity.Property(e => e.PublicKey)
+                    .HasColumnType("text")
+                    .HasColumnName("public_key")
+                    .IsRequired();
+            });
+        }
     }
 }

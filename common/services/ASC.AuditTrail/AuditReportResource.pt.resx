@@ -216,6 +216,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>O Tema de Cores foi Alterado</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Contatos</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>As Definições de Cookies foram Alteradas</value>
   </data>
@@ -251,9 +254,6 @@
   </data>
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Atualização das Definições de Substituição</value>
-  </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Documentos</value>
   </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Definições</value>
@@ -387,9 +387,6 @@
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>As Definições do Sphinx foram atualizadas</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>Geral</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>As Configurações da Página de Boas Vindas foram Atualizadas</value>
   </data>
@@ -398,9 +395,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Grupo Eliminado: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Grupos</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Grupo Atualizado: {0}</value>
@@ -484,13 +478,13 @@
     <value>Relatório do Histórico de Logins ({0}-{1})</value>
   </data>
   <data name="LoginSuccess" xml:space="preserve">
-    <value>Login Bem-sucedido</value>
+    <value>Login bem-sucedido</value>
   </data>
   <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Login através da Conta de Redes Sociais Bem-sucedido</value>
+    <value>Login através da Conta de Redes Sociais bem-sucedido: {0}</value>
   </data>
   <data name="LoginSuccessSocialApp" xml:space="preserve">
-    <value>O login através da conta de redes sociais foi Bem-sucedido</value>
+    <value>O login através da conta de redes sociais foi bem-sucedido</value>
   </data>
   <data name="LoginSuccessViaApi" xml:space="preserve">
     <value>Login através da API bem-sucedido</value>
@@ -505,13 +499,13 @@
     <value>Login via SMS bem-sucedido</value>
   </data>
   <data name="LoginSuccessViaSocialAccount" xml:space="preserve">
-    <value>Login via API e Redes Sociais Bem-sucedido</value>
+    <value>Login via API e Redes Sociais bem-sucedido</value>
   </data>
   <data name="LoginSuccessViaSSO" xml:space="preserve">
-    <value>Login via SSO Bem-sucedido</value>
+    <value>Login via SSO bem-sucedido</value>
   </data>
   <data name="LoginSuccesViaTfaApp" xml:space="preserve">
-    <value>Login via autenticador Bem-sucedido</value>
+    <value>Login via autenticador bem-sucedido</value>
   </data>
   <data name="Logout" xml:space="preserve">
     <value>Terminar Sessão</value>
@@ -524,9 +518,6 @@
   </data>
   <data name="MoveActionType" xml:space="preserve">
     <value>Mover</value>
-  </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Outros</value>
   </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Proprietário Alterado: {0}</value>
@@ -545,9 +536,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>As Definições da Força da Palavra-Passe foram Atualizadas</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>Pessoas</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Plataforma</value>
@@ -591,9 +579,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Lista de Produtos Atualizada</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Produtos</value>
-  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Reatribuições</value>
   </data>
@@ -609,7 +594,7 @@
   <data name="SessionStarted" xml:space="preserve">
     <value>Sessão Iniciada</value>
   </data>
-  <data name="SettingsProduct" xml:space="preserve">
+  <data name="SettingsModule" xml:space="preserve">
     <value>Definições</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
@@ -618,7 +603,7 @@
   <data name="SSOEnabled" xml:space="preserve">
     <value>SSO Ativado</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>Iniciar cópia de segurança</value>
   </data>
   <data name="StartStorageDecryption" xml:space="preserve">
@@ -731,9 +716,6 @@
   </data>
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>Utilizadores [{0}]. As Instruções para a Alteração de Palavra-Chave foram Enviadas</value>
-  </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>Utilizadores</value>
   </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>Utilizadores [{0}]. As Instruções de Ativação foram Enviadas</value>
@@ -867,9 +849,6 @@
   <data name="RoomInviteResend" xml:space="preserve">
     <value>Reenviar convites: {0}</value>
   </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
-  </data>
   <data name="ChangeClientActivation" xml:space="preserve">
     <value>Ativação do {0} do cliente alterada</value>
   </data>
@@ -929,5 +908,203 @@
   </data>
   <data name="UpdateClient" xml:space="preserve">
     <value>O {0} do cliente atualizado</value>
+  </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Definições de acesso às Ferramentas de Programador alteradas</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>Ficheiros [{0}]. Versão Eliminada: {1}</value>
+  </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Utilizadores [{0}]. Formulário completamente preenchido: {1}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Utilizadores [{0}]. Preencheu uma parte do formulário: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Utilizadores [{0}]. Começou a preencher: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Utilizadores [{0}]. O formulário parou: {1}</value>
+  </data>
+  <data name="WebhookCreated" xml:space="preserve">
+    <value>Webhook criado: {0}</value>
+  </data>
+  <data name="WebhookDeleted" xml:space="preserve">
+    <value>Webhook eliminado: {0}</value>
+  </data>
+  <data name="WebhookUpdated" xml:space="preserve">
+    <value>Webhook atualizado: {0}</value>
+  </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>Ficheiro: {0}. Filtro personalizado desativado</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>Ficheiro: {0}. Filtro personalizado ativado</value>
+  </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Chave API do utilizador criada: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Chave API do utilizador eliminada: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Chave API do utilizador atualizada: {0}</value>
+  </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>O link de autorização foi ativado</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Operação do cliente realizada</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Relatório de operações do cliente descarregado</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Assinatura do cliente atualizada: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Carteira do cliente recarregada: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Configurações de recarga da carteira do cliente atualizadas</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>Autenticação LDAP desativada</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>Autenticação LDAP ativada</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>Sincronização LDAP concluída</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Localização</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Configurações de visibilidade dos banners promocionais alteradas</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Configurações de serviços habilitados para carteira de cliente atualizadas</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>Adicionado servidor MCP {0} ao agente</value>
+  </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>Agente criado</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>Agente eliminado</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>Agente renomeado: {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>Agentes</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>Provedor de IA criado: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>Provedor de IA eliminado: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>Provedor de IA atualizado: {0}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Agentes de IA [{0}]. Definir quota de armazenamento personalizada para agentes de IA: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>Agentes de IA [{0}]. Definir quota de armazenamento padrão para agentes de IA: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Agentes de IA [{0}]. Quota de armazenamento desativada para agentes de IA</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>Servidor MCP {0} eliminado do agente</value>
+  </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Ficheiros [{0}]. Ligação externa criada: {1}. Função: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Ficheiros [{0}]. Ligação externa eliminada: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Ficheiros [{0}]. Ligação externa atualizada: {1}. Função: {2}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Ficheiro marcado como favorito: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Ficheiro removido dos favoritos: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Ficheiro removido de “Partilhado comigo”: {0}</value>
+  </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Ficheiros [{0}]. Acesso atualizado para {1}. Função: {2}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Pasta transferida: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Pastas [{0}]. Link externo criado: {1}. Função: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Pastas [{0}]. Link externo eliminado: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Pastas [{0}]. Link externo atualizado: {1}. Função: {2}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Pasta removida de “Partilhado comigo”: {0}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Pastas [{0}]. Acesso atualizado para {1}. Função: {2}</value>
+  </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Login através da Conta de Redes Sociais bem-sucedido</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Login bem-sucedido via OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Login bem-sucedido via login e senha</value>
+  </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Definir quota de armazenamento padrão para agentes de IA: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Quota de armazenamento padrão desativada para agentes de IA</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>As configurações de vetorização foram redefinidas</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>As configurações de pesquisa na Web foram redefinidas</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Link externo revogado: {1}</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>Servidor MCP criado: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>Servidor MCP eliminado: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>Servidor MCP desativado: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>Servidor MCP ativado: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>Servidor MCP atualizado: {0}</value>
+  </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>As definições de vetorização estão configuradas. Provedor: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>As definições de pesquisa na Web estão configuradas. Motor: {0}</value>
   </data>
 </root>

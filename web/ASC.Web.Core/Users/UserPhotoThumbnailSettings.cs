@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,11 +30,8 @@ namespace ASC.Web.Core.Users;
 
 public class UserPhotoThumbnailSettings : ISettings<UserPhotoThumbnailSettings>
 {
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{CC3AA821-43CA-421B-BDCD-81FB6D3361CF}"); }
-    }
+    public static Guid ID => new("{CC3AA821-43CA-421B-BDCD-81FB6D3361CF}");
+
     public UserPhotoThumbnailSettings()
     {
 
@@ -67,4 +64,6 @@ public class UserPhotoThumbnailSettings : ISettings<UserPhotoThumbnailSettings>
             IsDefault = true
         };
     }
+
+    public DateTime LastModified { get; set; }
 }

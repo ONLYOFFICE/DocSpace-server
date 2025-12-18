@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -37,9 +37,9 @@ public class FacebookLoginProvider : BaseLoginProvider<FacebookLoginProvider>
     public override string Scopes => "email,public_profile";
 
     private const string FacebookProfileUrl = "https://graph.facebook.com/me?fields=email,id,birthday,link,first_name,last_name,gender";
-    
+
     private readonly RequestHelper _requestHelper;
-    
+
     public FacebookLoginProvider() { }
     public FacebookLoginProvider(
         OAuth20TokenHelper oAuth20TokenHelper,
@@ -50,8 +50,8 @@ public class FacebookLoginProvider : BaseLoginProvider<FacebookLoginProvider>
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
         RequestHelper requestHelper,
-        string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-            : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
+        string name, int order, bool paid, Dictionary<string, string> props, Dictionary<string, string> additional = null)
+            : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, paid, props, additional)
     {
         _requestHelper = requestHelper;
     }

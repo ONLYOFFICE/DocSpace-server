@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,58 +27,69 @@
 namespace ASC.Web.Core.WhiteLabel;
 
 /// <summary>
-/// Company white label settings
+/// The company white label settings wrapper.
 /// </summary>
 public class CompanyWhiteLabelSettingsWrapper
 {
     /// <summary>
-    /// Company white label settings
+    /// The company white label settings.
     /// </summary>
     public CompanyWhiteLabelSettings Settings { get; set; }
 }
 
+/// <summary>
+/// The company white label settings.
+/// </summary>
 public class CompanyWhiteLabelSettings : ISettings<CompanyWhiteLabelSettings>
 {
+    /// <summary>
+    /// The core settings.
+    /// </summary>
     public CoreSettings CoreSettings;
 
     /// <summary>
-    /// Company name
+    /// The company name.
     /// </summary>
     [StringLength(255)]
     public string CompanyName { get; set; }
 
     /// <summary>
-    /// Site
+    /// The company site.
     /// </summary>
     [Url]
     [StringLength(255)]
     public string Site { get; set; }
 
     /// <summary>
-    /// Email address
+    /// The company email address.
     /// </summary>
     [EmailAddress]
     [StringLength(255)]
     public string Email { get; set; }
 
     /// <summary>
-    /// Address
+    /// The company address.
     /// </summary>
     [StringLength(255)]
     public string Address { get; set; }
 
     /// <summary>
-    /// Phone
+    /// The company phone number.
     /// </summary>
     [Phone]
     [StringLength(255)]
     public string Phone { get; set; }
 
     /// <summary>
-    /// Specifies if a company is a licensor or not
+    /// Specifies if a company is a licensor or not.
     /// </summary>
     [JsonPropertyName("IsLicensor")]
     public bool IsLicensor { get; set; }
+
+    /// <summary>
+    /// Specifies if the About page is visible or not
+    /// </summary>
+    public bool HideAbout { get; set; }
 
     public CompanyWhiteLabelSettings(CoreSettings coreSettings)
     {
@@ -92,11 +103,7 @@ public class CompanyWhiteLabelSettings : ISettings<CompanyWhiteLabelSettings>
 
     #region ISettings Members
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{C3C5A846-01A3-476D-A962-1CFD78C04ADB}"); }
-    }
+    public static Guid ID => new("{C3C5A846-01A3-476D-A962-1CFD78C04ADB}");
 
 
     public CompanyWhiteLabelSettings GetDefault()
@@ -109,6 +116,8 @@ public class CompanyWhiteLabelSettings : ISettings<CompanyWhiteLabelSettings>
 
         return result;
     }
+
+    public DateTime LastModified { get; set; }
 
     #endregion
 }
@@ -131,6 +140,7 @@ public class CompanyWhiteLabelSettingsHelper(CoreSettings coreSettings, Settings
                 settings.Email == defaultSettings.Email &&
                 settings.Address == defaultSettings.Address &&
                 settings.Phone == defaultSettings.Phone &&
-                settings.IsLicensor == defaultSettings.IsLicensor;
+                settings.IsLicensor == defaultSettings.IsLicensor &&
+                settings.HideAbout == defaultSettings.HideAbout;
     }
 }

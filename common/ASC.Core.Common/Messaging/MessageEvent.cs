@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,19 +26,23 @@
 
 namespace ASC.MessagingSystem.EF.Model;
 
-public class MessageEvent : IMapFrom<EventMessage>
+public class MessageEvent
 {
     public int Id { get; set; }
+
     [MaxLength(50)]
     public string Ip { get; set; }
+
     [MaxLength(200)]
     public string Browser { get; set; }
+
     [MaxLength(200)]
     public string Platform { get; set; }
     public DateTime Date { get; set; }
     public int TenantId { get; set; }
     public Guid? UserId { get; set; }
-    [MaxLength(300)]
+
+    [MaxLength(4096)]
     public string Page { get; set; }
     public int? Action { get; set; }
 }

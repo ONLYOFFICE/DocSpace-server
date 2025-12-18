@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,9 +29,9 @@ namespace ASC.Api.Core.Extensions;
 public static class ConfigurationManagerExtension
 {
     public static ConfigurationManager AddDefaultConfiguration(
-      this ConfigurationManager config,
-      IHostEnvironment env
-      )
+        this ConfigurationManager config,
+        IHostEnvironment env
+    )
     {
         var path = config["pathToConf"];
 
@@ -39,13 +39,10 @@ public static class ConfigurationManagerExtension
         {
             path = Path.GetFullPath(CrossPlatform.PathCombine(env.ContentRootPath, path));
         }
-              
+
         config.SetBasePath(path);
 
-        config.AddInMemoryCollection(new Dictionary<string, string>
-              {
-                      {"pathToConf", path }
-              });
+        config.AddInMemoryCollection(new Dictionary<string, string> { { "pathToConf", path } });
 
         config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
             .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
@@ -63,7 +60,89 @@ public static class ConfigurationManagerExtension
             .AddJsonFile("zookeeper.json", optional: true, reloadOnChange: true)
             .AddJsonFile($"zookeeper.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
 
+        var formatsPath = Path.GetFullPath(Path.Combine(path, "document-formats", "onlyoffice-docs-formats.json"));
+
+        if (File.Exists(formatsPath))
+        {
+            var readStream = File.ReadAllText(formatsPath);
+            var formats = JsonSerializer.Deserialize<List<FileFormatConfig>>(readStream, new JsonSerializerOptions
+            {
+                AllowTrailingCommas = true,
+                WriteIndented = true,
+                PropertyNameCaseInsensitive = true
+            });
+
+            using var memoryStream = new MemoryStream();
+            JsonSerializer.Serialize(memoryStream, new FileFormatConfigList { FileFormats = formats });
+            memoryStream.Position = 0;
+            config.AddJsonStream(memoryStream);
+        }
+
         return config;
     }
+}
 
+public class FileFormatConfigList
+{
+    public List<FileFormatConfig> FileFormats { get; set; } = [];
+}
+
+/// <summary>
+/// Represents a file format configuration with supported actions and conversions
+/// </summary>
+public class FileFormatConfig
+{
+    /// <summary>
+    /// Gets or sets the name of the file format
+    /// </summary>
+    public string Name { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the type of the file format
+    /// </summary>
+    public string Type { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the list of supported actions for this format
+    /// </summary>
+    public List<string> Actions { get; set; } = [];
+
+    /// <summary>
+    /// Gets or sets the list of formats this file can be converted to
+    /// </summary>
+    public List<string> Convert { get; set; } = [];
+
+    /// <summary>
+    /// Gets or sets the MIME types associated with this format
+    /// </summary>
+    public List<string> Mime { get; set; } = [];
+
+    /// <summary>
+    /// Checks if the format supports a specific action
+    /// </summary>
+    /// <param name="action">The action to check</param>
+    /// <returns>True if the action is supported, false otherwise</returns>
+    public bool SupportsAction(string action)
+    {
+        return Actions.Contains(action, StringComparer.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Checks if the format matches a specific MIME type
+    /// </summary>
+    /// <param name="mimeType">The MIME type to check</param>
+    /// <returns>True if the MIME type matches, false otherwise</returns>
+    public bool MatchesMimeType(string mimeType)
+    {
+        return Mime.Contains(mimeType, StringComparer.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Gets the primary MIME type for this format
+    /// </summary>
+    /// <returns>The first MIME type or empty string if none available</returns>
+    public string GetPrimaryMimeType()
+    {
+        return Mime.FirstOrDefault() ?? string.Empty;
+    }
 }

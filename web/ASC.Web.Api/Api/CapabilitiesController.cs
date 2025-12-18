@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -39,25 +39,25 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
         ProviderManager providerManager,
         SettingsManager settingsManager,
         ILogger<CapabilitiesController> logger,
-        CommonLinkUtility commonLinkUtility)
+        CommonLinkUtility commonLinkUtility,
+        GeolocationHelper geolocationHelper)
     : ControllerBase
 {
     private readonly ILogger _log = logger;
 
 
     ///<summary>
-    ///Returns the information about portal capabilities.
+    /// Returns the information about portal capabilities.
     ///</summary>
     ///<short>
-    ///Get portal capabilities
+    /// Get portal capabilities
     ///</short>
     ///<path>api/2.0/capabilities</path>
-    ///<requiresAuthorization>false</requiresAuthorization>
     [Tags("Capabilities")]
     [SwaggerResponse(200, "Portal capabilities", typeof(CapabilitiesDto))]
     [HttpGet] //NOTE: this method doesn't requires auth!!!  //NOTE: this method doesn't check payment!!!
     [AllowNotPayment]
-    public async Task<CapabilitiesDto> GetPortalCapabilitiesAsync()
+    public async Task<CapabilitiesDto> GetPortalCapabilities()
     {
         var quota = await tenantManager.GetTenantQuotaAsync(tenantManager.GetCurrentTenantId());
         var result = new CapabilitiesDto
@@ -91,7 +91,9 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
         {
             if (result.OauthEnabled)
             {
-                result.Providers = ProviderManager.AuthProviders.Where(loginProvider =>
+                var geoInfoKey = (await geolocationHelper.GetIPGeolocationFromHttpContextAsync()).Key;
+
+                result.Providers = ProviderManager.GetSortedAuthProviders(geoInfoKey).Where(loginProvider =>
                 {
                     if (loginProvider is ProviderConstants.Facebook or ProviderConstants.AppleId
                                                                     && coreBaseSettings.Standalone && HttpContext.Request.MobileApp())

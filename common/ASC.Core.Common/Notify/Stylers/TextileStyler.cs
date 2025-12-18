@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -281,7 +281,7 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
     {
         var withoutUnsubscribe = message.GetArgument("WithoutUnsubscribe");
 
-        if (withoutUnsubscribe != null && (bool)withoutUnsubscribe.Value)
+        if (withoutUnsubscribe != null && bool.TryParse((string)withoutUnsubscribe.Value, out var val) && val)
         {
             return string.Empty;
         }

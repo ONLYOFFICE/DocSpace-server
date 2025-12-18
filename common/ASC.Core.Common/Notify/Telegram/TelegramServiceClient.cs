@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Microsoft.Extensions.Caching.Distributed;
+
 namespace ASC.Core.Common.Notify;
 
 [Singleton]
@@ -31,7 +33,7 @@ public class TelegramServiceClient(IEventBus eventBus,
         ICacheNotify<RegisterUserProto> cacheRegisterUser,
         ICacheNotify<CreateClientProto> cacheCreateClient,
         ICacheNotify<DisableClientProto> cacheDisableClient,
-        ICache cache)
+        IDistributedCache cache)
     : ITelegramService
 {
     public async Task SendMessage(NotifyMessage m)
@@ -42,9 +44,13 @@ public class TelegramServiceClient(IEventBus eventBus,
         });
     }
 
-    public async Task RegisterUserAsync(string userId, int tenantId, string token)
+    public async Task RegisterUserAsync(string userId, int tenantId, int tokenLifespan, string token)
     {
-        cache.Insert(GetCacheTokenKey(tenantId, userId), token, DateTime.MaxValue);
+        await cache.SetStringAsync(GetCacheTokenKey(tenantId, userId), token, new DistributedCacheEntryOptions
+        {
+            AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(tokenLifespan)
+        });
+
         await cacheRegisterUser.PublishAsync(new RegisterUserProto
         {
             UserId = userId,
@@ -69,13 +75,13 @@ public class TelegramServiceClient(IEventBus eventBus,
         await cacheDisableClient.PublishAsync(new DisableClientProto { TenantId = tenantId }, CacheNotifyAction.Insert);
     }
 
-    public string RegistrationToken(string userId, int tenantId)
+    public async Task<string> RegistrationToken(string userId, int tenantId)
     {
-        return cache.Get<string>(GetCacheTokenKey(tenantId, userId));
+        return await cache.GetStringAsync(GetCacheTokenKey(tenantId, userId));
     }
 
     private string GetCacheTokenKey(int tenantId, string userId)
     {
-        return "Token" + userId + tenantId;
+        return $"tg-token:{userId}:{tenantId}";
     }
 }

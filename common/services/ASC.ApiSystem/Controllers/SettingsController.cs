@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -41,12 +41,13 @@ public class SettingsController(CommonMethods commonMethods,
     #region For TEST api
 
     /// <summary>
-    /// Test api
+    /// Test API.
     /// </summary>
     /// <path>apisystem/settings/test</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [SwaggerResponse(200, "Settings api works")]
     [HttpGet("test")]
+    [AllowAnonymous]
     public IActionResult Check()
     {
         return Ok(new
@@ -60,9 +61,12 @@ public class SettingsController(CommonMethods commonMethods,
     #region API methods
 
     /// <summary>
-    /// Gets settings
+    /// Returns the portal settings by the parameters specified in the request.
     /// </summary>
-    /// <path>apisystem/settings</path>
+    /// <short>
+    /// Get settings
+    /// </short>
+    /// <path>apisystem/settings/get</path>
     [Tags("Settings")]
     [SwaggerResponse(200, "Settings", typeof(IActionResult))]
     [HttpGet("get")]
@@ -93,8 +97,11 @@ public class SettingsController(CommonMethods commonMethods,
     }
 
     /// <summary>
-    /// Saves settings
+    /// Saves the settings specified in the request for the current portal.
     /// </summary>
+    /// <short>
+    /// Save settings
+    /// </short>
     /// <path>apisystem/settings/save</path>
     [Tags("Settings")]
     [SwaggerResponse(200, "Settings", typeof(IActionResult))]
@@ -151,8 +158,11 @@ public class SettingsController(CommonMethods commonMethods,
     }
 
     /// <summary>
-    /// Checks domain
+    /// Checks the domain with the name specified in the request.
     /// </summary>
+    /// <short>
+    /// Check the domain name
+    /// </short>
     /// <path>apisystem/settings/checkdomain</path>
     [Tags("Settings")]
     [SwaggerResponse(200, "True if success", typeof(IActionResult))]
@@ -195,7 +205,7 @@ public class SettingsController(CommonMethods commonMethods,
 
             return Ok(new
             {
-                value= false
+                value = false
             });
         }
     }

@@ -159,7 +159,9 @@ Un formular nou "$DocumentTitle":"$DocumentURL" este completat în sala "$RoomTi
  
 Expeditorul formularului: "$FromUserName":"$FromUserLink"
  
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>h1. Dumneavoastră ați completat formularul $Message
@@ -168,12 +170,73 @@ Dumneavoastră ați completat formularul "$DocumentTitle":"$DocumentURL" în sal
  
 Manager: "$ToUserName":"$ToUserLink"
  
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
     <value>Notificare DocSpace. Formularul este completat</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
     <value>Notificare DocSpace. Formularul este completat</value>
+  </data>
+  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
+    <value>Un document nou "$DocumentTitle" a fost creat în sala "$RoomTitle"</value>
+  </data>
+  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
+    <value>Fișiere noi au fost încărcate în sala "$RoomTitle" ($Count)</value>
+  </data>
+  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
+    <value>Un fișier nou "$DocumentTitle" a fost încărcat în sala "$RoomTitle"</value>
+  </data>
+  <data name="pattern_EditorMentions_push" xml:space="preserve">
+    <value>$ToUserName v-a menționat în documentul $DocumentTitle</value>
+  </data>
+  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
+    <value>Un folder nou "$FolderTitle" a fost creat în sala "$RoomTitle"</value>
+  </data>
+  <data name="pattern_FormStartedFilling" xml:space="preserve">
+    <value>
+      Notificare de activitate. "$FromUserName":"$FromUserLink" a început completarea formularului: "$DocumentTitle":"$DocumentURL" în sala: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_FormSubmitted_push" xml:space="preserve">
+    <value>Formularul "$DocumentTitle" a fost completat în sala "$RoomTitle"</value>
+  </data>
+  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+    <value>
+      Notificare de activitate. Formularul "$DocumentTitle":"$DocumentURL" a fost completat în întregime în sala: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
+    <value>$FromUserName a mutat sala "$RoomTitle" în arhivă</value>
+  </data>
+  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
+    <value>Rolul dvs în sala "$RoomTitle" s-a schimbat în "$RoomRole"</value>
+  </data>
+  <data name="pattern_StoppedFormFilling" xml:space="preserve">
+    <value>
+      Notificare de activitate. "$FromUserName":"$FromUserLink" a încetat completarea formularului: "$DocumentTitle":"$DocumentURL" în sala: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_YourTurnFormFilling" xml:space="preserve">
+    <value>
+      Notificare de activitate. Acum e rândul dvs. Formularul trebuie completat: "$DocumentTitle":"$DocumentURL" în sala: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="subject_FormStartedFilling" xml:space="preserve">
+    <value>Notificare DocSpace.</value>
+  </data>
+  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
+    <value>Notificare DocSpace.</value>
+  </data>
+  <data name="subject_StoppedFormFilling" xml:space="preserve">
+    <value>Notificare DocSpace.</value>
+  </data>
+  <data name="subject_YourTurnFormFilling" xml:space="preserve">
+    <value>Notificare DocSpace.</value>
+  </data>
+  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
+    <value>Ați fost invitat(ă) în sala "$RoomTitle"</value>
   </data>
 </root>

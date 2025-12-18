@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -71,9 +71,9 @@ internal class SharePointDaoBase(
 
             await foreach (var oldId in oldIds)
             {
-                var oldHashId = await mapping.MappingIdAsync(oldId);
+                var (oldHashId, _) = await mapping.MappingIdAsync(oldId);
                 var newId = oldId.Replace(oldValue, newValue);
-                var newHashId = await mapping.MappingIdAsync(newId);
+                var (newHashId, _) = await mapping.MappingIdAsync(newId);
 
                 var mappingForDelete = await Queries.ThirdpartyIdMappingsAsync(dbContext, tenantId, oldHashId).ToListAsync();
                 var mappingForInsert = mappingForDelete.Select(m => new DbFilesThirdpartyIdMapping

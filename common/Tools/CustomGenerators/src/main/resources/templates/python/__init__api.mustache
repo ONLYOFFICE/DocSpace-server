@@ -1,0 +1,5 @@
+{{>partial_header}}
+
+# import apis into api package
+{{#apiInfo}}{{#apis}}from {{apiPackage}}.{{x-folder}}.{{x-folder-api}} import {{x-classname}}
+{{/apis}}{{/apiInfo}}

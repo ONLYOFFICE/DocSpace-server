@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,7 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Data.Backup.Core.Quota;
 using ASC.Files.Core.Core;
+using ASC.Web.Files.Utils;
 
 namespace ASC.Data.Backup.BackgroundTasks;
 
@@ -42,11 +44,13 @@ public class Startup : BaseStartup
     {
         var services = builder.Services;
         await base.ConfigureServices(builder);
-        
-        services.RegisterQueue<BackupProgressItem>(5);
-        services.RegisterQueue<RestoreProgressItem>(5);
-        services.RegisterQueue<TransferProgressItem>(5);
-        
+
+        services.RegisterQueue<BackupProgressItem>(5, 60 * 60 * 24);
+        services.RegisterQueue<RestoreProgressItem>(5, 60 * 60 * 24);
+        services.RegisterQueue<TransferProgressItem>(5, 60 * 60 * 24);
+        services.RegisterQueue<AsyncTaskData<int>>();
+        services.RegisterQueue<AsyncTaskData<string>>();
+
         services.AddHostedService<BackupListenerService>();
         services.AddHostedService<BackupCleanerTempFileService>();
 
@@ -57,6 +61,8 @@ public class Startup : BaseStartup
         services.AddBaseDbContextPool<BackupsContext>();
         services.AddBaseDbContextPool<FilesDbContext>();
         services.RegisterQuotaFeature();
+        services.RegisterFreeBackupQuotaFeature();
 
+        services.AddBackupSchedulerServiceResiliencePipeline();
     }
 }

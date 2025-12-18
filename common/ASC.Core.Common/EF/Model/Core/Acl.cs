@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,7 +28,7 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Core.Common.EF;
 
-public class Acl : BaseEntity, IMapFrom<AzRecord>
+public class Acl : BaseEntity
 {
     public int TenantId { get; set; }
     public Guid Subject { get; set; }
@@ -128,64 +128,68 @@ public static class AclExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddAcl(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Acl>(entity =>
+        public void MySqlAddAcl()
         {
-            entity.HasKey(e => new { e.TenantId, e.Subject, e.Action, e.Object })
-                .HasName("PRIMARY");
+            modelBuilder.Entity<Acl>(entity =>
+            {
+                entity.HasKey(e => new { e.TenantId, e.Subject, e.Action, e.Object })
+                    .HasName("PRIMARY");
 
-            entity.ToTable("core_acl")
-                .HasCharSet("utf8");
+                entity.ToTable("core_acl")
+                    .HasCharSet("utf8");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant");
+                entity.Property(e => e.TenantId).HasColumnName("tenant");
 
-            entity.Property(e => e.Subject)
-                .HasColumnName("subject")
-                .HasColumnType("varchar(38)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Subject)
+                    .HasColumnName("subject")
+                    .HasColumnType("varchar(38)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Action)
-                .HasColumnName("action")
-                .HasColumnType("varchar(38)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Action)
+                    .HasColumnName("action")
+                    .HasColumnType("varchar(38)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Object)
-                .HasColumnName("object")
-                .HasColumnType("varchar")
-                .HasDefaultValueSql("''")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Object)
+                    .HasColumnName("object")
+                    .HasColumnType("varchar")
+                    .HasDefaultValueSql("''")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.AceType).HasColumnName("acetype");
-        });
-    }
-    public static void PgSqlAddAcl(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<Acl>(entity =>
+                entity.Property(e => e.AceType).HasColumnName("acetype");
+            });
+        }
+
+        public void PgSqlAddAcl()
         {
-            entity.HasKey(e => new { e.TenantId, e.Subject, e.Action, e.Object });
+            modelBuilder.Entity<Acl>(entity =>
+            {
+                entity.HasKey(e => new { e.TenantId, e.Subject, e.Action, e.Object });
 
-            entity.ToTable("core_acl");
+                entity.ToTable("core_acl");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant");
+                entity.Property(e => e.TenantId).HasColumnName("tenant");
 
-            entity.Property(e => e.Subject)
-                .HasColumnName("subject")
-                .HasColumnType("uuid");
+                entity.Property(e => e.Subject)
+                    .HasColumnName("subject")
+                    .HasColumnType("uuid");
 
-            entity.Property(e => e.Action)
-                .HasColumnName("action")
-                .HasColumnType("uuid");
+                entity.Property(e => e.Action)
+                    .HasColumnName("action")
+                    .HasColumnType("uuid");
 
-            entity.Property(e => e.Object)
-                .HasColumnName("object")
-                .HasColumnType("text");
+                entity.Property(e => e.Object)
+                    .HasColumnName("object")
+                    .HasColumnType("text");
 
-            entity.Property(e => e.AceType).HasColumnName("acetype");
-        });
-        
+                entity.Property(e => e.AceType).HasColumnName("acetype");
+            });
+
+        }
     }
 }

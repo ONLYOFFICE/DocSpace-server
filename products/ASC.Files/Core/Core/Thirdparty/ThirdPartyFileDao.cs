@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -109,8 +109,8 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         }
     }
 
-    public IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension,
-        bool searchInContent, bool checkShared = false)
+    public IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, IEnumerable<string> excludeParentsIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension,
+        bool searchInContent)
     {
         if (fileIds == null || !fileIds.Any() || filterType == FilterType.FoldersOnly)
         {
@@ -122,7 +122,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         //Filter
         if (subjectID != Guid.Empty)
         {
-            files = files.WhereAwait(async x => subjectGroup
+            files = files.Where(async (x, _) => subjectGroup
                 ? await userManager.IsUserInGroupAsync(x.CreateBy, subjectID)
                 : x.CreateBy == subjectID);
         }
@@ -154,6 +154,9 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
                     var fileType = FileUtility.GetFileTypeByFileName(x.Title);
                     return fileType is FileType.Audio or FileType.Video;
                 });
+                break;
+            case FilterType.DiagramsOnly:
+                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Diagram);
                 break;
             case FilterType.ByExtension:
                 if (!string.IsNullOrEmpty(searchText))
@@ -197,14 +200,22 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
             yield break;
         }
 
-        //Get only files
-        var filesWait = await Dao.GetItemsAsync(parentId, false);
+        List<TItem> filesWait;
+
+        try
+        {
+            filesWait = await Dao.GetItemsAsync(parentId, false);
+        }
+        catch
+        {
+            filesWait = [];
+        }
+
         var files = filesWait.Select(item => Dao.ToFile(item as TFile)).ToAsyncEnumerable();
 
-        //Filter
         if (subjectID != Guid.Empty)
         {
-            files = files.WhereAwait(async x => subjectGroup
+            files = files.Where(async (x, _) => subjectGroup
                 ? await userManager.IsUserInGroupAsync(x.CreateBy, subjectID)
                 : x.CreateBy == subjectID);
         }
@@ -237,6 +248,9 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
 
                     return fileType is FileType.Audio or FileType.Video;
                 });
+                break;
+            case FilterType.DiagramsOnly:
+                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Diagram);
                 break;
             case FilterType.ByExtension:
                 if (!string.IsNullOrEmpty(searchText))
@@ -383,6 +397,11 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         return item.Exists(i => Dao.GetName(i).Equals(title, StringComparison.InvariantCultureIgnoreCase));
     }
 
+    public async Task<bool> IsExistAsync(string title, int category, string folderId)
+    {
+        return await IsExistAsync(title, folderId);
+    }
+
     public Task<File<string>> ReplaceFileVersionAsync(File<string> file, Stream fileStream)
     {
         return SaveFileAsync(file, fileStream);
@@ -397,7 +416,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     {
         await DeleteFileAsync(fileId);
     }
-    
+
     public async Task DeleteFileAsync(string fileId)
     {
         var file = await Dao.GetFileAsync(fileId);
@@ -643,7 +662,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
             var path = uploadSession.TempPath;
             await using var fs = new FileStream(path, FileMode.Append);
             await stream.CopyToAsync(fs);
-            
+
             if (!uploadSession.Items.TryAdd(BytesTransferredKey, chunkLength.ToString()))
             {
                 if (long.TryParse(uploadSession.GetItemOrDefault<string>(BytesTransferredKey), out var transferred))
@@ -753,9 +772,19 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     }
 
     public Task<int> GetFilesCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, bool withSubfolders = false,
-        bool excludeSubject = false, string roomId = null, FormsItemDto formsItemDto = null)
+        bool excludeSubject = false, string roomId = null, FormsItemDto formsItemDto = null, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All)
     {
         throw new NotImplementedException();
+    }
+
+    public Task<int> GetSharedFilesCountAsync(string parentId)
+    {
+        return Task.FromResult(0);
+    }
+
+    public IAsyncEnumerable<File<string>> GetSharedFilesAsync(string parentId, int offset = 0, int count = -1)
+    {
+        return AsyncEnumerable.Empty<File<string>>();
     }
 
     public Task<int> SetCustomOrder(string fileId, string parentFolderId, int order)
@@ -768,14 +797,14 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         return Task.CompletedTask;
     }
 
-    public IAsyncEnumerable<File<string>> GetFilesByTagAsync(Guid tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, string[] extension, bool searchInContent, bool excludeSubject, OrderBy orderBy, int offset = 0, int count = -1)
+    public IAsyncEnumerable<File<string>> GetFilesByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
+        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, int trashId, OrderBy orderBy, int offset, int count)
     {
         return AsyncEnumerable.Empty<File<string>>();
     }
 
-    public Task<int> GetFilesByTagCountAsync(Guid tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, string[] extension, bool searchInContent, bool excludeSubject)
+    public Task<int> GetFilesByTagCountAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
+        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, int trashId)
     {
         return Task.FromResult(0);
     }
@@ -786,11 +815,11 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
 
         if (!uploadSession.Items.ContainsKey(UploadSessionKey))
         {
-            return long.TryParse(uploadSession.GetItemOrDefault<string>(BytesTransferredKey), out var transferred) 
-                ? Task.FromResult(transferred) 
+            return long.TryParse(uploadSession.GetItemOrDefault<string>(BytesTransferredKey), out var transferred)
+                ? Task.FromResult(transferred)
                 : null;
         }
-        
+
         var nativeSession = uploadSession.GetItemOrDefault<ThirdPartyUploadSessionBase>(UploadSessionKey);
 
         return Task.FromResult(nativeSession.BytesTransferred);
@@ -798,23 +827,36 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
 
     public Task SaveFormRoleMapping(string formId, IEnumerable<FormRole> formRoles)
     {
-        throw new NotImplementedException();
+        return Task.CompletedTask;
     }
     public IAsyncEnumerable<FormRole> GetFormRoles(string formId)
     {
-        throw new NotImplementedException();
+        return AsyncEnumerable.Empty<FormRole>();
     }
-    public Task<(int, IAsyncEnumerable<FormRole>)> GetUserFormRoles(string formId, Guid userId)
+    public Task<(int, List<FormRole>)> GetUserFormRoles(string formId, Guid userId)
     {
-        throw new NotImplementedException();
+        return Task.FromResult((-1, new List<FormRole>()));
+    }
+    public IAsyncEnumerable<FormRole> GetUserFormRolesInRoom(string roomId, Guid userId)
+    {
+        return AsyncEnumerable.Empty<FormRole>();
     }
     public Task<FormRole> ChangeUserFormRoleAsync(string formId, FormRole formRole)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<FormRole>(null);
     }
     public Task DeleteFormRolesAsync(string formId)
     {
-        throw new NotImplementedException();
+        return Task.CompletedTask;
+    }
+    public Task<int> UpdateCategoryAsync(string fileId, int fileVersion, int category, ForcesaveType forcesave)
+    {
+        return Task.FromResult(0);
+    }
+    
+    public Task SetVectorizationStatusAsync(string fileId, VectorizationStatus status, Func<Task> action = null)
+    {
+        return Task.CompletedTask;
     }
 }
 
@@ -824,9 +866,9 @@ static file class Queries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx) =>
                 (from ft in ctx.Tag
-                    join ftl in ctx.TagLink.DefaultIfEmpty() on new { ft.TenantId, ft.Id } equals new { ftl.TenantId, Id = ftl.TagId }
-                    where ftl == null
-                    select ft)
+                 join ftl in ctx.TagLink.DefaultIfEmpty() on new { ft.TenantId, ft.Id } equals new { ftl.TenantId, Id = ftl.TagId }
+                 where ftl == null
+                 select ft)
                 .ExecuteDelete());
 
     public static readonly Func<FilesDbContext, int, string, Task<int>> DeleteTagLinksAsync =

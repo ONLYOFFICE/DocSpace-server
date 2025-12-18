@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,6 +38,8 @@ public class DbWebhooksConfig : BaseEntity
     public bool Enabled { get; set; }
     public bool SSL { get; set; }
     public WebhookTrigger Triggers { get; set; }
+    [MaxLength(36)]
+    public string TargetId { get; set; }
 
     public Guid? CreatedBy { get; set; }
     public DateTime? CreatedOn { get; set; }
@@ -66,178 +68,194 @@ public static class WebhooksConfigExtension
 
         return modelBuilder;
     }
-    public static void MySqlAddWebhooksConfig(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbWebhooksConfig>(entity =>
+        public void MySqlAddWebhooksConfig()
         {
-            entity.HasKey(e => new { e.Id })
-                .HasName("PRIMARY");
+            modelBuilder.Entity<DbWebhooksConfig>(entity =>
+            {
+                entity.HasKey(e => new { e.Id })
+                    .HasName("PRIMARY");
 
-            entity.HasIndex(e => e.TenantId)
-                .HasDatabaseName("tenant_id");
+                entity.HasIndex(e => e.TenantId)
+                    .HasDatabaseName("tenant_id");
 
-            entity.ToTable("webhooks_config")
-                .HasCharSet("utf8");
+                entity.ToTable("webhooks_config")
+                    .HasCharSet("utf8");
 
-            entity.Property(e => e.Id)
-                .HasColumnType("int")
-                .HasColumnName("id");
+                entity.Property(e => e.Id)
+                    .HasColumnType("int")
+                    .HasColumnName("id");
 
-            entity.Property(e => e.TenantId)
-                .HasColumnName("tenant_id");
+                entity.Property(e => e.TenantId)
+                    .HasColumnName("tenant_id");
 
-            entity.Property(e => e.Name)
-                .HasColumnName("name")
-                .IsRequired();
+                entity.Property(e => e.Name)
+                    .HasColumnName("name")
+                    .IsRequired();
 
-            entity.Property(e => e.SecretKey)
-                .HasColumnName("secret_key")
-                .HasDefaultValueSql("''");
+                entity.Property(e => e.SecretKey)
+                    .HasColumnName("secret_key")
+                    .HasDefaultValueSql("''");
 
-            entity.Property(e => e.Uri)
-                .HasColumnName("uri")
-                .HasDefaultValueSql("''")
-                .HasColumnType("text")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Uri)
+                    .HasColumnName("uri")
+                    .HasDefaultValueSql("''")
+                    .HasColumnType("text")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Enabled)
-                .HasColumnName("enabled")
-                .HasDefaultValueSql("'1'")
-                .HasColumnType("tinyint(1)");
+                entity.Property(e => e.Enabled)
+                    .HasColumnName("enabled")
+                    .HasDefaultValueSql("'1'")
+                    .HasColumnType("tinyint(1)");
 
-            entity.Property(e => e.SSL)
-                .HasColumnName("ssl")
-                .HasDefaultValueSql("'1'")
-                .HasColumnType("tinyint(1)");
+                entity.Property(e => e.SSL)
+                    .HasColumnName("ssl")
+                    .HasDefaultValueSql("'1'")
+                    .HasColumnType("tinyint(1)");
 
-            entity.Property(e => e.Triggers)
-                .HasColumnName("triggers")
-                .IsRequired();
+                entity.Property(e => e.Triggers)
+                    .HasColumnName("triggers")
+                    .IsRequired();
 
-            entity.Property(e => e.CreatedBy)
-                .IsRequired(false)
-                .HasColumnName("created_by")
-                .HasColumnType("varchar(36)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.TargetId)
+                    .IsRequired(false)
+                    .HasColumnName("target_id")
+                    .HasColumnType("varchar(36)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.CreatedOn)
-                .IsRequired(false)
-                .HasColumnName("created_on")
-                .HasColumnType("datetime");
+                entity.Property(e => e.CreatedBy)
+                    .IsRequired(false)
+                    .HasColumnName("created_by")
+                    .HasColumnType("varchar(36)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.ModifiedBy)
-                .IsRequired(false)
-                .HasColumnName("modified_by")
-                .HasColumnType("varchar(36)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.CreatedOn)
+                    .IsRequired(false)
+                    .HasColumnName("created_on")
+                    .HasColumnType("datetime");
 
-            entity.Property(e => e.ModifiedOn)
-                .IsRequired(false)
-                .HasColumnName("modified_on")
-                .HasColumnType("datetime");
+                entity.Property(e => e.ModifiedBy)
+                    .IsRequired(false)
+                    .HasColumnName("modified_by")
+                    .HasColumnType("varchar(36)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.LastFailureOn)
-                .IsRequired(false)
-                .HasColumnName("last_failure_on")
-                .HasColumnType("datetime");
+                entity.Property(e => e.ModifiedOn)
+                    .IsRequired(false)
+                    .HasColumnName("modified_on")
+                    .HasColumnType("datetime");
 
-            entity.Property(e => e.LastFailureContent)
-                .IsRequired(false)
-                .HasColumnName("last_failure_content")
-                .HasColumnType("varchar(200)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.LastFailureOn)
+                    .IsRequired(false)
+                    .HasColumnName("last_failure_on")
+                    .HasColumnType("datetime");
 
-            entity.Property(e => e.LastSuccessOn)
-                .IsRequired(false)
-                .HasColumnName("last_success_on")
-                .HasColumnType("datetime");
-        });
-    }
+                entity.Property(e => e.LastFailureContent)
+                    .IsRequired(false)
+                    .HasColumnName("last_failure_content")
+                    .HasColumnType("varchar(200)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-    public static void PgSqlAddWebhooksConfig(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<DbWebhooksConfig>(entity =>
+                entity.Property(e => e.LastSuccessOn)
+                    .IsRequired(false)
+                    .HasColumnName("last_success_on")
+                    .HasColumnType("datetime");
+            });
+        }
+
+        public void PgSqlAddWebhooksConfig()
         {
-            entity.HasKey(e => e.Id)
-                .HasName("webhooks_config_pkey");
+            modelBuilder.Entity<DbWebhooksConfig>(entity =>
+            {
+                entity.HasKey(e => e.Id)
+                    .HasName("webhooks_config_pkey");
 
-            entity.HasIndex(e => e.TenantId)
-                .HasDatabaseName("idx_webhooks_config_tenant_id");
+                entity.HasIndex(e => e.TenantId)
+                    .HasDatabaseName("idx_webhooks_config_tenant_id");
 
-            entity.ToTable("webhooks_config");
+                entity.ToTable("webhooks_config");
 
-            entity.Property(e => e.Id)
-                .HasColumnName("id")
-                .HasColumnType("integer");
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("integer");
 
-            entity.Property(e => e.TenantId)
-                .HasColumnName("tenant_id")
-                .HasColumnType("integer");
+                entity.Property(e => e.TenantId)
+                    .HasColumnName("tenant_id")
+                    .HasColumnType("integer");
 
-            entity.Property(e => e.Name)
-                .HasColumnName("name")
-                .IsRequired()
-                .HasMaxLength(50)
-                .HasColumnType("character varying");
+                entity.Property(e => e.Name)
+                    .HasColumnName("name")
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .HasColumnType("character varying");
 
-            entity.Property(e => e.SecretKey)
-                .HasColumnName("secret_key")
-                .HasDefaultValueSql("''")
-                .HasColumnType("text");
+                entity.Property(e => e.SecretKey)
+                    .HasColumnName("secret_key")
+                    .HasDefaultValueSql("''")
+                    .HasColumnType("text");
 
-            entity.Property(e => e.Uri)
-                .HasColumnName("uri")
-                .IsRequired(false)
-                .HasColumnType("text");
+                entity.Property(e => e.Uri)
+                    .HasColumnName("uri")
+                    .IsRequired(false)
+                    .HasColumnType("text");
 
-            entity.Property(e => e.Enabled)
-                .HasColumnName("enabled")
-                .HasDefaultValueSql("true")
-                .HasColumnType("boolean");
+                entity.Property(e => e.Enabled)
+                    .HasColumnName("enabled")
+                    .HasDefaultValueSql("true")
+                    .HasColumnType("boolean");
 
-            entity.Property(e => e.SSL)
-                .HasColumnName("ssl")
-                .HasDefaultValueSql("true")
-                .HasColumnType("boolean");
+                entity.Property(e => e.SSL)
+                    .HasColumnName("ssl")
+                    .HasDefaultValueSql("true")
+                    .HasColumnType("boolean");
 
-            entity.Property(e => e.Triggers)
-                .HasColumnName("triggers")
-                .IsRequired();
+                entity.Property(e => e.Triggers)
+                    .HasColumnName("triggers")
+                    .IsRequired();
 
-            entity.Property(e => e.CreatedBy)
-                .IsRequired(false)
-                .HasColumnName("created_by")
-                .HasColumnType("uuid");
+                entity.Property(e => e.TargetId)
+                    .IsRequired(false)
+                    .HasColumnName("target_id")
+                    .HasMaxLength(36)
+                    .HasColumnType("character varying");
 
-            entity.Property(e => e.CreatedOn)
-                .IsRequired(false)
-                .HasColumnName("created_on");
+                entity.Property(e => e.CreatedBy)
+                    .IsRequired(false)
+                    .HasColumnName("created_by")
+                    .HasColumnType("uuid");
 
-            entity.Property(e => e.ModifiedBy)
-                .IsRequired(false)
-                .HasColumnName("modified_by")
-                .HasColumnType("uuid");
+                entity.Property(e => e.CreatedOn)
+                    .IsRequired(false)
+                    .HasColumnName("created_on");
 
-            entity.Property(e => e.ModifiedOn)
-                .IsRequired(false)
-                .HasColumnName("modified_on");
+                entity.Property(e => e.ModifiedBy)
+                    .IsRequired(false)
+                    .HasColumnName("modified_by")
+                    .HasColumnType("uuid");
 
-            entity.Property(e => e.LastFailureOn)
-                .IsRequired(false)
-                .HasColumnName("last_failure_on");
+                entity.Property(e => e.ModifiedOn)
+                    .IsRequired(false)
+                    .HasColumnName("modified_on");
 
-            entity.Property(e => e.LastFailureContent)
-                .IsRequired(false)
-                .HasColumnName("last_failure_content");
+                entity.Property(e => e.LastFailureOn)
+                    .IsRequired(false)
+                    .HasColumnName("last_failure_on");
 
-            entity.Property(e => e.LastSuccessOn)
-                .IsRequired(false)
-                .HasColumnName("last_success_on");
-        });
+                entity.Property(e => e.LastFailureContent)
+                    .IsRequired(false)
+                    .HasColumnName("last_failure_content");
+
+                entity.Property(e => e.LastSuccessOn)
+                    .IsRequired(false)
+                    .HasColumnName("last_success_on");
+            });
+        }
     }
 }
 

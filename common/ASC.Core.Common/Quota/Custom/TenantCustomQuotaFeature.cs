@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,5 +28,5 @@ namespace ASC.Core.Common.Quota.Custom;
 
 public class TenantCustomQuotaFeature : CustomQuotaFeature
 {
-    public override string Name { get => "tenant_custom_quota"; }
+    public override string Name => "tenant_custom_quota";
 }

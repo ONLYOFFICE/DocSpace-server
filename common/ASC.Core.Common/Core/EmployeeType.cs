@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,6 +26,9 @@
 
 namespace ASC.Core.Users;
 
+/// <summary>
+/// The user type.
+/// </summary>
 [Flags]
 [JsonConverter(typeof(JsonStringEnumConverter<EmployeeType>))]
 [EnumExtensions]
@@ -42,7 +45,7 @@ public enum EmployeeType
 
     [SwaggerEnum("DocSpace admin")]
     DocSpaceAdmin = 3,
-	
+
     [SwaggerEnum("User")]
     User = 4
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,30 +34,38 @@ public class WebPluginConfigSettings
         configuration.GetSetting("plugins", this);
     }
 
-    private long _maxSize;
-    private string _extension;
-    private string[] _assetExtensions;
-
     public bool Enabled { get; set; }
     public bool Upload { get; set; }
     public bool Delete { get; set; }
 
+    public int MaxCount
+    {
+        get => field > 0 ? field : 10;
+        set;
+    }
+
     public long MaxSize
     {
-        get => _maxSize > 0 ? _maxSize : 5L * 1024L * 1024L;
-        set => _maxSize = value;
+        get => field > 0 ? field : 5L * 1024L * 1024L;
+        set;
     }
 
     public string Extension
     {
-        get => _extension ?? ".zip";
-        set => _extension = value;
+        get => field ?? ".zip";
+        set;
     }
 
     public string[] AssetExtensions
     {
-        get => _assetExtensions ?? [];
-        set => _assetExtensions = value;
+        get => field ?? [];
+        set;
+    }
+
+    public int AssetMaxCount
+    {
+        get => field > 0 ? field : 10;
+        set;
     }
 }
 
@@ -65,16 +73,14 @@ public class WebPluginSettings : ISettings<WebPluginSettings>
 {
     public Dictionary<string, WebPluginState> EnabledPlugins { get; set; }
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{B33CB1F2-1FE6-4BD5-83D0-0D9C217490F5}"); }
-    }
+    public static Guid ID => new("{B33CB1F2-1FE6-4BD5-83D0-0D9C217490F5}");
 
     public WebPluginSettings GetDefault()
     {
         return new WebPluginSettings();
     }
+
+    public DateTime LastModified { get; set; }
 }
 
 public class WebPluginState(bool enabled, string settings)

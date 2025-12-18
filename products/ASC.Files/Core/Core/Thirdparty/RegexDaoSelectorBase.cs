@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -40,10 +40,9 @@ internal class RegexDaoSelectorBase<TFile, TFolder, TItem>(IServiceProvider serv
     where TItem : class
 {
     protected readonly IServiceProvider _serviceProvider = serviceProvider;
-    protected internal string Name { get => _serviceProvider.GetService<IProviderInfo<TFile, TFolder, TItem>>().Selector.Name; }
-    protected internal string Id { get => _serviceProvider.GetService<IProviderInfo<TFile, TFolder, TItem>>().Selector.Id; }
-    public Regex Selector => _selector ??= new Regex(@"^" + Id + @"-(?'id'\d+)(-(?'path'.*)){0,1}$", RegexOptions.Singleline | RegexOptions.Compiled);
-    private Regex _selector;
+    protected internal string Name => _serviceProvider.GetService<IProviderInfo<TFile, TFolder, TItem>>().Selector.Name;
+    protected internal string Id => _serviceProvider.GetService<IProviderInfo<TFile, TFolder, TItem>>().Selector.Id;
+    public Regex Selector => field ??= new Regex(@"^" + Id + @"-(?'id'\d+)(-(?'path'.*)){0,1}$", RegexOptions.Singleline | RegexOptions.Compiled);
 
     private Dictionary<string, BaseProviderInfo<TFile, TFolder, TItem>> Providers { get; set; } = new();
 
@@ -141,7 +140,7 @@ internal class RegexDaoSelectorBase<TFile, TFolder, TItem>(IServiceProvider serv
             ProviderInfo = providerInfo,
             PathPrefix = Id + "-" + match.Groups["id"].Value
         };
-        
+
         Providers.TryAdd(objectId, info);
         return info;
     }

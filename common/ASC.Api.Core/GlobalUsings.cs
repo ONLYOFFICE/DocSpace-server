@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,7 +27,6 @@
 global using System.ComponentModel.DataAnnotations;
 global using System.Globalization;
 global using System.IdentityModel.Tokens.Jwt;
-global using System.Linq.Expressions;
 global using System.Net;
 global using System.Reflection;
 global using System.Runtime.InteropServices;
@@ -36,7 +35,6 @@ global using System.Security;
 global using System.Security.Authentication;
 global using System.Security.Claims;
 global using System.Security.Cryptography;
-global using System.Security.Principal;
 global using System.Text;
 global using System.Text.Encodings.Web;
 global using System.Text.Json;
@@ -111,6 +109,7 @@ global using ASC.Web.Core.PublicResources;
 global using ASC.Web.Core.Quota;
 global using ASC.Web.Core.Users;
 global using ASC.Web.Studio.Core;
+global using ASC.Web.Studio.Core.TFA;
 global using ASC.Web.Studio.UserControls.Management.SingleSignOnSettings;
 global using ASC.Web.Studio.Utility;
 global using ASC.Webhooks.Core;

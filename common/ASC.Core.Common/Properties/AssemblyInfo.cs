@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,4 +29,4 @@ using System.Runtime.InteropServices;
 
 [assembly: ComVisible(false)]
 [assembly: Guid("3ff04204-4b22-4899-bcde-07edfcbb5355")]
-[assembly: InternalsVisibleTo("ASC.Core.Common.Tests")] 
+[assembly: InternalsVisibleTo("ASC.Core.Common.Tests")]

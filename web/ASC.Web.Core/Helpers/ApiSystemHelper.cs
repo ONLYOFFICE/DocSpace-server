@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -39,12 +39,10 @@ public class ApiSystemHelper
 {
     public string ApiSystemUrl { get; }
 
-    public bool ApiCacheEnable
-    {
-        get => _dynamoDbSettings.ApiCacheEnable;
-    }
+    public bool ApiCacheEnable => _dynamoDbSettings.ApiCacheEnable;
 
     private readonly byte[] _skey;
+    private readonly ILogger<ApiSystemHelper> _logger;
     private readonly CommonLinkUtility _commonLinkUtility;
     private readonly IHttpClientFactory _clientFactory;
     private readonly CoreBaseSettings _coreBaseSettings;
@@ -52,23 +50,25 @@ public class ApiSystemHelper
     private const string TenantRegionKey = "tenant_region";
     private const string TenantDomainKey = "tenant_domain";
     private readonly string _regionTableName;
-    private readonly Dictionary<string, string> _regions = new Dictionary<string, string> { { "us-west-2", "US" }, { "eu-central-1", "DEU" } };
+    private readonly Dictionary<string, string> _regions = new Dictionary<string, string> { { "us-west-2", "US" }, { "us-east-2", "US" }, { "eu-central-1", "DEU" } };
 
     public ApiSystemHelper(
         IConfiguration configuration,
+        ILogger<ApiSystemHelper> logger,
         CoreBaseSettings coreBaseSettings,
         CommonLinkUtility commonLinkUtility,
         MachinePseudoKeys machinePseudoKeys,
         IHttpClientFactory clientFactory)
     {
         ApiSystemUrl = configuration["web:api-system"];
+        _logger = logger;
         _commonLinkUtility = commonLinkUtility;
         _skey = machinePseudoKeys.GetMachineConstant();
         _clientFactory = clientFactory;
         _coreBaseSettings = coreBaseSettings;
-        _dynamoDbSettings =  configuration.GetSection("aws:dynamoDB").Get<DynamoDbSettings>();
-        _regionTableName = !string.IsNullOrEmpty(_dynamoDbSettings.TableName) ? _dynamoDbSettings.TableName: "docspace-tenants_region";
-        }
+        _dynamoDbSettings = configuration.GetSection("aws:dynamoDB").Get<DynamoDbSettings>();
+        _regionTableName = !string.IsNullOrEmpty(_dynamoDbSettings.TableName) ? _dynamoDbSettings.TableName : "docspace-tenants_region";
+    }
 
     public string CreateAuthToken(string pkey)
     {
@@ -107,11 +107,11 @@ public class ApiSystemHelper
 
     #region cache
 
-    public async Task AddTenantToCacheAsync(string tenantDomain, string tenantRegion)
+    public async Task<HttpStatusCode> AddTenantToCacheAsync(string tenantDomain, string tenantRegion)
     {
         if (String.IsNullOrEmpty(tenantRegion))
         {
-           throw new ArgumentNullException(nameof(tenantRegion));
+            throw new ArgumentNullException(nameof(tenantRegion));
         }
 
         using var awsDynamoDbClient = GetDynamoDBClient();
@@ -121,12 +121,12 @@ public class ApiSystemHelper
             TableName = _regionTableName,
             Item = new Dictionary<string, AttributeValue>
             {
-                { TenantDomainKey, new AttributeValue 
+                { TenantDomainKey, new AttributeValue
                     {
                         S = tenantDomain
                     }
                 },
-                { TenantRegionKey, new AttributeValue 
+                { TenantRegionKey, new AttributeValue
                     {
                         S = tenantRegion
                     }
@@ -134,7 +134,14 @@ public class ApiSystemHelper
             }
         };
 
-        await awsDynamoDbClient.PutItemAsync(putItemRequest);
+        var response = await awsDynamoDbClient.PutItemAsync(putItemRequest);
+
+        if (response.HttpStatusCode != HttpStatusCode.OK)
+        {
+            _logger.ErrorAddTenantToCache(tenantDomain, tenantRegion, response.HttpStatusCode.ToString());
+        }
+
+        return response.HttpStatusCode;
     }
 
     public async Task UpdateTenantToCacheAsync(string oldTenantDomain, string newTenantDomain)
@@ -158,7 +165,7 @@ public class ApiSystemHelper
         await RemoveTenantFromCacheAsync(oldTenantDomain);
     }
 
-    public async Task RemoveTenantFromCacheAsync(string tenantDomain)
+    public async Task<HttpStatusCode> RemoveTenantFromCacheAsync(string tenantDomain)
     {
         using var awsDynamoDbClient = GetDynamoDBClient();
 
@@ -171,7 +178,14 @@ public class ApiSystemHelper
             }
         };
 
-        await awsDynamoDbClient.DeleteItemAsync(request);
+        var response = await awsDynamoDbClient.DeleteItemAsync(request);
+
+        if (response.HttpStatusCode != HttpStatusCode.OK)
+        {
+            _logger.ErrorRemoveTenantFromCache(tenantDomain, response.HttpStatusCode.ToString());
+        }
+
+        return response.HttpStatusCode;
     }
 
     public async Task<string> GetTenantRegionAsync(string portalName)
@@ -197,7 +211,7 @@ public class ApiSystemHelper
 
         if (getItemResponse.Item.TryGetValue(TenantRegionKey, out var region))
         {
-            if(_regions.TryGetValue(region.S, out var value))
+            if (_regions.TryGetValue(region.S, out var value))
             {
                 return value;
             }
@@ -262,12 +276,12 @@ public class ApiSystemHelper
     }
 
     #endregion
-    
+
     private AmazonDynamoDBClient GetDynamoDBClient()
     {
         return new AmazonDynamoDBClient(_dynamoDbSettings.AccessKeyId, _dynamoDbSettings.SecretAccessKey, RegionEndpoint.GetBySystemName(_dynamoDbSettings.Region));
     }
-    
+
     private async Task<string> SendToApiAsync(string absoluteApiUrl, string apiPath, string httpMethod, Guid userId, string data = null)
     {
         if (!Uri.TryCreate(absoluteApiUrl, UriKind.Absolute, out _))

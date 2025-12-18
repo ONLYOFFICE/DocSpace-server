@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -70,7 +70,7 @@ public class RestoreDbModuleTask : PortalTaskBase
         _logger.DebugBeginRestoreDataForModule(_module.ModuleName);
         SetStepsCount(_module.Tables.Count(t => !_ignoredTables.Contains(t.Name)));
 
-        await using (var connection = DbFactory.OpenConnection(region:_region))
+        await using (var connection = DbFactory.OpenConnection(region: _region))
         {
             foreach (var table in _module.GetTablesOrdered().Where(t => !_ignoredTables.Contains(t.Name) && t.InsertMethod != InsertMethod.None))
             {
@@ -110,8 +110,9 @@ public class RestoreDbModuleTask : PortalTaskBase
         await using var stream = _reader.GetEntry(KeyHelper.GetTableZipKey(_module, tableInfo.Name));
         if (stream == null)
         {
-            throw new InvalidOperationException(tableInfo.Name + " not found");
+            return;
         }
+
         var lowImportanceRelations = _module
             .TableRelations
             .Where(r => string.Equals(r.ParentTable, tableInfo.Name, StringComparison.InvariantCultureIgnoreCase))

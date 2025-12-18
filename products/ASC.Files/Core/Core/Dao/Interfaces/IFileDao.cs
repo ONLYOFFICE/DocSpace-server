@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -81,16 +81,15 @@ public interface IFileDao<T>
     ///     Gets the file (s) by ID (s) for share
     /// </summary>
     /// <param name="fileIds">id file</param>
+    /// <param name="excludeParentsIds"></param>
     /// <param name="filterType"></param>
     /// <param name="subjectGroup"></param>
     /// <param name="subjectID"></param>
     /// <param name="searchText"></param>
     /// <param name="extension"></param>
     /// <param name="searchInContent"></param>
-    /// <param name="checkShared"></param>
     /// <returns></returns>
-    IAsyncEnumerable<File<T>> GetFilesFilteredAsync(IEnumerable<T> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, 
-        bool searchInContent, bool checkShared = false);
+    IAsyncEnumerable<File<T>> GetFilesFilteredAsync(IEnumerable<T> fileIds, IEnumerable<T> excludeParentsIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, bool searchInContent);
 
     /// <summary>
     /// 
@@ -141,7 +140,7 @@ public interface IFileDao<T>
     /// <param name="offset"></param>
     /// <returns>Stream</returns>
     Task<Stream> GetFileStreamAsync(File<T> file, long offset);
-    
+
     Task<Stream> GetFileStreamAsync(File<T> file, long offset, long length);
 
     Task<long> GetFileSizeAsync(File<T> file);
@@ -208,7 +207,7 @@ public interface IFileDao<T>
     /// <param name="fileId">file id</param>
     Task DeleteFileAsync(T fileId);
     Task DeleteFileVersionAsync(File<T> file, int version);
-    
+
     /// <summary>
     ///   Deletes a file including all previous versions
     /// </summary>
@@ -222,6 +221,15 @@ public interface IFileDao<T>
     /// <param name="folderId">folder id</param>
     /// <returns>Returns true if the file exists, otherwise false</returns>
     Task<bool> IsExistAsync(string title, T folderId);
+
+    /// <summary>
+    ///     Checks whether or not file
+    /// </summary>
+    /// <param name="title">file name</param>
+    /// <param name="category">file category</param>
+    /// <param name="folderId">folder id</param>
+    /// <returns>Returns true if the file exists, otherwise false</returns>
+    Task<bool> IsExistAsync(string title, int category, T folderId);
 
     /// <summary>
     ///   Moves a file or set of files in a folder
@@ -297,7 +305,15 @@ public interface IFileDao<T>
     /// <param name="formId"></param>
     /// <param name="userId"></param>
     /// <returns></returns>
-    Task<(int, IAsyncEnumerable<FormRole>)> GetUserFormRoles(T formId, Guid userId);
+    Task<(int, List<FormRole>)> GetUserFormRoles(T formId, Guid userId);
+
+    /// <summary>
+    /// Get user form roles in room
+    /// </summary>
+    /// <param name="roomId"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    IAsyncEnumerable<FormRole> GetUserFormRolesInRoom(T roomId, Guid userId);
     /// <summary>
     /// Updates user role
     /// </summary>
@@ -313,6 +329,16 @@ public interface IFileDao<T>
     /// <returns></returns>
     Task DeleteFormRolesAsync(T formId);
 
+    /// <summary>
+    /// Updates category and forcesave
+    /// </summary>
+    /// <param name="fileId"></param>
+    /// <param name="fileVersion"></param>
+    /// <param name="category"></param>
+    /// <param name="forcesave"></param>
+    /// <returns></returns>
+    Task<int> UpdateCategoryAsync(T fileId, int fileVersion, int category, ForcesaveType forcesave = ForcesaveType.None);
+
     string GetUniqFilePath(File<T> file, string fileTitle);
 
     #region chunking
@@ -322,7 +348,7 @@ public interface IFileDao<T>
     Task<File<T>> FinalizeUploadSessionAsync(ChunkedUploadSession<T> uploadSession);
     Task AbortUploadSessionAsync(ChunkedUploadSession<T> uploadSession);
     Task<long> GetTransferredBytesCountAsync(ChunkedUploadSession<T> uploadSession);
-    
+
     #endregion
 
     #region Only in TMFileDao
@@ -353,7 +379,7 @@ public interface IFileDao<T>
     /// <param name="extension"></param>
     /// <param name="searchInContent"></param>
     /// <returns></returns>
-    IAsyncEnumerable<File<T>> GetFilesAsync(IEnumerable<T> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, 
+    IAsyncEnumerable<File<T>> GetFilesAsync(IEnumerable<T> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension,
         bool searchInContent);
     /// <summary>
     /// Search the list of files containing text
@@ -393,19 +419,26 @@ public interface IFileDao<T>
 
     Task SaveProperties(T fileId, EntryProperties<T> entryProperties);
 
-    Task<int> GetFilesCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, 
+    Task<int> GetFilesCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent,
         bool withSubfolders = false, bool excludeSubject = false, T roomId = default,
-        FormsItemDto formsItemDto = null);
+        FormsItemDto formsItemDto = null, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All);
 
     Task<int> SetCustomOrder(T fileId, T parentFolderId, int order);
 
     Task InitCustomOrder(Dictionary<T, int> fileIds, T parentFolderId);
 
-    IAsyncEnumerable<File<T>> GetFilesByTagAsync(Guid tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, string[] extension, bool searchInContent, bool excludeSubject, OrderBy orderBy, int offset = 0, int count = -1);
+    IAsyncEnumerable<File<T>> GetFilesByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
+        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, int trashId, OrderBy orderBy, int offset, int count);
 
-    Task<int> GetFilesByTagCountAsync(Guid tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, string[] extension, bool searchInContent, bool excludeSubject);
+    Task<int> GetFilesByTagCountAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
+        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, int trashId);
+
+    Task<int> GetSharedFilesCountAsync(T parentId);
+
+    IAsyncEnumerable<File<T>> GetSharedFilesAsync(T parentId, int offset = 0, int count = -1);
+
+    Task SetVectorizationStatusAsync(T fileId, VectorizationStatus status, Func<Task> action = null);
 
     #endregion
 }
+public interface ICacheFileDao<T> : IFileDao<T>;

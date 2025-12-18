@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,6 +26,7 @@
 
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
+
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace ASC.Api.Core.Extensions;
@@ -35,6 +36,52 @@ public class HideRouteDocumentFilter(string routeToHide) : IDocumentFilter
     public void Apply(OpenApiDocument document, DocumentFilterContext context)
     {
         document.Paths.Remove(routeToHide);
+    }
+}
+
+public class DerivedSchemaFilter : ISchemaFilter
+{
+    public void Apply(OpenApiSchema schema, SchemaFilterContext context)
+    {
+        var baseType = context.Type;
+        var derivedTypes = baseType.GetCustomAttributes<JsonDerivedTypeAttribute>(true).Select(attr => attr.DerivedType).Where(t => t != null).Distinct().ToList();
+        if (derivedTypes.Count > 0)
+        {
+
+            schema.Extensions.Add("x-derived", new OpenApiBoolean(true));
+            var derivedArray = new OpenApiArray();
+            foreach (var type in derivedTypes)
+            {
+                var schemaId = CustomSchemaId(type);
+                derivedArray.Add(new OpenApiString(schemaId));
+            }
+
+            if (derivedArray.Any())
+            {
+                schema.Extensions["x-derived-types"] = derivedArray;
+            }
+        }
+    }
+
+    private static string CustomSchemaId(Type type)
+    {
+        var name = type.Name;
+
+        if (string.IsNullOrEmpty(name))
+        {
+            return name;
+        }
+
+        if (type.IsGenericType)
+        {
+            name = name.Split('`')[0];
+
+            var genericArgs = string.Join("", type.GenericTypeArguments.Select(CustomSchemaId));
+            name += genericArgs;
+        }
+        name = name.Replace("+", "_");
+        name = name.Replace("Int32", "Integer");
+        return name;
     }
 }
 
@@ -49,7 +96,7 @@ public class LowercaseDocumentFilter : IDocumentFilter
 
             for (var i = 0; i < segments.Length; i++)
             {
-                if (!segments[i].StartsWith("{") && !segments[i].EndsWith("}"))
+                if (!segments[i].StartsWith('{') && !segments[i].EndsWith("}"))
                 {
                     segments[i] = segments[i].ToLowerInvariant();
                 }
@@ -76,9 +123,10 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
         { "Files / Folders", "Operations for working with folders." },
         { "Files / Operations", "Operations for performing actions on files and folders." },
         { "Files / Quota", "Operations for working with room quota limit." },
-        { "Files / Rooms", "Operations for working with rooms." },
+        { "Rooms", "Operations for working with rooms." },
         { "Files / Settings", "Operations for working with file settings." },
         { "Files / Third-party integration", "Operations for working with third-party integrations." },
+        { "Files / Sharing", "Operations for working with sharing."},
         { "Group", "Operations for working with groups." },
         { "Group / Rooms", "Operations for getting groups with access rights to a room." },
         { "People / Contacts", "Operations for working with user contacts." },
@@ -97,16 +145,20 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
         { "Capabilities", "Operations for getting information about portal capabilities." },
         { "Migration", "Operations for performing migration." },
         { "Modules", "Operations for getting information about portal modules." },
+        { "ThirdParty", "Operations for working with third-party." },
         { "Portal / Quota", "Operations for getting information about portal quota." },
         { "Portal / Settings", "Operations for getting information about portal settings." },
         { "Portal / Users", "Operations for getting information about portal users." },
+        { "Portal / Payment", "Operations for getting information about payment."},
         { "Security / Active connections", "Operations for working with active connections." },
         { "Security / Audit trail data", "Operations for working with audit trail data." },
         { "Security / CSP", "Operations for working with CSP." },
+        { "Security / OAuth2", "Operations for working with OAuth2." },
         { "Security / Firebase", "Operations for working with Firebase." },
         { "Security / Login history", "Operations for getting login history." },
         { "Security / SMTP settings", "Operations for working with SMTP settings." },
         { "Settings / Authorization", "Operations for working with authorization settings." },
+        { "Security / Access to DevTools", "Operations for working with acess to devtools."},
         { "Settings / Common settings", "Operations for working with common settings." },
         { "Settings / Cookies", "Operations for working with cookies settings." },
         { "Settings / Custom Navigation", "Operations for working with custom navigation settings." },
@@ -128,7 +180,11 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
         { "Settings / TFA settings", "Operations for working with TFA settings." },
         { "Settings / Tips", "Operations for working with tip settings." },
         { "Settings / Webhooks", "Operations for working with webhook settings." },
-        { "Settings / Webplugins", "Operations for working with webplugin settings." }
+        { "Settings / Webplugins", "Operations for working with webplugin settings." },
+        { "Settings / Access to DevTools", "Operations for working with acess to devtools." },
+        { "Settings / Versions", "Operations for working with versions settings." },
+        { "Settings / LDAP", "Operations for working with LDAP settings." },
+        { "Api keys", "Operations for working with api keys." }
     };
 
     public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
@@ -148,7 +204,7 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
 
         swaggerDoc.Tags = customTags
             .Where(tag => _tagDescriptions.ContainsKey(tag))
-            .Select(tag => 
+            .Select(tag =>
             {
                 var tagParts = tag.Split(" / ");
                 var displayName = tagParts.Length > 1 ? tagParts[1] : tagParts[0];
@@ -174,7 +230,7 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
             var groupObject = new OpenApiObject();
             var tagsArray = new OpenApiArray();
 
-            foreach(var tag in group.Value)
+            foreach (var tag in group.Value)
             {
                 tagsArray.Add(new OpenApiString(tag));
             }

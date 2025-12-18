@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,9 +33,8 @@ public class ApiSystemAuthHandler(
     UrlEncoder encoder,
     SecurityContext securityContext,
     CookiesManager cookiesManager,
-    IHttpContextAccessor httpContextAccessor,
     ApiSystemAuthHandlerHelper systemAuthHandlerHelper)
-    : CookieAuthHandler(options, logger, encoder, securityContext, cookiesManager, httpContextAccessor)
+    : CookieAuthHandler(options, logger, encoder, securityContext, cookiesManager)
 {
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {

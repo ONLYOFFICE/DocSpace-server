@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -46,7 +46,7 @@ public class MessageService(
             return _enabled.Value ? sender : null;
         }
     }
-    
+
     private HttpRequest Request => httpContextAccessor?.HttpContext?.Request;
 
     private static readonly JsonSerializerOptions _serializerOptions = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
@@ -68,14 +68,24 @@ public class MessageService(
         SendRequestMessage(action, description: [d1, string.Join(", ", d2)]);
     }
 
-    public void Send(string loginName, MessageAction action)
+    public void SendLoginMessage(MessageAction action, string loginName)
     {
         SendRequestMessage(action, loginName: loginName);
+    }
+
+    public void SendLoginMessage(MessageAction action, string loginName, params string[] d)
+    {
+        SendRequestMessage(action, loginName: loginName, description: d);
     }
 
     #endregion
 
     #region HttpRequest & Target
+
+    public async Task SendAsync(MessageAction action, MessageTarget target)
+    {
+        await SendRequestMessageAsync(action, target);
+    }
 
     public void Send(MessageAction action, MessageTarget target)
     {
@@ -108,7 +118,7 @@ public class MessageService(
     {
         SendRequestMessage(action, target, description: [d1, d2], references: references, dateTime: dateTime);
     }
-    
+
     public void Send(MessageAction action, MessageTarget target, string[] description, IEnumerable<FilesAuditReference> references = null)
     {
         SendRequestMessage(action, target, description: description, references: references);
@@ -131,14 +141,14 @@ public class MessageService(
         }
     }
 
-    public void Send(string loginName, MessageAction action, MessageTarget target)
+    public void SendLoginMessage(MessageAction action, string loginName, MessageTarget target)
     {
         SendRequestMessage(action, target, loginName);
     }
 
     #endregion
 
-    private void SendRequestMessage(MessageAction action, MessageTarget target = null, string loginName = null, DateTime? dateTime = null, 
+    private void SendRequestMessage(MessageAction action, MessageTarget target = null, string loginName = null, DateTime? dateTime = null,
         IEnumerable<FilesAuditReference> references = null, params string[] description)
     {
         if (Sender == null)
@@ -162,13 +172,37 @@ public class MessageService(
         _ = Sender.SendAsync(message);
     }
 
+    private async Task SendRequestMessageAsync(MessageAction action, MessageTarget target = null, string loginName = null, DateTime? dateTime = null,
+        IEnumerable<FilesAuditReference> references = null, params string[] description)
+    {
+        if (Sender == null)
+        {
+            return;
+        }
+
+        if (Request == null)
+        {
+            logger.DebugEmptyHttpRequest(action);
+
+            return;
+        }
+
+        var message = messageFactory.Create(Request, loginName, dateTime, action, target, references, description);
+        if (!messagePolicy.Check(message))
+        {
+            return;
+        }
+
+        await Sender.SendAsync(message);
+    }
+
     #region HttpHeaders
 
     public void SendHeadersMessage(MessageAction action)
     {
         SendRequestHeadersMessage(action);
     }
-    
+
     public void SendHeadersMessage(MessageAction action, params string[] description)
     {
         SendRequestHeadersMessage(action, description: description);
@@ -184,7 +218,19 @@ public class MessageService(
         SendRequestHeadersMessage(action, target, httpHeaders, references, d1?.ToArray());
     }
 
-    private void SendRequestHeadersMessage(MessageAction action, MessageTarget target = null, IDictionary<string, StringValues> httpHeaders = null, 
+    public void SendHeadersMessage(MessageAction action, MessageTarget target, IDictionary<string, StringValues> httpHeaders, IEnumerable<string> d1, List<Guid> userIds, EmployeeType userType)
+    {
+        if (TryAddNotificationParam(action, userIds, out var parametr, userType))
+        {
+            SendRequestHeadersMessage(action, target, httpHeaders, description: [string.Join(", ", d1), parametr]);
+        }
+        else
+        {
+            SendRequestHeadersMessage(action, target, httpHeaders, description: string.Join(", ", d1));
+        }
+    }
+
+    private void SendRequestHeadersMessage(MessageAction action, MessageTarget target = null, IDictionary<string, StringValues> httpHeaders = null,
         IEnumerable<FilesAuditReference> references = null, params string[] description)
     {
         if (Sender == null)
@@ -194,7 +240,7 @@ public class MessageService(
 
         if (httpHeaders == null && Request != null)
         {
-            httpHeaders = Request.Headers.ToDictionary(k => k.Key, v => v.Value);
+            httpHeaders = MessageSettings.GetHttpHeaders(Request);
         }
 
         var message = messageFactory.Create(httpHeaders, action, target, references, description);
@@ -241,15 +287,15 @@ public class MessageService(
 
         _ = Sender.SendAsync(message);
     }
-    
-    public async Task<int> SendLoginMessageAsync(MessageUserData userData, MessageAction action)
+
+    public async Task<int> SendLoginMessageAsync(MessageUserData userData, MessageAction action, string initiator, params string[] description)
     {
         if (Sender == null)
         {
             return 0;
         }
 
-        var message = messageFactory.Create(Request, userData, action);
+        var message = messageFactory.Create(Request, userData, action, initiator, description);
         if (!messagePolicy.Check(message))
         {
             return 0;
@@ -308,4 +354,5 @@ public class EventDescription<T>
     public string FromParentTitle { get; set; }
     public int? FromParentType { get; set; }
     public int? FromFolderId { get; set; }
+    public bool? IsAgent { get; set; }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -43,7 +43,7 @@ public class SecurityContext(
 {
     public IAccount CurrentAccount => authContext.CurrentAccount;
     public bool IsAuthenticated => authContext.IsAuthenticated;
-    
+
     public async Task<string> AuthenticateMeAsync(string login, string passwordHash, Func<Task<int>> funcLoginEvent = null, List<Claim> additionalClaims = null)
     {
         ArgumentNullException.ThrowIfNull(login);
@@ -135,7 +135,7 @@ public class SecurityContext(
 
             var claims = new List<Claim>
             {
-                AuthConstants.Claim_ScopeRootWrite
+                AuthConstants.Claim_ScopeGlobalWrite
             };
 
             await AuthenticateMeWithoutCookieAsync(new UserAccount(new UserInfo { Id = userid }, tenant, userFormatter), claims);
@@ -195,7 +195,7 @@ public class SecurityContext(
 
             var anonymousSession = new AnonymousSession(Constants.Guest.ID, Constants.Guest.Name, session);
             authContext.Principal = new CustomClaimsPrincipal(new ClaimsIdentity(anonymousSession, []), anonymousSession);
-                
+
             return;
         }
 
@@ -226,7 +226,7 @@ public class SecurityContext(
             {
                 if (!(await tenantManager.GetTenantQuotaAsync(tenant.Id)).Ldap)
                 {
-                    throw new BillingException("Your tariff plan does not support this option.", "Ldap");
+                    throw new BillingException("Your tariff plan does not support this option.");
                 }
             }
 
@@ -255,6 +255,15 @@ public class SecurityContext(
         authContext.Principal = new CustomClaimsPrincipal(new ClaimsIdentity(account, claims), account);
     }
 
+    public async Task AuthByClaimAsync()
+    {
+        var id = httpContextAccessor.HttpContext?.User.Claims.FirstOrDefault(r => r.Type == ClaimTypes.Sid);
+        if (Guid.TryParse(id?.Value, out var userId))
+        {
+            await AuthenticateMeWithoutCookieAsync(userId);
+        }
+    }
+
     public async Task AuthenticateMeWithoutCookieAsync(Guid userId, List<Claim> additionalClaims = null)
     {
         await AuthenticateMeWithoutCookieAsync(tenantManager.GetCurrentTenantId(), userId, additionalClaims);
@@ -265,7 +274,7 @@ public class SecurityContext(
         var account = await authentication.GetAccountByIDAsync(tenantId, userId);
         await AuthenticateMeWithoutCookieAsync(account, additionalClaims);
     }
-    
+
     public void Logout()
     {
         authContext.Logout();
@@ -306,7 +315,7 @@ public class PermissionContext(IPermissionResolver permissionResolver, AuthConte
     {
         await PermissionResolver.DemandAsync(AuthContext.CurrentAccount, action);
     }
-    
+
     public async Task DemandPermissionsAsync(IAction action1, IAction action2)
     {
         await PermissionResolver.DemandAsync(AuthContext.CurrentAccount, action1, action2);
@@ -323,7 +332,7 @@ public class AuthContext(IHttpContextAccessor httpContextAccessor)
 {
     private IHttpContextAccessor HttpContextAccessor { get; } = httpContextAccessor;
     private static readonly List<string> _typesCheck = [ConfirmType.LinkInvite.ToStringFast(), ConfirmType.EmpInvite.ToStringFast()];
-    
+
     public IAccount CurrentAccount => Principal?.Identity as IAccount ?? Constants.Guest;
 
     public bool IsAuthenticated => CurrentAccount.IsAuthenticated;
@@ -338,24 +347,19 @@ public class AuthContext(IHttpContextAccessor httpContextAccessor)
         return Principal.Claims.Any(c => _typesCheck.Contains(c.Value));
     }
 
-    private ClaimsPrincipal _principal;
-
     internal ClaimsPrincipal Principal
     {
-        get => _principal ?? CustomSynchronizationContext.CurrentContext?.CurrentPrincipal as ClaimsPrincipal ?? HttpContextAccessor?.HttpContext?.User;
+        get => field ?? CustomSynchronizationContext.CurrentContext?.CurrentPrincipal as ClaimsPrincipal ?? HttpContextAccessor?.HttpContext?.User;
         set
         {
-            _principal = value;
+            field = value;
 
             if (CustomSynchronizationContext.CurrentContext != null)
             {
                 CustomSynchronizationContext.CurrentContext.CurrentPrincipal = value;
             }
 
-            if (HttpContextAccessor?.HttpContext != null)
-            {
-                HttpContextAccessor.HttpContext.User = value;
-            }
+            HttpContextAccessor?.HttpContext?.User = value;
         }
     }
 }

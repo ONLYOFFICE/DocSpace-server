@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,15 +26,24 @@
 
 namespace ASC.Web.Api.Models;
 
+/// <summary>
+/// The email invitations parameters.
+/// </summary>
 public class EmailInvitationsDto
 {
+    /// <summary>
+    /// The list of email invitations.
+    /// </summary>
     public List<EmailInvitationDto> Invitations { get; set; }
 }
 
+/// <summary>
+/// The email invitation parameters.
+/// </summary>
 public class EmailInvitationDto
 {
     /// <summary>
-    /// Email address
+    /// The email address.
     /// </summary>
     [EmailAddress]
     public string Email { get; set; }

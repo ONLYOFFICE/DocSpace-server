@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -45,32 +45,17 @@ internal sealed class StreamWrapper : Stream
         _metadataLength = metadata.GetMetadataLength();
     }
 
-    public override bool CanRead
-    {
-        get { return _stream.CanRead; }
-    }
+    public override bool CanRead => _stream.CanRead;
 
-    public override bool CanSeek
-    {
-        get { return false; }
-    }
+    public override bool CanSeek => false;
 
-    public override bool CanWrite
-    {
-        get { return false; }
-    }
+    public override bool CanWrite => false;
 
-    public override long Length
-    {
-        get { return _fileSize; }
-    }
+    public override long Length => _fileSize;
 
     public override long Position
     {
-        get
-        {
-            return _stream.Position - _metadataLength;
-        }
+        get => _stream.Position - _metadataLength;
         set
         {
             if (value < 0 || value > _fileSize)

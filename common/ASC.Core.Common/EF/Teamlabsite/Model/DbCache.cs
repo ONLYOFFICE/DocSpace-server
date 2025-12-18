@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,39 +42,42 @@ public static class DbCacheExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddDbCache(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbCache>(entity =>
+        public void MySqlAddDbCache()
         {
-            entity.ToTable("tenants_cache")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+            modelBuilder.Entity<DbCache>(entity =>
+            {
+                entity.ToTable("tenants_cache")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.HasKey(e => e.TenantAlias)
-                .HasName("PRIMARY");
+                entity.HasKey(e => e.TenantAlias)
+                    .HasName("PRIMARY");
 
-            entity.Property(e => e.TenantAlias)
-                .HasColumnName("tenant_alias")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.TenantAlias)
+                    .HasColumnName("tenant_alias")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-        });
-    }
+            });
+        }
 
-    public static void PgSqlAddDbCache(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<DbCache>(entity =>
+        public void PgSqlAddDbCache()
         {
-            entity.ToTable("tenants_cache");
+            modelBuilder.Entity<DbCache>(entity =>
+            {
+                entity.ToTable("tenants_cache");
 
-            entity.HasKey(e => e.TenantAlias)
-                .HasName("PRIMARY");
+                entity.HasKey(e => e.TenantAlias)
+                    .HasName("PRIMARY");
 
-            entity.Property(e => e.TenantAlias)
-                .HasColumnName("tenant_alias")
-                .HasColumnType("character varying")
-                .HasMaxLength(100);
-        });
+                entity.Property(e => e.TenantAlias)
+                    .HasColumnName("tenant_alias")
+                    .HasColumnType("character varying")
+                    .HasMaxLength(100);
+            });
+        }
     }
 }

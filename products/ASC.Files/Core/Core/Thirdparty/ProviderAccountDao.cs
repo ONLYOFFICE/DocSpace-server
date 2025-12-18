@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -53,11 +53,12 @@ internal class ProviderAccountDao(
     ILogger<ProviderAccountDao> logger)
     : IProviderDao
 {
-    public virtual Task<IProviderInfo> GetProviderInfoAsync(int linkId)
+    public virtual async Task<IProviderInfo> GetProviderInfoAsync(int linkId)
     {
         var providersInfo = GetProvidersInfoInternalAsync(linkId);
 
-        return providersInfo.SingleAsync().AsTask();
+        var allproviders = await providersInfo.ToListAsync();
+        return allproviders.Single();
     }
 
     public async Task<IProviderInfo> GetProviderInfoByEntryIdAsync(string entryId)
@@ -67,7 +68,7 @@ internal class ProviderAccountDao(
             var id = Selectors.Pattern.Match(entryId).Groups["id"].Value;
             return await GetProviderInfoAsync(int.Parse(id));
         }
-        catch(Exception exception)
+        catch (Exception exception)
         {
             logger.ErrorWithException(exception);
             return null;
@@ -133,7 +134,7 @@ internal class ProviderAccountDao(
         {
             throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMessage_SecurityException_Auth, providerKey));
         }
-        
+
         var tenantId = tenantManager.GetCurrentTenantId();
         var now = tenantUtil.DateTimeToUtc(tenantUtil.DateTimeNow());
 
@@ -164,7 +165,7 @@ internal class ProviderAccountDao(
     {
         return providerInfo != null && await providerInfo.CheckAccessAsync();
     }
-    
+
     public async Task<IProviderInfo> UpdateRoomProviderInfoAsync(ProviderData data)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
@@ -181,13 +182,13 @@ internal class ProviderAccountDao(
             ProviderTypesExtensions.TryParse(forUpdate.Provider, true, out var key);
             var updatedAuthData = GetEncodedAccessToken(data.AuthData, key);
             updatedAuthData.Url = forUpdate.Url;
-            
-            if (!await CheckProviderInfoAsync(await ToProviderInfoAsync(0, key, forUpdate.Title, updatedAuthData, authContext.CurrentAccount.ID, forUpdate.FolderType, 
+
+            if (!await CheckProviderInfoAsync(await ToProviderInfoAsync(0, key, forUpdate.Title, updatedAuthData, authContext.CurrentAccount.ID, forUpdate.FolderType,
                     tenantUtil.DateTimeToUtc(tenantUtil.DateTimeNow()))))
             {
                 throw new UnauthorizedAccessException(string.Format(FilesCommonResource.ErrorMessage_SecurityException_Auth, key));
             }
-            
+
             forUpdate.UserName = updatedAuthData.Login ?? string.Empty;
             forUpdate.Password = await EncryptPasswordAsync(updatedAuthData.Password);
             forUpdate.Token = await EncryptPasswordAsync(updatedAuthData.RawToken);
@@ -227,17 +228,22 @@ internal class ProviderAccountDao(
         {
             forUpdate.Color = data.Color;
         }
-        
+
+        if (!string.IsNullOrEmpty(data.Cover))
+        {
+            forUpdate.Cover = data.Cover;
+        }
+
         if (data.CreateBy.HasValue)
         {
             forUpdate.UserId = data.CreateBy.Value;
         }
 
         forUpdate.ModifiedOn = DateTime.UtcNow;
-        
+
         filesDbContext.Update(forUpdate);
         await filesDbContext.SaveChangesAsync();
-        
+
         return ToProviderInfo(forUpdate);
     }
 
@@ -332,7 +338,7 @@ internal class ProviderAccountDao(
                 t.Token = await EncryptPasswordAsync(authData.RawToken ?? "");
                 t.Url = authData.Url ?? "";
             }
-            
+
             t.ModifiedOn = DateTime.UtcNow;
 
             toUpdateCount++;
@@ -363,7 +369,7 @@ internal class ProviderAccountDao(
         {
             throw new ArgumentException("Unrecognize ProviderType");
         }
-        
+
         switch (key)
         {
             case ProviderTypes.NextCloud:
@@ -401,9 +407,9 @@ internal class ProviderAccountDao(
             thirdParty.Token = await EncryptPasswordAsync(newAuthData.RawToken ?? "");
             thirdParty.Url = newAuthData.Url ?? "";
         }
-        
+
         thirdParty.ModifiedOn = DateTime.UtcNow;
-        
+
         filesDbContext.Update(thirdParty);
         await filesDbContext.SaveChangesAsync();
 
@@ -411,7 +417,7 @@ internal class ProviderAccountDao(
     }
 
     public virtual async Task RemoveProviderInfoAsync(int linkId)
-    {       
+    {
         var tenantId = tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
@@ -430,7 +436,7 @@ internal class ProviderAccountDao(
             await tr.CommitAsync();
         });
     }
-    
+
     private async Task<IProviderInfo> ToProviderInfoAsync(int id, ProviderTypes providerKey, string customerTitle, AuthData authData, Guid owner, FolderType type, DateTime createOn)
     {
         var dbFilesThirdPartyAccount = new DbFilesThirdpartyAccount
@@ -470,6 +476,7 @@ internal class ProviderAccountDao(
         var authData = new AuthData(input.Url, input.UserName, DecryptPassword(input.Password, id), token, input.Provider);
         var hasLogo = input.HasLogo;
         var color = input.Color;
+        var cover = input.Cover;
 
         if (key == ProviderTypes.kDrive)
         {
@@ -497,6 +504,7 @@ internal class ProviderAccountDao(
             box.Private = privateRoom;
             box.HasLogo = hasLogo;
             box.Color = color;
+            box.Cover = cover;
 
             return box;
         }
@@ -522,6 +530,7 @@ internal class ProviderAccountDao(
             drop.Private = privateRoom;
             drop.HasLogo = hasLogo;
             drop.Color = color;
+            drop.Cover = cover;
 
             return drop;
         }
@@ -547,6 +556,7 @@ internal class ProviderAccountDao(
             sh.Private = privateRoom;
             sh.HasLogo = hasLogo;
             sh.Color = color;
+            sh.Cover = cover;
 
             return sh;
         }
@@ -572,6 +582,7 @@ internal class ProviderAccountDao(
             gd.Private = privateRoom;
             gd.HasLogo = hasLogo;
             gd.Color = color;
+            gd.Cover = cover;
 
             return gd;
         }
@@ -597,6 +608,7 @@ internal class ProviderAccountDao(
             od.Private = privateRoom;
             od.HasLogo = hasLogo;
             od.Color = color;
+            od.Cover = cover;
 
             return od;
         }
@@ -630,6 +642,7 @@ internal class ProviderAccountDao(
         webDavProviderInfo.Private = privateRoom;
         webDavProviderInfo.HasLogo = hasLogo;
         webDavProviderInfo.Color = color;
+        webDavProviderInfo.Cover = cover;
 
         return webDavProviderInfo;
     }
@@ -697,11 +710,11 @@ internal class ProviderAccountDao(
 
         return authData;
     }
-    
+
     private async Task<string> EncryptPasswordAsync(string password)
     {
-        return string.IsNullOrEmpty(password) ? 
-            string.Empty : 
+        return string.IsNullOrEmpty(password) ?
+            string.Empty :
             await instanceCrypto.EncryptAsync(password);
     }
 
@@ -742,6 +755,7 @@ public class ProviderData
     public bool? Private { get; init; }
     public bool? HasLogo { get; init; }
     public string Color { get; init; }
+    public string Cover { get; init; }
     public AuthData AuthData { get; init; }
     public Guid? CreateBy { get; init; }
 }

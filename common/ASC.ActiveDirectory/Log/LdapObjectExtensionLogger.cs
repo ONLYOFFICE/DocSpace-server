@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,7 +28,7 @@ namespace ASC.ActiveDirectory.Log;
 internal static partial class LdapObjectExtensionLogger
 {
     [LoggerMessage(LogLevel.Error, "Can't get attribute from ldap object (attr = {attribute}, dn = {dn})")]
-    public static partial void ErrorCanNotGetAttribute(this ILogger<LdapObjectExtension> logger, string attribute, string dn,Exception exception);
+    public static partial void ErrorCanNotGetAttribute(this ILogger<LdapObjectExtension> logger, string attribute, string dn, Exception exception);
 
     [LoggerMessage(LogLevel.Error, "Can't get attributes from ldap object (attr = {attribute}, dn = {dn})")]
     public static partial void ErrorCanNotGetAttributes(this ILogger<LdapObjectExtension> logger, string attribute, string dn, Exception exception);

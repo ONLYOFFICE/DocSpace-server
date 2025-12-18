@@ -74,7 +74,7 @@
     <value>Τα αρχεία θα συμπιεστούν σε {0}.zip αρχείο{1}</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>Τα έγγραφά</value>
+    <value>Τα έγγραφά μου</value>
   </data>
   <data name="PrivacyRoom" xml:space="preserve">
     <value>Ιδιωτικό Δωμάτιο</value>
@@ -102,5 +102,11 @@
   </data>
   <data name="ReadyFormFolder" xml:space="preserve">
     <value>Συμπλήρωση</value>
+  </data>
+  <data name="RoomTemplates" xml:space="preserve">
+    <value>Πρότυπα</value>
+  </data>
+  <data name="AiAgents" xml:space="preserve">
+    <value>Εκπρόσωποι AI</value>
   </data>
 </root>

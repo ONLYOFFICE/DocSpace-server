@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -54,7 +54,8 @@ public class BackupCode
 }
 
 [Scope]
-public class TfaManager(SettingsManager settingsManager,
+public class TfaManager(
+    SettingsManager settingsManager,
     SecurityContext securityContext,
     CookiesManager cookiesManager,
     SetupInfo setupInfo,
@@ -62,27 +63,29 @@ public class TfaManager(SettingsManager settingsManager,
     InstanceCrypto instanceCrypto,
     MachinePseudoKeys machinePseudoKeys,
     ICache cache,
-    TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper)
+    TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
+    TenantManager tenantManager,
+    CoreSettings coreSettings)
 {
     private static readonly TwoFactorAuthenticator _tfa = new();
     private ICache Cache { get; set; } = cache;
 
     public async Task<SetupCode> GenerateSetupCodeAsync(UserInfo user)
     {
-        return _tfa.GenerateSetupCode(setupInfo.TfaAppSender, user.Email, await GenerateAccessTokenAsync(user), false, 4);
+        return _tfa.GenerateSetupCode(tenantManager.GetCurrentTenant().GetTenantDomain(coreSettings), user.Email, await GenerateAccessTokenAsync(user), false, 4);
     }
 
-    public async Task<bool> ValidateAuthCodeAsync(UserInfo user, string code, bool checkBackup = true, bool isEntryPoint = false)
+    public async Task<(bool, string)> ValidateAuthCodeAsync(UserInfo user, string code, bool checkBackup = true, bool isEntryPoint = false)
     {
         if (!tfaAppAuthSettingsHelper.IsVisibleSettings
             || !(await settingsManager.LoadAsync<TfaAppAuthSettings>()).EnableSetting)
         {
-            return false;
+            return (false, null);
         }
 
         if (user == null || Equals(user, Constants.LostUser))
         {
-            throw new Exception(Resource.ErrorUserNotFound);
+            throw new ItemNotFoundException(Resource.ErrorUserNotFound);
         }
 
         code = (code ?? "").Trim();
@@ -117,19 +120,21 @@ public class TfaManager(SettingsManager settingsManager,
 
         Cache.Insert("tfa/" + user.Id, (counter - 1).ToString(CultureInfo.InvariantCulture), DateTime.UtcNow.Add(TimeSpan.FromMinutes(1)));
 
+        string token = null;
+        
         if (!securityContext.IsAuthenticated)
         {
             var action = isEntryPoint ? MessageAction.LoginSuccessViaApiTfa : MessageAction.LoginSuccesViaTfaApp;
-            await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id, action);
+            token = await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id, action);
         }
 
         if (!await TfaAppUserSettings.EnableForUserAsync(settingsManager, user.Id))
         {
             await GenerateBackupCodesAsync();
-            return true;
+            return (true, token);
         }
 
-        return false;
+        return (false, token);
     }
 
     public async Task<IEnumerable<BackupCode>> GenerateBackupCodesAsync()

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,11 +26,26 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The request parameters for accessing a provider by its ID.
+/// </summary>
 public class ProviderIdRequestDto
 {
     /// <summary>
-    /// Provider ID
+    /// The provider ID.
     /// </summary>
     [FromRoute(Name = "providerId")]
-    public int ProviderId { get; set; }
+    public required int ProviderId { get; set; }
+}
+
+/// <summary>
+/// The request parameters for retrieving third-party providers.
+/// </summary>
+public class GetProvidersRequestDto
+{
+    /// <summary>
+    /// Specifies whether WebDAV resources should be excluded from the result..
+    /// </summary>
+    [FromQuery(Name = "excludewebdav")]
+    public bool ExcludeWebDav { get; set; }
 }

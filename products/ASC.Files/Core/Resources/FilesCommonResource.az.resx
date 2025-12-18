@@ -133,6 +133,9 @@
   <data name="CommentRevertChanges" xml:space="preserve">
     <value>{0} sənəd dəyişikliyindən bərpa edildi</value>
   </data>
+  <data name="CommentSubmitFillForm" xml:space="preserve">
+    <value>Təqdim edilmiş forma</value>
+  </data>
   <data name="CommentUpload" xml:space="preserve">
     <value>Yükləndi</value>
   </data>
@@ -163,9 +166,6 @@
   <data name="ErrorMessage_DocServiceException" xml:space="preserve">
     <value>Sənədlər Xidmətində xəta baş verdi</value>
   </data>
-  <data name="ErrorMessage_EditingCoauth" xml:space="preserve">
-    <value>Fayl {0} istifadəçisi tərəfindən redaktə üçün açıqdır. Birgə redaktə, hazırda bu format üçün dəstəklənmir.</value>
-  </data>
   <data name="ErrorMessage_EditingMobile" xml:space="preserve">
     <value>Fayl {0} tərəfindən mobil tətbiqdə redaktə etmək üçün açıqdır</value>
   </data>
@@ -180,6 +180,9 @@
   </data>
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>{0} ölçüsündən böyük fayl köçürülməyəcək</value>
+  </data>
+  <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
+    <value>Yeni versiya cari versiya ilə eyni ola bilməz</value>
   </data>
   <data name="ErrorMessage_FolderCopyError" xml:space="preserve">
     <value>Qovluğu öz alt qovluğuna köçürə bilməzsiniz</value>
@@ -216,6 +219,12 @@
   </data>
   <data name="ErrorMessage_SecurityException_Auth" xml:space="preserve">
     <value>Verilən kredensiallar ilə {0} provayerinə qoşulmaq mümkün deyil.</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_CopyFile" xml:space="preserve">
+    <value>Faylı kopyalamaq üçün lazımi icazəniz yoxdur</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
+    <value>Qovluğu kopyalamaq üçün lazımi icazəniz yoxdur</value>
   </data>
   <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
     <value>Yaratmağa yetərincə icazəniz yoxdur</value>
@@ -277,6 +286,36 @@
   <data name="ErrorMessage_ViewTrashItem" xml:space="preserve">
     <value>Səbətdə elementlərə baxmağa icazəniz yoxdur</value>
   </data>
+  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
+    <value>Etibarsız provayder</value>
+  </data>
+  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
+    <value>Otağı saxlamaq üçün bu qovluqdan istifadə etmək mümkün deyil</value>
+  </data>
+  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
+    <value>Dəvət linki etibarsızdır və ya vaxtı keçmişdir</value>
+  </data>
+  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
+    <value>Rol bu istifadəçi növü üçün əlçatan deyil</value>
+  </data>
+  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
+    <value>Bu provayder artıq otağa qoşulub</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
+    <value>Bu qovluğa kopyalamaq icazəniz yoxdur</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
+    <value>Bu qovluğa köçürmək icazəniz yoxdur</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
+    <value>Otağı arxivdən çıxarmaq üçün lazımi icazəniz yoxdur</value>
+  </data>
+  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
+    <value>Arxivlənmiş otaqları redaktə edə bilməzsiniz</value>
+  </data>
+  <data name="ErrorrMessage_PinRoom" xml:space="preserve">
+    <value>Otağı sabitləyə bilməzsiniz</value>
+  </data>
   <data name="Everyone" xml:space="preserve">
     <value>Hər kəs</value>
   </data>
@@ -326,6 +365,12 @@ docx, xlsx, pptx ilə ən yüksək uyğunluq.</value>
   <data name="UnlockComment" xml:space="preserve">
     <value>Fayl kiliddən çıxarılıb</value>
   </data>
+  <data name="AceStatusEnum_Editing" xml:space="preserve">
+    <value>Redaktor</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
+    <value>Otağı redaktə etmək icazəniz yoxdur</value>
+  </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
     <value>DocSpace Administratoru</value>
   </data>
@@ -353,68 +398,20 @@ docx, xlsx, pptx ilə ən yüksək uyğunluq.</value>
   <data name="AceStatusEnum_Collaborator" xml:space="preserve">
     <value>Əməkdaş</value>
   </data>
-  <data name="AceStatusEnum_Editing" xml:space="preserve">
-    <value>Redaktor</value>
-  </data>
-  <data name="CommentSubmitFillForm" xml:space="preserve">
-    <value>Təqdim edilmiş forma</value>
-  </data>
-  <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
-    <value>Yeni versiya cari versiya ilə eyni ola bilməz</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_CopyFile" xml:space="preserve">
-    <value>Faylı kopyalamaq üçün lazımi icazəniz yoxdur</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
-    <value>Qovluğu kopyalamaq üçün lazımi icazəniz yoxdur</value>
-  </data>
-  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
-    <value>Etibarsız provayder</value>
-  </data>
-  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
-    <value>Otağı saxlamaq üçün bu qovluqdan istifadə etmək mümkün deyil</value>
-  </data>
-  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
-    <value>Dəvət linki etibarsızdır və ya vaxtı keçmişdir</value>
-  </data>
-  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
-    <value>Bu provayder artıq otağa qoşulub</value>
-  </data>
-  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
-    <value>Rol bu istifadəçi növü üçün əlçatan deyil</value>
-  </data>
   <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
     <value>Otağı arxivləşdirmək üçün lazımi icazəniz yoxdur</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
-    <value>Bu qovluğa kopyalamaq icazəniz yoxdur</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
-    <value>Otağı redaktə etmək icazəniz yoxdur</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
-    <value>Bu qovluğa köçürmək icazəniz yoxdur</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
-    <value>Otağı arxivdən çıxarmaq üçün lazımi icazəniz yoxdur</value>
-  </data>
-  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
-    <value>Arxivlənmiş otaqları redaktə edə bilməzsiniz</value>
-  </data>
-  <data name="ErrorrMessage_PinRoom" xml:space="preserve">
-    <value>Otağı sabitləyə bilməzsiniz</value>
-  </data>
-  <data name="DefaultExternalLinkTitle" xml:space="preserve">
-    <value>Paylaşılan keçid</value>
-  </data>
-  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
-    <value>Dəvət keçidi</value>
   </data>
   <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
     <value>Bağlantıların maksimum sayı {0}-dan çox ola bilməz</value>
   </data>
   <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
     <value>Siz şifrənizi bir neçə dəfə daxil etməyə çalışmısınız. Zəhmət olmasa, bir az sonra yenə cəhd edin</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Dəvət keçidi</value>
+  </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>Paylaşılan keçid</value>
   </data>
   <data name="RoomIndex_Author" xml:space="preserve">
     <value>Müəllif</value>
@@ -430,9 +427,6 @@ docx, xlsx, pptx ilə ən yüksək uyğunluq.</value>
   </data>
   <data name="RoomIndex_ExportAuthor" xml:space="preserve">
     <value>İxrac Müəllifi</value>
-  </data>
-  <data name="RoomIndex_Folder" xml:space="preserve">
-    <value>Qovluq</value>
   </data>
   <data name="RoomIndex_Index" xml:space="preserve">
     <value>İndeks</value>
@@ -458,49 +452,79 @@ docx, xlsx, pptx ilə ən yüksək uyğunluq.</value>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Növ</value>
   </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Qovluq</value>
+  </data>
   <data name="Date" xml:space="preserve">
     <value>Tarix</value>
   </data>
   <data name="User" xml:space="preserve">
     <value>İstifadəçi</value>
   </data>
-  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Birdən çox faylın Forma Doldurma otağına köçürülməsi dəstəklənmir. Hər dəfə bir {0} PDF formasını köçürün.</value>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Forma üçün link</value>
   </data>
-  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Qovluqların Forma Doldurma otağına köçürülməsi dəstəklənmir. Hər dəfə bir {0} PDF formasını köçürün.</value>
-  </data>
-  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Fayl bu otağa köçürülə bilməz. Lütfən, {0} PDF formasını köçürməyə cəhd edin.</value>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Faylı açın</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Fayl bu otağa yüklənə bilməz. Lütfən, {0} PDF formasını yükləməyə cəhd edin.</value>
+    <value>Fayl bu otağa yüklənə bilməz. Lütfən, ONLYOFFICE PDF formasını yükləməyə cəhd edin.</value>
   </data>
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Doldurmaq üçün link</value>
   </data>
-  <data name="LinkToForm" xml:space="preserve">
-    <value>Forma üçün link</value>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Birdən çox faylın Forma Doldurma otağına köçürülməsi dəstəklənmir. Hər dəfə bir ONLYOFFICE PDF formasını köçürün.</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Qovluqların Forma Doldurma otağına köçürülməsi dəstəklənmir. Hər dəfə bir ONLYOFFICE PDF formasını köçürün.</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Fayl bu otağa köçürülə bilməz. Lütfən, ONLYOFFICE PDF formasını köçürməyə cəhd edin.</value>
   </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Forma nömrəsi</value>
   </data>
-  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
-    <value>Məzmun yaradıcısı</value>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Xarici istifadəçi</value>
   </data>
   <data name="AceStatusEnum_RoomManager" xml:space="preserve">
     <value>Otaq meneceri</value>
   </data>
-  <data name="ExternalUser" xml:space="preserve">
-    <value>Xarici istifadəçi</value>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Otaq meneceri</value>
+  </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Məzmun yaradıcısı</value>
   </data>
   <data name="RoleEnum_ContentCreator" xml:space="preserve">
     <value>Məzmun yaradıcısı</value>
   </data>
-  <data name="RoleEnum_RoomManager" xml:space="preserve">
-    <value>Otaq meneceri</value>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Faylın cari versiyasını silmək mümkün deyil</value>
   </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Faylı açın</value>
+  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
+    <value>Doldurmaq üçün paylaşın</value>
+  </data>
+  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
+    <value>Doldurmağa başlayın</value>
+  </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>Qonaq</value>
+  </data>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Otaq administratoru</value>
+  </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>Agent Meneceri</value>
+  </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>{0} {1} istifadəçisinin sənədləri</value>
+  </data>
+  <data name="KnowledgeFolder" xml:space="preserve">
+    <value>Məlumat</value>
+  </data>
+  <data name="ResultStorageFolder" xml:space="preserve">
+    <value>Nəticə Saxlama</value>
   </data>
 </root>

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,13 +33,13 @@ public partial class CoreDbContext
     {
         return Queries.TariffAsync(this, tenantId, id);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public IAsyncEnumerable<Billing.Quota> QuotasAsync(int tenantId, int id)
     {
         return Queries.QuotasAsync(this, tenantId, id);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
     public Task<int> DeleteTariffs(int tenantId)
     {
@@ -62,10 +62,12 @@ static file class Queries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (CoreDbContext ctx, int tenantId, int id) =>
                 ctx.TariffRows
-                    .Where(r => r.TariffId == id && r.TenantId == tenantId)
-                    .Select(r => new Billing.Quota(r.Quota, r.Quantity)));
+                    .Join(ctx.Quotas, tr => tr.Quota, q => q.TenantId, (tariffRow, quota) => new { tariffRow, quota })
+                    .Where(r => r.tariffRow.TariffId == id && r.tariffRow.TenantId == tenantId)
+                    .OrderBy(r => r.quota.Wallet)
+                    .Select(r => new Billing.Quota(r.tariffRow.Quota, r.tariffRow.Quantity, r.quota.Wallet, r.tariffRow.DueDate, r.tariffRow.NextQuantity)));
 
     public static readonly Func<CoreDbContext, int, Task<int>> DeleteTariffs =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((CoreDbContext ctx, int tenantId) => 
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((CoreDbContext ctx, int tenantId) =>
             ctx.Tariffs.Where(r => r.TenantId == tenantId).ExecuteDelete());
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,18 +26,40 @@
 
 namespace ASC.Web.Files.Services.WCFService;
 
+/// <summary>
+/// The generic data wrapper parameters.
+/// </summary>
 public class DataWrapper<T>
 {
+    /// <summary>
+    /// The list of the file entries.
+    /// </summary>
     public List<FileEntry> Entries { get; init; }
+
+    /// <summary>
+    /// The total number of items in the folder.
+    /// </summary>
     public int Total { get; init; }
 
+    /// <summary>
+    /// The directory / file names that form part of a folder path.
+    /// </summary>
     [JsonPropertyName("path_parts")]
     public List<object> FolderPathParts { get; init; }
 
+    /// <summary>
+    /// The folder information.
+    /// </summary>
     [JsonPropertyName("folder_info")]
     public Folder<T> FolderInfo { get; init; }
-    
+
+    /// <summary>
+    /// The folder parent room.
+    /// </summary>
     public Folder<T> ParentRoom { get; init; }
 
+    /// <summary>
+    /// The number of items in the folder that the user has not seen yet.
+    /// </summary>
     public int New { get; init; }
 }

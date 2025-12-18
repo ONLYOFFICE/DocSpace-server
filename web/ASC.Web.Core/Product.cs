@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -54,11 +54,11 @@ public abstract class Product : IProduct
         return Task.FromResult(Enumerable.Empty<ActivityInfo>());
     }
 
-    WebItemContext IWebItem.Context { get { return ((IProduct)this).Context; } }
+    WebItemContext IWebItem.Context => ((IProduct)this).Context;
 
-    Guid IWebItem.ID { get { return ProductID; } }
+    Guid IWebItem.ID => ProductID;
 
-    public virtual bool IsPrimary { get => false; }
+    public virtual bool IsPrimary => false;
 
     public abstract string ApiURL { get; }
 }

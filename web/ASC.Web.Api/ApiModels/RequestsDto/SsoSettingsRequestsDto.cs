@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,12 +27,12 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// SSO settings request parameters
+/// The request parameters for the Single Sign-On (SSO) configuration settings.
 /// </summary>
 public class SsoSettingsRequestsDto
 {
     /// <summary>
-    /// Serialized SSO settings
+    /// The JSON-serialized SSO configuration settings.
     /// </summary>
-    public string SerializeSettings { get; set; }
+    public required string SerializeSettings { get; set; }
 }

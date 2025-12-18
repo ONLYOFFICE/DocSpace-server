@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -46,4 +46,42 @@ public interface IOAuthProvider
     string ClientID { get; }
     string ClientSecret { get; }
     bool IsEnabled { get; }
+}
+
+public class OauthProvider : Consumer, IOAuthProvider
+{
+    public virtual string Scopes => string.Empty;
+    public virtual string CodeUrl => string.Empty;
+    public virtual string AccessTokenUrl => string.Empty;
+    public virtual string RedirectUri => string.Empty;
+    public virtual string ClientID => string.Empty;
+    public virtual string ClientSecret => string.Empty;
+    public virtual bool IsEnabled => false;
+    
+    public OauthProvider() { }
+
+    public OauthProvider(
+        TenantManager tenantManager,
+        CoreBaseSettings coreBaseSettings,
+        CoreSettings coreSettings,
+        IConfiguration configuration,
+        ICacheNotify<ConsumerCacheItem> cache,
+        ConsumerFactory consumerFactory,
+        string name, 
+        int order, 
+        bool paid,
+        Dictionary<string, string> props, 
+        Dictionary<string, string> additional = null) 
+        : base(tenantManager, 
+            coreBaseSettings, 
+            coreSettings, 
+            configuration, 
+            cache, 
+            consumerFactory, 
+            name, 
+            order, 
+            paid,
+            props,
+            additional)
+    { }
 }

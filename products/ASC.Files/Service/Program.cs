@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -85,6 +85,7 @@ try
     await eventBus.SubscribeAsync<CreateRoomTemplateIntegrationEvent, RoomTemplatesIntegrationEventHandler>();
     await eventBus.SubscribeAsync<CreateRoomFromTemplateIntegrationEvent, RoomTemplatesIntegrationEventHandler>();
     await eventBus.SubscribeAsync<DataStorageEncryptionIntegrationEvent, DataStorageEncryptionIntegrationEventHandler>();
+    await eventBus.SubscribeAsync<CustomerOperationsReportIntegrationEvent, CustomerOperationsReportIntegrationEventHandler>();
 
     sp.GetRequiredService<FileTrackerHelper>().Subscribe();
 

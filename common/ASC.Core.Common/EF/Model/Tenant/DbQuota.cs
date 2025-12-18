@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,31 +24,34 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Profile = AutoMapper.Profile;
-
 namespace ASC.Core.Common.EF;
 
-public class DbQuota : BaseEntity, IMapFrom<TenantQuota>
+public class DbQuota : BaseEntity
 {
     public int TenantId { get; set; }
+
     [MaxLength(128)]
     public string Name { get; set; }
+
     [MaxLength(128)]
     public string Description { get; set; }
     public string Features { get; set; }
     public decimal Price { get; set; }
+
     [MaxLength(128)]
     public string ProductId { get; set; }
-    public bool Visible { get; set; }
 
+    [MaxLength(128)]
+    public string ServiceName { get; set; }
+    public bool Visible { get; set; }
+    public bool Wallet { get; set; }
     public override object[] GetKeys()
     {
         return [TenantId];
     }
-
-    public void Mapping(Profile profile)
+    public string GetPaymentId()
     {
-        profile.CreateMap<TenantQuota, DbQuota>();
+        return Wallet && !string.IsNullOrEmpty(ServiceName) ? ServiceName : ProductId;
     }
 }
 public static class DbQuotaExtension
@@ -76,7 +79,7 @@ public static class DbQuotaExtension
                     TenantId = -2,
                     Name = "admin",
                     Description = "until 01.04.2024",
-                    Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:107374182400,file_size:1024,manager:1,statistic",
+                    Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:107374182400,file_size:1024,manager:1,statistic,free_backup:2:fixed",
                     Price = 15,
                     ProductId = "1002",
                     Visible = false
@@ -116,7 +119,7 @@ public static class DbQuotaExtension
                     TenantId = -6,
                     Name = "subscription",
                     Description = null,
-                    Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,file_size:1024,statistic",
+                    Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,file_size:1024,statistic,free_backup:2:fixed",
                     Price = 0,
                     ProductId = "1001",
                     Visible = false
@@ -146,7 +149,7 @@ public static class DbQuotaExtension
                     TenantId = -9,
                     Name = "admin",
                     Description = "since 01.04.2024",
-                    Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic",
+                    Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,free_backup:2:fixed",
                     Price = 20,
                     ProductId = "1006",
                     Visible = true
@@ -156,100 +159,147 @@ public static class DbQuotaExtension
                     TenantId = -10,
                     Name = "adminyear",
                     Description = "since 10.02.2025",
-                    Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,year",
-                    Price = 200,
+                    Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,year,free_backup:2:fixed",
+                    Price = 220,
                     ProductId = "1009",
                     Visible = true
+                },
+                new DbQuota
+                {
+                    TenantId = -11,
+                    Name = "storage",
+                    Description = null,
+                    Features = "total_size:1073741824",
+                    Price = 0.14m,
+                    ProductId = "1011",
+                    Visible = true,
+                    Wallet = true
+                },
+                new DbQuota
+                {
+                    TenantId = -12,
+                    Name = "backup",
+                    Description = null,
+                    Features = "backup",
+                    Price = 10,
+                    ProductId = "10006",
+                    ServiceName = "backup",
+                    Visible = false,
+                    Wallet = true
                 }
                 );
         return modelBuilder;
     }
-    
-    public static void MySqlAddDbQuota(this ModelBuilder modelBuilder)
+
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbQuota>(entity =>
+        public void MySqlAddDbQuota()
         {
-            entity.HasKey(e => e.TenantId)
-                .HasName("PRIMARY");
+            modelBuilder.Entity<DbQuota>(entity =>
+            {
+                entity.HasKey(e => e.TenantId)
+                    .HasName("PRIMARY");
 
-            entity.ToTable("tenants_quota")
-                .HasCharSet("utf8");
+                entity.ToTable("tenants_quota")
+                    .HasCharSet("utf8");
 
-            entity.Property(e => e.TenantId)
-                .HasColumnName("tenant")
-                .ValueGeneratedNever();
+                entity.Property(e => e.TenantId)
+                    .HasColumnName("tenant")
+                    .ValueGeneratedNever();
 
-            entity.Property(e => e.ProductId)
-                .HasColumnName("product_id")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.ProductId)
+                    .HasColumnName("product_id")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Description)
-                .HasColumnName("description")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.ServiceName)
+                    .HasColumnName("service_name")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Features)
-                .HasColumnName("features")
-                .HasColumnType("text");
+                entity.Property(e => e.Description)
+                    .HasColumnName("description")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Name)
-                .HasColumnName("name")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Features)
+                    .HasColumnName("features")
+                    .HasColumnType("text");
 
-            entity.Property(e => e.Price)
-                .HasColumnName("price")
-                .HasDefaultValueSql("'0.00'")
-                .HasColumnType("decimal(10,2)");
+                entity.Property(e => e.Name)
+                    .HasColumnName("name")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Visible)
-                .HasColumnName("visible")
-                .HasColumnType("tinyint(1)")
-                .HasDefaultValueSql("'0'");
-        });
-    }
-    public static void PgSqlAddDbQuota(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<DbQuota>(entity =>
+                entity.Property(e => e.Price)
+                    .HasColumnName("price")
+                    .HasDefaultValueSql("'0.00'")
+                    .HasColumnType("decimal(10,4)");
+
+                entity.Property(e => e.Visible)
+                    .HasColumnName("visible")
+                    .HasColumnType("tinyint(1)")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Wallet)
+                    .HasColumnName("wallet")
+                    .HasColumnType("tinyint(1)")
+                    .HasDefaultValueSql("'0'");
+            });
+        }
+
+        public void PgSqlAddDbQuota()
         {
-            entity.HasKey(e => e.TenantId);
+            modelBuilder.Entity<DbQuota>(entity =>
+            {
+                entity.HasKey(e => e.TenantId);
 
-            entity.ToTable("tenants_quota");
+                entity.ToTable("tenants_quota");
 
-            entity.Property(e => e.TenantId)
-                .HasColumnName("tenant")
-                .ValueGeneratedNever();
+                entity.Property(e => e.TenantId)
+                    .HasColumnName("tenant")
+                    .ValueGeneratedNever();
 
-            entity.Property(e => e.ProductId)
-                .HasColumnName("product_id")
-                .HasColumnType("varchar(128)");
+                entity.Property(e => e.ProductId)
+                    .HasColumnName("product_id")
+                    .HasColumnType("varchar(128)");
 
-            entity.Property(e => e.Description)
-                .HasColumnName("description")
-                .HasColumnType("varchar(128)");
+                entity.Property(e => e.ServiceName)
+                    .HasColumnName("service_name")
+                    .HasColumnType("varchar(128)");
 
-            entity.Property(e => e.Features)
-                .HasColumnName("features")
-                .HasColumnType("text");
+                entity.Property(e => e.Description)
+                    .HasColumnName("description")
+                    .HasColumnType("varchar(128)");
 
-            entity.Property(e => e.Name)
-                .HasColumnName("name")
-                .HasColumnType("varchar(128)");
+                entity.Property(e => e.Features)
+                    .HasColumnName("features")
+                    .HasColumnType("text");
 
-            entity.Property(e => e.Price)
-                .HasColumnName("price")
-                .HasDefaultValue(0.00m)
-                .HasColumnType("decimal(10,2)");
+                entity.Property(e => e.Name)
+                    .HasColumnName("name")
+                    .HasColumnType("varchar(128)");
 
-            entity.Property(e => e.Visible)
-                .HasColumnName("visible")
-                .HasColumnType("boolean")
-                .HasDefaultValue(false);
-        });
-        
+                entity.Property(e => e.Price)
+                    .HasColumnName("price")
+                    .HasDefaultValue(0.00m)
+                    .HasColumnType("decimal(10,4)");
+
+                entity.Property(e => e.Visible)
+                    .HasColumnName("visible")
+                    .HasColumnType("boolean")
+                    .HasDefaultValue(false);
+
+                entity.Property(e => e.Wallet)
+                    .HasColumnName("wallet")
+                    .HasColumnType("boolean")
+                    .HasDefaultValue(false);
+            });
+
+        }
     }
 }

@@ -1,21 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
     <AssemblyTitle>ASC.Web.Api</AssemblyTitle>
-    <Company>Ascensio System SIA</Company>
     <Product>ASC.Web.Api</Product>
-    <Copyright>(c) Ascensio System SIA. All rights reserved</Copyright>
     <RazorCompileOnBuild>false</RazorCompileOnBuild>
     <GenerateMvcApplicationPartsAssemblyAttributes>false</GenerateMvcApplicationPartsAssemblyAttributes>
     <DisableImplicitComponentsAnalyzers>true</DisableImplicitComponentsAnalyzers>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <ImplicitUsings>enable</ImplicitUsings>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <NoWarn>1701;1702;1591</NoWarn>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DebugType>none</DebugType>
     <Optimize>true</Optimize>
   </PropertyGroup>
     <ItemGroup>
@@ -26,6 +22,7 @@
       <None Remove="img\audit.svg" />
       <None Remove="img\backup.svg" />
       <None Remove="img\customization.svg" />
+      <None Remove="img\free_backup.svg" />
       <None Remove="img\restore.svg" />
       <None Remove="img\room.svg" />
       <None Remove="img\sso.svg" />
@@ -35,15 +32,20 @@
 	  <None Remove="img\statistic.svg" />
     </ItemGroup>
     <ItemGroup>
+      <EmbeddedResource Include="img\aitools_wallet.svg" />
       <EmbeddedResource Include="img\audit.svg" />
+      <EmbeddedResource Include="img\free_backup.svg" />
       <EmbeddedResource Include="img\restore.svg" />
       <EmbeddedResource Include="img\room.svg" />
       <EmbeddedResource Include="img\sso.svg" />
       <EmbeddedResource Include="img\thirdparty.svg" />
+      <EmbeddedResource Include="img\backup_wallet.svg" />
+      <EmbeddedResource Include="img\total_size_wallet.svg" />
       <EmbeddedResource Include="img\total_size.svg" />
       <EmbeddedResource Include="img\users.svg" />
       <EmbeddedResource Include="img\customization.svg" />
       <EmbeddedResource Include="img\statistic.svg" />
+      <EmbeddedResource Include="img\websearch_wallet.svg" />
     </ItemGroup>
     <ItemGroup>
     <ProjectReference Include="..\..\common\ASC.Api.Core\ASC.Api.Core.csproj" />
@@ -114,6 +116,9 @@
     <EmbeddedResource Update="Core\AuditResource.sl.resx">
       <DependentUpon>AuditResource.resx</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Update="Core\AuditResource.sq-AL.resx">
+      <DependentUpon>AuditResource.resx</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Update="Core\AuditResource.sr-Cyrl-RS.resx">
       <DependentUpon>AuditResource.resx</DependentUpon>
     </EmbeddedResource>
@@ -150,5 +155,10 @@
     <EmbeddedResource Update="Core\AuditResource.ro.resx">
       <DependentUpon>AuditResource.resx</DependentUpon>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\..\.dockerignore">
+      <Link>.dockerignore</Link>
+    </Content>
   </ItemGroup>
 </Project>

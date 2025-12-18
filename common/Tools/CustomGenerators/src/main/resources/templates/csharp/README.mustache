@@ -1,0 +1,48 @@
+{{> README_nuget }}
+
+<a id="documentation-for-api-endpoints"></a>
+## Documentation for API Endpoints
+
+All URIs are relative to *https://your-docspace.onlyoffice.com*
+
+### API Endoints tables:
+
+{{#customApis}}
+<details>
+  <summary>{{folder}}</summary>
+
+  <table>
+    <tbody>
+      <tr>
+        <th>Method</th>
+        <th>HTTP request</th>
+        <th>Description</th>
+      </tr>
+      {{#apis}}<tr>
+        <td colspan="3" style="text-align: center;"><strong>{{x-classname}}</strong></td>
+      </tr>
+      {{#operations.operation}}
+      <tr>
+        <td><a href="{{apiDocPath}}{{classname}}.md#{{operationIdLowerCase}}"><strong>{{operationId}}</strong></a></td>
+        <td><strong>{{httpMethod}}</strong> {{path}}</td>
+        <td>{{summary}}</td>
+      </tr>
+      {{/operations.operation}}
+    {{/apis}}</tbody>
+  </table>
+
+</details>
+{{/customApis}}
+
+## Documentation for Models
+
+<details><summary>Models list</summary>
+
+{{#modelPackage}}
+{{#models}}{{#model}} - [{{{modelPackage}}}.{{{classname}}}]({{modelDocPath}}{{{classname}}}.md)
+{{/model}}{{/models}}
+{{/modelPackage}}
+{{^modelPackage}}
+No model defined in this package
+{{/modelPackage}}
+</details>

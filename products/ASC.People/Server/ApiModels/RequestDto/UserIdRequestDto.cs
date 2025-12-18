@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,15 +26,14 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
-
 /// <summary>
-/// 
+/// The request parameters for accessing a user by their ID.
 /// </summary>
 public class UserIdRequestDto
 {
     /// <summary>
-    /// User ID
+    /// The user ID.
     /// </summary>
     [FromRoute(Name = "userid")]
-    public Guid UserId { get; set; }
+    public required Guid UserId { get; set; }
 }

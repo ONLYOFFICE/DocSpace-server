@@ -65,7 +65,7 @@
     <value>Yhteiset tiedostot</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>Asiakirjat</value>
+    <value>Omat Asiakirjat</value>
   </data>
   <data name="ProjectFiles" xml:space="preserve">
     <value>Projektin asiakirjat</value>
@@ -102,5 +102,11 @@
   </data>
   <data name="ReadyFormFolder" xml:space="preserve">
     <value>Valmis</value>
+  </data>
+  <data name="RoomTemplates" xml:space="preserve">
+    <value>Mallit</value>
+  </data>
+  <data name="AiAgents" xml:space="preserve">
+    <value>Tekoälyagentit</value>
   </data>
 </root>

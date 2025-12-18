@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -50,56 +50,59 @@ public static class DbFileOrderExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddDbFileOrder(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbFileOrder>(entity =>
+        public void MySqlAddDbFileOrder()
         {
-            entity.ToTable("files_order")
-                .HasCharSet("utf8");
+            modelBuilder.Entity<DbFileOrder>(entity =>
+            {
+                entity.ToTable("files_order")
+                    .HasCharSet("utf8");
 
-            entity.HasKey(e => new { e.TenantId, e.EntryId, e.EntryType })
-                .HasName("primary");
+                entity.HasKey(e => new { e.TenantId, e.EntryId, e.EntryType })
+                    .HasName("primary");
 
-            entity.HasIndex(e => new { e.TenantId, e.ParentFolderId, e.EntryType })
-                .HasDatabaseName("parent_folder_id");
+                entity.HasIndex(e => new { e.TenantId, e.ParentFolderId, e.EntryType })
+                    .HasDatabaseName("parent_folder_id");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+                entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
-            entity.Property(e => e.EntryId).HasColumnName("entry_id");
+                entity.Property(e => e.EntryId).HasColumnName("entry_id");
 
-            entity.Property(e => e.EntryType)
-                .HasColumnName("entry_type")
-                .HasColumnType("tinyint");
+                entity.Property(e => e.EntryType)
+                    .HasColumnName("entry_type")
+                    .HasColumnType("tinyint");
 
-            entity.Property(e => e.ParentFolderId).HasColumnName("parent_folder_id");
+                entity.Property(e => e.ParentFolderId).HasColumnName("parent_folder_id");
 
-            entity.Property(e => e.Order).HasColumnName("order");
-        });
-    }
+                entity.Property(e => e.Order).HasColumnName("order");
+            });
+        }
 
-    public static void PgSqlAddDbFileOrder(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<DbFileOrder>(entity =>
+        public void PgSqlAddDbFileOrder()
         {
-            entity.ToTable("files_order");
+            modelBuilder.Entity<DbFileOrder>(entity =>
+            {
+                entity.ToTable("files_order");
 
-            entity.HasKey(e => new { e.TenantId, e.EntryId, e.EntryType })
-                .HasName("PK_files_order");
+                entity.HasKey(e => new { e.TenantId, e.EntryId, e.EntryType })
+                    .HasName("PK_files_order");
 
-            entity.HasIndex(e => new { e.TenantId, e.ParentFolderId, e.EntryType })
-                .HasDatabaseName("parent_folder_id");
+                entity.HasIndex(e => new { e.TenantId, e.ParentFolderId, e.EntryType })
+                    .HasDatabaseName("parent_folder_id");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+                entity.Property(e => e.TenantId).HasColumnName("tenant_id");
 
-            entity.Property(e => e.EntryId).HasColumnName("entry_id");
+                entity.Property(e => e.EntryId).HasColumnName("entry_id");
 
-            entity.Property(e => e.EntryType)
-                .HasColumnName("entry_type")
-                .HasColumnType("smallint");
+                entity.Property(e => e.EntryType)
+                    .HasColumnName("entry_type")
+                    .HasColumnType("smallint");
 
-            entity.Property(e => e.ParentFolderId).HasColumnName("parent_folder_id");
+                entity.Property(e => e.ParentFolderId).HasColumnName("parent_folder_id");
 
-            entity.Property(e => e.Order).HasColumnName("order");
-        });
+                entity.Property(e => e.Order).HasColumnName("order");
+            });
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,23 +26,24 @@
 
 namespace ASC.Core.Common.Quota;
 
-public class TenantQuotaFeature
+[DebuggerDisplay("{Name}")]
+public class TenantQuotaFeature(string name, bool paid = false)
 {
     public int Order { get; init; }
     public bool Visible { get; init; } = true;
-    public virtual string Name { get; init; }
-    public virtual bool Paid { get; init; }
+    public string Name { get; } = name;
+    public bool Paid { get; } = paid;
     public bool Standalone { get; init; }
 
     public EmployeeType EmployeeType { get; init; } = EmployeeType.All;
-    
+
     protected internal virtual void Multiply(int quantity)
     {
 
     }
 }
 
-public class TenantQuotaFeature<T>(TenantQuota tenantQuota) : TenantQuotaFeature
+public class TenantQuotaFeature<T>(TenantQuota tenantQuota, string name, T @default = default, bool paid = false) : TenantQuotaFeature(name, paid)
 {
     public virtual T Value
     {
@@ -62,13 +63,10 @@ public class TenantQuotaFeature<T>(TenantQuota tenantQuota) : TenantQuotaFeature
 
             return result;
         }
-        set
-        {
-            tenantQuota.ReplaceFeature(Name, value, Default);
-        }
+        set => tenantQuota.ReplaceFeature(Name, value, Default);
     }
 
-    public virtual T Default { get; }
+    public T Default { get; } = @default;
 
     protected virtual bool TryParse(string s, out T result)
     {
@@ -77,10 +75,8 @@ public class TenantQuotaFeature<T>(TenantQuota tenantQuota) : TenantQuotaFeature
     }
 }
 
-public class TenantQuotaFeatureCount(TenantQuota tenantQuota) : TenantQuotaFeature<int>(tenantQuota)
+public class TenantQuotaFeatureCount(TenantQuota tenantQuota, string name, bool paid = false) : TenantQuotaFeature<int>(tenantQuota, name, int.MaxValue, paid)
 {
-    public override int Default => int.MaxValue;
-
     protected override bool TryParse(string s, out int result)
     {
         return int.TryParse(s[(s.IndexOf(':') + 1)..], out result);
@@ -102,10 +98,22 @@ public class TenantQuotaFeatureCount(TenantQuota tenantQuota) : TenantQuotaFeatu
     }
 }
 
-public class TenantQuotaFeatureSize(TenantQuota tenantQuota) : TenantQuotaFeature<long>(tenantQuota)
+public class TenantQuotaFeatureFixedCount(TenantQuota tenantQuota, string name) : TenantQuotaFeature<int>(tenantQuota, name)
 {
-    public override long Default => long.MaxValue;
+    protected override bool TryParse(string s, out int result)
+    {
+        result = 0;
+        var parts = s.Split([':'], 3, StringSplitOptions.RemoveEmptyEntries);
+        return parts.Length == 3 && parts[2] == "fixed" && int.TryParse(parts[1], out result);
+    }
 
+    protected internal override void Multiply(int quantity)
+    {
+    }
+}
+
+public class TenantQuotaFeatureSize(TenantQuota tenantQuota, string name, bool paid = false) : TenantQuotaFeature<long>(tenantQuota, name, long.MaxValue, paid)
+{
     protected override bool TryParse(string s, out long result)
     {
         return long.TryParse(s[(s.IndexOf(':') + 1)..], out result);
@@ -133,7 +141,7 @@ public class TenantQuotaFeatureSize(TenantQuota tenantQuota) : TenantQuotaFeatur
     }
 }
 
-public class TenantQuotaFeatureFlag(TenantQuota tenantQuota) : TenantQuotaFeature<bool>(tenantQuota)
+public class TenantQuotaFeatureFlag(TenantQuota tenantQuota, string name, bool paid = false) : TenantQuotaFeature<bool>(tenantQuota, name, false, paid)
 {
     protected override bool TryParse(string s, out bool result)
     {

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,7 +32,7 @@ public class StorageUploader(
     TempStream tempStream,
     ICacheNotify<MigrationProgress> cacheMigrationNotify,
     IDistributedTaskQueueFactory queueFactory,
-    ILogger<StorageUploader> logger, 
+    ILogger<StorageUploader> logger,
     IDistributedLockProvider distributedLockProvider,
     IFusionCache cache)
 {
@@ -97,9 +97,9 @@ public class MigrateOperation : DistributedTaskProgress
 
     public MigrateOperation()
     {
-        
+
     }
-    
+
     public MigrateOperation(
         IServiceProvider serviceProvider,
         ICacheNotify<MigrationProgress> cacheMigrationNotify,

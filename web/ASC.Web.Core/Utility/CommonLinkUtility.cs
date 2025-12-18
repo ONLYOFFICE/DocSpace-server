@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -64,6 +64,7 @@ public class CommonLinkUtility(
         CoreSettings coreSettings,
         TenantManager tenantManager,
         UserManager userManager,
+        InstanceCrypto instanceCrypto,
         EmailValidationKeyProvider emailValidationKeyProvider,
         ILoggerProvider options,
         ExternalResourceSettingsHelper externalResourceSettingsHelper)
@@ -72,11 +73,8 @@ public class CommonLinkUtility(
     public const string ParamName_UserUserID = "uid";
     public const string AbsoluteAccountsPath = "/accounts/";
     public const string VirtualAccountsPath = "~/accounts/";
-    
-    public string Logout
-    {
-        get { return ToAbsolute("~/auth.aspx") + "?t=logout"; }
-    }
+
+    public string Logout => ToAbsolute("~/auth.aspx") + "?t=logout";
 
     public string GetDefault()
     {
@@ -188,24 +186,24 @@ public class CommonLinkUtility(
     public string GetInvitationLink(string email, EmployeeType employeeType, Guid createdBy, string culture = null)
     {
         var tenant = _tenantManager.GetCurrentTenant();
-        
+
         var link = GetConfirmationEmailUrl(email, ConfirmType.LinkInvite, employeeType.ToStringFast() + tenant.Alias, createdBy)
                    + $"&emplType={employeeType:d}";
-        
+
         if (!string.IsNullOrEmpty(culture))
         {
             link += $"&culture={culture}";
         }
-        
+
         return link;
     }
-    
-    public (string, string) GetConfirmationUrlAndKey(string email, ConfirmType confirmType, object postfix = null, Guid userId = default)
+
+    public (string, string) GetConfirmationUrlAndKey(Guid userId, ConfirmType confirmType, object postfix = null)
     {
-        var url = GetFullAbsolutePath($"confirm/{confirmType}?{GetTokenWithoutKey(email, confirmType, userId)}");
+        var url = GetFullAbsolutePath($"confirm/{confirmType}?{GetTokenWithoutKey(userId, confirmType)}");
 
         var tenantId = _tenantManager.GetCurrentTenantId();
-        var key = emailValidationKeyProvider.GetEmailKey(tenantId, email + confirmType + (postfix ?? ""));
+        var key = emailValidationKeyProvider.GetEmailKey(userId.ToString() + confirmType + (postfix ?? ""), tenantId);
         return (url, key);
     }
 
@@ -213,7 +211,7 @@ public class CommonLinkUtility(
     {
         return GetFullAbsolutePath(GetConfirmationUrlRelative(email, confirmType, postfix, userId));
     }
-    
+
     public string GetConfirmationUrl(string key, ConfirmType confirmType, Guid userId = default)
     {
         return GetFullAbsolutePath(GetConfirmationUrlRelative(key, confirmType, userId));
@@ -234,32 +232,21 @@ public class CommonLinkUtility(
         return $"confirm/{confirmType}?type={confirmType}&key={key}&uid={userId}";
     }
 
-    private string GetTokenWithoutKey(string email, ConfirmType confirmType, Guid userId = default)
+    private string GetTokenWithoutKey(Guid userId, ConfirmType confirmType)
     {
-        var link = $"type={confirmType}";
-
-        if (!string.IsNullOrEmpty(email))
-        {
-            link += $"&email={HttpUtility.UrlEncode(email)}";
-        }
-
-        if (userId != Guid.Empty)
-        {
-            link += $"&uid={userId}";
-        }
-
-        return link;
+        return $"type={confirmType}&uid={userId}";
     }
 
     public string GetToken(int tenantId, string email, ConfirmType confirmType, object postfix = null, Guid userId = default)
     {
-        var validationKey = emailValidationKeyProvider.GetEmailKey(tenantId, email + confirmType + (postfix ?? ""));
+        var validationKey = emailValidationKeyProvider.GetEmailKey(email + confirmType + (postfix ?? ""), tenantId);
 
         var link = $"type={confirmType}&key={validationKey}";
 
         if (!string.IsNullOrEmpty(email))
         {
-            link += $"&email={HttpUtility.UrlEncode(email)}";
+            var encryptedEmail = instanceCrypto.Encrypt(email).Base64ToUrlSafe();
+            link += $"&encemail={HttpUtility.UrlEncode(encryptedEmail)}";
         }
 
         if (userId != Guid.Empty)

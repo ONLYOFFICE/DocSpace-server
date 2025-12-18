@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,12 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Profile = AutoMapper.Profile;
-
 namespace ASC.Notify.Messages;
 
 [ProtoContract]
-public class NotifyMessage : IMapFrom<NotifyQueue>
+public class NotifyMessage
 {
     [ProtoMember(1)]
     public string Sender { get; set; }
@@ -72,11 +70,16 @@ public class NotifyMessage : IMapFrom<NotifyQueue>
 
     [ProtoMember(14)]
     public string Data { get; set; }
+}
 
-    public void Mapping(Profile profile)
-    {
-        profile.CreateMap<NotifyQueue, NotifyMessage>()
-               .ForMember(dest => dest.Attachments, opt => opt.Ignore())
-               .ReverseMap();
-    }
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class NotifyMessageMapper
+{
+    [MapperIgnoreSource(nameof(NotifyQueue.Attachments))]
+    [MapperIgnoreTarget(nameof(NotifyQueue.Attachments))]
+    public static partial NotifyMessage Map(this NotifyQueue source);
+
+    [MapperIgnoreSource(nameof(NotifyQueue.Attachments))]
+    [MapperIgnoreTarget(nameof(NotifyQueue.Attachments))]
+    public static partial NotifyQueue Map(this NotifyMessage source);
 }

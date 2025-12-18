@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -45,17 +45,15 @@ public class DbFactory(IConfiguration configuration, ConfigurationExtension conf
     {
         get
         {
-            if (_dbProviderFactory == null)
+            if (field == null)
             {
                 var type = Type.GetType(configuration["DbProviderFactories:mysql:type"], true);
-                _dbProviderFactory = (DbProviderFactory)Activator.CreateInstance(type, true);
+                field = (DbProviderFactory)Activator.CreateInstance(type, true);
             }
 
-            return _dbProviderFactory;
+            return field;
         }
     }
-
-    private DbProviderFactory _dbProviderFactory;
 
     public DbConnection OpenConnection(string path = "default", string connectionString = null, string region = "current")
     {
@@ -83,13 +81,9 @@ public class DbFactory(IConfiguration configuration, ConfigurationExtension conf
     public DbCommand CreateLastInsertIdCommand()
     {
         var command = DbProviderFactory.CreateCommand();
-        if (command != null)
-        {
-            command.CommandText =
-                configurationExtension.GetConnectionStrings(DefaultConnectionStringName).ProviderName.Contains("MySql", StringComparison.OrdinalIgnoreCase)
-                    ? "select Last_Insert_Id();"
-                    : "select last_insert_rowid();";
-        }
+        command?.CommandText = configurationExtension.GetConnectionStrings(DefaultConnectionStringName).ProviderName.Contains("MySql", StringComparison.OrdinalIgnoreCase)
+            ? "select Last_Insert_Id();"
+            : "select last_insert_rowid();";
 
         return command;
     }
@@ -97,10 +91,7 @@ public class DbFactory(IConfiguration configuration, ConfigurationExtension conf
     public DbCommand CreateShowColumnsCommand(string tableName)
     {
         var command = DbProviderFactory.CreateCommand();
-        if (command != null)
-        {
-            command.CommandText = "show columns from " + tableName + ";";
-        }
+        command?.CommandText = "show columns from " + tableName + ";";
 
         return command;
     }

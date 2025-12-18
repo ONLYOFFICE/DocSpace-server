@@ -126,4 +126,37 @@
   <data name="LargeBackup" xml:space="preserve">
     <value>Dublējums ir lielāks par kopējo portāla izmēru</value>
   </data>
+  <data name="BackupException" xml:space="preserve">
+    <value>Veidojot rezerves kopiju, radās problēma. Lūdzu, mēģiniet to izveidot vēlreiz vai sazinieties ar atbalsta centru.</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>Atjaunojot rezerves kopiju, radās problēma. Lūdzu, mēģiniet to atjaunot vēlreiz vai sazinieties ar atbalsta centru.</value>
+  </data>
+  <data name="BackupInvalid" xml:space="preserve">
+    <value>Rezerves kopijas fails ir nederīgs.</value>
+  </data>
+  <data name="AutoBackup" xml:space="preserve">
+    <value>Automātiskā rezerves kopēšana</value>
+  </data>
+  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
+    <value>Custom cloud</value>
+  </data>
+  <data name="BackupStorageTypeDataStore" xml:space="preserve">
+    <value>Pagaidu uzglabāšana</value>
+  </data>
+  <data name="BackupStorageTypeDocuments" xml:space="preserve">
+    <value>Dublējuma telpa</value>
+  </data>
+  <data name="BackupStorageTypeLocal" xml:space="preserve">
+    <value>Vietējais fails</value>
+  </data>
+  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
+    <value>Trešās puses krātuve</value>
+  </data>
+  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
+    <value>Trešās puses resurss</value>
+  </data>
+  <data name="BackupMissingFilesWarning" xml:space="preserve">
+    <value>Daži faili netika iekļauti dublējumkopijā. Lai uzzinātu vairāk, lūdzu, skatiet {0}</value>
+  </data>
 </root>

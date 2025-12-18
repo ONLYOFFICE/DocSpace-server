@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,11 +26,14 @@
 
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
+/// <summary>
+/// The request parameters for handling requests to delete a custom color theme.
+/// </summary>
 public class DeleteColorThemeRequestDto
 {
     /// <summary>
-    /// Portal theme ID
+    /// The ID of the portal theme to delete.
     /// </summary>
     [FromQuery(Name = "id")]
-    public int Id { get; set; }
+    public required int Id { get; set; }
 }

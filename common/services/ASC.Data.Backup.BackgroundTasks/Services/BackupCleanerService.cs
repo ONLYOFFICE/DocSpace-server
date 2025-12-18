@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,13 +28,13 @@ namespace ASC.Data.Backup.Services;
 
 [Singleton]
 internal sealed class BackupCleanerService(
-    IConfiguration configuration,
+    BackupConfigurationService backupConfigurationService,
     ILogger<BackupCleanerService> logger,
     IServiceScopeFactory scopeFactory)
     : ActivePassiveBackgroundService<BackupCleanerService>(logger, scopeFactory)
 {
     private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
-    protected override TimeSpan ExecuteTaskPeriod { get; set; } = configuration.GetSection("backup").Get<BackupSettings>().Cleaner.Period;
+    protected override TimeSpan ExecuteTaskPeriod { get; set; } = backupConfigurationService.Settings.Cleaner.Period;
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
         await using var serviceScope = _scopeFactory.CreateAsyncScope();
@@ -69,7 +69,7 @@ internal sealed class BackupCleanerService(
                 return;
             }
 
-            var schedule = await backupRepository.GetBackupScheduleAsync(scheduledBackups.Key);
+            var schedule = await backupRepository.GetBackupScheduleAsync(scheduledBackups.Key, null);
 
             if (schedule != null)
             {

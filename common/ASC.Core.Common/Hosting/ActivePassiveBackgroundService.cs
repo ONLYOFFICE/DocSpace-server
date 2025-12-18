@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,7 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Core.Common.Hosting;
-public abstract class ActivePassiveBackgroundService<T>(ILogger logger, IServiceScopeFactory scopeFactory) 
+public abstract class ActivePassiveBackgroundService<T>(ILogger logger, IServiceScopeFactory scopeFactory)
     : BackgroundService where T : ActivePassiveBackgroundService<T>
 {
     protected abstract Task ExecuteTaskAsync(CancellationToken stoppingToken);
@@ -41,7 +41,7 @@ public abstract class ActivePassiveBackgroundService<T>(ILogger logger, IService
         while (!stoppingToken.IsCancellationRequested)
         {
             await using var serviceScope = scopeFactory.CreateAsyncScope();
-           
+
             var registerInstanceService = serviceScope.ServiceProvider.GetService<IRegisterInstanceManager<T>>();
             var workerOptions = serviceScope.ServiceProvider.GetService<IOptions<InstanceWorkerOptions<T>>>().Value;
 
@@ -59,7 +59,7 @@ public abstract class ActivePassiveBackgroundService<T>(ILogger logger, IService
             catch (Exception e)
             {
                 logger.WarningWithException(e);
-                
+
                 await Task.Delay(millisecondsDelay, stoppingToken);
                 continue;
             }
@@ -69,7 +69,7 @@ public abstract class ActivePassiveBackgroundService<T>(ILogger logger, IService
             await ExecuteTaskAsync(stoppingToken);
 
             logger.TraceActivePassiveBackgroundServiceIsSleeping(serviceName, ExecuteTaskPeriod);
-            
+
             await Task.Delay(ExecuteTaskPeriod, stoppingToken);
         }
     }

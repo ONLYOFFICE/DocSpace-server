@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,11 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Profile = AutoMapper.Profile;
-
 namespace ASC.Core;
 
-public class Group : IMapFrom<DbGroup>
+public class Group
 {
     public Guid Id { get; set; }
     public Guid ParentId { get; set; }
@@ -53,13 +51,25 @@ public class Group : IMapFrom<DbGroup>
     {
         return obj is Group g && g.Id == Id;
     }
+}
 
-    public void Mapping(Profile profile)
-    {
-        profile.CreateMap<DbGroup, Group>()
-            .ForMember(src => src.CategoryId, opt => opt.NullSubstitute(Guid.Empty))
-            .ForMember(src => src.ParentId, opt => opt.NullSubstitute(Guid.Empty));
 
-        profile.CreateMap<GroupInfo, Group>();
-    }
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class GroupMapper
+{
+    public static partial Group Map(this DbGroup source);
+    public static partial IQueryable<Group> Project(this IQueryable<DbGroup> source);
+    public static partial DbGroup Map(this Group source);
+    public static partial Group Map(this GroupInfo source);
+
+    // Handle nullable Guid mapping
+    private static Guid MapNullableGuid(Guid? source) => source ?? Guid.Empty;
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class GroupInfoMapper
+{
+    public static partial GroupInfo MapToGroupInfo(this DbGroup source);
+
+    private static Guid MapNullableGuid(Guid? source) => source ?? Guid.Empty;
 }

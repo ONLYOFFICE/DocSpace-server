@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,67 +27,38 @@
 namespace ASC.ClearEvents.Services;
 
 [Scope]
-public class ClearEventsService(ILogger<ClearEventsService> logger, IServiceScopeFactory serviceScopeFactory)
-    : IHostedService, IDisposable
+public class ClearEventsService(ILogger<ClearEventsService> logger, IServiceScopeFactory serviceScopeFactory) : BackgroundService
 {
-    private Timer _timer;
+    private readonly PeriodicTimer _timer = new(TimeSpan.FromDays(1));
 
-    public Task StartAsync(CancellationToken cancellationToken)
-    {
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {        
         logger.InformationTimerRunnig();
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            try
+            {
+                await RemoveOldEventsAsync(r => r.LoginEvents, nameof(TenantAuditSettings.LoginHistoryLifeTime), stoppingToken);
+            }
+            catch (Exception ex)
+            {
+                logger.ErrorWithException(ex);
+            }
 
-        _timer = new Timer(async state => await DeleteOldEventsAsync(state), null, TimeSpan.Zero,
-            TimeSpan.FromDays(1));
-
-        return Task.CompletedTask;
-    }
-
-    public Task StopAsync(CancellationToken cancellationToken)
-    {
+            await _timer.WaitForNextTickAsync(stoppingToken);
+        }
         logger.InformationTimerStopping();
-
-        _timer?.Change(Timeout.Infinite, 0);
-
-        return Task.CompletedTask;
     }
+    
 
-    public void Dispose()
-    {
-        if (_timer == null)
-        {
-            return;
-        }
-
-        var handle = new AutoResetEvent(false);
-
-        if (!_timer.Dispose(handle))
-        {
-            throw new Exception("Timer already disposed");
-        }
-
-        handle.WaitOne();
-    }
-
-    private async Task DeleteOldEventsAsync(object state)
-    {
-        try
-        {
-            await RemoveOldEventsAsync(r => r.LoginEvents, "LoginHistoryLifeTime");
-        }
-        catch (Exception ex)
-        {
-            logger.ErrorWithException(ex);
-        }
-    }
-
-    private async Task RemoveOldEventsAsync<T>(Expression<Func<MessagesContext, DbSet<T>>> func, string settings) where T : MessageEvent
+    private async Task RemoveOldEventsAsync<T>(Expression<Func<MessagesContext, DbSet<T>>> func, string settings, CancellationToken stoppingToken) where T : MessageEvent
     {
         List<T> ids;
         var compile = func.Compile();
         do
         {
             using var scope = serviceScopeFactory.CreateScope();
-            await using var ef = await scope.ServiceProvider.GetService<IDbContextFactory<MessagesContext>>().CreateDbContextAsync();
+            await using var ef = await scope.ServiceProvider.GetService<IDbContextFactory<MessagesContext>>().CreateDbContextAsync(stoppingToken);
             var table = compile.Invoke(ef);
 
             var ae = table
@@ -101,12 +72,12 @@ public class ClearEventsService(ILogger<ClearEventsService> logger, IServiceScop
                 })
                 .Where(r => r.Date < DateTime.UtcNow.AddDays(-Convert.ToDouble(
                     ef.WebstudioSettings
-                    .Where(a => a.TenantId == r.TenantId && a.Id == TenantAuditSettings.Guid)
+                    .Where(a => a.TenantId == r.TenantId && a.Id == TenantAuditSettings.ID)
                     .Select(dbWebstudioSettings => DbFunctionsExtension.JsonExtract(nameof(dbWebstudioSettings.Data).ToLower(), settings))
                     .FirstOrDefault() ?? TenantAuditSettings.MaxLifeTime.ToString())))
                 .Take(1000);
 
-            ids = await ae.Select(r => r.ef).ToListAsync();
+            ids = await ae.Select(r => r.ef).ToListAsync(cancellationToken: stoppingToken);
 
             if (ids.Count == 0)
             {
@@ -114,7 +85,7 @@ public class ClearEventsService(ILogger<ClearEventsService> logger, IServiceScop
             }
 
             table.RemoveRange(ids);
-            await ef.SaveChangesAsync();
+            await ef.SaveChangesAsync(stoppingToken);
 
         } while (ids.Count != 0);
     }

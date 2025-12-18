@@ -499,31 +499,31 @@ $TrulyYours</value>
     <value>Новий користувач був доданий до порталу ${LetterLogoText}</value>
   </data>
   <data name="ActionFileUploaded" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; передав(-ла) новий документ: &lt;a href={1}&gt;{2}&lt;/a&gt; в кімнаті: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; передав(-ла) новий документ: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; в кімнаті: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomRenamed" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; перейменував(-ла) кімнату: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href={2}&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; перейменував(-ла) кімнату: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; створив(-ла) нову кімнату: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; створив(-ла) нову кімнату: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; було видалено з кімнати: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; було видалено з кімнати: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileEdited" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; відредагував(-ла) документ: &lt;a href={1}&gt;{2}&lt;/a&gt; в кімнаті: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; відредагував(-ла) документ: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; в кімнаті: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomRemoved" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; видалив(-ла) кімнату: &lt;b&gt;{1}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserAddedToRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; було додано до кімнати: &lt;a href={1}&gt;{2}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; було додано до кімнати: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomArchived" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; перемістив(-ла) кімнату: &lt;a href={1}&gt;{2}&lt;/a&gt; до архіву - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; перемістив(-ла) кімнату: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; до архіву - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomUpdateAccessForUser" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; було призначено роль &lt;b&gt;{1}&lt;/b&gt; в кімнаті: &lt;a href={2}&gt;{3}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; було призначено роль &lt;b&gt;{1}&lt;/b&gt; в кімнаті: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
     <value>Додано нового користувача DocSpace: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
@@ -823,7 +823,7 @@ $Body</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace&lt;span style="color: #FF6F3D;"&gt;деактивовано&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace&lt;span style="color: #FF6F3D;"&gt;видалено&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Ваш ${LetterLogoText} DocSpace успішно деактивовано. Зверніть увагу, що всі ваші дані буде видалено відповідно до нашої &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Політики конфіденційності&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
@@ -863,17 +863,6 @@ $TrulyYours</value>
 Зверніть увагу: для вашого ${LetterLogoText} DocSpace активовано пільговий період тривалістю $PaymentDelay‎ дн.
 
 Оплатіть підписку Business до закінчення пільгового періоду. Це дозволить вам продовжити використовувати всі можливості вашого ${LetterLogoText} DocSpace.
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Вітаємо, $UserName!
-
-Зверніть увагу, що термін дії вашої підписки на ${LetterLogoText} DocSpace закінчується через три дні. Після цього буде активовано пільговий період тривалістю $PaymentDelay дн.
-
-Рекомендуємо оплатити підписку Business зараз і продовжити використовувати всі можливості вашого ${LetterLogoText} DocSpace.
 
 $OrangeButton
 
@@ -934,10 +923,10 @@ $TrulyYours</value>
     <value>Відвідати розділ «Платежі»</value>
   </data>
   <data name="ActionNewComment" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; додав(-ла) новий коментар до версії документа: &lt;a href={1}&gt;{2}&lt;/a&gt; в кімнаті: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; додав(-ла) новий коментар до версії документа: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; в кімнаті: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; створив(-ла) новий документ: &lt;a href={1}&gt;{2}&lt;/a&gt; в кімнаті: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; створив(-ла) новий документ: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; в кімнаті: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ButtonActivateEmail" xml:space="preserve">
     <value>Натисніть тут, щоб активувати адресу електронної пошти</value>
@@ -1069,7 +1058,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Зміна паролю до поштової скриньки</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace деактивовано</value>
+    <value>Документаційний простір ${LetterLogoText} видалено</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>Користувач видалив свій профіль</value>
@@ -1103,9 +1092,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Пільговий період для вашого ${LetterLogoText} DocSpace активовано</value>
-  </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Термін дії вашої підписки на ${LetterLogoText} DocSpace скоро закінчиться</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Пільговий період для вашого ${LetterLogoText} DocSpace закінчився</value>
@@ -1169,7 +1155,9 @@ $OrangeButton
 
 Натисніть кнопку нижче, щоб перейти на сторінку входу до порталу й настроїти застосунок для аутентифікації:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
     <value>h1. Приєднайтеся до &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace
@@ -1790,11 +1778,13 @@ $TrulyYours</value>
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Вітаємо, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Ви щойно *створили ${LetterLogoText} DocSpace* — центр документів, за допомогою якого можна покращити співпрацю зі своєю командою, клієнтами, партнерами тощо. Його адреса: &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Ви щойно *створили ${LetterLogoText} DocSpace* — центр документів, за допомогою якого можна покращити співпрацю зі своєю командою, клієнтами, партнерами тощо. Його адреса: &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
+#if($OrangeButton != "")
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Підтвердьте свою адресу електронної пошти (посилання дійсне протягом 7 днів):&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 44px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
+#end
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;Ваш поточний тарифний план — STARTUP. Він абсолютно безплатний та містить:&lt;/td&gt;&lt;/tr&gt;
 
@@ -1900,5 +1890,214 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 26px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Якщо вам потрібна допомога, перейдіть до нашого &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;Довідкового центру&lt;/a&gt; або зверніться до &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__SupportLink}"&gt;служби підтримки&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
+  </data>
+  <data name="pattern_user_role_changed" xml:space="preserve">
+    <value>Вітаємо!
+
+Вам призначено нову роль у кімнаті DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+Дізнайтеся більше про ролі та дозволи в кімнаті в "Довідковому центрі":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_type_changed" xml:space="preserve">
+    <value>Вітаємо!
+
+Вам призначено новий тип користувача в DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
+
+Дізнайтеся більше про типи користувачів і дозволи в "Довідковому центрі":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Ваш простір ${LetterLogoText} DocSpace буде &lt;span style="color: #FF6F3D;"&gt;видалено&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Ваш простір ${LetterLogoText} DocSpace ${__VirtualRootPath} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; неактивний більше ніж рік.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Оскільки ви вирішили більше не використовувати його, ваш простір ${LetterLogoText} DocSpace і всі дані буде видалено відповідно до нашої &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Політики конфіденційності&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;Ми будемо вдячні за ваш відгук. Чому ви вирішили припинити використання ${LetterLogoText} DocSpace?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Якщо ви хочете продовжити використовувати ваш простір ${LetterLogoText} DocSpace, просто увійдіть до нього й виконайте будь-яку дію.&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>Ваш ${LetterLogoText} DocSpace буде видалено</value>
+  </data>
+  <data name="subject_user_role_changed" xml:space="preserve">
+    <value>Ваша роль у кімнаті DocSpace змінилася</value>
+  </data>
+  <data name="subject_user_type_changed" xml:space="preserve">
+    <value>Ваш тип користувача DocSpace змінився</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Перейти до сервісів</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Перейти до параметрів гаманця</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Вітаємо, $UserName!
+
+Повідомляємо вас про те, що не вдалося виконати автоматичне поновлення придбаного вами сервісного плану.
+
+Просимо вас поновити поточний сервісний план вручну (або придбати новий).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Вітаємо, $UserName!
+
+Повідомляємо вас про те, що оплату підписки буде автоматично списано з вашого рахунку через 3 дні.
+
+Щоб забезпечити успішне проведення транзакції, переконайтеся, що на рахунку вибраного вами методу оплати достатньо коштів.
+
+Якщо у вас виникли запитання або потрібна допомога, зв'яжіться з нами на сторінці "служби підтримки":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Вітаємо, $UserName!
+
+Повідомляємо Вас про невдале автоматичне поповнення балансу гаманця DocSpace.
+
+Просимо Вас перевірити та оновити баланс Вашого гаманця вручну.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Потрібна дія: не вдається автоматично поновити сервісний план у вашому ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Наступний платіж за підписку на ваш ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Потрібна дія: не вдається автоматично поповнити баланс гаманця у вашому ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>Відкрийте DocSpace</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>Ваш пароль успішно змінено</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.Пароль успішно змінено
+
+Ваш пароль для облікового запису *$UserName*, *$UserEmail* був успішно змінений *$Date* у DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+IP: *$IP*
+Пристрій: *$Device*
+#if($Location != "")
+Місцезнаходження: *$Location*
+#end
+Браузер: *$Browser*
+
+Якщо цю дію виконали ви, подальші кроки не потрібні. Якщо ця зміна виглядає підозрілою або не була авторизована вами, негайно скиньте пароль і вимкніть доступ до DocSpace для цього пристрою.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_backup_failed" xml:space="preserve">
+    <value>Резервне копіювання вашого простору DocSpace не вдалося</value>
+  </data>
+  <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Вас запрошено до агента ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_scheduled_backup_failed" xml:space="preserve">
+    <value>Автоматичне резервне копіювання вашого простору DocSpace не вдалося</value>
+  </data>
+  <data name="subject_saas_agent_invite" xml:space="preserve">
+    <value>Приєднайтеся до ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="ActionAgentCreated" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; створив(ла) нового агента: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRemoved" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; видалив(ла) агента: &lt;b&gt;{1}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRenamed" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; перейменував(ла) агента: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentUpdateAccessForUser" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; було призначено роль &lt;b&gt;{1}&lt;/b&gt; в агенті: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserAddedToAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; було додано до агента: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserRemovedFromAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; було видалено з агента: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ButtonJoinAgent" xml:space="preserve">
+    <value>Приєднатися до агента</value>
+  </data>
+  <data name="pattern_backup_failed" xml:space="preserve">
+    <value>Вітаємо, $UserName!
+
+Процес резервного копіювання вашого простору DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" не вдався.
+
+Якщо у вас виникли запитання або потрібна допомога, зв'яжіться з нами на сторінці "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_backup_failed_tg" xml:space="preserve">
+    <value>Вітаємо, $UserName!
+
+Процес резервного копіювання вашого простору DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) не вдався.
+
+Якщо у вас виникли запитання або потрібна допомога, зв'яжіться з нами на сторінці [${__SupportLink}](${__SupportLink})
+
+З найкращими побажаннями
+Команда підтримки ${LetterLogoText}
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="pattern_saas_agent_invite" xml:space="preserve">
+    <value>Вітаємо!
+
+Вас запрошено приєднатися до агента DocSpace за адресою "${__VirtualRootPath}":"${__VirtualRootPath}". Щоб прийняти запрошення, натисніть на посилання:
+
+$OrangeButton
+
+Після натискання на запрошувальне посилання встановіть новий пароль для свого облікового запису.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Вітаємо!
+
+$__AuthorName запросив(ла) вас приєднатися до агента "$Message":"$InviteLink" на "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed" xml:space="preserve">
+    <value>Вітаємо, $UserName!
+
+Запланований процес резервного копіювання вашого простору DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" не вдався.
+
+Рекомендуємо перевірити налаштування "Резервне копіювання":"${__VirtualRootPath}/portal-settings/backup/data-backup" та "Служби":"${__VirtualRootPath}/portal-settings/services".
+
+Якщо у вас виникли запитання або потрібна допомога, зв'яжіться з нами на сторінці "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
+    <value>Вітаємо, $UserName!
+
+Запланований процес резервного копіювання вашого простору DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) не вдався.
+
+Рекомендуємо перевірити налаштування [Резервне копіювання](${__VirtualRootPath}/portal-settings/backup/data-backup) та [Служби](${__VirtualRootPath}/portal-settings/services).
+
+Якщо у вас виникли запитання або потрібна допомога, зв'яжіться з нами на сторінці [${__SupportLink}](${__SupportLink})
+
+З найкращими побажаннями
+Команда підтримки ${LetterLogoText}
+[${__SiteLink}](${__SiteLink})</value>
   </data>
 </root>

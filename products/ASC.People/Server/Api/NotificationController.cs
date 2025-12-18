@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,13 +26,16 @@
 
 namespace ASC.People.Api;
 
-public class NotificationController    : ApiControllerBase
-    // UserManager userManager,
-    //     SecurityContext securityContext,
-    //     AuthContext authContext,
-    //     PermissionContext permissionContext,
-    //     CommonLinkUtility commonLinkUtility,
-    //     StudioNotifyService studioNotifyService
+///<summary>
+/// Notification API.
+///</summary>
+public class NotificationController : ApiControllerBase
+// UserManager userManager,
+//     SecurityContext securityContext,
+//     AuthContext authContext,
+//     PermissionContext permissionContext,
+//     CommonLinkUtility commonLinkUtility,
+//     StudioNotifyService studioNotifyService
 
 {
     /// <summary>
@@ -47,7 +50,7 @@ public class NotificationController    : ApiControllerBase
     [SwaggerResponse(501, "Not Implemented")]
     [ApiExplorerSettings(IgnoreApi = true)]
     [HttpPost("phone")]
-    public Task<string> SendNotificationToChangeAsync(UpdateMemberSimpleRequestDto inDto)
+    public Task<string> SendNotificationToChange(UpdateMemberSimpleRequestDto inDto)
     {
         throw new NotImplementedException();
         // var user = await userManager.GetUsersAsync(string.IsNullOrEmpty(inDto.UserId)
@@ -72,5 +75,5 @@ public class NotificationController    : ApiControllerBase
         // await studioNotifyService.SendMsgMobilePhoneChangeAsync(user);
         //
         // return string.Empty;
-        }
+    }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,12 +27,12 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Upload room logo request parameters
+/// The request parameters for uploading room logo.
 /// </summary>
 public class UploadRoomLogoRequestDto
 {
     /// <summary>
-    /// Image data
+    /// The image data.
     /// </summary>
     public IFormCollection FormCollection { get; set; }
 }

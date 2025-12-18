@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,8 +27,8 @@
 namespace ASC.Web.Core.Log;
 internal static partial class StudioPeriodicNotifyLogger
 {
-    [LoggerMessage(LogLevel.Error, "SendSaasLettersAsync")]
-    public static partial void ErrorSendSaasLettersAsync(this ILogger logger, Exception exception);
+    [LoggerMessage(LogLevel.Error, "SendSaasLettersAsync {tenantId}")]
+    public static partial void ErrorSendSaasLettersAsync(this ILogger logger, int tenantId, Exception exception);
 
     [LoggerMessage(LogLevel.Error, "SendEnterpriseLetters")]
     public static partial void ErrorSendEnterpriseLetters(this ILogger logger, Exception exception);
@@ -62,4 +62,10 @@ internal static partial class StudioPeriodicNotifyLogger
 
     [LoggerMessage(LogLevel.Information, "Total send count: {sendCount}")]
     public static partial void InformationTotalSendCount(this ILogger logger, int sendCount);
+
+    [LoggerMessage(LogLevel.Information, "Start removing unused free tenant: {tenantId} {tenantDomain}")]
+    public static partial void InformationStartRemovingUnusedFreeTenant(this ILogger logger, int tenantId, string tenantDomain);
+
+    [LoggerMessage(LogLevel.Information, "Start removing unused paid tenant: {tenantId} {tenantDomain}")]
+    public static partial void InformationStartRemovingUnusedPaidTenant(this ILogger logger, int tenantId, string tenantDomain);
 }

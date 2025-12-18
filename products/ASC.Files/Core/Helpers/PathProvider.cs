@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -43,10 +43,9 @@ public class PathProvider(WebImageSupplier webImageSupplier,
         return webImageSupplier.GetAbsoluteWebPath(imgFileName, ProductEntryPoint.ID);
     }
 
-    public string RoomUrlString
-    {
-        get { return "/rooms/shared/{0}/filter?withSubfolders={1}&folder={0}&count=100&page=1&sortby=DateAndTime&sortorder=descending"; }
-    }
+    public string RoomUrlString => "/rooms/shared/{0}/filter?withSubfolders={1}&folder={0}&count=100&page=1&sortby=DateAndTime&sortorder=descending";
+
+    public string AgentUrlString => "/ai-agents/{0}/chat?folder={0}";
 
     public string GetRoomsUrl(int roomId, bool withSubfolders = true)
     {
@@ -57,44 +56,45 @@ public class PathProvider(WebImageSupplier webImageSupplier,
     {
         return commonLinkUtility.GetFullAbsolutePath(string.Format(RoomUrlString, roomId, withSubfolders.ToString().ToLowerInvariant()));//ToDo
     }
+    
+    public string GetAgentUrl(string agentId)
+    {
+        return commonLinkUtility.GetFullAbsolutePath(string.Format(AgentUrlString, agentId));
+    }
 
-    public async Task<string> GetFolderUrlAsync<T>(Folder<T> folder, int projectID = 0)
+    public string GetFolderUrl<T>(Folder<T> folder, string key = null)
     {
         if (folder == null)
         {
             throw new ArgumentNullException(nameof(folder), FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
-        var folderDao = daoFactory.GetFolderDao<T>();
-
-        switch (folder.RootFolderType)
+        var result = "";
+        var urlPathEncode = HttpUtility.UrlPathEncode(folder.Id.ToString());
+        result = folder.RootFolderType switch
         {
-            case FolderType.BUNCH:
-                if (projectID == 0)
-                {
-                    var path = await folderDao.GetBunchObjectIDAsync(folder.RootId);
+            FolderType.USER => string.Format($"rooms/personal/filter?folder={urlPathEncode}"),
+            FolderType.Recent => string.Format($"recent/filter?folder={urlPathEncode}"),
+            FolderType.Archive => string.Format($"rooms/archived/filter?folder={urlPathEncode}"),
+            FolderType.SHARE => string.Format($"shared-with-me/filter?folder={urlPathEncode}"),
+            FolderType.VirtualRooms or FolderType.RoomTemplates => string.Format($"rooms/shared/{urlPathEncode}/filter?folder={urlPathEncode}"),
+            FolderType.AiAgents => string.Format($"ai-agents/{urlPathEncode}/filter?folder={urlPathEncode}"),
+            _ => result
+        };
 
-                    var projectIDFromDao = path.Split('/').Last();
-
-                    if (string.IsNullOrEmpty(projectIDFromDao))
-                    {
-                        return string.Empty;
-                    }
-
-                    projectID = Convert.ToInt32(projectIDFromDao);
-                }
-
-                return commonLinkUtility.GetFullAbsolutePath(string.Format("{0}?prjid={1}#{2}", ProjectVirtualPath, projectID, folder.Id));
-            default:
-                return commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + "#" + HttpUtility.UrlPathEncode(folder.Id.ToString()));
+        if (!string.IsNullOrEmpty(key))
+        {
+            result += $"&key={key}";
         }
+
+        return commonLinkUtility.GetFullAbsolutePath(string.Format($"{filesLinkUtility.FilesBaseAbsolutePath}{result}"));
     }
 
-    public async Task<string> GetFolderUrlByIdAsync<T>(T folderId)
+    public async Task<string> GetFolderUrlByIdAsync<T>(T folderId, string key = null)
     {
         var folder = await daoFactory.GetFolderDao<T>().GetFolderAsync(folderId);
 
-        return await GetFolderUrlAsync(folder);
+        return GetFolderUrl(folder, key);
     }
 
     public string GetFileStreamUrl<T>(File<T> file, bool lastVersion = false)
@@ -117,12 +117,12 @@ public class PathProvider(WebImageSupplier webImageSupplier,
         }
 
         query += FilesLinkUtility.AuthKey + "=" + emailValidationKeyProvider.GetEmailKey(file.Id.ToString() + version);
-        
+
         query = AddKey(query);
 
         return uriBuilder.Uri + "?" + query;
     }
-    
+
     public string GetFileChangesUrl<T>(File<T> file)
     {
         if (file == null)

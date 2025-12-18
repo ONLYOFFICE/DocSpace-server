@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,13 +26,13 @@
 
 namespace ASC.Notify.Log;
 internal static partial class NotifySenderServiceLogger
-{    
+{
     [LoggerMessage(LogLevel.Error, "ThreadManagerWork")]
-    public static partial void ErrorThreadManagerWork(this ILogger<NotifySenderService> logger, Exception exception);  
-    
+    public static partial void ErrorThreadManagerWork(this ILogger<NotifySenderService> logger, Exception exception);
+
     [LoggerMessage(LogLevel.Debug, "Notify #{id} has been sent.")]
-    public static partial void DebugNotify(this ILogger<NotifySenderService> logger, int id);  
-    
+    public static partial void DebugNotify(this ILogger<NotifySenderService> logger, int id);
+
     [LoggerMessage(LogLevel.Error, "SendMessages")]
     public static partial void ErrorSendMessages(this ILogger<NotifySenderService> logger, Exception exception);
 }

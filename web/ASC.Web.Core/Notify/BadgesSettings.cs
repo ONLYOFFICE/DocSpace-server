@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,11 +29,8 @@ public class BadgesSettings : ISettings<BadgesSettings>
 {
     public bool EnableBadges { get; set; }
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("23491DC6-FF99-43E0-885A-D6F7B9DD7665"); }
-    }
+    public static Guid ID => new("23491DC6-FF99-43E0-885A-D6F7B9DD7665");
+
     public BadgesSettings GetDefault()
     {
         return new BadgesSettings
@@ -41,6 +38,8 @@ public class BadgesSettings : ISettings<BadgesSettings>
             EnableBadges = true
         };
     }
+
+    public DateTime LastModified { get; set; }
 }
 
 [Scope]

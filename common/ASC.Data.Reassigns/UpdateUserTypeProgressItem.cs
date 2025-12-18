@@ -1,51 +1,55 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
-//
+﻿// (c) Copyright Ascensio System SIA 2009-2025
+// 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-//
+// 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-//
+// 
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-//
+// 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-//
+// 
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-//
+// 
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Webhook;
 using ASC.Core.Common;
-using ASC.Files.Core;
+using ASC.Core.Common.Settings;
+using ASC.Files.Core.Resources;
+using ASC.People.ApiModels.ResponseDto;
+using ASC.Webhooks.Core;
 
 using SecurityContext = ASC.Core.SecurityContext;
 
 namespace ASC.Data.Reassigns;
 
 [Transient]
-public class UpdateUserTypeProgressItem: DistributedTaskProgress
+public class UpdateUserTypeProgressItem : DistributedTaskProgress
 {
     public Guid User { get; private set; }
     public Guid ToUser { get; private set; }
     private int _tenantId;
     private Guid _currentUserId;
     private EmployeeType _employeeType;
+    private IDictionary<string, StringValues> _httpHeaders;
     private UserInfo _userInfo;
     private readonly IServiceScopeFactory _serviceScopeFactory;
 
 
     public UpdateUserTypeProgressItem()
     {
-
     }
 
     public UpdateUserTypeProgressItem(IServiceScopeFactory serviceScopeFactory)
@@ -53,13 +57,14 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
         _serviceScopeFactory = serviceScopeFactory;
     }
 
-    public void Init(int tenantId, Guid user, Guid toUserId, Guid currentUserId, EmployeeType employeeType)
+    public void Init(int tenantId, Guid user, Guid toUserId, Guid currentUserId, EmployeeType employeeType, IDictionary<string, StringValues> httpHeaders)
     {
         _tenantId = tenantId;
         User = user;
         ToUser = toUserId;
         _currentUserId = currentUserId;
         _employeeType = employeeType;
+        _httpHeaders = httpHeaders;
         Id = QueueWorkerUpdateUserType.GetProgressItemId(tenantId, user);
         Status = DistributedTaskStatus.Created;
         Exception = null;
@@ -71,11 +76,11 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
     {
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<ChangeUserTypeProgressItemScope>();
-        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, displayUserSettingsHelper, options, webItemSecurityCache, distributedLockProvider, socketManager, userFormatter, daoFactory) = scopeClass;
+        var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, displayUserSettingsHelper, options, webItemSecurityCache, distributedLockProvider, socketManager, webhookManager, userFormatter, daoFactory, groupFullDtoHelper) = scopeClass;
+        var settingsManager = scope.ServiceProvider.GetService<SettingsManager>();
         var logger = options.CreateLogger("ASC.Web");
         await tenantManager.SetCurrentTenantAsync(_tenantId);
         _userInfo = await userManager.GetUsersAsync(User);
-        var userName = userFormatter.GetUserName(_userInfo);
 
         try
         {
@@ -88,8 +93,23 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
             await fileStorageService.ReassignRoomsAsync(User, ToUser);
             await SetPercentageAndCheckCancellationAsync(40, true);
 
+            var currentType = await userManager.GetUserTypeAsync(_userInfo);
+            if (currentType is EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin &&
+                _employeeType is EmployeeType.User or EmployeeType.Guest)
+            {
+                await fileStorageService.DowngradeRoomManagerRoleAsync(User);
+                await SetPercentageAndCheckCancellationAsync(45, true);
+            }
+
             if (_employeeType == EmployeeType.Guest)
             {
+                var startFolderType = await settingsManager.LoadAsync<StudioDefaultPageSettings>(User);
+
+                if (startFolderType.DefaultFolderType == FolderType.USER)
+                {
+                    await settingsManager.SaveAsync(startFolderType.GetDefault(), User);
+                }
+                
                 await securityContext.AuthenticateMeWithoutCookieAsync(ToUser);
                 await fileStorageService.UpdatePersonalFolderModified(User);
                 await securityContext.AuthenticateMeWithoutCookieAsync(_currentUserId);
@@ -97,12 +117,12 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
                 await SetPercentageAndCheckCancellationAsync(60, true);
             }
 
-            await UpdateUserTypeAsync(userManager, webItemSecurityCache, distributedLockProvider, socketManager, daoFactory);
+            await UpdateUserTypeAsync(userManager, webItemSecurityCache, distributedLockProvider, socketManager, daoFactory, groupFullDtoHelper);
 
             await SetPercentageAndCheckCancellationAsync(100, false);
 
             Status = DistributedTaskStatus.Completed;
-            await SendSuccessNotifyAsync(userManager, studioNotifyService, messageService, displayUserSettingsHelper);
+            await SendSuccessNotifyAsync(userManager, studioNotifyService, messageService, webhookManager, displayUserSettingsHelper);
         }
         catch (OperationCanceledException)
         {
@@ -124,7 +144,7 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
         }
     }
 
-    private async Task UpdateUserTypeAsync(UserManager userManager, WebItemSecurityCache webItemSecurityCache, IDistributedLockProvider distributedLockProvider, UserSocketManager socketManager, IDaoFactory daoFactory)
+    private async Task UpdateUserTypeAsync(UserManager userManager, WebItemSecurityCache webItemSecurityCache, IDistributedLockProvider distributedLockProvider, UserSocketManager socketManager, IDaoFactory daoFactory, GroupFullDtoHelper groupFullDtoHelper)
     {
         var currentType = await userManager.GetUserTypeAsync(_userInfo);
         var lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(_tenantId));
@@ -151,9 +171,10 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
                     await userManager.AddUserIntoGroupAsync(User, Constants.GroupUser.ID);
                     await socketManager.UpdateUserAsync(_userInfo);
                 }
+
                 if (currentType != _employeeType)
                 {
-                    webItemSecurityCache.ClearCache(_tenantId);
+                    await webItemSecurityCache.ClearCacheAsync(_tenantId);
                     await socketManager.ChangeUserTypeAsync(_userInfo, true);
                 }
             }
@@ -183,7 +204,18 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
 
                 if (currentType != _employeeType)
                 {
-                    webItemSecurityCache.ClearCache(_tenantId);
+                    await webItemSecurityCache.ClearCacheAsync(_tenantId);
+
+                    var groups = await userManager.GetUserGroupsAsync(User);
+
+                    foreach (var group in groups)
+                    {
+                        await userManager.RemoveUserFromGroupAsync(User, group.ID);
+
+                        var groupInfo = await userManager.GetGroupInfoAsync(group.ID);
+                        var groupDto = await groupFullDtoHelper.Get(groupInfo, true);
+                        await socketManager.UpdateGroupAsync(groupDto);
+                    }
 
                     var folderDao = daoFactory.GetFolderDao<int>();
                     var myId = await folderDao.GetFolderIDUserAsync(false, User);
@@ -213,16 +245,18 @@ public class UpdateUserTypeProgressItem: DistributedTaskProgress
         CancellationToken.ThrowIfCancellationRequested();
     }
 
-    private async Task SendSuccessNotifyAsync(UserManager userManager, StudioNotifyService studioNotifyService, MessageService messageService, DisplayUserSettingsHelper displayUserSettingsHelper)
+    private async Task SendSuccessNotifyAsync(UserManager userManager, StudioNotifyService studioNotifyService, MessageService messageService, UserWebhookManager webhookManager, DisplayUserSettingsHelper displayUserSettingsHelper)
     {
         var toUser = await userManager.GetUsersAsync(ToUser);
 
         await studioNotifyService.SendMsgReassignsCompletedAsync(_currentUserId, _userInfo, toUser);
+        await studioNotifyService.SendMsgUserTypeChangedAsync(_userInfo, FilesCommonResource.ResourceManager.GetString("RoleEnum_" + _employeeType.ToStringFast()));
 
         var fromUserName = _userInfo.DisplayUserName(false, displayUserSettingsHelper);
-        var toUserName = toUser.DisplayUserName(false, displayUserSettingsHelper);
 
-        messageService.Send(MessageAction.UsersUpdatedType, MessageTarget.Create([User]));
+        messageService.SendHeadersMessage(MessageAction.UsersUpdatedType, MessageTarget.Create([User]), _httpHeaders, [fromUserName], [_userInfo.Id], _employeeType);
+
+        await webhookManager.PublishAsync(WebhookTrigger.UserUpdated, _userInfo);
     }
 
     private async Task SendErrorNotifyAsync(UserManager userManager, StudioNotifyService studioNotifyService, string errorMessage)
@@ -241,11 +275,12 @@ public record ChangeUserTypeProgressItemScope(
     StudioNotifyService StudioNotifyService,
     SecurityContext SecurityContext,
     UserManager UserManager,
-    UserPhotoManager UserPhotoManager,
     DisplayUserSettingsHelper DisplayUserSettingsHelper,
     ILoggerProvider Options,
     WebItemSecurityCache WebItemSecurityCache,
     IDistributedLockProvider DistributedLockProvider,
     UserSocketManager SocketManager,
+    UserWebhookManager WebhookManager,
     UserFormatter UserFormatter,
-    IDaoFactory DaoFactory);
+    IDaoFactory DaoFactory,
+    GroupFullDtoHelper GroupFullDtoHelper);

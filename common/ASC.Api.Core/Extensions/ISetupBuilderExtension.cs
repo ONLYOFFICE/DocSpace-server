@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,7 +35,7 @@ public static class ISetupBuilderExtension
         var conf = new XmlLoggingConfiguration(CrossPlatform.PathCombine(configuration["pathToConf"], "nlog.config"));
 
         var settings = configuration.GetSection("log").Get<NLogSettings>();
-        
+
         if (!string.IsNullOrEmpty(settings.Name))
         {
             conf.Variables["name"] = settings.Name;

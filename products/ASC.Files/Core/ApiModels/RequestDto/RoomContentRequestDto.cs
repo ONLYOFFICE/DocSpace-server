@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,65 +26,99 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The room content request parameters.
+/// </summary>
 public class RoomContentRequestDto
 {
     /// <summary>
-    /// Filter by room type
+    /// The filter by room type.
     /// </summary>
     [FromQuery(Name = "type")]
     public IEnumerable<RoomType> Type { get; set; }
 
     /// <summary>
-    /// Filter by user ID
+    /// The filter by user ID.
     /// </summary>
     [FromQuery(Name = "subjectId")]
     public string SubjectId { get; set; }
 
     /// <summary>
-    /// Room search area (Active, Archive, Any, Recent by links)
+    /// The room search area (Active, Archive, Any, Recent by links).
     /// </summary>
     [FromQuery(Name = "searchArea")]
     public SearchArea? SearchArea { get; set; }
 
     /// <summary>
-    /// Specifies whether to search by tags or not
+    /// Specifies whether to search by tags or not.
     /// </summary>
     [FromQuery(Name = "withoutTags")]
     public bool? WithoutTags { get; set; }
 
     /// <summary>
-    /// Tags in the serialized format
+    /// The tags in the serialized format.
     /// </summary>
     [FromQuery(Name = "tags")]
     public string Tags { get; set; }
 
     /// <summary>
-    /// Specifies whether to exclude a subject or not
+    /// Specifies whether to exclude search by user or group ID.
     /// </summary>
     [FromQuery(Name = "excludeSubject")]
     public bool? ExcludeSubject { get; set; }
 
     /// <summary>
-    /// Filter by provider name (None, Box, DropBox, GoogleDrive, kDrive, OneDrive, SharePoint, WebDav, Yandex, Storage)
+    /// The filter by provider name (None, Box, DropBox, GoogleDrive, kDrive, OneDrive, SharePoint, WebDav, Yandex, Storage).
     /// </summary>
     [FromQuery(Name = "provider")]
     public ProviderFilter? Provider { get; set; }
 
     /// <summary>
-    /// Filter by subject (Owner - 0, Member - 1)
+    /// The filter by user (Owner - 0, Member - 1).
     /// </summary>
     [FromQuery(Name = "subjectFilter")]
     public SubjectFilter? SubjectFilter { get; set; }
 
     /// <summary>
-    /// Filter by quota (All - 0, Default - 1, Custom - 2)
+    /// The filter by quota (All - 0, Default - 1, Custom - 2).
     /// </summary>
     [FromQuery(Name = "quotaFilter")]
     public QuotaFilter? QuotaFilter { get; set; }
 
     /// <summary>
-    /// Filter by storage (None - 0, Internal - 1, ThirdParty - 2)
+    /// The filter by storage (None - 0, Internal - 1, ThirdParty - 2).
     /// </summary>
     [FromQuery(Name = "storageFilter")]
     public StorageFilter? StorageFilter { get; set; }
+
+    /// <summary>
+    /// Specifies the maximum number of items to retrieve.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
+
+    /// <summary>
+    /// The index from which to start retrieving the room content.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
+
+    /// <summary>
+    /// Specifies the field by which the room content should be sorted.
+    /// </summary>
+    [FromQuery(Name = "sortBy")]
+    public string SortBy { get; set; }
+
+    /// <summary>
+    /// The order in which the results are sorted.
+    /// </summary>
+    [FromQuery(Name = "sortOrder")]
+    public SortOrder SortOrder { get; set; }
+
+    /// <summary>
+    /// The text filter value used to refine search or query operations.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }

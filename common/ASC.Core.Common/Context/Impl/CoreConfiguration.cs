@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,28 +26,46 @@
 
 namespace ASC.Core;
 
+/// <summary>
+/// The core base settings parameters.
+/// </summary>
 [Singleton]
 public class CoreBaseSettings(IConfiguration configuration)
 {
     private bool? _standalone;
-    private string _basedomain;
     private bool? _customMode;
-    private string _serverRoot;
-    private List<CultureInfo> _enabledCultures;
 
-    public string Basedomain => _basedomain ??= configuration["core:base-domain"] ?? string.Empty;
+    /// <summary>
+    /// The core base domain.
+    /// </summary>
+    public string Basedomain => field ??= configuration["core:base-domain"] ?? string.Empty;
 
-    public string ServerRoot => _serverRoot ??= configuration["core:server-root"] ?? string.Empty;
+    /// <summary>
+    /// The core base server root.
+    /// </summary>
+    public string ServerRoot => field ??= configuration["core:server-root"] ?? string.Empty;
 
+    /// <summary>
+    /// Specifies if it is the standalone .
+    /// </summary>
     public bool Standalone => _standalone ??= Basedomain == "localhost";
 
+    /// <summary>
+    /// Specifies if it is the custom mode.
+    /// </summary>
     public bool CustomMode => _customMode ??= string.Equals(configuration["core:custom-mode"], "true", StringComparison.OrdinalIgnoreCase);
 
-    public List<CultureInfo> EnabledCultures => _enabledCultures ??= (configuration.GetSection("web:cultures").Get<string[]>() ?? ["en-US"])
+    /// <summary>
+    /// Specifies if it is the custom mode.
+    /// </summary>
+    public List<CultureInfo> EnabledCultures => field ??= (configuration.GetSection("web:cultures").Get<string[]>() ?? ["en-US"])
         .Distinct()
         .Select(l => CultureInfo.GetCultureInfo(l.Trim()))
         .ToList();
-    
+
+    /// <summary>
+    /// Gets the right culture name.
+    /// </summary>    
     public string GetRightCultureName(CultureInfo cultureInfo)
     {
         return EnabledCultures.Contains(cultureInfo)
@@ -59,6 +77,7 @@ public class CoreBaseSettings(IConfiguration configuration)
 }
 
 /// <summary>
+/// The core settings parameters.
 /// </summary>
 [Scope]
 public class CoreSettings(
@@ -67,8 +86,9 @@ public class CoreSettings(
     IConfiguration configuration,
     IDistributedLockProvider distributedLockProvider)
 {
-    /// <summary>Base domain</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The core settings base domain.
+    /// </summary>
     public string BaseDomain
     {
         get
@@ -100,7 +120,7 @@ public class CoreSettings(
 
         var subdomain = baseHost.Remove(baseHost.IndexOf('.') + 1);
 
-        return hostedRegion.StartsWith(subdomain) ? hostedRegion : (subdomain + hostedRegion.TrimStart('.'));
+        return hostedRegion.StartsWith(subdomain) ? hostedRegion : subdomain + hostedRegion.TrimStart('.');
     }
 
     public async Task SaveSettingAsync(string key, string value, int tenant = Tenant.DefaultTenant)
@@ -171,8 +191,38 @@ public class CoreSettings(
 
         return configuration["core:payment:region"] + tenant;
     }
+
+    public async Task<string> GetDocDbKeyAsync()
+    {
+        const string dbKey = "UniqueDocument";
+
+        // check without lock
+        var resultKey = await GetSettingAsync(dbKey);
+        if (!string.IsNullOrEmpty(resultKey))
+        {
+            return resultKey;
+        }
+
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(dbKey))
+        {
+            // check again with lock
+            resultKey = await GetSettingAsync(dbKey);
+            if (!string.IsNullOrEmpty(resultKey))
+            {
+                return resultKey;
+            }
+
+            resultKey = Guid.NewGuid().ToString();
+            await SaveSettingAsync(dbKey, resultKey);
+
+            return resultKey;
+        }
+    }
 }
 
+/// <summary>
+/// The core configuration parameters.
+/// </summary>
 [Scope]
 public class CoreConfiguration(CoreSettings coreSettings, TenantManager tenantManager)
 {

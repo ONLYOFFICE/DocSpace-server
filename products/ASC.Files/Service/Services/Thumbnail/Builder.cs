@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -67,7 +67,9 @@ public class Builder<T>(
 
             tenantManager.SetCurrentTenant(tenant);
 
-            await securityContext.AuthenticateMeWithoutCookieAsync(fileData.CreatedBy);
+            var account = ASC.Core.Configuration.Constants.Guest.ID == fileData.CreatedBy ? tenant.OwnerId : fileData.CreatedBy;
+
+            await securityContext.AuthenticateMeWithoutCookieAsync(account);
 
             _dataStore = await storageFactory.GetStorageAsync(fileData.TenantId, FileConstant.StorageModule, (IQuotaController)null);
 
@@ -189,7 +191,7 @@ public class Builder<T>(
     }
 
     private async Task MakeThumbnailFromDocs(IFileDao<T> fileDao, File<T> file)
-    {            
+    {
         logger.DebugMakeThumbnail1(file.Id.ToString());
 
         string thumbnailUrl = null;
@@ -199,7 +201,7 @@ public class Builder<T>(
         var maxSize = settings.Sizes.MaxBy(r => r.Width + r.Height);
         var thumbnailHeight = maxSize.Height;
         var thumbnailWidth = maxSize.Width;
-        
+
 
         if (maxSize.Width > maxSize.Height) // change thumbnail orientation
         {
@@ -254,7 +256,7 @@ public class Builder<T>(
             await Task.Delay(settings.AttemptWaitInterval);
         }
         while (string.IsNullOrEmpty(thumbnailUrl));
-        
+
         logger.DebugMakeThumbnail3(file.Id.ToString(), thumbnailUrl);
 
         using var request = new HttpRequestMessage();
@@ -429,13 +431,17 @@ public class Builder<T>(
 
     private IMagickImage GetImageThumbnail(MagickImage sourceBitmap, uint thumbnailWidth, uint thumbnailHeight)
     {
-        if ((sourceBitmap.Width > sourceBitmap.Height && thumbnailWidth < thumbnailHeight ||
-             sourceBitmap.Width < sourceBitmap.Height && thumbnailWidth > thumbnailHeight))
+        if (sourceBitmap.Width > sourceBitmap.Height && thumbnailWidth < thumbnailHeight ||
+            sourceBitmap.Width < sourceBitmap.Height && thumbnailWidth > thumbnailHeight)
         {
             (thumbnailHeight, thumbnailWidth) = (thumbnailWidth, thumbnailHeight);
         }
 
-        var size = new MagickGeometry(thumbnailWidth, thumbnailHeight);
+        var size = new MagickGeometry(thumbnailWidth, thumbnailHeight)
+        {
+            IgnoreAspectRatio = false,
+            Greater = true
+        };
 
         var result = sourceBitmap.CloneAndMutate(r =>
         {
@@ -443,7 +449,7 @@ public class Builder<T>(
         });
 
         result.Quality = 50;
-        
+
         return result;
     }
 }

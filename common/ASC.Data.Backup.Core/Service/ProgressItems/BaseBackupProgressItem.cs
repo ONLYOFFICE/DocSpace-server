@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,7 +32,7 @@ public abstract class BaseBackupProgressItem : DistributedTaskProgress
 
     public BaseBackupProgressItem()
     {
-        
+
     }
 
     protected BaseBackupProgressItem(IServiceScopeFactory serviceScopeFactory)
@@ -41,8 +41,11 @@ public abstract class BaseBackupProgressItem : DistributedTaskProgress
     }
 
     public int NewTenantId { get; set; }
+    public bool Dump { get; set; }
     public int TenantId { get; set; }
     public string Link { get; set; }
+    public string Warning { get; set; }
+
     public BackupProgressItemType BackupProgressItemType { get; set; }
 
     protected void Init()
@@ -66,6 +69,10 @@ public abstract class BaseBackupProgressItem : DistributedTaskProgress
         if (BackupProgressItemType is BackupProgressItemType.Backup or BackupProgressItemType.Transfer && Link != null)
         {
             progress.Link = Link;
+        }
+        if (BackupProgressItemType is BackupProgressItemType.Backup && !string.IsNullOrEmpty(Warning))
+        {
+            progress.Warning = Warning;
         }
 
         return progress;

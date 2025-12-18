@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,78 +27,80 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Parameters for updating a room
+/// The request parameters for updating a room.
 /// </summary>
 public class UpdateRoomRequest
 {
     /// <summary>
-    /// Room name
+    /// The room title.
     /// </summary>
     [StringLength(170)]
     public string Title { get; set; }
 
     /// <summary>
-    /// Room quota
+    /// The room quota.
     /// </summary>
     public long? Quota { get; set; }
-    
+
     /// <summary>
-    /// Indexing
+    /// Specifies whether to create a third-party room with indexing.
     /// </summary>
     public bool? Indexing { get; set; }
-    
+
     /// <summary>
-    /// Room quota
+    /// Specifies whether to deny downloads from the third-party room.
     /// </summary>
     public bool? DenyDownload { get; set; }
 
     /// <summary>
-    /// Lifetime
+    /// The room data lifetime information.
     /// </summary>
     public RoomDataLifetimeDto Lifetime { get; set; }
 
     /// <summary>
-    /// Watermark settings
+    /// The watermark settings.
     /// </summary>
     public WatermarkRequestDto Watermark { get; set; }
 
     /// <summary>
-    /// Logo
+    /// The room logo.
     /// </summary>
     public LogoRequest Logo { get; set; }
 
     /// <summary>
-    /// List of tags
+    /// The list of tags.
     /// </summary>
     public IEnumerable<string> Tags { get; set; }
-    
+
     /// <summary>
-    /// Color
+    /// The room color.
     /// </summary>
     [StringLength(6)]
     public string Color { get; set; }
 
     /// <summary>
-    /// Cover
+    /// The room cover.
     /// </summary>
     [StringLength(50)]
     public string Cover { get; set; }
+    
+    public ChatSettings ChatSettings { get; set; }
 }
 
 /// <summary>
-/// Request parameters for updating a room
+/// The request parameters for updating a room.
 /// </summary>
 public class UpdateRoomRequestDto<T>
 {
     /// <summary>
-    /// Room ID
+    /// The room ID.
     /// </summary>
     [FromRoute(Name = "id")]
-    public T Id { get; set; }
+    public required T Id { get; set; }
 
     /// <summary>
-    /// Update room
+    /// The request parameters for updating a room.
     /// </summary>
     [FromBody]
-    public UpdateRoomRequest UpdateRoom { get; set; }
+    public required UpdateRoomRequest UpdateRoom { get; set; }
 }

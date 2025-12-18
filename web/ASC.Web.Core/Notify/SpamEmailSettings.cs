@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,11 +32,7 @@ public class SpamEmailSettings : ISettings<SpamEmailSettings>
 
     public DateTime MailsSendedDate { get; set; }
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{A9819A62-60AF-48E3-989C-08259772FA57}"); }
-    }
+    public static Guid ID => new("{A9819A62-60AF-48E3-989C-08259772FA57}");
 
     public SpamEmailSettings GetDefault()
     {
@@ -47,9 +43,11 @@ public class SpamEmailSettings : ISettings<SpamEmailSettings>
         };
     }
 
+    public DateTime LastModified { get; set; }
+
     public int MailsSended
     {
-        get { return GetCount(); }
+        get => GetCount();
         set
         {
             MailsSendedDate = DateTime.UtcNow.Date;

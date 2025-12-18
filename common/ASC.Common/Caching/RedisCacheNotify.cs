@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,6 +31,7 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient, ILogger<RedisCac
 {
     private readonly IRedisDatabase _redis = redisCacheClient.GetDefaultDatabase();
     private readonly ConcurrentDictionary<CacheNotifyAction, ConcurrentBag<Action<T>>> _invocationList = new();
+    private readonly ConcurrentDictionary<CacheNotifyAction, ConcurrentBag<Func<T, Task>>> _invocationListTasks = new();
     private readonly Guid _instanceId = Guid.NewGuid();
 
     public async Task PublishAsync(T obj, CacheNotifyAction action)
@@ -48,13 +49,25 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient, ILogger<RedisCac
                 logger.ErrorRedisCacheNotifyPublish(e);
             }
         }
+        
+        await foreach (var handler in Task.WhenEach(GetInvocationListTasks(action).Select(handler => handler(obj))))
+        {
+            try
+            {
+                await handler;
+            }
+            catch (Exception e)
+            {
+                logger.ErrorRedisCacheNotifyPublish(e);
+            }
+        }
     }
 
     public void Subscribe(Action<T> onChange, CacheNotifyAction action)
     {
         Task.Run(async () => await _redis.SubscribeAsync<RedisCachePubSubItem<T>>(GetChannelName(), i =>
         {
-            if (i.Id != _instanceId && (i.Action == action || Enum.IsDefined(typeof(CacheNotifyAction), (i.Action & action))))
+            if (i.Id != _instanceId && (i.Action == action || Enum.IsDefined(i.Action & action)))
             {
                 try
                 {
@@ -67,6 +80,26 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient, ILogger<RedisCac
             }
 
             return Task.FromResult(true);
+        })).GetAwaiter()
+          .GetResult();
+
+        AddToInInvocationList(onChange, action);
+    }
+    public void Subscribe(Func<T, Task> onChange, CacheNotifyAction action)
+    {
+        Task.Run(async () => await _redis.SubscribeAsync<RedisCachePubSubItem<T>>(GetChannelName(), async i =>
+        {
+            if (i.Id != _instanceId && (i.Action == action || Enum.IsDefined(i.Action & action)))
+            {
+                try
+                {
+                    await onChange(i.Object);
+                }
+                catch (Exception e)
+                {
+                    logger.ErrorRedisCacheNotifySubscribe(e);
+                }
+            }
         })).GetAwaiter()
           .GetResult();
 
@@ -87,7 +120,7 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient, ILogger<RedisCac
 
         var redisChannel = new RedisChannel(pattern, RedisChannel.PatternMode.Pattern);
 
-        return redisChannel; 
+        return redisChannel;
     }
 
     private List<Action<T>> GetInvocationList(CacheNotifyAction action)
@@ -96,7 +129,7 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient, ILogger<RedisCac
 
         foreach (var val in Enum.GetValues<CacheNotifyAction>())
         {
-            if (!(val == action || Enum.IsDefined(typeof(CacheNotifyAction), (val & action))))
+            if (!(val == action || Enum.IsDefined(val & action)))
             {
                 continue;
             }
@@ -106,6 +139,26 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient, ILogger<RedisCac
                 result.AddRange(handlers);
             }
 
+        }
+
+        return result;
+    }
+
+    private List<Func<T, Task>> GetInvocationListTasks(CacheNotifyAction action)
+    {
+        var result = new List<Func<T, Task>>();
+
+        foreach (var val in Enum.GetValues<CacheNotifyAction>())
+        {
+            if (!(val == action || Enum.IsDefined(val & action)))
+            {
+                continue;
+            }
+
+            if (_invocationListTasks.TryGetValue(val, out var handlers))
+            {
+                result.AddRange(handlers);
+            }
         }
 
         return result;
@@ -126,6 +179,23 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient, ILogger<RedisCac
         else
         {
             _invocationList.TryRemove(action, out _);
+        }
+    }
+    private void AddToInInvocationList(Func<T, Task> onChange, CacheNotifyAction action)
+    {
+        if (onChange != null)
+        {
+            _invocationListTasks.AddOrUpdate(action,
+                [onChange],
+                (_, bag) =>
+                {
+                    bag.Add(onChange);
+                    return bag;
+                });
+        }
+        else
+        {
+            _invocationListTasks.TryRemove(action, out _);
         }
     }
 

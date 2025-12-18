@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -92,7 +92,7 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                                MetaData meta = null)
     {
         logger.DebugDocServiceCommand(method.ToStringFast(), fileId.ToString(), docKeyForTrack, callbackUrl, users != null ? string.Join(", ", users) : "null", JsonSerializer.Serialize(meta));
-        
+
         try
         {
             var commandResponse = await CommandRequestAsync(
@@ -112,7 +112,14 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                 return true;
             }
 
-            logger.ErrorDocServiceCommandResponse(commandResponse.Error, commandResponse.ErrorString);
+            if (commandResponse.Error == ErrorTypes.DocumentIdError)
+            {
+                logger.InfoDocServiceCommandResponse(commandResponse.Error, commandResponse.ErrorString);
+            }
+            else
+            {
+                logger.ErrorDocServiceCommandResponse(commandResponse.Error, commandResponse.ErrorString);
+            }
         }
         catch (Exception e)
         {

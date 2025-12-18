@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,6 +26,9 @@
 
 namespace ASC.Core.Configuration;
 
+/// <summary>
+/// The SMTP settings parameters.
+/// </summary>
 public class SmtpSettings
 {
     public const int DefaultSmtpPort = 25;
@@ -42,7 +45,7 @@ public class SmtpSettings
     public bool IsDefaultSettings { get; internal set; }
     public bool UseNtlm { get; set; }
 
-    public static readonly SmtpSettings Empty = new();
+    public static readonly SmtpSettings Empty = new() { IsDefaultSettings = true };
 
     private SmtpSettings() { }
 

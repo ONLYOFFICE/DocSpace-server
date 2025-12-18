@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,28 +30,29 @@ namespace ASC.Files.Core.Core.History;
 
 [Scope]
 public class HistoryService(
-    IDbContextFactory<MessagesContext> dbContextFactory, 
-    TenantManager tenantManager,
-    AuditInterpreter interpreter)
+    IDbContextFactory<MessagesContext> dbContextFactory,
+    TenantManager tenantManager)
 {
     public static HashSet<MessageAction> TrackedActions => [
-        MessageAction.FileCreated, 
+        MessageAction.FileCreated,
         MessageAction.FileUploaded,
         MessageAction.FileUploadedWithOverwriting,
-        MessageAction.UserFileUpdated, 
-        MessageAction.FileRenamed, 
-        MessageAction.FileMoved, 
-        MessageAction.FileMovedWithOverwriting, 
-        MessageAction.FileMovedToTrash, 
-        MessageAction.FileCopied, 
-        MessageAction.FileCopiedWithOverwriting, 
-        MessageAction.FileVersionRemoved, 
-        MessageAction.FileDeleted, 
-        MessageAction.FileConverted, 
+        MessageAction.UserFileUpdated,
+        MessageAction.FileRenamed,
+        MessageAction.FileMoved,
+        MessageAction.FileMovedWithOverwriting,
+        MessageAction.FileMovedToTrash,
+        MessageAction.FileCopied,
+        MessageAction.FileCopiedWithOverwriting,
+        MessageAction.FileVersionRemoved,
+        MessageAction.FileDeleted,
+        MessageAction.FileConverted,
         MessageAction.FileRestoreVersion,
         MessageAction.FileIndexChanged,
         MessageAction.FileLocked,
         MessageAction.FileUnlocked,
+        MessageAction.FileCustomFilterEnabled,
+        MessageAction.FileCustomFilterDisabled,
         MessageAction.FolderCreated,
         MessageAction.FolderRenamed,
         MessageAction.FolderMoved,
@@ -65,6 +66,7 @@ public class HistoryService(
         MessageAction.RoomCreateUser,
         MessageAction.RoomUpdateAccessForUser,
         MessageAction.RoomRemoveUser,
+        MessageAction.RoomChangeOwner,
         MessageAction.RoomGroupAdded,
         MessageAction.RoomUpdateAccessForGroup,
         MessageAction.RoomGroupRemove,
@@ -94,7 +96,13 @@ public class HistoryService(
         MessageAction.RoomColorChanged,
         MessageAction.RoomCoverChanged,
         MessageAction.RoomIndexExportSaved,
-        MessageAction.RoomInviteResend
+        MessageAction.RoomInviteResend,
+        MessageAction.FormStartedToFill,
+        MessageAction.FormPartiallyFilled,
+        MessageAction.FormCompletelyFilled,
+        MessageAction.FormStopped,
+        MessageAction.AgentCreated,
+        MessageAction.AgentRenamed
     ];
 
     private static HashSet<int> FilterFolderActions => [
@@ -110,10 +118,14 @@ public class HistoryService(
         (int)MessageAction.FileMoved,
         (int)MessageAction.FileRenamed,
         (int)MessageAction.FormSubmit,
-        (int)MessageAction.FormOpenedForFilling
+        (int)MessageAction.FormOpenedForFilling,
+        (int)MessageAction.FormStartedToFill,
+        (int)MessageAction.FormPartiallyFilled,
+        (int)MessageAction.FormCompletelyFilled,
+        (int)MessageAction.FormStopped
     ];
-    
-    public async IAsyncEnumerable<HistoryEntry> GetHistoryAsync(
+
+    public async IAsyncEnumerable<Tuple<DbAuditEvent, DbFilesAuditReference>> GetHistoryAsync(
         FileEntry<int> entry,
         int offset,
         int count,
@@ -126,13 +138,13 @@ public class HistoryService(
         var messageDbContext = await dbContextFactory.CreateDbContextAsync();
         var tenantId = tenantManager.GetCurrentTenantId();
 
-        var events = needFiltering 
-            ? messageDbContext.GetFilteredAuditEventsByReferences(tenantId, entry.Id, (byte)entry.FileEntryType, offset, count, filterFolderIds, filterFilesIds, FilterFolderActions, FilterFileActions, fromDate, toDate) 
+        var events = needFiltering
+            ? messageDbContext.GetFilteredAuditEventsByReferences(tenantId, entry.Id, (byte)entry.FileEntryType, offset, count, filterFolderIds, filterFilesIds, FilterFolderActions, FilterFileActions, fromDate, toDate)
             : messageDbContext.GetAuditEventsByReferences(tenantId, entry.Id, (byte)entry.FileEntryType, offset, count, fromDate, toDate);
 
-        await foreach (var hEntry in events.SelectAwait(e => interpreter.ToHistoryAsync(e, entry)).Where(x => x != null))
+        await foreach (var e in events)
         {
-            yield return hEntry;
+            yield return e;
         }
     }
 
@@ -152,7 +164,7 @@ public class HistoryService(
         {
             return await messageDbContext.GetFilteredAuditEventsByReferencesTotalCount(tenantId, entryId, (byte)entryType, filterFolderIds, filterFilesIds, FilterFolderActions, FilterFileActions, fromDate, toDate);
         }
-        
+
         return await messageDbContext.GetAuditEventsByReferencesTotalCount(tenantId, entryId, (byte)entryType, fromDate, toDate);
     }
 }

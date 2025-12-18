@@ -29,39 +29,61 @@ package com.asc.common.utilities.validation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import java.net.URI;
 import java.util.Collection;
-import java.util.regex.Pattern;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * The URLCollectionValidator class is responsible for validating a collection of URLs based on the
- * specified pattern.
+ * The URLCollectionValidator class is responsible for validating a collection of URLs using URI/URL
+ * validation. HTTP, HTTPS, and custom protocols like claude: are allowed.
  */
 @Slf4j
 @Component
 public class URLCollectionValidator
     implements ConstraintValidator<URLCollection, Collection<String>> {
-  private Pattern pattern =
-      Pattern.compile(
-          "https?:\\/\\/(www\\.)?[-a-zA-Z0-9.]{1,256}\\.[a-zA-Z]{2,6}(\\/[a-zA-Z0-9/_-]*(\\.[a-zA-Z]{2,6})?)?");
+  private static final Set<String> ALLOWED_PROTOCOLS = Set.of("http", "https", "claude");
 
   /**
-   * Validates the collection of URLs against the specified pattern.
+   * Validates the collection of URLs using URI/URL validation. HTTP, HTTPS, and custom protocols
+   * like claude: are allowed.
    *
    * @param urls the collection of URLs to be validated
    * @param context the validation context
-   * @return true if all URLs are valid based on the pattern, false otherwise
+   * @return true if all URLs are valid, false otherwise
    */
   public boolean isValid(Collection<String> urls, ConstraintValidatorContext context) {
     if (urls == null) return false;
-    for (String url : urls) {
+
+    for (var url : urls) {
       log.debug("Validating URL: {}", url);
-      if (url == null || url.isEmpty() || !pattern.matcher(url).matches()) {
+      if (url == null || url.isEmpty()) {
         log.warn("Invalid URL detected: {}", url);
         return false;
       }
+
+      try {
+        var uri = URI.create(url);
+        var protocol = uri.getScheme();
+
+        if (protocol == null || !ALLOWED_PROTOCOLS.contains(protocol.toLowerCase())) {
+          log.warn("Invalid protocol detected: {} for URL: {}", protocol, url);
+          return false;
+        }
+
+        if ("http".equalsIgnoreCase(protocol) || "https".equalsIgnoreCase(protocol)) {
+          var validatedUrl = uri.toURL();
+          log.debug("URL is valid: {}", validatedUrl);
+        } else {
+          log.debug("Custom protocol URI is valid: {}", uri);
+        }
+      } catch (Exception e) {
+        log.warn("Invalid URL detected: {} - {}", url, e.getMessage());
+        return false;
+      }
     }
+
     return true;
   }
 }

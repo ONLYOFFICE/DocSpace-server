@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -55,6 +55,7 @@ global using ASC.Api.Utils;
 global using ASC.AuditTrail;
 global using ASC.AuditTrail.Mappers;
 global using ASC.AuditTrail.Models;
+global using ASC.AuditTrail.Models.Mappings;
 global using ASC.AuditTrail.Repositories;
 global using ASC.AuditTrail.Types;
 global using ASC.Common;
@@ -70,6 +71,7 @@ global using ASC.Common.Utils;
 global using ASC.Common.Web;
 global using ASC.Core;
 global using ASC.Core.Billing;
+global using ASC.Core.Common;
 global using ASC.Core.Common.Configuration;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.Notify;
@@ -86,7 +88,6 @@ global using ASC.Core.Encryption;
 global using ASC.Core.Security.Authentication;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
-global using ASC.Data.Backup;
 global using ASC.Data.Backup.Contracts;
 global using ASC.Data.Backup.EF.Context;
 global using ASC.Data.Storage;
@@ -98,6 +99,7 @@ global using ASC.FederatedLogin;
 global using ASC.FederatedLogin.Helpers;
 global using ASC.FederatedLogin.LoginProviders;
 global using ASC.FederatedLogin.Profile;
+global using ASC.Files.Core.ApiModels.RequestDto;
 global using ASC.Files.Core.Core;
 global using ASC.Files.Core.EF;
 global using ASC.Files.Core.Helpers;
@@ -122,11 +124,9 @@ global using ASC.Web.Api.ApiModels.RequestsDto;
 global using ASC.Web.Api.ApiModels.ResponseDto;
 global using ASC.Web.Api.Core;
 global using ASC.Web.Api.Log;
-global using ASC.Web.Api.Mapping;
 global using ASC.Web.Api.Models;
 global using ASC.Web.Api.Routing;
 global using ASC.Web.Core;
-global using ASC.Web.Core.Files;
 global using ASC.Web.Core.Helpers;
 global using ASC.Web.Core.Mobile;
 global using ASC.Web.Core.Notify;
@@ -154,8 +154,6 @@ global using ASC.Webhooks.Core.EF.Model;
 
 global using Autofac;
 
-global using AutoMapper;
-
 global using Google.Authenticator;
 
 global using MailKit.Security;
@@ -163,10 +161,11 @@ global using MailKit.Security;
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.WebUtilities;
-global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.Extensions.Hosting.WindowsServices;
 
 global using MimeKit;
+
+global using Riok.Mapperly.Abstractions;
 
 global using Swashbuckle.AspNetCore.Annotations;
 

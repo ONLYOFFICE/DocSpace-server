@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -76,18 +76,18 @@ public class AbstractDao
         return Query(filesDbContext.Files)
             .Where(where);
     }
-    
-        
+
+
     protected async Task IncrementCountAsync(FilesDbContext filesDbContext, int folderId, int tenantId, FileEntryType fileEntryType)
     {
         await ChangeCountAsync(filesDbContext, folderId, tenantId, fileEntryType, 1);
     }
-    
-    protected async Task DecrementCountAsync(FilesDbContext filesDbContext, int folderId, int tenantId,FileEntryType fileEntryType)
+
+    protected async Task DecrementCountAsync(FilesDbContext filesDbContext, int folderId, int tenantId, FileEntryType fileEntryType)
     {
         await ChangeCountAsync(filesDbContext, folderId, tenantId, fileEntryType, -1);
     }
-    
+
     private async Task ChangeCountAsync(FilesDbContext filesDbContext, int folderId, int tenantId, FileEntryType fileEntryType, int counter)
     {
         if (fileEntryType == FileEntryType.File)
@@ -114,10 +114,10 @@ public class AbstractDao
             _ => query
         };
     }
-    
-    internal static IQueryable<TQuery> BuildSearch<TQuery, TEntry>(IQueryable<TQuery> query, string text, SearchType searchType) 
-        where TQuery : IQueryResult<TEntry> 
-        where TEntry: IDbSearch
+
+    internal static IQueryable<TQuery> BuildSearch<TQuery, TEntry>(IQueryable<TQuery> query, string text, SearchType searchType)
+        where TQuery : IQueryResult<TEntry>
+        where TEntry : IDbSearch
     {
         var lowerText = GetSearchText(text);
 
@@ -129,9 +129,9 @@ public class AbstractDao
             _ => query
         };
     }
-    internal static IQueryable<TQuery> BuildSearch<TQuery, TEntry>(IQueryable<TQuery> query, IEnumerable<string> text, SearchType searchType) 
-        where TQuery : IQueryResult<TEntry> 
-        where TEntry: IDbSearch
+    internal static IQueryable<TQuery> BuildSearch<TQuery, TEntry>(IQueryable<TQuery> query, IEnumerable<string> text, SearchType searchType)
+        where TQuery : IQueryResult<TEntry>
+        where TEntry : IDbSearch
     {
         var lowerText = text.Select(GetSearchText);
 
@@ -220,11 +220,11 @@ public class AbstractDao
     internal static string GetSearchText(string text) => (text ?? "").ToLower().Trim();
 
     internal async Task<int> SetCustomOrder(FilesDbContext filesDbContext, int fileId, int parentFolderId, FileEntryType fileEntryType, int order = 0)
-    {            
+    {
         var tenantId = _tenantManager.GetCurrentTenantId();
         var indexing = await filesDbContext.IsIndexingAsync(tenantId, parentFolderId, fileEntryType);
-        
-        if(!indexing)
+
+        if (!indexing)
         {
             return 0;
         }
@@ -291,9 +291,9 @@ public class AbstractDao
                 .AsTracking()
                 .Where(r => r.TenantId == tenantId && r.EntryType == entryType && ids.Contains(r.EntryId))
                 .ToListAsync();
-            
+
             var orders = new List<DbFileOrder>();
-            
+
             foreach (var id in fileIds)
             {
                 var o = order.FirstOrDefault(r => r.EntryId == id.Key && r.EntryType == entryType);
@@ -313,14 +313,14 @@ public class AbstractDao
                     });
                 }
             }
-            
+
             filesDbContext.FileOrder.AddRange(orders);
             await filesDbContext.SaveChangesAsync();
         }
     }
-    
+
     internal async Task DeleteCustomOrder(FilesDbContext filesDbContext, int fileId, FileEntryType fileEntryType)
-    {        
+    {
         var tenantId = _tenantManager.GetCurrentTenantId();
         var fileOrder = await filesDbContext.GetFileOrderAsync(tenantId, fileId, fileEntryType);
         if (fileOrder != null)
@@ -332,7 +332,7 @@ public class AbstractDao
     }
 
     private string GetCustomOrderLockKey(int tenantId, int folderId) => $"order_{folderId}_{tenantId}";
-    
+
     internal enum SearchType
     {
         Start,

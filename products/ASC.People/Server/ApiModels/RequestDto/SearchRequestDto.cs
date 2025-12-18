@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,56 +27,68 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// Search model 
+/// The search model.
 /// </summary>
 public class SearchDto
 {
     /// <summary>
-    /// Employee status
+    /// The user status.
     /// </summary>
     [FromQuery(Name = "employeeStatus")]
     public EmployeeStatus? EmployeeStatus { get; set; }
 
     /// <summary>
-    /// Activation status
+    /// The user activation status.
     /// </summary>
     [FromQuery(Name = "activationStatus")]
     public EmployeeActivationStatus? ActivationStatus { get; set; }
 
     /// <summary>
-    /// Exclude shared
+    /// Specifies whether to exclude the user sharing settings or not.
     /// </summary>
     [FromQuery(Name = "excludeShared")]
     public bool? ExcludeShared { get; set; }
 }
 
 /// <summary>
-/// Search model id
+/// The search model ID.
 /// </summary>
 public class SearchIdDto<T>
 {
     /// <summary>
-    /// Id
+    /// The search ID.
     /// </summary>
     [FromRoute(Name = "id")]
-    public T Id { get; set; }
+    public required T Id { get; set; }
 }
 
 
 /// <summary>
-/// 
+/// The advanced search parameters.
 /// </summary>
 public class AdvancedSearchDto
 {
     /// <summary>
-    /// User status
+    /// The user status.
     /// </summary>
     [FromRoute(Name = "status")]
-    public EmployeeStatus Status { get; set; }
+    public required EmployeeStatus Status { get; set; }
 
     /// <summary>
-    /// Search query
+    /// The advanced search query.
     /// </summary>
     [FromQuery(Name = "query")]
     public string Query { get; set; }
+
+    /// <summary>
+    /// Specifies the criteria used to filter search results in advanced queries.
+    /// </summary>
+    [FromQuery(Name = "filterBy")]
+    public string FilterBy { get; set; }
+
+    /// <summary>
+    /// The value used to filter the search query.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }

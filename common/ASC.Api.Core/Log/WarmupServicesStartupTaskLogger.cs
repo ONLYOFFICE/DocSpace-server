@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,7 +30,7 @@ internal static partial class WarmupServicesStartupTaskLogger
 {
     [LoggerMessage(LogLevel.Trace, "Warm up services is starting...")]
     public static partial void TraceWarmupStarted(this ILogger<WarmupServicesStartupTask> logger);
-    
+
     [LoggerMessage(LogLevel.Trace, "Service:{fullName},time:{totalMilliseconds}")]
     public static partial void TraceWarmupTime(this ILogger<WarmupServicesStartupTask> logger, string fullName, double totalMilliseconds);
 

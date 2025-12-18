@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -126,21 +126,12 @@ public abstract class FormatterState
     /// Gets the formatting state we should fallback to if we don't find anything
     /// relevant in a line of text.
     /// </summary>
-    public virtual Type FallbackFormattingState
-    {
-        get
-        {
-            return typeof(ParagraphFormatterState);
-        }
-    }
+    public virtual Type FallbackFormattingState => typeof(ParagraphFormatterState);
 
-    protected FormatterState CurrentFormatterState
-    {
-        get { return this.Formatter.CurrentState; }
-    }
+    protected FormatterState CurrentFormatterState => Formatter.CurrentState;
 
     protected void ChangeFormatterState(FormatterState formatterState)
     {
-        this.Formatter.ChangeState(formatterState);
+        Formatter.ChangeState(formatterState);
     }
 }

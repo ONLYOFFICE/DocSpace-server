@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,24 +27,18 @@
 namespace ASC.Core.Common.Notify;
 
 [Scope]
-public class TelegramHelper(ConsumerFactory consumerFactory,
+public class TelegramHelper(
+    ConsumerFactory consumerFactory,
     TelegramDao telegramDao,
     TelegramServiceClient telegramServiceClient,
-    IHttpClientFactory httpClientFactory,
     ILogger<TelegramHelper> logger)
 {
-    public enum RegStatus
-    {
-        NotRegistered,
-        Registered,
-        AwaitingConfirmation
-    }
-
     public async Task<string> RegisterUserAsync(Guid userId, int tenantId)
     {
         var token = GenerateToken(userId);
 
-        await telegramServiceClient.RegisterUserAsync(userId.ToString(), tenantId, token);
+        var tgProvider = (ITelegramLoginProvider)consumerFactory.GetByKey("telegram");
+        await telegramServiceClient.RegisterUserAsync(userId.ToString(), tenantId, tgProvider.TelegramAuthTokenLifespan, token);
 
         return GetLink(token);
     }
@@ -57,7 +51,7 @@ public class TelegramHelper(ConsumerFactory consumerFactory,
     public async Task<bool> CreateClientAsync(int tenantId, string token, int tokenLifespan, string proxy)
     {
         var client = InitClient(token, proxy);
-        if (TestingClient(client))
+        if (await TestingClient(client))
         {
             await telegramServiceClient.CreateOrUpdateClientAsync(tenantId, token, tokenLifespan, proxy);
 
@@ -67,19 +61,17 @@ public class TelegramHelper(ConsumerFactory consumerFactory,
         return false;
     }
 
-    public async Task<RegStatus> UserIsConnectedAsync(Guid userId, int tenantId)
+    public async Task<(RegStatus, string)> GetTelegramUserStatus(Guid userId, int tenantId)
     {
-        if (await telegramDao.GetUserAsync(userId, tenantId) != null)
-        {
-            return RegStatus.Registered;
-        }
-
-        return IsAwaitingRegistration(userId, tenantId) ? RegStatus.AwaitingConfirmation : RegStatus.NotRegistered;
+        var tgUser = await telegramDao.GetUserAsync(userId, tenantId);
+        return tgUser == null
+            ? (await IsAwaitingRegistration(userId, tenantId) ? RegStatus.linking : RegStatus.unlinked, null)
+            : (RegStatus.linked, tgUser.TelegramUsername);
     }
 
-    public string CurrentRegistrationLink(Guid userId, int tenantId)
+    public async Task<string> CurrentRegistrationLink(Guid userId, int tenantId)
     {
-        var token = GetCurrentToken(userId, tenantId);
+        var token = await GetCurrentToken(userId, tenantId);
         return string.IsNullOrEmpty(token) ? string.Empty : GetLink(token);
     }
 
@@ -93,14 +85,14 @@ public class TelegramHelper(ConsumerFactory consumerFactory,
         await telegramDao.DeleteAsync(userId, tenantId);
     }
 
-    private bool IsAwaitingRegistration(Guid userId, int tenantId)
+    private async Task<bool> IsAwaitingRegistration(Guid userId, int tenantId)
     {
-        return GetCurrentToken(userId, tenantId) != null;
+        return await GetCurrentToken(userId, tenantId) != null;
     }
 
-    private string GetCurrentToken(Guid userId, int tenantId)
+    private async Task<string> GetCurrentToken(Guid userId, int tenantId)
     {
-        return telegramServiceClient.RegistrationToken(userId.ToString(), tenantId);
+        return await telegramServiceClient.RegistrationToken(userId.ToString(), tenantId);
     }
 
     private string GenerateToken(Guid userId)
@@ -110,27 +102,23 @@ public class TelegramHelper(ConsumerFactory consumerFactory,
 
         var buf = id.Concat(d).ToArray();
 
-        return Convert.ToBase64String(SHA256.HashData(buf))
-            .Replace('+', '-').Replace('/', '_').Replace("=", ""); // make base64 url safe
+        return Convert.ToBase64String(SHA256.HashData(buf)).Base64ToUrlSafe();
     }
 
     private string GetLink(string token)
     {
         var tgProvider = (ITelegramLoginProvider)consumerFactory.GetByKey("telegram");
         var botname = tgProvider?.TelegramBotName;
-        if (string.IsNullOrEmpty(botname))
-        {
-            return null;
-        }
-
-        return $"t.me/{botname}?start={token}";
+        return string.IsNullOrEmpty(botname)
+            ? null
+            : $"t.me/{botname.TrimStart('@')}?start={token}";
     }
 
-    public bool TestingClient(TelegramBotClient telegramBotClient)
+    public async Task<bool> TestingClient(TelegramBotClient telegramBotClient)
     {
         try
         {
-            if (!telegramBotClient.TestApi().GetAwaiter().GetResult())
+            if (!await telegramBotClient.TestApi())
             {
                 return false;
             }
@@ -152,10 +140,21 @@ public class TelegramHelper(ConsumerFactory consumerFactory,
             return new TelegramBotClient(token);
         }
 
-        var httpClient = httpClientFactory.CreateClient();
-
-        httpClient.BaseAddress = new Uri(proxy);
+        var httpClient = new HttpClient(new HttpClientHandler {
+            UseProxy = true,
+            Proxy = new WebProxy(proxy)
+        });
 
         return new TelegramBotClient(token, httpClient);
     }
+}
+
+/// <summary>
+/// The registration Telegram status.
+/// </summary>
+public enum RegStatus
+{
+    unlinked,
+    linked,
+    linking
 }

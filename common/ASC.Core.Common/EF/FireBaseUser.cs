@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,42 +26,45 @@
 
 namespace ASC.Core.Common.EF;
 
+/// <summary>
+/// The Firebase user parameters.
+/// </summary>
 public class FireBaseUser : BaseEntity
 {
-/// <summary>
-    /// ID
-/// </summary>
+    /// <summary>
+    /// The Firebase user ID.
+    /// </summary>
     public int Id { get; set; }
 
     /// <summary>
-    /// User ID
+    /// The user ID.
     /// </summary>
     public Guid UserId { get; set; }
 
     /// <summary>
-    /// Tenant ID
+    /// The tenant ID.
     /// </summary>
     public int TenantId { get; set; }
 
     /// <summary>
-    /// Firebase device token
+    /// The Firebase device token.
     /// </summary>
     [MaxLength(255)]
     public string FirebaseDeviceToken { get; set; }
 
     /// <summary>
-    /// Application
+    /// The Firebase application.
     /// </summary>
     [MaxLength(20)]
     public string Application { get; set; }
 
     /// <summary>
-    /// Specifies if the user is subscribed to the push notifications or not
+    /// Specifies if the user is subscribed to the push notifications or not.
     /// </summary>
     public bool? IsSubscribed { get; set; }
 
     /// <summary>
-    /// Tenant
+    /// The database tenant parameters.
     /// </summary>
     public DbTenant Tenant { get; set; }
 
@@ -84,72 +87,74 @@ public static class FireBaseUserExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddFireBaseUsers(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<FireBaseUser>(entity =>
+        public void MySqlAddFireBaseUsers()
         {
-            entity.HasKey(e => new { e.Id })
-                .HasName("PRIMARY");
+            modelBuilder.Entity<FireBaseUser>(entity =>
+            {
+                entity.HasKey(e => new { e.Id })
+                    .HasName("PRIMARY");
 
-            entity.ToTable("firebase_users");
+                entity.ToTable("firebase_users");
 
-            entity.HasIndex(e => new { e.TenantId, e.UserId })
-                .HasDatabaseName("user_id");
+                entity.HasIndex(e => new { e.TenantId, e.UserId })
+                    .HasDatabaseName("user_id");
 
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
-            entity.Property(e => e.IsSubscribed).HasColumnName("is_subscribed");
+                entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+                entity.Property(e => e.IsSubscribed).HasColumnName("is_subscribed");
 
-            entity.Property(e => e.UserId)
-                .HasColumnName("user_id")
-                .HasColumnType("varchar(36)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.UserId)
+                    .HasColumnName("user_id")
+                    .HasColumnType("varchar(36)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.FirebaseDeviceToken)
-                .HasColumnName("firebase_device_token")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.FirebaseDeviceToken)
+                    .HasColumnName("firebase_device_token")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Application)
-                .HasColumnName("application")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Application)
+                    .HasColumnName("application")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-        });
-    }
+            });
+        }
 
-    public static void PgSqlAddFireBaseUsers(this ModelBuilder modelBuilder)
-    {
-
-        modelBuilder.Entity<FireBaseUser>(entity =>
+        public void PgSqlAddFireBaseUsers()
         {
-            entity.HasKey(e => new { e.Id })
-                .HasName("PK_FireBaseUser");
 
-            entity.ToTable("firebase_users");
+            modelBuilder.Entity<FireBaseUser>(entity =>
+            {
+                entity.HasKey(e => new { e.Id })
+                    .HasName("PK_FireBaseUser");
 
-            entity.HasIndex(e => new { e.TenantId, e.UserId })
-                .HasDatabaseName("IX_firebase_users_user_id");
+                entity.ToTable("firebase_users");
 
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.TenantId).HasColumnName("tenant_id");
-            entity.Property(e => e.IsSubscribed).HasColumnName("is_subscribed");
+                entity.HasIndex(e => new { e.TenantId, e.UserId })
+                    .HasDatabaseName("IX_firebase_users_user_id");
 
-            entity.Property(e => e.UserId)
-                .HasColumnName("user_id")
-                .HasColumnType("uuid");
+                entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.TenantId).HasColumnName("tenant_id");
+                entity.Property(e => e.IsSubscribed).HasColumnName("is_subscribed");
 
-            entity.Property(e => e.FirebaseDeviceToken)
-                .HasColumnName("firebase_device_token")
-                .HasColumnType("varchar");
+                entity.Property(e => e.UserId)
+                    .HasColumnName("user_id")
+                    .HasColumnType("uuid");
 
-            entity.Property(e => e.Application)
-                .HasColumnName("application")
-                .HasColumnType("varchar");
-        });
+                entity.Property(e => e.FirebaseDeviceToken)
+                    .HasColumnName("firebase_device_token")
+                    .HasColumnType("varchar");
+
+                entity.Property(e => e.Application)
+                    .HasColumnName("application")
+                    .HasColumnType("varchar");
+            });
+        }
     }
-
 }

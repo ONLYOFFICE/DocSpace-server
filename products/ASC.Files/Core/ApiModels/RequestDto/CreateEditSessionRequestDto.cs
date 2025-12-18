@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,16 +26,19 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The request parameters for creating the editing session.
+/// </summary>
 public class CreateEditSessionRequestDto<T>
 {
     /// <summary>
-    /// File ID
+    /// The file ID.
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
+    public required T FileId { get; set; }
 
     /// <summary>
-    /// File size in bytes
+    /// The file size in bytes.
     /// </summary>
     [FromQuery(Name = "fileSize")]
     public long FileSize { get; set; }

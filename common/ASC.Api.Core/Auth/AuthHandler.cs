@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -120,18 +120,15 @@ public class AuthHandler(
 
             return Task.FromResult(AuthenticateResult.Fail(new AuthenticationException(nameof(HttpStatusCode.InternalServerError))));
         }
-        
+
         var identity = new ClaimsIdentity(Scheme.Name);
 
         log.LogInformation("Auth success {SchemeName}", Scheme.Name);
-        
-        if (httpContextAccessor?.HttpContext != null)
-        {
-            httpContextAccessor.HttpContext.User = new CustomClaimsPrincipal(new ClaimsIdentity(Scheme.Name), identity);
-        }
+
+        httpContextAccessor?.HttpContext?.User = new CustomClaimsPrincipal(new ClaimsIdentity(Scheme.Name), identity);
 
         Authenticate();
-        
+
         return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(Context.User, new AuthenticationProperties(), Scheme.Name)));
     }
 
@@ -152,9 +149,6 @@ public class AuthHandler(
         };
 
 
-        if (httpContextAccessor.HttpContext != null)
-        {
-            httpContextAccessor.HttpContext.User = new CustomClaimsPrincipal(new ClaimsIdentity(account, claims), account);
-        }
+        httpContextAccessor.HttpContext?.User = new CustomClaimsPrincipal(new ClaimsIdentity(account, claims), account);
     }
 }

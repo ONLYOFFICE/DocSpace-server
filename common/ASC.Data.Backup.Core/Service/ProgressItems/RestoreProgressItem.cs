@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,13 +42,12 @@ public class RestoreProgressItem : BaseBackupProgressItem
     private string _region;
     private string _upgradesPath;
     private string _serverBaseUri;
-    private bool _dump;
 
     public RestoreProgressItem()
     {
-        
+
     }
-    
+
     public RestoreProgressItem(
         IConfiguration configuration,
         ILogger<RestoreProgressItem> logger,
@@ -85,7 +84,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
         _upgradesPath = upgradesPath;
         _region = region;
         _serverBaseUri = request.ServerBaseUri;
-        _dump = request.Dump;
+        Dump = request.Dump;
     }
 
     protected override async Task DoJob()
@@ -93,24 +92,39 @@ public class RestoreProgressItem : BaseBackupProgressItem
         Tenant tenant = null;
         var tempFile = "";
         var socketTenant = TenantId;
+        await using var scope = _serviceScopeProvider.CreateAsyncScope();
+        _socketManager = scope.ServiceProvider.GetService<SocketManager>();
+
         try
         {
-            await using var scope = _serviceScopeProvider.CreateAsyncScope();
-
             _tenantManager = scope.ServiceProvider.GetService<TenantManager>();
             _backupStorageFactory = scope.ServiceProvider.GetService<BackupStorageFactory>();
             _backupRepository = scope.ServiceProvider.GetService<BackupRepository>();
-            _socketManager = scope.ServiceProvider.GetService<SocketManager>();
+
 
             tenant = await _tenantManager.GetTenantAsync(TenantId);
             _tenantManager.SetCurrentTenant(tenant);
-            await _socketManager.RestoreProgressAsync(socketTenant, 0);
+            await _socketManager.RestoreProgressAsync(socketTenant, Dump, 0);
 
             _notifyHelper.SetServerBaseUri(_serverBaseUri);
 
+            if (Dump)
+            {
+                var tenants = await _tenantManager.GetTenantsAsync();
+
+                foreach (var t in tenants)
+                {
+                    await _notifyHelper.SendAboutRestoreStartedAsync(t, Notify);
+                    t.SetStatus(TenantStatus.Restoring);
+                    await _tenantManager.SaveTenantAsync(t);
+                }
+            }
+            else
+            {
             await _notifyHelper.SendAboutRestoreStartedAsync(tenant, Notify);
             tenant.SetStatus(TenantStatus.Restoring);
             await _tenantManager.SaveTenantAsync(tenant);
+            }
 
             var restoreTask = scope.ServiceProvider.GetService<RestorePortalTask>();
 
@@ -140,7 +154,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
             columnMapper.SetMapping("tenants_tenants", "alias", tenant.Alias, Guid.Parse(Id).ToString("N"));
             columnMapper.Commit();
 
-            restoreTask.Init(_region, tempFile, _dump, CancellationToken, TenantId, columnMapper, _upgradesPath);
+            restoreTask.Init(_region, tempFile, Dump, CancellationToken, TenantId, columnMapper, _upgradesPath);
             restoreTask.ProgressChanged = async args =>
             {
                 if (CancellationToken.IsCancellationRequested)
@@ -148,7 +162,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
                     return;
                 }
                 Percentage = Percentage = 10d + 0.65 * args.Progress;
-                await _socketManager.RestoreProgressAsync(socketTenant, (int)Percentage);
+                await _socketManager.RestoreProgressAsync(socketTenant, Dump, (int)Percentage);
                 await PublishChanges();
             };
 
@@ -160,22 +174,19 @@ public class RestoreProgressItem : BaseBackupProgressItem
 
             NewTenantId = columnMapper.GetTenantMapping();
 
-            await _socketManager.RestoreProgressAsync(socketTenant, (int)Percentage);
+            await _socketManager.RestoreProgressAsync(socketTenant, Dump, (int)Percentage);
             await PublishChanges();
 
             if (restoreTask.Dump)
             {
                 _cache.Reset();
 
-                if (Notify)
-                {
                     var tenants = await _tenantManager.GetTenantsAsync();
                     foreach (var t in tenants)
                     {
                         await _notifyHelper.SendAboutRestoreCompletedAsync(t, Notify);
                     }
                 }
-            }
             else
             {
                 var restoredTenant = await _tenantManager.GetTenantAsync(columnMapper.GetTenantMapping());
@@ -188,14 +199,14 @@ public class RestoreProgressItem : BaseBackupProgressItem
                     restoredTenant.MappedDomain = tenant.MappedDomain;
                 }
 
-                await _tenantManager.RestoreTenantAsync(tenant.Id, restoredTenant);
+                await _tenantManager.RestoreTenantAsync(tenant, restoredTenant);
                 TenantId = restoredTenant.Id;
 
                 try
                 {
                     await _notifyHelper.SendAboutRestoreCompletedAsync(restoredTenant, Notify);
                 }
-                catch(Exception error)
+                catch (Exception error)
                 {
                     _logger.ErrorNotifyComplete(error);
                 }
@@ -208,12 +219,12 @@ public class RestoreProgressItem : BaseBackupProgressItem
             Percentage = 75;
             try
             {
-                await _socketManager.RestoreProgressAsync(socketTenant, (int)Percentage);
+                await _socketManager.RestoreProgressAsync(socketTenant, Dump, (int)Percentage);
                 await PublishChanges();
 
                 File.Delete(tempFile);
             }
-            catch(Exception error)
+            catch (Exception error)
             {
                 _logger.ErrorDeleteFiles(error);
             }
@@ -244,15 +255,27 @@ public class RestoreProgressItem : BaseBackupProgressItem
 
             if (tenant != null)
             {
+                if (Dump)
+                {
+                    var tenants = await _tenantManager.GetTenantsAsync(false);
+                    foreach (var t in tenants.Where(t => t.Status == TenantStatus.Restoring))
+                    {
+                        t.SetStatus(TenantStatus.Active);
+                        await _tenantManager.SaveTenantAsync(t);
+                    }
+                }
+                else
+                {
                 tenant.SetStatus(TenantStatus.Active);
                 await _tenantManager.SaveTenantAsync(tenant);
             }
+        }
         }
         finally
         {
             try
             {
-                await _socketManager.EndRestoreAsync(socketTenant, ToBackupProgress());
+                await _socketManager.EndRestoreAsync(socketTenant, Dump, ToBackupProgress());
                 await PublishChanges();
             }
             catch (Exception error)

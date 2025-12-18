@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -57,6 +57,11 @@ internal class OneDriveDaoBase(
         return item.Id;
     }
 
+    public bool IsFile(Item item)
+    {
+        return item.Folder == null;
+    }
+
     public string MakeThirdId(object entryId)
     {
         var id = Convert.ToString(entryId, CultureInfo.InvariantCulture);
@@ -70,9 +75,9 @@ internal class OneDriveDaoBase(
     {
         return onedriveItem == null || IsRoot(onedriveItem)
                    ? null
-                   : (onedriveItem.ParentReference.Path.Equals(OneDriveStorage.RootPath, StringComparison.InvariantCultureIgnoreCase)
-                          ? string.Empty
-                          : onedriveItem.ParentReference.Id);
+                   : onedriveItem.ParentReference.Path.Equals(OneDriveStorage.RootPath, StringComparison.InvariantCultureIgnoreCase)
+                       ? string.Empty
+                       : onedriveItem.ParentReference.Id;
     }
 
     public string MakeId(Item onedriveItem)
@@ -88,7 +93,7 @@ internal class OneDriveDaoBase(
 
     public override string MakeId(string id = null)
     {
-        var i = string.IsNullOrEmpty(id) ? "" : ("-|" + id.TrimStart('/'));
+        var i = string.IsNullOrEmpty(id) ? "" : "-|" + id.TrimStart('/');
 
         return $"{PathPrefix}{i}";
     }
@@ -135,15 +140,16 @@ internal class OneDriveDaoBase(
         folder.Id = MakeId(isRoot ? string.Empty : onedriveFolder.Id);
         folder.ParentId = isRoot ? null : MakeId(GetParentFolderId(onedriveFolder));
         folder.Title = MakeFolderTitle(onedriveFolder);
-        folder.CreateOn = isRoot ? ProviderInfo.CreateOn : (onedriveFolder.CreatedDateTime.HasValue 
-            ? _tenantUtil.DateTimeFromUtc(onedriveFolder.CreatedDateTime.Value.DateTime) : default);
-        folder.ModifiedOn = isRoot ? ProviderInfo.ModifiedOn : (onedriveFolder.LastModifiedDateTime.HasValue 
-            ? _tenantUtil.DateTimeFromUtc(onedriveFolder.LastModifiedDateTime.Value.DateTime) : default);
+        folder.CreateOn = isRoot ? ProviderInfo.CreateOn : onedriveFolder.CreatedDateTime.HasValue
+            ? _tenantUtil.DateTimeFromUtc(onedriveFolder.CreatedDateTime.Value.DateTime) : default;
+        folder.ModifiedOn = isRoot ? ProviderInfo.ModifiedOn : onedriveFolder.LastModifiedDateTime.HasValue
+            ? _tenantUtil.DateTimeFromUtc(onedriveFolder.LastModifiedDateTime.Value.DateTime) : default;
         folder.SettingsPrivate = ProviderInfo.Private;
         folder.SettingsHasLogo = ProviderInfo.HasLogo;
         folder.SettingsColor = ProviderInfo.Color;
+        folder.SettingsCover = ProviderInfo.Cover;
+        
         ProcessFolderAsRoom(folder);
-        folder.Shared = ProviderInfo.FolderType is FolderType.PublicRoom;
 
         return folder;
     }
@@ -206,7 +212,6 @@ internal class OneDriveDaoBase(
         file.Title = MakeFileTitle(onedriveFile);
         file.ThumbnailStatus = Thumbnail.Created;
         file.Encrypted = ProviderInfo.Private;
-        file.Shared = ProviderInfo.FolderType is FolderType.PublicRoom;
 
         return file;
     }
@@ -228,7 +233,7 @@ internal class OneDriveDaoBase(
             return new ErrorItem(ex, onedriveId);
         }
     }
-    
+
     public async Task<Item> CreateFolderAsync(string title, string folderId)
     {
         return await _providerInfo.CreateFolderAsync(title, MakeThirdId(folderId), GetId);
@@ -257,7 +262,7 @@ internal class OneDriveDaoBase(
     public async Task<List<Item>> GetItemsAsync(string parentId, bool? folder = null)
     {
         var onedriveFolderId = MakeThirdId(parentId);
-        var items = await _providerInfo.GetItemsAsync(onedriveFolderId);
+        var items = await _providerInfo.GetItemsAsync(onedriveFolderId, GetId, IsFile);
 
         if (!folder.HasValue)
         {

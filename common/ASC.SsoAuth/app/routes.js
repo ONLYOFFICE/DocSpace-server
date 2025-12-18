@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -457,7 +457,8 @@ module.exports = function (app, config) {
           )
         );
       } else {
-        return res.redirect(urlResolver.getPortalSsoLoginUrl(req, data));
+          var url = urlResolver.getPortalSsoLoginUrl(req, data);
+          return res.redirect(url);
       }
     } catch (e) {
       logger.error(`onLoginResponse ${getError(e)}`);
@@ -659,11 +660,12 @@ module.exports = function (app, config) {
         //return res.redirect(urlResolver.getPortal500Url(req));
       }
 
-      const url = urlResolver.getPortalSsoLogoutUrl(req, data);
+      const urls = urlResolver.getPortalSsoLogoutUrl(req, data);
 
       logger.info(`SEND PORTAL LOGOUT`);
 
-      const response = await fetch(url);
+      let headers = { Origin: urls.originUrl }
+      const response = await fetch(urls.url, { headers });
 
       logger.info(
         `PORTAL LOGOUT ${

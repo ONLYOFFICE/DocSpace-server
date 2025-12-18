@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -48,87 +48,90 @@ public static class ShortLinksExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddShortLinks(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<ShortLink>(entity =>
+        public void MySqlAddShortLinks()
         {
-            entity.ToTable("short_links")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+            modelBuilder.Entity<ShortLink>(entity =>
+            {
+                entity.ToTable("short_links")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.HasIndex(e => e.Short)
-                .IsUnique();
+                entity.HasIndex(e => e.Short)
+                    .IsUnique();
 
-            entity.HasKey(e => e.Id)
-                .HasName("PRIMARY");
+                entity.HasKey(e => e.Id)
+                    .HasName("PRIMARY");
 
-            entity.HasIndex(e => e.TenantId)
-                .HasDatabaseName("tenant_id");
+                entity.HasIndex(e => e.TenantId)
+                    .HasDatabaseName("tenant_id");
 
-            entity.Property(e => e.Id)
-                .HasColumnName("id");
+                entity.Property(e => e.Id)
+                    .HasColumnName("id");
 
-            entity.Property(e => e.Short)
-                .HasColumnName("short")
-                .HasColumnType("char")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci")
-                .IsRequired(false);
+                entity.Property(e => e.Short)
+                    .HasColumnName("short")
+                    .HasColumnType("char")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci")
+                    .IsRequired(false);
 
-            entity.Property(e => e.TenantId)
-                .IsRequired()
-                .HasColumnName("tenant_id")
-                .HasColumnType("int(10)")
-                .HasDefaultValue("-1");
+                entity.Property(e => e.TenantId)
+                    .IsRequired()
+                    .HasColumnName("tenant_id")
+                    .HasColumnType("int(10)")
+                    .HasDefaultValue("-1");
 
-            entity.Property(e => e.Link)
-                .HasColumnName("link")
-                .HasColumnType("text")
-                .UseCollation("utf8_bin")
-                .IsRequired(false);
-        });
-    }
+                entity.Property(e => e.Link)
+                    .HasColumnName("link")
+                    .HasColumnType("text")
+                    .UseCollation("utf8_bin")
+                    .IsRequired(false);
+            });
+        }
 
-    public static void PgSqlAddShortLinks(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<ShortLink>(entity =>
+        public void PgSqlAddShortLinks()
         {
-            entity.ToTable("short_links");
+            modelBuilder.Entity<ShortLink>(entity =>
+            {
+                entity.ToTable("short_links");
 
-            entity.HasKey(e => e.Id)
-                .HasName("PK_short_links");
+                entity.HasKey(e => e.Id)
+                    .HasName("PK_short_links");
 
-            entity.HasIndex(e => e.Short)
-                .IsUnique();
+                entity.HasIndex(e => e.Short)
+                    .IsUnique();
 
-            entity.HasIndex(e => e.TenantId)
-                .HasDatabaseName("IX_short_links_tenant_id");
+                entity.HasIndex(e => e.TenantId)
+                    .HasDatabaseName("IX_short_links_tenant_id");
 
-            entity.Property(e => e.Id)
-                .HasColumnName("id")
-                .HasColumnType("bigint");
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("bigint");
 
-            entity.Property(e => e.Short)
-                .HasColumnName("short")
-                .HasColumnType("char(15)")
-                .IsRequired(false);
+                entity.Property(e => e.Short)
+                    .HasColumnName("short")
+                    .HasColumnType("char(15)")
+                    .IsRequired(false);
 
-            entity.Property(e => e.TenantId)
-                .HasColumnName("tenant_id")
-                .HasColumnType("integer")
-                .IsRequired()
-                .HasDefaultValue(-1);
+                entity.Property(e => e.TenantId)
+                    .HasColumnName("tenant_id")
+                    .HasColumnType("integer")
+                    .IsRequired()
+                    .HasDefaultValue(-1);
 
-            entity.Property(e => e.Link)
-                .HasColumnName("link")
-                .HasColumnType("text")
-                .IsRequired(false);
+                entity.Property(e => e.Link)
+                    .HasColumnName("link")
+                    .HasColumnType("text")
+                    .IsRequired(false);
 
-            // Configure relationship if required
-            entity.HasOne(e => e.Tenant)
-                .WithMany()
-                .HasForeignKey(e => e.TenantId)
-                .OnDelete(DeleteBehavior.Restrict);
-        });
+                // Configure relationship if required
+                entity.HasOne(e => e.Tenant)
+                    .WithMany()
+                    .HasForeignKey(e => e.TenantId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+        }
     }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -53,8 +53,8 @@ public class StorageFactoryConfig(IConfiguration configuration, StorageConfigExt
 
     public Configuration.Storage GetStorage(string region)
     {
-        return region == "current" ? 
-            storageConfigExtension.Storage : 
+        return region == "current" ?
+            storageConfigExtension.Storage :
             configuration.GetSection($"regions:{region}:storage").Get<Configuration.Storage>();
     }
 }
@@ -71,7 +71,7 @@ public static class StorageFactoryExtenstion
 
         var storageConfigExtension = builder.ServiceProvider.GetService<StorageConfigExtension>();
         var section = storageConfigExtension.Storage;
-        
+
         if (section is { Module: not null })
         {
             foreach (var m in section.Module.Where(r => string.IsNullOrEmpty(module) || r.Name == module))

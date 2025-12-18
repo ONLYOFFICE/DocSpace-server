@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,33 +27,33 @@
 namespace ASC.Data.Backup.ApiModels;
 
 /// <summary>
-/// Restoring parameters
+/// The backup restoring parameters.
 /// </summary>
 public class BackupRestoreDto
 {
     /// <summary>
-    /// Backup ID
+    /// The backup ID.
     /// </summary>
-    public string BackupId { get; set; }
+    public required string BackupId { get; set; }
 
     /// <summary>
-    /// Storage type
+    /// The backup storage type.
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public BackupStorageType? StorageType { get; set; }
 
     /// <summary>
-    /// Storage parameters
+    /// The backup storage parameters.
     /// </summary>
     public IEnumerable<ItemKeyValuePair<object, object>> StorageParams { get; set; }
 
     /// <summary>
-    /// Notifies users about portal restoring process or not
+    /// Notifies users about the portal restoring process or not.
     /// </summary>
     public bool Notify { get; set; }
 
     /// <summary>
-    /// Expect  dump or not
+    /// Specifies if a dump will be created or not.
     /// </summary>
     public bool Dump { get; set; }
 }

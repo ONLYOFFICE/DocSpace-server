@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,5 +28,5 @@ namespace ASC.Files.Core;
 
 public interface IMappingId<in T>
 {
-    ValueTask<string> MappingIdAsync(T id, bool saveIfNotExist = false);
+    ValueTask<(string, int)> MappingIdAsync(T id, bool saveIfNotExist = false);
 }

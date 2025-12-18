@@ -368,7 +368,7 @@
     <value>Tin tức mới</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Theo dõi thông tin đăng nhập và hành động của người dùng</value>
+    <value>Theo dõi đăng nhập và hành động</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>Kích thước tập tin tối đa</value>
@@ -383,7 +383,7 @@
     <value>Số lượng quản trị viên</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Tự động sao lưu &amp; khôi phục</value>
+    <value>Phục hồi dữ liệu</value>
   </data>
   <data name="TariffsFeature_room" xml:space="preserve">
     <value>Không giới hạn số lượng phòng hoạt động</value>
@@ -410,7 +410,7 @@
     <value>Người dùng trong phòng:</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Số lượng người dùng không giới hạn</value>
+    <value>Số lượng người dùng và khách không giới hạn</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>Số lượng người dùng không được vượt quá {0}</value>
@@ -515,7 +515,7 @@
     <value>Số điện thoại từ Twilio (được yêu cầu để cho phép gửi SMS)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Kết nối ứng dụng để đăng nhập vào hệ thống bằng tài khoản Twitter.</value>
+    <value>Kết nối ứng dụng để đăng nhập vào hệ thống bằng tài khoản X.</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Bật ứng dụng cho phép nhập liên hệ từ Yahoo.</value>
@@ -578,7 +578,7 @@
     <value>WordPress</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumersYandexClientSecret" xml:space="preserve">
     <value>Mật khẩu</value>
@@ -854,7 +854,7 @@
     <value>Client Secret</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào {LogoText} bằng Twitter và liên kết tài khoản Twitter của khách hàng với mô-đun CRM. {0}Truy cập Cổng thông tin Nhà phát triển Twitter và tạo tích hợp ứng dụng {LogoText} mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
+    <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào {LogoText} bằng X và liên kết tài khoản X của khách hàng với mô-đun CRM. {0}Truy cập Cổng thông tin Nhà phát triển X và tạo tích hợp ứng dụng {LogoText} mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>API Key</value>
@@ -1077,5 +1077,161 @@
   </data>
   <data name="ErrorIpRestriction" xml:space="preserve">
     <value>Thêm ít nhất 1 địa chỉ IP được phép.</value>
+  </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>URL Webhook không khả dụng. Yêu cầu HEAD không nhận được mã trạng thái HTTP 200.</value>
+  </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Tín dụng</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Loại tiền</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>Ngày</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>Số lượng</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Dung lượng ổ đĩa</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Tiền nạp thêm vào tài khoản</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>Đơn vị đo</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>Báo cáo hoạt động khách hàng ({0}-{1})</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
+    <value>Không gian lưu trữ đã dùng:</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Điều chỉnh dung lượng lưu trữ theo đúng nhu cầu của bạn.</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Lưu trữ đĩa bổ sung</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>Không tìm thấy nhóm</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Sao lưu</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Sao lưu</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Sao lưu</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Tự động gia hạn</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Số lượng bản sao lưu miễn phí không được vượt quá {0} trong vòng một tháng</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Bật tính năng sao lưu cho DocSpace của bạn. Chi phí sẽ được tự động tính phí.</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Ghi nợ</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Liên hệ</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Lịch sử giao dịch</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Nạp tiền tự động</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Yêu cầu thanh toán</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Kiểu</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} bản sao lưu miễn phí mỗi tháng</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Chi tiết</value>
+  </data>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Véc-tơ hóa</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>Công cụ AI</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Token</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>Đã vượt quá hạn mức không gian AI agent</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Không thể đặt hạn mức cho mỗi ai agent. Giá trị đã nhập lớn hơn tổng dung lượng lưu trữ DocSpace.</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>ID Khách hàng</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Client Secret</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Cho phép ứng dụng đăng nhập vào cổng thông tin bằng tài khoản WeChat.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Cho phép ứng dụng đăng nhập vào cổng thông tin bằng tài khoản WeChat.</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Ngày</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Tên</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>Id</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Họ</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Hạn mức dịch vụ tài liệu ({0})</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>Số lượng plugin vượt quá giới hạn</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>Số lượng AI agent không được vượt quá {0}</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>Công cụ AI</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Bật các tính năng AI trong DocSpace của bạn để tăng năng suất.</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>Tìm kiếm web AI</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Nạp tiền vào ví để mở khóa tìm kiếm web AI.</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>Đã xảy ra lỗi ngoài dự kiến. Xin hãy thử lại.</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>Bạn đã được kết nối thành công với Telegram để nhận thông báo từ DocSpace của bạn.</value>
   </data>
 </root>

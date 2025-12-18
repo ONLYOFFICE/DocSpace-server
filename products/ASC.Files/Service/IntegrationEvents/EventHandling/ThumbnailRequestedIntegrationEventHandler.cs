@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,7 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Core.Common;
-using ASC.Files.Service.Services.Thumbnail;
 
 namespace ASC.Files.Service.IntegrationEvents.EventHandling;
 
@@ -60,38 +59,6 @@ public class ThumbnailRequestedIntegrationEventHandler : IIntegrationEventHandle
         _baseCommonLinkUtility = baseCommonLinkUtility;
     }
 
-    private async Task<IEnumerable<FileData<int>>> GetFreezingThumbnailsAsync()
-    {
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-
-        var files = await Queries.DbFilesAsync(filesDbContext).ToListAsync();
-
-        if (files.Count == 0)
-        {
-            return new List<FileData<int>>();
-        }
-
-        foreach (var f in files)
-        {
-            f.ThumbnailStatus = Thumbnail.Waiting;
-        }
-
-        filesDbContext.UpdateRange(files);
-        await filesDbContext.SaveChangesAsync();
-
-        return await files.ToAsyncEnumerable().SelectAwait(async r =>
-        {
-            _ = await _tenantManager.SetCurrentTenantAsync(r.TenantId);
-            var tariff = await _tariffService.GetTariffAsync(r.TenantId);
-            var baseUrl = _baseCommonLinkUtility.GetFullAbsolutePath(string.Empty);
-            
-            var fileData = new FileData<int>(r.TenantId, r.ModifiedBy, r.Id, baseUrl, tariff.State);
-
-            return fileData;
-        }).ToListAsync();
-    }
-
-
     public async Task Handle(ThumbnailRequestedIntegrationEvent @event)
     {
         CustomSynchronizationContext.CreateContext();
@@ -106,15 +73,12 @@ public class ThumbnailRequestedIntegrationEventHandler : IIntegrationEventHandle
 
             _logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
-            var freezingThumbnails = await GetFreezingThumbnailsAsync();
-
             _tenantManager.SetCurrentTenant(tenant);
 
             var tariff = await _tariffService.GetTariffAsync(@event.TenantId);
 
-            var data = @event.FileIds.Select(fileId => new FileData<int>(@event.TenantId, @event.CreateBy, Convert.ToInt32(fileId), @event.BaseUrl, tariff.State))
-                          .Union(freezingThumbnails);
-
+            var data = @event.FileIds.Select(fileId => new FileData<int>(@event.TenantId, @event.CreateBy,
+                Convert.ToInt32(fileId), @event.BaseUrl, tariff.State));
 
             if (await _channelWriter.WaitToWriteAsync())
             {
@@ -125,18 +89,4 @@ public class ThumbnailRequestedIntegrationEventHandler : IIntegrationEventHandle
             }
         }
     }
-}
-
-
-static file class Queries
-{
-    public static readonly Func<FilesDbContext, IAsyncEnumerable<DbFile>> DbFilesAsync =
-        EF.CompileAsyncQuery(
-            (FilesDbContext ctx) =>
-                ctx.Files
-                    .Join(ctx.Tenants, f => f.TenantId, t => t.Id, (file, tenant) => new { file, tenant })
-                    .Where(r => r.tenant.Status == TenantStatus.Active)
-                    .Where(r => r.file.CurrentVersion && r.file.ThumbnailStatus == Thumbnail.Creating &&
-                                EF.Functions.DateDiffMinute(r.file.ModifiedOn, DateTime.UtcNow) > 5)
-                    .Select(r => r.file));
 }

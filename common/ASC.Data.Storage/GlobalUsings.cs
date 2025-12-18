@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,6 +34,7 @@ global using System.Text;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using System.Web;
+
 global using Amazon;
 global using Amazon.CloudFront;
 global using Amazon.CloudFront.Model;
@@ -76,10 +77,13 @@ global using ASC.EventBus.Events;
 global using ASC.Notify.Messages;
 global using ASC.Protos.Migration;
 global using ASC.Security.Cryptography;
+
 global using Google.Apis.Auth.OAuth2;
 global using Google.Cloud.Storage.V1;
+
 global using ICSharpCode.SharpZipLib.GZip;
 global using ICSharpCode.SharpZipLib.Tar;
+
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.AspNetCore.Hosting;
 global using Microsoft.AspNetCore.Http;
@@ -89,11 +93,14 @@ global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Hosting;
 global using Microsoft.Extensions.Logging;
+
 global using net.openstack.Core.Domain;
 global using net.openstack.Providers.Rackspace;
+
 global using ProtoBuf;
 
 global using ZiggyCreatures.Caching.Fusion;
 
 global using static Google.Cloud.Storage.V1.UrlSigner;
+
 global using MimeMapping = ASC.Common.Web.MimeMapping;

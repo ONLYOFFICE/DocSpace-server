@@ -275,7 +275,7 @@
     <value>ブランディング＆カスタマイズ</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>ユーザーのログイン＆アクションの追跡</value>
+    <value>ログインとアクションの追跡</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>最大ファイルサイズ</value>
@@ -290,7 +290,7 @@
     <value>管理者数</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>自動バックアップ＆回復</value>
+    <value>データ復元</value>
   </data>
   <data name="TariffsFeature_room" xml:space="preserve">
     <value>アクティブルームの数は無制限</value>
@@ -317,7 +317,7 @@
     <value>ルーム内のユーザー数：</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>ユーザー数は無制限</value>
+    <value>ユーザーとゲストの数無制限</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>ユーザー数は {0} を超えないこと</value>
@@ -578,10 +578,10 @@
     <value>Twilioの電話番号(SMS承認のために必要です)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Twitterアカウントを使用してポータルにサインインするアプリケーションを有効にする。</value>
+    <value>Xアカウントを使用してポータルにサインインするアプリケーションを有効にする。</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>このアプリを接続すると、Twitterを使用して{LogoText}にサインイン、またはCRMモジュールでお客様のTwitterアカウントをリンクできます。{0} Twitter開発者ポータルで{LogoText}統合のために新しいアプリを作成してください。その後、データを以下に入力してください：</value>
+    <value>このアプリを接続すると、Xを使用して{LogoText}にサインイン、またはCRMモジュールでお客様のXアカウントをリンクできます。{0} X開発者ポータルで{LogoText}統合のために新しいアプリを作成してください。その後、データを以下に入力してください：</value>
   </data>
   <data name="ConsumersVkDescription" xml:space="preserve">
     <value>VKアカウントでポータルにサインインするようにアプリを接続します。</value>
@@ -818,7 +818,7 @@
     <value>WordPress</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumersYandexClientSecret" xml:space="preserve">
     <value>パスワード</value>
@@ -980,7 +980,7 @@
     <value>テキストメッセージの送信数が多すぎます。後で再試行してください。</value>
   </data>
   <data name="TariffsFeature_thirdparty" xml:space="preserve">
-    <value>サードパーティの統合</value>
+    <value>Proの統合</value>
   </data>
   <data name="ConsumersZoom" xml:space="preserve">
     <value>Zoom</value>
@@ -1071,5 +1071,161 @@
   </data>
   <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
     <value>管理者の数が制限を超えています：{0}/{1}。</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>少なくとも1つの許可されたIPアドレスを追加してください。</value>
+  </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>WebhookのURLは利用できません。HEADリクエストは200 HTTPステータスではありません。</value>
+  </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>非営利</value>
+  </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>クレジット</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>通貨</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>日付</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>数量</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>計測単位</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>顧客操作レポート({0}-{1})</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>グループが見つかりませんでした</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>追加ディスクストレージ</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>必要な容量に正確に調整してください。</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
+    <value>使用されたストレージスペース：</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>ディスク容量</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>残高チャージ</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>自動更新</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>月間の無料バックアップ数は{0}を超えないようにしてください</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>DocSpaceのバックアップを有効にする。料金は自動的に請求されます。</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>バックアップ</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>バックアップ</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>バックアップ</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>引き落とし</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>連絡先</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>取引履歴</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>自動チャージ</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>月間{0}回の無料バックアップ</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>お支払いが必要です</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>種類</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>詳細</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>クライアントID</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>クライアントシークレット</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>アプリケーションがWeChatアカウントを使用してポータルにサインインできるようにします。</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>アプリケーションがWeChatアカウントを使用してポータルにサインインできるようにします。</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>日付</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>名</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>姓</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>ドキュメントサービスのクォータ ({0})</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>プラグインの数が制限を超えています</value>
+  </data>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>ベクトル化</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>AIツール</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>トークン</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>AIエージェントのスペースクォータが上限に達しました</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>AIエージェントごとのクォータ設定に失敗しました。入力した値がDocSpace全体のストレージ容量を超えています。</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>AIエージェントの数は {0} を超えることはできません</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>AIツール</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>DocSpaceのAI機能を有効にして生産性を向上させましょう。</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>AIウェブ検索</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>AIウェブ検索を有効化するにはウォレットにチャージしてください。</value>
   </data>
 </root>

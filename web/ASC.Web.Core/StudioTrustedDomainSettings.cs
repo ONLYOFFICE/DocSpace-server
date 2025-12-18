@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,14 +30,12 @@ public class StudioTrustedDomainSettings : ISettings<StudioTrustedDomainSettings
 {
     public bool InviteAsUsers { get; init; }
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{00A2DB01-BAE3-48aa-BE32-CE768D7C874E}"); }
-    }
+    public static Guid ID => new("{00A2DB01-BAE3-48aa-BE32-CE768D7C874E}");
 
     public StudioTrustedDomainSettings GetDefault()
     {
         return new StudioTrustedDomainSettings { InviteAsUsers = true };
     }
+
+    public DateTime LastModified { get; set; }
 }

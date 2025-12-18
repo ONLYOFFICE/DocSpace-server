@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -65,11 +65,11 @@ public class WebhooksDbContext(DbContextOptions<WebhooksDbContext> options) : Ba
     {
         return Queries.WebhooksConfigAsync(this, tenantId, id);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
-    public Task<DbWebhooks> WebhooksLogAsync(int id)
+    public Task<DbWebhooks> WebhooksLogAsync(int tenantId, int id)
     {
-        return Queries.WebhooksLogAsync(this, id);
+        return Queries.WebhooksLogAsync(this, tenantId, id);
     }
 }
 
@@ -86,10 +86,10 @@ static file class Queries
                 ctx.WebhooksConfigs.Where(it => it.TenantId == tenantId && (userId == null || it.CreatedBy == userId))
                 .GroupJoin(ctx.WebhooksLogs, c => c.Id, l => l.ConfigId, (configs, logs) => new { configs, logs })
                 .Select(it => new WebhooksConfigWithStatus
-                    {
-                        WebhooksConfig = it.configs,
-                        Status = it.logs.OrderByDescending(webhooksLog => webhooksLog.Delivery).FirstOrDefault().Status
-                    }));
+                {
+                    WebhooksConfig = it.configs,
+                    Status = it.logs.OrderByDescending(webhooksLog => webhooksLog.Delivery).FirstOrDefault().Status
+                }));
 
     public static readonly Func<WebhooksDbContext, int, bool?, IAsyncEnumerable<DbWebhooksConfig>> WebhooksConfigsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -101,11 +101,11 @@ static file class Queries
             (WebhooksDbContext ctx, int tenantId, int id) =>
                 ctx.WebhooksConfigs.FirstOrDefault(it => it.TenantId == tenantId && it.Id == id));
 
-    public static readonly Func<WebhooksDbContext, int, Task<DbWebhooks>> WebhooksLogAsync =
+    public static readonly Func<WebhooksDbContext, int, int, Task<DbWebhooks>> WebhooksLogAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (WebhooksDbContext ctx, int id) =>
+            (WebhooksDbContext ctx, int tenantId, int id) =>
                 ctx.WebhooksLogs
-                    .Where(it => it.Id == id)
+                    .Where(it => it.TenantId == tenantId && it.Id == id)
                     .Join(ctx.WebhooksConfigs, r => r.ConfigId, r => r.Id, (log, config) => new DbWebhooks { Log = log, Config = config })
                     .FirstOrDefault());
 }

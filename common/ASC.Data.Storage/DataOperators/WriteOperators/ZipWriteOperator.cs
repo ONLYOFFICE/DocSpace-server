@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,13 +32,7 @@ public class ZipWriteOperator : IDataWriteOperator
     private readonly TarOutputStream _tarOutputStream;
     private readonly TempStream _tempStream;
 
-    public bool NeedUpload
-    {
-        get
-        {
-            return true;
-        }
-    }
+    public bool NeedUpload => true;
 
     public CancellationToken CancellationToken { get; set; }
 
@@ -61,7 +55,7 @@ public class ZipWriteOperator : IDataWriteOperator
             throw new OperationCanceledException();
         }
         var fileStream = await ActionInvoker.TryAsync(async () => await store.GetReadStreamAsync(domain, path), 5, error => throw error);
-        
+
         if (fileStream != null)
         {
             await WriteEntryAsync(tarKey, fileStream, action);
@@ -99,6 +93,6 @@ public class ZipWriteOperator : IDataWriteOperator
         _tarOutputStream.Close();
         await _tarOutputStream.DisposeAsync();
     }
-    
-    
+
+
 }

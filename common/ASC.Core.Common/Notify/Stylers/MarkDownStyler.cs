@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,20 +26,10 @@
 
 namespace ASC.Notify.Textile;
 
-public class MarkDownStyler : IPatternStyler
+[Scope]
+public partial class MarkDownStyler : IPatternStyler
 {
     static readonly Regex _velocityArguments = new(NVelocityPatternFormatter.NoStylePreffix + "(?<arg>.*?)" + NVelocityPatternFormatter.NoStyleSuffix, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
-    static readonly Regex _linkReplacer = new(@"""(?<text>[\w\W]+?)"":""(?<link>[^""]+)""", RegexOptions.Singleline | RegexOptions.Compiled);
-    static readonly Regex _divPTagReplacer = new(@"(<(p|div).*?>)|(<\/(p|div)>)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled | RegexOptions.Singleline);
-    static readonly Regex _tagReplacer = new(@"<(.|\n)*?>", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled | RegexOptions.Singleline);
-    static readonly Regex _multiLineBreaksReplacer = new(@"(?:\r\n|\r(?!\n)|(?!<\r)\n){3,}", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-    static readonly Regex _symbolReplacer = new(@"\[(.*?)]\(([^()]*)\)|[]\\[(){}*_|#+=.!~>`-]", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-    static readonly Regex _linkSymbolReplacer = new(@"[]\\[(){}*_|#+=.!~>`-]", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-    static readonly Regex _boldReplacer = new(@"<(strong|\/strong)\\>", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-    static readonly Regex _strikeThroughReplacer = new(@"<(s|\/s)\\>", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-    static readonly Regex _underLineReplacer = new(@"<(u|\/u)\\>", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-    static readonly Regex _italicReplacer = new(@"<(em|\/em)\\>", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-    static readonly Regex _hTMLLinkReplacer = new(@"<a.*?href=""(.*?)"".*?>(.*?)<\/a>", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
     public Task ApplyFormatingAsync(NoticeMessage message)
     {
@@ -55,24 +45,23 @@ public class MarkDownStyler : IPatternStyler
         }
 
         var lines = message.Body.Split([Environment.NewLine, "\n"], StringSplitOptions.None);
-        for (var i = 0; i < lines.Length - 1; i++)
+        foreach (var line in lines)
         {
-            if (string.IsNullOrEmpty(lines[i])) { body += Environment.NewLine; continue; }
-            lines[i] = _velocityArguments.Replace(lines[i], ArgMatchReplace);
-            body += _linkReplacer.Replace(lines[i], EvalLink) + Environment.NewLine;
+            if (string.IsNullOrEmpty(line)) { body += Environment.NewLine; continue; }
+            var lineToAdd = _velocityArguments.Replace(line, ArgMatchReplace);
+            if (lineToAdd.StartsWith("h1.")) { lineToAdd = lineToAdd.Substring("h1.".Length); }
+            body += LinkRegex().Replace(lineToAdd, EvalLink) + Environment.NewLine;
         }
-        lines[^1] = _velocityArguments.Replace(lines[^1], ArgMatchReplace);
-        body += _linkReplacer.Replace(lines[^1], EvalLink);
-        body = _divPTagReplacer.Replace(body, "");
-        body = _hTMLLinkReplacer.Replace(body, @"[$2]($1)");
+        body = PlainTextRegex().Replace(body, "");
+        body = HtmlLinkReplacer().Replace(body, @"[$2]($1)");
         body = HttpUtility.HtmlDecode(body);
-        body = _symbolReplacer.Replace(body, m => m.Groups[1].Success ? $@"[{_linkSymbolReplacer.Replace(m.Groups[1].Value, @"\$&")}]({m.Groups[2].Value})" : $@"\{m.Value}");
-        body = _boldReplacer.Replace(body, "*");
-        body = _strikeThroughReplacer.Replace(body, "~");
-        body = _underLineReplacer.Replace(body, "__");
-        body = _italicReplacer.Replace(body, "_");
-        body = _tagReplacer.Replace(body, "");
-        body = _multiLineBreaksReplacer.Replace(body, Environment.NewLine);
+        body = BoldReplacer().Replace(body, "*");
+        body = StrikeThroughReplacer().Replace(body, "~");
+        body = UnderlineReplacer().Replace(body, "__");
+        body = ItalicReplacer().Replace(body, "_");
+        body = TagReplacer().Replace(body, "");
+        body = MultilineBreaksReplacer().Replace(body, Environment.NewLine);
+        body = SymbolReplacer().Replace(body, m => m.Groups[1].Success ? $@"[{LinkSymbolReplacer().Replace(m.Groups[1].Value, @"\$&")}]({m.Groups[2].Value})" : $@"\{m.Value}");
         message.Body = body;
         return Task.CompletedTask;
     }
@@ -83,11 +72,7 @@ public class MarkDownStyler : IPatternStyler
         {
             if (match.Groups["text"].Success && match.Groups["link"].Success)
             {
-                if (match.Groups["text"].Value.Equals(match.Groups["link"].Value, StringComparison.OrdinalIgnoreCase))
-                {
-                    return " " + match.Groups["text"].Value + " ";
-                }
-                return match.Groups["text"].Value + string.Format(" ( {0} )", match.Groups["link"].Value);
+                return $"[{match.Groups["text"].Value}]({match.Groups["link"].Value})";
             }
         }
         return match.Value;
@@ -97,4 +82,37 @@ public class MarkDownStyler : IPatternStyler
     {
         return match.Result("${arg}");
     }
+
+    [GeneratedRegex(@"""(?<text>[\w\W]+?)"":""(?<link>[^""]+)""", RegexOptions.Compiled | RegexOptions.Singleline)]
+    private static partial Regex LinkRegex();
+
+    [GeneratedRegex(@"(<(p|div).*?>)|(<\/(p|div)>)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnorePatternWhitespace | RegexOptions.CultureInvariant)]
+    private static partial Regex PlainTextRegex();
+
+    [GeneratedRegex(@"<(.|\n)*?>", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnorePatternWhitespace | RegexOptions.CultureInvariant)]
+    private static partial Regex TagReplacer();
+
+    [GeneratedRegex(@"(?:\r\n|\r(?!\n)|(?!<\r)\n){3,}", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
+    private static partial Regex MultilineBreaksReplacer();
+
+    [GeneratedRegex(@"\[(.*?)]\(([^()]*)\)|[]\\[(){}*_|#+=.!~>`-]", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
+    private static partial Regex SymbolReplacer();
+
+    [GeneratedRegex(@"[]\\[(){}*_|#+=.!~>`-]", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
+    private static partial Regex LinkSymbolReplacer();
+
+    [GeneratedRegex(@"<(strong|\/strong)\\>", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
+    private static partial Regex BoldReplacer();
+
+    [GeneratedRegex(@"<(s|\/s)\\>", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
+    private static partial Regex StrikeThroughReplacer();
+
+    [GeneratedRegex(@"<(u|\/u)\\>", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
+    private static partial Regex UnderlineReplacer();
+
+    [GeneratedRegex(@"<(em|\/em)\\>", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
+    private static partial Regex ItalicReplacer();
+
+    [GeneratedRegex(@"<a.*?href=""(.*?)"".*?>(.*?)<\/a>", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
+    private static partial Regex HtmlLinkReplacer();
 }

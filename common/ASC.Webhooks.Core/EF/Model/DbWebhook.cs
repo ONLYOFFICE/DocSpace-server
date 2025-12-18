@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -44,55 +44,58 @@ public static class DbWebhookExtension
             .Add(PgSqlAddDbWebhook, Provider.PostgreSql);
     }
 
-    private static void MySqlAddDbWebhook(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbWebhook>(entity =>
+        private void MySqlAddDbWebhook()
         {
-            entity.HasKey(e => new { e.Id })
-                .HasName("PRIMARY");
+            modelBuilder.Entity<DbWebhook>(entity =>
+            {
+                entity.HasKey(e => new { e.Id })
+                    .HasName("PRIMARY");
 
-            entity.ToTable("webhooks")
-                .HasCharSet("utf8");
+                entity.ToTable("webhooks")
+                    .HasCharSet("utf8");
 
-            entity.Property(e => e.Id)
-                .HasColumnType("int")
-                .HasColumnName("id");
+                entity.Property(e => e.Id)
+                    .HasColumnType("int")
+                    .HasColumnName("id");
 
-            entity.Property(e => e.Route)
-                .HasColumnName("route")
-                .HasDefaultValueSql("''");
+                entity.Property(e => e.Route)
+                    .HasColumnName("route")
+                    .HasDefaultValueSql("''");
 
-            entity.Property(e => e.Method)
-                .HasColumnName("method")
-                .HasDefaultValueSql("''");
-        });
-    }
+                entity.Property(e => e.Method)
+                    .HasColumnName("method")
+                    .HasDefaultValueSql("''");
+            });
+        }
 
-    private static void PgSqlAddDbWebhook(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<DbWebhook>(entity =>
+        private void PgSqlAddDbWebhook()
         {
-            // Define primary key
-            entity.HasKey(e => new { e.Id })
-                .HasName("webhooks_pkey"); // Default naming convention for PostgreSQL primary keys
+            modelBuilder.Entity<DbWebhook>(entity =>
+            {
+                // Define primary key
+                entity.HasKey(e => new { e.Id })
+                    .HasName("webhooks_pkey"); // Default naming convention for PostgreSQL primary keys
 
-            // Define table name
-            entity.ToTable("webhooks"); // PostgreSQL typically uses snake_case for table names
+                // Define table name
+                entity.ToTable("webhooks"); // PostgreSQL typically uses snake_case for table names
 
-            // Define properties
-            entity.Property(e => e.Id)
-                .HasColumnName("id") // PostgreSQL uses snake_case for column names
-                .HasColumnType("integer"); // PostgreSQL uses 'integer' for int type
+                // Define properties
+                entity.Property(e => e.Id)
+                    .HasColumnName("id") // PostgreSQL uses snake_case for column names
+                    .HasColumnType("integer"); // PostgreSQL uses 'integer' for int type
 
-            entity.Property(e => e.Route)
-                .HasColumnName("route")
-                .HasColumnType("character varying(200)") // Equivalent to MaxLength(200)
-                .HasDefaultValue(string.Empty); // Set default value to an empty string
+                entity.Property(e => e.Route)
+                    .HasColumnName("route")
+                    .HasColumnType("character varying(200)") // Equivalent to MaxLength(200)
+                    .HasDefaultValue(string.Empty); // Set default value to an empty string
 
-            entity.Property(e => e.Method)
-                .HasColumnName("method")
-                .HasColumnType("character varying(10)") // Equivalent to MaxLength(10)
-                .HasDefaultValue(string.Empty); // Set default value to an empty string
-        });
+                entity.Property(e => e.Method)
+                    .HasColumnName("method")
+                    .HasColumnType("character varying(10)") // Equivalent to MaxLength(10)
+                    .HasDefaultValue(string.Empty); // Set default value to an empty string
+            });
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,13 +26,9 @@
 
 using System.Reflection;
 
-using CsvHelper;
-using CsvHelper.Configuration;
-using CsvHelper.TypeConversion;
-
 namespace ASC.AuditTrail.Models.Mappings;
 
-internal class BaseEventMap<T> : ClassMap<T> where T : BaseEvent
+public class BaseEventMap<T> : ClassMap<T> where T : BaseEvent
 {
     public BaseEventMap()
     {
@@ -49,24 +45,8 @@ internal class BaseEventMap<T> : ClassMap<T> where T : BaseEvent
 
             if (prop.PropertyType == typeof(DateTime))
             {
-                Map(eventType, prop).TypeConverter<CustomDateTimeConverter>();
+                Map(eventType, prop).TypeConverter<CsvFileHelper.CsvDateTimeConverter>();
             }
         }
-    }
-}
-
-public class CustomDateTimeConverter : DateTimeConverter
-{
-    public override string ConvertToString(object value, IWriterRow row, MemberMapData memberMapData)
-    {
-        if (value is not DateTime dateTime)
-        {
-            return base.ConvertToString(value, row, memberMapData);
-        }
-
-        var culture = memberMapData.TypeConverterOptions.CultureInfo;
-        var format = $"{culture?.DateTimeFormat.ShortDatePattern} {culture?.DateTimeFormat.ShortTimePattern}";
-            
-        return $"=\"{dateTime.ToString(format)}\"";
     }
 }

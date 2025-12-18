@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,13 +26,9 @@
 
 namespace ASC.Web.Studio.Core.TFA;
 
-public class TfaAppAuthSettings : TfaSettingsBase<TfaAppAuthSettings>
+public class TfaAppAuthSettings : TfaSettingsBase<TfaAppAuthSettings>, ISettings<TfaAppAuthSettings>
 {
-    [JsonIgnore]
-    public override Guid ID
-    {
-        get { return new Guid("{822CA059-AA8F-4588-BEE3-6CD2AA920CDB}"); }
-    }
+    public static new Guid ID => new("{822CA059-AA8F-4588-BEE3-6CD2AA920CDB}");
 
     public override TfaAppAuthSettings GetDefault()
     {

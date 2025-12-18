@@ -74,7 +74,7 @@
     <value>Os arquivos serão compactados no arquivo {0}.zip{1}</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>Documentos</value>
+    <value>Meus Documentos</value>
   </data>
   <data name="PrivacyRoom" xml:space="preserve">
     <value>Sala Privada</value>
@@ -102,5 +102,11 @@
   </data>
   <data name="ReadyFormFolder" xml:space="preserve">
     <value>Completo</value>
+  </data>
+  <data name="RoomTemplates" xml:space="preserve">
+    <value>Modelos</value>
+  </data>
+  <data name="AiAgents" xml:space="preserve">
+    <value>Agentes de IA</value>
   </data>
 </root>

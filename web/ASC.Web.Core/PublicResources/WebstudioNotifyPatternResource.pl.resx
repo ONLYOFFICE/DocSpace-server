@@ -502,37 +502,37 @@ Użytkownik "$__AuthorName":"$__AuthorUrl" dołączył do portalu "${__VirtualRo
     <value>Nowy użytkownik dodany do portalu ${LetterLogoText}</value>
   </data>
   <data name="ActionFileCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; utworzył(a) nowy dokument: &lt;a href={1}&gt;{2}&lt;/a&gt; w pokoju: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; utworzył(a) nowy dokument: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; w pokoju: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionNewComment" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; dodał(a) nowy komentarz do wersji dokumentu: &lt;a href={1}&gt;{2}&lt;/a&gt; w pokoju: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; dodał(a) nowy komentarz do wersji dokumentu: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; w pokoju: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileUploaded" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; wgrał(a) nowy dokument: &lt;a href={1}&gt;{2}&lt;/a&gt; w pokoju: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; wgrał(a) nowy dokument: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; w pokoju: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomRenamed" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; zmienił(a) nazwę pokoju: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href={2}&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; zmienił(a) nazwę pokoju: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; utworzył(a) nowy pokój: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; utworzył(a) nowy pokój: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; został(a) usunięta z pokoju: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; został(a) usunięta z pokoju: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileEdited" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; edytował(a) dokument: &lt;a href={1}&gt;{2}&lt;/a&gt; w pokoju: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; edytował(a) dokument: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; w pokoju: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomRemoved" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; usunął(nęła) pokój: &lt;b&gt;{1}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserAddedToRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; został(a) dodany(na) do pokoju: &lt;a href={1}&gt;{2}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; został(a) dodany(na) do pokoju: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomArchived" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; przeniósł(iosła) pokój: &lt;a href={1}&gt;{2}&lt;/a&gt; do archiwum - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; przeniósł(iosła) pokój: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; do archiwum - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomUpdateAccessForUser" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; uzyskał(a) rolę &lt;b&gt;{1}&lt;/b&gt; w pokoju: &lt;a href={2}&gt;{3}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; uzyskał(a) rolę &lt;b&gt;{1}&lt;/b&gt; w pokoju: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
     <value>Nowy użytkownik DocSpace został dodany: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
@@ -823,7 +823,7 @@ $Body</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Konto ${LetterLogoText} DocSpace zostało &lt;span style="color: #FF6F3D;"&gt;dezaktywowane&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Konto ${LetterLogoText} DocSpace zostało &lt;span style="color: #FF6F3D;"&gt;usunięty&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Twoje konto ${LetterLogoText} DocSpace zostało dezaktywowane. Wszystkie dane zostaną usunięte zgodnie z naszą &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Polityką prywatności&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
@@ -863,17 +863,6 @@ $TrulyYours</value>
 Informujemy, że okres prolongaty wynoszący $PaymentDelay dni dla Twojego konta ${LetterLogoText} DocSpace został aktywowany.
 
 Pamiętaj, aby opłacić swój plan Biznes przed upływem okresu prolongaty W ten sposób będziesz w stanie dalej korzystać ze wszystkich zalet oferowanych przez Twoje konto ${LetterLogoText} DocSpace.
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Witaj, $UserName!
-
-Przypominamy, że Twoja subskrypcja ${LetterLogoText} DocSpace wygaśnie za trzy dni. Po tym czasie zostanie aktywowany okres prolongaty o długości $PaymentDelay dni.
-
-Zachęcamy do opłacenia swojego planu Biznes już teraz, aby kontynuować korzystanie ze wszystkich zalet oferowanych przez Twoje konto ${LetterLogoText} DocSpace.
 
 $OrangeButton
 
@@ -953,9 +942,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_enterprise_whitelabel_admin_activation_v1" xml:space="preserve">
     <value>Witaj w ${LetterLogoText} DocSpace!</value>
-  </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Twoja subskrypcja ${LetterLogoText} DocSpace wkrótce wygaśnie</value>
   </data>
   <data name="subject_enterprise_user_welcome_v1" xml:space="preserve">
     <value>Witaj w ${LetterLogoText} DocSpace!</value>
@@ -1069,7 +1055,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Zmieniono hasło do skrzynki pocztowej</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>Konto ${LetterLogoText} DocSpace zostało dezaktywowane</value>
+    <value>${LetterLogoText} DocSpace został usunięty</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>Użytkownik usunął swój profil</value>
@@ -1148,7 +1134,9 @@ Konfiguracja aplikacji uwierzytelniającej, której używasz do logowania w port
 
 Kliknij poniższy przycisk, aby przejść do strony logowania portalu i skonfigurować aplikację uwierzytelniającą:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_enterprise_admin_welcome_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Poznaj plan Biznes &lt;span style="color: #FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
@@ -1784,11 +1772,13 @@ $TrulyYours</value>
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Witaj, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Właśnie udało Ci się *utworzyć konto DocSpace w ${LetterLogoText}*. Jest to centrum dokumentów, dzięki któremu możesz usprawnić współpracę ze swoim zespołem, klientami, partnerami i nie tylko. Jego adres to &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Właśnie udało Ci się *utworzyć konto DocSpace w ${LetterLogoText}*. Jest to centrum dokumentów, dzięki któremu możesz usprawnić współpracę ze swoim zespołem, klientami, partnerami i nie tylko. Jego adres to &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
+#if($OrangeButton != "")
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Potwierdź swój adres e-mail (link jest ważny przez 7 dni):&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 44px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
+#end
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;Twój obecny plan cenowy to STARTUP. Jest całkowicie darmowy i obejmuje:&lt;/td&gt;&lt;/tr&gt;
 
@@ -1894,5 +1884,150 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 26px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Jeśli masz pytania, sprawdź nasze &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;Centrum pomocy&lt;/a&gt; lub zapytaj nasz &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__SupportLink}"&gt;zespół wsparcia&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
+  </data>
+  <data name="pattern_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Twoje konto ${LetterLogoText} DocSpace zostanie &lt;span style="color: #FF6F3D;"&gt;usunięte&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Twoje konto ${LetterLogoText} DocSpace ${__VirtualRootPath} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; od ponad roku jest nieaktywne.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Ponieważ nie chcesz już z niego korzystać, Twojego konto ${LetterLogoText} DocSpace i wszystkie dane zostaną usunięte zgodnie z naszą &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Polityką prywatności&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;Będziemy wdzięczni za Twoją opinię. Dlaczego rezygnujesz z konta ${LetterLogoText} DocSpace?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Jeśli chcesz nadal korzystać z konta ${LetterLogoText} DocSpace, zaloguj się i wykonaj dowolne działanie.&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_role_changed" xml:space="preserve">
+    <value>Witaj!
+
+Przypisano Ci nową rolę w pokoju DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+Dowiedz się więcej o rolach i uprawnieniach w pokojach z Centrum pomocy "Help Center":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_type_changed" xml:space="preserve">
+    <value>Witaj!
+
+Przypisano Ci nowy rodzaj użytkownika w DoscSpace  "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
+
+Dowiedz się więcej o rodzajach użytkowników i uprawnieniach z Centrum pomocy "Help Center":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>Twoje konto ${LetterLogoText} DocSpace zostanie usunięte</value>
+  </data>
+  <data name="subject_user_type_changed" xml:space="preserve">
+    <value>Twój rodzaj użytkownika w DocSpace uległa zmianie</value>
+  </data>
+  <data name="subject_user_role_changed" xml:space="preserve">
+    <value>Twoja rola w pokoju DocSpace uległa zmianie</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Przejdź do usług</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Przejdź do ustawień portfela</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Witaj, $UserName!
+
+Informujemy, że automatyczne odnowienie zakupionego planu nie mogło zostać zrealizowane.
+
+Uprzejmie prosimy o ręczne odnowienie aktualnego planu (lub zakupienie nowego).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Witaj, $UserName!
+
+Informujemy, że płatność za subskrypcję zostanie automatycznie pobrana z Twojego konta za 3 dni.
+
+Aby transakcja przebiegła bezproblemowo, upewnij się, że masz na nim wystarczające środki.
+
+Jeśli masz pytania lub potrzebujesz pomocy, skontaktuj się z naszym "zespołem wsparcia":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Witaj, $UserName!
+
+Informujemy, że automatyczne doładowanie salda portfela DocSpace nie powiodło się.
+
+Uprzejmie prosimy o ręczne sprawdzenie i aktualizację salda portfela.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Wymagane działanie: Nie udało się automatycznie odnowić planu w ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Nadchodząca płatność za subskrypcję ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Wymagane działanie: Nie udało się automatycznie zasilić portfela w ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>Twoje hasło zostało pomyślnie zmienione</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>Otwórz DocSpace</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.Hasło zostało pomyślnie zmienione
+
+Twoje hasło do konta *$UserName*, *$UserEmail* zostało pomyślnie zmienione w dniu *$Date* w DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+IP: *$IP*
+Urządzenie: *$Device*
+#if($Location != "")
+Lokalizacja: *$Location*
+#end
+Przeglądarka: *$Browser*
+
+Jeśli ta czynność została wykonana przez Ciebie — nie są wymagane żadne dalsze kroki. Jeśli ta zmiana wygląda podejrzanie lub nie została przez Ciebie autoryzowana, natychmiast zresetuj hasło i wyłącz dostęp do DocSpace dla tego urządzenia.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="ActionAgentCreated" xml:space="preserve">
+    <value>Użytkownik &lt;b&gt;{0}&lt;/b&gt; utworzył nowego asystenta: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRemoved" xml:space="preserve">
+    <value>Użytkownik &lt;b&gt;{0}&lt;/b&gt; usunął asystenta: &lt;b&gt;{1}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRenamed" xml:space="preserve">
+    <value>Użytkownik &lt;b&gt;{0}&lt;/b&gt; zmienił nazwę asystenta: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentUpdateAccessForUser" xml:space="preserve">
+    <value>Użytkownik &lt;b&gt;{0}&lt;/b&gt; otrzymał w asystencie następującą rolę: &lt;b&gt;{1}&lt;/b&gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserAddedToAgent" xml:space="preserve">
+    <value>Użytkownik &lt;b&gt;{0}&lt;/b&gt; został dodany do asystenta: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserRemovedFromAgent" xml:space="preserve">
+    <value>Użytkownik &lt;b&gt;{0}&lt;/b&gt; został usunięty z asystenta: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ButtonJoinAgent" xml:space="preserve">
+    <value>Dołącz do asystenta</value>
+  </data>
+  <data name="subject_backup_failed" xml:space="preserve">
+    <value>Nie udało się utworzyć kopii zapasowej DocSpace</value>
+  </data>
+  <data name="subject_saas_agent_invite" xml:space="preserve">
+    <value>Dołącz do ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Zaproszono Cię do asystenta DocSpace ${LetterLogoText}</value>
+  </data>
+  <data name="subject_scheduled_backup_failed" xml:space="preserve">
+    <value>Nie udało się utworzyć automatycznej kopii zapasowej DocSpace</value>
   </data>
 </root>

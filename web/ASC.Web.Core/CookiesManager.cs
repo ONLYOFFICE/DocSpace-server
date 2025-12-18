@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -75,13 +75,13 @@ public class CookiesManager(
         if (type is CookiesType.AuthKey or CookiesType.ConfirmKey or CookiesType.AnonymousSessionKey or CookiesType.ShareLink)
         {
             options.HttpOnly = true;
-            
+
             SameSiteMode? sameSiteMode = null;
             if (Enum.TryParse<SameSiteMode>(configuration["web:samesite"], out var sameSiteModeFromConfig))
             {
                 sameSiteMode = sameSiteModeFromConfig;
             }
-            
+
             if (sameSiteMode.HasValue && sameSiteMode.Value != SameSiteMode.None)
             {
                 options.SameSite = sameSiteMode.Value;
@@ -96,7 +96,7 @@ public class CookiesManager(
                 if (sameSiteMode is SameSiteMode.None)
                 {
                     options.SameSite = sameSiteMode.Value;
-                } 
+                }
                 else if (!sameSiteMode.HasValue)
                 {
                     var cspSettings = await settingsManager.LoadAsync<CspSettings>();
@@ -139,7 +139,7 @@ public class CookiesManager(
         }
 
         var cookieName = GetFullCookiesName(type, itemId);
-        
+
         if (allowHeader && httpContextAccessor.HttpContext.Request.Headers.TryGetValue(cookieName, out var cookieHeader))
         {
             return cookieHeader;
@@ -149,7 +149,7 @@ public class CookiesManager(
         {
             return cookie;
         }
-        
+
         return string.Empty;
     }
 
@@ -215,7 +215,7 @@ public class CookiesManager(
     public async Task<TenantCookieSettings> GetLifeTimeAsync()
     {
         var tenantId = tenantManager.GetCurrentTenantId();
-        return (await tenantCookieSettingsHelper.GetForTenantAsync(tenantId));
+        return await tenantCookieSettingsHelper.GetForTenantAsync(tenantId);
     }
 
     public async Task ResetUserCookieAsync(Guid? userId = null, bool keepMeAuthenticated = true)
@@ -250,7 +250,7 @@ public class CookiesManager(
         await dbLoginEventsManager.LogOutAllActiveConnectionsForTenantAsync(tenant.Id);
     }
 
-    public async Task<string> AuthenticateMeAndSetCookiesAsync(Guid userId, MessageAction action = MessageAction.LoginSuccess, bool session = false)
+    public async Task<string> AuthenticateMeAndSetCookiesAsync(Guid userId, MessageAction action = MessageAction.LoginSuccess, bool session = false, string initiator = null, params string[] description)
     {
         var isSuccess = true;
         var cookies = string.Empty;
@@ -276,17 +276,17 @@ public class CookiesManager(
 
         async Task<int> FuncLoginEvent()
         {
-            return await ipSecurity.VerifyAsync() ? await GetLoginEventIdAsync(action) : 0;
+            return await ipSecurity.VerifyAsync() ? await GetLoginEventIdAsync(action, initiator, description) : 0;
         }
     }
 
-    private async Task<int> GetLoginEventIdAsync(MessageAction action)
+    private async Task<int> GetLoginEventIdAsync(MessageAction action, string initiator, params string[] description)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         var userId = securityContext.CurrentAccount.ID;
         var data = new MessageUserData(tenantId, userId);
 
-        return await messageService.SendLoginMessageAsync(data, action);
+        return await messageService.SendLoginMessageAsync(data, action, initiator, description);
     }
 
     public string GetAscCookiesName()
@@ -298,7 +298,12 @@ public class CookiesManager(
     {
         return GetCookiesName(CookiesType.ConfirmKey);
     }
-    
+
+    public static string GetAnonymousSessionKeyCookiesName()
+    {
+        return GetCookiesName(CookiesType.AnonymousSessionKey);
+    }
+
     private string GetFullCookiesName(CookiesType type, string itemId = null)
     {
         var name = GetCookiesName(type);
@@ -311,7 +316,7 @@ public class CookiesManager(
         return name;
     }
 
-    private string GetCookiesName(CookiesType type)
+    private static string GetCookiesName(CookiesType type)
     {
         var result = type switch
         {
@@ -332,11 +337,11 @@ public class CookiesManager(
 
         try
         {
-            if ( request.Headers.TryGetValue(HeaderNames.Origin, out var origin))
+            if (request.Headers.TryGetValue(HeaderNames.Origin, out var origin))
             {
                 var originUri = new Uri(origin);
                 var baseDomain = coreBaseSettings.Basedomain;
-                
+
                 if (!string.IsNullOrEmpty(baseDomain) && urlRewriter.Host != originUri.Host && originUri.Host.EndsWith(baseDomain))
                 {
                     return true;

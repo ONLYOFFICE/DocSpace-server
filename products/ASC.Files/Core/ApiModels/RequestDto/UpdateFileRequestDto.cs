@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,35 +27,36 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Parameters for updating a file
+/// The parameters for updating a file.
 /// </summary>
 public class UpdateFile
 {
     /// <summary>
-    /// File title
+    /// The file title to update.
     /// </summary>
+    [StringLength(165)]
     public string Title { get; set; }
 
     /// <summary>
-    /// Number of the latest file version
+    /// The number of the latest file version.
     /// </summary>
     public int LastVersion { get; set; }
 }
 
 /// <summary>
-/// Request parameters for updating a file
+/// The request parameters for updating a file.
 /// </summary>
 public class UpdateFileRequestDto<T>
 {
     /// <summary>
-    /// File ID
+    /// The file ID to update.
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
+    public required T FileId { get; set; }
 
     /// <summary>
-    /// File
+    /// The parameters for updating a file.
     /// </summary>
     [FromBody]
-    public UpdateFile File { get; set; }
+    public required UpdateFile File { get; set; }
 }

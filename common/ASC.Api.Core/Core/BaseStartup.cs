@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,13 +25,15 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using System.Diagnostics;
+
 using ASC.Api.Core.Cors;
 using ASC.Api.Core.Cors.Enums;
 using ASC.Api.Core.Cors.Middlewares;
-using ASC.Common.Mapping;
 using ASC.MessagingSystem;
+
 using Flurl.Util;
-using IPNetwork = Microsoft.AspNetCore.HttpOverrides.IPNetwork;
+
+using IPNetwork = System.Net.IPNetwork;
 
 namespace ASC.Api.Core;
 
@@ -44,9 +46,7 @@ public abstract class BaseStartup
     private readonly string _corsOrigin;
     private static readonly JsonSerializerOptions _serializerOptions = new() { PropertyNameCaseInsensitive = true };
 
-    protected bool AddAndUseSession { get; }
-
-    protected DIHelper DIHelper { get; }
+    private protected DIHelper DIHelper { get; }
 
     protected bool OpenApiEnabled { get; init; }
 
@@ -70,7 +70,7 @@ public abstract class BaseStartup
         {
             AppContext.SetSwitch("System.Net.Security.UseManagedNtlm", true);
         }
-        
+
         services.AddCustomHealthCheck(_configuration);
         services.AddHttpContextAccessor();
         services.AddMemoryCache();
@@ -94,7 +94,7 @@ public abstract class BaseStartup
         {
             options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
             options.ForwardLimit = null;
-            options.KnownNetworks.Clear();
+            options.KnownIPNetworks.Clear();
             options.KnownProxies.Clear();
 
             var knownProxies = _configuration.GetSection("core:hosting:forwardedHeadersOptions:knownProxies").Get<List<String>>();
@@ -123,7 +123,7 @@ public abstract class BaseStartup
                     var prefix = IPAddress.Parse(knownNetwork.Split("/")[0]);
                     var prefixLength = Convert.ToInt32(knownNetwork.Split("/")[1]);
 
-                    options.KnownNetworks.Add(new IPNetwork(prefix, prefixLength));
+                    options.KnownIPNetworks.Add(new IPNetwork(prefix, prefixLength));
                 }
             }
         });
@@ -322,6 +322,24 @@ public abstract class BaseStartup
                 return RateLimitPartition.Get(partitionKey, LimitterFactory);
             });
 
+            options.AddPolicy(RateLimiterPolicy.PaymentsApi, httpContext =>
+            {
+                var userId = httpContext?.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value ??
+                             httpContext?.Connection.RemoteIpAddress.ToInvariantString();
+
+                var permitLimit = 10;
+                var path = httpContext?.Request.Path.ToString();
+                var partitionKey = $"{RateLimiterPolicy.PaymentsApi}_{userId}|{path}";
+                var remoteIpAddress = httpContext?.Connection.RemoteIpAddress;
+
+                if (EnableNoLimiter(remoteIpAddress))
+                {
+                    return RateLimitPartition.GetNoLimiter("no_limiter");
+                }
+
+                return RedisRateLimitPartition.GetSlidingWindowRateLimiter(partitionKey, _ => new RedisSlidingWindowRateLimiterOptions { PermitLimit = permitLimit, Window = TimeSpan.FromMinutes(1), ConnectionMultiplexerFactory = () => connectionMultiplexer });
+            });
+
             options.OnRejected = (context, ct) => RateLimitMetadata.OnRejected(context.HttpContext, context.Lease, ct);
         });
 
@@ -340,26 +358,15 @@ public abstract class BaseStartup
             .AddBaseDbContextPool<InstanceRegistrationContext>()
             .AddBaseDbContextPool<IntegrationEventLogContext>()
             .AddBaseDbContextPool<MessagesContext>()
-            .AddBaseDbContextPool<WebhooksDbContext>();
-
-        if (AddAndUseSession)
-        {
-            services.AddSession();
-        }
+            .AddBaseDbContextPool<WebhooksDbContext>()
+            .AddBaseDbContextPool<ApiKeysDbContext>();
 
         DIHelper.Configure(services);
 
-        Action<JsonOptions> jsonOptions = options =>
-        {
-            options.JsonSerializerOptions.WriteIndented = false;
-            options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-            options.JsonSerializerOptions.NumberHandling = JsonNumberHandling.AllowReadingFromString;
-        };
+        services.ConfigureOptions<ConfigureJsonOptions>();
 
-        services.AddControllers().AddJsonOptions(jsonOptions);
+        services.AddControllers();
 
-        services.AddSingleton(jsonOptions);
-        
         DIHelper.Scan();
 
         if (!string.IsNullOrEmpty(_corsOrigin))
@@ -393,10 +400,12 @@ public abstract class BaseStartup
 
 
         services.AddHybridCache(connectionMultiplexer)
+            .AddMemoryCache(connectionMultiplexer)
             .AddEventBus(_configuration)
             .AddDistributedTaskQueue()
             .AddCacheNotify(_configuration)
-            .AddDistributedLock(_configuration);
+            .AddDistributedLock(_configuration)
+            .AddHeartBeat(_configuration);
 
         services.RegisterFeature();
 
@@ -437,7 +446,7 @@ public abstract class BaseStartup
             .AddScheme<AuthenticationSchemeOptions, CookieAuthHandler>(CookieAuthenticationDefaults.AuthenticationScheme, _ => { })
             .AddScheme<AuthenticationSchemeOptions, BasicAuthHandler>(BasicAuthScheme, _ => { })
             .AddScheme<AuthenticationSchemeOptions, ConfirmAuthHandler>("confirm", _ => { })
-            .AddPolicyScheme(MultiAuthSchemes, JwtBearerDefaults.AuthenticationScheme, options =>
+            .AddPolicyScheme(MultiAuthSchemes, MultiAuthSchemes, options =>
             {
                 options.ForwardDefaultSelector = context =>
                 {
@@ -462,43 +471,39 @@ public abstract class BaseStartup
                         {
                             return JwtBearerDefaults.AuthenticationScheme;
                         }
+
+                        if (token.StartsWith("sk-"))
+                        {
+                            return ApiKeyBearerDefaults.AuthenticationScheme;
+                        }
                     }
 
                     return CookieAuthenticationDefaults.AuthenticationScheme;
                 };
             });
 
-        services.AddJwtBearerAuthentication();
-
-        services.AddAutoMapper(GetAutoMapperProfileAssemblies());
+        services.AddApiKeyBearerAuthentication()
+                .AddJwtBearerAuthentication();
 
         services.AddBillingHttpClient();
+        services.AddAccountingHttpClient();
 
-        services.AddSingleton(Channel.CreateUnbounded<NotifyRequest>());
-        services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Reader);
-        services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Writer);
-        services.AddHostedService<NotifySenderService>();
+        services.ConfigureNotificationServices();
 
         services.AddSingleton(Channel.CreateUnbounded<SocketData>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Writer);
         services.AddHostedService<SocketService>();
-        
+
         services.RegisterQueue<ResizeWorkerItem>(2);
 
         services
             .AddStartupTask<WarmupServicesStartupTask>()
             .AddStartupTask<WarmupProtobufStartupTask>()
             .AddStartupTask<WarmupBaseDbContextStartupTask>()
-            .AddStartupTask<WarmupMappingStartupTask>()
             .TryAddSingleton(services);
-        
-        services.AddTransient<DistributedTaskProgress>();
-    }
 
-    public static IEnumerable<Assembly> GetAutoMapperProfileAssemblies()
-    {
-        return AppDomain.CurrentDomain.GetAssemblies().Where(x => x.GetName().Name.StartsWith("ASC."));
+        services.AddTransient<DistributedTaskProgress>();
     }
 
     public virtual void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -526,20 +531,15 @@ public abstract class BaseStartup
             await next(context);
         });
 
+        app.UseSynchronizationContextMiddleware();
+
+        app.UseTenantMiddleware();
+
         if (!string.IsNullOrEmpty(_corsOrigin))
         {
             app.UseDynamicCorsMiddleware(CorsPoliciesEnums.DynamicCorsPolicyName);
         }
 
-        if (AddAndUseSession)
-        {
-            app.UseSession();
-        }
-
-        app.UseSynchronizationContextMiddleware();
-
-        app.UseTenantMiddleware();
-        
         app.UseAuthentication();
 
         // TODO: if some client requests very slow, this line will need to remove
@@ -566,9 +566,17 @@ public abstract class BaseStartup
         {
             endpoints.MapCustomAsync();
 
-            endpoints.MapHealthChecks("/health", new HealthCheckOptions { Predicate = _ => true, ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse }).ShortCircuit();
+            endpoints.MapHealthChecks("/health", new HealthCheckOptions
+            {
+                Predicate = _ => true,
+                ResponseWriter = DefaultHealthChecksResponseWriter
+            }).ShortCircuit();
 
-            endpoints.MapHealthChecks("/ready", new HealthCheckOptions { Predicate = r => r.Name.Contains("services") });
+            endpoints.MapHealthChecks("/ready", new HealthCheckOptions
+            {
+                Predicate = r => r.Name.Contains("services"),
+                ResponseWriter = DefaultHealthChecksResponseWriter
+            });
 
             endpoints.MapHealthChecks("/liveness", new HealthCheckOptions { Predicate = r => r.Name.Contains("self") });
         });
@@ -581,6 +589,26 @@ public abstract class BaseStartup
                 await context.Response.WriteAsync($"{Environment.MachineName} running {CustomHealthCheck.Running}");
             });
         });
+    }
+
+    private async Task DefaultHealthChecksResponseWriter(HttpContext httpContext, HealthReport healthReport)
+    {
+        var logger = httpContext.RequestServices.GetRequiredService<ILoggerProvider>().CreateLogger("ASC.Api.HealthChecks");
+
+        if (healthReport.Status != HealthStatus.Healthy)
+        {
+            logger.ErrorHealthCheckFailed(healthReport.Status.ToString(), healthReport.TotalDuration.TotalMilliseconds);
+
+            foreach (var entry in healthReport.Entries.Where(e => e.Value.Status != HealthStatus.Healthy))
+            {
+                logger.ErrorHealthCheckEntry(entry.Key,
+                    entry.Value.Status.ToString(),
+                    entry.Value.Duration.TotalMilliseconds,
+                    entry.Value.Description);
+            }
+        }
+
+        await UIResponseWriter.WriteHealthCheckUIResponse(httpContext, healthReport);
     }
 
     public void ConfigureContainer(ContainerBuilder builder)

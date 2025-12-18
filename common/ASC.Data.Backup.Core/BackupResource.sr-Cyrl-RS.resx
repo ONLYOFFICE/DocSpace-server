@@ -126,4 +126,37 @@
   <data name="LargeBackup" xml:space="preserve">
     <value>Резервна копија је већа него целокупна величина портала</value>
   </data>
+  <data name="BackupException" xml:space="preserve">
+    <value>Дошло је до грешке приликом креирања резервне копије. Покушајте поново или контактирајте подршку.</value>
+  </data>
+  <data name="BackupInvalid" xml:space="preserve">
+    <value>Фајл резервне копије није важећи.</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>Дошло је до грешке приликом враћања резервне копије. Покушајте поново или контактирајте подршку.</value>
+  </data>
+  <data name="AutoBackup" xml:space="preserve">
+    <value>Аутоматка резервна копија</value>
+  </data>
+  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
+    <value>Custom cloud</value>
+  </data>
+  <data name="BackupStorageTypeDataStore" xml:space="preserve">
+    <value>Привремено складиште</value>
+  </data>
+  <data name="BackupStorageTypeDocuments" xml:space="preserve">
+    <value>Соба за резервне копије</value>
+  </data>
+  <data name="BackupStorageTypeLocal" xml:space="preserve">
+    <value>Локална датотека</value>
+  </data>
+  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
+    <value>Складиште треће стране</value>
+  </data>
+  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
+    <value>Ресурс треће стране</value>
+  </data>
+  <data name="BackupMissingFilesWarning" xml:space="preserve">
+    <value>Некe датотеке нису укључене у резервну копију. За више детаља проверите {0}</value>
+  </data>
 </root>

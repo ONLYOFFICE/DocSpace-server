@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,20 +26,23 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
+/// <summary>
+/// The custom color themes settings.
+/// </summary>
 public class CustomColorThemesSettingsDto
 {
     /// <summary>
-    /// Themes
+    /// The list of the custom color themes.
     /// </summary>
     public IEnumerable<CustomColorThemesSettingsItem> Themes { get; set; }
 
     /// <summary>
-    /// Selected
+    /// Specifies whether the custom color theme is selected.
     /// </summary>
     public int Selected { get; set; }
 
     /// <summary>
-    /// Limit
+    /// The maximum number of the custom color themes.
     /// </summary>
     public int Limit { get; set; }
 

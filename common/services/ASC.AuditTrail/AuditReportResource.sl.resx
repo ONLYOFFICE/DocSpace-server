@@ -91,6 +91,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Barva teme spremenjena</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Kontakti</value>
+  </data>
   <data name="CopyActionType" xml:space="preserve">
     <value>Kopiraj</value>
   </data>
@@ -114,9 +117,6 @@
   </data>
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Nastavitve prepisovanja posodobljene</value>
-  </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>Dokumenti</value>
   </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Nastavitve</value>
@@ -229,9 +229,6 @@
   <data name="FollowActionType" xml:space="preserve">
     <value>Sledi</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>Splošen</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Nastavitve pozdrava posodobljene</value>
   </data>
@@ -240,9 +237,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>Skupina izbrisana: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>Skupine</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>Skupina posodobljena: {0}</value>
@@ -308,7 +302,7 @@
     <value>Uspešen vpis</value>
   </data>
   <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Uspešen vpis preko socialnega računa</value>
+    <value>Uspešen vpis preko socialnega računa: {0}</value>
   </data>
   <data name="LoginSuccessViaApi" xml:space="preserve">
     <value>Uspešen vpis preko API</value>
@@ -331,9 +325,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>Premakni</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>Drugi</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>Lastnik spremenjen: {0}</value>
   </data>
@@ -351,9 +342,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>Nastavitve moči gesla posodobljene</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>Osebe</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>Platforma</value>
@@ -388,9 +376,6 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Seznam izdelkov posodobljen</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>Izdelki</value>
-  </data>
   <data name="SendActionType" xml:space="preserve">
     <value>Pošlji</value>
   </data>
@@ -403,7 +388,7 @@
   <data name="SessionStarted" xml:space="preserve">
     <value>Seja začeta</value>
   </data>
-  <data name="SettingsProduct" xml:space="preserve">
+  <data name="SettingsModule" xml:space="preserve">
     <value>Nastavitve</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
@@ -501,9 +486,6 @@
   </data>
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>Uporabniki [{0}]. Poslana navodila za spremembo gesla</value>
-  </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>Uporabniki</value>
   </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>Uporabniki [{0}]. Aktivacijska navodila poslana</value>
@@ -676,7 +658,7 @@
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Prerazporeditve</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>Začni varnostno kopiranje</value>
   </data>
   <data name="StartStorageDecryption" xml:space="preserve">
@@ -808,9 +790,6 @@
   <data name="RoomInviteResend" xml:space="preserve">
     <value>Ponovno poslana vabila: {0}</value>
   </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
-  </data>
   <data name="ChangeClientActivation" xml:space="preserve">
     <value>Aktivacija odjemalca {0} je spremenjena</value>
   </data>
@@ -870,5 +849,203 @@
   </data>
   <data name="UpdateClient" xml:space="preserve">
     <value>Odjemalec {0} posodobljen</value>
+  </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Nastavitve dostopa do orodij za razvijalce so spremenjene</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>Datoteke [{0}]. Izbrisana različica: {1}</value>
+  </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Uporabniki [{0}]. V celoti izpolnjen obrazec: {1}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Uporabniki [{0}]. Izpolnjen del obrazca: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Uporabniki [{0}]. Začeto izpolnjevanje: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Uporabniki [{0}]. Obrazec ustavljen: {1}</value>
+  </data>
+  <data name="WebhookCreated" xml:space="preserve">
+    <value>Webhook ustvarjen: {0}</value>
+  </data>
+  <data name="WebhookDeleted" xml:space="preserve">
+    <value>Webhook izbrisan: {0}</value>
+  </data>
+  <data name="WebhookUpdated" xml:space="preserve">
+    <value>Webhook posodobljen: {0}</value>
+  </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>Datoteka: {0}. Filter po meri onemogočen</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>Datoteka: {0}. Filter po meri je omogočen</value>
+  </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Ustvarjen uporabniški ključ API: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Izbrisan uporabniški ključ API: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Uporabniški ključ API posodobljen: {0}</value>
+  </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Povezava za aktivacijo je bila aktivirana</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Operacija stranke izvedena</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Poročilo o poslovanju stranke preneseno</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Naročnina stranke posodobljena: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Denarnica stranke napolnjena: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Nastavitve polnjenja denarnice stranke posodobljene</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>Preverjanje LDAP je odklopljeno</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>Preverjanje LDAP je omogočeno</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>Sinhronizacija LDAP je končana</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Lokacija</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Nastavitve vidnosti promocijskih pasic so bile spremenjene</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Nastavitve storitev, omogočenih za denarnico strank, so bile posodobljene</value>
+  </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Uspešen vpis preko socialnega računa</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>Agentu je bil dodan MCP strežnik {0}</value>
+  </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>Agent ustvarjen</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>Agent izbrisan</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>Agent preimenovan: {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>Agenti</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>AI ponudnik ustvarjen: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>AI ponudnik izbrisan: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>AI ponudnik posodobljen: {0}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>AI agenti [{0}]. Nastavite kvoto shranjevanja po meri za AI agente: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>AI agenti  [{0}]. Nastavite privzeto kvoto shranjevanja za AI agente : {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>AI agenti  [{0}]. Onemogočite kvoto shranjevanja za AI agente</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>Izbrisan MCP strežnik {0} od agenta</value>
+  </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Datoteke [{0}]. Zunanja povezava ustvarjena: {1}. Vloga: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Datoteke [{0}]. Zunanja povezava izbrisana: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Datoteke [{0}]. Zunanja povezava posodobljena: {1}. Vloga: {2}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Datoteka označena kot Priljubljena: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Datoteka odstranjena iz Priljubljenih: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Datoteka odstranjena iz ”Deljeno z mano”: {0}</value>
+  </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Datoteke [{0}]. Dostop posodobljen za {1}. Vloga: {2}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Mapa prenesena: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Mape [{0}]. Zunanja povezava ustvarjena: {1}. Vloga: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Mape [{0}]. Zunanja povezava izbrisana: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Mape [{0}]. Zunanja povezava posodobljena: {1}. Vloga: {2}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Mapa odstranjena iz “Deljeno z mano”: {0}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Mape [{0}]. Dostop posodobljen za {1}. Vloga: {2}</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Uspešna prijava z OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Uspešna prijava z uporabniškim imenom in geslom</value>
+  </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Nastavitev privzete kvote shranjevanja za AI agente: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Onemogočena privzeta kvota shranjevanja za AI agente</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>Nastavitve vektorizacije so bile ponastavljene</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>Nastavitve spletnega iskanja so bile ponastavljene</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Zunanja povezava preklicana: {1}</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>MCP strežnik ustvarjen: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>MCP strežnik izbrisan: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>MCP strežnik onemogočen: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>MCP strežnik omogočen: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>MCP strežnik posodobljen: {0}</value>
+  </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>Nastavitve vektorizacije so konfigurirane. Ponudnik: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>Nastavitve spletnega iskanja so konfigurirane. Iskalnik: {0}</value>
   </data>
 </root>

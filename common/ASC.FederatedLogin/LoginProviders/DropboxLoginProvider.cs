@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,15 +35,10 @@ public class DropboxLoginProvider : Consumer, IOAuthProvider
     public string RedirectUri => this["dropboxRedirectUrl"];
     public string ClientID => this["dropboxClientId"];
     public string ClientSecret => this["dropboxClientSecret"];
-    public bool IsEnabled
-    {
-        get
-        {
-            return !string.IsNullOrEmpty(ClientID) &&
-                   !string.IsNullOrEmpty(ClientSecret) &&
-                   !string.IsNullOrEmpty(RedirectUri);
-        }
-    }
+    public bool IsEnabled =>
+        !string.IsNullOrEmpty(ClientID) &&
+        !string.IsNullOrEmpty(ClientSecret) &&
+        !string.IsNullOrEmpty(RedirectUri);
 
     public DropboxLoginProvider() { }
 
@@ -54,8 +49,8 @@ public class DropboxLoginProvider : Consumer, IOAuthProvider
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
-        string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
+        string name, int order, bool paid, Dictionary<string, string> props, Dictionary<string, string> additional = null)
+        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, paid, props, additional)
     {
     }
 }

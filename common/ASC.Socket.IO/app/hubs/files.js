@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -111,21 +111,42 @@ module.exports = (io) => {
       changeSubscription(roomParts, individual, unsubscribe);
     });
 
+    socket.on("subscribeInSpaces", ({ roomParts, individual }) => {
+      changeSubscription(roomParts, individual, subscribeInSpaces);
+    });
+
+    socket.on("unsubscribeInSpaces", ({ roomParts, individual }) => {
+      changeSubscription(roomParts, individual, unsubscribeInSpaces);
+    });
+
     socket.on("refresh-folder", (folderId) => {
       const room = getRoom(`DIR-${folderId}`);
       logger.info(`refresh folder ${folderId} in room ${room}`);
       socket.to(room).emit("refresh-folder", folderId);
     });
 
-    socket.on("restore-backup", () => {
-      const room = getRoom("restore");
+    socket.on("restore-backup", (data) => {
       const sess = socket.handshake.session;
       const tenant = sess?.portal?.tenantId || "unknown";
       const user = sess?.user?.id || "unknown";
       const sessId = sess?.id;
+      const room = data.dump ? `restore` : getRoom("restore");
 
       logger.info(`WS: restore backup in room ${room} session=[sessionId='sess:${sessId}' tenantId=${tenant}|${tenantId()} userId='${user}'|'${userId()}']`);
+
       socket.to(room).emit("restore-backup");
+    });
+
+    socket.on("storage-encryption", (data) => {
+      const sess = socket.handshake.session;
+      const tenant = sess?.portal?.tenantId || "unknown";
+      const user = sess?.user?.id || "unknown";
+      const sessId = sess?.id;
+      const room = `storage-encryption`;
+
+      logger.info(`WS: storage encryption in room ${room} session=[sessionId='sess:${sessId}' tenantId=${tenant}|${tenantId()} userId='${user}'|'${userId()}']`);
+
+      socket.to(room).emit("storage-encryption");
     });
 
     function changeSubscription(roomParts, individual, changeFunc) {
@@ -190,6 +211,42 @@ module.exports = (io) => {
         const room = getRoom(roomParts);
         logger.info(`client ${socket.id} leave room ${room}`);
         socket.leave(room);
+      }
+    }
+
+    function subscribeInSpaces(roomParts) {
+      if (!roomParts) return;
+
+      if (Array.isArray(roomParts)) 
+      {
+        if(!isAdmin() && !isOwner())
+        {
+          roomParts = roomParts.filter(rp=> rp != "backup");
+        }
+        logger.info(`client ${socket.id} join rooms [${roomParts.join(",")}]`);
+        socket.join(roomParts);
+      } 
+      else 
+      {
+        if(roomParts == "backup" && !isAdmin() && !isOwner())
+        {
+            return;
+        }
+        logger.info(`client ${socket.id} join room ${roomParts}`);
+        socket.join(roomParts);
+      }
+    }
+
+    function unsubscribeInSpaces(roomParts) {
+      if (!roomParts) return;
+
+      if (Array.isArray(roomParts))
+      {
+        logger.info(`client ${socket.id} leave rooms [${roomParts.join(",")}]`);
+        socket.leave(roomParts);
+      } else {
+        logger.info(`client ${socket.id} leave room ${roomParts}`);
+        socket.leave(roomParts);
       }
     }
 
@@ -275,29 +332,29 @@ module.exports = (io) => {
     }
   }
 
-  function deleteFile({ id, room, userIds } = {}) {
+  function deleteFile({ id, room, data, userIds } = {}) {
     logger.info(`delete file ${id} in room ${room}`);
 
     if(userIds)
     {
-      userIds.forEach(userId => modifyFolder(`${room}-${userId}`, "delete", id, "file"));
+      userIds.forEach(userId => modifyFolder(`${room}-${userId}`, "delete", id, "file", data));
     }
     else
     {
-      modifyFolder(room, "delete", id, "file");
+      modifyFolder(room, "delete", id, "file", data);
     }
   }
 
-  function deleteFolder({ id, room, userIds } = {}) {
+  function deleteFolder({ id, room, data, userIds } = {}) {
     logger.info(`delete folder ${id} in room ${room}`);
     
     if(userIds)
     {
-      userIds.forEach(userId => modifyFolder(`${room}-${userId}`, "delete", id, "folder"));
+      userIds.forEach(userId => modifyFolder(`${room}-${userId}`, "delete", id, "folder", data));
     }
     else
     {
-      modifyFolder(room, "delete", id, "folder");
+      modifyFolder(room, "delete", id, "folder", data);
     }
   }
 
@@ -362,11 +419,27 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:update-history", { id, type });
   }
 
-  function logoutSession({ room, loginEventId } = {}) {
-    logger.info(`logout user ${room} session ${loginEventId}`);
-    filesIO.to(room).emit("s:logout-session", loginEventId);
+  function logoutSession({ room, loginEventId, redirectUrl } = {}) {
+    logger.info(`logout user ${room} session ${loginEventId}, redirectUrl ${redirectUrl}`);
+    filesIO.to(room).emit("s:logout-session", { loginEventId, redirectUrl });
   }
 
+  function backupProgress({ tenantId, dump, percentage } = {}) 
+  {
+    var room;
+    
+    if(dump)
+    {
+      room = `backup`;
+    }
+    else
+    {
+      room = `${tenantId}-backup`;
+    }
+    
+    filesIO.to(room).emit("s:backup-progress", {progress: percentage});
+  }
+  
   function changeMyType({ tenantId, user, admin, hasPersonalFolder } = {}) {
     var room = `${tenantId}-change-my-type-${user.id}`;
     filesIO.to(room).emit("s:change-my-type",  {id: user.id, data: user, admin: admin, hasPersonalFolder: hasPersonalFolder});
@@ -417,25 +490,94 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:delete-guest", guestId);
   }
 
-  function backupProgress({ tenantId, percentage } = {}) {
-    filesIO.to(`${tenantId}-backup`).emit("s:backup-progress", {progress: percentage});
+ function connectTelegram({ tenantId, userId } = {}) {
+    var room = `${tenantId}-telegram`;
+    filesIO.to(room).emit("s:telegram", userId);
+  }
+  
+  function updateTelegram({ tenantId, userId, username } = {}) {
+    var room = `${tenantId}-telegram-${userId}`;
+    filesIO.to(room).emit("s:update-telegram", username);
   }
 
-  function restoreProgress({ tenantId, percentage } = {}) {
-    filesIO.to(`${tenantId}-restore`).emit("s:restore-progress", {progress: percentage});
+  function restoreProgress({ tenantId, dump, percentage } = {})
+  {
+    if(dump)
+      {
+        var room = `restore`;
+      }
+      else
+      {
+        var room = `${tenantId}-restore`;
+      }
+    filesIO.to(room).emit("s:restore-progress", {progress: percentage});
   }
 
-  function endBackup({ tenantId, result } = {}) {
-    filesIO.to(`${tenantId}-backup`).emit("s:backup-progress", result);
+  function endBackup({ tenantId, dump, result } = {})
+  {
+
+    if(dump)
+    {
+      var room = `backup`;
+    }
+    else
+    {
+      var room = `${tenantId}-backup`;
+    }
+    
+    filesIO.to(room).emit("s:backup-progress", result);
   }
 
-  function endRestore({ tenantId, result } = {}) {
-    filesIO.to(`${tenantId}-restore`).emit("s:restore-progress", result);
+  function endRestore({ tenantId, dump, result } = {}) {
+    if(dump)
+      {
+        var room = `restore`;
+      }
+      else
+      {
+        var room = `${tenantId}-restore`;
+      }
+    filesIO.to(room).emit("s:restore-progress", result);
   }
 
   function encryptionProgress({ room, percentage, error } = {}) {
     logger.info(`${room} progress ${percentage}, error ${error}`);
     filesIO.to(room).emit("s:encryption-progress", { percentage, error });
+  }
+
+  function selfRestrictionForFile({ id, room, data } = {}) {
+    logger.info(`self restriction for file ${id} in room ${room}`);
+    filesIO.to(room).emit("s:self-restriction-file", { id, data });
+  }
+
+  function selfRestrictionForFolder({ id, room, data } = {}) {
+    logger.info(`self restriction for folder ${id} in room ${room}`);
+    filesIO.to(room).emit("s:self-restriction-folder", { id, data });
+  }
+
+  function commitChatMessage({ room, messageId }) {
+    logger.info(`commit chat message ${messageId} in room ${room}`);
+    filesIO.to(room).emit("s:commit-chat-message", { messageId });
+  }
+
+  function updateChat({ room, chatId, chatTitle, userId }) {
+    const userRoom = `${room}-${userId}`;
+    logger.info(`update chat ${chatId} in room ${room}`);
+    filesIO.to(userRoom).emit("s:update-chat", { chatId, chatTitle });
+  }
+
+  function exportChat({ room, resultFile, error }) {
+    filesIO.to(room).emit("s:export-chat", { resultFile, error });
+  }
+
+  function changeAccessRightsForFile({ id, room, data, userId } = {}) {
+    logger.info(`change access rights for file ${id} in room ${room} to user ${userId}`);
+    filesIO.to(`${room}-${userId}`).emit("s:change-access-rights-file", { id, data });
+  }
+
+  function changeAccessRightsForFolder({ id, room, data, userId } = {}) {
+    logger.info(`change access rights for folder ${id} in room ${room} to user ${userId}`);
+    filesIO.to(`${room}-${userId}`).emit("s:change-access-rights-folder", { id, data });
   }
 
   return {
@@ -466,10 +608,19 @@ module.exports = (io) => {
     addGuest,
     updateGuest,
     deleteGuest,
+    connectTelegram,
+    updateTelegram,
     backupProgress,
     restoreProgress,
     endBackup,
     endRestore,
-    encryptionProgress
+    encryptionProgress,
+    selfRestrictionForFile,
+    selfRestrictionForFolder,
+    commitChatMessage,
+    updateChat,
+    exportChat,
+    changeAccessRightsForFile,
+    changeAccessRightsForFolder
   };
 };

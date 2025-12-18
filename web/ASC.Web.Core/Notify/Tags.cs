@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,6 +42,9 @@ public static class Tags
     public const string SettingsLink = "SettingsLink";
     public const string InviteLink = "InviteLink";
     public const string Date = "Date";
+    public const string Device = "Device";
+    public const string Location = "Location";
+    public const string Browser = "Browser";
     public const string IP = "IP";
     public const string AuthorLink = "AuthorLink";
     public const string Activities = "Activities";

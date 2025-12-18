@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,6 +27,9 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 
+/// <summary>
+/// The room type.
+/// </summary>
 public enum RoomType
 {
     [SwaggerEnum(Description = "Form filling room")]
@@ -42,7 +45,10 @@ public enum RoomType
     PublicRoom = 6,
 
     [SwaggerEnum(Description = "Virtual data room")]
-    VirtualDataRoom = 8
+    VirtualDataRoom = 8,
+    
+    [SwaggerEnum(Description = "AI Room")]
+    AiRoom = 9
 }
 
 public static class RoomTypeExtensions
@@ -53,7 +59,7 @@ public static class RoomTypeExtensions
         {
             return null;
         }
-        
+
         return types.Select(x => x switch
         {
             RoomType.FillingFormsRoom => FilterType.FillingFormsRooms,
@@ -61,28 +67,85 @@ public static class RoomTypeExtensions
             RoomType.CustomRoom => FilterType.CustomRooms,
             RoomType.PublicRoom => FilterType.PublicRooms,
             RoomType.VirtualDataRoom => FilterType.VirtualDataRooms,
+            RoomType.AiRoom => FilterType.AiRooms,
             _ => FilterType.CustomRooms
         }).ToHashSet();
     }
 }
 
 /// <summary>
-/// Request parameters for creating a room
+/// The request parameters for creating a room.
 /// </summary>
-public class CreateRoomRequestDto : UpdateRoomRequest
+public class CreateRoomRequestDto
 {
     /// <summary>
-    /// Room type
+    /// The room name.
     /// </summary>
-    public RoomType RoomType { get; set; }
+    [StringLength(170)]
+    public required string Title { get; set; }
 
     /// <summary>
-    /// Private
+    /// The room quota.
+    /// </summary>
+    public long? Quota { get; set; }
+
+    /// <summary>
+    /// Specifies whether to create a room with indexing.
+    /// </summary>
+    public bool? Indexing { get; set; }
+
+    /// <summary>
+    /// Specifies whether to deny downloads from the room.
+    /// </summary>
+    public bool? DenyDownload { get; set; }
+
+    /// <summary>
+    /// The room data lifetime information.
+    /// </summary>
+    public RoomDataLifetimeDto Lifetime { get; set; }
+
+    /// <summary>
+    /// The watermark settings.
+    /// </summary>
+    public WatermarkRequestDto Watermark { get; set; }
+
+    /// <summary>
+    /// The room logo.
+    /// </summary>
+    public LogoRequest Logo { get; set; }
+
+    /// <summary>
+    /// The list of tags.
+    /// </summary>
+    public IEnumerable<string> Tags { get; set; }
+
+    /// <summary>
+    /// The room color.
+    /// </summary>
+    [StringLength(6)]
+    public string Color { get; set; }
+
+    /// <summary>
+    /// The room cover.
+    /// </summary>
+    [StringLength(50)]
+    public string Cover { get; set; }
+
+    /// <summary>
+    /// The room type.
+    /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter<RoomType>))]
+    public required RoomType RoomType { get; set; }
+
+    /// <summary>
+    /// Specifies whether the room to be created is private or not.
     /// </summary>
     public bool Private { get; set; }
 
     /// <summary>
-    /// Collection of sharing parameters
+    /// The collection of sharing parameters.
     /// </summary>
     public IEnumerable<FileShareParams> Share { get; set; }
+    
+    public ChatSettings ChatSettings { get; set; }
 }

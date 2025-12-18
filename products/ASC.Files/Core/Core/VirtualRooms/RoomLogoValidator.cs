@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -46,7 +46,7 @@ public class RoomLogoValidator(IDaoFactory daoFactory, FileSecurity fileSecurity
         }
 
         var id = path.Substring(0, path.LastIndexOf(RoomLogoManager.LogosPathSplitter, StringComparison.Ordinal));
-        
+
         if (int.TryParse(id, out var internalId))
         {
             return await CheckRoomAccess(internalId);
@@ -60,12 +60,12 @@ public class RoomLogoValidator(IDaoFactory daoFactory, FileSecurity fileSecurity
 
         return await CheckRoomAccess(id);
     }
-    
+
     private async Task<bool> CheckRoomAccess<T>(T id)
     {
         var folderDao = daoFactory.GetFolderDao<T>();
         var folder = await folderDao.GetFolderAsync(id);
 
-        return DocSpaceHelper.IsRoom(folder.FolderType) && await fileSecurity.CanReadAsync(folder);
+        return folder.IsRoom && await fileSecurity.CanReadAsync(folder);
     }
 }

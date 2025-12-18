@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,32 +26,31 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
-
 /// <summary>
-/// 
+/// The request parameters for the authentication providers.
 /// </summary>
 public class AuthProvidersRequestDto
 {
     /// <summary>
-    /// Specifies whether to return providers that are available for invitation links, i.e. the user can login or register through these providers
+    /// Specifies whether to return providers that are available for invitation links, i.e. the user can login or register through these providers.
     /// </summary>
     [FromQuery(Name = "inviteView")]
-    public bool InviteView {  get; set; }
+    public bool InviteView { get; set; }
 
     /// <summary>
-    /// Specifies whether to return URLs in the format that is used on the Settings page
+    /// Specifies whether to display the provider settings in a pop-up window (true) or redirect them to the desktop application (false).
     /// </summary>
     [FromQuery(Name = "settingsView")]
     public bool SettingsView { get; set; }
 
     /// <summary>
-    /// Method that is called after authorization
+    /// The method that is called after authentication.
     /// </summary>
     [FromQuery(Name = "clientCallback")]
     public string ClientCallback { get; set; }
 
     /// <summary>
-    /// Provider name if the response only from this provider is needed
+    /// The provider name if a response is required only from this provider.
     /// </summary>
     [FromQuery(Name = "fromOnly")]
     public string FromOnly { get; set; }

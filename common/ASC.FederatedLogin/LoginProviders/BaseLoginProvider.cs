@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,39 +24,65 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Api.Core.Extensions;
+
 namespace ASC.FederatedLogin.LoginProviders;
 
 /// <summary>
+/// The identity provider used for authentication.
 /// </summary>
 public enum LoginProvider
 {
+    [SwaggerEnum("Facebook")]
     Facebook,
+
+    [SwaggerEnum("Google")]
     Google,
+
+    [SwaggerEnum("Dropbox")]
     Dropbox,
+
+    [SwaggerEnum("Docusign")]
     Docusign,
+
+    [SwaggerEnum("Box")]
     Box,
+
+    [SwaggerEnum("OneDrive")]
     OneDrive,
+
+    [SwaggerEnum("GosUslugi")]
     GosUslugi,
+
+    [SwaggerEnum("LinkedIn")]
     LinkedIn,
+
+    [SwaggerEnum("MailRu")]
     MailRu,
+
+    [SwaggerEnum("VK")]
     VK,
+
+    [SwaggerEnum("Wordpress")]
     Wordpress,
+
+    [SwaggerEnum("Yahoo")]
     Yahoo,
-    Yandex
+
+    [SwaggerEnum("Yandex")]
+    Yandex,
+    
+    [SwaggerEnum("Github")]
+    Github
 }
 
 public abstract class BaseLoginProvider<T> : Consumer, ILoginProvider where T : Consumer, ILoginProvider, new()
 {
     public T Instance => ConsumerFactory.Get<T>();
-    public virtual bool IsEnabled
-    {
-        get
-        {
-            return !string.IsNullOrEmpty(ClientID) &&
-                   !string.IsNullOrEmpty(ClientSecret) &&
-                   !string.IsNullOrEmpty(RedirectUri);
-        }
-    }
+    public virtual bool IsEnabled =>
+        !string.IsNullOrEmpty(ClientID) &&
+        !string.IsNullOrEmpty(ClientSecret) &&
+        !string.IsNullOrEmpty(RedirectUri);
 
     public abstract string CodeUrl { get; }
     public abstract string AccessTokenUrl { get; }
@@ -65,20 +91,20 @@ public abstract class BaseLoginProvider<T> : Consumer, ILoginProvider where T : 
     public abstract string ClientSecret { get; }
     public virtual string Scopes => string.Empty;
 
-    protected readonly OAuth20TokenHelper _oAuth20TokenHelper;
+    protected readonly IOAuth20TokenHelper _oAuth20TokenHelper;
 
     protected BaseLoginProvider() { }
 
     protected BaseLoginProvider(
-        OAuth20TokenHelper oAuth20TokenHelper,
+        IOAuth20TokenHelper oAuth20TokenHelper,
         TenantManager tenantManager,
         CoreBaseSettings coreBaseSettings,
         CoreSettings coreSettings,
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
-        string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
+        string name, int order, bool paid, Dictionary<string, string> props, Dictionary<string, string> additional = null)
+        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, paid, props, additional)
     {
         _oAuth20TokenHelper = oAuth20TokenHelper;
     }

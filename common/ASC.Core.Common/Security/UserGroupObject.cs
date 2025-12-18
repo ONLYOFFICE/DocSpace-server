@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -44,7 +44,7 @@ public class UserGroupObject : SecurityObject
     protected override IEnumerable<IRole> GetTargetRoles(IRoleProvider roleProvider)
     {
         if (_groupId == Constants.GroupAdmin.ID)
-        { 
+        {
             return [AuthConstants.DocSpaceAdmin];
         }
 
@@ -58,7 +58,7 @@ public class UserGroupObject : SecurityObject
             return [AuthConstants.User];
         }
 
-        return Array.Empty<IRole>();
+        return [];
     }
 
     protected override IRuleData GetRuleData()

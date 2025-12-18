@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,6 +31,7 @@ public class FirstTimeTenantSettings(
     ILogger<FirstTimeTenantSettings> logger,
     TenantManager tenantManager,
     TenantExtra tenantExtra,
+    TenantLogoManager tenantLogoManager,
     SettingsManager settingsManager,
     UserManager userManager,
     SetupInfo setupInfo,
@@ -76,7 +77,7 @@ public class FirstTimeTenantSettings(
                 }
             }
 
-            var currentUser = await userManager.GetUsersAsync((tenantManager.GetCurrentTenant()).OwnerId);
+            var currentUser = await userManager.GetUsersAsync(tenantManager.GetCurrentTenant().OwnerId);
 
             if (!UserManagerWrapper.ValidateEmail(email))
             {
@@ -116,7 +117,7 @@ public class FirstTimeTenantSettings(
 
             await tenantManager.SaveTenantAsync(tenant);
             await cspSettingsHelper.SaveAsync(null);
-            
+
             await studioNotifyService.SendCongratulationsAsync(currentUser);
             await studioNotifyService.SendRegDataAsync(currentUser);
 
@@ -133,9 +134,15 @@ public class FirstTimeTenantSettings(
         {
             throw new Exception(UserControlsCommonResource.LicenseKeyNotFound);
         }
-        catch (BillingNotConfiguredException)
+        catch (BillingNotConfiguredException ex)
         {
+            logger.ErrorWithException(ex);
             throw new Exception(UserControlsCommonResource.LicenseKeyNotCorrect);
+        }
+        catch (BillingLicenseTypeException)
+        {
+            var logoText = await tenantLogoManager.GetLogoTextAsync();
+            throw new Exception(string.Format(UserControlsCommonResource.LicenseTypeNotCorrect, logoText));
         }
         catch (BillingException)
         {
@@ -150,7 +157,7 @@ public class FirstTimeTenantSettings(
 
     public async Task<bool> GetRequestLicense()
     {
-        return await tenantExtra.GetEnableTariffSettings() && 
+        return await tenantExtra.GetEnableTariffSettings() &&
                tenantExtra.Enterprise &&
                !File.Exists(licenseReader.LicensePath);
     }
@@ -199,11 +206,9 @@ public class FirstTimeTenantSettings(
 
     private async Task<string> GetResponseString(HttpClient httpClient, HttpMethod method, string requestUrl, Dictionary<string, string> headers)
     {
-        string responseString = null;
-
         if (string.IsNullOrEmpty(requestUrl))
         {
-            return responseString;
+            return null;
         }
 
         var request = new HttpRequestMessage
@@ -216,7 +221,9 @@ public class FirstTimeTenantSettings(
         {
             request.Headers.Add(header.Key, header.Value);
         }
-
+        
+        string responseString = null;
+        
         try
         {
             using (var response = await httpClient.SendAsync(request))

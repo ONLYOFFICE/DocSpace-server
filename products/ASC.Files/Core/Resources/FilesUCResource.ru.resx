@@ -74,7 +74,7 @@
     <value>Файлы будут сжаты в {0}.zip-файл{1}</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>Документы</value>
+    <value>Мои документы</value>
   </data>
   <data name="PrivacyRoom" xml:space="preserve">
     <value>Приватная комната</value>
@@ -102,5 +102,11 @@
   </data>
   <data name="ReadyFormFolder" xml:space="preserve">
     <value>Готово</value>
+  </data>
+  <data name="RoomTemplates" xml:space="preserve">
+    <value>Шаблоны</value>
+  </data>
+  <data name="AiAgents" xml:space="preserve">
+    <value>ИИ-агенты</value>
   </data>
 </root>

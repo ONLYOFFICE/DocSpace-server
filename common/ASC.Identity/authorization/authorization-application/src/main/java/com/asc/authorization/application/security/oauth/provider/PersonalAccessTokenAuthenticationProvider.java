@@ -34,10 +34,13 @@ import com.asc.authorization.application.security.authentication.TenantAuthority
 import com.asc.authorization.application.security.oauth.authentication.PersonalAccessTokenAuthenticationToken;
 import com.asc.authorization.application.security.oauth.error.AuthenticationError;
 import com.asc.authorization.application.security.oauth.grant.ExtendedAuthorizationGrantType;
+import com.asc.authorization.application.security.oauth.service.AuthorizationLoginEventRegistrationService;
 import com.asc.common.core.domain.value.enums.AuditCode;
-import com.asc.common.service.ports.output.message.publisher.AuditMessagePublisher;
 import com.asc.common.service.transfer.message.AuditMessage;
+import com.asc.common.service.transfer.message.LoginRegisteredEvent;
 import com.asc.common.utilities.HttpUtils;
+import jakarta.servlet.http.HttpServletRequest;
+import java.time.ZonedDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -73,6 +76,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @Component
 @RequiredArgsConstructor
 public class PersonalAccessTokenAuthenticationProvider implements AuthenticationProvider {
+  private static final int LOGIN_REGISTERED_ACTION = 1028;
+
   @Value("${spring.application.name}")
   private String serviceName;
 
@@ -81,9 +86,10 @@ public class PersonalAccessTokenAuthenticationProvider implements Authentication
       "https://datatracker.ietf.org/doc/html/rfc6749#section-5.2";
 
   private final HttpUtils httpUtils;
-  private final AuditMessagePublisher auditMessagePublisher;
   private final OAuth2AuthorizationService authorizationService;
   private final OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator;
+  private final AuthorizationLoginEventRegistrationService
+      authorizationLoginEventRegistrationService;
 
   /**
    * Authenticates the provided personal access token request.
@@ -158,27 +164,9 @@ public class PersonalAccessTokenAuthenticationProvider implements Authentication
       var accessToken = accessToken(authorizationBuilder, generatedAccessToken, tokenContext);
       authorizationService.save(authorizationBuilder.build());
 
-      log.debug("Authentication successful for user: {}", patAuthentication.getUserId());
+      publishAudit(request, patAuthentication, registeredClient.getClientId());
 
-      auditMessagePublisher.publish(
-          AuditMessage.builder()
-              .ip(
-                  httpUtils
-                      .getRequestClientAddress(request)
-                      .map(httpUtils::extractHostFromUrl)
-                      .orElseGet(
-                          () -> httpUtils.extractHostFromUrl(httpUtils.getFirstRequestIP(request))))
-              .initiator(serviceName)
-              .target(registeredClient.getClientId())
-              .browser(httpUtils.getClientBrowser(request))
-              .platform(httpUtils.getClientOS(request))
-              .tenantId(patAuthentication.getTenantId())
-              .userId(patAuthentication.getUserId())
-              .userEmail(patAuthentication.getUserEmail())
-              .userName(patAuthentication.getUserName())
-              .page(httpUtils.getFullURL(request))
-              .action(AuditCode.GENERATE_PERSONAL_ACCESS_TOKEN.getCode())
-              .build());
+      log.debug("Authentication successful for user: {}", patAuthentication.getUserId());
 
       return new OAuth2AccessTokenAuthenticationToken(
           registeredClient, clientPrincipal, accessToken, null);
@@ -191,6 +179,52 @@ public class PersonalAccessTokenAuthenticationProvider implements Authentication
   }
 
   /**
+   * Publishes an audit log for the authentication attempt.
+   *
+   * @param request the {@link HttpServletRequest}.
+   * @param patAuthentication the {@link PersonalAccessTokenAuthenticationToken}.
+   * @param clientId oauth2 clientId.
+   */
+  private void publishAudit(
+      HttpServletRequest request,
+      PersonalAccessTokenAuthenticationToken patAuthentication,
+      String clientId) {
+    var eventDate = ZonedDateTime.now();
+    var clientIP = httpUtils.extractHostFromUrl(httpUtils.getFirstRequestIP(request));
+    var browser = httpUtils.getClientBrowser(request);
+    var platform = httpUtils.getClientOS(request);
+    var fullUrl = httpUtils.getFullURL(request);
+
+    authorizationLoginEventRegistrationService.registerLogin(
+        LoginRegisteredEvent.builder()
+            .login(patAuthentication.getUserEmail())
+            .active(false)
+            .ip(clientIP)
+            .browser(browser)
+            .platform(platform)
+            .date(eventDate)
+            .tenantId(patAuthentication.getTenantId())
+            .userId(patAuthentication.getUserId())
+            .page(fullUrl)
+            .action(LOGIN_REGISTERED_ACTION)
+            .build(),
+        AuditMessage.builder()
+            .ip(clientIP)
+            .initiator(serviceName)
+            .target(clientId)
+            .browser(browser)
+            .platform(platform)
+            .date(eventDate)
+            .tenantId(patAuthentication.getTenantId())
+            .userId(patAuthentication.getUserId())
+            .userEmail(patAuthentication.getUserEmail())
+            .userName(patAuthentication.getUserName())
+            .page(fullUrl)
+            .action(AuditCode.GENERATE_PERSONAL_ACCESS_TOKEN.getCode())
+            .build());
+  }
+
+  /**
    * Checks if this provider supports the given authentication type.
    *
    * @param authentication the {@link Authentication} class to check.
@@ -200,6 +234,13 @@ public class PersonalAccessTokenAuthenticationProvider implements Authentication
     return PersonalAccessTokenAuthenticationToken.class.equals(authentication);
   }
 
+  /**
+   * Extracts and validates the authenticated OAuth2 client from the authentication principal.
+   *
+   * @param authentication the {@link Authentication} object containing the client principal.
+   * @return the authenticated {@link OAuth2ClientAuthenticationToken}.
+   * @throws OAuth2AuthenticationException if the client is not authenticated or invalid.
+   */
   private static OAuth2ClientAuthenticationToken getAuthenticatedClientElseThrowInvalidClient(
       Authentication authentication) {
     OAuth2ClientAuthenticationToken clientPrincipal = null;
@@ -210,6 +251,20 @@ public class PersonalAccessTokenAuthenticationProvider implements Authentication
     throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_CLIENT);
   }
 
+  /**
+   * Creates an OAuth2 access token and associates it with the authorization builder.
+   *
+   * <p>This method constructs an {@link OAuth2AccessToken} from the generated token, attaches
+   * metadata including claims (if available), invalidation status, and token format, then adds it
+   * to the authorization builder.
+   *
+   * @param <T> the type of the generated token, extending {@link OAuth2Token}.
+   * @param builder the {@link OAuth2Authorization.Builder} to attach the token to.
+   * @param token the generated token containing the token value and timestamps.
+   * @param accessTokenContext the {@link OAuth2TokenContext} providing authorized scopes and
+   *     registered client settings.
+   * @return the constructed {@link OAuth2AccessToken}.
+   */
   private static <T extends OAuth2Token> OAuth2AccessToken accessToken(
       OAuth2Authorization.Builder builder, T token, OAuth2TokenContext accessTokenContext) {
     var accessToken =

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -53,6 +53,7 @@ public class SharePointProviderInfo(ILogger<SharePointProviderInfo> logger,
     public bool Private { get; set; }
     public bool HasLogo { get; set; }
     public string Color { get; set; }
+    public string Cover { get; set; }
 
     public Selector Selector => Selectors.SharePoint;
     public ProviderFilter ProviderFilter => ProviderFilter.SharePoint;
@@ -569,6 +570,7 @@ public class SharePointProviderInfo(ILogger<SharePointProviderInfo> logger,
             result.SettingsPrivate = Private;
             result.SettingsHasLogo = HasLogo;
             result.SettingsColor = Color;
+            result.SettingsCover = Cover;
 
             return result;
         }
@@ -593,7 +595,7 @@ public class SharePointProviderInfo(ILogger<SharePointProviderInfo> logger,
         result.FoldersCount = 0;
         result.SettingsPrivate = Private;
         result.SettingsHasLogo = HasLogo;
-        
+
         SetFolderType(result, isRoot);
 
         return result;
@@ -604,7 +606,7 @@ public class SharePointProviderInfo(ILogger<SharePointProviderInfo> logger,
     public string MakeId(string path = "")
     {
         path = path.Replace(SpRootFolderId, "");
-        var p = string.IsNullOrEmpty(path) || path == "/" || path == SpRootFolderId ? "" : ("-" + path.Replace('/', '|'));
+        var p = string.IsNullOrEmpty(path) || path == "/" || path == SpRootFolderId ? "" : "-" + path.Replace('/', '|');
 
         return $"{ID}{p}";
     }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,39 +35,37 @@ public class Settings
 
     public int? Period
     {
-        get => _period ?? 1;
-        set => _period = value;
+        get => field ?? 1;
+        set;
     }
+
     public long? MaxContentLength
     {
-        get => _maxContentLength ?? 100 * 1024 * 1024L;
-        set => _maxContentLength = value;
+        get => field ?? 100 * 1024 * 1024L;
+        set;
     }
+
     public long? MaxFileSize
     {
-        get => _maxFileSize ?? 10 * 1024 * 1024L;
-        set => _maxFileSize = value;
+        get => field ?? 10 * 1024 * 1024L;
+        set;
     }
+
     public int? Threads
     {
-        get => _threads ?? 1;
-        set => _threads = value;
+        get => field ?? 1;
+        set;
     }
+
     public bool? HttpCompression
     {
-        get => _httpCompression ?? true;
-        set => _httpCompression = value;
+        get => field ?? true;
+        set;
     }
 
     public Authentication Authentication { get; set; }
 
     public ApiKey ApiKey { get; set; }
-
-    private int? _period;
-    private long? _maxContentLength;
-    private long? _maxFileSize;
-    private int? _threads;
-    private bool? _httpCompression;
 
     public Settings(ConfigurationExtension configuration)
     {
@@ -86,4 +84,3 @@ public class ApiKey
     public string Id { get; set; }
     public string Value { get; set; }
 }
-

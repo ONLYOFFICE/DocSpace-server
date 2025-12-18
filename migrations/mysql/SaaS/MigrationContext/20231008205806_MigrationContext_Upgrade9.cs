@@ -74,7 +74,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 unique: true);
 
             migrationBuilder.Sql("insert into files_room_settings (room_id, tenant_id, private, has_logo, color) select id, tenant_id, private, has_logo, color from files_folder where folder_type in (15,16,17,18,19,22)");
-            
+
             migrationBuilder.DropColumn(
                 name: "color",
                 table: "files_folder");
@@ -112,7 +112,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 type: "tinyint(1)",
                 nullable: false,
                 defaultValueSql: "0");
-            
+
             migrationBuilder.DropTable(
                 name: "files_order");
 

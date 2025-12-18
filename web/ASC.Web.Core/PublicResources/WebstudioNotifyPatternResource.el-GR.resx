@@ -134,37 +134,37 @@
     <value>${LetterLogoText}. Η διαδικασία κρυπτογράφησης ξεκίνησε</value>
   </data>
   <data name="ActionFileCreated" xml:space="preserve">
-    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; δημιούργησε ένα νέο έγγραφο: &lt;a href={1}&gt;{2}&lt;/a&gt; στο δωμάτιο: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; δημιούργησε ένα νέο έγγραφο: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; στο δωμάτιο: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionNewComment" xml:space="preserve">
-    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; πρόσθεσε ένα νέο σχόλιο στην έκδοση του εγγράφου: &lt;a href={1}&gt;{2}&lt;/a&gt; στο δωμάτιο: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; πρόσθεσε ένα νέο σχόλιο στην έκδοση του εγγράφου: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; στο δωμάτιο: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileUploaded" xml:space="preserve">
-    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; μεταφόρτωσε ένα νέο έγγραφο: &lt;a href={1}&gt;{2}&lt;/a&gt; στο δωμάτιο: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; μεταφόρτωσε ένα νέο έγγραφο: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; στο δωμάτιο: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomRenamed" xml:space="preserve">
-    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; μετονόμασε το δωμάτιο: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href={2}&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; μετονόμασε το δωμάτιο: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomCreated" xml:space="preserve">
-    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; δημιούργησε ένα νέο δωμάτιο: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; δημιούργησε ένα νέο δωμάτιο: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromRoom" xml:space="preserve">
-    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; αφαιρέθηκε από το δωμάτιο: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; αφαιρέθηκε από το δωμάτιο: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileEdited" xml:space="preserve">
-    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; επεξεργάστηκε το έγγραφο: &lt;a href={1}&gt;{2}&lt;/a&gt; στο δωμάτιο: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; επεξεργάστηκε το έγγραφο: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; στο δωμάτιο: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomRemoved" xml:space="preserve">
     <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; διέγραψε το δωμάτιο: &lt;b&gt;{1}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserAddedToRoom" xml:space="preserve">
-    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; προστέθηκε στο δωμάτιο: &lt;a href={1}&gt;{2}&lt;/a&gt;</value>
+    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; προστέθηκε στο δωμάτιο: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomArchived" xml:space="preserve">
-    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; μετέφερε το δωμάτιο: &lt;a href={1}&gt;{2}&lt;/a&gt; στο αρχείο - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; μετέφερε το δωμάτιο: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; στο αρχείο - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomUpdateAccessForUser" xml:space="preserve">
-    <value>Στον χρήστη &lt;b&gt;{0}&lt;/b&gt; ανατέθηκε ο ρόλος &lt;b&gt;{1}&lt;/b&gt; στο δωμάτιο: &lt;a href={2}&gt;{3}&lt;/a&gt;</value>
+    <value>Στον χρήστη &lt;b&gt;{0}&lt;/b&gt; ανατέθηκε ο ρόλος &lt;b&gt;{1}&lt;/b&gt; στο δωμάτιο: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
     <value>Προστέθηκε νέος χρήστης DocSpace: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
@@ -556,7 +556,7 @@ $Body</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Το ${LetterLogoText} DocSpace έχει &lt;span style="color: #FF6F3D;"&gt;απενεργοποιηθεί&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Το ${LetterLogoText} DocSpace έχει &lt;span style="color: #FF6F3D;"&gt;διαγραφεί&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Το DocSpace σας στο ${LetterLogoText} απενεργοποιήθηκε επιτυχώς. Σημειώστε ότι όλα τα δεδομένα σας θα διαγραφούν σύμφωνα με την &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Πολιτική απορρήτου&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
@@ -596,17 +596,6 @@ $TrulyYours</value>
 Λάβετε υπόψη ότι η περίοδος χάριτος των $PaymentDelay ημερών για το DocSpace σας στο ${LetterLogoText} έχει ενεργοποιηθεί.
 
 Φροντίστε να πληρώσετε την Επαγγελματική συνδρομή σας πριν από τη λήξη της περιόδου χάριτος. Έτσι, θα μπορέσετε να χρησιμοποιήσετε περαιτέρω όλα τα οφέλη του DocSpace σας στο ${LetterLogoText}.
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Καλησπέρα, $UserName!
-
-Λάβετε υπόψη ότι η συνδρομή σας στο DocSpace του ${LetterLogoText} λήγει σε τρεις ημέρες. Μετά από αυτό, θα ενεργοποιηθεί η περίοδος χάριτος των $PaymentDelay ημερών.
-
-Σας συνιστούμε να πληρώσετε την Επαγγελματική συνδρομή σας τώρα και να συνεχίσετε να χρησιμοποιείτε όλα τα οφέλη του DocSpace σας στο ${LetterLogoText}.
 
 $OrangeButton
 
@@ -763,7 +752,7 @@ $TrulyYours</value>
     <value>Διαγραφή της πύλης ${__VirtualRootHost}</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>Το ${LetterLogoText} DocSpace έχει απενεργοποιηθεί</value>
+    <value>Το ${LetterLogoText} DocSpace έχει διαγραφεί</value>
   </data>
   <data name="subject_portal_rename" xml:space="preserve">
     <value>${LetterLogoText}. Αλλαγή της διεύθυνσης πύλης</value>
@@ -791,9 +780,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>Το ${LetterLogoText} DocSpace σας θα διαγραφεί</value>
-  </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Η συνδρομή σας στο ${LetterLogoText} DocSpace πρόκειται να λήξει</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Η περίοδος χάριτος για το ${LetterLogoText} DocSpace έληξε</value>
@@ -953,7 +939,9 @@ $OrangeButton
 
 Κάντε κλικ στο παρακάτω κουμπί για να μεταβείτε στη σελίδα εισόδου στην πύλη και να διαμορφώσετε την εφαρμογή αυθεντικοποίησης:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Αλλαγή του ιδιοκτήτης της πύλης "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -1785,11 +1773,13 @@ $TrulyYours</value>
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Καλησπέρα, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Μόλις *δημιουργήσατε το DocSpace του ${LetterLogoText}*, έναν κόμβο εγγράφων όπου μπορείτε να ενισχύσετε τη συνεργασία με την ομάδα σας, τους πελάτες, τους συνεργάτες και άλλους. Η διεύθυνσή του είναι &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Μόλις *δημιουργήσατε το DocSpace του ${LetterLogoText}*, έναν κόμβο εγγράφων όπου μπορείτε να ενισχύσετε τη συνεργασία με την ομάδα σας, τους πελάτες, τους συνεργάτες και άλλους. Η διεύθυνσή του είναι &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
+#if($OrangeButton != "")
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Επιβεβαιώστε το email σας (ο σύνδεσμος ισχύει για 7 ημέρες):&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 44px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
+#end
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;Το τρέχον τιμολογιακό σας πρόγραμμα είναι ΒΑΣΙΚΟ. Είναι απολύτως δωρεάν και περιλαμβάνει:&lt;/td&gt;&lt;/tr&gt;
 
@@ -1895,5 +1885,214 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 26px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Αν χρειάζεστε βοήθεια, περιηγηθείτε στο r &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;Κέντρο βοήθειας&lt;/a&gt; ή ρωτήστε την r &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__SupportLink}"&gt;ομάδα υποστήριξης&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
+  </data>
+  <data name="pattern_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Το ${LetterLogoText} DocSpace σας θα &lt;span style="color: #FF6F3D;"&gt;διαγραφεί&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Το ${LetterLogoText} DocSpace ${__VirtualRootPath} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; είναι ανενεργό για περισσότερο από έναν χρόνο.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Εφόσον αποφασίσατε να μην το χρησιμοποιείτε πλέον, το ${LetterLogoText} DocSpace σας και όλα τα δεδομένα θα διαγραφούν σύμφωνα με την &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Πολιτική Απορρήτου μας&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;Θα εκτιμούσαμε τα σχόλιά σας. Γιατί αποφασίσατε να σταματήσετε να χρησιμοποιείτε το ${LetterLogoText} DocSpace;&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Εάν θέλετε να συνεχίσετε να χρησιμοποιείτε το ${LetterLogoText} DocSpace σας, απλά πληκτρολογήστε το και κάντε οποιαδήποτε ενέργεια.&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_role_changed" xml:space="preserve">
+    <value>Γεια σας!
+
+Σας έχει ανατεθεί ένας νέος ρόλος στο δωμάτιο DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+Μάθετε περισσότερα σχετικά με τους ρόλους και τα δικαιώματα του δωματίου στο "Κέντρο Βοήθειας":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_type_changed" xml:space="preserve">
+    <value>Γεια σας!
+
+Σας έχει ανατεθεί ένας νέος τύπος χρήστη στο DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
+
+Μάθετε περισσότερα σχετικά με τους τύπους χρηστών και τα δικαιώματα στο "Κέντρο Βοήθειας":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>Το ${LetterLogoText} DocSpace σας θα διαγραφεί</value>
+  </data>
+  <data name="subject_user_type_changed" xml:space="preserve">
+    <value>Ο τύπος χρήστη σας στο DocSpace έχει αλλάξει</value>
+  </data>
+  <data name="subject_user_role_changed" xml:space="preserve">
+    <value>Ο ρόλος σας σε ένα δωμάτιο DocSpace έχει αλλάξει</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Μεταβείτε στις Υπηρεσίες</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Γεια σου, $UserName!
+
+Επικοινωνούμε μαζί σας για να σας ενημερώσουμε ότι η αυτόματη ανανέωση του υπολοίπου ττου Πορτοφολιού στο DocSpace δεν ήταν επιτυχής.
+
+Σας παρακαλούμε να ελέγξετε και να ενημερώσετε χειροκίνητα το υπόλοιπο του πορτοφολιού σας.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Απαιτείται ενέργεια: Δεν είναι δυνατή η αυτόματη ανανέωση του προγράμματος υπηρεσιών στο DocSpace ${LetterLogoText}</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Προσεχής καταβολή συνδρομής για το DocSpace ${LetterLogoText}</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Απαιτείται ενέργεια: Δεν είναι δυνατή η αυτόματη ανανέωση του υπολοίπου του Πορτοφολιού στο DocSpace ${LetterLogoText}</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Γεια σου, $UserName!
+
+Σας ενημερώνουμε ότι η καταβολή της συνδρομής σας θα χρεωθεί αυτόματα στον λογαριασμό σας σε 3 ημέρες.
+
+Για να εξασφαλιστεί η ομαλή διεκπεραίωση της συναλλαγής, βεβαιωθείτε ότι διαθέτετε επαρκή χρήματα στον τρόπο πληρωμής που έχετε επιλέξει.
+
+Αν έχετε απορίες ή χρειάζεστε βοήθεια, μη διστάσετε να επικοινωνήσετε με την "ομάδα υποστήριξης":"${__SupportLink}" μας.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Καλησπέρα, $UserName!
+
+Σας ενημερώνουμε ότι η αυτόματη ανανέωση του προγράμματος υπηρεσιών που έχετε αγοράσει δεν ολοκληρώθηκε.
+
+Παρακαλείσθε να ανανεώσετε μη αυτόματα το τρέχον πρόγραμμα υπηρεσιών σας (ή να αγοράσετε ένα νέο).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Μεταβείτε στις Ρυθμίσεις πορτοφολιού</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>Ανοίξτε το DocSpace</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>Ο κωδικός πρόσβασής σας άλλαξε με επιτυχία</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.Ο κωδικός πρόσβασης άλλαξε με επιτυχία
+
+Ο κωδικός πρόσβασής σας για τον λογαριασμό *$UserName*, *$UserEmail* άλλαξε με επιτυχία στις *$Date* στο DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+IP: *$IP*
+Συσκευή: *$Device*
+#if($Location != "")
+Τοποθεσία: *$Location*
+#end
+Πρόγραμμα περιήγησης: *$Browser*
+
+Εάν αυτή η ενέργεια έγινε από εσάς — δεν απαιτούνται περαιτέρω βήματα. Εάν αυτή η αλλαγή φαίνεται ύποπτη ή δεν έχει εξουσιοδοτηθεί από εσάς, επαναφέρετε αμέσως τον κωδικό πρόσβασής σας και απενεργοποιήστε την πρόσβαση στο DocSpace για αυτήν τη συσκευή.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="ButtonJoinAgent" xml:space="preserve">
+    <value>Συμμετοχή στον εκπρόσωπο</value>
+  </data>
+  <data name="subject_saas_agent_invite" xml:space="preserve">
+    <value>Εγγραφείτε στο ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_backup_failed" xml:space="preserve">
+    <value>Αποτυχία δημιουργίας αντιγράφου ασφαλείας για το DocSpace</value>
+  </data>
+  <data name="subject_scheduled_backup_failed" xml:space="preserve">
+    <value>Αποτυχία αυτόματης δημιουργίας αντιγράφου ασφαλείας για το DocSpace σας</value>
+  </data>
+  <data name="ActionUserRemovedFromAgent" xml:space="preserve">
+    <value>Ο/Η &lt;b&gt;{0}&lt;/b&gt; αφαιρέθηκε από τον εκπρόσωπο: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentUpdateAccessForUser" xml:space="preserve">
+    <value>Στον/Στην &lt;b&gt;{0}&lt;/b&gt; ανατέθηκε ο ρόλος του &lt;b&gt;{1}&lt;/b&gt; στον εκπρόσωπο: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserAddedToAgent" xml:space="preserve">
+    <value>Ο/Η &lt;b&gt;{0}&lt;/b&gt; προστέθηκε στον εκπρόσωπο: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionAgentRenamed" xml:space="preserve">
+    <value>Ο/Η &lt;b&gt;{0}&lt;/b&gt; μετονόμασε τον εκπρόσωπο: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRemoved" xml:space="preserve">
+    <value>Ο/Η &lt;b&gt;{0}&lt;/b&gt; διέγραψε τον εκπρόσωπο: &lt;b&gt;{1}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentCreated" xml:space="preserve">
+    <value>Ο/Η &lt;b&gt;{0}&lt;/b&gt; δημιούργησε έναν νέο εκπρόσωπο: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Έχετε προσκληθεί στον εκπρόσωπο DocSpace ${LetterLogoText}</value>
+  </data>
+  <data name="pattern_backup_failed" xml:space="preserve">
+    <value>Γεια σας, $UserName,
+
+Η διαδικασία δημιουργίας αντιγράφων ασφαλείας για το DocSpace σας "${__VirtualRootPath}":"${__VirtualRootPath}" απέτυχε.
+
+Εάν έχετε ερωτήσεις ή χρειάζεστε βοήθεια, μη διστάσετε να επικοινωνήσετε μαζί μας μέσω "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_backup_failed_tg" xml:space="preserve">
+    <value>Γεια σας, $UserName,
+
+Η διαδικασία δημιουργίας αντιγράφων ασφαλείας για το DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) απέτυχε.
+
+Εάν έχετε ερωτήσεις ή χρειάζεστε βοήθεια, μη διστάσετε να επικοινωνήσετε μαζί μας μέσω του [${__SupportLink}](${__SupportLink})
+
+Με εκτίμηση
+Η Ομάδα Υποστήριξης ${LetterLogoText}
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="pattern_saas_agent_invite" xml:space="preserve">
+    <value>Γεια σας!
+
+Σας προσκαλούμε να συμμετάσχετε σε έναν εκπρόσωπο DocSpace στο "${__VirtualRootPath}":"${__VirtualRootPath}". Αποδεχτείτε την πρόσκληση κάνοντας κλικ στον σύνδεσμο:
+
+$OrangeButton
+
+Αφού κάνετε κλικ στον σύνδεσμο πρόσκλησης, ορίστε έναν νέο κωδικό πρόσβασης για τον λογαριασμό σας.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Γεια σας!
+
+Ο/Η $__AuthorName σάς προσκάλεσε να συμμετάσχετε στον εκπρόσωπο "$Message":"$InviteLink" στο "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed" xml:space="preserve">
+    <value>Γεια σας, $UserName,
+
+Η προγραμματισμένη διαδικασία δημιουργίας αντιγράφου ασφαλείας για το DocSpace σας "${__VirtualRootPath}":"${__VirtualRootPath}" απέτυχε.
+
+Συνιστούμε να ελέγξετε τις ρυθμίσεις "Αντίγραφο Ασφαλείας":"${__VirtualRootPath}/portal-settings/backup/data-backup" και "Υπηρεσίες":"${__VirtualRootPath}/portal-settings/services".
+
+Εάν έχετε ερωτήσεις ή χρειάζεστε βοήθεια, μη διστάσετε να επικοινωνήσετε μαζί μας μέσω "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
+    <value>Γεια σας, $UserName,
+
+Η προγραμματισμένη διαδικασία δημιουργίας αντιγράφου ασφαλείας για το DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) απέτυχε.
+
+Συνιστούμε να ελέγξετε τις ρυθμίσεις [Αντίγραφο Ασφαλείας](${__VirtualRootPath}/portal-settings/backup/data-backup) και [Υπηρεσίες](${__VirtualRootPath}/portal-settings/services).
+
+Εάν έχετε ερωτήσεις ή χρειάζεστε βοήθεια, μη διστάσετε να επικοινωνήσετε μαζί μας μέσω του [${__SupportLink}](${__SupportLink})
+
+Με εκτίμηση
+Η Ομάδα Υποστήριξης ${LetterLogoText}
+[${__SiteLink}](${__SiteLink})</value>
   </data>
 </root>

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -52,7 +52,7 @@ function getAndSaveAppsettings(){
 
     nconf.file("redisWithEnv", path.join(appsettings, 'redis.' + env + '.json'));
     nconf.file("redis", path.join(appsettings, 'redis.json'));
-
+    
     var redis = nconf.get("Redis");
     if(redis != null)
     {
@@ -64,6 +64,7 @@ function getAndSaveAppsettings(){
             host: redis.Hosts[0].Host,
             port: redis.Hosts[0].Port
         };
+        
         nconf.set("Redis", redis);
     }
 }

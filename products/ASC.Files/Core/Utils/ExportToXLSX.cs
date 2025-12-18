@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,7 +30,7 @@ namespace ASC.Web.Files.Utils;
 
 [Transient]
 public class ExportToXLSX(
-    ILogger<AuditReportUploader> logger,
+    ILogger<CsvFileUploader> logger,
     IServiceProvider serviceProvider,
     TenantManager tenantManager,
     IEventBus eventBus,
@@ -68,5 +68,5 @@ public class ExportToXLSX(
         }
     }
 
-    
+
 }

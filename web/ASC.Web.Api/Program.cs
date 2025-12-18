@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,6 +35,8 @@ var options = new WebApplicationOptions
 var builder = WebApplication.CreateBuilder(options);
 
 builder.Configuration.AddDefaultConfiguration(builder.Environment)
+                     .AddJsonFile("notify.json", optional: false, reloadOnChange: true)
+                     .AddJsonFile($"notify.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
                      .AddEnvironmentVariables()
                      .AddCommandLine(args);
 

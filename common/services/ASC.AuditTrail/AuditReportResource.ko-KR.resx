@@ -210,9 +210,6 @@
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>사용자 [{0}]. 활성화 지침이 전송되었습니다</value>
   </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>사용자</value>
-  </data>
   <data name="UserUpdated" xml:space="preserve">
     <value>사용자가 업데이트되었습니다: {0}</value>
   </data>
@@ -336,7 +333,7 @@
   <data name="StartTransferSetting" xml:space="preserve">
     <value>포털 리전 마이그레이션 시작</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>백업 시작</value>
   </data>
   <data name="SSOEnabled" xml:space="preserve">
@@ -354,9 +351,6 @@
   <data name="UserLinkedSocialAccount" xml:space="preserve">
     <value>소셜 계정이 연결되었습니다. 제공자: {0}</value>
   </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>설정</value>
-  </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>설정</value>
   </data>
@@ -368,6 +362,9 @@
   </data>
   <data name="SessionCompleted" xml:space="preserve">
     <value>세션이 완료되었습니다</value>
+  </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>설정</value>
   </data>
   <data name="FileSendAccessLink" xml:space="preserve">
     <value>[{0}] 파일로 공유 링크가 발송되었습니다. 수신자: [{1}]</value>
@@ -402,9 +399,6 @@
   <data name="ProductAccessOpened" xml:space="preserve">
     <value>프로덕트 [{0}]. 액세스가 열렸습니다</value>
   </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>프로덕트</value>
-  </data>
   <data name="ProductCol" xml:space="preserve">
     <value>프로덕트</value>
   </data>
@@ -425,9 +419,6 @@
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>플랫폼</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>사람</value>
   </data>
   <data name="UserUpdatedPassword" xml:space="preserve">
     <value>비밀번호가 업데이트되었습니다</value>
@@ -453,9 +444,6 @@
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>덮어쓰기 설정이 업데이트되었습니다</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>기타</value>
-  </data>
   <data name="UserTfaGenerateCodes" xml:space="preserve">
     <value>새로운 백업 코드가 생성되었습니다</value>
   </data>
@@ -475,7 +463,7 @@
     <value>SSO를 통한 로그인에 실패했습니다</value>
   </data>
   <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>소셜 계정을 통한 로그인에 성공했습니다</value>
+    <value>소셜 계정을 통한 로그인에 성공했습니다: {0}</value>
   </data>
   <data name="LoginSuccessViaSms" xml:space="preserve">
     <value>SMS를 통한 로그인에 성공했습니다</value>
@@ -558,9 +546,6 @@
   <data name="GuestAccount" xml:space="preserve">
     <value>게스트</value>
   </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>그룹</value>
-  </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>그룹이 업데이트되었습니다: {0}</value>
   </data>
@@ -569,9 +554,6 @@
   </data>
   <data name="GroupCreated" xml:space="preserve">
     <value>그룹이 생성되었습니다: {0}</value>
-  </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>일반</value>
   </data>
   <data name="DocumentsForcesave" xml:space="preserve">
     <value>강제 저장 설정이 업데이트되었습니다</value>
@@ -693,9 +675,6 @@
   <data name="DownloadActionType" xml:space="preserve">
     <value>다운로드</value>
   </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>문서</value>
-  </data>
   <data name="DocumentServiceLocationSetting" xml:space="preserve">
     <value>문서 서비스 위치가 업데이트되었습니다</value>
   </data>
@@ -752,6 +731,9 @@
   </data>
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>색상 테마가 변경되었습니다</value>
+  </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>연락처</value>
   </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>쿠키 설정이 업데이트되었습니다</value>
@@ -867,9 +849,6 @@
   <data name="RoomInviteResend" xml:space="preserve">
     <value>초대장이 다시 전송되었습니다: {0}</value>
   </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
-  </data>
   <data name="ChangeClientActivation" xml:space="preserve">
     <value>클라이언트의 {0} 활성화가 변경되었습니다</value>
   </data>
@@ -929,5 +908,203 @@
   </data>
   <data name="UpdateClient" xml:space="preserve">
     <value>{0} 클라이언트가 업데이트되었습니다</value>
+  </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>개발자 도구 액세스 설정이 변경되었습니다</value>
+  </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>파일: {0}. 사용자 지정 필터가 비활성화되었습니다</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>파일: {0}. 사용자 지정 필터가 활성화되었습니다</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>파일 [{0}]. 버전이 삭제되었습니다: {1}</value>
+  </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>사용자 API 키가 생성됨: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>사용자 API 키가 삭제되었습니다: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>사용자 API 키가 업데이트되었습니다: {0}</value>
+  </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>사용자 [{0}]. 양식 작성이 완료되었습니다: {1}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>사용자 [{0}]. 양식의 일부가 작성되었습니다: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>사용자 [{0}]. 양식이 중지되었습니다: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>사용자 [{0}]. 작성이 시작되었습니다: {1}</value>
+  </data>
+  <data name="WebhookCreated" xml:space="preserve">
+    <value>웹훅이 생성되었습니다: {0}</value>
+  </data>
+  <data name="WebhookDeleted" xml:space="preserve">
+    <value>웹훅이 삭제되었습니다: {0}</value>
+  </data>
+  <data name="WebhookUpdated" xml:space="preserve">
+    <value>웹훅이 업데이트되었습니다: {0}</value>
+  </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>승인 링크가 활성화되었습니다</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>고객 작업이 수행되었습니다</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>고객 작업 보고서가 다운로드되었습니다</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>고객 구독이 업데이트되었습니다: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>고객 지갑이 충전되었습니다: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>고객 지갑 충전 설정이 업데이트되었습니다</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>LDAP 인증이 비활성화되었습니다</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>LDAP 인증이 활성화되었습니다</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>LDAP 동기화가 완료되었습니다</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>위치</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>프로모션 배너 가시성 설정이 변경되었습니다</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>고객 지갑 활성화 서비스 설정이 업데이트되었습니다</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>에이전트에 MCP 서버({0})가 추가되었습니다</value>
+  </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>에이전트가 생성되었습니다</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>에이전트가 삭제되었습니다</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>에이전트 이름이 변경되었습니다: {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>에이전트</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>AI 공급자가 생성되었습니다: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>AI 공급자가 삭제되었습니다: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>AI 공급자가 업데이트되었습니다: {0}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>AI 에이전트 [{0}]. AI 에이전트에 대한 사용자 지정 저장 공간 할당량이 설정되었습니다 : {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>AI 에이전트 [{0}]. AI 에이전트에 대한 기본 저장 공간 할당량이 설정되었습니다 : {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>AI 에이전트  [{0}]. AI 에이전트에 대한 저장 공간 할당량이 비활성화되었습니다</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>에이전트에서 MCP 서버({0})가 삭제되었습니다</value>
+  </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>파일 [{0}]. 외부 링크가 생성되었습니다: {1}. 역할: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>파일 [{0}]. 외부 링크 삭제되었습니다: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>파일 [{0}]. 외부 링크 업데이트되었습니다: {1}. 역할: {2}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>파일이 즐겨찾기로 표시되었습니다: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>파일이 즐겨찾기에서 제거되었습니다: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>파일이 "공유 문서함"에서 제거되었습니다: {0}</value>
+  </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>파일 [{0}]. {1}에 대한 액세스가 업데이트되었습니다. 역할: {2}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>폴더가 다운로드되었습니다: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>폴더 [{0}]. 외부 링크가 생성되었습니다: {1}. 역할: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>폴더 [{0}]. 외부 링크가 삭제되었습니다: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>폴더 [{0}]. 외부 링크가 업데이트되었습니다: {1}. 역할: {2}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>폴더가 "공유 문서함"에서 제거되었습니다: {0}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>폴더 [{0}]. 다음에 대한 액세스가 업데이트되었습니다: {1}. 역할: {2}</value>
+  </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>소셜 계정을 통한 로그인에 성공했습니다</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>OAuth 2.0을 통한 로그인에 성공했습니다</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>로그인 및 비밀번호를 통한 로그인에 성공했습니다</value>
+  </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>AI 에이전트에 대한 기본 저장 공간 할당량이 설정되었습니다: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>I 에이전트에 대한 기본 저장 공간 할당량이 비활성화되었습니다</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>벡터화 설정이 재설정되었습니다</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>웹 검색 설정이 재설정되었습니다</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>외부 링크가 취소되었습니다: {1}</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>MCP 서버가 생성되었습니다: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>MCP 서버가 삭제되었습니다: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>MCP 서버가 비활성화되었습니다: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>MCP 서버가 활성화되었습니다: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>MCP 서버가 업데이트되었습니다: {0}</value>
+  </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>벡터화 설정이 구성되었습니다. 공급자: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>웹 검색 설정이 구성되었습니다. 엔진: {0}</value>
   </data>
 </root>

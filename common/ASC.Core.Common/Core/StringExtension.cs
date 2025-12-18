@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,131 +33,167 @@ public static class StringExtension
                                                   + @"\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$");
 
 
-    public static string HtmlEncode(this string str)
-    {
-        return !string.IsNullOrEmpty(str) ? HttpUtility.HtmlEncode(str) : str;
-    }
-
-    /// <summary>
-    /// Replace ' on ′
-    /// </summary>
     /// <param name="str"></param>
-    /// <returns></returns>
-    public static string ReplaceSingleQuote(this string str)
+    extension(string str)
     {
-        return str?.Replace('\'', '′');
-    }
-
-    public static bool TestEmailRegex(this string emailAddress)
-    {
-        emailAddress = (emailAddress ?? "").Trim();
-        return !string.IsNullOrEmpty(emailAddress) && _reStrict.IsMatch(emailAddress);
-    }
-
-    public static bool TestEmailPunyCode(this string emailAddress)
-    {
-        var toTest = _reStrict.Match(emailAddress);
-        return toTest.Groups.Values.Distinct().Select(r => r.Value).Where(r => !string.IsNullOrEmpty(r)).Any(TestPunnyCode);
-    }
-
-    public static bool TestUrlPunyCode(this string url)
-    {
-        return Uri.TryCreate(url, UriKind.RelativeOrAbsolute, out var uri) && TestPunnyCode(uri.DnsSafeHost);
-    }
-
-    public static bool TestPunnyCode(this string data)
-    {
-        var idn = new IdnMapping();
-
-        try
+        public string HtmlEncode()
         {
-            var punyCode = idn.GetAscii(data.TrimStart('.'));
-            var domain2 = idn.GetUnicode(punyCode);
+            return !string.IsNullOrEmpty(str) ? HttpUtility.HtmlEncode(str) : str;
+        }
 
-            if (!string.Equals(punyCode, domain2))
+        /// <summary>
+        /// Replace ' on ′
+        /// </summary>
+        /// <returns></returns>
+        public string ReplaceSingleQuote()
+        {
+            return str?.Replace('\'', '′');
+        }
+
+        public bool TestEmailRegex()
+        {
+            str = (str ?? "").Trim();
+            return !string.IsNullOrEmpty(str) && _reStrict.IsMatch(str);
+        }
+
+        public bool TestEmailPunyCode()
+        {
+            var toTest = _reStrict.Match(str);
+            return toTest.Groups.Values.Distinct().Select(r => r.Value).Where(r => !string.IsNullOrEmpty(r)).Any(TestPunnyCode);
+        }
+
+        public bool TestUrlPunyCode()
+        {
+            return Uri.TryCreate(str, UriKind.RelativeOrAbsolute, out var uri) && TestPunnyCode(uri.DnsSafeHost);
+        }
+
+        public bool TestPunnyCode()
+        {
+            var idn = new IdnMapping();
+
+            try
+            {
+                var punyCode = idn.GetAscii(str.TrimStart('.'));
+                var domain2 = idn.GetUnicode(punyCode);
+
+                if (!string.Equals(punyCode, domain2))
+                {
+                    return true;
+                }
+            }
+            catch (ArgumentException ex) when (ex.ParamName == "unicode")
             {
                 return true;
             }
-        }
-        catch (ArgumentException ex) when(ex.ParamName == "unicode")
-        {
-            return true;
-        }
-        
-        return false;
-    }
-    
 
-    public static int EnumerableComparer(this string x, string y)
-    {
-        var xIndex = 0;
-        var yIndex = 0;
+            return false;
+        }
 
-        while (xIndex < x.Length)
+        public int EnumerableComparer(string y)
         {
-            if (yIndex >= y.Length)
+            var xIndex = 0;
+            var yIndex = 0;
+
+            while (xIndex < str.Length)
             {
-                return 1;
+                if (yIndex >= y.Length)
+                {
+                    return 1;
+                }
+
+                if (char.IsDigit(str[xIndex]) && char.IsDigit(y[yIndex]))
+                {
+                    var xBuilder = new StringBuilder();
+                    while (xIndex < str.Length && char.IsDigit(str[xIndex]))
+                    {
+                        xBuilder.Append(str[xIndex++]);
+                    }
+
+                    var yBuilder = new StringBuilder();
+                    while (yIndex < y.Length && char.IsDigit(y[yIndex]))
+                    {
+                        yBuilder.Append(y[yIndex++]);
+                    }
+
+                    long xValue;
+                    try
+                    {
+                        xValue = Convert.ToInt64(xBuilder.ToString());
+                    }
+                    catch (OverflowException)
+                    {
+                        xValue = long.MaxValue;
+                    }
+
+                    long yValue;
+                    try
+                    {
+                        yValue = Convert.ToInt64(yBuilder.ToString());
+                    }
+                    catch (OverflowException)
+                    {
+                        yValue = long.MaxValue;
+                    }
+
+                    int difference;
+                    if ((difference = xValue.CompareTo(yValue)) != 0)
+                    {
+                        return difference;
+                    }
+                }
+                else
+                {
+                    int difference;
+                    if ((difference = string.Compare(str[xIndex].ToString(CultureInfo.InvariantCulture), y[yIndex].ToString(CultureInfo.InvariantCulture), StringComparison.InvariantCultureIgnoreCase)) != 0)
+                    {
+                        return difference;
+                    }
+
+                    xIndex++;
+                    yIndex++;
+                }
             }
 
-            if (char.IsDigit(x[xIndex]) && char.IsDigit(y[yIndex]))
+            if (yIndex < y.Length)
             {
-                var xBuilder = new StringBuilder();
-                while (xIndex < x.Length && char.IsDigit(x[xIndex]))
-                {
-                    xBuilder.Append(x[xIndex++]);
-                }
-
-                var yBuilder = new StringBuilder();
-                while (yIndex < y.Length && char.IsDigit(y[yIndex]))
-                {
-                    yBuilder.Append(y[yIndex++]);
-                }
-
-                long xValue;
-                try
-                {
-                    xValue = Convert.ToInt64(xBuilder.ToString());
-                }
-                catch (OverflowException)
-                {
-                    xValue = long.MaxValue;
-                }
-
-                long yValue;
-                try
-                {
-                    yValue = Convert.ToInt64(yBuilder.ToString());
-                }
-                catch (OverflowException)
-                {
-                    yValue = long.MaxValue;
-                }
-
-                int difference;
-                if ((difference = xValue.CompareTo(yValue)) != 0)
-                {
-                    return difference;
-                }
+                return -1;
             }
-            else
-            {
-                int difference;
-                if ((difference = string.Compare(x[xIndex].ToString(CultureInfo.InvariantCulture), y[yIndex].ToString(CultureInfo.InvariantCulture), StringComparison.InvariantCultureIgnoreCase)) != 0)
-                {
-                    return difference;
-                }
 
-                xIndex++;
-                yIndex++;
-            }
+            return 0;
         }
 
-        if (yIndex < y.Length)
+        /// <summary>
+        /// Convert standard Base64 to URL-safe Base64
+        /// </summary>
+        public string Base64ToUrlSafe()
         {
-            return -1;
+            if (string.IsNullOrEmpty(str))
+            {
+                return str;
+            }
+
+            return str.Replace('+', '-').Replace('/', '_').TrimEnd('=');
         }
 
-        return 0;
+        /// <summary>
+        /// Convert URL-safe Base64 to standard Base64
+        /// </summary>
+        public string Base64FromUrlSafe()
+        {
+            if (string.IsNullOrEmpty(str))
+            {
+                return str;
+            }
+
+            str = str.Replace('-', '+').Replace('_', '/');
+
+            switch (str.Length % 4)
+            {
+                case 2: str += "=="; break;
+                case 3: str += "="; break;
+            }
+
+            return str;
+        }
     }
 }

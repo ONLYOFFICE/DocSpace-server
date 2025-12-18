@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,6 +23,8 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+using ASC.Web.Core.Files;
 
 namespace ASC.Web.Core.WhiteLabel;
 
@@ -90,26 +92,30 @@ public class TenantLogoManager(
         /***/
     }
 
-    public async Task<string> GetLogoDocsEditorAsync(bool dark)
+    public async Task<string> GetLogoDocsEditorAsync(FileType fileType, bool dark)
     {
         var tenantWhiteLabelSettings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
 
+        var logoType = WhiteLabelLogoTypeHelper.GetEditorLogoType(fileType, false);
+
         if (WhiteLabelEnabled)
         {
-            return await tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, WhiteLabelLogoType.DocsEditor, dark);
+            return await tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, logoType, dark);
         }
-        return await tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(WhiteLabelLogoType.DocsEditor, dark);
+        return await tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(logoType, dark);
     }
 
-    public async Task<string> GetLogoDocsEditorEmbedAsync(bool dark)
+    public async Task<string> GetLogoDocsEditorEmbedAsync(FileType fileType, bool dark)
     {
         var tenantWhiteLabelSettings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
 
+        var logoType = WhiteLabelLogoTypeHelper.GetEditorLogoType(fileType, true);
+
         if (WhiteLabelEnabled)
         {
-            return await tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, WhiteLabelLogoType.DocsEditorEmbed, dark);
+            return await tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, logoType, dark);
         }
-        return await tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(WhiteLabelLogoType.DocsEditorEmbed, dark);
+        return await tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(logoType, dark);
     }
 
 
@@ -149,20 +155,20 @@ public class TenantLogoManager(
     {
         return (await tenantManager.GetCurrentTenantQuotaAsync()).Customization;
     }
-    
+
     public async Task<bool> GetEnableWhitelabelAsync()
     {
         return WhiteLabelEnabled && await GetWhiteLabelPaidAsync();
     }
-    
+
     public async Task DemandWhiteLabelPermissionAsync()
     {
         if (!await GetEnableWhitelabelAsync())
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "Customization");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
     }
-    
+
     /// <summary>
     /// Get logo stream or null in case of default logo
     /// </summary>

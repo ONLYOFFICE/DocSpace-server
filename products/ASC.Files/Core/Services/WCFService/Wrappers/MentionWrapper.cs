@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,77 +26,81 @@
 
 namespace ASC.Web.Files.Services.WCFService;
 
+/// <summary>
+/// The parameters of a user mentioned in a message.
+/// </summary>
 public class MentionWrapper
 {
     internal MentionWrapper() { }
 
     /// <summary>
-    /// User information
+    /// The user information.
     /// </summary>
     public UserInfo User { get; internal set; }
 
     /// <summary>
-    /// User email
+    /// The user email address.
     /// </summary>
     [EmailAddress]
     public string Email { get; internal set; }
 
     /// <summary>
-    /// User ID
+    /// The user unique identification.
     /// </summary>
     public string Id { get; internal set; }
 
     /// <summary>
-    /// User image
+    /// The path to the user's avatar.
     /// </summary>
     public string Image { get; internal set; }
 
     /// <summary>
-    /// Specifies if the user has the access to the file or not
+    /// Specifies whether the user has the access to the file where they are mentioned.
     /// </summary>
     public bool HasAccess { get; internal set; }
 
     /// <summary>
-    /// User display name
+    /// The user full name.
     /// </summary>
     public string Name { get; internal set; }
 }
 
 /// <summary>
-/// Mention message parameters
+/// The mention message parameters.
 /// </summary>
 public class MentionMessageWrapper
 {
     /// <summary>
-    /// The config parameter which contains the information about the comment in the document that will be scrolled to
+    /// The config parameter which contains the information about the action in the document that will be scrolled to.
     /// </summary>
     public ActionLinkConfig ActionLink { get; set; }
 
     /// <summary>
-    /// A list of emails which will receive the mention message
+    /// A list of emails that will receive the mention message.
     /// </summary>
     public List<string> Emails { get; set; }
 
     /// <summary>
-    /// The comment message
+    /// The mention message.
     /// </summary>
+    [StringLength(255)]
     public string Message { get; set; }
 }
 
 /// <summary>
-/// Mention message request parameters
+/// The request parameters for sending the mention message.
 /// </summary>
 public class MentionMessageWrapperRequestDto<T>
 {
     /// <summary>
-    /// File ID
+    /// The file ID with the mention message.
     /// </summary>
     [FromRoute(Name = "fileId")]
     public T FileId { get; set; }
 
     /// <summary>
-    /// Mention message
+    /// The mention message.
     /// </summary>
     [FromBody]
-    public MentionMessageWrapper MentionMessage {  get; set; }
+    public MentionMessageWrapper MentionMessage { get; set; }
 }

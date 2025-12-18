@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,10 +32,9 @@ public class UserFormatter : IComparer<UserInfo>
     private static readonly Dictionary<string, Dictionary<DisplayUserNameFormat, string>> _displayFormats = new()
     {
         { "ru", new Dictionary<DisplayUserNameFormat, string>{ { DisplayUserNameFormat.Default, "{1} {0}" }, { DisplayUserNameFormat.FirstLast, "{0} {1}" }, { DisplayUserNameFormat.LastFirst, "{1} {0}" } } },
-        { "zh-CN", new Dictionary<DisplayUserNameFormat, string>{ { DisplayUserNameFormat.Default, "{0}{1}" }, { DisplayUserNameFormat.FirstLast, "{0}{1}" }, { DisplayUserNameFormat.LastFirst, "{0}{1}" } } },
         { "default", new Dictionary<DisplayUserNameFormat, string>{ {DisplayUserNameFormat.Default, "{0} {1}" }, { DisplayUserNameFormat.FirstLast, "{0} {1}" }, { DisplayUserNameFormat.LastFirst, "{1}, {0}" } } }
     };
-    
+
     private readonly IConfiguration _configuration;
     private readonly DisplayUserNameFormat _format;
     private bool _forceFormatChecked;
@@ -53,7 +52,7 @@ public class UserFormatter : IComparer<UserInfo>
     {
         ArgumentNullException.ThrowIfNull(userInfo);
 
-        return string.Format(GetUserDisplayFormat(format), userInfo.FirstName, userInfo.LastName);
+        return GetUserDisplayFormat(format, userInfo.FirstName, userInfo.LastName);
     }
 
     public string GetUserName(string firstName, string lastName)
@@ -68,7 +67,7 @@ public class UserFormatter : IComparer<UserInfo>
             throw new ArgumentException(lastName);
         }
 
-        return string.Format(GetUserDisplayFormat(DisplayUserNameFormat.Default), firstName, lastName);
+        return GetUserDisplayFormat(DisplayUserNameFormat.Default, firstName, lastName);
     }
 
     int IComparer<UserInfo>.Compare(UserInfo x, UserInfo y)
@@ -84,10 +83,10 @@ public class UserFormatter : IComparer<UserInfo>
             {
                 return 0;
             }
-            
+
             return -1;
         }
-        
+
         if (y == null)
         {
             return +1;
@@ -119,8 +118,9 @@ public class UserFormatter : IComparer<UserInfo>
         return result;
     }
 
-    private string GetUserDisplayFormat(DisplayUserNameFormat format)
+    private string GetUserDisplayFormat(DisplayUserNameFormat format, string firstName, string lastName)
     {
+        string formatString;
         if (!_forceFormatChecked)
         {
             _forceFormat = _configuration["core:user-display-format"];
@@ -131,22 +131,42 @@ public class UserFormatter : IComparer<UserInfo>
 
             _forceFormatChecked = true;
         }
+
         if (_forceFormat != null)
         {
-            return _forceFormat;
+            formatString = _forceFormat;
         }
-
-        var culture = CultureInfo.CurrentCulture.Name;
-        if (!_displayFormats.TryGetValue(culture, out var formats))
+        else
         {
-            var twoletter = CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
-            if (!_displayFormats.TryGetValue(twoletter, out formats))
+            var culture = CultureInfo.CurrentCulture.Name;
+            if (!_displayFormats.TryGetValue(culture, out var formats))
             {
-                formats = _displayFormats["default"];
+                var twoLetterIsoLanguageName = CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
+                if (!_displayFormats.TryGetValue(twoLetterIsoLanguageName, out formats))
+                {
+                    formats = _displayFormats["default"];
+                }
             }
+            formatString = formats[format];
         }
 
-        return formats[format];
+        if (IsChineseText(firstName) || IsChineseText(lastName))
+        {
+            formatString = "{1}{0}";
+        }
+
+        return string.Format(formatString, firstName, lastName);
+    }
+
+    private static bool IsChineseText(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return false;
+        }
+
+        var pattern = @"[\u4e00-\u9fff]";
+        return Regex.IsMatch(text, pattern);
     }
 
     public static DisplayUserNameFormat GetUserDisplayDefaultOrder()

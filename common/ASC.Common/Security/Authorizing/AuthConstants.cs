@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -39,5 +39,6 @@ public static class AuthConstants
     public static readonly Role Owner = new(new Guid("bba32183-a14d-48ed-9d39-c6b4d8925fbf"), "Owner");
     public static readonly Role Self = new(new Guid("5d5b7260-f7f7-49f1-a1c9-95fbb6a12604"), "Self");
 
-    public static readonly Claim Claim_ScopeRootWrite = new("scope", "root_write");
+    public static readonly Claim Claim_ScopeGlobalWrite = new("scope", "*:write");
+    public static readonly Claim Claim_ScopeGlobalRead = new("scope", "*:read");
 }

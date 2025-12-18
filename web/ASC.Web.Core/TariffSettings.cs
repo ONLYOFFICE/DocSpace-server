@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -49,11 +49,9 @@ public class TariffSettings : ISettings<TariffSettings>
         };
     }
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{07956D46-86F7-433b-A657-226768EF9B0D}"); }
-    }
+    public DateTime LastModified { get; set; }
+
+    public static Guid ID => new("{07956D46-86F7-433b-A657-226768EF9B0D}");
 
     public static async Task<bool> GetHideNotifyAsync(SettingsManager settingsManager)
     {

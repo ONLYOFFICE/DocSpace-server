@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,7 +26,7 @@
 
 namespace ASC.Core.Common.EF;
 
-public class DbGroup : BaseEntity, IMapFrom<Group>
+public class DbGroup : BaseEntity
 {
     public int TenantId { get; set; }
     public Guid Id { get; set; }
@@ -60,108 +60,111 @@ public static class DbGroupExtension
         return modelBuilder;
     }
 
-    private static void MySqlAddDbGroup(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbGroup>(entity =>
+        private void MySqlAddDbGroup()
         {
-            entity.ToTable("core_group")
-                .HasCharSet("utf8");
+            modelBuilder.Entity<DbGroup>(entity =>
+            {
+                entity.ToTable("core_group")
+                    .HasCharSet("utf8");
 
-            entity.HasIndex(e => e.LastModified)
-                .HasDatabaseName("last_modified");
+                entity.HasIndex(e => e.LastModified)
+                    .HasDatabaseName("last_modified");
 
-            entity.HasIndex(e => new { e.TenantId, e.ParentId })
-                .HasDatabaseName("parentid");
+                entity.HasIndex(e => new { e.TenantId, e.ParentId })
+                    .HasDatabaseName("parentid");
 
-            entity.Property(e => e.Id)
-                .HasColumnName("id")
-                .HasColumnType("varchar(38)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("varchar(38)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.CategoryId)
-                .HasColumnName("categoryid")
-                .HasColumnType("varchar(38)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.CategoryId)
+                    .HasColumnName("categoryid")
+                    .HasColumnType("varchar(38)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.LastModified)
-                .HasColumnName("last_modified")
-                .HasColumnType("timestamp");
+                entity.Property(e => e.LastModified)
+                    .HasColumnName("last_modified")
+                    .HasColumnType("timestamp");
 
-            entity.Property(e => e.Name)
-                .IsRequired()
-                .HasColumnName("name")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasColumnName("name")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.ParentId)
-                .HasColumnName("parentid")
-                .HasColumnType("varchar(38)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.ParentId)
+                    .HasColumnName("parentid")
+                    .HasColumnType("varchar(38)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Removed)
-            .HasColumnName("removed")
-            .HasColumnType("tinyint(1)")
-            .HasDefaultValueSql("'0'");
+                entity.Property(e => e.Removed)
+                    .HasColumnName("removed")
+                    .HasColumnType("tinyint(1)")
+                    .HasDefaultValueSql("'0'");
 
-            entity.Property(e => e.Sid)
-                .HasColumnName("sid")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Sid)
+                    .HasColumnName("sid")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant");
-        });
-    }
-    
-    private static void PgSqlAddDbGroup(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<DbGroup>(entity =>
+                entity.Property(e => e.TenantId).HasColumnName("tenant");
+            });
+        }
+
+        private void PgSqlAddDbGroup()
         {
-            entity.ToTable("core_group");
+            modelBuilder.Entity<DbGroup>(entity =>
+            {
+                entity.ToTable("core_group");
 
-            entity.HasIndex(e => e.LastModified)
-                .HasDatabaseName("ix_last_modified");
+                entity.HasIndex(e => e.LastModified)
+                    .HasDatabaseName("ix_last_modified");
 
-            entity.HasIndex(e => new { e.TenantId, e.ParentId })
-                .HasDatabaseName("ix_parentid");
+                entity.HasIndex(e => new { e.TenantId, e.ParentId })
+                    .HasDatabaseName("ix_parentid");
 
-            entity.Property(e => e.Id)
-                .HasColumnName("id")
-                .HasColumnType("uuid");
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("uuid");
 
-            entity.Property(e => e.CategoryId)
-                .HasColumnName("categoryid")
-                .HasColumnType("uuid");
+                entity.Property(e => e.CategoryId)
+                    .HasColumnName("categoryid")
+                    .HasColumnType("uuid");
 
-            entity.Property(e => e.LastModified)
-                .HasColumnName("last_modified")
-                .HasColumnType("timestamptz");
+                entity.Property(e => e.LastModified)
+                    .HasColumnName("last_modified")
+                    .HasColumnType("timestamptz");
 
-            entity.Property(e => e.Name)
-                .IsRequired()
-                .HasColumnName("name")
-                .HasColumnType("varchar(128)");
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasColumnName("name")
+                    .HasColumnType("varchar(128)");
 
-            entity.Property(e => e.ParentId)
-                .HasColumnName("parentid")
-                .HasColumnType("uuid");
+                entity.Property(e => e.ParentId)
+                    .HasColumnName("parentid")
+                    .HasColumnType("uuid");
 
-            entity.Property(e => e.Removed)
-                .HasColumnName("removed")
-                .HasColumnType("boolean")
-                .HasDefaultValue(false);
+                entity.Property(e => e.Removed)
+                    .HasColumnName("removed")
+                    .HasColumnType("boolean")
+                    .HasDefaultValue(false);
 
-            entity.Property(e => e.Sid)
-                .HasColumnName("sid")
-                .HasColumnType("varchar(512)");
+                entity.Property(e => e.Sid)
+                    .HasColumnName("sid")
+                    .HasColumnType("varchar(512)");
 
-            entity.Property(e => e.TenantId)
-                .HasColumnName("tenant")
-                .HasColumnType("integer");
-        });
+                entity.Property(e => e.TenantId)
+                    .HasColumnName("tenant")
+                    .HasColumnType("integer");
+            });
+        }
     }
 }

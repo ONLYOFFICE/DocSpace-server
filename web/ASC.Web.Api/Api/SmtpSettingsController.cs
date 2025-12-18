@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -37,7 +37,6 @@ public class SmtpSettingsController(
         PermissionContext permissionContext,
         CoreConfiguration coreConfiguration,
         CoreBaseSettings coreBaseSettings,
-        IMapper mapper,
         SecurityContext securityContext,
         SmtpOperation smtpOperation,
         TenantManager tenantManager)
@@ -54,7 +53,7 @@ public class SmtpSettingsController(
     [SwaggerResponse(200, "SMTP settings", typeof(SmtpSettingsDto))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("")]
-    public async Task<SmtpSettingsDto> GetSmtpSettingsAsync()
+    public async Task<SmtpSettingsDto> GetSmtpSettings()
     {
         await CheckSmtpPermissionsAsync();
 
@@ -65,7 +64,7 @@ public class SmtpSettingsController(
             current = SmtpSettings.Empty;
         }
 
-        var settings = mapper.Map<SmtpSettings, SmtpSettingsDto>(current);
+        var settings = current.MapToDto();
         settings.CredentialsUserPassword = "";
 
         return settings;
@@ -82,21 +81,21 @@ public class SmtpSettingsController(
     [SwaggerResponse(200, "SMTP settings", typeof(SmtpSettingsDto))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpPost("")]
-    public async Task<SmtpSettingsDto> SaveSmtpSettingsAsync(SmtpSettingsDto inDto)
+    public async Task<SmtpSettingsDto> SaveSmtpSettings(SmtpSettingsDto inDto)
     {
         ArgumentNullException.ThrowIfNull(inDto);
-        
+
         await CheckSmtpPermissionsAsync();
 
         //TODO: Add validation check
 
-        
+
 
         var settingConfig = ToSmtpSettingsConfig(inDto);
 
         await coreConfiguration.SetSmtpSettingsAsync(settingConfig);
 
-        var settings = mapper.Map<SmtpSettings, SmtpSettingsDto>(settingConfig);
+        var settings = settingConfig.MapToDto();
         settings.CredentialsUserPassword = "";
 
         return settings;
@@ -133,7 +132,7 @@ public class SmtpSettingsController(
     [SwaggerResponse(200, "Default SMTP settings", typeof(SmtpSettingsDto))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpDelete("")]
-    public async Task<SmtpSettingsDto> ResetSmtpSettingsAsync()
+    public async Task<SmtpSettingsDto> ResetSmtpSettings()
     {
         await CheckSmtpPermissionsAsync();
 
@@ -149,9 +148,8 @@ public class SmtpSettingsController(
             current = SmtpSettings.Empty;
         }
 
-        var settings = mapper.Map<SmtpSettings, SmtpSettingsDto>(current);
+        var settings = current.MapToDto();
         settings.CredentialsUserPassword = "";
-
         return settings;
     }
 
@@ -170,7 +168,7 @@ public class SmtpSettingsController(
     {
         await CheckSmtpPermissionsAsync();
 
-        var settings = mapper.Map<SmtpSettings, SmtpSettingsDto>(await coreConfiguration.GetDefaultSmtpSettingsAsync());
+        var settings = (await coreConfiguration.GetDefaultSmtpSettingsAsync()).MapToDto();
 
         var tenant = tenantManager.GetCurrentTenant();
 
@@ -180,10 +178,10 @@ public class SmtpSettingsController(
     }
 
     /// <summary>
-    /// Returns the SMTP test process status.
+    /// Returns the status of the SMTP testing process.
     /// </summary>
     /// <short>
-    /// Get the SMTP test process status
+    /// Get the SMTP testing process status
     /// </short>
     /// <path>api/2.0/smtpsettings/smtp/test/status</path>
     [Tags("Security / SMTP settings")]
@@ -198,11 +196,11 @@ public class SmtpSettingsController(
     }
 
     private async Task CheckSmtpPermissionsAsync()
-    {            
+    {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         if (!SetupInfo.IsVisibleSettings(nameof(ManagementType.SmtpSettings)))
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption, "Smtp");
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
     }
 }

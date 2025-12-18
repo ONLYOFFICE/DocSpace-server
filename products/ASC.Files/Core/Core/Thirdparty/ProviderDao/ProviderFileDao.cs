@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -114,7 +114,7 @@ internal class ProviderFileDao(
         }
     }
 
-    public async IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, bool searchInContent, bool checkShared = false)
+    public async IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, IEnumerable<string> excludeParentsIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, bool searchInContent)
     {
         foreach (var (selectorLocal, matchedIds) in _selectorFactory.GetSelectors(fileIds))
         {
@@ -127,7 +127,7 @@ internal class ProviderFileDao(
             {
                 var fileDao = selectorLocal.GetFileDao(matchedId.FirstOrDefault());
 
-                await foreach (var file in fileDao.GetFilesFilteredAsync(matchedId.Select(selectorLocal.ConvertId).ToArray(), filterType, subjectGroup, subjectID, searchText, 
+                await foreach (var file in fileDao.GetFilesFilteredAsync(matchedId.Select(selectorLocal.ConvertId).ToArray(), excludeParentsIds, filterType, subjectGroup, subjectID, searchText,
                                    extension, searchInContent))
                 {
                     if (file != null)
@@ -181,7 +181,7 @@ internal class ProviderFileDao(
     {
         return await GetFileStreamAsync(file, offset, long.MaxValue);
     }
-    
+
     public async Task<Stream> GetFileStreamAsync(File<string> file, long offset, long length)
     {
         ArgumentNullException.ThrowIfNull(file);
@@ -360,6 +360,11 @@ internal class ProviderFileDao(
         return await fileDao.IsExistAsync(title, selector.ConvertId(folderId));
     }
 
+    public async Task<bool> IsExistAsync(string title, int category, string folderId)
+    {
+        return await IsExistAsync(title, folderId);
+    }
+
     public async Task<TTo> MoveFileAsync<TTo>(string fileId, TTo toFolderId, bool deleteLinks = false)
     {
         if (toFolderId is int tId)
@@ -435,7 +440,7 @@ internal class ProviderFileDao(
         var selector = _selectorFactory.GetSelector(file.Id);
         var fileId = file.Id;
         var parentId = file.ParentId;
-        
+
         var fileDao = selector.GetFileDao(file.Id);
         file.Id = ConvertId(file.Id);
         file.ParentId = ConvertId(file.ParentId);
@@ -444,7 +449,7 @@ internal class ProviderFileDao(
 
         file.Id = fileId;
         file.ParentId = parentId;
-        
+
         return newFileId;
     }
 
@@ -484,23 +489,32 @@ internal class ProviderFileDao(
 
     public Task SaveFormRoleMapping(string formId, IEnumerable<FormRole> formRoles)
     {
-        throw new NotImplementedException();
+        return Task.CompletedTask;
     }
     public IAsyncEnumerable<FormRole> GetFormRoles(string formId)
     {
-        throw new NotImplementedException();
+        return AsyncEnumerable.Empty<FormRole>();
     }
-    public Task<(int, IAsyncEnumerable<FormRole>)> GetUserFormRoles(string formId, Guid userId)
+    public Task<(int, List<FormRole>)> GetUserFormRoles(string formId, Guid userId)
     {
-        throw new NotImplementedException();
+        return Task.FromResult((-1, new List<FormRole>()));
+    }
+    public IAsyncEnumerable<FormRole> GetUserFormRolesInRoom(string roomId, Guid userId)
+    {
+        return AsyncEnumerable.Empty<FormRole>();
     }
     public Task<FormRole> ChangeUserFormRoleAsync(string formId, FormRole formRole)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<FormRole>(null);
     }
     public Task DeleteFormRolesAsync(string formId)
     {
-        throw new NotImplementedException();
+        return Task.CompletedTask;
+    }
+
+    public Task<int> UpdateCategoryAsync(string fileId, int fileVersion, int category, ForcesaveType forcesave)
+    {
+        return Task.FromResult(0);
     }
 
     #region chunking
@@ -593,6 +607,13 @@ internal class ProviderFileDao(
         var selector = _selectorFactory.GetSelector(parentFolderId);
         var fileDao = selector.GetFileDao(parentFolderId);
         await fileDao.InitCustomOrder(fileIds, parentFolderId);
+    }
+
+    public Task SetVectorizationStatusAsync(string fileId, VectorizationStatus status, Func<Task> action = null)
+    {
+        var selector = _selectorFactory.GetSelector(fileId);
+        var fileDao = selector.GetFileDao(fileId);
+        return fileDao.SetVectorizationStatusAsync(selector.ConvertId(fileId), status);
     }
 
     public Task<long> GetTransferredBytesCountAsync(ChunkedUploadSession<string> uploadSession)

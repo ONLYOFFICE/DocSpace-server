@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -65,14 +65,14 @@ public static class UserPhotoThumbnailManager
     {
         var x = thumbnailSettings.Point.X > 0 ? thumbnailSettings.Point.X : 0;
         var y = thumbnailSettings.Point.Y > 0 ? thumbnailSettings.Point.Y : 0;
-        var width = x + thumbnailSettings.Size.Width >= mainImg.Width ? mainImg.Width - x : thumbnailSettings.Size.Width ;
+        var width = x + thumbnailSettings.Size.Width >= mainImg.Width ? mainImg.Width - x : thumbnailSettings.Size.Width;
         var height = y + thumbnailSettings.Size.Height >= mainImg.Height ? mainImg.Height - y : thumbnailSettings.Size.Height;
-        
+
         var result = mainImg.CloneAndMutate(a =>
         {
             a.Colorize(MagickColors.White, new Percentage());
         });
-        
+
         result.Crop(new MagickGeometry(x, y, (uint)width, (uint)height));
         result.Resize(size.Width, size.Height);
 
@@ -158,8 +158,8 @@ public static class UserPhotoThumbnailManager
                 var tmpW = width;
                 var tmpH = height;
                 #endregion
-                
-                using var destRound = img.CloneAndMutate(x=> x.Resize(tmpW, tmpH));
+
+                using var destRound = img.CloneAndMutate(x => x.Resize(tmpW, tmpH));
 
                 data = await CommonPhotoManager.SaveToBytes(destRound);
             }

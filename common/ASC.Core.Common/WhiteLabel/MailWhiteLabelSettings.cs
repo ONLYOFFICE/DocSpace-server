@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,32 +27,33 @@
 namespace ASC.Web.Core.WhiteLabel;
 
 /// <summary>
-/// Mail white label settings
+/// The mail white label settings wrapper.
 /// </summary>
 public class MailWhiteLabelSettingsWrapper
 {
     /// <summary>
-    /// Mail white label settings
+    /// The mail white label settings.
     /// </summary>
     public MailWhiteLabelSettings Settings { get; set; }
 }
 
 /// <summary>
-/// Mail white label settings
+/// The mail white label settings.
 /// </summary>
 public class MailWhiteLabelSettings : ISettings<MailWhiteLabelSettings>
 {
-    /// <summary>Specifies if the mail footer is enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the mail footer is enabled or not.
+    /// </summary>
     public bool FooterEnabled { get; set; }
 
-    /// <summary>Specifies if the footer with social media contacts is enabled or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the footer with social media contacts is enabled or not.
+    /// </summary>
     public bool FooterSocialEnabled { get; set; }
 
 
-    [JsonIgnore]
-    public Guid ID => new("{C3602052-5BA2-452A-BD2A-ADD0FAF8EB88}");
+    public static Guid ID => new("{C3602052-5BA2-452A-BD2A-ADD0FAF8EB88}");
 
     public MailWhiteLabelSettings()
     {
@@ -61,12 +62,14 @@ public class MailWhiteLabelSettings : ISettings<MailWhiteLabelSettings>
 
     public MailWhiteLabelSettings GetDefault()
     {
-        return new MailWhiteLabelSettings()
+        return new MailWhiteLabelSettings
         {
             FooterEnabled = true,
             FooterSocialEnabled = true
         };
     }
+
+    public DateTime LastModified { get; set; }
 
     public bool IsDefault()
     {

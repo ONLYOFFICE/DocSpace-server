@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -43,7 +43,7 @@ internal class SharePointFileDao(
     : SharePointDaoBase(daoFactory, serviceProvider, userManager, tenantManager, tenantUtil, dbContextManager, fileUtility, regexDaoSelectorBase), IFileDao<string>
 {
     private const string BytesTransferredKey = "BytesTransferred";
-    
+
     public async Task InvalidateCacheAsync(string fileId)
     {
         await SharePointProviderInfo.InvalidateStorageAsync();
@@ -90,8 +90,8 @@ internal class SharePointFileDao(
         }
     }
 
-    public IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, 
-        string[] extension, bool searchInContent, bool checkShared = false)
+    public IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, IEnumerable<string> excludeParentsIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
+        string[] extension, bool searchInContent)
     {
         if (fileIds == null || !fileIds.Any() || filterType == FilterType.FoldersOnly)
         {
@@ -103,7 +103,7 @@ internal class SharePointFileDao(
         //Filter
         if (subjectID != Guid.Empty)
         {
-            files = files.WhereAwait(async x => subjectGroup
+            files = files.Where(async (x, _) => subjectGroup
                                          ? await _userManager.IsUserInGroupAsync(x.CreateBy, subjectID)
                                          : x.CreateBy == subjectID);
         }
@@ -136,6 +136,9 @@ internal class SharePointFileDao(
 
                     return fileType is FileType.Audio or FileType.Video;
                 });
+                break;
+            case FilterType.DiagramsOnly:
+                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Diagram);
                 break;
             case FilterType.ByExtension:
                 if (!string.IsNullOrEmpty(searchText))
@@ -185,7 +188,7 @@ internal class SharePointFileDao(
         //Filter
         if (subjectID != Guid.Empty)
         {
-            files = files.WhereAwait(async x => subjectGroup
+            files = files.Where(async (x, _) => subjectGroup
                                          ? await _userManager.IsUserInGroupAsync(x.CreateBy, subjectID)
                                          : x.CreateBy == subjectID);
         }
@@ -218,6 +221,9 @@ internal class SharePointFileDao(
 
                     return fileType is FileType.Audio or FileType.Video;
                 });
+                break;
+            case FilterType.DiagramsOnly:
+                files = files.Where(x => FileUtility.GetFileTypeByFileName(x.Title) == FileType.Diagram);
                 break;
             case FilterType.ByExtension:
                 if (!string.IsNullOrEmpty(searchText))
@@ -274,7 +280,7 @@ internal class SharePointFileDao(
         return fileStream;
     }
 
-    
+
     public async Task<Stream> GetFileStreamAsync(File<string> file, long offset, long length)
     {
         return await GetFileStreamAsync(file, offset);
@@ -290,7 +296,7 @@ internal class SharePointFileDao(
 
         return SharePointProviderInfo.ToFile(fileToDownload).ContentLength;
     }
-    
+
     public Task<string> GetPreSignedUriAsync(File<string> file, TimeSpan expires, string shareKey = null)
     {
         throw new NotSupportedException();
@@ -354,7 +360,7 @@ internal class SharePointFileDao(
     {
         await DeleteFileAsync(fileId);
     }
-    
+
     public async Task DeleteFileAsync(string fileId)
     {
         await SharePointProviderInfo.DeleteFileAsync(fileId);
@@ -366,7 +372,11 @@ internal class SharePointFileDao(
 
         return files.Any(item => item.Name.Equals(title, StringComparison.InvariantCultureIgnoreCase));
     }
-    
+
+    public async Task<bool> IsExistAsync(string title, int category, string folderId)
+    {
+        return await IsExistAsync(title, folderId);
+    }
 
     public async Task<TTo> MoveFileAsync<TTo>(string fileId, TTo toFolderId, bool deleteLinks = false)
     {
@@ -480,7 +490,7 @@ internal class SharePointFileDao(
         }
 
         uploadSession.File = await SaveFileAsync(uploadSession.File, chunkStream);
-            
+
         uploadSession.Items[BytesTransferredKey] = chunkLength.ToString();
 
         return uploadSession.File;
@@ -522,6 +532,11 @@ internal class SharePointFileDao(
         return Task.CompletedTask;
     }
 
+    public Task SetVectorizationStatusAsync(string fileId, VectorizationStatus status, Func<Task> action = null)
+    {
+        return Task.CompletedTask;
+    }
+
     public Task<long> GetTransferredBytesCountAsync(ChunkedUploadSession<string> uploadSession)
     {
         if (!long.TryParse(uploadSession.GetItemOrDefault<string>(BytesTransferredKey), out var transferred))
@@ -530,28 +545,36 @@ internal class SharePointFileDao(
         }
 
         uploadSession.File = FixId(uploadSession.File);
-        
+
         return Task.FromResult(transferred);
     }
 
     public Task SaveFormRoleMapping(string formId, IEnumerable<FormRole> formRoles)
     {
-        throw new NotImplementedException();
+        return Task.CompletedTask;
     }
     public IAsyncEnumerable<FormRole> GetFormRoles(string formId)
     {
-        throw new NotImplementedException();
+        return AsyncEnumerable.Empty<FormRole>();
     }
-    public Task<(int, IAsyncEnumerable<FormRole>)> GetUserFormRoles(string formId, Guid userId)
+    public Task<(int, List<FormRole>)> GetUserFormRoles(string formId, Guid userId)
     {
-        throw new NotImplementedException();
+        return Task.FromResult((-1, new List<FormRole>()));
+    }
+    public IAsyncEnumerable<FormRole> GetUserFormRolesInRoom(string roomId, Guid userId)
+    {
+        return AsyncEnumerable.Empty<FormRole>();
     }
     public Task<FormRole> ChangeUserFormRoleAsync(string formId, FormRole formRole)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<FormRole>(null);
     }
     public Task DeleteFormRolesAsync(string formId)
     {
-        throw new NotImplementedException();
+        return Task.CompletedTask;
+    }
+    public Task<int> UpdateCategoryAsync(string fileId, int fileVersion, int category, ForcesaveType forcesave)
+    {
+        return Task.FromResult(0);
     }
 }

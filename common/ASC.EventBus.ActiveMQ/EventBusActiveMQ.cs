@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -112,11 +112,11 @@ public class EventBusActiveMQ : IEventBus, IDisposable
             await _persistentConnection.TryConnectAsync();
         }
 
-        Policy.Handle<SocketException>()
-            .WaitAndRetry(_retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
-            {
-                _logger.WarningCouldNotPublishEvent(@event.Id, time.TotalSeconds, ex);
-            });
+        //Policy.Handle<SocketException>()
+        //    .WaitAndRetry(_retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
+        //    {
+        //        _logger.WarningCouldNotPublishEvent(@event.Id, time.TotalSeconds, ex);
+        //    });
 
         using var session = await _persistentConnection.CreateSessionAsync(AcknowledgementMode.ClientAcknowledge);
         var destination = await session.GetQueueAsync(_queueName);
@@ -182,7 +182,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
 
         if (!_persistentConnection.IsConnected)
         {
-           await  _persistentConnection.TryConnectAsync();
+            await _persistentConnection.TryConnectAsync();
         }
 
         var destination = await _consumerSession.GetQueueAsync(_queueName);
@@ -241,7 +241,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
             }
 
             await ProcessEventAsync(eventName, @event);
-               
+
             await streamMessage.AcknowledgeAsync();
         }
         catch (IntegrationEventRejectExeption ex)

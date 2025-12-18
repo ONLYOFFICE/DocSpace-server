@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -57,7 +57,7 @@ public class InstanceCrypto(MachinePseudoKeys machinePseudoKeys)
     {
         return Convert.ToBase64String(await EncryptAsync(Encoding.UTF8.GetBytes(data)));
     }
-    
+
     public async Task<byte[]> EncryptAsync(byte[] data)
     {
         using var hasher = Aes.Create();
@@ -94,7 +94,7 @@ public class InstanceCrypto(MachinePseudoKeys machinePseudoKeys)
         // and place them in a string.
         return srDecrypt.ReadToEnd();
     }
-    
+
     public Task<string> DecryptAsync(string data) => DecryptAsync(Convert.FromBase64String(data));
 
     public async Task<string> DecryptAsync(byte[] data, Encoding encoding = null)

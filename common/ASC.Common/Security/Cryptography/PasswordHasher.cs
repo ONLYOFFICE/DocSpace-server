@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,29 +26,32 @@
 
 namespace ASC.Security.Cryptography;
 
+/// <ssummary>
+/// The password hash parameters.
+/// </summary>
 [Singleton]
 public class PasswordHasher
 {
     /// <summary>
-    /// Size
+    /// The password hash size.
     /// </summary>
     public int Size { get; private set; }
 
     /// <summary>
-    /// Iterations
+    /// The number of iterations to generate the ppassword hash.
     /// </summary>
     public int Iterations { get; private set; }
 
     /// <summary>
-    /// Salt
+    /// The salt to generate the ppassword hash.
     /// </summary>
     public string Salt { get; private set; }
 
     public PasswordHasher()
     {
-        
+
     }
-    
+
     public PasswordHasher(IConfiguration configuration, MachinePseudoKeys machinePseudoKeys)
     {
         if (!int.TryParse(configuration["core:password:size"], out var size))

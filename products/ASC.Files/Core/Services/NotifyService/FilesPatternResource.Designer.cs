@@ -79,7 +79,7 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A new files have been uploaded to the room &quot;$RoomTitle&quot; ($Count).
+        ///   Looks up a localized string similar to New files have been uploaded to the room &quot;$RoomTitle&quot; ($Count).
         /// </summary>
         public static string pattern_DocumentsUploadedTo_push {
             get {
@@ -156,7 +156,9 @@ namespace ASC.Files.Core.Services.NotifyService {
         ///
         ///Form submitter: &quot;$FromUserName&quot;:&quot;$FromUserLink&quot;
         ///
-        ///$OrangeButton.
+        ///$OrangeButton
+        ///
+        ///&amp;nbsp;.
         /// </summary>
         public static string pattern_FormReceived {
             get {
@@ -182,7 +184,9 @@ namespace ASC.Files.Core.Services.NotifyService {
         ///
         ///Manager: &quot;$ToUserName&quot;:&quot;$ToUserLink&quot;
         ///
-        ///$OrangeButton.
+        ///$OrangeButton
+        ///
+        ///&amp;nbsp;.
         /// </summary>
         public static string pattern_FormSubmitted {
             get {
@@ -201,7 +205,7 @@ namespace ASC.Files.Core.Services.NotifyService {
         
         /// <summary>
         ///   Looks up a localized string similar to 
-        ///      Activity notification. The form &quot;$DocumentTitle&quot;:&quot;$DocumentURL&quot; was completely filled out, finalized, and signed in the room: &quot;$RoomTitle&quot;:&quot;$RoomURL&quot; — $__DateTime.
+        ///      Activity notification. The form &quot;$DocumentTitle&quot;:&quot;$DocumentURL&quot; was completely filled out in the room: &quot;$RoomTitle&quot;:&quot;$RoomURL&quot; — $__DateTime.
         ///    .
         /// </summary>
         public static string pattern_FormWasCompletelyFilled {
@@ -289,7 +293,7 @@ namespace ASC.Files.Core.Services.NotifyService {
         
         /// <summary>
         ///   Looks up a localized string similar to 
-        ///      Activity notification.  &quot;$FromUserName&quot;:&quot;$FromUserLink&quot; stopped form filling: &quot;$DocumentTitle&quot;:&quot;$DocumentURL&quot; in the room: &quot;$RoomTitle&quot;:&quot;$RoomURL&quot; — $__DateTime.
+        ///      Activity notification. &quot;$FromUserName&quot;:&quot;$FromUserLink&quot; stopped form filling: &quot;$DocumentTitle&quot;:&quot;$DocumentURL&quot; in the room: &quot;$RoomTitle&quot;:&quot;$RoomURL&quot; — $__DateTime.
         ///    .
         /// </summary>
         public static string pattern_StoppedFormFilling {

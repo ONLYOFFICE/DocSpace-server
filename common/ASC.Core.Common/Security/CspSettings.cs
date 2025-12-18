@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,8 +27,7 @@
 namespace ASC.Core.Common.Security;
 public class CspSettings : ISettings<CspSettings>
 {
-    [JsonIgnore]
-    public Guid ID => new("27504162-16FF-405F-8530-1537B0F2B89D");
+    public static Guid ID => new("27504162-16FF-405F-8530-1537B0F2B89D");
 
     public IEnumerable<string> Domains { get; set; }
 
@@ -36,4 +35,6 @@ public class CspSettings : ISettings<CspSettings>
     {
         return new CspSettings { Domains = new List<string>() };
     }
+
+    public DateTime LastModified { get; set; }
 }

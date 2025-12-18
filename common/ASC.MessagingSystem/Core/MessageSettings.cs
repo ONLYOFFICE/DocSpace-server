@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -85,6 +85,11 @@ public class MessageSettings
     public static string GetReferer(HttpRequest request)
     {
         return request?.Headers.Referer.FirstOrDefault();
+    }
+
+    public static string GetRequestPath(HttpRequest request)
+    {
+        return request == null ? null : $"{request.Scheme}://{request.Host}{request.PathBase}{request.Path}{request.QueryString}";
     }
 
     public static string GetReferer(IDictionary<string, StringValues> headers)

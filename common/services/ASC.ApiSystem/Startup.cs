@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,10 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Threading.Channels;
-
-using ASC.Core.Notify.Socket;
-
 namespace ASC.ApiSystem;
 
 public class Startup
@@ -51,13 +47,13 @@ public class Startup
     }
 
     public async Task ConfigureServices(WebApplicationBuilder builder)
-    {        
-        var services = builder.Services;
+    {
         if (_configuration.GetValue<bool>("openTelemetry:enable"))
         {
             builder.ConfigureOpenTelemetry();
         }
-        
+
+        var services = builder.Services;
         services.AddCustomHealthCheck(_configuration);
         services.AddHttpContextAccessor();
         services.AddMemoryCache();
@@ -80,6 +76,7 @@ public class Startup
         services.AddBaseDbContextPool<MessagesContext>();
         services.AddBaseDbContextPool<WebhooksDbContext>();
         services.AddBaseDbContextPool<FilesDbContext>();
+        services.AddBaseDbContextPool<ApiKeysDbContext>();
 
         services.AddSession();
 
@@ -122,16 +119,18 @@ public class Startup
         var connectionMultiplexer = await services.GetRedisConnectionMultiplexerAsync(_configuration, GetType().Namespace);
 
         services.AddHybridCache(connectionMultiplexer)
+                .AddMemoryCache(connectionMultiplexer)
                 .AddEventBus(_configuration)
                 .AddDistributedTaskQueue()
                 .AddCacheNotify(_configuration)
-                .AddDistributedLock(_configuration);
+                .AddDistributedLock(_configuration)
+                .AddHeartBeat(_configuration);
+
+
 
         services.RegisterFeature();
         services.RegisterQuotaFeature();
 
-        services.AddAutoMapper(BaseStartup.GetAutoMapperProfileAssemblies());
-        
         if (_configuration.GetValue<bool>("openApi:enable"))
         {
             services.AddOpenApi(_configuration);
@@ -141,15 +140,21 @@ public class Startup
             services.AddStartupTask<WarmupServicesStartupTask>()
                     .TryAddSingleton(services);
         }
-        
+
         services.AddSingleton(Channel.CreateUnbounded<SocketData>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Reader);
         services.AddSingleton(svc => svc.GetRequiredService<Channel<SocketData>>().Writer);
         services.AddScoped<AuthHandler>();
         services.AddScoped<ApiSystemAuthHandler>();
         services.AddScoped<ApiSystemBasicAuthHandler>();
-        
-        
+        services.AddScoped(_ => UrlEncoder.Default);
+
+        services.AddBillingHttpClient();
+        services.AddAccountingHttpClient();
+        services.AddSingleton(Channel.CreateUnbounded<NotifyRequest>());
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Reader);
+        services.AddSingleton(svc => svc.GetRequiredService<Channel<NotifyRequest>>().Writer);
+
         services
             .AddAuthentication()
             .AddScheme<AuthenticationSchemeOptions, AuthHandler>("auth:allowskip:default", _ => { })
@@ -161,13 +166,7 @@ public class Startup
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
         app.UseExceptionHandler();
-
         app.UseRouting();
-
-        if (!string.IsNullOrEmpty(_corsOrigin))
-        { 
-            app.UseCors(CustomCorsPolicyName);
-        }
 
         if (_configuration.GetValue<bool>("openApi:enable"))
         {
@@ -176,7 +175,12 @@ public class Startup
         app.UseSynchronizationContextMiddleware();
 
         app.UseTenantMiddleware();
-        
+
+        if (!string.IsNullOrEmpty(_corsOrigin))
+        {
+            app.UseCors(CustomCorsPolicyName);
+        }
+
         app.UseAuthentication();
 
         app.UseAuthorization();

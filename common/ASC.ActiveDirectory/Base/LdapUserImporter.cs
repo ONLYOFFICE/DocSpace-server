@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -43,7 +43,7 @@ public class LdapUserImporter(
     public Dictionary<LdapObject, LdapSettingsStatus> AllSkipedDomainGroups { get; private set; } = new();
 
     private string _ldapDomain;
-    private readonly string _unknownDomain = configuration["ldap:domain"] ?? "LDAP";
+
     public string LDAPDomain
     {
         get
@@ -57,18 +57,16 @@ public class LdapUserImporter(
 
             if (string.IsNullOrEmpty(_ldapDomain))
             {
-                _ldapDomain = _unknownDomain;
+                _ldapDomain = field;
             }
 
             return _ldapDomain;
         }
-    }
+    } = configuration["ldap:domain"] ?? "LDAP";
+
     public List<string> PrimaryGroupIds { get; set; }
 
-    public LdapSettings Settings
-    {
-        get { return LdapHelper.Settings; }
-    }
+    public LdapSettings Settings => LdapHelper.Settings;
 
     public LdapHelper LdapHelper { get; private set; } = novellLdapHelper;
     public LdapLocalization Resource { get; private set; }
@@ -92,7 +90,10 @@ public class LdapUserImporter(
             return users;
         }
 
-        var usersToAdd = await AllDomainUsers.ToAsyncEnumerable().SelectAwait(async ldapObject => await ldapObjectExtension.ToUserInfoAsync(ldapObject, this)).ToListAsync();
+        var usersToAdd = await AllDomainUsers
+            .ToAsyncEnumerable()
+            .Select(async (LdapObject ldapObject, CancellationToken _) => await ldapObjectExtension.ToUserInfoAsync(ldapObject, this))
+            .ToListAsync();
 
         users.AddRange(usersToAdd);
 
@@ -380,7 +381,7 @@ public class LdapUserImporter(
             if (Equals(groupInfo, Constants.LostGroupInfo))
             {
                 logger.DebugTrySyncUserGroupMembershipCreatingPortalGroup(ldapUserGroup.DistinguishedName, ldapUserGroup.Sid);
-                 groupInfo = await UserManager.SaveGroupInfoAsync(ldapObjectExtension.ToGroupInfo(ldapUserGroup, Settings));
+                groupInfo = await UserManager.SaveGroupInfoAsync(ldapObjectExtension.ToGroupInfo(ldapUserGroup, Settings));
 
                 logger.DebugTrySyncUserGroupMembershipAddingUserToGroup(userInfo.UserName, ldapUser.Sid, groupInfo.Name, groupInfo.Sid);
                 await UserManager.AddUserIntoGroupAsync(userInfo.Id, groupInfo.ID);
@@ -731,7 +732,7 @@ public class LdapUserImporter(
 
         var users = await LdapHelper.GetUsers(searchTerm, !string.IsNullOrEmpty(email) ? -1 : 1).ToAsyncEnumerable()
             .Where(user => user != null)
-            .ToLookupAwaitAsync(async lu =>
+            .ToLookupAsync(async (lu, _) =>
             {
                 var ui = Constants.LostUser;
 

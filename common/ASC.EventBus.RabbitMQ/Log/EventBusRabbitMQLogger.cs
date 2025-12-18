@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -65,7 +65,7 @@ internal static partial class EventBusRabbitMQLogger
 
     [LoggerMessage(LogLevel.Information, "Channel was recreated successfully")]
     public static partial void InfoCreatedConsumerChannel(this ILogger<EventBusRabbitMQ> logger);
-       
+
     [LoggerMessage(LogLevel.Warning, "RabbitMQ: Consumer channel callback exception")]
     public static partial void WarningCallbackException(this ILogger<EventBusRabbitMQ> logger, Exception exception);
 

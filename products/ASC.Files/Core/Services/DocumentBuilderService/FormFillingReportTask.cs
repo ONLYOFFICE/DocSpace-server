@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,26 +31,26 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
 {
     public FormFillingReportTask()
     {
-        
+
     }
-    
+
     public FormFillingReportTask(IServiceScopeFactory serviceProvider) : base(serviceProvider)
     {
     }
 
     private const string ScriptName = "FormFillingReport.docbuilder";
-    
+
     protected override async Task<DocumentBuilderInputData> GetDocumentBuilderInputDataAsync(IServiceProvider serviceProvider)
     {
         var script = await DocumentBuilderScriptHelper.ReadTemplateFromEmbeddedResource(ScriptName) ?? throw new Exception("Template not found");
         var tempFileName = DocumentBuilderScriptHelper.GetTempFileName(".xlsx");
-        
+
         var data = await GetFormFillingReportData(serviceProvider, _userId, _data.RoomId, _data.OriginalFormId);
 
         script = script
             .Replace("${tempFileName}", tempFileName)
             .Replace("${inputData}", JsonSerializer.Serialize(data));
-        
+
         return new DocumentBuilderInputData(script, tempFileName, "");
     }
 
@@ -58,6 +58,7 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
     {
         var daoFactory = serviceProvider.GetService<IDaoFactory>();
         var clientFactory = serviceProvider.GetService<IHttpClientFactory>();
+        var tenantUtil = serviceProvider.GetService<TenantUtil>();
 
         var fileDao = daoFactory.GetFileDao<int>();
         var origProperties = await daoFactory.GetFileDao<int>().GetProperties(_data.OriginalFormId);
@@ -69,28 +70,17 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
         using var httpClient = clientFactory.CreateClient();
         using var response = await httpClient.SendAsync(request);
         await using var stream = await response.Content.ReadAsStreamAsync();
-        
-        resultFile.Version++;
-        resultFile.VersionGroup++;
+
+        resultFile.CreateOn = tenantUtil.DateTimeNow();
         resultFile.ContentLength = stream.Length;
 
-        resultFile = await fileDao.SaveFileAsync(resultFile, stream, false);
+        resultFile = await fileDao.ReplaceFileVersionAsync(resultFile, stream);
 
         if (resultFile.Id != origProperties.FormFilling.ResultsFileID)
         {
             origProperties.FormFilling.ResultsFileID = resultFile.Id;
             await fileDao.SaveProperties(_data.OriginalFormId, origProperties);
         }
-
-        var filesMessageService = serviceProvider.GetService<FilesMessageService>();
-        
-        var headers = _data.Headers != null 
-            ? _data.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value)) 
-            : [];
-        
-        var room = await daoFactory.GetFolderDao<int>().GetFolderAsync(_data.RoomId);
-        
-        await filesMessageService.SendAsync(MessageAction.RoomIndexExportSaved, room, headers: headers);
 
         return resultFile;
     }
@@ -122,13 +112,10 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
         if (formFillingResults.Any())
         {
             var formsData = formFillingResults.FirstOrDefault().FormsData;
-            if(formsData.Any())
+            if (formsData.Any())
             {
                 keys.Add(FilesCommonResource.ResourceManager.GetString("FormNumber", tenantCulture));
-                foreach (var field in formsData.Skip(1))
-                {
-                    keys.Add(field.Key);
-                }
+                keys.AddRange(formsData.Skip(1).Where(d => d.Type != "picture" && d.Type != "signature").Select(field => field.Key));
                 keys.Add(FilesCommonResource.ResourceManager.GetString("Date", tenantCulture));
                 keys.Add(FilesCommonResource.ResourceManager.GetString("LinkToForm", tenantCulture));
 
@@ -137,7 +124,7 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
                     var t = new List<object>();
                     foreach (var field in formFillingRes.FormsData)
                     {
-                        if (field.Type == "picture")
+                        if (field.Type is "picture" or "signature")
                         {
                             continue;
                         }
@@ -155,13 +142,16 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
                         url = ""
                     });
                     var formsDataFile = await fileDao.GetFileAsync(formFillingRes.Id);
-                    var resultUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, formsDataFile.Title, formsDataFile.Id, formsDataFile.Version));
-                    t.Add(new
+                    if (formsDataFile != null)
                     {
-                        format = "@",
-                        value = FilesCommonResource.ResourceManager.GetString("OpenForm", tenantCulture),
-                        url = resultUrl
-                    });
+                        var resultUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, formsDataFile.Title, formsDataFile.Id, formsDataFile.Version));
+                        t.Add(new
+                        {
+                            format = "@",
+                            value = FilesCommonResource.ResourceManager.GetString("OpenForm", tenantCulture),
+                            url = resultUrl
+                        });
+                    }
                     values.Add(t);
                 }
             }
@@ -185,7 +175,8 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
                 mainFontColor = DocumentBuilderScriptHelper.ConvertHtmlColorToRgb(selectedColorTheme.Text.Accent, 1)
             },
 
-            data = new {
+            data = new
+            {
                 keys,
                 values
             }

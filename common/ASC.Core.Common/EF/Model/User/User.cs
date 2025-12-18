@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,13 +26,16 @@
 
 namespace ASC.Core.Common.EF;
 
-public class User : BaseEntity, IMapFrom<UserInfo>
+public class User : BaseEntity
 {
     public int TenantId { get; set; }
+
     [MaxLength(255)]
     public string UserName { get; set; }
+
     [MaxLength(64)]
     public string FirstName { get; set; }
+
     [MaxLength(64)]
     public string LastName { get; set; }
     public Guid Id { get; set; }
@@ -40,27 +43,37 @@ public class User : BaseEntity, IMapFrom<UserInfo>
     public DateTime? BirthDate { get; set; }
     public EmployeeStatus Status { get; set; }
     public EmployeeActivationStatus ActivationStatus { get; set; }
+
     [MaxLength(255)]
     public string Email { get; set; }
     public DateTime? WorkFromDate { get; set; }
     public DateTime? TerminatedDate { get; set; }
+
     [MaxLength(64)]
     public string Title { get; set; }
+
     [MaxLength(20)]
     public string CultureName { get; set; }
+
     [MaxLength(1024)]
     public string Contacts { get; set; }
+
     [MaxLength(255)]
     public string MobilePhone { get; set; }
     public MobilePhoneActivationStatus MobilePhoneActivation { get; set; }
+
     [MaxLength(255)]
     public string Location { get; set; }
+
     [MaxLength(512)]
     public string Notes { get; set; }
+
     [MaxLength(512)]
     public string Sid { get; set; }
+
     [MaxLength(512)]
     public string SsoNameId { get; set; }
+
     [MaxLength(512)]
     public string SsoSessionId { get; set; }
     public bool Removed { get; set; }
@@ -105,287 +118,290 @@ public static class DbUserExtension
         return modelBuilder;
     }
 
-    private static void MySqlAddUser(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<User>(entity =>
+        private void MySqlAddUser()
         {
-            entity.ToTable("core_user")
-                .HasCharSet("utf8");
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.ToTable("core_user")
+                    .HasCharSet("utf8");
 
-            entity.HasKey(e => e.Id)
-                .HasName("PRIMARY");
+                entity.HasKey(e => e.Id)
+                    .HasName("PRIMARY");
 
-            entity.HasIndex(e => e.Email)
-                .HasDatabaseName("email");
+                entity.HasIndex(e => e.Email)
+                    .HasDatabaseName("email");
 
-            entity.HasIndex(e => e.LastModified)
-                .HasDatabaseName("last_modified");
+                entity.HasIndex(e => e.LastModified)
+                    .HasDatabaseName("last_modified");
 
-            entity.HasIndex(e => new { e.TenantId, e.UserName })
-                .HasDatabaseName("username");
+                entity.HasIndex(e => new { e.TenantId, e.UserName })
+                    .HasDatabaseName("username");
 
-            entity.HasIndex(e => new { e.TenantId, e.ActivationStatus, e.FirstName })
-                .HasDatabaseName("tenant_activation_status_firstname");
+                entity.HasIndex(e => new { e.TenantId, e.ActivationStatus, e.FirstName })
+                    .HasDatabaseName("tenant_activation_status_firstname");
 
-            entity.HasIndex(e => new { e.TenantId, e.ActivationStatus, e.LastName })
-                .HasDatabaseName("tenant_activation_status_lastname");
+                entity.HasIndex(e => new { e.TenantId, e.ActivationStatus, e.LastName })
+                    .HasDatabaseName("tenant_activation_status_lastname");
 
-            entity.HasIndex(e => new { e.TenantId, e.ActivationStatus, e.Email })
-                .HasDatabaseName("tenant_activation_status_email");
+                entity.HasIndex(e => new { e.TenantId, e.ActivationStatus, e.Email })
+                    .HasDatabaseName("tenant_activation_status_email");
 
-            entity.Property(e => e.Id)
-                .HasColumnName("id")
-                .HasColumnType("varchar(38)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("varchar(38)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.ActivationStatus)
-                .HasColumnName("activation_status")
-                .HasDefaultValueSql("'0'");
+                entity.Property(e => e.ActivationStatus)
+                    .HasColumnName("activation_status")
+                    .HasDefaultValueSql("'0'");
 
-            entity.Property(e => e.BirthDate)
-                .HasColumnName("bithdate")
-                .HasColumnType("datetime");
+                entity.Property(e => e.BirthDate)
+                    .HasColumnName("bithdate")
+                    .HasColumnType("datetime");
 
-            entity.Property(e => e.Contacts)
-                .HasColumnName("contacts")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Contacts)
+                    .HasColumnName("contacts")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.CreateDate)
-                .HasColumnName("create_on")
-                .HasColumnType("timestamp");
+                entity.Property(e => e.CreateDate)
+                    .HasColumnName("create_on")
+                    .HasColumnType("timestamp");
 
-            entity.Property(e => e.CultureName)
-                .HasColumnName("culture")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.CultureName)
+                    .HasColumnName("culture")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
 
-            entity.Property(e => e.Email)
-                .HasColumnName("email")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Email)
+                    .HasColumnName("email")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.FirstName)
-                .IsRequired()
-                .HasColumnName("firstname")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.FirstName)
+                    .IsRequired()
+                    .HasColumnName("firstname")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.LastModified)
-                .HasColumnName("last_modified")
-                .HasColumnType("datetime");
+                entity.Property(e => e.LastModified)
+                    .HasColumnName("last_modified")
+                    .HasColumnType("datetime");
 
-            entity.Property(e => e.LastName)
-                .IsRequired()
-                .HasColumnName("lastname")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.LastName)
+                    .IsRequired()
+                    .HasColumnName("lastname")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Location)
-                .HasColumnName("location")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Location)
+                    .HasColumnName("location")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Notes)
-                .HasColumnName("notes")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Notes)
+                    .HasColumnName("notes")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.MobilePhone)
-                .HasColumnName("phone")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.MobilePhone)
+                    .HasColumnName("phone")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.MobilePhoneActivation)
-                .HasColumnName("phone_activation")
-                .HasDefaultValueSql("'0'");
+                entity.Property(e => e.MobilePhoneActivation)
+                    .HasColumnName("phone_activation")
+                    .HasDefaultValueSql("'0'");
 
-            entity.Property(e => e.Removed)
-                .HasColumnName("removed")
-                .HasColumnType("tinyint(1)")
-                .HasDefaultValueSql("'0'");
+                entity.Property(e => e.Removed)
+                    .HasColumnName("removed")
+                    .HasColumnType("tinyint(1)")
+                    .HasDefaultValueSql("'0'");
 
-            entity.Property(e => e.Sex)
-                .HasColumnName("sex")
-                .HasColumnType("tinyint(1)");
+                entity.Property(e => e.Sex)
+                    .HasColumnName("sex")
+                    .HasColumnType("tinyint(1)");
 
-            entity.Property(e => e.Sid)
-                .HasColumnName("sid")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Sid)
+                    .HasColumnName("sid")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.SsoNameId)
-                .HasColumnName("sso_name_id")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.SsoNameId)
+                    .HasColumnName("sso_name_id")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.SsoSessionId)
-                .HasColumnName("sso_session_id")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.SsoSessionId)
+                    .HasColumnName("sso_session_id")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Status)
-                .HasColumnName("status")
-                .HasDefaultValueSql("'1'");
+                entity.Property(e => e.Status)
+                    .HasColumnName("status")
+                    .HasDefaultValueSql("'1'");
 
-            entity.Property(e => e.TenantId).HasColumnName("tenant");
+                entity.Property(e => e.TenantId).HasColumnName("tenant");
 
-            entity.Property(e => e.TerminatedDate)
-                .HasColumnName("terminateddate")
-                .HasColumnType("datetime");
+                entity.Property(e => e.TerminatedDate)
+                    .HasColumnName("terminateddate")
+                    .HasColumnType("datetime");
 
-            entity.Property(e => e.Title)
-                .HasColumnName("title")
-                .HasColumnType("varchar(64)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.Title)
+                    .HasColumnName("title")
+                    .HasColumnType("varchar(64)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.UserName)
-                .IsRequired()
-                .HasColumnName("username")
-                .HasColumnType("varchar")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.UserName)
+                    .IsRequired()
+                    .HasColumnName("username")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.WorkFromDate)
-                .HasColumnName("workfromdate")
-                .HasColumnType("datetime");
+                entity.Property(e => e.WorkFromDate)
+                    .HasColumnName("workfromdate")
+                    .HasColumnType("datetime");
 
-            entity.Property(e => e.CreatedBy)
-                .HasColumnName("created_by")
-                .HasColumnType("varchar(36)")
-                .HasCharSet("utf8")
-                .UseCollation("utf8_general_ci");
+                entity.Property(e => e.CreatedBy)
+                    .HasColumnName("created_by")
+                    .HasColumnType("varchar(36)")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
 
-            entity.Property(e => e.Spam)
-                .HasColumnName("spam")
-                .HasColumnType("tinyint(1)");
-        });
-    }
+                entity.Property(e => e.Spam)
+                    .HasColumnName("spam")
+                    .HasColumnType("tinyint(1)");
+            });
+        }
 
-    private static void PgSqlAddUser(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<User>(entity =>
-        {            
-            entity.ToTable("core_user");
-            
-            // Setting the primary key
-            entity.HasKey(e => e.Id);
+        private void PgSqlAddUser()
+        {
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.ToTable("core_user");
 
-            // Configuring properties with specific column mappings for PostgreSQL
-            entity.Property(e => e.Id)
-                .HasColumnName("id")
-                .HasColumnType("uuid")
-                .IsRequired();
+                // Setting the primary key
+                entity.HasKey(e => e.Id);
 
-            entity.Property(e => e.TenantId)
-                .HasColumnName("tenant_id")
-                .HasColumnType("integer")
-                .IsRequired();
+                // Configuring properties with specific column mappings for PostgreSQL
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("uuid")
+                    .IsRequired();
 
-            entity.Property(e => e.UserName)
-                .HasColumnName("username")
-                .HasColumnType("character varying")
-                .HasMaxLength(255)
-                .IsRequired();
+                entity.Property(e => e.TenantId)
+                    .HasColumnName("tenant_id")
+                    .HasColumnType("integer")
+                    .IsRequired();
 
-            entity.Property(e => e.FirstName)
-                .HasColumnName("first_name")
-                .HasColumnType("character varying")
-                .HasMaxLength(64);
+                entity.Property(e => e.UserName)
+                    .HasColumnName("username")
+                    .HasColumnType("character varying")
+                    .HasMaxLength(255)
+                    .IsRequired();
 
-            entity.Property(e => e.LastName)
-                .HasColumnName("last_name")
-                .HasColumnType("character varying")
-                .HasMaxLength(64);
+                entity.Property(e => e.FirstName)
+                    .HasColumnName("first_name")
+                    .HasColumnType("character varying")
+                    .HasMaxLength(64);
 
-            entity.Property(e => e.Email)
-                .HasColumnName("email")
-                .HasColumnType("character varying")
-                .HasMaxLength(255);
+                entity.Property(e => e.LastName)
+                    .HasColumnName("last_name")
+                    .HasColumnType("character varying")
+                    .HasMaxLength(64);
 
-            entity.Property(e => e.Status)
-                .HasColumnName("status")
-                .HasColumnType("integer");
+                entity.Property(e => e.Email)
+                    .HasColumnName("email")
+                    .HasColumnType("character varying")
+                    .HasMaxLength(255);
 
-            entity.Property(e => e.ActivationStatus)
-                .HasColumnName("activation_status")
-                .HasColumnType("integer");
+                entity.Property(e => e.Status)
+                    .HasColumnName("status")
+                    .HasColumnType("integer");
 
-            entity.Property(e => e.CreateDate)
-                .HasColumnName("create_date")
-                .HasColumnType("timestamptz");
+                entity.Property(e => e.ActivationStatus)
+                    .HasColumnName("activation_status")
+                    .HasColumnType("integer");
 
-            entity.Property(e => e.LastModified)
-                .HasColumnName("last_modified")
-                .HasColumnType("timestamptz");
+                entity.Property(e => e.CreateDate)
+                    .HasColumnName("create_date")
+                    .HasColumnType("timestamptz");
 
-            entity.Property(e => e.Removed)
-                .HasColumnName("removed")
-                .HasColumnType("boolean")
-                .IsRequired();
+                entity.Property(e => e.LastModified)
+                    .HasColumnName("last_modified")
+                    .HasColumnType("timestamptz");
 
-            // Optional property configuration as shown in the provided `User` class
-            entity.Property(e => e.Sex)
-                .HasColumnName("sex")
-                .HasColumnType("boolean");
+                entity.Property(e => e.Removed)
+                    .HasColumnName("removed")
+                    .HasColumnType("boolean")
+                    .IsRequired();
 
-            entity.Property(e => e.BirthDate)
-                .HasColumnName("birth_date")
-                .HasColumnType("timestamptz");
+                // Optional property configuration as shown in the provided `User` class
+                entity.Property(e => e.Sex)
+                    .HasColumnName("sex")
+                    .HasColumnType("boolean");
 
-            entity.Property(e => e.Notes)
-                .HasColumnName("notes")
-                .HasColumnType("character varying")
-                .HasMaxLength(512);
+                entity.Property(e => e.BirthDate)
+                    .HasColumnName("birth_date")
+                    .HasColumnType("timestamptz");
 
-            entity.Property(e => e.Title)
-                .HasColumnName("title")
-                .HasColumnType("character varying")
-                .HasMaxLength(64);
+                entity.Property(e => e.Notes)
+                    .HasColumnName("notes")
+                    .HasColumnType("character varying")
+                    .HasMaxLength(512);
 
-            entity.Property(e => e.CultureName)
-                .HasColumnName("culture_name")
-                .HasColumnType("character varying")
-                .HasMaxLength(20);
+                entity.Property(e => e.Title)
+                    .HasColumnName("title")
+                    .HasColumnType("character varying")
+                    .HasMaxLength(64);
 
-            entity.Property(e => e.Contacts)
-                .HasColumnName("contacts")
-                .HasColumnType("character varying")
-                .HasMaxLength(1024);
+                entity.Property(e => e.CultureName)
+                    .HasColumnName("culture_name")
+                    .HasColumnType("character varying")
+                    .HasMaxLength(20);
 
-            entity.Property(e => e.MobilePhone)
-                .HasColumnName("mobile_phone")
-                .HasColumnType("character varying")
-                .HasMaxLength(255);
+                entity.Property(e => e.Contacts)
+                    .HasColumnName("contacts")
+                    .HasColumnType("character varying")
+                    .HasMaxLength(1024);
 
-            entity.Property(e => e.MobilePhoneActivation)
-                .HasColumnName("mobile_phone_activation")
-                .HasColumnType("integer");
+                entity.Property(e => e.MobilePhone)
+                    .HasColumnName("mobile_phone")
+                    .HasColumnType("character varying")
+                    .HasMaxLength(255);
 
-            entity.Property(e => e.Location)
-                .HasColumnName("location")
-                .HasColumnType("character varying")
-                .HasMaxLength(255);
+                entity.Property(e => e.MobilePhoneActivation)
+                    .HasColumnName("mobile_phone_activation")
+                    .HasColumnType("integer");
 
-            // Tenancy system mapping (foreign key)
-            entity.HasOne(e => e.Tenant)
-                .WithMany()
-                .HasForeignKey(e => e.TenantId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
+                entity.Property(e => e.Location)
+                    .HasColumnName("location")
+                    .HasColumnType("character varying")
+                    .HasMaxLength(255);
+
+                // Tenancy system mapping (foreign key)
+                entity.HasOne(e => e.Tenant)
+                    .WithMany()
+                    .HasForeignKey(e => e.TenantId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,15 +27,15 @@
 namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("customschemas")]
-public class CustomSchemasController(MessageService messageService,
-        ApiContext apiContext,
-        TenantManager tenantManager,
-        PermissionContext permissionContext,
-        WebItemManager webItemManager,
-        CustomNamingPeople customNamingPeople,
-        IFusionCache fusionCache,
-        IHttpContextAccessor httpContextAccessor)
-    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+[ApiExplorerSettings(IgnoreApi = true)]
+public class CustomSchemasController(
+    MessageService messageService,
+    TenantManager tenantManager,
+    PermissionContext permissionContext,
+    WebItemManager webItemManager,
+    CustomNamingPeople customNamingPeople,
+    IFusionCache fusionCache)
+    : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <summary>
     /// Returns all portal team templates that allow users to name their organization (or group), add members, and define their activities within the portal.
@@ -46,11 +46,11 @@ public class CustomSchemasController(MessageService messageService,
     [Tags("Settings / Team templates")]
     [SwaggerResponse(200, "List of team templates with the following parameters", typeof(List<SchemaRequestsDto>))]
     [HttpGet("")]
-    public async Task<List<SchemaRequestsDto>> PeopleSchemasAsync()
+    public async Task<List<SchemaRequestsDto>> GetPeopleSchemas()
     {
-        return await customNamingPeople
-                .GetSchemas().ToAsyncEnumerable()
-                .SelectAwait(async r =>
+        return await customNamingPeople.GetSchemas()
+                .ToAsyncEnumerable()
+                .Select(async (KeyValuePair<string, string> r, CancellationToken _) =>
                 {
                     var names = await customNamingPeople.GetPeopleNamesAsync(r.Key);
 
@@ -80,7 +80,7 @@ public class CustomSchemasController(MessageService messageService,
     [Tags("Settings / Team templates")]
     [SwaggerResponse(200, "Team template with the following parameters", typeof(SchemaRequestsDto))]
     [HttpPost("")]
-    public async Task<SchemaRequestsDto> SaveNamingSettingsAsync(SchemaBaseRequestsDto inDto)
+    public async Task<SchemaRequestsDto> SaveNamingSettings(SchemaBaseRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -92,7 +92,7 @@ public class CustomSchemasController(MessageService messageService,
 
         var people = new IdRequestDto<string> { Id = inDto.Id };
 
-        return await PeopleSchemaAsync(people);
+        return await GetPeopleSchema(people);
     }
 
     /// <summary>
@@ -104,7 +104,7 @@ public class CustomSchemasController(MessageService messageService,
     [SwaggerResponse(200, "Custom team template with the following parameters", typeof(SchemaRequestsDto))]
     [SwaggerResponse(400, "Please fill in all fields")]
     [HttpPut("")]
-    public async Task<SchemaRequestsDto> SaveCustomNamingSettingsAsync(SchemaRequestsDto inDto)
+    public async Task<SchemaRequestsDto> SaveCustomNamingSettings(SchemaRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -152,7 +152,7 @@ public class CustomSchemasController(MessageService messageService,
         messageService.Send(MessageAction.TeamTemplateChanged);
 
         var people = new IdRequestDto<string> { Id = PeopleNamesItem.CustomID };
-        return await PeopleSchemaAsync(people);
+        return await GetPeopleSchema(people);
     }
 
     /// <summary>
@@ -163,7 +163,7 @@ public class CustomSchemasController(MessageService messageService,
     [Tags("Settings / Team templates")]
     [SwaggerResponse(200, "Team template with the following parameters", typeof(SchemaRequestsDto))]
     [HttpGet("{id}")]
-    public async Task<SchemaRequestsDto> PeopleSchemaAsync(IdRequestDto<string> inDto)
+    public async Task<SchemaRequestsDto> GetPeopleSchema(IdRequestDto<string> inDto)
     {
         var names = await customNamingPeople.GetPeopleNamesAsync(inDto.Id);
         var schemaItem = new SchemaRequestsDto

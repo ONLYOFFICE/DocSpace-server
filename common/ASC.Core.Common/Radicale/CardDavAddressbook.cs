@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -80,7 +80,7 @@ public class CardDavAddressbook(ILogger<CardDavAddressbook> logger,
 
     public async Task<DavResponse> GetCollection(string url, string authorization, string myUri)
     {
-        var path = (new Uri(url).AbsolutePath.StartsWith("/carddav")) ? (new Uri(url).AbsolutePath.Remove(0, 8)) : new Uri(url).AbsolutePath;
+        var path = new Uri(url).AbsolutePath.StartsWith("/carddav") ? new Uri(url).AbsolutePath.Remove(0, 8) : new Uri(url).AbsolutePath;
         var defaultUrlconn = _defaultRadicaleUrl + path;
         var davRequest = new DavRequest
         {
@@ -94,7 +94,7 @@ public class CardDavAddressbook(ILogger<CardDavAddressbook> logger,
 
     public async Task<DavResponse> UpdateItem(string url, string authorization, string data, string headerUrl = "")
     {
-        var path = (new Uri(url).AbsolutePath.StartsWith("/carddav")) ? (new Uri(url).AbsolutePath.Remove(0, 8)) : new Uri(url).AbsolutePath;
+        var path = new Uri(url).AbsolutePath.StartsWith("/carddav") ? new Uri(url).AbsolutePath.Remove(0, 8) : new Uri(url).AbsolutePath;
         var requrl = _defaultRadicaleUrl + path;
         var davRequest = new DavRequest
         {
@@ -109,7 +109,7 @@ public class CardDavAddressbook(ILogger<CardDavAddressbook> logger,
 
     public string GetUserSerialization(CardDavItem user)
     {
-        var sex = (user.Sex.HasValue) ? user.Sex.Value ? "M" : "W" : string.Empty;
+        var sex = user.Sex.HasValue ? user.Sex.Value ? "M" : "W" : string.Empty;
 
         var builder = new StringBuilder();
 
@@ -134,20 +134,23 @@ public class CardDavAddressbook(ILogger<CardDavAddressbook> logger,
     public async Task Delete(string uri, Guid userID, string email, int tenantId = 0)
     {
         var authorization = await GetSystemAuthorizationAsync();
-        var deleteUrlBook = GetRadicaleUrl(uri, email.ToLower(), true, true);
-        var davRequest = new DavRequest
+        if (authorization != null)
         {
-            Url = deleteUrlBook,
-            Authorization = authorization
-        };
-        try
-        {
-            await radicaleClient.RemoveAsync(davRequest);
-            await dbRadicale.RemoveCardDavUserAsync(tenantId, userID);
-        }
-        catch (Exception ex)
-        {
-            logger.ErrorWithException(ex);
+            var deleteUrlBook = GetRadicaleUrl(uri, email.ToLower(), true, true);
+            var davRequest = new DavRequest
+            {
+                Url = deleteUrlBook,
+                Authorization = authorization
+            };
+            try
+            {
+                await radicaleClient.RemoveAsync(davRequest);
+                await dbRadicale.RemoveCardDavUserAsync(tenantId, userID);
+            }
+            catch (Exception ex)
+            {
+                logger.ErrorWithException(ex);
+            }
         }
     }
 

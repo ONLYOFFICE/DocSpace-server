@@ -159,7 +159,9 @@ $__AuthorName さんが次のルームを削除しました：$RoomTitle</value>
  
 フォーム記入者： "$FromUserName":"$FromUserLink"
  
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>h1. 「$Message」フォームが記入されました
@@ -168,12 +170,73 @@ $OrangeButton</value>
  
 マネージャー："$ToUserName":"$ToUserLink"
  
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
     <value>DocSpaceからの通知。フォームが記入されました</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
     <value>DocSpaceからの通知。フォームが記入されました</value>
+  </data>
+  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
+    <value>新しいドキュメント"$DocumentTitle"が"$RoomTitle"のルームに作成されました</value>
+  </data>
+  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
+    <value>新しいファイルがルーム"$RoomTitle"にアップロードされました ($Count)</value>
+  </data>
+  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
+    <value>新しいファイル"$DocumentTitle"がルーム"$RoomTitle"にアップロードされました</value>
+  </data>
+  <data name="pattern_EditorMentions_push" xml:space="preserve">
+    <value>$ToUserName さんが文書$DocumentTitleにあなたに言及しました</value>
+  </data>
+  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
+    <value>新しいフォルダー"$FolderTitle"がルーム"$RoomTitle"に作成されました</value>
+  </data>
+  <data name="pattern_FormStartedFilling" xml:space="preserve">
+    <value>
+      アクティビティ通知。 "$FromUserName":"$FromUserLink" がフォーム記入プロセスを開始しました： "$DocumentTitle":"$DocumentURL" ルーム: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_FormSubmitted_push" xml:space="preserve">
+    <value>フォーム "$DocumentTitle" は "$RoomTitle" のルームで記入されました</value>
+  </data>
+  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+    <value>
+      活動通知。フォーム "$DocumentTitle":"$DocumentURL" がルーム "$RoomTitle":"$RoomURL" で完全に記入されました — $__DateTime。
+    </value>
+  </data>
+  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
+    <value>$FromUserName は "$RoomTitle" のルームをアーカイブに移動しました</value>
+  </data>
+  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
+    <value>あなたの役割がルーム "$RoomTitle" で "$RoomRole" に変更されました</value>
+  </data>
+  <data name="pattern_StoppedFormFilling" xml:space="preserve">
+    <value>
+      アクティビティ通知。 "$FromUserName":"$FromUserLink" がフォームの入力を停止しました: "$DocumentTitle":"$DocumentURL" ルーム内: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_YourTurnFormFilling" xml:space="preserve">
+    <value>
+      アクティビティ通知。あなたの番です！フォームの記入が必要です： "$DocumentTitle":"$DocumentURL" ルーム： "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="subject_FormStartedFilling" xml:space="preserve">
+    <value>DocSpaceの通知。</value>
+  </data>
+  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
+    <value>DocSpaceの通知。</value>
+  </data>
+  <data name="subject_StoppedFormFilling" xml:space="preserve">
+    <value>DocSpaceの通知。</value>
+  </data>
+  <data name="subject_YourTurnFormFilling" xml:space="preserve">
+    <value>DocSpaceの通知。</value>
+  </data>
+  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
+    <value>"$RoomTitle"ルームに招待されました</value>
   </data>
 </root>

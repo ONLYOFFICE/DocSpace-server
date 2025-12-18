@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,19 +24,25 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Profile = AutoMapper.Profile;
-
 namespace ASC.Core;
 
-public partial class SubscriptionRecord : IMapFrom<Subscription>
+public partial class SubscriptionRecord;
+
+[Mapper]
+public static partial class SubscriptionRecordMapper
 {
-    public void Mapping(Profile profile)
+    [MapperIgnoreSource(nameof(Subscription.Tenant))]
+    [MapProperty(nameof(Subscription.TenantId), nameof(SubscriptionRecord.Tenant))]
+    [MapProperty(nameof(Subscription.Recipient), nameof(SubscriptionRecord.RecipientId))]
+    [MapProperty(nameof(Subscription.Action), nameof(SubscriptionRecord.ActionId))]
+    [MapProperty(nameof(Subscription.Object), nameof(SubscriptionRecord.ObjectId))]
+    [MapProperty(nameof(Subscription.Source), nameof(SubscriptionRecord.SourceId))]
+    [MapProperty(nameof(Subscription.TenantId), nameof(SubscriptionRecord.Tenant))]
+    [MapProperty(nameof(Subscription.Unsubscribed), nameof(SubscriptionRecord.Subscribed), Use = nameof(MapSubscribedToUnsubscribed))]
+    public static partial SubscriptionRecord Map(this Subscription source);
+
+    public static bool MapSubscribedToUnsubscribed(bool unsubscribed)
     {
-        profile.CreateMap<Subscription, SubscriptionRecord>()
-            .ForMember(dest => dest.RecipientId, opt => opt.MapFrom(src => src.Recipient))
-            .ForMember(dest => dest.Subscribed, opt => opt.MapFrom(src => !src.Unsubscribed))
-            .ForMember(dest => dest.ActionId, opt => opt.MapFrom(src => src.Action))
-            .ForMember(dest => dest.ObjectId, opt => opt.MapFrom(src => src.Object))
-            .ForMember(dest => dest.SourceId, opt => opt.MapFrom(src => src.Source));
+        return !unsubscribed;
     }
 }

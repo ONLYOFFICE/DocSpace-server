@@ -126,4 +126,37 @@
   <data name="LargeBackup" xml:space="preserve">
     <value>Varmuuskopio on suurempi kuin portaalin koko</value>
   </data>
+  <data name="BackupException" xml:space="preserve">
+    <value>Jokin meni vikaan varmuuskopiota luodessa. Ole hyvä ja kokeile luoda sitä uudelleen tai ota yhteyttä tukeen.</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>Jokin meni vikaan palautettaessa varmuuskopiota. Ole hyvä ja kokeile palautusta uudelleen tai ota yhteyttä tukeen.</value>
+  </data>
+  <data name="BackupInvalid" xml:space="preserve">
+    <value>Varmuuskopiotiedosto on virheellinen.</value>
+  </data>
+  <data name="AutoBackup" xml:space="preserve">
+    <value>Automaattinen varmuuskopiointi</value>
+  </data>
+  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
+    <value>Custom cloud</value>
+  </data>
+  <data name="BackupStorageTypeDataStore" xml:space="preserve">
+    <value>Väliaikainen varastointi</value>
+  </data>
+  <data name="BackupStorageTypeDocuments" xml:space="preserve">
+    <value>Varmuuskopioi huone</value>
+  </data>
+  <data name="BackupStorageTypeLocal" xml:space="preserve">
+    <value>Paikallinen tiedosto</value>
+  </data>
+  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
+    <value>Kolmannen osapuolen tallennus</value>
+  </data>
+  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
+    <value>Kolmannen osapuolen resurssi</value>
+  </data>
+  <data name="BackupMissingFilesWarning" xml:space="preserve">
+    <value>Jotkut tiedostot ei ole mukana varmuuskopiossa. Ole hyvä ja katso lisätietoja {0}</value>
+  </data>
 </root>

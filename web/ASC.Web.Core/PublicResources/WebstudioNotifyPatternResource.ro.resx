@@ -417,7 +417,7 @@ $Body</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Spațiul ${LetterLogoText} DocSpace a &lt;span style="color: #FF6F3D;"&gt;fost activat&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Spațiul ${LetterLogoText} DocSpace a fost&lt;span style="color: #FF6F3D;"&gt;șters&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Spațiul dvs ${LetterLogoText} DocSpace a fost dezactivat cu succes. Va rugam sa rețineți că, datele dumneavoastră vor fi șterse în conformitate cu &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;politica noastră de confidențialitate&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
@@ -448,17 +448,6 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Sunteţi invitat să vă asociaţi la spaţiul ${LetterLogoText} DocSpace &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;. Faceți clic pe linkul pentru a accepta invitația:&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Stimate, $UserName!
-
-Vă rugăm să țineți cont de faptul că abonamentul dumneavoastră ${LetterLogoText} DocSpace expiră în trei zile. După aceea, o perioadă de grație de $PaymentDelay zile va fi activată.
-
-Vă recomandăm să plătiți abonamentul dvs Business acum pentru a utiliza în continuare toate beneficiile oferite de ${LetterLogoText} DocSpace.
-
-$OrangeButton
 
 $TrulyYours</value>
   </data>
@@ -496,37 +485,37 @@ Odată ce faceți clic pe linkul de invitație, setați o nouă parolă pentru c
 $TrulyYours</value>
   </data>
   <data name="ActionFileCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; a creat un document nou: &lt;a href={1}&gt;{2}&lt;/a&gt; în sală: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; a creat un document nou: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; în sală: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileUploaded" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; a încărcat un document nou: &lt;a href={1}&gt;{2}&lt;/a&gt; în sală: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; a încărcat un document nou: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; în sală: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionNewComment" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; a adăugat un comentariu nou documentului în versiunea: &lt;a href={1}&gt;{2}&lt;/a&gt; în sală: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; a adăugat un comentariu nou documentului în versiunea: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; în sală: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomArchived" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; a mutat sală: &lt;a href={1}&gt;{2}&lt;/a&gt;  în arhivă - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; a mutat sală: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;  în arhivă - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; a creat o sală nouă: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; a creat o sală nouă: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomRemoved" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; a șters sală: &lt;b&gt;{1}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomRenamed" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; a redenumit sală: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href={2}&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; a redenumit sală: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomUpdateAccessForUser" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; i-a fost atribuit rolul &lt;b&gt;{1}&lt;/b&gt; în sală: &lt;a href={2}&gt;{3}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; i-a fost atribuit rolul &lt;b&gt;{1}&lt;/b&gt; în sală: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserAddedToRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; a fost adăugat la sală: &lt;a href={1}&gt;{2}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; a fost adăugat la sală: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
     <value>Un nou utilizator DocSpace a fost adăugat: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; a fost eliminat din sală: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; a fost eliminat din sală: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionUsersUpdatedType" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; s-a modificat nivelul de acces al utilizatorilor &lt;b&gt;{1}&lt;/b&gt; to &lt;b&gt;{2}&lt;/b&gt;</value>
@@ -535,7 +524,7 @@ $TrulyYours</value>
     <value>Utilizatorul DocSpace a actualizat: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileEdited" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; a modificat documentul: &lt;a href={1}&gt;{2}&lt;/a&gt; în sală: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; a modificat documentul: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; în sală: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="subject_self_profile_updated" xml:space="preserve">
     <value>${__VirtualRootHost} notificarea privind modificarea profilului de portal</value>
@@ -793,7 +782,7 @@ Echipă de Asistență ${LetterLogoText}
 [$__AuthorName]($__AuthorUrl) s-a alăturat portalului dvs [${__VirtualRootPath}](${__VirtualRootPath}).</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>Spațiul ${LetterLogoText} DocSpace a fost activat</value>
+    <value>${LetterLogoText} DocSpace a fost șters</value>
   </data>
   <data name="ButtonRemoveProfile" xml:space="preserve">
     <value>Dezactivare cont</value>
@@ -879,9 +868,6 @@ Echipă de Asistență ${LetterLogoText}
   <data name="subject_user_ldap_activation" xml:space="preserve">
     <value>Sunteţi invitat să vă asociaţi ${__VirtualRootHost}</value>
   </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Abonamentul dvs ${LetterLogoText} DocSpace va expira în curînd</value>
-  </data>
   <data name="subject_saas_admin_trial_warning_after_half_year_v1" xml:space="preserve">
     <value>Spațiul dvs ${LetterLogoText} DocSpace va fi șters</value>
   </data>
@@ -963,7 +949,9 @@ Configurația aplicației de autentificare pe care o utilizați pentru a accesa 
 
 Faceți clic pe butonul de mai jos pentru a accesa pagina de conectare la portal și pentru a configura aplicația de autentificare:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_confirm_owner_change" xml:space="preserve">
     <value>h1.Schimbarea proprietarului de portal "${__VirtualRootPath}":"${__VirtualRootPath}"
@@ -1844,11 +1832,13 @@ Linkul este valabil timp de 7 zile.</value>
  
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Stimate, $UserName!&lt;/td&gt;&lt;/tr&gt;
  
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Tocmai ați *creat spațiul ${LetterLogoText} DocSpace*, un hub de documente pentru a oferi un impuls colaborării în echipa, cu clienții și partenerii dvs și nu numai. Adresa spațiului &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Tocmai ați *creat spațiul ${LetterLogoText} DocSpace*, un hub de documente pentru a oferi un impuls colaborării în echipa, cu clienții și partenerii dvs și nu numai. Adresa spațiului &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
  
+#if($OrangeButton != "")
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Confirmați adresa dvs de e-mail (linkul este valabil timp de 7 zile):&lt;/td&gt;&lt;/tr&gt;
  
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 44px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
+#end
  
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;Planul dvs tarifar actual est STARTUP. Acest abonament este absolut gratuit și include:&lt;/td&gt;&lt;/tr&gt;
  
@@ -1954,5 +1944,223 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 26px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Dacă aveți nevoie de ajutor, navigați &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;Centru de ajutor&lt;/a&gt; sau contactați &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__SupportLink}"&gt;echipa noastră de asistență&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
  
 $TrulyYours</value>
+  </data>
+  <data name="pattern_user_role_changed" xml:space="preserve">
+    <value>Bună!
+
+Vi s-a atribuit un nou rol în sala DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+Aflați mai multe despre roluri și permisiuni în "Centru de ajutor":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_type_changed" xml:space="preserve">
+    <value>Bună!
+
+Vi s-a atribuit un nou tip de utilizator DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
+
+Aflați mai multe despre tipuri de utilizator și permisiuni în "Centru de ajutor":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>Spațiu dvs ${LetterLogoText} DocSpace va fi șters</value>
+  </data>
+  <data name="subject_user_role_changed" xml:space="preserve">
+    <value>Rolul dvs în sala DocSpace s-a schimbat</value>
+  </data>
+  <data name="subject_user_type_changed" xml:space="preserve">
+    <value>Tipul dvs de utilizator DocSpace s-a schimbar</value>
+  </data>
+  <data name="pattern_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Spațiu dvs ${LetterLogoText} DocSpace va fi &lt;span style="color: #FF6F3D;"&gt;șters&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;${__VirtualRootPath} din spațiu dvs ${LetterLogoText} DocSpace &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; a fost inactivă timp de mai mult de un an.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Deoarece ați decis să nu-l mai utilizați, spațiul dvs DocSpace ${LetterLogoText} și toate datele vor fi șterse în conformitate cu &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Politica noastră de confidențialitate&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;Apreciem feedbackul din partea dvs. De ce ați decis să nu mai folosiți ${LetterLogoText} DocSpace?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Dacă doriți să folosiți ${LetterLogoText} DocSpace mai departe, trebuie pur și simplu să-l accesați și să efectuați orice acțiune.&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Stimate, $UserName!
+
+Vă reamintim că abonamentul dvs va fi facturat și plătit automat din contul dvs la 3 zile.
+
+Pentru a vă asigura că totul decurge fără probleme, verificați dacă dispuneți de suficiente fonduri disponibile conform metodei de plată selectate.
+
+Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la "support team":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Următoarea dată de facturare a abonamentului dvs ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Acces servicii</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Acces configurare Portofel</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Stimate, $UserName!
+
+Vă informăm că reînnoirea automată a abonamentului la serviciile conectate a eșuat.
+
+Vă rugăm să reînnoiți manual abonamentul la serviciile conectate actual (sau procurați un abonament nou).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Stimate, $UserName!
+
+Vă informăm că alimentarea automată a contului dvs de Portofel DocSpace nu a fost finalizată cu succes.
+
+Vă rugăm să verificați și să alimentați contul de portofel dvs manual.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Acțiune necesară: Problema de reînnoire automată a abonamentului la servicii conectate din DocSpace ${LetterLogoText}</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Acțiune necesară: Problema de alimentare automată a contului de Portofel dvs din DocSpace ${LetterLogoText}</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>Parola a fost schimbată cu succes</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>Deschidere DocSpace</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.Parola a fost schimbată cu succes
+
+Parola dvs pentru contul *$UserName*, *$UserEmail* a fost schimbată cu succes la data de *$Date* în spațiul DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+IP: *$IP*
+Dispozitivul: *$Device*
+#if($Location != "")
+Locaţia: *$Location*
+#end
+Browser: *$Browser*
+
+Dacă această acţiune a fost întreprinsă de dumneavoastră, nu trebuie să faci nimic altceva. Dacă ați observat această activitate suspectă sau dacă nu recunoașteți această activitate, schimbați imediat parola și blocați accesul la DocSpace pentru acest dispozitiv.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_scheduled_backup_failed" xml:space="preserve">
+    <value>Copierea de rezervă automată a spațiului DocSpace a eșuat</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed" xml:space="preserve">
+    <value>Stimate, $UserName,
+
+Copierea de rezervă programată a spațiului DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" a eșuat.
+
+Vă recomandăm să verificați setările pentru "Copiere de rezervă":"${__VirtualRootPath}/portal-settings/backup/data-backup" și "Servicii":"${__VirtualRootPath}/portal-settings/services".
+
+Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
+    <value>Stimate, $UserName,
+
+Copierea de rezervă programată a spațiului DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) a eșuat.
+
+Vă recomandăm să verificați setările pentru [Copiere de rezervă](${__VirtualRootPath}/portal-settings/backup/data-backup) și [Servicii](${__VirtualRootPath}/portal-settings/services).
+
+Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la [${__SupportLink}](${__SupportLink})
+
+Cu stimă,
+${LetterLogoText} Echipă de Asistență
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="ActionAgentCreated" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; a creat un agent nou: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRemoved" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; a șters agentul: &lt;b&gt;{1}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRenamed" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; a redenumit agentul: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentUpdateAccessForUser" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; i-a fost atribuit rolul &lt;b&gt;{1}&lt;/b&gt; în agentul: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserAddedToAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; a fost adăugat la agentul: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserRemovedFromAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; a fost eliminat din agentul: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ButtonJoinAgent" xml:space="preserve">
+    <value>Asociere agent</value>
+  </data>
+  <data name="pattern_backup_failed" xml:space="preserve">
+    <value>Stimate, $UserName,
+
+Copierea de rezervă a spațiului dvs DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" nu a reușit.
+
+Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_backup_failed_tg" xml:space="preserve">
+    <value>Stimate, $UserName,
+
+Copierea de rezervă a spațiului dvs DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) nu a reușit.
+
+Dacă aveți întrebări sau aveți nevoie de asistență, nu ezitați să ne contactați la [${__SupportLink}](${__SupportLink})
+
+Cu stimă,
+${LetterLogoText} Echipă de Asistență
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="pattern_saas_agent_invite" xml:space="preserve">
+    <value>Bună!
+
+Sunteţi invitat să vă asociaţi la agentul de IA din DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}". Faceți clic pe linkul pentru a accepta invitația:
+
+$OrangeButton
+
+Odată ce faceți clic pe linkul de invitație, setați o nouă parolă pentru contul dvs.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Bună!
+
+$__AuthorName v-a invitat să vă asociați la agentul "$Message":"$InviteLink" la "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_backup_failed" xml:space="preserve">
+    <value>Copierea de rezervă a spațiului dvs DocSpace nu a reușit</value>
+  </data>
+  <data name="subject_saas_agent_invite" xml:space="preserve">
+    <value>Asociați-vă la ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Sunteţi invitat să vă asociaţi la agentul DocSpace ${LetterLogoText}</value>
+  </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} spațiul DocSpace a fost șters.
+ 
+*Portal:* ${PortalUrl}
+*Proprietar:* ${UserName} ${UserEmail} 
+*Client:* ${OwnerName}
+ 
+Verificați dacă facturarea automată este dezactivată. Verificați statutul facturării automate în contul Stripe al clientului.</value>
   </data>
 </root>

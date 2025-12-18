@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -39,21 +39,19 @@ public class IPSecurity(
     SettingsManager settingsManager,
     ILogger<IPSecurity> logger)
 {
-    private string _currentIpForTest;
     private string CurrentIpForTest
     {
         get
         {
-            return _currentIpForTest ??= configuration["ipsecurity:test"];
+            return field ??= configuration["ipsecurity:test"];
         }
     }
 
-    private string _myNetworks;
     private string MyNetworks
     {
         get
         {
-            return _myNetworks ??= configuration["ipsecurity:mynetworks"];
+            return field ??= configuration["ipsecurity:mynetworks"];
         }
     }
 
@@ -66,14 +64,14 @@ public class IPSecurity(
             {
                 return _ipSecurityEnabled.Value;
             }
-            
+
             var hideSettings = configuration.GetSection("web:hide-settings").Get<string[]>() ?? [];
             _ipSecurityEnabled = !hideSettings.Contains("IpSecurity", StringComparer.CurrentCultureIgnoreCase);
             return _ipSecurityEnabled.Value;
         }
     }
-    
-    
+
+
     public async Task<bool> VerifyAsync()
     {
         var tenant = tenantManager.GetCurrentTenant();
@@ -82,14 +80,14 @@ public class IPSecurity(
         {
             return true;
         }
-        
+
         var enable = (await settingsManager.LoadAsync<IPRestrictionsSettings>()).Enable;
 
         if (!enable)
         {
             return true;
         }
-        
+
         if (httpContextAccessor?.HttpContext == null)
         {
             return true;
@@ -127,7 +125,7 @@ public class IPSecurity(
             {
                 return true;
             }
-            
+
             if (IsMyNetwork(ips))
             {
                 return true;

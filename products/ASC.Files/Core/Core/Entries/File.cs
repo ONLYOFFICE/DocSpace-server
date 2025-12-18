@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,8 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Mapping;
+
 namespace ASC.Files.Core;
 
+/// <summary>
+/// The file status.
+/// </summary>
 [Flags]
 public enum FileStatus
 {
@@ -54,9 +59,15 @@ public enum FileStatus
     IsTemplate = 0x40,
 
     [SwaggerEnum(Description = "Is fill form draft")]
-    IsFillFormDraft = 0x80
+    IsFillFormDraft = 0x80,
+
+    [SwaggerEnum(Description = "Is completed form")]
+    IsCompletedForm = 0x100
 }
 
+/// <summary>
+/// Represents a file with associated metadata and operations.
+/// </summary>
 [Transient(GenericArguments = [typeof(int)])]
 [Transient(GenericArguments = [typeof(string)])]
 [DebuggerDisplay("{Title} ({Id} v{Version})")]
@@ -64,92 +75,151 @@ public class File<T> : FileEntry<T>
 {
     private FileStatus _status;
 
-    public File()
+    [JsonConstructor]
+    protected File()
     {
         Version = 1;
         VersionGroup = 1;
         FileEntryType = FileEntryType.File;
     }
 
-    public File(
-        FileHelper fileHelper,
-        Global global, SecurityContext securityContext) : base(fileHelper, global, securityContext)
+    public File(IServiceProvider provider) : base(provider)
     {
         Version = 1;
         VersionGroup = 1;
         FileEntryType = FileEntryType.File;
     }
 
+    public FileStatus FileStatus
+    {
+        get => _status;
+        set => _status = value;
+    }
+    /// <summary>
+    /// The file version.
+    /// </summary>
     public int Version { get; set; }
+
+    /// <summary>
+    /// The file version group.
+    /// </summary>
     public int VersionGroup { get; set; }
+
+    /// <summary>
+    /// The file comment.
+    /// </summary>
+    [JsonIgnore]
     public string Comment { get; set; }
+
+    /// <summary>
+    /// The file pure title.
+    /// </summary>
     public string PureTitle
     {
         get => base.Title;
         set => base.Title = value;
     }
+
+    /// <summary>
+    /// The file content length.
+    /// </summary>
     public long ContentLength { get; set; }
 
+    /// <summary>
+    /// The file content length in the string format.
+    /// </summary>
     [JsonIgnore]
     public string ContentLengthString => FileSizeComment.FilesSizeToString(ContentLength);
 
+    /// <summary>
+    /// The file filter type.
+    /// </summary>
     [JsonIgnore]
     public FilterType FilterType
     {
         get
         {
-            switch (FileUtility.GetFileTypeByFileName(Title))
+            return FileUtility.GetFileTypeByFileName(Title) switch
             {
-                case FileType.Image:
-                    return FilterType.ImagesOnly;
-                case FileType.Document:
-                    return FilterType.DocumentsOnly;
-                case FileType.Presentation:
-                    return FilterType.PresentationsOnly;
-                case FileType.Spreadsheet:
-                    return FilterType.SpreadsheetsOnly;
-                case FileType.Archive:
-                    return FilterType.ArchiveOnly;
-                case FileType.Audio:
-                case FileType.Video:
-                    return FilterType.MediaOnly;
-                case FileType.Pdf:
-                    return this.IsForm ? FilterType.PdfForm : FilterType.Pdf;
-                   
-            }
-
-            return FilterType.None;
+                FileType.Image => FilterType.ImagesOnly,
+                FileType.Document => FilterType.DocumentsOnly,
+                FileType.Presentation => FilterType.PresentationsOnly,
+                FileType.Spreadsheet => FilterType.SpreadsheetsOnly,
+                FileType.Archive => FilterType.ArchiveOnly,
+                FileType.Audio or FileType.Video => FilterType.MediaOnly,
+                FileType.Pdf => IsForm ? FilterType.PdfForm : FilterType.Pdf,
+                FileType.Diagram => FilterType.DiagramsOnly,
+                _ => FilterType.None
+            };
         }
     }
-
+    /// <summary>
+    /// Returns the file status.
+    /// </summary>
     public async Task<FileStatus> GetFileStatus()
     {
-        _status = await FileHelper.GetFileStatus(this, _status);
+        _status = await ServiceProvider.GetService<FileHelper>().GetFileStatus(this, _status);
         return _status;
     }
 
+    /// <summary>
+    /// Sets the file status.
+    /// </summary>
     public void SetFileStatus(FileStatus value) => _status = value;
 
+    /// <summary>
+    /// Sets the file unique ID.
+    /// </summary>
     public override string UniqID => $"file_{Id}";
 
+    /// <summary>
+    /// The file title.
+    /// </summary>
     [JsonIgnore]
-    public override string Title => FileHelper.GetTitle(this);
+    public override string Title =>
+        string.IsNullOrEmpty(ConvertedType)
+            ? PureTitle
+            : FileUtility.ReplaceFileExtension(PureTitle, ServiceProvider.GetService<FileUtility>().GetInternalExtension(PureTitle));
 
-
+    /// <summary>
+    /// The file download URL.
+    /// </summary>
     [JsonIgnore]
-    public string DownloadUrl => FileHelper.GetDownloadUrl(this);
+    public string DownloadUrl => ServiceProvider.GetService<FileHelper>().GetDownloadUrl(this);
 
+    /// <summary>
+    /// Specifies whether the file is locked or not.
+    /// </summary>
     public bool Locked { get; set; }
-    public bool IsForm {
-        get
-        {
-            return (FilterType)Category == FilterType.PdfForm;
-        }
-    }
 
-    public int Category { get; set; }
+    /// <summary>
+    /// The name of the user who locked the file.
+    /// </summary>
     public string LockedBy { get; set; }
 
+    /// <summary>
+    /// Specifies if the file is a form or not.
+    /// </summary>
+    public bool IsForm => (FilterType)Category == FilterType.PdfForm;
+
+    /// <summary>
+    /// Specifies if a Custom Filter editing mode is enabled for a file or not.
+    /// </summary>
+    public bool CustomFilterEnabled { get; set; }
+
+    /// <summary>
+    /// The name of the user who enabled a Custom Filter editing mode for a file.
+    /// </summary>
+    public string CustomFilterEnabledBy { get; set; }
+
+    /// <summary>
+    /// The file category.
+    /// </summary>
+    public int Category { get; set; }
+
+    /// <summary>
+    /// Specifies whether the file is new or not.
+    /// </summary>
     [JsonIgnore]
     public override bool IsNew
     {
@@ -167,6 +237,9 @@ public class File<T> : FileEntry<T>
         }
     }
 
+    /// <summary>
+    /// Specifies whether the file is favorite or not.
+    /// </summary>
     [JsonIgnore]
     public bool IsFavorite
     {
@@ -184,6 +257,29 @@ public class File<T> : FileEntry<T>
         }
     }
 
+    /// <summary>
+    /// Specifies whether the form filling is completed.
+    /// </summary>
+    [JsonIgnore]
+    public bool IsCompletedForm
+    {
+        get => (_status & FileStatus.IsCompletedForm) == FileStatus.IsCompletedForm;
+        set
+        {
+            if (value)
+            {
+                _status |= FileStatus.IsCompletedForm;
+            }
+            else
+            {
+                _status &= ~FileStatus.IsCompletedForm;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Specifies whether the file is a template or not.
+    /// </summary>
     [JsonIgnore]
     public bool IsTemplate
     {
@@ -201,11 +297,29 @@ public class File<T> : FileEntry<T>
         }
     }
 
+    /// <summary>
+    /// Specifies whether the file is encrypted or not.
+    /// </summary>
     public bool Encrypted { get; set; }
+
+    /// <summary>
+    /// The file thumbnail status.
+    /// </summary>
     public Thumbnail ThumbnailStatus { get; set; }
+
+    /// <summary>
+    /// The file force save type.
+    /// </summary>
     public ForcesaveType Forcesave { get; set; }
+
+    /// <summary>
+    /// The file converted type.
+    /// </summary>
     public string ConvertedType { get; set; }
 
+    /// <summary>
+    /// The file converted extension.
+    /// </summary>
     [JsonIgnore]
     public string ConvertedExtension
     {
@@ -227,14 +341,79 @@ public class File<T> : FileEntry<T>
             };
         }
     }
-    
+
+    /// <summary>
+    /// The date and time when the file was last opened.
+    /// </summary>
     public DateTime? LastOpened { get; set; }
+
+    /// <summary>
+    /// The file form information.
+    /// </summary>
     public FormInfo<T> FormInfo { get; set; }
+    
+    public VectorizationStatus? VectorizationStatus { get; set; }
 }
 
+/// <summary>
+/// The file form information.
+/// </summary>
 public record FormInfo<T>
 {
+    /// <summary>
+    /// The linked ID of the form.
+    /// </summary>
     public T LinkedId { get; init; }
+
+    /// <summary>
+    /// The form properties.
+    /// </summary>
     public EntryProperties<T> Properties { get; init; }
-    public static  FormInfo<T> Empty => new();
+
+    /// <summary>
+    /// The file filling session ID.
+    /// </summary>
+    public string FillingSessionId { get; set; }
+
+    /// <summary>
+    /// The empty form information.
+    /// </summary>
+    public static FormInfo<T> Empty => new();
+}
+
+[Scope]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public partial class FileMapper(IServiceProvider serviceProvider, TenantDateTimeConverter tenantDateTimeConverter, SecurityTreeRecordMapper treeRecordMapper)
+{
+    private partial File<int> Map(DbFileQuery source);
+
+    [MapProperty(nameof(DbFile.Title), nameof(File<int>.PureTitle))]
+    private partial void ApplyChanges(DbFile source, File<int> target);
+
+    [UserMapping(Default = true)]
+    public File<int> MapDbFileQueryToDbFileInternal(DbFileQuery dbFileQuery)
+    {
+        if (dbFileQuery == null)
+        {
+            return null;
+        }
+
+        var result = Map(dbFileQuery);
+        ApplyChanges(dbFileQuery.File, result);
+        result.CreateOn = tenantDateTimeConverter.Convert(dbFileQuery.File.CreateOn);
+        result.ModifiedOn = tenantDateTimeConverter.Convert(dbFileQuery.File.ModifiedOn);
+        result.LastOpened = tenantDateTimeConverter.Convert(dbFileQuery.LastOpened);
+        result.ShareRecord = treeRecordMapper.MapToInternal(dbFileQuery.SharedRecord);
+
+        if (dbFileQuery.UserShared != null)
+        {
+            result.Shared = dbFileQuery.UserShared.Any(r => r is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink);
+            result.SharedForUser = dbFileQuery.UserShared.Any(r => r is SubjectType.Group or SubjectType.User);
+        }
+
+        return result;
+    }
+
+    [ObjectFactory]
+    private File<int> CreateFile() => serviceProvider.GetService<File<int>>();
 }

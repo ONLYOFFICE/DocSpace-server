@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,7 +36,7 @@ public class FilesChunkedUploadSessionHolder : CommonChunkedUploadSessionHolder
         _daoFactory = daoFactory;
         TempDomain = FileConstant.StorageDomainTmp;
     }
-    
+
     public override async Task<(string, string)> UploadChunkAsync(CommonChunkedUploadSession uploadSession, Stream stream, long length, int chunkNumber)
     {
         if (uploadSession is ChunkedUploadSession<int>)

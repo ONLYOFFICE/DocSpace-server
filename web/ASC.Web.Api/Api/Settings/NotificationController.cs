@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,14 +28,11 @@ namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("notification")]
 public class NotificationController(
-    ApiContext apiContext,
     IFusionCache fusionCache,
     WebItemManager webItemManager,
     NotificationControllerHelper notificationControllerHelper,
-    RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
-    IMapper mapper,
-    IHttpContextAccessor httpContextAccessor)
-: BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+    RoomsNotificationSettingsHelper roomsNotificationSettingsHelper)
+: BaseSettingsController(fusionCache, webItemManager)
 {
     /// <summary>
     /// Checks if the notification type specified in the request is enabled or not.
@@ -45,7 +42,7 @@ public class NotificationController(
     [Tags("Settings / Notifications")]
     [SwaggerResponse(200, "Notification settings", typeof(NotificationSettingsDto))]
     [HttpGet("{type}")]
-    public async Task<NotificationSettingsDto> GetNotificationSettingsAsync(NotificationTypeRequestsDto inDto)
+    public async Task<NotificationSettingsDto> GetNotificationSettings(NotificationTypeRequestsDto inDto)
     {
         var isEnabled = await notificationControllerHelper.GetNotificationStatusAsync(inDto.Type);
 
@@ -60,15 +57,15 @@ public class NotificationController(
     [Tags("Settings / Notifications")]
     [SwaggerResponse(200, "Notification settings", typeof(NotificationSettingsDto))]
     [HttpPost("")]
-    public async Task<NotificationSettingsDto> SetSettingsAsync(NotificationSettingsRequestsDto inDto)
+    public async Task<NotificationSettingsDto> SetNotificationSettings(NotificationSettingsRequestsDto inDto)
     {
         await notificationControllerHelper.SetNotificationStatusAsync(inDto.Type, inDto.IsEnabled);
 
-        return mapper.Map<NotificationSettingsDto>(inDto);
+        return inDto.Map();
     }
 
     /// <summary>
-    /// Returns a list of rooms with the disabled notifications
+    /// Returns a list of rooms with the disabled notifications.
     /// </summary>
     /// <short>Get room notification settings</short>
     /// <path>api/2.0/settings/notification/rooms</path>
@@ -77,8 +74,8 @@ public class NotificationController(
     [HttpGet("rooms")]
     public async Task<RoomsNotificationSettingsDto> GetRoomsNotificationSettings()
     {
-        var  settings = await roomsNotificationSettingsHelper.GetSettingsForCurrentUserAsync();
-        return mapper.Map<RoomsNotificationSettingsDto>(settings);
+        var settings = await roomsNotificationSettingsHelper.GetSettingsForCurrentUserAsync();
+        return settings.Map();
     }
 
     /// <summary>
@@ -92,6 +89,23 @@ public class NotificationController(
     public async Task<RoomsNotificationSettingsDto> SetRoomsNotificationStatus(RoomsNotificationsSettingsRequestDto inDto)
     {
         var settings = await roomsNotificationSettingsHelper.SetForCurrentUserAsync(inDto.RoomsId, inDto.Mute);
-        return mapper.Map<RoomsNotificationSettingsDto>(settings);
+        return settings.Map();
+    }
+
+    /// <summary>
+    /// Returns a list of notification channels.
+    /// </summary>
+    /// <short>Get notification channels</short>
+    /// <path>api/2.0/settings/notification/channels</path>
+    [Tags("Settings / Notifications")]
+    [SwaggerResponse(200, "Notification settings", typeof(NotificationChannelStatusDto))]
+    [HttpGet("channels")]
+    public NotificationChannelStatusDto GetNotificationChannels()
+    {
+        var channels = notificationControllerHelper.GetNotificationChannels();
+        return new NotificationChannelStatusDto
+        {
+            Channels = [.. channels.Select(c => new NotificationChannelDto { Name = c.Name, IsEnabled = c.IsEnabled })]
+        };
     }
 }

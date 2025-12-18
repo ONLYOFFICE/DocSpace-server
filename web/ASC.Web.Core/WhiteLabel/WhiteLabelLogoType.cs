@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Web.Core.Files;
+
 using NetEscapades.EnumGenerators;
 
 namespace ASC.Web.Core.WhiteLabel;
@@ -38,5 +40,28 @@ public enum WhiteLabelLogoType
     DocsEditorEmbed = 5,
     LeftMenu = 6,
     AboutPage = 7,
-    Notification = 8
+    Notification = 8,
+    SpreadsheetEditor = 9,
+    SpreadsheetEditorEmbed = 10,
+    PresentationEditor = 11,
+    PresentationEditorEmbed = 12,
+    PdfEditor = 13,
+    PdfEditorEmbed = 14,
+    DiagramEditor = 15,
+    DiagramEditorEmbed = 16
+}
+
+public static class WhiteLabelLogoTypeHelper
+{
+    public static WhiteLabelLogoType GetEditorLogoType(FileType fileType, bool embed)
+    {
+        return fileType switch
+        {
+            FileType.Spreadsheet => embed ? WhiteLabelLogoType.SpreadsheetEditorEmbed : WhiteLabelLogoType.SpreadsheetEditor,
+            FileType.Presentation => embed ? WhiteLabelLogoType.PresentationEditorEmbed : WhiteLabelLogoType.PresentationEditor,
+            FileType.Pdf => embed ? WhiteLabelLogoType.PdfEditorEmbed : WhiteLabelLogoType.PdfEditor,
+            FileType.Diagram => embed ? WhiteLabelLogoType.DiagramEditorEmbed : WhiteLabelLogoType.DiagramEditor,
+            _ => embed ? WhiteLabelLogoType.DocsEditorEmbed : WhiteLabelLogoType.DocsEditor
+        };
+    }
 }

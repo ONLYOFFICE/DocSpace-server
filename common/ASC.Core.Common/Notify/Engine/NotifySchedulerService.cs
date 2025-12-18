@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Core.Common.Hosting;
+
 using static ASC.Notify.Engine.NotifyEngine;
 
 namespace ASC.Core.Common.Notify.Engine;
@@ -32,7 +33,7 @@ namespace ASC.Core.Common.Notify.Engine;
 [Singleton]
 public class NotifySchedulerService(NotifyEngine notifyEngine,
                                     ILogger<NotifyEngine> logger,
-                                    IServiceScopeFactory scopeFactory) :  ActivePassiveBackgroundService<NotifySchedulerService>(logger, scopeFactory)
+                                    IServiceScopeFactory scopeFactory) : ActivePassiveBackgroundService<NotifySchedulerService>(logger, scopeFactory)
 {
     private static readonly TimeSpan _defaultSleep = TimeSpan.FromSeconds(10);
 

@@ -7,13 +7,13 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.0</version>
+        <version>3.5.8</version>
         <relativePath/>
     </parent>
 
     <groupId>com.asc</groupId>
     <artifactId>identity</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.3</version>
     <packaging>pom</packaging>
 
     <profiles>
@@ -45,31 +45,26 @@
 
     <properties>
         <annotations.version>6.0.53</annotations.version>
-        <aws.version>3.2.1</aws.version>
-        <bucket4j.lettuce.version>8.12.1</bucket4j.lettuce.version>
+        <aws.version>3.4.0</aws.version>
+        <aws.cloudwatch.version>2.32.19</aws.cloudwatch.version>
         <bucket4j.version>8.10.1</bucket4j.version>
-        <buildnumber.maven.plugin.version>3.1.0</buildnumber.maven.plugin.version>
-        <caffeine.caching.version>3.1.7</caffeine.caching.version>
+        <caffeine.caching.version>3.2.2</caffeine.caching.version>
         <dependency.maven.check.plugin.version>9.2.0</dependency.maven.check.plugin.version>
         <depgraph.maven.plugin.version>4.0.3</depgraph.maven.plugin.version>
         <flyway.version>11.1.1</flyway.version>
-        <grpc.version>1.63.0</grpc.version>
+        <grpc.version>1.74.0</grpc.version>
         <grpc.starter.version>3.1.0.RELEASE</grpc.starter.version>
-        <jackson.version>2.13.4</jackson.version>
         <jsystemd.version>3.1.1</jsystemd.version>
-        <junit.version>5.10.2</junit.version>
-        <lettuce.version>6.3.1.RELEASE</lettuce.version>
+        <junit.version>5.12.2</junit.version>
+        <lettuce.version>6.8.0.RELEASE</lettuce.version>
         <logback.gelf.version>5.0.1</logback.gelf.version>
         <logback.logstash.version>7.4</logback.logstash.version>
-        <mockito.version>5.12.0</mockito.version>
+        <mockito.version>5.18.0</mockito.version>
         <mysql.connector.version>8.4.0</mysql.connector.version>
-        <resilience4j.version>2.2.0</resilience4j.version>
-        <shedlock.version>5.10.0</shedlock.version>
-        <spring.caching.version>2.4.0</spring.caching.version>
-        <spring.cloud.loadbalancer.version>4.1.2</spring.cloud.loadbalancer.version>
-        <spring.cloud.openfeign.version>4.2.0</spring.cloud.openfeign.version>
-        <spring.oauth2.server.version>1.4.1</spring.oauth2.server.version>
-        <springdoc.version>2.2.0</springdoc.version>
+        <resilience4j.version>2.3.0</resilience4j.version>
+        <shedlock.version>6.9.2</shedlock.version>
+        <spring.oauth2.server.version>1.5.1</spring.oauth2.server.version>
+        <springdoc.version>2.8.6</springdoc.version>
         <os.maven.plugin.version>1.7.1</os.maven.plugin.version>
         <protobuf.maven.plugin.version>0.6.1</protobuf.maven.plugin.version>
         <winsw.maven.plugin.version>0.1.10</winsw.maven.plugin.version>
@@ -79,9 +74,10 @@
         <protoc.gen.version>1.51.0</protoc.gen.version>
 
         <!-- Maven and Java Versions -->
-        <maven.compiler.plugin.vesrion>3.13.0</maven.compiler.plugin.vesrion>
+        <maven.compiler.plugin.vesrion>3.14.0</maven.compiler.plugin.vesrion>
+        <maven.documentation.plugin.version>1.4</maven.documentation.plugin.version>
         <maven.formatter.plugin.version>2.24</maven.formatter.plugin.version>
-        <maven.surefire.plugin.version>3.2.5</maven.surefire.plugin.version>
+        <maven.surefire.plugin.version>3.5.3</maven.surefire.plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -192,6 +188,13 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-logging</artifactId>
+        </dependency>
+
+        <!-- OpenAPI Documentation -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
+            <version>${springdoc.version}</version>
         </dependency>
 
         <!-- Testing Dependencies -->

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,7 +36,7 @@ public class RemovePortalWorker(
 
     public async Task StartAsync(int tenantId)
     {
-        await using (await distributedLockProvider.TryAcquireLockAsync($"lock_removePortal"))
+        await using (await distributedLockProvider.TryAcquireLockAsync($"lock_removePortal_{tenantId}"))
         {
             var item = (await _queue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId);
 

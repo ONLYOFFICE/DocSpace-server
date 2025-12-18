@@ -136,7 +136,7 @@
     <value>У процесу</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>Документи</value>
+    <value>Моји документи</value>
   </data>
   <data name="Personal" xml:space="preserve">
     <value>Лично</value>
@@ -161,5 +161,11 @@
   </data>
   <data name="ReadyFormFolder" xml:space="preserve">
     <value>Спремно</value>
+  </data>
+  <data name="RoomTemplates" xml:space="preserve">
+    <value>Шаблони</value>
+  </data>
+  <data name="AiAgents" xml:space="preserve">
+    <value>AI агенти</value>
   </data>
 </root>

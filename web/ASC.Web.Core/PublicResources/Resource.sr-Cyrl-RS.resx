@@ -520,7 +520,7 @@
     <value>Број телефона са Twilio (потребно за SMS ауторизацију)</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
     <value>ID клијента</value>
@@ -529,10 +529,10 @@
     <value>Тајна клијента</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Омогућите апликацију да бисте се пријавили на портал користећи Twitter налог.</value>
+    <value>Омогућите апликацију да бисте се пријавили на портал користећи X налог.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Омогуц́ите ову апликацију да бисте својим корисницима омогуц́или да се пријаве на {LogoText} користец́и свој Тwиттер и повежу Twitter налоге својих клијената са CRM модулом. {0}Идите на Twitter Developers портал и направите нову интеграцију апликације {LogoText}. Унесите податке које сте примили испод:</value>
+    <value>Омогуц́ите ову апликацију да бисте својим корисницима омогуц́или да се пријаве на {LogoText} користец́и свој X и повежу X налоге својих клијената са CRM модулом. {0}Идите на X Developers портал и направите нову интеграцију апликације {LogoText}. Унесите податке које сте примили испод:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>API кључ</value>
@@ -1021,7 +1021,7 @@
     <value>Startup</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Праћење корисничких пријава и акција</value>
+    <value>Праћење пријава и радњи</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>Максимална величина датотеке</value>
@@ -1036,7 +1036,7 @@
     <value>Број админа</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Аутоматска резервна копија и опоравак</value>
+    <value>Опоравак података</value>
   </data>
   <data name="TariffsFeature_room" xml:space="preserve">
     <value>Неограничен број активних соба</value>
@@ -1066,7 +1066,7 @@
     <value>Корисници у соби:</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Неограничен број корисника</value>
+    <value>Неограничен број корисника и гостiju</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>Број корисника не би требало да прекорачи {0}</value>
@@ -1136,5 +1136,161 @@
   </data>
   <data name="Tariffs_nonprofit" xml:space="preserve">
     <value>Непрофитабилно</value>
+  </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>URL адреса Webhook-а није доступна. HEAD захтев није вратио HTTP статус 200.</value>
+  </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Кредит</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Валута</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>Датум</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>Колицина</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>Јединица мере</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>Извештај о корисничким операцијама ({0}-{1})</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>Група није пронађена</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Додатни простор на диску</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Поставите простор за складиштење на тачну количину коју вам је потребна.</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
+    <value>Складишни простор искоришћен:</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Простор на диску</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Допуна стања</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} бесплатних бекaпа месечно</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Контакт</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Задужење</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Плаћање је обавезно</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Број бесплатних бекaпа не смe да прелази {0} у току месеца</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Омогући бекaпе за свој DocSpace. Трошкови ће бити наплаћени аутоматски.</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Историја трансакција</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Бекап</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Бекап</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Бекап</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>ГБ</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Аутоматска обнова</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Детаљи</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Тип</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Аутоматско допуњавање</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>Id</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Квоте за Document Service ({0})</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>ID клијента</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Тајна клијента</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Омогући апликацији да се пријави на портал помоћу WeChat налога.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Омогући апликацији да се пријави на портал помоћу WeChat налога.</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Датум</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>Емаил</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Име</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Презиме</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>Број додатака прелази ограничење</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>Дошло је до неочекиване грешке. Молимо покушајте поново.</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>Успешно сте повезали Telegram да примате обавештења из свог DocSpace-а.</value>
+  </data>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Векторизација</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>AI алати</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Токени</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>Квота простора AI агента је прекорачена</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Неуспешно подешавање квоте по AI агенту. Унета вредност је већа од укупног DocSpace складишта.</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>Број AI агената не сме прећи {0}</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>AI алати</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Омогућите AI функције у вашем DocSpace-у да бисте повећали продуктивност.</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>AI веб претрага</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Додајте средства у новчаник да откључате AI веб претрагу.</value>
   </data>
 </root>

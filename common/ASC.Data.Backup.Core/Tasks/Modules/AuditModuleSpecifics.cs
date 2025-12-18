@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -47,8 +47,8 @@ public class AuditModuleSpecifics(Helpers helpers) : ModuleSpecificsBase(helpers
 
     protected override string GetSelectCommandConditionText(int tenantId, TableInfo table)
     {
-        return table.Name == "files_audit_reference" 
-            ? $"inner join audit_events as ae on ae.id = t.audit_event_id and ae.tenant_id = {tenantId}" 
+        return table.Name == "files_audit_reference"
+            ? $"inner join audit_events as ae on ae.id = t.audit_event_id and ae.tenant_id = {tenantId}"
             : base.GetSelectCommandConditionText(tenantId, table);
     }
 }

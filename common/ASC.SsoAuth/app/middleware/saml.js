@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,7 +36,7 @@ module.exports = (app, config) => {
   const routes = _.values(config.routes);
   const machineKey = config["core"].machinekey
     ? config["core"].machinekey
-    : config.app.machinekey;
+    : config.get("app").machinekey;
 
   const fetchConfig = async (req, res, next) => {
     const foundRoutes =
@@ -61,53 +61,53 @@ module.exports = (app, config) => {
       return res.redirect(urlResolver.getPortal404Url(req));
     }
 
-    const baseUrl = urlResolver.getBaseUrl(req);
+    try 
+    {
+        const baseUrl = urlResolver.getBaseUrl(req).originUrl;
+        var urls = urlResolver.getPortalSsoConfigUrl(req);
 
-    const promise = new Promise(async (resolve) => {
-      var url = urlResolver.getPortalSsoConfigUrl(req);
+        let headers = { Origin: urls.originUrl }
+        const response = await fetch(urls.url, { headers });
 
-      const response = await fetch(url);
-
-      if (!response || response.status === 404) {
-        if (response) {
-          logger.error(response.statusText);
+        if (!response || response.status === 404) {
+            if (response) {
+                logger.error(response.statusText);
+            }
+            return res.redirect(urlResolver.getPortal404Url(req));
+        } else if (response.status !== 200) {
+            throw new Error(`Invalid response status ${response.status}`);
         }
-        return resolve(res.redirect(urlResolver.getPortal404Url(req)));
-      } else if (response.status !== 200) {
-        throw new Error(`Invalid response status ${response.status}`);
-      } else if (!response.body) {
-        throw new Error("Empty config response");
-      }
 
-      const text = await response.text();
+        const text = await response.text();
+        if (!text) {
+            throw new Error("Empty config response");
+        }
 
-      const ssoConfig = coder.decodeData(text, machineKey);
+        const ssoConfig = coder.decodeData(text, machineKey);
 
-      const idp = converter.toIdp(ssoConfig);
+        const idp = converter.toIdp(ssoConfig);
 
-      const sp = converter.toSp(ssoConfig, baseUrl);
+        const sp = converter.toSp(ssoConfig, baseUrl);
 
-      const providersInfo = {
-        sp: sp,
-        idp: idp,
-        mapping: ssoConfig.FieldMapping,
-        settings: ssoConfig,
-      };
+        const providersInfo = {
+            sp: sp,
+            idp: idp,
+            mapping: ssoConfig.FieldMapping,
+            settings: ssoConfig,
+        };
 
-      req.providersInfo = providersInfo;
+        req.providersInfo = providersInfo;
 
-      return resolve(next());
-    }).catch((error) => {
-      logger.error(error);
-      return res.redirect(
-        urlResolver.getPortalAuthErrorUrl(
-          req,
-          urlResolver.ErrorMessageKey.SsoError
-        )
-      );
-    });
-
-    return promise;
+        next();
+    } catch (error) {
+        logger.error(error);
+        return res.redirect(
+            urlResolver.getPortalAuthErrorUrl(
+                req,
+                urlResolver.ErrorMessageKey.SsoError
+            )
+        );
+    }
   };
 
   app.use(fetchConfig);

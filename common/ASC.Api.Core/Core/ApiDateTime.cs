@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,17 +28,20 @@ using System.ComponentModel;
 
 namespace ASC.Api.Core;
 
+/// <summary>
+/// The API date and time parameters.
+/// </summary>
 [TypeConverter(typeof(ApiDateTimeTypeConverter))]
 [JsonConverter(typeof(ApiDateTimeConverter))]
 public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
 {
     /// <summary>
-    /// UtcTime
+    /// The time in UTC format.
     /// </summary>
     public DateTime UtcTime { get; private set; }
 
     /// <summary>
-    /// TimeZoneOffset
+    /// The time zone offset.
     /// </summary>
     [SwaggerSchemaCustom(Example = "00:00:00")]
     public TimeSpan TimeZoneOffset { get; private set; }
@@ -173,7 +176,7 @@ public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
     {
         var dateString = date.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffffff", CultureInfo.InvariantCulture);
         var offsetString = offset.Ticks == 0
-            ? "Z" : ((offset < TimeSpan.Zero)
+            ? "Z" : (offset < TimeSpan.Zero
             ? "-" : "+") + offset.ToString("hh\\:mm", CultureInfo.InvariantCulture);
 
         return dateString + offsetString;
@@ -381,15 +384,20 @@ public class ApiDateTimeConverter : JsonConverter<ApiDateTime>
 {
     public override ApiDateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        if (reader.TryGetDateTime(out var result))
+        if (DateTimeOffset.TryParse(reader.GetString(), out var offset))
         {
-            return new ApiDateTime(result, TimeSpan.Zero);
+            return new ApiDateTime(offset.UtcDateTime, offset.Offset);
         }
 
         if (DateTime.TryParseExact(reader.GetString(), ApiDateTime.Formats,
                 CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out var dateTime))
         {
             return new ApiDateTime(dateTime, TimeSpan.Zero);
+        }
+
+        if (reader.TryGetDateTime(out var result))
+        {
+            return new ApiDateTime(result, TimeSpan.Zero);
         }
 
         return new ApiDateTime();

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,64 +26,27 @@
 
 namespace ASC.Core.Caching;
 
-[Singleton]
-class AzServiceCache
+[Scope]
+class CachedAzService(DbAzService service, IFusionCacheProvider cacheProvider) : IAzService
 {
-    internal readonly ICache Cache;
-    internal readonly ICacheNotify<AzRecordCache> CacheNotify;
+    private readonly DbAzService _service = service ?? throw new ArgumentNullException(nameof(service));
+    private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
+    private readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(10);
 
-    public AzServiceCache(ICacheNotify<AzRecordCache> cacheNotify, ICache cache)
-    {
-        CacheNotify = cacheNotify;
-        Cache = cache;
-
-        cacheNotify.Subscribe(r => UpdateCache(r, true), CacheNotifyAction.Remove);
-        cacheNotify.Subscribe(r => UpdateCache(r, false), CacheNotifyAction.InsertOrUpdate);
-    }
-
-    private void UpdateCache(AzRecord r, bool remove)
-    {
-        var aces = Cache.Get<AzRecordStore>(GetKey(r.TenantId));
-        if (aces != null)
-        {
-            lock (aces)
-            {
-                if (remove)
-                {
-                    aces.Remove(r);
-                }
-                else
-                {
-                    aces.Add(r);
-                }
-            }
-        }
-    }
-
-    public static string GetKey(int tenant)
+    private string GetKey(int tenant)
     {
         return "acl" + tenant;
     }
-}
-
-[Scope]
-class CachedAzService(DbAzService service, AzServiceCache azServiceCache) : IAzService
-{
-    private readonly DbAzService _service = service ?? throw new ArgumentNullException(nameof(service));
-    private readonly ICacheNotify<AzRecordCache> _cacheNotify = azServiceCache.CacheNotify;
-    private readonly ICache _cache = azServiceCache.Cache;
-    private readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(10);
 
     public async Task<IEnumerable<AzRecord>> GetAcesAsync(int tenant, DateTime from)
     {
-        var key = AzServiceCache.GetKey(tenant);
-        var aces = _cache.Get<AzRecordStore>(key);
-        if (aces == null)
+        var key = GetKey(tenant);
+        var aces = await _cache.GetOrSetAsync<IEnumerable<AzRecord>>(key, async (ctx, token) =>
         {
             var records = await _service.GetAcesAsync(tenant, default);
-            aces = new AzRecordStore(records);
-            _cache.Insert(key, aces, DateTime.UtcNow.Add(_cacheExpiration));
-        }
+            var aces = new AzRecordStore(records);
+            return ctx.Modified(aces);
+        }, _cacheExpiration);
 
         return aces;
     }
@@ -91,7 +54,7 @@ class CachedAzService(DbAzService service, AzServiceCache azServiceCache) : IAzS
     public async Task<AzRecord> SaveAceAsync(int tenant, AzRecord r)
     {
         r = await _service.SaveAceAsync(tenant, r);
-        await _cacheNotify.PublishAsync(r, CacheNotifyAction.InsertOrUpdate);
+        await _cache.RemoveAsync(GetKey(tenant));
 
         return r;
     }
@@ -99,6 +62,6 @@ class CachedAzService(DbAzService service, AzServiceCache azServiceCache) : IAzS
     public async Task RemoveAceAsync(int tenant, AzRecord r)
     {
         await _service.RemoveAceAsync(tenant, r);
-        await _cacheNotify.PublishAsync(r, CacheNotifyAction.Remove);
+        await _cache.RemoveAsync(GetKey(tenant));
     }
 }

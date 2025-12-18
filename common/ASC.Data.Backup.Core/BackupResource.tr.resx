@@ -67,4 +67,37 @@
   <data name="LargeBackup" xml:space="preserve">
     <value>Yedekleme, portalın toplam boyutundan daha büyük</value>
   </data>
+  <data name="BackupException" xml:space="preserve">
+    <value>Yedekleme oluşturulurken bir hata oluştu. Lütfen tekrar oluşturmayı deneyin veya destek ile iletişime geçin.</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>Yedek geri yüklenirken bir hata oluştu. Lütfen tekrar deneyin veya destek ile iletişime geçin.</value>
+  </data>
+  <data name="BackupInvalid" xml:space="preserve">
+    <value>Yedekleme dosyası geçersiz.</value>
+  </data>
+  <data name="AutoBackup" xml:space="preserve">
+    <value>Otomatik yedekleme</value>
+  </data>
+  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
+    <value>Custom cloud</value>
+  </data>
+  <data name="BackupStorageTypeDataStore" xml:space="preserve">
+    <value>Geçici depolama</value>
+  </data>
+  <data name="BackupStorageTypeDocuments" xml:space="preserve">
+    <value>Odayı yedekle</value>
+  </data>
+  <data name="BackupStorageTypeLocal" xml:space="preserve">
+    <value>Yerel dosya</value>
+  </data>
+  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
+    <value>Üçüncü taraf depolama</value>
+  </data>
+  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
+    <value>Üçüncü taraf kaynak</value>
+  </data>
+  <data name="BackupMissingFilesWarning" xml:space="preserve">
+    <value>Bazı dosyalar yedeklemeye dahil edilmedi. Daha fazla bilgi almak için lütfen {0} adresini kontrol edin</value>
+  </data>
 </root>

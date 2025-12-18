@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -79,14 +79,14 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
 
             var request = new ChunkedRequestHelper<T>(context.Request);
 
-            if (!(await TryAuthorizeAsync(request)))
+            if (!await TryAuthorizeAsync(request))
             {
                 await WriteError(context, "Not authorized or session with specified upload id already expired");
 
                 return;
             }
 
-            if ((tenantManager.GetCurrentTenant()).Status != TenantStatus.Active)
+            if (tenantManager.GetCurrentTenant().Status != TenantStatus.Active)
             {
                 await WriteError(context, "Can't perform upload for deleted or transferring portals");
 
@@ -111,7 +111,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                     {
                         var resumedSession = await fileUploader.UploadChunkAsync<T>(request.UploadId, await request.ChunkStream(), await request.ChunkSize());
                         await chunkedUploadSessionHolder.StoreSessionAsync(resumedSession);
-                        
+
                         var transferredBytes = await fileUploader.GetTransferredBytesCountAsync(resumedSession);
                         if (transferredBytes == resumedSession.BytesTotal || !resumedSession.UseChunks)
                         {
@@ -119,13 +119,13 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                             {
                                 resumedSession = await fileUploader.FinalizeUploadSessionAsync<T>(request.UploadId);
                             }
-                            
+
                             await fileUploader.DeleteLinkAndMarkAsync(resumedSession.File);
 
                             await WriteSuccess(context, await ToResponseObject(resumedSession.File), (int)HttpStatusCode.Created);
 
-                            await filesMessageService.SendAsync(resumedSession.File.Version > 1 
-                                ? MessageAction.FileUploadedWithOverwriting 
+                            await filesMessageService.SendAsync(resumedSession.File.Version > 1
+                                ? MessageAction.FileUploadedWithOverwriting
                                 : MessageAction.FileUploaded, resumedSession.File, resumedSession.File.Title);
 
                             await webhookManager.PublishAsync(WebhookTrigger.FileUploaded, resumedSession.File);
@@ -134,7 +134,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                             if (resumedSession.File.Version <= 1)
                             {
                                 var folderDao = daoFactory.GetFolderDao<T>();
-                                var room = await folderDao.GetParentFoldersAsync(resumedSession.FolderId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+                                var room = await folderDao.GetParentFoldersAsync(resumedSession.FolderId).FirstOrDefaultAsync(f => f.IsRoom);
                                 if (room != null)
                                 {
                                     var data = room.Id is int rId && resumedSession.File.Id is int fId
@@ -145,11 +145,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                                         ? new RoomNotifyIntegrationData<string> { RoomId = srId, FileId = sfId }
                                         : null;
 
-                                    var evt = new RoomNotifyIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenant().Id)
-                                    {
-                                        Data = data,
-                                        ThirdPartyData = thirdPartyData
-                                    };
+                                    var evt = new RoomNotifyIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenant().Id) { Data = data, ThirdPartyData = thirdPartyData };
 
                                     await eventBus.PublishAsync(evt);
 
@@ -178,11 +174,10 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                         {
                             headersLength += h.Value.Sum(r => r.Length) + h.Key.Length + "\n\n".Length;
                         }
-                       
+
                         var resumedSession = await fileUploader.UploadChunkAsync<T>(request.UploadId, section.Body, context.Request.ContentLength.Value - headersLength - boundaryLength * 2 - 6, request.ChunkNumber);
                         await chunkedUploadSessionHolder.StoreSessionAsync(resumedSession);
-                        await WriteSuccess(context,
-                            await chunkedUploadSessionHelper.ToResponseObjectAsync(resumedSession));
+                        await WriteSuccess(context, await chunkedUploadSessionHelper.ToResponseObjectAsync(resumedSession));
                         return;
                     }
                 case ChunkedRequestType.Finalize:
@@ -194,19 +189,17 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
 
                     await fileUploader.DeleteLinkAndMarkAsync(session.File);
 
-                    await WriteSuccess(context, await ToResponseObject(session.File), (int)HttpStatusCode.Created);
-                    
-                    await filesMessageService.SendAsync(session.File.Version > 1 
-                        ? MessageAction.FileUploadedWithOverwriting 
+                    await filesMessageService.SendAsync(session.File.Version > 1
+                        ? MessageAction.FileUploadedWithOverwriting
                         : MessageAction.FileUploaded, session.File, session.File.Title);
 
                     await webhookManager.PublishAsync(WebhookTrigger.FileUploaded, session.File);
-
-                    await socketManager.CreateFileAsync(session.File);
+                    
                     if (session.File.Version <= 1)
                     {
                         var folderDao = daoFactory.GetFolderDao<T>();
-                        var room = await folderDao.GetParentFoldersAsync(session.FolderId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+                        var parents = await folderDao.GetParentFoldersAsync(session.FolderId).ToListAsync();
+                        var room = parents.FirstOrDefault(f => f.IsRoom);
                         if (room != null)
                         {
                             var data = room.Id is int rId && session.File.Id is int fId
@@ -219,17 +212,26 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
 
                             var evt = new RoomNotifyIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenant().Id)
                             {
-                                Data = data,
+                                Data = data, 
                                 ThirdPartyData = thirdPartyData
                             };
 
                             await eventBus.PublishAsync(evt);
                         }
                     }
+
+                    await socketManager.CreateFileAsync(session.File);
+                    
+                    await WriteSuccess(context, await ToResponseObject(session.File), (int)HttpStatusCode.Created);
+
                     return;
             }
         }
-        catch (System.Text.Json.JsonException)
+        catch (JsonException)
+        {
+            throw;
+        }
+        catch (FusionCacheSerializationException)
         {
             throw;
         }
@@ -238,10 +240,14 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
             logger.ErrorChunkedUploaderHandlerService(error);
             await WriteError(context, FilesCommonResource.ErrorMessage_FileNotFound);
         }
+        catch (InvalidCastException e) when (e.Message.Contains($"'{typeof(ChunkedUploadSession<string>)}'") && e.Message.Contains($"'{typeof(ChunkedUploadSession<int>)}'"))
+        {
+            throw;
+        }
         catch (Exception error)
         {
             logger.ErrorChunkedUploaderHandlerService(error);
-            await WriteError(context, error.Message);
+            await WriteError(context, error.InnerException?.Message ?? error.Message);
         }
     }
 
@@ -426,20 +432,19 @@ public class ChunkedRequestHelper<T>(HttpRequest request)
 
     public bool Encrypted => _request.Query["encrypted"] == "true";
 
-    private int? _chunkNumber;
     public int? ChunkNumber
     {
         get
         {
-            if (!_chunkNumber.HasValue)
+            if (!field.HasValue)
             {
                 var result = int.TryParse(_request.Query["chunkNumber"], out var i);
                 if (result)
                 {
-                    _chunkNumber = i;
+                    field = i;
                 }
             }
-            return _chunkNumber;
+            return field;
         }
     }
 

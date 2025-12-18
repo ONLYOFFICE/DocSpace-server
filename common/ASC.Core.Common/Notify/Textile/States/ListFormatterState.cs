@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -40,10 +40,7 @@ public abstract class ListFormatterState(TextileFormatter formatter) : Formatter
     private string _attsInfo;
     private string _alignInfo;
 
-    protected int NestingDepth
-    {
-        get { return _tag.Length; }
-    }
+    protected int NestingDepth => _tag.Length;
 
     public override string Consume(string input, Match m)
     {
@@ -52,7 +49,7 @@ public abstract class ListFormatterState(TextileFormatter formatter) : Formatter
         _attsInfo = m.Groups["atts"].Value;
         input = m.Groups["content"].Value;
 
-        this.Formatter.ChangeState(this);
+        Formatter.ChangeState(this);
 
         return input;
     }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,12 +26,46 @@
 
 namespace ASC.Files.Core.Entries;
 
-public class TagInfo : IMapFrom<DbFilesTag>
+/// <summary>
+/// The tag information.
+/// </summary>
+public class TagInfo
 {
+    /// <summary>
+    /// The tag ID.
+    /// </summary>
     public int Id { get; set; }
+
+    /// <summary>
+    /// The tag name.
+    /// </summary>
     public string Name { get; init; }
+
+    /// <summary>
+    /// The tag owner ID.
+    /// </summary>
     public Guid Owner { get; set; }
+
+    /// <summary>
+    /// The tag type.
+    /// </summary>
     public TagType Type { get; set; }
+
+    /// <summary>
+    /// The tag entry ID.
+    /// </summary>
     public object EntryId { get; set; }
+
+    /// <summary>
+    /// The file entry type for which the tag has been created.
+    /// </summary>
     public FileEntryType EntryType { get; set; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class TagInfoMapper
+{
+    public static partial DbFilesTag MapToDbFilesTag(this TagInfo source);
+    public static partial TagInfo MapToTagInfo(this DbFilesTag source);
+    public static partial void ApplyUpdate(DbFilesTagLink link, TagInfo source);
 }

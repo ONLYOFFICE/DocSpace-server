@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,6 +27,7 @@
 namespace ASC.Core.Encryption;
 
 /// <summary>
+/// The encryption settings.
 /// </summary>
 [ProtoContract]
 public class EncryptionSettings
@@ -41,21 +42,24 @@ public class EncryptionSettings
         NotifyUsers = true;
     }
 
-    /// <summary>Password</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The encryption password.
+    /// </summary>
     public string Password
     {
         get => Pass;
         set => Pass = (value ?? string.Empty).Replace('#', '_');
     }
 
-    /// <summary>Status</summary>
-    /// <type>ASC.Core.Encryption.EncryprtionStatus, ASC.Core.Common</type>
+    /// <summary>
+    /// The encryption status.
+    /// </summary>
     [ProtoMember(2)]
     public EncryprtionStatus Status { get; set; }
 
-    /// <summary>Specifies if the users will be notified or not</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies if the users will be notified about the encryption operation or not.
+    /// </summary>
     [ProtoMember(3)]
     public bool NotifyUsers { get; set; }
 
@@ -82,8 +86,8 @@ public class EncryptionSettingsHelper(CoreConfiguration coreConfiguration, Insta
     private async Task<string> SerializeAsync(EncryptionSettings encryptionSettings)
     {
         return string.Join("#",
-            string.IsNullOrEmpty(encryptionSettings.Pass) ? 
-                string.Empty : 
+            string.IsNullOrEmpty(encryptionSettings.Pass) ?
+                string.Empty :
                 await instanceCrypto.EncryptAsync(encryptionSettings.Pass),
             (int)encryptionSettings.Status,
             encryptionSettings.NotifyUsers

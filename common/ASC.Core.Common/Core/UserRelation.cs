@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,9 +26,17 @@
 
 namespace ASC.Core.Common.Core;
 
-public class UserRelation : IMapFrom<DbUserRelation>
+public class UserRelation
 {
     public int TenantId { get; set; }
     public Guid SourceUserId { get; set; }
     public Guid TargetUserId { get; set; }
+}
+
+[Mapper]
+public static partial class UserRelationMapper
+{
+    [MapperIgnoreSource(nameof(DbUserRelation.Tenant))]
+    public static partial UserRelation Map(this DbUserRelation source);
+
 }

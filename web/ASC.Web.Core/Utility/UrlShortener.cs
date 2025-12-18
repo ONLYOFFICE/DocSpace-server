@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -78,7 +78,7 @@ public class OnlyoShortener(IDbContextFactory<UrlShortenerDbContext> contextFact
         {
             var tenantId = tenantManager.GetCurrentTenantId();
             var context = await contextFactory.CreateDbContextAsync();
-            var link = await context.ShortLinks.FirstOrDefaultAsync(q=> q.TenantId == tenantId && q.Link == shareLink);
+            var link = await context.ShortLinks.FirstOrDefaultAsync(q => q.TenantId == tenantId && q.Link == shareLink);
             if (link != null)
             {
                 return commonLinkUtility.GetFullAbsolutePath(UrlShortRewriter.BasePath + link.Short);
@@ -120,19 +120,23 @@ public class ShortUrl
     {
         _alphabet = configuration["urlShortener:alphabet"] ?? "5XzpDt6wZRdsTrJkSY_cgPyxN4j-fnb9WKBF8vh3GH72QqmLVCM";
         _base = _alphabet.Length;
-        if(!int.TryParse(configuration["urlShortener:length"], out _length))
+        if (!int.TryParse(configuration["urlShortener:length"], out _length))
         {
             _length = 15;
         }
     }
-    public string GenerateRandomKey()
+    public string GenerateRandomKey(int customLength = 0, string alphabet = null)
     {
         var rand = new Random();
         var result = new StringBuilder();
-        for (var i = 0; i < _length; i++)
+        var length = customLength == 0 ? _length : customLength;
+        alphabet ??= _alphabet;
+        var @base = alphabet.Length;
+
+        for (var i = 0; i < length; i++)
         {
-            var x = rand.Next(0, _base);
-            result.Append(_alphabet.ElementAt(x));
+            var x = rand.Next(0, @base);
+            result.Append(alphabet.ElementAt(x));
         }
         return result.ToString();
     }

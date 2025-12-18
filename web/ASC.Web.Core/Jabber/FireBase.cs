@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,25 +28,13 @@ namespace ASC.Web.Core.Jabber;
 
 public class FireBase : Consumer
 {
-    public string Authorization
-    {
-        get { return this["firebase_authorization"]; }
-    }
+    public string Authorization => this["firebase_authorization"];
 
-    public string ProjectId
-    {
-        get { return this["firebase_projectId"]; }
-    }
+    public string ProjectId => this["firebase_projectId"];
 
-    public string ApiKey
-    {
-        get { return this["firebase_apiKey"]; }
-    }
+    public string ApiKey => this["firebase_apiKey"];
 
-    public string MessagingSenderId
-    {
-        get { return this["firebase_messagingSenderId"]; }
-    }
+    public string MessagingSenderId => this["firebase_messagingSenderId"];
 
     public FireBase()
     {
@@ -59,8 +47,8 @@ public class FireBase : Consumer
         IConfiguration configuration,
         ICacheNotify<ConsumerCacheItem> cache,
         ConsumerFactory consumerFactory,
-        string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
+        string name, int order, bool paid, Dictionary<string, string> props, Dictionary<string, string> additional = null)
+        : base(tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, paid, props, additional)
     {
     }
 }

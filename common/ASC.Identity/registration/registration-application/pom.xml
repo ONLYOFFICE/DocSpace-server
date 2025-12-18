@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.asc</groupId>
         <artifactId>registration</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.3</version>
     </parent>
 
     <artifactId>registration-application</artifactId>
@@ -49,7 +49,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-cache</artifactId>
-            <version>${spring.caching.version}</version>
         </dependency>
 
         <!-- Spring Security Dependencies -->
@@ -60,13 +59,6 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-oauth2-jose</artifactId>
-        </dependency>
-
-        <!-- SpringDoc OpenAPI -->
-        <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
-            <version>${springdoc.version}</version>
         </dependency>
 
         <!-- Resilience4j -->

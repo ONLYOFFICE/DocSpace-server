@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -45,9 +45,8 @@ public class RoomLogoManager(
     FileUtilityConfiguration fileUtilityConfiguration,
     SetupInfo setupInfo,
     FileSizeComment fileSizeComment,
-    CommonLinkUtility commonLinkUtility, 
+    CommonLinkUtility commonLinkUtility,
     ExternalShare externalShare,
-    GlobalFolderHelper globalFolderHelper,
     WebhookManager webhookManager)
 {
     internal const string LogosPathSplitter = "_";
@@ -81,8 +80,8 @@ public class RoomLogoManager(
     {
         var folderDao = daoFactory.GetFolderDao<T>();
         var room = await folderDao.GetFolderAsync(id);
-        
-        if (room == null || !DocSpaceHelper.IsRoom(room.FolderType))
+
+        if (room is not { IsRoom: true })
         {
             throw new ItemNotFoundException();
         }
@@ -91,12 +90,12 @@ public class RoomLogoManager(
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
         }
-        
+
         if (string.IsNullOrEmpty(tempFile))
         {
             return room;
         }
-        
+
         await SaveLogo(tempFile, x, y, width, height, room, folderDao);
 
         await webhookManager.PublishAsync(WebhookTrigger.RoomUpdated, room);
@@ -137,7 +136,7 @@ public class RoomLogoManager(
 
         return uri;
     }
-    
+
 
     private async Task<string> CreateWatermarkImageAsync<T>(Folder<T> room, IDataStore store, byte[] data)
     {
@@ -190,7 +189,7 @@ public class RoomLogoManager(
 
         try
         {
-            var store = await GetLogoStoreAsync(); 
+            var store = await GetLogoStoreAsync();
             await store.DeleteFilesAsync(string.Empty, $"{ProcessFolderId(stringId)}*.*", false);
             room.SettingsHasLogo = false;
 
@@ -230,7 +229,7 @@ public class RoomLogoManager(
                     Data = fromDict
                 };
             }
-            
+
             return new Logo
             {
                 Original = string.Empty,
@@ -272,17 +271,17 @@ public class RoomLogoManager(
         {
             throw new Exception(fileSizeComment.FileImageSizeExceptionString);
         }
-                
+
         byte[] data;
-        await using(var inputStream = roomLogo.OpenReadStream())
+        await using (var inputStream = roomLogo.OpenReadStream())
         using (var ms = new MemoryStream())
         {
             await inputStream.CopyToAsync(ms);
             data = ms.ToArray();
         }
-                
+
         UserPhotoThumbnailManager.CheckImgFormat(data);
-        
+
         data = await UserPhotoThumbnailManager.TryParseImage(data, maxFileSize, _originalLogoSize.Item2);
 
         var fileName = $"{Guid.NewGuid()}{LogosPathSplitter}{securityContext.CurrentAccount.ID}.png";
@@ -321,7 +320,7 @@ public class RoomLogoManager(
 
         return true;
     }
-    
+
     private static readonly ConcurrentDictionary<string, string> _covers = new();
     public static async Task<ConcurrentDictionary<string, string>> GetCoversAsync()
     {
@@ -353,17 +352,12 @@ public class RoomLogoManager(
 
         return _covers;
     }
-    
+
     public async Task<Folder<T>> ChangeCoverAsync<T>(T id, string color, string cover)
     {
         var folderDao = daoFactory.GetFolderDao<T>();
         var room = await folderDao.GetFolderAsync(id);
-        if (room == null || !DocSpaceHelper.IsRoom(room.FolderType))
-        {
-            throw new ItemNotFoundException();
-        }
-
-        if (room.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync)
+        if (room is not { IsRoom: true })
         {
             throw new ItemNotFoundException();
         }
@@ -403,7 +397,7 @@ public class RoomLogoManager(
     public static bool ColorChanged<T>(string color, Folder<T> room)
     {
         var colorChanged = false;
-        
+
         if (color != null && room.SettingsColor != color)
         {
             // if (color != "" && !Color.TryParse(color, out _))
@@ -421,7 +415,7 @@ public class RoomLogoManager(
     public static async Task<bool> CoverChanged<T>(string cover, Folder<T> room)
     {
         var coverChanged = false;
-        
+
         if (cover != null && room.SettingsCover != cover)
         {
             var covers = await GetCoversAsync();
@@ -448,7 +442,7 @@ public class RoomLogoManager(
     private async Task RemoveTempAsync(IDataStore store, string fileName)
     {
         var index = fileName.LastIndexOf('.');
-        var fileNameWithoutExt = (index != -1) ? fileName[..index] : fileName;
+        var fileNameWithoutExt = index != -1 ? fileName[..index] : fileName;
 
         try
         {
@@ -463,9 +457,9 @@ public class RoomLogoManager(
     private async Task SaveWithProcessAsync(IDataStore store, string id, byte[] imageData, long maxFileSize, Point position, MagickGeometry cropSize)
     {
         imageData = await UserPhotoThumbnailManager.TryParseImage(imageData, maxFileSize, _originalLogoSize.Item2);
-        
+
         var fileName = GetFileName(id, SizeName.Original);
-        
+
         if (imageData == null || imageData.Length == 0)
         {
             return;
@@ -476,7 +470,7 @@ public class RoomLogoManager(
             await store.SaveAsync(fileName, stream);
         }
 
-        var sizes = new[] { _mediumLogoSize, _smallLogoSize, _largeLogoSize};
+        var sizes = new[] { _mediumLogoSize, _smallLogoSize, _largeLogoSize };
 
         if (imageData is not { Length: > 0 })
         {
@@ -532,7 +526,7 @@ public class RoomLogoManager(
         using var stream = new MemoryStream(imageData);
         await store.SaveAsync(fileName, stream);
     }
-    
+
     private async ValueTask<string> GetWatermarkImagePathAsync<T>(T id, int hash, bool secure = false)
     {
         var fileName = string.Format(ImageWatermarkPath, ProcessFolderId(id));
@@ -544,7 +538,7 @@ public class RoomLogoManager(
 
         return uri + (secure ? "&" : "?") + $"hash={hash}";
     }
-    
+
     private async ValueTask<string> GetLogoPathAsync<T>(IDataStore store, T id, SizeName size, int hash, bool secure = false)
     {
         var fileName = GetFileName(id, size);
@@ -564,16 +558,16 @@ public class RoomLogoManager(
     private async Task<byte[]> GetTempAsync(IDataStore store, string fileName)
     {
         var index = fileName.LastIndexOf('.');
-        var fileNameWithoutExt = (index != -1) ? fileName[..index] : fileName;
-        
+        var fileNameWithoutExt = index != -1 ? fileName[..index] : fileName;
+
         var fileNameParts = fileNameWithoutExt.Split(LogosPathSplitter);
-        
+
         var userIdString = fileNameParts.Length > 1 ? fileNameParts[1] : string.Empty;
         if (!Guid.TryParse(userIdString, out var userId) || userId != securityContext.CurrentAccount.ID)
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
-        
+
         await using var stream = await store.GetReadStreamAsync(TempDomainPath, fileName);
 
         var data = await ReadStreamToByteArrayAsync(stream);
@@ -604,9 +598,10 @@ public class RoomLogoManager(
             {
                 Id = room.ProviderId,
                 HasLogo = room.SettingsHasLogo,
-                Color = room.SettingsColor
+                Color = room.SettingsColor,
+                Cover = room.SettingsCover
             });
-            
+
             room.ModifiedOn = provider.ModifiedOn;
         }
         else
@@ -634,8 +629,8 @@ public class RoomLogoManager(
         var match = Selectors.Pattern.Match(room.Id.ToString()!);
 
         return $"{match.Groups["selector"]}-{match.Groups["id"]}";
-        }
     }
+}
 
 [EnumExtensions]
 public enum SizeName

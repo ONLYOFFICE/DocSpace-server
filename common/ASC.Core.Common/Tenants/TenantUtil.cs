@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,8 +29,21 @@ namespace ASC.Core.Tenants;
 [Scope]
 public class TenantUtil(TenantManager tenantManager, TimeZoneConverter timeZoneConverter)
 {
-    private TimeZoneInfo _timeZoneInfo;
-    private TimeZoneInfo TimeZoneInfo => _timeZoneInfo ??= timeZoneConverter.GetTimeZone(tenantManager.GetCurrentTenant().TimeZone);
+    private string _timeZoneName;
+
+    public TimeZoneInfo TimeZoneInfo
+    {
+        get
+        {
+            var tenantTimeZone = tenantManager.GetCurrentTenant().TimeZone;
+            if (field == null || _timeZoneName != tenantTimeZone)
+            {
+                _timeZoneName = tenantTimeZone;
+                field = timeZoneConverter.GetTimeZone(tenantTimeZone);
+            }
+            return field;
+        }
+    }
 
     public DateTime DateTimeFromUtc(DateTime utc)
     {
@@ -89,7 +102,7 @@ public class TenantUtil(TenantManager tenantManager, TimeZoneConverter timeZoneC
     {
         return DateTime.SpecifyKind(TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZone), DateTimeKind.Local);
     }
-    
+
     public DateTime DateTimeNow(string timeZone)
     {
         return DateTimeNow(timeZoneConverter.GetTimeZone(timeZone));

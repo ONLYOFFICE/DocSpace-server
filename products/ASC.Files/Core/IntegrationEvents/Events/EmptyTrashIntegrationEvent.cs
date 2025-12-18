@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -41,10 +41,10 @@ public record EmptyTrashIntegrationEvent : IntegrationEvent
 
     [ProtoMember(2)]
     public IDictionary<string, string> Headers { get; set; }
-    
+
     [ProtoMember(3)]
     public FileDeleteOperationData<int> Data { get; set; }
-    
+
     [ProtoMember(4)]
     public FileDeleteOperationData<string> ThirdPartyData { get; set; }
 }

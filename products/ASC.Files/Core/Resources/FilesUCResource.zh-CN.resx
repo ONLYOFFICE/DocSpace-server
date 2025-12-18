@@ -74,7 +74,7 @@
     <value>文件将被压缩成{0}.zip文件{1}</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>文档</value>
+    <value>我的文档</value>
   </data>
   <data name="PrivacyRoom" xml:space="preserve">
     <value>私人房间</value>
@@ -102,5 +102,11 @@
   </data>
   <data name="ReadyFormFolder" xml:space="preserve">
     <value>完成</value>
+  </data>
+  <data name="RoomTemplates" xml:space="preserve">
+    <value>模板</value>
+  </data>
+  <data name="AiAgents" xml:space="preserve">
+    <value>AI 智能体</value>
   </data>
 </root>

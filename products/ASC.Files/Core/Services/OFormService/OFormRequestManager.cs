@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -46,7 +46,7 @@ public class OFormRequestManager(
             using var httpClient = httpClientFactory.CreateClient();
             using var response = await httpClient.GetAsync($"{_configuration.Domain.TrimEnd('/')}/{_configuration.Path.Trim('/')}/{id}?populate[file_oform][fields]=url&populate[file_oform][fields]=name&populate[file_oform][fields]=ext&populate[file_oform][filters][url][$endsWith]={_configuration.Ext}");
             var data = JsonSerializer.Deserialize<OFromRequestData>(await response.Content.ReadAsStringAsync(), _options);
-            
+
             var file = data.Data.Attributes.File.Data.FirstOrDefault(f => f.Attributes.Ext == _configuration.Ext);
             var streamResponse = await httpClient.GetAsync(file?.Attributes.Url);
             return await streamResponse.Content.ReadAsStreamAsync();

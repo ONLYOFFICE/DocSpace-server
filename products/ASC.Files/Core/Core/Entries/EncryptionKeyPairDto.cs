@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,27 +27,33 @@
 namespace ASC.Web.Files.Core.Entries;
 
 /// <summary>
+/// The encryption key pair parameters.
 /// </summary>
 public class EncryptionKeyPairDto
 {
-    /// <summary>Private key</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The private key.
+    /// </summary>
     public string PrivateKeyEnc { get; set; }
 
-    /// <summary>Public key</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The public key.
+    /// </summary>
     public string PublicKey { get; set; }
 
-    /// <summary>User ID</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The user ID of the encryption keys.
+    /// </summary>
     public Guid UserId { get; set; }
 }
 
 [Scope]
-public class EncryptionKeyPairDtoHelper(UserManager userManager,
+public class EncryptionKeyPairDtoHelper(
+    UserManager userManager,
     AuthContext authContext,
     EncryptionLoginProvider encryptionLoginProvider,
     FileSecurity fileSecurity,
+    FileSharing fileSharing,
     IDaoFactory daoFactory)
 {
     public async Task SetKeyPairAsync(string publicKey, string privateKeyEnc)
@@ -55,8 +61,8 @@ public class EncryptionKeyPairDtoHelper(UserManager userManager,
         ArgumentException.ThrowIfNullOrEmpty(publicKey);
         ArgumentException.ThrowIfNullOrEmpty(privateKeyEnc);
 
-        var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
-        if (!authContext.IsAuthenticated || await userManager.IsGuestAsync(user))
+        var userId = authContext.CurrentAccount.ID;
+        if (!authContext.IsAuthenticated || await userManager.IsGuestAsync(userId))
         {
             throw new SecurityException();
         }
@@ -65,11 +71,11 @@ public class EncryptionKeyPairDtoHelper(UserManager userManager,
         {
             PrivateKeyEnc = privateKeyEnc,
             PublicKey = publicKey,
-            UserId = user.Id
+            UserId = userId
         };
 
         var keyPairString = JsonSerializer.Serialize(keyPair);
-        await encryptionLoginProvider.SetKeysAsync(user.Id, keyPairString);
+        await encryptionLoginProvider.SetKeysAsync(userId, keyPairString);
     }
 
     public async Task<EncryptionKeyPairDto> GetKeyPairAsync()
@@ -94,7 +100,7 @@ public class EncryptionKeyPairDtoHelper(UserManager userManager,
         return keyPair;
     }
 
-    public async Task<IEnumerable<EncryptionKeyPairDto>> GetKeyPairAsync<T>(T fileId, FileStorageService FileStorageService)
+    public async Task<IEnumerable<EncryptionKeyPairDto>> GetKeyPairAsync<T>(T fileId)
     {
         var fileDao = daoFactory.GetFileDao<T>();
         var folderDao = daoFactory.GetFolderDao<T>();
@@ -120,7 +126,7 @@ public class EncryptionKeyPairDtoHelper(UserManager userManager,
             throw new NotSupportedException();
         }
 
-        var tmpFiles = await FileStorageService.GetSharedInfoAsync(new List<T> { fileId }, new List<T>());
+        var tmpFiles = await fileSharing.GetSharedInfoAsync([fileId], []);
         var fileShares = tmpFiles.ToList();
         fileShares = fileShares.Where(share => !share.SubjectGroup && share.Access == FileShare.ReadWrite).ToList();
 

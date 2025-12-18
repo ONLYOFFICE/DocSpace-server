@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -93,6 +93,12 @@ public class DocumentsBackupStorage(SetupInfo setupInfo,
         await DeleteDaoAsync(storagePath);
     }
 
+    public async Task<File<T>> GetAsync<T>(T storagePath)
+    {
+        await tenantManager.SetCurrentTenantAsync(_tenantId);
+        return await GetDaoAsync(storagePath);
+    }
+
     public async Task<bool> IsExistsAsync(string storagePath)
     {
         await tenantManager.SetCurrentTenantAsync(_tenantId);
@@ -174,6 +180,12 @@ public class DocumentsBackupStorage(SetupInfo setupInfo,
     {
         var fileDao = await GetFileDaoAsync<T>();
         await fileDao.DeleteFileAsync(fileId);
+    }
+
+    private async Task<File<T>> GetDaoAsync<T>(T fileId)
+    {
+        var fileDao = await GetFileDaoAsync<T>();
+        return await fileDao.GetFileAsync(fileId);
     }
 
     private async Task<bool> IsExistsDaoAsync<T>(T fileId)

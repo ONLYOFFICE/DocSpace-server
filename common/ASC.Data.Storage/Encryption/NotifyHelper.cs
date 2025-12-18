@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -65,7 +65,7 @@ public class NotifyHelper(ILogger<NotifyHelper> logger, NotifyServiceClient noti
 
     public async Task SendStorageDecryptionErrorAsync(int tenantId)
     {
-       await SendStorageEncryptionNotificationAsync("SendStorageDecryptionErrorAsync", tenantId);
+        await SendStorageEncryptionNotificationAsync("SendStorageDecryptionErrorAsync", tenantId);
     }
 
     private async Task SendStorageEncryptionNotificationAsync(string method, int tenantId)
@@ -80,7 +80,7 @@ public class NotifyHelper(ILogger<NotifyHelper> logger, NotifyServiceClient noti
 
         try
         {
-           await notifyServiceClient.InvokeSendMethodAsync(notifyInvoke);
+            await notifyServiceClient.InvokeSendMethodAsync(notifyInvoke);
         }
         catch (Exception error)
         {

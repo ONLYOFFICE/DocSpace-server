@@ -545,37 +545,37 @@ $TrulyYours</value>
     <value>Nový používateľ pridaný do ${LetterLogoText} portálu</value>
   </data>
   <data name="ActionFileCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; vytvoril nový dokument: &lt;a href={1}&gt;{2}&lt;/a&gt; v miestnosti: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; vytvoril nový dokument: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; v miestnosti: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionNewComment" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; pridal nový komentár k verzii dokumentu: &lt;a href={1}&gt;{2}&lt;/a&gt; v miestnosti: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; pridal nový komentár k verzii dokumentu: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; v miestnosti: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileUploaded" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; nahral nový dokument: &lt;a href={1}&gt;{2}&lt;/a&gt; v miestnosti: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; nahral nový dokument: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; v miestnosti: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomRenamed" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; premenoval miestnosť: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href={2}&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; premenoval miestnosť: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; vytvoril novú miestnosť: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; vytvoril novú miestnosť: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; bol odstránený z miestnosti: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; bol odstránený z miestnosti: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileEdited" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; upravil dokument: &lt;a href={1}&gt;{2}&lt;/a&gt; v miestnosti: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; upravil dokument: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; v miestnosti: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomRemoved" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; odstránil miestnosť: &lt;b&gt;{1}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserAddedToRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; bol pridaný do miestnosti: &lt;a href={1}&gt;{2}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; bol pridaný do miestnosti: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomArchived" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; presunul miestnosť: &lt;a href={1}&gt;{2}&lt;/a&gt; do archívu - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; presunul miestnosť: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; do archívu - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomUpdateAccessForUser" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; - bola mu pridelená úloha &lt;b&gt;{1}&lt;/b&gt; v miestnosti: &lt;a href={2}&gt;{3}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; - bola mu pridelená úloha &lt;b&gt;{1}&lt;/b&gt; v miestnosti: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
     <value>Bol pridaný nový používateľ DocSpace: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
@@ -875,7 +875,7 @@ $Body</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace bol &lt;span style="color: #FF6F3D;"&gt;deaktivovaný&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace bol &lt;span style="color: #FF6F3D;"&gt;odstránený&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Váš účet ${LetterLogoText} DocSpace bol úspešne deaktivovaný. Upozorňujeme, že všetky Vaše údaje budú vymazané v súlade s našimi &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Zásadami ochrany osobných údajov&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
@@ -915,17 +915,6 @@ $TrulyYours</value>
 Vezmite si prosím na vedomie, že bolo aktivovane tolerančné obdobie $PaymentDelay dní pre váš ${LetterLogoText} DocSpace.
 
 Nezabudnite zaplatiť svoje predplatné Business pred uplynutím obdobia odkladu. Takto budete môcť v budúcnosti naplno využívať svoj ${LetterLogoText} DocSpace.
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Dobrý deň, $UserName!
-
-Prosím, vezmite do úvahy, že Vaše predplatné ${LetterLogoText} DocSpace vyprší o tri dni. Potom sa aktivuje odkladná lehota $PaymentDelay dní.
-
-Odporúčame vám zaplatiť predplatné Business teraz a naďalej využívať všetky výhody vášho priestoru ${LetterLogoText} DocSpace.
 
 $OrangeButton
 
@@ -1091,7 +1080,7 @@ $TrulyYours</value>
     <value>${LetterLogoText}. Zmena hesla poštovej schránky</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace bol deaktivovaný</value>
+    <value>Dokumentačný priestor ${LetterLogoText} bol odstránený</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>Používateľ vymazal svoj profil</value>
@@ -1104,9 +1093,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Dodatočná lehota pre váš ${LetterLogoText} DocSpace bola aktivovaná</value>
-  </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Vaše predplatné ${LetterLogoText} DocSpace čoskoro vyprší</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Dodatočná lehota pre vaše predplatné ${LetterLogoText} DocSpace vypršala</value>
@@ -1470,7 +1456,9 @@ Konfigurácia aplikácie autentifikátora, ktorú používate na vstup do portá
 
 Kliknite na tlačidlo nižšie, aby ste prešli na stránku prihlásenia do portálu a nakonfigurovali aplikáciu autentifikátora:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="subject_saas_video_guides_v1" xml:space="preserve">
     <value>Zvládnite ${LetterLogoText} DocSpace s videonávodmi</value>
@@ -1785,11 +1773,13 @@ $TrulyYours</value>
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Dobrý deň, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Práve ste *vytvorili ${LetterLogoText} DocSpace*, hub dokumentov, v ktorom môžete zlepšiť spoluprácu so svojím tímom, zákazníkmi, partnermi a ďalšími. Jeho adresa je &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Práve ste *vytvorili ${LetterLogoText} DocSpace*, hub dokumentov, v ktorom môžete zlepšiť spoluprácu so svojím tímom, zákazníkmi, partnermi a ďalšími. Jeho adresa je &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
+#if($OrangeButton != "")
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Potvrďte svoj e-mail (odkaz je platný 7 dní):&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 44px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
+#end
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;Váš aktuálny tarifný plán je STARTUP. Je úplne bezplatný a zahŕňa:&lt;/td&gt;&lt;/tr&gt;
 
@@ -1895,5 +1885,214 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 26px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Ak potrebujete pomoc, navštívte naš &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;Centrum pomoci&lt;/a&gt; alebo kontaktujte našu &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__SupportLink}"&gt;podporu&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
+  </data>
+  <data name="subject_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>Váš ${LetterLogoText} DocSpace bude vymazaný</value>
+  </data>
+  <data name="subject_user_type_changed" xml:space="preserve">
+    <value>Váš typ používateľa DocSpace sa zmenil</value>
+  </data>
+  <data name="subject_user_role_changed" xml:space="preserve">
+    <value>Vaša rola v miestnosti DocSpace sa zmenila</value>
+  </data>
+  <data name="pattern_user_role_changed" xml:space="preserve">
+    <value>Dobrý deň!
+
+V miestnosti DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole} bola vám pridelená nová rola.
+
+Viac informácií o rolách a oprávneniach v miestnosti nájdete v časti "Centre pomoci":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_type_changed" xml:space="preserve">
+    <value>Dobrý deň!
+
+V DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" máte pridelený nový typ používateľa: ${UserType}.
+
+Viac informácií o typoch používateľov a oprávneniach sa dozviete v "Centre pomoci":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Váš ${LetterLogoText} DocSpace bude &lt;span style="color: #FF6F3D;"&gt;vymazaný&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Váš ${LetterLogoText} DocSpace ${__VirtualRootPath} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; je neaktívny už viac ako rok.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Keďže ste sa rozhodli, že ho už nebudete používať, váš ${LetterLogoText} DocSpace a všetky údaje budú vymazané v súlade s našimi &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;zásadami ochrany osobných údajov&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;Budeme vám vďační za vašu spätnú väzbu. Prečo ste sa rozhodli prestať používať ${LetterLogoText} DocSpace?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Ak chcete pokračovať v používaní svojho ${LetterLogoText} DocSpace, stačí sa do neho prihlásiť a vykonať akúkoľvek operáciu.&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Prejsť na Služby</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Prejsť na Nastavenia peňaženky</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>Vaše heslo bolo úspešne zmenené</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>Otvoriť DocSpace</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.Heslo bolo úspešne zmenené
+
+Vaše heslo pre účet *$UserName*, *$UserEmail* bolo úspešne zmenené dňa *$Date* v DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+IP: *$IP*
+Zariadenie: *$Device*
+#if($Location != "")
+Poloha: *$Location*
+#end
+Prehliadač: *$Browser*
+
+Ak ste túto akciu vykonali vy, nie sú potrebné žiadne ďalšie kroky. Ak táto zmena vyzerá podozrivo alebo ste ju neschválili, okamžite si obnovte heslo a zakážte prístup k DocSpace pre toto zariadenie.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="ActionAgentCreated" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; vytvoril nového agenta: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRemoved" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; vymazal agenta: &lt;b&gt;{1}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRenamed" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; premenoval agenta: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentUpdateAccessForUser" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; bola pridelená rola &lt;b&gt;{1}&lt;/b&gt; v agentu: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserAddedToAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; bol pridaný do agenta: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserRemovedFromAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; bol odstránený z agenta: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ButtonJoinAgent" xml:space="preserve">
+    <value>Pripojiť sa k agentu</value>
+  </data>
+  <data name="pattern_backup_failed" xml:space="preserve">
+    <value>Dobrý deň, $UserName,
+
+Proces zálohovania vášho DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" zlyhal.
+
+Ak máte akékoľvek otázky alebo potrebujete pomoc, neváhajte nás kontaktovať prostredníctvom "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_backup_failed_tg" xml:space="preserve">
+    <value>Dobrý deň, $UserName,
+
+Proces zálohovania vášho DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) zlyhal.
+
+Ak máte akékoľvek otázky alebo potrebujete pomoc, neváhajte nás kontaktovať prostredníctvom [${__SupportLink}](${__SupportLink})
+
+S pozdravom,
+${LetterLogoText} Tím podpory
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Dobrý deň, $UserName!
+
+Snažíme sa vás informovať, že automatické obnovenie vášho zakúpeného servisného plánu sa nepodarilo dokončiť.
+
+Láskavo vás žiadame, aby ste svoj aktuálny servisný plán obnovili manuálne (alebo zakúpili nový).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_agent_invite" xml:space="preserve">
+    <value>Dobrý deň!
+
+Boli ste pozvaní pripojiť sa k agentu DocSpace na "${__VirtualRootPath}":"${__VirtualRootPath}". Prijmite pozvánku kliknutím na odkaz:
+
+$OrangeButton
+
+Po kliknutí na odkaz nastavte nové heslo pre svoj účet.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Dobrý deň!
+
+$__AuthorName vás pozval, aby ste sa pripojili k agentu "$Message":"$InviteLink" na "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Dobrý deň, $UserName!!
+
+Chceme vás informovať, že vaša platba za predplatné bude automaticky strhnutá z vášho účtu o 3 dni.
+
+Aby bola transakcia hladká, prosím, overte, či máte na vašom platobnom spôsobe dostatok financií.
+
+Ak máte akékoľvek otázky alebo potrebujete pomoc, neváhajte sa obrátiť na náš tím podpory: ${__SupportLink}.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed" xml:space="preserve">
+    <value>Dobrý deň, $UserName,
+
+Plánovaný process zálohovania vášho DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" zlyhal.
+
+Odporúčame skontrolovať nastavenia "Záloha":"${__VirtualRootPath}/portal-settings/backup/data-backup" a "Služby":"${__VirtualRootPath}/portal-settings/services".
+
+Ak máte akékoľvek otázky alebo potrebujete pomoc, neváhajte nás kontaktovať prostredníctvom "${__SupportLink}":"${__SupportLink}"
+ 
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
+    <value>Dobrý deň, $UserName,
+
+Plánovaný process zálohovania vášho DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) zlyhal.
+
+Odporúčame skontrolovať nastavenia [Záloha](${__VirtualRootPath}/portal-settings/backup/data-backup) a [Služby](${__VirtualRootPath}/portal-settings/services).
+
+Ak máte akékoľvek otázky alebo potrebujete pomoc, neváhajte nás kontaktovať prostredníctvom [${__SupportLink}](${__SupportLink})
+
+S pozdravom,
+${LetterLogoText} Tím podpory
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Dobrý deň, $UserName!
+
+Kontaktujeme vás, aby sme vás informovali, že automatické dobitie zostatku peňaženky DocSpace bolo neúspešné.
+
+Láskavo vás žiadame, aby ste manuálne skontrolovali a aktualizovali zostatok vo vašej peňaženke.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_backup_failed" xml:space="preserve">
+    <value>Nepodarilo sa vytvoriť zálohu pre váš DocSpace</value>
+  </data>
+  <data name="subject_saas_agent_invite" xml:space="preserve">
+    <value>Pripojiť sa k ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Boli ste pozvaní do agenta ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_scheduled_backup_failed" xml:space="preserve">
+    <value>Automatické zálohovanie vášho DocSpace zlyhalo</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Vyžaduje sa akcia: Nie je možné automaticky obnoviť servisný plán vo vašom ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Nadchádzajúca platba za predplatné pre váš ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Je potrebná akcia: Nie je možné automaticky dobiť zostatok peňaženky vo vašom ${LetterLogoText} DocSpace</value>
   </data>
 </root>

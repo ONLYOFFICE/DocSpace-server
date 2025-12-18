@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,30 +27,30 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// Request parameters for setting a group manager
+/// The request for setting a group manager.
 /// </summary>
 public class SetManagerRequest
 {
     /// <summary>
-    /// User ID
+    /// The user ID.
     /// </summary>
-    public Guid UserId { get; set; }
+    public required Guid UserId { get; set; }
 }
 
 /// <summary>
-/// Request parameters for setting a group manager
+/// The request parameters for setting a group manager.
 /// </summary>
 public class SetManagerRequestDto
 {
     /// <summary>
-    /// Group ID
+    /// The group ID.
     /// </summary>
     [FromRoute(Name = "id")]
-    public Guid Id { get; set; }
+    public required Guid Id { get; set; }
 
     /// <summary>
-    /// Set manager
+    /// The request for setting a group manager.
     /// </summary>
     [FromBody]
-    public SetManagerRequest SetManager { get; set; }
+    public required SetManagerRequest SetManager { get; set; }
 }

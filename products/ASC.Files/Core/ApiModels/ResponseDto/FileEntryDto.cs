@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,98 +35,135 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 [JsonSerializable(typeof(FolderDto<string>[]))]
 public partial class FileEntryDtoContext : JsonSerializerContext;
 
-
+/// <summary>
+/// The file entry information.
+/// </summary>
 [JsonDerivedType(typeof(FileDto<int>))]
 [JsonDerivedType(typeof(FileDto<string>))]
 [JsonDerivedType(typeof(FolderDto<int>))]
 [JsonDerivedType(typeof(FolderDto<string>))]
-public abstract class FileEntryDto
+public abstract class FileEntryBaseDto
 {
     /// <summary>
-    /// Title
+    /// The file entry title.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Some titile.txt/ Some title")]
     public string Title { get; set; }
 
     /// <summary>
-    /// Access rights
+    /// The access rights to the file entry.
     /// </summary>
     public FileShare Access { get; set; }
 
     /// <summary>
-    /// Specifies if the file is shared or not
+    /// Provides information about the employee who shared the file or folder.
+    /// </summary>
+    public EmployeeDto SharedBy { get; set; }
+
+    /// <summary>
+    /// The information about the employee who owns the file entry.
+    /// </summary>
+    public EmployeeDto OwnedBy { get; set; }
+
+    /// <summary>
+    /// Specifies if the file entry is shared via link or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
     public bool Shared { get; set; }
 
     /// <summary>
-    /// Creation time
+    /// Specifies if the file entry is shared for user or not.
+    /// </summary>
+    [SwaggerSchemaCustom(Example = false)]
+    public bool SharedForUser { get; set; }
+
+    /// <summary>
+    /// Indicates whether the parent entity is shared.
+    /// </summary>
+    public bool ParentShared { get; set; }
+
+    /// <summary>
+    /// The short Web URL.
+    /// </summary>
+    [Url]
+    public string ShortWebUrl { get; set; }
+
+    /// <summary>
+    /// The creation date and time of the file entry.
     /// </summary>
     public ApiDateTime Created { get; set; }
 
     /// <summary>
-    /// Author
+    /// The file entry author.
     /// </summary>
     public EmployeeDto CreatedBy { get; set; }
 
-    private ApiDateTime _updated;
-
     /// <summary>
-    /// Time of the last file update
+    /// The last date and time when the file entry was updated.
     /// </summary>
     public ApiDateTime Updated
     {
-        get => _updated < Created ? Created : _updated;
-        set => _updated = value;
+        get => field < Created ? Created : field;
+        set;
     }
 
     /// <summary>
-    /// Time when the file will be automatically deleted
+    /// The date and time when the file entry will be automatically deleted.
     /// </summary>
     public ApiDateTime AutoDelete { get; set; }
 
     /// <summary>
-    /// Root folder type
+    /// The root folder type of the file entry.
     /// </summary>
     public FolderType RootFolderType { get; set; }
 
     /// <summary>
-    /// First parent folder type
+    /// The parent room type of the file entry.
     /// </summary>
     public FolderType? ParentRoomType { get; set; }
 
     /// <summary>
-    /// A user who updated a file
+    /// The user who updated the file entry.
     /// </summary>
     public EmployeeDto UpdatedBy { get; set; }
 
     /// <summary>
-    /// Provider is specified or not
+    /// Specifies if the file entry provider is specified or not.
     /// </summary>
     public bool? ProviderItem { get; set; }
 
     /// <summary>
-    /// Provider key
+    /// The provider key of the file entry.
     /// </summary>
     public string ProviderKey { get; set; }
 
     /// <summary>
-    /// Provider ID
+    /// The provider ID of the file entry.
     /// </summary>
     public int? ProviderId { get; set; }
 
     /// <summary>
-    /// Order
+    /// The order of the file entry.
     /// </summary>
     public string Order { get; set; }
-    
+
+    /// <summary>
+    /// Specifies if the file is a favorite or not.
+    /// </summary>
+    public bool? IsFavorite { get; set; }
+
+    /// <summary>
+    /// The file entry type.
+    /// </summary>
     public abstract FileEntryType FileEntryType { get; }
 
-    protected FileEntryDto(FileEntry entry)
+    protected FileEntryBaseDto(FileEntry entry)
     {
         Title = entry.Title;
         Access = entry.Access;
         Shared = entry.Shared;
+        SharedForUser = entry.SharedForUser;
+        ParentShared = entry.ParentShared;
         RootFolderType = entry.RootFolderType;
         ParentRoomType = entry.ParentRoomType;
         ProviderItem = entry.ProviderEntry.NullIfDefault();
@@ -134,54 +171,87 @@ public abstract class FileEntryDto
         ProviderId = entry.ProviderId.NullIfDefault();
     }
 
-    protected FileEntryDto() { }
+    protected FileEntryBaseDto() { }
 }
 
-public abstract class FileEntryDto<T> : FileEntryDto
+/// <summary>
+/// The generic file entry information.
+/// </summary>
+[DebuggerDisplay("{Title} ({Id})")]
+public abstract class FileEntryDto<T> : FileEntryBaseDto
 {
     /// <summary>
-    /// Id
+    /// The file entry ID.
     /// </summary>
     [SwaggerSchemaCustom(Example = 10)]
     public T Id { get; set; }
 
     /// <summary>
-    /// Root folder id
+    /// The root folder ID of the file entry.
     /// </summary>
     public T RootFolderId { get; set; }
 
     /// <summary>
-    /// Origin id
+    /// The origin ID of the file entry.
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public T OriginId { get; set; }
 
     /// <summary>
-    /// Origin room id
+    /// The origin room ID of the file entry.
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public T OriginRoomId { get; set; }
 
     /// <summary>
-    /// Origin title
+    /// The origin title of the file entry.
     /// </summary>
     public string OriginTitle { get; set; }
 
     /// <summary>
-    /// Origin room title
+    /// The origin room title of the file entry.
     /// </summary>
     public string OriginRoomTitle { get; set; }
 
     /// <summary>
-    /// Can share
+    /// Specifies if the file entry can be shared or not.
     /// </summary>
     public bool CanShare { get; set; }
 
     /// <summary>
-    /// Security
+    /// A dictionary representing the sharing settings for the file entry.
+    /// </summary>
+    public IDictionary<SubjectType, int> ShareSettings { get; set; }
+
+    /// <summary>
+    /// The actions that can be performed with the file entry.
     /// </summary>
     public IDictionary<FilesSecurityActions, bool> Security { get; set; }
+
+    /// <summary>
+    /// The available external rights of the file entry.
+    /// </summary>
+    public IDictionary<SubjectType, IEnumerable<string>> AvailableShareRights { get; set; }
+
+    /// <summary>
+    /// The request token of the file entry.
+    /// </summary>
     public string RequestToken { get; set; }
+
+    /// <summary>
+    /// Specifies if the folder can be accessed via an external link or not.
+    /// </summary>
+    public bool? External { get; set; }
+
+    /// <summary>
+    /// Represents the expiration date of the file entry.
+    /// </summary>
+    public ApiDateTime ExpirationDate { get; set; }
+
+    /// <summary>
+    /// Indicates whether the shareable link associated with the file or folder has expired.
+    /// </summary>
+    public bool? IsLinkExpired { get; set; }
 
     protected FileEntryDto(FileEntry<T> entry)
         : base(entry)
@@ -194,7 +264,8 @@ public abstract class FileEntryDto<T> : FileEntryDto
 }
 
 [Scope]
-public class FileEntryDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
+public class FileEntryDtoHelper(
+    ApiDateTimeHelper apiDateTimeHelper,
     EmployeeDtoHelper employeeWrapperHelper,
     FileSharingHelper fileSharingHelper,
     FileSecurity fileSecurity,
@@ -203,11 +274,16 @@ public class FileEntryDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
     FileDateTime fileDateTime,
     SecurityContext securityContext,
     UserManager userManager,
-    IDaoFactory daoFactory)
+    IDaoFactory daoFactory,
+    ExternalShare externalShare,
+    IUrlShortener urlShortener)
 {
     protected readonly FileSecurity _fileSecurity = fileSecurity;
     protected readonly GlobalFolderHelper _globalFolderHelper = globalFolderHelper;
     protected readonly IDaoFactory _daoFactory = daoFactory;
+    protected readonly ExternalShare _externalShare = externalShare;
+    protected readonly IUrlShortener _urlShortener = urlShortener;
+    protected readonly ApiDateTimeHelper _apiDateTimeHelper = apiDateTimeHelper;
 
     protected async Task<T> GetAsync<T, TId>(FileEntry<TId> entry) where T : FileEntryDto<TId>, new()
     {
@@ -230,16 +306,82 @@ public class FileEntryDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
                 _ => entry.RootId
             };
         }
-        
+
+        var shortWebUrl = "";
+
+        if (entry.FullShared)
+        {
+            var linkId = await _externalShare.GetLinkIdAsync();
+            if (linkId != Guid.Empty)
+            {
+                var securityDao = _daoFactory.GetSecurityDao<string>();
+                var record = await securityDao.GetSharesAsync([linkId]).FirstOrDefaultAsync();
+                if (record != null)
+                {
+                    var linkData = await _externalShare.GetLinkDataAsync(entry, record.Subject);
+                    shortWebUrl = await _urlShortener.GetShortenLinkAsync(linkData.Url);
+                }
+            }
+        }
+
+        var canSetAccess = await fileSharingHelper.CanSetAccessAsync(entry);
+        if (entry is Folder<TId> { FolderType: FolderType.EditingRoom or FolderType.VirtualDataRoom })
+        {
+            canSetAccess = false;
+        }
+
+        Dictionary<SubjectType, int> shareSettings = null;
+
+        if (canSetAccess)
+        {
+
+            var primaryCount = await _fileSecurity.GetLinksSettings(entry, SubjectType.PrimaryExternalLink);
+            var additionalCount = await _fileSecurity.GetLinksSettings(entry, SubjectType.ExternalLink);
+
+            if (primaryCount > 0)
+            {
+                shareSettings = new Dictionary<SubjectType, int>
+                {
+                    {
+                        SubjectType.PrimaryExternalLink, primaryCount
+                    }
+                };
+            }
+
+            if (additionalCount > 0)
+            {
+                shareSettings ??= new Dictionary<SubjectType, int>();
+                shareSettings.Add(SubjectType.ExternalLink, additionalCount);
+            }
+        }
+
+        var sharedBy = entry.SharedBy;
+
+        if (sharedBy == null &&  entry.ShareRecord != null && Equals(entry.Id, entry.ShareRecord.EntryId))
+        {
+            sharedBy = entry.ShareRecord?.Owner;
+        }
+
+        Guid? ownedBy = null;
+        if (entry.ShareRecord != null)
+        {
+            ownedBy = entry.ParentRoomCreatedBy ?? entry.RootCreateBy;
+        }
+
         return new T
         {
             Id = entry.Id,
             Title = entry.Title,
             Access = entry.Access,
             Shared = entry.Shared,
-            Created = apiDateTimeHelper.Get(entry.CreateOn),
+            SharedBy = sharedBy.HasValue ? await employeeWrapperHelper.GetAsync(sharedBy.Value) : null,
+            OwnedBy = ownedBy.HasValue ? await employeeWrapperHelper.GetAsync(ownedBy.Value) : null,
+            SharedForUser = entry.SharedForUser,
+            ParentShared = entry.ParentShared,
+            ShortWebUrl = shortWebUrl,
+            Created = _apiDateTimeHelper.Get(entry.CreateOn),
             CreatedBy = await employeeWrapperHelper.GetAsync(entry.CreateBy),
-            Updated = apiDateTimeHelper.Get(entry.ModifiedOn),
+            Updated = _apiDateTimeHelper.Get(entry.ModifiedOn),
             UpdatedBy = await employeeWrapperHelper.GetAsync(entry.ModifiedBy),
             RootFolderType = entry.RootFolderType,
             ParentRoomType = entry.ParentRoomType,
@@ -247,20 +389,21 @@ public class FileEntryDtoHelper(ApiDateTimeHelper apiDateTimeHelper,
             ProviderItem = entry.ProviderEntry.NullIfDefault(),
             ProviderKey = entry.ProviderKey,
             ProviderId = entry.ProviderId.NullIfDefault(),
-            CanShare = await fileSharingHelper.CanSetAccessAsync(entry),
+            CanShare = canSetAccess,
+            ShareSettings = shareSettings,
             Security = entry.Security,
             OriginId = entry.OriginId,
             OriginTitle = entry.OriginTitle,
             OriginRoomId = entry.OriginRoomId,
             OriginRoomTitle = entry.OriginRoomTitle,
-            AutoDelete = permanentlyDeletedOn != default ? apiDateTimeHelper.Get(permanentlyDeletedOn) : null
+            AutoDelete = permanentlyDeletedOn != default ? _apiDateTimeHelper.Get(permanentlyDeletedOn) : null
         };
     }
 
     private async ValueTask<DateTime> GetDeletedPermanentlyOn<T>(FileEntry<T> entry)
     {
         var isGuest = await userManager.IsGuestAsync(securityContext.CurrentAccount.ID);
-        if (isGuest) 
+        if (isGuest)
         {
             var myId = await _globalFolderHelper.GetFolderMyAsync<int>();
 

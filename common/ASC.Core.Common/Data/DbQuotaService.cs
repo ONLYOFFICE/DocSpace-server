@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,30 +27,42 @@
 namespace ASC.Core.Data;
 
 [Scope]
-class DbQuotaService(IDbContextFactory<CoreDbContext> dbContextManager, IMapper mapper)
-    : IQuotaService
+class DbQuotaService(IDbContextFactory<CoreDbContext> dbContextManager, TenantQuotaMapper tenantQuotaMapper) : IQuotaService
 {
     public async Task<IEnumerable<TenantQuota>> GetTenantQuotasAsync()
     {
         await using var coreDbContext = await dbContextManager.CreateDbContextAsync();
         var res = await coreDbContext.AllQuotasAsync().ToListAsync();
-        return mapper.Map<List<DbQuota>, List<TenantQuota>>(res);
+        return tenantQuotaMapper.Map(res);
     }
 
     public async Task<TenantQuota> GetTenantQuotaAsync(int id)
     {
         await using var coreDbContext = await dbContextManager.CreateDbContextAsync();
 
-        return mapper.Map<DbQuota, TenantQuota>(await coreDbContext.Quotas.SingleOrDefaultAsync(r => r.TenantId == id));
+        return tenantQuotaMapper.MapDbQuotaToTenantQuota(await coreDbContext.Quotas.SingleOrDefaultAsync(r => r.TenantId == id));
     }
 
     public async Task<TenantQuota> SaveTenantQuotaAsync(TenantQuota quota)
     {
         ArgumentNullException.ThrowIfNull(quota);
 
-        await using var coreDbContext = await dbContextManager.CreateDbContextAsync();
-        await coreDbContext.AddOrUpdateAsync(q => q.Quotas, mapper.Map<TenantQuota, DbQuota>(quota));
-        await coreDbContext.SaveChangesAsync();
+        try
+        {
+            await using var coreDbContext = await dbContextManager.CreateDbContextAsync();
+            await coreDbContext.AddOrUpdateAsync(q => q.Quotas, tenantQuotaMapper.Map(quota));
+            await coreDbContext.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        { 
+            await using var coreDbContext = await dbContextManager.CreateDbContextAsync();
+            var fromDb = await coreDbContext.QuotaAsync(quota.TenantId);
+            if (fromDb != null)
+            {
+                return tenantQuotaMapper.MapDbQuotaToTenantQuota(fromDb);
+            }
+        }
+
 
         return quota;
     }
@@ -74,7 +86,7 @@ class DbQuotaService(IDbContextFactory<CoreDbContext> dbContextManager, IMapper 
         ArgumentNullException.ThrowIfNull(row);
 
         await using var coreDbContext = await dbContextManager.CreateDbContextAsync();
-        var dbTenantQuotaRow = mapper.Map<TenantQuotaRow, DbQuotaRow>(row);
+        var dbTenantQuotaRow = row.Map();
         dbTenantQuotaRow.UserId = row.UserId;
 
         var exist = await coreDbContext.QuotaRows.FindAsync(dbTenantQuotaRow.TenantId, dbTenantQuotaRow.UserId, dbTenantQuotaRow.Path);
@@ -113,6 +125,6 @@ class DbQuotaService(IDbContextFactory<CoreDbContext> dbContextManager, IMapper 
             q = q.Where(r => r.TenantId == tenantId);
         }
 
-        return await q.ProjectTo<TenantQuotaRow>(mapper.ConfigurationProvider).ToListAsync();
+        return await q.Project().ToListAsync();
     }
 }

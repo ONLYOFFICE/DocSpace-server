@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,57 +27,60 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// 
+/// The request parameters for managing additional tenant information in a portal.
 /// </summary>
 public class PortalExtraTenantRequestDto
 {
     /// <summary>
-    /// Specifies whether the tariff will be refreshed
+    /// Specifies whether to fetch fresh tariff information.
     /// </summary>
     [FromQuery(Name = "refresh")]
     public bool Refresh { get; set; }
 }
 
 /// <summary>
-/// 
+/// The request parameters for the portal path configuration.
 /// </summary>
 public class PortalPathRequestDto
 {
     /// <summary>
-    /// Portal virtual path
+    /// The virtual path for the portal resource access.
     /// </summary>
     [FromQuery(Name = "virtualPath")]
     public string VirtualPath { get; set; }
 }
 
 /// <summary>
-/// 
+/// The request parameters for managing the portal thumbnail generation.
 /// </summary>
 public class PortalThumbnailRequestDto
 {
     /// <summary>
-    /// Bookmark URL
+    /// The URL of the content to generate a thumbnail from.
     /// </summary>
     [FromQuery(Name = "url")]
     public string Url { get; set; }
 }
 
 /// <summary>
-/// 
+/// The request parameters for the mobile application configuration of the portal.
 /// </summary>
 public class PortalMobileAppRequestDto
 {
     /// <summary>
-    /// Mobile app type (IosProjects, AndroidProjects, IosDocuments, AndroidDocuments, or DesktopEditor)
+    /// The target mobile platform or application type.
     /// </summary>
     [FromQuery(Name = "type")]
     public MobileAppType Type { get; set; }
 }
 
-public class PortalSettingsrequestDto
+/// <summary>
+/// The request parameters for the portal security and configuration settings.
+/// </summary>
+public class PortalSettingsRequestDto
 {
     /// <summary>
-    /// Specifies if the password hasher settings will be returned or not
+    /// Specifies whether to include the password hashing configuration in the response.
     /// </summary>
     [FromQuery(Name = "withpassword")]
     public bool? WithPassword { get; set; }

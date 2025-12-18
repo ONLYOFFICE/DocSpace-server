@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,98 +26,101 @@
 
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
+/// <summary>
+/// The audit event parameters.
+/// </summary>
 public class AuditEventDto
 {
     /// <summary>
-    /// ID
+    /// The audit event ID.
     /// </summary>
     public int Id { get; set; }
 
     /// <summary>
-    /// Date
+    /// The audit event date.
     /// </summary>
     public ApiDateTime Date { get; set; }
 
     /// <summary>
-    /// User
+    /// The name of the user who triggered the audit event.
     /// </summary>
     public string User { get; set; }
 
     /// <summary>
-    /// User ID
+    /// The ID of the user who triggered the audit event.
     /// </summary>
     public Guid UserId { get; set; }
 
     /// <summary>
-    /// Action
+    /// The audit event action.
     /// </summary>
     public string Action { get; set; }
 
     /// <summary>
-    /// Action ID
+    /// The specific action that occurred within the audit event.
     /// </summary>
     public MessageAction ActionId { get; set; }
 
     /// <summary>
-    /// IP
+    /// The audit event IP.
     /// </summary>
     public string IP { get; set; }
 
     /// <summary>
-    /// Country
+    /// The audit event country.
     /// </summary>
     public string Country { get; set; }
 
     /// <summary>
-    /// City
+    /// The audit event city.
     /// </summary>
     public string City { get; set; }
 
     /// <summary>
-    /// Browser
+    /// The audit event browser.
     /// </summary>
     public string Browser { get; set; }
 
     /// <summary>
-    /// Platform
+    /// The audit event platform.
     /// </summary>
     public string Platform { get; set; }
 
     /// <summary>
-    /// Page
+    /// The audit event page.
     /// </summary>
     public string Page { get; set; }
 
     /// <summary>
-    /// Action type
+    /// The type of action performed in the audit event (e.g., Create, Update, Delete).
     /// </summary>
     public ActionType ActionType { get; set; }
 
     /// <summary>
-    /// Product type
+    /// The type of product related to the audit event.
     /// </summary>
     public ProductType Product { get; set; }
 
     /// <summary>
-    /// Module type
+    /// The location where the audit event occurred.
     /// </summary>
-    public ModuleType Module { get; set; }
+    public LocationType Location { get; set; }
 
     /// <summary>
-    /// List of targets
+    /// The list of target objects affected by the audit event (e.g., document ID, user account).
     /// </summary>
     public IEnumerable<string> Target { get; set; }
 
     /// <summary>
-    /// List of entry types
+    /// The list of audit entry types (e.g., Folder, User, File).
     /// </summary>
     public IEnumerable<EntryType> Entries { get; set; }
 
     /// <summary>
-    /// Context
+    /// The audit event context.
     /// </summary>
     public string Context { get; set; }
-    
+
     public AuditEventDto(AuditEvent auditEvent, AuditActionMapper auditActionMapper, ApiDateTimeHelper apiDateTimeHelper)
     {
         Id = auditEvent.Id;
@@ -137,7 +140,7 @@ public class AuditEventDto
 
         ActionType = maps.ActionType;
         Product = maps.ProductType;
-        Module = maps.ModuleType;
+        Location = maps.LocationType;
 
         var list = new List<EntryType>(2);
 

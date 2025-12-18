@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -157,9 +157,19 @@ module.exports = (files) => {
     res.end();
   });
 
+  router.post("/telegram", (req, res) => {
+    files.connectTelegram(req.body);
+    res.end();
+  });
+
+  router.post("/update-telegram", (req, res) => {
+    files.updateTelegram(req.body);
+    res.end();
+  });
+
   router.post("/delete-guest", (req, res) => {
     files.deleteGuest(req.body);
-
+    res.end();
   });
 
   router.post("/backup-progress", (req, res) => {
@@ -184,6 +194,41 @@ module.exports = (files) => {
 
   router.post("/encryption-progress", (req, res) => {
     files.encryptionProgress(req.body);
+    res.end();
+  });
+
+  router.post("/self-restriction-file", (req, res) => {
+    files.selfRestrictionForFile(req.body);
+    res.end();
+  });
+
+  router.post("/self-restriction-folder", (req, res) => {
+    files.selfRestrictionForFolder(req.body);
+    res.end();
+  });
+
+  router.post("/commit-chat-message", (req, res) => {
+    files.commitChatMessage(req.body);
+    res.end();
+  });
+
+  router.post("/update-chat", (req, res) => {
+    files.updateChat(req.body);
+    res.end();
+  });
+
+  router.post("/chat-export", (req, res) => {
+    files.exportChat(req.body);
+    res.end();
+  });
+
+  router.post("/change-access-rights-file", (req, res) => {
+    files.changeAccessRightsForFile(req.body);
+    res.end();
+  });
+
+  router.post("/change-access-rights-folder", (req, res) => {
+    files.changeAccessRightsForFolder(req.body);
     res.end();
   });
 

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,7 +38,7 @@ public class BackupFileUploadHandler
 
     public async Task Invoke(HttpContext context,
         PermissionContext permissionContext,
-        BackupAjaxHandler backupAjaxHandler,
+        BackupService backupService,
         IFusionCache cache,
         TenantManager tenantManager,
         SetupInfo setupInfo)
@@ -46,16 +46,16 @@ public class BackupFileUploadHandler
         BackupFileUploadResult result;
         try
         {
-            await backupAjaxHandler.DemandPermissionsRestoreAsync();
+            await backupService.DemandPermissionsRestoreAsync();
             if (!await permissionContext.CheckPermissionsAsync(SecurityConstants.EditPortalSettings))
             {
                 throw new ArgumentException("Access denied.");
             }
-            var tenantId = (tenantManager.GetCurrentTenant()).Id;
+            var tenantId = tenantManager.GetCurrentTenant().Id;
             string path;
             try
             {
-                path = await backupAjaxHandler.GetTmpFilePathAsync(tenantId);
+                path = await backupService.GetTmpFilePathAsync(tenantId);
             }
             catch
             {

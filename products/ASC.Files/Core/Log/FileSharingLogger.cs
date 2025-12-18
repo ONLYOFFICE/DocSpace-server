@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,6 +30,6 @@ internal static partial class FileSharingLogger
     [LoggerMessage(LogLevel.Error, "GetSharedInfo")]
     public static partial void ErrorGetSharedInfo(this ILogger<FileSharing> logger, Exception exception);
 
-    [LoggerMessage(LogLevel.Error, "User {userId} can't get shared info for {fileEntryType} {entryId}")]
-    public static partial void ErrorUserCanTGetSharedInfo(this ILogger<FileSharing> logger, Guid userId, FileEntryType fileEntryType, string entryId);
+    [LoggerMessage(LogLevel.Information, "User {userId} can't get shared info for {fileEntryType} {entryId} {filterType}")]
+    public static partial void InfoUserCanTGetSharedInfo(this ILogger<FileSharing> logger, Guid userId, FileEntryType fileEntryType, string entryId, string filterType);
 }

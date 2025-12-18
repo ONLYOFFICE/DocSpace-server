@@ -18,8 +18,134 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn)
-                .HasAnnotation("ProductVersion", "8.0.13")
+                .HasAnnotation("ProductVersion", "9.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
+
+            modelBuilder.Entity("ASC.AI.Core.Database.Models.DbMcpServer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)")
+                        .HasColumnName("id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<int>("ConnectionType")
+                        .HasColumnType("int")
+                        .HasColumnName("connection_type");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("description")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<string>("Endpoint")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("endpoint")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<bool>("HasIcon")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("has_icon");
+
+                    b.Property<string>("Headers")
+                        .HasColumnType("text")
+                        .HasColumnName("headers")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<DateTime>("ModifiedOn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("modified_on")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar(128)")
+                        .HasColumnName("name")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex("TenantId", "Id")
+                        .HasDatabaseName("IX_tenant_id_id");
+
+                    b.HasIndex("TenantId", "Name")
+                        .IsUnique()
+                        .HasDatabaseName("IX_tenant_id_name");
+
+                    b.ToTable("ai_mcp_servers", (string)null);
+
+                    b
+                        .HasAnnotation("MySql:CharSet", "utf8")
+                        .HasAnnotation("Relational:Collation", "utf8_general_ci");
+                });
+
+            modelBuilder.Entity("ASC.AI.Core.Database.Models.DbMcpServerState", b =>
+                {
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<Guid>("ServerId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("enabled");
+
+                    b.HasKey("TenantId", "ServerId")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("ai_mcp_server_states", (string)null);
+
+                    b
+                        .HasAnnotation("MySql:CharSet", "utf8")
+                        .HasAnnotation("Relational:Collation", "utf8_general_ci");
+                });
+
+            modelBuilder.Entity("ASC.AI.Core.Database.Models.DbRoomMcpServer", b =>
+                {
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<int>("RoomId")
+                        .HasColumnType("int")
+                        .HasColumnName("room_id");
+
+                    b.Property<Guid>("ServerId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("server_id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.HasKey("TenantId", "RoomId", "ServerId")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex("RoomId");
+
+                    b.ToTable("ai_mcp_room_servers", (string)null);
+
+                    b
+                        .HasAnnotation("MySql:CharSet", "utf8")
+                        .HasAnnotation("Relational:Collation", "utf8_general_ci");
+                });
 
             modelBuilder.Entity("ASC.Core.Common.EF.Acl", b =>
                 {
@@ -703,7 +829,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.Property<decimal>("Price")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(10,2)")
+                        .HasColumnType("decimal(10,4)")
                         .HasColumnName("price")
                         .HasDefaultValueSql("'0.00'");
 
@@ -714,10 +840,23 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
+                    b.Property<string>("ServiceName")
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar")
+                        .HasColumnName("service_name")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
                     b.Property<bool>("Visible")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(1)")
                         .HasColumnName("visible")
+                        .HasDefaultValueSql("'0'");
+
+                    b.Property<bool>("Wallet")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("wallet")
                         .HasDefaultValueSql("'0'");
 
                     b.HasKey("TenantId")
@@ -734,17 +873,19 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Features = "trial,audit,ldap,sso,customization,thirdparty,restore,oauth,total_size:107374182400,file_size:100,manager:1,statistic",
                             Name = "trial",
                             Price = 0m,
-                            Visible = false
+                            Visible = false,
+                            Wallet = false
                         },
                         new
                         {
                             TenantId = -2,
                             Description = "until 01.04.2024",
-                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:107374182400,file_size:1024,manager:1,statistic",
+                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:107374182400,file_size:1024,manager:1,statistic,free_backup:2:fixed",
                             Name = "admin",
                             Price = 15m,
                             ProductId = "1002",
-                            Visible = false
+                            Visible = false,
+                            Wallet = false
                         },
                         new
                         {
@@ -752,7 +893,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Features = "free,oauth,total_size:2147483648,manager:3,room:12",
                             Name = "startup",
                             Price = 0m,
-                            Visible = false
+                            Visible = false,
+                            Wallet = false
                         },
                         new
                         {
@@ -761,7 +903,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Name = "disk",
                             Price = 0m,
                             ProductId = "1004",
-                            Visible = false
+                            Visible = false,
+                            Wallet = false
                         },
                         new
                         {
@@ -770,16 +913,18 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Name = "admin1",
                             Price = 0m,
                             ProductId = "1005",
-                            Visible = false
+                            Visible = false,
+                            Wallet = false
                         },
                         new
                         {
                             TenantId = -6,
-                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,file_size:1024,statistic",
+                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,file_size:1024,statistic,free_backup:2:fixed",
                             Name = "subscription",
                             Price = 0m,
                             ProductId = "1001",
-                            Visible = false
+                            Visible = false,
+                            Wallet = false
                         },
                         new
                         {
@@ -788,7 +933,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Name = "nonprofit",
                             Price = 0m,
                             ProductId = "1007",
-                            Visible = false
+                            Visible = false,
+                            Wallet = false
                         },
                         new
                         {
@@ -796,27 +942,51 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Features = "free,oauth,total_size:107374182400,manager:100,room:100",
                             Name = "zoom",
                             Price = 0m,
-                            Visible = false
+                            Visible = false,
+                            Wallet = false
                         },
                         new
                         {
                             TenantId = -9,
                             Description = "since 01.04.2024",
-                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic",
+                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,free_backup:2:fixed",
                             Name = "admin",
                             Price = 20m,
                             ProductId = "1006",
-                            Visible = true
+                            Visible = true,
+                            Wallet = false
                         },
                         new
                         {
                             TenantId = -10,
                             Description = "since 10.02.2025",
-                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,year",
+                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,year,free_backup:2:fixed",
                             Name = "adminyear",
-                            Price = 200m,
+                            Price = 220m,
                             ProductId = "1009",
-                            Visible = true
+                            Visible = true,
+                            Wallet = false
+                        },
+                        new
+                        {
+                            TenantId = -11,
+                            Features = "total_size:1073741824",
+                            Name = "storage",
+                            Price = 0.14m,
+                            ProductId = "1011",
+                            Visible = true,
+                            Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -12,
+                            Features = "backup",
+                            Name = "backup",
+                            Price = 10m,
+                            ProductId = "10006",
+                            ServiceName = "backup",
+                            Visible = false,
+                            Wallet = true
                         });
                 });
 
@@ -916,7 +1086,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "asc.web.studio",
                             Action = "send_whats_new",
                             Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e",
-                            Sender = "email.sender"
+                            Sender = "email.sender|telegram.sender"
                         },
                         new
                         {
@@ -980,7 +1150,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "6fe286a4-479e-4c25-a8d9-0156e332b0c0",
                             Action = "sharedocument",
                             Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e",
-                            Sender = "email.sender|messanger.sender"
+                            Sender = "email.sender|messanger.sender|telegram.sender"
                         },
                         new
                         {
@@ -988,7 +1158,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "6fe286a4-479e-4c25-a8d9-0156e332b0c0",
                             Action = "sharefolder",
                             Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e",
-                            Sender = "email.sender|messanger.sender"
+                            Sender = "email.sender|messanger.sender|telegram.sender"
                         },
                         new
                         {
@@ -996,7 +1166,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "6fe286a4-479e-4c25-a8d9-0156e332b0c0",
                             Action = "updatedocument",
                             Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e",
-                            Sender = "email.sender|messanger.sender"
+                            Sender = "email.sender|messanger.sender|telegram.sender"
                         },
                         new
                         {
@@ -1108,7 +1278,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "asc.web.studio",
                             Action = "admin_notify",
                             Recipient = "cd84e66b-b803-40fc-99f9-b2969a54a1de",
-                            Sender = "email.sender"
+                            Sender = "email.sender|telegram.sender"
                         },
                         new
                         {
@@ -1164,7 +1334,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "asc.web.studio",
                             Action = "periodic_notify",
                             Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e",
-                            Sender = "email.sender"
+                            Sender = "email.sender|telegram.sender"
                         });
                 });
 
@@ -1226,6 +1396,18 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Property<int>("Quota")
                         .HasColumnType("int")
                         .HasColumnName("quota");
+
+                    b.Property<DateTime?>("DueDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("due_date")
+                        .HasDefaultValueSql("NULL");
+
+                    b.Property<int?>("NextQuantity")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("next_quantity")
+                        .HasDefaultValueSql("NULL");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int")
@@ -1352,6 +1534,227 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
 
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.Ai.DbAiProvider", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id")
+                        .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime")
+                        .HasColumnName("created_on");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("key")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<DateTime>("ModifiedOn")
+                        .HasColumnType("datetime")
+                        .HasColumnName("modified_on");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("title")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int")
+                        .HasColumnName("type");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("url")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.HasKey("Id")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex("TenantId", "Id")
+                        .HasDatabaseName("IX_tenant_id_id");
+
+                    b.ToTable("ai_providers", (string)null);
+
+                    b.HasAnnotation("MySql:CharSet", "utf8");
+                });
+
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.Ai.DbChat", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)")
+                        .HasColumnName("id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime")
+                        .HasColumnName("created_on");
+
+                    b.Property<DateTime>("ModifiedOn")
+                        .HasColumnType("datetime")
+                        .HasColumnName("modified_on");
+
+                    b.Property<int>("RoomId")
+                        .HasColumnType("int")
+                        .HasColumnName("room_id");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("title")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("user_id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.HasKey("Id")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex("TenantId", "Id")
+                        .HasDatabaseName("IX_tenant_id_id");
+
+                    b.HasIndex("TenantId", "RoomId", "UserId", "ModifiedOn")
+                        .HasDatabaseName("IX_tenant_id_room_id_user_id_modified_on");
+
+                    b.ToTable("ai_chats", (string)null);
+
+                    b.HasAnnotation("MySql:CharSet", "utf8");
+                });
+
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.Ai.DbChatMessage", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id")
+                        .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<Guid>("ChatId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("chat_id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<string>("Content")
+                        .HasColumnType("json")
+                        .HasColumnName("content")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime")
+                        .HasColumnName("created_on");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int")
+                        .HasColumnName("role");
+
+                    b.HasKey("Id")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex("ChatId");
+
+                    b.ToTable("ai_chats_messages", (string)null);
+
+                    b.HasAnnotation("MySql:CharSet", "utf8");
+                });
+
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.ApiKey", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("CreateBy")
+                        .IsRequired()
+                        .HasColumnType("varchar(38)")
+                        .HasColumnName("create_by")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<DateTime>("CreateOn")
+                        .HasColumnType("datetime")
+                        .HasColumnName("create_on");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("expires_at");
+
+                    b.Property<string>("HashedKey")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar")
+                        .HasColumnName("hashed_key")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("KeyPostfix")
+                        .IsRequired()
+                        .HasMaxLength(4)
+                        .HasColumnType("varchar")
+                        .HasColumnName("key_postfix")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<DateTime?>("LastUsed")
+                        .HasColumnType("datetime")
+                        .HasColumnName("last_used");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar")
+                        .HasColumnName("name")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<string>("Permissions")
+                        .HasColumnType("longtext")
+                        .HasColumnName("permissions");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex("ExpiresAt")
+                        .HasDatabaseName("expires_at");
+
+                    b.HasIndex("TenantId", "HashedKey")
+                        .HasDatabaseName("hashed_key");
+
+                    b.ToTable("core_user_api_key", (string)null);
+
+                    b.HasAnnotation("MySql:CharSet", "utf8");
+                });
+
             modelBuilder.Entity("ASC.Core.Common.EF.Model.DbCoreSettings", b =>
                 {
                     b.Property<int>("TenantId")
@@ -1418,6 +1821,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Property<int>("AuditEventId")
                         .HasColumnType("int")
                         .HasColumnName("audit_event_id");
+
+                    b.Property<bool>("Corrupted")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("corrupted");
 
                     b.HasKey("EntryId", "EntryType", "AuditEventId")
                         .HasName("PRIMARY");
@@ -1705,6 +2112,30 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             Address = "localhost"
+                        },
+                        new
+                        {
+                            Address = "settings"
+                        },
+                        new
+                        {
+                            Address = "api-system-eu-central-1"
+                        },
+                        new
+                        {
+                            Address = "api-system-us-east-2"
+                        },
+                        new
+                        {
+                            Address = "identity-eu-central-1"
+                        },
+                        new
+                        {
+                            Address = "identity-us-east-2"
+                        },
+                        new
+                        {
+                            Address = "oauth"
                         });
                 });
 
@@ -1829,6 +2260,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
+                    b.Property<DateTime>("LastModified")
+                        .HasColumnType("datetime")
+                        .HasColumnName("last_modified");
+
                     b.HasKey("TenantId", "Id", "UserId")
                         .HasName("PRIMARY");
 
@@ -1845,2718 +2280,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             TenantId = 1,
                             Id = "9a925891-1f92-4ed7-b277-d6f649739f06",
                             UserId = "00000000-0000-0000-0000-000000000000",
-                            Data = "{\"Completed\":false}"
-                        });
-                });
-
-            modelBuilder.Entity("ASC.Core.Common.EF.Model.FilesConverts", b =>
-                {
-                    b.Property<string>("Input")
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar")
-                        .HasColumnName("input")
-                        .UseCollation("utf8_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8");
-
-                    b.Property<string>("Output")
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar")
-                        .HasColumnName("output")
-                        .UseCollation("utf8_general_ci")
-                        .HasAnnotation("MySql:CharSet", "utf8");
-
-                    b.HasKey("Input", "Output")
-                        .HasName("PRIMARY");
-
-                    b.ToTable("files_converts", (string)null);
-
-                    b.HasAnnotation("MySql:CharSet", "utf8");
-
-                    b.HasData(
-                        new
-                        {
-                            Input = ".csv",
-                            Output = ".ods"
-                        },
-                        new
-                        {
-                            Input = ".csv",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".csv",
-                            Output = ".ots"
-                        },
-                        new
-                        {
-                            Input = ".csv",
-                            Output = ".xlsx"
-                        },
-                        new
-                        {
-                            Input = ".csv",
-                            Output = ".xlsm"
-                        },
-                        new
-                        {
-                            Input = ".csv",
-                            Output = ".xltm"
-                        },
-                        new
-                        {
-                            Input = ".csv",
-                            Output = ".xltx"
-                        },
-                        new
-                        {
-                            Input = ".djvu",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".doc",
-                            Output = ".docx"
-                        },
-                        new
-                        {
-                            Input = ".doc",
-                            Output = ".docm"
-                        },
-                        new
-                        {
-                            Input = ".doc",
-                            Output = ".dotm"
-                        },
-                        new
-                        {
-                            Input = ".doc",
-                            Output = ".dotx"
-                        },
-                        new
-                        {
-                            Input = ".doc",
-                            Output = ".epub"
-                        },
-                        new
-                        {
-                            Input = ".doc",
-                            Output = ".fb2"
-                        },
-                        new
-                        {
-                            Input = ".doc",
-                            Output = ".html"
-                        },
-                        new
-                        {
-                            Input = ".doc",
-                            Output = ".ott"
-                        },
-                        new
-                        {
-                            Input = ".doc",
-                            Output = ".odt"
-                        },
-                        new
-                        {
-                            Input = ".doc",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".doc",
-                            Output = ".rtf"
-                        },
-                        new
-                        {
-                            Input = ".doc",
-                            Output = ".txt"
-                        },
-                        new
-                        {
-                            Input = ".docm",
-                            Output = ".docx"
-                        },
-                        new
-                        {
-                            Input = ".docm",
-                            Output = ".dotm"
-                        },
-                        new
-                        {
-                            Input = ".docm",
-                            Output = ".html"
-                        },
-                        new
-                        {
-                            Input = ".docm",
-                            Output = ".dotx"
-                        },
-                        new
-                        {
-                            Input = ".docm",
-                            Output = ".epub"
-                        },
-                        new
-                        {
-                            Input = ".docm",
-                            Output = ".fb2"
-                        },
-                        new
-                        {
-                            Input = ".docm",
-                            Output = ".ott"
-                        },
-                        new
-                        {
-                            Input = ".docm",
-                            Output = ".odt"
-                        },
-                        new
-                        {
-                            Input = ".docm",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".docm",
-                            Output = ".rtf"
-                        },
-                        new
-                        {
-                            Input = ".docm",
-                            Output = ".txt"
-                        },
-                        new
-                        {
-                            Input = ".doct",
-                            Output = ".docx"
-                        },
-                        new
-                        {
-                            Input = ".docx",
-                            Output = ".odt"
-                        },
-                        new
-                        {
-                            Input = ".docx",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".docx",
-                            Output = ".rtf"
-                        },
-                        new
-                        {
-                            Input = ".docx",
-                            Output = ".txt"
-                        },
-                        new
-                        {
-                            Input = ".docx",
-                            Output = ".html"
-                        },
-                        new
-                        {
-                            Input = ".docx",
-                            Output = ".dotm"
-                        },
-                        new
-                        {
-                            Input = ".docx",
-                            Output = ".dotx"
-                        },
-                        new
-                        {
-                            Input = ".docx",
-                            Output = ".epub"
-                        },
-                        new
-                        {
-                            Input = ".docx",
-                            Output = ".fb2"
-                        },
-                        new
-                        {
-                            Input = ".docx",
-                            Output = ".ott"
-                        },
-                        new
-                        {
-                            Input = ".docx",
-                            Output = ".docm"
-                        },
-                        new
-                        {
-                            Input = ".docxf",
-                            Output = ".docm"
-                        },
-                        new
-                        {
-                            Input = ".docxf",
-                            Output = ".docx"
-                        },
-                        new
-                        {
-                            Input = ".docxf",
-                            Output = ".dotm"
-                        },
-                        new
-                        {
-                            Input = ".docxf",
-                            Output = ".odt"
-                        },
-                        new
-                        {
-                            Input = ".docxf",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".docxf",
-                            Output = ".rtf"
-                        },
-                        new
-                        {
-                            Input = ".docxf",
-                            Output = ".txt"
-                        },
-                        new
-                        {
-                            Input = ".docxf",
-                            Output = ".dotx"
-                        },
-                        new
-                        {
-                            Input = ".docxf",
-                            Output = ".epub"
-                        },
-                        new
-                        {
-                            Input = ".docxf",
-                            Output = ".fb2"
-                        },
-                        new
-                        {
-                            Input = ".docxf",
-                            Output = ".html"
-                        },
-                        new
-                        {
-                            Input = ".docxf",
-                            Output = ".ott"
-                        },
-                        new
-                        {
-                            Input = ".dot",
-                            Output = ".docx"
-                        },
-                        new
-                        {
-                            Input = ".dot",
-                            Output = ".odt"
-                        },
-                        new
-                        {
-                            Input = ".dot",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".dot",
-                            Output = ".rtf"
-                        },
-                        new
-                        {
-                            Input = ".dot",
-                            Output = ".txt"
-                        },
-                        new
-                        {
-                            Input = ".dot",
-                            Output = ".docm"
-                        },
-                        new
-                        {
-                            Input = ".dot",
-                            Output = ".dotm"
-                        },
-                        new
-                        {
-                            Input = ".dot",
-                            Output = ".dotx"
-                        },
-                        new
-                        {
-                            Input = ".dot",
-                            Output = ".epub"
-                        },
-                        new
-                        {
-                            Input = ".dot",
-                            Output = ".fb2"
-                        },
-                        new
-                        {
-                            Input = ".dot",
-                            Output = ".html"
-                        },
-                        new
-                        {
-                            Input = ".dot",
-                            Output = ".ott"
-                        },
-                        new
-                        {
-                            Input = ".dotm",
-                            Output = ".docx"
-                        },
-                        new
-                        {
-                            Input = ".dotm",
-                            Output = ".odt"
-                        },
-                        new
-                        {
-                            Input = ".dotm",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".dotm",
-                            Output = ".rtf"
-                        },
-                        new
-                        {
-                            Input = ".dotm",
-                            Output = ".txt"
-                        },
-                        new
-                        {
-                            Input = ".dotm",
-                            Output = ".docm"
-                        },
-                        new
-                        {
-                            Input = ".dotm",
-                            Output = ".dotx"
-                        },
-                        new
-                        {
-                            Input = ".dotm",
-                            Output = ".epub"
-                        },
-                        new
-                        {
-                            Input = ".dotm",
-                            Output = ".fb2"
-                        },
-                        new
-                        {
-                            Input = ".dotm",
-                            Output = ".html"
-                        },
-                        new
-                        {
-                            Input = ".dotm",
-                            Output = ".ott"
-                        },
-                        new
-                        {
-                            Input = ".dotx",
-                            Output = ".docx"
-                        },
-                        new
-                        {
-                            Input = ".dotx",
-                            Output = ".odt"
-                        },
-                        new
-                        {
-                            Input = ".dotx",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".dotx",
-                            Output = ".rtf"
-                        },
-                        new
-                        {
-                            Input = ".dotx",
-                            Output = ".txt"
-                        },
-                        new
-                        {
-                            Input = ".dotx",
-                            Output = ".docm"
-                        },
-                        new
-                        {
-                            Input = ".dotx",
-                            Output = ".dotm"
-                        },
-                        new
-                        {
-                            Input = ".dotx",
-                            Output = ".epub"
-                        },
-                        new
-                        {
-                            Input = ".dotx",
-                            Output = ".fb2"
-                        },
-                        new
-                        {
-                            Input = ".dotx",
-                            Output = ".html"
-                        },
-                        new
-                        {
-                            Input = ".dotx",
-                            Output = ".ott"
-                        },
-                        new
-                        {
-                            Input = ".dps",
-                            Output = ".odp"
-                        },
-                        new
-                        {
-                            Input = ".dps",
-                            Output = ".otp"
-                        },
-                        new
-                        {
-                            Input = ".dps",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".dps",
-                            Output = ".potm"
-                        },
-                        new
-                        {
-                            Input = ".dps",
-                            Output = ".potx"
-                        },
-                        new
-                        {
-                            Input = ".dps",
-                            Output = ".ppsm"
-                        },
-                        new
-                        {
-                            Input = ".dps",
-                            Output = ".ppsx"
-                        },
-                        new
-                        {
-                            Input = ".dps",
-                            Output = ".pptm"
-                        },
-                        new
-                        {
-                            Input = ".dps",
-                            Output = ".pptx"
-                        },
-                        new
-                        {
-                            Input = ".dpt",
-                            Output = ".odp"
-                        },
-                        new
-                        {
-                            Input = ".dpt",
-                            Output = ".otp"
-                        },
-                        new
-                        {
-                            Input = ".dpt",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".dpt",
-                            Output = ".potm"
-                        },
-                        new
-                        {
-                            Input = ".dpt",
-                            Output = ".potx"
-                        },
-                        new
-                        {
-                            Input = ".dpt",
-                            Output = ".ppsm"
-                        },
-                        new
-                        {
-                            Input = ".dpt",
-                            Output = ".ppsx"
-                        },
-                        new
-                        {
-                            Input = ".dpt",
-                            Output = ".pptm"
-                        },
-                        new
-                        {
-                            Input = ".dpt",
-                            Output = ".pptx"
-                        },
-                        new
-                        {
-                            Input = ".epub",
-                            Output = ".docx"
-                        },
-                        new
-                        {
-                            Input = ".epub",
-                            Output = ".odt"
-                        },
-                        new
-                        {
-                            Input = ".epub",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".epub",
-                            Output = ".rtf"
-                        },
-                        new
-                        {
-                            Input = ".epub",
-                            Output = ".txt"
-                        },
-                        new
-                        {
-                            Input = ".epub",
-                            Output = ".docm"
-                        },
-                        new
-                        {
-                            Input = ".epub",
-                            Output = ".dotm"
-                        },
-                        new
-                        {
-                            Input = ".epub",
-                            Output = ".dotx"
-                        },
-                        new
-                        {
-                            Input = ".epub",
-                            Output = ".fb2"
-                        },
-                        new
-                        {
-                            Input = ".epub",
-                            Output = ".html"
-                        },
-                        new
-                        {
-                            Input = ".epub",
-                            Output = ".ott"
-                        },
-                        new
-                        {
-                            Input = ".et",
-                            Output = ".csv"
-                        },
-                        new
-                        {
-                            Input = ".et",
-                            Output = ".ods"
-                        },
-                        new
-                        {
-                            Input = ".et",
-                            Output = ".ots"
-                        },
-                        new
-                        {
-                            Input = ".et",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".et",
-                            Output = ".xlsm"
-                        },
-                        new
-                        {
-                            Input = ".et",
-                            Output = ".xlsx"
-                        },
-                        new
-                        {
-                            Input = ".et",
-                            Output = ".xltm"
-                        },
-                        new
-                        {
-                            Input = ".et",
-                            Output = ".xltx"
-                        },
-                        new
-                        {
-                            Input = ".ett",
-                            Output = ".csv"
-                        },
-                        new
-                        {
-                            Input = ".ett",
-                            Output = ".ods"
-                        },
-                        new
-                        {
-                            Input = ".ett",
-                            Output = ".ots"
-                        },
-                        new
-                        {
-                            Input = ".ett",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".ett",
-                            Output = ".xlsm"
-                        },
-                        new
-                        {
-                            Input = ".ett",
-                            Output = ".xlsx"
-                        },
-                        new
-                        {
-                            Input = ".ett",
-                            Output = ".xltm"
-                        },
-                        new
-                        {
-                            Input = ".ett",
-                            Output = ".xltx"
-                        },
-                        new
-                        {
-                            Input = ".fb2",
-                            Output = ".docx"
-                        },
-                        new
-                        {
-                            Input = ".fb2",
-                            Output = ".odt"
-                        },
-                        new
-                        {
-                            Input = ".fb2",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".fb2",
-                            Output = ".rtf"
-                        },
-                        new
-                        {
-                            Input = ".fb2",
-                            Output = ".txt"
-                        },
-                        new
-                        {
-                            Input = ".fb2",
-                            Output = ".docm"
-                        },
-                        new
-                        {
-                            Input = ".fb2",
-                            Output = ".dotm"
-                        },
-                        new
-                        {
-                            Input = ".fb2",
-                            Output = ".dotx"
-                        },
-                        new
-                        {
-                            Input = ".fb2",
-                            Output = ".epub"
-                        },
-                        new
-                        {
-                            Input = ".fb2",
-                            Output = ".html"
-                        },
-                        new
-                        {
-                            Input = ".fb2",
-                            Output = ".ott"
-                        },
-                        new
-                        {
-                            Input = ".fodp",
-                            Output = ".odp"
-                        },
-                        new
-                        {
-                            Input = ".fodp",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".fodp",
-                            Output = ".pptx"
-                        },
-                        new
-                        {
-                            Input = ".fodp",
-                            Output = ".otp"
-                        },
-                        new
-                        {
-                            Input = ".fodp",
-                            Output = ".potm"
-                        },
-                        new
-                        {
-                            Input = ".fodp",
-                            Output = ".potx"
-                        },
-                        new
-                        {
-                            Input = ".fodp",
-                            Output = ".ppsm"
-                        },
-                        new
-                        {
-                            Input = ".fodp",
-                            Output = ".ppsx"
-                        },
-                        new
-                        {
-                            Input = ".fodp",
-                            Output = ".pptm"
-                        },
-                        new
-                        {
-                            Input = ".fods",
-                            Output = ".csv"
-                        },
-                        new
-                        {
-                            Input = ".fods",
-                            Output = ".ods"
-                        },
-                        new
-                        {
-                            Input = ".fods",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".fods",
-                            Output = ".xlsx"
-                        },
-                        new
-                        {
-                            Input = ".fods",
-                            Output = ".xlsm"
-                        },
-                        new
-                        {
-                            Input = ".fods",
-                            Output = ".xltm"
-                        },
-                        new
-                        {
-                            Input = ".fods",
-                            Output = ".xltx"
-                        },
-                        new
-                        {
-                            Input = ".fods",
-                            Output = ".ots"
-                        },
-                        new
-                        {
-                            Input = ".fodt",
-                            Output = ".docx"
-                        },
-                        new
-                        {
-                            Input = ".fodt",
-                            Output = ".odt"
-                        },
-                        new
-                        {
-                            Input = ".fodt",
-                            Output = ".docm"
-                        },
-                        new
-                        {
-                            Input = ".fodt",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".fodt",
-                            Output = ".rtf"
-                        },
-                        new
-                        {
-                            Input = ".fodt",
-                            Output = ".txt"
-                        },
-                        new
-                        {
-                            Input = ".fodt",
-                            Output = ".dotm"
-                        },
-                        new
-                        {
-                            Input = ".fodt",
-                            Output = ".dotx"
-                        },
-                        new
-                        {
-                            Input = ".fodt",
-                            Output = ".epub"
-                        },
-                        new
-                        {
-                            Input = ".fodt",
-                            Output = ".fb2"
-                        },
-                        new
-                        {
-                            Input = ".fodt",
-                            Output = ".html"
-                        },
-                        new
-                        {
-                            Input = ".fodt",
-                            Output = ".ott"
-                        },
-                        new
-                        {
-                            Input = ".htm",
-                            Output = ".docm"
-                        },
-                        new
-                        {
-                            Input = ".htm",
-                            Output = ".docx"
-                        },
-                        new
-                        {
-                            Input = ".htm",
-                            Output = ".dotm"
-                        },
-                        new
-                        {
-                            Input = ".htm",
-                            Output = ".dotx"
-                        },
-                        new
-                        {
-                            Input = ".htm",
-                            Output = ".epub"
-                        },
-                        new
-                        {
-                            Input = ".htm",
-                            Output = ".fb2"
-                        },
-                        new
-                        {
-                            Input = ".htm",
-                            Output = ".html"
-                        },
-                        new
-                        {
-                            Input = ".htm",
-                            Output = ".odt"
-                        },
-                        new
-                        {
-                            Input = ".htm",
-                            Output = ".ott"
-                        },
-                        new
-                        {
-                            Input = ".htm",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".htm",
-                            Output = ".rtf"
-                        },
-                        new
-                        {
-                            Input = ".htm",
-                            Output = ".txt"
-                        },
-                        new
-                        {
-                            Input = ".html",
-                            Output = ".docx"
-                        },
-                        new
-                        {
-                            Input = ".html",
-                            Output = ".odt"
-                        },
-                        new
-                        {
-                            Input = ".html",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".html",
-                            Output = ".rtf"
-                        },
-                        new
-                        {
-                            Input = ".html",
-                            Output = ".txt"
-                        },
-                        new
-                        {
-                            Input = ".html",
-                            Output = ".docm"
-                        },
-                        new
-                        {
-                            Input = ".html",
-                            Output = ".dotm"
-                        },
-                        new
-                        {
-                            Input = ".html",
-                            Output = ".dotx"
-                        },
-                        new
-                        {
-                            Input = ".html",
-                            Output = ".epub"
-                        },
-                        new
-                        {
-                            Input = ".html",
-                            Output = ".fb2"
-                        },
-                        new
-                        {
-                            Input = ".html",
-                            Output = ".ott"
-                        },
-                        new
-                        {
-                            Input = ".mht",
-                            Output = ".docx"
-                        },
-                        new
-                        {
-                            Input = ".mht",
-                            Output = ".odt"
-                        },
-                        new
-                        {
-                            Input = ".mht",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".mht",
-                            Output = ".rtf"
-                        },
-                        new
-                        {
-                            Input = ".mht",
-                            Output = ".txt"
-                        },
-                        new
-                        {
-                            Input = ".mht",
-                            Output = ".docm"
-                        },
-                        new
-                        {
-                            Input = ".mht",
-                            Output = ".dotm"
-                        },
-                        new
-                        {
-                            Input = ".mht",
-                            Output = ".dotx"
-                        },
-                        new
-                        {
-                            Input = ".mht",
-                            Output = ".epub"
-                        },
-                        new
-                        {
-                            Input = ".mht",
-                            Output = ".fb2"
-                        },
-                        new
-                        {
-                            Input = ".mht",
-                            Output = ".html"
-                        },
-                        new
-                        {
-                            Input = ".mht",
-                            Output = ".ott"
-                        },
-                        new
-                        {
-                            Input = ".mhtml",
-                            Output = ".docm"
-                        },
-                        new
-                        {
-                            Input = ".mhtml",
-                            Output = ".docx"
-                        },
-                        new
-                        {
-                            Input = ".mhtml",
-                            Output = ".dotm"
-                        },
-                        new
-                        {
-                            Input = ".mhtml",
-                            Output = ".dotx"
-                        },
-                        new
-                        {
-                            Input = ".mhtml",
-                            Output = ".epub"
-                        },
-                        new
-                        {
-                            Input = ".mhtml",
-                            Output = ".fb2"
-                        },
-                        new
-                        {
-                            Input = ".mhtml",
-                            Output = ".html"
-                        },
-                        new
-                        {
-                            Input = ".mhtml",
-                            Output = ".odt"
-                        },
-                        new
-                        {
-                            Input = ".mhtml",
-                            Output = ".ott"
-                        },
-                        new
-                        {
-                            Input = ".mhtml",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".mhtml",
-                            Output = ".rtf"
-                        },
-                        new
-                        {
-                            Input = ".mhtml",
-                            Output = ".txt"
-                        },
-                        new
-                        {
-                            Input = ".odp",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".odp",
-                            Output = ".pptx"
-                        },
-                        new
-                        {
-                            Input = ".odp",
-                            Output = ".otp"
-                        },
-                        new
-                        {
-                            Input = ".odp",
-                            Output = ".potm"
-                        },
-                        new
-                        {
-                            Input = ".odp",
-                            Output = ".potx"
-                        },
-                        new
-                        {
-                            Input = ".odp",
-                            Output = ".ppsm"
-                        },
-                        new
-                        {
-                            Input = ".odp",
-                            Output = ".ppsx"
-                        },
-                        new
-                        {
-                            Input = ".odp",
-                            Output = ".pptm"
-                        },
-                        new
-                        {
-                            Input = ".otp",
-                            Output = ".odp"
-                        },
-                        new
-                        {
-                            Input = ".otp",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".otp",
-                            Output = ".potm"
-                        },
-                        new
-                        {
-                            Input = ".otp",
-                            Output = ".potx"
-                        },
-                        new
-                        {
-                            Input = ".otp",
-                            Output = ".pptm"
-                        },
-                        new
-                        {
-                            Input = ".otp",
-                            Output = ".ppsm"
-                        },
-                        new
-                        {
-                            Input = ".otp",
-                            Output = ".ppsx"
-                        },
-                        new
-                        {
-                            Input = ".otp",
-                            Output = ".pptx"
-                        },
-                        new
-                        {
-                            Input = ".ods",
-                            Output = ".csv"
-                        },
-                        new
-                        {
-                            Input = ".ods",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".ods",
-                            Output = ".xlsx"
-                        },
-                        new
-                        {
-                            Input = ".ods",
-                            Output = ".ots"
-                        },
-                        new
-                        {
-                            Input = ".ods",
-                            Output = ".xlsm"
-                        },
-                        new
-                        {
-                            Input = ".ods",
-                            Output = ".xltm"
-                        },
-                        new
-                        {
-                            Input = ".ods",
-                            Output = ".xltx"
-                        },
-                        new
-                        {
-                            Input = ".ots",
-                            Output = ".csv"
-                        },
-                        new
-                        {
-                            Input = ".ots",
-                            Output = ".ods"
-                        },
-                        new
-                        {
-                            Input = ".ots",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".ots",
-                            Output = ".xlsm"
-                        },
-                        new
-                        {
-                            Input = ".ots",
-                            Output = ".xltm"
-                        },
-                        new
-                        {
-                            Input = ".ots",
-                            Output = ".xltx"
-                        },
-                        new
-                        {
-                            Input = ".ots",
-                            Output = ".xlsx"
-                        },
-                        new
-                        {
-                            Input = ".oform",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".odt",
-                            Output = ".docx"
-                        },
-                        new
-                        {
-                            Input = ".odt",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".odt",
-                            Output = ".rtf"
-                        },
-                        new
-                        {
-                            Input = ".odt",
-                            Output = ".txt"
-                        },
-                        new
-                        {
-                            Input = ".odt",
-                            Output = ".docm"
-                        },
-                        new
-                        {
-                            Input = ".odt",
-                            Output = ".dotm"
-                        },
-                        new
-                        {
-                            Input = ".odt",
-                            Output = ".dotx"
-                        },
-                        new
-                        {
-                            Input = ".odt",
-                            Output = ".epub"
-                        },
-                        new
-                        {
-                            Input = ".odt",
-                            Output = ".fb2"
-                        },
-                        new
-                        {
-                            Input = ".odt",
-                            Output = ".html"
-                        },
-                        new
-                        {
-                            Input = ".odt",
-                            Output = ".ott"
-                        },
-                        new
-                        {
-                            Input = ".ott",
-                            Output = ".docx"
-                        },
-                        new
-                        {
-                            Input = ".ott",
-                            Output = ".odt"
-                        },
-                        new
-                        {
-                            Input = ".ott",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".ott",
-                            Output = ".rtf"
-                        },
-                        new
-                        {
-                            Input = ".ott",
-                            Output = ".txt"
-                        },
-                        new
-                        {
-                            Input = ".ott",
-                            Output = ".docm"
-                        },
-                        new
-                        {
-                            Input = ".ott",
-                            Output = ".dotm"
-                        },
-                        new
-                        {
-                            Input = ".ott",
-                            Output = ".dotx"
-                        },
-                        new
-                        {
-                            Input = ".ott",
-                            Output = ".epub"
-                        },
-                        new
-                        {
-                            Input = ".ott",
-                            Output = ".fb2"
-                        },
-                        new
-                        {
-                            Input = ".ott",
-                            Output = ".html"
-                        },
-                        new
-                        {
-                            Input = ".oxps",
-                            Output = ".docm"
-                        },
-                        new
-                        {
-                            Input = ".oxps",
-                            Output = ".docx"
-                        },
-                        new
-                        {
-                            Input = ".oxps",
-                            Output = ".dotm"
-                        },
-                        new
-                        {
-                            Input = ".oxps",
-                            Output = ".dotx"
-                        },
-                        new
-                        {
-                            Input = ".oxps",
-                            Output = ".epub"
-                        },
-                        new
-                        {
-                            Input = ".oxps",
-                            Output = ".fb2"
-                        },
-                        new
-                        {
-                            Input = ".oxps",
-                            Output = ".html"
-                        },
-                        new
-                        {
-                            Input = ".oxps",
-                            Output = ".odt"
-                        },
-                        new
-                        {
-                            Input = ".oxps",
-                            Output = ".ott"
-                        },
-                        new
-                        {
-                            Input = ".oxps",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".oxps",
-                            Output = ".rtf"
-                        },
-                        new
-                        {
-                            Input = ".oxps",
-                            Output = ".txt"
-                        },
-                        new
-                        {
-                            Input = ".pdf",
-                            Output = ".docm"
-                        },
-                        new
-                        {
-                            Input = ".pdf",
-                            Output = ".docx"
-                        },
-                        new
-                        {
-                            Input = ".pdf",
-                            Output = ".dotm"
-                        },
-                        new
-                        {
-                            Input = ".pdf",
-                            Output = ".dotx"
-                        },
-                        new
-                        {
-                            Input = ".pdf",
-                            Output = ".epub"
-                        },
-                        new
-                        {
-                            Input = ".pdf",
-                            Output = ".fb2"
-                        },
-                        new
-                        {
-                            Input = ".pdf",
-                            Output = ".html"
-                        },
-                        new
-                        {
-                            Input = ".pdf",
-                            Output = ".odt"
-                        },
-                        new
-                        {
-                            Input = ".pdf",
-                            Output = ".ott"
-                        },
-                        new
-                        {
-                            Input = ".pdf",
-                            Output = ".rtf"
-                        },
-                        new
-                        {
-                            Input = ".pdf",
-                            Output = ".txt"
-                        },
-                        new
-                        {
-                            Input = ".pot",
-                            Output = ".odp"
-                        },
-                        new
-                        {
-                            Input = ".pot",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".pot",
-                            Output = ".pptx"
-                        },
-                        new
-                        {
-                            Input = ".pot",
-                            Output = ".otp"
-                        },
-                        new
-                        {
-                            Input = ".pot",
-                            Output = ".potm"
-                        },
-                        new
-                        {
-                            Input = ".pot",
-                            Output = ".potx"
-                        },
-                        new
-                        {
-                            Input = ".pot",
-                            Output = ".pptm"
-                        },
-                        new
-                        {
-                            Input = ".pot",
-                            Output = ".ppsm"
-                        },
-                        new
-                        {
-                            Input = ".pot",
-                            Output = ".ppsx"
-                        },
-                        new
-                        {
-                            Input = ".potm",
-                            Output = ".odp"
-                        },
-                        new
-                        {
-                            Input = ".potm",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".potm",
-                            Output = ".pptx"
-                        },
-                        new
-                        {
-                            Input = ".potm",
-                            Output = ".otp"
-                        },
-                        new
-                        {
-                            Input = ".potm",
-                            Output = ".potx"
-                        },
-                        new
-                        {
-                            Input = ".potm",
-                            Output = ".pptm"
-                        },
-                        new
-                        {
-                            Input = ".potm",
-                            Output = ".ppsm"
-                        },
-                        new
-                        {
-                            Input = ".potm",
-                            Output = ".ppsx"
-                        },
-                        new
-                        {
-                            Input = ".potx",
-                            Output = ".odp"
-                        },
-                        new
-                        {
-                            Input = ".potx",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".potx",
-                            Output = ".pptx"
-                        },
-                        new
-                        {
-                            Input = ".potx",
-                            Output = ".otp"
-                        },
-                        new
-                        {
-                            Input = ".potx",
-                            Output = ".potm"
-                        },
-                        new
-                        {
-                            Input = ".potx",
-                            Output = ".pptm"
-                        },
-                        new
-                        {
-                            Input = ".potx",
-                            Output = ".ppsm"
-                        },
-                        new
-                        {
-                            Input = ".potx",
-                            Output = ".ppsx"
-                        },
-                        new
-                        {
-                            Input = ".pps",
-                            Output = ".odp"
-                        },
-                        new
-                        {
-                            Input = ".pps",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".pps",
-                            Output = ".pptx"
-                        },
-                        new
-                        {
-                            Input = ".pps",
-                            Output = ".otp"
-                        },
-                        new
-                        {
-                            Input = ".pps",
-                            Output = ".potm"
-                        },
-                        new
-                        {
-                            Input = ".pps",
-                            Output = ".potx"
-                        },
-                        new
-                        {
-                            Input = ".pps",
-                            Output = ".pptm"
-                        },
-                        new
-                        {
-                            Input = ".pps",
-                            Output = ".ppsm"
-                        },
-                        new
-                        {
-                            Input = ".pps",
-                            Output = ".ppsx"
-                        },
-                        new
-                        {
-                            Input = ".ppsm",
-                            Output = ".odp"
-                        },
-                        new
-                        {
-                            Input = ".ppsm",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".ppsm",
-                            Output = ".pptx"
-                        },
-                        new
-                        {
-                            Input = ".ppsm",
-                            Output = ".otp"
-                        },
-                        new
-                        {
-                            Input = ".ppsm",
-                            Output = ".potm"
-                        },
-                        new
-                        {
-                            Input = ".ppsm",
-                            Output = ".potx"
-                        },
-                        new
-                        {
-                            Input = ".ppsm",
-                            Output = ".pptm"
-                        },
-                        new
-                        {
-                            Input = ".ppsm",
-                            Output = ".ppsx"
-                        },
-                        new
-                        {
-                            Input = ".ppsx",
-                            Output = ".odp"
-                        },
-                        new
-                        {
-                            Input = ".ppsx",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".ppsx",
-                            Output = ".pptx"
-                        },
-                        new
-                        {
-                            Input = ".ppsx",
-                            Output = ".otp"
-                        },
-                        new
-                        {
-                            Input = ".ppsx",
-                            Output = ".potm"
-                        },
-                        new
-                        {
-                            Input = ".ppsx",
-                            Output = ".potx"
-                        },
-                        new
-                        {
-                            Input = ".ppsx",
-                            Output = ".ppsm"
-                        },
-                        new
-                        {
-                            Input = ".ppsx",
-                            Output = ".pptm"
-                        },
-                        new
-                        {
-                            Input = ".ppt",
-                            Output = ".odp"
-                        },
-                        new
-                        {
-                            Input = ".ppt",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".ppt",
-                            Output = ".pptx"
-                        },
-                        new
-                        {
-                            Input = ".ppt",
-                            Output = ".otp"
-                        },
-                        new
-                        {
-                            Input = ".ppt",
-                            Output = ".potm"
-                        },
-                        new
-                        {
-                            Input = ".ppt",
-                            Output = ".potx"
-                        },
-                        new
-                        {
-                            Input = ".ppt",
-                            Output = ".pptm"
-                        },
-                        new
-                        {
-                            Input = ".ppt",
-                            Output = ".ppsm"
-                        },
-                        new
-                        {
-                            Input = ".ppt",
-                            Output = ".ppsx"
-                        },
-                        new
-                        {
-                            Input = ".pptm",
-                            Output = ".odp"
-                        },
-                        new
-                        {
-                            Input = ".pptm",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".pptm",
-                            Output = ".pptx"
-                        },
-                        new
-                        {
-                            Input = ".pptm",
-                            Output = ".otp"
-                        },
-                        new
-                        {
-                            Input = ".pptm",
-                            Output = ".potm"
-                        },
-                        new
-                        {
-                            Input = ".pptm",
-                            Output = ".potx"
-                        },
-                        new
-                        {
-                            Input = ".pptm",
-                            Output = ".ppsm"
-                        },
-                        new
-                        {
-                            Input = ".pptm",
-                            Output = ".ppsx"
-                        },
-                        new
-                        {
-                            Input = ".pptt",
-                            Output = ".pptx"
-                        },
-                        new
-                        {
-                            Input = ".pptx",
-                            Output = ".odp"
-                        },
-                        new
-                        {
-                            Input = ".pptx",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".pptx",
-                            Output = ".otp"
-                        },
-                        new
-                        {
-                            Input = ".pptx",
-                            Output = ".potm"
-                        },
-                        new
-                        {
-                            Input = ".pptx",
-                            Output = ".potx"
-                        },
-                        new
-                        {
-                            Input = ".pptx",
-                            Output = ".pptm"
-                        },
-                        new
-                        {
-                            Input = ".pptx",
-                            Output = ".ppsm"
-                        },
-                        new
-                        {
-                            Input = ".pptx",
-                            Output = ".ppsx"
-                        },
-                        new
-                        {
-                            Input = ".rtf",
-                            Output = ".odt"
-                        },
-                        new
-                        {
-                            Input = ".rtf",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".rtf",
-                            Output = ".docx"
-                        },
-                        new
-                        {
-                            Input = ".rtf",
-                            Output = ".txt"
-                        },
-                        new
-                        {
-                            Input = ".rtf",
-                            Output = ".docm"
-                        },
-                        new
-                        {
-                            Input = ".rtf",
-                            Output = ".dotm"
-                        },
-                        new
-                        {
-                            Input = ".rtf",
-                            Output = ".dotx"
-                        },
-                        new
-                        {
-                            Input = ".rtf",
-                            Output = ".epub"
-                        },
-                        new
-                        {
-                            Input = ".rtf",
-                            Output = ".fb2"
-                        },
-                        new
-                        {
-                            Input = ".rtf",
-                            Output = ".html"
-                        },
-                        new
-                        {
-                            Input = ".rtf",
-                            Output = ".ott"
-                        },
-                        new
-                        {
-                            Input = ".stw",
-                            Output = ".docm"
-                        },
-                        new
-                        {
-                            Input = ".stw",
-                            Output = ".docx"
-                        },
-                        new
-                        {
-                            Input = ".stw",
-                            Output = ".dotm"
-                        },
-                        new
-                        {
-                            Input = ".stw",
-                            Output = ".dotx"
-                        },
-                        new
-                        {
-                            Input = ".stw",
-                            Output = ".epub"
-                        },
-                        new
-                        {
-                            Input = ".stw",
-                            Output = ".fb2"
-                        },
-                        new
-                        {
-                            Input = ".stw",
-                            Output = ".html"
-                        },
-                        new
-                        {
-                            Input = ".stw",
-                            Output = ".odt"
-                        },
-                        new
-                        {
-                            Input = ".stw",
-                            Output = ".ott"
-                        },
-                        new
-                        {
-                            Input = ".stw",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".stw",
-                            Output = ".rtf"
-                        },
-                        new
-                        {
-                            Input = ".stw",
-                            Output = ".txt"
-                        },
-                        new
-                        {
-                            Input = ".sxc",
-                            Output = ".csv"
-                        },
-                        new
-                        {
-                            Input = ".sxc",
-                            Output = ".ods"
-                        },
-                        new
-                        {
-                            Input = ".sxc",
-                            Output = ".ots"
-                        },
-                        new
-                        {
-                            Input = ".sxc",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".sxc",
-                            Output = ".xlsm"
-                        },
-                        new
-                        {
-                            Input = ".sxc",
-                            Output = ".xlsx"
-                        },
-                        new
-                        {
-                            Input = ".sxc",
-                            Output = ".xltm"
-                        },
-                        new
-                        {
-                            Input = ".sxc",
-                            Output = ".xltx"
-                        },
-                        new
-                        {
-                            Input = ".sxi",
-                            Output = ".odp"
-                        },
-                        new
-                        {
-                            Input = ".sxi",
-                            Output = ".otp"
-                        },
-                        new
-                        {
-                            Input = ".sxi",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".sxi",
-                            Output = ".potm"
-                        },
-                        new
-                        {
-                            Input = ".sxi",
-                            Output = ".potx"
-                        },
-                        new
-                        {
-                            Input = ".sxi",
-                            Output = ".ppsm"
-                        },
-                        new
-                        {
-                            Input = ".sxi",
-                            Output = ".ppsx"
-                        },
-                        new
-                        {
-                            Input = ".sxi",
-                            Output = ".pptm"
-                        },
-                        new
-                        {
-                            Input = ".sxi",
-                            Output = ".pptx"
-                        },
-                        new
-                        {
-                            Input = ".sxw",
-                            Output = ".docm"
-                        },
-                        new
-                        {
-                            Input = ".sxw",
-                            Output = ".docx"
-                        },
-                        new
-                        {
-                            Input = ".sxw",
-                            Output = ".dotm"
-                        },
-                        new
-                        {
-                            Input = ".sxw",
-                            Output = ".dotx"
-                        },
-                        new
-                        {
-                            Input = ".sxw",
-                            Output = ".epub"
-                        },
-                        new
-                        {
-                            Input = ".sxw",
-                            Output = ".fb2"
-                        },
-                        new
-                        {
-                            Input = ".sxw",
-                            Output = ".html"
-                        },
-                        new
-                        {
-                            Input = ".sxw",
-                            Output = ".odt"
-                        },
-                        new
-                        {
-                            Input = ".sxw",
-                            Output = ".ott"
-                        },
-                        new
-                        {
-                            Input = ".sxw",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".sxw",
-                            Output = ".rtf"
-                        },
-                        new
-                        {
-                            Input = ".sxw",
-                            Output = ".txt"
-                        },
-                        new
-                        {
-                            Input = ".txt",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".txt",
-                            Output = ".docx"
-                        },
-                        new
-                        {
-                            Input = ".txt",
-                            Output = ".odt"
-                        },
-                        new
-                        {
-                            Input = ".txt",
-                            Output = ".rtf"
-                        },
-                        new
-                        {
-                            Input = ".txt",
-                            Output = ".docm"
-                        },
-                        new
-                        {
-                            Input = ".txt",
-                            Output = ".dotm"
-                        },
-                        new
-                        {
-                            Input = ".txt",
-                            Output = ".dotx"
-                        },
-                        new
-                        {
-                            Input = ".txt",
-                            Output = ".epub"
-                        },
-                        new
-                        {
-                            Input = ".txt",
-                            Output = ".fb2"
-                        },
-                        new
-                        {
-                            Input = ".txt",
-                            Output = ".html"
-                        },
-                        new
-                        {
-                            Input = ".txt",
-                            Output = ".ott"
-                        },
-                        new
-                        {
-                            Input = ".wps",
-                            Output = ".docm"
-                        },
-                        new
-                        {
-                            Input = ".wps",
-                            Output = ".docx"
-                        },
-                        new
-                        {
-                            Input = ".wps",
-                            Output = ".dotm"
-                        },
-                        new
-                        {
-                            Input = ".wps",
-                            Output = ".dotx"
-                        },
-                        new
-                        {
-                            Input = ".wps",
-                            Output = ".epub"
-                        },
-                        new
-                        {
-                            Input = ".wps",
-                            Output = ".fb2"
-                        },
-                        new
-                        {
-                            Input = ".wps",
-                            Output = ".html"
-                        },
-                        new
-                        {
-                            Input = ".wps",
-                            Output = ".odt"
-                        },
-                        new
-                        {
-                            Input = ".wps",
-                            Output = ".ott"
-                        },
-                        new
-                        {
-                            Input = ".wps",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".wps",
-                            Output = ".rtf"
-                        },
-                        new
-                        {
-                            Input = ".wps",
-                            Output = ".txt"
-                        },
-                        new
-                        {
-                            Input = ".wpt",
-                            Output = ".docm"
-                        },
-                        new
-                        {
-                            Input = ".wpt",
-                            Output = ".docx"
-                        },
-                        new
-                        {
-                            Input = ".wpt",
-                            Output = ".dotm"
-                        },
-                        new
-                        {
-                            Input = ".wpt",
-                            Output = ".dotx"
-                        },
-                        new
-                        {
-                            Input = ".wpt",
-                            Output = ".epub"
-                        },
-                        new
-                        {
-                            Input = ".wpt",
-                            Output = ".fb2"
-                        },
-                        new
-                        {
-                            Input = ".wpt",
-                            Output = ".html"
-                        },
-                        new
-                        {
-                            Input = ".wpt",
-                            Output = ".odt"
-                        },
-                        new
-                        {
-                            Input = ".wpt",
-                            Output = ".ott"
-                        },
-                        new
-                        {
-                            Input = ".wpt",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".wpt",
-                            Output = ".rtf"
-                        },
-                        new
-                        {
-                            Input = ".wpt",
-                            Output = ".txt"
-                        },
-                        new
-                        {
-                            Input = ".xls",
-                            Output = ".csv"
-                        },
-                        new
-                        {
-                            Input = ".xls",
-                            Output = ".ods"
-                        },
-                        new
-                        {
-                            Input = ".xls",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".xls",
-                            Output = ".xlsx"
-                        },
-                        new
-                        {
-                            Input = ".xls",
-                            Output = ".ots"
-                        },
-                        new
-                        {
-                            Input = ".xls",
-                            Output = ".xlsm"
-                        },
-                        new
-                        {
-                            Input = ".xls",
-                            Output = ".xltm"
-                        },
-                        new
-                        {
-                            Input = ".xls",
-                            Output = ".xltx"
-                        },
-                        new
-                        {
-                            Input = ".xlsb",
-                            Output = ".csv"
-                        },
-                        new
-                        {
-                            Input = ".xlsb",
-                            Output = ".ods"
-                        },
-                        new
-                        {
-                            Input = ".xlsb",
-                            Output = ".ots"
-                        },
-                        new
-                        {
-                            Input = ".xlsb",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".xlsb",
-                            Output = ".xlsm"
-                        },
-                        new
-                        {
-                            Input = ".xlsb",
-                            Output = ".xlsx"
-                        },
-                        new
-                        {
-                            Input = ".xlsb",
-                            Output = ".xltm"
-                        },
-                        new
-                        {
-                            Input = ".xlsb",
-                            Output = ".xltx"
-                        },
-                        new
-                        {
-                            Input = ".xlsm",
-                            Output = ".csv"
-                        },
-                        new
-                        {
-                            Input = ".xlsm",
-                            Output = ".xltm"
-                        },
-                        new
-                        {
-                            Input = ".xlsm",
-                            Output = ".xltx"
-                        },
-                        new
-                        {
-                            Input = ".xlsm",
-                            Output = ".ots"
-                        },
-                        new
-                        {
-                            Input = ".xlsm",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".xlsm",
-                            Output = ".ods"
-                        },
-                        new
-                        {
-                            Input = ".xlsm",
-                            Output = ".xlsx"
-                        },
-                        new
-                        {
-                            Input = ".xlsx",
-                            Output = ".csv"
-                        },
-                        new
-                        {
-                            Input = ".xlsx",
-                            Output = ".ods"
-                        },
-                        new
-                        {
-                            Input = ".xlsx",
-                            Output = ".ots"
-                        },
-                        new
-                        {
-                            Input = ".xlsx",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".xlsx",
-                            Output = ".xlsm"
-                        },
-                        new
-                        {
-                            Input = ".xlsx",
-                            Output = ".xltm"
-                        },
-                        new
-                        {
-                            Input = ".xlsx",
-                            Output = ".xltx"
-                        },
-                        new
-                        {
-                            Input = ".xlst",
-                            Output = ".xlsx"
-                        },
-                        new
-                        {
-                            Input = ".xlt",
-                            Output = ".csv"
-                        },
-                        new
-                        {
-                            Input = ".xlt",
-                            Output = ".ods"
-                        },
-                        new
-                        {
-                            Input = ".xlt",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".xlt",
-                            Output = ".xlsx"
-                        },
-                        new
-                        {
-                            Input = ".xlt",
-                            Output = ".ots"
-                        },
-                        new
-                        {
-                            Input = ".xlt",
-                            Output = ".xlsm"
-                        },
-                        new
-                        {
-                            Input = ".xlt",
-                            Output = ".xltm"
-                        },
-                        new
-                        {
-                            Input = ".xlt",
-                            Output = ".xltx"
-                        },
-                        new
-                        {
-                            Input = ".xltm",
-                            Output = ".csv"
-                        },
-                        new
-                        {
-                            Input = ".xltm",
-                            Output = ".ods"
-                        },
-                        new
-                        {
-                            Input = ".xltm",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".xltm",
-                            Output = ".ots"
-                        },
-                        new
-                        {
-                            Input = ".xltm",
-                            Output = ".xlsm"
-                        },
-                        new
-                        {
-                            Input = ".xltm",
-                            Output = ".xltx"
-                        },
-                        new
-                        {
-                            Input = ".xltm",
-                            Output = ".xlsx"
-                        },
-                        new
-                        {
-                            Input = ".xltx",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".xltx",
-                            Output = ".csv"
-                        },
-                        new
-                        {
-                            Input = ".xltx",
-                            Output = ".ods"
-                        },
-                        new
-                        {
-                            Input = ".xltx",
-                            Output = ".ots"
-                        },
-                        new
-                        {
-                            Input = ".xltx",
-                            Output = ".xlsm"
-                        },
-                        new
-                        {
-                            Input = ".xltx",
-                            Output = ".xltm"
-                        },
-                        new
-                        {
-                            Input = ".xltx",
-                            Output = ".xlsx"
-                        },
-                        new
-                        {
-                            Input = ".xml",
-                            Output = ".docm"
-                        },
-                        new
-                        {
-                            Input = ".xml",
-                            Output = ".docx"
-                        },
-                        new
-                        {
-                            Input = ".xml",
-                            Output = ".dotm"
-                        },
-                        new
-                        {
-                            Input = ".xml",
-                            Output = ".dotx"
-                        },
-                        new
-                        {
-                            Input = ".xml",
-                            Output = ".epub"
-                        },
-                        new
-                        {
-                            Input = ".xml",
-                            Output = ".fb2"
-                        },
-                        new
-                        {
-                            Input = ".xml",
-                            Output = ".html"
-                        },
-                        new
-                        {
-                            Input = ".xml",
-                            Output = ".odt"
-                        },
-                        new
-                        {
-                            Input = ".xml",
-                            Output = ".ott"
-                        },
-                        new
-                        {
-                            Input = ".xml",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".xml",
-                            Output = ".rtf"
-                        },
-                        new
-                        {
-                            Input = ".xml",
-                            Output = ".txt"
-                        },
-                        new
-                        {
-                            Input = ".xps",
-                            Output = ".docm"
-                        },
-                        new
-                        {
-                            Input = ".xps",
-                            Output = ".docx"
-                        },
-                        new
-                        {
-                            Input = ".xps",
-                            Output = ".dotm"
-                        },
-                        new
-                        {
-                            Input = ".xps",
-                            Output = ".dotx"
-                        },
-                        new
-                        {
-                            Input = ".xps",
-                            Output = ".epub"
-                        },
-                        new
-                        {
-                            Input = ".xps",
-                            Output = ".fb2"
-                        },
-                        new
-                        {
-                            Input = ".xps",
-                            Output = ".html"
-                        },
-                        new
-                        {
-                            Input = ".xps",
-                            Output = ".odt"
-                        },
-                        new
-                        {
-                            Input = ".xps",
-                            Output = ".ott"
-                        },
-                        new
-                        {
-                            Input = ".xps",
-                            Output = ".pdf"
-                        },
-                        new
-                        {
-                            Input = ".xps",
-                            Output = ".rtf"
-                        },
-                        new
-                        {
-                            Input = ".xps",
-                            Output = ".txt"
+                            Data = "{\"Completed\":false}",
+                            LastModified = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
                 });
 
@@ -4796,11 +2521,20 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("int")
                         .HasColumnName("telegram_user_id");
 
+                    b.Property<string>("TelegramUsername")
+                        .HasColumnType("varchar(35)")
+                        .HasColumnName("telegram_username")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
                     b.HasKey("TenantId", "PortalUserId")
                         .HasName("PRIMARY");
 
                     b.HasIndex("TelegramUserId")
                         .HasDatabaseName("tgId");
+
+                    b.HasIndex("TelegramUsername")
+                        .HasDatabaseName("tgUsername");
 
                     b.ToTable("telegram_users", (string)null);
 
@@ -5399,8 +3133,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
-                    b.Property<DateTime?>("LastModified")
-                        .IsRequired()
+                    b.Property<DateTime>("LastModified")
                         .HasColumnType("timestamp");
 
                     b.Property<string>("PwdHash")
@@ -5509,6 +3242,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("name")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<bool>("Paid")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("paid");
 
                     b.Property<bool>("Removed")
                         .HasColumnType("tinyint(1)")
@@ -5859,6 +3596,37 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
 
+            modelBuilder.Entity("ASC.Files.Core.EF.DbFileVectorization", b =>
+                {
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<int>("FileId")
+                        .HasColumnType("int")
+                        .HasColumnName("file_id");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime>("UpdatedOn")
+                        .HasColumnType("datetime")
+                        .HasColumnName("updated_on");
+
+                    b.HasKey("TenantId", "FileId")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex("FileId")
+                        .HasDatabaseName("IX_file_id");
+
+                    b.ToTable("files_file_vectorization", (string)null);
+
+                    b
+                        .HasAnnotation("MySql:CharSet", "utf8")
+                        .HasAnnotation("Relational:Collation", "utf8_general_ci");
+                });
+
             modelBuilder.Entity("ASC.Files.Core.EF.DbFilesBunchObjects", b =>
                 {
                     b.Property<int>("TenantId")
@@ -5902,8 +3670,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("form_id");
 
                     b.Property<string>("RoleName")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar")
                         .HasColumnName("role_name")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -5919,10 +3687,15 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("opened_at");
 
                     b.Property<string>("RoleColor")
-                        .HasColumnType("char(6)")
+                        .HasMaxLength(6)
+                        .HasColumnType("char")
                         .HasColumnName("role_color")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<int>("RoomId")
+                        .HasColumnType("int")
+                        .HasColumnName("room_id");
 
                     b.Property<int>("Sequence")
                         .HasColumnType("int")
@@ -6036,6 +3809,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
+                    b.Property<int>("InternalEntryId")
+                        .HasColumnType("int")
+                        .HasColumnName("internal_entry_id");
+
                     b.Property<string>("Options")
                         .HasColumnType("json")
                         .HasColumnName("options")
@@ -6066,6 +3843,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.HasIndex("Owner")
                         .HasDatabaseName("owner");
+
+                    b.HasIndex("TenantId", "InternalEntryId")
+                        .HasDatabaseName("tenant_id_internal_entry_id");
+
+                    b.HasIndex("TenantId", "Subject")
+                        .HasDatabaseName("tenant_id_subject");
 
                     b.HasIndex("TenantId", "EntryType", "EntryId", "Owner")
                         .HasDatabaseName("tenant_id");
@@ -6181,6 +3964,13 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasMaxLength(6)
                         .HasColumnType("char")
                         .HasColumnName("color")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<string>("Cover")
+                        .HasMaxLength(50)
+                        .HasColumnType("char")
+                        .HasColumnName("cover")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
@@ -6471,6 +4261,52 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
 
+            modelBuilder.Entity("ASC.Files.Core.EF.DbMcpServerSettings", b =>
+                {
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<int>("RoomId")
+                        .HasColumnType("int")
+                        .HasColumnName("room_id");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("varchar(36)")
+                        .HasColumnName("user_id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<Guid>("ServerId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("server_id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<string>("OauthCredentials")
+                        .HasColumnType("text")
+                        .HasColumnName("oauth_credentials")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<string>("ToolsConfiguration")
+                        .HasColumnType("json")
+                        .HasColumnName("tool_config")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.HasKey("TenantId", "RoomId", "UserId", "ServerId")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex("RoomId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ai_mcp_server_settings", (string)null);
+
+                    b.HasAnnotation("MySql:CharSet", "utf8");
+                });
+
             modelBuilder.Entity("ASC.Files.Core.EF.DbRoomSettings", b =>
                 {
                     b.Property<int>("TenantId")
@@ -6480,6 +4316,16 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Property<int>("RoomId")
                         .HasColumnType("int")
                         .HasColumnName("room_id");
+
+                    b.Property<string>("ChatParameters")
+                        .HasColumnType("json")
+                        .HasColumnName("chat_settings")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<int>("ChatProviderId")
+                        .HasColumnType("int")
+                        .HasColumnName("chat_provider_id");
 
                     b.Property<string>("Color")
                         .HasMaxLength(6)
@@ -6540,10 +4386,47 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasKey("TenantId", "RoomId")
                         .HasName("primary");
 
+                    b.HasIndex("ChatProviderId")
+                        .HasDatabaseName("IX_chat_provider_id");
+
                     b.HasIndex("RoomId")
                         .IsUnique();
 
                     b.ToTable("files_room_settings", (string)null);
+
+                    b.HasAnnotation("MySql:CharSet", "utf8");
+                });
+
+            modelBuilder.Entity("ASC.Files.Core.EF.DbUserChatSettings", b =>
+                {
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<int>("RoomId")
+                        .HasColumnType("int")
+                        .HasColumnName("room_id");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("varchar(36)")
+                        .HasColumnName("user_id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<bool>("WebSearchEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(true)
+                        .HasColumnName("web_search_enabled");
+
+                    b.HasKey("TenantId", "RoomId", "UserId")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex("RoomId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ai_user_chat_settings", (string)null);
 
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
@@ -6572,8 +4455,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("date");
 
                     b.Property<string>("DescriptionRaw")
-                        .HasMaxLength(20000)
-                        .HasColumnType("varchar")
+                        .HasColumnType("text")
                         .HasColumnName("description")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
@@ -6593,7 +4475,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Page")
-                        .HasMaxLength(300)
+                        .HasMaxLength(4096)
                         .HasColumnType("varchar")
                         .HasColumnName("page")
                         .UseCollation("utf8_general_ci")
@@ -6681,7 +4563,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<string>("Page")
-                        .HasMaxLength(300)
+                        .HasMaxLength(4096)
                         .HasColumnType("varchar")
                         .HasColumnName("page")
                         .UseCollation("utf8_general_ci")
@@ -7342,6 +5224,13 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("secret_key")
                         .HasDefaultValueSql("''");
 
+                    b.Property<string>("TargetId")
+                        .HasMaxLength(36)
+                        .HasColumnType("varchar(36)")
+                        .HasColumnName("target_id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
                     b.Property<int>("TenantId")
                         .HasColumnType("int")
                         .HasColumnName("tenant_id");
@@ -7446,6 +5335,47 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
 
+            modelBuilder.Entity("ASC.AI.Core.Database.Models.DbMcpServer", b =>
+                {
+                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("ASC.AI.Core.Database.Models.DbMcpServerState", b =>
+                {
+                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("ASC.AI.Core.Database.Models.DbRoomMcpServer", b =>
+                {
+                    b.HasOne("ASC.Files.Core.EF.DbFolder", "Room")
+                        .WithMany()
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Room");
+
+                    b.Navigation("Tenant");
+                });
+
             modelBuilder.Entity("ASC.Core.Common.EF.Acl", b =>
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
@@ -7524,6 +5454,50 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 });
 
             modelBuilder.Entity("ASC.Core.Common.EF.FireBaseUser", b =>
+                {
+                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.Ai.DbAiProvider", b =>
+                {
+                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.Ai.DbChat", b =>
+                {
+                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.Ai.DbChatMessage", b =>
+                {
+                    b.HasOne("ASC.Core.Common.EF.Model.Ai.DbChat", "Chat")
+                        .WithMany("Messages")
+                        .HasForeignKey("ChatId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Chat");
+                });
+
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.ApiKey", b =>
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
                         .WithMany()
@@ -7743,6 +5717,17 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Navigation("Tenant");
                 });
 
+            modelBuilder.Entity("ASC.Files.Core.EF.DbFileVectorization", b =>
+                {
+                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
             modelBuilder.Entity("ASC.Files.Core.EF.DbFilesBunchObjects", b =>
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
@@ -7875,6 +5860,33 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Navigation("Folder");
                 });
 
+            modelBuilder.Entity("ASC.Files.Core.EF.DbMcpServerSettings", b =>
+                {
+                    b.HasOne("ASC.Files.Core.EF.DbFolder", "Room")
+                        .WithMany()
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ASC.Core.Common.EF.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Room");
+
+                    b.Navigation("Tenant");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("ASC.Files.Core.EF.DbRoomSettings", b =>
                 {
                     b.HasOne("ASC.Files.Core.EF.DbFolder", "Room")
@@ -7892,6 +5904,33 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Navigation("Room");
 
                     b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("ASC.Files.Core.EF.DbUserChatSettings", b =>
+                {
+                    b.HasOne("ASC.Files.Core.EF.DbFolder", "Room")
+                        .WithMany()
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ASC.Core.Common.EF.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Room");
+
+                    b.Navigation("Tenant");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("ASC.MessagingSystem.EF.Model.DbAuditEvent", b =>
@@ -8044,6 +6083,11 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Navigation("Config");
 
                     b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.Ai.DbChat", b =>
+                {
+                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("ASC.Core.Common.EF.Model.DbTenant", b =>

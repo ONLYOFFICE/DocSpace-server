@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -43,7 +43,7 @@ class NotifyClientImpl(
     {
         _notifySource = notifySource;
     }
-    
+
     public async Task SendNoticeToAsync(INotifyAction action, IRecipient recipient, string senderNames, params ITagValue[] args)
     {
         await SendNoticeToAsync(action, null, recipient, [senderNames], false, args);
@@ -95,16 +95,16 @@ class NotifyClientImpl(
             await SendNoticeToAsync(action, objectID, recipient, senderNames, checkSubsciption, args);
         }
     }
-    
+
     public async Task SendNoticeToAsync(INotifyAction action, string objectID, IRecipient recipient, string[] senderNames, bool checkSubsciption, params ITagValue[] args)
     {
         ArgumentNullException.ThrowIfNull(recipient);
 
         BeginSingleRecipientEvent("__syspreventduplicateinterceptor");
-        
+
         await SendRequest(action, objectID, recipient, senderNames, checkSubsciption, args);
     }
-    
+
     private async Task SendRequest(INotifyAction action, string objectID, IRecipient recipient, string[] senderNames, bool checkSubsciption, params ITagValue[] args)
     {
         var r = CreateRequest(action, objectID, recipient, args, senderNames, checkSubsciption);

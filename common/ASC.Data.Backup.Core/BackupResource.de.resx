@@ -126,4 +126,37 @@
   <data name="LargeBackup" xml:space="preserve">
     <value>Backup ist größer als die Gesamtgröße des Portals</value>
   </data>
+  <data name="BackupException" xml:space="preserve">
+    <value>Beim Erstellen der Sicherung ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut oder wenden Sie sich an den Support.</value>
+  </data>
+  <data name="BackupInvalid" xml:space="preserve">
+    <value>Die Sicherungsdatei ist ungültig.</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>Beim Wiederherstellen der Sicherung ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut oder wenden Sie sich an den Support.</value>
+  </data>
+  <data name="AutoBackup" xml:space="preserve">
+    <value>Automatische Sicherung</value>
+  </data>
+  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
+    <value>Custom cloud</value>
+  </data>
+  <data name="BackupStorageTypeDataStore" xml:space="preserve">
+    <value>Vorläufige Speicherung</value>
+  </data>
+  <data name="BackupStorageTypeDocuments" xml:space="preserve">
+    <value>Ersatzraum</value>
+  </data>
+  <data name="BackupStorageTypeLocal" xml:space="preserve">
+    <value>Lokale Datei</value>
+  </data>
+  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
+    <value>Drittanbieter</value>
+  </data>
+  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
+    <value>Ressource eines Drittanbieters</value>
+  </data>
+  <data name="BackupMissingFilesWarning" xml:space="preserve">
+    <value>Einige Dateien wurden nicht in die Sicherung aufgenommen. Weitere Details finden Sie unter {0}</value>
+  </data>
 </root>

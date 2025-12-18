@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,8 +30,8 @@ namespace ASC.Web.Core.Quota;
 
 [Scope]
 public class CountPaidUserChecker(
-    ITenantQuotaFeatureStat<CountPaidUserFeature, int> tenantQuotaFeatureStatistic, 
-    TenantManager tenantManager, 
+    ITenantQuotaFeatureStat<CountPaidUserFeature, int> tenantQuotaFeatureStatistic,
+    TenantManager tenantManager,
     ITariffService tariffService)
     : TenantQuotaFeatureCheckerCount<CountPaidUserFeature>(tenantQuotaFeatureStatistic, tenantManager)
 {
@@ -40,12 +40,12 @@ public class CountPaidUserChecker(
     {
         return string.Format(Resource.TariffsFeature_manager_exception, count);
     }
-    
+
     public override async Task CheckAddAsync(int tenantId, int newValue)
     {
         if ((await tariffService.GetTariffAsync(tenantId)).State > TariffState.Paid)
         {
-            throw new BillingNotFoundException(Resource.ErrorNotAllowedOption, "paid users");
+            throw new BillingNotFoundException(Resource.ErrorNotAllowedOption);
         }
 
         await base.CheckAddAsync(tenantId, newValue);

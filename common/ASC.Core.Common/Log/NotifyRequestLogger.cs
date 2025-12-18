@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,5 +28,5 @@ namespace ASC.Core.Common.Log;
 public static partial class NotifyRequestLogger
 {
     [LoggerMessage(LogLevel.Error, "{name} {action} {recipient}")]
-    public static partial void ErrorIntercept(this ILogger logger, string name, INotifyAction action, IRecipient recipient, Exception exception);
+    public static partial void ErrorIntercept(this ILogger logger, string name, string action, string recipient, Exception exception);
 }

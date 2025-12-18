@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -39,13 +39,13 @@ public class TableRowFormatterState(TextileFormatter f) : FormatterState(f)
         _attsInfo = m.Groups["atts"].Value;
         input = "|" + m.Groups["content"].Value + "|";
 
-        if (this.Formatter.CurrentState is not TableFormatterState)
+        if (Formatter.CurrentState is not TableFormatterState)
         {
-            var s = new TableFormatterState(this.Formatter);
-            this.Formatter.ChangeState(s);
+            var s = new TableFormatterState(Formatter);
+            Formatter.ChangeState(s);
         }
 
-        this.Formatter.ChangeState(this);
+        Formatter.ChangeState(this);
 
         return input;
     }

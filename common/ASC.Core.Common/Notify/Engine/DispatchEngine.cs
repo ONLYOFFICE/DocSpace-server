@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -70,15 +70,15 @@ public class DispatchEngine
     {
         if (response.Result == SendResult.Inprogress)
         {
-            _logger.LogDebugResponceWithException(message.Subject, message.Recipient, senderName, response.Result, response.Exception);
+            _logger.LogDebugResponceWithException(message.Subject, message.Recipient.ToString(), senderName, response.Result, response.Exception);
         }
         else if (response.Result == SendResult.Impossible)
         {
-            _logger.LogErrorResponceWithException(message.Subject, message.Recipient, senderName, response.Result, response.Exception);
+            _logger.LogErrorResponceWithException(message.Subject, message.Recipient.ToString(), senderName, response.Result, response.Exception);
         }
         else
         {
-            _logger.LogDebugResponce(message.Subject, message.Recipient, senderName, response.Result);
+            _logger.LogDebugResponce(message.Subject, message.Recipient.ToString(), senderName, response.Result);
         }
     }
 
@@ -87,8 +87,8 @@ public class DispatchEngine
         try
         {
             _messagesLogger.LogMessage(
-                message.Action,
-                message.Recipient.Name,
+                message.Action.ToString(),
+                message.Recipient.ToString(),
                 senderName,
                 0 < message.Recipient.Addresses.Length ? message.Recipient.Addresses[0] : string.Empty,
                 DateTime.Now,

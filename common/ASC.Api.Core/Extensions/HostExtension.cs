@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,35 +28,38 @@ namespace ASC.Api.Core.Extensions;
 
 public static class HostExtension
 {
-    public static async Task RunWithTasksAsync(this WebApplication webHost, bool awaitTasks = true, CancellationToken cancellationToken = default)
+    extension(WebApplication webHost)
     {
-        CustomSynchronizationContext.CreateContext();
-
-        var t = RunTasksAsync(webHost, cancellationToken);
-
-        if (awaitTasks)
+        public async Task RunWithTasksAsync(bool awaitTasks = true, CancellationToken cancellationToken = default)
         {
-            await t.ConfigureAwait(false);
-        }
+            CustomSynchronizationContext.CreateContext();
 
-        // Start the tasks as normal
-        await webHost.RunAsync(cancellationToken);
-    }
+            var t = RunTasksAsync(webHost, cancellationToken);
 
-    private static async Task RunTasksAsync(this WebApplication webHost, CancellationToken cancellationToken = default)
-    {
-        await Task.Delay(1, cancellationToken);
-
-        // Load all tasks from DI
-        var startupTasks = webHost.Services.GetServices<IStartupTask>();
-
-        // Execute all the tasks
-        foreach (var startupTask in startupTasks)
-        {        
-            var t = startupTask.ExecuteAsync(cancellationToken);
-            if (startupTask is not IStartupTaskNotAwaitable)
+            if (awaitTasks)
             {
                 await t.ConfigureAwait(false);
+            }
+
+            // Start the tasks as normal
+            await webHost.RunAsync(cancellationToken);
+        }
+
+        private async Task RunTasksAsync(CancellationToken cancellationToken = default)
+        {
+            await Task.Delay(1, cancellationToken);
+
+            // Load all tasks from DI
+            var startupTasks = webHost.Services.GetServices<IStartupTask>();
+
+            // Execute all the tasks
+            foreach (var startupTask in startupTasks)
+            {
+                var t = startupTask.ExecuteAsync(cancellationToken);
+                if (startupTask is not IStartupTaskNotAwaitable)
+                {
+                    await t.ConfigureAwait(false);
+                }
             }
         }
     }

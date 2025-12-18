@@ -510,37 +510,37 @@ $TrulyYours</value>
     <value>新用户添加到${LetterLogoText}门户</value>
   </data>
   <data name="ActionFileCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; 已创建新的文档： &lt;a href={1}&gt;{2}&lt;/a&gt; ，房间： &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; 已创建新的文档： &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; ，房间： &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionNewComment" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; 已添加新的评论，文档: &lt;a href={1}&gt;{2}&lt;/a&gt; ，房间： &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; 已添加新的评论，文档: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; ，房间： &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileUploaded" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; 已上传新的文档： &lt;a href={1}&gt;{2}&lt;/a&gt; ，房间： &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; 已上传新的文档： &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; ，房间： &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomRenamed" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; 已重新命名房间： &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href={2}&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; 已重新命名房间： &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; 已创建新的房间： &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; 已创建新的房间： &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; 已被移出房间： &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; 已被移出房间： &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileEdited" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; 已编辑文档：&lt;a href={1}&gt;{2}&lt;/a&gt; in the room: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; 已编辑文档：&lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; in the room: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomRemoved" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; 已删除房间： &lt;b&gt;{1}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserAddedToRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt;  已被加入房间：&lt;a href={1}&gt;{2}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt;  已被加入房间：&lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomArchived" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; 把房间： &lt;a href={1}&gt;{2}&lt;/a&gt; 已移动至存档 - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; 把房间： &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; 已移动至存档 - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomUpdateAccessForUser" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; 被任命为 &lt;b&gt;{1}&lt;/b&gt; ，房间： &lt;a href={2}&gt;{3}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; 被任命为 &lt;b&gt;{1}&lt;/b&gt; ，房间： &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
     <value>新增协作空间的用户： &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
@@ -840,7 +840,7 @@ $Body</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace &lt;span style="color: #FF6F3D;"&gt;协作空间已停用&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText}协作空间 已被&lt;span style="color: #FF6F3D;"&gt;删除&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;您的 ${LetterLogoText} 协作空间已成功停用。请注意，您的所有数据将被删除，依据是我们的&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;隐私政策&lt;/a&gt;。&lt;/td&gt;&lt;/tr&gt;
 
@@ -880,17 +880,6 @@ $TrulyYours</value>
 您好！请注意，您的 ${LetterLogoText} 协作空间的 $PaymentDelay 天宽限期已激活。
 
 请确保在宽限期到期之前支付您的专业版订阅费用，以继续畅享 ${LetterLogoText} 协作空间的所有福利。
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>尊敬的$UserName！
-
-您好！请注意，您的 ${LetterLogoText} 协作空间订阅将在三天后到期。之后，$PaymentDelay 天的宽限期将被激活。
-
-我们建议您即刻支付专业版订阅费用，以继续畅享 ${LetterLogoText} 协作空间的所有福利。
 
 $OrangeButton
 
@@ -1018,7 +1007,9 @@ $OrangeButton
 
 请点击下方的按钮前往门户登录页面并配置身份验证器应用程序：
  
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
     <value>h1. 加入 &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt;协作空间
@@ -1387,7 +1378,7 @@ $OrangeButton
     <value>加入 ${LetterLogoText} 协作空间</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>${LetterLogoText} 协作空间已停用</value>
+    <value>${LetterLogoText} 协作空间已删除</value>
   </data>
   <data name="subject_opensource_admin_activation_v1" xml:space="preserve">
     <value>欢迎来到 ${LetterLogoText} 协作空间！</value>
@@ -1427,9 +1418,6 @@ $OrangeButton
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_last_day" xml:space="preserve">
     <value>${LetterLogoText} 协作空间宽限期将于明日到期</value>
-  </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>您的 ${LetterLogoText} 协作空间订阅即将到期</value>
   </data>
   <data name="subject_mailbox_created" xml:space="preserve">
     <value>${LetterLogoText}。邮箱创建</value>
@@ -1807,11 +1795,13 @@ $OrangeButton
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;您好, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;您已成功 *创建 ${LetterLogoText} 协作空间* ，您可以使用它管理文档，提升与团队、客户、合作伙伴的协作。协作空间的地址是&lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;。&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;您已成功 *创建 ${LetterLogoText} 协作空间* ，您可以使用它管理文档，提升与团队、客户、合作伙伴的协作。协作空间的地址是&lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;。&lt;/td&gt;&lt;/tr&gt;
 
+#if($OrangeButton != "")
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;请确认您的电子邮箱（该链接有效期为7天）:&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 44px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
+#end
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;您目前的方案是完全免费的初创版，包括：&lt;/td&gt;&lt;/tr&gt;
 
@@ -1917,5 +1907,223 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 26px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;如果您需要帮助，请浏览我们的&lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;帮助中心&lt;/a&gt;或询问我们的 &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__SupportLink}"&gt;支持团队&lt;/a&gt;。&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
+  </data>
+  <data name="subject_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>您的 ${LetterLogoText} 协作空间将被删除</value>
+  </data>
+  <data name="subject_user_role_changed" xml:space="preserve">
+    <value>您在协作空间房间中的权限已更改</value>
+  </data>
+  <data name="subject_user_type_changed" xml:space="preserve">
+    <value>您的协作空间用户类型已更改</value>
+  </data>
+  <data name="pattern_user_role_changed" xml:space="preserve">
+    <value>您好！
+
+您在协作空间房间 "${RoomTitle}":"${RoomUrl}" 中被分配了一个新权限：${UserRole}。
+
+了解更多关于房间中角色和权限的信息，请访问 "帮助中心":"${HelpCenterUrl}"。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_type_changed" xml:space="preserve">
+    <value>您好！
+
+您在协作空间中被分配了一个新的用户类型："${__VirtualRootPath}":"${__VirtualRootPath}"：${UserType}。
+
+在 "帮助中心":"${HelpCenterUrl}" 中了解更多关于用户类型和权限的信息。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;您的${LetterLogoText}协作空间将&lt;span style="color: #FF6F3D;"&gt;被删除&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;您的${LetterLogoText}协作空间&lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; 已超过一年未活跃使用。&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;由于您决定不再使用，依据&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;隐私政策&lt;/a&gt;，您的${LetterLogoText}协作空间及其所有数据将被删除。&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;我们非常希望您能提供反馈：请问出于哪些原因决定停用${LetterLogoText}协作空间？&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;如需继续使用您的${LetterLogoText}协作空间，请输入您的信息并进行任意操作即可保留。&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>您好, $UserName!
+
+请注意，您的订阅费用将在3天内自动从账户中扣除。
+
+为确保扣款顺利，请确认您的付款方式中有足够金额。
+
+如有任何疑问或需要帮助，请随时联系我们的 "支持团队":"${__SupportLink}"。
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>您的 ${LetterLogoText} 协作空间即将支付的订阅费用</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>前往服务</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>前往钱包设置</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>您好，$UserName!
+
+温馨提示，您已购买的服务计划未能自动续订。
+
+请您手动续订当前服务计划（或购买新计划）。
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>您好，$UserName!
+
+温馨提示，协作空间钱包自动充值未成功。
+
+请及时处理您的钱包余额。
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>需要操作：无法自动续订您的${LetterLogoText}协作空间中的服务套餐</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>需要操作：无法自动为您的${LetterLogoText}协作空间中的钱包余额充值</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>您的密码已成功更改</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>打开协作空间</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1.密码成功更改
+
+您已于 *$Date* 在协作空间中成功更改了帐户 *$UserName*, *$UserEmail* 的密码："${__VirtualRootPath}":"${__VirtualRootPath}"。
+
+IP 地址: *$IP*
+设备: *$Device*
+#if($Location != "")
+位置: *$Location*
+#end
+浏览器: *$Browser*
+
+如果此操作由您本人执行，则可忽视此邮件。如果此更改可疑或未经您授权，请立即重置密码并禁用此设备对协作空间的访问权限。
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_scheduled_backup_failed" xml:space="preserve">
+    <value>您的协作空间自动备份失败</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed" xml:space="preserve">
+    <value>您好，$UserName，
+
+您的协作空间 "${__VirtualRootPath}":"${__VirtualRootPath}" 的计划备份过程失败。
+
+我们建议您检查 "Backup":"${__VirtualRootPath}/portal-settings/backup/data-backup" 和 "Services":"${__VirtualRootPath}/portal-settings/services" 设置。
+
+如果您有任何疑问或需要帮助，请随时通过 "${__SupportLink}":"${__SupportLink}" 与我们联系。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
+    <value>您好，$UserName，
+
+您的协作空间 [${__VirtualRootPath}](${__VirtualRootPath}) 的计划备份过程失败。
+
+我们建议您检查 [备份](${__VirtualRootPath}/portal-settings/backup/data-backup) 和 [服务](${__VirtualRootPath}/portal-settings/services) 设置。
+
+如有任何疑问或需要帮助，请随时通过 [${__SupportLink}](${__SupportLink}) 联系我们。
+
+此致，
+${LetterLogoText} 支持团队
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="ActionAgentCreated" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; 创建了一个新的智能体：&lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRemoved" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; 删除了智能体：&lt;b&gt;{1}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRenamed" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; 重命名了智能体：&lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentUpdateAccessForUser" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; 在智能体中被授予 &lt;b&gt;{1}&lt;/b&gt; 的角色： &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserAddedToAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; 被添加到智能体：&lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserRemovedFromAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; 从智能体中移除：&lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ButtonJoinAgent" xml:space="preserve">
+    <value>加入智能体</value>
+  </data>
+  <data name="pattern_backup_failed" xml:space="preserve">
+    <value>您好，$UserName，
+
+您的协作空间 "${__VirtualRootPath}":"${__VirtualRootPath}" 的备份过程失败。
+
+如有任何疑问或需要帮助，请随时通过 "${__SupportLink}":"${__SupportLink}" 联系我们。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_backup_failed_tg" xml:space="preserve">
+    <value>您好，$UserName，
+
+您的协作空间 [${__VirtualRootPath}](${__VirtualRootPath}) 的备份过程失败。
+
+如有任何疑问或需要帮助，请随时通过 [${__SupportLink}](${__SupportLink}) 联系我们。
+
+此致，
+${LetterLogoText} 支持团队
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="pattern_saas_agent_invite" xml:space="preserve">
+    <value>您好！
+
+您已受邀加入协作空间智能体 "${__VirtualRootPath}":"${__VirtualRootPath}"。请点击以下链接接受邀请：
+
+$OrangeButton
+
+点击邀请链接后，请为您的帐户设置新密码。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>您好！
+
+$__AuthorName 邀请您加入智能体 "$Message":"$InviteLink"，地址为 "${__VirtualRootPath}":"${__VirtualRootPath}"。
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_backup_failed" xml:space="preserve">
+    <value>协作空间备份失败</value>
+  </data>
+  <data name="subject_saas_agent_invite" xml:space="preserve">
+    <value>加入 ${LetterLogoText} 协作空间</value>
+  </data>
+  <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>您已受邀加入 ${LetterLogoText} 协作空间智能体</value>
+  </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>协作空间${LetterLogoText}已被删除。
+
+*门户：* ${PortalUrl}
+*所有者：* ${UserName} ${UserEmail}
+*客户：* ${OwnerName}
+
+请确保已关闭自动扣款，可在客户的 Stripe 账户中检查自动扣款状态。</value>
   </data>
 </root>

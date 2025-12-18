@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -50,4 +50,7 @@ internal static partial class FileStorageServiceLogger
 
     [LoggerMessage(LogLevel.Information, "Delete personal data for {userId}")]
     public static partial void InformationDeletePersonalData(this ILogger logger, Guid userId);
+
+    [LoggerMessage(LogLevel.Information, "Unable to perform file {fileId} move copy operation: {reason}")]
+    public static partial void InformationUnableFileMoveCopyOperation(this ILogger logger, string fileId, string reason);
 }

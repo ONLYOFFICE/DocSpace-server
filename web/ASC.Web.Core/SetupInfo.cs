@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -50,7 +50,7 @@ public class SetupInfo
     public long ProviderMaxUploadSize { get; private set; }
     public bool ThirdPartyAuthEnabled { get; private set; }
     public string TipsAddress { get; private set; }
-    public string WebApiBaseUrl { get { return VirtualPathUtility.ToAbsolute(GetAppSettings("api.url", "~/api/2.0/")); } }
+    public string WebApiBaseUrl => VirtualPathUtility.ToAbsolute(GetAppSettings("api.url", "~/api/2.0/"));
 
     public static bool IsSecretEmail(string email)
     {

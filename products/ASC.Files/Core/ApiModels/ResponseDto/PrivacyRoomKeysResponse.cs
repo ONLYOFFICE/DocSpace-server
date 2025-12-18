@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,7 +26,13 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The response containing the status of the privacy room keys.
+/// </summary>
 public class PrivacyRoomKeysResponse
 {
-    public bool IsSet { get; set; }
+    /// <summary>
+    /// Indicates whether the privacy room keys are set.
+    /// </summary>
+    public required bool IsSet { get; set; }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,10 +26,8 @@
 
 namespace ASC.Core.Common.Quota.Features;
 
-public class MaxFileSizeFeature(TenantQuota tenantQuota) : TenantQuotaFeatureSize(tenantQuota)
+public class MaxFileSizeFeature(TenantQuota tenantQuota) : TenantQuotaFeatureSize(tenantQuota, "file_size")
 {
-    public override string Name { get => "file_size"; }
-
     protected internal override void Multiply(int quantity)
     {
 

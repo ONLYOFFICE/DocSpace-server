@@ -74,7 +74,7 @@
     <value>Dateien werden zu einem {0}ZIP-Archiv{1} hinzugefügt</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>Dokumente</value>
+    <value>Meine Dokumente</value>
   </data>
   <data name="PrivacyRoom" xml:space="preserve">
     <value>Privater Raum</value>
@@ -101,6 +101,12 @@
     <value>Im Gange</value>
   </data>
   <data name="ReadyFormFolder" xml:space="preserve">
-    <value>Kom­plett</value>
+    <value>Komplett</value>
+  </data>
+  <data name="RoomTemplates" xml:space="preserve">
+    <value>Vorlagen</value>
+  </data>
+  <data name="AiAgents" xml:space="preserve">
+    <value>KI-Agenten</value>
   </data>
 </root>

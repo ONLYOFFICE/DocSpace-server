@@ -126,4 +126,37 @@
   <data name="LargeBackup" xml:space="preserve">
     <value>백업이 포털의 전체 크기보다 큽니다</value>
   </data>
+  <data name="BackupException" xml:space="preserve">
+    <value>백업을 생성하는 동안 오류가 발생했습니다. 다시 생성을 시도하거나 지원팀에 문의하세요.</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>백업을 복원하는 동안 오류가 발생했습니다. 다시 복원을 시도하거나 지원팀에 문의하세요.</value>
+  </data>
+  <data name="BackupInvalid" xml:space="preserve">
+    <value>백업 파일이 유효하지 않습니다.</value>
+  </data>
+  <data name="AutoBackup" xml:space="preserve">
+    <value>자동 백업</value>
+  </data>
+  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
+    <value>Custom cloud</value>
+  </data>
+  <data name="BackupStorageTypeDataStore" xml:space="preserve">
+    <value>임시 저장소</value>
+  </data>
+  <data name="BackupStorageTypeDocuments" xml:space="preserve">
+    <value>백업 방</value>
+  </data>
+  <data name="BackupStorageTypeLocal" xml:space="preserve">
+    <value>로컬 파일</value>
+  </data>
+  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
+    <value>타사 저장소</value>
+  </data>
+  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
+    <value>타사 리소스</value>
+  </data>
+  <data name="BackupMissingFilesWarning" xml:space="preserve">
+    <value>일부 파일이 백업에 포함되지 않았습니다. 자세한 내용은 다음을 확인하세요: {0}</value>
+  </data>
 </root>

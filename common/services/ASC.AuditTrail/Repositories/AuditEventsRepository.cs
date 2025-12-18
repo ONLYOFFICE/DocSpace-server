@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,13 +30,12 @@ namespace ASC.AuditTrail.Repositories;
 public class AuditEventsRepository(AuditActionMapper auditActionMapper,
         TenantManager tenantManager,
         IDbContextFactory<MessagesContext> dbContextFactory,
-        IMapper mapper,
+        AuditEventMapper mapper,
         GeolocationHelper geolocationHelper)
-    {
+{
     public async Task<IEnumerable<AuditEvent>> GetByFilterAsync(
         Guid? userId = null,
-        ProductType? productType = null,
-        ModuleType? moduleType = null,
+        LocationType? moduleType = null,
         ActionType? actionType = null,
         MessageAction? action = null,
         EntryType? entry = null,
@@ -45,11 +44,11 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
         DateTime? to = null,
         int startIndex = 0,
         int limit = 0,
-        Guid? withoutUserId = null)
+        Guid? withoutUserId = null,
+        bool limitedActionText = false)
     {
         return await GetByFilterWithActionsAsync(
             userId,
-            productType,
             moduleType,
             actionType,
             [action],
@@ -59,13 +58,14 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
             to,
             startIndex,
             limit,
-            withoutUserId);
+            withoutUserId,
+            null,
+            limitedActionText);
     }
 
     public async Task<IEnumerable<AuditEvent>> GetByFilterWithActionsAsync(
         Guid? userId = null,
-        ProductType? productType = null,
-        ModuleType? moduleType = null,
+        LocationType? locationType = null,
         ActionType? actionType = null,
         List<MessageAction?> actions = null,
         EntryType? entry = null,
@@ -75,7 +75,8 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
         int startIndex = 0,
         int limit = 0,
         Guid? withoutUserId = null,
-        string description = null)
+        string description = null,
+        bool limitedActionText = false)
     {
         var tenant = tenantManager.GetCurrentTenantId();
         await using var auditTrailContext = await dbContextFactory.CreateDbContextAsync();
@@ -103,42 +104,31 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
         }
         else
         {
-            IEnumerable<KeyValuePair<MessageAction, MessageMaps>> actionsList = new List<KeyValuePair<MessageAction, MessageMaps>>();
+            var actionsList = new List<KeyValuePair<MessageAction, MessageMaps>>();
 
             var isFindActionType = actionType.HasValue && actionType.Value != ActionType.None;
 
-            if (productType.HasValue && productType.Value != ProductType.None)
+            if (locationType.HasValue && locationType.Value != LocationType.None)
             {
-                var productMapper = auditActionMapper.Mappers.Find(m => m.Product == productType.Value);
-
-                if (productMapper != null)
+                foreach (var mappers in auditActionMapper.Mappers)
                 {
-                    if (moduleType.HasValue && moduleType.Value != ModuleType.None)
-                    {
-                        var moduleMapper = productMapper.Mappers.Find(m => m.Module == moduleType.Value);
-                        if (moduleMapper != null)
-                        {
-                            actionsList = moduleMapper.Actions;
-                        }
-                    }
-                    else
-                    {
-                        actionsList = productMapper.Mappers.SelectMany(r => r.Actions);
-                    }
+                    var moduleMapper = mappers.Mappers.Find(m => m.Location == locationType.Value);
+                    actionsList.AddRange(moduleMapper.Actions);
                 }
             }
             else
             {
                 actionsList = auditActionMapper.Mappers
-                        .SelectMany(r => r.Mappers)
-                        .SelectMany(r => r.Actions);
+                       .SelectMany(r => r.Mappers)
+                       .SelectMany(r => r.Actions)
+                       .ToList();
             }
-            
+
             var isNeedFindEntry = entry.HasValue && entry.Value != EntryType.None && target != null;
             if (isFindActionType || isNeedFindEntry)
             {
                 actionsList = actionsList
-                        .Where(a => (!isFindActionType || a.Value.ActionType == actionType.Value) && (!isNeedFindEntry || (entry.Value == a.Value.EntryType1) || entry.Value == a.Value.EntryType2))
+                        .Where(a => (!isFindActionType || a.Value.ActionType == actionType.Value) && (!isNeedFindEntry || entry.Value == a.Value.EntryType1 || entry.Value == a.Value.EntryType2))
                         .ToList();
             }
 
@@ -153,8 +143,8 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
             }
         }
 
-        var hasFromFilter = (from.HasValue && from.Value != DateTime.MinValue);
-        var hasToFilter = (to.HasValue && to.Value != DateTime.MinValue);
+        var hasFromFilter = from.HasValue && from.Value != DateTime.MinValue;
+        var hasToFilter = to.HasValue && to.Value != DateTime.MinValue;
 
         if (hasFromFilter || hasToFilter)
         {
@@ -172,14 +162,14 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
         {
             q1 = q1.Where(r => r.DescriptionRaw.Contains(description));
         }
-        
+
         q1 = q1.OrderByDescending(r => r.Date);
 
         if (startIndex > 0)
         {
             q1 = q1.Skip(startIndex);
         }
-        
+
         if (limit > 0)
         {
             q1 = q1.Take(limit);
@@ -194,14 +184,15 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
                 LastName = u.LastName
             }).FirstOrDefault()
         });
-        
-        var events = mapper.Map<List<AuditEventQuery>, IEnumerable<AuditEvent>>(await q2.ToListAsync());
-        
+
+        var eventQueryList = await q2.ToListAsync();
+        var events = limitedActionText ? mapper.ToLimitedAuditEvents(eventQueryList) : mapper.ToAuditEvents(eventQueryList);
+
         foreach (var e in events)
         {
             await geolocationHelper.AddGeolocationAsync(e);
         }
-        
+
         return events;
     }
 
@@ -211,7 +202,7 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
 
         q = q.Where(r => dict.Keys.Contains(r.Action.Value)
             && r.Target.Contains(target));
-        
+
         return q;
     }
 

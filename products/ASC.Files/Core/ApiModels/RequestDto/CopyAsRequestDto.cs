@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,49 +27,50 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Parameters for copying a file
+/// The parameters for copying a file.
 /// </summary>
 public class CopyAs<T>
 {
     /// <summary>
-    /// Destination file title
+    /// The copied file name.
     /// </summary>
-    public string DestTitle { get; set; }
+    public required string DestTitle { get; set; }
 
     /// <summary>
-    /// Destination folder ID
+    /// The destination folder ID of the copied file.
     /// </summary>
-    public T DestFolderId { get; set; }
+    public required T DestFolderId { get; set; }
 
     /// <summary>
-    /// Specifies whether to allow the creation of external extension files or not
+    /// Specifies whether to allow creating the copied file of an external extension or not.
     /// </summary>
     public bool EnableExternalExt { get; set; }
 
     /// <summary>
-    /// Password
+    /// The copied file password.
     /// </summary>
     public string Password { get; set; }
 
-    /// <summary>Convert to form</summary>
-    /// <type>System.Boolean, System</type>
+    /// <summary>
+    /// Specifies whether to convert the file to form or not.
+    /// </summary>
     public bool ToForm { get; set; }
 }
 
 /// <summary>
-/// Request parameters for copying a file
+/// The request parameters for copying a file.
 /// </summary>
 public class CopyAsRequestDto<T>
 {
     /// <summary>
-    /// File id
+    /// The file ID to copy.
     /// </summary>
     [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
+    public required T FileId { get; set; }
 
     /// <summary>
-    /// File
+    /// The parameters for copying a file.
     /// </summary>
     [FromBody]
-    public CopyAs<JsonElement> File { get; set; }
+    public required CopyAs<JsonElement> File { get; set; }
 }

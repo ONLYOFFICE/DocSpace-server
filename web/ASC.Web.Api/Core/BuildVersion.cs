@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,16 +27,19 @@
 namespace ASC.Api.Settings;
 
 /// <summary>
+/// The build version parameters.
 /// </summary>
 [Scope]
 public class BuildVersion
 {
-    /// <summary>DocSpace version</summary>
-    /// <type>System.String, System</type>
+    /// <summary>
+    /// The ONLYOFFICE DocSpace version.
+    /// </summary>
     public string DocSpace { get; set; }
-    
-    /// <summary>Document Server version</summary>
-    /// <type>System.String, System</type>
+
+    /// <summary>
+    /// The ONLYOFFICE Docs version.
+    /// </summary>
     public string DocumentServer { get; set; }
 
     [JsonIgnore]

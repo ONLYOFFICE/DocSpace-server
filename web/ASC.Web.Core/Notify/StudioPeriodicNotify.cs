@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.Identity;
+
 using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Studio.Core.Notify;
@@ -47,7 +49,9 @@ public class StudioPeriodicNotify(ILoggerProvider log,
         AuditEventsRepository auditEventsRepository,
         LoginEventsRepository loginEventsRepository,
         IFusionCache hybridCache,
-        IEventBus eventBus)
+        IEventBus eventBus,
+        IdentityClient identityClient,
+        SecurityContext securityContext)
 {
     private readonly ILogger _log = log.CreateLogger("ASC.Notify");
 
@@ -258,7 +262,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         orangeButtonText2 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetStarted", c);
                         orangeButtonUrl2 = c => externalResourceSettingsHelper.Integrations.GetRegionalFullEntry("zapier", c);
                         orangeButtonText3 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetFreeApp", c);
-                        orangeButtonUrl3 = c => externalResourceSettingsHelper.Site.GetRegionalFullEntry("wordpress", c);
+                        orangeButtonUrl3 = c => externalResourceSettingsHelper.Integrations.GetRegionalFullEntry("wordpress", c);
                         orangeButtonText4 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetFreeApp", c);
                         orangeButtonUrl4 = c => externalResourceSettingsHelper.Integrations.GetRegionalFullEntry("drupal", c);
                         orangeButtonText5 = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetFreeApp", c);
@@ -309,36 +313,54 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         var lastAuditEvent = await auditEventsRepository.GetLastEventAsync(tenant.Id);
                         var lastAuditEventDate = lastAuditEvent != null ? lastAuditEvent.Date.Date : tenant.CreationDateTime.Date;
 
+                        if (lastAuditEventDate.AddYears(1) > nowDate)
+                        {
+                            continue;
+                        }
+
                         var lastLoginEvent = await loginEventsRepository.GetLastSuccessEventAsync(tenant.Id);
                         var lastLoginEventDate = lastLoginEvent != null ? lastLoginEvent.Date.Date : tenant.CreationDateTime.Date;
 
-                        if ((lastAuditEventDate > lastLoginEventDate ? lastAuditEventDate : lastLoginEventDate).AddYears(1) <= nowDate)
+                        if (lastLoginEventDate.AddYears(1) > nowDate)
                         {
-                            if (nowDate >= startDateToNotifyUnusedPortals && nowDate.Day == tenant.CreationDateTime.Day)
+                            continue;
+                        }
+
+                        if (nowDate >= startDateToNotifyUnusedPortals && nowDate.Day == tenant.CreationDateTime.Day)
+                        {
+                            action = Actions.SaasAdminStartupWarningAfterYearV1;
+                            toowner = true;
+
+                            orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonLeaveFeedback", c);
+                            orangeButtonUrl = c => externalResourceSettingsHelper.Site.GetRegionalFullEntry("registrationcanceled", c);
+
+                            url1 = c => externalResourceSettingsHelper.Common.GetRegionalFullEntry("legalterms", c);
+
+                            topGif = studioNotifyHelper.GetNotificationImageUrl("docspace_deleted.gif");
+
+                            trulyYoursAsTebleRow = true;
+                        }
+
+                        if (nowDate >= startDateToRemoveUnusedPortals && nowDate.AddDays(-7).Day == tenant.CreationDateTime.Day)
+                        {
+                            if (await tenantManager.IsForbiddenDomainAsync(tenant.Alias))
                             {
-                                action = Actions.SaasAdminStartupWarningAfterYearV1;
-                                toowner = true;
-
-                                orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonLeaveFeedback", c);
-                                orangeButtonUrl = c => externalResourceSettingsHelper.Site.GetRegionalFullEntry("registrationcanceled", c);
-
-                                url1 = c => externalResourceSettingsHelper.Common.GetRegionalFullEntry("legalterms", c);
-
-                                topGif = studioNotifyHelper.GetNotificationImageUrl("docspace_deleted.gif");
-
-                                trulyYoursAsTebleRow = true;
+                                continue;
                             }
 
-                            if (nowDate >= startDateToRemoveUnusedPortals && nowDate.AddDays(-7).Day == tenant.CreationDateTime.Day)
-                            {
-                                await tenantManager.RemoveTenantAsync(tenant.Id, true);
+                            var tenantDomain = tenant.GetTenantDomain(coreSettings);
 
-                                if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
-                                {
-                                    await apiSystemHelper.RemoveTenantFromCacheAsync(tenant.GetTenantDomain(coreSettings));
-                                }
-                                await eventBus.PublishAsync(new RemovePortalIntegrationEvent(Guid.Empty, tenant.Id));
+                            _log.InformationStartRemovingUnusedFreeTenant(tenant.Id, tenantDomain);
+
+                            await securityContext.AuthenticateMeWithoutCookieAsync(tenant.OwnerId);
+                            await identityClient.DeleteTenantClientsAsync(false);
+                            await tenantManager.RemoveTenantAsync(tenant, true);
+
+                            if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
+                            {
+                                await apiSystemHelper.RemoveTenantFromCacheAsync(tenantDomain);
                             }
+                            await eventBus.PublishAsync(new RemovePortalIntegrationEvent(Guid.Empty, tenant.Id));
                         }
                     }
 
@@ -365,7 +387,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     #region grace period activation
 
-                    else if (dueDateIsNotMax && dueDate == nowDate)
+                    else if (dueDateIsNotMax && dueDate.AddDays(1) == nowDate && delayDueDateIsNotMax)
                     {
                         action = Actions.SaasOwnerPaymentWarningGracePeriodActivation;
                         toowner = true;
@@ -420,11 +442,22 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                     }
                     else if (tariff.State == TariffState.NotPaid && dueDateIsNotMax && dueDate.AddMonths(6).AddDays(7) <= nowDate)
                     {
-                        await tenantManager.RemoveTenantAsync(tenant.Id, true);
+                        if (await tenantManager.IsForbiddenDomainAsync(tenant.Alias))
+                        {
+                            continue;
+                        }
+
+                        var tenantDomain = tenant.GetTenantDomain(coreSettings);
+
+                        _log.InformationStartRemovingUnusedPaidTenant(tenant.Id, tenantDomain);
+
+                        await securityContext.AuthenticateMeWithoutCookieAsync(tenant.OwnerId);
+                        await identityClient.DeleteTenantClientsAsync(false);
+                        await tenantManager.RemoveTenantAsync(tenant, true);
 
                         if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
                         {
-                            await apiSystemHelper.RemoveTenantFromCacheAsync(tenant.GetTenantDomain(coreSettings));
+                            await apiSystemHelper.RemoveTenantFromCacheAsync(tenantDomain);
                         }
                         await eventBus.PublishAsync(new RemovePortalIntegrationEvent(Guid.Empty, tenant.Id));
                     }
@@ -446,7 +479,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                 if (topayer)
                 {
-                    var payer = await userManager.GetUserByEmailAsync(tariff.CustomerId);
+                    var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+                    var payer = await userManager.GetUserByEmailAsync(customerInfo?.Email);
 
                     if (payer.Id != Constants.LostUser.Id && !users.Any(u => u.Id == payer.Id))
                     {
@@ -454,7 +488,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                     }
                 }
                 var asyncUsers = users.ToAsyncEnumerable();
-                await foreach (var u in asyncUsers.WhereAwait(async u => paymentMessage || await studioNotifyHelper.IsSubscribedToNotifyAsync(u, Actions.PeriodicNotify)))
+                await foreach (var u in asyncUsers.Where(async (u, _) => paymentMessage || await studioNotifyHelper.IsSubscribedToNotifyAsync(u, Actions.PeriodicNotify)))
                 {
                     var culture = string.IsNullOrEmpty(u.CultureName) ? tenant.GetCulture() : u.GetCulture();
                     CultureInfo.CurrentCulture = culture;
@@ -507,7 +541,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
             }
             catch (Exception err)
             {
-                _log.ErrorSendSaasLettersAsync(err);
+                _log.ErrorSendSaasLettersAsync(tenant.Id, err);
             }
         }
 
@@ -532,8 +566,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
         {
             try
             {
-                var defaultRebranding = await tenantLogoManager.IsDefaultLogoSettingsAsync();
                 await tenantManager.SetCurrentTenantAsync(tenant.Id);
+                var defaultRebranding = await tenantLogoManager.IsDefaultLogoSettingsAsync();
                 var client = workContext.RegisterClient(serviceProvider, studioNotifyHelper.NotifySource);
 
                 var tariff = await tariffService.GetTariffAsync(tenant.Id);
@@ -722,7 +756,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                 var users = await studioNotifyHelper.GetRecipientsAsync(toadmins, tousers, false);
 
-                await foreach (var u in users.ToAsyncEnumerable().WhereAwait(async u => paymentMessage || await studioNotifyHelper.IsSubscribedToNotifyAsync(u, Actions.PeriodicNotify)))
+                await foreach (var u in users.ToAsyncEnumerable().Where(async (u, _) => paymentMessage || await studioNotifyHelper.IsSubscribedToNotifyAsync(u, Actions.PeriodicNotify)))
                 {
                     var culture = string.IsNullOrEmpty(u.CultureName) ? tenant.GetCulture() : u.GetCulture();
                     CultureInfo.CurrentCulture = culture;
@@ -735,7 +769,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         u,
                         senderName,
                         new TagValue(CommonTags.Culture, culture.Name),
-                        new TagValue(Tags.UserName, u.FirstName.HtmlEncode()), 
+                        new TagValue(Tags.UserName, u.FirstName.HtmlEncode()),
                         new TagValue(Tags.ActiveUsers, (await userManager.GetUsersAsync()).Length),
                         new TagValue(Tags.Price, rquota.Price),
                         new TagValue(Tags.PricePeriod, rquota.Year ? UserControlsCommonResource.TariffPerYear : UserControlsCommonResource.TariffPerMonth),
@@ -819,7 +853,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     var topGif = studioNotifyHelper.GetNotificationImageUrl("five_tips.gif");
 
-                    await foreach (var u in users.ToAsyncEnumerable().WhereAwait(async u => await studioNotifyHelper.IsSubscribedToNotifyAsync(u, Actions.PeriodicNotify)))
+                    await foreach (var u in users.ToAsyncEnumerable().Where(async (u, _) => await studioNotifyHelper.IsSubscribedToNotifyAsync(u, Actions.PeriodicNotify)))
                     {
                         var culture = string.IsNullOrEmpty(u.CultureName) ? tenant.GetCulture() : u.GetCulture();
                         Thread.CurrentThread.CurrentCulture = culture;

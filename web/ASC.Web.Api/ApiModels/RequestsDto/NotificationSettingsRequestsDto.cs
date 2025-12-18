@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,30 +27,30 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// Notification settings request parameters
+/// The request parameters for configuring notification settings.
 /// </summary>
 public class NotificationSettingsRequestsDto
 {
     /// <summary>
-    /// Notification type
+    /// The notification to be configured.
     /// </summary>
-    public NotificationType Type { get; set; }
+    public required NotificationType Type { get; set; }
 
     /// <summary>
-    /// Specifies if the notification type is enabled or not
+    /// Specifies if the specified notification type is enabled or not.
     /// </summary>
     public bool IsEnabled { get; set; }
 }
 
 
 /// <summary>
-/// 
+/// The request parameters for retrieving notification type information.
 /// </summary>
 public class NotificationTypeRequestsDto
 {
     /// <summary>
-    /// Notification type (Badges, RoomsActivity, DailyFeed, UsefullTips)
+    /// The type of notification to query, specified in the route.
     /// </summary>
     [FromRoute(Name = "type")]
-    public NotificationType Type { get; set; }
+    public required NotificationType Type { get; set; }
 }

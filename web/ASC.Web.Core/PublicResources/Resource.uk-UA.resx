@@ -251,7 +251,7 @@
     <value>Новеньке</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Відстеження входів та дій користувача</value>
+    <value>Відстеження входів та дій</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>Максимальний розмір файлу</value>
@@ -266,7 +266,7 @@
     <value>Кількість адміністраторів</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Автоматичне резервне копіювання та відновлення</value>
+    <value>Відновлення даних</value>
   </data>
   <data name="TariffsFeature_room" xml:space="preserve">
     <value>Необмежена кількість активних кімнат</value>
@@ -293,7 +293,7 @@
     <value>Користувачі в кімнаті:</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Необмежена кількість користувачів</value>
+    <value>Необмежена кількість користувачів та гостей</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>Кількість користувачів не повинна перевищувати {0}</value>
@@ -413,7 +413,7 @@
     <value>Номер телефону від Twilio (необхідний для авторизації SMS)</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Підключіть програму для входу на портал за допомогою облікового запису Twitter.</value>
+    <value>Підключіть програму для входу на портал за допомогою облікового запису X.</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Увімкніть додаток для імпорту контактів Yahoo.</value>
@@ -503,7 +503,7 @@
     <value>WordPress</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
+    <value>X</value>
   </data>
   <data name="ConsumersYandexClientSecret" xml:space="preserve">
     <value>Пароль</value>
@@ -788,7 +788,7 @@
     <value>Секрет клієнта</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Увімкніть цей застосунок, щоб дозволити користувачам входити до {LogoText} за допомогою Twitter і пов’язувати облікові записи Twitter своїх клієнтів із модулем CRM. {0}Перейдіть до порталу Twitter Developer і створіть новий застосунок для інтеграції {LogoText}. Вставте отримані дані нижче:</value>
+    <value>Увімкніть цей застосунок, щоб дозволити користувачам входити до {LogoText} за допомогою X і пов’язувати облікові записи X своїх клієнтів із модулем CRM. {0}Перейдіть до порталу X Developer і створіть новий застосунок для інтеграції {LogoText}. Вставте отримані дані нижче:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>Ключ API</value>
@@ -1077,5 +1077,161 @@
   </data>
   <data name="ErrorIpRestriction" xml:space="preserve">
     <value>Додайте мінімум 1 дозволену IP-адресу.</value>
+  </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>URL-адреса вебхуку недоступна. Запит HEAD не повертає статус 200 http.</value>
+  </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Зарахування</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Валюта</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>Дата</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>Кількість</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Дисковий простір</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Поповнення балансу</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>Одиниця виміру</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>Звіт про клієнтські операції ({0}–{1})</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>Групу не знайдено</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Додатковий дисковий простір</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Скорегуйте обсяг сховища відповідно до ваших потреб.</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
+    <value>Використаний обсяг сховища:</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Автоматичне поновлення</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Резервна копія</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Резервна копія</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Резервна копія</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>ГБ</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Тип</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Потрібна оплата</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} безкоштовних резервних копій на місяць</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Деталі</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Контакти</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Дебет</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Історія транзакцій</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Автоматичне поповнення</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Увімкніть резервне копіювання для вашого DocSpace. Витрати стягуватимуться автоматично.</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Кількість безкоштовних резервних копій не повинна перевищувати {0} протягом місяця</value>
+  </data>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Векторизація</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>Інструменти ШІ</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Маркери</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>Перевищено квоту простору для агента ШІ</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Не вдалося задати квоту для агента ШІ. Введене значення більше загального сховища DocSpace.</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>Ідентифікатор клієнта</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Секрет клієнта</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Увімкніть застосунок, щоб входити до порталу за допомогою облікового запису WeChat.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Увімкніть застосунок, щоб входити до порталу за допомогою облікового запису WeChat.</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Дата</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>Електронна пошта</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Ім'я</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>Ідентифікатор</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Прізвище</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Квота сервісу документів ({0})</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>Кількість плагінів перевищує обмеження</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>Кількість агентів ШІ не повинна перевищувати {0}</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>Інструменти ШІ</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Увімкніть функції ШІ у вашому просторі DocSpace, щоб збільшити продуктивність.</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>Вебпошук на основі ШІ</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Поповніть гаманець, щоб розблокувати вебпошук на основі ШІ.</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>Сталася неочікувана помилка. Повторіть спробу.</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>Ви успішно під'єднали Telegram для отримання сповіщень з вашого простору DocSpace.</value>
   </data>
 </root>

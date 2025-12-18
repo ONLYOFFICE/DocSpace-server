@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,47 +28,50 @@ using ASC.Files.Core.Services.DocumentBuilderService;
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The Document Builder task parameters.
+/// </summary>
 public class DocumentBuilderTaskDto
 {
     /// <summary>
-    /// Id
+    /// The Document Builder task ID.
     /// </summary>
-    public string Id { get; set; }
+    public required string Id { get; set; }
 
     /// <summary>
-    /// Error
+    /// The error message occurred during the document building process.
     /// </summary>
-    public string Error { get; set; }
+    public required string Error { get; set; }
 
     /// <summary>
-    /// Percentage
+    /// The progress percentage of the document building process.
     /// </summary>
-    public int Percentage { get; set; }
+    public required int Percentage { get; set; }
 
     /// <summary>
-    /// Is completed
+    /// Specifies whether the document building process is completed or not.
     /// </summary>
-    public bool IsCompleted { get; set; }
+    public required bool IsCompleted { get; set; }
 
     /// <summary>
-    /// Status
+    /// The status of the document building process.
     /// </summary>
-    public DistributedTaskStatus Status { get; set; }
+    public required DistributedTaskStatus Status { get; set; }
 
     /// <summary>
-    /// Result file id
+    /// The result file ID.
     /// </summary>
-    public object ResultFileId { get; set; }
+    public required object ResultFileId { get; set; }
 
     /// <summary>
-    /// Result file name
+    /// The result file name.
     /// </summary>
-    public string ResultFileName { get; set; }
+    public required string ResultFileName { get; set; }
 
     /// <summary>
-    /// Result file url
+    /// The result file URL.
     /// </summary>
-    public string ResultFileUrl { get; set; }
+    public required string ResultFileUrl { get; set; }
 
     public static DocumentBuilderTaskDto Get<TId, TData>(DocumentBuilderTask<TId, TData> task)
     {

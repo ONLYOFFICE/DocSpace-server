@@ -162,6 +162,9 @@
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>تم تغيير لون السمات</value>
   </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>جهات الاتصال</value>
+  </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>تم تحديث إعدادات ملفات تعريف الارتباط</value>
   </data>
@@ -200,9 +203,6 @@
   </data>
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>تم تحديث إعدادات الكتابة</value>
-  </data>
-  <data name="DocumentsProduct" xml:space="preserve">
-    <value>المستندات</value>
   </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>الإعدادات</value>
@@ -336,9 +336,6 @@
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>تم تحديث إعدادات Sphinx</value>
   </data>
-  <data name="GeneralModule" xml:space="preserve">
-    <value>عام</value>
-  </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>تم تحديث إعدادات البوابة الترحيبية</value>
   </data>
@@ -347,9 +344,6 @@
   </data>
   <data name="GroupDeleted" xml:space="preserve">
     <value>تم حذف المجموعة: {0}</value>
-  </data>
-  <data name="GroupsModule" xml:space="preserve">
-    <value>المجموعات</value>
   </data>
   <data name="GroupUpdated" xml:space="preserve">
     <value>تم تحديث المجموعات: {0}</value>
@@ -435,9 +429,6 @@
   <data name="LoginSuccess" xml:space="preserve">
     <value>تم تسجيل الدخول بنجاح</value>
   </data>
-  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>تم تسجيل الدخول من خلال حسابات مواقع التواصل الاجتماعي بنجاح</value>
-  </data>
   <data name="LoginSuccessSocialApp" xml:space="preserve">
     <value>تم تسجيل الدخول من خلال تطبيق مواقع التواصل الاجتماعي</value>
   </data>
@@ -474,9 +465,6 @@
   <data name="MoveActionType" xml:space="preserve">
     <value>نقل</value>
   </data>
-  <data name="OthersProduct" xml:space="preserve">
-    <value>آخرين</value>
-  </data>
   <data name="OwnerChanged" xml:space="preserve">
     <value>تم تغيير المالك: {0}</value>
   </data>
@@ -494,9 +482,6 @@
   </data>
   <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
     <value>تم تحديث إعدادات قوة كلمة المرور</value>
-  </data>
-  <data name="PeopleProduct" xml:space="preserve">
-    <value>الأشخاص</value>
   </data>
   <data name="PlatformCol" xml:space="preserve">
     <value>منصة</value>
@@ -539,9 +524,6 @@
   </data>
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>تم تحديث قائمة المنتجات</value>
-  </data>
-  <data name="ProductsModule" xml:space="preserve">
-    <value>المنتجات</value>
   </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>إعادات التعيين</value>
@@ -600,8 +582,8 @@
   <data name="SessionStarted" xml:space="preserve">
     <value>تم بدء الجلسة</value>
   </data>
-  <data name="SettingsProduct" xml:space="preserve">
-    <value>الاعدادات</value>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>الإعدادات</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>تم تعطيل بوابة الدخول الموحد</value>
@@ -609,7 +591,7 @@
   <data name="SSOEnabled" xml:space="preserve">
     <value>تم تفعيل بوابة الدخول الموحد</value>
   </data>
-  <data name="StartBackupSetting" xml:space="preserve">
+  <data name="BackupStarted" xml:space="preserve">
     <value>بدء النسخ الاحتياطي</value>
   </data>
   <data name="StartStorageDecryption" xml:space="preserve">
@@ -738,9 +720,6 @@
   <data name="UserSentPasswordInstructions" xml:space="preserve">
     <value>تم ارسال تعليمات تغيير كلمة المرور بواسطة المستخدمين [{0}]</value>
   </data>
-  <data name="UsersModule" xml:space="preserve">
-    <value>المستخدمين</value>
-  </data>
   <data name="UsersSentActivationInstructions" xml:space="preserve">
     <value>تم ارسال تعليمات التفعيل بواسطة المستخدمين [{0}]</value>
   </data>
@@ -867,9 +846,6 @@
   <data name="RoomInviteResend" xml:space="preserve">
     <value>تم إرسال الدعوات مرة أخرى: {0}</value>
   </data>
-  <data name="OAuthModule" xml:space="preserve">
-    <value>OAuth</value>
-  </data>
   <data name="ChangeClientActivation" xml:space="preserve">
     <value>تم تغيير تنشيط {0} للعميل</value>
   </data>
@@ -929,5 +905,230 @@
   </data>
   <data name="UpdateClient" xml:space="preserve">
     <value>تم تحديث العميل {0}</value>
+  </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>تم تغيير إعدادات الوصول إلى أدوات المطوّرين</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>الملفات [{0}] - تم حذف النسخة: {1}</value>
+  </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>المستخدمون [{0}] - أتمّوا تعبئة النموذج: {1}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>المستخدمون [{0}] - أكملوا جزءًا من النموذج: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>المستخدمون [{0}] - بدأوا في تعبئة النموذج: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>المستخدمون [{0}] - توقفوا عن تعبئة النموذج: {1}</value>
+  </data>
+  <data name="WebhookCreated" xml:space="preserve">
+    <value>تم إنشاء "Webhook": {0}</value>
+  </data>
+  <data name="WebhookDeleted" xml:space="preserve">
+    <value>تم حذف "Webhook": {0}</value>
+  </data>
+  <data name="WebhookUpdated" xml:space="preserve">
+    <value>تم تحديث "Webhook": {0}</value>
+  </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>تم إنشاء مفتاح واجهة برمجة التطبيقات للمستخدم: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>تم حذف مفتاح واجهة برمجة التطبيقات للمستخدم: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>تم تحديث مفتاح واجهة برمجة التطبيقات للمستخدم: {0}</value>
+  </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>الملف: {0}. تم تعطيل الفلتر المخصص</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>الملف: {0}. تم تمكين الفلتر المخصص</value>
+  </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>تم تفعيل رابط التفويض</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>يتم تنفيذ عملية العميل</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>تم تنزيل تقرير عمليات العملاء</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>تم تحديث اشتراك العميل: {0}</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>تم تعبئة محفظة العميل: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>تم تحديث إعدادات تعبئة محفظة العميل</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>تم تعطيل مصادقة LDAP</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>تم تمكين مصادقة LDAP</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>اكتملت مزامنة LDAP</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>الموقع</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>تم تغيير إعدادات رؤية اللافتات الترويجية</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>تم تحديث إعدادات الخدمات الممكّنة لمحفظة العملاء</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>تسجيل الدخول بنجاح عبر OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>تم تسجيل الدخول بنجاح عبر تسجيل الدخول وكلمة المرور</value>
+  </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>الملفات [{0}]. تم إنشاء الرابط الخارجي: {1}. الدور: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>الملفات [{0}]. تم حذف الرابط الخارجي: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>الملفات [{0}]. تم تحديث الرابط الخارجي: {1}. الدور: {2}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>تم تمييز الملف كمفضل: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>تمت إزالة الملف من المفضلة: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>تمت إزالة الملف من "المشارك معي": {0}</value>
+  </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>الملفات [{0}]. تم تحديث الوصول لـ {1}. الدور: {2}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>تم تنزيل المجلد: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>المجلدات [{0}]. تم إنشاء الرابط الخارجي: {1}. الدور: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>المجلدات [{0}]. تم حذف الرابط الخارجي: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>المجلدات [{0}]. تم تحديث الرابط الخارجي: {1}. الدور: {2}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>تمت إزالة المجلد من "المشارك معي": {0}</value>
+  </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>المجلدات [{0}]. تم تحديث الوصول لـ {1}. الدور: {2}</value>
+  </data>
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
+    <value>تم تسجيل الدخول بنجاح عبر حساب التواصل الاجتماعي: {0}</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>تم إلغاء الرابط الخارجي: {1}</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>تمت إضافة خادم MCP {0} إلى الوكيل</value>
+  </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>تم إنشاء الوكيل</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>تم حذف الوكيل</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>تمت إعادة تسمية الوكيل: {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>الوكلاء</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>تم إنشاء مزود الذكاء الاصطناعي: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>تم حذف مزود الذكاء الاصطناعي: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>تم تحديث مزود الذكاء الاصطناعي: {0}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>وكلاء الذكاء الاصطناعي [{0}]. تعيين حصة تخزين مخصصة لوكلاء الذكاء الاصطناعي: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>وكلاء الذكاء الاصطناعي [{0}]. تعيين حصة تخزين افتراضية لوكلاء الذكاء الاصطناعي: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>وكلاء الذكاء الاصطناعي [{0}]. تم تعطيل حصة التخزين لوكلاء الذكاء الاصطناعي</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>تم حذف خادم MCP {0} من الوكيل</value>
+  </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>تم تسجيل الدخول بنجاح عبر حساب التواصل الاجتماعي</value>
+  </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>تعيين حصة تخزين افتراضية لوكلاء الذكاء الاصطناعي: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>تم تعطيل حصة التخزين الافتراضية لوكلاء الذكاء الاصطناعي</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>تم إعادة تعيين إعدادات التحويل المتجهي (Vectorization)</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>تمت إعادة تعيين إعدادات بحث الويب</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>تم إنشاء خادم MCP: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>تم حذف خادم MCP: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>تم تعطيل خادم MCP: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>تم تمكين خادم MCP: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>تم تحديث خادم MCP: {0}</value>
+  </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>تم تكوين إعدادات التحويل المتجهي (Vectorization). المزود: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>تم تكوين إعدادات بحث الويب. المحرك: {0}</value>
+  </data>
+  <data name="BackupCompleted" xml:space="preserve">
+    <value>اكتمل النسخ الاحتياطي</value>
+  </data>
+  <data name="BackupFailed" xml:space="preserve">
+    <value>فشل النسخ الاحتياطي</value>
+  </data>
+  <data name="ScheduledBackupCompleted" xml:space="preserve">
+    <value>اكتمل النسخ الاحتياطي المجدول</value>
+  </data>
+  <data name="ScheduledBackupFailed" xml:space="preserve">
+    <value>فشل النسخ الاحتياطي المجدول</value>
+  </data>
+  <data name="ScheduledBackupStarted" xml:space="preserve">
+    <value>بدأ النسخ الاحتياطي المجدول</value>
+  </data>
+  <data name="WebpluginDeleted" xml:space="preserve">
+    <value>تم حذف الإضافة: {0}</value>
+  </data>
+  <data name="WebpluginUpdated" xml:space="preserve">
+    <value>تم تحديث الإضافة: {0}</value>
+  </data>
+  <data name="WebpluginUploaded" xml:space="preserve">
+    <value>تم رفع الإضافة: {0}</value>
   </data>
 </root>

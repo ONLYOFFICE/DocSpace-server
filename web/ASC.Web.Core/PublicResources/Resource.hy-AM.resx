@@ -139,7 +139,7 @@
     <value>Ադմինիստրատորների թիվը</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Հետևել օգտվողների մուտքերին &amp; գործողություն</value>
+    <value>Մուտքերի և գործողությունների հետևում</value>
   </data>
   <data name="TariffsFeature_restore" xml:space="preserve">
     <value>Ավտոմատ կրկնօրինակում &amp; վերականգնում</value>
@@ -169,7 +169,7 @@
     <value>Օգտագործողները սենյակում:</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Անսահմանափակ թվով օգտվողներ</value>
+    <value>Օգտատերերի և հյուրերի անսահմանափակ քանակ</value>
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>Օգտատերերի թիվը չպետք է գերազանցի {0}-ը</value>
@@ -1136,5 +1136,161 @@
   </data>
   <data name="Tariffs_nonprofit" xml:space="preserve">
     <value>Ոչ կոմերցիոն</value>
+  </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>Webhook URL-ը հասանելի չէ։ HEAD հարցումը չի վերադարձնում 200 HTTP կարգավիճակ։</value>
+  </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Կրեդիտ</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Արտարժույթ</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>Ամսաթիվ</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>Քանակ</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>Չափման միավոր</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>Հաճախորդների գործունեության հաշվետվություն ({0}-{1})</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>Խումբը չհաջողվեց գտնել</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Լրացուցիչ սկավառակի պահեստ</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Կարգավորեք պահեստավորման ծավալը ձեզ անհրաժեշտ ճշգրիտ քանակին համապատասխան։</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
+    <value>Օգտագործված պահեստային տարածք:</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Մանրամասներ</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Դեբետ</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Կոնտակտ</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Սկավառակի տարածություն</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Մնացորդի լիցքավորում</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Պահուստավորում</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Տեսակ</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Ավտոմատ երկարաձգում</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Ավտոմատ լիցքավորում</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Պահուստավորում</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} անվճար պահուստավորում ամսական</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Միացրեք ձեր DocSpace-ի պահուստավորումը: Արժեքները կգանձվեն ավտոմատ կերպով:</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Անվճար պահուստավորման քանակը մեկ ամսվա ընթացքում չպետք է գերազանցի {0}-ը</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Գործարքների պատմություն</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Պահուստավորում</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Պահանջվում է վճարում</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>ԳԲ</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>Հաճախորդի ID</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Հաճախորդի գաղտնի բանալին</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Միացրեք հավելվածը՝ մուտք գործելու պորտալը օգտագործելով WeChat հաշիվ։</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Միացրեք հավելվածը՝ մուտք գործելու պորտալը օգտագործելով WeChat հաշիվ։</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Ամսաթիվ</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>Էլ. փոստ</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Անուն</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Ազգանուն</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Փաստաթղթերի ծառայության քվոտա ({0})</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>Պլագինների թիվը գերազանցում է սահմանը</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>Անսպասելի սխալ տեղի ունեցավ։ Խնդրում ենք կրկին փորձել։</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>Դուք հաջողությամբ միացել եք Telegram-ին՝ ձեր DocSpace-ից ծանուցումներ ստանալու համար։</value>
+  </data>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Վեկտորացում</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>ԱԲ գործիքներ</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Թոքեններ</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>ԱԲ գործակալի տարածքի քվոտան գերազանցվել է</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Չհաջողվեց սահմանել քվոտա յուրաքանչյուր ԱԲ գործակալի համար։ Մուտքագրված արժեքը մեծ է DocSpace-ի ընդհանուր պահեստից։</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>ԱԲ գործակալների թիվը չպետք է գերազանցի {0}-ը</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>ԱԲ գործիքներ</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Միացրեք ԱԲ գործառույթները ձեր DocSpace-ում՝ արտադրողականությունը բարձրացնելու համար։</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>ԱԲ վեբ որոնում</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Ավելացրեք գումար ձեր դրամապանակին՝ ԱԲ վեբ որոնումը բացելու համար։</value>
   </data>
 </root>

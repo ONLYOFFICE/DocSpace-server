@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,75 +24,88 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core;
+
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// Settings request parameters
+/// The request parameters for managing the owner-specific settings.
 /// </summary>
 public class OwnerIdSettingsRequestDto
 {
     /// <summary>
-    /// Owner ID
+    /// The ID of the owner whose settings are being managed.
     /// </summary>
-    public Guid OwnerId { get; set; }
+    public required Guid OwnerId { get; set; }
 }
 
 /// <summary>
-/// Settings request parameters
+/// The request parameters for managing the version-specific settings.
 /// </summary>
 public class SettingsRequestsDto
 {
     /// <summary>
-    /// Version ID
+    /// The version ID.
     /// </summary>
-    public int VersionId { get; set; }
+    public required int VersionId { get; set; }
 }
 
 /// <summary>
-/// Settings request parameters
+/// The request parameters for managing the user interface tips visibility.
 /// </summary>
 public class TipsRequestDto
 {
     /// <summary>
-    /// Specifies whether to show tips for the user or not
+    /// Controls the visibility of the user interface tips (displayed or hidden).
     /// </summary>
     public bool Show { get; set; } //tips
 }
 
 /// <summary>
-/// Settings request parameters
+/// The request parameters for setting the default product configuration.
 /// </summary>
 public class DefaultProductRequestDto
 {
     /// <summary>
-    /// Default product ID
+    /// The ID of the product to be set as default.
     /// </summary>
-    public Guid DefaultProductID { get; set; }
+    public required FolderType DefaultFolderType { get; set; }
 }
 
 /// <summary>
-/// Settings request parameters
+/// The request parameters for configuring the time zone settings.
 /// </summary>
 public class TimeZoneRequestDto
 {
     /// <summary>
-    /// Language
+    /// The language code for the time zone localization.
     /// </summary>
-    public string Lng { get; set; }
+    public required string Lng { get; set; }
 
     /// <summary>
-    /// Time zone ID
+    /// The IANA time zone identifier.
     /// </summary>
     public string TimeZoneID { get; set; }
 }
 
 /// <summary>
-/// Settings request parameters
+/// The request parameters for managing the Developer Tools access settings for the current tenant.
 /// </summary>
 public class TenantDevToolsAccessSettingsDto
 {
     /// <summary>
-    /// Limited access to Developer Tools for users
+    /// Determines if users have restricted access to the Developer Tools.
     /// </summary>
     public bool LimitedAccessForUsers { get; set; }
+}
+
+/// <summary>
+/// The request parameters for managing the visibility settings of the promotional banners for the current tenant.
+/// </summary>
+public class TenantBannerSettingsDto
+{
+    /// <summary>
+    /// The banners visibility flag.
+    /// </summary>
+    public bool Hidden { get; set; }
 }

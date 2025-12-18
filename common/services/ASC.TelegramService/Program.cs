@@ -42,7 +42,7 @@ builder.Configuration.AddDefaultConfiguration(builder.Environment)
 var logger = LogManager.Setup()
                             .SetupExtensions(s =>
                             {
-                                s.RegisterLayoutRenderer("application-context", (logevent) => AppName);
+                                s.RegisterLayoutRenderer("application-context", logevent => AppName);
                             })
                             .LoadConfiguration(builder.Configuration, builder.Environment)
                             .GetLogger(typeof(Startup).Namespace);
@@ -52,31 +52,21 @@ try
     builder.Host.ConfigureDefault();
     builder.WebHost.ConfigureDefaultKestrel();
 
-    var startup = new Startup(builder.Configuration, builder.Environment);
+    var startup = new Startup(builder.Configuration);
 
-    startup.ConfigureServices(builder.Services);
+    await startup.ConfigureServices(builder);
 
-    builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder =>
-    {
-        startup.ConfigureContainer(containerBuilder);
-    });
+    builder.Host.ConfigureContainer<ContainerBuilder>(startup.ConfigureContainer);
 
     var app = builder.Build();
 
     startup.Configure(app, app.Environment);
 
-    var eventBus = ((IApplicationBuilder)app).ApplicationServices.GetRequiredService<IEventBus>();
-
-    eventBus.Subscribe<NotifySendTelegramMessageRequestedIntegrationEvent, TelegramSendMessageRequestedIntegrationEventHandler>();
-
     await app.RunWithTasksAsync();
 }
 catch (Exception ex)
 {
-    if (logger != null)
-    {
-        logger.Error(ex, "Program terminated unexpectedly ({applicationContext})!", AppName);
-    }
+    logger?.Error(ex, "Program terminated unexpectedly ({applicationContext})!", AppName);
 
     throw;
 }

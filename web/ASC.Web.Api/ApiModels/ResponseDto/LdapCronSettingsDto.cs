@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,14 +26,19 @@
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
-public class LdapCronSettingsDto : IMapFrom<LdapCronSettings>
+/// <summary>
+/// The LDAP cron settings.
+/// </summary>
+public class LdapCronSettingsDto
 {
     /// <summary>
-    /// Cron expression
+    /// The LDAP cron settings expression.
     /// </summary>
     public string Cron { get; set; }
-    public void Mapping(Profile profile)
-    {
-        profile.CreateMap<LdapCronSettings, LdapCronSettingsDto>();
-    }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class LdapCronSettingsDtoMapper
+{
+    public static partial LdapCronSettingsDto MapToDto(this LdapCronSettings source);
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,7 +34,7 @@ public class DistributedTask
 {
     [JsonInclude]
     protected string _exeption = String.Empty;
-    
+
     [JsonIgnore]
     public Func<DistributedTask, Task> Publication { get; set; }
 
@@ -84,7 +84,7 @@ public class DistributedTask
 
         await Publication(this);
     }
-    
+
     public override int GetHashCode()
     {
         return Id.GetHashCode();

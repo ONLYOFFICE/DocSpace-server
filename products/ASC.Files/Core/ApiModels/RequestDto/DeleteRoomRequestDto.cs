@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,30 +27,30 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// Parameters for deleting a room
+/// The parameters for deleting a room.
 /// </summary>
 public class DeleteRoomRequest
 {
     /// <summary>
-    /// Specifies whether to delete a room after the editing session is finished or not
+    /// Specifies whether to delete a room after the editing session is finished or not.
     /// </summary>
     public bool DeleteAfter { get; set; }
 }
 
 /// <summary>
-/// Request parameters for deleting a room
+/// The request parameters for deleting a room.
 /// </summary>
 public class DeleteRoomRequestDto<T>
 {
     /// <summary>
-    /// Room ID
+    /// The room ID.
     /// </summary>
     [FromRoute(Name = "id")]
-    public T Id { get; set; }
+    public required T Id { get; set; }
 
     /// <summary>
-    /// Parameters for deleting a room
+    /// The parameters for deleting a room.
     /// </summary>
     [FromBody]
-    public DeleteRoomRequest DeleteRoom { get; set; }
+    public required DeleteRoomRequest DeleteRoom { get; set; }
 }

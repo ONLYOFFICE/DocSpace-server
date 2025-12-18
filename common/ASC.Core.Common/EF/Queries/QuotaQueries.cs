@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,13 +33,13 @@ public partial class CoreDbContext
     {
         return QuotaQueries.QuotaAsync(this, tenantId);
     }
-    
+
     [PreCompileQuery([])]
     public IAsyncEnumerable<DbQuota> AllQuotasAsync()
     {
         return QuotaQueries.AllQuotasAsync(this);
     }
-    
+
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, null, long.MaxValue])]
     public Task<int> UpdateCounterAsync(int tenantId, Guid userId, string path, long counter)
     {
@@ -49,11 +49,11 @@ public partial class CoreDbContext
 
 static file class QuotaQueries
 {
-    public static readonly Func<CoreDbContext, int, Task<DbQuota>> QuotaAsync = 
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((CoreDbContext ctx, int tenantId) => 
+    public static readonly Func<CoreDbContext, int, Task<DbQuota>> QuotaAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((CoreDbContext ctx, int tenantId) =>
             ctx.Quotas.SingleOrDefault(r => r.TenantId == tenantId));
 
-    public static readonly Func<CoreDbContext, IAsyncEnumerable<DbQuota>> AllQuotasAsync = 
+    public static readonly Func<CoreDbContext, IAsyncEnumerable<DbQuota>> AllQuotasAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((CoreDbContext ctx) => ctx.Quotas);
 
     public static readonly Func<CoreDbContext, int, Guid, string, long, Task<int>> UpdateCounterAsync =

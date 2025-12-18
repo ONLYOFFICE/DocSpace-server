@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,8 +30,7 @@ public class PersonalQuotaSettings : ISettings<PersonalQuotaSettings>
 {
     public long MaxSpace { get; init; }
 
-    [JsonIgnore]
-    public Guid ID => new("{C634A747-C39B-4517-8698-B3B39BF2BD8E}");
+    public static Guid ID => new("{C634A747-C39B-4517-8698-B3B39BF2BD8E}");
 
     public PersonalQuotaSettings GetDefault()
     {
@@ -40,4 +39,6 @@ public class PersonalQuotaSettings : ISettings<PersonalQuotaSettings>
             MaxSpace = long.MaxValue
         };
     }
+
+    public DateTime LastModified { get; set; }
 }

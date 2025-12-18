@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,16 +33,35 @@ namespace ASC.Data.Storage.DiscStorage;
 
 public class StorageHandler(string storagePath, string module, string domain, bool checkAuth = true)
 {
-    public async Task InvokeAsync(HttpContext context, TenantManager tenantManager, AuthContext authContext, StorageFactory storageFactory, EmailValidationKeyProvider emailValidationKeyProvider, UserManager userManager)
+    public async Task InvokeAsync(
+        HttpContext context,
+        TenantManager tenantManager,
+        AuthContext authContext,
+        StorageFactory storageFactory,
+        EmailValidationKeyProvider emailValidationKeyProvider,
+        UserManager userManager,
+        CoreSettings coreSettings)
     {
-        var storage = await storageFactory.GetStorageAsync(tenantManager.GetCurrentTenantId(), module);
+        var currentTenant = tenantManager.GetCurrentTenant(false);
+        if (currentTenant == null)
+        {
+            throw new ItemNotFoundException("tenant");
+        }
+
+        var storage = await storageFactory.GetStorageAsync(currentTenant.Id, module);
         var path = CrossPlatform.PathCombine(storagePath, GetRouteValue("pathInfo", context).Replace('/', Path.DirectorySeparatorChar));
         string header = context.Request.Query[Constants.QueryHeader];
         string auth = context.Request.Query[Constants.QueryAuth];
         var storageExpire = storage.GetExpire(domain);
+        var fromPublicRoom = false;
+        if (!authContext.IsAuthenticated)
+        {
+            var anonymousSessionKey = context.Request.Cookies["anonymous_session_key"];
+            fromPublicRoom = Signature.Read<Guid>(anonymousSessionKey, await coreSettings.GetDocDbKeyAsync()) != Guid.Empty;
+        }
 
-        if (checkAuth && !authContext.IsAuthenticated && !SecureHelper.CheckSecureKeyHeader(header, path, emailValidationKeyProvider) 
-            || module == "backup" && (!authContext.IsAuthenticated || !(await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))))
+        if (checkAuth && !authContext.IsAuthenticated && !SecureHelper.CheckSecureKeyHeader(header, path, emailValidationKeyProvider) && !fromPublicRoom
+            || module == "backup" && (!authContext.IsAuthenticated || !await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID)))
         {
             context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
             return;
@@ -69,7 +88,7 @@ public class StorageHandler(string storagePath, string module, string domain, bo
             context.Response.StatusCode = (int)HttpStatusCode.NotFound;
             return;
         }
-        
+
         if (storage.DataStoreValidator != null && !await storage.DataStoreValidator.Validate(path))
         {
             context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
@@ -78,9 +97,11 @@ public class StorageHandler(string storagePath, string module, string domain, bo
 
         var headers = header is { Length: > 0 } ? header.Split('&').Select(HttpUtility.UrlDecode).ToList() : [];
 
-        if (storage.IsContentAsAttachment(domain))
+        if (storage.IsContentAsAttachment(domain) && !headers.Any(h => h.StartsWith("Content-Disposition")))
         {
-            headers.Add("Content-Disposition:attachment");
+            var fileName = Path.GetFileName(path);
+            var contentDisposition = ContentDispositionUtil.GetHeaderValue(fileName);
+            headers.Add($"Content-Disposition:{contentDisposition}");
         }
 
         const int bigSize = 5 * 1024 * 1024;
@@ -113,7 +134,7 @@ public class StorageHandler(string storagePath, string module, string domain, bo
         //}
 
         //context.Response.Headers.ETag = etag;
-        
+
         string encoding = null;
 
         if (storage is DiscDataStore && await storage.IsFileAsync(domain, path + ".gz"))
@@ -133,7 +154,7 @@ public class StorageHandler(string storagePath, string module, string domain, bo
 
             context.Response.Headers[toCopy] = h[(toCopy.Length + 1)..];
         }
-                
+
         try
         {
             context.Response.ContentType = MimeMapping.GetMimeMapping(path);

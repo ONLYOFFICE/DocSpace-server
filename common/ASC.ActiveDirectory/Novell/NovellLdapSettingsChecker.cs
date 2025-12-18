@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,10 +31,7 @@ public class NovellLdapSettingsChecker(ILogger<LdapSettingsChecker> logger) : Ld
 {
     public LdapCertificateConfirmRequest CertificateConfirmRequest { get; set; }
 
-    public LdapHelper LdapHelper
-    {
-        get { return LdapImporter.LdapHelper; }
-    }
+    public LdapHelper LdapHelper => LdapImporter.LdapHelper;
 
     public new void Init(LdapUserImporter importer)
     {
@@ -134,7 +131,8 @@ public class NovellLdapSettingsChecker(ILogger<LdapSettingsChecker> logger) : Ld
                 _logger.ErrorSecurityException(ex);
                 return LdapSettingsStatus.StrongAuthRequired;
             }
-            catch (LdapException ex) {
+            catch (LdapException ex)
+            {
 
                 if (ex.ResultCode == LdapException.InvalidCredentials)
                 {

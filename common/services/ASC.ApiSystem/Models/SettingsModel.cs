@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,41 +27,41 @@
 namespace ASC.ApiSystem.Models;
 
 /// <summary>
-/// Request parameters for settings
+/// The request parameters for managing portal settings.
 /// </summary>
 public class SettingsModel : IModel
 {
     /// <summary>
-    /// Portal name
+    /// The portal name.
     /// </summary>
     [StringLength(255)]
     public string PortalName { get; set; }
 
     /// <summary>
-    /// Tenant id
+    /// The tenant ID.
     /// </summary>
     public int? TenantId { get; set; }
 
     /// <summary>
-    /// Key
+    /// The settings parameter key.
     /// </summary>
     [StringLength(255)]
     public string Key { get; set; }
 
     /// <summary>
-    /// Value
+    /// The settings parameter value.
     /// </summary>
     public string Value { get; set; }
 }
 
 /// <summary>
-/// Requst parameters for domain
+/// The request parameters for checking domain names.
 /// </summary>
 public class DomainModel
 {
     /// <summary>
-    /// Host name
+    /// The host name.
     /// </summary>
-    [StringLength (255)]
+    [StringLength(255)]
     public string HostName { get; set; }
 }

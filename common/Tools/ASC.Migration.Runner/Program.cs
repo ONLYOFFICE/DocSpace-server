@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.EF;
+
 var options = new WebApplicationOptions
 {
     Args = args,
@@ -39,22 +41,38 @@ builder.Services.AddScoped<EFLoggerFactory>();
 builder.Services.AddBaseDbContext<MigrationContext>();
 builder.Services.AddBaseDbContext<TeamlabSiteContext>();
 
+var connectionString = builder.Configuration.GetConnectionString("docspace");
+
+
 var app = builder.Build();
 
 var providersInfo = app.Configuration.GetSection("options").Get<Options>();
 var configurationInfo = !string.IsNullOrEmpty(app.Configuration["standalone"]) ? ConfigurationInfo.Standalone : ConfigurationInfo.SaaS;
 var targetMigration = app.Configuration["targetMigration"];
 
-foreach (var providerInfo in providersInfo.Providers)
+if (!string.IsNullOrEmpty(connectionString))
 {
     var migrationCreator = new MigrationRunner(app.Services);
-    migrationCreator.RunApplyMigrations(providerInfo, configurationInfo, typeof(MigrationContext), targetMigration);
+    migrationCreator.RunApplyMigrations(new ProviderInfo
+    {
+        Provider = Provider.MySql,
+        ConnectionString = connectionString,
+        ProviderFullName = "MySql.Data.MySqlClient"
+    }, configurationInfo, typeof(MigrationContext), targetMigration);
 }
-
-foreach (var providerInfo in providersInfo.TeamlabsiteProviders)
+else
 {
-    var migrationCreator = new MigrationRunner(app.Services);
-    migrationCreator.RunApplyMigrations(providerInfo, configurationInfo, typeof(TeamlabSiteContext), targetMigration);
+    foreach (var providerInfo in providersInfo.Providers)
+    {
+        var migrationCreator = new MigrationRunner(app.Services);
+        migrationCreator.RunApplyMigrations(providerInfo, configurationInfo, typeof(MigrationContext), targetMigration);
+    }
+
+    foreach (var providerInfo in providersInfo.TeamlabsiteProviders)
+    {
+        var migrationCreator = new MigrationRunner(app.Services);
+        migrationCreator.RunApplyMigrations(providerInfo, configurationInfo, typeof(TeamlabSiteContext), targetMigration);
+    }
 }
 
 Console.WriteLine("Migrations applied");

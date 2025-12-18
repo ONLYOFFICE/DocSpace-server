@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,41 +25,37 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace ASC.ElasticSearch.Core;
 
 public class SearchSettings : ISettings<SearchSettings>
 {
     public string Data { get; set; }
+    
+    public static Guid ID => new("{93784AB2-10B5-4C2F-9B36-F2662CCCF316}");
 
-    [JsonIgnore]
-    public Guid ID => new("{93784AB2-10B5-4C2F-9B36-F2662CCCF316}");
     internal List<SearchSettingsItem> Items
     {
         get
         {
-            if (_items != null)
+            if (field != null)
             {
-                return _items;
+                return field;
             }
 
             var parsed = JsonSerializer.Deserialize<List<SearchSettingsItem>>(Data ?? "");
 
-            return _items = parsed ?? [];
+            return field = parsed ?? [];
         }
-        set
-        {
-            _items = value;
-        }
+        set;
     }
-
-    private List<SearchSettingsItem> _items;
 
     public SearchSettings GetDefault()
     {
         return new SearchSettings();
     }
+
+    public DateTime LastModified { get; set; }
 
     internal bool IsEnabled(string name)
     {
@@ -77,9 +73,7 @@ public class SearchSettingsHelper(TenantManager tenantManager,
     IServiceProvider serviceProvider)
 {
     internal IEnumerable<IFactoryIndexer> AllItems =>
-        _allItems ??= serviceProvider.GetService<IEnumerable<IFactoryIndexer>>();
-
-    private IEnumerable<IFactoryIndexer> _allItems;
+        field ??= serviceProvider.GetService<IEnumerable<IFactoryIndexer>>();
 
     public async Task<List<SearchSettingsItem>> GetAllItemsAsync()
     {

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -46,7 +46,7 @@ public class LogoUploader
         {
             await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
             await tenantLogoManager.DemandWhiteLabelPermissionAsync();
-            
+
             var type = (WhiteLabelLogoType)Convert.ToInt32(context.Request.Form["logotype"]);
             var width = Convert.ToUInt32(context.Request.Form["width"]);
             var height = Convert.ToUInt32(context.Request.Form["height"]);

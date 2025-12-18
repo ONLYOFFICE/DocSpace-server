@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -168,15 +168,15 @@ public class Selector<T>(IServiceProvider serviceProvider)
 
         return this;
     }
-    
+
     public Selector<T> Nested(Expression<Func<T, object>> fieldSelector, Func<QueryContainerDescriptor<T>, QueryContainer> selector)
     {
         var path = IsNested(fieldSelector);
         _queryContainer &= _queryContainerDescriptor.Nested(a => a.Query(selector).Path(char.ToLower(path[0]) + path[1..]));
-        
+
         return this;
     }
-    
+
     public Selector<T> Sort(Expression<Func<T, object>> selector, bool asc)
     {
         _sortContainerDescriptor = _sortContainerDescriptor.Field(selector, asc ? SortOrder.Ascending : SortOrder.Descending);
@@ -379,7 +379,7 @@ public class Selector<T>(IServiceProvider serviceProvider)
         {
             return memberExpression.Member.Name;
         }
-        
+
         if (lambdaExpression.Body is MethodCallExpression { Arguments.Count: > 1 } methodCallExpression)
         {
             return methodCallExpression.Arguments[0] is not MemberExpression pathMember
@@ -444,30 +444,33 @@ public class Selector<T>(IServiceProvider serviceProvider)
 
 internal static class StringExtension
 {
-    public static string WrapAsterisk(this string value)
+    extension(string value)
     {
-        var result = value;
-
-        if (!value.Contains('*') && !value.Contains('?'))
+        public string WrapAsterisk()
         {
-            result = "*" + result + "*";
+            var result = value;
+
+            if (!value.Contains('*') && !value.Contains('?'))
+            {
+                result = "*" + result + "*";
+            }
+
+            return result;
         }
 
-        return result;
-    }
+        public string ReplaceBackslash()
+        {
+            return value.Replace("\\", "\\\\");
+        }
 
-    public static string ReplaceBackslash(this string value)
-    {
-        return value.Replace("\\", "\\\\");
-    }
+        public string TrimQuotes()
+        {
+            return value.Trim('\"');
+        }
 
-    public static string TrimQuotes(this string value)
-    {
-        return value.Trim('\"');
-    }
-
-    public static string PrepareToSearch(this string value)
-    {
-        return value.ReplaceBackslash().ToLowerInvariant().Replace('ё', 'е').Replace('Ё', 'Е');
+        public string PrepareToSearch()
+        {
+            return value.ReplaceBackslash().ToLowerInvariant().Replace('ё', 'е').Replace('Ё', 'Е');
+        }
     }
 }

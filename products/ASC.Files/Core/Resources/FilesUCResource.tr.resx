@@ -74,7 +74,7 @@
     <value>Dosyalar, {0}.zip dosyasına{1} sıkıştırılacak</value>
   </data>
   <data name="MyFiles" xml:space="preserve">
-    <value>Belgeler</value>
+    <value>Belgelerim</value>
   </data>
   <data name="PrivacyRoom" xml:space="preserve">
     <value>Özel oda</value>
@@ -102,5 +102,11 @@
   </data>
   <data name="ReadyFormFolder" xml:space="preserve">
     <value>Tamamlandı</value>
+  </data>
+  <data name="RoomTemplates" xml:space="preserve">
+    <value>Şablonlar</value>
+  </data>
+  <data name="AiAgents" xml:space="preserve">
+    <value>Yapay zekâ ajanları</value>
   </data>
 </root>

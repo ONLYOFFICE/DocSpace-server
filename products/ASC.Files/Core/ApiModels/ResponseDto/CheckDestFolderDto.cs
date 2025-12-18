@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,19 +26,25 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The result of checking whether files can be moved or copied to the specified folder.
+/// </summary>
 public class CheckDestFolderDto
 {
     /// <summary>
-    /// Result
+    /// The result of the validation operation.
     /// </summary>
     public CheckDestFolderResult Result { get; set; }
 
     /// <summary>
-    /// Files
+    /// The list of files in the destination folder.
     /// </summary>
-    public List<FileEntryDto> Files { get; set; }
+    public List<FileEntryBaseDto> Files { get; set; }
 }
 
+/// <summary>
+/// The result of the validation operation.
+/// </summary>
 public enum CheckDestFolderResult
 {
     [SwaggerEnum(Description = "All allowed")]

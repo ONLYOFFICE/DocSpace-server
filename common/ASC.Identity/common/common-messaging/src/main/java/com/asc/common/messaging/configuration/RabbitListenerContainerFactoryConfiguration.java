@@ -27,7 +27,7 @@
 
 package com.asc.common.messaging.configuration;
 
-import com.asc.common.service.transfer.message.AuditMessage;
+import com.asc.common.service.transfer.message.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import lombok.Getter;
@@ -78,7 +78,14 @@ public class RabbitListenerContainerFactoryConfiguration {
     var messageConverter = new Jackson2JsonMessageConverter(mapper);
     var classMapper = new DefaultJackson2JavaTypeMapper();
     classMapper.setTrustedPackages("*");
-    classMapper.setIdClassMapping(Map.of("audit", AuditMessage.class));
+    classMapper.setIdClassMapping(
+        Map.of(
+            "audit", AuditMessage.class,
+            "clientRemoved", ClientRemovedEvent.class,
+            "retrieveAuthorization", RetrieveAuthorizationMessage.class,
+            "saveAuthorization", SaveAuthorizationMessage.class,
+            "tenantClientsRemoved", TenantClientsRemovedEvent.class,
+            "userClientsRemoved", UserClientsRemovedEvent.class));
     messageConverter.setClassMapper(classMapper);
     messageConverter.setTypePrecedence(Jackson2JavaTypeMapper.TypePrecedence.TYPE_ID);
     return messageConverter;
@@ -143,12 +150,63 @@ public class RabbitListenerContainerFactoryConfiguration {
    */
   @Bean("rabbitSingleManualContainerFactory")
   public SimpleRabbitListenerContainerFactory rabbitSingleManualContainerFactory(
-      ConnectionFactory connectionFactory) {
+      ConnectionFactory connectionFactory, MessageConverter messageConverter) {
+    log.info("Building a single manual listener container factory");
+
     SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
     factory.setConnectionFactory(connectionFactory);
+    factory.setMessageConverter(messageConverter);
     factory.setAcknowledgeMode(AcknowledgeMode.MANUAL);
+    factory.setConcurrentConsumers(4);
+    factory.setMaxConcurrentConsumers(10);
     factory.setPrefetchCount(1);
     return factory;
+  }
+
+  /**
+   * Configures a {@link SimpleRabbitListenerContainerFactory} bean optimized for RPC workloads.
+   * Uses higher prefetch count for better throughput with auto-acknowledgment (sufficient for RPC
+   * since we wait for response). Supports direct reply-to pattern for reduced latency.
+   *
+   * @param connectionFactory the RabbitMQ {@link ConnectionFactory} to be used for establishing
+   *     connections.
+   * @param messageConverter the {@link MessageConverter} for message serialization.
+   * @return a configured {@link SimpleRabbitListenerContainerFactory} optimized for RPC.
+   */
+  @Bean("rabbitRpcContainerFactory")
+  public SimpleRabbitListenerContainerFactory rabbitRpcContainerFactory(
+      ConnectionFactory connectionFactory, MessageConverter messageConverter) {
+    log.info("Building an RPC simple rabbit listener container factory");
+
+    var factory = new SimpleRabbitListenerContainerFactory();
+    factory.setConnectionFactory(connectionFactory);
+    factory.setMessageConverter(messageConverter);
+    factory.setAcknowledgeMode(AcknowledgeMode.AUTO);
+    factory.setConcurrentConsumers(4);
+    factory.setMaxConcurrentConsumers(16);
+    factory.setPrefetchCount(20);
+    return factory;
+  }
+
+  /**
+   * Creates and configures a RabbitTemplate optimized for synchronous RPC calls. Uses direct
+   * reply-to pattern which leverages RabbitMQ's pseudo-queue (amq.rabbitmq.reply-to) for optimized
+   * request-response without creating temporary queues.
+   *
+   * @param connectionFactory the RabbitMQ connection factory.
+   * @param converter the message converter to use.
+   * @return a configured RabbitTemplate instance optimized for RPC.
+   */
+  @Bean("rpcRabbitTemplate")
+  public RabbitTemplate rpcRabbitTemplate(
+      ConnectionFactory connectionFactory, MessageConverter converter) {
+    log.info("Building an RPC-optimized rabbit template with direct reply-to");
+
+    var rabbitTemplate = new RabbitTemplate(connectionFactory);
+    rabbitTemplate.setMessageConverter(converter);
+    rabbitTemplate.setUseDirectReplyToContainer(true);
+    rabbitTemplate.setReplyTimeout(600);
+    return rabbitTemplate;
   }
 
   /**

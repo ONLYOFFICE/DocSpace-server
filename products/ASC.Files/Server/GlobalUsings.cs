@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -45,6 +45,8 @@ global using ASC.Core.Common.EF;
 global using ASC.Core.Common.Settings;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
+global using ASC.Data.Backup.Core.Quota;
+global using ASC.Data.Backup.EF.Context;
 global using ASC.EventBus.Abstractions;
 global using ASC.FederatedLogin.Helpers;
 global using ASC.FederatedLogin.LoginProviders;
@@ -92,11 +94,10 @@ global using ASC.Webhooks.Core;
 
 global using Autofac;
 
-global using AutoMapper;
-
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.RateLimiting;
+global using Microsoft.AspNetCore.WebUtilities;
 global using Microsoft.Extensions.DependencyInjection.Extensions;
 global using Microsoft.Extensions.Hosting.WindowsServices;
 

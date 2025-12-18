@@ -524,37 +524,37 @@ $TrulyYours</value>
     <value>Jauns lietotājs pievienots portālam ${LetterLogoText}</value>
   </data>
   <data name="ActionFileCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; izveidoja jaunu dokumentu: &lt;a href={1}&gt;{2}&lt;/a&gt; telpā: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; izveidoja jaunu dokumentu: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; telpā: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionNewComment" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; pievienoja jaunu komentāru dokumenta versijai: &lt;a href={1}&gt;{2}&lt;/a&gt; telpā: &lt;a href={3}&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; pievienoja jaunu komentāru dokumenta versijai: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; telpā: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileUploaded" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; augšupielādēja dokumentu: &lt;a href={1}&gt;{2}&lt;/a&gt; telpā: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; augšupielādēja dokumentu: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; telpā: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomRenamed" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; pārdēvēja telpu: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href={2}&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; pārdēvēja telpu: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; izveidoja jaunu telpu: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; izveidoja jaunu telpu: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; tika izņemts no telpas: &lt;a href={1}&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; tika izņemts no telpas: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionFileEdited" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; rediģēja dokumentu: &lt;a href={1}&gt;{2}&lt;/a&gt; telpā: &lt;a href={3}&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; rediģēja dokumentu: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; telpā: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomRemoved" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; izdzēsa telpu: &lt;b&gt;{1}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserAddedToRoom" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; tika pievienots telpai: &lt;a href={1}&gt;{2}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; tika pievienots telpai: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionRoomArchived" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; pārvietoja telpu: &lt;a href={1}&gt;{2}&lt;/a&gt; uz arhīvu - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; pārvietoja telpu: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; uz arhīvu - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionRoomUpdateAccessForUser" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; tika piešķirta loma &lt;b&gt;{1}&lt;/b&gt; telpā: &lt;a href={2}&gt;{3}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; tika piešķirta loma &lt;b&gt;{1}&lt;/b&gt; telpā: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
   </data>
   <data name="ActionUserCreated" xml:space="preserve">
     <value>Pievienots jauns DocSpace lietotājs: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;</value>
@@ -866,7 +866,7 @@ $Body</value>
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace ir &lt;span style="color: #FF6F3D;"&gt;deaktivizēts&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace ir &lt;span style="color: #FF6F3D;"&gt;dzēsts&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Jūsu ${LetterLogoText} DocSpace ir veiksmīgi deaktivizēts. Ņemiet vērā, ka visi jūsu dati tiks izdzēsti saskaņā ar mūsu &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Konfidencialitātes politiku&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
@@ -906,17 +906,6 @@ $TrulyYours</value>
 Ņemiet vērā, ka jūsu ${LetterLogoText} DocSpace ir aktivizēts $PaymentDelay ‎dienas (-u) pagarinājuma periods.
 
 Pārliecinieties, ka apmaksājiet Business abonementu pirms pagarinājuma perioda beigām. Tādējādi jūs varēsiet turpināt izmantot visas ${LetterLogoText} DocSpace priekšrocības.
-
-$OrangeButton
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Sveiki, $UserName!
-
-Ņemiet vērā, ka jūsu ${LetterLogoText} DocSpace abonementa derīguma termiņš beigsies pēc trim dienām. Pēc tam tiks aktivizēts $PaymentDelay dienas (-u) pagarinājuma periods.
-
-Mēs iesakām samaksāt jūsu Business abonementu tagad un turpināt izmantot visas jūsu ${LetterLogoText} DocSpace priekšrocības.
 
 $OrangeButton
 
@@ -1100,7 +1089,7 @@ $TrulyYours</value>
     <value>Pievienojieties ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace ir deaktivizēts</value>
+    <value>${LetterLogoText} DocSpace ir dzēsts</value>
   </data>
   <data name="subject_profile_has_deleted_itself" xml:space="preserve">
     <value>Lietotājs (a-) ir izdzēsis (-usi) savu profilu</value>
@@ -1122,9 +1111,6 @@ $TrulyYours</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_activation" xml:space="preserve">
     <value>Pagarinājuma periods jūsu ${LetterLogoText} DocSpace ir aktivizēts</value>
-  </data>
-  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
-    <value>Jūsu ${LetterLogoText} DocSpace abonementa derīgums drīz beigsies</value>
   </data>
   <data name="subject_saas_owner_payment_warning_grace_period_expired" xml:space="preserve">
     <value>Pagarinājuma periods jūsu ${LetterLogoText} DocSpace ir beidzies</value>
@@ -1191,7 +1177,9 @@ Autentificētāja lietotnes konfigurācija, ko izmantojat, lai ieietu ${LetterLo
 
 Noklikšķiniet uz tālāk redzamās pogas, lai pārietu uz portāla pieteikšanās lapu un konfigurētu autentificētāja lietojumprogrammu:
 
-$OrangeButton</value>
+$OrangeButton
+
+&amp;nbsp;</value>
   </data>
   <data name="pattern_enterprise_guest_activation_v10" xml:space="preserve">
     <value>h1. Pievienojieties &lt;span style="color:#FF6F3D;"&gt;${LetterLogoText}&lt;/span&gt; DocSpace
@@ -1785,11 +1773,13 @@ Saite ir derīga septiņas dienas.</value>
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Sveiki, $UserName!&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Jūs tikko *izveidojāt ${LetterLogoText} DocSpace* - dokumentu centru, kurā varat uzlabot sadarbību ar savu komandu, klientiem, partneriem un daudz ko citu. Tā adrese ir &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Jūs tikko *izveidojāt ${LetterLogoText} DocSpace* - dokumentu centru, kurā varat uzlabot sadarbību ar savu komandu, klientiem, partneriem un daudz ko citu. Tā adrese ir &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
+#if($OrangeButton != "")
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Apstipriniet savu e-pastu (saite ir derīga 7 dienas):&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 44px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
+#end
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 700; line-height: 19px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;Jūsu pašreizējais tarifu plāns ir STARTUP. Tas ir pilnīgi bezmaksas un ietver:&lt;/td&gt;&lt;/tr&gt;
 
@@ -1895,5 +1885,174 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 26px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt; Ja nepieciešama palīdzība, pārlūkojiet mūsu &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;Palīdzības centru&lt;/a&gt; vai jautājiet mūsu &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="${__SupportLink}"&gt;atbalsta komandai&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
+  </data>
+  <data name="subject_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>Jūsu ${LetterLogoText} DocSpace tiks izdzēsts</value>
+  </data>
+  <data name="subject_user_type_changed" xml:space="preserve">
+    <value>Jūsu DocSpace lietotāja tips ir mainīts</value>
+  </data>
+  <data name="subject_user_role_changed" xml:space="preserve">
+    <value>Jūsu loma DocSpace telpā ir mainīta</value>
+  </data>
+  <data name="pattern_user_role_changed" xml:space="preserve">
+    <value>Sveicināti!
+
+Jums ir piešķirta jauna loma DocSpace telpā "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+Uzziniet vairāk par telpas lomām un atļaujām sadaļā "Palīdzības centrs":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_type_changed" xml:space="preserve">
+    <value>Sveicināti!
+
+Jums ir piešķirts jauns lietotāja tips DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}": ${UserType}.
+
+Uzziniet vairāk par lietotāju tipiem un atļaujām sadaļā "Palīdzības centrs":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_admin_startup_warning_after_year_v1" xml:space="preserve">
+    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Jūsu ${LetterLogoText} DocSpace tiks &lt;span style="color: #FF6F3D;"&gt;dzēsts&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;ūsu ${LetterLogoText} DocSpace ${__VirtualRootPath} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; ir neaktīvs vairāk nekā gadu.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Tā kā esat nolēmis to vairs neizmantot, jūsu ${LetterLogoText} DocSpace un visi dati tiks dzēsti saskaņā ar mūsu &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Privātuma politiku&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;Būsim pateicīgi par jūsu atsauksmēm. Kāpēc esat nolēmis pārtraukt lietot ${LetterLogoText} DocSpace?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
+
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Ja vēlaties turpināt izmantot savu ${LetterLogoText} DocSpace, vienkārši atveriet to un veiciet jebkuru darbību.&lt;/td&gt;&lt;/tr&gt;
+
+$TrulyYours</value>
+  </data>
+  <data name="ButtonGoToServices" xml:space="preserve">
+    <value>Doties uz Pakalpojumiem</value>
+  </data>
+  <data name="ButtonGoToWalletSettings" xml:space="preserve">
+    <value>Doties uz Maka iestatījumiem</value>
+  </data>
+  <data name="pattern_renew_subscription_error" xml:space="preserve">
+    <value>Sveiki, $UserName!
+
+Mēs vēlamies Jūs informēt, ka Jūsu iegādātā pakalpojumu plāna automātiskā atjaunošana neizdevās.
+
+Lūdzu, atjaunojiet savu pašreizējo pakalpojumu plānu manuāli (vai iegādājieties jaunu).
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Sveiki, $UserName!
+
+Mēs vēlamies Jūs informēt, ka Jūsu abonementa maksa tiks automātiski ieturēta no Jūsu konta pēc 3 dienām.
+
+Lai darījums noritētu veiksmīgi, lūdzu, pārliecinieties, ka Jūsu maksājuma metodē ir pietiekami daudz naudas.
+
+Ja Jums ir kādi jautājumi vai nepieciešama palīdzība, lūdzu, sazinieties ar mūsu "atbalsta komandu":"${__SupportLink}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_top_up_wallet_error" xml:space="preserve">
+    <value>Sveiki, $UserName!
+
+Ar šo sazināmies, lai informētu jūs, ka DocSpace maka atlikuma automātiskā papildināšana neizdevās.
+
+Lūdzam jūs manuāli pārbaudīt un atjaunināt maka atlikumu.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_renew_subscription_error" xml:space="preserve">
+    <value>Nepieciešama darbība: Neizdevās automātiski atjaunot pakalpojumu plānu Jūsu ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_owner_payment_warning_grace_period_before_activation" xml:space="preserve">
+    <value>Gaidāmais abonementa maksājums par Jūsu ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_top_up_wallet_error" xml:space="preserve">
+    <value>Nepieciešama darbība: Neizdevās automātiski papildināt Maka atlikumu Jūsu ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_password_changed" xml:space="preserve">
+    <value>Jūsu parole ir veiksmīgi nomainīta</value>
+  </data>
+  <data name="ButtonOpenDocSpace" xml:space="preserve">
+    <value>Atvērt DocSpace</value>
+  </data>
+  <data name="pattern_password_changed" xml:space="preserve">
+    <value>h1. Parole veiksmīgi nomainīta
+
+Jūsu konta *$UserName*, *$UserEmail* parole tika veiksmīgi nomainīta *$Date* vietnē DocSpace: "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+IP: *$IP*
+Ierīce: *$Device*
+#if($Location != "")
+Atrašanās vieta: *$Location*
+#end
+Pārlūkprogramma: *$Browser*
+
+Ja šo darbību veicāt jūs, nekādas turpmākas darbības nav nepieciešamas. Ja šīs izmaiņas šķiet aizdomīgas vai jūs tās neatļāvāt, lūdzu, nekavējoties atiestatiet paroli un atspējojiet piekļuvi DocSpace šai ierīcei.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="ActionAgentCreated" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; izveidoja jaunu aģentu: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRemoved" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; dzēsa aģentu: &lt;b&gt;{1}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentRenamed" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; pārdēvēja aģentu: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+  </data>
+  <data name="ActionAgentUpdateAccessForUser" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; tika piešķirta &lt;b&gt;{1}&lt;/b&gt; loma aģentā: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserAddedToAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; tika pievienots aģentam: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
+  </data>
+  <data name="ActionUserRemovedFromAgent" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; tika noņemts no aģenta: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+  </data>
+  <data name="ButtonJoinAgent" xml:space="preserve">
+    <value>Pievienoties aģentam</value>
+  </data>
+  <data name="subject_backup_failed" xml:space="preserve">
+    <value>Neizdevās izveidot DocSpace dublējumkopiju</value>
+  </data>
+  <data name="subject_saas_agent_invite" xml:space="preserve">
+    <value>Pievienoties ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Jūs esat uzaicināts pievienoties ${LetterLogoText} DocSpace aģentam</value>
+  </data>
+  <data name="subject_scheduled_backup_failed" xml:space="preserve">
+    <value>Neizdevās automātiski izveidot DocSpace dublējumkopiju</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed" xml:space="preserve">
+    <value>Sveiki, $UserName!
+
+Jūsu DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" ieplānotais dublēšanas process nav izdevies.
+
+Mēs iesakām pārbaudīt iestatījumus "Dublējums":"${__VirtualRootPath}/portal-settings/backup/data-backup" un "Pakalpojumi":"${__VirtualRootPath}/portal-settings/services".
+
+Ja jums ir kādi jautājumi vai nepieciešama palīdzība, lūdzu, sazinieties ar mums, izmantojot "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
+    <value>Sveiki, $UserName!
+
+Jūsu DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) ieplānotais dublēšanas process nav izdevies.
+
+Mēs iesakām pārbaudīt iestatījumus [Dublējums](${__VirtualRootPath}/portal-settings/backup/data-backup) un [Pakalpojumi](${__VirtualRootPath}/portal-settings/services).
+
+Ja jums ir kādi jautājumi vai nepieciešama palīdzība, lūdzu, sazinieties ar mums, izmantojot [${__SupportLink}](${__SupportLink})
+
+Ar cieņu,
+${LetterLogoText} atbalsta komanda
+[${__SiteLink}](${__SiteLink})</value>
   </data>
 </root>

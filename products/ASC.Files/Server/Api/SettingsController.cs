@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -45,8 +45,8 @@ public class SettingsController(
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPut("thirdparty")]
-    public async Task<bool> ChangeAccessToThirdpartyAsync(SettingsRequestDto inDto)
-    {        
+    public async Task<bool> ChangeAccessToThirdparty(SettingsRequestDto inDto)
+    {
         await filesSettingsHelper.SetEnableThirdParty(inDto.Set);
 
         return await filesSettingsHelper.GetEnableThirdParty();
@@ -75,7 +75,7 @@ public class SettingsController(
     [SwaggerResponse(200, "Archive", typeof(ICompress))]
     [HttpPut("settings/downloadtargz")]
     public async Task<ICompress> ChangeDownloadZipFromBody([FromBody] DisplayRequestDto inDto)
-    {        
+    {
         await filesSettingsHelper.SetDownloadTarGz(inDto.Set);
         return compressToArchive;
     }
@@ -103,7 +103,6 @@ public class SettingsController(
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
-    [SwaggerResponse(401, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpPut("settings/favorites")]
     public async Task<bool> DisplayFavorite(DisplayRequestDto inDto)
@@ -117,16 +116,14 @@ public class SettingsController(
     /// </summary>
     /// <short>Display the "Recent" folder</short>
     /// <path>api/2.0/files/displayRecent</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
-    [SwaggerResponse(401, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpPut("displayRecent")]
     public async Task<bool> DisplayRecent(DisplayRequestDto inDto)
     {
         await filesSettingsHelper.SetRecentSection(inDto.Set);
-        return  await filesSettingsHelper.GetRecentSection();
+        return await filesSettingsHelper.GetRecentSection();
     }
 
     /// <summary>
@@ -137,11 +134,10 @@ public class SettingsController(
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
-    [SwaggerResponse(401, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpPut("settings/templates")]
     public async Task<bool> DisplayTemplates(DisplayRequestDto inDto)
-    {        
+    {
         await filesSettingsHelper.SetTemplatesSection(inDto.Set);
         return await filesSettingsHelper.GetTemplatesSection();
     }
@@ -154,7 +150,7 @@ public class SettingsController(
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
     [HttpPut("settings/external")]
-    public async Task<bool> ExternalShareAsync(DisplayRequestDto inDto)
+    public async Task<bool> ExternalShare(DisplayRequestDto inDto)
     {
         return await filesSettingsHelper.ChangeExternalShareSettingsAsync(inDto.Set);
     }
@@ -167,15 +163,15 @@ public class SettingsController(
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
     [HttpPut("settings/externalsocialmedia")]
-    public async Task<bool> ExternalShareSocialMediaAsync(DisplayRequestDto inDto)
+    public async Task<bool> ExternalShareSocialMedia(DisplayRequestDto inDto)
     {
         return await filesSettingsHelper.ChangeExternalShareSocialMediaSettingsAsync(inDto.Set);
     }
 
     /// <summary>
-    /// Changes the ability to force save a file.
+    /// Specifies if the file forcesaving is enabled or not.
     /// </summary>
-    /// <short>Change the forcasaving ability</short>
+    /// <short>Change the forcesaving ability</short>
     /// <path>api/2.0/files/forcesave</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
@@ -202,9 +198,9 @@ public class SettingsController(
     }
 
     /// <summary>
-    /// Returns the information about the Documents module.
+    /// Returns the information about the "Documents" module.
     /// </summary>
-    /// <short>Get the Documents information</short>
+    /// <short>Get the "Documents" information</short>
     /// <path>api/2.0/files/info</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Module information: ID, product class name, title, description, icon URL, large icon URL, start URL, primary or nor, help URL", typeof(Module))]
@@ -216,10 +212,10 @@ public class SettingsController(
     }
 
     /// <summary>
-    /// Hide confirmation dialog when canceling operation.
+    /// Hides the confirmation dialog when canceling operations.
     /// </summary>
-    /// <short>Hide confirmation dialog when canceling operation</short>
-    /// <path>api/2.0/files/hideconfirmroomlifetime</path>
+    /// <short>Hide confirmation dialog when canceling operations</short>
+    /// <path>api/2.0/files/hideconfirmcanceloperation</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
     [HttpPut("hideconfirmcanceloperation")]
@@ -227,7 +223,7 @@ public class SettingsController(
     {
         return await filesSettingsHelper.SetHideConfirmCancelOperation(inDto.Set);
     }
-    
+
     /// <summary>
     /// Hides the confirmation dialog for saving the file copy in the original format when converting a file.
     /// </summary>
@@ -242,7 +238,7 @@ public class SettingsController(
     }
 
     /// <summary>
-    /// Hide confirmation dialog when changing room lifetime settings.
+    /// Hides the confirmation dialog when changing the room lifetime settings.
     /// </summary>
     /// <short>Hide confirmation dialog when changing room lifetime settings</short>
     /// <path>api/2.0/files/hideconfirmroomlifetime</path>
@@ -255,9 +251,9 @@ public class SettingsController(
     }
 
     /// <summary>
-    /// Checks if the Private Room settings are available or not.
+    /// Checks if the "Private Room" settings are available or not.
     /// </summary>
-    /// <short>Check the Private Room availability</short>
+    /// <short>Check the "Private Room" availability</short>
     /// <path>api/2.0/files/@privacy/available</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the Private Room settings are available", typeof(bool))]
@@ -289,7 +285,7 @@ public class SettingsController(
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPut("storeoriginal")]
-    public async Task<bool> StoreOriginalAsync(SettingsRequestDto inDto)
+    public async Task<bool> StoreOriginal(SettingsRequestDto inDto)
     {
         await filesSettingsHelper.SetStoreOriginalFiles(inDto.Set);
         return await filesSettingsHelper.GetStoreOriginalFiles();
@@ -303,7 +299,7 @@ public class SettingsController(
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPut("keepnewfilename")]
-    public async Task<bool> KeepNewFileNameAsync(SettingsRequestDto inDto)
+    public async Task<bool> KeepNewFileName(SettingsRequestDto inDto)
     {
         return await filesSettingsHelper.SetKeepNewFileName(inDto.Set);
     }
@@ -329,7 +325,7 @@ public class SettingsController(
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [HttpPut("updateifexist")]
-    public Task<bool> UpdateIfExistAsync(SettingsRequestDto inDto)
+    public Task<bool> UpdateFileIfExist(SettingsRequestDto inDto)
     {
         return Task.FromResult(false);
     }
@@ -371,20 +367,20 @@ public class SettingsController(
     [SwaggerResponse(200, "Updated sharing rights (None, ReadWrite, Read, Restrict, Varies, Review, Comment, FillForms, CustomFilter, RoomAdmin, Editing, Collaborator)", typeof(List<FileShare>))]
     [HttpPut("settings/dafaultaccessrights")]
     public async Task<List<FileShare>> ChangeDefaultAccessRights(DefaultAccessRightsrequestDto inDto)
-    {        
+    {
         await filesSettingsHelper.SetDefaultSharingAccessRights(inDto.Value);
         return await filesSettingsHelper.GetDefaultSharingAccessRights();
     }
 
     /// <summary>
-    /// Change the ability to open in a document in the same browser tab
+    /// Changes the ability to open the document in the same browser tab.
     /// </summary>
-    /// <short>Open document in same browser tab</short>
+    /// <short>Open document in the same browser tab</short>
     /// <path>api/2.0/files/settings/openeditorinsametab</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
     [HttpPut("settings/openeditorinsametab")]
-    public async Task<bool> SetOpenEditorInSameTabAsync(SettingsRequestDto inDto)
+    public async Task<bool> SetOpenEditorInSameTab(SettingsRequestDto inDto)
     {
         await filesSettingsHelper.SetOpenEditorInSameTabAsync(inDto.Set);
         return await filesSettingsHelper.GetOpenEditorInSameTabAsync();

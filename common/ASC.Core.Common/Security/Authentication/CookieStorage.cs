@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -61,7 +61,7 @@ public class CookieStorage(InstanceCrypto instanceCrypto,
 
         try
         {
-            cookie = (HttpUtility.UrlDecode(cookie)).Replace(' ', '+');
+            cookie = HttpUtility.UrlDecode(cookie).Replace(' ', '+');
             var s = instanceCrypto.Decrypt(cookie).Split('$');
 
             if (1 < s.Length)
@@ -99,28 +99,32 @@ public class CookieStorage(InstanceCrypto instanceCrypto,
     }
 
 
-    public int GetLoginEventIdFromCookie(string cookie)
+    public (int loginEventId, DateTime expiration) GetLoginEventIdFromCookie(string cookie)
     {
         var loginEventId = 0;
+        var expiration = DateTime.MaxValue;
+
         if (string.IsNullOrEmpty(cookie))
         {
-            return loginEventId;
+            return (loginEventId, expiration);
         }
 
         try
         {
-            cookie = (HttpUtility.UrlDecode(cookie)).Replace(' ', '+');
+            cookie = HttpUtility.UrlDecode(cookie).Replace(' ', '+');
             var s = instanceCrypto.Decrypt(cookie).Split('$');
             if (8 < s.Length)
             {
                 loginEventId = !string.IsNullOrEmpty(s[8]) ? int.Parse(s[8]) : 0;
+                expiration = DateTime.ParseExact(s[6], DateTimeFormat, CultureInfo.InvariantCulture);
             }
         }
         catch (Exception err)
         {
             logger.ErrorLoginEvent(cookie, loginEventId, err);
         }
-        return loginEventId;
+
+        return (loginEventId, expiration);
     }
 
     public async Task<string> EncryptCookieAsync(int tenant, Guid userid, int loginEventId)
@@ -138,7 +142,7 @@ public class CookieStorage(InstanceCrypto instanceCrypto,
             string.Empty, //login
             tenant,
             string.Empty, //password
-            GetUserDependencySalt(), 
+            GetUserDependencySalt(),
             userid,
             indexTenant,
             expires.ToString(DateTimeFormat, CultureInfo.InvariantCulture),

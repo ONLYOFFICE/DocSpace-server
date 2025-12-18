@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -121,7 +121,7 @@ public class ConnectionsController(
 
         async Task<BaseEvent> GetBaseEvent()
         {
-            var request = httpContextAccessor.HttpContext.Request;
+            var request = Request;
             var uaHeader = MessageSettings.GetUAHeader(request);
             var clientInfo = MessageSettings.GetClientInfo(uaHeader);
             var platformAndDevice = MessageSettings.GetPlatformAndDevice(clientInfo);
@@ -141,7 +141,7 @@ public class ConnectionsController(
     }
 
     /// <summary>
-    /// Logs out from all the active connections of the current user and changes their password.
+    /// Logs out from all the active connections for the current user and changes their password.
     /// </summary>
     /// <short>
     /// Log out and change password
@@ -179,7 +179,7 @@ public class ConnectionsController(
     }
 
     /// <summary>
-    /// Logs out from all the active connections of the user with the ID specified in the request.
+    /// Logs out from all the active connections for the user with the ID specified in the request.
     /// </summary>
     /// <short>
     /// Log out for the user by ID
@@ -189,11 +189,11 @@ public class ConnectionsController(
     [SwaggerResponse(200, "Ok")]
     [SwaggerResponse(403, "Method not available")]
     [HttpPut("logoutall/{userId:guid}")]
-    public async Task LogOutAllActiveConnectionsForUserAsync(UserIdRequestDto inDto)
+    public async Task LogOutAllActiveConnectionsForUser(UserIdRequestDto inDto)
     {
         var currentUserId = securityContext.CurrentAccount.ID;
-        if (!await userManager.IsDocSpaceAdminAsync(currentUserId) && 
-            !await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, currentUserId) || 
+        if (!await userManager.IsDocSpaceAdminAsync(currentUserId) &&
+            !await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, currentUserId) ||
             (currentUserId != inDto.Id && await userManager.IsDocSpaceAdminAsync(inDto.Id)))
         {
             throw new SecurityException("Method not available");
@@ -206,7 +206,7 @@ public class ConnectionsController(
     /// Logs out from all the active connections except the current connection.
     /// </summary>
     /// <short>
-    /// Log out from all connections
+    /// Log out from all connections except the current one
     /// </short>
     /// <path>api/2.0/security/activeconnections/logoutallexceptthis</path>
     [Tags("Security / Active connections")]
@@ -302,7 +302,7 @@ public class ConnectionsController(
     private int GetLoginEventIdFromCookie()
     {
         var cookie = cookiesManager.GetCookies(CookiesType.AuthKey);
-        var loginEventId = cookieStorage.GetLoginEventIdFromCookie(cookie);
+        var (loginEventId, _) = cookieStorage.GetLoginEventIdFromCookie(cookie);
         return loginEventId;
     }
 }

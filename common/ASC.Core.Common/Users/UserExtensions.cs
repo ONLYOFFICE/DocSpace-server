@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,139 +42,144 @@ public static class UserExtensions
         return tenant != null && tenant.OwnerId.Equals(ui);
     }
 
-    public static bool IsMe(this UserInfo ui, AuthContext authContext)
+    extension(UserInfo ui)
     {
-        return IsMe(ui, authContext.CurrentAccount.ID);
-    }
-
-    public static bool IsMe(this UserInfo user, Guid id)
-    {
-        return user != null && user.Id == id;
-    }
-
-    public static async Task<bool> IsDocSpaceAdminAsync(this UserManager userManager, Guid id)
-    {
-        var ui = await userManager.GetUsersAsync(id);
-        return await userManager.IsDocSpaceAdminAsync(ui);
-    }
-
-    public static async Task<bool> IsDocSpaceAdminAsync(this UserManager userManager, UserInfo ui)
-    {
-        return ui != null && await userManager.IsUserInGroupAsync(ui.Id, Constants.GroupAdmin.ID);
-    }
-
-    public static async Task<bool> IsGuestAsync(this UserManager userManager, Guid id)
-    {
-        var ui = await userManager.GetUsersAsync(id);
-        return await userManager.IsGuestAsync(ui);
-    }
-
-    public static async Task<bool> IsGuestAsync(this UserManager userManager, UserInfo ui)
-    {
-        return ui != null && await userManager.IsUserInGroupAsync(ui.Id, Constants.GroupGuest.ID);
-    }
-
-    public static async Task<bool> IsSystemGroup(this UserManager userManager, Guid groupId)
-    {
-        var group = await userManager.GetGroupInfoAsync(groupId);
-        return group.ID == Constants.LostGroupInfo.ID || group.CategoryID == Constants.SysGroupCategoryId;
-    }
-
-    public static async Task<bool> IsUserAsync(this UserManager userManager, UserInfo userInfo)
-    {
-        return userInfo != null && await userManager.IsUserInGroupAsync(userInfo.Id, Constants.GroupUser.ID);
-    }
-    
-    public static async Task<bool> IsUserAsync(this UserManager userManager, Guid id)
-    {
-        var userInfo = await userManager.GetUsersAsync(id);
-        return await userManager.IsUserAsync(userInfo);
-    }
-
-    public static async Task<bool> IsOutsiderAsync(this UserManager userManager, Guid id)
-    {
-        return await userManager.IsGuestAsync(id) && id == Constants.OutsideUser.Id;
-    }
-
-    public static async Task<bool> IsOutsiderAsync(this UserManager userManager, UserInfo ui)
-    {
-        return await userManager.IsGuestAsync(ui) && ui.Id == Constants.OutsideUser.Id;
-    }
-
-    public static bool IsLDAP(this UserInfo ui)
-    {
-        if (ui == null)
+        public bool IsMe(AuthContext authContext)
         {
-            return false;
+            return IsMe(ui, authContext.CurrentAccount.ID);
         }
 
-        return !string.IsNullOrEmpty(ui.Sid);
+        public bool IsMe(Guid id)
+        {
+            return ui != null && ui.Id == id;
+        }
+    }
+
+    extension(UserManager userManager)
+    {
+        public async Task<bool> IsDocSpaceAdminAsync(Guid id)
+        {
+            return await userManager.IsUserInGroupAsync(id, Constants.GroupAdmin.ID);
+        }
+
+        public Task<bool> IsDocSpaceAdminAsync(UserInfo ui)
+        {
+            return userManager.IsDocSpaceAdminAsync(ui.Id);
+        }
+
+        public async Task<bool> IsGuestAsync(Guid id)
+        {
+            return await userManager.IsUserInGroupAsync(id, Constants.GroupGuest.ID);
+        }
+
+        public Task<bool> IsGuestAsync(UserInfo ui)
+        {
+            return userManager.IsGuestAsync(ui.Id);
+        }
+
+        public async Task<bool> IsSystemGroup(Guid groupId)
+        {
+            var group = await userManager.GetGroupInfoAsync(groupId);
+            return group.ID == Constants.LostGroupInfo.ID || group.CategoryID == Constants.SysGroupCategoryId;
+        }
+
+        public Task<bool> IsUserAsync(UserInfo userInfo)
+        {
+            return userManager.IsUserAsync(userInfo.Id);
+        }
+
+        public async Task<bool> IsUserAsync(Guid id)
+        {
+            return await userManager.IsUserInGroupAsync(id, Constants.GroupUser.ID);
+        }
+
+        public async Task<bool> IsOutsiderAsync(Guid id)
+        {
+            return await userManager.IsGuestAsync(id) && id == Constants.OutsideUser.Id;
+        }
+
+        public Task<bool> IsOutsiderAsync(UserInfo ui)
+        {
+            return userManager.IsOutsiderAsync(ui.Id);
+        }
+    }
+
+    extension(UserInfo ui)
+    {
+        public bool IsLDAP()
+        {
+            if (ui == null)
+            {
+                return false;
+            }
+
+            return !string.IsNullOrEmpty(ui.Sid);
+        }
+
+        public bool IsSSO()
+        {
+            if (ui == null)
+            {
+                return false;
+            }
+
+            return !string.IsNullOrEmpty(ui.SsoNameId);
+        }
     }
 
     // ReSharper disable once InconsistentNaming
-    public static bool IsSSO(this UserInfo ui)
+
+    extension(UserManager userManager)
     {
-        if (ui == null)
-        {
-            return false;
+        public async Task<EmployeeType> GetUserTypeAsync(Guid id)
+        {        
+            if (id.Equals(Constants.LostUser.Id))
+            {
+                return EmployeeType.Guest;
+            }
+
+            return
+                await userManager.IsDocSpaceAdminAsync(id) ? EmployeeType.DocSpaceAdmin :
+                await userManager.IsGuestAsync(id) ? EmployeeType.Guest :
+                await userManager.IsUserAsync(id) ? EmployeeType.User :
+                EmployeeType.RoomAdmin;
         }
 
-        return !string.IsNullOrEmpty(ui.SsoNameId);
-    }
-
-    public static async Task<EmployeeType> GetUserTypeAsync(this UserManager userManager, Guid id)
-    {
-        return await userManager.GetUserTypeAsync(await userManager.GetUsersAsync(id));
-    }
-
-    public static async Task<EmployeeType> GetUserTypeAsync(this UserManager userManager, UserInfo user)
-    {
-        if (user.Equals(Constants.LostUser))
+        public Task<EmployeeType> GetUserTypeAsync(UserInfo user)
         {
-            return EmployeeType.Guest;
-        }
-        
-        return 
-            await userManager.IsDocSpaceAdminAsync(user) ? EmployeeType.DocSpaceAdmin : 
-            await userManager.IsGuestAsync(user) ? EmployeeType.Guest : 
-            await userManager.IsUserAsync(user) ? EmployeeType.User :
-            EmployeeType.RoomAdmin;
-    }
-
-    public static async Task<bool> CanUserViewAnotherUserAsync(this UserManager userManager, UserInfo sourceUser, UserInfo targetUser)
-    {
-        if (sourceUser.Id == targetUser.Id)
-        {
-            return true;
+            return userManager.GetUserTypeAsync(user.Id);
         }
 
-        var sourceUserType = await userManager.GetUserTypeAsync(sourceUser);
-
-        if (sourceUserType is EmployeeType.DocSpaceAdmin)
+        public async Task<bool> CanUserViewAnotherUserAsync(Guid sourceUserId, Guid targetUserId)
         {
-            return true;
-        }
-
-        if (sourceUserType is EmployeeType.User or EmployeeType.Guest)
-        {
-            return false;
-        }
-
-        var targetUserType = await userManager.GetUserTypeAsync(targetUser);
-
-        if (targetUserType is EmployeeType.Guest)
-        {
-            if (targetUser.CreatedBy.HasValue && targetUser.CreatedBy.Value == sourceUser.Id)
+            if (sourceUserId == targetUserId)
             {
                 return true;
             }
 
-            var userRelations = await userManager.GetUserRelationsAsync(sourceUser.Id);
+            var sourceUserType = await userManager.GetUserTypeAsync(sourceUserId);
 
-            return userRelations.ContainsKey(targetUser.Id);
+            if (sourceUserType is EmployeeType.DocSpaceAdmin)
+            {
+                return true;
+            }
+
+            if (sourceUserType is EmployeeType.User or EmployeeType.Guest)
+            {
+                return false;
+            }
+
+            var targetUserType = await userManager.GetUserTypeAsync(targetUserId);
+
+            if (targetUserType is EmployeeType.Guest)
+            {
+                var userRelations = await userManager.GetUserRelationsAsync(sourceUserId);
+
+                return userRelations.ContainsKey(targetUserId);
+            }
+
+            return true;
         }
-
-        return true;
     }
 
     private const string _extMobPhone = "extmobphone";

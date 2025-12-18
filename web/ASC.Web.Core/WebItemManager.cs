@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -39,66 +39,38 @@ public class WebItemManager
 {
     private readonly ILogger _log;
 
-    private ConcurrentDictionary<Guid, IWebItem> _items;
     private ConcurrentDictionary<Guid, IWebItem> Items
     {
         get
         {
             if (_lazyItems.IsValueCreated)
             {
-                return _items;
+                return field;
             }
 
-            return _items = _lazyItems.Value;
+            return field = _lazyItems.Value;
         }
     }
     private readonly Lazy<ConcurrentDictionary<Guid, IWebItem>> _lazyItems;
     private readonly List<string> _disableItem;
 
-    public static Guid CommunityProductID
-    {
-        get { return new Guid("{EA942538-E68E-4907-9394-035336EE0BA8}"); }
-    }
+    public static Guid CommunityProductID => new("{EA942538-E68E-4907-9394-035336EE0BA8}");
 
-    public static Guid ProjectsProductID
-    {
-        get { return new Guid("{1e044602-43b5-4d79-82f3-fd6208a11960}"); }
-    }
+    public static Guid ProjectsProductID => new("{1e044602-43b5-4d79-82f3-fd6208a11960}");
 
-    public static Guid CRMProductID
-    {
-        get { return new Guid("{6743007C-6F95-4d20-8C88-A8601CE5E76D}"); }
-    }
+    public static Guid CRMProductID => new("{6743007C-6F95-4d20-8C88-A8601CE5E76D}");
 
-    public static Guid DocumentsProductID
-    {
-        get { return new Guid("{E67BE73D-F9AE-4ce1-8FEC-1880CB518CB4}"); }
-    }
+    public static Guid DocumentsProductID => new("{E67BE73D-F9AE-4ce1-8FEC-1880CB518CB4}");
 
-    public static Guid PeopleProductID
-    {
-        get { return new Guid("{F4D98AFD-D336-4332-8778-3C6945C81EA0}"); }
-    }
+    public static Guid PeopleProductID => new("{F4D98AFD-D336-4332-8778-3C6945C81EA0}");
 
-    public static Guid MailProductID
-    {
-        get { return new Guid("{2A923037-8B2D-487b-9A22-5AC0918ACF3F}"); }
-    }
+    public static Guid MailProductID => new("{2A923037-8B2D-487b-9A22-5AC0918ACF3F}");
 
-    public static Guid CalendarProductID
-    {
-        get { return new Guid("{32D24CB5-7ECE-4606-9C94-19216BA42086}"); }
-    }
+    public static Guid CalendarProductID => new("{32D24CB5-7ECE-4606-9C94-19216BA42086}");
 
-    public static Guid BirthdaysProductID
-    {
-        get { return new Guid("{37620AE5-C40B-45ce-855A-39DD7D76A1FA}"); }
-    }
+    public static Guid BirthdaysProductID => new("{37620AE5-C40B-45ce-855A-39DD7D76A1FA}");
 
-    public static Guid TalkProductID
-    {
-        get { return new Guid("{BF88953E-3C43-4850-A3FB-B1E43AD53A3E}"); }
-    }
+    public static Guid TalkProductID => new("{BF88953E-3C43-4850-A3FB-B1E43AD53A3E}");
 
     private readonly IServiceProvider _serviceProvider;
 
@@ -199,7 +171,7 @@ public class WebItemManager
 [Scope]
 public class WebItemManagerSecurity(WebItemSecurity webItemSecurity, AuthContext authContext, WebItemManager webItemManager)
 {
-    public List<IWebItem> GetItems(WebZoneType webZone, ItemAvailableState availableState =  ItemAvailableState.Normal)
+    public List<IWebItem> GetItems(WebZoneType webZone, ItemAvailableState availableState = ItemAvailableState.Normal)
     {
         var copy = webItemManager.GetItemsAll().ToList();
         var list = copy.Where(item =>

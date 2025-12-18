@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -44,20 +44,23 @@ public static class RegionsExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddRegions(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Regions>(entity =>
+        public void MySqlAddRegions()
         {
-            entity.HasCharSet("utf8");
-            entity.HasKey(e => e.Region);
-        });
-    }
+            modelBuilder.Entity<Regions>(entity =>
+            {
+                entity.HasCharSet("utf8");
+                entity.HasKey(e => e.Region);
+            });
+        }
 
-    public static void PgSqlAddRegions(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<Regions>(entity =>
+        public void PgSqlAddRegions()
         {
-            entity.HasKey(e => e.Region);
-        });
+            modelBuilder.Entity<Regions>(entity =>
+            {
+                entity.HasKey(e => e.Region);
+            });
+        }
     }
 }

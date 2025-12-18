@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,15 +33,14 @@ public class CookieAuthHandler(
     ILoggerFactory logger,
     UrlEncoder encoder,
     SecurityContext securityContext,
-    CookiesManager cookiesManager,
-    IHttpContextAccessor httpContextAccessor)
+    CookiesManager cookiesManager)
     : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         try
         {
-            var authorization = httpContextAccessor.HttpContext.Request.Cookies[cookiesManager.GetAscCookiesName()] ?? httpContextAccessor.HttpContext.Request.Headers.Authorization.ToString();
+            var authorization = Request.Cookies[cookiesManager.GetAscCookiesName()] ?? Request.Headers.Authorization.ToString();
 
             if (string.IsNullOrEmpty(authorization))
             {
@@ -55,7 +54,7 @@ public class CookieAuthHandler(
                 authorization = authorization["Bearer ".Length..];
             }
 
-            if (!(await securityContext.AuthenticateMeAsync(authorization)))
+            if (!await securityContext.AuthenticateMeAsync(authorization))
             {
                 throw new AuthenticationException(nameof(HttpStatusCode.Unauthorized));
             }

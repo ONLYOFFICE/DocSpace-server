@@ -1,14 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
     <NoWarn>NU1701</NoWarn>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DebugType>none</DebugType>
-    <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,9 +19,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DotNetOpenAuth.Ultimate" Version="4.3.4.13329" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.6.0" />
-    <PackageReference Include="TweetinviAPI" Version="5.0.4" />
+    <PackageReference Include="DotNetOpenAuth.Ultimate" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
+    <PackageReference Include="TweetinviAPI" />
   </ItemGroup>
 
   <ItemGroup>

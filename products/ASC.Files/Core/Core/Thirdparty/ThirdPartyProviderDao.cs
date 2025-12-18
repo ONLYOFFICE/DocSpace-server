@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -41,7 +41,7 @@ internal abstract class ThirdPartyProviderDao
     }
 
 
-    public IAsyncEnumerable<File<string>> GetFilesAsync(IEnumerable<string> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, 
+    public IAsyncEnumerable<File<string>> GetFilesAsync(IEnumerable<string> parentIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension,
         bool searchInContent)
     {
         return AsyncEnumerable.Empty<File<string>>();
@@ -132,6 +132,11 @@ internal abstract class ThirdPartyProviderDao
         return Task.CompletedTask;
     }
 
+    public Task ReassignFoldersAsync(Guid newOwnerId, IEnumerable<string> folderIds)
+    {
+        return Task.CompletedTask;
+    }
+
     public IAsyncEnumerable<Folder<string>> SearchFoldersAsync(string text, bool bunch)
     {
         return null;
@@ -210,6 +215,11 @@ internal abstract class ThirdPartyProviderDao
         return Task.FromResult<string>(null);
     }
 
+    public Task<string> GetFolderIDAiAgentsAsync(bool createIfNotExists)
+    {
+        return Task.FromResult<string>(null);
+    }
+
     public Task<string> GetBunchObjectIDAsync(string folderID)
     {
         return Task.FromResult<string>(null);
@@ -224,26 +234,51 @@ internal abstract class ThirdPartyProviderDao
     {
         throw new NotImplementedException();
     }
-    public Task<int> GetFilesCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, bool withSubfolders = false,
-        bool excludeSubject = false, string roomId = null, FormsItemDto formsItemDto = null)
-    {
-        throw new NotImplementedException();
-    }
-    
-    public Task<int> GetFoldersCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool withSubfolders = false, bool excludeSubject = false, 
-        string roomId = null)
+    public Task<bool> ContainsFormsInFolder(Folder<string> folder)
     {
         throw new NotImplementedException();
     }
 
-    public IAsyncEnumerable<File<string>> GetFilesByTagAsync(Guid tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, string[] extension, bool searchInContent, bool excludeSubject, OrderBy orderBy, int offset = 0, int count = -1)
+    public Task<int> GetFilesCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, bool withSubfolders = false,
+        bool excludeSubject = false, string roomId = null, FormsItemDto formsItemDto = null, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<int> GetSharedFilesCountAsync(string parentId)
+    {
+        return Task.FromResult(0);
+    }
+
+    public IAsyncEnumerable<File<string>> GetSharedFilesAsync(string parentId, int offset = 0, int count = -1)
     {
         return AsyncEnumerable.Empty<File<string>>();
     }
 
-    public Task<int> GetFilesByTagCountAsync(Guid tagOwner, TagType tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, string[] extension, bool searchInContent, bool excludeSubject)
+    public Task<int> GetSharedFoldersCountAsync(string parentId)
+    {
+        return Task.FromResult(0);
+    }
+
+    public IAsyncEnumerable<Folder<string>> GetSharedFoldersAsync(string parentId, int offset = 0, int count = -1)
+    {
+        return AsyncEnumerable.Empty<Folder<string>>();
+    }
+
+    public Task<int> GetFoldersCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool withSubfolders = false, bool excludeSubject = false,
+        string roomId = null, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IAsyncEnumerable<File<string>> GetFilesByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
+        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, int trashId, OrderBy orderBy, int offset, int count)
+    {
+        return AsyncEnumerable.Empty<File<string>>();
+    }
+
+    public Task<int> GetFilesByTagCountAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
+        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, int trashId)
     {
         return Task.FromResult(0);
     }
@@ -254,7 +289,7 @@ internal abstract class ThirdPartyProviderDao
         return AsyncEnumerable.Empty<Folder<string>>();
     }
 
-    public virtual IAsyncEnumerable<Folder<string>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, 
+    public virtual IAsyncEnumerable<Folder<string>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText,
         bool withoutTags, bool excludeSubject, ProviderFilter provider, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds)
     {
         return AsyncEnumerable.Empty<Folder<string>>();
@@ -266,6 +301,12 @@ internal abstract class ThirdPartyProviderDao
     {
         return AsyncEnumerable.Empty<Folder<string>>();
     }
+
+    public virtual Task<int> GetProviderBasedRoomsCountAsync(SearchArea searchArea)
+    {
+        return Task.FromResult(0);
+    }
+
     public Task<string> ChangeTreeFolderSizeAsync(string folderId, long size)
     {
         throw new NotImplementedException();
@@ -293,7 +334,7 @@ internal abstract class ThirdPartyProviderDao
         if (withoutTags)
         {
             return rooms.Join(Queries.AllThirdPartyIdMappingsAsync(filesDbContext), f => f.Id, m => m.Id, (folder, map) => new { folder, map.HashId })
-                .WhereAwait(async r => !await Queries.AnyTagLinksAsync(filesDbContext, r.HashId))
+                .Where(async (r, _) => !await Queries.AnyTagLinksAsync(filesDbContext, r.HashId))
                 .Select(r => r.folder);
         }
 
@@ -380,7 +421,7 @@ internal abstract class ThirdPartyProviderDao
             ProviderFilter.Box => ProviderTypes.Box,
             _ => throw new NotImplementedException()
         };
-        
+
         return filter.ToStringFast();
     }
 
@@ -410,7 +451,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(
     protected IProviderInfo<TFile, TFolder, TItem> ProviderInfo { get; set; }
     protected string PathPrefix { get; set; }
 
-    protected string Id { get => ProviderInfo.Selector.Id; }
+    protected string Id => ProviderInfo.Selector.Id;
 
     protected Folder<string> GetFolder()
     {
@@ -481,7 +522,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(
     protected void ProcessFolderAsRoom(Folder<string> folder)
     {
         folder.ProviderMapped = !string.IsNullOrEmpty(ProviderInfo.FolderId);
-        
+
         if (ProviderInfo.FolderId != folder.Id)
         {
             return;
@@ -490,7 +531,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(
         folder.FolderType = ProviderInfo.FolderType;
         folder.Title = ProviderInfo.CustomerTitle;
     }
-    
+
     public bool CheckInvalidFilters(IEnumerable<FilterType> filterTypes)
     {
         return filterTypes != null && filterTypes.Any(CheckInvalidFilter);
@@ -507,6 +548,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(
             FilterType.SpreadsheetsOnly or
             FilterType.ArchiveOnly or
             FilterType.MediaOnly or
+            FilterType.DiagramsOnly or
             FilterType.Pdf or
             FilterType.PdfForm;
     }
@@ -519,7 +561,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(
         }
 
         var tenantId = tenantManager.GetCurrentTenantId();
-        
+
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
@@ -532,9 +574,9 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(
 
             await foreach (var oldId in oldIds)
             {
-                var oldHashId = await mapping.MappingIdAsync(oldId);
+                var (oldHashId, _) = await mapping.MappingIdAsync(oldId);
                 var newId = oldId.Replace(oldValue, newValue);
-                var newHashId = await mapping.MappingIdAsync(newId);
+                var (newHashId, _) = await mapping.MappingIdAsync(newId);
 
                 var mappingForDelete = await Queries.ThirdPartyIdMappingsAsync(dbContext, tenantId, oldHashId).ToListAsync();
 
@@ -628,7 +670,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(
             ProviderInfo = null;
         }
     }
-    
+
     public Folder<string> GetErrorRoom()
     {
         var folder = GetFolder();
@@ -644,13 +686,14 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(
         folder.ProviderId = ProviderInfo.ProviderId;
         folder.ProviderKey = ProviderInfo.ProviderKey;
         folder.SettingsColor = ProviderInfo.Color;
+        folder.SettingsCover = ProviderInfo.Cover;
         folder.RootCreateBy = ProviderInfo.Owner;
         folder.RootId = MakeId();
         folder.ParentId = MakeId();
         folder.Error = FilesCommonResource.ErrorMessage_InvalidThirdPartyFolder;
 
         return folder;
-}
+    }
 
     public bool IsRoom(string folderId)
     {
@@ -695,7 +738,7 @@ static file class Queries
                     .Where(r => r.HashId == hashId)
                     .Select(r => r.Id)
                     .FirstOrDefault());
-    
+
     public static readonly Func<FilesDbContext, int, string, IAsyncEnumerable<string>> IdsAsync =
         EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, string idStart) =>
@@ -703,28 +746,28 @@ static file class Queries
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.Id.StartsWith(idStart))
                     .Select(r => r.Id));
-    
+
     public static readonly Func<FilesDbContext, int, string, IAsyncEnumerable<DbFilesThirdpartyIdMapping>>
         ThirdPartyIdMappingsAsync = EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, string hashId) =>
                 ctx.ThirdpartyIdMapping
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.HashId == hashId));
-    
+
     public static readonly Func<FilesDbContext, int, string, IAsyncEnumerable<DbFilesTagLink>> DbFilesTagLinksAsync =
         EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, string entryId) =>
                 ctx.TagLink
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.EntryId == entryId));
-    
+
     public static readonly Func<FilesDbContext, int, string, IAsyncEnumerable<DbFilesSecurity>> DbFilesSecuritiesAsync =
         EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, string entryId) =>
                 ctx.Security
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.EntryId == entryId));
-    
+
     public static readonly Func<FilesDbContext, int, string, IAsyncEnumerable<DbFilesLink>> FilesLinksBySourceIdAsync =
         EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, string sourceId) =>

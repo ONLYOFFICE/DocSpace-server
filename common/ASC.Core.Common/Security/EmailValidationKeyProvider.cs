@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,6 +26,9 @@
 
 namespace ASC.Security.Cryptography;
 
+/// <summary>
+/// The confirmation result.
+/// </summary>
 [Scope]
 public class EmailValidationKeyProvider
 {
@@ -78,23 +81,19 @@ public class EmailValidationKeyProvider
         {
             validVisitLinkInterval = TimeSpan.FromMinutes(15);
         }
-       
+
         ValidEmailKeyInterval = validInterval;
         ValidAuthKeyInterval = authValidInterval;
         ValidVisitLinkInterval = validVisitLinkInterval;
         _logger = logger;
     }
 
-    public string GetEmailKey(string email)
-    {
-        return GetEmailKey(_tenantManager.GetCurrentTenantId(), email);
-    }
 
-    public string GetEmailKey(int tenantId, string email)
+    public string GetEmailKey(string email, int? tenantId = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(email);
 
-        email = FormatEmail(tenantId, email);
+        email = FormatEmail(tenantId ?? _tenantManager.GetCurrentTenantId(), email);
 
         var ms = (long)(DateTime.UtcNow - _from).TotalMilliseconds;
         var hash = GetMachineHashedData(BitConverter.GetBytes(ms), Encoding.ASCII.GetBytes(email));
@@ -131,7 +130,7 @@ public class EmailValidationKeyProvider
         return result;
     }
 
-    private ValidationResult ValidateEmailKey(string email, string key, TimeSpan validInterval, int tenantId)
+    public ValidationResult ValidateEmailKey(string email, string key, TimeSpan validInterval, int tenantId)
     {
         ArgumentException.ThrowIfNullOrEmpty(email);
         ArgumentNullException.ThrowIfNull(key);
@@ -180,48 +179,53 @@ public class EmailValidationKeyProvider
 }
 
 /// <summary>
-/// Confirmation email parameters
+/// The confirmation email parameters.
 /// </summary>
 public class EmailValidationKeyModel
 {
     /// <summary>
-    /// Key
+    /// The email validation key. 
     /// </summary>
     public string Key { get; set; }
 
     /// <summary>
-    /// Employee type
+    /// The user type.
     /// </summary>
     public EmployeeType? EmplType { get; init; }
 
     /// <summary>
-    /// Email
+    /// The email address.
     /// </summary>
     [EmailAddress]
     public string Email { get; init; }
 
     /// <summary>
-    /// User ID
+    /// The encrypted email address.
+    /// </summary>
+    public string EncEmail { get; init; }
+
+    /// <summary>
+    /// The user ID.
     /// </summary>
     public Guid? UiD { get; init; }
 
     /// <summary>
-    /// Confirmation email type
+    /// The confirmation email type.
     /// </summary>
     public ConfirmType? Type { get; init; }
 
     /// <summary>
-    /// Access an account for the first time or not
+    /// Specifies whether it is the first time account access or not.
     /// </summary>
     public string First { get; init; }
 
     /// <summary>
-    /// Room ID
+    /// The room ID.
     /// </summary>
     public string RoomId { get; init; }
 
-    public void Deconstruct(out string key, out EmployeeType? emplType, out string email, out Guid? uiD, out ConfirmType? type, out string first)
+    public void Deconstruct(out string key, out EmployeeType? emplType, out string email, out Guid? uiD, out ConfirmType? type, out string first, out string encEmail)
     {
-        (key, emplType, email, uiD, type, first) = (Key, EmplType, Email, UiD, Type, First);
+        (key, emplType, email, uiD, type, first, encEmail) = (Key, EmplType, Email, UiD, Type, First, EncEmail);
     }
 }

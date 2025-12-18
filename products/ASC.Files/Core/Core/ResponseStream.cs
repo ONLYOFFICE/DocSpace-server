@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,7 +34,7 @@ public class ResponseStream(Stream stream, long length) : Stream
     {
         var stream = await response.Content.ReadAsStreamAsync();
         var length = response.Content.Headers.ContentLength ?? stream.Length;
-        
+
         var result = new ResponseStream(stream, length) { _response = response };
         return result;
     }
@@ -59,7 +59,7 @@ public class ResponseStream(Stream stream, long length) : Stream
     {
         return stream.FlushAsync(cancellationToken);
     }
-    
+
     public override int Read(byte[] buffer, int offset, int count)
     {
         return stream.Read(buffer, offset, count);
@@ -89,7 +89,7 @@ public class ResponseStream(Stream stream, long length) : Stream
     {
         stream.Write(buffer, offset, count);
     }
-    
+
     public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
     {
         return stream.WriteAsync(buffer, offset, count, cancellationToken);

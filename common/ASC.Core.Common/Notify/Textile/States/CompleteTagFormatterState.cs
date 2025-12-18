@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,7 +34,7 @@ public class CompleteTagFormatterState(TextileFormatter f) : FormatterState(f)
 {
     public override string Consume(string input, Match m)
     {
-        this.Formatter.ChangeState(this);
+        Formatter.ChangeState(this);
         return input;
     }
 
@@ -71,11 +71,5 @@ public class CompleteTagFormatterState(TextileFormatter f) : FormatterState(f)
         return false;
     }
 
-    public override Type FallbackFormattingState
-    {
-        get
-        {
-            return null;
-        }
-    }
+    public override Type FallbackFormattingState => null;
 }

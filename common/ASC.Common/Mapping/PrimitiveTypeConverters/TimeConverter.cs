@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,14 +26,14 @@
 
 namespace ASC.Common.Mapping.PrimitiveTypeConverters;
 
-public class TimeConverter : ITypeConverter<long, DateTime>, ITypeConverter<DateTime, long>
+public class TimeConverter
 {
-    public DateTime Convert(long source, DateTime destination, ResolutionContext context)
+    public DateTime Convert(long source, DateTime destination)
     {
         return new DateTime(source);
     }
 
-    public long Convert(DateTime source, long destination, ResolutionContext context)
+    public long Convert(DateTime source, long destination)
     {
         return source.Ticks;
     }

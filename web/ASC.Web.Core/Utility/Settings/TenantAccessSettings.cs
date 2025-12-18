@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,14 +32,12 @@ public class TenantAccessSettings : ISettings<TenantAccessSettings>
 
     public bool RegisterUsersImmediately { get; set; }
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{0CB4C871-0040-45AB-AE79-4CC292B91EF1}"); }
-    }
+    public static Guid ID => new("{0CB4C871-0040-45AB-AE79-4CC292B91EF1}");
 
     public TenantAccessSettings GetDefault()
     {
         return new TenantAccessSettings { Anyone = false, RegisterUsersImmediately = false };
     }
+
+    public DateTime LastModified { get; set; }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2024
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,12 +26,26 @@
 
 namespace ASC.Files.Core;
 
+/// <summary>
+/// The form filling status.
+/// </summary>
 public enum FormFillingStatus
 {
+    [SwaggerEnum("None")]
     None = 0,
+
+    [SwaggerEnum("Draft")]
     Draft = 1,
+
+    [SwaggerEnum("You turn")]
     YouTurn = 2,
+
+    [SwaggerEnum("In progress")]
     InProgress = 3,
+
+    [SwaggerEnum("Complete")]
     Complete = 4,
+
+    [SwaggerEnum("Stoped")]
     Stoped = 5
 }

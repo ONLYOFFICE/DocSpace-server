@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,11 +32,10 @@ public abstract class ModuleSpecificsBase(Helpers helpers) : IModuleSpecifics
     public abstract IEnumerable<TableInfo> Tables { get; }
     public abstract IEnumerable<RelationInfo> TableRelations { get; }
     public virtual string ConnectionStringName
-        => _connectionStringName ??= ModuleName.ToString().ToLower();
+        => field ??= ModuleName.ToString().ToLower();
 
-    private string _connectionStringName;
     protected Helpers Helpers => helpers;
-    
+
     public IEnumerable<TableInfo> GetTablesOrdered()
     {
         var notOrderedTables = new List<TableInfo>(Tables);
@@ -92,7 +91,7 @@ public abstract class ModuleSpecificsBase(Helpers helpers) : IModuleSpecifics
 
         command.CommandText = string.Format("select t.* from {0} as t {1} {2} limit {3},{4};", table.Name, GetSelectCommandConditionText(tenantId, table, id), conditionUserText, offset, limit);
 
-        return command; 
+        return command;
     }
 
     private string GetSelectCommandConditionText(int tenantId, TableInfo table, Guid id)
@@ -146,7 +145,7 @@ public abstract class ModuleSpecificsBase(Helpers helpers) : IModuleSpecifics
         var insert = table.InsertMethod != InsertMethod.Ignore
                                               ? table.InsertMethod.ToString().ToLower()
                                                   : "insert ignore";
-        var insertCommantText = $"{insert} into {table.Name}({string.Join(",", columns.Select(c=> $"`{c}`"))}) values({string.Join(",", columns.Select(c => "@" + c))});";
+        var insertCommantText = $"{insert} into {table.Name}({string.Join(",", columns.Select(c => $"`{c}`"))}) values({string.Join(",", columns.Select(c => "@" + c))});";
 
         var command = connection.CreateCommand();
         command.CommandText = insertCommantText;
@@ -199,7 +198,7 @@ public abstract class ModuleSpecificsBase(Helpers helpers) : IModuleSpecifics
         return true;
     }
 
-    public virtual void PrepareData(DataTable data)
+    public virtual void PrepareData(DataTable data, BackupCorrection backupCorrection)
     {
         // nothing to do
     }
