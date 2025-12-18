@@ -636,6 +636,21 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Hello, $UserName!
+        ///
+        ///This email is to inform you that your API key &quot;*$Message*&quot; has expired and has been deactivated.
+        ///
+        ///You can generate a new API key in the &quot;Developer Tools&quot;:&quot;${__VirtualRootPath}/developer-tools/api-keys&quot;.
+        ///
+        ///$TrulyYours.
+        /// </summary>
+        public static string pattern_api_key_expired {
+            get {
+                return ResourceManager.GetString("pattern_api_key_expired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to h1.&quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal backup created
         ///
         ///Dear $OwnerName,
@@ -2438,6 +2453,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_activate_email {
             get {
                 return ResourceManager.GetString("subject_activate_email", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ${LetterLogoText} DocSpace: Your API key is expired.
+        /// </summary>
+        public static string subject_api_key_expired {
+            get {
+                return ResourceManager.GetString("subject_api_key_expired", resourceCulture);
             }
         }
         

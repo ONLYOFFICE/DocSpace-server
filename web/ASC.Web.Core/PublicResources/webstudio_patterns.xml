@@ -713,4 +713,10 @@
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_renew_subscription_error|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
+  <!-- api key expired -->
+  <pattern id="api_key_expired">
+    <subject resource="|subject_api_key_expired|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_api_key_expired|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
 </patterns>

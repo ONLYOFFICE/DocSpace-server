@@ -166,7 +166,9 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
                 Actions.UserAgentRoleChanged,
 
                 Actions.TopUpWalletError,
-                Actions.RenewSubscriptionError
+                Actions.RenewSubscriptionError,
+
+                Actions.ApiKeyExpired
             );
     }
 

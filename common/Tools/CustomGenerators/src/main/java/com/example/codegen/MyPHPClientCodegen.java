@@ -34,7 +34,7 @@ public class MyPHPClientCodegen extends PhpClientCodegen {
     @Override
     public void processOpts() {
         super.processOpts();
-        this.outputFolder = "generated-code/my-php";
+        this.outputFolder = "../../../sdk/docspace-api-sdk-php";
 
         if (openAPI.getServers() != null && !openAPI.getServers().isEmpty()) {
             Server server = openAPI.getServers().get(0);

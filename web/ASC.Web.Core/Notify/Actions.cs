@@ -168,4 +168,6 @@ public static class Actions
 
     public static readonly INotifyAction TopUpWalletError = new NotifyAction("top_up_wallet_error");
     public static readonly INotifyAction RenewSubscriptionError = new NotifyAction("renew_subscription_error");
+
+    public static readonly INotifyAction ApiKeyExpired = new NotifyAction("api_key_expired");
 }

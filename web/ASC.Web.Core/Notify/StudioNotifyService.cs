@@ -1110,7 +1110,7 @@ public class StudioNotifyService(
             await studioNotifyHelper.RecipientFromEmailAsync(user.Email, false),
             [EMailSenderName],
             new TagValue(Tags.UserName, user.FirstName.HtmlEncode()),
-            new TagValue(CommonTags.Culture, user.GetCulture().Name),
+            new TagValue(CommonTags.Culture, culture.Name),
             TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/wallet")),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours));
         }
@@ -1180,6 +1180,27 @@ public class StudioNotifyService(
         var displayUserName = userInfo.DisplayUserName(false, displayUserSettingsHelper);
 
         messageService.Send(MessageAction.UserSentPasswordChangeInstructions, MessageTarget.Create(userInfo.Id), auditEventDate, displayUserName);
+    }
+
+    #endregion
+
+
+    #region API Keys
+
+    public async Task SendApiKeyExpiredAsync(UserInfo userInfo, string keyName)
+    {
+        var culture = GetCulture(userInfo);
+
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
+
+        await studioNotifyServiceHelper.SendNoticeToAsync(
+            Actions.ApiKeyExpired,
+            [userInfo],
+            [EMailSenderName],
+            new TagValue(Tags.UserName, userInfo.FirstName.HtmlEncode()),
+            new TagValue(Tags.Message, keyName),
+            new TagValue(CommonTags.Culture, culture.Name),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours));
     }
 
     #endregion

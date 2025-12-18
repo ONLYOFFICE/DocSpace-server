@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core;
+
 namespace ASC.Web.Api.Controllers.Settings;
 
 public partial class SettingsController(
@@ -46,7 +48,6 @@ public partial class SettingsController(
     ExternalResourceSettings externalResourceSettings,
     ExternalResourceSettingsHelper externalResourceSettingsHelper,
     ConsumerFactory consumerFactory,
-    TimeZoneConverter timeZoneConverter,
     CustomNamingPeople customNamingPeople,
     IFusionCache fusionCache,
     ProviderManager providerManager,
@@ -125,8 +126,8 @@ public partial class SettingsController(
         {
             settings.TrustedDomains = tenant.TrustedDomains;
             settings.TrustedDomainsType = tenant.TrustedDomainsType;
-            var timeZone = timeZoneConverter.GetTimeZone(tenant.TimeZone);
-            settings.Timezone = timeZoneConverter.GetIanaTimeZoneId(timeZone);
+            var timeZone = TimeZoneConverter.GetTimeZone(tenant.TimeZone);
+            settings.Timezone = TimeZoneConverter.GetIanaTimeZoneId(timeZone);
             settings.UtcOffset = timeZone.GetUtcOffset(DateTime.UtcNow);
             settings.UtcHoursOffset = settings.UtcOffset.TotalHours;
             settings.OwnerId = tenant.OwnerId;
@@ -178,6 +179,7 @@ public partial class SettingsController(
 
             settings.InvitationLimit = await userInvitationLimitHelper.GetLimit();
             settings.MaxImageUploadSize = setupInfo.MaxImageUploadSize;
+            settings.DefaultFolderType = (await settingsManager.LoadForCurrentUserAsync<StudioDefaultPageSettings>()).DefaultFolderType;
         }
         else
         {
@@ -596,8 +598,8 @@ public partial class SettingsController(
         {
             listOfTimezones.Add(new TimezonesRequestsDto
             {
-                Id = timeZoneConverter.GetIanaTimeZoneId(tz),
-                DisplayName = timeZoneConverter.GetTimeZoneDisplayName(tz)
+                Id = TimeZoneConverter.GetIanaTimeZoneId(tz),
+                DisplayName = TimeZoneConverter.GetTimeZoneDisplayName(tz)
             });
         }
 
@@ -884,7 +886,7 @@ public partial class SettingsController(
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Message about saving settings successfully", typeof(object))]
     [HttpPut("timeandlanguage")]
-    public async Task<string> SetTimaAndLanguage(TimeZoneRequestDto inDto)
+    public async Task<string> SetTimeAndLanguage(TimeZoneRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -899,23 +901,8 @@ public partial class SettingsController(
         }
 
         var oldTimeZone = tenant.TimeZone;
-        var newTimeZone = TimeZoneInfo.Utc;
 
-        try
-        {
-            newTimeZone = TimeZoneInfo.FindSystemTimeZoneById(inDto.TimeZoneID);
-        }
-        catch
-        {
-            var timeZones = TimeZoneInfo.GetSystemTimeZones().ToList();
-            if (timeZones.All(tz => tz.Id != "UTC"))
-            {
-                timeZones.Add(TimeZoneInfo.Utc);
-            }
-            newTimeZone = timeZones.FirstOrDefault(tz => tz.Id == inDto.TimeZoneID) ?? TimeZoneInfo.Utc;
-        }
-
-        tenant.TimeZone = timeZoneConverter.GetIanaTimeZoneId(newTimeZone);
+        tenant.TimeZone = TimeZoneConverter.GetIanaTimeZoneId(inDto.TimeZoneID);
 
         await tenantManager.SaveTenantAsync(tenant);
 
@@ -935,23 +922,45 @@ public partial class SettingsController(
     }
 
     /// <summary>
-    /// Sets the default product page.
+    /// Sets the default folder.
     /// </summary>
-    /// <short>Set the default product page</short>
-    /// <path>api/2.0/settings/defaultpage</path>
-    [ApiExplorerSettings(IgnoreApi = true)]
+    /// <short>Set the default folder</short>
+    /// <path>api/2.0/settings/defaultFolder</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Message about saving settings successfully", typeof(object))]
-    [HttpPut("defaultpage")]
-    public async Task<string> SaveDefaultPageSetting(DefaultProductRequestDto inDto)
+    [SwaggerResponse(200, "Message about saving settings successfully", typeof(StudioDefaultPageSettings))]
+    [HttpPut("defaultfolder")]
+    public async Task<StudioDefaultPageSettings> SaveDefaultFolder(DefaultProductRequestDto inDto)
     {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        List<FolderType> allowedFolderTypes =
+        [
+            FolderType.AiAgents,
+            FolderType.USER,
+            FolderType.VirtualRooms,
+            FolderType.SHARE,
+            FolderType.Favorites,
+            FolderType.Recent
+        ];
 
-        await settingsManager.SaveAsync(new StudioDefaultPageSettings { DefaultProductID = inDto.DefaultProductID });
+        if (!allowedFolderTypes.Contains(inDto.DefaultFolderType))
+        {
+            throw new ArgumentException(nameof(inDto.DefaultFolderType));
+        }
+
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID) && inDto.DefaultFolderType == FolderType.USER)
+        {
+            throw new ArgumentException(nameof(inDto.DefaultFolderType));
+        }
+        
+        var defaultPageSettings = new StudioDefaultPageSettings
+        {
+            DefaultFolderType = inDto.DefaultFolderType
+        };
+        
+        await settingsManager.SaveForCurrentUserAsync(defaultPageSettings);
 
         messageService.Send(MessageAction.DefaultStartPageSettingsUpdated);
 
-        return Resource.SuccessfullySaveSettingsMessage;
+        return defaultPageSettings;
     }
 
     /// <summary>
