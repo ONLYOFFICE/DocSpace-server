@@ -27,7 +27,7 @@
 namespace ASC.Core.Tenants;
 
 /// <summary>
-/// The ai agent quota settings.
+/// The AI agent quota settings.
 /// </summary>
 [Serializable]
 public class TenantAiAgentQuotaSettings : TenantEntityQuotaSettings, ISettings<TenantAiAgentQuotaSettings>

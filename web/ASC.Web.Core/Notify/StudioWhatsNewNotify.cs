@@ -261,8 +261,11 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
         }
         else if (action == MessageAction.FileUploaded)
         {
-            userActivityText = string.Format(WebstudioNotifyPatternResource.ActionFileUploaded,
-                userName, fileUrl, fileTitle, roomsUrl, roomsTitle, date);
+            var pattern = activityInfo.IsAgent && activityInfo.IsKnowledge
+                ? WebstudioNotifyPatternResource.ActionFileUploadedToAgentKnowledge
+                : WebstudioNotifyPatternResource.ActionFileUploaded;
+
+            userActivityText = string.Format(pattern, userName, fileUrl, fileTitle, roomsUrl, roomsTitle, date);
         }
         else if (action == MessageAction.UserFileUpdated)
         {
@@ -369,6 +372,7 @@ public class ActivityInfo
     public List<Guid> TargetUsers { get; set; }
     public string UserRole { get; set; }
     public bool IsAgent { get; set; }
+    public bool IsKnowledge { get; set; }
 }
 
 public enum WhatsNewType

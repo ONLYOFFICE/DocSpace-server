@@ -2636,27 +2636,27 @@ ${LetterLogoText} Support Team
     <value>Backup for your DocSpace failed</value>
   </data>
   <data name="ActionAgentCreated" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; created a new agent: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; created a new AI agent: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionAgentRenamed" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; renamed the agent: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; renamed the AI agent: &lt;b&gt;{1}&lt;/b&gt; &gt; &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt; - &lt;b&gt;{4}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserAddedToAgent" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; was added to the agent: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; was added to the AI agent: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
   <data name="ActionAgentRemoved" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; deleted the agent: &lt;b&gt;{1}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; deleted the AI agent: &lt;b&gt;{1}&lt;/b&gt;</value>
   </data>
   <data name="ActionUserRemovedFromAgent" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; was removed from the agent: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; was removed from the AI agent: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; - &lt;b&gt;{3}&lt;/b&gt;</value>
   </data>
   <data name="ActionAgentUpdateAccessForUser" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; was assigned the role of &lt;b&gt;{1}&lt;/b&gt; in the agent: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; was assigned the role of &lt;b&gt;{1}&lt;/b&gt; in the AI agent: &lt;a href="{2}" style="color:#FF6F3D;"&gt;{3}&lt;/a&gt;</value>
   </data>
   <data name="pattern_saas_agent_invite" xml:space="preserve">
     <value>Hello!
 
-You are invited to join a DocSpace agent at "${__VirtualRootPath}":"${__VirtualRootPath}". Accept the invitation by clicking the link:
+You are invited to join a DocSpace AI agent at "${__VirtualRootPath}":"${__VirtualRootPath}". Accept the invitation by clicking the link:
 
 $OrangeButton
 
@@ -2667,7 +2667,7 @@ $TrulyYours</value>
   <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
     <value>Hello!
 
-$__AuthorName invited you to join the agent "$Message":"$InviteLink" on "${__VirtualRootPath}":"${__VirtualRootPath}".
+$__AuthorName invited you to join the AI agent "$Message":"$InviteLink" on "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 $OrangeButton
 
@@ -2677,10 +2677,10 @@ $TrulyYours</value>
     <value>Join ${LetterLogoText} DocSpace</value>
   </data>
   <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
-    <value>You're invited to the ${LetterLogoText} DocSpace agent</value>
+    <value>You're invited to the ${LetterLogoText} DocSpace AI agent</value>
   </data>
   <data name="ButtonJoinAgent" xml:space="preserve">
-    <value>Join agent</value>
+    <value>Join AI agent</value>
   </data>
   <data name="pattern_portal_deleted_to_support" xml:space="preserve">
     <value>${LetterLogoText} DocSpace has been deleted.
@@ -2705,5 +2705,20 @@ $TrulyYours</value>
   </data>
   <data name="subject_api_key_expired" xml:space="preserve">
     <value>${LetterLogoText} DocSpace: Your API key is expired</value>
+  </data>
+  <data name="pattern_user_agent_role_changed" xml:space="preserve">
+    <value>Hello!
+
+You are assigned a new role in the DocSpace AI agent "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+Learn more about room roles and permissions in "Help Center":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_user_agent_role_changed" xml:space="preserve">
+    <value>Your role in a DocSpace AI agent has changed</value>
+  </data>
+  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; uploaded a new document: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; to the knowledge base of the AI agent: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
 </root>
