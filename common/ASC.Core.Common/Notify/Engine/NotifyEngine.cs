@@ -302,7 +302,6 @@ public class NotifyEngine(Context context,
         noticeMessage.Pattern = pattern;
         noticeMessage.ContentType = pattern.ContentType;
         noticeMessage.AddArgument(request.Arguments.ToArray());
-        var patternProvider = await request.GetPatternProvider(serviceScope);
 
         var formatter = new NVelocityPatternFormatter();
         try
