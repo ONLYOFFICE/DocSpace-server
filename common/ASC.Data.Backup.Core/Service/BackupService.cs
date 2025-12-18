@@ -320,11 +320,15 @@ public class BackupService(
     
     public async Task CancelBackupAsync(int tenantId)
     {
+        await DemandPermissionsBackupAsync();
+
         await backupWorker.CancelBackupAsync(tenantId);
     }
 
     public async Task CancelRestoreAsync(int tenantId)
     {
+        await DemandPermissionsBackupAsync();
+
         await backupWorker.CancelRestoreAsync(tenantId);
     }
 
