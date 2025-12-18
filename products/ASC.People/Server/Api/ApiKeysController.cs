@@ -182,6 +182,11 @@ public class ApiKeysController(
         var isAdmin = currentType is EmployeeType.DocSpaceAdmin;
         var apiKey = await apiKeyManager.GetApiKeyAsync(requestDto.KeyId);
 
+        if (apiKey.ExpiresAt.HasValue && apiKey.ExpiresAt.Value < DateTime.UtcNow)
+        {
+            return false;
+        }
+
         if (!isAdmin)
         {
 
