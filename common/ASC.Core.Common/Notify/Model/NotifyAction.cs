@@ -32,6 +32,7 @@ public class NotifyAction(string id, string name = null) : INotifyAction
 {
     public string ID { get; } = id ?? throw new ArgumentNullException(nameof(id));
     public string Name { get; } = name;
+    public List<Pattern2> Patterns { get; set; } = [];
 
     public static implicit operator NotifyActionItem(NotifyAction cache)
     {

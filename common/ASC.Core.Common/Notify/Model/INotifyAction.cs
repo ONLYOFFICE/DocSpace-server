@@ -30,4 +30,5 @@ public interface INotifyAction
 {
     string ID { get; }
     string Name { get; }
+    List<Pattern2> Patterns { get; set; }
 }

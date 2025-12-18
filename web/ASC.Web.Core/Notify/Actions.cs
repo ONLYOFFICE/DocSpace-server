@@ -169,5 +169,12 @@ public static class Actions
     public static readonly INotifyAction TopUpWalletError = new NotifyAction("top_up_wallet_error");
     public static readonly INotifyAction RenewSubscriptionError = new NotifyAction("renew_subscription_error");
 
-    public static readonly INotifyAction ApiKeyExpired = new NotifyAction("api_key_expired");
+    public static readonly INotifyAction ApiKeyExpired = new NotifyAction("api_key_expired")
+    {
+        Patterns = [ 
+            new EmailPattern("api_key_expired", 
+            () => WebstudioNotifyPatternResource.subject_api_key_expired, 
+            () => WebstudioNotifyPatternResource.pattern_api_key_expired)
+        ]
+    };
 }

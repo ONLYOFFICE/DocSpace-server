@@ -34,3 +34,11 @@ public interface IPattern
     string ContentType { get; }
     string Styler { get; }
 }
+
+public interface IPattern2
+{
+    string ID { get; }
+    Func<string> Subject { get; }
+    Func<string> Body { get; }
+    Type Styler { get; }
+}
