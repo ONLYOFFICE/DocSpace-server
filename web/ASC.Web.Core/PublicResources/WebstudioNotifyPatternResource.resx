@@ -2694,4 +2694,16 @@ Please make sure that automatic billing is turned off. Check the status of autom
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
     <value>${LetterLogoText} DocSpace has been deleted</value>
   </data>
+  <data name="pattern_api_key_expired" xml:space="preserve">
+    <value>Hello, $UserName!
+
+This email is to inform you that your API key "*$Message*" has expired and has been deactivated.
+
+You can generate a new API key in the "Developer Tools":"${__VirtualRootPath}/developer-tools/api-keys".
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_api_key_expired" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace: Your API key is expired</value>
+  </data>
 </root>
