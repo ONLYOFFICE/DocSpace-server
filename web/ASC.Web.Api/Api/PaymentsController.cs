@@ -602,11 +602,11 @@ public class PaymentController(
     /// <short>
     /// Get the checkout setup page URL
     /// </short>
-    /// <path>api/2.0/portal/payment/chechoutsetupurl</path>
+    /// <path>api/2.0/portal/payment/checkoutsetupurl</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The URL to the checkout setup page", typeof(Uri))]
     [SwaggerResponse(403, "No permissions to perform this action")]
-    [HttpGet("chechoutsetupurl")]
+    [HttpGet("checkoutsetupurl")]
     public async Task<Uri> GetCheckoutSetupUrl(CheckoutSetupUrlRequestsDto inDto)
     {
         await DemandAdminAsync();
