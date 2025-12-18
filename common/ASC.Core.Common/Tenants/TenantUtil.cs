@@ -27,7 +27,7 @@
 namespace ASC.Core.Tenants;
 
 [Scope]
-public class TenantUtil(TenantManager tenantManager, TimeZoneConverter timeZoneConverter)
+public class TenantUtil(TenantManager tenantManager)
 {
     private string _timeZoneName;
 
@@ -39,7 +39,7 @@ public class TenantUtil(TenantManager tenantManager, TimeZoneConverter timeZoneC
             if (field == null || _timeZoneName != tenantTimeZone)
             {
                 _timeZoneName = tenantTimeZone;
-                field = timeZoneConverter.GetTimeZone(tenantTimeZone);
+                field = TimeZoneConverter.GetTimeZone(tenantTimeZone);
             }
             return field;
         }
@@ -52,7 +52,7 @@ public class TenantUtil(TenantManager tenantManager, TimeZoneConverter timeZoneC
 
     public DateTime DateTimeFromUtc(string timeZone, DateTime utc)
     {
-        return DateTimeFromUtc(timeZoneConverter.GetTimeZone(timeZone), utc);
+        return DateTimeFromUtc(TimeZoneConverter.GetTimeZone(timeZone), utc);
     }
 
     private static DateTime DateTimeFromUtc(TimeZoneInfo timeZone, DateTime utc)
@@ -105,6 +105,6 @@ public class TenantUtil(TenantManager tenantManager, TimeZoneConverter timeZoneC
 
     public DateTime DateTimeNow(string timeZone)
     {
-        return DateTimeNow(timeZoneConverter.GetTimeZone(timeZone));
+        return DateTimeNow(TimeZoneConverter.GetTimeZone(timeZone));
     }
 }
