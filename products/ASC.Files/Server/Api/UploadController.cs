@@ -27,21 +27,28 @@
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
-public class UploadControllerInternal(UploadControllerHelper filesControllerHelper,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
-    : UploadController<int>(filesControllerHelper,
-        folderDtoHelper,
-    fileDtoHelper);
+public class UploadControllerInternal(
+    UploadControllerHelper filesControllerHelper,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    FileUploader fileUploader,
+    ChunkedUploadSessionHelper chunkedUploadSessionHelper)
+    : UploadController<int>(filesControllerHelper, folderDtoHelper, fileDtoHelper, fileUploader, chunkedUploadSessionHelper);
 
-public class UploadControllerThirdparty(UploadControllerHelper filesControllerHelper,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
-    : UploadController<string>(filesControllerHelper, folderDtoHelper, fileDtoHelper);
+public class UploadControllerThirdparty(
+    UploadControllerHelper filesControllerHelper,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    FileUploader fileUploader,
+    ChunkedUploadSessionHelper chunkedUploadSessionHelper)
+    : UploadController<string>(filesControllerHelper, folderDtoHelper, fileDtoHelper, fileUploader, chunkedUploadSessionHelper);
 
-public abstract class UploadController<T>(UploadControllerHelper filesControllerHelper,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
+public abstract class UploadController<T>(
+    UploadControllerHelper filesControllerHelper,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    FileUploader fileUploader,
+    ChunkedUploadSessionHelper chunkedUploadSessionHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -68,12 +75,35 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// </remarks>
     /// <path>api/2.0/files/{folderId}/upload/create_session</path>
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "Information about created session", typeof(object))]
+    [SwaggerResponse(200, "Information about created session", typeof(ChunkedUploadSessionResponseWrapper<>))]
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [HttpPost("{folderId}/upload/create_session")]
     public async Task<ChunkedUploadSessionResponseWrapper<T>> CreateUploadSession(SessionRequestDto<T> inDto)
     {
         return await filesControllerHelper.CreateUploadSessionAsync(inDto.FolderId, inDto.Session.FileName, inDto.Session.FileSize, inDto.Session.RelativePath, inDto.Session.Encrypted, inDto.Session.CreateOn, inDto.Session.CreateNewIfExist);
+    }
+    
+    [Tags("Files / Operations")]
+    [SwaggerResponse(200, "Information about created session")]
+    [SwaggerResponse(403, "You don't have enough permission to create")]
+    [HttpDelete("{folderId}/upload/abort_session/{sessionId}")]
+    public async Task AbortUploadSession(AbortSessionRequestDto<T> inDto)
+    {
+        await fileUploader.AbortUploadAsync<T>(inDto.SessionId);
+    }
+    
+    [Tags("Files / Operations")]
+    [SwaggerResponse(200, "Information about created session")]
+    [SwaggerResponse(403, "You don't have enough permission to create")]
+    [HttpDelete("{folderId}/upload/initiate_session/{sessionId}")]
+    public async Task<ChunkedUploadSessionResponseWrapper<T>> InitiateUploadSession(InitiateSessionRequestDto<T> inDto)
+    {
+        var createdSession =  await fileUploader.InitiateUploadAsync(inDto.FolderId, inDto.FileId, inDto.FileName, inDto.FileSize, inDto.Encrypted);
+        return new ChunkedUploadSessionResponseWrapper<T>
+        {
+            Success = true,
+            Data = await chunkedUploadSessionHelper.ToResponseObjectAsync(createdSession, true)
+        };
     }
 
     /// <summary>
@@ -95,7 +125,7 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// </remarks>
     /// <path>api/2.0/files/file/{fileId}/edit_session</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Information about created session", typeof(object))]
+    [SwaggerResponse(200, "Information about created session", typeof(ChunkedUploadSessionResponseWrapper<>))]
     [SwaggerResponse(403, "You don't have enough permission to edit the file")]
     [HttpPost("file/{fileId}/edit_session")]
     public async Task<ChunkedUploadSessionResponseWrapper<T>> CreateEditSession(CreateEditSessionRequestDto<T> inDto)
