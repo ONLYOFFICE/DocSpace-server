@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -75,11 +76,13 @@ public class SwaggerOperationIdFilter : IOperationFilter
 {
     private readonly string _route;
     private readonly string _newOperationId;
+    private readonly string _shortName;
 
-    public SwaggerOperationIdFilter(string route, string newOperationId)
+    public SwaggerOperationIdFilter(string route, string newOperationId, string shortName)
     {
         _route = route;
         _newOperationId = newOperationId;
+        _shortName = shortName;
     }
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {
@@ -87,6 +90,7 @@ public class SwaggerOperationIdFilter : IOperationFilter
             context.ApiDescription.HttpMethod.Equals("GET", System.StringComparison.OrdinalIgnoreCase))
         {
             operation.OperationId = _newOperationId;
+            operation.Extensions["x-shortName"] = new OpenApiString(_shortName);
         }
     }
 }

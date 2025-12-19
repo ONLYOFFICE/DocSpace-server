@@ -759,6 +759,11 @@ public static class DocumentService
         public int FitToHeight { get; set; }
 
         /// <summary>
+        /// Allows to set the scale of the output PDF file.
+        /// </summary>
+        public int? Scale { get; set; }
+
+        /// <summary>
         /// The width of the converted area, measured in the number of pages.
         /// </summary>
         public int FitToWidth { get; set; }

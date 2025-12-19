@@ -202,15 +202,8 @@ public class ThirdpartyController(
         var employeeType = linkData.EmployeeType;
         var quotaLimit = false;
 
-        var user = await userManager.GetUserByEmailAsync(thirdPartyProfile.EMail);
-        if (user.Id != ASC.Core.Users.Constants.LostUser.Id)
-        {
-            if (!(await accountLinker.GetLinkedProfilesAsync(user.Id.ToString(), thirdPartyProfile.Provider)).Any())
-            {
-                await accountLinker.AddLinkAsync(user.Id, thirdPartyProfile);
-            }
-        }
-        else
+        var user = await GetUserByThirdPartyProfileAsync(thirdPartyProfile);
+        if (user.Id == ASC.Core.Users.Constants.LostUser.Id)
         {
             try
             {
@@ -273,6 +266,42 @@ public class ThirdpartyController(
         }
 
         return await employeeDtoHelper.GetAsync(user);
+    }
+
+    private async Task<UserInfo> GetUserByThirdPartyProfileAsync(LoginProfile profile)
+    {
+        if (!string.IsNullOrEmpty(profile.HashId))
+        {
+            var linkedProfiles = await accountLinker.GetLinkedObjectsByHashIdAsync(profile.HashId);
+            foreach (var profileId in linkedProfiles)
+            {
+                if (Guid.TryParse(profileId, out var userId))
+                {
+                    var user = await userManager.GetUsersAsync(userId);
+                    if (user.Id != Core.Users.Constants.LostUser.Id)
+                    {
+                        return user;
+                    }
+                }
+            }
+        }
+
+        if (!string.IsNullOrEmpty(profile.EMail))
+        {
+            var user = await userManager.GetUserByEmailAsync(profile.EMail);
+            if (user.Id != Core.Users.Constants.LostUser.Id)
+            {
+                var linkedProfiles = await accountLinker.GetLinkedProfilesAsync(user.Id.ToString(), profile.Provider);
+                if (!linkedProfiles.Any())
+                {
+                    await accountLinker.AddLinkAsync(user.Id, profile);
+                }
+
+                return user;
+            }
+        }
+
+        return ASC.Core.Users.Constants.LostUser;
     }
 
     /// <summary>
@@ -375,9 +404,7 @@ public class ThirdpartyController(
 
     private string GetEmailAddress(SignupAccountRequestDto inDto, LoginProfile account)
     {
-        var value = GetEmailAddress(inDto);
-
-        return string.IsNullOrEmpty(value) ? account.EMail : value;
+        return string.IsNullOrEmpty(account.EMail) ? GetEmailAddress(inDto) : account.EMail;
     }
 
     private string GetFirstName(SignupAccountRequestDto inDto)

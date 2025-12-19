@@ -1790,7 +1790,7 @@ public class FileSecurity(
                 switch (e.RootFolderType)
                 {
                     case FolderType.USER:
-                        if (e.Access is FileShare.Editing or FileShare.Comment or FileShare.Review or FileShare.CustomFilter)
+                        if (e.Access is FileShare.ReadWrite or FileShare.Editing or FileShare.Comment or FileShare.Review or FileShare.CustomFilter)
                         {
                             return true;
                         }
@@ -2082,30 +2082,33 @@ public class FileSecurity(
 
                 break;
             case FilesSecurityActions.Copy:
-                switch (e.RootFolderType)
+                if (e.Access == FileShare.Restrict || ace?.Options is { DenyDownload: true })
                 {
+                    return false;
+                }
+
+                if (e.Access != FileShare.Read && e.Access != FileShare.None)
+                {
+                    return true;
+                }
+
+                switch (e.RootFolderType)
+                {                        
                     case FolderType.USER:
-                        if (e.Access != FileShare.Restrict && isAuthenticated && !isGuest && ace?.Options is not { DenyDownload: true })
+                        if (isAuthenticated && !isGuest)
                         {
                             return true;
                         }
 
                         break;
+                    
                     default:
-                        if (ace is { SubjectType: SubjectType.ExternalLink or SubjectType.PrimaryExternalLink } && ace.Subject != userId)
-                        {
-                            return false;
-                        }
-
                         if (isRoom)
                         {
-                            if (!(isDocSpaceAdmin && (!folder.SettingsDenyDownload || e.Access is not (FileShare.Restrict or FileShare.Read or FileShare.None))))
-                            {
-                                break;
-                            }
+                            return !folder.SettingsDenyDownload;
                         }
 
-                        return true;
+                        return room is not { SettingsDenyDownload: true };
                 }
 
                 break;
@@ -2330,12 +2333,13 @@ public class FileSecurity(
         {
             ace = shares
                 .OrderBy(r => r, new OrderedSubjectComparer<T>(orderedSubjects))
+                .ThenBy(r => r.Level)
                 .ThenByDescending(r => r.Share, new FileShareRecord<T>.ShareComparer(entry.RootFolderType))
                 .FirstOrDefault();
         }
         else
         {
-            ace = shares.Where(r => Equals(r.EntryId, entry.Id) && r.EntryType == FileEntryType.Folder)
+            ace = shares
                 .OrderBy(r => r, new OrderedSubjectComparer<T>(orderedSubjects))
                 .ThenBy(r => r.Level)
                 .ThenBy(r => r.Share, new FileShareRecord<T>.ShareComparer(entry.RootFolderType))
@@ -3309,7 +3313,10 @@ public class FileSecurity(
             result.Add(new(Constants.GroupAdmin.ID, SubjectOrderType.Group));
         }
 
-        result.Add(new(Constants.GroupEveryone.ID, SubjectOrderType.Group));
+        if (userId != ASC.Core.Configuration.Constants.Guest.ID)
+        {
+            result.Add(new(Constants.GroupEveryone.ID, SubjectOrderType.Group));
+        }
 
         var linkId = await externalShare.GetLinkIdAsync();
         if (linkId != Guid.Empty)

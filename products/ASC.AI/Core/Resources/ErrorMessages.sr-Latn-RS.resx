@@ -171,4 +171,7 @@
   <data name="UnavailableServers" xml:space="preserve">
     <value>MCP serveri nisu dostupni: {0}. Proverite podešavanja veze</value>
   </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>Nije moguće obraditi fajlove: {0}. Fajlovi mogu biti oštećeni ili šifrovani</value>
+  </data>
 </root>

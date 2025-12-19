@@ -29,8 +29,11 @@ namespace ASC.AI.Core.Settings;
 public class AiSettings
 {
     public bool WebSearchEnabled { get; init; }
+    public bool WebSearchNeedReset { get; init; }
     public bool VectorizationEnabled { get; init; }
+    public bool VectorizationNeedReset { get; init; }
     public bool AiReady { get; init; }
+    public bool AiReadyNeedReset { get; init; }
     public required string EmbeddingModel { get; init; }
     public Guid? PortalMcpServerId { get; init; }
     public string KnowledgeSearchToolName => KnowledgeSearchTool.Name;

@@ -2154,4 +2154,13 @@ $TrulyYours</value>
   <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
     <value>Sunteţi invitat să vă asociaţi la agentul DocSpace ${LetterLogoText}</value>
   </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} spațiul DocSpace a fost șters.
+ 
+*Portal:* ${PortalUrl}
+*Proprietar:* ${UserName} ${UserEmail} 
+*Client:* ${OwnerName}
+ 
+Verificați dacă facturarea automată este dezactivată. Verificați statutul facturării automate în contul Stripe al clientului.</value>
+  </data>
 </root>

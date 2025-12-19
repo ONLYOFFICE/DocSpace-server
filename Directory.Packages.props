@@ -6,11 +6,11 @@
   </PropertyGroup>
   <!-- Common properties for all projects -->
   <PropertyGroup>
-      <TargetFramework>net10.0</TargetFramework>
-      <ImplicitUsings>enable</ImplicitUsings>
-      <Company>Ascensio System SIA</Company>
-      <AssemblyVersion>3.6.0</AssemblyVersion>
-      <ProductVersion>3.6.0</ProductVersion>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Company>Ascensio System SIA</Company>
+    <AssemblyVersion>3.6.0</AssemblyVersion>
+    <ProductVersion>3.6.0</ProductVersion>
     <Copyright>(c) Ascensio System SIA. All rights reserved</Copyright>
   </PropertyGroup>
   <!-- Release configuration properties -->
@@ -32,6 +32,8 @@
     <PackageVersion Include="AspNetCore.HealthChecks.UI.Client" Version="9.0.0" />
     <PackageVersion Include="DocSpace.API.SDK" Version="3.5.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Hosting.Systemd" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.0" />
     <PackageVersion Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.14.0" />
@@ -48,6 +50,7 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.Process" Version="1.10.0-beta.1" />
     <PackageVersion Include="RedisRateLimiting" Version="1.2.0" />
     <PackageVersion Include="RedisRateLimiting.AspNetCore" Version="1.2.0" />
+    <PackageVersion Include="Spectre.Console.Cli" Version="0.53.1" />
     <PackageVersion Include="StackExchange.Redis.Extensions.AspNetCore" Version="11.0.0" />
     <PackageVersion Include="StackExchange.Redis.Extensions.Newtonsoft" Version="11.0.0" />
     <PackageVersion Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />
@@ -120,7 +123,7 @@
     <PackageVersion Include="Ical.Net" Version="4.3.1" />
     <PackageVersion Include="Joonasw.AspNetCore.SecurityHeaders" Version="6.0.0" />
     <PackageVersion Include="log4net" Version="3.0.3" />
-    <PackageVersion Include="Magick.NET-Q8-AnyCPU" Version="14.9.1" />
+    <PackageVersion Include="Magick.NET-Q8-AnyCPU" Version="14.10.0" />
     <PackageVersion Include="MailKit" Version="4.14.1" />
     <PackageVersion Include="Microsoft.AspNet.WebApi.Core" Version="5.3.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.0" />

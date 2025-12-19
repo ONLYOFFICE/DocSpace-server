@@ -2117,4 +2117,13 @@ $TrulyYours</value>
   <data name="subject_saas_agent_invite_existing_user" xml:space="preserve">
     <value>您已受邀加入 ${LetterLogoText} 协作空间智能体</value>
   </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>协作空间${LetterLogoText}已被删除。
+
+*门户：* ${PortalUrl}
+*所有者：* ${UserName} ${UserEmail}
+*客户：* ${OwnerName}
+
+请确保已关闭自动扣款，可在客户的 Stripe 账户中检查自动扣款状态。</value>
+  </data>
 </root>

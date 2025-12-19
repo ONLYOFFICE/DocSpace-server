@@ -1048,4 +1048,28 @@
   <data name="SetWebSearchSettings" xml:space="preserve">
     <value>已配置联网搜索设置。引擎：{0}</value>
   </data>
+  <data name="BackupCompleted" xml:space="preserve">
+    <value>备份完成</value>
+  </data>
+  <data name="BackupFailed" xml:space="preserve">
+    <value>备份失败</value>
+  </data>
+  <data name="ScheduledBackupCompleted" xml:space="preserve">
+    <value>计划备份完成</value>
+  </data>
+  <data name="ScheduledBackupFailed" xml:space="preserve">
+    <value>计划备份失败</value>
+  </data>
+  <data name="ScheduledBackupStarted" xml:space="preserve">
+    <value>计划备份开始</value>
+  </data>
+  <data name="WebpluginDeleted" xml:space="preserve">
+    <value>插件已删除：{0}</value>
+  </data>
+  <data name="WebpluginUpdated" xml:space="preserve">
+    <value>插件已更新：{0}</value>
+  </data>
+  <data name="WebpluginUploaded" xml:space="preserve">
+    <value>插件已上传：{0}</value>
+  </data>
 </root>

@@ -296,7 +296,8 @@ public class FileDtoHelper(
                 FileSecurity.FilesSecurityActions.CopySharedLink,
                 FileSecurity.FilesSecurityActions.CopyLink,
                 FileSecurity.FilesSecurityActions.FillingStatus,
-                FileSecurity.FilesSecurityActions.Vectorization
+                FileSecurity.FilesSecurityActions.Vectorization,
+                FileSecurity.FilesSecurityActions.Rename
             };
 
             foreach (var action in forbiddenActions)
@@ -306,7 +307,6 @@ public class FileDtoHelper(
 
             result.Locked = false;
             result.CanShare = false;
-            result.ViewAccessibility[Accessibility.CanConvert] = false;
 
             result.Order = "";
 
@@ -320,11 +320,6 @@ public class FileDtoHelper(
             else if(Equals(result.OriginRoomId,  await _globalFolderHelper.FolderArchiveAsync))
             {
                 result.OriginRoomTitle = result.OriginTitle;
-            }
-            else if(result.RootFolderType == FolderType.USER)
-            {
-                result.OriginRoomTitle = FilesUCResource.SharedForMe;
-                
             }
         }
         
@@ -359,6 +354,11 @@ public class FileDtoHelper(
                         result.FolderId = folderShareAsync;
                     }
 
+                    if (contextFolder is {FolderType: FolderType.Recent}  or { FolderType: FolderType.Favorites })
+                    {
+                        result.OriginRoomTitle = FilesUCResource.SharedForMe;
+                    }
+                    
                     break;
             }
         }

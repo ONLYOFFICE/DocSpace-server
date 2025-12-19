@@ -31,4 +31,6 @@ public class WebSearchSettings
     public bool Enabled { get; set; }
     public EngineType Type { get; set; }
     public EngineConfig? Config { get; set; }
+
+    public bool NeedReset { get; set; }
 }

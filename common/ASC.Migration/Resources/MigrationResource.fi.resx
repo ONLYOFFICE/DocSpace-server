@@ -210,4 +210,7 @@
   <data name="СreateRootFolder" xml:space="preserve">
     <value>Luo juuritiedosto</value>
   </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>Varmuuskopio on suurempi kuin portaalin koko</value>
+  </data>
 </root>

@@ -171,4 +171,7 @@
   <data name="UnavailableServers" xml:space="preserve">
     <value>Les serveurs MCP sont indisponibles : {0}. Veuillez vérifier les paramètres de connexion</value>
   </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>Impossible de traiter les fichiers : {0}. Les fichiers peuvent être corrompus ou chiffrés</value>
+  </data>
 </root>
