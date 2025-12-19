@@ -74,6 +74,6 @@ public class Pattern : IPattern
 
 public abstract record Pattern2(string ID, Func<string> Subject, Func<string> Body, string SenderName, Type Styler) : IPattern2;
 public record EmailPattern(string ID, Func<string> Subject, Func<string> Body) : Pattern2(ID, Subject, Body, Core.Configuration.Constants.NotifyEMailSenderSysName, typeof(TextileStyler));
-public record TelegramPattern(string ID, Func<string> Subject, Func<string> Body) : Pattern2(ID, Subject, Body, Core.Configuration.Constants.NotifyTelegramSenderSysName, typeof(MarkDownStyler));
-public record PushPattern(string ID, Func<string> Subject, Func<string> Body) : Pattern2(ID, Subject, Body, Core.Configuration.Constants.NotifyPushSenderSysName, typeof(PushStyler));
-public record JabberPattern(string ID, Func<string> Subject, Func<string> Body) : Pattern2(ID, Subject, Body, Core.Configuration.Constants.NotifyMessengerSenderSysName, typeof(JabberStyler));
+public record TelegramPattern(string ID, Func<string> Body) : Pattern2(ID, () => string.Empty, Body, Core.Configuration.Constants.NotifyTelegramSenderSysName, typeof(MarkDownStyler));
+public record PushPattern(string ID, Func<string> Body) : Pattern2(ID, () => string.Empty, Body, Core.Configuration.Constants.NotifyPushSenderSysName, typeof(PushStyler));
+public record JabberPattern(string ID, Func<string> Body) : Pattern2(ID, () => string.Empty, Body, Core.Configuration.Constants.NotifyMessengerSenderSysName, typeof(JabberStyler));
