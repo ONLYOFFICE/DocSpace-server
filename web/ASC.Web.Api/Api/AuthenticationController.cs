@@ -59,7 +59,6 @@ public class AuthenticationController(
     SettingsManager settingsManager,
     SmsManager smsManager,
     TfaManager tfaManager,
-    TimeZoneConverter timeZoneConverter,
     SmsKeyStorage smsKeyStorage,
     CommonLinkUtility commonLinkUtility,
     AuthContext authContext,
@@ -155,7 +154,7 @@ public class AuthenticationController(
             var result = new AuthenticationTokenDto
             {
                 Token = token,
-                Expires = new ApiDateTime(tenantManager, timeZoneConverter, expires)
+                Expires = new ApiDateTime(tenantManager, expires)
             };
 
             if (sms)
@@ -232,7 +231,7 @@ public class AuthenticationController(
             {
                 Sms = true,
                 PhoneNoise = SmsSender.BuildPhoneNoise(user.MobilePhone),
-                Expires = new ApiDateTime(tenantManager, timeZoneConverter, DateTime.UtcNow.Add(smsKeyStorage.StoreInterval)),
+                Expires = new ApiDateTime(tenantManager, DateTime.UtcNow.Add(smsKeyStorage.StoreInterval)),
                 ConfirmUrl = commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.PhoneAuth)
             };
         }
@@ -308,7 +307,7 @@ public class AuthenticationController(
                 var tenant = tenantManager.GetCurrentTenantId();
                 var expires = await tenantCookieSettingsHelper.GetExpiresTimeAsync(tenant);
 
-                outDto.Expires = new ApiDateTime(tenantManager, timeZoneConverter, expires);
+                outDto.Expires = new ApiDateTime(tenantManager, expires);
             }
 
             return outDto;
@@ -449,7 +448,7 @@ public class AuthenticationController(
         {
             Sms = true,
             PhoneNoise = SmsSender.BuildPhoneNoise(inDto.MobilePhone),
-            Expires = new ApiDateTime(tenantManager, timeZoneConverter, DateTime.UtcNow.Add(smsKeyStorage.StoreInterval))
+            Expires = new ApiDateTime(tenantManager, DateTime.UtcNow.Add(smsKeyStorage.StoreInterval))
         };
     }
 
@@ -487,7 +486,7 @@ public class AuthenticationController(
         {
             Sms = true,
             PhoneNoise = SmsSender.BuildPhoneNoise(user.MobilePhone),
-            Expires = new ApiDateTime(tenantManager, timeZoneConverter, DateTime.UtcNow.Add(smsKeyStorage.StoreInterval))
+            Expires = new ApiDateTime(tenantManager, DateTime.UtcNow.Add(smsKeyStorage.StoreInterval))
         };
     }
 

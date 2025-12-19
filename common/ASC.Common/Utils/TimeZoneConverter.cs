@@ -24,20 +24,58 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Core.Tenants;
+namespace ASC.Common.Utils;
 
-/// <summary>
-/// The AI agent quota settings.
-/// </summary>
-[Serializable]
-public class TenantAiAgentQuotaSettings : TenantEntityQuotaSettings, ISettings<TenantAiAgentQuotaSettings>
+public class TimeZoneConverter
 {
-    public static Guid ID => new("{6D0B226C-EF0F-4765-836E-0A08B55DC06C}");
-
-    public TenantAiAgentQuotaSettings GetDefault()
+    public static string GetTimeZoneDisplayName(TimeZoneInfo tz)
     {
-        return new TenantAiAgentQuotaSettings();
+        var displayName = tz.DisplayName;
+        if (!displayName.StartsWith("(UTC") && !displayName.StartsWith("UTC"))
+        {
+            if (tz.BaseUtcOffset != TimeSpan.Zero)
+            {
+                var offSet = tz.BaseUtcOffset < TimeSpan.Zero ? "-" : "+";
+                var name = tz.BaseUtcOffset.ToString(@"hh\:mm");
+                displayName = $"(UTC{offSet}{name}) {displayName}";
+            }
+            else
+            {
+                displayName = "(UTC) " + displayName;
+            }
+        }
+
+        return displayName;
     }
 
-    public DateTime LastModified { get; set; }
+    public static string GetIanaTimeZoneId(string timeZoneId)
+    {
+        var timeZone = GetTimeZone(timeZoneId);
+
+        return GetIanaTimeZoneId(timeZone);
+    }
+
+    public static string GetIanaTimeZoneId(TimeZoneInfo timeZone)
+    {
+        if (timeZone.HasIanaId)
+        {
+            return timeZone.Id;
+        }
+
+        return TimeZoneInfo.TryConvertWindowsIdToIanaId(timeZone.Id, out var ianaTimeZoneId)
+            ? ianaTimeZoneId
+            : timeZone.Id;
+    }
+
+    public static TimeZoneInfo GetTimeZone(string timeZoneId, bool defaultIfNoMatch = true)
+    {
+        try
+        {
+            return TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+        }
+        catch
+        {
+            return defaultIfNoMatch ? TimeZoneInfo.Utc : null;
+        }
+    }
 }

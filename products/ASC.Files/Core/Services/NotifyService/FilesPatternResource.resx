@@ -243,4 +243,18 @@ $OrangeButton
       Activity notification. "$FromUserName":"$FromUserLink" stopped form filling: "$DocumentTitle":"$DocumentURL" in the room: "$RoomTitle":"$RoomURL" — $__DateTime.
     </value>
   </data>
+  <data name="pattern_AgentRemoved" xml:space="preserve">
+    <value>h1. $__AuthorName deleted an AI agent
+
+$__AuthorName deleted the AI agent: $RoomTitle</value>
+  </data>
+  <data name="pattern_AgentUpdateAccessForUser_push" xml:space="preserve">
+    <value>Your role in the AI agent "$RoomTitle" has been changed to "$RoomRole"</value>
+  </data>
+  <data name="pattern_InvitedToAgent_push" xml:space="preserve">
+    <value>You have been invited to the AI agent "$RoomTitle"</value>
+  </data>
+  <data name="subject_AgentRemoved" xml:space="preserve">
+    <value>DocSpace notification. AI agent deleted</value>
+  </data>
 </root>
