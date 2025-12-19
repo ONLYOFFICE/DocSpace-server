@@ -26,14 +26,16 @@
 
 using ASC.Notify.Textile;
 
+using static ASC.Core.Configuration.Constants;
+
 namespace ASC.Notify.Patterns;
 
-public abstract record Pattern(string ID, Func<string> Subject, Func<string> Body, string SenderName, Type Styler) : IPattern
+public abstract record Pattern(Func<string> Subject, Func<string> Body, string SenderName, Type Styler) : IPattern
 {
     public const string HtmlContentType = "html";
 }
 
-public record EmailPattern(string ID, Func<string> Subject, Func<string> Body) : Pattern(ID, Subject, Body, Core.Configuration.Constants.NotifyEMailSenderSysName, typeof(TextileStyler));
-public record TelegramPattern(string ID, Func<string> Body) : Pattern(ID, () => string.Empty, Body, Core.Configuration.Constants.NotifyTelegramSenderSysName, typeof(MarkDownStyler));
-public record PushPattern(string ID, Func<string> Body) : Pattern(ID, () => string.Empty, Body, Core.Configuration.Constants.NotifyPushSenderSysName, typeof(PushStyler));
-public record JabberPattern(string ID, Func<string> Body) : Pattern(ID, () => string.Empty, Body, Core.Configuration.Constants.NotifyMessengerSenderSysName, typeof(JabberStyler));
+public record EmailPattern(Func<string> Subject, Func<string> Body) : Pattern(Subject, Body, NotifyEMailSenderSysName, typeof(TextileStyler));
+public record TelegramPattern(Func<string> Body) : Pattern(() => string.Empty, Body, NotifyTelegramSenderSysName, typeof(MarkDownStyler));
+public record PushPattern(Func<string> Body) : Pattern(() => string.Empty, Body, NotifyPushSenderSysName, typeof(PushStyler));
+public record JabberPattern(Func<string> Body) : Pattern(() => string.Empty, Body, NotifyMessengerSenderSysName, typeof(JabberStyler));

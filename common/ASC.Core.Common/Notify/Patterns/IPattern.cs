@@ -28,7 +28,6 @@ namespace ASC.Notify.Patterns;
 
 public interface IPattern
 {
-    string ID { get; }
     Func<string> Subject { get; }
     Func<string> Body { get; }
     Type Styler { get; }

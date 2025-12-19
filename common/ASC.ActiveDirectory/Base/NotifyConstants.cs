@@ -35,7 +35,7 @@ public static class NotifyConstants
     public static readonly INotifyAction ActionLdapActivation = new NotifyAction("user_ldap_activation")
     {
         Patterns = [
-            new EmailPattern("user_ldap_activation", () =>  WebstudioNotifyPatternResource.subject_user_ldap_activation, () => WebstudioNotifyPatternResource.pattern_user_ldap_activation)
+            new EmailPattern(() =>  WebstudioNotifyPatternResource.subject_user_ldap_activation, () => WebstudioNotifyPatternResource.pattern_user_ldap_activation)
         ]
     };
 
