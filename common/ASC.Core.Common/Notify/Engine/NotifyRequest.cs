@@ -41,7 +41,7 @@ public class NotifyRequest(ILoggerProvider options, INotifySource notifySource, 
 
     internal int _tenantId;
     internal string[] _senderNames;
-    internal IPattern2[] _patterns;
+    internal IPattern[] _patterns;
     internal List<string> _requaredTags = [];
     internal List<ISendInterceptor> _interceptors = [];
     internal bool _isNeedCheckSubscriptions = true;
@@ -71,7 +71,7 @@ public class NotifyRequest(ILoggerProvider options, INotifySource notifySource, 
         return result;
     }
 
-    internal IPattern2 GetSenderPattern(string senderName)
+    internal IPattern GetSenderPattern(string senderName)
     {
         if (_senderNames == null || _patterns == null ||
             _senderNames.Length == 0 || _patterns.Length == 0 ||

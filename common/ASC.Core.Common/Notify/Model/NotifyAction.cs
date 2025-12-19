@@ -31,7 +31,7 @@ namespace ASC.Notify.Model;
 public class NotifyAction(string id) : INotifyAction
 {
     public string ID { get; } = id ?? throw new ArgumentNullException(nameof(id));
-    public List<Pattern2> Patterns { get; set; } = [];
+    public List<Pattern> Patterns { get; set; } = [];
 
     public static implicit operator NotifyActionItem(NotifyAction cache)
     {

@@ -28,6 +28,6 @@ namespace ASC.Notify.Patterns;
 
 public interface IPatternFormatter
 {
-    List<string> GetTags(IPattern2 pattern);
+    List<string> GetTags(IPattern pattern);
     void FormatMessage(INoticeMessage message, ITagValue[] tagsValues);
 }

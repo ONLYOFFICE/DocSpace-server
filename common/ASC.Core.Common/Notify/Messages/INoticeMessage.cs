@@ -29,7 +29,7 @@ namespace ASC.Notify.Messages;
 public interface INoticeMessage
 {
     IDirectRecipient Recipient { get; }
-    IPattern2 Pattern { get; }
+    IPattern Pattern { get; }
     INotifyAction Action { get; }
     ITagValue[] Arguments { get; }
     string Subject { get; set; }

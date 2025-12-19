@@ -40,7 +40,7 @@ public class NoticeMessage : INoticeMessage
         ObjectID = objectID;
     }
 
-    public NoticeMessage(IDirectRecipient recipient, INotifyAction action, string objectID, IPattern2 pattern)
+    public NoticeMessage(IDirectRecipient recipient, INotifyAction action, string objectID, IPattern pattern)
     {
         Recipient = recipient ?? throw new ArgumentNullException(nameof(recipient));
         Action = action;
@@ -62,7 +62,7 @@ public class NoticeMessage : INoticeMessage
     public IDirectRecipient Recipient { get; private set; }
 
     [field: NonSerialized]
-    public IPattern2 Pattern { get; internal set; }
+    public IPattern Pattern { get; internal set; }
 
     public INotifyAction Action { get; private set; }
 

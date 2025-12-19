@@ -293,6 +293,13 @@ public class NotifyEngine(Context context,
             return (new SendResponse(request.NotifyAction, sender, recipient, new NotifyException($"For recipient {recipient} by sender {sender} no one addresses getted.")), noticeMessage);
         }
 
+        var tenantManager = serviceScope.ServiceProvider.GetService<TenantManager>();
+        var userManager = serviceScope.ServiceProvider.GetService<UserManager>();
+
+        var culture = await request.GetCulture(tenantManager, userManager);
+        CultureInfo.CurrentCulture = culture;
+        CultureInfo.CurrentUICulture = culture;
+        
         var pattern = request.GetSenderPattern(sender);
         if (pattern == null)
         {
@@ -306,24 +313,18 @@ public class NotifyEngine(Context context,
         var formatter = new NVelocityPatternFormatter();
         try
         {
-            formatter?.FormatMessage(noticeMessage, noticeMessage.Arguments);
+            formatter.FormatMessage(noticeMessage, noticeMessage.Arguments);
             _sysTagFormatter.FormatMessage(
                 noticeMessage,
                 [
                     new TagValue(Context.SysRecipientId, request.Recipient.ID),
-                       new TagValue(Context.SysRecipientName, request.Recipient.Name),
-                       new TagValue(Context.SysRecipientAddress, addresses is { Length: > 0 } ? addresses[0] : null)
+                    new TagValue(Context.SysRecipientName, request.Recipient.Name),
+                    new TagValue(Context.SysRecipientAddress, addresses is { Length: > 0 } ? addresses[0] : null)
                 ]
             );
             //Do styling here
             if (pattern.Styler != null)
             {
-                var tenantManager = serviceScope.ServiceProvider.GetService<TenantManager>();
-                var userManager = serviceScope.ServiceProvider.GetService<UserManager>();
-
-                var culture = await request.GetCulture(tenantManager, userManager);
-                CultureInfo.CurrentCulture = culture;
-                CultureInfo.CurrentUICulture = culture;
                 //We need to run through styler before templating
                 await StyleMessageAsync(serviceScope, noticeMessage);
             }
@@ -374,7 +375,7 @@ public class NotifyEngine(Context context,
     {
         if (request._patterns == null)
         {
-            request._patterns = new IPattern2[request._senderNames.Length];
+            request._patterns = new IPattern[request._senderNames.Length];
             if (request._patterns.Length == 0)
             {
                 return;

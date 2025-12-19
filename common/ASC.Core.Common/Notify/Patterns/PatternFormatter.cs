@@ -47,7 +47,7 @@ public abstract class PatternFormatter : IPatternFormatter
         _doformat = formatMessage;
     }
 
-    public List<string> GetTags(IPattern2 pattern)
+    public List<string> GetTags(IPattern pattern)
     {
         ArgumentNullException.ThrowIfNull(pattern);
 

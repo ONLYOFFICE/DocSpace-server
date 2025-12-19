@@ -29,15 +29,6 @@ namespace ASC.Notify.Patterns;
 public interface IPattern
 {
     string ID { get; }
-    string Subject { get; }
-    string Body { get; }
-    string ContentType { get; }
-    string Styler { get; }
-}
-
-public interface IPattern2
-{
-    string ID { get; }
     Func<string> Subject { get; }
     Func<string> Body { get; }
     Type Styler { get; }
