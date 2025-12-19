@@ -48,7 +48,6 @@ public partial class SettingsController(
     ExternalResourceSettings externalResourceSettings,
     ExternalResourceSettingsHelper externalResourceSettingsHelper,
     ConsumerFactory consumerFactory,
-    TimeZoneConverter timeZoneConverter,
     CustomNamingPeople customNamingPeople,
     IFusionCache fusionCache,
     ProviderManager providerManager,
@@ -127,8 +126,8 @@ public partial class SettingsController(
         {
             settings.TrustedDomains = tenant.TrustedDomains;
             settings.TrustedDomainsType = tenant.TrustedDomainsType;
-            var timeZone = timeZoneConverter.GetTimeZone(tenant.TimeZone);
-            settings.Timezone = timeZoneConverter.GetIanaTimeZoneId(timeZone);
+            var timeZone = TimeZoneConverter.GetTimeZone(tenant.TimeZone);
+            settings.Timezone = TimeZoneConverter.GetIanaTimeZoneId(timeZone);
             settings.UtcOffset = timeZone.GetUtcOffset(DateTime.UtcNow);
             settings.UtcHoursOffset = settings.UtcOffset.TotalHours;
             settings.OwnerId = tenant.OwnerId;
@@ -599,8 +598,8 @@ public partial class SettingsController(
         {
             listOfTimezones.Add(new TimezonesRequestsDto
             {
-                Id = timeZoneConverter.GetIanaTimeZoneId(tz),
-                DisplayName = timeZoneConverter.GetTimeZoneDisplayName(tz)
+                Id = TimeZoneConverter.GetIanaTimeZoneId(tz),
+                DisplayName = TimeZoneConverter.GetTimeZoneDisplayName(tz)
             });
         }
 
@@ -887,7 +886,7 @@ public partial class SettingsController(
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Message about saving settings successfully", typeof(object))]
     [HttpPut("timeandlanguage")]
-    public async Task<string> SetTimaAndLanguage(TimeZoneRequestDto inDto)
+    public async Task<string> SetTimeAndLanguage(TimeZoneRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -902,23 +901,8 @@ public partial class SettingsController(
         }
 
         var oldTimeZone = tenant.TimeZone;
-        var newTimeZone = TimeZoneInfo.Utc;
 
-        try
-        {
-            newTimeZone = TimeZoneInfo.FindSystemTimeZoneById(inDto.TimeZoneID);
-        }
-        catch
-        {
-            var timeZones = TimeZoneInfo.GetSystemTimeZones().ToList();
-            if (timeZones.All(tz => tz.Id != "UTC"))
-            {
-                timeZones.Add(TimeZoneInfo.Utc);
-            }
-            newTimeZone = timeZones.FirstOrDefault(tz => tz.Id == inDto.TimeZoneID) ?? TimeZoneInfo.Utc;
-        }
-
-        tenant.TimeZone = timeZoneConverter.GetIanaTimeZoneId(newTimeZone);
+        tenant.TimeZone = TimeZoneConverter.GetIanaTimeZoneId(inDto.TimeZoneID);
 
         await tenantManager.SaveTenantAsync(tenant);
 

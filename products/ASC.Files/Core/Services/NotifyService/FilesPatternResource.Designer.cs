@@ -70,6 +70,26 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to h1. $__AuthorName deleted an AI agent
+        ///
+        ///$__AuthorName deleted the AI agent: $RoomTitle.
+        /// </summary>
+        public static string pattern_AgentRemoved {
+            get {
+                return ResourceManager.GetString("pattern_AgentRemoved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your role in the AI agent &quot;$RoomTitle&quot; has been changed to &quot;$RoomRole&quot;.
+        /// </summary>
+        public static string pattern_AgentUpdateAccessForUser_push {
+            get {
+                return ResourceManager.GetString("pattern_AgentUpdateAccessForUser_push", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A new document &quot;$DocumentTitle&quot; has been created in the room &quot;$RoomTitle&quot;.
         /// </summary>
         public static string pattern_DocumentCreatedInRoom_push {
@@ -215,6 +235,15 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to You have been invited to the AI agent &quot;$RoomTitle&quot;.
+        /// </summary>
+        public static string pattern_InvitedToAgent_push {
+            get {
+                return ResourceManager.GetString("pattern_InvitedToAgent_push", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You have been invited to the room &quot;$RoomTitle&quot;.
         /// </summary>
         public static string pattern_InvitedToRoom_push {
@@ -326,6 +355,15 @@ namespace ASC.Files.Core.Services.NotifyService {
         public static string patterns {
             get {
                 return ResourceManager.GetString("patterns", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DocSpace notification. AI agent deleted.
+        /// </summary>
+        public static string subject_AgentRemoved {
+            get {
+                return ResourceManager.GetString("subject_AgentRemoved", resourceCulture);
             }
         }
         

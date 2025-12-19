@@ -97,7 +97,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Added MCP server {0} to agent.
+        ///   Looks up a localized string similar to Added MCP server {0} to AI agent.
         /// </summary>
         public static string AddedServerToAgent {
             get {
@@ -142,7 +142,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Agent created.
+        ///   Looks up a localized string similar to AI agent created.
         /// </summary>
         public static string AgentCreated {
             get {
@@ -151,7 +151,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Agent deleted.
+        ///   Looks up a localized string similar to AI agent deleted.
         /// </summary>
         public static string AgentDeleted {
             get {
@@ -160,7 +160,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Agent renamed: {0}.
+        ///   Looks up a localized string similar to AI agent renamed: {0}.
         /// </summary>
         public static string AgentRenamed {
             get {
@@ -169,7 +169,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Agents.
+        ///   Looks up a localized string similar to AI agents.
         /// </summary>
         public static string AgentsModule {
             get {
@@ -610,7 +610,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Deleted MCP server {0} from agent.
+        ///   Looks up a localized string similar to Deleted MCP server {0} from AI agent.
         /// </summary>
         public static string DeletedServerFromAgent {
             get {
