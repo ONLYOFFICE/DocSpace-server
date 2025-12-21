@@ -107,16 +107,22 @@ public abstract class UploadController<T>(
     [HttpPost("{folderId}/upload/create_session")]
     public async Task<ChunkedUploadSessionResponseWrapper<T>> CreateUploadSession(SessionRequestDto<T> inDto)
     {
-        return await filesControllerHelper.CreateUploadSessionAsync(inDto.FolderId, inDto.Session.FileName, inDto.Session.FileSize, inDto.Session.RelativePath, inDto.Session.Encrypted, inDto.Session.CreateOn, inDto.Session.CreateNewIfExist);
+        var data =  await filesControllerHelper.CreateUploadSessionAsync(inDto.FolderId, inDto.Session.FileName, inDto.Session.FileSize, inDto.Session.RelativePath, inDto.Session.Encrypted, inDto.Session.CreateOn, inDto.Session.CreateNewIfExist);
+        
+        return new ChunkedUploadSessionResponseWrapper<T>
+        {
+            Success = true,
+            Data = data
+        };
     }
     
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "Information about created session", typeof(ChunkedUploadSessionResponseWrapper<>))]
+    [SwaggerResponse(200, "Information about created session", typeof(ChunkedUploadSessionResponse<>))]
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [HttpPost("session")]
-    public async Task<ChunkedUploadSessionResponseWrapper<T>> CreateUploadSessionInFolder(SessionRequestInFolderDto<T> inDto)
+    public async Task<ChunkedUploadSessionResponse<T>> CreateUploadSessionInFolder(SessionRequestInFolderDto<T> inDto)
     {
-        return await filesControllerHelper.CreateUploadSessionAsync(inDto.FolderId, inDto.Session.FileName, inDto.Session.FileSize, inDto.Session.RelativePath, inDto.Session.Encrypted, inDto.Session.CreateOn, inDto.Session.CreateNewIfExist);
+        return await filesControllerHelper.CreateUploadSessionAsync(inDto.FolderId, inDto.FileName, inDto.FileSize, inDto.RelativePath, inDto.Encrypted, inDto.CreateOn, inDto.CreateNewIfExist);
     }
     
     [Tags("Files / Operations")]
@@ -310,7 +316,12 @@ public abstract class UploadController<T>(
     [HttpPost("file/{fileId}/edit_session")]
     public async Task<ChunkedUploadSessionResponseWrapper<T>> CreateEditSession(CreateEditSessionRequestDto<T> inDto)
     {
-        return await filesControllerHelper.CreateEditSessionAsync(inDto.FileId, inDto.FileSize);
+        var data = await filesControllerHelper.CreateEditSessionAsync(inDto.FileId, inDto.FileSize);
+        return new ChunkedUploadSessionResponseWrapper<T>
+        {
+            Success = true,
+            Data = data
+        };
     }
 
     /// <summary>

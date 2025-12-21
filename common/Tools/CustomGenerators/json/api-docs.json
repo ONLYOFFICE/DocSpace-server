@@ -3991,7 +3991,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "0dec3996-2dfc-7cb2-e974-8e5fb9f399ce"
+              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
             }
           },
           {
@@ -9967,7 +9967,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "0dec3996-2dfc-7cb2-e974-8e5fb9f399ce"
             }
           }
         ],
@@ -19608,7 +19608,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9079
+              "example": 9846
             }
           }
         ],
@@ -23855,7 +23855,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9079
+              "example": 9846
             }
           }
         ],
@@ -26660,7 +26660,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "9846"
+              "example": "9079"
             }
           }
         ],
@@ -26894,18 +26894,13 @@
         ],
         "operationId": "createUploadSessionInFolder",
         "requestBody": {
-          "description": "The session folder ID.",
           "content": {
             "application/json": {
               "schema": {
-                "type": "integer",
-                "description": "The session folder ID.",
-                "format": "int32",
-                "example": 9846
+                "$ref": "#/components/schemas/SessionRequestInFolderDtoInteger"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -31479,7 +31474,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 9079
             }
           }
         ],
@@ -32004,7 +31999,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9079
+              "example": 9846
             }
           }
         ],
@@ -32142,7 +32137,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9079
+              "example": 9846
             }
           }
         ],
@@ -35927,7 +35922,7 @@
             "type": "string",
             "description": "The password in plain text for user authentication.",
             "nullable": true,
-            "example": "vfUygauQXp"
+            "example": "vfmf2vO1Kp"
           },
           "passwordHash": {
             "type": "string",
@@ -36595,7 +36590,7 @@
             "description": "The company email address.",
             "format": "email",
             "nullable": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "Nat63@hotmail.com"
           },
           "address": {
             "type": "string",
@@ -44789,7 +44784,7 @@
             "type": "string",
             "description": "The display name or description of the TFA configuration.",
             "nullable": true,
-            "example": "circuit_avon_generating"
+            "example": "legacy_1080p_small_wooden_mouse"
           },
           "enabled": {
             "type": "boolean",
@@ -45809,13 +45804,13 @@
             "type": "integer",
             "description": "The webhook ID.",
             "format": "int32",
-            "example": 9079
+            "example": 9846
           },
           "name": {
             "type": "string",
             "description": "The webhook name.",
             "nullable": true,
-            "example": "Winfield Roberts"
+            "example": "Winfield Upton"
           },
           "uri": {
             "type": "string",
@@ -46484,7 +46479,7 @@
             "type": "string",
             "description": "The API key unique identifier.",
             "format": "uuid",
-            "example": "0dec3996-2dfc-7cb2-e974-8e5fb9f399ce"
+            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
           },
           "name": {
             "type": "string",
@@ -46621,7 +46616,7 @@
             "minLength": 0,
             "type": "string",
             "description": "The API key name.",
-            "example": "Sydney Schroeder"
+            "example": "Winfield Upton"
           },
           "permissions": {
             "type": "array",
@@ -47209,7 +47204,7 @@
             "type": "string",
             "description": "The group ID.",
             "format": "uuid",
-            "example": "0dec3996-2dfc-7cb2-e974-8e5fb9f399ce"
+            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
           },
           "isLDAP": {
             "type": "boolean",
@@ -48067,7 +48062,7 @@
             "type": "string",
             "description": "The new name for the API key.",
             "nullable": true,
-            "example": "Sydney Roberts"
+            "example": "Winfield Upton"
           },
           "permissions": {
             "type": "array",
@@ -49585,7 +49580,7 @@
             "type": "string",
             "description": "The copied file password.",
             "nullable": true,
-            "example": "fmf2vO1KpU"
+            "example": "vfmf2vO1Kp"
           },
           "toForm": {
             "type": "boolean",
@@ -50073,7 +50068,7 @@
             "type": "string",
             "description": "The name of the customer configuration.",
             "nullable": true,
-            "example": "Sydney Schroeder"
+            "example": "Winfield Upton"
           },
           "www": {
             "type": "string",
@@ -56083,7 +56078,7 @@
             "type": "string",
             "description": "The provider name.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "Winfield Schroeder"
           },
           "key": {
             "type": "string",
@@ -56541,7 +56536,7 @@
             "type": "string",
             "description": "The room template title.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "auxiliary_sports_illinois"
           },
           "logo": {
             "$ref": "#/components/schemas/LogoRequest"
@@ -56957,6 +56952,28 @@
         },
         "additionalProperties": false,
         "description": "The session request parameters."
+      },
+      "SessionRequestInFolderDtoInteger": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SessionRequest"
+          },
+          {
+            "required": [
+              "folderId"
+            ],
+            "type": "object",
+            "properties": {
+              "folderId": {
+                "type": "integer",
+                "description": "The session folder ID.",
+                "format": "int32",
+                "example": 9846
+              }
+            }
+          }
+        ],
+        "additionalProperties": false
       },
       "SetPublicDto": {
         "required": [

@@ -80,17 +80,10 @@ public class SessionRequestDto<T>
     public required SessionRequest Session { get; set; }
 }
 
-public class SessionRequestInFolderDto<T>
+public class SessionRequestInFolderDto<T> : SessionRequest
 {
     /// <summary>
     /// The session folder ID.
     /// </summary>
-    [FromBody]
     public required T FolderId { get; set; }
-
-    /// <summary>
-    /// The session parameters.
-    /// </summary>
-    [FromBody]
-    public required SessionRequest Session { get; set; }
 }

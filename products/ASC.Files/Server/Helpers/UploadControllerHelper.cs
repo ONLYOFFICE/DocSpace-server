@@ -54,7 +54,7 @@ public class UploadControllerHelper(
         tenantManager,
         authContext)
 {
-    public async Task<ChunkedUploadSessionResponseWrapper<T>> CreateEditSessionAsync<T>(T fileId, long fileSize)
+    public async Task<ChunkedUploadSessionResponse<T>> CreateEditSessionAsync<T>(T fileId, long fileSize)
     {
         var file = await _fileUploader.VerifyChunkedUploadForEditing(fileId, fileSize);
 
@@ -93,23 +93,17 @@ public class UploadControllerHelper(
         return result;
     }
 
-    public async Task<ChunkedUploadSessionResponseWrapper<T>> CreateUploadSessionAsync<T>(T folderId, string fileName, long fileSize, string relativePath, bool encrypted, ApiDateTime createOn, bool createNewIfExist, bool keepVersion = false)
+    public async Task<ChunkedUploadSessionResponse<T>> CreateUploadSessionAsync<T>(T folderId, string fileName, long fileSize, string relativePath, bool encrypted, ApiDateTime createOn, bool createNewIfExist, bool keepVersion = false)
     {
         var file = await _fileUploader.VerifyChunkedUploadAsync(folderId, fileName, fileSize, !createNewIfExist, relativePath);
         return await CreateUploadSessionAsync(file, encrypted, createOn, keepVersion);
     }
 
-    private async Task<ChunkedUploadSessionResponseWrapper<T>> CreateUploadSessionAsync<T>(File<T> file, bool encrypted, ApiDateTime createOn, bool keepVersion = false)
+    private async Task<ChunkedUploadSessionResponse<T>> CreateUploadSessionAsync<T>(File<T> file, bool encrypted, ApiDateTime createOn, bool keepVersion = false)
     {
         var session = await _fileUploader.InitiateUploadAsync(file.ParentId, file.Id ?? default, file.Title, file.ContentLength, encrypted, keepVersion, createOn);
 
-        var responseObject = await chunkedUploadSessionHelper.ToResponseObjectAsync(session, true);
-
-        return new ChunkedUploadSessionResponseWrapper<T>
-        {
-            Success = true,
-            Data = responseObject
-        };
+        return await chunkedUploadSessionHelper.ToResponseObjectAsync(session, true);
     }
 
     public async Task<List<FileDto<T>>> UploadFileAsync<T>(T folderId, UploadRequestDto uploadModel)
