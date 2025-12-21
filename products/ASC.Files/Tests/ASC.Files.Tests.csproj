@@ -52,4 +52,9 @@
       </None>
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="Data\new.docx" />
+      <EmbeddedResource Include="Data\new.docx" />
+    </ItemGroup>
+
 </Project>

@@ -117,7 +117,7 @@ public abstract class UploadController<T>(
     }
     
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "Information about created session", typeof(ChunkedUploadSessionResponse<>))]
+    [SwaggerResponse(200, "Information about created session")]
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [HttpPost("session")]
     public async Task<ChunkedUploadSessionResponse<T>> CreateUploadSessionInFolder(SessionRequestInFolderDto<T> inDto)

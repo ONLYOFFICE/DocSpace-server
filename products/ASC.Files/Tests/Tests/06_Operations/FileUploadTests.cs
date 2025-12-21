@@ -24,6 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Reflection;
+
+using ASC.Files.Core.ApiModels.RequestDto;
 using ASC.Files.Tests.ApiFactories;
 
 namespace ASC.Files.Tests.Tests._06_Operations;
@@ -44,7 +47,17 @@ public class FileUploadTests(
         await _filesClient.Authenticate(Initializer.Owner);
         
         var myFolder = await GetUserFolderIdAsync(Initializer.Owner);
-        var createdSession = (await _filesOperationsApi.CreateUploadSessionAsync(myFolder, new SessionRequest(), TestContext.Current.CancellationToken)).Response;
+        var assembly = Assembly.GetExecutingAssembly();
+        await using var stream = assembly.GetManifestResourceStream("ASC.Files.Tests.Data.new.docx")!;
+        var model = new SessionRequestInFolderDtoInteger
+        {
+            FolderId = myFolder,
+            FileName = "new.docx",
+            FileSize = stream.Length
+        };
+        
+        var createdSession = (await _filesOperationsApi.CreateUploadSessionInFolderAsync(model, TestContext.Current.CancellationToken)).Response;
         createdSession.Should().NotBeNull();
+        createdSession.Id.Should().NotBeEmpty();
     }
 }

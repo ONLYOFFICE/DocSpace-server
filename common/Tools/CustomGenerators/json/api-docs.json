@@ -9967,7 +9967,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "0dec3996-2dfc-7cb2-e974-8e5fb9f399ce"
+              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
             }
           }
         ],
@@ -20483,7 +20483,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 9079
             }
           }
         ],
@@ -26660,7 +26660,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "9079"
+              "example": "9846"
             }
           }
         ],
@@ -26908,7 +26908,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChunkedUploadSessionResponseWrapperTWrapper"
+                  "$ref": "#/components/schemas/ChunkedUploadSessionResponseIntegerWrapper"
                 }
               }
             }
@@ -31474,7 +31474,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9079
+              "example": 9846
             }
           }
         ],
@@ -36590,7 +36590,7 @@
             "description": "The company email address.",
             "format": "email",
             "nullable": true,
-            "example": "Nat63@hotmail.com"
+            "example": "Sydney_Roberts4@hotmail.com"
           },
           "address": {
             "type": "string",
@@ -47514,7 +47514,7 @@
             "type": "string",
             "description": "The user location.",
             "nullable": true,
-            "example": "001 Schroeder Run, New Tabithaport, Colombia"
+            "example": "910 Camden Plaza, Adalbertoville, Sao Tome and Principe"
           },
           "sex": {
             "$ref": "#/components/schemas/SexEnum"
@@ -56078,7 +56078,7 @@
             "type": "string",
             "description": "The provider name.",
             "nullable": true,
-            "example": "Winfield Schroeder"
+            "example": "Winfield Upton"
           },
           "key": {
             "type": "string",
@@ -56536,7 +56536,7 @@
             "type": "string",
             "description": "The room template title.",
             "nullable": true,
-            "example": "auxiliary_sports_illinois"
+            "example": "legacy_1080p_small_wooden_mouse"
           },
           "logo": {
             "$ref": "#/components/schemas/LogoRequest"
