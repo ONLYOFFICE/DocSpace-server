@@ -79,9 +79,6 @@ public class ChunkedUploadSessionResponse<T>
     public DateTime Expired { get; init; }
     public string Location { get; init; }
     
-    [JsonPropertyName("bytes_uploaded")]
-    public long BytesUploaded { get; init; }
-    
     [JsonPropertyName("bytes_total")]
     public long BytesTotal { get; init; }
 }
