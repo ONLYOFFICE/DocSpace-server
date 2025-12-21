@@ -111,23 +111,34 @@ public abstract class UploadController<T>(
     }
     
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "Information about created session")]
+    [SwaggerResponse(200, "Information about created session", typeof(ChunkedUploadSessionResponseWrapper<>))]
     [SwaggerResponse(403, "You don't have enough permission to create")]
-    [HttpDelete("session/{sessionId}/abort")]
-    public async Task AbortUploadSession(AbortSessionRequestDto<T> inDto)
+    [HttpPost("session")]
+    public async Task<ChunkedUploadSessionResponseWrapper<T>> CreateUploadSessionInFolder(SessionRequestInFolderDto<T> inDto)
     {
-        await fileUploader.AbortUploadAsync<T>(inDto.SessionId);
+        return await filesControllerHelper.CreateUploadSessionAsync(inDto.FolderId, inDto.Session.FileName, inDto.Session.FileSize, inDto.Session.RelativePath, inDto.Session.Encrypted, inDto.Session.CreateOn, inDto.Session.CreateNewIfExist);
     }
     
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Information about created session")]
     [SwaggerResponse(403, "You don't have enough permission to create")]
-    [HttpPut("{folderId}/session/initiate")]
-    public async Task<ChunkedUploadSessionResponse<T>> InitiateUploadSession(InitiateSessionRequestDto<T> inDto)
+    [HttpDelete("session/{sessionId}")]
+    public async Task AbortUploadSession(AbortSessionRequestDto<T> inDto)
     {
-        var createdSession =  await fileUploader.InitiateUploadAsync(inDto.FolderId, inDto.FileId, inDto.FileName, inDto.FileSize, inDto.Encrypted);
-        return await chunkedUploadSessionHelper.ToResponseObjectAsync(createdSession, true);
+        await fileUploader.AbortUploadAsync<T>(inDto.SessionId);
     }
+    
+    //
+    // [Tags("Files / Operations")]
+    // [SwaggerResponse(200, "Information about created session")]
+    // [SwaggerResponse(403, "You don't have enough permission to create")]
+    // [HttpPut("{folderId}/session/initiate")]
+    // public async Task<ChunkedUploadSessionResponse<T>> InitiateUploadSession(InitiateSessionRequestDto<T> inDto)
+    // {
+    //     var createdSession =  await fileUploader.InitiateUploadAsync(inDto.FolderId, inDto.FileId, inDto.FileName, inDto.FileSize, inDto.Encrypted);
+    //     return await chunkedUploadSessionHelper.ToResponseObjectAsync(createdSession, true);
+    // }
+    //
     
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Information about created session")]
@@ -223,7 +234,7 @@ public abstract class UploadController<T>(
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Information about created session")]
     [SwaggerResponse(403, "You don't have enough permission to create")]
-    [HttpPost("session/{sessionId}/finalize")]
+    [HttpPut("session/{sessionId}/finalize")]
     public async Task<UploadSessionResponseDto<T>> FinalizeAsyncSession(FinalizeSessionDto inDto)
     {
         var session = await chunkedUploadSessionHolder.GetSessionAsync<T>(inDto.SessionId);

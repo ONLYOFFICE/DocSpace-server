@@ -3991,7 +3991,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "0dec3996-2dfc-7cb2-e974-8e5fb9f399ce"
             }
           },
           {
@@ -13925,7 +13925,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "a5aae1e1-a1bc-ba9f-8c42-058b4abf2896"
+              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
             }
           }
         ],
@@ -19608,7 +19608,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 9079
             }
           }
         ],
@@ -19845,7 +19845,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9079
+              "example": 9846
             }
           },
           {
@@ -20302,7 +20302,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9079
+              "example": 9846
             }
           }
         ],
@@ -20874,7 +20874,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9079
+              "example": 9846
             }
           }
         ],
@@ -20993,7 +20993,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9079
+              "example": 9846
             }
           }
         ],
@@ -23855,7 +23855,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 9079
             }
           }
         ],
@@ -26887,26 +26887,36 @@
         ]
       }
     },
-    "/api/2.0/files/session/{sessionId}/abort": {
-      "delete": {
+    "/api/2.0/files/session": {
+      "post": {
         "tags": [
           "Files / Operations"
         ],
-        "operationId": "abortUploadSession",
-        "parameters": [
-          {
-            "name": "sessionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "example": "some text"
+        "operationId": "createUploadSessionInFolder",
+        "requestBody": {
+          "description": "The session folder ID.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "integer",
+                "description": "The session folder ID.",
+                "format": "int32",
+                "example": 9846
+              }
             }
-          }
-        ],
+          },
+          "required": true
+        },
         "responses": {
           "200": {
-            "description": "Information about created session"
+            "description": "Information about created session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChunkedUploadSessionResponseWrapperTWrapper"
+                }
+              }
+            }
           },
           "401": {
             "description": "Unauthorized"
@@ -26946,41 +26956,26 @@
         ]
       }
     },
-    "/api/2.0/files/{folderId}/session/initiate": {
-      "put": {
+    "/api/2.0/files/session/{sessionId}": {
+      "delete": {
         "tags": [
           "Files / Operations"
         ],
-        "operationId": "initiateUploadSession",
+        "operationId": "abortUploadSession",
         "parameters": [
           {
-            "name": "folderId",
+            "name": "sessionId",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "example": "some text"
             }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/InitiateSessionRequestDtoInteger"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
-            "description": "Information about created session",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ChunkedUploadSessionResponseIntegerWrapper"
-                }
-              }
-            }
+            "description": "Information about created session"
           },
           "401": {
             "description": "Unauthorized"
@@ -27182,7 +27177,7 @@
       }
     },
     "/api/2.0/files/session/{sessionId}/finalize": {
-      "post": {
+      "put": {
         "tags": [
           "Files / Operations"
         ],
@@ -32009,7 +32004,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 9079
             }
           }
         ],
@@ -32147,7 +32142,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 9079
             }
           }
         ],
@@ -35932,7 +35927,7 @@
             "type": "string",
             "description": "The password in plain text for user authentication.",
             "nullable": true,
-            "example": "vfmf2vO1Kp"
+            "example": "vfUygauQXp"
           },
           "passwordHash": {
             "type": "string",
@@ -44794,7 +44789,7 @@
             "type": "string",
             "description": "The display name or description of the TFA configuration.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "circuit_avon_generating"
           },
           "enabled": {
             "type": "boolean",
@@ -45814,13 +45809,13 @@
             "type": "integer",
             "description": "The webhook ID.",
             "format": "int32",
-            "example": 9846
+            "example": 9079
           },
           "name": {
             "type": "string",
             "description": "The webhook name.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "Winfield Roberts"
           },
           "uri": {
             "type": "string",
@@ -46489,7 +46484,7 @@
             "type": "string",
             "description": "The API key unique identifier.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "0dec3996-2dfc-7cb2-e974-8e5fb9f399ce"
           },
           "name": {
             "type": "string",
@@ -46626,7 +46621,7 @@
             "minLength": 0,
             "type": "string",
             "description": "The API key name.",
-            "example": "Winfield Upton"
+            "example": "Sydney Schroeder"
           },
           "permissions": {
             "type": "array",
@@ -47214,7 +47209,7 @@
             "type": "string",
             "description": "The group ID.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "0dec3996-2dfc-7cb2-e974-8e5fb9f399ce"
           },
           "isLDAP": {
             "type": "boolean",
@@ -48072,7 +48067,7 @@
             "type": "string",
             "description": "The new name for the API key.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "Sydney Roberts"
           },
           "permissions": {
             "type": "array",
@@ -49590,7 +49585,7 @@
             "type": "string",
             "description": "The copied file password.",
             "nullable": true,
-            "example": "vfmf2vO1Kp"
+            "example": "fmf2vO1KpU"
           },
           "toForm": {
             "type": "boolean",
@@ -50078,7 +50073,7 @@
             "type": "string",
             "description": "The name of the customer configuration.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "Sydney Schroeder"
           },
           "www": {
             "type": "string",
@@ -52524,7 +52519,7 @@
             "type": "string",
             "description": "The file operation ID.",
             "nullable": true,
-            "example": "9079"
+            "example": "9846"
           },
           "Operation": {
             "$ref": "#/components/schemas/FileOperationType"
@@ -54679,7 +54674,7 @@
             "type": "string",
             "description": "The user ID.",
             "format": "uuid",
-            "example": "0dec3996-2dfc-7cb2-e974-8e5fb9f399ce"
+            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
           },
           "sequence": {
             "type": "integer",
@@ -55235,36 +55230,6 @@
         },
         "additionalProperties": false,
         "description": "The information config parameters."
-      },
-      "InitiateSessionRequestDtoInteger": {
-        "type": "object",
-        "properties": {
-          "folderId": {
-            "type": "integer",
-            "format": "int32",
-            "example": 9846
-          },
-          "fileId": {
-            "type": "integer",
-            "format": "int32",
-            "example": 9846
-          },
-          "fileName": {
-            "type": "string",
-            "nullable": true,
-            "example": "some text"
-          },
-          "fileSize": {
-            "type": "integer",
-            "format": "int64",
-            "example": 1234
-          },
-          "encrypted": {
-            "type": "boolean",
-            "example": true
-          }
-        },
-        "additionalProperties": false
       },
       "KeyValuePairBooleanString": {
         "type": "object",
@@ -56799,7 +56764,7 @@
             "type": "string",
             "description": "The file title to save as PDF.",
             "nullable": true,
-            "example": "1080p_small_wooden_mouse_investment_account"
+            "example": "legacy_1080p_small_wooden_mouse"
           }
         },
         "additionalProperties": false,
