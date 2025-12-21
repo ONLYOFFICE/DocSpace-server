@@ -1187,7 +1187,7 @@ public class FileSecurity(
             return false;
         }
 
-        if (file != null && action == FilesSecurityActions.SubmitToFormGallery && !file.IsForm)
+        if (file != null && action == FilesSecurityActions.SubmitToFormGallery && ((FilterType)file.Category is not (FilterType.DocumentsOnly or FilterType.PresentationsOnly or FilterType.SpreadsheetsOnly or FilterType.PdfForm)))
         {
             return false;
         }

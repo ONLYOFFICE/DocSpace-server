@@ -1589,7 +1589,7 @@ public class FileStorageService //: IFileStorageService
 
         if (fileWrapper.FormId != 0)
         {
-            await using var stream = await oFormRequestManager.Get(fileWrapper.FormId);
+            await using var stream = await oFormRequestManager.Get(fileWrapper.FormId, fileExt);
             file.ContentLength = stream.Length;
 
             if (FileUtility.GetFileTypeByExtention(fileExt) == FileType.Pdf)
