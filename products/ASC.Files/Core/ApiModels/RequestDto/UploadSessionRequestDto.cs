@@ -28,7 +28,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class UploadSessionRequestDto
 {    
-    [FromRoute]
+    [FromRoute(Name = "sessionId")]
     public string SessionId { get; set; }
     
     public IFormFile File { get; set; }
@@ -36,7 +36,7 @@ public class UploadSessionRequestDto
 
 public class UploadSessionAsyncRequestDto
 {
-    [FromRoute]
+    [FromRoute(Name = "sessionId")]
     public string SessionId { get; set; }
     
     [FromQuery]

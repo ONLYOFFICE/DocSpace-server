@@ -28,12 +28,6 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class AbortSessionRequestDto<T>
 {
-    /// <summary>
-    /// The session folder ID.
-    /// </summary>
-    [FromRoute(Name = "folderId")]
-    public required T FolderId { get; set; }
-    
     [FromRoute(Name = "sessionId")]
     public required string SessionId { get; set; }
 }

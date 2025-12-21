@@ -28,6 +28,6 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 
 public class FinalizeSessionDto
 {
-    [FromRoute]
+    [FromRoute(Name = "sessionId")]
     public string SessionId { get; set; }
 }
