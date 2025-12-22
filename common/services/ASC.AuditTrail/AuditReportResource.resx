@@ -1036,16 +1036,16 @@
     <value>Login Via Social Account Success</value>
   </data>
   <data name="AgentCreated" xml:space="preserve">
-    <value>Agent created</value>
+    <value>AI agent created</value>
   </data>
   <data name="AgentRenamed" xml:space="preserve">
-    <value>Agent renamed: {0}</value>
+    <value>AI agent renamed: {0}</value>
   </data>
   <data name="AgentsModule" xml:space="preserve">
-    <value>Agents</value>
+    <value>AI agents</value>
   </data>
   <data name="AgentDeleted" xml:space="preserve">
-    <value>Agent deleted</value>
+    <value>AI agent deleted</value>
   </data>
   <data name="QuotaPerAiAgentChanged" xml:space="preserve">
     <value>Set default storage quota for AI agents: {0}</value>
@@ -1087,10 +1087,10 @@
     <value>MCP server disabled: {0}</value>
   </data>
   <data name="AddedServerToAgent" xml:space="preserve">
-    <value>Added MCP server {0} to agent</value>
+    <value>Added MCP server {0} to AI agent</value>
   </data>
   <data name="DeletedServerFromAgent" xml:space="preserve">
-    <value>Deleted MCP server {0} from agent</value>
+    <value>Deleted MCP server {0} from AI agent</value>
   </data>
   <data name="SetWebSearchSettings" xml:space="preserve">
     <value>Web search settings are configured. Engine: {0}</value>

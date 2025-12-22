@@ -53,7 +53,6 @@ public class PortalController(
         CommonConstants commonConstants,
         ILogger<PortalController> option,
         TimeZonesProvider timeZonesProvider,
-        TimeZoneConverter timeZoneConverter,
         PasswordHasher passwordHasher,
         CspSettingsHelper cspSettingsHelper,
         CoreBaseSettings coreBaseSettings,
@@ -196,7 +195,7 @@ public class PortalController(
 
         if (!string.IsNullOrEmpty(model.TimeZoneName))
         {
-            tz = timeZoneConverter.GetTimeZone(model.TimeZoneName.Trim(), false) ?? tz;
+            tz = TimeZoneConverter.GetTimeZone(model.TimeZoneName.Trim(), false) ?? tz;
 
             option.LogDebug("PortalName = {0}; Elapsed ms. TimeZonesProvider.OlsonTimeZoneToTimeZoneInfo: {1}", model.PortalName, sw.ElapsedMilliseconds);
         }
@@ -508,7 +507,7 @@ public class PortalController(
 
         if (!string.IsNullOrEmpty(model.TimeZoneName))
         {
-            tz = timeZoneConverter.GetTimeZone(model.TimeZoneName.Trim(), false) ?? tz;
+            tz = TimeZoneConverter.GetTimeZone(model.TimeZoneName.Trim(), false) ?? tz;
 
             option.LogDebug("PortalName = {0}; Elapsed ms. TimeZonesProvider.OlsonTimeZoneToTimeZoneInfo: {1}", model.PortalName, sw.ElapsedMilliseconds);
         }

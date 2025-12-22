@@ -695,6 +695,12 @@
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_user_role_changed|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
+  <!-- user agent role changed -->
+  <pattern id="user_agent_role_changed">
+    <subject resource="|subject_user_agent_role_changed|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core"/>
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_user_agent_role_changed|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
   <!-- top up wallet error -->
   <pattern id="top_up_wallet_error">
     <subject resource="|subject_top_up_wallet_error|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
@@ -705,6 +711,12 @@
   <pattern id="renew_subscription_error">
     <subject resource="|subject_renew_subscription_error|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
     <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_renew_subscription_error|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+  </pattern>
+
+  <!-- api key expired -->
+  <pattern id="api_key_expired">
+    <subject resource="|subject_api_key_expired|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
+    <body styler="ASC.Notify.Textile.TextileStyler,ASC.Core.Common" resource="|pattern_api_key_expired|ASC.Web.Core.PublicResources.WebstudioNotifyPatternResource,ASC.Web.Core" />
   </pattern>
 
 </patterns>

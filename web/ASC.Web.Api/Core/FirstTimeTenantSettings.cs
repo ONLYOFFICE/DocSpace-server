@@ -40,7 +40,6 @@ public class FirstTimeTenantSettings(
     MessageService messageService,
     LicenseReader licenseReader,
     StudioNotifyService studioNotifyService,
-    TimeZoneConverter timeZoneConverter,
     CoreBaseSettings coreBaseSettings,
     IHttpClientFactory clientFactory,
     CookiesManager cookiesManager,
@@ -113,7 +112,7 @@ public class FirstTimeTenantSettings(
 
             TrySetLanguage(tenant, lng);
 
-            tenant.TimeZone = timeZoneConverter.GetTimeZone(timeZone).Id;
+            tenant.TimeZone = TimeZoneConverter.GetIanaTimeZoneId(timeZone);
 
             await tenantManager.SaveTenantAsync(tenant);
             await cspSettingsHelper.SaveAsync(null);

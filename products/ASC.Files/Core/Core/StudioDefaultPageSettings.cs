@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,21 +24,18 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Data.Backup.Core.Log;
-internal static partial class RestoreProgressItemLogger
+namespace ASC.Files.Core;
+
+public class StudioDefaultPageSettings : ISettings<StudioDefaultPageSettings>
 {
-    [LoggerMessage(LogLevel.Error, "RestoreProgressItem")]
-    public static partial void ErrorRestoreProgressItem(this ILogger<RestoreProgressItem> logger, Exception exception);
+    public FolderType DefaultFolderType { get; init; }
 
-    [LoggerMessage(LogLevel.Error, "publish")]
-    public static partial void ErrorPublish(this ILogger<RestoreProgressItem> logger, Exception exception);
+    public static Guid ID => new("{F3FF27C5-BDE3-43ae-8DD0-2E8E0D7044F1}");
 
-    [LoggerMessage(LogLevel.Error, "NotifyComplete")]
-    public static partial void ErrorNotifyComplete(this ILogger<RestoreProgressItem> logger, Exception exception);
+    public StudioDefaultPageSettings GetDefault()
+    {
+        return new StudioDefaultPageSettings { DefaultFolderType = FolderType.VirtualRooms };
+    }
 
-    [LoggerMessage(LogLevel.Error, "DeleteFiles")]
-    public static partial void ErrorDeleteFiles(this ILogger<RestoreProgressItem> logger, Exception exception);
-
-    [LoggerMessage(LogLevel.Error, "Clear2faSettings")]
-    public static partial void ErrorClear2faSettings(this ILogger<RestoreProgressItem> logger, Exception exception);
+    public DateTime LastModified { get; set; }
 }

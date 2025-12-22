@@ -100,7 +100,8 @@ public class FileStorageService //: IFileStorageService
     FormRoleDtoHelper formRoleDtoHelper,
     WebhookManager webhookManager,
     FileSharingHelper fileSharingHelper,
-    AiGateway gateway)
+    AiGateway gateway,
+    FormFillingReportCreator formFillingReportCreator)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
 
@@ -1588,7 +1589,7 @@ public class FileStorageService //: IFileStorageService
 
         if (fileWrapper.FormId != 0)
         {
-            await using var stream = await oFormRequestManager.Get(fileWrapper.FormId);
+            await using var stream = await oFormRequestManager.Get(fileWrapper.FormId, fileExt);
             file.ContentLength = stream.Length;
 
             if (FileUtility.GetFileTypeByExtention(fileExt) == FileType.Pdf)
@@ -4035,7 +4036,7 @@ public class FileStorageService //: IFileStorageService
 
                                             var role = FileShareExtensions.GetAccessString(ace.Access, true, folder.FolderType == FolderType.AiRoom);
                                             var url = commonLinkUtility.GetFullAbsolutePath($"rooms/shared/{folder.Id}");
-                                            await studioNotifyService.SendMsgUserRoleChangedAsync(user, folder.Title, url, role);
+                                            await studioNotifyService.SendMsgUserRoleChangedAsync(user, folder.Title, url, role, folder.FolderType == FolderType.AiRoom);
                                             break;
                                     }
                                 }
@@ -5213,6 +5214,59 @@ public class FileStorageService //: IFileStorageService
         await socketManager.UpdateFileAsync(form);
     }
 
+    public async IAsyncEnumerable<FormResultsDto> GetSubmissionsByFormId(int formId)
+    {
+        var fileDao = daoFactory.GetFileDao<int>();
+        var folderDao = daoFactory.GetFolderDao<int>();
+
+        var form = await fileDao.GetFileAsync(formId);
+        if (form == null)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        if (!await DocSpaceHelper.IsFormOrCompletedForm(form, daoFactory))
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!await fileSecurity.CanReadAsync(form))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
+        }
+
+        var properties = await fileDao.GetProperties(form.Id);
+        var formFilling = properties?.FormFilling;
+
+        if (formFilling?.StartFilling != true || formFilling.OriginalFormId != form.Id)
+        {
+            throw new InvalidOperationException();
+        }
+
+        var resultsFileTask = fileDao.GetFileAsync(formFilling.ResultsFileID);
+        var roomTask = DocSpaceHelper.GetParentRoom(form, folderDao);
+
+        await Task.WhenAll(resultsFileTask, roomTask);
+
+        var resultsFile = await resultsFileTask;
+        var room = await roomTask;
+
+        if (room == null ||
+            resultsFile == null ||
+            formFilling.RoomId != room.Id ||
+            !await fileSecurity.CanReadAsync(resultsFile))
+        {
+            throw new InvalidOperationException();
+        }
+
+        var results = await formFillingReportCreator
+            .GetFormFillingResults(room.Id, form.Id);
+
+        foreach (var result in results)
+        {
+            yield return result.MapToFormResultsDto();
+        }
+    }
 
     private async Task ValidateChangeRolesPermission<T>(File<T> form)
     {
