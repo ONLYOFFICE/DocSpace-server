@@ -2030,4 +2030,71 @@ $TrulyYours</value>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
     <value>Nie udało się utworzyć automatycznej kopii zapasowej DocSpace</value>
   </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace został usunięty</value>
+  </data>
+  <data name="pattern_backup_failed" xml:space="preserve">
+    <value>Witaj, $UserName!
+
+Nie udało się utworzyć kopii zapasowej DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}”.
+
+Jeśli masz pytania lub potrzebujesz pomocy, zachęcamy do kontaktu za pośrednictwem tego linku "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_backup_failed_tg" xml:space="preserve">
+    <value>Witaj, $UserName!
+
+Nie udało się utworzyć kopii zapasowej DocSpace [${__VirtualRootPath}](${__VirtualRootPath}).
+
+Jeśli masz pytania lub potrzebujesz pomocy, zachęcamy do kontaktu za pośrednictwem tego linku [${__SupportLink}](${__SupportLink})
+
+Pozdrawiamy,
+Zespół wsparcia ${LetterLogoText}
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="pattern_saas_agent_invite" xml:space="preserve">
+    <value>Witaj!
+
+Zaproszono Cię do dołączenia do asystenta DocSpace pod adresem "${__VirtualRootPath}":"${__VirtualRootPath}". Zaakceptuj zaproszenie, klikając ten link:
+
+$OrangeButton
+
+Po kliknięciu linku z zaproszeniem skonfiguruj nowe hasło dla swojego konta.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Witaj!
+
+Użytkownik $__AuthorName zaprosił Cię do asystenta "$Message":"$ InviteLink" w "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed" xml:space="preserve">
+    <value>Witaj, $UserName!
+
+Nie udało się utworzyć zaplanowanej kopii zapasowej DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}”.
+
+Zalecamy sprawdzenie ustawień "Kopia zapasowa":"${__VirtualRootPath}/portal-settings/backup/data-backup" i "Usługi":"${__VirtualRootPath}/portal-settings/services".
+
+Jeśli masz pytania lub potrzebujesz pomocy, zachęcamy do kontaktu za pośrednictwem tego linku "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
+    <value>Witaj, $UserName!
+
+Nie udało się utworzyć zaplanowanej kopii zapasowej DocSpace [${__VirtualRootPath}](${__VirtualRootPath}).
+
+Zalecamy sprawdzenie ustawień [Kopia zapasowa]:(${__VirtualRootPath}/portal-settings/backup/data-backup) i [Usługi]:(${__VirtualRootPath}/portal-settings/services).
+
+Jeśli masz pytania lub potrzebujesz pomocy, zachęcamy do kontaktu za pośrednictwem tego linku [${__SupportLink}](${__SupportLink})
+
+Pozdrawiamy,
+Zespół wsparcia ${LetterLogoText}
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
 </root>
