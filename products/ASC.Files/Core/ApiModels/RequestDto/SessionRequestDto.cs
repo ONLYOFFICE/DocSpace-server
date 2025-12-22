@@ -85,5 +85,6 @@ public class SessionRequestInFolderDto<T> : SessionRequest
     /// <summary>
     /// The session folder ID.
     /// </summary>
+    [FromRoute(Name = "folderId")]
     public required T FolderId { get; set; }
 }

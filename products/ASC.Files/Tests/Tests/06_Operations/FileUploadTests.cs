@@ -26,8 +26,8 @@
 
 using System.Reflection;
 
-using ASC.Files.Core.ApiModels.RequestDto;
 using ASC.Files.Tests.ApiFactories;
+using ASC.Web.Studio.Core;
 
 namespace ASC.Files.Tests.Tests._06_Operations;
 
@@ -47,17 +47,37 @@ public class FileUploadTests(
         await _filesClient.Authenticate(Initializer.Owner);
         
         var myFolder = await GetUserFolderIdAsync(Initializer.Owner);
-        var assembly = Assembly.GetExecutingAssembly();
-        await using var stream = assembly.GetManifestResourceStream("ASC.Files.Tests.Data.new.docx")!;
-        var model = new SessionRequestInFolderDtoInteger
-        {
-            FolderId = myFolder,
-            FileName = "new.docx",
-            FileSize = stream.Length
-        };
+        var fileName = "new.docx";
         
-        var createdSession = (await _filesOperationsApi.CreateUploadSessionInFolderAsync(model, TestContext.Current.CancellationToken)).Response;
+        var assembly = Assembly.GetExecutingAssembly();
+        await using var stream = assembly.GetManifestResourceStream($"ASC.Files.Tests.Data.{fileName}")!;
+        var contentLength = stream.Length;
+        
+        var createdSession = (await _filesOperationsApi.CreateUploadSessionInFolderAsync(myFolder, fileName, contentLength, cancellationToken: TestContext.Current.CancellationToken)).Response;
         createdSession.Should().NotBeNull();
         createdSession.Id.Should().NotBeEmpty();
+        
+        const int chunkSize = 4 * 1024; // 4 KB
+        var buffer = new byte[chunkSize];
+        var chunkNumber = 1;
+        int bytesRead;
+        
+        while ((bytesRead = await stream.ReadAsync(buffer.AsMemory(0, chunkSize), TestContext.Current.CancellationToken)) > 0)
+        {
+            var chunkStream = new MemoryStream(buffer, 0, bytesRead);
+            var fileParameter = new FileParameter(chunkStream);
+            
+            await _filesOperationsApi.UploadAsyncSessionAsync(myFolder, createdSession.Id, chunkNumber, fileParameter, TestContext.Current.CancellationToken);
+            chunkNumber++;
+        }
+        
+        var resultFile = (await _filesOperationsApi.FinalizeSessionAsync(myFolder, createdSession.Id, TestContext.Current.CancellationToken)).Response;
+        resultFile.Should().NotBeNull();
+        resultFile.FolderId.Should().Be(myFolder);
+        resultFile.Uploaded.Should().BeTrue();
+        resultFile.Title.Should().Be(fileName);
+        resultFile.File.Should().NotBeNull();
+        resultFile.File.FolderId.Should().Be(myFolder);
+        resultFile.File.ContentLength.Should().Be(FileSizeComment.FilesSizeToString(contentLength));
     }
 }

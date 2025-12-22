@@ -26,19 +26,28 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-public class UploadSessionRequestDto
+public class UploadSessionRequestDto<T>
 {    
+    [FromRoute(Name = "folderId")]
+    public T FolderId { get; set; }
+    
     [FromRoute(Name = "sessionId")]
     public string SessionId { get; set; }
     
     public IFormFile File { get; set; }
 }
 
-public class UploadSessionAsyncRequestDto
+public class UploadSessionAsyncRequestDto<T>
 {
+    [FromRoute(Name = "folderId")]
+    public T FolderId { get; set; }
+    
     [FromRoute(Name = "sessionId")]
     public string SessionId { get; set; }
     
     [FromQuery]
     public int? ChunkNumber { get; set; }
+    
+    [FromForm]
+    public IFormFile File { get; set; }
 }

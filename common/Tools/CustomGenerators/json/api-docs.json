@@ -20483,7 +20483,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9079
+              "example": 9846
             }
           }
         ],
@@ -26887,21 +26887,80 @@
         ]
       }
     },
-    "/api/2.0/files/session": {
+    "/api/2.0/files/{folderId}/session": {
       "post": {
         "tags": [
           "Files / Operations"
         ],
         "operationId": "createUploadSessionInFolder",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SessionRequestInFolderDtoInteger"
-              }
+        "parameters": [
+          {
+            "name": "folderId",
+            "in": "path",
+            "description": "The session folder ID.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 9846
+            }
+          },
+          {
+            "name": "FileName",
+            "in": "query",
+            "description": "The file name.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "some text"
+            }
+          },
+          {
+            "name": "FileSize",
+            "in": "query",
+            "description": "The file size.",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "example": 1234
+            }
+          },
+          {
+            "name": "RelativePath",
+            "in": "query",
+            "description": "The relative path to the file.",
+            "schema": {
+              "type": "string",
+              "example": "some text"
+            }
+          },
+          {
+            "name": "CreateOn",
+            "in": "query",
+            "description": "The date and time when the file was created.",
+            "schema": {
+              "$ref": "#/components/schemas/ApiDateTime"
+            }
+          },
+          {
+            "name": "Encrypted",
+            "in": "query",
+            "description": "Specifies whether the file is encrypted or not.",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          },
+          {
+            "name": "CreateNewIfExist",
+            "in": "query",
+            "description": "Specifies whether to create a new file if it already exists.",
+            "schema": {
+              "type": "boolean",
+              "example": true
             }
           }
-        },
+        ],
         "responses": {
           "200": {
             "description": "Information about created session",
@@ -26951,7 +27010,7 @@
         ]
       }
     },
-    "/api/2.0/files/session/{sessionId}": {
+    "/api/2.0/files/{folderId}/session/{sessionId}": {
       "delete": {
         "tags": [
           "Files / Operations"
@@ -26965,6 +27024,16 @@
             "schema": {
               "type": "string",
               "example": "some text"
+            }
+          },
+          {
+            "name": "folderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 9846
             }
           }
         ],
@@ -27010,13 +27079,23 @@
         ]
       }
     },
-    "/api/2.0/files/session/{sessionId}/upload": {
+    "/api/2.0/files/{folderId}/session/{sessionId}/upload": {
       "post": {
         "tags": [
           "Files / Operations"
         ],
         "operationId": "uploadSession",
         "parameters": [
+          {
+            "name": "folderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 9846
+            }
+          },
           {
             "name": "sessionId",
             "in": "path",
@@ -27096,13 +27175,23 @@
         ]
       }
     },
-    "/api/2.0/files/session/{sessionId}/upload_async": {
+    "/api/2.0/files/{folderId}/session/{sessionId}/upload_async": {
       "post": {
         "tags": [
           "Files / Operations"
         ],
         "operationId": "uploadAsyncSession",
         "parameters": [
+          {
+            "name": "folderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 9846
+            }
+          },
           {
             "name": "sessionId",
             "in": "path",
@@ -27122,6 +27211,26 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "File": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              },
+              "encoding": {
+                "File": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Information about created session",
@@ -27171,13 +27280,23 @@
         ]
       }
     },
-    "/api/2.0/files/session/{sessionId}/finalize": {
+    "/api/2.0/files/{folderId}/session/{sessionId}/finalize": {
       "put": {
         "tags": [
           "Files / Operations"
         ],
-        "operationId": "finalizeAsyncSession",
+        "operationId": "finalizeSession",
         "parameters": [
+          {
+            "name": "folderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 9846
+            }
+          },
           {
             "name": "sessionId",
             "in": "path",
@@ -35922,7 +36041,7 @@
             "type": "string",
             "description": "The password in plain text for user authentication.",
             "nullable": true,
-            "example": "vfmf2vO1Kp"
+            "example": "vm2OKp8jga"
           },
           "passwordHash": {
             "type": "string",
@@ -36485,7 +36604,7 @@
             "description": "The company email address.",
             "format": "email",
             "nullable": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "Randall63@hotmail.com"
           },
           "address": {
             "maxLength": 255,
@@ -36590,7 +36709,7 @@
             "description": "The company email address.",
             "format": "email",
             "nullable": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "Randall63@hotmail.com"
           },
           "address": {
             "type": "string",
@@ -47514,7 +47633,7 @@
             "type": "string",
             "description": "The user location.",
             "nullable": true,
-            "example": "910 Camden Plaza, Adalbertoville, Sao Tome and Principe"
+            "example": "001 Schroeder Run, New Tabithaport, Colombia"
           },
           "sex": {
             "$ref": "#/components/schemas/SexEnum"
@@ -50463,7 +50582,7 @@
             "type": "string",
             "description": "The document title.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "protocol_generic_granite_mouse_refined"
           },
           "url": {
             "type": "string",
@@ -56952,28 +57071,6 @@
         },
         "additionalProperties": false,
         "description": "The session request parameters."
-      },
-      "SessionRequestInFolderDtoInteger": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/SessionRequest"
-          },
-          {
-            "required": [
-              "folderId"
-            ],
-            "type": "object",
-            "properties": {
-              "folderId": {
-                "type": "integer",
-                "description": "The session folder ID.",
-                "format": "int32",
-                "example": 9846
-              }
-            }
-          }
-        ],
-        "additionalProperties": false
       },
       "SetPublicDto": {
         "required": [

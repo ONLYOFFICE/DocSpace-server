@@ -119,7 +119,7 @@ public abstract class UploadController<T>(
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Information about created session")]
     [SwaggerResponse(403, "You don't have enough permission to create")]
-    [HttpPost("session")]
+    [HttpPost("{folderId}/session")]
     public async Task<ChunkedUploadSessionResponse<T>> CreateUploadSessionInFolder(SessionRequestInFolderDto<T> inDto)
     {
         return await filesControllerHelper.CreateUploadSessionAsync(inDto.FolderId, inDto.FileName, inDto.FileSize, inDto.RelativePath, inDto.Encrypted, inDto.CreateOn, inDto.CreateNewIfExist);
@@ -128,7 +128,7 @@ public abstract class UploadController<T>(
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Information about created session")]
     [SwaggerResponse(403, "You don't have enough permission to create")]
-    [HttpDelete("session/{sessionId}")]
+    [HttpDelete("{folderId}/session/{sessionId}")]
     public async Task AbortUploadSession(AbortSessionRequestDto<T> inDto)
     {
         await fileUploader.AbortUploadAsync<T>(inDto.SessionId);
@@ -149,8 +149,8 @@ public abstract class UploadController<T>(
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Information about created session")]
     [SwaggerResponse(403, "You don't have enough permission to create")]
-    [HttpPost("session/{sessionId}/upload")]
-    public async Task<UploadSessionResponseDto<T>> UploadSession(UploadSessionRequestDto inDto)
+    [HttpPost("{folderId}/session/{sessionId}/upload")]
+    public async Task<UploadSessionResponseDto<T>> UploadSession(UploadSessionRequestDto<T> inDto)
     {
         var resumedSession = await fileUploader.UploadChunkAsync<T>(inDto.SessionId, inDto.File.OpenReadStream(),  inDto.File.Length);
         await chunkedUploadSessionHolder.StoreSessionAsync(resumedSession);
@@ -218,21 +218,10 @@ public abstract class UploadController<T>(
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Information about created session")]
     [SwaggerResponse(403, "You don't have enough permission to create")]
-    [HttpPost("session/{sessionId}/upload_async")]
-    public async Task<ChunkedUploadSessionResponse<T>> UploadAsyncSession(UploadSessionAsyncRequestDto inDto)
+    [HttpPost("{folderId}/session/{sessionId}/upload_async")]
+    public async Task<ChunkedUploadSessionResponse<T>> UploadAsyncSession(UploadSessionAsyncRequestDto<T> inDto)
     {
-        var boundary = MultipartRequestHelper.GetBoundary(MediaTypeHeaderValue.Parse(HttpContext.Request.ContentType), 100);
-        var reader = new MultipartReader(boundary, HttpContext.Request.Body);
-        var section = await reader.ReadNextSectionAsync();
-        var headersLength = 0;
-        boundary = HeaderUtilities.RemoveQuotes(new StringSegment(boundary)).ToString();
-        var boundaryLength = Encoding.UTF8.GetBytes("\r\n--" + boundary).Length + 2;
-        foreach (var h in section.Headers)
-        {
-            headersLength += h.Value.Sum(r => r.Length) + h.Key.Length + "\n\n".Length;
-        }
-
-        var resumedSession = await fileUploader.UploadChunkAsync<T>(inDto.SessionId, section.Body, HttpContext.Request.ContentLength.Value - headersLength - boundaryLength * 2 - 6, inDto.ChunkNumber);
+        var resumedSession = await fileUploader.UploadChunkAsync<T>(inDto.SessionId, inDto.File.OpenReadStream(), inDto.File.Length, inDto.ChunkNumber);
         await chunkedUploadSessionHolder.StoreSessionAsync(resumedSession);
         return await chunkedUploadSessionHelper.ToResponseObjectAsync(resumedSession);
     }
@@ -240,8 +229,8 @@ public abstract class UploadController<T>(
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Information about created session")]
     [SwaggerResponse(403, "You don't have enough permission to create")]
-    [HttpPut("session/{sessionId}/finalize")]
-    public async Task<UploadSessionResponseDto<T>> FinalizeAsyncSession(FinalizeSessionDto inDto)
+    [HttpPut("{folderId}/session/{sessionId}/finalize")]
+    public async Task<UploadSessionResponseDto<T>> FinalizeSession(FinalizeSessionDto<T> inDto)
     {
         var session = await chunkedUploadSessionHolder.GetSessionAsync<T>(inDto.SessionId);
         if (session.UseChunks)

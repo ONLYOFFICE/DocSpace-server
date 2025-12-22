@@ -30,4 +30,7 @@ public class AbortSessionRequestDto<T>
 {
     [FromRoute(Name = "sessionId")]
     public required string SessionId { get; set; }
+    
+    [FromRoute(Name = "folderId")]
+    public required T FolderId { get; set; }
 }
