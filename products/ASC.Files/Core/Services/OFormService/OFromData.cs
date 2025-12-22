@@ -24,20 +24,20 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.Services.OFormService;
+namespace ASC.Files.Core.Services.TemplateGalleryService;
 
 /// <summary>
-/// The form data.
+/// The template data.
 /// </summary>
-public class OFromData
+public class TemplateGalleryData
 {
     /// <summary>
-    /// The form ID.
+    /// The template ID.
     /// </summary>
     public int Id { get; set; }
 
     /// <summary>
-    /// The form data attributes.
+    /// The template data attributes.
     /// </summary>
-    public OFormDataAttributes Attributes { get; set; }
+    public TemplateGalleryDataAttributes Attributes { get; set; }
 }

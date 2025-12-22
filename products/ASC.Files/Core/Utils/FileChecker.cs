@@ -44,7 +44,7 @@ public class FileChecker(
         using var reader = new StreamReader(stream, Encoding.GetEncoding("iso-8859-1"));
         var message = await reader.ReadToEndAsync();
 
-        var config = configuration.GetSection("files:oform").Get<OFormSettings>();
+        var config = configuration.GetSection("files:oform").Get<TemplateGallerySettings>();
 
         return IsExtendedPDFFile(message, config.Signature);
     }

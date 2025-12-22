@@ -24,64 +24,64 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.Services.OFormService;
+namespace ASC.Files.Core.Services.TemplateGalleryService;
 
 /// <summary>
-/// The form data attributes.
+/// The template data attributes.
 /// </summary>
-public class OFormDataAttributes
+public class TemplateGalleryDataAttributes
 {
     /// <summary>
-    /// The form file.
+    /// The template file.
     /// </summary>
-    [JsonPropertyName("file_oform")]
-    public OFromFile File { get; set; }
+    [JsonPropertyName("file_template")]
+    public TemplateGalleryFile File { get; set; }
 }
 
 /// <summary>
-/// The form file.
+/// The template file.
 /// </summary>
-public class OFromFile
+public class TemplateGalleryFile
 {
     /// <summary>
-    /// The form file data.
+    /// The template file data.
     /// </summary>
-    public IEnumerable<OFromFileData> Data { get; set; }
+    public IEnumerable<TemplateGalleryFileData> Data { get; set; }
 }
 
 /// <summary>
-/// The form file data.
+/// The template file data.
 /// </summary>
-public class OFromFileData
+public class TemplateGalleryFileData
 {
     /// <summary>
-    /// The form file ID.
+    /// The template file ID.
     /// </summary>
     public int Id { get; set; }
 
     /// <summary>
-    /// The form file attributes.
+    /// The template file attributes.
     /// </summary>
-    public OFromFileAttribute Attributes { get; set; }
+    public TemplateGalleryFileAttribute Attributes { get; set; }
 }
 
 /// <summary>
-/// The form file attributes.
+/// The template file attributes.
 /// </summary>
-public class OFromFileAttribute
+public class TemplateGalleryFileAttribute
 {
     /// <summary>
-    /// The form file name.
+    /// The template file name.
     /// </summary>
     public string Name { get; set; }
 
     /// <summary>
-    /// The form file URL.
+    /// The template file URL.
     /// </summary>
     public string Url { get; set; }
 
     /// <summary>
-    /// The form file extension.
+    /// The template file extension.
     /// </summary>
     public string Ext { get; set; }
 }

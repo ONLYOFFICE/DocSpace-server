@@ -24,15 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.Services.OFormService;
+namespace ASC.Files.Core.Services.TemplateGalleryService;
 
 /// <summary>
-/// The form request data.
+/// The template request data.
 /// </summary>
-public class OFromRequestData
+public class TemplateGalleryRequestData
 {
     /// <summary>
-    /// The form data.
+    /// The template data.
     /// </summary>
-    public OFromData Data { get; set; }
+    public TemplateGalleryData Data { get; set; }
 }

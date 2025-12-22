@@ -24,15 +24,15 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.Services.OFormService;
+namespace ASC.Files.Core.Services.TemplateGalleryService;
 
 [Singleton]
-public class OFormRequestManager(
-    ILogger<OFormRequestManager> logger,
+public class TemplateGalleryRequestManager(
+    ILogger<TemplateGalleryRequestManager> logger,
     IConfiguration configuration,
     IHttpClientFactory httpClientFactory)
 {
-    private readonly OFormSettings _configuration = configuration.GetSection("files:oform").Get<OFormSettings>();
+    private readonly TemplateGallerySettings _configuration = configuration.GetSection("files:oform").Get<TemplateGallerySettings>();
 
     private readonly JsonSerializerOptions _options = new()
     {
@@ -45,7 +45,7 @@ public class OFormRequestManager(
         {
             using var httpClient = httpClientFactory.CreateClient();
             using var response = await httpClient.GetAsync($"{_configuration.Domain.TrimEnd('/')}/{_configuration.Path.Trim('/')}/{id}?populate[file_oform][fields]=url&populate[file_oform][fields]=name&populate[file_oform][fields]=ext&populate[file_oform][filters][url][$endsWith]={ext}");
-            var data = JsonSerializer.Deserialize<OFromRequestData>(await response.Content.ReadAsStringAsync(), _options);
+            var data = JsonSerializer.Deserialize<TemplateGalleryRequestData>(await response.Content.ReadAsStringAsync(), _options);
 
             var file = data.Data.Attributes.File.Data.FirstOrDefault(f => f.Attributes.Ext == ext);
             var streamResponse = await httpClient.GetAsync(file?.Attributes.Url);

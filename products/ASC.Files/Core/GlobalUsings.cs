@@ -130,7 +130,7 @@ global using ASC.Files.Core.RoomTemplates.Events;
 global using ASC.Files.Core.RoomTemplates.Operations;
 global using ASC.Files.Core.Security;
 global using ASC.Files.Core.Services.NotifyService;
-global using ASC.Files.Core.Services.OFormService;
+global using ASC.Files.Core.Services.TemplateGalleryService;
 global using ASC.Files.Core.Services.WCFService.Wrappers;
 global using ASC.Files.Core.Text;
 global using ASC.Files.Core.Thirdparty;

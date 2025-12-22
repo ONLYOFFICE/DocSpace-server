@@ -24,40 +24,40 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.Services.OFormService;
+namespace ASC.Files.Core.Services.TemplateGalleryService;
 
 /// <summary>
-/// The form settings.
+/// The template settings.
 /// </summary>
-public class OFormSettings
+public class TemplateGallerySettings
 {
     /// <summary>
-    /// The form domain.
+    /// The template domain.
     /// </summary>
     public string Domain { get; set; }
 
     /// <summary>
-    /// The form path.
+    /// The template path.
     /// </summary>
     public string Path { get; set; }
 
     /// <summary>
-    /// The form dashboard.
+    /// The template dashboard.
     /// </summary>
     public string Dashboard { get; set; }
 
     /// <summary>
-    /// The form extension.
+    /// The template extension.
     /// </summary>
     public string Ext { get; set; }
 
     /// <summary>
-    /// The form signature.
+    /// The template signature.
     /// </summary>
     public string Signature { get; set; }
 
     /// <summary>
-    /// The form uploading settings.
+    /// The template uploading settings.
     /// </summary>
-    public OFormSettings Upload { get; set; }
+    public TemplateGallerySettings Upload { get; set; }
 }

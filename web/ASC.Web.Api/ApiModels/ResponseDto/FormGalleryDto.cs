@@ -27,48 +27,48 @@
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 /// <summary>
-/// The form gallery parameters.
+/// The template gallery parameters.
 /// </summary>
-public class FormGalleryDto
+public class TemplateGalleryDto
 {
     /// <summary>
-    /// The form gallery path.
+    /// The template gallery path.
     /// </summary>
     public required string Path { get; set; }
 
     /// <summary>
-    /// The form gallery domain.
+    /// The template gallery domain.
     /// </summary>
     public required string Domain { get; set; }
 
     /// <summary>
-    /// The form gallery extension.
+    /// The template gallery extension.
     /// </summary>
     public required string Ext { get; set; }
 
     /// <summary>
-    /// The form gallery upload path.
+    /// The template gallery upload path.
     /// </summary>
     public required string UploadPath { get; set; }
 
     /// <summary>
-    /// The form gallery upload domain.
+    /// The template gallery upload domain.
     /// </summary>
     public required string UploadDomain { get; set; }
 
     /// <summary>
-    /// The form gallery upload extension.
+    /// The template gallery upload extension.
     /// </summary>
     public required string UploadExt { get; set; }
 
     /// <summary>
-    /// The form gallery upload dashboard.
+    /// The template gallery upload dashboard.
     /// </summary>
     public required string UploadDashboard { get; set; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public static partial class FormGalleryDtoMapper
+public static partial class TemplateGalleryDtoMapper
 {
-    public static partial FormGalleryDto Map(this OFormSettings source);
+    public static partial TemplateGalleryDto Map(this TemplateGallerySettings source);
 }

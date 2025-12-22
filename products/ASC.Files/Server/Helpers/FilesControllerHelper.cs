@@ -145,7 +145,7 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         }
         else
         {
-            file = await _fileStorageService.CreateNewFileAsync(new FileModel<T, int> { ParentId = folderId, Title = title, TemplateId = 0, FormId = formId }, enableExternalExt);
+            file = await _fileStorageService.CreateNewFileAsync(new FileModel<T, int> { ParentId = folderId, Title = title, TemplateId = 0, TemplateGalleryFileId = formId }, enableExternalExt);
         }
 
         return await _fileDtoHelper.GetAsync(file);

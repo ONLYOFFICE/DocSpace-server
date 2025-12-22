@@ -229,9 +229,9 @@ public class SettingsDto
     public required DeepLinkDto DeepLink { get; set; }
 
     /// <summary>
-    /// The form gallery settings.
+    /// The template gallery settings.
     /// </summary>
-    public FormGalleryDto FormGallery { get; set; }
+    public TemplateGalleryDto TemplateGallery { get; set; }
 
     /// <summary>
     /// The maximum image upload size.
