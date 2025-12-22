@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using System.Reflection;
+using System.Security.Cryptography;
 
 using ASC.Files.Tests.ApiFactories;
 using ASC.Web.Studio.Core;
@@ -45,7 +46,8 @@ public class FileUploadTests(
     public async Task UploadFile_ReturnsValidFile()
     {
         await _filesClient.Authenticate(Initializer.Owner);
-        
+
+        var settings = (await _filesSettingsApi.GetFilesSettingsAsync(TestContext.Current.CancellationToken)).Response;
         var myFolder = await GetUserFolderIdAsync(Initializer.Owner);
         var fileName = "new.docx";
         
@@ -57,7 +59,7 @@ public class FileUploadTests(
         createdSession.Should().NotBeNull();
         createdSession.Id.Should().NotBeEmpty();
         
-        const int chunkSize = 4 * 1024; // 4 KB
+        var chunkSize = (int)settings.ChunkUploadSize;
         var buffer = new byte[chunkSize];
         var chunkNumber = 1;
         int bytesRead;
@@ -79,5 +81,32 @@ public class FileUploadTests(
         resultFile.File.Should().NotBeNull();
         resultFile.File.FolderId.Should().Be(myFolder);
         resultFile.File.ContentLength.Should().Be(FileSizeComment.FilesSizeToString(contentLength));
+        
+        var configuration = (await _filesApi.GetFileInfoAsync(resultFile.File.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var fileStream = await _filesClient.GetStreamAsync(configuration.ViewUrl, TestContext.Current.CancellationToken);
+        
+        await using var fileTempStream = new MemoryStream();
+        await fileStream.CopyToAsync(fileTempStream, TestContext.Current.CancellationToken);
+
+        fileTempStream.Position = 0;
+        stream.Position = 0;
+
+        AreStreamsEqual(fileTempStream, stream).Should().BeTrue();
+
     }
+    
+    private static bool AreStreamsEqual(Stream stream1, Stream stream2)
+    {
+        stream1.Position = 0;
+        stream2.Position = 0;
+
+        using var sha256 = SHA256.Create();
+        var hash1 = sha256.ComputeHash(stream1);
+    
+        stream2.Position = 0;
+        var hash2 = sha256.ComputeHash(stream2);
+
+        return hash1.SequenceEqual(hash2);
+    }
+
 }
