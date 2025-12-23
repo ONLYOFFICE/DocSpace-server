@@ -147,6 +147,7 @@ public class DocumentServiceTrackerHelper(
     EmailValidationKeyProvider emailValidationKeyProvider,
     BaseCommonLinkUtility baseCommonLinkUtility,
     SocketManager socketManager,
+    Global global,
     GlobalStore globalStore,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     IDaoFactory daoFactory,
@@ -318,12 +319,15 @@ public class DocumentServiceTrackerHelper(
             logger.ErrorDocServiceDropFailed(usersDrop);
         }
 
+        var editingBy = await fileTracker.GetEditingByWithNamesAsync(fileId, global);
+
         foreach (var removeUserId in users)
         {
+            editingBy.Remove(removeUserId);
             await fileTracker.RemoveAsync(fileId, userId: removeUserId);
         }
 
-        await socketManager.StartEditAsync(fileId);
+        await socketManager.StartEditAsync(fileId, editingBy);
 
         if (file != null && fileData.Actions != null && fileData.Actions.Any(r => r.Type == 1))
         {

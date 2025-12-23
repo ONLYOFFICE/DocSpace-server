@@ -28,6 +28,12 @@ using ASC.Files.Core.Mapping;
 
 namespace ASC.Files.Core;
 
+
+/// <summary>
+/// The file state.
+/// </summary>
+public record FileState(FileStatus FileStatus, Dictionary<Guid, string> EditingBy);
+
 /// <summary>
 /// The file status.
 /// </summary>
@@ -74,6 +80,7 @@ public enum FileStatus
 public class File<T> : FileEntry<T>
 {
     private FileStatus _status;
+    private Dictionary<Guid, string> _editingBy;
 
     [JsonConstructor]
     protected File()
@@ -95,6 +102,13 @@ public class File<T> : FileEntry<T>
         get => _status;
         set => _status = value;
     }
+
+    public Dictionary<Guid, string> EditingBy
+    {
+        get => _editingBy;
+        set => _editingBy = value;
+    }
+
     /// <summary>
     /// The file version.
     /// </summary>
@@ -154,18 +168,17 @@ public class File<T> : FileEntry<T>
         }
     }
     /// <summary>
-    /// Returns the file status.
+    /// Returns the file state.
     /// </summary>
-    public async Task<FileStatus> GetFileStatus()
+    public async Task<FileState> GetFileState()
     {
-        _status = await ServiceProvider.GetService<FileHelper>().GetFileStatus(this, _status);
-        return _status;
-    }
+        var state = await ServiceProvider.GetService<FileHelper>().GetFileState(this, _status);
 
-    /// <summary>
-    /// Sets the file status.
-    /// </summary>
-    public void SetFileStatus(FileStatus value) => _status = value;
+        _status = state.FileStatus;
+        _editingBy = state.EditingBy;
+
+        return state;
+    }
 
     /// <summary>
     /// Sets the file unique ID.

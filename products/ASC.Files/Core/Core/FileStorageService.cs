@@ -4828,12 +4828,15 @@ public class FileStorageService //: IFileStorageService
             var newFile = file;
             if (file.CreateBy != userInfo.Id)
             {
+                var state = await file.GetFileState();
+
                 newFile = serviceProvider.GetService<File<T>>();
                 newFile.Id = file.Id;
                 newFile.Version = file.Version + 1;
                 newFile.VersionGroup = file.VersionGroup + 1;
                 newFile.Title = file.Title;
-                newFile.SetFileStatus(await file.GetFileStatus());
+                newFile.FileStatus = state.FileStatus;
+                newFile.EditingBy = state.EditingBy;
                 newFile.ParentId = file.ParentId;
                 newFile.CreateBy = userInfo.Id;
                 newFile.CreateOn = file.CreateOn;

@@ -30,17 +30,20 @@ namespace ASC.Files.Core;
 public class FileHelper(FileTrackerHelper fileTracker,
                         FilesLinkUtility filesLinkUtility,
                         FileUtility fileUtility,
-                        FileConverter fileConverter)
+                        FileConverter fileConverter,
+                        Global global)
 {
-    internal async Task<FileStatus> GetFileStatus<T>(File<T> file, FileStatus currentStatus)
+    internal async Task<FileState> GetFileState<T>(File<T> file, FileStatus currentStatus)
     {
         var editingTask = fileUtility.CanWebEdit(file.Title)
             ? fileTracker.GetEditingStatusAsync(file.Id)
             : Task.FromResult<FileTrackerHelper.EditingStatus>(null);
 
+        var editingByTask = fileTracker.GetEditingByWithNamesAsync(file.Id, global);
+
         var convertingTask = fileConverter.IsConverting(file);
 
-        await Task.WhenAll(editingTask, convertingTask);
+        await Task.WhenAll(editingTask, editingByTask, convertingTask);
 
         var editingStatus = editingTask.Result;
         if (editingStatus != null)
@@ -60,7 +63,7 @@ public class FileHelper(FileTrackerHelper fileTracker,
             currentStatus |= FileStatus.IsConverting;
         }
 
-        return currentStatus;
+        return new FileState(currentStatus, editingByTask.Result);
     }
 
     public string GetDownloadUrl<T>(FileEntry<T> fileEntry)

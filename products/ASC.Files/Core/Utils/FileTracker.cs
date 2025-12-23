@@ -209,6 +209,29 @@ public class FileTrackerHelper(IFusionCache cache, IServiceProvider serviceProvi
             : [];
     }
 
+    public async Task<Dictionary<Guid, string>> GetEditingByWithNamesAsync<T>(T fileId, Global global)
+    {
+        var tracker = await GetTrackerAsync(fileId);
+        if (tracker == null || !await IsEditingAsync(fileId))
+        {
+            return null;
+        }
+
+        var result = new Dictionary<Guid, string>();
+        foreach (var trackInfo in tracker.EditingBy.Values)
+        {
+            if (result.ContainsKey(trackInfo.UserId))
+            {
+                continue;
+            }
+
+            var userName = await global.GetUserNameAsync(trackInfo.UserId, true);
+            result.Add(trackInfo.UserId, userName);
+        }
+
+        return result;
+    }
+
     public async Task<string> GetTrackerDocKey<T>(T fileId)
     {
         var tracker = await GetTrackerAsync(fileId);

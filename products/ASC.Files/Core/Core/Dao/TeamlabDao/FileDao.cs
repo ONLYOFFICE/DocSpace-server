@@ -1350,11 +1350,12 @@ internal class FileDao(
 
     private async Task<File<int>> CopyFileAsync(File<int> file, int toFolderId)
     {
-        var status = await file.GetFileStatus();
+        var state = await file.GetFileState();
         const FileStatus flagsToRemove = FileStatus.IsEditing | FileStatus.IsEditingAlone | FileStatus.IsConverting;
 
         var copy = _serviceProvider.GetService<File<int>>();
-        copy.SetFileStatus(status & ~flagsToRemove);
+        copy.FileStatus = state.FileStatus & ~flagsToRemove;
+        copy.EditingBy = state.EditingBy;
         copy.ParentId = toFolderId;
         copy.Title = await global.GetAvailableTitleAsync(file.Title, toFolderId, IsExistAsync, FileEntryType.File);
         copy.ConvertedType = file.ConvertedType;
