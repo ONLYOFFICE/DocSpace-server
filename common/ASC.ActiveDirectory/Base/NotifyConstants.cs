@@ -24,20 +24,27 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.Notify.Model;
+
 namespace ASC.ActiveDirectory.Base;
 
-public static class NotifyConstants
+public class NotifyConstants : INotifyActionList
 {
     public static readonly string TagUserName = "UserName";
     public static readonly string TagUserEmail = "UserEmail";
     public static readonly string TagMyStaffLink = "MyStaffLink";
 
-    public static readonly INotifyAction ActionLdapActivation = new NotifyAction("user_ldap_activation")
+    public readonly INotifyAction ActionLdapActivation;
+
+    public NotifyConstants()
     {
-        Patterns = [
-            new EmailPattern(() =>  WebstudioNotifyPatternResource.subject_user_ldap_activation, () => WebstudioNotifyPatternResource.pattern_user_ldap_activation)
-        ]
-    };
+        ActionLdapActivation = new NotifyAction("user_ldap_activation", this)
+        {
+            Patterns = [
+                new EmailPattern(() => WebstudioNotifyPatternResource.subject_user_ldap_activation, () => WebstudioNotifyPatternResource.pattern_user_ldap_activation)
+            ]
+        };
+    }
 
     public static ITagValue TagOrangeButton(string btnText, string btnUrl)
     {

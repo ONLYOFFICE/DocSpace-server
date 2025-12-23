@@ -27,15 +27,20 @@
 namespace ASC.Web.Studio.Core.Notify;
 
 [Scope]
-public class StudioNotifySource(UserManager userManager, IRecipientProvider recipientsProvider, SubscriptionManager subscriptionManager)
+public class StudioNotifySource(
+    UserManager userManager, 
+    IRecipientProvider 
+        recipientsProvider, 
+    SubscriptionManager subscriptionManager, 
+    Actions actions)
     : NotifySource("asc.web.studio", userManager, recipientsProvider, subscriptionManager)
 {
     protected override ISubscriptionProvider CreateSubscriptionProvider()
     {
-        return new AdminNotifySubscriptionProvider(base.CreateSubscriptionProvider());
+        return new AdminNotifySubscriptionProvider(base.CreateSubscriptionProvider(), actions);
     }
 
-    private sealed class AdminNotifySubscriptionProvider(ISubscriptionProvider provider) : ISubscriptionProvider
+    private sealed class AdminNotifySubscriptionProvider(ISubscriptionProvider provider, Actions actions) : ISubscriptionProvider
     {
         public async Task<object> GetSubscriptionRecordAsync(INotifyAction action, IRecipient recipient, string objectID)
         {
@@ -94,13 +99,13 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
 
         private INotifyAction GetAdminAction(INotifyAction action)
         {
-            if (Actions.SelfProfileUpdated.ID == action.ID ||
-                Actions.UserHasJoin.ID == action.ID ||
-                Actions.UserMessageToAdmin.ID == action.ID ||
-                Actions.ProfileHasDeletedItself.ID == action.ID
+            if (actions.SelfProfileUpdated.ID == action.ID ||
+                actions.UserHasJoin.ID == action.ID ||
+                actions.UserMessageToAdmin.ID == action.ID ||
+                actions.ProfileHasDeletedItself.ID == action.ID
                )
             {
-                return Actions.AdminNotify;
+                return actions.AdminNotify;
             }
 
             return action;

@@ -24,166 +24,221 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.Notify.Model;
+
 namespace ASC.Files.Core.Services.NotifyService;
 
-public static class NotifyConstants
+[Singleton]
+public class NotifyConstants : INotifyActionList
 {
+    public NotifyConstants()
+    {
+        EventDocuSignComplete = new NotifyAction("DocuSignComplete", this)
+        {
+            Patterns =
+            [
+                new EmailPattern(() => FilesPatternResource.subject_DocuSignComplete, () => FilesPatternResource.pattern_DocuSignComplete)
+            ]
+        };
+        
+        EventDocuSignStatus = new NotifyAction("DocuSignStatus", this)
+        {
+            Patterns = [
+                new EmailPattern(() => FilesPatternResource.subject_DocuSignStatus, () => FilesPatternResource.pattern_DocuSignStatus)
+            ]
+        };
+        
+        EventMailMergeEnd = new NotifyAction("MailMergeEnd", this)
+        {
+            Patterns = [
+                new EmailPattern(() => FilesPatternResource.subject_MailMergeEnd, () => FilesPatternResource.pattern_MailMergeEnd)
+            ]
+        };
+        
+        EventShareDocument = new NotifyAction("ShareDocument", this)
+        {
+            Patterns = [
+                new EmailPattern(() => FilesPatternResource.subject_ShareDocument, () => FilesPatternResource.pattern_ShareDocument),
+                new TelegramPattern(() => FilesPatternResource.pattern_ShareDocument),
+                new PushPattern(() => FilesPatternResource.subject_ShareDocument_push)
+            ]
+        };
+        
+        EventShareEncryptedDocument = new NotifyAction("ShareEncryptedDocument", this);
+        
+        EventShareFolder = new NotifyAction("ShareFolder", this)
+        {
+            Patterns = [
+                new EmailPattern(() => FilesPatternResource.subject_ShareFolder, () => FilesPatternResource.pattern_ShareFolder),
+                new TelegramPattern(() => FilesPatternResource.pattern_ShareFolder),
+                new PushPattern(() => FilesPatternResource.subject_ShareFolder_push)
+            ]
+        };
+        
+        EventEditorMentions = new NotifyAction("EditorMentions", this)
+        {
+            Patterns = [
+                new EmailPattern(() => FilesPatternResource.subject_EditorMentions, () => FilesPatternResource.pattern_EditorMentions),
+                new TelegramPattern(() => FilesPatternResource.pattern_EditorMentions),
+                new PushPattern(() => FilesPatternResource.pattern_EditorMentions_push)
+            ]
+        };
+        
+        EventRoomRemoved = new NotifyAction("RoomRemoved", this)
+        {
+            Patterns = [
+                new EmailPattern(() => FilesPatternResource.subject_RoomRemoved, () => FilesPatternResource.pattern_RoomRemoved),
+                new TelegramPattern(() => FilesPatternResource.pattern_RoomRemoved)
+            ]
+        };
+        
+        EventAgentRemoved = new NotifyAction("AgentRemoved", this)
+        {
+            Patterns = [
+                new EmailPattern(() => FilesPatternResource.subject_AgentRemoved, () => FilesPatternResource.pattern_AgentRemoved),
+                new TelegramPattern(() => FilesPatternResource.pattern_AgentRemoved)
+            ]
+        };
+        
+        EventFormSubmitted = new NotifyAction("FormSubmitted", this)
+        {
+            Patterns = [
+                new EmailPattern(() => FilesPatternResource.subject_FormSubmitted, () => FilesPatternResource.pattern_FormSubmitted),
+                new TelegramPattern(() => FilesPatternResource.pattern_FormSubmitted),
+                new PushPattern(() => FilesPatternResource.pattern_FormSubmitted_push)
+            ]
+        };
+        
+        EventFormReceived = new NotifyAction("FormReceived", this)
+        {
+            Patterns = [
+                new EmailPattern(() => FilesPatternResource.subject_FormReceived, () => FilesPatternResource.pattern_FormReceived),
+                new TelegramPattern(() => FilesPatternResource.pattern_FormReceived)
+            ]
+        };
+        
+        EventRoomMovedArchive = new NotifyAction("RoomMovedArchive", this)
+        {
+            Patterns = [
+                new PushPattern(() => FilesPatternResource.pattern_RoomMovedArchive_push)
+            ]
+        };
+        
+        EventInvitedToRoom = new NotifyAction("InvitedToRoom", this)
+        {
+            Patterns = [
+                new PushPattern(() => FilesPatternResource.pattern_InvitedToRoom_push)
+            ]
+        };
+        
+        EventInvitedToAgent = new NotifyAction("InvitedToAgent", this)
+        {
+            Patterns = [
+                new PushPattern(() => FilesPatternResource.pattern_InvitedToAgent_push)
+            ]
+        };
+        
+        EventRoomUpdateAccessForUser = new NotifyAction("RoomUpdateAccessForUser", this)
+        {
+            Patterns = [
+                new PushPattern(() => FilesPatternResource.pattern_RoomUpdateAccessForUser_push)
+            ]
+        };
+        
+        EventAgentUpdateAccessForUser = new NotifyAction("AgentUpdateAccessForUser", this)
+        {
+            Patterns = [
+                new PushPattern(() => FilesPatternResource.pattern_AgentUpdateAccessForUser_push)
+            ]
+        };
+        
+        EventDocumentCreatedInRoom = new NotifyAction("DocumentCreatedInRoom", this)
+        {
+            Patterns = [
+                new PushPattern(() => FilesPatternResource.pattern_DocumentCreatedInRoom_push)
+            ]
+        };
+        
+        EventDocumentUploadedToRoom = new NotifyAction("DocumentUploadedTo", this)
+        {
+            Patterns = [
+                new PushPattern(() => FilesPatternResource.pattern_DocumentUploadedTo_push)
+            ]
+        };
+        
+        EventDocumentsUploadedToRoom = new NotifyAction("DocumentsUploadedTo", this)
+        {
+            Patterns = [
+                new PushPattern(() => FilesPatternResource.pattern_DocumentsUploadedTo_push)
+            ]
+        };
+        
+        EventFolderCreatedInRoom = new NotifyAction("FolderCreatedInRoom", this)
+        {
+            Patterns = [
+                new PushPattern(() => FilesPatternResource.pattern_FolderCreatedInRoom_push)
+            ]
+        };
+        
+        EventFormStartedFilling = new NotifyAction("FormStartedFilling", this)
+        {
+            Patterns = [
+                new EmailPattern(() => FilesPatternResource.subject_FormStartedFilling, () => FilesPatternResource.pattern_FormStartedFilling),
+                new TelegramPattern(() => FilesPatternResource.pattern_FormStartedFilling)
+            ]
+        };
+        
+        EventYourTurnFormFilling = new NotifyAction("YourTurnFormFilling", this)
+        {
+            Patterns = [
+                new EmailPattern(() => FilesPatternResource.subject_YourTurnFormFilling, () => FilesPatternResource.pattern_YourTurnFormFilling),
+                new TelegramPattern(() => FilesPatternResource.pattern_YourTurnFormFilling)
+            ]
+        };
+        
+        EventFormWasCompletelyFilled = new NotifyAction("FormWasCompletelyFilled", this)
+        {
+            Patterns = [
+                new EmailPattern(() => FilesPatternResource.subject_FormWasCompletelyFilled, () => FilesPatternResource.pattern_FormWasCompletelyFilled),
+                new TelegramPattern(() => FilesPatternResource.pattern_FormWasCompletelyFilled)
+            ]
+        };
+        
+        EventStoppedFormFilling = new NotifyAction("StoppedFormFilling", this)
+        {
+            Patterns = [
+                new EmailPattern(() => FilesPatternResource.subject_StoppedFormFilling, () => FilesPatternResource.pattern_StoppedFormFilling),
+                new TelegramPattern(() => FilesPatternResource.pattern_StoppedFormFilling)
+            ]
+        };
+    }
+    
     #region Events
-
-    public static readonly INotifyAction EventDocuSignComplete = new NotifyAction("DocuSignComplete")
-    {
-        Patterns = [
-            new EmailPattern(() => FilesPatternResource.subject_DocuSignComplete, () => FilesPatternResource.pattern_DocuSignComplete)
-        ]
-    };
-    public static readonly INotifyAction EventDocuSignStatus = new NotifyAction("DocuSignStatus")
-    {
-        Patterns = [
-            new EmailPattern(() => FilesPatternResource.subject_DocuSignStatus, () => FilesPatternResource.pattern_DocuSignStatus)
-        ]
-    };
-    public static readonly INotifyAction EventMailMergeEnd = new NotifyAction("MailMergeEnd")
-    {
-        Patterns = [
-            new EmailPattern(() => FilesPatternResource.subject_MailMergeEnd, () => FilesPatternResource.pattern_MailMergeEnd)
-        ]
-    };
-    public static readonly INotifyAction EventShareDocument = new NotifyAction("ShareDocument")
-    {
-        Patterns = [
-            new EmailPattern(() => FilesPatternResource.subject_ShareDocument, () => FilesPatternResource.pattern_ShareDocument),
-            new TelegramPattern(() => FilesPatternResource.pattern_ShareDocument),
-            new PushPattern(() => FilesPatternResource.subject_ShareDocument_push)
-        ]
-    };
-    public static readonly INotifyAction EventShareEncryptedDocument = new NotifyAction("ShareEncryptedDocument");
-    public static readonly INotifyAction EventShareFolder = new NotifyAction("ShareFolder")
-    {
-        Patterns = [
-            new EmailPattern(() => FilesPatternResource.subject_ShareFolder, () => FilesPatternResource.pattern_ShareFolder),
-            new TelegramPattern(() => FilesPatternResource.pattern_ShareFolder),
-            new PushPattern(() => FilesPatternResource.subject_ShareFolder_push)
-        ]
-    };
-    public static readonly INotifyAction EventEditorMentions = new NotifyAction("EditorMentions")
-    {
-        Patterns = [
-            new EmailPattern(() => FilesPatternResource.subject_EditorMentions, () => FilesPatternResource.pattern_EditorMentions),
-            new TelegramPattern(() => FilesPatternResource.pattern_EditorMentions),
-            new PushPattern(() => FilesPatternResource.pattern_EditorMentions_push)
-        ]
-    };
-    public static readonly INotifyAction EventRoomRemoved = new NotifyAction("RoomRemoved")
-    {
-        Patterns = [
-            new EmailPattern(() => FilesPatternResource.subject_RoomRemoved, () => FilesPatternResource.pattern_RoomRemoved),
-            new TelegramPattern(() => FilesPatternResource.pattern_RoomRemoved)
-        ]
-    };
-    public static readonly INotifyAction EventAgentRemoved = new NotifyAction("AgentRemoved")
-    {
-        Patterns = [
-            new EmailPattern(() => FilesPatternResource.subject_AgentRemoved, () => FilesPatternResource.pattern_AgentRemoved),
-            new TelegramPattern(() => FilesPatternResource.pattern_AgentRemoved)
-        ]
-    };
-    public static readonly INotifyAction EventFormSubmitted = new NotifyAction("FormSubmitted")
-    {
-        Patterns = [
-            new EmailPattern(() => FilesPatternResource.subject_FormSubmitted, () => FilesPatternResource.pattern_FormSubmitted),
-            new TelegramPattern(() => FilesPatternResource.pattern_FormSubmitted),
-            new PushPattern(() => FilesPatternResource.pattern_FormSubmitted_push)
-        ]
-    };
-    public static readonly INotifyAction EventFormReceived = new NotifyAction("FormReceived")
-    {
-        Patterns = [
-            new EmailPattern(() => FilesPatternResource.subject_FormReceived, () => FilesPatternResource.pattern_FormReceived),
-            new TelegramPattern(() => FilesPatternResource.pattern_FormReceived)
-        ]
-    };
-    public static readonly INotifyAction EventRoomMovedArchive = new NotifyAction("RoomMovedArchive")
-    {
-        Patterns = [
-            new PushPattern(() => FilesPatternResource.pattern_RoomMovedArchive_push)
-        ]
-    };
-    public static readonly INotifyAction EventInvitedToRoom = new NotifyAction("InvitedToRoom")
-    {
-        Patterns = [
-            new PushPattern(() => FilesPatternResource.pattern_InvitedToRoom_push)
-        ]
-    };
-    public static readonly INotifyAction EventInvitedToAgent = new NotifyAction("InvitedToAgent")
-    {
-        Patterns = [
-            new PushPattern(() => FilesPatternResource.pattern_InvitedToAgent_push)
-        ]
-    };
-    public static readonly INotifyAction EventRoomUpdateAccessForUser = new NotifyAction("RoomUpdateAccessForUser")
-    {
-        Patterns = [
-            new PushPattern(() => FilesPatternResource.pattern_RoomUpdateAccessForUser_push)
-        ]
-    };
-    public static readonly INotifyAction EventAgentUpdateAccessForUser = new NotifyAction("AgentUpdateAccessForUser")
-    {
-        Patterns = [
-            new PushPattern(() => FilesPatternResource.pattern_AgentUpdateAccessForUser_push)
-        ]
-    };
-    public static readonly INotifyAction EventDocumentCreatedInRoom = new NotifyAction("DocumentCreatedInRoom")
-    {
-        Patterns = [
-            new PushPattern(() => FilesPatternResource.pattern_DocumentCreatedInRoom_push)
-        ]
-    };
-    public static readonly INotifyAction EventDocumentUploadedToRoom = new NotifyAction("DocumentUploadedTo")
-    {
-        Patterns = [
-            new PushPattern(() => FilesPatternResource.pattern_DocumentUploadedTo_push)
-        ]
-    };
-    public static readonly INotifyAction EventDocumentsUploadedToRoom = new NotifyAction("DocumentsUploadedTo")
-    {
-        Patterns = [
-            new PushPattern(() => FilesPatternResource.pattern_DocumentsUploadedTo_push)
-        ]
-    };
-    public static readonly INotifyAction EventFolderCreatedInRoom = new NotifyAction("FolderCreatedInRoom")
-    {
-        Patterns = [
-            new PushPattern(() => FilesPatternResource.pattern_FolderCreatedInRoom_push)
-        ]
-    };
-    public static readonly INotifyAction EventFormStartedFilling = new NotifyAction("FormStartedFilling")
-    {
-        Patterns = [
-            new EmailPattern(() => FilesPatternResource.subject_FormStartedFilling, () => FilesPatternResource.pattern_FormStartedFilling),
-            new TelegramPattern(() => FilesPatternResource.pattern_FormStartedFilling)
-        ]
-    };
-    public static readonly INotifyAction EventYourTurnFormFilling = new NotifyAction("YourTurnFormFilling")
-    {
-        Patterns = [
-            new EmailPattern(() => FilesPatternResource.subject_YourTurnFormFilling, () => FilesPatternResource.pattern_YourTurnFormFilling),
-            new TelegramPattern(() => FilesPatternResource.pattern_YourTurnFormFilling)
-        ]
-    };
-    public static readonly INotifyAction EventFormWasCompletelyFilled = new NotifyAction("FormWasCompletelyFilled")
-    {
-        Patterns = [
-            new EmailPattern(() => FilesPatternResource.subject_FormWasCompletelyFilled, () => FilesPatternResource.pattern_FormWasCompletelyFilled),
-            new TelegramPattern(() => FilesPatternResource.pattern_FormWasCompletelyFilled)
-        ]
-    };
-    public static readonly INotifyAction EventStoppedFormFilling = new NotifyAction("StoppedFormFilling")
-    {
-        Patterns = [
-            new EmailPattern(() => FilesPatternResource.subject_StoppedFormFilling, () => FilesPatternResource.pattern_StoppedFormFilling),
-            new TelegramPattern(() => FilesPatternResource.pattern_StoppedFormFilling)
-        ]
-    };
+    
+    public readonly INotifyAction EventDocuSignComplete;
+    public readonly INotifyAction EventDocuSignStatus;
+    public readonly INotifyAction EventMailMergeEnd;
+    public readonly INotifyAction EventShareDocument;
+    public readonly INotifyAction EventShareEncryptedDocument;
+    public readonly INotifyAction EventShareFolder;
+    public readonly INotifyAction EventEditorMentions;
+    public readonly INotifyAction EventRoomRemoved;
+    public readonly INotifyAction EventAgentRemoved;
+    public readonly INotifyAction EventFormSubmitted;
+    public readonly INotifyAction EventFormReceived;
+    public readonly INotifyAction EventRoomMovedArchive;
+    public readonly INotifyAction EventInvitedToRoom;
+    public readonly INotifyAction EventInvitedToAgent;
+    public readonly INotifyAction EventRoomUpdateAccessForUser;
+    public readonly INotifyAction EventAgentUpdateAccessForUser;
+    public readonly INotifyAction EventDocumentCreatedInRoom;
+    public readonly INotifyAction EventDocumentUploadedToRoom;
+    public readonly INotifyAction EventDocumentsUploadedToRoom;
+    public readonly INotifyAction EventFolderCreatedInRoom;
+    public readonly INotifyAction EventFormStartedFilling;
+    public readonly INotifyAction EventYourTurnFormFilling;
+    public readonly INotifyAction EventFormWasCompletelyFilled;
+    public readonly INotifyAction EventStoppedFormFilling;
 
     #endregion
 

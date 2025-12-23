@@ -40,6 +40,7 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
     AuditEventsRepository auditEventsRepository,
     WebItemManager webItemManager,
     DisplayUserSettingsHelper displayUserSettingsHelper,
+    Actions actions,
     IServiceProvider serviceProvider)
 {
     private readonly ILogger _log = optionsMonitor.CreateLogger("ASC.Notify");
@@ -160,7 +161,7 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
 
                 _log.Debug($"SendMsgWhatsNew userActivities count : {userActivities.Count}");//temp
 
-                var action = whatsNewType == WhatsNewType.RoomsActivity ? Actions.RoomsActivity : Actions.SendWhatsNew;
+                var action = whatsNewType == WhatsNewType.RoomsActivity ? actions.RoomsActivity : actions.SendWhatsNew;
 
                 if (userActivities.Count != 0)
                 {
@@ -322,13 +323,13 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
     private async Task<bool> CheckSubscriptionAsync(UserInfo user, WhatsNewType whatsNewType)
     {
         if (whatsNewType == WhatsNewType.DailyFeed &&
-            await studioNotifyHelper.IsSubscribedToNotifyAsync(user, Actions.SendWhatsNew))
+            await studioNotifyHelper.IsSubscribedToNotifyAsync(user, actions.SendWhatsNew))
         {
             return true;
         }
 
         if (whatsNewType == WhatsNewType.RoomsActivity &&
-            await studioNotifyHelper.IsSubscribedToNotifyAsync(user, Actions.RoomsActivity))
+            await studioNotifyHelper.IsSubscribedToNotifyAsync(user, actions.RoomsActivity))
         {
             return true;
         }

@@ -25,22 +25,23 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Common.IntegrationEvents.Events;
+using ASC.Core.Common.Notify.Model;
 
 namespace ASC.Notify.Model;
 
-public class NotifyAction(string id) : INotifyAction
+public class NotifyAction(string id, INotifyActionList list) : INotifyAction
 {
+    private readonly INotifyActionList _list = list;
     public string ID { get; } = id ?? throw new ArgumentNullException(nameof(id));
     public List<Pattern> Patterns { get; set; } = [];
 
     public static implicit operator NotifyActionItem(NotifyAction cache)
     {
-        return new NotifyActionItem { Id = cache.ID };
-    }
-
-    public static explicit operator NotifyAction(NotifyActionItem cache)
-    {
-        return new NotifyAction(cache.Id);
+        return new NotifyActionItem
+        {
+            Id = cache.ID,
+            NotifyActionListType = cache._list.GetType().FullName
+        };
     }
 
     public override bool Equals(object obj)
