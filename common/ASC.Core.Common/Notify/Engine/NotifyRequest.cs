@@ -112,12 +112,7 @@ public class NotifyRequest(ILoggerProvider options, INotifySource notifySource, 
     {
         return new NoticeMessage(recipient, NotifyAction, ObjectID);
     }
-
-    public async Task<IPatternProvider> GetPatternProvider(IServiceScope scope)
-    {
-        return await ((INotifySource)scope.ServiceProvider.GetService(_notifySource.GetType())).GetPatternProvider(this);
-    }
-
+    
     public IRecipientProvider GetRecipientsProvider(IServiceScope scope)
     {
         return ((INotifySource)scope.ServiceProvider.GetService(_notifySource.GetType())).GetRecipientsProvider();
