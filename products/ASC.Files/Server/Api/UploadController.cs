@@ -101,6 +101,7 @@ public abstract class UploadController<T>(
     /// ]]>
     /// </remarks>
     /// <path>api/2.0/files/{folderId}/upload/create_session</path>
+    [Obsolete]
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Information about created session", typeof(ChunkedUploadSessionResponseWrapper<>))]
     [SwaggerResponse(403, "You don't have enough permission to create")]
@@ -117,8 +118,7 @@ public abstract class UploadController<T>(
     }
     
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "Information about created session")]
-    [SwaggerResponse(403, "You don't have enough permission to create")]
+    [SwaggerResponse(200)]
     [HttpPost("{folderId}/session")]
     public async Task<ChunkedUploadSessionResponse<T>> CreateUploadSessionInFolder(SessionRequestInFolderDto<T> inDto)
     {
@@ -126,8 +126,7 @@ public abstract class UploadController<T>(
     }
     
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "Information about created session")]
-    [SwaggerResponse(403, "You don't have enough permission to create")]
+    [SwaggerResponse(200)]
     [HttpDelete("{folderId}/session/{sessionId}")]
     public async Task AbortUploadSession(AbortSessionRequestDto<T> inDto)
     {
@@ -147,9 +146,8 @@ public abstract class UploadController<T>(
     //
     
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "Information about created session")]
-    [SwaggerResponse(403, "You don't have enough permission to create")]
-    [HttpPost("{folderId}/session/{sessionId}/upload")]
+    [SwaggerResponse(200)]
+    [HttpPost("{folderId}/session/{sessionId}")]
     public async Task<UploadSessionResponseDto<T>> UploadSession(UploadSessionRequestDto<T> inDto)
     {
         var resumedSession = await fileUploader.UploadChunkAsync<T>(inDto.SessionId, inDto.File.OpenReadStream(),  inDto.File.Length);
@@ -216,9 +214,8 @@ public abstract class UploadController<T>(
     }
     
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "Information about created session")]
-    [SwaggerResponse(403, "You don't have enough permission to create")]
-    [HttpPost("{folderId}/session/{sessionId}/upload_async")]
+    [SwaggerResponse(200)]
+    [HttpPost("{folderId}/session/{sessionId}/upload")]
     public async Task<ChunkedUploadSessionResponse<T>> UploadAsyncSession(UploadSessionAsyncRequestDto<T> inDto)
     {
         var resumedSession = await fileUploader.UploadChunkAsync<T>(inDto.SessionId, inDto.File.OpenReadStream(), inDto.File.Length, inDto.ChunkNumber);
@@ -227,8 +224,7 @@ public abstract class UploadController<T>(
     }
 
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "Information about created session")]
-    [SwaggerResponse(403, "You don't have enough permission to create")]
+    [SwaggerResponse(200)]
     [HttpPut("{folderId}/session/{sessionId}/finalize")]
     public async Task<UploadSessionResponseDto<T>> FinalizeSession(FinalizeSessionDto<T> inDto)
     {

@@ -25258,7 +25258,7 @@
                   "InsertFile.Title": {
                     "type": "string",
                     "description": "The file title to be inserted.",
-                    "example": "legacy_1080p_small_wooden_mouse"
+                    "example": "1080p_small_wooden_mouse_personal_loan_account"
                   },
                   "InsertFile.CreateNewIfExist": {
                     "type": "boolean",
@@ -26856,6 +26856,7 @@
             "description": "You don't have enough permission to create"
           }
         },
+        "deprecated": true,
         "security": [
           {
             "asc_auth_key": [
@@ -26963,7 +26964,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Information about created session",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
@@ -26974,9 +26975,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "403": {
-            "description": "You don't have enough permission to create"
           }
         },
         "security": [
@@ -27039,13 +27037,10 @@
         ],
         "responses": {
           "200": {
-            "description": "Information about created session"
+            "description": "OK"
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "403": {
-            "description": "You don't have enough permission to create"
           }
         },
         "security": [
@@ -27077,9 +27072,7 @@
             "OpenId": []
           }
         ]
-      }
-    },
-    "/api/2.0/files/{folderId}/session/{sessionId}/upload": {
+      },
       "post": {
         "tags": [
           "Files / Operations"
@@ -27128,7 +27121,7 @@
         },
         "responses": {
           "200": {
-            "description": "Information about created session",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
@@ -27139,9 +27132,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "403": {
-            "description": "You don't have enough permission to create"
           }
         },
         "security": [
@@ -27175,7 +27165,7 @@
         ]
       }
     },
-    "/api/2.0/files/{folderId}/session/{sessionId}/upload_async": {
+    "/api/2.0/files/{folderId}/session/{sessionId}/upload": {
       "post": {
         "tags": [
           "Files / Operations"
@@ -27233,7 +27223,7 @@
         },
         "responses": {
           "200": {
-            "description": "Information about created session",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
@@ -27244,9 +27234,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "403": {
-            "description": "You don't have enough permission to create"
           }
         },
         "security": [
@@ -27309,7 +27296,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Information about created session",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
@@ -27320,9 +27307,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "403": {
-            "description": "You don't have enough permission to create"
           }
         },
         "security": [
@@ -36041,7 +36025,7 @@
             "type": "string",
             "description": "The password in plain text for user authentication.",
             "nullable": true,
-            "example": "vm2OKp8jga"
+            "example": "vfmf2vO1Kp"
           },
           "passwordHash": {
             "type": "string",
@@ -36604,7 +36588,7 @@
             "description": "The company email address.",
             "format": "email",
             "nullable": true,
-            "example": "Randall63@hotmail.com"
+            "example": "Sydney_Roberts4@hotmail.com"
           },
           "address": {
             "maxLength": 255,
@@ -36709,7 +36693,7 @@
             "description": "The company email address.",
             "format": "email",
             "nullable": true,
-            "example": "Randall63@hotmail.com"
+            "example": "Sydney_Roberts4@hotmail.com"
           },
           "address": {
             "type": "string",
@@ -49215,7 +49199,7 @@
           "location": {
             "type": "string",
             "nullable": true,
-            "example": "001 Schroeder Run, New Tabithaport, Colombia"
+            "example": "011 Ritchie Canyon, Tabithaport, Colombia"
           },
           "bytes_total": {
             "type": "integer",
@@ -50582,7 +50566,7 @@
             "type": "string",
             "description": "The document title.",
             "nullable": true,
-            "example": "protocol_generic_granite_mouse_refined"
+            "example": "legacy_1080p_small_wooden_mouse"
           },
           "url": {
             "type": "string",
@@ -56449,7 +56433,7 @@
                 "type": "string",
                 "description": "The ID of the user to share a room with.",
                 "format": "uuid",
-                "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+                "example": "a5aae1e1-a1bc-ba9f-8c42-058b4abf2896"
               },
               "access": {
                 "$ref": "#/components/schemas/FileShare"
