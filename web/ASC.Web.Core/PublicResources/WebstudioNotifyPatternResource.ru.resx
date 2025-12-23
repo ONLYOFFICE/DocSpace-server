@@ -2107,4 +2107,31 @@ $TrulyYours</value>
   <data name="subject_portal_deleted_to_support" xml:space="preserve">
     <value>${LetterLogoText} DocSpace был удален</value>
   </data>
+  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; Загружен новый документ: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; в базу знаний ИИ-агента: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="pattern_api_key_expired" xml:space="preserve">
+    <value>Здравствуйте, $UserName!
+
+Уведомляем вас о том, что ваш ключ API "*$Message*" устарел и был деактивирован.
+
+Вы можете сгенерировать новый ключ API в разделе "Инструменты разработчика":"${__VirtualRootPath}/developer-tools/api-keys".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_agent_role_changed" xml:space="preserve">
+    <value>Здравствуйте!
+
+Вам назначена новая роль в ИИ-агенте DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+Подробнее о ролях и правах доступа в комнате можно узнать в "Справочном центре":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_api_key_expired" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace: Срок действия вашего ключа API истек</value>
+  </data>
+  <data name="subject_user_agent_role_changed" xml:space="preserve">
+    <value>Ваша роль в ИИ-агенте DocSpace изменилась</value>
+  </data>
 </root>

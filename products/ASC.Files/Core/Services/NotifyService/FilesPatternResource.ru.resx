@@ -239,4 +239,18 @@ $OrangeButton
   <data name="pattern_InvitedToRoom_push" xml:space="preserve">
     <value>Вы приглашены в комнату "$RoomTitle"</value>
   </data>
+  <data name="pattern_InvitedToAgent_push" xml:space="preserve">
+    <value>Вы приглашены в ИИ-агент "$RoomTitle"</value>
+  </data>
+  <data name="pattern_AgentUpdateAccessForUser_push" xml:space="preserve">
+    <value>Ваша роль в ИИ-агенте "$RoomTitle" изменена на "$RoomRole"</value>
+  </data>
+  <data name="pattern_AgentRemoved" xml:space="preserve">
+    <value>h1. $__AuthorName удалил ИИ-агента
+
+$__AuthorName удалил ИИ-агента: $RoomTitle</value>
+  </data>
+  <data name="subject_AgentRemoved" xml:space="preserve">
+    <value>Уведомление DocSpace. ИИ-агент удален.</value>
+  </data>
 </root>
