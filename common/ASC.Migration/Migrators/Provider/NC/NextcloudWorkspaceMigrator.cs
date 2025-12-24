@@ -37,7 +37,8 @@ public class NextcloudWorkspaceMigrator : Migrator
     private readonly Regex _emailRegex = new(@"(\S*@\S*\.\S*)");
     private readonly Regex _phoneRegex = new(@"(\+?\d+)");
 
-    public NextcloudWorkspaceMigrator(SecurityContext securityContext,
+    public NextcloudWorkspaceMigrator(
+        SecurityContext securityContext,
         UserManager userManager,
         TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
         QuotaSocketManager quotaSocketManager,
@@ -45,12 +46,11 @@ public class NextcloudWorkspaceMigrator : Migrator
         GlobalFolderHelper globalFolderHelper,
         IServiceProvider serviceProvider,
         IDaoFactory daoFactory,
-        EntryManager entryManager,
         MigrationLogger migrationLogger,
         AuthContext authContext,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         UserManagerWrapper userManagerWrapper,
-        UserSocketManager socketManager) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, entryManager, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper, socketManager)
+        UserSocketManager socketManager) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper, socketManager)
     {
         MigrationInfo = new MigrationInfo { Name = "Nextcloud" };
     }
