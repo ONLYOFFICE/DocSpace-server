@@ -26,6 +26,8 @@ cd ../../../sdk/docspace-api-sdk-typescript
 
 echo [7/12] npm install in typescript-sdk...
 call npm install || goto :error
+call npm pack || goto :error
+xcopy "onlyoffice-docspace-api-sdk-*.tgz" "..\..\..\client\packages\shared"  /s /y /b /i
 cd ../../common/Tools/CustomGenerators
 
 echo [8/12] Generating Java SDK with OpenAPI Generator...
