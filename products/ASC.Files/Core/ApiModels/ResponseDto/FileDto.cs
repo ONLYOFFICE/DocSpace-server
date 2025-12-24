@@ -224,6 +224,7 @@ public class FileDtoHelper(
     FileUtility fileUtility,
     FileSharingHelper fileSharingHelper,
     BadgesSettingsHelper badgesSettingsHelper,
+    FileHelper fileHelper,
     FilesSettingsHelper filesSettingsHelper,
     FileDateTime fileDateTime,
     ExternalShare externalShare,
@@ -410,7 +411,7 @@ public class FileDtoHelper(
 
         var getFileTask = GetAsync<FileDto<T>, T>(file);
         var badgesTask = badgesSettingsHelper.GetEnabledForCurrentUserAsync();
-        var fileStateTask = file.GetFileState();
+        var fileStateTask = fileHelper.GetFileState(file);
 
         var extension = FileUtility.GetFileExtension(file.Title);
         var fileType = FileUtility.GetFileTypeByExtention(extension);
@@ -420,14 +421,17 @@ public class FileDtoHelper(
         var result = getFileTask.Result;
         var isEnabledBadges = badgesTask.Result;
         var fileState = fileStateTask.Result;
+
+        file.SetFileState(fileState);
+
         result.FolderId = file.ParentId;
         result.FileExst = extension;
         result.FileType = fileType;
         result.Version = file.Version;
         result.VersionGroup = file.VersionGroup;
         result.ContentLength = file.ContentLengthString;
-        result.FileStatus = fileState.FileStatus;
-        result.EditingBy = fileState.EditingBy;
+        result.FileStatus = file.FileStatus;
+        result.EditingBy = file.EditingBy;
         result.Mute = !isEnabledBadges;
         result.PureContentLength = file.ContentLength.NullIfDefault();
         result.Comment = file.Comment;
@@ -623,7 +627,7 @@ public class FileDtoHelper(
                 }
             }
             
-            result.ViewUrl = _externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl), result.RequestToken);
+            result.ViewUrl = _externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileDownloadUrl(file.Id)), result.RequestToken);
             result.WebUrl = _externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version, externalMediaAccess)), result.RequestToken);
             result.ThumbnailStatus = file.ThumbnailStatus;
             

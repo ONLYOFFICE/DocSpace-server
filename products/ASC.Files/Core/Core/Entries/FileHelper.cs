@@ -27,14 +27,16 @@
 namespace ASC.Files.Core;
 
 [Scope]
-public class FileHelper(FileTrackerHelper fileTracker,
-                        FilesLinkUtility filesLinkUtility,
-                        FileUtility fileUtility,
-                        FileConverter fileConverter,
-                        Global global)
+public class FileHelper(
+    FileTrackerHelper fileTracker,
+    FileUtility fileUtility,
+    FileConverter fileConverter,
+    Global global)
 {
-    internal async Task<FileState> GetFileState<T>(File<T> file, FileStatus currentStatus)
+    internal async Task<FileState> GetFileState<T>(File<T> file)
     {
+        var currentStatus = file.FileStatus;
+
         var editingTask = fileUtility.CanWebEdit(file.Title)
             ? fileTracker.GetEditingStatusAsync(file.Id)
             : Task.FromResult<FileTrackerHelper.EditingStatus>(null);
@@ -64,10 +66,5 @@ public class FileHelper(FileTrackerHelper fileTracker,
         }
 
         return new FileState(currentStatus, editingByTask.Result);
-    }
-
-    public string GetDownloadUrl<T>(FileEntry<T> fileEntry)
-    {
-        return filesLinkUtility.GetFileDownloadUrl(fileEntry.Id);
     }
 }

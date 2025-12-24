@@ -168,16 +168,12 @@ public class File<T> : FileEntry<T>
         }
     }
     /// <summary>
-    /// Returns the file state.
+    /// Set the file state.
     /// </summary>
-    public async Task<FileState> GetFileState()
+    public void SetFileState(FileState fileState)
     {
-        var state = await ServiceProvider.GetService<FileHelper>().GetFileState(this, _status);
-
-        _status = state.FileStatus;
-        _editingBy = state.EditingBy;
-
-        return state;
+        _status = fileState.FileStatus;
+        _editingBy = fileState.EditingBy;
     }
 
     /// <summary>
@@ -193,12 +189,6 @@ public class File<T> : FileEntry<T>
         string.IsNullOrEmpty(ConvertedType)
             ? PureTitle
             : FileUtility.ReplaceFileExtension(PureTitle, ServiceProvider.GetService<FileUtility>().GetInternalExtension(PureTitle));
-
-    /// <summary>
-    /// The file download URL.
-    /// </summary>
-    [JsonIgnore]
-    public string DownloadUrl => ServiceProvider.GetService<FileHelper>().GetDownloadUrl(this);
 
     /// <summary>
     /// Specifies whether the file is locked or not.

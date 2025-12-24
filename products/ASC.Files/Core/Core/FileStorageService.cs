@@ -45,6 +45,7 @@ public class FileStorageService //: IFileStorageService
     SocketManager socketManager,
     IDaoFactory daoFactory,
     FileMarker fileMarker,
+    FileHelper fileHelper,
     BreadCrumbsManager breadCrumbsManager,
     LockerManager lockerManager,
     EntryManager entryManager,
@@ -4828,15 +4829,17 @@ public class FileStorageService //: IFileStorageService
             var newFile = file;
             if (file.CreateBy != userInfo.Id)
             {
-                var state = await file.GetFileState();
+                var fileState = await fileHelper.GetFileState(file);
+
+                file.SetFileState(fileState);
 
                 newFile = serviceProvider.GetService<File<T>>();
                 newFile.Id = file.Id;
                 newFile.Version = file.Version + 1;
                 newFile.VersionGroup = file.VersionGroup + 1;
                 newFile.Title = file.Title;
-                newFile.FileStatus = state.FileStatus;
-                newFile.EditingBy = state.EditingBy;
+                newFile.FileStatus = file.FileStatus;
+                newFile.EditingBy = file.EditingBy;
                 newFile.ParentId = file.ParentId;
                 newFile.CreateBy = userInfo.Id;
                 newFile.CreateOn = file.CreateOn;
