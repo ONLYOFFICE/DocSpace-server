@@ -120,11 +120,20 @@
   <data name="AceShareLink" xml:space="preserve">
     <value>Portali i jashtëm</value>
   </data>
+  <data name="AceStatusEnum_Collaborator" xml:space="preserve">
+    <value>Bashkëpunëtor</value>
+  </data>
   <data name="AceStatusEnum_Comment" xml:space="preserve">
     <value>Komentoni</value>
   </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Krijuesi i përmbajtjes</value>
+  </data>
   <data name="AceStatusEnum_CustomFilter" xml:space="preserve">
     <value>Filtri i personalizuar</value>
+  </data>
+  <data name="AceStatusEnum_Editing" xml:space="preserve">
+    <value>Redaktori</value>
   </data>
   <data name="AceStatusEnum_FillForms" xml:space="preserve">
     <value>Plotësimi i formularit</value>
@@ -141,8 +150,14 @@
   <data name="AceStatusEnum_Review" xml:space="preserve">
     <value>Rishikimi</value>
   </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Menaxheri i dhomës</value>
+  </data>
   <data name="Admin" xml:space="preserve">
     <value>Administratori</value>
+  </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>Menaxheri i agjentit</value>
   </data>
   <data name="AppAccessDenied" xml:space="preserve">
     <value>Për të punuar me skedarin, duhet të jepni akses në të</value>
@@ -198,6 +213,15 @@
   <data name="CommentUpload" xml:space="preserve">
     <value>Ngarkuar</value>
   </data>
+  <data name="Date" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>Lidhje e shpërndarë</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Lidhja e ftesës</value>
+  </data>
   <data name="DocuSignStatusDeclined" xml:space="preserve">
     <value>Refuzuar</value>
   </data>
@@ -240,17 +264,32 @@
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Skedari më i madh se {0} nuk do të zhvendoset</value>
   </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Zhvendosja e disa skedarëve në dhomën e plotësimit të formularit nuk mbështetet. Lëvizni një formular PDF ONLYOFFICE në të njëjtën kohë.</value>
+  </data>
   <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
     <value>Versioni i ri nuk mund të jetë i njëjtë me atë aktual</value>
   </data>
   <data name="ErrorMessage_FolderCopyError" xml:space="preserve">
     <value>Nuk mund ta kopjoni dosjen në nënfolderin e saj</value>
   </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Zhvendosja e dosjeve në dhomën e plotësimit të formularit nuk mbështetet. Lëvizni një formular PDF ONLYOFFICE në të njëjtën kohë.</value>
+  </data>
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Dosja e kërkuar nuk u gjet</value>
   </data>
+  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
+    <value>Ofruesi i pavlefshëm</value>
+  </data>
+  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
+    <value>Nuk është e mundur të përdoret kjo dosje për të ruajtur dhomën</value>
+  </data>
   <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Titulli i pasaktë</value>
+  </data>
+  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
+    <value>Lidhja e ftesës është e pavlefshme ose vlefshmëria e saj ka skaduar</value>
   </data>
   <data name="ErrorMessage_LockedFile" xml:space="preserve">
     <value>Skedari aktualisht është i kyçur nga një përdorues tjetër</value>
@@ -261,8 +300,20 @@
   <data name="ErrorMessage_ManyDownloads" xml:space="preserve">
     <value>Shumë shkarkime.</value>
   </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>Numri maksimal i lidhjeve nuk mund të kalojë {0}</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Skedari nuk mund të zhvendoset në këtë dhomë. Ju lutemi provoni të zhvendosni formularin PDF ONLYOFFICE.</value>
+  </data>
   <data name="ErrorMessage_NotSupportedFormat" xml:space="preserve">
     <value>Na vjen keq, ky format skedari nuk mbështetet</value>
+  </data>
+  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
+    <value>Ky ofrues është i lidhur tashmë me dhomën</value>
+  </data>
+  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
+    <value>Roli nuk është i disponueshëm për këtë lloj përdoruesi</value>
   </data>
   <data name="ErrorMessage_SaveAnonymous" xml:space="preserve">
     <value>Autori i ruajtjes është i panjohur</value>
@@ -276,6 +327,9 @@
   <data name="ErrorMessage_SecurityException" xml:space="preserve">
     <value>Nuk keni leje të mjaftueshme për të kryer operacionin</value>
   </data>
+  <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
+    <value>Nuk keni leje të mjaftueshme për të arkivuar dhomën</value>
+  </data>
   <data name="ErrorMessage_SecurityException_Auth" xml:space="preserve">
     <value>Nuk mund të autorizohet te ofruesi i {0} me kredencialet e dhëna.</value>
   </data>
@@ -284,6 +338,9 @@
   </data>
   <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
     <value>Nuk keni leje mjaftueshme për të kopjuar dosjen</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
+    <value>Ju nuk keni leje të kopjoni në këtë dosje</value>
   </data>
   <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
     <value>Nuk keni leje të mjaftueshme për të krijuar</value>
@@ -306,11 +363,20 @@
   <data name="ErrorMessage_SecurityException_EditFileTwice" xml:space="preserve">
     <value>Ky dokument po modifikohet nga ju në një skedë tjetër</value>
   </data>
+  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
+    <value>Ju nuk keni leje për të redaktuar dhomën</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Versioni aktual i skedarit nuk mund të fshihet</value>
+  </data>
   <data name="ErrorMessage_SecurityException_MoveFile" xml:space="preserve">
     <value>Ju nuk keni leje të mjaftueshme për të zhvendosur skedarin</value>
   </data>
   <data name="ErrorMessage_SecurityException_MoveFolder" xml:space="preserve">
     <value>Ju nuk keni leje të mjaftueshme për të lëvizur dosjen</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
+    <value>Ju nuk keni leje të kalosh në këtë dosje</value>
   </data>
   <data name="ErrorMessage_SecurityException_ReadFile" xml:space="preserve">
     <value>Ju nuk keni leje të mjaftueshme për të parë skedarin</value>
@@ -324,11 +390,17 @@
   <data name="ErrorMessage_SecurityException_RenameFolder" xml:space="preserve">
     <value>Ju nuk keni leje të mjaftueshme për të riemërtuar dosjen</value>
   </data>
+  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
+    <value>Ju nuk keni leje të mjaftueshme për të hequr arkivin e dhomës</value>
+  </data>
   <data name="ErrorMessage_SecurityException_UpdateEditingFile" xml:space="preserve">
     <value>Skedari nuk mund të përditësohet sepse është i hapur për redaktim</value>
   </data>
   <data name="ErrorMessage_SecurityException_ViewFolder" xml:space="preserve">
     <value>Ju nuk keni leje të mjaftueshme për të parë përmbajtjen e dosjes</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>Ju jeni përpjekur shumë herë për të futur fjalëkalimin tuaj. Ju lutem provoni përsëri më vonë</value>
   </data>
   <data name="ErrorMessage_SharpBoxException" xml:space="preserve">
     <value>Përmbajtja e dosjes së palëve të treta nuk është e disponueshme. Provoni të rilidhni llogarinë.</value>
@@ -336,8 +408,14 @@
   <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>Gabim në fillimin e redaktimit të skedarit</value>
   </data>
+  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
+    <value>Ju nuk mund të modifikoni dhomat e arkivuara</value>
+  </data>
   <data name="ErrorMessage_UpdateEditingFile" xml:space="preserve">
     <value>Ju nuk mund të përditësoni një skedar që hapet për redaktim</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Skedari nuk mund të ngarkohet në këtë dhomë. Ju lutem provoni të ngarkoni formularin PDF ONLYOFFICE.</value>
   </data>
   <data name="ErrorMessage_UserNotFound" xml:space="preserve">
     <value>Përdoruesi nuk mund të gjendej</value>
@@ -345,44 +423,35 @@
   <data name="ErrorMessage_ViewTrashItem" xml:space="preserve">
     <value>Nuk ju lejohet të shikoni paraprakisht elementët në kosh</value>
   </data>
-  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
-    <value>Ofruesi i pavlefshëm</value>
-  </data>
-  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
-    <value>Nuk është e mundur të përdoret kjo dosje për të ruajtur dhomën</value>
-  </data>
-  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
-    <value>Lidhja e ftesës është e pavlefshme ose vlefshmëria e saj ka skaduar</value>
-  </data>
-  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
-    <value>Roli nuk është i disponueshëm për këtë lloj përdoruesi</value>
-  </data>
-  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
-    <value>Ky ofrues është i lidhur tashmë me dhomën</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
-    <value>Ju nuk keni leje të kopjoni në këtë dosje</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
-    <value>Ju nuk keni leje të kalosh në këtë dosje</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
-    <value>Ju nuk keni leje të mjaftueshme për të hequr arkivin e dhomës</value>
-  </data>
-  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
-    <value>Ju nuk mund të modifikoni dhomat e arkivuara</value>
-  </data>
   <data name="ErrorrMessage_PinRoom" xml:space="preserve">
     <value>Ju nuk mund të gozhdoni një dhomë</value>
   </data>
   <data name="Everyone" xml:space="preserve">
     <value>Të gjithë</value>
   </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Përdorues i jashtëm</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Lidhje për të plotësuar</value>
+  </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>Dokumentet e përdoruesit {0} {1}</value>
+  </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Numri i formularit</value>
+  </data>
   <data name="Guest" xml:space="preserve">
     <value>Anonim</value>
   </data>
   <data name="IndexTitle" xml:space="preserve">
     <value>Kërkoni në përmbajtjen e dokumenteve</value>
+  </data>
+  <data name="KnowledgeFolder" xml:space="preserve">
+    <value>Njohuri</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Lidhja për formularin</value>
   </data>
   <data name="MessageFileCreated" xml:space="preserve">
     <value>Skedari u krijua në dosjen "{0}"</value>
@@ -395,6 +464,9 @@
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Skedari nuk është më një draft për të plotësuar formularin.</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Hapni skedarin</value>
   </data>
   <data name="ProductAdminOpportunities" xml:space="preserve">
     <value>Bëni të njëjtën gjë si një përdorues |Link Dropbox, Box dhe llogari të tjera në seksionin e 'Përbashkët'| Konfiguroni të drejtat e aksesit në dokumentet dhe dosjet në seksionin e 'Përbashkët'</value>
@@ -415,20 +487,17 @@ Përputhshmëria më e lartë me docx, xlsx, pptx.</value>
   <data name="ProductUserOpportunities" xml:space="preserve">
     <value>Krijoni dhe modifikoni dokumentet e veta, si dhe dokumentet e përbashkëta me të drejtat e duhura të aksesit |Jepni akses për lexim/redaktim përdoruesve të tjerë në dokumente dhe dosje|Link Dropbox, Box dhe llogari të tjera në seksionin 'Dokumentet'</value>
   </data>
-  <data name="UnknownFirstName" xml:space="preserve">
-    <value>Emri</value>
+  <data name="ResultStorageFolder" xml:space="preserve">
+    <value>Ruajtja e rezultateve</value>
   </data>
-  <data name="UnknownLastName" xml:space="preserve">
-    <value>Mbiemri</value>
+  <data name="RoleEnum_Collaborator" xml:space="preserve">
+    <value>Bashkëpunëtor</value>
   </data>
-  <data name="UnlockComment" xml:space="preserve">
-    <value>Skedari është i hapur</value>
+  <data name="RoleEnum_Comment" xml:space="preserve">
+    <value>Komentues</value>
   </data>
-  <data name="AceStatusEnum_Editing" xml:space="preserve">
-    <value>Redaktori</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
-    <value>Ju nuk keni leje për të redaktuar dhomën</value>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Krijuesi i përmbajtjes</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
     <value>Administratori i DocSpace</value>
@@ -436,41 +505,26 @@ Përputhshmëria më e lartë me docx, xlsx, pptx.</value>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Redaktor</value>
   </data>
-  <data name="RoleEnum_User" xml:space="preserve">
-    <value>Përdoruesi</value>
+  <data name="RoleEnum_FillForms" xml:space="preserve">
+    <value>Mbushës i formës</value>
+  </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>Mysafir</value>
   </data>
   <data name="RoleEnum_Read" xml:space="preserve">
     <value>Shikuesi</value>
   </data>
-  <data name="RoleEnum_Comment" xml:space="preserve">
-    <value>Komentues</value>
-  </data>
-  <data name="RoleEnum_FillForms" xml:space="preserve">
-    <value>Mbushës i formës</value>
-  </data>
   <data name="RoleEnum_Review" xml:space="preserve">
     <value>Rishikuesi</value>
   </data>
-  <data name="RoleEnum_Collaborator" xml:space="preserve">
-    <value>Bashkëpunëtor</value>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Administratori i dhomës</value>
   </data>
-  <data name="AceStatusEnum_Collaborator" xml:space="preserve">
-    <value>Bashkëpunëtor</value>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Menaxher i dhomës</value>
   </data>
-  <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
-    <value>Nuk keni leje të mjaftueshme për të arkivuar dhomën</value>
-  </data>
-  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
-    <value>Numri maksimal i lidhjeve nuk mund të kalojë {0}</value>
-  </data>
-  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
-    <value>Ju jeni përpjekur shumë herë për të futur fjalëkalimin tuaj. Ju lutem provoni përsëri më vonë</value>
-  </data>
-  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
-    <value>Lidhja e ftesës</value>
-  </data>
-  <data name="DefaultExternalLinkTitle" xml:space="preserve">
-    <value>Lidhje e shpërndarë</value>
+  <data name="RoleEnum_User" xml:space="preserve">
+    <value>Përdoruesi</value>
   </data>
   <data name="RoomIndex_Author" xml:space="preserve">
     <value>Autori</value>
@@ -486,6 +540,9 @@ Përputhshmëria më e lartë me docx, xlsx, pptx.</value>
   </data>
   <data name="RoomIndex_ExportAuthor" xml:space="preserve">
     <value>Autori i eksportit</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Dosja</value>
   </data>
   <data name="RoomIndex_Index" xml:space="preserve">
     <value>Indeksi</value>
@@ -511,79 +568,22 @@ Përputhshmëria më e lartë me docx, xlsx, pptx.</value>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Lloji</value>
   </data>
-  <data name="RoomIndex_Folder" xml:space="preserve">
-    <value>Dosja</value>
-  </data>
-  <data name="Date" xml:space="preserve">
-    <value>Data</value>
-  </data>
-  <data name="User" xml:space="preserve">
-    <value>Përdoruesi</value>
-  </data>
-  <data name="LinkToForm" xml:space="preserve">
-    <value>Lidhja për formularin</value>
-  </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Hapni skedarin</value>
-  </data>
-  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Skedari nuk mund të ngarkohet në këtë dhomë. Ju lutem provoni të ngarkoni formularin PDF ONLYOFFICE.</value>
-  </data>
-  <data name="FillOutExternalLinkTitle" xml:space="preserve">
-    <value>Lidhje për të plotësuar</value>
-  </data>
-  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Zhvendosja e disa skedarëve në dhomën e plotësimit të formularit nuk mbështetet. Lëvizni një formular PDF ONLYOFFICE në të njëjtën kohë.</value>
-  </data>
-  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Zhvendosja e dosjeve në dhomën e plotësimit të formularit nuk mbështetet. Lëvizni një formular PDF ONLYOFFICE në të njëjtën kohë.</value>
-  </data>
-  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Skedari nuk mund të zhvendoset në këtë dhomë. Ju lutemi provoni të zhvendosni formularin PDF ONLYOFFICE.</value>
-  </data>
-  <data name="FormNumber" xml:space="preserve">
-    <value>Numri i formularit</value>
-  </data>
-  <data name="ExternalUser" xml:space="preserve">
-    <value>Përdorues i jashtëm</value>
-  </data>
-  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
-    <value>Menaxheri i dhomës</value>
-  </data>
-  <data name="RoleEnum_RoomManager" xml:space="preserve">
-    <value>Menaxher i dhomës</value>
-  </data>
-  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
-    <value>Krijuesi i përmbajtjes</value>
-  </data>
-  <data name="RoleEnum_ContentCreator" xml:space="preserve">
-    <value>Krijuesi i përmbajtjes</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
-    <value>Versioni aktual i skedarit nuk mund të fshihet</value>
-  </data>
   <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
     <value>Shpërndajeni për plotësim</value>
   </data>
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>Filloni plotësimin</value>
   </data>
-  <data name="RoleEnum_Guest" xml:space="preserve">
-    <value>Mysafir</value>
+  <data name="UnknownFirstName" xml:space="preserve">
+    <value>Emri</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Administratori i dhomës</value>
+  <data name="UnknownLastName" xml:space="preserve">
+    <value>Mbiemri</value>
   </data>
-  <data name="FolderNameForReassignedData" xml:space="preserve">
-    <value>Dokumentet e përdoruesit {0} {1}</value>
+  <data name="UnlockComment" xml:space="preserve">
+    <value>Skedari është i hapur</value>
   </data>
-  <data name="AgentManager" xml:space="preserve">
-    <value>Menaxheri i agjentit</value>
-  </data>
-  <data name="KnowledgeFolder" xml:space="preserve">
-    <value>Njohuri</value>
-  </data>
-  <data name="ResultStorageFolder" xml:space="preserve">
-    <value>Ruajtja e rezultateve</value>
+  <data name="User" xml:space="preserve">
+    <value>Përdoruesi</value>
   </data>
 </root>

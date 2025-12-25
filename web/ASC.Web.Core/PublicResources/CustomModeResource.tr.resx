@@ -159,10 +159,10 @@ Aşağıdakileri boşaltmak üzere kişisel veri silinmesine izin verilmiştir: 
   <data name="ProductUserOpportunitiesCustomMode" xml:space="preserve">
     <value>Kendi belgelerinizi ve uygun erişim hakları sayesinde paylaşılan belgeleri oluşturun ve düzenleyin|Diğer kullanıcılara belgeler ve klasörler için okuma/düzenleme erişimi verin|Dropbox, Box ve diğer hesapları 'Belgelerim' bölümünde bağlayın</value>
   </data>
-  <data name="subject_saas_custom_mode_reg_data" xml:space="preserve">
-    <value>Yeni portal kaydedildi</value>
-  </data>
   <data name="subject_remove_user_data_completed_custom_mode" xml:space="preserve">
     <value>${LetterLogoText}. Kullanıcı verilerini kaldırma tamamlandı</value>
+  </data>
+  <data name="subject_saas_custom_mode_reg_data" xml:space="preserve">
+    <value>Yeni portal kaydedildi</value>
   </data>
 </root>

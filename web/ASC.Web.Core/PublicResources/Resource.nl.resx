@@ -1,5 +1,64 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -53,16 +112,76 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=7.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=7.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Vectorisatie</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Contact</value>
+  </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Tegoed</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Valuta</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>Datum</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Debiteren</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>Aantal</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>AI tools</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Back-up</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Schijfruimte</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Tegoed opladen</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>Meeteenheid</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Tokens</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Back-up</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>Klantactiviteitenverslag ({0}-{1})</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Transactiegeschiedenis</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Type</value>
+  </data>
   <data name="ActivateMobilePhoneEmptyCode" xml:space="preserve">
     <value>Veld met validatiecode mag niet leeg zijn</value>
   </data>
   <data name="ActivateMobilePhoneEmptyPhoneNumber" xml:space="preserve">
     <value>Mobiel telefoonnummer invoeren</value>
+  </data>
+  <data name="ActivateTfaAppEmptyCode" xml:space="preserve">
+    <value>Validatiecode veld kan niet leeg zijn</value>
   </data>
   <data name="AdministratorNotifySenderTypeName" xml:space="preserve">
     <value>Beheerdersmeldingen</value>
@@ -70,560 +189,26 @@
   <data name="AdminMessageSent" xml:space="preserve">
     <value>Uw bericht is succesvol verzonden. De portaalbeheerder zal contact met u opnemen.</value>
   </data>
-  <data name="ChangePortalOwnerMsg" xml:space="preserve">
-    <value>Een link om de actie te bevestigen is verzonden naar :email (het e-mailadres van de portaaleigenaar).</value>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>De ruimtequota voor AI-agenten is overschreden</value>
   </data>
-  <data name="CouldNotRecoverPasswordForLdapUser" xml:space="preserve">
-    <value>Wachtwoordherstelactie is verboden voor een LDAP-gebruiker</value>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Fout bij het instellen van quota per AI-agent. De ingevoerde waarde is groter dan de totale DocSpace opslag.</value>
   </data>
-  <data name="CouldNotRecoverPasswordForSsoUser" xml:space="preserve">
-    <value>Wachtwoordherstelactie is verboden voor een SSO-gebruiker</value>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Automatische verlenging</value>
   </data>
-  <data name="CustomNamingPeopleSchema" xml:space="preserve">
-    <value>Aangepast</value>
-  </data>
-  <data name="EmailAndPasswordIncorrectEmail" xml:space="preserve">
-    <value>Onjuist e-mailadres</value>
-  </data>
-  <data name="ErrorAccessDenied" xml:space="preserve">
-    <value>Geen toestemming om deze actie uit te voeren</value>
-  </data>
-  <data name="ErrorAccessRestricted" xml:space="preserve">
-    <value>De toegang tot het portaal is beperkt.</value>
-  </data>
-  <data name="ErrorBadKeys" xml:space="preserve">
-    <value>Verkeerde sleutels</value>
-  </data>
-  <data name="ErrorDisabledProfile" xml:space="preserve">
-    <value>Uw profiel is geschorst</value>
-  </data>
-  <data name="ErrorEmailAlreadyExists" xml:space="preserve">
-    <value>{!User} met dit e-mailadres is al geregistreerd</value>
-  </data>
-  <data name="ErrorEmailDomainNotAllowed" xml:space="preserve">
-    <value>E-mails van dit domein zijn niet toegestaan voor registratie</value>
-  </data>
-  <data name="ErrorEmailEmpty" xml:space="preserve">
-    <value>Veld E-mail is leeg</value>
-  </data>
-  <data name="ErrorEmailsAreTheSame" xml:space="preserve">
-    <value>De huidige e-mail en de nieuwe e-mail zijn hetzelfde</value>
-  </data>
-  <data name="ErrorEmptyFields" xml:space="preserve">
-    <value>Vul alstublieft alle velden in</value>
-  </data>
-  <data name="ErrorEmptyUploadFileSelected" xml:space="preserve">
-    <value>Het geüploade bestand kon niet worden gevonden</value>
-  </data>
-  <data name="ErrorImageWeightLimit" xml:space="preserve">
-    <value>De bestandsgrootte van de afbeelding is te groot</value>
-  </data>
-  <data name="ErrorIpSecurity" xml:space="preserve">
-    <value>De toegang tot het portaal is beperkt</value>
-  </data>
-  <data name="ErrorNotAllowedOption" xml:space="preserve">
-    <value>Uw abonnement ondersteunt deze optie niet</value>
-  </data>
-  <data name="ErrorNotCorrectEmail" xml:space="preserve">
-    <value>Onjuiste e-mail</value>
-  </data>
-  <data name="ErrorNotCorrectTrustedDomain" xml:space="preserve">
-    <value>Ongeldige domeinnaam</value>
-  </data>
-  <data name="ErrorPasswordEmpty" xml:space="preserve">
-    <value>Het wachtwoord is leeg.</value>
-  </data>
-  <data name="ErrorPasswordLength" xml:space="preserve">
-    <value>van {0} tot {1} karakters</value>
-  </data>
-  <data name="ErrorPasswordMessage" xml:space="preserve">
-    <value>Wachtwoord moet bevatten</value>
-  </data>
-  <data name="ErrorPasswordNoDigits" xml:space="preserve">
-    <value>cijfers</value>
-  </data>
-  <data name="ErrorPasswordNoSpecialSymbols" xml:space="preserve">
-    <value>speciale karakters</value>
-  </data>
-  <data name="ErrorPasswordNoUpperCase" xml:space="preserve">
-    <value>hoofdletters</value>
-  </data>
-  <data name="ErrorUserNotFound" xml:space="preserve">
-    <value>De gebruiker kon niet worden gevonden</value>
-  </data>
-  <data name="ErrorUserNotFoundByEmail" xml:space="preserve">
-    <value>De gebruiker met "{0}" e-mail kon niet worden gevonden</value>
-  </data>
-  <data name="EuServerRegion" xml:space="preserve">
-    <value>EU (Frankfurt) Regio</value>
-  </data>
-  <data name="FileSizeMaxExceed" xml:space="preserve">
-    <value>De maximale bestandsgrootte is overschreden</value>
-  </data>
-  <data name="FileSizeNote" xml:space="preserve">
-    <value>Opmerking: de bestandsgrootte mag niet meer bedragen dan {1}{0}{2}</value>
-  </data>
-  <data name="FileSizePostfix" xml:space="preserve">
-    <value>bytes,KB,MB,GB,TB</value>
-  </data>
-  <data name="FinishInviteJoinEmailMessage" xml:space="preserve">
-    <value>De link om uw account te bevestigen is verstuurd naar de gespecificeerde e-mail</value>
-  </data>
-  <data name="FirstName" xml:space="preserve">
-    <value>Voornaam</value>
-  </data>
-  <data name="LastName" xml:space="preserve">
-    <value>Familienaam</value>
-  </data>
-  <data name="LdapSettingsConnectError" xml:space="preserve">
-    <value>Verbindingsfout</value>
-  </data>
-  <data name="LdapSettingsErrorCantCreateUsers" xml:space="preserve">
-    <value>Gebruikers konden niet worden aangemaakt, de ontvangen data is onjuist.</value>
-  </data>
-  <data name="LdapSettingsErrorCantGetLdapSettings" xml:space="preserve">
-    <value>De server kon de instellingen niet ophalen.</value>
-  </data>
-  <data name="LdapSettingsErrorCantSaveLdapSettings" xml:space="preserve">
-    <value>De server kon de instellingen niet opslaan.</value>
-  </data>
-  <data name="LdapSettingsErrorCredentialsNotValid" xml:space="preserve">
-    <value>Onjuiste gebruikersnaam of wachtwoord.</value>
-  </data>
-  <data name="LdapSettingsErrorDomainNotFound" xml:space="preserve">
-    <value>LDAP-domein niet gevonden.</value>
-  </data>
-  <data name="LdapSettingsErrorGroupsNotFound" xml:space="preserve">
-    <value>Er konden geen groepen worden gevonden.</value>
-  </data>
-  <data name="LdapSettingsErrorIncorrectLdapFilter" xml:space="preserve">
-    <value>Ongeldige waarde voor Gebruikersfilter.</value>
-  </data>
-  <data name="LdapSettingsErrorUnknownError" xml:space="preserve">
-    <value>Onbekende fout.</value>
-  </data>
-  <data name="LdapSettingsErrorUsersNotFound" xml:space="preserve">
-    <value>Er konden geen gebruikers worden gevonden.</value>
-  </data>
-  <data name="LdapSettingsErrorWrongGroupAttribute" xml:space="preserve">
-    <value>Kon Groepsattribuut niet ophalen voor een of meerdere groepen.</value>
-  </data>
-  <data name="LdapSettingsErrorWrongGroupFilter" xml:space="preserve">
-    <value>Onjuiste Groepsfilter.</value>
-  </data>
-  <data name="LdapSettingsErrorWrongGroupNameAttribute" xml:space="preserve">
-    <value>Kon Groepsnaamattribuut niet ophalen voor een of meerdere groepen.</value>
-  </data>
-  <data name="LdapSettingsErrorWrongLoginAttribute" xml:space="preserve">
-    <value>Kon Loginattribuut niet ophalen voor een of meerdere gebruikers.</value>
-  </data>
-  <data name="LdapSettingsErrorWrongServerOrPort" xml:space="preserve">
-    <value>Kan geen verbinding maken met LDAP-server. Controleer of het serveradres en poortnummer correct zijn.</value>
-  </data>
-  <data name="LdapSettingsErrorWrongUserAttribute" xml:space="preserve">
-    <value>Kon Gebruikersattribuut niet ophalen voor een of meerdere gebruikers.</value>
-  </data>
-  <data name="LdapSettingsInternalServerError" xml:space="preserve">
-    <value>Interne serverfout.</value>
-  </data>
-  <data name="LdapSettingsModifyLdapUsers" xml:space="preserve">
-    <value>LDAP-gebruikers aanpassen op gewone portaalgebruikers</value>
-  </data>
-  <data name="LdapSettingsStatusAddingGroupUser" xml:space="preserve">
-    <value>gebruiker toevoegen</value>
-  </data>
-  <data name="LdapSettingsStatusCertificateVerification" xml:space="preserve">
-    <value>Certificaatverificatie</value>
-  </data>
-  <data name="LdapSettingsStatusCheckingLdapSettings" xml:space="preserve">
-    <value>Controleer de LDAP-ondersteuningsinstellingen</value>
-  </data>
-  <data name="LdapSettingsStatusGettingGroupsFromLdap" xml:space="preserve">
-    <value>De groepslijst ophalen van de LDAP-server</value>
-  </data>
-  <data name="LdapSettingsStatusGettingUsersFromLdap" xml:space="preserve">
-    <value>De gebruikerslijst ophalen van de LDAP-server</value>
-  </data>
-  <data name="LdapSettingsStatusLoadingBaseInfo" xml:space="preserve">
-    <value>LDAP-basisinformatie laden</value>
-  </data>
-  <data name="LdapSettingsStatusRemovingGroupUser" xml:space="preserve">
-    <value>gebruiker verwijderen</value>
-  </data>
-  <data name="LdapSettingsStatusRemovingOldGroups" xml:space="preserve">
-    <value>Verouderde groepen verwijderen die eerder via LDAP zijn geladen</value>
-  </data>
-  <data name="LdapSettingsStatusRemovingOldUsers" xml:space="preserve">
-    <value>Verouderde gebruikersprofielen verwijderen die eerder via LDAP zijn geladen</value>
-  </data>
-  <data name="LdapSettingsStatusSavingGroups" xml:space="preserve">
-    <value>Groepen opslaan</value>
-  </data>
-  <data name="LdapSettingsStatusSavingSettings" xml:space="preserve">
-    <value>Instellingen opslaan</value>
-  </data>
-  <data name="LdapSettingsStatusSavingUsers" xml:space="preserve">
-    <value>Gebruikers opslaan</value>
-  </data>
-  <data name="LdapSettingsStrongAuthRequired" xml:space="preserve">
-    <value>Een veiliger authenticatietype is vereist. Gebruik alstublieft een versleutelde verbinding of schakel gewone authenticatie op de server in.</value>
-  </data>
-  <data name="LdapSettingsTenantQuotaSettled" xml:space="preserve">
-    <value>De gebruikerslimiet van het huidige abonnement is bereikt</value>
-  </data>
-  <data name="LdapSettingsTlsNotSupported" xml:space="preserve">
-    <value>StartTLS niet ondersteund voor huidige LDAP-server.</value>
-  </data>
-  <data name="LdapSettingsTooManyOperations" xml:space="preserve">
-    <value>Teveel LDAP acties.</value>
-  </data>
-  <data name="LdapSettingsWrongSidAttribute" xml:space="preserve">
-    <value>Unieke ID voor gebruikers-/groepsobjecten kon niet worden opgehaald. Standaard probeert het systeem een van de volgende identificaties te combineren: entryUUID, nsuniqueid, GUID, objectSid. Als geen van de attributen overeenkomt met uw LDAP-server, geef dan alstublieft het benodigde attribuut op in de instelling ldap.unique.id van het bestand web.appsettings.config.</value>
-  </data>
-  <data name="LicenseError" xml:space="preserve">
-    <value>Licentie is niet correct</value>
-  </data>
-  <data name="LicenseErrorExpired" xml:space="preserve">
-    <value>Licentie is verlopen.</value>
-  </data>
-  <data name="LicenseErrorPortal" xml:space="preserve">
-    <value>Het aantal portalen overschrijdt het aantal toegestaan voor de licentie</value>
-  </data>
-  <data name="LicenseErrorQuota" xml:space="preserve">
-    <value>Het aantal gebruikers overschrijdt het aantal toegestaan voor de licentie</value>
-  </data>
-  <data name="LicenseUploaded" xml:space="preserve">
-    <value>Succesvol geüpload</value>
-  </data>
-  <data name="MessageEmailChangeInstuctionsSentOnEmail" xml:space="preserve">
-    <value>De e-mailwijzigingsinstructies zijn succesvol verzonden</value>
-  </data>
-  <data name="MobilePhoneMustErase" xml:space="preserve">
-    <value>Om het nummer te veranderen, moet u uw huidige telefoonnummer verwijderen</value>
-  </data>
-  <data name="OrgServerRegion" xml:space="preserve">
-    <value>ORG Regio</value>
-  </data>
-  <data name="Owner" xml:space="preserve">
-    <value>Eigenaar</value>
-  </data>
-  <data name="PortalSecurity" xml:space="preserve">
-    <value>Portaaltoegang</value>
-  </data>
-  <data name="SgServerRegion" xml:space="preserve">
-    <value>Asia Pacific (Singapore)</value>
-  </data>
-  <data name="SmsAuthenticationMessageError" xml:space="preserve">
-    <value>Incorrecte code</value>
-  </data>
-  <data name="SmsAuthenticationMessageToUser" xml:space="preserve">
-    <value>Code: {0}</value>
-  </data>
-  <data name="SmsAuthenticationTimeout" xml:space="preserve">
-    <value>De tijd om de code te kunnen gebruiken is verlopen. Vraag alstublieft een nieuw tekstbericht aan.</value>
-  </data>
-  <data name="SmsNotAvailable" xml:space="preserve">
-    <value>SMS instellingen zijn niet beschikbaar</value>
-  </data>
-  <data name="SmsTooMuchError" xml:space="preserve">
-    <value>U heeft teveel tekstberichten verstuurd. Probeer het alstublieft later nog eens.</value>
-  </data>
-  <data name="SsoSettingsCantSaveSettings" xml:space="preserve">
-    <value>Kon instellingen niet opslaan</value>
-  </data>
-  <data name="SsoSettingsCouldNotBeNull" xml:space="preserve">
-    <value>Instellingen mogen niet leeg zijn</value>
-  </data>
-  <data name="SsoSettingsInvalidBinding" xml:space="preserve">
-    <value>Ongeldige binding: {0}</value>
-  </data>
-  <data name="SsoSettingsInvalidEntityId" xml:space="preserve">
-    <value>Ongeldige entityID</value>
-  </data>
-  <data name="SsoSettingsInvalidMapping" xml:space="preserve">
-    <value>Ongeldige veldenindeling</value>
-  </data>
-  <data name="SuccessfullySaveGreetingSettingsMessage" xml:space="preserve">
-    <value>Welkomstpagina instellingen zijn succesvol opgeslagen</value>
-  </data>
-  <data name="SuccessfullySaveSettingsMessage" xml:space="preserve">
-    <value>Instellingen zijn met succes bijgewerkt</value>
-  </data>
-  <data name="SuccessfullySentNotificationDeleteUserInfoMessage" xml:space="preserve">
-    <value>Instructies om profiel te verwijderen is verzonden naar {0} e-mailadres</value>
-  </data>
-  <data name="UsServerRegion" xml:space="preserve">
-    <value>VS West (Oregon) Regio</value>
-  </data>
-  <data name="WhatsNewSubscriptionName" xml:space="preserve">
-    <value>What's New</value>
-  </data>
-  <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Inloggegevens en acties bijhouden</value>
-  </data>
-  <data name="TariffsFeature_file_size" xml:space="preserve">
-    <value>Maximale bestandsgrootte</value>
-  </data>
-  <data name="TariffsFeature_file_size_exception" xml:space="preserve">
-    <value>De bestandsgrootte mag niet groter zijn dan {0}</value>
-  </data>
-  <data name="TariffsFeature_manager_exception" xml:space="preserve">
-    <value>Het aantal beheerders mag niet groter zijn dan {0}</value>
-  </data>
-  <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Aantal beheerders</value>
-  </data>
-  <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Gegevensherstel</value>
-  </data>
-  <data name="TariffsFeature_room" xml:space="preserve">
-    <value>Onbeperkt aantal actieve kamers</value>
-  </data>
-  <data name="TariffsFeature_room_exception" xml:space="preserve">
-    <value>Het aantal kamers mag niet meer zijn dan {0}</value>
-  </data>
-  <data name="TariffsFeature_sso" xml:space="preserve">
-    <value>SSO</value>
-  </data>
-  <data name="TariffsFeature_total_size_exception" xml:space="preserve">
-    <value>De gebruikte opslagruimte mag niet groter zijn dan {0}</value>
-  </data>
-  <data name="TariffsFeature_total_size_price_count" xml:space="preserve">
-    <value>Opslagruimte</value>
-  </data>
-  <data name="TariffsFeature_used_room" xml:space="preserve">
-    <value>Kamers:</value>
-  </data>
-  <data name="TariffsFeature_used_total_size" xml:space="preserve">
-    <value>Opslagruimte gebruikt:</value>
-  </data>
-  <data name="TariffsFeature_used_usersInRoom" xml:space="preserve">
-    <value>Gebruikers in kamer:</value>
-  </data>
-  <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Onbeperkt aantal gebruikers en gasten</value>
-  </data>
-  <data name="TariffsFeature_users_exception" xml:space="preserve">
-    <value>Het aantal gebruikers mag niet groter zijn dan {0}</value>
-  </data>
-  <data name="TariffsFeature_usersInRoom" xml:space="preserve">
-    <value>Gebruikers in kamer</value>
-  </data>
-  <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
-    <value>Het aantal gebruikers in de kamer mag niet groter zijn dan {0}</value>
-  </data>
-  <data name="TariffsFeature_customization" xml:space="preserve">
-    <value>Branding &amp; aanpassing</value>
-  </data>
-  <data name="ConsumersBitly" xml:space="preserve">
-    <value>Bitly</value>
-  </data>
-  <data name="ConsumersbitlyClientSecret" xml:space="preserve">
-    <value>apiKey</value>
-  </data>
-  <data name="ConsumersbitlyClientId" xml:space="preserve">
-    <value>inloggen</value>
-  </data>
-  <data name="ConsumersBitlyDescription" xml:space="preserve">
-    <value>Maak verbinding met de Bitly-service om uitnodigingslinks voor het portaal en gedeelde links in de Documentenmodule te verkorten.</value>
-  </data>
-  <data name="ConsumersboxClientId" xml:space="preserve">
-    <value>Box ID</value>
-  </data>
-  <data name="ConsumersboxClientSecret" xml:space="preserve">
-    <value>Boxsleutel</value>
-  </data>
-  <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Verbind de applicatie om bestanden en mappen in Box te beheren.</value>
-  </data>
-  <data name="ConsumersClickatell" xml:space="preserve">
-    <value>Clickatell</value>
-  </data>
-  <data name="ConsumersclickatellapiKey" xml:space="preserve">
-    <value>apiKey</value>
-  </data>
-  <data name="ConsumersClickatellDescription" xml:space="preserve">
-    <value>Schakel de applicatie in voor de twee-factor authenticatie via Clickatell.</value>
-  </data>
-  <data name="ConsumersDocuSign" xml:space="preserve">
-    <value>DocuSign</value>
-  </data>
-  <data name="ConsumersdocuSignClientId" xml:space="preserve">
-    <value>DocuSign Sleutel</value>
-  </data>
-  <data name="ConsumersDocuSignDescription" xml:space="preserve">
-    <value>Verbind de applicatie om DocuSign toe te voegen en elektronisch documenten te ondertekenen.</value>
-  </data>
-  <data name="ConsumersdocuSignHost" xml:space="preserve">
-    <value>DocuSign authenticatie eindpunt</value>
-  </data>
-  <data name="ConsumersDropBox" xml:space="preserve">
-    <value>DropBox</value>
-  </data>
-  <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Verbind de applicatie om bestanden en mappen in Dropbox te beheren.</value>
-  </data>
-  <data name="ConsumersDropBoxKey" xml:space="preserve">
-    <value>DropBox ID</value>
-  </data>
-  <data name="ConsumersfacebookClientId" xml:space="preserve">
-    <value>Facebook ID</value>
-  </data>
-  <data name="ConsumersfacebookClientSecret" xml:space="preserve">
-    <value>Facebook Sleutel</value>
-  </data>
-  <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Verbind de applicatie om in te loggen op het portaal met een Facebook-account.</value>
-  </data>
-  <data name="ConsumersFirebase" xml:space="preserve">
-    <value>Firebase</value>
-  </data>
-  <data name="Consumersfirebase_apiKey" xml:space="preserve">
-    <value>Web API sleutel</value>
-  </data>
-  <data name="Consumersfirebase_authorization" xml:space="preserve">
-    <value>Serversleutel</value>
-  </data>
-  <data name="ConsumersFirebaseDescription" xml:space="preserve">
-    <value>Verbind Firebase Cloud Messaging service om notificaties te ontvangen over de berichten die naar u worden gestuurd.</value>
-  </data>
-  <data name="ConsumersdocuSignClientSecret" xml:space="preserve">
-    <value>DocuSign Geheim</value>
-  </data>
-  <data name="Consumersfirebase_messagingSenderId" xml:space="preserve">
-    <value>Zender ID</value>
-  </data>
-  <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Verbind het project door in te loggen op het portaal met een Google-account en beheer Google Drive-bestanden en mappen.</value>
-  </data>
-  <data name="ConsumersLinkedIn" xml:space="preserve">
-    <value>LinkedIn</value>
-  </data>
-  <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>Verbind de applicatie om in te loggen op het portaal met een LinkedIn-account.</value>
-  </data>
-  <data name="ConsumersLinkedInSecret" xml:space="preserve">
-    <value>LinkedIn Sleutel</value>
-  </data>
-  <data name="ConsumersmicrosoftClientSecret" xml:space="preserve">
-    <value>Client Geheim</value>
-  </data>
-  <data name="Consumersskydriveappsecret" xml:space="preserve">
-    <value>Client Geheim</value>
-  </data>
-  <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>Verbind de applicatie om bestanden en mappen in OneDrive te beheren.</value>
-  </data>
-  <data name="ConsumersSmscDescription" xml:space="preserve">
-    <value>Schakel de applicatie in voor de twee-factor authenticatie via SMS Center.</value>
-  </data>
-  <data name="Consumerssmscpsw" xml:space="preserve">
-    <value>Wachtwoord of wachtwoord MD5 hash in kleine letters</value>
-  </data>
-  <data name="ConsumersTwilioDescription" xml:space="preserve">
-    <value>Twilio toevoegen om te kunnen bellen naar CRM-contacten rechtstreeks vanaf de browser.</value>
-  </data>
-  <data name="Consumerstwiliosender" xml:space="preserve">
-    <value>Telefoonnummer van Twilio (vereist voor SMS autorisatie)</value>
-  </data>
-  <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Verbind de applicatie om in te loggen op het portaal met een X-account.</value>
-  </data>
-  <data name="ConsumersYahooDescription" xml:space="preserve">
-    <value>Schakel de applicatie in voor importeren van Yahoo-contacten.</value>
-  </data>
-  <data name="ErrorFileNotImage" xml:space="preserve">
-    <value>Onbekend afbeeldingsbestandtype</value>
-  </data>
-  <data name="ErrorImageSize" xml:space="preserve">
-    <value>Afbeeldingsgrootte overschrijdt de toegestane parameters</value>
-  </data>
-  <data name="ConsumersDropBoxSecret" xml:space="preserve">
-    <value>DropBox Sleutel</value>
-  </data>
-  <data name="ConsumersEasyBib" xml:space="preserve">
-    <value>EasyBib</value>
-  </data>
-  <data name="ConsumersFacebook" xml:space="preserve">
-    <value>Facebook</value>
-  </data>
-  <data name="ConsumersGoogle" xml:space="preserve">
-    <value>Google</value>
-  </data>
-  <data name="ConsumersgoogleClientId" xml:space="preserve">
-    <value>Google ID</value>
-  </data>
-  <data name="ConsumersgoogleClientSecret" xml:space="preserve">
-    <value>Google Sleutel</value>
-  </data>
-  <data name="ConsumersLinkedInKey" xml:space="preserve">
-    <value>LinkedIn ID</value>
-  </data>
-  <data name="ConsumersMailru" xml:space="preserve">
-    <value>Mail.ru</value>
-  </data>
-  <data name="ConsumersMicrosoft" xml:space="preserve">
-    <value>Microsoft</value>
-  </data>
-  <data name="ConsumersSkyDrive" xml:space="preserve">
-    <value>OneDrive</value>
-  </data>
-  <data name="ConsumersSmsc" xml:space="preserve">
-    <value>SMS Center</value>
-  </data>
-  <data name="Consumerssmsclogin" xml:space="preserve">
-    <value>Inloggen</value>
-  </data>
-  <data name="ConsumersTelegram" xml:space="preserve">
-    <value>Telegram</value>
-  </data>
-  <data name="ConsumersTwilio" xml:space="preserve">
-    <value>Twilio</value>
-  </data>
-  <data name="ConsumerstwilioAccountSid" xml:space="preserve">
-    <value>Account Sid</value>
-  </data>
-  <data name="ConsumerstwitterAccessTokenSecret_Default" xml:space="preserve">
-    <value>Client Geheim</value>
-  </data>
-  <data name="ConsumersYahoo" xml:space="preserve">
-    <value>Yahoo</value>
-  </data>
-  <data name="ConsumersYandex" xml:space="preserve">
-    <value>Yandex</value>
-  </data>
-  <data name="ConsumersWordpress" xml:space="preserve">
-    <value>WordPress</value>
-  </data>
-  <data name="ConsumersTwitter" xml:space="preserve">
-    <value>X</value>
-  </data>
-  <data name="ConsumersYandexClientSecret" xml:space="preserve">
-    <value>Wachtwoord</value>
-  </data>
-  <data name="ConsumersBox" xml:space="preserve">
-    <value>Box</value>
-  </data>
-  <data name="Tariffs_admin" xml:space="preserve">
-    <value>Business</value>
-  </data>
-  <data name="Tariffs_adminyear" xml:space="preserve">
-    <value>Business</value>
-  </data>
-  <data name="Tariffs_startup" xml:space="preserve">
-    <value>Startup</value>
-  </data>
-  <data name="ConsumersMailruClientId" xml:space="preserve">
-    <value>ID</value>
-  </data>
-  <data name="ActivateTfaAppEmptyCode" xml:space="preserve">
-    <value>Validatiecode veld kan niet leeg zijn</value>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Automatisch opwaarderen</value>
   </data>
   <data name="ButtonSmsEnable" xml:space="preserve">
     <value>Per SMS</value>
   </data>
   <data name="ButtonTfaAppEnable" xml:space="preserve">
     <value>Met authenticator app</value>
+  </data>
+  <data name="ChangePortalOwnerMsg" xml:space="preserve">
+    <value>Een link om de actie te bevestigen is verzonden naar :email (het e-mailadres van de portaaleigenaar).</value>
   </data>
   <data name="Consumersacesskey" xml:space="preserve">
     <value>S3 accesskey</value>
@@ -658,20 +243,83 @@
   <data name="ConsumersauthUser" xml:space="preserve">
     <value>Selectel authUser</value>
   </data>
+  <data name="ConsumersBitly" xml:space="preserve">
+    <value>Bitly</value>
+  </data>
+  <data name="ConsumersbitlyClientId" xml:space="preserve">
+    <value>inloggen</value>
+  </data>
+  <data name="ConsumersbitlyClientSecret" xml:space="preserve">
+    <value>apiKey</value>
+  </data>
+  <data name="ConsumersBitlyDescription" xml:space="preserve">
+    <value>Maak verbinding met de Bitly-service om uitnodigingslinks voor het portaal en gedeelde links in de Documentenmodule te verkorten.</value>
+  </data>
   <data name="ConsumersBitlyInstruction" xml:space="preserve">
     <value>Schakel deze app in om de uitnodigings- en documentkoppelingen in te korten. {0}Vul hieronder uw Bitly-inlognaam en API-sleutel in:</value>
+  </data>
+  <data name="ConsumersBox" xml:space="preserve">
+    <value>Box</value>
+  </data>
+  <data name="ConsumersboxClientId" xml:space="preserve">
+    <value>Box ID</value>
+  </data>
+  <data name="ConsumersboxClientSecret" xml:space="preserve">
+    <value>Boxsleutel</value>
+  </data>
+  <data name="ConsumersBoxDescription" xml:space="preserve">
+    <value>Verbind de applicatie om bestanden en mappen in Box te beheren.</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
     <value>Schakel deze app in om uw Box account met de module Documenten te verbinden. U kunt bestanden uit Box beheren, bewerken en delen met gebruikers van {LogoText}. {0}Meld u aan bij uw account op de Box ontwikkelaars pagina en maak een nieuwe app voor de {LogoText} integratie. Vul hieronder de gegevens in die u hebt ontvangen:</value>
   </data>
+  <data name="ConsumersClickatell" xml:space="preserve">
+    <value>Clickatell</value>
+  </data>
+  <data name="ConsumersclickatellapiKey" xml:space="preserve">
+    <value>apiKey</value>
+  </data>
+  <data name="ConsumersClickatellDescription" xml:space="preserve">
+    <value>Schakel de applicatie in voor de twee-factor authenticatie via Clickatell.</value>
+  </data>
   <data name="ConsumersClickatellInstruction" xml:space="preserve">
     <value>Gebruik deze app om twee-factor authenticatie in te schakelen met de Clickatell service. {0}Meld u aan bij uw SMS Platform account en maak een nieuwe integratie voor {LogoText}. Kopieer een apiKey en voeg deze hieronder in:</value>
+  </data>
+  <data name="ConsumersDocuSign" xml:space="preserve">
+    <value>DocuSign</value>
+  </data>
+  <data name="ConsumersdocuSignClientId" xml:space="preserve">
+    <value>DocuSign Sleutel</value>
+  </data>
+  <data name="ConsumersdocuSignClientSecret" xml:space="preserve">
+    <value>DocuSign Geheim</value>
+  </data>
+  <data name="ConsumersDocuSignDescription" xml:space="preserve">
+    <value>Verbind de applicatie om DocuSign toe te voegen en elektronisch documenten te ondertekenen.</value>
+  </data>
+  <data name="ConsumersdocuSignHost" xml:space="preserve">
+    <value>DocuSign authenticatie eindpunt</value>
   </data>
   <data name="ConsumersDocuSignInstruction" xml:space="preserve">
     <value>Schakel deze app in om documenten digitaal te ondertekenen met DocuSign. {0}Ga naar uw DocuSign beheerconsole en voeg de {LogoText} integratie toe. Vul hieronder de gegevens in die u hebt ontvangen:</value>
   </data>
+  <data name="ConsumersDropBox" xml:space="preserve">
+    <value>DropBox</value>
+  </data>
+  <data name="ConsumersDropBoxDescription" xml:space="preserve">
+    <value>Verbind de applicatie om bestanden en mappen in Dropbox te beheren.</value>
+  </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
     <value>Schakel deze app in om uw Dropbox account met de module Documenten te verbinden. U kunt bestanden van Dropbox beheren, bewerken en delen met gebruikers van {LogoText}. {0}Meld u aan bij uw account op de Dropbox Developers-website en maak een nieuwe app voor {LogoText} integratie. Vul hieronder de gegevens in die u hebt ontvangen:</value>
+  </data>
+  <data name="ConsumersDropBoxKey" xml:space="preserve">
+    <value>DropBox ID</value>
+  </data>
+  <data name="ConsumersDropBoxSecret" xml:space="preserve">
+    <value>DropBox Sleutel</value>
+  </data>
+  <data name="ConsumersEasyBib" xml:space="preserve">
+    <value>EasyBib</value>
   </data>
   <data name="ConsumerseasyBibappkey" xml:space="preserve">
     <value>App key</value>
@@ -682,17 +330,53 @@
   <data name="ConsumersEasyBibInstruction" xml:space="preserve">
     <value>Schakel deze app in om bibliografieën te maken in {LogoText} editors. {0}Ga naar de EasyBib aanmeldpagina en vul het formulier in om de {LogoText} integratie toe te voegen. Nadat u een applicatie sleutel hebt ontvangen, kunt u deze hieronder plakken:</value>
   </data>
+  <data name="ConsumersFacebook" xml:space="preserve">
+    <value>Facebook</value>
+  </data>
   <data name="ConsumersfacebookAccessToken_Default" xml:space="preserve">
     <value>App Token</value>
+  </data>
+  <data name="ConsumersfacebookClientId" xml:space="preserve">
+    <value>Facebook ID</value>
+  </data>
+  <data name="ConsumersfacebookClientSecret" xml:space="preserve">
+    <value>Facebook Sleutel</value>
+  </data>
+  <data name="ConsumersFacebookDescription" xml:space="preserve">
+    <value>Verbind de applicatie om in te loggen op het portaal met een Facebook-account.</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>Schakel deze app in zodat uw gebruikers zich met hun Facebook kunnen aanmelden bij {LogoText} en de Facebook accounts van hun klanten kunnen koppelen aan de CRM module. {0}Ga naar de Facebook Developers Portal en maak een nieuwe app {LogoText} integration. Vul hieronder de gegevens in die u hebt ontvangen:</value>
   </data>
-  <data name="Consumersfirebase_projectId" xml:space="preserve">
-    <value>Project ID</value>
+  <data name="ConsumersFirebase" xml:space="preserve">
+    <value>Firebase</value>
+  </data>
+  <data name="ConsumersFirebaseDescription" xml:space="preserve">
+    <value>Verbind Firebase Cloud Messaging service om notificaties te ontvangen over de berichten die naar u worden gestuurd.</value>
   </data>
   <data name="ConsumersFirebaseInstruction" xml:space="preserve">
     <value>Schakel deze app in om uw gebruikers zelfs offline meldingen over de berichten te laten ontvangen.{0}Ga naar de Firebase console en voeg een nieuw project toe voor de {LogoText} integratie. Vul hieronder de gegevens in die u hebt ontvangen:</value>
+  </data>
+  <data name="Consumersfirebase_apiKey" xml:space="preserve">
+    <value>Web API sleutel</value>
+  </data>
+  <data name="Consumersfirebase_authorization" xml:space="preserve">
+    <value>Serversleutel</value>
+  </data>
+  <data name="Consumersfirebase_messagingSenderId" xml:space="preserve">
+    <value>Zender ID</value>
+  </data>
+  <data name="Consumersfirebase_projectId" xml:space="preserve">
+    <value>Project ID</value>
+  </data>
+  <data name="ConsumersGoogle" xml:space="preserve">
+    <value>Google</value>
+  </data>
+  <data name="ConsumersgoogleClientId" xml:space="preserve">
+    <value>Google ID</value>
+  </data>
+  <data name="ConsumersgoogleClientSecret" xml:space="preserve">
+    <value>Google Sleutel</value>
   </data>
   <data name="ConsumersGoogleCloud" xml:space="preserve">
     <value>Google Cloudopslag</value>
@@ -712,11 +396,32 @@
   <data name="ConsumersGoogleCloudjson" xml:space="preserve">
     <value>GoogleCloud json</value>
   </data>
+  <data name="ConsumersGoogleDescription" xml:space="preserve">
+    <value>Verbind het project door in te loggen op het portaal met een Google-account en beheer Google Drive-bestanden en mappen.</value>
+  </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>Schakel deze app in om uw Google Drive account met de module Documenten te verbinden. U kunt bestanden van Google Drive beheren, bewerken en delen met gebruikers van {LogoText}. {0}Ga naar de Google APIs console en maak een nieuw project aan voor de {LogoText} integratie. Vul hieronder de gegevens in die u hebt ontvangen:</value>
   </data>
+  <data name="ConsumersLinkedIn" xml:space="preserve">
+    <value>LinkedIn</value>
+  </data>
+  <data name="ConsumersLinkedInDescription" xml:space="preserve">
+    <value>Verbind de applicatie om in te loggen op het portaal met een LinkedIn-account.</value>
+  </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>Schakel deze app in zodat uw gebruikers zich met hun LinkedIn-accounts kunnen aanmelden bij {LogoText}. {0}Ga naar de LinkedIn Developers website en maak een nieuwe app {LogoText} integratie. Vul hieronder de gegevens in die u hebt ontvangen:</value>
+  </data>
+  <data name="ConsumersLinkedInKey" xml:space="preserve">
+    <value>LinkedIn ID</value>
+  </data>
+  <data name="ConsumersLinkedInSecret" xml:space="preserve">
+    <value>LinkedIn Sleutel</value>
+  </data>
+  <data name="ConsumersMailru" xml:space="preserve">
+    <value>Mail.ru</value>
+  </data>
+  <data name="ConsumersMailruClientId" xml:space="preserve">
+    <value>ID</value>
   </data>
   <data name="ConsumersMailruClientSecret" xml:space="preserve">
     <value>Secret key</value>
@@ -727,8 +432,14 @@
   <data name="ConsumersMailruInstruction" xml:space="preserve">
     <value>Wanneer u de Mail.ru toepassing toevoegt, kunt u het aanmelden bij het portaal met de Mail.ru account op uw profielpagina inschakelen.</value>
   </data>
+  <data name="ConsumersMicrosoft" xml:space="preserve">
+    <value>Microsoft</value>
+  </data>
   <data name="ConsumersmicrosoftClientId" xml:space="preserve">
     <value>Applicatie Klant ID</value>
+  </data>
+  <data name="ConsumersmicrosoftClientSecret" xml:space="preserve">
+    <value>Client Geheim</value>
   </data>
   <data name="ConsumersMicrosoftDescription" xml:space="preserve">
     <value>Activeer dat deze toepassing zich met een Microsoft account aanmeldt bij het portaal.</value>
@@ -805,23 +516,47 @@
   <data name="ConsumersSelectelprivate_container" xml:space="preserve">
     <value>Privé Container</value>
   </data>
-  <data name="ConsumersSelectelpublic_container" xml:space="preserve">
-    <value>Openbare Container</value>
-  </data>
   <data name="ConsumersSelectelprivate_containerDescription" xml:space="preserve">
     <value>Voer de naam in van de Selectel privé container voor het opslaan van back-ups.</value>
+  </data>
+  <data name="ConsumersSelectelpublic_container" xml:space="preserve">
+    <value>Openbare Container</value>
   </data>
   <data name="ConsumersSelectelpublic_containerDescription" xml:space="preserve">
     <value>Voer de naam in van de Selectel openbare container voor het opslaan van back-ups.</value>
   </data>
+  <data name="ConsumersSkyDrive" xml:space="preserve">
+    <value>OneDrive</value>
+  </data>
   <data name="Consumersskydriveappkey" xml:space="preserve">
     <value>Applicatie ID</value>
+  </data>
+  <data name="Consumersskydriveappsecret" xml:space="preserve">
+    <value>Client Geheim</value>
+  </data>
+  <data name="ConsumersSkyDriveDescription" xml:space="preserve">
+    <value>Verbind de applicatie om bestanden en mappen in OneDrive te beheren.</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>Schakel deze app in om uw OneDrive account met de module Documenten te verbinden. You’ll be able to manage, edit, and share files from OneDrive with {LogoText} users. {0}Sign in to your Microsoft Azure account and create a new app for {LogoText} integration. Vul hieronder de gegevens in die u hebt ontvangen:</value>
   </data>
+  <data name="ConsumersSmsc" xml:space="preserve">
+    <value>SMS Center</value>
+  </data>
+  <data name="ConsumersSmscDescription" xml:space="preserve">
+    <value>Schakel de applicatie in voor de twee-factor authenticatie via SMS Center.</value>
+  </data>
   <data name="ConsumersSmscInstruction" xml:space="preserve">
     <value>Gebruik deze app om twee-factor authenticatie met SMS Center service in te schakelen. {0}Voer uw smsc account login en uw wachtwoord (of wachtwoord MD5 hash) in kleine letters in:</value>
+  </data>
+  <data name="Consumerssmsclogin" xml:space="preserve">
+    <value>Inloggen</value>
+  </data>
+  <data name="Consumerssmscpsw" xml:space="preserve">
+    <value>Wachtwoord of wachtwoord MD5 hash in kleine letters</value>
+  </data>
+  <data name="ConsumersTelegram" xml:space="preserve">
+    <value>Telegram</value>
   </data>
   <data name="ConsumersTelegramBotName" xml:space="preserve">
     <value>Bot gebruikersnaam</value>
@@ -835,14 +570,35 @@
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>Schakel Telegram bot in om portaalmeldingen via Telegram te ontvangen. U kunt een nieuwe bot maken met BotFather in Telegram Desktop. Om deze bot te gebruiken, moeten portaalgebruikers Telegram meldingen inschakelen op hun Profielpagina. {0}Plak de gebruikersnaam van de bot en het token dat u hebt ontvangen in de onderstaande velden.</value>
   </data>
+  <data name="ConsumersTwilio" xml:space="preserve">
+    <value>Twilio</value>
+  </data>
+  <data name="ConsumerstwilioAccountSid" xml:space="preserve">
+    <value>Account Sid</value>
+  </data>
   <data name="ConsumerstwilioAuthToken" xml:space="preserve">
     <value>Auth Token</value>
+  </data>
+  <data name="ConsumersTwilioDescription" xml:space="preserve">
+    <value>Twilio toevoegen om te kunnen bellen naar CRM-contacten rechtstreeks vanaf de browser.</value>
   </data>
   <data name="ConsumersTwilioInstruction" xml:space="preserve">
     <value>Schakel deze app in zodat uw gebruikers hun contactpersonen vanuit de CRM module kunnen bellen met Twilio. {0}Ga naar Twilio Console en plak de volgende gegevens hieronder:</value>
   </data>
+  <data name="Consumerstwiliosender" xml:space="preserve">
+    <value>Telefoonnummer van Twilio (vereist voor SMS autorisatie)</value>
+  </data>
+  <data name="ConsumersTwitter" xml:space="preserve">
+    <value>X</value>
+  </data>
+  <data name="ConsumerstwitterAccessTokenSecret_Default" xml:space="preserve">
+    <value>Client Geheim</value>
+  </data>
   <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
     <value>Klant ID</value>
+  </data>
+  <data name="ConsumersTwitterDescription" xml:space="preserve">
+    <value>Verbind de applicatie om in te loggen op het portaal met een X-account.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Schakel deze app in zodat uw gebruikers zich met hun X kunnen aanmelden bij {LogoText} en de X accounts van hun klanten kunnen koppelen aan de CRM module. {0}Ga naar de X Developers Portal en maak een nieuwe app {LogoText} integration. Vul hieronder de gegevens in die u hebt ontvangen:</value>
@@ -871,6 +627,24 @@
   <data name="ConsumersVkInstruction" xml:space="preserve">
     <value>Wanneer u de VK toepassing toevoegt, kunt u het aanmelden bij het portaal met de VK account op uw profielpagina inschakelen.</value>
   </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>Klant ID</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Client Geheim</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Activeer dat deze toepassing zich met een WeChat account aanmeldt bij het portaal.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Activeer dat deze toepassing zich met een WeChat account aanmeldt bij het portaal.</value>
+  </data>
+  <data name="ConsumersWordpress" xml:space="preserve">
+    <value>WordPress</value>
+  </data>
   <data name="ConsumersWordpressDescription" xml:space="preserve">
     <value>Schakel de toepassing in om documenten direct in WordPress te publiceren.</value>
   </data>
@@ -883,104 +657,35 @@
   <data name="ConsumerswpClientSecret" xml:space="preserve">
     <value>WordPress Secret</value>
   </data>
+  <data name="ConsumersYahoo" xml:space="preserve">
+    <value>Yahoo</value>
+  </data>
   <data name="ConsumersyahooClientId" xml:space="preserve">
     <value>Klant ID</value>
   </data>
   <data name="ConsumersyahooClientSecret" xml:space="preserve">
     <value>Client Geheim</value>
   </data>
+  <data name="ConsumersYahooDescription" xml:space="preserve">
+    <value>Schakel de applicatie in voor importeren van Yahoo-contacten.</value>
+  </data>
   <data name="ConsumersYahooInstruction" xml:space="preserve">
     <value>Schakel deze app in om nieuwe portaalgebruikers uit uw Yahoo contactenlijst toe te voegen. {0}Ga naar de pagina Toepassing maken in het Yahoo Developer Network en maak een nieuwe app voor de {LogoText} integratie. Vul hieronder de gegevens in die u hebt ontvangen:</value>
   </data>
+  <data name="ConsumersYandex" xml:space="preserve">
+    <value>Yandex</value>
+  </data>
   <data name="ConsumersYandexClientId" xml:space="preserve">
     <value>ID</value>
+  </data>
+  <data name="ConsumersYandexClientSecret" xml:space="preserve">
+    <value>Wachtwoord</value>
   </data>
   <data name="ConsumersYandexDescription" xml:space="preserve">
     <value>Activeer dat deze toepassing zich met een Yandex account aanmeldt bij het portaal.</value>
   </data>
   <data name="ConsumersYandexInstruction" xml:space="preserve">
     <value>Wanneer u de Yandex toepassing toevoegt, kunt u het aanmelden bij het portaal met de Yandex account op uw profielpagina inschakelen.</value>
-  </data>
-  <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
-    <value>Onjuist Instance id.</value>
-  </data>
-  <data name="ErrorEmptyMessage" xml:space="preserve">
-    <value>Berichttekst is leeg</value>
-  </data>
-  <data name="ErrorIncorrectUserName" xml:space="preserve">
-    <value>Onjuiste voornaam of achternaam</value>
-  </data>
-  <data name="ErrorPasswordNoSpaces" xml:space="preserve">
-    <value>geen spaties</value>
-  </data>
-  <data name="ErrorPasswordOnlyLatinLetters" xml:space="preserve">
-    <value>uitsluitend Latijnse letters</value>
-  </data>
-  <data name="ErrorRequestLimitExceeded" xml:space="preserve">
-    <value>Aanvraaglimiet is overschreden</value>
-  </data>
-  <data name="ErrorTenantTooShort" xml:space="preserve">
-    <value>Het tenant domein kan niet leeg zijn.</value>
-  </data>
-  <data name="ErrorTenantTooShortFormat" xml:space="preserve">
-    <value>De domeinnaam moet tussen {0} en {1} tekens lang zijn.</value>
-  </data>
-  <data name="LdapSettingsErrorLostRights" xml:space="preserve">
-    <value>U probeerde uzelf de beheerdersrechten te ontnemen. Uw beheerdersrechten zijn niet aangetast.</value>
-  </data>
-  <data name="LdapSettingsErrorRemovedYourself" xml:space="preserve">
-    <value>Uw account is niet gekoppeld aan de LDAP directory en uw LDAP wachtwoord is niet meer actief. Wijzig of stel het wachtwoord van uw account in op de pagina met profielinstellingen.</value>
-  </data>
-  <data name="LdapSettingsStatusDisconnecting" xml:space="preserve">
-    <value>LDAP aan het verbreken</value>
-  </data>
-  <data name="LdapSettingsStatusGivingRights" xml:space="preserve">
-    <value>Gebruiker {0} instellen als {1} beheerder</value>
-  </data>
-  <data name="LdapSettingsStatusRemovingOldRights" xml:space="preserve">
-    <value>Verouderde toegangsrechten verwijderen die eerder via LDAP zijn geladen</value>
-  </data>
-  <data name="LdapSettingsStatusSavingUserPhoto" xml:space="preserve">
-    <value>Foto opslaan</value>
-  </data>
-  <data name="LdapSettingsStatusSyncingUsers" xml:space="preserve">
-    <value>Gebruikers synchroniseren</value>
-  </data>
-  <data name="LdapSettingsStatusUpdatingAccessRights" xml:space="preserve">
-    <value>Toegangsrechten van gebruikers bijwerken</value>
-  </data>
-  <data name="LdapSettingsStatusUpdatingUserPhotos" xml:space="preserve">
-    <value>Gebruikersfoto's bijwerken</value>
-  </data>
-  <data name="LicenseUploadedOverdue" xml:space="preserve">
-    <value>Succesvol geüpload. {0}Ondersteuning is sinds {2}.{1} niet beschikbaar voor deze licentie</value>
-  </data>
-  <data name="LicenseUploadedOverdueSupport" xml:space="preserve">
-    <value>Succesvol geüpload. {0}Ondersteuning is sinds {2}.{1} niet beschikbaar voor deze licentie</value>
-  </data>
-  <data name="MessageYourPasswordSendedToEmail" xml:space="preserve">
-    <value>Als er een gebruiker met het e-mailadres {0} bestaat, is de instructie voor het wijzigen van het wachtwoord naar dit e-mailadres gestuurd.</value>
-  </data>
-  <data name="PortalName" xml:space="preserve">
-    <value>Cloudruimte voor uw office documenten</value>
-  </data>
-  <data name="ReassignDataRemoveUserError" xml:space="preserve">
-    <value>Het proces voor het opnieuw toewijzen van gegevens voor {0} is niet voltooid.</value>
-  </data>
-  <data name="RecaptchaInvalid" xml:space="preserve">
-    <value>Ongeldige Recaptcha</value>
-  </data>
-  <data name="TariffsFeature_thirdparty" xml:space="preserve">
-    <value>Integraties van derden</value>
-  </data>
-  <data name="TfaAppAuthMessageError" xml:space="preserve">
-    <value>Onjuiste code</value>
-  </data>
-  <data name="TfaAppNotAvailable" xml:space="preserve">
-    <value>TFA toepassingsinstellingen zijn niet beschikbaar</value>
-  </data>
-  <data name="TfaTooMuchError" xml:space="preserve">
-    <value>U hebt te veel SMS berichten verstuurd. Probeer het later opnieuw.</value>
   </data>
   <data name="ConsumersZoom" xml:space="preserve">
     <value>Zoom</value>
@@ -997,11 +702,164 @@
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>Schakel deze app in zodat uw gebruikers zich met hun Zoom-accounts kunnen aanmelden bij {LogoText}. {0}Ga naar de Zoom Developers website en maak een nieuwe app {LogoText} integratie. Vul hieronder de gegevens in die u hebt ontvangen:</value>
   </data>
-  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
-    <value>Te veel aanmeldingspogingen. Probeer het later opnieuw</value>
+  <data name="CouldNotRecoverPasswordForLdapUser" xml:space="preserve">
+    <value>Wachtwoordherstelactie is verboden voor een LDAP-gebruiker</value>
+  </data>
+  <data name="CouldNotRecoverPasswordForSsoUser" xml:space="preserve">
+    <value>Wachtwoordherstelactie is verboden voor een SSO-gebruiker</value>
+  </data>
+  <data name="CustomNamingPeopleSchema" xml:space="preserve">
+    <value>Aangepast</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Datum</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>E-mail</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Voornaam</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>Id</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Achternaam</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Document Service Quota ({0})</value>
+  </data>
+  <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
+    <value>Onjuist Instance id.</value>
+  </data>
+  <data name="EmailAndPasswordIncorrectEmail" xml:space="preserve">
+    <value>Onjuist e-mailadres</value>
+  </data>
+  <data name="ErrorAccessDenied" xml:space="preserve">
+    <value>Geen toestemming om deze actie uit te voeren</value>
+  </data>
+  <data name="ErrorAccessRestricted" xml:space="preserve">
+    <value>De toegang tot het portaal is beperkt.</value>
+  </data>
+  <data name="ErrorBadKeys" xml:space="preserve">
+    <value>Verkeerde sleutels</value>
   </data>
   <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
     <value>De laatste volledige toegang tot de ruimte kan niet worden verwijderd</value>
+  </data>
+  <data name="ErrorDisabledProfile" xml:space="preserve">
+    <value>Uw profiel is geschorst</value>
+  </data>
+  <data name="ErrorEmailAlreadyExists" xml:space="preserve">
+    <value>{!User} met dit e-mailadres is al geregistreerd</value>
+  </data>
+  <data name="ErrorEmailDomainNotAllowed" xml:space="preserve">
+    <value>E-mails van dit domein zijn niet toegestaan voor registratie</value>
+  </data>
+  <data name="ErrorEmailEmpty" xml:space="preserve">
+    <value>Veld E-mail is leeg</value>
+  </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>Deze e-mail is gekoppeld aan de gebruiker {0} als een externe provider</value>
+  </data>
+  <data name="ErrorEmailsAreTheSame" xml:space="preserve">
+    <value>De huidige e-mail en de nieuwe e-mail zijn hetzelfde</value>
+  </data>
+  <data name="ErrorEmptyFields" xml:space="preserve">
+    <value>Vul alstublieft alle velden in</value>
+  </data>
+  <data name="ErrorEmptyMessage" xml:space="preserve">
+    <value>Berichttekst is leeg</value>
+  </data>
+  <data name="ErrorEmptyUploadFileSelected" xml:space="preserve">
+    <value>Het geüploade bestand kon niet worden gevonden</value>
+  </data>
+  <data name="ErrorFileNotImage" xml:space="preserve">
+    <value>Onbekend afbeeldingsbestandtype</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>De groep kon niet worden gevonden</value>
+  </data>
+  <data name="ErrorImageSize" xml:space="preserve">
+    <value>Afbeeldingsgrootte overschrijdt de toegestane parameters</value>
+  </data>
+  <data name="ErrorImageWeightLimit" xml:space="preserve">
+    <value>De bestandsgrootte van de afbeelding is te groot</value>
+  </data>
+  <data name="ErrorIncorrectUserName" xml:space="preserve">
+    <value>Onjuiste voornaam of achternaam</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Uitnodigingslimiet is overschreden</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Voeg minstens 1 toegestaan IP-adres toe.</value>
+  </data>
+  <data name="ErrorIpSecurity" xml:space="preserve">
+    <value>De toegang tot het portaal is beperkt</value>
+  </data>
+  <data name="ErrorNotAllowedOption" xml:space="preserve">
+    <value>Uw abonnement ondersteunt deze optie niet</value>
+  </data>
+  <data name="ErrorNotCorrectEmail" xml:space="preserve">
+    <value>Onjuiste e-mail</value>
+  </data>
+  <data name="ErrorNotCorrectTrustedDomain" xml:space="preserve">
+    <value>Ongeldige domeinnaam</value>
+  </data>
+  <data name="ErrorPasswordEmpty" xml:space="preserve">
+    <value>Het wachtwoord is leeg.</value>
+  </data>
+  <data name="ErrorPasswordLength" xml:space="preserve">
+    <value>van {0} tot {1} karakters</value>
+  </data>
+  <data name="ErrorPasswordMessage" xml:space="preserve">
+    <value>Wachtwoord moet bevatten</value>
+  </data>
+  <data name="ErrorPasswordNoDigits" xml:space="preserve">
+    <value>cijfers</value>
+  </data>
+  <data name="ErrorPasswordNoSpaces" xml:space="preserve">
+    <value>geen spaties</value>
+  </data>
+  <data name="ErrorPasswordNoSpecialSymbols" xml:space="preserve">
+    <value>speciale karakters</value>
+  </data>
+  <data name="ErrorPasswordNoUpperCase" xml:space="preserve">
+    <value>hoofdletters</value>
+  </data>
+  <data name="ErrorPasswordOnlyLatinLetters" xml:space="preserve">
+    <value>uitsluitend Latijnse letters</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Betaling vereist</value>
+  </data>
+  <data name="ErrorRequestLimitExceeded" xml:space="preserve">
+    <value>Aanvraaglimiet is overschreden</value>
+  </data>
+  <data name="ErrorTenantTooShort" xml:space="preserve">
+    <value>Het tenant domein kan niet leeg zijn.</value>
+  </data>
+  <data name="ErrorTenantTooShortFormat" xml:space="preserve">
+    <value>De domeinnaam moet tussen {0} en {1} tekens lang zijn.</value>
+  </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>Te veel aanmeldingspogingen. Probeer het later opnieuw</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Voeg minstens 1 vertrouwd domein toe.</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Gebruiker uitgeschakeld</value>
+  </data>
+  <data name="ErrorUserNotFound" xml:space="preserve">
+    <value>De gebruiker kon niet worden gevonden</value>
+  </data>
+  <data name="ErrorUserNotFoundByEmail" xml:space="preserve">
+    <value>De gebruiker met "{0}" e-mail kon niet worden gevonden</value>
+  </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>Webhook URL is niet beschikbaar. HEAD verzoek reageert niet 200 http status.</value>
   </data>
   <data name="ErrorWebPluginArchive" xml:space="preserve">
     <value>Verkeerd plug-in archief</value>
@@ -1018,6 +876,9 @@
   <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
     <value>Wijzigingen aan systeem plug-ins zijn verboden</value>
   </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>Het aantal plug-ins overschrijdt de limiet</value>
+  </data>
   <data name="ErrorWebPluginName" xml:space="preserve">
     <value>Verkeerd plug-in naam</value>
   </data>
@@ -1030,83 +891,326 @@
   <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
     <value>Te veel invoerbestanden</value>
   </data>
-  <data name="QuotaGreaterPortalError" xml:space="preserve">
-    <value>Het geheugenquotum is niet ingesteld - het geheugenquotum dat u heeft ingesteld is groter dan het portaal quota.</value>
+  <data name="EuServerRegion" xml:space="preserve">
+    <value>EU (Frankfurt) Regio</value>
   </data>
-  <data name="RoomFreeSpaceException" xml:space="preserve">
-    <value>Kamer ruimte quota overschreden</value>
+  <data name="FileSizeMaxExceed" xml:space="preserve">
+    <value>De maximale bestandsgrootte is overschreden</value>
   </data>
-  <data name="UserFreeSpaceException" xml:space="preserve">
-    <value>Gebruikersruimte quota overschreden</value>
+  <data name="FileSizeNote" xml:space="preserve">
+    <value>Opmerking: de bestandsgrootte mag niet meer bedragen dan {1}{0}{2}</value>
   </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Beheerders toegevoegd:</value>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>bytes,KB,MB,GB,TB</value>
   </data>
-  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
-    <value>Uitnodigingslimiet is overschreden</value>
+  <data name="FinishInviteJoinEmailMessage" xml:space="preserve">
+    <value>De link om uw account te bevestigen is verstuurd naar de gespecificeerde e-mail</value>
   </data>
-  <data name="ErrorUserDisabled" xml:space="preserve">
-    <value>Gebruiker uitgeschakeld</value>
+  <data name="FirstName" xml:space="preserve">
+    <value>Voornaam</value>
+  </data>
+  <data name="LastName" xml:space="preserve">
+    <value>Familienaam</value>
+  </data>
+  <data name="LdapSettingsConnectError" xml:space="preserve">
+    <value>Verbindingsfout</value>
+  </data>
+  <data name="LdapSettingsErrorCantCreateUsers" xml:space="preserve">
+    <value>Gebruikers konden niet worden aangemaakt, de ontvangen data is onjuist.</value>
+  </data>
+  <data name="LdapSettingsErrorCantGetLdapSettings" xml:space="preserve">
+    <value>De server kon de instellingen niet ophalen.</value>
+  </data>
+  <data name="LdapSettingsErrorCantSaveLdapSettings" xml:space="preserve">
+    <value>De server kon de instellingen niet opslaan.</value>
+  </data>
+  <data name="LdapSettingsErrorCredentialsNotValid" xml:space="preserve">
+    <value>Onjuiste gebruikersnaam of wachtwoord.</value>
+  </data>
+  <data name="LdapSettingsErrorDomainNotFound" xml:space="preserve">
+    <value>LDAP-domein niet gevonden.</value>
+  </data>
+  <data name="LdapSettingsErrorGroupsNotFound" xml:space="preserve">
+    <value>Er konden geen groepen worden gevonden.</value>
+  </data>
+  <data name="LdapSettingsErrorIncorrectLdapFilter" xml:space="preserve">
+    <value>Ongeldige waarde voor Gebruikersfilter.</value>
+  </data>
+  <data name="LdapSettingsErrorLostRights" xml:space="preserve">
+    <value>U probeerde uzelf de beheerdersrechten te ontnemen. Uw beheerdersrechten zijn niet aangetast.</value>
+  </data>
+  <data name="LdapSettingsErrorRemovedYourself" xml:space="preserve">
+    <value>Uw account is niet gekoppeld aan de LDAP directory en uw LDAP wachtwoord is niet meer actief. Wijzig of stel het wachtwoord van uw account in op de pagina met profielinstellingen.</value>
+  </data>
+  <data name="LdapSettingsErrorUnknownError" xml:space="preserve">
+    <value>Onbekende fout.</value>
+  </data>
+  <data name="LdapSettingsErrorUsersNotFound" xml:space="preserve">
+    <value>Er konden geen gebruikers worden gevonden.</value>
+  </data>
+  <data name="LdapSettingsErrorWrongGroupAttribute" xml:space="preserve">
+    <value>Kon Groepsattribuut niet ophalen voor een of meerdere groepen.</value>
+  </data>
+  <data name="LdapSettingsErrorWrongGroupFilter" xml:space="preserve">
+    <value>Onjuiste Groepsfilter.</value>
+  </data>
+  <data name="LdapSettingsErrorWrongGroupNameAttribute" xml:space="preserve">
+    <value>Kon Groepsnaamattribuut niet ophalen voor een of meerdere groepen.</value>
+  </data>
+  <data name="LdapSettingsErrorWrongLoginAttribute" xml:space="preserve">
+    <value>Kon Loginattribuut niet ophalen voor een of meerdere gebruikers.</value>
+  </data>
+  <data name="LdapSettingsErrorWrongServerOrPort" xml:space="preserve">
+    <value>Kan geen verbinding maken met LDAP-server. Controleer of het serveradres en poortnummer correct zijn.</value>
+  </data>
+  <data name="LdapSettingsErrorWrongUserAttribute" xml:space="preserve">
+    <value>Kon Gebruikersattribuut niet ophalen voor een of meerdere gebruikers.</value>
+  </data>
+  <data name="LdapSettingsInternalServerError" xml:space="preserve">
+    <value>Interne serverfout.</value>
+  </data>
+  <data name="LdapSettingsModifyLdapUsers" xml:space="preserve">
+    <value>LDAP-gebruikers aanpassen op gewone portaalgebruikers</value>
+  </data>
+  <data name="LdapSettingsStatusAddingGroupUser" xml:space="preserve">
+    <value>gebruiker toevoegen</value>
+  </data>
+  <data name="LdapSettingsStatusCertificateVerification" xml:space="preserve">
+    <value>Certificaatverificatie</value>
+  </data>
+  <data name="LdapSettingsStatusCheckingLdapSettings" xml:space="preserve">
+    <value>Controleer de LDAP-ondersteuningsinstellingen</value>
+  </data>
+  <data name="LdapSettingsStatusDisconnecting" xml:space="preserve">
+    <value>LDAP aan het verbreken</value>
+  </data>
+  <data name="LdapSettingsStatusGettingGroupsFromLdap" xml:space="preserve">
+    <value>De groepslijst ophalen van de LDAP-server</value>
+  </data>
+  <data name="LdapSettingsStatusGettingUsersFromLdap" xml:space="preserve">
+    <value>De gebruikerslijst ophalen van de LDAP-server</value>
+  </data>
+  <data name="LdapSettingsStatusGivingRights" xml:space="preserve">
+    <value>Gebruiker {0} instellen als {1} beheerder</value>
+  </data>
+  <data name="LdapSettingsStatusLoadingBaseInfo" xml:space="preserve">
+    <value>LDAP-basisinformatie laden</value>
+  </data>
+  <data name="LdapSettingsStatusRemovingGroupUser" xml:space="preserve">
+    <value>gebruiker verwijderen</value>
+  </data>
+  <data name="LdapSettingsStatusRemovingOldGroups" xml:space="preserve">
+    <value>Verouderde groepen verwijderen die eerder via LDAP zijn geladen</value>
+  </data>
+  <data name="LdapSettingsStatusRemovingOldRights" xml:space="preserve">
+    <value>Verouderde toegangsrechten verwijderen die eerder via LDAP zijn geladen</value>
+  </data>
+  <data name="LdapSettingsStatusRemovingOldUsers" xml:space="preserve">
+    <value>Verouderde gebruikersprofielen verwijderen die eerder via LDAP zijn geladen</value>
+  </data>
+  <data name="LdapSettingsStatusSavingGroups" xml:space="preserve">
+    <value>Groepen opslaan</value>
+  </data>
+  <data name="LdapSettingsStatusSavingSettings" xml:space="preserve">
+    <value>Instellingen opslaan</value>
+  </data>
+  <data name="LdapSettingsStatusSavingUserPhoto" xml:space="preserve">
+    <value>Foto opslaan</value>
+  </data>
+  <data name="LdapSettingsStatusSavingUsers" xml:space="preserve">
+    <value>Gebruikers opslaan</value>
+  </data>
+  <data name="LdapSettingsStatusSyncingUsers" xml:space="preserve">
+    <value>Gebruikers synchroniseren</value>
+  </data>
+  <data name="LdapSettingsStatusUpdatingAccessRights" xml:space="preserve">
+    <value>Toegangsrechten van gebruikers bijwerken</value>
+  </data>
+  <data name="LdapSettingsStatusUpdatingUserPhotos" xml:space="preserve">
+    <value>Gebruikersfoto's bijwerken</value>
+  </data>
+  <data name="LdapSettingsStrongAuthRequired" xml:space="preserve">
+    <value>Een veiliger authenticatietype is vereist. Gebruik alstublieft een versleutelde verbinding of schakel gewone authenticatie op de server in.</value>
+  </data>
+  <data name="LdapSettingsTenantQuotaSettled" xml:space="preserve">
+    <value>De gebruikerslimiet van het huidige abonnement is bereikt</value>
+  </data>
+  <data name="LdapSettingsTlsNotSupported" xml:space="preserve">
+    <value>StartTLS niet ondersteund voor huidige LDAP-server.</value>
+  </data>
+  <data name="LdapSettingsTooManyOperations" xml:space="preserve">
+    <value>Teveel LDAP acties.</value>
+  </data>
+  <data name="LdapSettingsWrongSidAttribute" xml:space="preserve">
+    <value>Unieke ID voor gebruikers-/groepsobjecten kon niet worden opgehaald. Standaard probeert het systeem een van de volgende identificaties te combineren: entryUUID, nsuniqueid, GUID, objectSid. Als geen van de attributen overeenkomt met uw LDAP-server, geef dan alstublieft het benodigde attribuut op in de instelling ldap.unique.id van het bestand web.appsettings.config.</value>
+  </data>
+  <data name="LicenseError" xml:space="preserve">
+    <value>Licentie is niet correct</value>
+  </data>
+  <data name="LicenseErrorExpired" xml:space="preserve">
+    <value>Licentie is verlopen.</value>
+  </data>
+  <data name="LicenseErrorPortal" xml:space="preserve">
+    <value>Het aantal portalen overschrijdt het aantal toegestaan voor de licentie</value>
+  </data>
+  <data name="LicenseErrorQuota" xml:space="preserve">
+    <value>Het aantal gebruikers overschrijdt het aantal toegestaan voor de licentie</value>
+  </data>
+  <data name="LicenseUploaded" xml:space="preserve">
+    <value>Succesvol geüpload</value>
+  </data>
+  <data name="LicenseUploadedOverdue" xml:space="preserve">
+    <value>Succesvol geüpload. {0}Ondersteuning is sinds {2}.{1} niet beschikbaar voor deze licentie</value>
+  </data>
+  <data name="LicenseUploadedOverdueSupport" xml:space="preserve">
+    <value>Succesvol geüpload. {0}Ondersteuning is sinds {2}.{1} niet beschikbaar voor deze licentie</value>
+  </data>
+  <data name="MessageEmailChangeInstuctionsSentOnEmail" xml:space="preserve">
+    <value>De e-mailwijzigingsinstructies zijn succesvol verzonden</value>
   </data>
   <data name="MessagePasswordSendedToEmail" xml:space="preserve">
     <value>De instructies voor het wijzigen van het wachtwoord zijn naar {0} e-mailadres verzonden.</value>
   </data>
-  <data name="ErrorEmailLinked" xml:space="preserve">
-    <value>Deze e-mail is gekoppeld aan de gebruiker {0} als een externe provider</value>
+  <data name="MessageYourPasswordSendedToEmail" xml:space="preserve">
+    <value>Als er een gebruiker met het e-mailadres {0} bestaat, is de instructie voor het wijzigen van het wachtwoord naar dit e-mailadres gestuurd.</value>
   </data>
-  <data name="TariffsFeature_statistic" xml:space="preserve">
-    <value>Opslagquota &amp; statistieken</value>
+  <data name="MobilePhoneMustErase" xml:space="preserve">
+    <value>Om het nummer te veranderen, moet u uw huidige telefoonnummer verwijderen</value>
   </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} per beheerder en mogelijkheid om ruimte op verzoek toe te voegen</value>
+  <data name="OrgServerRegion" xml:space="preserve">
+    <value>ORG Regio</value>
+  </data>
+  <data name="Owner" xml:space="preserve">
+    <value>Eigenaar</value>
+  </data>
+  <data name="PortalName" xml:space="preserve">
+    <value>Cloudruimte voor uw office documenten</value>
+  </data>
+  <data name="PortalSecurity" xml:space="preserve">
+    <value>Portaaltoegang</value>
+  </data>
+  <data name="QuotaGreaterPortalError" xml:space="preserve">
+    <value>Het geheugenquotum is niet ingesteld - het geheugenquotum dat u heeft ingesteld is groter dan het portaal quota.</value>
+  </data>
+  <data name="ReassignDataRemoveUserError" xml:space="preserve">
+    <value>Het proces voor het opnieuw toewijzen van gegevens voor {0} is niet voltooid.</value>
+  </data>
+  <data name="RecaptchaInvalid" xml:space="preserve">
+    <value>Ongeldige Recaptcha</value>
+  </data>
+  <data name="RoomFreeSpaceException" xml:space="preserve">
+    <value>Kamer ruimte quota overschreden</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
     <value>Fout bij het instellen van quota per kamer. De ingevoerde waarde is groter dan de totale DocSpace opslag.</value>
   </data>
-  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Fout bij het instellen van quota per gebruiker. De ingevoerde waarde is groter dan de totale DocSpace opslag.</value>
+  <data name="SgServerRegion" xml:space="preserve">
+    <value>Asia Pacific (Singapore)</value>
   </data>
-  <data name="ErrorTrustedMailDomain" xml:space="preserve">
-    <value>Voeg minstens 1 vertrouwd domein toe.</value>
+  <data name="SmsAuthenticationMessageError" xml:space="preserve">
+    <value>Incorrecte code</value>
   </data>
-  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
-    <value>Het aantal beheerders overschrijdt de limiet: {0}/{1}.</value>
+  <data name="SmsAuthenticationMessageToUser" xml:space="preserve">
+    <value>Code: {0}</value>
   </data>
-  <data name="ErrorIpRestriction" xml:space="preserve">
-    <value>Voeg minstens 1 toegestaan IP-adres toe.</value>
+  <data name="SmsAuthenticationTimeout" xml:space="preserve">
+    <value>De tijd om de code te kunnen gebruiken is verlopen. Vraag alstublieft een nieuw tekstbericht aan.</value>
   </data>
-  <data name="Tariffs_nonprofit" xml:space="preserve">
-    <value>Non-profit</value>
+  <data name="SmsNotAvailable" xml:space="preserve">
+    <value>SMS instellingen zijn niet beschikbaar</value>
   </data>
-  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
-    <value>Webhook URL is niet beschikbaar. HEAD verzoek reageert niet 200 http status.</value>
+  <data name="SmsTooMuchError" xml:space="preserve">
+    <value>U heeft teveel tekstberichten verstuurd. Probeer het alstublieft later nog eens.</value>
   </data>
-  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
-    <value>Tegoed</value>
+  <data name="SsoSettingsCantSaveSettings" xml:space="preserve">
+    <value>Kon instellingen niet opslaan</value>
   </data>
-  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
-    <value>Valuta</value>
+  <data name="SsoSettingsCouldNotBeNull" xml:space="preserve">
+    <value>Instellingen mogen niet leeg zijn</value>
   </data>
-  <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>Datum</value>
+  <data name="SsoSettingsInvalidBinding" xml:space="preserve">
+    <value>Ongeldige binding: {0}</value>
   </data>
-  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
-    <value>Aantal</value>
+  <data name="SsoSettingsInvalidEntityId" xml:space="preserve">
+    <value>Ongeldige entityID</value>
   </data>
-  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
-    <value>Schijfruimte</value>
+  <data name="SsoSettingsInvalidMapping" xml:space="preserve">
+    <value>Ongeldige veldenindeling</value>
   </data>
-  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
-    <value>Tegoed opladen</value>
+  <data name="SuccessfullySaveGreetingSettingsMessage" xml:space="preserve">
+    <value>Welkomstpagina instellingen zijn succesvol opgeslagen</value>
   </data>
-  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
-    <value>Meeteenheid</value>
+  <data name="SuccessfullySaveSettingsMessage" xml:space="preserve">
+    <value>Instellingen zijn met succes bijgewerkt</value>
   </data>
-  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
-    <value>Klantactiviteitenverslag ({0}-{1})</value>
+  <data name="SuccessfullySentNotificationDeleteUserInfoMessage" xml:space="preserve">
+    <value>Instructies om profiel te verwijderen is verzonden naar {0} e-mailadres</value>
   </data>
-  <data name="ErrorGroupNotFound" xml:space="preserve">
-    <value>De groep kon niet worden gevonden</value>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>Het aantal AI-agenten mag niet hoger zijn dan {0}</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>AI tools</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Activeer AI-functies in uw DocSpace om de productiviteit te verhogen.</value>
+  </data>
+  <data name="TariffsFeature_audit" xml:space="preserve">
+    <value>Inloggegevens en acties bijhouden</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Back-up</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Schakel back-ups in voor uw DocSpace. De kosten worden automatisch gefactureerd.</value>
+  </data>
+  <data name="TariffsFeature_customization" xml:space="preserve">
+    <value>Branding &amp; aanpassing</value>
+  </data>
+  <data name="TariffsFeature_file_size" xml:space="preserve">
+    <value>Maximale bestandsgrootte</value>
+  </data>
+  <data name="TariffsFeature_file_size_exception" xml:space="preserve">
+    <value>De bestandsgrootte mag niet groter zijn dan {0}</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} gratis back-ups per maand</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Het aantal gratis back-ups mag binnen een maand niet meer dan {0} bedragen</value>
+  </data>
+  <data name="TariffsFeature_manager_exception" xml:space="preserve">
+    <value>Het aantal beheerders mag niet groter zijn dan {0}</value>
+  </data>
+  <data name="TariffsFeature_manager_price_count" xml:space="preserve">
+    <value>Aantal beheerders</value>
+  </data>
+  <data name="TariffsFeature_restore" xml:space="preserve">
+    <value>Gegevensherstel</value>
+  </data>
+  <data name="TariffsFeature_room" xml:space="preserve">
+    <value>Onbeperkt aantal actieve kamers</value>
+  </data>
+  <data name="TariffsFeature_room_exception" xml:space="preserve">
+    <value>Het aantal kamers mag niet meer zijn dan {0}</value>
+  </data>
+  <data name="TariffsFeature_sso" xml:space="preserve">
+    <value>SSO</value>
+  </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Opslagquota &amp; statistieken</value>
+  </data>
+  <data name="TariffsFeature_thirdparty" xml:space="preserve">
+    <value>Integraties van derden</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} per beheerder en mogelijkheid om ruimte op verzoek toe te voegen</value>
+  </data>
+  <data name="TariffsFeature_total_size_exception" xml:space="preserve">
+    <value>De gebruikte opslagruimte mag niet groter zijn dan {0}</value>
+  </data>
+  <data name="TariffsFeature_total_size_price_count" xml:space="preserve">
+    <value>Opslagruimte</value>
   </data>
   <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
     <value>Extra schijfopslagruimte</value>
@@ -1114,124 +1218,79 @@
   <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
     <value>Pas de opslag aan tot de exacte benodigde hoeveelheid.</value>
   </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Beheerders toegevoegd:</value>
+  </data>
+  <data name="TariffsFeature_used_room" xml:space="preserve">
+    <value>Kamers:</value>
+  </data>
+  <data name="TariffsFeature_used_total_size" xml:space="preserve">
+    <value>Opslagruimte gebruikt:</value>
+  </data>
   <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
     <value>Opslagruimte gebruikt:</value>
   </data>
-  <data name="AutoRenewal" xml:space="preserve">
-    <value>Automatische verlenging</value>
+  <data name="TariffsFeature_used_usersInRoom" xml:space="preserve">
+    <value>Gebruikers in kamer:</value>
   </data>
-  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
-    <value>Het aantal gratis back-ups mag binnen een maand niet meer dan {0} bedragen</value>
+  <data name="TariffsFeature_users" xml:space="preserve">
+    <value>Onbeperkt aantal gebruikers en gasten</value>
   </data>
-  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
-    <value>Schakel back-ups in voor uw DocSpace. De kosten worden automatisch gefactureerd.</value>
+  <data name="TariffsFeature_usersInRoom" xml:space="preserve">
+    <value>Gebruikers in kamer</value>
   </data>
-  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
-    <value>Back-up</value>
+  <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
+    <value>Het aantal gebruikers in de kamer mag niet groter zijn dan {0}</value>
   </data>
-  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>Back-up</value>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Het aantal beheerders overschrijdt de limiet: {0}/{1}.</value>
   </data>
-  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
-    <value>Back-up</value>
-  </data>
-  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
-    <value>Debiteren</value>
-  </data>
-  <data name="AccountingCustomerOperationContact" xml:space="preserve">
-    <value>Contact</value>
-  </data>
-  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
-    <value>Transactiegeschiedenis</value>
-  </data>
-  <data name="AutoTopUp" xml:space="preserve">
-    <value>Automatisch opwaarderen</value>
-  </data>
-  <data name="TariffsFeature_free_backup" xml:space="preserve">
-    <value>{0} gratis back-ups per maand</value>
-  </data>
-  <data name="ErrorPaymentRequired" xml:space="preserve">
-    <value>Betaling vereist</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
-    <value>GB</value>
-  </data>
-  <data name="AccountingCustomerOperationType" xml:space="preserve">
-    <value>Type</value>
-  </data>
-  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
-    <value>Details</value>
-  </data>
-  <data name="TelegramOnGenericError" xml:space="preserve">
-    <value>Er is een onverwachte fout opgetreden. Probeer het opnieuw.</value>
-  </data>
-  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
-    <value>Vectorisatie</value>
-  </data>
-  <data name="ConsumersWeixin" xml:space="preserve">
-    <value>WeChat</value>
-  </data>
-  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>U bent nu succesvol verbonden met Telegram om meldingen van uw DocSpace te ontvangen.</value>
-  </data>
-  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
-    <value>Voeg geld toe aan uw account om AI-webzoekfuncties te gebruiken.</value>
-  </data>
-  <data name="AiAgentFreeSpaceException" xml:space="preserve">
-    <value>De ruimtequota voor AI-agenten is overschreden</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
-    <value>AI tools</value>
-  </data>
-  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>AI tools</value>
+  <data name="TariffsFeature_users_exception" xml:space="preserve">
+    <value>Het aantal gebruikers mag niet groter zijn dan {0}</value>
   </data>
   <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
     <value>AI-webzoekopdracht</value>
   </data>
-  <data name="ConsumersWeixinClientId" xml:space="preserve">
-    <value>Klant ID</value>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Voeg geld toe aan uw account om AI-webzoekfuncties te gebruiken.</value>
   </data>
-  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
-    <value>Client Geheim</value>
+  <data name="Tariffs_admin" xml:space="preserve">
+    <value>Business</value>
   </data>
-  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
-    <value>Datum</value>
+  <data name="Tariffs_adminyear" xml:space="preserve">
+    <value>Business</value>
   </data>
-  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
-    <value>Document Service Quota ({0})</value>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Non-profit</value>
   </data>
-  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
-    <value>E-mail</value>
+  <data name="Tariffs_startup" xml:space="preserve">
+    <value>Startup</value>
   </data>
-  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Activeer AI-functies in uw DocSpace om de productiviteit te verhogen.</value>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>Er is een onverwachte fout opgetreden. Probeer het opnieuw.</value>
   </data>
-  <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Activeer dat deze toepassing zich met een WeChat account aanmeldt bij het portaal.</value>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>U bent nu succesvol verbonden met Telegram om meldingen van uw DocSpace te ontvangen.</value>
   </data>
-  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Fout bij het instellen van quota per AI-agent. De ingevoerde waarde is groter dan de totale DocSpace opslag.</value>
+  <data name="TfaAppAuthMessageError" xml:space="preserve">
+    <value>Onjuiste code</value>
   </data>
-  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
-    <value>Tokens</value>
+  <data name="TfaAppNotAvailable" xml:space="preserve">
+    <value>TFA toepassingsinstellingen zijn niet beschikbaar</value>
   </data>
-  <data name="ConsumersWeixinInstruction" xml:space="preserve">
-    <value>Activeer dat deze toepassing zich met een WeChat account aanmeldt bij het portaal.</value>
+  <data name="TfaTooMuchError" xml:space="preserve">
+    <value>U hebt te veel SMS berichten verstuurd. Probeer het later opnieuw.</value>
   </data>
-  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
-    <value>Voornaam</value>
+  <data name="UserFreeSpaceException" xml:space="preserve">
+    <value>Gebruikersruimte quota overschreden</value>
   </data>
-  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
-    <value>Id</value>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>Fout bij het instellen van quota per gebruiker. De ingevoerde waarde is groter dan de totale DocSpace opslag.</value>
   </data>
-  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
-    <value>Achternaam</value>
+  <data name="UsServerRegion" xml:space="preserve">
+    <value>VS West (Oregon) Regio</value>
   </data>
-  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
-    <value>Het aantal plug-ins overschrijdt de limiet</value>
-  </data>
-  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
-    <value>Het aantal AI-agenten mag niet hoger zijn dan {0}</value>
+  <data name="WhatsNewSubscriptionName" xml:space="preserve">
+    <value>What's New</value>
   </data>
 </root>

@@ -117,56 +117,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Unzipping" xml:space="preserve">
-    <value>Açılır...</value>
-  </data>
-  <data name="DataProcessing" xml:space="preserve">
-    <value>Məlumatların emalı...</value>
-  </data>
-  <data name="DumpParse" xml:space="preserve">
-    <value>Məlumatlar bazasının təhlili</value>
-  </data>
-  <data name="DataProcessingCompleted" xml:space="preserve">
-    <value>Məlumatların email tamamlandı</value>
-  </data>
-  <data name="MigratingUserFiles" xml:space="preserve">
-    <value>İstifadəçi faylları köçürülür {0} ({1}/{2})</value>
-  </data>
-  <data name="MigrationCompleted" xml:space="preserve">
-    <value>Köçürülmə tamamlandı</value>
-  </data>
-  <data name="GroupMigration" xml:space="preserve">
-    <value>Qrup köçürməsi {0} ({1}/{2})</value>
-  </data>
-  <data name="PreparingForMigration" xml:space="preserve">
-    <value>Köçürülmə üçün hazırlıq</value>
-  </data>
-  <data name="StartOfDataProcessing" xml:space="preserve">
-    <value>Məlumat emalı başlayır...</value>
-  </data>
-  <data name="UnzippingFinished" xml:space="preserve">
-    <value>Açılma tamamlandı...</value>
-  </data>
-  <data name="UserMigration" xml:space="preserve">
-    <value>İstifadəçi köçürülməsi {0} ({1}/{2})</value>
-  </data>
-  <data name="MigrationCommonFiles" xml:space="preserve">
-    <value>Ümumi faylların köçürülməsi</value>
-  </data>
-  <data name="MigrationNotFoundException" xml:space="preserve">
-    <value>Belə bir köçürülmə provayderi yoxdur</value>
-  </data>
-  <data name="MigrationProgressException" xml:space="preserve">
-    <value>Heç bir köçürülmə davam etmir</value>
-  </data>
-  <data name="MigrationProjectFiles" xml:space="preserve">
-    <value>Köçürülmə layihəsi faylları</value>
-  </data>
   <data name="CanNotAddUserInGroup" xml:space="preserve">
     <value>{0} istifadəçisini {1} qrupuna əlavə etmək mümkün olmadı</value>
   </data>
   <data name="CanNotCreateFile" xml:space="preserve">
     <value>{0} faylı yaratmaq mümkün olmadı</value>
+  </data>
+  <data name="CanNotImportCommonFiles" xml:space="preserve">
+    <value>Ümumi faylları idxal etmək mümkün olmadı</value>
+  </data>
+  <data name="CanNotImportProjectFiles" xml:space="preserve">
+    <value>Layihə fayllarını idxal etmək mümkün olmadı</value>
   </data>
   <data name="CanNotImportUser" xml:space="preserve">
     <value>İstifadəçini idxal etmək mümkün olmadı</value>
@@ -198,19 +159,58 @@
   <data name="CreateFolder" xml:space="preserve">
     <value>{0} qovluğu yaradın</value>
   </data>
+  <data name="CreateRootFolder" xml:space="preserve">
+    <value>Kök qovluğu yaradın</value>
+  </data>
   <data name="CreateShareRoom" xml:space="preserve">
     <value>ortaq otaq yaradın {0}</value>
   </data>
-  <data name="СanNotImportCommonFiles" xml:space="preserve">
-    <value>Ümumi faylları idxal etmək mümkün olmadı</value>
+  <data name="DataProcessing" xml:space="preserve">
+    <value>Məlumatların emalı...</value>
   </data>
-  <data name="СanNotImportProjectFiles" xml:space="preserve">
-    <value>Layihə fayllarını idxal etmək mümkün olmadı</value>
+  <data name="DataProcessingCompleted" xml:space="preserve">
+    <value>Məlumatların email tamamlandı</value>
   </data>
-  <data name="СreateRootFolder" xml:space="preserve">
-    <value>Kök qovluğu yaradın</value>
+  <data name="DumpParse" xml:space="preserve">
+    <value>Məlumatlar bazasının təhlili</value>
+  </data>
+  <data name="GroupMigration" xml:space="preserve">
+    <value>Qrup köçürməsi {0} ({1}/{2})</value>
   </data>
   <data name="LargeBackup" xml:space="preserve">
     <value>Ehtiyat nüsxə portalın ümumi ölçüsündən böyükdür</value>
+  </data>
+  <data name="MigratingUserFiles" xml:space="preserve">
+    <value>İstifadəçi faylları köçürülür {0} ({1}/{2})</value>
+  </data>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>Ümumi faylların köçürülməsi</value>
+  </data>
+  <data name="MigrationCompleted" xml:space="preserve">
+    <value>Köçürülmə tamamlandı</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>Belə bir köçürülmə provayderi yoxdur</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>Heç bir köçürülmə davam etmir</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>Köçürülmə layihəsi faylları</value>
+  </data>
+  <data name="PreparingForMigration" xml:space="preserve">
+    <value>Köçürülmə üçün hazırlıq</value>
+  </data>
+  <data name="StartOfDataProcessing" xml:space="preserve">
+    <value>Məlumat emalı başlayır...</value>
+  </data>
+  <data name="Unzipping" xml:space="preserve">
+    <value>Açılır...</value>
+  </data>
+  <data name="UnzippingFinished" xml:space="preserve">
+    <value>Açılma tamamlandı...</value>
+  </data>
+  <data name="UserMigration" xml:space="preserve">
+    <value>İstifadəçi köçürülməsi {0} ({1}/{2})</value>
   </data>
 </root>

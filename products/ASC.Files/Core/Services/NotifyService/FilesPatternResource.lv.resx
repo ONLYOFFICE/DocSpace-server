@@ -1,5 +1,64 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -53,11 +112,23 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>Pārbaudīt gatavās veidlapas</value>
+  </data>
+  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
+    <value>Telpā "$RoomTitle" ir izveidots jauns dokuments "$DocumentTitle"</value>
+  </data>
+  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
+    <value>Telpā "$RoomTitle" ir augšupielādēti jauni faili ($Count)</value>
+  </data>
+  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
+    <value>Telpā "$RoomTitle" ir augšupielādēts jauns fails "$DocumentTitle"</value>
+  </data>
   <data name="pattern_DocuSignComplete" xml:space="preserve">
     <value>h1. Visas parakstošās puses pabeidza $DocumentTitle
 
@@ -68,12 +139,74 @@
 
 Lai saņemtu papildu informāciju, ieejiet savā DocuSign kontā.</value>
   </data>
+  <data name="pattern_EditorMentions" xml:space="preserve">
+    <value>h1. $__AuthorName pieminēja jūs dokumenta komentārā
+
+$__AuthorName pieminēja jūs komentārā par dokumentu "$DocumentTitle":"$DocumentURL" telpā "$RoomTitle":"$RoomURL":
+
+$Message</value>
+  </data>
+  <data name="pattern_EditorMentions_push" xml:space="preserve">
+    <value>$ToUserName pieminēja jūs dokumentā $DocumentTitle</value>
+  </data>
+  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
+    <value>Telpā "$RoomTitle" ir izveidota jauna mape "$FolderTitle"</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. Veidlapa $Message ir aizpildīta
+
+Telpā "$RoomTitle":"$RoomURL" ir aizpildīta jauna veidlapa "$DocumentTitle":"$DocumentURL"
+
+Veidlapas iesniedzējs: "$FromUserName":"$FromUserLink"
+
+$OrangeButton
+
+&amp;nbsp;</value>
+  </data>
+  <data name="pattern_FormStartedFilling" xml:space="preserve">
+    <value>
+      Paziņojums par aktivitāti. "$FromUserName":"$FromUserLink" sāka veidlapas aizpildīšanas procesu:  "$DocumentTitle":"$DocumentURL" telpā: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. Jūs aizpildījāt veidlapu $Message
+
+Jūs aizpildījāt veidlapu "$DocumentTitle":"$DocumentURL" telpā "$RoomTitle":"$RoomURL"
+
+Pārvaldnieks: "$ToUserName":"$ToUserLink"
+
+$OrangeButton
+
+&amp;nbsp;</value>
+  </data>
+  <data name="pattern_FormSubmitted_push" xml:space="preserve">
+    <value>Veidlapa "$DocumentTitle" ir aizpildīta telpā "$RoomTitle"</value>
+  </data>
+  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+    <value>
+      Paziņojums par aktivitāti. Veidlapa "$DocumentTitle":"$DocumentURL" tika pilnībā aizpildīta telpā: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
+    <value>Jūs esat uzaicināts uz istabu "$RoomTitle"</value>
+  </data>
   <data name="pattern_MailMergeEnd" xml:space="preserve">
     <value>h1. Sūtīšana pabeigta
 
 Šis ir e-pasta paziņojums, lai jūs informētu par to, ka esat pieprasījuši $MailsCount ziņu nosūtīšanu un ka process ir pabeigts. $Message
 
 Veiksmīgi nosūtītās ziņas varat atrast savā Pasta moduļa mapē "Nosūtītās":"$__VirtualRootPath/addons/mail/#sent".</value>
+  </data>
+  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
+    <value>$FromUserName pārvietoja telpu "$RoomTitle" uz arhīvu</value>
+  </data>
+  <data name="pattern_RoomRemoved" xml:space="preserve">
+    <value>h1. $__AuthorName izdzēsa telpu
+
+$__AuthorName izdzēsa telpu: $RoomTitle</value>
+  </data>
+  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
+    <value>Jūsu loma telpā "$RoomTitle" ir mainīta uz "$RoomRole"</value>
   </data>
   <data name="pattern_ShareDocument" xml:space="preserve">
     <value>h1.Piekļuve piešķirta dokumentam: "$DocumentTitle":"$DocumentURL"
@@ -89,139 +222,9 @@ $__DateTime "$__AuthorName":"$__AuthorUrl" piešķir jums piekļuvi mapei "$Docu
 
 $Message</value>
   </data>
-  <data name="subject_DocuSignComplete" xml:space="preserve">
-    <value>Dokumenti. Visas parakstošās puses ir pabeigušas $DocumentTitle</value>
-  </data>
-  <data name="subject_DocuSignStatus" xml:space="preserve">
-    <value>Dokumenti. Mainīts paraksta statuss</value>
-  </data>
-  <data name="subject_MailMergeEnd" xml:space="preserve">
-    <value>Dokumenti. Sūtīšana pabeigta.</value>
-  </data>
-  <data name="subject_ShareDocument" xml:space="preserve">
-    <value>Dokumenti. Piešķirta piekļuve dokumentam $DocumentTitle</value>
-  </data>
-  <data name="subject_ShareFolder" xml:space="preserve">
-    <value>Dokumenti. Nodrošināta piekļuve mapei $DocumentTitle</value>
-  </data>
-  <data name="pattern_EditorMentions" xml:space="preserve">
-    <value>h1. $__AuthorName pieminēja jūs dokumenta komentārā
-
-$__AuthorName pieminēja jūs komentārā par dokumentu "$DocumentTitle":"$DocumentURL" telpā "$RoomTitle":"$RoomURL":
-
-$Message</value>
-  </data>
-  <data name="pattern_RoomRemoved" xml:space="preserve">
-    <value>h1. $__AuthorName izdzēsa telpu
-
-$__AuthorName izdzēsa telpu: $RoomTitle</value>
-  </data>
-  <data name="subject_DocuSignComplete_push" xml:space="preserve">
-    <value>Visi parakstītāji pabeidza $DocumentTitle</value>
-  </data>
-  <data name="subject_ShareFolder_push" xml:space="preserve">
-    <value>Mapei ir piešķirta piekļuve: $DocumentTitle</value>
-  </data>
-  <data name="subject_ShareEncryptedDocument_push" xml:space="preserve">
-    <value>Šifrētajam dokumentam ir piešķirta piekļuve: $DocumentTitle</value>
-  </data>
-  <data name="subject_ShareFolder_tg" xml:space="preserve">
-    <value>Dokumenti. Mapei ir piešķirta piekļuve: [$DocumentTitle]($DocumentURL)</value>
-  </data>
-  <data name="subject_DocuSignComplete_tg" xml:space="preserve">
-    <value>Dokumenti. Visi parakstītāji pabeidza [$DocumentTitle]($DocumentURL)</value>
-  </data>
-  <data name="subject_DocuSignStatus_push" xml:space="preserve">
-    <value>Parakstīšanas statuss ir mainīts</value>
-  </data>
-  <data name="subject_EditorMentions" xml:space="preserve">
-    <value>DocSpace paziņojums. Minēts dokumentā</value>
-  </data>
-  <data name="subject_MailMergeEnd_push" xml:space="preserve">
-    <value>Nosūtīšana ir pabeigta.</value>
-  </data>
-  <data name="subject_RoomRemoved" xml:space="preserve">
-    <value>DocSpace paziņojums. Telpa ir izdzēsta</value>
-  </data>
-  <data name="subject_ShareDocument_push" xml:space="preserve">
-    <value>Dokumentam ir piešķirta piekļuve: $DocumentTitle</value>
-  </data>
-  <data name="subject_ShareDocument_tg" xml:space="preserve">
-    <value>Dokumenti. Dokumentam ir piešķirta piekļuve: [$DocumentTitle]($DocumentURL)</value>
-  </data>
-  <data name="button_CheckReadyForms" xml:space="preserve">
-    <value>Pārbaudīt gatavās veidlapas</value>
-  </data>
-  <data name="pattern_FormReceived" xml:space="preserve">
-    <value>h1. Veidlapa $Message ir aizpildīta
-
-Telpā "$RoomTitle":"$RoomURL" ir aizpildīta jauna veidlapa "$DocumentTitle":"$DocumentURL"
-
-Veidlapas iesniedzējs: "$FromUserName":"$FromUserLink"
-
-$OrangeButton
-
-&amp;nbsp;</value>
-  </data>
-  <data name="pattern_FormSubmitted" xml:space="preserve">
-    <value>h1. Jūs aizpildījāt veidlapu $Message
-
-Jūs aizpildījāt veidlapu "$DocumentTitle":"$DocumentURL" telpā "$RoomTitle":"$RoomURL"
-
-Pārvaldnieks: "$ToUserName":"$ToUserLink"
-
-$OrangeButton
-
-&amp;nbsp;</value>
-  </data>
-  <data name="subject_FormReceived" xml:space="preserve">
-    <value>DocSpace paziņojums. Veidlapa ir aizpildīta</value>
-  </data>
-  <data name="subject_FormSubmitted" xml:space="preserve">
-    <value>DocSpace paziņojums. Veidlapa ir aizpildīta</value>
-  </data>
-  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
-    <value>Jūs esat uzaicināts uz istabu "$RoomTitle"</value>
-  </data>
-  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
-    <value>Jūsu loma telpā "$RoomTitle" ir mainīta uz "$RoomRole"</value>
-  </data>
-  <data name="pattern_FormSubmitted_push" xml:space="preserve">
-    <value>Veidlapa "$DocumentTitle" ir aizpildīta telpā "$RoomTitle"</value>
-  </data>
-  <data name="subject_FormStartedFilling" xml:space="preserve">
-    <value>DocSpace paziņojums.</value>
-  </data>
-  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
-    <value>DocSpace paziņojums.</value>
-  </data>
-  <data name="subject_StoppedFormFilling" xml:space="preserve">
-    <value>DocSpace paziņojums.</value>
-  </data>
-  <data name="subject_YourTurnFormFilling" xml:space="preserve">
-    <value>DocSpace paziņojums.</value>
-  </data>
-  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
-    <value>Telpā "$RoomTitle" ir izveidota jauna mape "$FolderTitle"</value>
-  </data>
-  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
-    <value>Telpā "$RoomTitle" ir augšupielādēti jauni faili ($Count)</value>
-  </data>
-  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
-    <value>Telpā "$RoomTitle" ir augšupielādēts jauns fails "$DocumentTitle"</value>
-  </data>
-  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
-    <value>Telpā "$RoomTitle" ir izveidots jauns dokuments "$DocumentTitle"</value>
-  </data>
-  <data name="pattern_EditorMentions_push" xml:space="preserve">
-    <value>$ToUserName pieminēja jūs dokumentā $DocumentTitle</value>
-  </data>
-  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
-    <value>$FromUserName pārvietoja telpu "$RoomTitle" uz arhīvu</value>
-  </data>
-  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+  <data name="pattern_StoppedFormFilling" xml:space="preserve">
     <value>
-      Paziņojums par aktivitāti. Veidlapa "$DocumentTitle":"$DocumentURL" tika pilnībā aizpildīta telpā: "$RoomTitle":"$RoomURL" — $__DateTime.
+      Paziņojums par aktivitāti. "$FromUserName":"$FromUserLink" pārtrauca veidlapas aizpildīšanu: "$DocumentTitle":"$DocumentURL" telpā: "$RoomTitle":"$RoomURL" — $__DateTime.
     </value>
   </data>
   <data name="pattern_YourTurnFormFilling" xml:space="preserve">
@@ -229,14 +232,70 @@ $OrangeButton
       Paziņojums par aktivitāti. Jūsu kārta! Nepieciešams aizpildīt veidlapu: "$DocumentTitle":"$DocumentURL" telpā: "$RoomTitle":"$RoomURL" — $__DateTime.
     </value>
   </data>
-  <data name="pattern_StoppedFormFilling" xml:space="preserve">
-    <value>
-      Paziņojums par aktivitāti. "$FromUserName":"$FromUserLink" pārtrauca veidlapas aizpildīšanu: "$DocumentTitle":"$DocumentURL" telpā: "$RoomTitle":"$RoomURL" — $__DateTime.
-    </value>
+  <data name="subject_DocuSignComplete" xml:space="preserve">
+    <value>Dokumenti. Visas parakstošās puses ir pabeigušas $DocumentTitle</value>
   </data>
-  <data name="pattern_FormStartedFilling" xml:space="preserve">
-    <value>
-      Paziņojums par aktivitāti. "$FromUserName":"$FromUserLink" sāka veidlapas aizpildīšanas procesu:  "$DocumentTitle":"$DocumentURL" telpā: "$RoomTitle":"$RoomURL" — $__DateTime.
-    </value>
+  <data name="subject_DocuSignComplete_push" xml:space="preserve">
+    <value>Visi parakstītāji pabeidza $DocumentTitle</value>
+  </data>
+  <data name="subject_DocuSignComplete_tg" xml:space="preserve">
+    <value>Dokumenti. Visi parakstītāji pabeidza [$DocumentTitle]($DocumentURL)</value>
+  </data>
+  <data name="subject_DocuSignStatus" xml:space="preserve">
+    <value>Dokumenti. Mainīts paraksta statuss</value>
+  </data>
+  <data name="subject_DocuSignStatus_push" xml:space="preserve">
+    <value>Parakstīšanas statuss ir mainīts</value>
+  </data>
+  <data name="subject_EditorMentions" xml:space="preserve">
+    <value>DocSpace paziņojums. Minēts dokumentā</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>DocSpace paziņojums. Veidlapa ir aizpildīta</value>
+  </data>
+  <data name="subject_FormStartedFilling" xml:space="preserve">
+    <value>DocSpace paziņojums.</value>
+  </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>DocSpace paziņojums. Veidlapa ir aizpildīta</value>
+  </data>
+  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
+    <value>DocSpace paziņojums.</value>
+  </data>
+  <data name="subject_MailMergeEnd" xml:space="preserve">
+    <value>Dokumenti. Sūtīšana pabeigta.</value>
+  </data>
+  <data name="subject_MailMergeEnd_push" xml:space="preserve">
+    <value>Nosūtīšana ir pabeigta.</value>
+  </data>
+  <data name="subject_RoomRemoved" xml:space="preserve">
+    <value>DocSpace paziņojums. Telpa ir izdzēsta</value>
+  </data>
+  <data name="subject_ShareDocument" xml:space="preserve">
+    <value>Dokumenti. Piešķirta piekļuve dokumentam $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareDocument_push" xml:space="preserve">
+    <value>Dokumentam ir piešķirta piekļuve: $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareDocument_tg" xml:space="preserve">
+    <value>Dokumenti. Dokumentam ir piešķirta piekļuve: [$DocumentTitle]($DocumentURL)</value>
+  </data>
+  <data name="subject_ShareEncryptedDocument_push" xml:space="preserve">
+    <value>Šifrētajam dokumentam ir piešķirta piekļuve: $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareFolder" xml:space="preserve">
+    <value>Dokumenti. Nodrošināta piekļuve mapei $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareFolder_push" xml:space="preserve">
+    <value>Mapei ir piešķirta piekļuve: $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareFolder_tg" xml:space="preserve">
+    <value>Dokumenti. Mapei ir piešķirta piekļuve: [$DocumentTitle]($DocumentURL)</value>
+  </data>
+  <data name="subject_StoppedFormFilling" xml:space="preserve">
+    <value>DocSpace paziņojums.</value>
+  </data>
+  <data name="subject_YourTurnFormFilling" xml:space="preserve">
+    <value>DocSpace paziņojums.</value>
   </data>
 </root>

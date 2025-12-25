@@ -1,5 +1,64 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -53,11 +112,68 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>ベクトル化</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>連絡先</value>
+  </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>クレジット</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>通貨</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>日付</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>引き落とし</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>詳細</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>数量</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>AIツール</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>バックアップ</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>ディスク容量</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>残高チャージ</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>計測単位</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>トークン</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>バックアップ</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>顧客操作レポート({0}-{1})</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>取引履歴</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>種類</value>
+  </data>
   <data name="ActivateMobilePhoneEmptyCode" xml:space="preserve">
     <value>検証コードフィールドは空にすることはできません</value>
   </data>
@@ -73,6 +189,18 @@
   <data name="AdminMessageSent" xml:space="preserve">
     <value>あなたのメッセージが正常に送信されました。あなたは、ポータル管理者がご連絡いたします。</value>
   </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>AIエージェントのスペースクォータが上限に達しました</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>AIエージェントごとのクォータ設定に失敗しました。入力した値がDocSpace全体のストレージ容量を超えています。</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>自動更新</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>自動チャージ</value>
+  </data>
   <data name="ButtonSmsEnable" xml:space="preserve">
     <value>SMSで</value>
   </data>
@@ -82,263 +210,17 @@
   <data name="ChangePortalOwnerMsg" xml:space="preserve">
     <value>メール（ポータル所有者の電子メールアドレス）：動作を確認するためのリンクがに送信されました。</value>
   </data>
-  <data name="CouldNotRecoverPasswordForLdapUser" xml:space="preserve">
-    <value>パスワード回復は、LDAPユーザーのために禁止されます</value>
-  </data>
-  <data name="CouldNotRecoverPasswordForSsoUser" xml:space="preserve">
-    <value>パスワード回復は、SSOユーザーのために禁止されます</value>
-  </data>
-  <data name="CustomNamingPeopleSchema" xml:space="preserve">
-    <value>カスタム</value>
-  </data>
-  <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
-    <value>インスタンスIDが間違っているようです。</value>
-  </data>
-  <data name="EmailAndPasswordIncorrectEmail" xml:space="preserve">
-    <value>正しくないメールアドレス</value>
-  </data>
-  <data name="ErrorAccessDenied" xml:space="preserve">
-    <value>この操作を実行するアクセス許可がありません</value>
-  </data>
-  <data name="ErrorAccessRestricted" xml:space="preserve">
-    <value>ポータルアクセスは制限です。</value>
-  </data>
-  <data name="ErrorBadKeys" xml:space="preserve">
-    <value>不正なライセンスキー</value>
-  </data>
-  <data name="ErrorEmailAlreadyExists" xml:space="preserve">
-    <value>{!User} このメールアドレスは既に登録されていると</value>
-  </data>
-  <data name="ErrorEmailDomainNotAllowed" xml:space="preserve">
-    <value>このドメインからのメールは登録できません</value>
-  </data>
-  <data name="ErrorEmailEmpty" xml:space="preserve">
-    <value>メールフィールドは空です</value>
-  </data>
-  <data name="ErrorEmailsAreTheSame" xml:space="preserve">
-    <value>現在のメールアドレスと新しいメールアドレスは同じです</value>
-  </data>
-  <data name="ErrorEmptyFields" xml:space="preserve">
-    <value>すべての欄に記入してください</value>
-  </data>
-  <data name="ErrorEmptyMessage" xml:space="preserve">
-    <value>メッセージテキストを入力してください</value>
-  </data>
-  <data name="ErrorEmptyUploadFileSelected" xml:space="preserve">
-    <value>アップロードされたファイルが見つかりませんでした</value>
-  </data>
-  <data name="ErrorImageWeightLimit" xml:space="preserve">
-    <value>イメージファイルのサイズが大きすぎます</value>
-  </data>
-  <data name="ErrorIncorrectUserName" xml:space="preserve">
-    <value>不適切な名または姓</value>
-  </data>
-  <data name="ErrorNotAllowedOption" xml:space="preserve">
-    <value>あなたの料金プランは、このオプションをサポートしていません</value>
-  </data>
-  <data name="ErrorNotCorrectEmail" xml:space="preserve">
-    <value>無効なメール</value>
-  </data>
-  <data name="ErrorNotCorrectTrustedDomain" xml:space="preserve">
-    <value>無効なドメイン名</value>
-  </data>
-  <data name="ErrorPasswordEmpty" xml:space="preserve">
-    <value>パスワードは空です。</value>
-  </data>
-  <data name="ErrorPasswordLength" xml:space="preserve">
-    <value>{0}～{1}文字</value>
-  </data>
-  <data name="ErrorPasswordMessage" xml:space="preserve">
-    <value>パスワードが含まれている必要な記号</value>
-  </data>
-  <data name="ErrorPasswordNoDigits" xml:space="preserve">
-    <value>桁</value>
-  </data>
-  <data name="ErrorPasswordNoSpecialSymbols" xml:space="preserve">
-    <value>特殊文字</value>
-  </data>
-  <data name="ErrorPasswordNoUpperCase" xml:space="preserve">
-    <value>大文字</value>
-  </data>
-  <data name="ErrorRequestLimitExceeded" xml:space="preserve">
-    <value>要求数が上限を超過しました</value>
-  </data>
-  <data name="ErrorTenantTooShortFormat" xml:space="preserve">
-    <value>ドメイン名の長さは{0}文字から{1}文字の間でなければなりません。</value>
-  </data>
-  <data name="ErrorUserNotFound" xml:space="preserve">
-    <value>ユーザーが見つかりませんでした</value>
-  </data>
-  <data name="ErrorUserNotFoundByEmail" xml:space="preserve">
-    <value>"{0}"のメールアドレスのユーザーは見つかりませんでした</value>
-  </data>
-  <data name="EuServerRegion" xml:space="preserve">
-    <value>欧州（フランクフルト）地域</value>
-  </data>
-  <data name="FileSizeMaxExceed" xml:space="preserve">
-    <value>最大ファイルサイズを超えています</value>
-  </data>
-  <data name="FileSizeNote" xml:space="preserve">
-    <value>注：ファイルサイズを超えることはできません{1}{0}{2}</value>
-  </data>
-  <data name="FileSizePostfix" xml:space="preserve">
-    <value>bytes,KB,MB,GB</value>
-  </data>
-  <data name="FinishInviteJoinEmailMessage" xml:space="preserve">
-    <value>アカウントを確認するためのリンクが指定された電子メールに送信されました</value>
-  </data>
-  <data name="LdapSettingsTooManyOperations" xml:space="preserve">
-    <value>LDAP操作が多すぎています。</value>
-  </data>
-  <data name="LicenseError" xml:space="preserve">
-    <value>ライセンスが間違っているようです</value>
-  </data>
-  <data name="LicenseErrorQuota" xml:space="preserve">
-    <value>ユーザー数はライセンスで許可されたユーザー数を超過した</value>
-  </data>
-  <data name="MessageEmailChangeInstuctionsSentOnEmail" xml:space="preserve">
-    <value>メールアドレスの変更手順は、メールアドレスに送信されました</value>
-  </data>
-  <data name="MessageYourPasswordSendedToEmail" xml:space="preserve">
-    <value>{0}メールアドレスを持つユーザが存在する場合は、パスワード変更手順はこのメールアドレスに送信されます。</value>
-  </data>
-  <data name="MobilePhoneMustErase" xml:space="preserve">
-    <value>電話番号を変更のために、現在電話番後を削除するのは必要です</value>
-  </data>
-  <data name="OrgServerRegion" xml:space="preserve">
-    <value>ORG地域</value>
-  </data>
-  <data name="Owner" xml:space="preserve">
-    <value>所有者</value>
-  </data>
-  <data name="PortalSecurity" xml:space="preserve">
-    <value>ポータルでのアクセス</value>
-  </data>
-  <data name="ReassignDataRemoveUserError" xml:space="preserve">
-    <value>{0}にデータの再割り当て過程が完了です。</value>
-  </data>
-  <data name="RecaptchaInvalid" xml:space="preserve">
-    <value>Recaptchaが間違っているようです</value>
-  </data>
-  <data name="SgServerRegion" xml:space="preserve">
-    <value>アジア太平洋 (シンガポール)</value>
-  </data>
-  <data name="SmsAuthenticationMessageError" xml:space="preserve">
-    <value>不正なコード</value>
-  </data>
-  <data name="SmsAuthenticationMessageToUser" xml:space="preserve">
-    <value>コード：{0}</value>
-  </data>
-  <data name="SmsAuthenticationTimeout" xml:space="preserve">
-    <value>コードを利用する時間は期限が切れています。新しいテクストメッセージを請求してください。</value>
-  </data>
-  <data name="SmsNotAvailable" xml:space="preserve">
-    <value>SMS設定は利用できません</value>
-  </data>
-  <data name="SsoSettingsCantSaveSettings" xml:space="preserve">
-    <value>設定は保存できませんでした</value>
-  </data>
-  <data name="SsoSettingsCouldNotBeNull" xml:space="preserve">
-    <value>設定はnullにすることはできません</value>
-  </data>
-  <data name="SsoSettingsInvalidBinding" xml:space="preserve">
-    <value>無効な束縛：{0}</value>
-  </data>
-  <data name="SsoSettingsInvalidEntityId" xml:space="preserve">
-    <value>無効なエンティティーID</value>
-  </data>
-  <data name="SsoSettingsInvalidMapping" xml:space="preserve">
-    <value>無効なフィールドマッピング</value>
-  </data>
-  <data name="SuccessfullySaveGreetingSettingsMessage" xml:space="preserve">
-    <value>「開始ページ」設定は保存しました</value>
-  </data>
-  <data name="SuccessfullySaveSettingsMessage" xml:space="preserve">
-    <value>設定が正常に更新されました</value>
-  </data>
-  <data name="SuccessfullySentNotificationDeleteUserInfoMessage" xml:space="preserve">
-    <value>プロフィールの削除方法は、「{0}」メールアドレスに送信されました</value>
-  </data>
-  <data name="TfaAppAuthMessageError" xml:space="preserve">
-    <value>不正なコード</value>
-  </data>
-  <data name="TfaAppNotAvailable" xml:space="preserve">
-    <value>二要素認証アプリ設定は無効です</value>
-  </data>
-  <data name="UsServerRegion" xml:space="preserve">
-    <value>US西部地域（オレゴン）</value>
-  </data>
-  <data name="WhatsNewSubscriptionName" xml:space="preserve">
-    <value>新着情報</value>
-  </data>
-  <data name="TariffsFeature_customization" xml:space="preserve">
-    <value>ブランディング＆カスタマイズ</value>
-  </data>
-  <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>ログインとアクションの追跡</value>
-  </data>
-  <data name="TariffsFeature_file_size" xml:space="preserve">
-    <value>最大ファイルサイズ</value>
-  </data>
-  <data name="TariffsFeature_file_size_exception" xml:space="preserve">
-    <value>ファイルサイズは {0} を超えないこと</value>
-  </data>
-  <data name="TariffsFeature_manager_exception" xml:space="preserve">
-    <value>管理者の数は {0} を超えないこと</value>
-  </data>
-  <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>管理者数</value>
-  </data>
-  <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>データ復元</value>
-  </data>
-  <data name="TariffsFeature_room" xml:space="preserve">
-    <value>アクティブルームの数は無制限</value>
-  </data>
-  <data name="TariffsFeature_room_exception" xml:space="preserve">
-    <value>ルーム数は{0}を超えないこと</value>
-  </data>
-  <data name="TariffsFeature_sso" xml:space="preserve">
-    <value>SSO</value>
-  </data>
-  <data name="TariffsFeature_total_size_exception" xml:space="preserve">
-    <value>使用するストレージのサイズは {0} を超えないこと</value>
-  </data>
-  <data name="TariffsFeature_total_size_price_count" xml:space="preserve">
-    <value>ストレージスペース</value>
-  </data>
-  <data name="TariffsFeature_used_room" xml:space="preserve">
-    <value>ルーム：</value>
-  </data>
-  <data name="TariffsFeature_used_total_size" xml:space="preserve">
-    <value>使用されたストレージスペース：</value>
-  </data>
-  <data name="TariffsFeature_used_usersInRoom" xml:space="preserve">
-    <value>ルーム内のユーザー数：</value>
-  </data>
-  <data name="TariffsFeature_users" xml:space="preserve">
-    <value>ユーザーとゲストの数無制限</value>
-  </data>
-  <data name="TariffsFeature_users_exception" xml:space="preserve">
-    <value>ユーザー数は {0} を超えないこと</value>
-  </data>
-  <data name="TariffsFeature_usersInRoom" xml:space="preserve">
-    <value>ルーム内のユーザー数</value>
-  </data>
-  <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
-    <value>ルーム内のユーザー数は {0} を超えないこと</value>
-  </data>
   <data name="Consumersacesskey" xml:space="preserve">
     <value>Ｓ３アクセスキー</value>
   </data>
   <data name="ConsumersapiKey" xml:space="preserve">
     <value>Rackspace APIキー</value>
   </data>
+  <data name="ConsumersAppleId" xml:space="preserve">
+    <value>Apple ID</value>
+  </data>
   <data name="ConsumersappleIdClientId" xml:space="preserve">
     <value>アプリケーションクライアント ID</value>
-  </data>
-  <data name="ConsumersappleIdKeyId" xml:space="preserve">
-    <value>Sign in with Appleシクレットキー用に生成された10文字の鍵識別子</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
     <value>アプリケーションがApple IDを使用してポータルにサインインできるようにする。</value>
@@ -346,20 +228,41 @@
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
     <value>このアプリを有効にすると、ユーザーはApple IDを使って{LogoText}にサインインできるようになります。{0}Apple Developersポータルにアクセスし、新規アプリ{LogoText} integrationを作成します。以下、受け取ったデータを挿入してください：</value>
   </data>
+  <data name="ConsumersappleIdKeyId" xml:space="preserve">
+    <value>Sign in with Appleシクレットキー用に生成された10文字の鍵識別子</value>
+  </data>
   <data name="ConsumersappleIdPrivateKey" xml:space="preserve">
     <value>Apple Developerからダウンロードした秘密キー</value>
   </data>
   <data name="ConsumersappleIdTeamId" xml:space="preserve">
     <value>10文字の開発者アカウントのTeam ID</value>
   </data>
+  <data name="ConsumersauthPwd" xml:space="preserve">
+    <value>Selectel authPwd</value>
+  </data>
+  <data name="ConsumersauthUser" xml:space="preserve">
+    <value>Selectel authUser</value>
+  </data>
+  <data name="ConsumersBitly" xml:space="preserve">
+    <value>Bitly</value>
+  </data>
   <data name="ConsumersbitlyClientId" xml:space="preserve">
     <value>ログイン</value>
+  </data>
+  <data name="ConsumersbitlyClientSecret" xml:space="preserve">
+    <value>apiKey</value>
   </data>
   <data name="ConsumersBitlyDescription" xml:space="preserve">
     <value>ポータルの招待リンクと文書モジュール共有リンクをを短くするように、Bitlyサービスを接続します。</value>
   </data>
   <data name="ConsumersBitlyInstruction" xml:space="preserve">
     <value>このアプリを有効にすると、文書と招待リンクを短くすることができます。{0}以下にBitlyログインとAPIキーを入力してください：</value>
+  </data>
+  <data name="ConsumersBox" xml:space="preserve">
+    <value>Box</value>
+  </data>
+  <data name="ConsumersboxClientId" xml:space="preserve">
+    <value>Box ID</value>
   </data>
   <data name="ConsumersboxClientSecret" xml:space="preserve">
     <value>Boxキー</value>
@@ -388,6 +291,9 @@
   <data name="ConsumersdocuSignClientId" xml:space="preserve">
     <value>DocuSignのキー</value>
   </data>
+  <data name="ConsumersdocuSignClientSecret" xml:space="preserve">
+    <value>DocuSignの秘密なキー</value>
+  </data>
   <data name="ConsumersDocuSignDescription" xml:space="preserve">
     <value>DocuSignの電子サインを文書に追加するように、アプリを接続します。</value>
   </data>
@@ -396,6 +302,9 @@
   </data>
   <data name="ConsumersDocuSignInstruction" xml:space="preserve">
     <value>このアプリを有効にすると、DocuSignを使用してデジタル的に文書を署名します。{0}DocuSign管理者コンソールで{LogoText}統合を追加してください。その後、データを以下に入力してください：</value>
+  </data>
+  <data name="ConsumersDropBox" xml:space="preserve">
+    <value>DropBox</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
     <value>Dropboxファイルとフォルダを管理するように、アプリを接続します。</value>
@@ -406,17 +315,32 @@
   <data name="ConsumersDropBoxKey" xml:space="preserve">
     <value>DropBox ID</value>
   </data>
+  <data name="ConsumersDropBoxSecret" xml:space="preserve">
+    <value>Dropboxキー</value>
+  </data>
+  <data name="ConsumersEasyBib" xml:space="preserve">
+    <value>EasyBib</value>
+  </data>
   <data name="ConsumerseasyBibappkey" xml:space="preserve">
     <value>アプリキー</value>
   </data>
   <data name="ConsumersEasyBibDescription" xml:space="preserve">
     <value>EasyBibアプリを接続して、書誌リストを作成します。</value>
   </data>
+  <data name="ConsumersEasyBibInstruction" xml:space="preserve">
+    <value>このアプリを有効にすると、{LogoText}エディターで書誌を作成できます。{0}EasyBibサインアップページでフォームを入力して、{LogoText}統合を追加してください。その後、アプリキーをを以下に貼り付けてください：</value>
+  </data>
+  <data name="ConsumersFacebook" xml:space="preserve">
+    <value>Facebook</value>
+  </data>
   <data name="ConsumersfacebookAccessToken_Default" xml:space="preserve">
     <value>Appトークン</value>
   </data>
   <data name="ConsumersfacebookClientId" xml:space="preserve">
     <value>Facebook ID</value>
+  </data>
+  <data name="ConsumersfacebookClientSecret" xml:space="preserve">
+    <value>Facebook キー</value>
   </data>
   <data name="ConsumersFacebookDescription" xml:space="preserve">
     <value>アプリを{LogoText}に接続すると、Facebookでポータルにサインインし、コンタクトを検索できます。</value>
@@ -427,17 +351,17 @@
   <data name="ConsumersFirebase" xml:space="preserve">
     <value>Firebase</value>
   </data>
+  <data name="ConsumersFirebaseDescription" xml:space="preserve">
+    <value>このアプリを有効にすると、Firebase Cloud Messagingサービスを使用して送信されたメッセージ通知を受信するようになります。</value>
+  </data>
+  <data name="ConsumersFirebaseInstruction" xml:space="preserve">
+    <value>このアプリを有効にすると、オフラインであっても送信されたメッセージ通知を受信できます。{0}Firebaseコンソールで{LogoText}統合のために新しいプロジェクトを作成してください。その後、データを以下に入力してください：</value>
+  </data>
   <data name="Consumersfirebase_apiKey" xml:space="preserve">
     <value>ウェブAPIキー</value>
   </data>
   <data name="Consumersfirebase_authorization" xml:space="preserve">
     <value>サーバーキー</value>
-  </data>
-  <data name="ConsumersFirebaseDescription" xml:space="preserve">
-    <value>このアプリを有効にすると、Firebase Cloud Messagingサービスを使用して送信されたメッセージ通知を受信するようになります。</value>
-  </data>
-  <data name="ConsumersdocuSignClientSecret" xml:space="preserve">
-    <value>DocuSignの秘密なキー</value>
   </data>
   <data name="Consumersfirebase_messagingSenderId" xml:space="preserve">
     <value>送信者ID</value>
@@ -445,11 +369,29 @@
   <data name="Consumersfirebase_projectId" xml:space="preserve">
     <value>プロジェクトＩＤ</value>
   </data>
+  <data name="ConsumersGoogle" xml:space="preserve">
+    <value>Google</value>
+  </data>
+  <data name="ConsumersgoogleClientId" xml:space="preserve">
+    <value>Google ID</value>
+  </data>
+  <data name="ConsumersgoogleClientSecret" xml:space="preserve">
+    <value>Googleキー</value>
+  </data>
+  <data name="ConsumersGoogleCloud" xml:space="preserve">
+    <value>Googleクラウドストレージ</value>
+  </data>
+  <data name="ConsumersGoogleCloudbucket" xml:space="preserve">
+    <value>バケット</value>
+  </data>
   <data name="ConsumersGoogleCloudbucketDescription" xml:space="preserve">
     <value>バックアプを保存したいGoogle Cloudバケットの名前を入力してください。</value>
   </data>
   <data name="ConsumersGoogleCloudDescription" xml:space="preserve">
     <value>バックアップし、ポータルデータをストアするように、Googleクラウドストレージを接続します。</value>
+  </data>
+  <data name="ConsumersGoogleCloudInstruction" xml:space="preserve">
+    <value>Googleクラウドストーレジを接続すると、ポータルデータのバックアップと保存するように使用できます。{0} Google Cloud Platformコンソールで{LogoText}のために新しいサービスアカウントを作成してください。その後、受けたデータを以下に入力してください：</value>
   </data>
   <data name="ConsumersGoogleCloudjson" xml:space="preserve">
     <value>GoogleCloud jsonファイル</value>
@@ -466,11 +408,32 @@
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
     <value>アプリを{LogoText}に接続して、LinkedInでポータルにサインインします。</value>
   </data>
+  <data name="ConsumersLinkedInInstruction" xml:space="preserve">
+    <value>このアプリを有効にして、ユーザーがLinkedInアカウントを使用して{LogoText}にサインインできるようにします。{0}LinkedIn開発者ウェブサイトにアクセスし、新しいアプリ{LogoText}統合を作成します。受け取ったデータを以下に挿入してください：</value>
+  </data>
+  <data name="ConsumersLinkedInKey" xml:space="preserve">
+    <value>Linkedin ID</value>
+  </data>
   <data name="ConsumersLinkedInSecret" xml:space="preserve">
     <value>Linkedinキー</value>
   </data>
+  <data name="ConsumersMailru" xml:space="preserve">
+    <value>Mail.ru</value>
+  </data>
+  <data name="ConsumersMailruClientId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="ConsumersMailruClientSecret" xml:space="preserve">
+    <value>秘密なスキー</value>
+  </data>
   <data name="ConsumersMailruDescription" xml:space="preserve">
     <value>Mail.ruアカウントでポータルにサインインするようにアプリを接続します。</value>
+  </data>
+  <data name="ConsumersMailruInstruction" xml:space="preserve">
+    <value>Mail.ruアプリケーションを追加すると、プロフィールページでMail.ruアカウントを使用してポータルにサインインすることができるようになります。</value>
+  </data>
+  <data name="ConsumersMicrosoft" xml:space="preserve">
+    <value>Microsoft</value>
   </data>
   <data name="ConsumersmicrosoftClientId" xml:space="preserve">
     <value>アプリケーションクライアント ID</value>
@@ -490,6 +453,9 @@
   <data name="ConsumersRackspaceDescription" xml:space="preserve">
     <value>バックアップし、ポータルデータをストアするように、Rackspaceクラウドストレージを接続します。</value>
   </data>
+  <data name="ConsumersRackspaceInstruction" xml:space="preserve">
+    <value>Rackspace Cloud Storageを接続すると、ポータルデータのバックアップと保存するように使用できます。{0}Rackspace Cloudコントロールパネルのセキュリティ設定でRackspace APIキーの隣に［リンク表示］というオプションをクリックしてください。以下に受けたデータを入力してください：</value>
+  </data>
   <data name="ConsumersRackspaceprivate_container" xml:space="preserve">
     <value>プライバット・コンテナ</value>
   </data>
@@ -508,11 +474,23 @@
   <data name="ConsumersRackspaceregionDescription" xml:space="preserve">
     <value>Rackspaceコンテナが存在する地域を入力してください。</value>
   </data>
+  <data name="ConsumersS3" xml:space="preserve">
+    <value>Amazon AWS S3</value>
+  </data>
+  <data name="ConsumersS3bucket" xml:space="preserve">
+    <value>バケット</value>
+  </data>
   <data name="ConsumersS3bucketDescription" xml:space="preserve">
     <value>バックアップを保存したいAmazon S3バケットの名前を入力してください。</value>
   </data>
   <data name="ConsumersS3Description" xml:space="preserve">
     <value>ポータルデータをバックアップと保存するようにAmazon AWS S3を接続します。</value>
+  </data>
+  <data name="ConsumersS3Instruction" xml:space="preserve">
+    <value>ポータルデータを保存とバックアップするように、Amazon AWS S3を接続してください。{0}AWS マネジメントコンソールで{LogoText}のためにアクセスキーを作成してください。以下にそのキーを入力してください：</value>
+  </data>
+  <data name="ConsumersS3region" xml:space="preserve">
+    <value>地域</value>
   </data>
   <data name="ConsumersS3regionDescription" xml:space="preserve">
     <value>Amazonバケットが存在するAWS地域を入力してください。</value>
@@ -526,8 +504,14 @@
   <data name="ConsumersSelectelauthPwd" xml:space="preserve">
     <value>認証パスワード</value>
   </data>
+  <data name="ConsumersSelectelauthUser" xml:space="preserve">
+    <value>認証ユーザ</value>
+  </data>
   <data name="ConsumersSelectelDescription" xml:space="preserve">
     <value>バックアップし、ポータルデータをストアするように、Selectelクラウドストレージを接続します。</value>
+  </data>
+  <data name="ConsumersSelectelInstruction" xml:space="preserve">
+    <value>お選びのクラウドストレージを接続すると、ポータルデータのバックアップと保存ができます。{0}バックアップをする予定のコンテナ用の閲覧のみ/編集権限を持つユーザーのアクセスデータを取得し、以下に入力してください：</value>
   </data>
   <data name="ConsumersSelectelprivate_container" xml:space="preserve">
     <value>プライバット・コンテナ</value>
@@ -535,11 +519,20 @@
   <data name="ConsumersSelectelprivate_containerDescription" xml:space="preserve">
     <value>バックアプを保存したいSelectelプライベートバケットの名前を入力してください。</value>
   </data>
+  <data name="ConsumersSelectelpublic_container" xml:space="preserve">
+    <value>パブリック・コンテナ</value>
+  </data>
   <data name="ConsumersSelectelpublic_containerDescription" xml:space="preserve">
     <value>バックアプを保存したいSelectelパブリックバケットの名前を入力してください。</value>
   </data>
-  <data name="ConsumersSelectelpublic_container" xml:space="preserve">
-    <value>パブリック・コンテナ</value>
+  <data name="ConsumersSkyDrive" xml:space="preserve">
+    <value>OneDrive</value>
+  </data>
+  <data name="Consumersskydriveappkey" xml:space="preserve">
+    <value>アプリID</value>
+  </data>
+  <data name="Consumersskydriveappsecret" xml:space="preserve">
+    <value>クライアントのシークレット</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
     <value>OneDriveファイルとフォルダを管理するように、アプリを接続します。</value>
@@ -547,14 +540,23 @@
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>このアプリを有効にすると、OneDriveアカウントを文書モジュールに接続して、OneDriveの文書を管理・編集・別の{LogoText}ユーザと共有できます。{0}Microsoft Azureアカウントにサインインし、{LogoText}統合のために新しいアプリを作成してください。その後、データを以下に入力してください：</value>
   </data>
+  <data name="ConsumersSmsc" xml:space="preserve">
+    <value>SMSセンター</value>
+  </data>
   <data name="ConsumersSmscDescription" xml:space="preserve">
     <value>SMSセンターを介して二要素認証のアプリを有効します。</value>
   </data>
   <data name="ConsumersSmscInstruction" xml:space="preserve">
     <value>SMSセンターサービスで二要素認証を有効にするには、このアプリを使用します。{0}smscアカウントのログイン名とパスワード（またはパスワードのMD5ハッシュ）を小文字で入力してください:</value>
   </data>
+  <data name="Consumerssmsclogin" xml:space="preserve">
+    <value>ログイン</value>
+  </data>
   <data name="Consumerssmscpsw" xml:space="preserve">
     <value>パスワードまたはパ スワードのＭＤ５ハッシュ小文字で</value>
+  </data>
+  <data name="ConsumersTelegram" xml:space="preserve">
+    <value>Telegram</value>
   </data>
   <data name="ConsumersTelegramBotName" xml:space="preserve">
     <value>ボットのユーザ名</value>
@@ -568,6 +570,15 @@
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>Telegramを使用してポータル通知を受けるように、Telegram用のボットを有効にしてください。新しいボットを作成するためにTelegramデスクトップでBotFatherを使用してください。そのボットを使用を使用するように、各ユーザがプロフィールのページでTelegram通知を有効にしなければなりません。{0}ボットのユーザ名とトークンを以下のフィールドに入力してください。</value>
   </data>
+  <data name="ConsumersTwilio" xml:space="preserve">
+    <value>Twilio</value>
+  </data>
+  <data name="ConsumerstwilioAccountSid" xml:space="preserve">
+    <value>アカウントSid</value>
+  </data>
+  <data name="ConsumerstwilioAuthToken" xml:space="preserve">
+    <value>認証トークン</value>
+  </data>
   <data name="ConsumersTwilioDescription" xml:space="preserve">
     <value>Twilioを追加すると、ブラウザー直接からＣＲＭ顧客に電話できます。</value>
   </data>
@@ -577,17 +588,83 @@
   <data name="Consumerstwiliosender" xml:space="preserve">
     <value>Twilioの電話番号(SMS承認のために必要です)</value>
   </data>
+  <data name="ConsumersTwitter" xml:space="preserve">
+    <value>X</value>
+  </data>
+  <data name="ConsumerstwitterAccessTokenSecret_Default" xml:space="preserve">
+    <value>クライアントのシークレット</value>
+  </data>
+  <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
+    <value>クライアントID</value>
+  </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
     <value>Xアカウントを使用してポータルにサインインするアプリケーションを有効にする。</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>このアプリを接続すると、Xを使用して{LogoText}にサインイン、またはCRMモジュールでお客様のXアカウントをリンクできます。{0} X開発者ポータルで{LogoText}統合のために新しいアプリを作成してください。その後、データを以下に入力してください：</value>
   </data>
+  <data name="ConsumersTwitterKey" xml:space="preserve">
+    <value>API キー</value>
+  </data>
+  <data name="ConsumersTwitterSecret" xml:space="preserve">
+    <value>API キーのシークレット</value>
+  </data>
+  <data name="Consumersusername" xml:space="preserve">
+    <value>Rackspaceのユーザー名</value>
+  </data>
+  <data name="ConsumersVk" xml:space="preserve">
+    <value>VK</value>
+  </data>
+  <data name="ConsumersVkClientId" xml:space="preserve">
+    <value>アプリケーションID</value>
+  </data>
+  <data name="ConsumersVkClientSecret" xml:space="preserve">
+    <value>セキュリティキー</value>
+  </data>
   <data name="ConsumersVkDescription" xml:space="preserve">
     <value>VKアカウントでポータルにサインインするようにアプリを接続します。</value>
   </data>
+  <data name="ConsumersVkInstruction" xml:space="preserve">
+    <value>VKアプリケーションを追加すると、プロフィールページでVKアカウントを使用したポータルへのサインインを有効にすることができます。</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>クライアントID</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>クライアントシークレット</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>アプリケーションがWeChatアカウントを使用してポータルにサインインできるようにします。</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>アプリケーションがWeChatアカウントを使用してポータルにサインインできるようにします。</value>
+  </data>
+  <data name="ConsumersWordpress" xml:space="preserve">
+    <value>WordPress</value>
+  </data>
   <data name="ConsumersWordpressDescription" xml:space="preserve">
     <value>WordPressで文書を公開するように、アプリを接続します。</value>
+  </data>
+  <data name="ConsumersWordpressInstruction" xml:space="preserve">
+    <value>このアプリを接続すると、WordPressウェブサイトに文書を投稿に使用できます。{0}Wordpress開発者ページで{LogoText}統合のために新しいアプリを作成します。その後、データを以下に入力してください：</value>
+  </data>
+  <data name="ConsumerswpClientId" xml:space="preserve">
+    <value>WordPress キー</value>
+  </data>
+  <data name="ConsumerswpClientSecret" xml:space="preserve">
+    <value>WordPress シークレット</value>
+  </data>
+  <data name="ConsumersYahoo" xml:space="preserve">
+    <value>Yahoo</value>
+  </data>
+  <data name="ConsumersyahooClientId" xml:space="preserve">
+    <value>クライアントID</value>
+  </data>
+  <data name="ConsumersyahooClientSecret" xml:space="preserve">
+    <value>クライアントのシークレット</value>
   </data>
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Yahoo連絡先インポートのアプリを接続します。</value>
@@ -595,23 +672,239 @@
   <data name="ConsumersYahooInstruction" xml:space="preserve">
     <value>このアプリを有効にすると、Yahooの連絡先リストからのユーザをポータルに追加できます。{0}Yahoo!デベロッパーネットワークのアプリ作成というページで{LogoText}統合のために新しいアップリを作成してください。その後、データを以下に入力してください：</value>
   </data>
+  <data name="ConsumersYandex" xml:space="preserve">
+    <value>Yandex</value>
+  </data>
+  <data name="ConsumersYandexClientId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="ConsumersYandexClientSecret" xml:space="preserve">
+    <value>パスワード</value>
+  </data>
   <data name="ConsumersYandexDescription" xml:space="preserve">
     <value>Yandexアカウントでポータルにサインインするようにアプリを接続します。</value>
+  </data>
+  <data name="ConsumersYandexInstruction" xml:space="preserve">
+    <value>Yandexアプリケーションを追加すると、プロフィールページでYandexアカウントを使用してポータルにサインインすることが可能になります。</value>
+  </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>ZoomクライアントID</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Zoomクライアントのシクレット</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>Zoomアカウントを使用してポータルにサインインするアプリケーションを有効にします。</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>ユーザーがZoomアカウントを使って{LogoText}にサインインできるように、このアプリを有効にしてください。{0}Zoom開発者向けウェブサイトにアクセスし、新しいアプリ{LogoText}統合を作成します。以下に受け取ったデータを挿入してください：</value>
+  </data>
+  <data name="CouldNotRecoverPasswordForLdapUser" xml:space="preserve">
+    <value>パスワード回復は、LDAPユーザーのために禁止されます</value>
+  </data>
+  <data name="CouldNotRecoverPasswordForSsoUser" xml:space="preserve">
+    <value>パスワード回復は、SSOユーザーのために禁止されます</value>
+  </data>
+  <data name="CustomNamingPeopleSchema" xml:space="preserve">
+    <value>カスタム</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>日付</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>名</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>姓</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>ドキュメントサービスのクォータ ({0})</value>
+  </data>
+  <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
+    <value>インスタンスIDが間違っているようです。</value>
+  </data>
+  <data name="EmailAndPasswordIncorrectEmail" xml:space="preserve">
+    <value>正しくないメールアドレス</value>
+  </data>
+  <data name="ErrorAccessDenied" xml:space="preserve">
+    <value>この操作を実行するアクセス許可がありません</value>
+  </data>
+  <data name="ErrorAccessRestricted" xml:space="preserve">
+    <value>ポータルアクセスは制限です。</value>
+  </data>
+  <data name="ErrorBadKeys" xml:space="preserve">
+    <value>不正なライセンスキー</value>
+  </data>
+  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
+    <value>最後のフルアクセススペースは削除できません</value>
+  </data>
+  <data name="ErrorDisabledProfile" xml:space="preserve">
+    <value>現在のプロフィールが停止しています</value>
+  </data>
+  <data name="ErrorEmailAlreadyExists" xml:space="preserve">
+    <value>{!User} このメールアドレスは既に登録されていると</value>
+  </data>
+  <data name="ErrorEmailDomainNotAllowed" xml:space="preserve">
+    <value>このドメインからのメールは登録できません</value>
+  </data>
+  <data name="ErrorEmailEmpty" xml:space="preserve">
+    <value>メールフィールドは空です</value>
+  </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>このメールアドレスはサードパーティプロバイダとしてユーザー {0} に添付されます</value>
+  </data>
+  <data name="ErrorEmailsAreTheSame" xml:space="preserve">
+    <value>現在のメールアドレスと新しいメールアドレスは同じです</value>
+  </data>
+  <data name="ErrorEmptyFields" xml:space="preserve">
+    <value>すべての欄に記入してください</value>
+  </data>
+  <data name="ErrorEmptyMessage" xml:space="preserve">
+    <value>メッセージテキストを入力してください</value>
+  </data>
+  <data name="ErrorEmptyUploadFileSelected" xml:space="preserve">
+    <value>アップロードされたファイルが見つかりませんでした</value>
   </data>
   <data name="ErrorFileNotImage" xml:space="preserve">
     <value>不明な画像ファイルタイプ</value>
   </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>グループが見つかりませんでした</value>
+  </data>
   <data name="ErrorImageSize" xml:space="preserve">
     <value>画像サイズは許容されるパラメータを超えています</value>
+  </data>
+  <data name="ErrorImageWeightLimit" xml:space="preserve">
+    <value>イメージファイルのサイズが大きすぎます</value>
+  </data>
+  <data name="ErrorIncorrectUserName" xml:space="preserve">
+    <value>不適切な名または姓</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>招待上限を超えています</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>少なくとも1つの許可されたIPアドレスを追加してください。</value>
   </data>
   <data name="ErrorIpSecurity" xml:space="preserve">
     <value>ポータルアクセスは制限です</value>
   </data>
+  <data name="ErrorNotAllowedOption" xml:space="preserve">
+    <value>あなたの料金プランは、このオプションをサポートしていません</value>
+  </data>
+  <data name="ErrorNotCorrectEmail" xml:space="preserve">
+    <value>無効なメール</value>
+  </data>
+  <data name="ErrorNotCorrectTrustedDomain" xml:space="preserve">
+    <value>無効なドメイン名</value>
+  </data>
+  <data name="ErrorPasswordEmpty" xml:space="preserve">
+    <value>パスワードは空です。</value>
+  </data>
+  <data name="ErrorPasswordLength" xml:space="preserve">
+    <value>{0}～{1}文字</value>
+  </data>
+  <data name="ErrorPasswordMessage" xml:space="preserve">
+    <value>パスワードが含まれている必要な記号</value>
+  </data>
+  <data name="ErrorPasswordNoDigits" xml:space="preserve">
+    <value>桁</value>
+  </data>
   <data name="ErrorPasswordNoSpaces" xml:space="preserve">
     <value>スペースを含めない</value>
   </data>
+  <data name="ErrorPasswordNoSpecialSymbols" xml:space="preserve">
+    <value>特殊文字</value>
+  </data>
+  <data name="ErrorPasswordNoUpperCase" xml:space="preserve">
+    <value>大文字</value>
+  </data>
   <data name="ErrorPasswordOnlyLatinLetters" xml:space="preserve">
     <value>ローマ字のみ</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>お支払いが必要です</value>
+  </data>
+  <data name="ErrorRequestLimitExceeded" xml:space="preserve">
+    <value>要求数が上限を超過しました</value>
+  </data>
+  <data name="ErrorTenantTooShort" xml:space="preserve">
+    <value>テナントドメインを空にすることはできません。</value>
+  </data>
+  <data name="ErrorTenantTooShortFormat" xml:space="preserve">
+    <value>ドメイン名の長さは{0}文字から{1}文字の間でなければなりません。</value>
+  </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>ログイン試行回数が多すぎます。後で再試行してください</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>少なくとも1つの信頼済みドメインを追加してください。</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>ユーザーが無効化されました</value>
+  </data>
+  <data name="ErrorUserNotFound" xml:space="preserve">
+    <value>ユーザーが見つかりませんでした</value>
+  </data>
+  <data name="ErrorUserNotFoundByEmail" xml:space="preserve">
+    <value>"{0}"のメールアドレスのユーザーは見つかりませんでした</value>
+  </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>WebhookのURLは利用できません。HEADリクエストは200 HTTPステータスではありません。</value>
+  </data>
+  <data name="ErrorWebPluginArchive" xml:space="preserve">
+    <value>このプラグインアーカイブは正しくありません</value>
+  </data>
+  <data name="ErrorWebPluginExist" xml:space="preserve">
+    <value>このプラグインはすでに存在しています</value>
+  </data>
+  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
+    <value>このファイル拡張子は正しくありません</value>
+  </data>
+  <data name="ErrorWebPluginFileSize" xml:space="preserve">
+    <value>ファイルサイズが制限を超えています</value>
+  </data>
+  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
+    <value>システムプラグインの変更は禁止されています</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>プラグインの数が制限を超えています</value>
+  </data>
+  <data name="ErrorWebPluginName" xml:space="preserve">
+    <value>このプラグイン名は正しくありません</value>
+  </data>
+  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
+    <value>入力ファイルがありません</value>
+  </data>
+  <data name="ErrorWebPluginNotFound" xml:space="preserve">
+    <value>プラグインが見つかりませんでした</value>
+  </data>
+  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
+    <value>入力ファイルが多すぎます</value>
+  </data>
+  <data name="EuServerRegion" xml:space="preserve">
+    <value>欧州（フランクフルト）地域</value>
+  </data>
+  <data name="FileSizeMaxExceed" xml:space="preserve">
+    <value>最大ファイルサイズを超えています</value>
+  </data>
+  <data name="FileSizeNote" xml:space="preserve">
+    <value>注：ファイルサイズを超えることはできません{1}{0}{2}</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>bytes,KB,MB,GB</value>
+  </data>
+  <data name="FinishInviteJoinEmailMessage" xml:space="preserve">
+    <value>アカウントを確認するためのリンクが指定された電子メールに送信されました</value>
   </data>
   <data name="FirstName" xml:space="preserve">
     <value>名</value>
@@ -745,212 +1038,23 @@
   <data name="LdapSettingsTlsNotSupported" xml:space="preserve">
     <value>現在のLDAPサーバーでStartTLSがサポートされません。</value>
   </data>
+  <data name="LdapSettingsTooManyOperations" xml:space="preserve">
+    <value>LDAP操作が多すぎています。</value>
+  </data>
   <data name="LdapSettingsWrongSidAttribute" xml:space="preserve">
     <value>ユーザー/グループ・オブジェクトの一意IDを取得できませんでした。デフォルトでは、entryUUID、nsuniqueid、GUID、objectSidのいずれかのIDに一致するものを取得しようとします。LDAPサーバーに該当する属性がない場合は、web.appsettings.configファイルのldap.unique.id設定に必要な属性を指定してください。</value>
   </data>
-  <data name="ConsumersDropBoxSecret" xml:space="preserve">
-    <value>Dropboxキー</value>
-  </data>
-  <data name="ConsumersEasyBib" xml:space="preserve">
-    <value>EasyBib</value>
-  </data>
-  <data name="ConsumersFacebook" xml:space="preserve">
-    <value>Facebook</value>
-  </data>
-  <data name="ConsumersGoogle" xml:space="preserve">
-    <value>Google</value>
-  </data>
-  <data name="ConsumersgoogleClientId" xml:space="preserve">
-    <value>Google ID</value>
-  </data>
-  <data name="ConsumersgoogleClientSecret" xml:space="preserve">
-    <value>Googleキー</value>
-  </data>
-  <data name="ConsumersGoogleCloud" xml:space="preserve">
-    <value>Googleクラウドストレージ</value>
-  </data>
-  <data name="ConsumersGoogleCloudbucket" xml:space="preserve">
-    <value>バケット</value>
-  </data>
-  <data name="ConsumersMailru" xml:space="preserve">
-    <value>Mail.ru</value>
-  </data>
-  <data name="ConsumersMailruClientSecret" xml:space="preserve">
-    <value>秘密なスキー</value>
-  </data>
-  <data name="ConsumersMicrosoft" xml:space="preserve">
-    <value>Microsoft</value>
-  </data>
-  <data name="ConsumersS3" xml:space="preserve">
-    <value>Amazon AWS S3</value>
-  </data>
-  <data name="ConsumersSelectelauthUser" xml:space="preserve">
-    <value>認証ユーザ</value>
-  </data>
-  <data name="ConsumersSkyDrive" xml:space="preserve">
-    <value>OneDrive</value>
-  </data>
-  <data name="Consumersskydriveappkey" xml:space="preserve">
-    <value>アプリID</value>
-  </data>
-  <data name="ConsumersSmsc" xml:space="preserve">
-    <value>SMSセンター</value>
-  </data>
-  <data name="ConsumersTelegram" xml:space="preserve">
-    <value>Telegram</value>
-  </data>
-  <data name="ConsumersTwilio" xml:space="preserve">
-    <value>Twilio</value>
-  </data>
-  <data name="ConsumerstwilioAccountSid" xml:space="preserve">
-    <value>アカウントSid</value>
-  </data>
-  <data name="ConsumerstwilioAuthToken" xml:space="preserve">
-    <value>認証トークン</value>
-  </data>
-  <data name="ConsumersYahoo" xml:space="preserve">
-    <value>Yahoo</value>
-  </data>
-  <data name="ConsumersYandex" xml:space="preserve">
-    <value>Yandex</value>
-  </data>
-  <data name="ConsumersWordpress" xml:space="preserve">
-    <value>WordPress</value>
-  </data>
-  <data name="ConsumersTwitter" xml:space="preserve">
-    <value>X</value>
-  </data>
-  <data name="ConsumersYandexClientSecret" xml:space="preserve">
-    <value>パスワード</value>
-  </data>
-  <data name="ConsumersS3region" xml:space="preserve">
-    <value>地域</value>
-  </data>
-  <data name="Consumerssmsclogin" xml:space="preserve">
-    <value>ログイン</value>
-  </data>
-  <data name="ConsumersEasyBibInstruction" xml:space="preserve">
-    <value>このアプリを有効にすると、{LogoText}エディターで書誌を作成できます。{0}EasyBibサインアップページでフォームを入力して、{LogoText}統合を追加してください。その後、アプリキーをを以下に貼り付けてください：</value>
-  </data>
-  <data name="ConsumersFirebaseInstruction" xml:space="preserve">
-    <value>このアプリを有効にすると、オフラインであっても送信されたメッセージ通知を受信できます。{0}Firebaseコンソールで{LogoText}統合のために新しいプロジェクトを作成してください。その後、データを以下に入力してください：</value>
-  </data>
-  <data name="ConsumersGoogleCloudInstruction" xml:space="preserve">
-    <value>Googleクラウドストーレジを接続すると、ポータルデータのバックアップと保存するように使用できます。{0} Google Cloud Platformコンソールで{LogoText}のために新しいサービスアカウントを作成してください。その後、受けたデータを以下に入力してください：</value>
-  </data>
-  <data name="ConsumersRackspaceInstruction" xml:space="preserve">
-    <value>Rackspace Cloud Storageを接続すると、ポータルデータのバックアップと保存するように使用できます。{0}Rackspace Cloudコントロールパネルのセキュリティ設定でRackspace APIキーの隣に［リンク表示］というオプションをクリックしてください。以下に受けたデータを入力してください：</value>
-  </data>
-  <data name="ConsumersS3Instruction" xml:space="preserve">
-    <value>ポータルデータを保存とバックアップするように、Amazon AWS S3を接続してください。{0}AWS マネジメントコンソールで{LogoText}のためにアクセスキーを作成してください。以下にそのキーを入力してください：</value>
-  </data>
-  <data name="ConsumersSelectelInstruction" xml:space="preserve">
-    <value>お選びのクラウドストレージを接続すると、ポータルデータのバックアップと保存ができます。{0}バックアップをする予定のコンテナ用の閲覧のみ/編集権限を持つユーザーのアクセスデータを取得し、以下に入力してください：</value>
-  </data>
-  <data name="ConsumersWordpressInstruction" xml:space="preserve">
-    <value>このアプリを接続すると、WordPressウェブサイトに文書を投稿に使用できます。{0}Wordpress開発者ページで{LogoText}統合のために新しいアプリを作成します。その後、データを以下に入力してください：</value>
-  </data>
-  <data name="ConsumersAppleId" xml:space="preserve">
-    <value>Apple ID</value>
-  </data>
-  <data name="ConsumersauthPwd" xml:space="preserve">
-    <value>Selectel authPwd</value>
-  </data>
-  <data name="ConsumersauthUser" xml:space="preserve">
-    <value>Selectel authUser</value>
-  </data>
-  <data name="ConsumersBitly" xml:space="preserve">
-    <value>Bitly</value>
-  </data>
-  <data name="ConsumersbitlyClientSecret" xml:space="preserve">
-    <value>apiKey</value>
-  </data>
-  <data name="ConsumersBox" xml:space="preserve">
-    <value>Box</value>
-  </data>
-  <data name="ConsumersboxClientId" xml:space="preserve">
-    <value>Box ID</value>
-  </data>
-  <data name="ConsumersDropBox" xml:space="preserve">
-    <value>DropBox</value>
-  </data>
-  <data name="ConsumersfacebookClientSecret" xml:space="preserve">
-    <value>Facebook キー</value>
-  </data>
-  <data name="ConsumersLinkedInInstruction" xml:space="preserve">
-    <value>このアプリを有効にして、ユーザーがLinkedInアカウントを使用して{LogoText}にサインインできるようにします。{0}LinkedIn開発者ウェブサイトにアクセスし、新しいアプリ{LogoText}統合を作成します。受け取ったデータを以下に挿入してください：</value>
-  </data>
-  <data name="ConsumersLinkedInKey" xml:space="preserve">
-    <value>Linkedin ID</value>
-  </data>
-  <data name="ConsumersMailruClientId" xml:space="preserve">
-    <value>ID</value>
-  </data>
-  <data name="ConsumersMailruInstruction" xml:space="preserve">
-    <value>Mail.ruアプリケーションを追加すると、プロフィールページでMail.ruアカウントを使用してポータルにサインインすることができるようになります。</value>
-  </data>
-  <data name="ConsumersS3bucket" xml:space="preserve">
-    <value>バケット</value>
-  </data>
-  <data name="Consumersskydriveappsecret" xml:space="preserve">
-    <value>クライアントのシークレット</value>
-  </data>
-  <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
-    <value>クライアントID</value>
-  </data>
-  <data name="ConsumerstwitterAccessTokenSecret_Default" xml:space="preserve">
-    <value>クライアントのシークレット</value>
-  </data>
-  <data name="ConsumersTwitterKey" xml:space="preserve">
-    <value>API キー</value>
-  </data>
-  <data name="ConsumersTwitterSecret" xml:space="preserve">
-    <value>API キーのシークレット</value>
-  </data>
-  <data name="Consumersusername" xml:space="preserve">
-    <value>Rackspaceのユーザー名</value>
-  </data>
-  <data name="ConsumersVk" xml:space="preserve">
-    <value>VK</value>
-  </data>
-  <data name="ConsumersVkClientId" xml:space="preserve">
-    <value>アプリケーションID</value>
-  </data>
-  <data name="ConsumersVkClientSecret" xml:space="preserve">
-    <value>セキュリティキー</value>
-  </data>
-  <data name="ConsumersVkInstruction" xml:space="preserve">
-    <value>VKアプリケーションを追加すると、プロフィールページでVKアカウントを使用したポータルへのサインインを有効にすることができます。</value>
-  </data>
-  <data name="ConsumerswpClientId" xml:space="preserve">
-    <value>WordPress キー</value>
-  </data>
-  <data name="ConsumerswpClientSecret" xml:space="preserve">
-    <value>WordPress シークレット</value>
-  </data>
-  <data name="ConsumersyahooClientId" xml:space="preserve">
-    <value>クライアントID</value>
-  </data>
-  <data name="ConsumersyahooClientSecret" xml:space="preserve">
-    <value>クライアントのシークレット</value>
-  </data>
-  <data name="ConsumersYandexClientId" xml:space="preserve">
-    <value>ID</value>
-  </data>
-  <data name="ConsumersYandexInstruction" xml:space="preserve">
-    <value>Yandexアプリケーションを追加すると、プロフィールページでYandexアカウントを使用してポータルにサインインすることが可能になります。</value>
-  </data>
-  <data name="ErrorDisabledProfile" xml:space="preserve">
-    <value>現在のプロフィールが停止しています</value>
-  </data>
-  <data name="ErrorTenantTooShort" xml:space="preserve">
-    <value>テナントドメインを空にすることはできません。</value>
+  <data name="LicenseError" xml:space="preserve">
+    <value>ライセンスが間違っているようです</value>
   </data>
   <data name="LicenseErrorExpired" xml:space="preserve">
     <value>ライセンスがこのポータルのバージョンに有効ではありません。</value>
   </data>
   <data name="LicenseErrorPortal" xml:space="preserve">
     <value>ポータルの数がライセンスに含まれている数を超えています</value>
+  </data>
+  <data name="LicenseErrorQuota" xml:space="preserve">
+    <value>ユーザー数はライセンスで許可されたユーザー数を超過した</value>
   </data>
   <data name="LicenseUploaded" xml:space="preserve">
     <value>アップロード完了</value>
@@ -961,257 +1065,86 @@
   <data name="LicenseUploadedOverdueSupport" xml:space="preserve">
     <value>正常にアップロードされました。{0}このライセンスは{2}.{1}からサポートが利用できません</value>
   </data>
-  <data name="PortalName" xml:space="preserve">
-    <value>オフィス文書用のクラウドスペース</value>
-  </data>
-  <data name="SmsTooMuchError" xml:space="preserve">
-    <value>テキストメッセージの送信数が多すぎます。後で再試行してください。</value>
-  </data>
-  <data name="Tariffs_admin" xml:space="preserve">
-    <value>BUSINESS</value>
-  </data>
-  <data name="Tariffs_adminyear" xml:space="preserve">
-    <value>BUSINESS</value>
-  </data>
-  <data name="Tariffs_startup" xml:space="preserve">
-    <value>STARTUP</value>
-  </data>
-  <data name="TfaTooMuchError" xml:space="preserve">
-    <value>テキストメッセージの送信数が多すぎます。後で再試行してください。</value>
-  </data>
-  <data name="TariffsFeature_thirdparty" xml:space="preserve">
-    <value>Proの統合</value>
-  </data>
-  <data name="ConsumersZoom" xml:space="preserve">
-    <value>Zoom</value>
-  </data>
-  <data name="ConsumersZoomClientId" xml:space="preserve">
-    <value>ZoomクライアントID</value>
-  </data>
-  <data name="ConsumersZoomClientSecret" xml:space="preserve">
-    <value>Zoomクライアントのシクレット</value>
-  </data>
-  <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Zoomアカウントを使用してポータルにサインインするアプリケーションを有効にします。</value>
-  </data>
-  <data name="ConsumersZoomInstruction" xml:space="preserve">
-    <value>ユーザーがZoomアカウントを使って{LogoText}にサインインできるように、このアプリを有効にしてください。{0}Zoom開発者向けウェブサイトにアクセスし、新しいアプリ{LogoText}統合を作成します。以下に受け取ったデータを挿入してください：</value>
-  </data>
-  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
-    <value>ログイン試行回数が多すぎます。後で再試行してください</value>
-  </data>
-  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
-    <value>最後のフルアクセススペースは削除できません</value>
-  </data>
-  <data name="ErrorWebPluginArchive" xml:space="preserve">
-    <value>このプラグインアーカイブは正しくありません</value>
-  </data>
-  <data name="ErrorWebPluginExist" xml:space="preserve">
-    <value>このプラグインはすでに存在しています</value>
-  </data>
-  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
-    <value>このファイル拡張子は正しくありません</value>
-  </data>
-  <data name="ErrorWebPluginFileSize" xml:space="preserve">
-    <value>ファイルサイズが制限を超えています</value>
-  </data>
-  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
-    <value>システムプラグインの変更は禁止されています</value>
-  </data>
-  <data name="ErrorWebPluginName" xml:space="preserve">
-    <value>このプラグイン名は正しくありません</value>
-  </data>
-  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
-    <value>入力ファイルがありません</value>
-  </data>
-  <data name="ErrorWebPluginNotFound" xml:space="preserve">
-    <value>プラグインが見つかりませんでした</value>
-  </data>
-  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
-    <value>入力ファイルが多すぎます</value>
-  </data>
-  <data name="QuotaGreaterPortalError" xml:space="preserve">
-    <value>メモリ容量制限の設定に失敗しました。設定したメモリ容量制限はポータル容量制限を超えています。</value>
-  </data>
-  <data name="RoomFreeSpaceException" xml:space="preserve">
-    <value>ルームの容量制限を超えています</value>
-  </data>
-  <data name="UserFreeSpaceException" xml:space="preserve">
-    <value>ユーザーの容量制限を超えています</value>
-  </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} 管理者ごとに、リクエストに応じて容量を追加できる</value>
-  </data>
-  <data name="TariffsFeature_statistic" xml:space="preserve">
-    <value>ストレージ容量制限と統計</value>
-  </data>
-  <data name="ErrorUserDisabled" xml:space="preserve">
-    <value>ユーザーが無効化されました</value>
-  </data>
-  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
-    <value>招待上限を超えています</value>
+  <data name="MessageEmailChangeInstuctionsSentOnEmail" xml:space="preserve">
+    <value>メールアドレスの変更手順は、メールアドレスに送信されました</value>
   </data>
   <data name="MessagePasswordSendedToEmail" xml:space="preserve">
     <value>パスワード変更指示が{0}メールアドレスに送信されました。</value>
   </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>管理者が追加されました：</value>
+  <data name="MessageYourPasswordSendedToEmail" xml:space="preserve">
+    <value>{0}メールアドレスを持つユーザが存在する場合は、パスワード変更手順はこのメールアドレスに送信されます。</value>
   </data>
-  <data name="ErrorEmailLinked" xml:space="preserve">
-    <value>このメールアドレスはサードパーティプロバイダとしてユーザー {0} に添付されます</value>
+  <data name="MobilePhoneMustErase" xml:space="preserve">
+    <value>電話番号を変更のために、現在電話番後を削除するのは必要です</value>
+  </data>
+  <data name="OrgServerRegion" xml:space="preserve">
+    <value>ORG地域</value>
+  </data>
+  <data name="Owner" xml:space="preserve">
+    <value>所有者</value>
+  </data>
+  <data name="PortalName" xml:space="preserve">
+    <value>オフィス文書用のクラウドスペース</value>
+  </data>
+  <data name="PortalSecurity" xml:space="preserve">
+    <value>ポータルでのアクセス</value>
+  </data>
+  <data name="QuotaGreaterPortalError" xml:space="preserve">
+    <value>メモリ容量制限の設定に失敗しました。設定したメモリ容量制限はポータル容量制限を超えています。</value>
+  </data>
+  <data name="ReassignDataRemoveUserError" xml:space="preserve">
+    <value>{0}にデータの再割り当て過程が完了です。</value>
+  </data>
+  <data name="RecaptchaInvalid" xml:space="preserve">
+    <value>Recaptchaが間違っているようです</value>
+  </data>
+  <data name="RoomFreeSpaceException" xml:space="preserve">
+    <value>ルームの容量制限を超えています</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
     <value>ルームごとの容量制限の設定に失敗しました。入力された値はDocSpaceストレージの合計容量を超えています。</value>
   </data>
-  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>ユーザーごとの容量制限の設定に失敗しました。入力された値はDocSpaceストレージの合計容量を超えています。</value>
+  <data name="SgServerRegion" xml:space="preserve">
+    <value>アジア太平洋 (シンガポール)</value>
   </data>
-  <data name="ErrorTrustedMailDomain" xml:space="preserve">
-    <value>少なくとも1つの信頼済みドメインを追加してください。</value>
+  <data name="SmsAuthenticationMessageError" xml:space="preserve">
+    <value>不正なコード</value>
   </data>
-  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
-    <value>管理者の数が制限を超えています：{0}/{1}。</value>
+  <data name="SmsAuthenticationMessageToUser" xml:space="preserve">
+    <value>コード：{0}</value>
   </data>
-  <data name="ErrorIpRestriction" xml:space="preserve">
-    <value>少なくとも1つの許可されたIPアドレスを追加してください。</value>
+  <data name="SmsAuthenticationTimeout" xml:space="preserve">
+    <value>コードを利用する時間は期限が切れています。新しいテクストメッセージを請求してください。</value>
   </data>
-  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
-    <value>WebhookのURLは利用できません。HEADリクエストは200 HTTPステータスではありません。</value>
+  <data name="SmsNotAvailable" xml:space="preserve">
+    <value>SMS設定は利用できません</value>
   </data>
-  <data name="Tariffs_nonprofit" xml:space="preserve">
-    <value>非営利</value>
+  <data name="SmsTooMuchError" xml:space="preserve">
+    <value>テキストメッセージの送信数が多すぎます。後で再試行してください。</value>
   </data>
-  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
-    <value>クレジット</value>
+  <data name="SsoSettingsCantSaveSettings" xml:space="preserve">
+    <value>設定は保存できませんでした</value>
   </data>
-  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
-    <value>通貨</value>
+  <data name="SsoSettingsCouldNotBeNull" xml:space="preserve">
+    <value>設定はnullにすることはできません</value>
   </data>
-  <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>日付</value>
+  <data name="SsoSettingsInvalidBinding" xml:space="preserve">
+    <value>無効な束縛：{0}</value>
   </data>
-  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
-    <value>数量</value>
+  <data name="SsoSettingsInvalidEntityId" xml:space="preserve">
+    <value>無効なエンティティーID</value>
   </data>
-  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
-    <value>計測単位</value>
+  <data name="SsoSettingsInvalidMapping" xml:space="preserve">
+    <value>無効なフィールドマッピング</value>
   </data>
-  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
-    <value>顧客操作レポート({0}-{1})</value>
+  <data name="SuccessfullySaveGreetingSettingsMessage" xml:space="preserve">
+    <value>「開始ページ」設定は保存しました</value>
   </data>
-  <data name="ErrorGroupNotFound" xml:space="preserve">
-    <value>グループが見つかりませんでした</value>
+  <data name="SuccessfullySaveSettingsMessage" xml:space="preserve">
+    <value>設定が正常に更新されました</value>
   </data>
-  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
-    <value>追加ディスクストレージ</value>
-  </data>
-  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
-    <value>必要な容量に正確に調整してください。</value>
-  </data>
-  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
-    <value>使用されたストレージスペース：</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
-    <value>ディスク容量</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
-    <value>残高チャージ</value>
-  </data>
-  <data name="AutoRenewal" xml:space="preserve">
-    <value>自動更新</value>
-  </data>
-  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
-    <value>月間の無料バックアップ数は{0}を超えないようにしてください</value>
-  </data>
-  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
-    <value>DocSpaceのバックアップを有効にする。料金は自動的に請求されます。</value>
-  </data>
-  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
-    <value>バックアップ</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
-    <value>バックアップ</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>バックアップ</value>
-  </data>
-  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
-    <value>引き落とし</value>
-  </data>
-  <data name="AccountingCustomerOperationContact" xml:space="preserve">
-    <value>連絡先</value>
-  </data>
-  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
-    <value>取引履歴</value>
-  </data>
-  <data name="AutoTopUp" xml:space="preserve">
-    <value>自動チャージ</value>
-  </data>
-  <data name="TariffsFeature_free_backup" xml:space="preserve">
-    <value>月間{0}回の無料バックアップ</value>
-  </data>
-  <data name="ErrorPaymentRequired" xml:space="preserve">
-    <value>お支払いが必要です</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
-    <value>GB</value>
-  </data>
-  <data name="AccountingCustomerOperationType" xml:space="preserve">
-    <value>種類</value>
-  </data>
-  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
-    <value>詳細</value>
-  </data>
-  <data name="ConsumersWeixin" xml:space="preserve">
-    <value>WeChat</value>
-  </data>
-  <data name="ConsumersWeixinClientId" xml:space="preserve">
-    <value>クライアントID</value>
-  </data>
-  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
-    <value>クライアントシークレット</value>
-  </data>
-  <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>アプリケーションがWeChatアカウントを使用してポータルにサインインできるようにします。</value>
-  </data>
-  <data name="ConsumersWeixinInstruction" xml:space="preserve">
-    <value>アプリケーションがWeChatアカウントを使用してポータルにサインインできるようにします。</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
-    <value>日付</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
-    <value>Email</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
-    <value>名</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
-    <value>ID</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
-    <value>姓</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
-    <value>ドキュメントサービスのクォータ ({0})</value>
-  </data>
-  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
-    <value>プラグインの数が制限を超えています</value>
-  </data>
-  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
-    <value>ベクトル化</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
-    <value>AIツール</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
-    <value>トークン</value>
-  </data>
-  <data name="AiAgentFreeSpaceException" xml:space="preserve">
-    <value>AIエージェントのスペースクォータが上限に達しました</value>
-  </data>
-  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>AIエージェントごとのクォータ設定に失敗しました。入力した値がDocSpace全体のストレージ容量を超えています。</value>
+  <data name="SuccessfullySentNotificationDeleteUserInfoMessage" xml:space="preserve">
+    <value>プロフィールの削除方法は、「{0}」メールアドレスに送信されました</value>
   </data>
   <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
     <value>AIエージェントの数は {0} を超えることはできません</value>
@@ -1222,10 +1155,136 @@
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
     <value>DocSpaceのAI機能を有効にして生産性を向上させましょう。</value>
   </data>
+  <data name="TariffsFeature_audit" xml:space="preserve">
+    <value>ログインとアクションの追跡</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>バックアップ</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>DocSpaceのバックアップを有効にする。料金は自動的に請求されます。</value>
+  </data>
+  <data name="TariffsFeature_customization" xml:space="preserve">
+    <value>ブランディング＆カスタマイズ</value>
+  </data>
+  <data name="TariffsFeature_file_size" xml:space="preserve">
+    <value>最大ファイルサイズ</value>
+  </data>
+  <data name="TariffsFeature_file_size_exception" xml:space="preserve">
+    <value>ファイルサイズは {0} を超えないこと</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>月間{0}回の無料バックアップ</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>月間の無料バックアップ数は{0}を超えないようにしてください</value>
+  </data>
+  <data name="TariffsFeature_manager_exception" xml:space="preserve">
+    <value>管理者の数は {0} を超えないこと</value>
+  </data>
+  <data name="TariffsFeature_manager_price_count" xml:space="preserve">
+    <value>管理者数</value>
+  </data>
+  <data name="TariffsFeature_restore" xml:space="preserve">
+    <value>データ復元</value>
+  </data>
+  <data name="TariffsFeature_room" xml:space="preserve">
+    <value>アクティブルームの数は無制限</value>
+  </data>
+  <data name="TariffsFeature_room_exception" xml:space="preserve">
+    <value>ルーム数は{0}を超えないこと</value>
+  </data>
+  <data name="TariffsFeature_sso" xml:space="preserve">
+    <value>SSO</value>
+  </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>ストレージ容量制限と統計</value>
+  </data>
+  <data name="TariffsFeature_thirdparty" xml:space="preserve">
+    <value>Proの統合</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} 管理者ごとに、リクエストに応じて容量を追加できる</value>
+  </data>
+  <data name="TariffsFeature_total_size_exception" xml:space="preserve">
+    <value>使用するストレージのサイズは {0} を超えないこと</value>
+  </data>
+  <data name="TariffsFeature_total_size_price_count" xml:space="preserve">
+    <value>ストレージスペース</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>追加ディスクストレージ</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>必要な容量に正確に調整してください。</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>管理者が追加されました：</value>
+  </data>
+  <data name="TariffsFeature_used_room" xml:space="preserve">
+    <value>ルーム：</value>
+  </data>
+  <data name="TariffsFeature_used_total_size" xml:space="preserve">
+    <value>使用されたストレージスペース：</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
+    <value>使用されたストレージスペース：</value>
+  </data>
+  <data name="TariffsFeature_used_usersInRoom" xml:space="preserve">
+    <value>ルーム内のユーザー数：</value>
+  </data>
+  <data name="TariffsFeature_users" xml:space="preserve">
+    <value>ユーザーとゲストの数無制限</value>
+  </data>
+  <data name="TariffsFeature_usersInRoom" xml:space="preserve">
+    <value>ルーム内のユーザー数</value>
+  </data>
+  <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
+    <value>ルーム内のユーザー数は {0} を超えないこと</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>管理者の数が制限を超えています：{0}/{1}。</value>
+  </data>
+  <data name="TariffsFeature_users_exception" xml:space="preserve">
+    <value>ユーザー数は {0} を超えないこと</value>
+  </data>
   <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
     <value>AIウェブ検索</value>
   </data>
   <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
     <value>AIウェブ検索を有効化するにはウォレットにチャージしてください。</value>
+  </data>
+  <data name="Tariffs_admin" xml:space="preserve">
+    <value>BUSINESS</value>
+  </data>
+  <data name="Tariffs_adminyear" xml:space="preserve">
+    <value>BUSINESS</value>
+  </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>非営利</value>
+  </data>
+  <data name="Tariffs_startup" xml:space="preserve">
+    <value>STARTUP</value>
+  </data>
+  <data name="TfaAppAuthMessageError" xml:space="preserve">
+    <value>不正なコード</value>
+  </data>
+  <data name="TfaAppNotAvailable" xml:space="preserve">
+    <value>二要素認証アプリ設定は無効です</value>
+  </data>
+  <data name="TfaTooMuchError" xml:space="preserve">
+    <value>テキストメッセージの送信数が多すぎます。後で再試行してください。</value>
+  </data>
+  <data name="UserFreeSpaceException" xml:space="preserve">
+    <value>ユーザーの容量制限を超えています</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>ユーザーごとの容量制限の設定に失敗しました。入力された値はDocSpaceストレージの合計容量を超えています。</value>
+  </data>
+  <data name="UsServerRegion" xml:space="preserve">
+    <value>US西部地域（オレゴン）</value>
+  </data>
+  <data name="WhatsNewSubscriptionName" xml:space="preserve">
+    <value>新着情報</value>
   </data>
 </root>

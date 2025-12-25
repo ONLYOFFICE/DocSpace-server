@@ -1,5 +1,64 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -53,11 +112,23 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>Controlla i moduli pronti</value>
+  </data>
+  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
+    <value>Un nuovo documento "$DocumentTitle" è stato creato nella stanza "$RoomTitle"</value>
+  </data>
+  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
+    <value>Nuovi file sono stati caricati nella stanza "$RoomTitle" ($Count)</value>
+  </data>
+  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
+    <value>Un nuovo file "$DocumentTitle" è stato caricato nella stanza "$RoomTitle"</value>
+  </data>
   <data name="pattern_DocuSignComplete" xml:space="preserve">
     <value>h1. Tutti i firmatari hanno firmato $DocumentTitle
 
@@ -68,12 +139,74 @@ Questa è una email di notifica per informarti che tutti i firmatari hanno firma
 
 Accedi al tuo account DocuSign per maggiori informazioni.</value>
   </data>
+  <data name="pattern_EditorMentions" xml:space="preserve">
+    <value>h1. $__AuthorName ti ha menzionato nel commento al documento
+
+$__AuthorName ti ha menzionato nel commento al documento "$Document Title":"$Document URL" nella stanza "$RoomTitle":"$Room URL":
+ 
+$Message</value>
+  </data>
+  <data name="pattern_EditorMentions_push" xml:space="preserve">
+    <value>$ToUserName ti ha menzionato nel documento $DocumentTitle</value>
+  </data>
+  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
+    <value>Una nuova cartella "$FolderTitle" è stata creata nella stanza "$RoomTitle"</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. Il modulo $Message è compilato
+
+Un nuovo modulo "$DocumentTitle":"$DocumentURL" è stato compilato nella stanza "$RoomTitle":"$RoomURL"
+
+Mittente del modulo: "$FromUserName":"$FromUserLink"
+
+$OrangeButton
+
+&amp;nbsp;</value>
+  </data>
+  <data name="pattern_FormStartedFilling" xml:space="preserve">
+    <value>
+      Notifica attività. "$FromUserName":"$FromUserLink" ha iniziato la compilazione del modulo: "$DocumentTitle":"$DocumentURL" nella stanza: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. Hai compilato il modulo $Message
+
+Hai compilato il modulo "$DocumentTitle":"$DocumentURL" nella stanza "$RoomTitle":"$RoomURL"
+
+Responsabile: "$ToUserName":"$ToUserLink"
+
+$OrangeButton
+
+&amp;nbsp;</value>
+  </data>
+  <data name="pattern_FormSubmitted_push" xml:space="preserve">
+    <value>Il modulo "$DocumentTitle" è stato compilato nella stanza "$RoomTitle"</value>
+  </data>
+  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+    <value>
+      Notifica attività. Il modulo "$DocumentTitle":"$DocumentURL" è stato compilato completamente nella stanza: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
+    <value>Sei stato invitato nella stanza "$RoomTitle"</value>
+  </data>
   <data name="pattern_MailMergeEnd" xml:space="preserve">
     <value>h1. Invio completato
 
 Questa è una email di notifica per informarti che hai richiesto l'invio di $MailsCount messaggi e che il processo è ora stato completato. $Message
 
 Puoi controllare le mail inviate con successo possono nella cartella "Inviati":"$__VirtualRootPath/addons/mail/#sent" del Modulo mail.</value>
+  </data>
+  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
+    <value>$FromUserName ha spostato la stanza "$RoomTitle" nell'archivio</value>
+  </data>
+  <data name="pattern_RoomRemoved" xml:space="preserve">
+    <value>h1. $__AuthorName ha eliminato una stanza
+
+$__AuthorName ha eliminato una stanza: $RoomTitle</value>
+  </data>
+  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
+    <value>Il tuo ruolo nella stanza "$RoomTitle" è stato modificato in "$RoomRole"</value>
   </data>
   <data name="pattern_ShareDocument" xml:space="preserve">
     <value>h1. Accesso consentito al documento: "$DocumentTitle":"$DocumentURL"
@@ -89,134 +222,6 @@ $__DateTime "$__AuthorName":"$__AuthorUrl" ti ha concesso l'accesso alla cartell
 
 $Message</value>
   </data>
-  <data name="subject_DocuSignComplete" xml:space="preserve">
-    <value>Documenti. Tutti i firmatari hanno firmato $DocumentTitle</value>
-  </data>
-  <data name="subject_DocuSignComplete_tg" xml:space="preserve">
-    <value>Documenti. Tutti i firmatari hanno completato [$DocumentTitle]($DocumentURL)</value>
-  </data>
-  <data name="subject_DocuSignStatus" xml:space="preserve">
-    <value>Documenti. Lo status della firma è cambiato</value>
-  </data>
-  <data name="subject_MailMergeEnd" xml:space="preserve">
-    <value>Documenti. L'invio è stato completato.</value>
-  </data>
-  <data name="subject_ShareDocument" xml:space="preserve">
-    <value>Documenti. Accesso concesso al documento: $DocumentTitle</value>
-  </data>
-  <data name="subject_ShareDocument_tg" xml:space="preserve">
-    <value>Documenti. Accesso concesso al documento: [$DocumentTitle]($DocumentURL)</value>
-  </data>
-  <data name="subject_ShareFolder" xml:space="preserve">
-    <value>Documenti. Accesso concesso alla cartella: $DocumentTitle</value>
-  </data>
-  <data name="subject_ShareFolder_tg" xml:space="preserve">
-    <value>Documenti. Accesso concesso alla cartella: [$DocumentTitle]($DocumentURL)</value>
-  </data>
-  <data name="pattern_EditorMentions" xml:space="preserve">
-    <value>h1. $__AuthorName ti ha menzionato nel commento al documento
-
-$__AuthorName ti ha menzionato nel commento al documento "$Document Title":"$Document URL" nella stanza "$RoomTitle":"$Room URL":
- 
-$Message</value>
-  </data>
-  <data name="pattern_RoomRemoved" xml:space="preserve">
-    <value>h1. $__AuthorName ha eliminato una stanza
-
-$__AuthorName ha eliminato una stanza: $RoomTitle</value>
-  </data>
-  <data name="subject_DocuSignComplete_push" xml:space="preserve">
-    <value>Tutti i firmatari hanno completato il $DocumentTitle</value>
-  </data>
-  <data name="subject_DocuSignStatus_push" xml:space="preserve">
-    <value>Lo stato della firma è cambiato</value>
-  </data>
-  <data name="subject_EditorMentions" xml:space="preserve">
-    <value>Notifica di DocSpace. Menzionato nel documento</value>
-  </data>
-  <data name="subject_MailMergeEnd_push" xml:space="preserve">
-    <value>L'invio è completato.</value>
-  </data>
-  <data name="subject_RoomRemoved" xml:space="preserve">
-    <value>Notifica di DocSpace. La stanza e stata eliminata</value>
-  </data>
-  <data name="subject_ShareDocument_push" xml:space="preserve">
-    <value>Accesso autorizzato al documento: $DocumentTitle</value>
-  </data>
-  <data name="subject_ShareEncryptedDocument_push" xml:space="preserve">
-    <value>Accesso autorizzato al documento crittografato: $DocumentTitle</value>
-  </data>
-  <data name="subject_ShareFolder_push" xml:space="preserve">
-    <value>Accesso autorizzato alla cartella: $DocumentTitle</value>
-  </data>
-  <data name="button_CheckReadyForms" xml:space="preserve">
-    <value>Controlla i moduli pronti</value>
-  </data>
-  <data name="pattern_FormReceived" xml:space="preserve">
-    <value>h1. Il modulo $Message è compilato
-
-Un nuovo modulo "$DocumentTitle":"$DocumentURL" è stato compilato nella stanza "$RoomTitle":"$RoomURL"
-
-Mittente del modulo: "$FromUserName":"$FromUserLink"
-
-$OrangeButton
-
-&amp;nbsp;</value>
-  </data>
-  <data name="pattern_FormSubmitted" xml:space="preserve">
-    <value>h1. Hai compilato il modulo $Message
-
-Hai compilato il modulo "$DocumentTitle":"$DocumentURL" nella stanza "$RoomTitle":"$RoomURL"
-
-Responsabile: "$ToUserName":"$ToUserLink"
-
-$OrangeButton
-
-&amp;nbsp;</value>
-  </data>
-  <data name="subject_FormReceived" xml:space="preserve">
-    <value>Notifica di DocSpace. Il modulo è compilato</value>
-  </data>
-  <data name="subject_FormSubmitted" xml:space="preserve">
-    <value>Notifica di DocSpace. Il modulo è compilato</value>
-  </data>
-  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
-    <value>Sei stato invitato nella stanza "$RoomTitle"</value>
-  </data>
-  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
-    <value>Un nuovo documento "$DocumentTitle" è stato creato nella stanza "$RoomTitle"</value>
-  </data>
-  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
-    <value>Nuovi file sono stati caricati nella stanza "$RoomTitle" ($Count)</value>
-  </data>
-  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
-    <value>Un nuovo file "$DocumentTitle" è stato caricato nella stanza "$RoomTitle"</value>
-  </data>
-  <data name="pattern_EditorMentions_push" xml:space="preserve">
-    <value>$ToUserName ti ha menzionato nel documento $DocumentTitle</value>
-  </data>
-  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
-    <value>Una nuova cartella "$FolderTitle" è stata creata nella stanza "$RoomTitle"</value>
-  </data>
-  <data name="pattern_FormStartedFilling" xml:space="preserve">
-    <value>
-      Notifica attività. "$FromUserName":"$FromUserLink" ha iniziato la compilazione del modulo: "$DocumentTitle":"$DocumentURL" nella stanza: "$RoomTitle":"$RoomURL" — $__DateTime.
-    </value>
-  </data>
-  <data name="pattern_FormSubmitted_push" xml:space="preserve">
-    <value>Il modulo "$DocumentTitle" è stato compilato nella stanza "$RoomTitle"</value>
-  </data>
-  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
-    <value>
-      Notifica attività. Il modulo "$DocumentTitle":"$DocumentURL" è stato compilato completamente nella stanza: "$RoomTitle":"$RoomURL" — $__DateTime.
-    </value>
-  </data>
-  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
-    <value>$FromUserName ha spostato la stanza "$RoomTitle" nell'archivio</value>
-  </data>
-  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
-    <value>Il tuo ruolo nella stanza "$RoomTitle" è stato modificato in "$RoomRole"</value>
-  </data>
   <data name="pattern_StoppedFormFilling" xml:space="preserve">
     <value>
       Notifica attività. "$FromUserName":"$FromUserLink" ha interrotto la compilazione del modulo: "$DocumentTitle":"$DocumentURL" nella stanza: "$RoomTitle":"$RoomURL" — $__DateTime.
@@ -227,11 +232,65 @@ $OrangeButton
       Notifica attività. È il tuo turno! È richiesta la compilazione del modulo: "$DocumentTitle":"$DocumentURL" nella stanza: "$RoomTitle":"$RoomURL" — $__DateTime.
     </value>
   </data>
+  <data name="subject_DocuSignComplete" xml:space="preserve">
+    <value>Documenti. Tutti i firmatari hanno firmato $DocumentTitle</value>
+  </data>
+  <data name="subject_DocuSignComplete_push" xml:space="preserve">
+    <value>Tutti i firmatari hanno completato il $DocumentTitle</value>
+  </data>
+  <data name="subject_DocuSignComplete_tg" xml:space="preserve">
+    <value>Documenti. Tutti i firmatari hanno completato [$DocumentTitle]($DocumentURL)</value>
+  </data>
+  <data name="subject_DocuSignStatus" xml:space="preserve">
+    <value>Documenti. Lo status della firma è cambiato</value>
+  </data>
+  <data name="subject_DocuSignStatus_push" xml:space="preserve">
+    <value>Lo stato della firma è cambiato</value>
+  </data>
+  <data name="subject_EditorMentions" xml:space="preserve">
+    <value>Notifica di DocSpace. Menzionato nel documento</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>Notifica di DocSpace. Il modulo è compilato</value>
+  </data>
   <data name="subject_FormStartedFilling" xml:space="preserve">
     <value>Notifica DocSpace.</value>
   </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>Notifica di DocSpace. Il modulo è compilato</value>
+  </data>
   <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
     <value>Notifica DocSpace.</value>
+  </data>
+  <data name="subject_MailMergeEnd" xml:space="preserve">
+    <value>Documenti. L'invio è stato completato.</value>
+  </data>
+  <data name="subject_MailMergeEnd_push" xml:space="preserve">
+    <value>L'invio è completato.</value>
+  </data>
+  <data name="subject_RoomRemoved" xml:space="preserve">
+    <value>Notifica di DocSpace. La stanza e stata eliminata</value>
+  </data>
+  <data name="subject_ShareDocument" xml:space="preserve">
+    <value>Documenti. Accesso concesso al documento: $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareDocument_push" xml:space="preserve">
+    <value>Accesso autorizzato al documento: $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareDocument_tg" xml:space="preserve">
+    <value>Documenti. Accesso concesso al documento: [$DocumentTitle]($DocumentURL)</value>
+  </data>
+  <data name="subject_ShareEncryptedDocument_push" xml:space="preserve">
+    <value>Accesso autorizzato al documento crittografato: $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareFolder" xml:space="preserve">
+    <value>Documenti. Accesso concesso alla cartella: $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareFolder_push" xml:space="preserve">
+    <value>Accesso autorizzato alla cartella: $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareFolder_tg" xml:space="preserve">
+    <value>Documenti. Accesso concesso alla cartella: [$DocumentTitle]($DocumentURL)</value>
   </data>
   <data name="subject_StoppedFormFilling" xml:space="preserve">
     <value>Notifica DocSpace.</value>

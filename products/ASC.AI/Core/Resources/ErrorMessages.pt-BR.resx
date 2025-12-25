@@ -120,6 +120,9 @@
   <data name="AiSettingsAccessDenied" xml:space="preserve">
     <value>Você não tem permissão para gerenciar as configurações de IA</value>
   </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>Não foi possível processar os arquivos: {0}. Os arquivos podem estar corrompidos ou criptografados</value>
+  </data>
   <data name="ChatAccessDenied" xml:space="preserve">
     <value>Você não tem permissão para usar o chat</value>
   </data>
@@ -170,8 +173,5 @@
   </data>
   <data name="UnavailableServers" xml:space="preserve">
     <value>Os servidores MCP estão indisponíveis: {0}. Verifique as configurações de conexão</value>
-  </data>
-  <data name="AttachmentProcessFailed" xml:space="preserve">
-    <value>Não foi possível processar os arquivos: {0}. Os arquivos podem estar corrompidos ou criptografados</value>
   </data>
 </root>

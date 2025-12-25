@@ -126,6 +126,12 @@
   <data name="ActionTypeCol" xml:space="preserve">
     <value>Tip acţiune</value>
   </data>
+  <data name="AddedRoomTags" xml:space="preserve">
+    <value>Adăugare etichete: [{1}]</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>Serverul MCP {0} a fost adăugat la agentul</value>
+  </data>
   <data name="AdministratorAdded" xml:space="preserve">
     <value>Administratorul adăugat: {0}</value>
   </data>
@@ -137,6 +143,36 @@
   </data>
   <data name="AdministratorOpenedFullAccess" xml:space="preserve">
     <value>Administratori [{0}]. Acces complet deschis</value>
+  </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>Agentul a fost creat</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>Agentul a fost șters</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>Agentul a fost redenumit {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>Agenți</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>Furnizorul de IA a fost creat: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>Furnizorul de IA a fost șters: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>Furnizorul de IA a fost actualizat: {0}</value>
+  </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Cheie API pentru utilizator a fost creată: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Cheie API pentru utilizator a fost eliminată: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Cheie API pentru utilizator a fost actualizată: {0}</value>
   </data>
   <data name="AttachActionType" xml:space="preserve">
     <value>Atașare</value>
@@ -150,11 +186,35 @@
   <data name="AuditTrailReportName" xml:space="preserve">
     <value>Raport Lanț de Audit ({0}-{1})</value>
   </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Link-ul de autorizare a fost activat</value>
+  </data>
   <data name="AuthorizationKeysSetting" xml:space="preserve">
     <value>Chei de autorizare terță parte au fost actualizate</value>
   </data>
+  <data name="BackupCompleted" xml:space="preserve">
+    <value>Copierea de rezervă a fost finalizată</value>
+  </data>
+  <data name="BackupFailed" xml:space="preserve">
+    <value>Copierea de rezervă nu a reușit</value>
+  </data>
+  <data name="BackupStarted" xml:space="preserve">
+    <value>Pornire copiere de rezerva</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Setările de vizibilitate ale anunțurilor banner au fost modificate</value>
+  </data>
   <data name="BrowserCol" xml:space="preserve">
     <value>Browser</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Activarea Clientului {0} s-a schimbat</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Vizibilitatea Clientului {0} s-a schimbat</value>
+  </data>
+  <data name="CityCol" xml:space="preserve">
+    <value>Oraș</value>
   </data>
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Temă de culori s-a schimbat</value>
@@ -168,11 +228,62 @@
   <data name="CopyActionType" xml:space="preserve">
     <value>Copiere</value>
   </data>
+  <data name="CountryCol" xml:space="preserve">
+    <value>Țară</value>
+  </data>
   <data name="CreateActionType" xml:space="preserve">
     <value>Creare</value>
   </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Clientul a fost creat</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Operațiunea efectuată de client</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Raportul privind operaţiunile de client a fost descărcat</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Abonamentrul clientului a fost actualizat: {0}</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Setările serviciilor care au fost activate cu portofelul clientului au fost actualizate</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Portofelul clientului a fost alimentat: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Setările de alimentare a portofelului de client au fost actualizate</value>
+  </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>Setări de navigare particularizate au fost actualizate</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Agenți de IA [{0}]. Stabilire cotă de stocare particularizată pentru agenți de IA: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>Agenți de IA [{0}]. Stabilire cotă de stocare implicită pentru agenți de IA: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Agenți de IA [{0}]. Cotă de stocare pentru agenți de IA este dezactivată</value>
+  </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Săli [{0}]. Stabilire cotă de stocare particularizată pentru săli: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Săli [{0}]. Stabilire cotă de stocare implicită pentru săli: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Săli [{0}]. Cotă de stocare pentru săli este dezactivată</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Utilizatori [{0}]. Stabilire cotă de stocare particularizată pentru utilizatori: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Utilizatori [{0}]. Stabilire cotă de stocare implicită pentru utilizatori: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Utilizatori [{0}]. Cotă de stocare pentru utilizatori este dezactivată</value>
   </data>
   <data name="DateCol" xml:space="preserve">
     <value>Data</value>
@@ -183,8 +294,20 @@
   <data name="DeleteActionType" xml:space="preserve">
     <value>Ștergere</value>
   </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Clientul {0} a fost șters</value>
+  </data>
+  <data name="DeletedRoomTags" xml:space="preserve">
+    <value>Etichete șterse: [{1}]</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>Serverul MCP {0} a fost eliminat din agentul</value>
+  </data>
   <data name="DetachActionType" xml:space="preserve">
     <value>Detașare</value>
+  </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Setări de acces la Instrumente pentru dezvoltatori s-au schimbat</value>
   </data>
   <data name="DnsSettingsUpdated" xml:space="preserve">
     <value>Setări DNS actualizate</value>
@@ -234,6 +357,12 @@
   <data name="FileCreatedVersion" xml:space="preserve">
     <value>Fișiere [{0}]. Revizuire: {1}. Versiunea a fost creată</value>
   </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>Fișierul: {0}. Filtrul personalizat a fost dezactivat</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>Fișierul: {0}. Filtrul personalizat a fost activat</value>
+  </data>
   <data name="FileDeleted" xml:space="preserve">
     <value>Fișier șters: {0}</value>
   </data>
@@ -246,11 +375,26 @@
   <data name="FileDownloadedAs" xml:space="preserve">
     <value>Fișiere [{0}]. Descărcare ca: {1}</value>
   </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Fișiere [{0}]. Link-ul extern a fost creat: {1}. Rol: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Fișiere [{0}]. Link-ul extern a fost șters: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Fișiere [{0}]. Link-ul extern a fost actualizat: {1}. Rol: {2}</value>
+  </data>
   <data name="FileImported" xml:space="preserve">
     <value>Foldere [{0}]. Fișier importat: {1}. Furnizor: {2}</value>
   </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Fișierul: {0}. Indexul s-a schimbat din {1} în {2}</value>
+  </data>
   <data name="FileLocked" xml:space="preserve">
     <value>Fișier blocat: {0}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Fișierul a fost marcat ca favorit: {0}</value>
   </data>
   <data name="FileMoved" xml:space="preserve">
     <value>Fișiere [{0}]. Deplasare din dosarul "{1}" în dosarul: "{2}"</value>
@@ -260,6 +404,15 @@
   </data>
   <data name="FileMovedWithOverwriting" xml:space="preserve">
     <value>Fișiere [{0}]. Deplasare cu suprascriere din dosarul "{1}" în dosarul: "{2}"</value>
+  </data>
+  <data name="FileOpenedForChange" xml:space="preserve">
+    <value>Fișierul este deschis pentru modificare: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Fişierul a fost eliminat din Favorite: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Fişieul a fost eliminat din secțiunea Partajate cu mine: {0}</value>
   </data>
   <data name="FileRenamed" xml:space="preserve">
     <value>Fişier redenumit: {0}</value>
@@ -272,6 +425,9 @@
   </data>
   <data name="FileSendAccessLink" xml:space="preserve">
     <value>A trimis link-ul partajat către fișierului [{0}]. Destinatarii: [{1}]</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>octeți, KO, MO, GO, TO</value>
   </data>
   <data name="FilesModule" xml:space="preserve">
     <value>Fișiere</value>
@@ -288,11 +444,20 @@
   <data name="FileUpdatedAccess" xml:space="preserve">
     <value>Fișiere [{0}]. Permisiuni de acces actualizate</value>
   </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Fișiere [{0}]. Permisiuni de acces actualizate pentru {1}. Rol: {2}</value>
+  </data>
   <data name="FileUpdatedRevisionComment" xml:space="preserve">
     <value>Fișiere [{0}]. Revizuire {1}. Comentariu actualizat</value>
   </data>
   <data name="FileUploaded" xml:space="preserve">
     <value>Fişierul încărcat: {0}</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Fișierul a fost încărcat cu suprascriere: {0}</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>Fișiere [{0}]. Versiunea a fost ștearsă: {1}</value>
   </data>
   <data name="FolderCopied" xml:space="preserve">
     <value>Foldere [{0}]. Copiere în folderul: {1}</value>
@@ -306,6 +471,24 @@
   <data name="FolderDeleted" xml:space="preserve">
     <value>Folderul șters: {0}</value>
   </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Folderul a fost încărcat {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Foldere [{0}]. Link-ul extern a fost creat: {1}. Rol: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Foldere [{0}]. Link-ul extern a fost șters: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Foldere [{0}]. Link-ul extern a fost actualizat: {1}. Rol: {2}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Folderul: {0}. Indexul s-a schimbat din {1} în {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Folderul: {0}. Indexuri au fost înregistrate</value>
+  </data>
   <data name="FolderMoved" xml:space="preserve">
     <value>Foldere [{0}]. Deplasare în folderul: {1}</value>
   </data>
@@ -314,6 +497,9 @@
   </data>
   <data name="FolderMovedWithOverwriting" xml:space="preserve">
     <value>Foldere [{0}]. Deplasare cu suprascriere în folderul: {1}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Folderul a fost eliminat din secțiunea Partajate cu mine: {0}</value>
   </data>
   <data name="FolderRenamed" xml:space="preserve">
     <value>Folderul redenumit: {0}</value>
@@ -324,11 +510,38 @@
   <data name="FolderUpdatedAccess" xml:space="preserve">
     <value>Foldere [{0}]. Permisiuni de acces actualizate</value>
   </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Foldere [{0}]. Permisiuni de acces au fost actualizate pentru {1}. Rol: {2}</value>
+  </data>
   <data name="FollowActionType" xml:space="preserve">
     <value>Urmărire</value>
   </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Utilizatori [{0}]. Formular completat în întregime: {1}</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>Fișierul este deschis pentru completare: {0}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Utilizatori [{0}]. Formularul este completat parțial: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Utilizatori [{0}]. Completarea s-a început: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Utilizatori [{0}]. Completarea formularului încetată: {1}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Utilizatori [{0}]. Formular a fost trimis: {1}</value>
+  </data>
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Setări Sphinx au fost actualizate</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Codul de autorizare a fost generat pentru clientul {0}</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Token-ul de acces personal a fost generat pentru clientul {0}</value>
   </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Setările paginii de întâmpinare au fost actualizate</value>
@@ -366,11 +579,26 @@
   <data name="LanguageSettingsUpdated" xml:space="preserve">
     <value>Setări de limbă au fost actualizate</value>
   </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>Autentificarea LDAP a fost dezactivată</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>Autentificarea LDAP a fost activată</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>Sincronizarea LDAP s-a încheiat</value>
+  </data>
   <data name="LicenseKeyUploaded" xml:space="preserve">
     <value>Cheia de licență a fost încărcată</value>
   </data>
   <data name="LinkActionType" xml:space="preserve">
     <value>Legătură</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Locaţie</value>
+  </data>
+  <data name="LoginFail" xml:space="preserve">
+    <value>Conectarea nu a reușit</value>
   </data>
   <data name="LoginFailBruteForce" xml:space="preserve">
     <value>Conectarea nu a reușit. Prea multe încercări</value>
@@ -420,8 +648,8 @@
   <data name="LoginSuccess" xml:space="preserve">
     <value>Conectarea a reușit</value>
   </data>
-  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Conectarea prin cont de rețea socială a reușit: {0}</value>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Conectarea prin cont de rețea socială a reușit</value>
   </data>
   <data name="LoginSuccessSocialApp" xml:space="preserve">
     <value>Conectarea prin aplicația de socializare a reușit</value>
@@ -432,8 +660,17 @@
   <data name="LoginSuccessViaApiSms" xml:space="preserve">
     <value>Conectarea prin API și SMS a reușit</value>
   </data>
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
+    <value>Conectarea prin cont de rețea socială a reușit: {0}</value>
+  </data>
   <data name="LoginSuccessViaApiTfa" xml:space="preserve">
     <value>Conectarea prin API și aplicația de autentificare a reușit</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Autentificarea reușită prin OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Autentificarea reușită cu nume de utilizator și parolă</value>
   </data>
   <data name="LoginSuccessViaSms" xml:space="preserve">
     <value>Conectarea prin SMS a reușit</value>
@@ -489,6 +726,9 @@
   <data name="PortalDeleted" xml:space="preserve">
     <value>Portalul a fost șters</value>
   </data>
+  <data name="PortalRenamed" xml:space="preserve">
+    <value>Portalul a fost redenumit</value>
+  </data>
   <data name="PrivacyRoomDisable" xml:space="preserve">
     <value>Sala privată a fost dezactivată</value>
   </data>
@@ -519,17 +759,50 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Lista produse a fost actualizată</value>
   </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Stabilire cotă de stocare implicită pentru agenții de IA: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Cotă de stocare implicită pentru agenți de IA este dezactivată</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Stabilirea cotei de stocare implicită: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Cotă de stocare implicită este dezactivată</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Stabilirea cotei de stocare implicită pentru săli: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Cotă de stocare implicită pentru săli este dezactivată</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Stabilirea cotei de stocare implicită pentru utilizatori: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Cotă de stocare implicită pentru utilizatori este dezactivată</value>
+  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Reatribuiri</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Cheia secretă a clientului {0} a fost regenerată</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>Setările de vectorizare au fost resetate</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>Setările de căutare pe web au fost resetate</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Accesul clientului {0} a fost revocat</value>
   </data>
   <data name="RoomArchived" xml:space="preserve">
     <value>Sala arhivată</value>
   </data>
-  <data name="RoomUnarchived" xml:space="preserve">
-    <value>Sala dezarhivată</value>
-  </data>
-  <data name="RoomRenamed" xml:space="preserve">
-    <value>Sala redenumită: {0}</value>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Sala copiată: {0}</value>
   </data>
   <data name="RoomCreated" xml:space="preserve">
     <value>Sala a fost creată</value>
@@ -540,6 +813,57 @@
   <data name="RoomDeleted" xml:space="preserve">
     <value>Sala a fost ștearsă</value>
   </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Sală: {0}. Interzicerea încărcării a fost dezactivată</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Sală: {0}. Interzicerea încărcării a fost activată</value>
+  </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>A fost creat un link extern: {0}. Rol: {1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>A fost șters un link extern: {0}</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Link-ul extern a fost revocat: {1}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>A fost actualizat un link extern: {0}. Rol: {1}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Grup adăugat: {0}. Rol: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Grup șters: {0}</value>
+  </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Exportul indexelor de săli din secțiunea Documente</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Indexarea sălilor a fost dezactivată</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Indexarea sălilor a fost activată</value>
+  </data>
+  <data name="RoomInvitationLinkCreated" xml:space="preserve">
+    <value>Link-ul a fost creat. Rol: {1}</value>
+  </data>
+  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
+    <value>Link-ul a fost șters</value>
+  </data>
+  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
+    <value>Link-ul a fost actualizat. Rol: {1}</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Invitația a trimis din nou: {0}</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>Durată de viaţă este dezactivată</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Durată de viaţă este definită. Valoarea: {0}. Perioadă: {1}. Ștergerea definitivă {2}</value>
+  </data>
   <data name="RoomLogoCreated" xml:space="preserve">
     <value>Siglă a fost creată</value>
   </data>
@@ -549,14 +873,59 @@
   <data name="RoomRemoveUser" xml:space="preserve">
     <value>Utilizator șters: {0}</value>
   </data>
+  <data name="RoomRenamed" xml:space="preserve">
+    <value>Sala redenumită: {0}</value>
+  </data>
+  <data name="RoomsModule" xml:space="preserve">
+    <value>Săli</value>
+  </data>
+  <data name="RoomUnarchived" xml:space="preserve">
+    <value>Sala dezarhivată</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} desemnat(ți): {1}</value>
+  </data>
   <data name="RoomUpdateAccessForUser" xml:space="preserve">
     <value>{0} desemnat(ți): {1}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Sală: {0}. Inscripționare a fost dezactivată</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Sală: {0}. Inscripționare a fost activată</value>
+  </data>
+  <data name="ScheduledBackupCompleted" xml:space="preserve">
+    <value>Copierea de rezervă programată a fost finalizată</value>
+  </data>
+  <data name="ScheduledBackupFailed" xml:space="preserve">
+    <value>Copierea de rezervă programată nu a reușit</value>
+  </data>
+  <data name="ScheduledBackupStarted" xml:space="preserve">
+    <value>Copierea de rezervă programată a fost inițiată</value>
   </data>
   <data name="SendActionType" xml:space="preserve">
     <value>Trimitere</value>
   </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>Utilizatorul {0} a trimis invitația de asociere la DocSpace către {1}</value>
+  </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Instrucțiuni de invitare au fost trimise: {0}</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>Serverul MCP a fost creat: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>Severul MCP a fost șters: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>Severul MCP a fost dezctivat: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>Severul MCP a fost activat: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>Severul MCP a fost actualizat: {0}</value>
   </data>
   <data name="SessionCompleted" xml:space="preserve">
     <value>Sesiunea finalizată</value>
@@ -567,14 +936,17 @@
   <data name="SettingsModule" xml:space="preserve">
     <value>Setări</value>
   </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>Setările de vectorizare au fost configurate. Furnizor: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>Setările de căutare pe web au fost configurate. Motor: {0}</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>Conectarea unică dezactivată</value>
   </data>
   <data name="SSOEnabled" xml:space="preserve">
     <value>Conectarea unică activată</value>
-  </data>
-  <data name="BackupStarted" xml:space="preserve">
-    <value>Pornire copiere de rezerva</value>
   </data>
   <data name="StartStorageDecryption" xml:space="preserve">
     <value>Pornire decriptare de stocare</value>
@@ -647,6 +1019,9 @@
   </data>
   <data name="UpdateActionType" xml:space="preserve">
     <value>Actualizare</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Clientul {0} a fost actualizat</value>
   </data>
   <data name="UploadActionType" xml:space="preserve">
     <value>Încărcare</value>
@@ -738,195 +1113,6 @@
   <data name="UserUpdatedPassword" xml:space="preserve">
     <value>Parola actualizată</value>
   </data>
-  <data name="AddedRoomTags" xml:space="preserve">
-    <value>Adăugare etichete: [{1}]</value>
-  </data>
-  <data name="DeletedRoomTags" xml:space="preserve">
-    <value>Etichete șterse: [{1}]</value>
-  </data>
-  <data name="RoomExternalLinkCreated" xml:space="preserve">
-    <value>A fost creat un link extern: {0}. Rol: {1}</value>
-  </data>
-  <data name="RoomExternalLinkDeleted" xml:space="preserve">
-    <value>A fost șters un link extern: {0}</value>
-  </data>
-  <data name="RoomExternalLinkUpdated" xml:space="preserve">
-    <value>A fost actualizat un link extern: {0}. Rol: {1}</value>
-  </data>
-  <data name="CityCol" xml:space="preserve">
-    <value>Oraș</value>
-  </data>
-  <data name="CountryCol" xml:space="preserve">
-    <value>Țară</value>
-  </data>
-  <data name="LoginFail" xml:space="preserve">
-    <value>Conectarea nu a reușit</value>
-  </data>
-  <data name="RoomInvitationLinkCreated" xml:space="preserve">
-    <value>Link-ul a fost creat. Rol: {1}</value>
-  </data>
-  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
-    <value>Link-ul a fost șters</value>
-  </data>
-  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
-    <value>Link-ul a fost actualizat. Rol: {1}</value>
-  </data>
-  <data name="RoomsModule" xml:space="preserve">
-    <value>Săli</value>
-  </data>
-  <data name="FileOpenedForChange" xml:space="preserve">
-    <value>Fișierul este deschis pentru modificare: {0}</value>
-  </data>
-  <data name="PortalRenamed" xml:space="preserve">
-    <value>Portalul a fost redenumit</value>
-  </data>
-  <data name="FileSizePostfix" xml:space="preserve">
-    <value>octeți, KO, MO, GO, TO</value>
-  </data>
-  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
-    <value>Săli [{0}]. Stabilire cotă de stocare particularizată pentru săli: {1}</value>
-  </data>
-  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
-    <value>Săli [{0}]. Stabilire cotă de stocare implicită pentru săli: {1}</value>
-  </data>
-  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
-    <value>Săli [{0}]. Cotă de stocare pentru săli este dezactivată</value>
-  </data>
-  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
-    <value>Utilizatori [{0}]. Stabilire cotă de stocare particularizată pentru utilizatori: {1}</value>
-  </data>
-  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
-    <value>Utilizatori [{0}]. Stabilire cotă de stocare implicită pentru utilizatori: {1}</value>
-  </data>
-  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
-    <value>Utilizatori [{0}]. Cotă de stocare pentru utilizatori este dezactivată</value>
-  </data>
-  <data name="FileUploadedWithOverwriting" xml:space="preserve">
-    <value>Fișierul a fost încărcat cu suprascriere: {0}</value>
-  </data>
-  <data name="FormOpenedForFilling" xml:space="preserve">
-    <value>Fișierul este deschis pentru completare: {0}</value>
-  </data>
-  <data name="FormSubmit" xml:space="preserve">
-    <value>Utilizatori [{0}]. Formular a fost trimis: {1}</value>
-  </data>
-  <data name="QuotaPerPortalChanged" xml:space="preserve">
-    <value>Stabilirea cotei de stocare implicită: {0}</value>
-  </data>
-  <data name="QuotaPerPortalDisabled" xml:space="preserve">
-    <value>Cotă de stocare implicită este dezactivată</value>
-  </data>
-  <data name="QuotaPerRoomChanged" xml:space="preserve">
-    <value>Stabilirea cotei de stocare implicită pentru săli: {0}</value>
-  </data>
-  <data name="QuotaPerRoomDisabled" xml:space="preserve">
-    <value>Cotă de stocare implicită pentru săli este dezactivată</value>
-  </data>
-  <data name="QuotaPerUserChanged" xml:space="preserve">
-    <value>Stabilirea cotei de stocare implicită pentru utilizatori: {0}</value>
-  </data>
-  <data name="QuotaPerUserDisabled" xml:space="preserve">
-    <value>Cotă de stocare implicită pentru utilizatori este dezactivată</value>
-  </data>
-  <data name="RoomCopied" xml:space="preserve">
-    <value>Sala copiată: {0}</value>
-  </data>
-  <data name="RoomGroupAdded" xml:space="preserve">
-    <value>Grup adăugat: {0}. Rol: {1}</value>
-  </data>
-  <data name="RoomGroupRemove" xml:space="preserve">
-    <value>Grup șters: {0}</value>
-  </data>
-  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
-    <value>{0} desemnat(ți): {1}</value>
-  </data>
-  <data name="SendJoinInvite" xml:space="preserve">
-    <value>Utilizatorul {0} a trimis invitația de asociere la DocSpace către {1}</value>
-  </data>
-  <data name="FileIndexChanged" xml:space="preserve">
-    <value>Fișierul: {0}. Indexul s-a schimbat din {1} în {2}</value>
-  </data>
-  <data name="FolderIndexChanged" xml:space="preserve">
-    <value>Folderul: {0}. Indexul s-a schimbat din {1} în {2}</value>
-  </data>
-  <data name="FolderIndexReordered" xml:space="preserve">
-    <value>Folderul: {0}. Indexuri au fost înregistrate</value>
-  </data>
-  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
-    <value>Sală: {0}. Interzicerea încărcării a fost dezactivată</value>
-  </data>
-  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
-    <value>Sală: {0}. Interzicerea încărcării a fost activată</value>
-  </data>
-  <data name="RoomIndexExportSaved" xml:space="preserve">
-    <value>Exportul indexelor de săli din secțiunea Documente</value>
-  </data>
-  <data name="RoomIndexingDisabled" xml:space="preserve">
-    <value>Indexarea sălilor a fost dezactivată</value>
-  </data>
-  <data name="RoomIndexingEnabled" xml:space="preserve">
-    <value>Indexarea sălilor a fost activată</value>
-  </data>
-  <data name="RoomLifeTimeDisabled" xml:space="preserve">
-    <value>Durată de viaţă este dezactivată</value>
-  </data>
-  <data name="RoomLifeTimeSet" xml:space="preserve">
-    <value>Durată de viaţă este definită. Valoarea: {0}. Perioadă: {1}. Ștergerea definitivă {2}</value>
-  </data>
-  <data name="RoomWatermarkDisabled" xml:space="preserve">
-    <value>Sală: {0}. Inscripționare a fost dezactivată</value>
-  </data>
-  <data name="RoomWatermarkSet" xml:space="preserve">
-    <value>Sală: {0}. Inscripționare a fost activată</value>
-  </data>
-  <data name="RoomInviteResend" xml:space="preserve">
-    <value>Invitația a trimis din nou: {0}</value>
-  </data>
-  <data name="ChangeClientActivation" xml:space="preserve">
-    <value>Activarea Clientului {0} s-a schimbat</value>
-  </data>
-  <data name="ChangeClientVisibility" xml:space="preserve">
-    <value>Vizibilitatea Clientului {0} s-a schimbat</value>
-  </data>
-  <data name="CreateClient" xml:space="preserve">
-    <value>Clientul a fost creat</value>
-  </data>
-  <data name="DeleteClient" xml:space="preserve">
-    <value>Clientul {0} a fost șters</value>
-  </data>
-  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
-    <value>Codul de autorizare a fost generat pentru clientul {0}</value>
-  </data>
-  <data name="GeneratePersonalAccessToken" xml:space="preserve">
-    <value>Token-ul de acces personal a fost generat pentru clientul {0}</value>
-  </data>
-  <data name="RegenerateSecret" xml:space="preserve">
-    <value>Cheia secretă a clientului {0} a fost regenerată</value>
-  </data>
-  <data name="RevokeUserClient" xml:space="preserve">
-    <value>Accesul clientului {0} a fost revocat</value>
-  </data>
-  <data name="UpdateClient" xml:space="preserve">
-    <value>Clientul {0} a fost actualizat</value>
-  </data>
-  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
-    <value>Setări de acces la Instrumente pentru dezvoltatori s-au schimbat</value>
-  </data>
-  <data name="FileVersionRemoved" xml:space="preserve">
-    <value>Fișiere [{0}]. Versiunea a fost ștearsă: {1}</value>
-  </data>
-  <data name="FormCompletelyFilled" xml:space="preserve">
-    <value>Utilizatori [{0}]. Formular completat în întregime: {1}</value>
-  </data>
-  <data name="FormPartiallyFilled" xml:space="preserve">
-    <value>Utilizatori [{0}]. Formularul este completat parțial: {1}</value>
-  </data>
-  <data name="FormStartedToFill" xml:space="preserve">
-    <value>Utilizatori [{0}]. Completarea s-a început: {1}</value>
-  </data>
-  <data name="FormStopped" xml:space="preserve">
-    <value>Utilizatori [{0}]. Completarea formularului încetată: {1}</value>
-  </data>
   <data name="WebhookCreated" xml:space="preserve">
     <value>Webhook a fost creat: {0}</value>
   </data>
@@ -935,192 +1121,6 @@
   </data>
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Webhook a fost actualizat {0}</value>
-  </data>
-  <data name="ApiKeyCreated" xml:space="preserve">
-    <value>Cheie API pentru utilizator a fost creată: {0}</value>
-  </data>
-  <data name="ApiKeyDeleted" xml:space="preserve">
-    <value>Cheie API pentru utilizator a fost eliminată: {0}</value>
-  </data>
-  <data name="ApiKeyUpdated" xml:space="preserve">
-    <value>Cheie API pentru utilizator a fost actualizată: {0}</value>
-  </data>
-  <data name="FileCustomFilterDisabled" xml:space="preserve">
-    <value>Fișierul: {0}. Filtrul personalizat a fost dezactivat</value>
-  </data>
-  <data name="FileCustomFilterEnabled" xml:space="preserve">
-    <value>Fișierul: {0}. Filtrul personalizat a fost activat</value>
-  </data>
-  <data name="AuthLinkActivated" xml:space="preserve">
-    <value>Link-ul de autorizare a fost activat</value>
-  </data>
-  <data name="LdapDisabled" xml:space="preserve">
-    <value>Autentificarea LDAP a fost dezactivată</value>
-  </data>
-  <data name="LdapEnabled" xml:space="preserve">
-    <value>Autentificarea LDAP a fost activată</value>
-  </data>
-  <data name="LdapSync" xml:space="preserve">
-    <value>Sincronizarea LDAP s-a încheiat</value>
-  </data>
-  <data name="CustomerOperationPerformed" xml:space="preserve">
-    <value>Operațiunea efectuată de client</value>
-  </data>
-  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
-    <value>Raportul privind operaţiunile de client a fost descărcat</value>
-  </data>
-  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
-    <value>Abonamentrul clientului a fost actualizat: {0}</value>
-  </data>
-  <data name="CustomerWalletToppedUp" xml:space="preserve">
-    <value>Portofelul clientului a fost alimentat: {0}</value>
-  </data>
-  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Setările de alimentare a portofelului de client au fost actualizate</value>
-  </data>
-  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Setările serviciilor care au fost activate cu portofelul clientului au fost actualizate</value>
-  </data>
-  <data name="LocationCol" xml:space="preserve">
-    <value>Locaţie</value>
-  </data>
-  <data name="LoginSuccessViaOAuth" xml:space="preserve">
-    <value>Autentificarea reușită prin OAuth 2.0</value>
-  </data>
-  <data name="LoginSuccessViaPassword" xml:space="preserve">
-    <value>Autentificarea reușită cu nume de utilizator și parolă</value>
-  </data>
-  <data name="FileExternalLinkCreated" xml:space="preserve">
-    <value>Fișiere [{0}]. Link-ul extern a fost creat: {1}. Rol: {2}</value>
-  </data>
-  <data name="FileExternalLinkDeleted" xml:space="preserve">
-    <value>Fișiere [{0}]. Link-ul extern a fost șters: {1}</value>
-  </data>
-  <data name="FileExternalLinkUpdated" xml:space="preserve">
-    <value>Fișiere [{0}]. Link-ul extern a fost actualizat: {1}. Rol: {2}</value>
-  </data>
-  <data name="FileMarkedAsFavorite" xml:space="preserve">
-    <value>Fișierul a fost marcat ca favorit: {0}</value>
-  </data>
-  <data name="FileRemovedFromFavorite" xml:space="preserve">
-    <value>Fişierul a fost eliminat din Favorite: {0}</value>
-  </data>
-  <data name="FileRemovedFromList" xml:space="preserve">
-    <value>Fişieul a fost eliminat din secțiunea Partajate cu mine: {0}</value>
-  </data>
-  <data name="FileUpdatedAccessFor" xml:space="preserve">
-    <value>Fișiere [{0}]. Permisiuni de acces actualizate pentru {1}. Rol: {2}</value>
-  </data>
-  <data name="FolderDownloaded" xml:space="preserve">
-    <value>Folderul a fost încărcat {0}</value>
-  </data>
-  <data name="FolderExternalLinkCreated" xml:space="preserve">
-    <value>Foldere [{0}]. Link-ul extern a fost creat: {1}. Rol: {2}</value>
-  </data>
-  <data name="FolderExternalLinkDeleted" xml:space="preserve">
-    <value>Foldere [{0}]. Link-ul extern a fost șters: {1}</value>
-  </data>
-  <data name="FolderExternalLinkUpdated" xml:space="preserve">
-    <value>Foldere [{0}]. Link-ul extern a fost actualizat: {1}. Rol: {2}</value>
-  </data>
-  <data name="FolderRemovedFromList" xml:space="preserve">
-    <value>Folderul a fost eliminat din secțiunea Partajate cu mine: {0}</value>
-  </data>
-  <data name="FolderUpdatedAccessFor" xml:space="preserve">
-    <value>Foldere [{0}]. Permisiuni de acces au fost actualizate pentru {1}. Rol: {2}</value>
-  </data>
-  <data name="BannerSettingsChanged" xml:space="preserve">
-    <value>Setările de vizibilitate ale anunțurilor banner au fost modificate</value>
-  </data>
-  <data name="RoomExternalLinkRevoked" xml:space="preserve">
-    <value>Link-ul extern a fost revocat: {1}</value>
-  </data>
-  <data name="LoginSuccessSocialAccount" xml:space="preserve">
-    <value>Conectarea prin cont de rețea socială a reușit</value>
-  </data>
-  <data name="AddedServerToAgent" xml:space="preserve">
-    <value>Serverul MCP {0} a fost adăugat la agentul</value>
-  </data>
-  <data name="AgentCreated" xml:space="preserve">
-    <value>Agentul a fost creat</value>
-  </data>
-  <data name="AgentDeleted" xml:space="preserve">
-    <value>Agentul a fost șters</value>
-  </data>
-  <data name="AgentRenamed" xml:space="preserve">
-    <value>Agentul a fost redenumit {0}</value>
-  </data>
-  <data name="AgentsModule" xml:space="preserve">
-    <value>Agenți</value>
-  </data>
-  <data name="AIProviderCreated" xml:space="preserve">
-    <value>Furnizorul de IA a fost creat: {0}</value>
-  </data>
-  <data name="AIProviderDeleted" xml:space="preserve">
-    <value>Furnizorul de IA a fost șters: {0}</value>
-  </data>
-  <data name="AIProviderUpdated" xml:space="preserve">
-    <value>Furnizorul de IA a fost actualizat: {0}</value>
-  </data>
-  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
-    <value>Agenți de IA [{0}]. Stabilire cotă de stocare particularizată pentru agenți de IA: {1}</value>
-  </data>
-  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
-    <value>Agenți de IA [{0}]. Stabilire cotă de stocare implicită pentru agenți de IA: {1}</value>
-  </data>
-  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
-    <value>Agenți de IA [{0}]. Cotă de stocare pentru agenți de IA este dezactivată</value>
-  </data>
-  <data name="DeletedServerFromAgent" xml:space="preserve">
-    <value>Serverul MCP {0} a fost eliminat din agentul</value>
-  </data>
-  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
-    <value>Stabilire cotă de stocare implicită pentru agenții de IA: {0}</value>
-  </data>
-  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
-    <value>Cotă de stocare implicită pentru agenți de IA este dezactivată</value>
-  </data>
-  <data name="ResetVectorizationSettings" xml:space="preserve">
-    <value>Setările de vectorizare au fost resetate</value>
-  </data>
-  <data name="ResetWebSearchSettings" xml:space="preserve">
-    <value>Setările de căutare pe web au fost resetate</value>
-  </data>
-  <data name="ServerCreated" xml:space="preserve">
-    <value>Serverul MCP a fost creat: {0}</value>
-  </data>
-  <data name="ServerDeleted" xml:space="preserve">
-    <value>Severul MCP a fost șters: {0}</value>
-  </data>
-  <data name="ServerDisabled" xml:space="preserve">
-    <value>Severul MCP a fost dezctivat: {0}</value>
-  </data>
-  <data name="ServerEnabled" xml:space="preserve">
-    <value>Severul MCP a fost activat: {0}</value>
-  </data>
-  <data name="ServerUpdated" xml:space="preserve">
-    <value>Severul MCP a fost actualizat: {0}</value>
-  </data>
-  <data name="SetVectorizationSettings" xml:space="preserve">
-    <value>Setările de vectorizare au fost configurate. Furnizor: {0}</value>
-  </data>
-  <data name="SetWebSearchSettings" xml:space="preserve">
-    <value>Setările de căutare pe web au fost configurate. Motor: {0}</value>
-  </data>
-  <data name="BackupCompleted" xml:space="preserve">
-    <value>Copierea de rezervă a fost finalizată</value>
-  </data>
-  <data name="BackupFailed" xml:space="preserve">
-    <value>Copierea de rezervă nu a reușit</value>
-  </data>
-  <data name="ScheduledBackupCompleted" xml:space="preserve">
-    <value>Copierea de rezervă programată a fost finalizată</value>
-  </data>
-  <data name="ScheduledBackupFailed" xml:space="preserve">
-    <value>Copierea de rezervă programată nu a reușit</value>
-  </data>
-  <data name="ScheduledBackupStarted" xml:space="preserve">
-    <value>Copierea de rezervă programată a fost inițiată</value>
   </data>
   <data name="WebpluginDeleted" xml:space="preserve">
     <value>Plugin-ul a fost șters: {0}</value>

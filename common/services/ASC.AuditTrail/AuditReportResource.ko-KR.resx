@@ -117,587 +117,20 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AddedRoomTags" xml:space="preserve">
-    <value>추가된 태그: [{1}]</value>
-  </data>
-  <data name="DeletedRoomTags" xml:space="preserve">
-    <value>삭제된 태그: [{1}]</value>
-  </data>
-  <data name="RoomArchived" xml:space="preserve">
-    <value>방이 아카이브되었습니다</value>
-  </data>
-  <data name="RoomCreated" xml:space="preserve">
-    <value>방이 생성되었습니다</value>
-  </data>
-  <data name="RoomCreateUser" xml:space="preserve">
-    <value>추가된 사용자: {0}. 역할: {1}</value>
-  </data>
-  <data name="RoomDeleted" xml:space="preserve">
-    <value>방이 삭제되었습니다</value>
-  </data>
-  <data name="RoomInvitationLinkCreated" xml:space="preserve">
-    <value>링크가 생성되었습니다. 역할: {1}</value>
-  </data>
-  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
-    <value>링크가 삭제되었습니다</value>
-  </data>
-  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
-    <value>링크가 업데이트되었습니다. 역할: {1}</value>
-  </data>
-  <data name="RoomLogoCreated" xml:space="preserve">
-    <value>로고가 생성되었습니다</value>
-  </data>
-  <data name="RoomLogoDeleted" xml:space="preserve">
-    <value>로고가 삭제되었습니다</value>
-  </data>
-  <data name="RoomRemoveUser" xml:space="preserve">
-    <value>삭제된 사용자: {0}</value>
-  </data>
-  <data name="RoomRenamed" xml:space="preserve">
-    <value>방의 이름이 변경되었습니다: {0}</value>
-  </data>
-  <data name="RoomUnarchived" xml:space="preserve">
-    <value>방의 아카이브가 취소되었습니다</value>
-  </data>
-  <data name="RoomsModule" xml:space="preserve">
-    <value>방</value>
-  </data>
-  <data name="RoomUpdateAccessForUser" xml:space="preserve">
-    <value>{0} 지정 완료: {1}</value>
-  </data>
-  <data name="TagCreated" xml:space="preserve">
-    <value>태그가 생성되었습니다: {0}</value>
-  </data>
-  <data name="TagsDeleted" xml:space="preserve">
-    <value>태그가 삭제되었습니다: {0}</value>
-  </data>
-  <data name="GreetingSettingsUpdated" xml:space="preserve">
-    <value>환영 페이지 설정이 업데이트되었습니다</value>
-  </data>
-  <data name="UsersDeleted" xml:space="preserve">
-    <value>사용자가 삭제되었습니다: {0}</value>
-  </data>
-  <data name="UsersUpdatedType" xml:space="preserve">
-    <value>사용자 [{0}]. 유형이 업데이트되었습니다</value>
-  </data>
-  <data name="UsersUpdatedStatus" xml:space="preserve">
-    <value>사용자 [{0}]. 상태가 업데이트되었습니다</value>
-  </data>
-  <data name="UserSentPasswordInstructions" xml:space="preserve">
-    <value>사용자 [{0}]. 비밀번호 변경 지침이 전송되었습니다</value>
-  </data>
-  <data name="UserSentEmailInstructions" xml:space="preserve">
-    <value>사용자 [{0}]. 이메일 변경 지침이 전송되었습니다</value>
-  </data>
-  <data name="UserSentActivationInstructions" xml:space="preserve">
-    <value>사용자 [{0}]. 활성화 지침이 전송되었습니다</value>
-  </data>
-  <data name="UserUpdatedMobileNumber" xml:space="preserve">
-    <value>사용자 [{0}]. 휴대폰 번호가 업데이트되었습니다: {1}</value>
-  </data>
-  <data name="UserFileUpdated" xml:space="preserve">
-    <value>사용자 [{0}]. 파일이 업데이트되었습니다: {1}</value>
-  </data>
-  <data name="UserUpdatedAvatarThumbnails" xml:space="preserve">
-    <value>사용자 [{0}]. 아바타 썸네일이 업데이트되었습니다</value>
-  </data>
-  <data name="UserDeletedAvatar" xml:space="preserve">
-    <value>사용자 [{0}]. 아바타가 삭제되었습니다</value>
-  </data>
-  <data name="UserAddedAvatar" xml:space="preserve">
-    <value>사용자 [{0}]. 아바타가 추가되었습니다</value>
-  </data>
-  <data name="UsersSentActivationInstructions" xml:space="preserve">
-    <value>사용자 [{0}]. 활성화 지침이 전송되었습니다</value>
-  </data>
-  <data name="UserUpdated" xml:space="preserve">
-    <value>사용자가 업데이트되었습니다: {0}</value>
-  </data>
-  <data name="UserImported" xml:space="preserve">
-    <value>사용자가 가져오기되었습니다: {0}</value>
-  </data>
-  <data name="UserDeleted" xml:space="preserve">
-    <value>사용자가 삭제되었습니다: {0}</value>
-  </data>
-  <data name="UserDataRemoving" xml:space="preserve">
-    <value>{0} 에 대한 사용자 데이터가 삭제되었습니다</value>
-  </data>
-  <data name="UserCreated" xml:space="preserve">
-    <value>사용자가 생성되었습니다: {0}</value>
-  </data>
-  <data name="UserCreatedViaInvite" xml:space="preserve">
-    <value>초대를 통해 사용자가 생성되었습니다: {0}</value>
-  </data>
-  <data name="UserActivated" xml:space="preserve">
-    <value>사용자가 활성화되었습니다: {0}</value>
-  </data>
-  <data name="UserCol" xml:space="preserve">
-    <value>사용자</value>
-  </data>
-  <data name="DocumentsUploadingFormatsSettingsUpdated" xml:space="preserve">
-    <value>업로딩 형식 설정이 업데이트되었습니다</value>
-  </data>
-  <data name="UploadActionType" xml:space="preserve">
-    <value>업로드</value>
-  </data>
-  <data name="UpdateAccessActionType" xml:space="preserve">
-    <value>액세스가 업데이트되었습니다</value>
-  </data>
-  <data name="UpdateActionType" xml:space="preserve">
-    <value>업데이트</value>
-  </data>
-  <data name="UnlinkActionType" xml:space="preserve">
-    <value>연결 해제</value>
-  </data>
-  <data name="UnknownAccount" xml:space="preserve">
-    <value>알 수 없는 계정</value>
-  </data>
-  <data name="UnfollowActionType" xml:space="preserve">
-    <value>팔로우 해제</value>
-  </data>
-  <data name="TwoFactorAuthenticationSettingsDisabled" xml:space="preserve">
-    <value>이중 인증 설정이 업데이트되었습니다: 이중 인증이 비활성화되었습니다</value>
-  </data>
-  <data name="TwoFactorAuthenticationSettingsEnabledBySms" xml:space="preserve">
-    <value>이중 인증 설정이 업데이트되었습니다: SMS 확인이 활성화되었습니다</value>
-  </data>
-  <data name="TwoFactorAuthenticationSettingsEnabledByTfaApp" xml:space="preserve">
-    <value>이중 인증 설정이 업데이트되었습니다: 인증이 활성화되었습니다</value>
-  </data>
-  <data name="TwoFactorAuthenticationSettingsUpdated" xml:space="preserve">
-    <value>이중 인증 설정이 업데이트되었습니다</value>
-  </data>
-  <data name="TrustedMailDomainSettingsUpdated" xml:space="preserve">
-    <value>신뢰할 수 있는 메일 도메인 설정이 업데이트되었습니다</value>
-  </data>
-  <data name="TrashEmptied" xml:space="preserve">
-    <value>휴지통이 비워졌습니다</value>
-  </data>
-  <data name="TimeZoneSettingsUpdated" xml:space="preserve">
-    <value>시간대 설정이 업데이트되었습니다</value>
-  </data>
-  <data name="TimeTrackingModule" xml:space="preserve">
-    <value>시간 추적 중</value>
-  </data>
-  <data name="DocumentsThirdPartySettingsUpdated" xml:space="preserve">
-    <value>제3자 설정이 업데이트되었습니다</value>
-  </data>
-  <data name="AuthorizationKeysSetting" xml:space="preserve">
-    <value>제3자 인증 키가 업데이트되었습니다</value>
-  </data>
-  <data name="ThirdPartyUpdated" xml:space="preserve">
-    <value>제3자가 업데이트했습니다: {0}. 제공자: {1}</value>
-  </data>
-  <data name="ThirdPartyDeleted" xml:space="preserve">
-    <value>제3자가 삭제했습니다: {0}. 제공자: {1}</value>
-  </data>
-  <data name="ThirdPartyCreated" xml:space="preserve">
-    <value>제3자가 생성했습니다: {0}. 제공자: {1}</value>
-  </data>
-  <data name="TeamTemplateChanged" xml:space="preserve">
-    <value>팀 템플릿이 변경되었습니다</value>
-  </data>
-  <data name="TargetIdCol" xml:space="preserve">
-    <value>타깃 ID</value>
-  </data>
-  <data name="SystemAccount" xml:space="preserve">
-    <value>시스템 계정</value>
-  </data>
-  <data name="LoginSuccessViaSSO" xml:space="preserve">
-    <value>SSO를 통한 로그인에 성공했습니다</value>
-  </data>
-  <data name="LoginSuccessSocialApp" xml:space="preserve">
-    <value>소셜 애플리케이션을 통한 로그인에 성공했습니다</value>
-  </data>
-  <data name="LoginSuccesViaTfaApp" xml:space="preserve">
-    <value>인증 애플리케이션을 통한 로그인에 성공했습니다</value>
-  </data>
-  <data name="LoginSuccessViaApiSms" xml:space="preserve">
-    <value>API &amp; SMS 코드를 통한 로그인에 성공했습니다</value>
-  </data>
-  <data name="LoginSuccessViaApiTfa" xml:space="preserve">
-    <value>API &amp; 인증 애플리케이션을 통한 로그인에 성공했습니다</value>
-  </data>
-  <data name="LoginSuccessViaApi" xml:space="preserve">
-    <value>API를 통한 로그인에 성공했습니다</value>
-  </data>
-  <data name="DocumentsStoreForcesave" xml:space="preserve">
-    <value>강제 저장 설정이 업데이트되었습니다</value>
-  </data>
-  <data name="StartStorageEncryption" xml:space="preserve">
-    <value>스토리지 암호화 시작</value>
-  </data>
-  <data name="StartStorageDecryption" xml:space="preserve">
-    <value>스토리지 복호화 시작</value>
-  </data>
-  <data name="StartTransferSetting" xml:space="preserve">
-    <value>포털 리전 마이그레이션 시작</value>
-  </data>
-  <data name="BackupStarted" xml:space="preserve">
-    <value>백업 시작</value>
-  </data>
-  <data name="SSOEnabled" xml:space="preserve">
-    <value>SSO가 활성화되었습니다</value>
-  </data>
-  <data name="SSODisabled" xml:space="preserve">
-    <value>SSO가 비활성화되었습니다</value>
-  </data>
-  <data name="FullTextSearchSetting" xml:space="preserve">
-    <value>Sphinx 설정이 업데이트되었습니다</value>
-  </data>
-  <data name="UserUnlinkedSocialAccount" xml:space="preserve">
-    <value>소셜 계정의 연결이 해제되었습니다. 제공자: {0}</value>
-  </data>
-  <data name="UserLinkedSocialAccount" xml:space="preserve">
-    <value>소셜 계정이 연결되었습니다. 제공자: {0}</value>
-  </data>
-  <data name="DocumentsSettingsModule" xml:space="preserve">
-    <value>설정</value>
-  </data>
-  <data name="FileChangeOwner" xml:space="preserve">
-    <value>[{0}] 소유자가 [{1}]님으로 설정되었습니다</value>
-  </data>
-  <data name="SessionStarted" xml:space="preserve">
-    <value>세션이 시작되었습니다</value>
-  </data>
-  <data name="SessionCompleted" xml:space="preserve">
-    <value>세션이 완료되었습니다</value>
-  </data>
-  <data name="SettingsModule" xml:space="preserve">
-    <value>설정</value>
-  </data>
-  <data name="FileSendAccessLink" xml:space="preserve">
-    <value>[{0}] 파일로 공유 링크가 발송되었습니다. 수신자: [{1}]</value>
-  </data>
-  <data name="UserSentDeleteInstructions" xml:space="preserve">
-    <value>프로필 삭제 지침이 전송되었습니다</value>
-  </data>
-  <data name="SendActionType" xml:space="preserve">
-    <value>전송</value>
-  </data>
-  <data name="ReassignsActionType" xml:space="preserve">
-    <value>재할당</value>
-  </data>
-  <data name="ProductAccessOpenedForUsers" xml:space="preserve">
-    <value>프로덕트: [{0}]. 사용자 [{1}].  액세스가 열렸습니다</value>
-  </data>
-  <data name="ProductAccessOpenedForGroups" xml:space="preserve">
-    <value>프로덕트: [{0}]. 그룹 [{1}].  액세스가 열렸습니다</value>
-  </data>
-  <data name="ProductsListUpdated" xml:space="preserve">
-    <value>프로덕트 목록이 업데이트되었습니다</value>
-  </data>
-  <data name="ProductDeletedAdministrator" xml:space="preserve">
-    <value>프로덕트 [{0}]. 관리자가 삭제되었습니다: {1}</value>
-  </data>
-  <data name="ProductAddedAdministrator" xml:space="preserve">
-    <value>프로덕트 [{0}]. 관리자가 추가되었습니다: {1}</value>
-  </data>
-  <data name="ProductAccessRestricted" xml:space="preserve">
-    <value>프로덕트 [{0}]. 액세스가 제한되었습니다</value>
-  </data>
-  <data name="ProductAccessOpened" xml:space="preserve">
-    <value>프로덕트 [{0}]. 액세스가 열렸습니다</value>
-  </data>
-  <data name="ProductCol" xml:space="preserve">
-    <value>프로덕트</value>
-  </data>
-  <data name="PrivacyRoomEnable" xml:space="preserve">
-    <value>포털 룸이 활성화되었습니다</value>
-  </data>
-  <data name="PrivacyRoomDisable" xml:space="preserve">
-    <value>포털 룸이 비활성화되었습니다</value>
-  </data>
-  <data name="PortalDeleted" xml:space="preserve">
-    <value>포털이 삭제되었습니다</value>
-  </data>
-  <data name="PortalDeactivated" xml:space="preserve">
-    <value>포털이 비활성화되었습니다</value>
-  </data>
-  <data name="PortalAccessSettingsUpdated" xml:space="preserve">
-    <value>포털 액세스 설정이 업데이트되었습니다</value>
-  </data>
-  <data name="PlatformCol" xml:space="preserve">
-    <value>플랫폼</value>
-  </data>
-  <data name="UserUpdatedPassword" xml:space="preserve">
-    <value>비밀번호가 업데이트되었습니다</value>
-  </data>
-  <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
-    <value>비밀번호 강도 설정이 업데이트되었습니다</value>
-  </data>
-  <data name="PageCol" xml:space="preserve">
-    <value>페이지</value>
-  </data>
-  <data name="OwnerChanged" xml:space="preserve">
-    <value>소유자가 변경되었습니다: {0}</value>
-  </data>
-  <data name="OwnerSentPortalDeleteInstructions" xml:space="preserve">
-    <value>소유자 [{0}]. 포털 삭제 지침이 전송되었습니다</value>
-  </data>
-  <data name="OwnerSentPortalDeactivationInstructions" xml:space="preserve">
-    <value>소유자 [{0}]. 포털 비활성화 지침이 전송되었습니다</value>
-  </data>
-  <data name="OwnerSentChangeOwnerInstructions" xml:space="preserve">
-    <value>소유자 [{0}]. 소유자 변경 지침이 전송되었습니다</value>
-  </data>
-  <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
-    <value>덮어쓰기 설정이 업데이트되었습니다</value>
-  </data>
-  <data name="UserTfaGenerateCodes" xml:space="preserve">
-    <value>새로운 백업 코드가 생성되었습니다</value>
-  </data>
-  <data name="MoveActionType" xml:space="preserve">
-    <value>이동</value>
-  </data>
-  <data name="ModuleCol" xml:space="preserve">
-    <value>모듈</value>
-  </data>
-  <data name="MailServiceSettingsUpdated" xml:space="preserve">
-    <value>메일 서비스 설정이 업데이트되었습니다</value>
-  </data>
-  <data name="Logout" xml:space="preserve">
-    <value>로그아웃</value>
-  </data>
-  <data name="LoginFailViaSSO" xml:space="preserve">
-    <value>SSO를 통한 로그인에 실패했습니다</value>
-  </data>
-  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>소셜 계정을 통한 로그인에 성공했습니다: {0}</value>
-  </data>
-  <data name="LoginSuccessViaSms" xml:space="preserve">
-    <value>SMS를 통한 로그인에 성공했습니다</value>
-  </data>
-  <data name="LoginFailViaSms" xml:space="preserve">
-    <value>SMS를 통한 로그인에 실패했습니다</value>
-  </data>
-  <data name="LoginFailViaTfaApp" xml:space="preserve">
-    <value>인증 애플리케이션을 통한 로그인에 실패했습니다</value>
-  </data>
-  <data name="LoginSuccessViaSocialAccount" xml:space="preserve">
-    <value>API &amp; 소셜 미디어를 통한 로그인에 성공했습니다</value>
-  </data>
-  <data name="LoginFailViaApiSocialAccount" xml:space="preserve">
-    <value>API &amp; 소셜 미디어를 통한 로그인에 실패했습니다</value>
-  </data>
-  <data name="LoginSuccess" xml:space="preserve">
-    <value>로그인에 성공했습니다</value>
-  </data>
-  <data name="LoginHistoryReportDownloaded" xml:space="preserve">
-    <value>로그인 기록 보고서가 다운로드되었습니다</value>
-  </data>
-  <data name="LoginHistoryReportName" xml:space="preserve">
-    <value>로그인 기록 보고서 ({0}-{1})</value>
-  </data>
-  <data name="LoginFailBruteForce" xml:space="preserve">
-    <value>로그인 실패. 너무 많이 시도했습니다</value>
-  </data>
-  <data name="LoginFailRecaptcha" xml:space="preserve">
-    <value>로그인 실패. Recaptcha가 유효하지 않습니다</value>
-  </data>
-  <data name="LoginFailDisabledProfile" xml:space="preserve">
-    <value>로그인 실패. 프로필이 비활성화되었습니다</value>
-  </data>
-  <data name="LoginFailInvalidCombination" xml:space="preserve">
-    <value>로그인 실패. 사용자명-비밀번호 조합이 유효하지 않습니다</value>
-  </data>
-  <data name="LoginFailSocialAccountNotFound" xml:space="preserve">
-    <value>로그인 실패. 연결된 소셜 계정을 찾지 못했습니다</value>
-  </data>
-  <data name="LoginFail" xml:space="preserve">
-    <value>로그인 실패</value>
-  </data>
-  <data name="LinkActionType" xml:space="preserve">
-    <value>연결</value>
-  </data>
-  <data name="LicenseKeyUploaded" xml:space="preserve">
-    <value>라이선스 키가 업로드되었습니다</value>
-  </data>
-  <data name="UserUpdatedLanguage" xml:space="preserve">
-    <value>언어가 업데이트되었습니다</value>
-  </data>
-  <data name="LanguageSettingsUpdated" xml:space="preserve">
-    <value>언어 설정이 업데이트되었습니다</value>
-  </data>
-  <data name="LoginFailIpSecurity" xml:space="preserve">
-    <value>IP 보안: 로그인에 실패했습니다</value>
-  </data>
-  <data name="IpCol" xml:space="preserve">
-    <value>IP</value>
-  </data>
-  <data name="SentInviteInstructions" xml:space="preserve">
-    <value>초대 지침이 전송되었습니다: {0}</value>
-  </data>
-  <data name="ImportActionType" xml:space="preserve">
-    <value>가져오기</value>
-  </data>
-  <data name="GuestImported" xml:space="preserve">
-    <value>게스트가 가져오기되었습니다: {0}</value>
-  </data>
-  <data name="GuestCreated" xml:space="preserve">
-    <value>게스트가 생성되었습니다: {0}</value>
-  </data>
-  <data name="GuestCreatedViaInvite" xml:space="preserve">
-    <value>초대를 통해 게스트가 생성되었습니다: {0}</value>
-  </data>
-  <data name="GuestActivated" xml:space="preserve">
-    <value>게스트가 활성화되었습니다: {0}</value>
-  </data>
-  <data name="GuestAccount" xml:space="preserve">
-    <value>게스트</value>
-  </data>
-  <data name="GroupUpdated" xml:space="preserve">
-    <value>그룹이 업데이트되었습니다: {0}</value>
-  </data>
-  <data name="GroupDeleted" xml:space="preserve">
-    <value>그룹이 삭제되었습니다: {0}</value>
-  </data>
-  <data name="GroupCreated" xml:space="preserve">
-    <value>그룹이 생성되었습니다: {0}</value>
-  </data>
-  <data name="DocumentsForcesave" xml:space="preserve">
-    <value>강제 저장 설정이 업데이트되었습니다</value>
-  </data>
-  <data name="FollowActionType" xml:space="preserve">
-    <value>팔로우</value>
-  </data>
-  <data name="FolderMovedWithOverwriting" xml:space="preserve">
-    <value>폴더 [{0}]. {1} 폴더로 덮어쓰기로 이동되었습니다</value>
-  </data>
-  <data name="FolderMovedToTrash" xml:space="preserve">
-    <value>폴더 [{0}]. 휴지통 폴더로 이동되었습니다</value>
-  </data>
-  <data name="FolderMoved" xml:space="preserve">
-    <value>폴더 [{0}]. 폴더로 이동되었습니다: {1}</value>
-  </data>
-  <data name="FileImported" xml:space="preserve">
-    <value>폴더 [{0}]. 파일이 가져오기되었습니다: {1}. 제공자: {2}</value>
-  </data>
-  <data name="FolderCopiedWithOverwriting" xml:space="preserve">
-    <value>폴더 [{0}]. {1} 폴더로 덮어쓰기로 복사되었습니다</value>
-  </data>
-  <data name="FolderCopied" xml:space="preserve">
-    <value>폴더 [{0}]. 폴더로 복사되었습니다: {1}</value>
-  </data>
-  <data name="FolderUpdatedAccess" xml:space="preserve">
-    <value>폴더 [{0}]. 액세스가 업데이트되었습니다</value>
-  </data>
-  <data name="FoldersModule" xml:space="preserve">
-    <value>폴더</value>
-  </data>
-  <data name="FolderRenamed" xml:space="preserve">
-    <value>파일의 이름이 변경되었습니다: {0}</value>
-  </data>
-  <data name="FolderDeleted" xml:space="preserve">
-    <value>폴더가 삭제되었습니다: {0}</value>
-  </data>
-  <data name="FolderCreated" xml:space="preserve">
-    <value>폴더가 생성되었습니다: {0}</value>
-  </data>
-  <data name="FileRestoreVersion" xml:space="preserve">
-    <value>파일 [{0}]. 리비전: {1}. 버전이 복원되었습니다</value>
-  </data>
-  <data name="FileDeletedVersion" xml:space="preserve">
-    <value>파일 [{0}]. 리비전: {1}. 버전이 삭제되었습니다</value>
-  </data>
-  <data name="FileCreatedVersion" xml:space="preserve">
-    <value>파일 [{0}]. 리비전: {1}. 버전이 생성되었습니다</value>
-  </data>
-  <data name="FileUpdatedRevisionComment" xml:space="preserve">
-    <value>파일 [{0}]. 리비전 {1}. 코멘트가 업데이트되었습니다</value>
-  </data>
-  <data name="FileMovedWithOverwriting" xml:space="preserve">
-    <value>파일 [{0}]. "{1}" 폴더에서 "{2}" 폴더로 덮어쓰기로 이동되었습니다</value>
-  </data>
-  <data name="FileMovedToTrash" xml:space="preserve">
-    <value>파일 [{0}]. 휴지통 폴더로 이동되었습니다</value>
-  </data>
-  <data name="FileMoved" xml:space="preserve">
-    <value>파일 [{0}]. "{1}" 폴더에서: "{2}" 폴더로 이동되었습니다</value>
-  </data>
-  <data name="FileDownloadedAs" xml:space="preserve">
-    <value>파일 [{0}]. {1}로 다운로드되었습니다</value>
-  </data>
-  <data name="FileCopiedWithOverwriting" xml:space="preserve">
-    <value>파일 [{0}]. "{1}" 폴더에서 "{2}" 폴더로 덮어쓰기로 복사되었습니다</value>
-  </data>
-  <data name="FileCopied" xml:space="preserve">
-    <value>파일 [{0}]. "{1}" 폴더에서: "{2}" 폴더로 복사되었습니다</value>
-  </data>
-  <data name="FileUpdatedAccess" xml:space="preserve">
-    <value>파일 [{0}]. 액세스가 업데이트되었습니다</value>
-  </data>
-  <data name="FilesModule" xml:space="preserve">
-    <value>파일</value>
-  </data>
-  <data name="FileUploaded" xml:space="preserve">
-    <value>폴더가 업데이트되었습니다: {0}</value>
-  </data>
-  <data name="FileUpdated" xml:space="preserve">
-    <value>파일이 업데이트되었습니다: {0}</value>
-  </data>
-  <data name="FileUnlocked" xml:space="preserve">
-    <value>파일의 잠금이 해제되었습니다: {0}</value>
-  </data>
-  <data name="FileRenamed" xml:space="preserve">
-    <value>파일의 이름이 변경되었습니다: {0}</value>
-  </data>
-  <data name="FileLocked" xml:space="preserve">
-    <value>파일이 잠겼습니다: {0}</value>
-  </data>
-  <data name="FileDownloaded" xml:space="preserve">
-    <value>파일이 다운로드되었습니다: {0}</value>
-  </data>
-  <data name="FileDeleted" xml:space="preserve">
-    <value>파일이 삭제되었습니다: {0}</value>
-  </data>
-  <data name="FileCreated" xml:space="preserve">
-    <value>파일이 생성되었습니다: {0}</value>
-  </data>
-  <data name="FileConverted" xml:space="preserve">
-    <value>파일이 내부 형식으로 변환되었습니다: {0}</value>
-  </data>
-  <data name="LoginFailViaApiSms" xml:space="preserve">
-    <value>API &amp; SMS 코드를 통한 로그인에 실패했습니다</value>
-  </data>
-  <data name="LoginFailViaApiTfa" xml:space="preserve">
-    <value>API &amp; 인증 애플리케이션을 통한 로그인에 실패했습니다</value>
-  </data>
-  <data name="LoginFailViaApi" xml:space="preserve">
-    <value>API를 통한 로그인에 실패했습니다</value>
-  </data>
-  <data name="ExportActionType" xml:space="preserve">
-    <value>내보내기</value>
-  </data>
-  <data name="UserUpdatedEmail" xml:space="preserve">
-    <value>이메일이 업데이트되었습니다</value>
-  </data>
-  <data name="DownloadActionType" xml:space="preserve">
-    <value>다운로드</value>
-  </data>
-  <data name="DocumentServiceLocationSetting" xml:space="preserve">
-    <value>문서 서비스 위치가 업데이트되었습니다</value>
-  </data>
-  <data name="FilesDocumentSigned" xml:space="preserve">
-    <value>{1} 문서가 {0}를 통해 서명되었습니다</value>
-  </data>
-  <data name="FilesRequestSign" xml:space="preserve">
-    <value>{1} 문서가 {0}을 통해 서명하도록 전송되었습니다</value>
-  </data>
-  <data name="DnsSettingsUpdated" xml:space="preserve">
-    <value>DNS 설정이 업데이트되었습니다</value>
-  </data>
-  <data name="DetachActionType" xml:space="preserve">
-    <value>분리</value>
-  </data>
-  <data name="ActionTypeCol" xml:space="preserve">
-    <value>작업 유형</value>
+  <data name="ActionCol" xml:space="preserve">
+    <value>작업</value>
   </data>
   <data name="ActionIdCol" xml:space="preserve">
     <value>작업 ID</value>
   </data>
-  <data name="ActionCol" xml:space="preserve">
-    <value>작업</value>
+  <data name="ActionTypeCol" xml:space="preserve">
+    <value>작업 유형</value>
+  </data>
+  <data name="AddedRoomTags" xml:space="preserve">
+    <value>추가된 태그: [{1}]</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>에이전트에 MCP 서버({0})가 추가되었습니다</value>
   </data>
   <data name="AdministratorAdded" xml:space="preserve">
     <value>관리자가 추가되었습니다: {0}</value>
@@ -710,285 +143,6 @@
   </data>
   <data name="AdministratorOpenedFullAccess" xml:space="preserve">
     <value>관리자 [{0}]. 전체 액세스가 열렸습니다</value>
-  </data>
-  <data name="AttachActionType" xml:space="preserve">
-    <value>연결</value>
-  </data>
-  <data name="AuditSettingsUpdated" xml:space="preserve">
-    <value>감사 수명 설정이 업데이트되었습니다</value>
-  </data>
-  <data name="AuditTrailReportName" xml:space="preserve">
-    <value>감사 추적 보고서 ({0}-{1})</value>
-  </data>
-  <data name="AuditTrailReportDownloaded" xml:space="preserve">
-    <value>감사 추적 보고서가 다운로드되었습니다</value>
-  </data>
-  <data name="UserTfaDisconnected" xml:space="preserve">
-    <value>인증 애플리케이션의 연결이 해제되었습니다: {0}</value>
-  </data>
-  <data name="BrowserCol" xml:space="preserve">
-    <value>브라우저</value>
-  </data>
-  <data name="ColorThemeChanged" xml:space="preserve">
-    <value>색상 테마가 변경되었습니다</value>
-  </data>
-  <data name="ContactsModule" xml:space="preserve">
-    <value>연락처</value>
-  </data>
-  <data name="CookieSettingsUpdated" xml:space="preserve">
-    <value>쿠키 설정이 업데이트되었습니다</value>
-  </data>
-  <data name="CopyActionType" xml:space="preserve">
-    <value>복사</value>
-  </data>
-  <data name="CreateActionType" xml:space="preserve">
-    <value>생성</value>
-  </data>
-  <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
-    <value>커스텀 네비게이션 설정이 업데이트되었습니다</value>
-  </data>
-  <data name="UserDataReassigns" xml:space="preserve">
-    <value>데이터 재할당되었습니다: {0} 사용자에서 {1} 사용자에게</value>
-  </data>
-  <data name="DateCol" xml:space="preserve">
-    <value>날짜</value>
-  </data>
-  <data name="DefaultStartPageSettingsUpdated" xml:space="preserve">
-    <value>기본 시작 페이지 설정이 업데이트되었습니다</value>
-  </data>
-  <data name="DeleteActionType" xml:space="preserve">
-    <value>삭제</value>
-  </data>
-  <data name="CityCol" xml:space="preserve">
-    <value>도시</value>
-  </data>
-  <data name="CountryCol" xml:space="preserve">
-    <value>국가</value>
-  </data>
-  <data name="RoomExternalLinkCreated" xml:space="preserve">
-    <value>외부 링크가 생성되었습니다: {0}. 역할: {1}</value>
-  </data>
-  <data name="RoomExternalLinkDeleted" xml:space="preserve">
-    <value>외부 링크가 삭제되었습니다: {0}</value>
-  </data>
-  <data name="RoomExternalLinkUpdated" xml:space="preserve">
-    <value>외부 링크가 업데이트되었습니다: {0}. 역할: {1}</value>
-  </data>
-  <data name="FileOpenedForChange" xml:space="preserve">
-    <value>변경을 위해 파일이 열렸습니다: {0}</value>
-  </data>
-  <data name="PortalRenamed" xml:space="preserve">
-    <value>포털 이름이 변경되었습니다</value>
-  </data>
-  <data name="FileSizePostfix" xml:space="preserve">
-    <value>bytes,KB,MB,GB</value>
-  </data>
-  <data name="FileUploadedWithOverwriting" xml:space="preserve">
-    <value>덮어쓰기로 업로드된 파일: {0}</value>
-  </data>
-  <data name="QuotaPerPortalChanged" xml:space="preserve">
-    <value>기본 스토리지 할당량 설정: {0}</value>
-  </data>
-  <data name="QuotaPerPortalDisabled" xml:space="preserve">
-    <value>비활성화된 기본 스토리지 할당량</value>
-  </data>
-  <data name="QuotaPerRoomChanged" xml:space="preserve">
-    <value>룸에 대한 기본 스토리지 할당량 설정: {0}</value>
-  </data>
-  <data name="QuotaPerRoomDisabled" xml:space="preserve">
-    <value>비활성화된 룸에 대한 기본 스토리지 할당량</value>
-  </data>
-  <data name="QuotaPerUserChanged" xml:space="preserve">
-    <value>사용자에 대한 기본 스토리지 할당량 설정: {0}</value>
-  </data>
-  <data name="QuotaPerUserDisabled" xml:space="preserve">
-    <value>비활성화된 사용자에 대한 기본 스토리지 할당량</value>
-  </data>
-  <data name="RoomCopied" xml:space="preserve">
-    <value>복사된 방: {0}</value>
-  </data>
-  <data name="RoomGroupAdded" xml:space="preserve">
-    <value>추가된 그룹: {0}. 역할: {1}</value>
-  </data>
-  <data name="RoomGroupRemove" xml:space="preserve">
-    <value>삭제된 그룹: {0}</value>
-  </data>
-  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
-    <value>{0} 지정 완료: {1}</value>
-  </data>
-  <data name="SendJoinInvite" xml:space="preserve">
-    <value>사용자 {0}님이 {1}님에게 이 DocSpace에 참여하라는 초대장을 보냈습니다</value>
-  </data>
-  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
-    <value>[{0}] 룸. 룸에 대한 커스텀 스토리지 할당량 설정: {1}</value>
-  </data>
-  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
-    <value>[{0}] 룸. 룸에 대한 기본 스토리지 할당량 설정: {1}</value>
-  </data>
-  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
-    <value>[{0}] 룸. 룸에 대한 스토리지 할당량 비활성화</value>
-  </data>
-  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
-    <value>[{0}] 사용자. 사용자에 대한 커스텀 스토리지 할당량 설정: {1}</value>
-  </data>
-  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
-    <value>[{0}] 사용자. 사용자에 대한 기본 스토리지 할당량 설정: {1}</value>
-  </data>
-  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
-    <value>[{0}] 사용자. 사용자에 대한 스토리지 할당량 비활성화</value>
-  </data>
-  <data name="FormOpenedForFilling" xml:space="preserve">
-    <value>작성을 위해 열린 파일: {0}</value>
-  </data>
-  <data name="FormSubmit" xml:space="preserve">
-    <value>[{0}] 사용자. 제출된 양식: {1}</value>
-  </data>
-  <data name="RoomIndexExportSaved" xml:space="preserve">
-    <value>문서에 저장된 룸 인덱스 내보내기</value>
-  </data>
-  <data name="RoomInviteResend" xml:space="preserve">
-    <value>초대장이 다시 전송되었습니다: {0}</value>
-  </data>
-  <data name="ChangeClientActivation" xml:space="preserve">
-    <value>클라이언트의 {0} 활성화가 변경되었습니다</value>
-  </data>
-  <data name="ChangeClientVisibility" xml:space="preserve">
-    <value>클라이언트의 {0} 가시성이 변경되었습니다</value>
-  </data>
-  <data name="CreateClient" xml:space="preserve">
-    <value>클라이언트가 생성되었습니다</value>
-  </data>
-  <data name="DeleteClient" xml:space="preserve">
-    <value>{0} 클라이언트가 삭제되었습니다</value>
-  </data>
-  <data name="FileIndexChanged" xml:space="preserve">
-    <value>파일: {0}. 인덱스가 변경되었습니다: {1} &gt; {2}</value>
-  </data>
-  <data name="FolderIndexChanged" xml:space="preserve">
-    <value>폴더: {0}. 인덱스가 변경되었습니다: {1} &gt; {2}</value>
-  </data>
-  <data name="FolderIndexReordered" xml:space="preserve">
-    <value>폴더: {0}. 인덱스가 재정렬되었습니다</value>
-  </data>
-  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
-    <value>{0} 클라이언트에 대한 인증 코드가 생성되었습니다</value>
-  </data>
-  <data name="GeneratePersonalAccessToken" xml:space="preserve">
-    <value>{0} 클라이언트에 대한 개인 액세스 토큰이 생성되었습니다</value>
-  </data>
-  <data name="RegenerateSecret" xml:space="preserve">
-    <value>클라이언트의 {0} 시크릿이 재생성되었습니다</value>
-  </data>
-  <data name="RevokeUserClient" xml:space="preserve">
-    <value>{0} 클라이언트 액세스가 취소되었습니다</value>
-  </data>
-  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
-    <value>룸: {0}. 다운로드 거부가 비활성화되었습니다</value>
-  </data>
-  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
-    <value>룸: {0}. 다운로드 거부가 활성화되었습니다</value>
-  </data>
-  <data name="RoomIndexingDisabled" xml:space="preserve">
-    <value>룸 인덱싱이 비활성화되었습니다</value>
-  </data>
-  <data name="RoomIndexingEnabled" xml:space="preserve">
-    <value>룸 인덱싱이 활성화되었습니다</value>
-  </data>
-  <data name="RoomLifeTimeDisabled" xml:space="preserve">
-    <value>수명이 비활성화되었습니다</value>
-  </data>
-  <data name="RoomLifeTimeSet" xml:space="preserve">
-    <value>수명이 설정되었습니다. 값: {0}. 기간: {1}. 영구 삭제: {2}</value>
-  </data>
-  <data name="RoomWatermarkDisabled" xml:space="preserve">
-    <value>룸: {0}. 워터마크가 비활성화되었습니다</value>
-  </data>
-  <data name="RoomWatermarkSet" xml:space="preserve">
-    <value>룸: {0}. 워터마크가 활성화되었습니다</value>
-  </data>
-  <data name="UpdateClient" xml:space="preserve">
-    <value>{0} 클라이언트가 업데이트되었습니다</value>
-  </data>
-  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
-    <value>개발자 도구 액세스 설정이 변경되었습니다</value>
-  </data>
-  <data name="FileCustomFilterDisabled" xml:space="preserve">
-    <value>파일: {0}. 사용자 지정 필터가 비활성화되었습니다</value>
-  </data>
-  <data name="FileCustomFilterEnabled" xml:space="preserve">
-    <value>파일: {0}. 사용자 지정 필터가 활성화되었습니다</value>
-  </data>
-  <data name="FileVersionRemoved" xml:space="preserve">
-    <value>파일 [{0}]. 버전이 삭제되었습니다: {1}</value>
-  </data>
-  <data name="ApiKeyCreated" xml:space="preserve">
-    <value>사용자 API 키가 생성됨: {0}</value>
-  </data>
-  <data name="ApiKeyDeleted" xml:space="preserve">
-    <value>사용자 API 키가 삭제되었습니다: {0}</value>
-  </data>
-  <data name="ApiKeyUpdated" xml:space="preserve">
-    <value>사용자 API 키가 업데이트되었습니다: {0}</value>
-  </data>
-  <data name="FormCompletelyFilled" xml:space="preserve">
-    <value>사용자 [{0}]. 양식 작성이 완료되었습니다: {1}</value>
-  </data>
-  <data name="FormPartiallyFilled" xml:space="preserve">
-    <value>사용자 [{0}]. 양식의 일부가 작성되었습니다: {1}</value>
-  </data>
-  <data name="FormStopped" xml:space="preserve">
-    <value>사용자 [{0}]. 양식이 중지되었습니다: {1}</value>
-  </data>
-  <data name="FormStartedToFill" xml:space="preserve">
-    <value>사용자 [{0}]. 작성이 시작되었습니다: {1}</value>
-  </data>
-  <data name="WebhookCreated" xml:space="preserve">
-    <value>웹훅이 생성되었습니다: {0}</value>
-  </data>
-  <data name="WebhookDeleted" xml:space="preserve">
-    <value>웹훅이 삭제되었습니다: {0}</value>
-  </data>
-  <data name="WebhookUpdated" xml:space="preserve">
-    <value>웹훅이 업데이트되었습니다: {0}</value>
-  </data>
-  <data name="AuthLinkActivated" xml:space="preserve">
-    <value>승인 링크가 활성화되었습니다</value>
-  </data>
-  <data name="CustomerOperationPerformed" xml:space="preserve">
-    <value>고객 작업이 수행되었습니다</value>
-  </data>
-  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
-    <value>고객 작업 보고서가 다운로드되었습니다</value>
-  </data>
-  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
-    <value>고객 구독이 업데이트되었습니다: {0}</value>
-  </data>
-  <data name="CustomerWalletToppedUp" xml:space="preserve">
-    <value>고객 지갑이 충전되었습니다: {0}</value>
-  </data>
-  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>고객 지갑 충전 설정이 업데이트되었습니다</value>
-  </data>
-  <data name="LdapDisabled" xml:space="preserve">
-    <value>LDAP 인증이 비활성화되었습니다</value>
-  </data>
-  <data name="LdapEnabled" xml:space="preserve">
-    <value>LDAP 인증이 활성화되었습니다</value>
-  </data>
-  <data name="LdapSync" xml:space="preserve">
-    <value>LDAP 동기화가 완료되었습니다</value>
-  </data>
-  <data name="LocationCol" xml:space="preserve">
-    <value>위치</value>
-  </data>
-  <data name="BannerSettingsChanged" xml:space="preserve">
-    <value>프로모션 배너 가시성 설정이 변경되었습니다</value>
-  </data>
-  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>고객 지갑 활성화 서비스 설정이 업데이트되었습니다</value>
-  </data>
-  <data name="AddedServerToAgent" xml:space="preserve">
-    <value>에이전트에 MCP 서버({0})가 추가되었습니다</value>
   </data>
   <data name="AgentCreated" xml:space="preserve">
     <value>에이전트가 생성되었습니다</value>
@@ -1011,6 +165,93 @@
   <data name="AIProviderUpdated" xml:space="preserve">
     <value>AI 공급자가 업데이트되었습니다: {0}</value>
   </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>사용자 API 키가 생성됨: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>사용자 API 키가 삭제되었습니다: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>사용자 API 키가 업데이트되었습니다: {0}</value>
+  </data>
+  <data name="AttachActionType" xml:space="preserve">
+    <value>연결</value>
+  </data>
+  <data name="AuditSettingsUpdated" xml:space="preserve">
+    <value>감사 수명 설정이 업데이트되었습니다</value>
+  </data>
+  <data name="AuditTrailReportDownloaded" xml:space="preserve">
+    <value>감사 추적 보고서가 다운로드되었습니다</value>
+  </data>
+  <data name="AuditTrailReportName" xml:space="preserve">
+    <value>감사 추적 보고서 ({0}-{1})</value>
+  </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>승인 링크가 활성화되었습니다</value>
+  </data>
+  <data name="AuthorizationKeysSetting" xml:space="preserve">
+    <value>제3자 인증 키가 업데이트되었습니다</value>
+  </data>
+  <data name="BackupStarted" xml:space="preserve">
+    <value>백업 시작</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>프로모션 배너 가시성 설정이 변경되었습니다</value>
+  </data>
+  <data name="BrowserCol" xml:space="preserve">
+    <value>브라우저</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>클라이언트의 {0} 활성화가 변경되었습니다</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>클라이언트의 {0} 가시성이 변경되었습니다</value>
+  </data>
+  <data name="CityCol" xml:space="preserve">
+    <value>도시</value>
+  </data>
+  <data name="ColorThemeChanged" xml:space="preserve">
+    <value>색상 테마가 변경되었습니다</value>
+  </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>연락처</value>
+  </data>
+  <data name="CookieSettingsUpdated" xml:space="preserve">
+    <value>쿠키 설정이 업데이트되었습니다</value>
+  </data>
+  <data name="CopyActionType" xml:space="preserve">
+    <value>복사</value>
+  </data>
+  <data name="CountryCol" xml:space="preserve">
+    <value>국가</value>
+  </data>
+  <data name="CreateActionType" xml:space="preserve">
+    <value>생성</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>클라이언트가 생성되었습니다</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>고객 작업이 수행되었습니다</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>고객 작업 보고서가 다운로드되었습니다</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>고객 구독이 업데이트되었습니다: {0}</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>고객 지갑 활성화 서비스 설정이 업데이트되었습니다</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>고객 지갑이 충전되었습니다: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>고객 지갑 충전 설정이 업데이트되었습니다</value>
+  </data>
+  <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
+    <value>커스텀 네비게이션 설정이 업데이트되었습니다</value>
+  </data>
   <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
     <value>AI 에이전트 [{0}]. AI 에이전트에 대한 사용자 지정 저장 공간 할당량이 설정되었습니다 : {1}</value>
   </data>
@@ -1020,8 +261,113 @@
   <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
     <value>AI 에이전트  [{0}]. AI 에이전트에 대한 저장 공간 할당량이 비활성화되었습니다</value>
   </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>[{0}] 룸. 룸에 대한 커스텀 스토리지 할당량 설정: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>[{0}] 룸. 룸에 대한 기본 스토리지 할당량 설정: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>[{0}] 룸. 룸에 대한 스토리지 할당량 비활성화</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>[{0}] 사용자. 사용자에 대한 커스텀 스토리지 할당량 설정: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>[{0}] 사용자. 사용자에 대한 기본 스토리지 할당량 설정: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>[{0}] 사용자. 사용자에 대한 스토리지 할당량 비활성화</value>
+  </data>
+  <data name="DateCol" xml:space="preserve">
+    <value>날짜</value>
+  </data>
+  <data name="DefaultStartPageSettingsUpdated" xml:space="preserve">
+    <value>기본 시작 페이지 설정이 업데이트되었습니다</value>
+  </data>
+  <data name="DeleteActionType" xml:space="preserve">
+    <value>삭제</value>
+  </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>{0} 클라이언트가 삭제되었습니다</value>
+  </data>
+  <data name="DeletedRoomTags" xml:space="preserve">
+    <value>삭제된 태그: [{1}]</value>
+  </data>
   <data name="DeletedServerFromAgent" xml:space="preserve">
     <value>에이전트에서 MCP 서버({0})가 삭제되었습니다</value>
+  </data>
+  <data name="DetachActionType" xml:space="preserve">
+    <value>분리</value>
+  </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>개발자 도구 액세스 설정이 변경되었습니다</value>
+  </data>
+  <data name="DnsSettingsUpdated" xml:space="preserve">
+    <value>DNS 설정이 업데이트되었습니다</value>
+  </data>
+  <data name="DocumentServiceLocationSetting" xml:space="preserve">
+    <value>문서 서비스 위치가 업데이트되었습니다</value>
+  </data>
+  <data name="DocumentsForcesave" xml:space="preserve">
+    <value>강제 저장 설정이 업데이트되었습니다</value>
+  </data>
+  <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
+    <value>덮어쓰기 설정이 업데이트되었습니다</value>
+  </data>
+  <data name="DocumentsSettingsModule" xml:space="preserve">
+    <value>설정</value>
+  </data>
+  <data name="DocumentsStoreForcesave" xml:space="preserve">
+    <value>강제 저장 설정이 업데이트되었습니다</value>
+  </data>
+  <data name="DocumentsThirdPartySettingsUpdated" xml:space="preserve">
+    <value>제3자 설정이 업데이트되었습니다</value>
+  </data>
+  <data name="DocumentsUploadingFormatsSettingsUpdated" xml:space="preserve">
+    <value>업로딩 형식 설정이 업데이트되었습니다</value>
+  </data>
+  <data name="DownloadActionType" xml:space="preserve">
+    <value>다운로드</value>
+  </data>
+  <data name="ExportActionType" xml:space="preserve">
+    <value>내보내기</value>
+  </data>
+  <data name="FileChangeOwner" xml:space="preserve">
+    <value>[{0}] 소유자가 [{1}]님으로 설정되었습니다</value>
+  </data>
+  <data name="FileConverted" xml:space="preserve">
+    <value>파일이 내부 형식으로 변환되었습니다: {0}</value>
+  </data>
+  <data name="FileCopied" xml:space="preserve">
+    <value>파일 [{0}]. "{1}" 폴더에서: "{2}" 폴더로 복사되었습니다</value>
+  </data>
+  <data name="FileCopiedWithOverwriting" xml:space="preserve">
+    <value>파일 [{0}]. "{1}" 폴더에서 "{2}" 폴더로 덮어쓰기로 복사되었습니다</value>
+  </data>
+  <data name="FileCreated" xml:space="preserve">
+    <value>파일이 생성되었습니다: {0}</value>
+  </data>
+  <data name="FileCreatedVersion" xml:space="preserve">
+    <value>파일 [{0}]. 리비전: {1}. 버전이 생성되었습니다</value>
+  </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>파일: {0}. 사용자 지정 필터가 비활성화되었습니다</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>파일: {0}. 사용자 지정 필터가 활성화되었습니다</value>
+  </data>
+  <data name="FileDeleted" xml:space="preserve">
+    <value>파일이 삭제되었습니다: {0}</value>
+  </data>
+  <data name="FileDeletedVersion" xml:space="preserve">
+    <value>파일 [{0}]. 리비전: {1}. 버전이 삭제되었습니다</value>
+  </data>
+  <data name="FileDownloaded" xml:space="preserve">
+    <value>파일이 다운로드되었습니다: {0}</value>
+  </data>
+  <data name="FileDownloadedAs" xml:space="preserve">
+    <value>파일 [{0}]. {1}로 다운로드되었습니다</value>
   </data>
   <data name="FileExternalLinkCreated" xml:space="preserve">
     <value>파일 [{0}]. 외부 링크가 생성되었습니다: {1}. 역할: {2}</value>
@@ -1032,8 +378,29 @@
   <data name="FileExternalLinkUpdated" xml:space="preserve">
     <value>파일 [{0}]. 외부 링크 업데이트되었습니다: {1}. 역할: {2}</value>
   </data>
+  <data name="FileImported" xml:space="preserve">
+    <value>폴더 [{0}]. 파일이 가져오기되었습니다: {1}. 제공자: {2}</value>
+  </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>파일: {0}. 인덱스가 변경되었습니다: {1} &gt; {2}</value>
+  </data>
+  <data name="FileLocked" xml:space="preserve">
+    <value>파일이 잠겼습니다: {0}</value>
+  </data>
   <data name="FileMarkedAsFavorite" xml:space="preserve">
     <value>파일이 즐겨찾기로 표시되었습니다: {0}</value>
+  </data>
+  <data name="FileMoved" xml:space="preserve">
+    <value>파일 [{0}]. "{1}" 폴더에서: "{2}" 폴더로 이동되었습니다</value>
+  </data>
+  <data name="FileMovedToTrash" xml:space="preserve">
+    <value>파일 [{0}]. 휴지통 폴더로 이동되었습니다</value>
+  </data>
+  <data name="FileMovedWithOverwriting" xml:space="preserve">
+    <value>파일 [{0}]. "{1}" 폴더에서 "{2}" 폴더로 덮어쓰기로 이동되었습니다</value>
+  </data>
+  <data name="FileOpenedForChange" xml:space="preserve">
+    <value>변경을 위해 파일이 열렸습니다: {0}</value>
   </data>
   <data name="FileRemovedFromFavorite" xml:space="preserve">
     <value>파일이 즐겨찾기에서 제거되었습니다: {0}</value>
@@ -1041,8 +408,62 @@
   <data name="FileRemovedFromList" xml:space="preserve">
     <value>파일이 "공유 문서함"에서 제거되었습니다: {0}</value>
   </data>
+  <data name="FileRenamed" xml:space="preserve">
+    <value>파일의 이름이 변경되었습니다: {0}</value>
+  </data>
+  <data name="FileRestoreVersion" xml:space="preserve">
+    <value>파일 [{0}]. 리비전: {1}. 버전이 복원되었습니다</value>
+  </data>
+  <data name="FilesDocumentSigned" xml:space="preserve">
+    <value>{1} 문서가 {0}를 통해 서명되었습니다</value>
+  </data>
+  <data name="FileSendAccessLink" xml:space="preserve">
+    <value>[{0}] 파일로 공유 링크가 발송되었습니다. 수신자: [{1}]</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>bytes,KB,MB,GB</value>
+  </data>
+  <data name="FilesModule" xml:space="preserve">
+    <value>파일</value>
+  </data>
+  <data name="FilesRequestSign" xml:space="preserve">
+    <value>{1} 문서가 {0}을 통해 서명하도록 전송되었습니다</value>
+  </data>
+  <data name="FileUnlocked" xml:space="preserve">
+    <value>파일의 잠금이 해제되었습니다: {0}</value>
+  </data>
+  <data name="FileUpdated" xml:space="preserve">
+    <value>파일이 업데이트되었습니다: {0}</value>
+  </data>
+  <data name="FileUpdatedAccess" xml:space="preserve">
+    <value>파일 [{0}]. 액세스가 업데이트되었습니다</value>
+  </data>
   <data name="FileUpdatedAccessFor" xml:space="preserve">
     <value>파일 [{0}]. {1}에 대한 액세스가 업데이트되었습니다. 역할: {2}</value>
+  </data>
+  <data name="FileUpdatedRevisionComment" xml:space="preserve">
+    <value>파일 [{0}]. 리비전 {1}. 코멘트가 업데이트되었습니다</value>
+  </data>
+  <data name="FileUploaded" xml:space="preserve">
+    <value>폴더가 업데이트되었습니다: {0}</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>덮어쓰기로 업로드된 파일: {0}</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>파일 [{0}]. 버전이 삭제되었습니다: {1}</value>
+  </data>
+  <data name="FolderCopied" xml:space="preserve">
+    <value>폴더 [{0}]. 폴더로 복사되었습니다: {1}</value>
+  </data>
+  <data name="FolderCopiedWithOverwriting" xml:space="preserve">
+    <value>폴더 [{0}]. {1} 폴더로 덮어쓰기로 복사되었습니다</value>
+  </data>
+  <data name="FolderCreated" xml:space="preserve">
+    <value>폴더가 생성되었습니다: {0}</value>
+  </data>
+  <data name="FolderDeleted" xml:space="preserve">
+    <value>폴더가 삭제되었습니다: {0}</value>
   </data>
   <data name="FolderDownloaded" xml:space="preserve">
     <value>폴더가 다운로드되었습니다: {0}</value>
@@ -1056,14 +477,188 @@
   <data name="FolderExternalLinkUpdated" xml:space="preserve">
     <value>폴더 [{0}]. 외부 링크가 업데이트되었습니다: {1}. 역할: {2}</value>
   </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>폴더: {0}. 인덱스가 변경되었습니다: {1} &gt; {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>폴더: {0}. 인덱스가 재정렬되었습니다</value>
+  </data>
+  <data name="FolderMoved" xml:space="preserve">
+    <value>폴더 [{0}]. 폴더로 이동되었습니다: {1}</value>
+  </data>
+  <data name="FolderMovedToTrash" xml:space="preserve">
+    <value>폴더 [{0}]. 휴지통 폴더로 이동되었습니다</value>
+  </data>
+  <data name="FolderMovedWithOverwriting" xml:space="preserve">
+    <value>폴더 [{0}]. {1} 폴더로 덮어쓰기로 이동되었습니다</value>
+  </data>
   <data name="FolderRemovedFromList" xml:space="preserve">
     <value>폴더가 "공유 문서함"에서 제거되었습니다: {0}</value>
+  </data>
+  <data name="FolderRenamed" xml:space="preserve">
+    <value>파일의 이름이 변경되었습니다: {0}</value>
+  </data>
+  <data name="FoldersModule" xml:space="preserve">
+    <value>폴더</value>
+  </data>
+  <data name="FolderUpdatedAccess" xml:space="preserve">
+    <value>폴더 [{0}]. 액세스가 업데이트되었습니다</value>
   </data>
   <data name="FolderUpdatedAccessFor" xml:space="preserve">
     <value>폴더 [{0}]. 다음에 대한 액세스가 업데이트되었습니다: {1}. 역할: {2}</value>
   </data>
+  <data name="FollowActionType" xml:space="preserve">
+    <value>팔로우</value>
+  </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>사용자 [{0}]. 양식 작성이 완료되었습니다: {1}</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>작성을 위해 열린 파일: {0}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>사용자 [{0}]. 양식의 일부가 작성되었습니다: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>사용자 [{0}]. 작성이 시작되었습니다: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>사용자 [{0}]. 양식이 중지되었습니다: {1}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>[{0}] 사용자. 제출된 양식: {1}</value>
+  </data>
+  <data name="FullTextSearchSetting" xml:space="preserve">
+    <value>Sphinx 설정이 업데이트되었습니다</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>{0} 클라이언트에 대한 인증 코드가 생성되었습니다</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>{0} 클라이언트에 대한 개인 액세스 토큰이 생성되었습니다</value>
+  </data>
+  <data name="GreetingSettingsUpdated" xml:space="preserve">
+    <value>환영 페이지 설정이 업데이트되었습니다</value>
+  </data>
+  <data name="GroupCreated" xml:space="preserve">
+    <value>그룹이 생성되었습니다: {0}</value>
+  </data>
+  <data name="GroupDeleted" xml:space="preserve">
+    <value>그룹이 삭제되었습니다: {0}</value>
+  </data>
+  <data name="GroupUpdated" xml:space="preserve">
+    <value>그룹이 업데이트되었습니다: {0}</value>
+  </data>
+  <data name="GuestAccount" xml:space="preserve">
+    <value>게스트</value>
+  </data>
+  <data name="GuestActivated" xml:space="preserve">
+    <value>게스트가 활성화되었습니다: {0}</value>
+  </data>
+  <data name="GuestCreated" xml:space="preserve">
+    <value>게스트가 생성되었습니다: {0}</value>
+  </data>
+  <data name="GuestCreatedViaInvite" xml:space="preserve">
+    <value>초대를 통해 게스트가 생성되었습니다: {0}</value>
+  </data>
+  <data name="GuestImported" xml:space="preserve">
+    <value>게스트가 가져오기되었습니다: {0}</value>
+  </data>
+  <data name="ImportActionType" xml:space="preserve">
+    <value>가져오기</value>
+  </data>
+  <data name="IpCol" xml:space="preserve">
+    <value>IP</value>
+  </data>
+  <data name="LanguageSettingsUpdated" xml:space="preserve">
+    <value>언어 설정이 업데이트되었습니다</value>
+  </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>LDAP 인증이 비활성화되었습니다</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>LDAP 인증이 활성화되었습니다</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>LDAP 동기화가 완료되었습니다</value>
+  </data>
+  <data name="LicenseKeyUploaded" xml:space="preserve">
+    <value>라이선스 키가 업로드되었습니다</value>
+  </data>
+  <data name="LinkActionType" xml:space="preserve">
+    <value>연결</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>위치</value>
+  </data>
+  <data name="LoginFail" xml:space="preserve">
+    <value>로그인 실패</value>
+  </data>
+  <data name="LoginFailBruteForce" xml:space="preserve">
+    <value>로그인 실패. 너무 많이 시도했습니다</value>
+  </data>
+  <data name="LoginFailDisabledProfile" xml:space="preserve">
+    <value>로그인 실패. 프로필이 비활성화되었습니다</value>
+  </data>
+  <data name="LoginFailInvalidCombination" xml:space="preserve">
+    <value>로그인 실패. 사용자명-비밀번호 조합이 유효하지 않습니다</value>
+  </data>
+  <data name="LoginFailIpSecurity" xml:space="preserve">
+    <value>IP 보안: 로그인에 실패했습니다</value>
+  </data>
+  <data name="LoginFailRecaptcha" xml:space="preserve">
+    <value>로그인 실패. Recaptcha가 유효하지 않습니다</value>
+  </data>
+  <data name="LoginFailSocialAccountNotFound" xml:space="preserve">
+    <value>로그인 실패. 연결된 소셜 계정을 찾지 못했습니다</value>
+  </data>
+  <data name="LoginFailViaApi" xml:space="preserve">
+    <value>API를 통한 로그인에 실패했습니다</value>
+  </data>
+  <data name="LoginFailViaApiSms" xml:space="preserve">
+    <value>API &amp; SMS 코드를 통한 로그인에 실패했습니다</value>
+  </data>
+  <data name="LoginFailViaApiSocialAccount" xml:space="preserve">
+    <value>API &amp; 소셜 미디어를 통한 로그인에 실패했습니다</value>
+  </data>
+  <data name="LoginFailViaApiTfa" xml:space="preserve">
+    <value>API &amp; 인증 애플리케이션을 통한 로그인에 실패했습니다</value>
+  </data>
+  <data name="LoginFailViaSms" xml:space="preserve">
+    <value>SMS를 통한 로그인에 실패했습니다</value>
+  </data>
+  <data name="LoginFailViaSSO" xml:space="preserve">
+    <value>SSO를 통한 로그인에 실패했습니다</value>
+  </data>
+  <data name="LoginFailViaTfaApp" xml:space="preserve">
+    <value>인증 애플리케이션을 통한 로그인에 실패했습니다</value>
+  </data>
+  <data name="LoginHistoryReportDownloaded" xml:space="preserve">
+    <value>로그인 기록 보고서가 다운로드되었습니다</value>
+  </data>
+  <data name="LoginHistoryReportName" xml:space="preserve">
+    <value>로그인 기록 보고서 ({0}-{1})</value>
+  </data>
+  <data name="LoginSuccess" xml:space="preserve">
+    <value>로그인에 성공했습니다</value>
+  </data>
   <data name="LoginSuccessSocialAccount" xml:space="preserve">
     <value>소셜 계정을 통한 로그인에 성공했습니다</value>
+  </data>
+  <data name="LoginSuccessSocialApp" xml:space="preserve">
+    <value>소셜 애플리케이션을 통한 로그인에 성공했습니다</value>
+  </data>
+  <data name="LoginSuccessViaApi" xml:space="preserve">
+    <value>API를 통한 로그인에 성공했습니다</value>
+  </data>
+  <data name="LoginSuccessViaApiSms" xml:space="preserve">
+    <value>API &amp; SMS 코드를 통한 로그인에 성공했습니다</value>
+  </data>
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
+    <value>소셜 계정을 통한 로그인에 성공했습니다: {0}</value>
+  </data>
+  <data name="LoginSuccessViaApiTfa" xml:space="preserve">
+    <value>API &amp; 인증 애플리케이션을 통한 로그인에 성공했습니다</value>
   </data>
   <data name="LoginSuccessViaOAuth" xml:space="preserve">
     <value>OAuth 2.0을 통한 로그인에 성공했습니다</value>
@@ -1071,11 +666,122 @@
   <data name="LoginSuccessViaPassword" xml:space="preserve">
     <value>로그인 및 비밀번호를 통한 로그인에 성공했습니다</value>
   </data>
+  <data name="LoginSuccessViaSms" xml:space="preserve">
+    <value>SMS를 통한 로그인에 성공했습니다</value>
+  </data>
+  <data name="LoginSuccessViaSocialAccount" xml:space="preserve">
+    <value>API &amp; 소셜 미디어를 통한 로그인에 성공했습니다</value>
+  </data>
+  <data name="LoginSuccessViaSSO" xml:space="preserve">
+    <value>SSO를 통한 로그인에 성공했습니다</value>
+  </data>
+  <data name="LoginSuccesViaTfaApp" xml:space="preserve">
+    <value>인증 애플리케이션을 통한 로그인에 성공했습니다</value>
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value>로그아웃</value>
+  </data>
+  <data name="MailServiceSettingsUpdated" xml:space="preserve">
+    <value>메일 서비스 설정이 업데이트되었습니다</value>
+  </data>
+  <data name="ModuleCol" xml:space="preserve">
+    <value>모듈</value>
+  </data>
+  <data name="MoveActionType" xml:space="preserve">
+    <value>이동</value>
+  </data>
+  <data name="OwnerChanged" xml:space="preserve">
+    <value>소유자가 변경되었습니다: {0}</value>
+  </data>
+  <data name="OwnerSentChangeOwnerInstructions" xml:space="preserve">
+    <value>소유자 [{0}]. 소유자 변경 지침이 전송되었습니다</value>
+  </data>
+  <data name="OwnerSentPortalDeactivationInstructions" xml:space="preserve">
+    <value>소유자 [{0}]. 포털 비활성화 지침이 전송되었습니다</value>
+  </data>
+  <data name="OwnerSentPortalDeleteInstructions" xml:space="preserve">
+    <value>소유자 [{0}]. 포털 삭제 지침이 전송되었습니다</value>
+  </data>
+  <data name="PageCol" xml:space="preserve">
+    <value>페이지</value>
+  </data>
+  <data name="PasswordStrengthSettingsUpdated" xml:space="preserve">
+    <value>비밀번호 강도 설정이 업데이트되었습니다</value>
+  </data>
+  <data name="PlatformCol" xml:space="preserve">
+    <value>플랫폼</value>
+  </data>
+  <data name="PortalAccessSettingsUpdated" xml:space="preserve">
+    <value>포털 액세스 설정이 업데이트되었습니다</value>
+  </data>
+  <data name="PortalDeactivated" xml:space="preserve">
+    <value>포털이 비활성화되었습니다</value>
+  </data>
+  <data name="PortalDeleted" xml:space="preserve">
+    <value>포털이 삭제되었습니다</value>
+  </data>
+  <data name="PortalRenamed" xml:space="preserve">
+    <value>포털 이름이 변경되었습니다</value>
+  </data>
+  <data name="PrivacyRoomDisable" xml:space="preserve">
+    <value>포털 룸이 비활성화되었습니다</value>
+  </data>
+  <data name="PrivacyRoomEnable" xml:space="preserve">
+    <value>포털 룸이 활성화되었습니다</value>
+  </data>
+  <data name="ProductAccessOpened" xml:space="preserve">
+    <value>프로덕트 [{0}]. 액세스가 열렸습니다</value>
+  </data>
+  <data name="ProductAccessOpenedForGroups" xml:space="preserve">
+    <value>프로덕트: [{0}]. 그룹 [{1}].  액세스가 열렸습니다</value>
+  </data>
+  <data name="ProductAccessOpenedForUsers" xml:space="preserve">
+    <value>프로덕트: [{0}]. 사용자 [{1}].  액세스가 열렸습니다</value>
+  </data>
+  <data name="ProductAccessRestricted" xml:space="preserve">
+    <value>프로덕트 [{0}]. 액세스가 제한되었습니다</value>
+  </data>
+  <data name="ProductAddedAdministrator" xml:space="preserve">
+    <value>프로덕트 [{0}]. 관리자가 추가되었습니다: {1}</value>
+  </data>
+  <data name="ProductCol" xml:space="preserve">
+    <value>프로덕트</value>
+  </data>
+  <data name="ProductDeletedAdministrator" xml:space="preserve">
+    <value>프로덕트 [{0}]. 관리자가 삭제되었습니다: {1}</value>
+  </data>
+  <data name="ProductsListUpdated" xml:space="preserve">
+    <value>프로덕트 목록이 업데이트되었습니다</value>
+  </data>
   <data name="QuotaPerAiAgentChanged" xml:space="preserve">
     <value>AI 에이전트에 대한 기본 저장 공간 할당량이 설정되었습니다: {0}</value>
   </data>
   <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
     <value>I 에이전트에 대한 기본 저장 공간 할당량이 비활성화되었습니다</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>기본 스토리지 할당량 설정: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>비활성화된 기본 스토리지 할당량</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>룸에 대한 기본 스토리지 할당량 설정: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>비활성화된 룸에 대한 기본 스토리지 할당량</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>사용자에 대한 기본 스토리지 할당량 설정: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>비활성화된 사용자에 대한 기본 스토리지 할당량</value>
+  </data>
+  <data name="ReassignsActionType" xml:space="preserve">
+    <value>재할당</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>클라이언트의 {0} 시크릿이 재생성되었습니다</value>
   </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>벡터화 설정이 재설정되었습니다</value>
@@ -1083,8 +789,113 @@
   <data name="ResetWebSearchSettings" xml:space="preserve">
     <value>웹 검색 설정이 재설정되었습니다</value>
   </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>{0} 클라이언트 액세스가 취소되었습니다</value>
+  </data>
+  <data name="RoomArchived" xml:space="preserve">
+    <value>방이 아카이브되었습니다</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>복사된 방: {0}</value>
+  </data>
+  <data name="RoomCreated" xml:space="preserve">
+    <value>방이 생성되었습니다</value>
+  </data>
+  <data name="RoomCreateUser" xml:space="preserve">
+    <value>추가된 사용자: {0}. 역할: {1}</value>
+  </data>
+  <data name="RoomDeleted" xml:space="preserve">
+    <value>방이 삭제되었습니다</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>룸: {0}. 다운로드 거부가 비활성화되었습니다</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>룸: {0}. 다운로드 거부가 활성화되었습니다</value>
+  </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>외부 링크가 생성되었습니다: {0}. 역할: {1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>외부 링크가 삭제되었습니다: {0}</value>
+  </data>
   <data name="RoomExternalLinkRevoked" xml:space="preserve">
     <value>외부 링크가 취소되었습니다: {1}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>외부 링크가 업데이트되었습니다: {0}. 역할: {1}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>추가된 그룹: {0}. 역할: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>삭제된 그룹: {0}</value>
+  </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>문서에 저장된 룸 인덱스 내보내기</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>룸 인덱싱이 비활성화되었습니다</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>룸 인덱싱이 활성화되었습니다</value>
+  </data>
+  <data name="RoomInvitationLinkCreated" xml:space="preserve">
+    <value>링크가 생성되었습니다. 역할: {1}</value>
+  </data>
+  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
+    <value>링크가 삭제되었습니다</value>
+  </data>
+  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
+    <value>링크가 업데이트되었습니다. 역할: {1}</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>초대장이 다시 전송되었습니다: {0}</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>수명이 비활성화되었습니다</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>수명이 설정되었습니다. 값: {0}. 기간: {1}. 영구 삭제: {2}</value>
+  </data>
+  <data name="RoomLogoCreated" xml:space="preserve">
+    <value>로고가 생성되었습니다</value>
+  </data>
+  <data name="RoomLogoDeleted" xml:space="preserve">
+    <value>로고가 삭제되었습니다</value>
+  </data>
+  <data name="RoomRemoveUser" xml:space="preserve">
+    <value>삭제된 사용자: {0}</value>
+  </data>
+  <data name="RoomRenamed" xml:space="preserve">
+    <value>방의 이름이 변경되었습니다: {0}</value>
+  </data>
+  <data name="RoomsModule" xml:space="preserve">
+    <value>방</value>
+  </data>
+  <data name="RoomUnarchived" xml:space="preserve">
+    <value>방의 아카이브가 취소되었습니다</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} 지정 완료: {1}</value>
+  </data>
+  <data name="RoomUpdateAccessForUser" xml:space="preserve">
+    <value>{0} 지정 완료: {1}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>룸: {0}. 워터마크가 비활성화되었습니다</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>룸: {0}. 워터마크가 활성화되었습니다</value>
+  </data>
+  <data name="SendActionType" xml:space="preserve">
+    <value>전송</value>
+  </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>사용자 {0}님이 {1}님에게 이 DocSpace에 참여하라는 초대장을 보냈습니다</value>
+  </data>
+  <data name="SentInviteInstructions" xml:space="preserve">
+    <value>초대 지침이 전송되었습니다: {0}</value>
   </data>
   <data name="ServerCreated" xml:space="preserve">
     <value>MCP 서버가 생성되었습니다: {0}</value>
@@ -1101,10 +912,199 @@
   <data name="ServerUpdated" xml:space="preserve">
     <value>MCP 서버가 업데이트되었습니다: {0}</value>
   </data>
+  <data name="SessionCompleted" xml:space="preserve">
+    <value>세션이 완료되었습니다</value>
+  </data>
+  <data name="SessionStarted" xml:space="preserve">
+    <value>세션이 시작되었습니다</value>
+  </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>설정</value>
+  </data>
   <data name="SetVectorizationSettings" xml:space="preserve">
     <value>벡터화 설정이 구성되었습니다. 공급자: {0}</value>
   </data>
   <data name="SetWebSearchSettings" xml:space="preserve">
     <value>웹 검색 설정이 구성되었습니다. 엔진: {0}</value>
+  </data>
+  <data name="SSODisabled" xml:space="preserve">
+    <value>SSO가 비활성화되었습니다</value>
+  </data>
+  <data name="SSOEnabled" xml:space="preserve">
+    <value>SSO가 활성화되었습니다</value>
+  </data>
+  <data name="StartStorageDecryption" xml:space="preserve">
+    <value>스토리지 복호화 시작</value>
+  </data>
+  <data name="StartStorageEncryption" xml:space="preserve">
+    <value>스토리지 암호화 시작</value>
+  </data>
+  <data name="StartTransferSetting" xml:space="preserve">
+    <value>포털 리전 마이그레이션 시작</value>
+  </data>
+  <data name="SystemAccount" xml:space="preserve">
+    <value>시스템 계정</value>
+  </data>
+  <data name="TagCreated" xml:space="preserve">
+    <value>태그가 생성되었습니다: {0}</value>
+  </data>
+  <data name="TagsDeleted" xml:space="preserve">
+    <value>태그가 삭제되었습니다: {0}</value>
+  </data>
+  <data name="TargetIdCol" xml:space="preserve">
+    <value>타깃 ID</value>
+  </data>
+  <data name="TeamTemplateChanged" xml:space="preserve">
+    <value>팀 템플릿이 변경되었습니다</value>
+  </data>
+  <data name="ThirdPartyCreated" xml:space="preserve">
+    <value>제3자가 생성했습니다: {0}. 제공자: {1}</value>
+  </data>
+  <data name="ThirdPartyDeleted" xml:space="preserve">
+    <value>제3자가 삭제했습니다: {0}. 제공자: {1}</value>
+  </data>
+  <data name="ThirdPartyUpdated" xml:space="preserve">
+    <value>제3자가 업데이트했습니다: {0}. 제공자: {1}</value>
+  </data>
+  <data name="TimeTrackingModule" xml:space="preserve">
+    <value>시간 추적 중</value>
+  </data>
+  <data name="TimeZoneSettingsUpdated" xml:space="preserve">
+    <value>시간대 설정이 업데이트되었습니다</value>
+  </data>
+  <data name="TrashEmptied" xml:space="preserve">
+    <value>휴지통이 비워졌습니다</value>
+  </data>
+  <data name="TrustedMailDomainSettingsUpdated" xml:space="preserve">
+    <value>신뢰할 수 있는 메일 도메인 설정이 업데이트되었습니다</value>
+  </data>
+  <data name="TwoFactorAuthenticationSettingsDisabled" xml:space="preserve">
+    <value>이중 인증 설정이 업데이트되었습니다: 이중 인증이 비활성화되었습니다</value>
+  </data>
+  <data name="TwoFactorAuthenticationSettingsEnabledBySms" xml:space="preserve">
+    <value>이중 인증 설정이 업데이트되었습니다: SMS 확인이 활성화되었습니다</value>
+  </data>
+  <data name="TwoFactorAuthenticationSettingsEnabledByTfaApp" xml:space="preserve">
+    <value>이중 인증 설정이 업데이트되었습니다: 인증이 활성화되었습니다</value>
+  </data>
+  <data name="TwoFactorAuthenticationSettingsUpdated" xml:space="preserve">
+    <value>이중 인증 설정이 업데이트되었습니다</value>
+  </data>
+  <data name="UnfollowActionType" xml:space="preserve">
+    <value>팔로우 해제</value>
+  </data>
+  <data name="UnknownAccount" xml:space="preserve">
+    <value>알 수 없는 계정</value>
+  </data>
+  <data name="UnlinkActionType" xml:space="preserve">
+    <value>연결 해제</value>
+  </data>
+  <data name="UpdateAccessActionType" xml:space="preserve">
+    <value>액세스가 업데이트되었습니다</value>
+  </data>
+  <data name="UpdateActionType" xml:space="preserve">
+    <value>업데이트</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>{0} 클라이언트가 업데이트되었습니다</value>
+  </data>
+  <data name="UploadActionType" xml:space="preserve">
+    <value>업로드</value>
+  </data>
+  <data name="UserActivated" xml:space="preserve">
+    <value>사용자가 활성화되었습니다: {0}</value>
+  </data>
+  <data name="UserAddedAvatar" xml:space="preserve">
+    <value>사용자 [{0}]. 아바타가 추가되었습니다</value>
+  </data>
+  <data name="UserCol" xml:space="preserve">
+    <value>사용자</value>
+  </data>
+  <data name="UserCreated" xml:space="preserve">
+    <value>사용자가 생성되었습니다: {0}</value>
+  </data>
+  <data name="UserCreatedViaInvite" xml:space="preserve">
+    <value>초대를 통해 사용자가 생성되었습니다: {0}</value>
+  </data>
+  <data name="UserDataReassigns" xml:space="preserve">
+    <value>데이터 재할당되었습니다: {0} 사용자에서 {1} 사용자에게</value>
+  </data>
+  <data name="UserDataRemoving" xml:space="preserve">
+    <value>{0} 에 대한 사용자 데이터가 삭제되었습니다</value>
+  </data>
+  <data name="UserDeleted" xml:space="preserve">
+    <value>사용자가 삭제되었습니다: {0}</value>
+  </data>
+  <data name="UserDeletedAvatar" xml:space="preserve">
+    <value>사용자 [{0}]. 아바타가 삭제되었습니다</value>
+  </data>
+  <data name="UserFileUpdated" xml:space="preserve">
+    <value>사용자 [{0}]. 파일이 업데이트되었습니다: {1}</value>
+  </data>
+  <data name="UserImported" xml:space="preserve">
+    <value>사용자가 가져오기되었습니다: {0}</value>
+  </data>
+  <data name="UserLinkedSocialAccount" xml:space="preserve">
+    <value>소셜 계정이 연결되었습니다. 제공자: {0}</value>
+  </data>
+  <data name="UsersDeleted" xml:space="preserve">
+    <value>사용자가 삭제되었습니다: {0}</value>
+  </data>
+  <data name="UserSentActivationInstructions" xml:space="preserve">
+    <value>사용자 [{0}]. 활성화 지침이 전송되었습니다</value>
+  </data>
+  <data name="UserSentDeleteInstructions" xml:space="preserve">
+    <value>프로필 삭제 지침이 전송되었습니다</value>
+  </data>
+  <data name="UserSentEmailInstructions" xml:space="preserve">
+    <value>사용자 [{0}]. 이메일 변경 지침이 전송되었습니다</value>
+  </data>
+  <data name="UserSentPasswordInstructions" xml:space="preserve">
+    <value>사용자 [{0}]. 비밀번호 변경 지침이 전송되었습니다</value>
+  </data>
+  <data name="UsersSentActivationInstructions" xml:space="preserve">
+    <value>사용자 [{0}]. 활성화 지침이 전송되었습니다</value>
+  </data>
+  <data name="UsersUpdatedStatus" xml:space="preserve">
+    <value>사용자 [{0}]. 상태가 업데이트되었습니다</value>
+  </data>
+  <data name="UsersUpdatedType" xml:space="preserve">
+    <value>사용자 [{0}]. 유형이 업데이트되었습니다</value>
+  </data>
+  <data name="UserTfaDisconnected" xml:space="preserve">
+    <value>인증 애플리케이션의 연결이 해제되었습니다: {0}</value>
+  </data>
+  <data name="UserTfaGenerateCodes" xml:space="preserve">
+    <value>새로운 백업 코드가 생성되었습니다</value>
+  </data>
+  <data name="UserUnlinkedSocialAccount" xml:space="preserve">
+    <value>소셜 계정의 연결이 해제되었습니다. 제공자: {0}</value>
+  </data>
+  <data name="UserUpdated" xml:space="preserve">
+    <value>사용자가 업데이트되었습니다: {0}</value>
+  </data>
+  <data name="UserUpdatedAvatarThumbnails" xml:space="preserve">
+    <value>사용자 [{0}]. 아바타 썸네일이 업데이트되었습니다</value>
+  </data>
+  <data name="UserUpdatedEmail" xml:space="preserve">
+    <value>이메일이 업데이트되었습니다</value>
+  </data>
+  <data name="UserUpdatedLanguage" xml:space="preserve">
+    <value>언어가 업데이트되었습니다</value>
+  </data>
+  <data name="UserUpdatedMobileNumber" xml:space="preserve">
+    <value>사용자 [{0}]. 휴대폰 번호가 업데이트되었습니다: {1}</value>
+  </data>
+  <data name="UserUpdatedPassword" xml:space="preserve">
+    <value>비밀번호가 업데이트되었습니다</value>
+  </data>
+  <data name="WebhookCreated" xml:space="preserve">
+    <value>웹훅이 생성되었습니다: {0}</value>
+  </data>
+  <data name="WebhookDeleted" xml:space="preserve">
+    <value>웹훅이 삭제되었습니다: {0}</value>
+  </data>
+  <data name="WebhookUpdated" xml:space="preserve">
+    <value>웹훅이 업데이트되었습니다: {0}</value>
   </data>
 </root>

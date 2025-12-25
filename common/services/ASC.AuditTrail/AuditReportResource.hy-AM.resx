@@ -126,6 +126,12 @@
   <data name="ActionTypeCol" xml:space="preserve">
     <value>Գործողություն Տեսակ</value>
   </data>
+  <data name="AddedRoomTags" xml:space="preserve">
+    <value>Ավելացված է պիտակներ: [{1}]</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>MCP սերվեր {0}-ն ավելացվել է գործակալին</value>
+  </data>
   <data name="AdministratorAdded" xml:space="preserve">
     <value>Ադմինիստրատորն ավելացված է: {0}</value>
   </data>
@@ -137,6 +143,36 @@
   </data>
   <data name="AdministratorOpenedFullAccess" xml:space="preserve">
     <value>Ադմինիստրատորներ [{0}]. Ամբողջական մատչումը բացված է</value>
+  </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>Գործակալը ստեղծվել է</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>Գործակալը ջնջվել է</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>Գործակալը վերանվանվել է՝ {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>Գործակալներ</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>ԱԲ պրովայդերը ստեղծվել է՝ {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>ԱԲ պրովայդերը ջնջվել է՝ {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>ԱԲ պրովայդերը թարմացվել է՝ {0}</value>
+  </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Օգտատիրոջ Api Բանալին Ստեղծվել է: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Օգտատիրոջ Api Բանալին Ջնջվել է: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Օգտատիրոջ Api Բանալին Թարմացվել է: {0}</value>
   </data>
   <data name="AttachActionType" xml:space="preserve">
     <value>Կցել</value>
@@ -150,11 +186,35 @@
   <data name="AuditTrailReportName" xml:space="preserve">
     <value>Աուդիտի տրիալի հաշվետվություն ({0}-{1})</value>
   </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Հաստատման հղումը ակտիվացված է</value>
+  </data>
   <data name="AuthorizationKeysSetting" xml:space="preserve">
     <value>Երրորդ կողմի լիազորման բանալիները թարմացվել են</value>
   </data>
+  <data name="BackupCompleted" xml:space="preserve">
+    <value>Պահուստավորումն ավարտված է</value>
+  </data>
+  <data name="BackupFailed" xml:space="preserve">
+    <value>Պահուստավորումը ձախողվեց</value>
+  </data>
+  <data name="BackupStarted" xml:space="preserve">
+    <value>Մեկնարկել պահուստավորումը</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Գովազդային պաստառների տեսանելիության կարգավորումները փոխվել են</value>
+  </data>
   <data name="BrowserCol" xml:space="preserve">
     <value>Բրաուզեր</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Հաճախորդի {0} ակտիվացումը փոխվել է</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Հաճախորդի {0} տեսանելիությունը փոխվել է</value>
+  </data>
+  <data name="CityCol" xml:space="preserve">
+    <value>Քաղաք</value>
   </data>
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Գունային ոճ փոխվել է</value>
@@ -168,11 +228,62 @@
   <data name="CopyActionType" xml:space="preserve">
     <value>Պատճեն</value>
   </data>
+  <data name="CountryCol" xml:space="preserve">
+    <value>Երկիր</value>
+  </data>
   <data name="CreateActionType" xml:space="preserve">
     <value>Ստեղծել</value>
   </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Հաճախորդը ստեղծվել է</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Հաճախորդի գործողությունը կատարվել է</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Հաճախորդի գործառնությունների հաշվետվությունը ներբեռնվել է</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Հաճախորդի բաժանորդագրությունը թարմացվել է՝ {0}</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Հաճախորդի դրամապանակի միացված ծառայությունների կարգավորումները թարմացվել են</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Հաճախորդի դրամապանակը լիցքավորվել է՝ {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Հաճախորդի դրամապանակի լիցքավորման կարգավորումները թարմացվեցին</value>
+  </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>Հարմարեցված նավիգացիայի կարգավորումները թարմացվել են</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>ԱԲ գործակալներ [{0}]: Սահմանեք ԱԲ գործակալների համար նախատեսված պահեստավորման քվոտա՝ {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>ԱԲ գործակալներ [{0}]: Սահմանեք ԱԲ գործակալների համար լռելյայն պահեստավորման քվոտա՝ {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>ԱԲ գործակալներ [{0}]: ԱԲ գործակալների պահեստավորման քվոտան անջատված է</value>
+  </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Սենյակներ [{0}]: Սահմանել հարմարեցված պահեստային քվոտա սենյակների համար՝ {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Սենյակներ [{0}]: Սահմանել լռելյայն պահեստի քվոտան սենյակների համար՝ {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Սենյակներ [{0}]: Անջատված պահեստային քվոտա սենյակների համար</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Օգտատերեր [{0}]: Օգտատերերի համար սահմանել հատուկ պահեստային քվոտա՝ {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Օգտատերեր [{0}]: Սահմանել օգտատերերի համար լռելյայն պահեստի քվոտան՝ {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Օգտատերեր [{0}]: Անջատված է օգտատերերի պահեստային քվոտան</value>
   </data>
   <data name="DateCol" xml:space="preserve">
     <value>Ամսաթիվ</value>
@@ -183,8 +294,20 @@
   <data name="DeleteActionType" xml:space="preserve">
     <value>Ջնջել</value>
   </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Հաճախորդը {0} ջնջվել է</value>
+  </data>
+  <data name="DeletedRoomTags" xml:space="preserve">
+    <value>Ջնջված պիտակներ: [{1}]</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>MCP սերվեր {0}-ը ջնջվել է գործակալից</value>
+  </data>
   <data name="DetachActionType" xml:space="preserve">
     <value>Հեռացնել</value>
+  </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Ծրագրավորողի գործիքների մուտքի կարգավորումները փոփոխվել են</value>
   </data>
   <data name="DnsSettingsUpdated" xml:space="preserve">
     <value>DNS-ի կարգավորումները թարմացվել են</value>
@@ -234,6 +357,12 @@
   <data name="FileCreatedVersion" xml:space="preserve">
     <value>Ֆայլեր [{0}]. Վերանայում: {1}. Ստեղծված տարբերակ</value>
   </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>Ֆայլ՝ {0}։ Հատուկ ֆիլտրն անջատված է</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>Ֆայլ՝ {0}։ Հատուկ ֆիլտրը միացված է</value>
+  </data>
   <data name="FileDeleted" xml:space="preserve">
     <value>Ֆայլը ջնջված է: {0}</value>
   </data>
@@ -246,11 +375,26 @@
   <data name="FileDownloadedAs" xml:space="preserve">
     <value>Ֆայլեր [{0}]. Ներբեռնված է որպես: {1}</value>
   </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Ֆայլեր [{0}]: Արտաքին հղումը ստեղծվել է՝ {1}: Դեր՝ {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Ֆայլեր [{0}]: Արտաքին հղումը ջնջվել է՝ {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Ֆայլեր [{0}]: Արտաքին հղումը թարմացվել է՝ {1}: Դեր՝ {2}</value>
+  </data>
   <data name="FileImported" xml:space="preserve">
     <value>Պանակներ [{0}]. Ֆայլը ներմուծվել է: {1}. Մատակարար: {2}</value>
   </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Ֆայլ՝ {0}: Ցուցանիշը փոխվել է {1}-ից մինչև {2}</value>
+  </data>
   <data name="FileLocked" xml:space="preserve">
     <value>Ֆայլը կողպված է: {0}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Ֆայլը նշվել է որպես Նախընտրելի՝ {0}</value>
   </data>
   <data name="FileMoved" xml:space="preserve">
     <value>Ֆայլեր [{0}]. Տեղափոխվել է պանակից"{1}" Պանակ: "{2}"</value>
@@ -260,6 +404,15 @@
   </data>
   <data name="FileMovedWithOverwriting" xml:space="preserve">
     <value>Ֆայլեր [{0}]. Տեղափոխվել է թղթապանակից վրագրման միջոցով "{1}" Թղթապանակ: "{2}"</value>
+  </data>
+  <data name="FileOpenedForChange" xml:space="preserve">
+    <value>Փոփոխության համար բացված ֆայլ՝ {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Ֆայլը հեռացվել է նախընտրելիից՝ {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Ֆայլը հեռացվել է «Ինձ հետ կիսված» բաժնից՝ {0}</value>
   </data>
   <data name="FileRenamed" xml:space="preserve">
     <value>Ֆայլը վերանվանվել է: {0}</value>
@@ -272,6 +425,9 @@
   </data>
   <data name="FileSendAccessLink" xml:space="preserve">
     <value>Ուղարկվել է համօգտագործվող հղում դեպի[{0}] ֆայլ. Ստացողներ: [{1}]</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>բայթ, ԿԲ, ՄԲ, ԳԲ, ՏԲ</value>
   </data>
   <data name="FilesModule" xml:space="preserve">
     <value>Ֆայլեր</value>
@@ -288,11 +444,20 @@
   <data name="FileUpdatedAccess" xml:space="preserve">
     <value>Ֆայլեր [{0}]. Մատչումը թարմացվել է</value>
   </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Ֆայլեր [{0}]: Մուտքը թարմացվել է {1}-ի համար: Դեր՝ {2}</value>
+  </data>
   <data name="FileUpdatedRevisionComment" xml:space="preserve">
     <value>Ֆայլեր [{0}]. Վերանայում{1}. Մեկնաբանությունը թարմացվել է</value>
   </data>
   <data name="FileUploaded" xml:space="preserve">
     <value>Ֆայլը թարմացվել է: {0}</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Ֆայլը վերբեռնվել է վերագրանցմամբ՝ {0}</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>Ֆայլեր [{0}]. Տարբերակը ջնջված է: {1}</value>
   </data>
   <data name="FolderCopied" xml:space="preserve">
     <value>Պանակներ [{0}]. Պատճենվել է թղթապանակում: {1}</value>
@@ -306,6 +471,24 @@
   <data name="FolderDeleted" xml:space="preserve">
     <value>Պանակը ջնջված է: {0}</value>
   </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Թղթապանակը ներբեռնվել է՝ {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Թղթապանակները [{0}]: Արտաքին հղումը ստեղծվել է՝ {1}: Դեր՝ {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Թղթապանակները[{0}]: Արտաքին հղումը ջնջվել է՝ {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Թղթապանակները [{0}]: Արտաքին հղումը թարմացվել է՝ {1}: Դեր՝ {2}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Թղթապանակ՝ {0}: Ցուցանիշը փոխվել է {1}-ից մինչև {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Թղթապանակ՝ {0}: Ցուցանիշները վերադասավորվել են</value>
+  </data>
   <data name="FolderMoved" xml:space="preserve">
     <value>Պանակներ [{0}]. Տեղափոխվել է պանակ: {1}</value>
   </data>
@@ -314,6 +497,9 @@
   </data>
   <data name="FolderMovedWithOverwriting" xml:space="preserve">
     <value>Պանակներ [{0}]. Վրագրանցմամբ տեղափոխվել է պանակ: {1}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Թղթապանակը հեռացվել է «Ինձ հետ կիսված»-ից՝ {0}</value>
   </data>
   <data name="FolderRenamed" xml:space="preserve">
     <value>Պանակը վերանվանվել է: {0}</value>
@@ -324,11 +510,38 @@
   <data name="FolderUpdatedAccess" xml:space="preserve">
     <value>Պանակներ [{0}]. Մատչումը թարմացվել է</value>
   </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Թղթապանակները [{0}]: Մուտքը թարմացվել է {1}-ի համար: Դեր՝ {2}</value>
+  </data>
   <data name="FollowActionType" xml:space="preserve">
     <value>Հետևել</value>
   </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Օգտատերեր [{0}]. Completely filled out form՝ {1}</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>Լրացման համար բացված ֆայլ՝ {0}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Օգտատերեր [{0}]. Մասնակի լրացված ձևաթուղթ՝ {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Օգտատերեր [{0}]. Սկսել են լրացնել ձևաթուղթը՝ {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Օգտատերեր [{0}]. Կիսատ թողած ձևաթուղթ՝ {1}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Օգտատերեր [{0}]: Ներկայացված ձևը՝ {1}</value>
+  </data>
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Սֆինքսի կարգավորումները թարմացվել են</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Հաճախորդի համար ստեղծվել է թույլտվության կոդը {0}</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Հաճախորդի համար ստեղծվել է անձնական մուտքի նշան {0}</value>
   </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Ողջույնի էջի կարգավորումները թարմացվել են</value>
@@ -366,11 +579,23 @@
   <data name="LanguageSettingsUpdated" xml:space="preserve">
     <value>Լեզվի կարգավորումները թարմացվել են</value>
   </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>LDAP նույնականացումը անջատված է</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>LDAP նույնականացումը միացված է</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>LDAP սինխրոնիզացիան ավարտվեց</value>
+  </data>
   <data name="LicenseKeyUploaded" xml:space="preserve">
     <value>Լիցենզիայի բանալին վերբեռնվեց</value>
   </data>
   <data name="LinkActionType" xml:space="preserve">
     <value>Հղում</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Լոկացիա</value>
   </data>
   <data name="LoginFail" xml:space="preserve">
     <value>Մուտքը ձախողվեց</value>
@@ -423,8 +648,8 @@
   <data name="LoginSuccess" xml:space="preserve">
     <value>Հաջողությամբ մուտք է գործել</value>
   </data>
-  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Մուտք սոցիալական հաշվի միջոցով՝ հաջողությամբ՝ {0}</value>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Մուտք սոցիալական հաշվի միջոցով՝ հաջողությամբ՝</value>
   </data>
   <data name="LoginSuccessSocialApp" xml:space="preserve">
     <value>Հաջող մուտք սոցիալական հավելվածի միջոցով</value>
@@ -435,8 +660,17 @@
   <data name="LoginSuccessViaApiSms" xml:space="preserve">
     <value>Հաջող մուտք API-ի միջոցով &amp; SMS կոդ</value>
   </data>
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
+    <value>Մուտք սոցիալական հաշվի միջոցով՝ հաջողությամբ՝ {0}</value>
+  </data>
   <data name="LoginSuccessViaApiTfa" xml:space="preserve">
     <value>Հաջող մուտք API-ի միջոցով &amp; իսկորոշիչի հավելված</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Հաջող մուտք OAuth 2.0 միջոցով</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Հաջող մուտք՝ օգտագործելով մուտք և գաղտնաբառ</value>
   </data>
   <data name="LoginSuccessViaSms" xml:space="preserve">
     <value>SMS- ի միջոցով մուտք գործել հաջողվել է</value>
@@ -492,6 +726,9 @@
   <data name="PortalDeleted" xml:space="preserve">
     <value>Պորտալը ջնջված է</value>
   </data>
+  <data name="PortalRenamed" xml:space="preserve">
+    <value>Պորտալը վերանվանվել է</value>
+  </data>
   <data name="PrivacyRoomDisable" xml:space="preserve">
     <value>Անձնական սենյակն անջատված է</value>
   </data>
@@ -522,14 +759,173 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Արտադրանքների ցանկը թարմացվել է</value>
   </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Սահմանել ԱԲ գործակալների համար լռելյայն պահեստավորման քվոտա՝ {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>ԱԲ գործակալների համար լռելյայն պահեստավորման քվոտան անջատված է</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Սահմանեք լռելյայն պահեստի քվոտան՝ {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Անջատված լռելյայն պահեստի քվոտա</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Սահմանել լռելյայն պահեստի քվոտան սենյակների համար՝ {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Սենյակների համար լռելյայն պահեստի քվոտան անջատված է</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Սահմանեք օգտատերերի համար լռելյայն պահեստի քվոտան՝ {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Անջատված է օգտատերերի լռելյայն պահեստի քվոտան</value>
+  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Վերագրումներ</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Հաճախորդի {0} գաղտնին վերականգնվել է</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>Վեկտորացման կարգավորումները վերակայվել են</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>Վեբ որոնման կարգավորումները վերակայվել են</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Հաճախորդի {0} մուտքը չեղարկվել է</value>
+  </data>
+  <data name="RoomArchived" xml:space="preserve">
+    <value>Սենյակը արխիվացված է</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Սենյակը պատճենված է՝ {0}</value>
+  </data>
+  <data name="RoomCreated" xml:space="preserve">
+    <value>Ստեղծվել է սենյակ</value>
+  </data>
+  <data name="RoomCreateUser" xml:space="preserve">
+    <value>Ավելացված օգտվող՝ {0}: Դեր՝ {1}</value>
+  </data>
+  <data name="RoomDeleted" xml:space="preserve">
+    <value>Սենյակը ջնջված է</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Սենյակ՝ {0}: Ներբեռնման արգելումը անջատված է</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Սենյակ՝ {0}: Ներբեռնման արգելումը միացված է</value>
+  </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>Ստեղծվել է արտաքին հղում՝ {0}:Դերը՝ {1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>Արտաքին հղումը ջնջված է՝ {0}</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Արտաքին հղումը չեղարկվել է՝ {1}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>Արտաքին հղումը թարմացվել է՝ {0}:Դերը՝ {1}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Ավելացվեց խումբ՝ {0}: Դերը՝ {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Ջնջված խումբ՝ {0}</value>
+  </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Սենյակի ինդեքսի արտահանումը պահված է Փաստաթղթերում</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Սենյակների ինդեքսավորումը անջատված է</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Սենյակների ինդեքսավորումը միացված է</value>
+  </data>
+  <data name="RoomInvitationLinkCreated" xml:space="preserve">
+    <value>Հղումը ստեղծվել է: Դեր: {1}</value>
+  </data>
+  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
+    <value>Հղումը ջնջված է</value>
+  </data>
+  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
+    <value>Հղումը թարմացվել է: Դեր: {1}</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Կրկին ուղարկված հրավեր՝ {0}</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>Մշտականը անջատված է</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Մշտական լիցենզիայի ժամանակը սահմանված է: Արժեք՝ {0}: Ժամանակահատվածը՝ {1}: Ընդմիշտ ջնջել՝ {2}</value>
+  </data>
+  <data name="RoomLogoCreated" xml:space="preserve">
+    <value>Ստեղծվել է լոգոն</value>
+  </data>
+  <data name="RoomLogoDeleted" xml:space="preserve">
+    <value>Լոգոն ջնջված է</value>
+  </data>
+  <data name="RoomRemoveUser" xml:space="preserve">
+    <value>Ջնջված օգտվող: {0}</value>
+  </data>
+  <data name="RoomRenamed" xml:space="preserve">
+    <value>Սենյակը վերանվանվել է: {0}</value>
+  </data>
+  <data name="RoomsModule" xml:space="preserve">
+    <value>Սենյակներ</value>
+  </data>
+  <data name="RoomUnarchived" xml:space="preserve">
+    <value>Սենյակը հանվել է արխիվից</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} նշանակված: {1}</value>
+  </data>
+  <data name="RoomUpdateAccessForUser" xml:space="preserve">
+    <value>{0} նշանակված: {1}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Սենյակ՝ {0}: Ջրանշանն անջատված է</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Սենյակ՝ {0}: Ջրանշանը միացված է</value>
+  </data>
+  <data name="ScheduledBackupCompleted" xml:space="preserve">
+    <value>Պլանավորված պահուստավորումն ավարտվեց</value>
+  </data>
+  <data name="ScheduledBackupFailed" xml:space="preserve">
+    <value>Պլանավորված պահուստավորումը ձախողվեց</value>
+  </data>
+  <data name="ScheduledBackupStarted" xml:space="preserve">
+    <value>Պլանավորված պահուստավորումը սկսվել է</value>
   </data>
   <data name="SendActionType" xml:space="preserve">
     <value>ՈՒղարկել</value>
   </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>{0} օգտատերը հրավեր է ուղարկել {1}-ին միանալու այս DocSpace-ին</value>
+  </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Հրավերի հրահանգները ուղարկված են: {0}</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>MCP սերվերը ստեղծվել է՝ {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>MCP սերվերը ջնջվել է՝ {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>MCP սերվերը անջատվել է՝ {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>MCP սերվերը միացվել է՝ {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>MCP սերվերը թարմացվել է՝ {0}</value>
   </data>
   <data name="SessionCompleted" xml:space="preserve">
     <value>Աշխատաշրջանն ավարտված է</value>
@@ -540,14 +936,17 @@
   <data name="SettingsModule" xml:space="preserve">
     <value>Կարգավորումներ</value>
   </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>Վեկտորացման կարգավորումները կարգավորված են։ Մատակարար՝ {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>Վեբ որոնման կարգավորումները կարգավորված են։ Շարժիչ՝ {0}</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO անջատված</value>
   </data>
   <data name="SSOEnabled" xml:space="preserve">
     <value>SSO միացված է</value>
-  </data>
-  <data name="BackupStarted" xml:space="preserve">
-    <value>Մեկնարկել պահուստավորումը</value>
   </data>
   <data name="StartStorageDecryption" xml:space="preserve">
     <value>Մեկնարկել պահեստի վերծանումը</value>
@@ -560,6 +959,12 @@
   </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>Համակարգային հաշիվ</value>
+  </data>
+  <data name="TagCreated" xml:space="preserve">
+    <value>Ստեղծվել է պիտակ: {0}</value>
+  </data>
+  <data name="TagsDeleted" xml:space="preserve">
+    <value>Պիտակները ջնջված են: {0}</value>
   </data>
   <data name="TargetIdCol" xml:space="preserve">
     <value>Թիրախային ID</value>
@@ -581,6 +986,9 @@
   </data>
   <data name="TimeZoneSettingsUpdated" xml:space="preserve">
     <value>Ժամային գոտու կարգավորումները թարմացվել են</value>
+  </data>
+  <data name="TrashEmptied" xml:space="preserve">
+    <value>Աղբարկղը դատարկվեց</value>
   </data>
   <data name="TrustedMailDomainSettingsUpdated" xml:space="preserve">
     <value>Վստահելի փոստի տիրույթի կարգավորումները թարմացվել են</value>
@@ -611,6 +1019,9 @@
   </data>
   <data name="UpdateActionType" xml:space="preserve">
     <value>Թարմացնել</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Հաճախորդը {0} թարմացվել է</value>
   </data>
   <data name="UploadActionType" xml:space="preserve">
     <value>Վերբեռնել</value>
@@ -702,231 +1113,6 @@
   <data name="UserUpdatedPassword" xml:space="preserve">
     <value>Գաղտնաբառը թարմացվել է</value>
   </data>
-  <data name="TagCreated" xml:space="preserve">
-    <value>Ստեղծվել է պիտակ: {0}</value>
-  </data>
-  <data name="TagsDeleted" xml:space="preserve">
-    <value>Պիտակները ջնջված են: {0}</value>
-  </data>
-  <data name="TrashEmptied" xml:space="preserve">
-    <value>Աղբարկղը դատարկվեց</value>
-  </data>
-  <data name="AddedRoomTags" xml:space="preserve">
-    <value>Ավելացված է պիտակներ: [{1}]</value>
-  </data>
-  <data name="DeletedRoomTags" xml:space="preserve">
-    <value>Ջնջված պիտակներ: [{1}]</value>
-  </data>
-  <data name="RoomArchived" xml:space="preserve">
-    <value>Սենյակը արխիվացված է</value>
-  </data>
-  <data name="RoomCreated" xml:space="preserve">
-    <value>Ստեղծվել է սենյակ</value>
-  </data>
-  <data name="RoomDeleted" xml:space="preserve">
-    <value>Սենյակը ջնջված է</value>
-  </data>
-  <data name="RoomCreateUser" xml:space="preserve">
-    <value>Ավելացված օգտվող՝ {0}: Դեր՝ {1}</value>
-  </data>
-  <data name="RoomInvitationLinkCreated" xml:space="preserve">
-    <value>Հղումը ստեղծվել է: Դեր: {1}</value>
-  </data>
-  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
-    <value>Հղումը ջնջված է</value>
-  </data>
-  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
-    <value>Հղումը թարմացվել է: Դեր: {1}</value>
-  </data>
-  <data name="RoomLogoCreated" xml:space="preserve">
-    <value>Ստեղծվել է լոգոն</value>
-  </data>
-  <data name="RoomLogoDeleted" xml:space="preserve">
-    <value>Լոգոն ջնջված է</value>
-  </data>
-  <data name="RoomRemoveUser" xml:space="preserve">
-    <value>Ջնջված օգտվող: {0}</value>
-  </data>
-  <data name="RoomRenamed" xml:space="preserve">
-    <value>Սենյակը վերանվանվել է: {0}</value>
-  </data>
-  <data name="RoomsModule" xml:space="preserve">
-    <value>Սենյակներ</value>
-  </data>
-  <data name="RoomUnarchived" xml:space="preserve">
-    <value>Սենյակը հանվել է արխիվից</value>
-  </data>
-  <data name="RoomUpdateAccessForUser" xml:space="preserve">
-    <value>{0} նշանակված: {1}</value>
-  </data>
-  <data name="CityCol" xml:space="preserve">
-    <value>Քաղաք</value>
-  </data>
-  <data name="CountryCol" xml:space="preserve">
-    <value>Երկիր</value>
-  </data>
-  <data name="RoomExternalLinkCreated" xml:space="preserve">
-    <value>Ստեղծվել է արտաքին հղում՝ {0}:Դերը՝ {1}</value>
-  </data>
-  <data name="RoomExternalLinkDeleted" xml:space="preserve">
-    <value>Արտաքին հղումը ջնջված է՝ {0}</value>
-  </data>
-  <data name="RoomExternalLinkUpdated" xml:space="preserve">
-    <value>Արտաքին հղումը թարմացվել է՝ {0}:Դերը՝ {1}</value>
-  </data>
-  <data name="FileOpenedForChange" xml:space="preserve">
-    <value>Փոփոխության համար բացված ֆայլ՝ {0}</value>
-  </data>
-  <data name="PortalRenamed" xml:space="preserve">
-    <value>Պորտալը վերանվանվել է</value>
-  </data>
-  <data name="FileSizePostfix" xml:space="preserve">
-    <value>բայթ, ԿԲ, ՄԲ, ԳԲ, ՏԲ</value>
-  </data>
-  <data name="FileUploadedWithOverwriting" xml:space="preserve">
-    <value>Ֆայլը վերբեռնվել է վերագրանցմամբ՝ {0}</value>
-  </data>
-  <data name="QuotaPerPortalChanged" xml:space="preserve">
-    <value>Սահմանեք լռելյայն պահեստի քվոտան՝ {0}</value>
-  </data>
-  <data name="QuotaPerPortalDisabled" xml:space="preserve">
-    <value>Անջատված լռելյայն պահեստի քվոտա</value>
-  </data>
-  <data name="QuotaPerRoomChanged" xml:space="preserve">
-    <value>Սահմանել լռելյայն պահեստի քվոտան սենյակների համար՝ {0}</value>
-  </data>
-  <data name="QuotaPerRoomDisabled" xml:space="preserve">
-    <value>Սենյակների համար լռելյայն պահեստի քվոտան անջատված է</value>
-  </data>
-  <data name="QuotaPerUserChanged" xml:space="preserve">
-    <value>Սահմանեք օգտատերերի համար լռելյայն պահեստի քվոտան՝ {0}</value>
-  </data>
-  <data name="QuotaPerUserDisabled" xml:space="preserve">
-    <value>Անջատված է օգտատերերի լռելյայն պահեստի քվոտան</value>
-  </data>
-  <data name="RoomGroupAdded" xml:space="preserve">
-    <value>Ավելացվեց խումբ՝ {0}: Դերը՝ {1}</value>
-  </data>
-  <data name="RoomCopied" xml:space="preserve">
-    <value>Սենյակը պատճենված է՝ {0}</value>
-  </data>
-  <data name="RoomGroupRemove" xml:space="preserve">
-    <value>Ջնջված խումբ՝ {0}</value>
-  </data>
-  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
-    <value>{0} նշանակված: {1}</value>
-  </data>
-  <data name="SendJoinInvite" xml:space="preserve">
-    <value>{0} օգտատերը հրավեր է ուղարկել {1}-ին միանալու այս DocSpace-ին</value>
-  </data>
-  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
-    <value>Սենյակներ [{0}]: Սահմանել հարմարեցված պահեստային քվոտա սենյակների համար՝ {1}</value>
-  </data>
-  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
-    <value>Սենյակներ [{0}]: Սահմանել լռելյայն պահեստի քվոտան սենյակների համար՝ {1}</value>
-  </data>
-  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
-    <value>Սենյակներ [{0}]: Անջատված պահեստային քվոտա սենյակների համար</value>
-  </data>
-  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
-    <value>Օգտատերեր [{0}]: Օգտատերերի համար սահմանել հատուկ պահեստային քվոտա՝ {1}</value>
-  </data>
-  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
-    <value>Օգտատերեր [{0}]: Սահմանել օգտատերերի համար լռելյայն պահեստի քվոտան՝ {1}</value>
-  </data>
-  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
-    <value>Օգտատերեր [{0}]: Անջատված է օգտատերերի պահեստային քվոտան</value>
-  </data>
-  <data name="FormOpenedForFilling" xml:space="preserve">
-    <value>Լրացման համար բացված ֆայլ՝ {0}</value>
-  </data>
-  <data name="FormSubmit" xml:space="preserve">
-    <value>Օգտատերեր [{0}]: Ներկայացված ձևը՝ {1}</value>
-  </data>
-  <data name="ChangeClientActivation" xml:space="preserve">
-    <value>Հաճախորդի {0} ակտիվացումը փոխվել է</value>
-  </data>
-  <data name="ChangeClientVisibility" xml:space="preserve">
-    <value>Հաճախորդի {0} տեսանելիությունը փոխվել է</value>
-  </data>
-  <data name="CreateClient" xml:space="preserve">
-    <value>Հաճախորդը ստեղծվել է</value>
-  </data>
-  <data name="DeleteClient" xml:space="preserve">
-    <value>Հաճախորդը {0} ջնջվել է</value>
-  </data>
-  <data name="FileIndexChanged" xml:space="preserve">
-    <value>Ֆայլ՝ {0}: Ցուցանիշը փոխվել է {1}-ից մինչև {2}</value>
-  </data>
-  <data name="FolderIndexChanged" xml:space="preserve">
-    <value>Թղթապանակ՝ {0}: Ցուցանիշը փոխվել է {1}-ից մինչև {2}</value>
-  </data>
-  <data name="FolderIndexReordered" xml:space="preserve">
-    <value>Թղթապանակ՝ {0}: Ցուցանիշները վերադասավորվել են</value>
-  </data>
-  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
-    <value>Հաճախորդի համար ստեղծվել է թույլտվության կոդը {0}</value>
-  </data>
-  <data name="GeneratePersonalAccessToken" xml:space="preserve">
-    <value>Հաճախորդի համար ստեղծվել է անձնական մուտքի նշան {0}</value>
-  </data>
-  <data name="RegenerateSecret" xml:space="preserve">
-    <value>Հաճախորդի {0} գաղտնին վերականգնվել է</value>
-  </data>
-  <data name="RevokeUserClient" xml:space="preserve">
-    <value>Հաճախորդի {0} մուտքը չեղարկվել է</value>
-  </data>
-  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
-    <value>Սենյակ՝ {0}: Ներբեռնման արգելումը անջատված է</value>
-  </data>
-  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
-    <value>Սենյակ՝ {0}: Ներբեռնման արգելումը միացված է</value>
-  </data>
-  <data name="RoomIndexingDisabled" xml:space="preserve">
-    <value>Սենյակների ինդեքսավորումը անջատված է</value>
-  </data>
-  <data name="RoomIndexExportSaved" xml:space="preserve">
-    <value>Սենյակի ինդեքսի արտահանումը պահված է Փաստաթղթերում</value>
-  </data>
-  <data name="RoomIndexingEnabled" xml:space="preserve">
-    <value>Սենյակների ինդեքսավորումը միացված է</value>
-  </data>
-  <data name="RoomLifeTimeDisabled" xml:space="preserve">
-    <value>Մշտականը անջատված է</value>
-  </data>
-  <data name="RoomLifeTimeSet" xml:space="preserve">
-    <value>Մշտական լիցենզիայի ժամանակը սահմանված է: Արժեք՝ {0}: Ժամանակահատվածը՝ {1}: Ընդմիշտ ջնջել՝ {2}</value>
-  </data>
-  <data name="RoomInviteResend" xml:space="preserve">
-    <value>Կրկին ուղարկված հրավեր՝ {0}</value>
-  </data>
-  <data name="RoomWatermarkDisabled" xml:space="preserve">
-    <value>Սենյակ՝ {0}: Ջրանշանն անջատված է</value>
-  </data>
-  <data name="RoomWatermarkSet" xml:space="preserve">
-    <value>Սենյակ՝ {0}: Ջրանշանը միացված է</value>
-  </data>
-  <data name="UpdateClient" xml:space="preserve">
-    <value>Հաճախորդը {0} թարմացվել է</value>
-  </data>
-  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
-    <value>Ծրագրավորողի գործիքների մուտքի կարգավորումները փոփոխվել են</value>
-  </data>
-  <data name="FileVersionRemoved" xml:space="preserve">
-    <value>Ֆայլեր [{0}]. Տարբերակը ջնջված է: {1}</value>
-  </data>
-  <data name="FormCompletelyFilled" xml:space="preserve">
-    <value>Օգտատերեր [{0}]. Completely filled out form՝ {1}</value>
-  </data>
-  <data name="FormPartiallyFilled" xml:space="preserve">
-    <value>Օգտատերեր [{0}]. Մասնակի լրացված ձևաթուղթ՝ {1}</value>
-  </data>
-  <data name="FormStartedToFill" xml:space="preserve">
-    <value>Օգտատերեր [{0}]. Սկսել են լրացնել ձևաթուղթը՝ {1}</value>
-  </data>
-  <data name="FormStopped" xml:space="preserve">
-    <value>Օգտատերեր [{0}]. Կիսատ թողած ձևաթուղթ՝ {1}</value>
-  </data>
   <data name="WebhookCreated" xml:space="preserve">
     <value>Վեբհուկը ստեղծվել է՝ {0}</value>
   </data>
@@ -935,192 +1121,6 @@
   </data>
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Վեբհուկը թարմացվել է՝ {0}</value>
-  </data>
-  <data name="ApiKeyCreated" xml:space="preserve">
-    <value>Օգտատիրոջ Api Բանալին Ստեղծվել է: {0}</value>
-  </data>
-  <data name="ApiKeyDeleted" xml:space="preserve">
-    <value>Օգտատիրոջ Api Բանալին Ջնջվել է: {0}</value>
-  </data>
-  <data name="ApiKeyUpdated" xml:space="preserve">
-    <value>Օգտատիրոջ Api Բանալին Թարմացվել է: {0}</value>
-  </data>
-  <data name="FileCustomFilterDisabled" xml:space="preserve">
-    <value>Ֆայլ՝ {0}։ Հատուկ ֆիլտրն անջատված է</value>
-  </data>
-  <data name="FileCustomFilterEnabled" xml:space="preserve">
-    <value>Ֆայլ՝ {0}։ Հատուկ ֆիլտրը միացված է</value>
-  </data>
-  <data name="AuthLinkActivated" xml:space="preserve">
-    <value>Հաստատման հղումը ակտիվացված է</value>
-  </data>
-  <data name="CustomerOperationPerformed" xml:space="preserve">
-    <value>Հաճախորդի գործողությունը կատարվել է</value>
-  </data>
-  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
-    <value>Հաճախորդի գործառնությունների հաշվետվությունը ներբեռնվել է</value>
-  </data>
-  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
-    <value>Հաճախորդի բաժանորդագրությունը թարմացվել է՝ {0}</value>
-  </data>
-  <data name="CustomerWalletToppedUp" xml:space="preserve">
-    <value>Հաճախորդի դրամապանակը լիցքավորվել է՝ {0}</value>
-  </data>
-  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Հաճախորդի դրամապանակի լիցքավորման կարգավորումները թարմացվեցին</value>
-  </data>
-  <data name="LdapDisabled" xml:space="preserve">
-    <value>LDAP նույնականացումը անջատված է</value>
-  </data>
-  <data name="LdapEnabled" xml:space="preserve">
-    <value>LDAP նույնականացումը միացված է</value>
-  </data>
-  <data name="LdapSync" xml:space="preserve">
-    <value>LDAP սինխրոնիզացիան ավարտվեց</value>
-  </data>
-  <data name="LocationCol" xml:space="preserve">
-    <value>Լոկացիա</value>
-  </data>
-  <data name="BannerSettingsChanged" xml:space="preserve">
-    <value>Գովազդային պաստառների տեսանելիության կարգավորումները փոխվել են</value>
-  </data>
-  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Հաճախորդի դրամապանակի միացված ծառայությունների կարգավորումները թարմացվել են</value>
-  </data>
-  <data name="LoginSuccessViaOAuth" xml:space="preserve">
-    <value>Հաջող մուտք OAuth 2.0 միջոցով</value>
-  </data>
-  <data name="LoginSuccessViaPassword" xml:space="preserve">
-    <value>Հաջող մուտք՝ օգտագործելով մուտք և գաղտնաբառ</value>
-  </data>
-  <data name="FileExternalLinkCreated" xml:space="preserve">
-    <value>Ֆայլեր [{0}]: Արտաքին հղումը ստեղծվել է՝ {1}: Դեր՝ {2}</value>
-  </data>
-  <data name="FileExternalLinkDeleted" xml:space="preserve">
-    <value>Ֆայլեր [{0}]: Արտաքին հղումը ջնջվել է՝ {1}</value>
-  </data>
-  <data name="FileExternalLinkUpdated" xml:space="preserve">
-    <value>Ֆայլեր [{0}]: Արտաքին հղումը թարմացվել է՝ {1}: Դեր՝ {2}</value>
-  </data>
-  <data name="FileMarkedAsFavorite" xml:space="preserve">
-    <value>Ֆայլը նշվել է որպես Նախընտրելի՝ {0}</value>
-  </data>
-  <data name="FileRemovedFromFavorite" xml:space="preserve">
-    <value>Ֆայլը հեռացվել է նախընտրելիից՝ {0}</value>
-  </data>
-  <data name="FileRemovedFromList" xml:space="preserve">
-    <value>Ֆայլը հեռացվել է «Ինձ հետ կիսված» բաժնից՝ {0}</value>
-  </data>
-  <data name="FileUpdatedAccessFor" xml:space="preserve">
-    <value>Ֆայլեր [{0}]: Մուտքը թարմացվել է {1}-ի համար: Դեր՝ {2}</value>
-  </data>
-  <data name="FolderDownloaded" xml:space="preserve">
-    <value>Թղթապանակը ներբեռնվել է՝ {0}</value>
-  </data>
-  <data name="FolderExternalLinkCreated" xml:space="preserve">
-    <value>Թղթապանակները [{0}]: Արտաքին հղումը ստեղծվել է՝ {1}: Դեր՝ {2}</value>
-  </data>
-  <data name="FolderExternalLinkDeleted" xml:space="preserve">
-    <value>Թղթապանակները[{0}]: Արտաքին հղումը ջնջվել է՝ {1}</value>
-  </data>
-  <data name="FolderExternalLinkUpdated" xml:space="preserve">
-    <value>Թղթապանակները [{0}]: Արտաքին հղումը թարմացվել է՝ {1}: Դեր՝ {2}</value>
-  </data>
-  <data name="FolderRemovedFromList" xml:space="preserve">
-    <value>Թղթապանակը հեռացվել է «Ինձ հետ կիսված»-ից՝ {0}</value>
-  </data>
-  <data name="FolderUpdatedAccessFor" xml:space="preserve">
-    <value>Թղթապանակները [{0}]: Մուտքը թարմացվել է {1}-ի համար: Դեր՝ {2}</value>
-  </data>
-  <data name="RoomExternalLinkRevoked" xml:space="preserve">
-    <value>Արտաքին հղումը չեղարկվել է՝ {1}</value>
-  </data>
-  <data name="AddedServerToAgent" xml:space="preserve">
-    <value>MCP սերվեր {0}-ն ավելացվել է գործակալին</value>
-  </data>
-  <data name="AgentCreated" xml:space="preserve">
-    <value>Գործակալը ստեղծվել է</value>
-  </data>
-  <data name="AgentDeleted" xml:space="preserve">
-    <value>Գործակալը ջնջվել է</value>
-  </data>
-  <data name="AgentRenamed" xml:space="preserve">
-    <value>Գործակալը վերանվանվել է՝ {0}</value>
-  </data>
-  <data name="AgentsModule" xml:space="preserve">
-    <value>Գործակալներ</value>
-  </data>
-  <data name="AIProviderCreated" xml:space="preserve">
-    <value>ԱԲ պրովայդերը ստեղծվել է՝ {0}</value>
-  </data>
-  <data name="AIProviderDeleted" xml:space="preserve">
-    <value>ԱԲ պրովայդերը ջնջվել է՝ {0}</value>
-  </data>
-  <data name="AIProviderUpdated" xml:space="preserve">
-    <value>ԱԲ պրովայդերը թարմացվել է՝ {0}</value>
-  </data>
-  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
-    <value>ԱԲ գործակալներ [{0}]: Սահմանեք ԱԲ գործակալների համար նախատեսված պահեստավորման քվոտա՝ {1}</value>
-  </data>
-  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
-    <value>ԱԲ գործակալներ [{0}]: Սահմանեք ԱԲ գործակալների համար լռելյայն պահեստավորման քվոտա՝ {1}</value>
-  </data>
-  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
-    <value>ԱԲ գործակալներ [{0}]: ԱԲ գործակալների պահեստավորման քվոտան անջատված է</value>
-  </data>
-  <data name="DeletedServerFromAgent" xml:space="preserve">
-    <value>MCP սերվեր {0}-ը ջնջվել է գործակալից</value>
-  </data>
-  <data name="LoginSuccessSocialAccount" xml:space="preserve">
-    <value>Մուտք սոցիալական հաշվի միջոցով՝ հաջողությամբ՝</value>
-  </data>
-  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
-    <value>Սահմանել ԱԲ գործակալների համար լռելյայն պահեստավորման քվոտա՝ {0}</value>
-  </data>
-  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
-    <value>ԱԲ գործակալների համար լռելյայն պահեստավորման քվոտան անջատված է</value>
-  </data>
-  <data name="ResetVectorizationSettings" xml:space="preserve">
-    <value>Վեկտորացման կարգավորումները վերակայվել են</value>
-  </data>
-  <data name="ResetWebSearchSettings" xml:space="preserve">
-    <value>Վեբ որոնման կարգավորումները վերակայվել են</value>
-  </data>
-  <data name="ServerCreated" xml:space="preserve">
-    <value>MCP սերվերը ստեղծվել է՝ {0}</value>
-  </data>
-  <data name="ServerDeleted" xml:space="preserve">
-    <value>MCP սերվերը ջնջվել է՝ {0}</value>
-  </data>
-  <data name="ServerDisabled" xml:space="preserve">
-    <value>MCP սերվերը անջատվել է՝ {0}</value>
-  </data>
-  <data name="ServerEnabled" xml:space="preserve">
-    <value>MCP սերվերը միացվել է՝ {0}</value>
-  </data>
-  <data name="ServerUpdated" xml:space="preserve">
-    <value>MCP սերվերը թարմացվել է՝ {0}</value>
-  </data>
-  <data name="SetVectorizationSettings" xml:space="preserve">
-    <value>Վեկտորացման կարգավորումները կարգավորված են։ Մատակարար՝ {0}</value>
-  </data>
-  <data name="SetWebSearchSettings" xml:space="preserve">
-    <value>Վեբ որոնման կարգավորումները կարգավորված են։ Շարժիչ՝ {0}</value>
-  </data>
-  <data name="BackupCompleted" xml:space="preserve">
-    <value>Պահուստավորումն ավարտված է</value>
-  </data>
-  <data name="BackupFailed" xml:space="preserve">
-    <value>Պահուստավորումը ձախողվեց</value>
-  </data>
-  <data name="ScheduledBackupCompleted" xml:space="preserve">
-    <value>Պլանավորված պահուստավորումն ավարտվեց</value>
-  </data>
-  <data name="ScheduledBackupFailed" xml:space="preserve">
-    <value>Պլանավորված պահուստավորումը ձախողվեց</value>
-  </data>
-  <data name="ScheduledBackupStarted" xml:space="preserve">
-    <value>Պլանավորված պահուստավորումը սկսվել է</value>
   </data>
   <data name="WebpluginDeleted" xml:space="preserve">
     <value>Պլագինը ջնջվել է՝ {0}</value>

@@ -120,11 +120,20 @@
   <data name="AceShareLink" xml:space="preserve">
     <value>Mimo portál</value>
   </data>
+  <data name="AceStatusEnum_Collaborator" xml:space="preserve">
+    <value>Spolupracovník</value>
+  </data>
   <data name="AceStatusEnum_Comment" xml:space="preserve">
     <value>Komentár</value>
   </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Tvorca obsahu</value>
+  </data>
   <data name="AceStatusEnum_CustomFilter" xml:space="preserve">
     <value>Vlastný filter</value>
+  </data>
+  <data name="AceStatusEnum_Editing" xml:space="preserve">
+    <value>Redaktor</value>
   </data>
   <data name="AceStatusEnum_FillForms" xml:space="preserve">
     <value>Vyplňovanie formulárov</value>
@@ -141,8 +150,14 @@
   <data name="AceStatusEnum_Review" xml:space="preserve">
     <value>Posúdiť</value>
   </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Manažér miestnosti</value>
+  </data>
   <data name="Admin" xml:space="preserve">
     <value>Administrátor</value>
+  </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>Správca agentov</value>
   </data>
   <data name="AppAccessDenied" xml:space="preserve">
     <value>Ak chcete pracovať so súborom, musíte mať prístup</value>
@@ -198,6 +213,15 @@
   <data name="CommentUpload" xml:space="preserve">
     <value>Nahrané</value>
   </data>
+  <data name="Date" xml:space="preserve">
+    <value>Dátum</value>
+  </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>Zdieľaný odkaz</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Odkaz na pozvánku</value>
+  </data>
   <data name="DocuSignStatusDeclined" xml:space="preserve">
     <value>Odmietnuté</value>
   </data>
@@ -240,17 +264,32 @@
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Súbor väčší než {0} nebude presunutý</value>
   </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Presun viacerých súborov do miestnosti na vyplnenie formulárov nie je podporovaný. Presúvajte vždy len jeden ONLYOFFICE PDF formulár.</value>
+  </data>
   <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
     <value>Nová verzia nemôže byť taká istá, ako aktuálna verzia</value>
   </data>
   <data name="ErrorMessage_FolderCopyError" xml:space="preserve">
     <value>Priečinok nemôžete skopírovať do jeho podpriečinku</value>
   </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Presun priečinkov do miestnosti na vyplnenie formulárov nie je podporovaný. Presúvajte vždy jeden ONLYOFFICE PDF formulár.</value>
+  </data>
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Požadovaný priečinok nebol nájdený</value>
   </data>
+  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
+    <value>Neplatný poskytovateľ</value>
+  </data>
+  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
+    <value>Nemôžete použiť tento priečinok na ukladanie miestnosti</value>
+  </data>
   <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Nesprávny názov</value>
+  </data>
+  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
+    <value>Odkaz na pozvánku je neplatný alebo jeho platnosť vypršala</value>
   </data>
   <data name="ErrorMessage_LockedFile" xml:space="preserve">
     <value>Súbor je momentálne uzamknutý iným používateľom</value>
@@ -261,8 +300,20 @@
   <data name="ErrorMessage_ManyDownloads" xml:space="preserve">
     <value>Príliš veľa sťahovaní.</value>
   </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>Maximálny počet odkazov nesmie presiahnuť {0}</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Súbor nie je možné presunúť do tejto miestnosti. Pokúste sa presunúť ONLYOFFICE PDF formulár.</value>
+  </data>
   <data name="ErrorMessage_NotSupportedFormat" xml:space="preserve">
     <value>Ľutujeme, ale formát tohto súboru nie je podporovaný</value>
+  </data>
+  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
+    <value>Tento poskytovateľ je už pripojený k miestnosti</value>
+  </data>
+  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
+    <value>Táto rola nie je dostupná pre tento typ používateľa</value>
   </data>
   <data name="ErrorMessage_SaveAnonymous" xml:space="preserve">
     <value>Autor poslednej uloženej zmeny je neznámy</value>
@@ -276,6 +327,9 @@
   <data name="ErrorMessage_SecurityException" xml:space="preserve">
     <value>Nemáte dostatočné práva na vykonanie operácie</value>
   </data>
+  <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
+    <value>Nemáte dostatočné oprávnenia na archiváciu miestnosti</value>
+  </data>
   <data name="ErrorMessage_SecurityException_Auth" xml:space="preserve">
     <value>Nie je možné autorizovať poskytovateľa {0} s pridelenými povereniami.</value>
   </data>
@@ -284,6 +338,9 @@
   </data>
   <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
     <value>Nemáte oprávnenie na kopírovanie priečinka</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
+    <value>Nemáte oprávnenie na kopírovanie do tohto priečinka</value>
   </data>
   <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
     <value>Nemáte dostatočné práva na vytvorenie</value>
@@ -306,11 +363,20 @@
   <data name="ErrorMessage_SecurityException_EditFileTwice" xml:space="preserve">
     <value>Tento dokument upravujete na inej karte</value>
   </data>
+  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
+    <value>Nemáte oprávnenie upravovať túto miestnosť</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Nemožno odstrániť aktuálnu verziu súboru</value>
+  </data>
   <data name="ErrorMessage_SecurityException_MoveFile" xml:space="preserve">
     <value>Nemáte dostatočné oprávnenie na presunutie súboru</value>
   </data>
   <data name="ErrorMessage_SecurityException_MoveFolder" xml:space="preserve">
     <value>Nemáte dostatočné oprávnenie na presunutie priečinka</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
+    <value>Nemáte oprávnenie na presun do tohto priečinka</value>
   </data>
   <data name="ErrorMessage_SecurityException_ReadFile" xml:space="preserve">
     <value>Nemáte dostatočné práva na zobrazenie súboru</value>
@@ -324,11 +390,17 @@
   <data name="ErrorMessage_SecurityException_RenameFolder" xml:space="preserve">
     <value>Nemáte dostatočné práva k premenovaniu priečinka</value>
   </data>
+  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
+    <value>Nemáte dostatočné oprávnenia na vrátenie miestnosti z archívu</value>
+  </data>
   <data name="ErrorMessage_SecurityException_UpdateEditingFile" xml:space="preserve">
     <value>Nie je možné aktualizovať súbor, pretože je otvorený pre úpravy</value>
   </data>
   <data name="ErrorMessage_SecurityException_ViewFolder" xml:space="preserve">
     <value>Nemáte dostatočné práva na zobrazenie obsahu priečinka</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>Príliš veľa krát ste skúšali zadať svoje heslo. Prosím, skúste to znova neskôr</value>
   </data>
   <data name="ErrorMessage_SharpBoxException" xml:space="preserve">
     <value>Obsah priečinka tretej strany nie je k dispozícii. Pokúste sa znova pripojiť k účtu.</value>
@@ -336,8 +408,14 @@
   <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>Chyba pri spustení editácie súboru</value>
   </data>
+  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
+    <value>Nemôžete upravovať archivované miestnosti</value>
+  </data>
   <data name="ErrorMessage_UpdateEditingFile" xml:space="preserve">
     <value>Nemôžete aktualizovať súbor, ktorý je otvorený na úpravu</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Súbor nie je možné nahrať do tejto miestnosti. Pokúste sa nahrať ONLYOFFICE PDF formulár.</value>
   </data>
   <data name="ErrorMessage_UserNotFound" xml:space="preserve">
     <value>Používateľ nebol nájdený</value>
@@ -345,44 +423,35 @@
   <data name="ErrorMessage_ViewTrashItem" xml:space="preserve">
     <value>Nemáte povolené prezeranie prvkov v koši</value>
   </data>
-  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
-    <value>Neplatný poskytovateľ</value>
-  </data>
-  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
-    <value>Nemôžete použiť tento priečinok na ukladanie miestnosti</value>
-  </data>
-  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
-    <value>Odkaz na pozvánku je neplatný alebo jeho platnosť vypršala</value>
-  </data>
-  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
-    <value>Táto rola nie je dostupná pre tento typ používateľa</value>
-  </data>
-  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
-    <value>Tento poskytovateľ je už pripojený k miestnosti</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
-    <value>Nemáte oprávnenie na kopírovanie do tohto priečinka</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
-    <value>Nemáte oprávnenie na presun do tohto priečinka</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
-    <value>Nemáte dostatočné oprávnenia na vrátenie miestnosti z archívu</value>
-  </data>
-  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
-    <value>Nemôžete upravovať archivované miestnosti</value>
-  </data>
   <data name="ErrorrMessage_PinRoom" xml:space="preserve">
     <value>Nemôžete ukotviť miestnosť</value>
   </data>
   <data name="Everyone" xml:space="preserve">
     <value>Každý</value>
   </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Externý používateľ</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Odkaz na vyplnenie</value>
+  </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>Dokumenty používateľa {0} {1}</value>
+  </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Číslo formulára</value>
+  </data>
   <data name="Guest" xml:space="preserve">
     <value>Anonymný</value>
   </data>
   <data name="IndexTitle" xml:space="preserve">
     <value>Hľadať v obsahu dokumentov</value>
+  </data>
+  <data name="KnowledgeFolder" xml:space="preserve">
+    <value>Vedomosti</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Odkaz na formulár</value>
   </data>
   <data name="MessageFileCreated" xml:space="preserve">
     <value>Súbor vytvorený v priečinku "{0}"</value>
@@ -395,6 +464,9 @@
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>bor už nie je návrhom na vyplnenie formulára.</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Otvoriť súbor</value>
   </data>
   <data name="ProductAdminOpportunities" xml:space="preserve">
     <value>Robte to isté ako používateľ|Prepojte Dropbox, Box a iné kontá v sekcii 'Spoločné dokumenty'|Nastavte prístupové práva dokumentom a priečinkom v sekcii 'Spoločné dokumenty'</value>
@@ -415,20 +487,17 @@
   <data name="ProductUserOpportunities" xml:space="preserve">
     <value>Vytvárajte a upravujte vlastné dokumenty, rovnako ako zdieľané dokumenty s príslušnými prístupovými právami|Udeľte práva na čítanie/úpravu ostatným používateľom na dokumenty a priečinky|Prepojte Dropbox, Box a iné kontá v sekcii 'Dokumenty'</value>
   </data>
-  <data name="UnknownFirstName" xml:space="preserve">
-    <value>Krstné meno</value>
+  <data name="ResultStorageFolder" xml:space="preserve">
+    <value>Úložisko výsledkov</value>
   </data>
-  <data name="UnknownLastName" xml:space="preserve">
-    <value>Priezvisko</value>
+  <data name="RoleEnum_Collaborator" xml:space="preserve">
+    <value>Spolupracovník</value>
   </data>
-  <data name="UnlockComment" xml:space="preserve">
-    <value>Súbor je odomknutý</value>
+  <data name="RoleEnum_Comment" xml:space="preserve">
+    <value>Komentátor</value>
   </data>
-  <data name="AceStatusEnum_Editing" xml:space="preserve">
-    <value>Redaktor</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
-    <value>Nemáte oprávnenie upravovať túto miestnosť</value>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Tvorca obsahu</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
     <value>Administrátor DocSpace</value>
@@ -436,41 +505,26 @@
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Redaktor</value>
   </data>
-  <data name="RoleEnum_User" xml:space="preserve">
-    <value>Používateľ</value>
+  <data name="RoleEnum_FillForms" xml:space="preserve">
+    <value>Vyplňovač formulárov</value>
+  </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>Hosť</value>
   </data>
   <data name="RoleEnum_Read" xml:space="preserve">
     <value>Prehliadač</value>
   </data>
-  <data name="RoleEnum_Comment" xml:space="preserve">
-    <value>Komentátor</value>
-  </data>
-  <data name="RoleEnum_FillForms" xml:space="preserve">
-    <value>Vyplňovač formulárov</value>
-  </data>
   <data name="RoleEnum_Review" xml:space="preserve">
     <value>Recenzent</value>
   </data>
-  <data name="RoleEnum_Collaborator" xml:space="preserve">
-    <value>Spolupracovník</value>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Administrátor miestnosti</value>
   </data>
-  <data name="AceStatusEnum_Collaborator" xml:space="preserve">
-    <value>Spolupracovník</value>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Manažér miestnosti</value>
   </data>
-  <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
-    <value>Nemáte dostatočné oprávnenia na archiváciu miestnosti</value>
-  </data>
-  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
-    <value>Maximálny počet odkazov nesmie presiahnuť {0}</value>
-  </data>
-  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
-    <value>Príliš veľa krát ste skúšali zadať svoje heslo. Prosím, skúste to znova neskôr</value>
-  </data>
-  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
-    <value>Odkaz na pozvánku</value>
-  </data>
-  <data name="DefaultExternalLinkTitle" xml:space="preserve">
-    <value>Zdieľaný odkaz</value>
+  <data name="RoleEnum_User" xml:space="preserve">
+    <value>Používateľ</value>
   </data>
   <data name="RoomIndex_Author" xml:space="preserve">
     <value>Autor</value>
@@ -486,6 +540,9 @@
   </data>
   <data name="RoomIndex_ExportAuthor" xml:space="preserve">
     <value>Exportovať autora</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Priečinok</value>
   </data>
   <data name="RoomIndex_Index" xml:space="preserve">
     <value>Index</value>
@@ -511,79 +568,22 @@
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Typ</value>
   </data>
-  <data name="RoomIndex_Folder" xml:space="preserve">
-    <value>Priečinok</value>
-  </data>
-  <data name="Date" xml:space="preserve">
-    <value>Dátum</value>
-  </data>
-  <data name="User" xml:space="preserve">
-    <value>Používateľ</value>
-  </data>
-  <data name="LinkToForm" xml:space="preserve">
-    <value>Odkaz na formulár</value>
-  </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Otvoriť súbor</value>
-  </data>
-  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Súbor nie je možné nahrať do tejto miestnosti. Pokúste sa nahrať ONLYOFFICE PDF formulár.</value>
-  </data>
-  <data name="FillOutExternalLinkTitle" xml:space="preserve">
-    <value>Odkaz na vyplnenie</value>
-  </data>
-  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Presun viacerých súborov do miestnosti na vyplnenie formulárov nie je podporovaný. Presúvajte vždy len jeden ONLYOFFICE PDF formulár.</value>
-  </data>
-  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Presun priečinkov do miestnosti na vyplnenie formulárov nie je podporovaný. Presúvajte vždy jeden ONLYOFFICE PDF formulár.</value>
-  </data>
-  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Súbor nie je možné presunúť do tejto miestnosti. Pokúste sa presunúť ONLYOFFICE PDF formulár.</value>
-  </data>
-  <data name="FormNumber" xml:space="preserve">
-    <value>Číslo formulára</value>
-  </data>
-  <data name="ExternalUser" xml:space="preserve">
-    <value>Externý používateľ</value>
-  </data>
-  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
-    <value>Manažér miestnosti</value>
-  </data>
-  <data name="RoleEnum_RoomManager" xml:space="preserve">
-    <value>Manažér miestnosti</value>
-  </data>
-  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
-    <value>Tvorca obsahu</value>
-  </data>
-  <data name="RoleEnum_ContentCreator" xml:space="preserve">
-    <value>Tvorca obsahu</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
-    <value>Nemožno odstrániť aktuálnu verziu súboru</value>
-  </data>
   <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
     <value>Zdieľať na vyplnenie</value>
   </data>
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>Začať vyplňovanie</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrátor miestnosti</value>
+  <data name="UnknownFirstName" xml:space="preserve">
+    <value>Krstné meno</value>
   </data>
-  <data name="RoleEnum_Guest" xml:space="preserve">
-    <value>Hosť</value>
+  <data name="UnknownLastName" xml:space="preserve">
+    <value>Priezvisko</value>
   </data>
-  <data name="AgentManager" xml:space="preserve">
-    <value>Správca agentov</value>
+  <data name="UnlockComment" xml:space="preserve">
+    <value>Súbor je odomknutý</value>
   </data>
-  <data name="FolderNameForReassignedData" xml:space="preserve">
-    <value>Dokumenty používateľa {0} {1}</value>
-  </data>
-  <data name="KnowledgeFolder" xml:space="preserve">
-    <value>Vedomosti</value>
-  </data>
-  <data name="ResultStorageFolder" xml:space="preserve">
-    <value>Úložisko výsledkov</value>
+  <data name="User" xml:space="preserve">
+    <value>Používateľ</value>
   </data>
 </root>

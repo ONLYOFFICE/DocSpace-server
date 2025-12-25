@@ -120,6 +120,9 @@
   <data name="AiSettingsAccessDenied" xml:space="preserve">
     <value>U heeft niet de rechten om AI-instellingen te beheren</value>
   </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>Kan bestanden niet verwerken: {0}. Bestanden kunnen beschadigd of versleuteld zijn</value>
+  </data>
   <data name="ChatAccessDenied" xml:space="preserve">
     <value>U heeft niet de rechten om de chat te gebruiken</value>
   </data>
@@ -147,6 +150,12 @@
   <data name="ManageProviders" xml:space="preserve">
     <value>U heeft niet de rechten om providers te beheren</value>
   </data>
+  <data name="ManageServers" xml:space="preserve">
+    <value>U heeft niet de rechten om MCP-servers te beheren</value>
+  </data>
+  <data name="ProviderNotFound" xml:space="preserve">
+    <value>Provider niet gevonden</value>
+  </data>
   <data name="ReservedServerName" xml:space="preserve">
     <value>Kan geen verbinding maken met MCP-server</value>
   </data>
@@ -156,22 +165,13 @@
   <data name="ServerNameExists" xml:space="preserve">
     <value>MCP-servernaam bestaat al</value>
   </data>
-  <data name="ServersRoomLimit" xml:space="preserve">
-    <value>Het maximale aantal servers per kamer is {0}</value>
-  </data>
   <data name="ServerNotFound" xml:space="preserve">
     <value>MCP-server niet gevonden</value>
   </data>
-  <data name="ProviderNotFound" xml:space="preserve">
-    <value>Provider niet gevonden</value>
-  </data>
-  <data name="ManageServers" xml:space="preserve">
-    <value>U heeft niet de rechten om MCP-servers te beheren</value>
+  <data name="ServersRoomLimit" xml:space="preserve">
+    <value>Het maximale aantal servers per kamer is {0}</value>
   </data>
   <data name="UnavailableServers" xml:space="preserve">
     <value>MCP-servers zijn niet beschikbaar: {0}. Controleer de verbindingsinstellingen</value>
-  </data>
-  <data name="AttachmentProcessFailed" xml:space="preserve">
-    <value>Kan bestanden niet verwerken: {0}. Bestanden kunnen beschadigd of versleuteld zijn</value>
   </data>
 </root>

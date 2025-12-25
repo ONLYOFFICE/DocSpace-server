@@ -120,6 +120,9 @@
   <data name="AiSettingsAccessDenied" xml:space="preserve">
     <value>ليس لديكم صلاحية لإدارة إعدادات الذكاء الاصطناعي</value>
   </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>لا يمكن معالجة الملفات: {0}. قد تكون الملفات تالفة أو مشفرة</value>
+  </data>
   <data name="ChatAccessDenied" xml:space="preserve">
     <value>ليس لديكم صلاحية لاستخدام الدردشة</value>
   </data>
@@ -129,11 +132,11 @@
   <data name="IncorrectProvider" xml:space="preserve">
     <value>نوع المزود غير صحيح</value>
   </data>
-  <data name="InvalidAuthCode" xml:space="preserve">
-    <value>رمز التفويض غير صالح</value>
-  </data>
   <data name="IncorrectServerCredentials" xml:space="preserve">
     <value>فشلت المصادقة. تحققوا من بيانات اعتمادكم</value>
+  </data>
+  <data name="InvalidAuthCode" xml:space="preserve">
+    <value>رمز التفويض غير صالح</value>
   </data>
   <data name="InvalidKey" xml:space="preserve">
     <value>مفتاح API المحدد غير صالح أو ليس لديه حقوق الوصول. تحققوا من صحة المفتاح وحاولوا مرة أخرى</value>
@@ -170,8 +173,5 @@
   </data>
   <data name="UnavailableServers" xml:space="preserve">
     <value>خوادم MCP غير متوفرة: {0}. التحقق من إعدادات الاتصال</value>
-  </data>
-  <data name="AttachmentProcessFailed" xml:space="preserve">
-    <value>لا يمكن معالجة الملفات: {0}. قد تكون الملفات تالفة أو مشفرة</value>
   </data>
 </root>

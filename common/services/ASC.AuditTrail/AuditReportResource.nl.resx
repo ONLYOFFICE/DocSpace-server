@@ -1,5 +1,64 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -53,16 +112,25 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ActionCol" xml:space="preserve">
     <value>Actie</value>
   </data>
+  <data name="ActionIdCol" xml:space="preserve">
+    <value>Action ID</value>
+  </data>
   <data name="ActionTypeCol" xml:space="preserve">
     <value>Actie type</value>
+  </data>
+  <data name="AddedRoomTags" xml:space="preserve">
+    <value>Tags toegevoegd: [{1}]</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>MCP-server {0} toegevoegd aan agent</value>
   </data>
   <data name="AdministratorAdded" xml:space="preserve">
     <value>Beheerder Toegevoegd: {0}</value>
@@ -76,8 +144,41 @@
   <data name="AdministratorOpenedFullAccess" xml:space="preserve">
     <value>Beheerders [{0}]. Volledige Toegang Geopend</value>
   </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>Agent aangemaakt</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>Agent verwijderd</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>Agent hernoemd: {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>Agenten</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>AI- provider aangemaakt: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>AI- provider verwijderd: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>AI- provider bijgewerkt: {0}</value>
+  </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Gebruiker Api sleutel aangemaakt: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Gebruiker Api sleutel verwijderd: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Gebruiker Api sleutel bijgewerkt: {0}</value>
+  </data>
   <data name="AttachActionType" xml:space="preserve">
     <value>Bijlage toevoegen</value>
+  </data>
+  <data name="AuditSettingsUpdated" xml:space="preserve">
+    <value>Audittijd Instellingen Bijgewerkt</value>
   </data>
   <data name="AuditTrailReportDownloaded" xml:space="preserve">
     <value>Audit Trail Rapport Gedownload</value>
@@ -85,11 +186,35 @@
   <data name="AuditTrailReportName" xml:space="preserve">
     <value>Audit Trail Rapport ({0}-{1})</value>
   </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>De autorisatielink is geactiveerd</value>
+  </data>
   <data name="AuthorizationKeysSetting" xml:space="preserve">
     <value>Derde Partij Autorisatiesleutel geüpdatet</value>
   </data>
+  <data name="BackupCompleted" xml:space="preserve">
+    <value>Back-up voltooid</value>
+  </data>
+  <data name="BackupFailed" xml:space="preserve">
+    <value>Back-up mislukt</value>
+  </data>
+  <data name="BackupStarted" xml:space="preserve">
+    <value>Start back-up</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Zichtbaarheidsinstellingen voor promotionele banners gewijzigd</value>
+  </data>
   <data name="BrowserCol" xml:space="preserve">
     <value>Browser</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Activatie van client {0} gewijzigd</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Zichtbaarheid van client {0} gewijzigd</value>
+  </data>
+  <data name="CityCol" xml:space="preserve">
+    <value>Plaats</value>
   </data>
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Kleurthema Veranderd</value>
@@ -103,8 +228,62 @@
   <data name="CopyActionType" xml:space="preserve">
     <value>Kopiëren</value>
   </data>
+  <data name="CountryCol" xml:space="preserve">
+    <value>Land</value>
+  </data>
   <data name="CreateActionType" xml:space="preserve">
     <value>Aanmaken</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Client aangemaakt</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Klantenhandeling uitgevoerd</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Klantactiviteitenverslag gedownload</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Klantabonnement bijgewerkt: {0}</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Instellingen voor ingeschakelde klantportemonnee-services bijgewerkt</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Klant wallet opgeladen: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Instellingen voor het opladen van klant wallet bijgewerkt</value>
+  </data>
+  <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
+    <value>Aangepaste Navigatie Instellingen Bijgewerkt</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>AI-agenten [{0}]. Aangepaste opslagquota instellen voor AI-agenten: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>AI-agenten [{0}]. Standaard opslagquota instellen voor AI-agenten : {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>AI-agenten [{0}]. Opslagquota voor AI-agenten uitgeschakeld</value>
+  </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Kamers [{0}]. Aangepaste opslagquota instellen voor kamers: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Kamers [{0}]. Standaard opslagquota instellen voor kamers: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Kamers [{0}]. Opslagquota voor kamers uitgeschakeld</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Gebruikers [{0}]. Aangepaste opslagquota instellen voor gebruikers: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Gebruikers [{0}]. Standaard opslagquota instellen voor gebruikers: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Gebruikers [{0}]. Opslagquota voor gebruikers uitgeschakeld</value>
   </data>
   <data name="DateCol" xml:space="preserve">
     <value>Datum</value>
@@ -115,8 +294,20 @@
   <data name="DeleteActionType" xml:space="preserve">
     <value>Verwijderen</value>
   </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Client {0} verwijderd</value>
+  </data>
+  <data name="DeletedRoomTags" xml:space="preserve">
+    <value>Verwijderde tags: [{1}]</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>MCP-server {0} verwijderd uit agent</value>
+  </data>
   <data name="DetachActionType" xml:space="preserve">
     <value>Losmaken</value>
+  </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Toegangsinstellingen voor tools voor ontwikkelaars gewijzigd</value>
   </data>
   <data name="DnsSettingsUpdated" xml:space="preserve">
     <value>DNS Instellingen Geüpdatet</value>
@@ -124,11 +315,17 @@
   <data name="DocumentServiceLocationSetting" xml:space="preserve">
     <value>Documentservice Locatie Geüpdatet</value>
   </data>
+  <data name="DocumentsForcesave" xml:space="preserve">
+    <value>Forcesave instellingen bijgewerkt</value>
+  </data>
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Overschrijf instellingen geactualiseerd</value>
   </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Instellingen</value>
+  </data>
+  <data name="DocumentsStoreForcesave" xml:space="preserve">
+    <value>Sla forcesave instellingen op Bijgewerkt</value>
   </data>
   <data name="DocumentsThirdPartySettingsUpdated" xml:space="preserve">
     <value>Derde Partij Instellingen Geüpdatet</value>
@@ -160,6 +357,12 @@
   <data name="FileCreatedVersion" xml:space="preserve">
     <value>Bestanden [{0}]. Revisie:{1}. Versie Aangemaakt</value>
   </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>Bestand: {0}. Aangepast filter uitgeschakeld</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>Bestand: {0}. Aangepast filter ingeschakeld</value>
+  </data>
   <data name="FileDeleted" xml:space="preserve">
     <value>Bestand Verwijderd: {0}</value>
   </data>
@@ -172,11 +375,26 @@
   <data name="FileDownloadedAs" xml:space="preserve">
     <value>Bestanden [{0}]. Gedownload Als: {1}</value>
   </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Bestanden [{0}]. Externe link aangemaakt: {1}. Rol: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Bestanden [{0}]. Externe link verwijderd: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Bestanden [{0}]. Externe link bijgewerkt: {1}.c Rol: {2}</value>
+  </data>
   <data name="FileImported" xml:space="preserve">
     <value>Mappen [{0}]. Bestand Geïmporteerd: {1}. Provider: {2}</value>
   </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Bestand: {0}. Index gewijzigd van {1} in {2}</value>
+  </data>
   <data name="FileLocked" xml:space="preserve">
     <value>Bestand Op Slot: {0}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Bestand Gemarkeerd Als Favoriet: {0}</value>
   </data>
   <data name="FileMoved" xml:space="preserve">
     <value>Bestanden [{0}]. Verplaatst Van Map "{1}" Naar Map: "{2}"</value>
@@ -186,6 +404,15 @@
   </data>
   <data name="FileMovedWithOverwriting" xml:space="preserve">
     <value>Bestanden [{0}]. Verplaatst Met Overschrijven Van Map "{1}" Naar Map: "{2}"</value>
+  </data>
+  <data name="FileOpenedForChange" xml:space="preserve">
+    <value>Bestand Geopend Om Te Wijzigen: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Bestand Verwijderd Uit Favorieten: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Bestand verwijderd uit ‘Met mij gedeeld’: {0}</value>
   </data>
   <data name="FileRenamed" xml:space="preserve">
     <value>Bestand Hernoemd: {0}</value>
@@ -198,6 +425,9 @@
   </data>
   <data name="FileSendAccessLink" xml:space="preserve">
     <value>Verstuurde gedeelde link voor het [{0}] bestand. Ontvangers: [{1}]</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>bytes,KB,MB,GB,TB</value>
   </data>
   <data name="FilesModule" xml:space="preserve">
     <value>Bestanden</value>
@@ -214,11 +444,20 @@
   <data name="FileUpdatedAccess" xml:space="preserve">
     <value>Bestanden [{0}]. Toegang Geüpdatet</value>
   </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Bestanden [{0}]. Toegang bijgewerkt voor {1}. Rol: {2}</value>
+  </data>
   <data name="FileUpdatedRevisionComment" xml:space="preserve">
     <value>Bestanden [{0}]. Revisie {1}. Opmerking Geüpdatet</value>
   </data>
   <data name="FileUploaded" xml:space="preserve">
     <value>Bestand Geüpload: {0}</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Bestand geüpload met overschrijven: {0}</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>Bestanden [{0}]. Versie Verwijderd: {1}</value>
   </data>
   <data name="FolderCopied" xml:space="preserve">
     <value>Mappen [{0}]. Gekopieerd nar Map: {1}</value>
@@ -232,6 +471,24 @@
   <data name="FolderDeleted" xml:space="preserve">
     <value>Map Verwijderd: {0}</value>
   </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Map Gedownload: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Mappen [{0}]. Externe link aangemaakt: {1}. Rol: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Mappen [{0}]. Externe link verwijderd: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Mappen [{0}]. Externe link bijgewerkt: {1}.c Rol: {2}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Map: {0}. Index gewijzigd van {1} in {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Map: {0}. Indexen opnieuw geordend</value>
+  </data>
   <data name="FolderMoved" xml:space="preserve">
     <value>Mappen [{0}]. Verplaatst Naar Map: {1}</value>
   </data>
@@ -240,6 +497,9 @@
   </data>
   <data name="FolderMovedWithOverwriting" xml:space="preserve">
     <value>Mappen [{0}]. Verplaatst Met Overschrijven Naar Map: {1}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Map verwijderd uit ‘Met mij gedeeld’: {0}</value>
   </data>
   <data name="FolderRenamed" xml:space="preserve">
     <value>Map Hernoemd: {0}</value>
@@ -250,11 +510,38 @@
   <data name="FolderUpdatedAccess" xml:space="preserve">
     <value>Mappen [{0}]. Toegang Geüpdatet</value>
   </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Mappen [{0}]. Toegang bijgewerkt voor {1}. Rol: {2}</value>
+  </data>
   <data name="FollowActionType" xml:space="preserve">
     <value>Volgen</value>
   </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Gebruikers [{0}]. Volledig ingevuld formulier: {1}</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>Bestand Geopend Om In Te Vullen: {0}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Gebruikers [{0}]. Deel van het formulier ingevuld: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Gebruikers [{0}]. Begon met vullen: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Gebruikers [{0}]. Formulier gestopt: {1}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Gebruikers [{0}]. Formulier ingediend: {1}</value>
+  </data>
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Sphinx instellingen geüpdatet</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Autorisatiecode voor client {0} gegenereerd</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Persoonlijk toegangstoken voor client {0} gegenereerd</value>
   </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Welkomstpagina Instellingen Geüpdatet</value>
@@ -292,14 +579,29 @@
   <data name="LanguageSettingsUpdated" xml:space="preserve">
     <value>Taalinstellingen</value>
   </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>LDAP-authenticatie uitgeschakeld</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>LDAP-authenticatie ingeschakeld</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>LDAP-synchronisatie voltooid</value>
+  </data>
   <data name="LicenseKeyUploaded" xml:space="preserve">
     <value>Licentiesleutel geüpload</value>
   </data>
   <data name="LinkActionType" xml:space="preserve">
     <value>Link</value>
   </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Locatie</value>
+  </data>
   <data name="LoginFail" xml:space="preserve">
     <value>Inloggen Mislukt</value>
+  </data>
+  <data name="LoginFailBruteForce" xml:space="preserve">
+    <value>Inloggen Mislukt. Te veel pog</value>
   </data>
   <data name="LoginFailDisabledProfile" xml:space="preserve">
     <value>Inloggen Mislukt. Profiel Geblokkeerd</value>
@@ -309,6 +611,9 @@
   </data>
   <data name="LoginFailIpSecurity" xml:space="preserve">
     <value>IP Beveiliging: Inloggen Mislukt</value>
+  </data>
+  <data name="LoginFailRecaptcha" xml:space="preserve">
+    <value>Inloggen Mislukt. Recaptcha is ongeldig</value>
   </data>
   <data name="LoginFailSocialAccountNotFound" xml:space="preserve">
     <value>Inloggen Mislukt. Geassocieerd Social Media Account Niet Gevonden</value>
@@ -322,11 +627,17 @@
   <data name="LoginFailViaApiSocialAccount" xml:space="preserve">
     <value>Inloggen via API &amp; Social Media Mislukt</value>
   </data>
+  <data name="LoginFailViaApiTfa" xml:space="preserve">
+    <value>Mislukte aanmelding via API &amp; authenticatie toepassing</value>
+  </data>
   <data name="LoginFailViaSms" xml:space="preserve">
     <value>Inloggen via SMS mislukt</value>
   </data>
   <data name="LoginFailViaSSO" xml:space="preserve">
     <value>Inloggen via SSO Mislukt</value>
+  </data>
+  <data name="LoginFailViaTfaApp" xml:space="preserve">
+    <value>Inloggen via authenticatie toepassing mislukt</value>
   </data>
   <data name="LoginHistoryReportDownloaded" xml:space="preserve">
     <value>Inloggeschiedenis Rapport Gedownload</value>
@@ -337,14 +648,29 @@
   <data name="LoginSuccess" xml:space="preserve">
     <value>Inloggen Gelukt</value>
   </data>
-  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Inloggen via Social Media Gelukt: {0}</value>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Inloggen via Social Media Gelukt</value>
+  </data>
+  <data name="LoginSuccessSocialApp" xml:space="preserve">
+    <value>Succesvol inloggen via sociale toepassing</value>
   </data>
   <data name="LoginSuccessViaApi" xml:space="preserve">
     <value>Succesvolle Login via API</value>
   </data>
   <data name="LoginSuccessViaApiSms" xml:space="preserve">
     <value>Succesvolle Login via API &amp; SMS-code</value>
+  </data>
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
+    <value>Inloggen via Social Media Gelukt: {0}</value>
+  </data>
+  <data name="LoginSuccessViaApiTfa" xml:space="preserve">
+    <value>Succesvol inloggen via API &amp; authenticatie toepassing</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Succesvol Inloggen via OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Succesvol inloggen met gebruikersnaam en wachtwoord</value>
   </data>
   <data name="LoginSuccessViaSms" xml:space="preserve">
     <value>Inloggen via SMS gelukt</value>
@@ -354,6 +680,9 @@
   </data>
   <data name="LoginSuccessViaSSO" xml:space="preserve">
     <value>Succesvolle Login via SSO</value>
+  </data>
+  <data name="LoginSuccesViaTfaApp" xml:space="preserve">
+    <value>Succesvol Inloggen via authenticatie toepassing</value>
   </data>
   <data name="Logout" xml:space="preserve">
     <value>Uitloggen</value>
@@ -397,6 +726,15 @@
   <data name="PortalDeleted" xml:space="preserve">
     <value>Portaal Verwijderd</value>
   </data>
+  <data name="PortalRenamed" xml:space="preserve">
+    <value>Portaal hernoemd</value>
+  </data>
+  <data name="PrivacyRoomDisable" xml:space="preserve">
+    <value>Privé kamer is uitgeschakeld</value>
+  </data>
+  <data name="PrivacyRoomEnable" xml:space="preserve">
+    <value>Privé kamer is ingeschakeld</value>
+  </data>
   <data name="ProductAccessOpened" xml:space="preserve">
     <value>Producten [{0}]. Toegang Geopend</value>
   </data>
@@ -421,11 +759,173 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Productenlijst Geüpdatet</value>
   </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Standaard opslagquota instellen voor AI-agenten: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Standaard opslagquota voor AI-agenten uitgeschakeld</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Standaard opslagquota instellen: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Standaard opslagquota uitgeschakeld</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Standaard opslagquota instellen voor kamers: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Standaard opslagquota voor kamers uitgeschakeld</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Standaard opslagquota instellen voor gebruikers: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Standaard opslagquota voor gebruikers uitgeschakeld</value>
+  </data>
+  <data name="ReassignsActionType" xml:space="preserve">
+    <value>Opnieuw toewijzen</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>{0} client secret opnieuw gegenereerd</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>Vectorisatie-instellingen zijn gereset</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>Instellingen voor zoeken op internet zijn opnieuw ingesteld</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Client {0} toegang ingetrokken</value>
+  </data>
+  <data name="RoomArchived" xml:space="preserve">
+    <value>Kamer gearchiveerd</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Kamer gekopieerd: {0}</value>
+  </data>
+  <data name="RoomCreated" xml:space="preserve">
+    <value>Kamer aangemaakt</value>
+  </data>
+  <data name="RoomCreateUser" xml:space="preserve">
+    <value>Gebruiker toegevoegd: {0}. Rol: {1}</value>
+  </data>
+  <data name="RoomDeleted" xml:space="preserve">
+    <value>Kamer verwijderd</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Kamer: {0}. Download weigeren uitgeschakeld</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Kamer: {0}. Download weigeren ingeschakeld</value>
+  </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>Externe link aangemaakt: {0}. Rol: {1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>Externe link verwijderd: {0}</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Externe link ingetrokken: {1}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>Externe link bijgewerkt: {0}. Rol: {1}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Toegevoegde groep: {0}. Rol: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Verwijderde groep: {0}</value>
+  </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Exporteren van de kamer index opgeslagen in Documenten</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Kamer indexering uitgeschakeld</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Kamer indexering ingeschakeld</value>
+  </data>
+  <data name="RoomInvitationLinkCreated" xml:space="preserve">
+    <value>Link aangemaakt. Rol: {1}</value>
+  </data>
+  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
+    <value>Link verwijderd</value>
+  </data>
+  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
+    <value>Link bijgewerkt. Rol: {1}</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Uitnodigingen opnieuw verstuurd: {0}</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>Levensduur uitgeschakeld</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Levensduur is ingesteld. Waarde: {0}. Periode: {1}. Definitief Verwijderen: {2}</value>
+  </data>
+  <data name="RoomLogoCreated" xml:space="preserve">
+    <value>Logo aangemaakt</value>
+  </data>
+  <data name="RoomLogoDeleted" xml:space="preserve">
+    <value>Logo verwijderd</value>
+  </data>
+  <data name="RoomRemoveUser" xml:space="preserve">
+    <value>Verwijderde gebruiker: {0}</value>
+  </data>
+  <data name="RoomRenamed" xml:space="preserve">
+    <value>Kamer hernoemd: {0}</value>
+  </data>
+  <data name="RoomsModule" xml:space="preserve">
+    <value>Kamers</value>
+  </data>
+  <data name="RoomUnarchived" xml:space="preserve">
+    <value>Kamer niet meer gearchiveerd</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} toegewezen: {1}</value>
+  </data>
+  <data name="RoomUpdateAccessForUser" xml:space="preserve">
+    <value>{0} toegewezen: {1}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Kamer: {0}. Watermerk uitgeschakeld</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Kamer: {0}. Watermerk ingeschakeld</value>
+  </data>
+  <data name="ScheduledBackupCompleted" xml:space="preserve">
+    <value>Geplande back-up voltooid</value>
+  </data>
+  <data name="ScheduledBackupFailed" xml:space="preserve">
+    <value>Geplande back-up mislukt</value>
+  </data>
+  <data name="ScheduledBackupStarted" xml:space="preserve">
+    <value>Geplande back-up gestart</value>
+  </data>
   <data name="SendActionType" xml:space="preserve">
     <value>Verzenden</value>
   </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>Gebruiker {0} stuurde een uitnodiging naar {1} om lid te worden van deze DocSpace</value>
+  </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Uitnodigingsinstructies Verstuurd: {0}</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>MCP-server aangemaakt: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>MCP-server verwijderd: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>MCP-server uitgeschakeld: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>MCP-server ingeschakeld: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>MCP-server bijgewerkt: {0}</value>
   </data>
   <data name="SessionCompleted" xml:space="preserve">
     <value>Sessie Voltooid</value>
@@ -436,20 +936,38 @@
   <data name="SettingsModule" xml:space="preserve">
     <value>Instellingen</value>
   </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>Vectorisatie-instellingen zijn geconfigureerd. Provider: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>Instellingen voor zoeken op internet zijn geconfigureerd. Engine: {0}</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO Uitgeschakeld</value>
   </data>
   <data name="SSOEnabled" xml:space="preserve">
     <value>SSO Ingeschakeld</value>
   </data>
-  <data name="BackupStarted" xml:space="preserve">
-    <value>Start back-up</value>
+  <data name="StartStorageDecryption" xml:space="preserve">
+    <value>Begin opslag ontsleuteling</value>
+  </data>
+  <data name="StartStorageEncryption" xml:space="preserve">
+    <value>Begin opslag versleuteling</value>
   </data>
   <data name="StartTransferSetting" xml:space="preserve">
     <value>Start portaalregio migratie</value>
   </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>Systeemaccount</value>
+  </data>
+  <data name="TagCreated" xml:space="preserve">
+    <value>Tag aangemaakt: {0}</value>
+  </data>
+  <data name="TagsDeleted" xml:space="preserve">
+    <value>Tags verwijderd: {0}</value>
+  </data>
+  <data name="TargetIdCol" xml:space="preserve">
+    <value>Target ID</value>
   </data>
   <data name="TeamTemplateChanged" xml:space="preserve">
     <value>Teamsjabloon Veranderd</value>
@@ -469,8 +987,20 @@
   <data name="TimeZoneSettingsUpdated" xml:space="preserve">
     <value>Tijdszone Instellingen Geüpdatet</value>
   </data>
+  <data name="TrashEmptied" xml:space="preserve">
+    <value>Prullenmand geleegd</value>
+  </data>
   <data name="TrustedMailDomainSettingsUpdated" xml:space="preserve">
     <value>Vertrouwde Maildomein Instellingen Geüpdatet</value>
+  </data>
+  <data name="TwoFactorAuthenticationSettingsDisabled" xml:space="preserve">
+    <value>Instellingen voor twee-factor authenticatie bijgewerkt: Twee-factor authenticatie is uitgeschakeld</value>
+  </data>
+  <data name="TwoFactorAuthenticationSettingsEnabledBySms" xml:space="preserve">
+    <value>Twee-factor authenticatie instellingen bijgewerkt: SMS-bevestiging is ingeschakeld</value>
+  </data>
+  <data name="TwoFactorAuthenticationSettingsEnabledByTfaApp" xml:space="preserve">
+    <value>Twee-factor authenticatie instellingen bijgewerkt: Authenticatie app is ingeschakeld</value>
   </data>
   <data name="TwoFactorAuthenticationSettingsUpdated" xml:space="preserve">
     <value>Twee-factor Authenticatie Instellingen Geüpdatet</value>
@@ -490,6 +1020,9 @@
   <data name="UpdateActionType" xml:space="preserve">
     <value>Update</value>
   </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Client {0} bijgewerkt</value>
+  </data>
   <data name="UploadActionType" xml:space="preserve">
     <value>Uploaden</value>
   </data>
@@ -507,6 +1040,12 @@
   </data>
   <data name="UserCreatedViaInvite" xml:space="preserve">
     <value>Gebruiker Aangemaakt Via Uitnodiging: {0}</value>
+  </data>
+  <data name="UserDataReassigns" xml:space="preserve">
+    <value>Gegevens opnieuw toegewezen: van gebruiker {0} naar gebruiker {1}</value>
+  </data>
+  <data name="UserDataRemoving" xml:space="preserve">
+    <value>Gebruikersgegevens voor {0} zijn verwijderd</value>
   </data>
   <data name="UserDeleted" xml:space="preserve">
     <value>Gebruiker Verwijderd: {0}</value>
@@ -547,6 +1086,12 @@
   <data name="UsersUpdatedType" xml:space="preserve">
     <value>Gebruikers [{0}]. Geüpdate Type</value>
   </data>
+  <data name="UserTfaDisconnected" xml:space="preserve">
+    <value>Authenticator app losgekoppeld: {0}</value>
+  </data>
+  <data name="UserTfaGenerateCodes" xml:space="preserve">
+    <value>Nieuwe back-upcodes zijn aangemaakt</value>
+  </data>
   <data name="UserUnlinkedSocialAccount" xml:space="preserve">
     <value>Social Account Ontkoppeld. Provider: {0}</value>
   </data>
@@ -555,6 +1100,9 @@
   </data>
   <data name="UserUpdatedAvatarThumbnails" xml:space="preserve">
     <value>Gebruikers [{0}]. Avatar Thumbnails Geüpdatet</value>
+  </data>
+  <data name="UserUpdatedEmail" xml:space="preserve">
+    <value>E-mail Bijgewerkt</value>
   </data>
   <data name="UserUpdatedLanguage" xml:space="preserve">
     <value>Taal Geüpdatet</value>
@@ -565,324 +1113,6 @@
   <data name="UserUpdatedPassword" xml:space="preserve">
     <value>Wachtwoord Geüpdatet</value>
   </data>
-  <data name="RoomCreated" xml:space="preserve">
-    <value>Kamer aangemaakt</value>
-  </data>
-  <data name="RoomsModule" xml:space="preserve">
-    <value>Kamers</value>
-  </data>
-  <data name="TrashEmptied" xml:space="preserve">
-    <value>Prullenmand geleegd</value>
-  </data>
-  <data name="AddedRoomTags" xml:space="preserve">
-    <value>Tags toegevoegd: [{1}]</value>
-  </data>
-  <data name="DeletedRoomTags" xml:space="preserve">
-    <value>Verwijderde tags: [{1}]</value>
-  </data>
-  <data name="RoomArchived" xml:space="preserve">
-    <value>Kamer gearchiveerd</value>
-  </data>
-  <data name="RoomCreateUser" xml:space="preserve">
-    <value>Gebruiker toegevoegd: {0}. Rol: {1}</value>
-  </data>
-  <data name="RoomDeleted" xml:space="preserve">
-    <value>Kamer verwijderd</value>
-  </data>
-  <data name="RoomInvitationLinkCreated" xml:space="preserve">
-    <value>Link aangemaakt. Rol: {1}</value>
-  </data>
-  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
-    <value>Link verwijderd</value>
-  </data>
-  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
-    <value>Link bijgewerkt. Rol: {1}</value>
-  </data>
-  <data name="RoomLogoCreated" xml:space="preserve">
-    <value>Logo aangemaakt</value>
-  </data>
-  <data name="RoomLogoDeleted" xml:space="preserve">
-    <value>Logo verwijderd</value>
-  </data>
-  <data name="RoomRemoveUser" xml:space="preserve">
-    <value>Verwijderde gebruiker: {0}</value>
-  </data>
-  <data name="RoomRenamed" xml:space="preserve">
-    <value>Kamer hernoemd: {0}</value>
-  </data>
-  <data name="RoomUnarchived" xml:space="preserve">
-    <value>Kamer niet meer gearchiveerd</value>
-  </data>
-  <data name="RoomUpdateAccessForUser" xml:space="preserve">
-    <value>{0} toegewezen: {1}</value>
-  </data>
-  <data name="TagCreated" xml:space="preserve">
-    <value>Tag aangemaakt: {0}</value>
-  </data>
-  <data name="TagsDeleted" xml:space="preserve">
-    <value>Tags verwijderd: {0}</value>
-  </data>
-  <data name="ActionIdCol" xml:space="preserve">
-    <value>Action ID</value>
-  </data>
-  <data name="AuditSettingsUpdated" xml:space="preserve">
-    <value>Audittijd Instellingen Bijgewerkt</value>
-  </data>
-  <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
-    <value>Aangepaste Navigatie Instellingen Bijgewerkt</value>
-  </data>
-  <data name="DocumentsForcesave" xml:space="preserve">
-    <value>Forcesave instellingen bijgewerkt</value>
-  </data>
-  <data name="DocumentsStoreForcesave" xml:space="preserve">
-    <value>Sla forcesave instellingen op Bijgewerkt</value>
-  </data>
-  <data name="LoginFailBruteForce" xml:space="preserve">
-    <value>Inloggen Mislukt. Te veel pog</value>
-  </data>
-  <data name="LoginFailRecaptcha" xml:space="preserve">
-    <value>Inloggen Mislukt. Recaptcha is ongeldig</value>
-  </data>
-  <data name="LoginFailViaApiTfa" xml:space="preserve">
-    <value>Mislukte aanmelding via API &amp; authenticatie toepassing</value>
-  </data>
-  <data name="LoginFailViaTfaApp" xml:space="preserve">
-    <value>Inloggen via authenticatie toepassing mislukt</value>
-  </data>
-  <data name="LoginSuccessSocialApp" xml:space="preserve">
-    <value>Succesvol inloggen via sociale toepassing</value>
-  </data>
-  <data name="LoginSuccessViaApiTfa" xml:space="preserve">
-    <value>Succesvol inloggen via API &amp; authenticatie toepassing</value>
-  </data>
-  <data name="LoginSuccesViaTfaApp" xml:space="preserve">
-    <value>Succesvol Inloggen via authenticatie toepassing</value>
-  </data>
-  <data name="PrivacyRoomDisable" xml:space="preserve">
-    <value>Privé kamer is uitgeschakeld</value>
-  </data>
-  <data name="PrivacyRoomEnable" xml:space="preserve">
-    <value>Privé kamer is ingeschakeld</value>
-  </data>
-  <data name="ReassignsActionType" xml:space="preserve">
-    <value>Opnieuw toewijzen</value>
-  </data>
-  <data name="StartStorageDecryption" xml:space="preserve">
-    <value>Begin opslag ontsleuteling</value>
-  </data>
-  <data name="StartStorageEncryption" xml:space="preserve">
-    <value>Begin opslag versleuteling</value>
-  </data>
-  <data name="TargetIdCol" xml:space="preserve">
-    <value>Target ID</value>
-  </data>
-  <data name="TwoFactorAuthenticationSettingsDisabled" xml:space="preserve">
-    <value>Instellingen voor twee-factor authenticatie bijgewerkt: Twee-factor authenticatie is uitgeschakeld</value>
-  </data>
-  <data name="TwoFactorAuthenticationSettingsEnabledBySms" xml:space="preserve">
-    <value>Twee-factor authenticatie instellingen bijgewerkt: SMS-bevestiging is ingeschakeld</value>
-  </data>
-  <data name="TwoFactorAuthenticationSettingsEnabledByTfaApp" xml:space="preserve">
-    <value>Twee-factor authenticatie instellingen bijgewerkt: Authenticatie app is ingeschakeld</value>
-  </data>
-  <data name="UserDataReassigns" xml:space="preserve">
-    <value>Gegevens opnieuw toegewezen: van gebruiker {0} naar gebruiker {1}</value>
-  </data>
-  <data name="UserDataRemoving" xml:space="preserve">
-    <value>Gebruikersgegevens voor {0} zijn verwijderd</value>
-  </data>
-  <data name="UserTfaDisconnected" xml:space="preserve">
-    <value>Authenticator app losgekoppeld: {0}</value>
-  </data>
-  <data name="UserTfaGenerateCodes" xml:space="preserve">
-    <value>Nieuwe back-upcodes zijn aangemaakt</value>
-  </data>
-  <data name="UserUpdatedEmail" xml:space="preserve">
-    <value>E-mail Bijgewerkt</value>
-  </data>
-  <data name="CityCol" xml:space="preserve">
-    <value>Plaats</value>
-  </data>
-  <data name="CountryCol" xml:space="preserve">
-    <value>Land</value>
-  </data>
-  <data name="RoomExternalLinkCreated" xml:space="preserve">
-    <value>Externe link aangemaakt: {0}. Rol: {1}</value>
-  </data>
-  <data name="RoomExternalLinkDeleted" xml:space="preserve">
-    <value>Externe link verwijderd: {0}</value>
-  </data>
-  <data name="RoomExternalLinkUpdated" xml:space="preserve">
-    <value>Externe link bijgewerkt: {0}. Rol: {1}</value>
-  </data>
-  <data name="FileOpenedForChange" xml:space="preserve">
-    <value>Bestand Geopend Om Te Wijzigen: {0}</value>
-  </data>
-  <data name="PortalRenamed" xml:space="preserve">
-    <value>Portaal hernoemd</value>
-  </data>
-  <data name="FileSizePostfix" xml:space="preserve">
-    <value>bytes,KB,MB,GB,TB</value>
-  </data>
-  <data name="FileUploadedWithOverwriting" xml:space="preserve">
-    <value>Bestand geüpload met overschrijven: {0}</value>
-  </data>
-  <data name="QuotaPerPortalChanged" xml:space="preserve">
-    <value>Standaard opslagquota instellen: {0}</value>
-  </data>
-  <data name="QuotaPerPortalDisabled" xml:space="preserve">
-    <value>Standaard opslagquota uitgeschakeld</value>
-  </data>
-  <data name="QuotaPerRoomChanged" xml:space="preserve">
-    <value>Standaard opslagquota instellen voor kamers: {0}</value>
-  </data>
-  <data name="QuotaPerRoomDisabled" xml:space="preserve">
-    <value>Standaard opslagquota voor kamers uitgeschakeld</value>
-  </data>
-  <data name="QuotaPerUserChanged" xml:space="preserve">
-    <value>Standaard opslagquota instellen voor gebruikers: {0}</value>
-  </data>
-  <data name="QuotaPerUserDisabled" xml:space="preserve">
-    <value>Standaard opslagquota voor gebruikers uitgeschakeld</value>
-  </data>
-  <data name="RoomGroupAdded" xml:space="preserve">
-    <value>Toegevoegde groep: {0}. Rol: {1}</value>
-  </data>
-  <data name="RoomGroupRemove" xml:space="preserve">
-    <value>Verwijderde groep: {0}</value>
-  </data>
-  <data name="RoomCopied" xml:space="preserve">
-    <value>Kamer gekopieerd: {0}</value>
-  </data>
-  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
-    <value>{0} toegewezen: {1}</value>
-  </data>
-  <data name="SendJoinInvite" xml:space="preserve">
-    <value>Gebruiker {0} stuurde een uitnodiging naar {1} om lid te worden van deze DocSpace</value>
-  </data>
-  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
-    <value>Kamers [{0}]. Aangepaste opslagquota instellen voor kamers: {1}</value>
-  </data>
-  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
-    <value>Kamers [{0}]. Standaard opslagquota instellen voor kamers: {1}</value>
-  </data>
-  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
-    <value>Kamers [{0}]. Opslagquota voor kamers uitgeschakeld</value>
-  </data>
-  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
-    <value>Gebruikers [{0}]. Aangepaste opslagquota instellen voor gebruikers: {1}</value>
-  </data>
-  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
-    <value>Gebruikers [{0}]. Standaard opslagquota instellen voor gebruikers: {1}</value>
-  </data>
-  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
-    <value>Gebruikers [{0}]. Opslagquota voor gebruikers uitgeschakeld</value>
-  </data>
-  <data name="FormOpenedForFilling" xml:space="preserve">
-    <value>Bestand Geopend Om In Te Vullen: {0}</value>
-  </data>
-  <data name="FormSubmit" xml:space="preserve">
-    <value>Gebruikers [{0}]. Formulier ingediend: {1}</value>
-  </data>
-  <data name="RoomIndexExportSaved" xml:space="preserve">
-    <value>Exporteren van de kamer index opgeslagen in Documenten</value>
-  </data>
-  <data name="RoomInviteResend" xml:space="preserve">
-    <value>Uitnodigingen opnieuw verstuurd: {0}</value>
-  </data>
-  <data name="ChangeClientActivation" xml:space="preserve">
-    <value>Activatie van client {0} gewijzigd</value>
-  </data>
-  <data name="ChangeClientVisibility" xml:space="preserve">
-    <value>Zichtbaarheid van client {0} gewijzigd</value>
-  </data>
-  <data name="CreateClient" xml:space="preserve">
-    <value>Client aangemaakt</value>
-  </data>
-  <data name="DeleteClient" xml:space="preserve">
-    <value>Client {0} verwijderd</value>
-  </data>
-  <data name="FileIndexChanged" xml:space="preserve">
-    <value>Bestand: {0}. Index gewijzigd van {1} in {2}</value>
-  </data>
-  <data name="FolderIndexChanged" xml:space="preserve">
-    <value>Map: {0}. Index gewijzigd van {1} in {2}</value>
-  </data>
-  <data name="FolderIndexReordered" xml:space="preserve">
-    <value>Map: {0}. Indexen opnieuw geordend</value>
-  </data>
-  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
-    <value>Autorisatiecode voor client {0} gegenereerd</value>
-  </data>
-  <data name="GeneratePersonalAccessToken" xml:space="preserve">
-    <value>Persoonlijk toegangstoken voor client {0} gegenereerd</value>
-  </data>
-  <data name="RegenerateSecret" xml:space="preserve">
-    <value>{0} client secret opnieuw gegenereerd</value>
-  </data>
-  <data name="RevokeUserClient" xml:space="preserve">
-    <value>Client {0} toegang ingetrokken</value>
-  </data>
-  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
-    <value>Kamer: {0}. Download weigeren uitgeschakeld</value>
-  </data>
-  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
-    <value>Kamer: {0}. Download weigeren ingeschakeld</value>
-  </data>
-  <data name="RoomIndexingDisabled" xml:space="preserve">
-    <value>Kamer indexering uitgeschakeld</value>
-  </data>
-  <data name="RoomIndexingEnabled" xml:space="preserve">
-    <value>Kamer indexering ingeschakeld</value>
-  </data>
-  <data name="RoomLifeTimeDisabled" xml:space="preserve">
-    <value>Levensduur uitgeschakeld</value>
-  </data>
-  <data name="RoomLifeTimeSet" xml:space="preserve">
-    <value>Levensduur is ingesteld. Waarde: {0}. Periode: {1}. Definitief Verwijderen: {2}</value>
-  </data>
-  <data name="RoomWatermarkDisabled" xml:space="preserve">
-    <value>Kamer: {0}. Watermerk uitgeschakeld</value>
-  </data>
-  <data name="RoomWatermarkSet" xml:space="preserve">
-    <value>Kamer: {0}. Watermerk ingeschakeld</value>
-  </data>
-  <data name="UpdateClient" xml:space="preserve">
-    <value>Client {0} bijgewerkt</value>
-  </data>
-  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
-    <value>Toegangsinstellingen voor tools voor ontwikkelaars gewijzigd</value>
-  </data>
-  <data name="FileCustomFilterDisabled" xml:space="preserve">
-    <value>Bestand: {0}. Aangepast filter uitgeschakeld</value>
-  </data>
-  <data name="FileCustomFilterEnabled" xml:space="preserve">
-    <value>Bestand: {0}. Aangepast filter ingeschakeld</value>
-  </data>
-  <data name="FileVersionRemoved" xml:space="preserve">
-    <value>Bestanden [{0}]. Versie Verwijderd: {1}</value>
-  </data>
-  <data name="ApiKeyCreated" xml:space="preserve">
-    <value>Gebruiker Api sleutel aangemaakt: {0}</value>
-  </data>
-  <data name="ApiKeyDeleted" xml:space="preserve">
-    <value>Gebruiker Api sleutel verwijderd: {0}</value>
-  </data>
-  <data name="ApiKeyUpdated" xml:space="preserve">
-    <value>Gebruiker Api sleutel bijgewerkt: {0}</value>
-  </data>
-  <data name="FormCompletelyFilled" xml:space="preserve">
-    <value>Gebruikers [{0}]. Volledig ingevuld formulier: {1}</value>
-  </data>
-  <data name="FormPartiallyFilled" xml:space="preserve">
-    <value>Gebruikers [{0}]. Deel van het formulier ingevuld: {1}</value>
-  </data>
-  <data name="FormStopped" xml:space="preserve">
-    <value>Gebruikers [{0}]. Formulier gestopt: {1}</value>
-  </data>
-  <data name="FormStartedToFill" xml:space="preserve">
-    <value>Gebruikers [{0}]. Begon met vullen: {1}</value>
-  </data>
   <data name="WebhookCreated" xml:space="preserve">
     <value>Webhook aangemaakt: {0}</value>
   </data>
@@ -891,177 +1121,6 @@
   </data>
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Webhook bijgewerkt: {0}</value>
-  </data>
-  <data name="AuthLinkActivated" xml:space="preserve">
-    <value>De autorisatielink is geactiveerd</value>
-  </data>
-  <data name="CustomerOperationPerformed" xml:space="preserve">
-    <value>Klantenhandeling uitgevoerd</value>
-  </data>
-  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
-    <value>Klantactiviteitenverslag gedownload</value>
-  </data>
-  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
-    <value>Klantabonnement bijgewerkt: {0}</value>
-  </data>
-  <data name="CustomerWalletToppedUp" xml:space="preserve">
-    <value>Klant wallet opgeladen: {0}</value>
-  </data>
-  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Instellingen voor het opladen van klant wallet bijgewerkt</value>
-  </data>
-  <data name="LdapDisabled" xml:space="preserve">
-    <value>LDAP-authenticatie uitgeschakeld</value>
-  </data>
-  <data name="LdapEnabled" xml:space="preserve">
-    <value>LDAP-authenticatie ingeschakeld</value>
-  </data>
-  <data name="LdapSync" xml:space="preserve">
-    <value>LDAP-synchronisatie voltooid</value>
-  </data>
-  <data name="LocationCol" xml:space="preserve">
-    <value>Locatie</value>
-  </data>
-  <data name="BannerSettingsChanged" xml:space="preserve">
-    <value>Zichtbaarheidsinstellingen voor promotionele banners gewijzigd</value>
-  </data>
-  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Instellingen voor ingeschakelde klantportemonnee-services bijgewerkt</value>
-  </data>
-  <data name="LoginSuccessSocialAccount" xml:space="preserve">
-    <value>Inloggen via Social Media Gelukt</value>
-  </data>
-  <data name="AddedServerToAgent" xml:space="preserve">
-    <value>MCP-server {0} toegevoegd aan agent</value>
-  </data>
-  <data name="AgentCreated" xml:space="preserve">
-    <value>Agent aangemaakt</value>
-  </data>
-  <data name="AgentDeleted" xml:space="preserve">
-    <value>Agent verwijderd</value>
-  </data>
-  <data name="AgentRenamed" xml:space="preserve">
-    <value>Agent hernoemd: {0}</value>
-  </data>
-  <data name="AgentsModule" xml:space="preserve">
-    <value>Agenten</value>
-  </data>
-  <data name="AIProviderCreated" xml:space="preserve">
-    <value>AI- provider aangemaakt: {0}</value>
-  </data>
-  <data name="AIProviderDeleted" xml:space="preserve">
-    <value>AI- provider verwijderd: {0}</value>
-  </data>
-  <data name="AIProviderUpdated" xml:space="preserve">
-    <value>AI- provider bijgewerkt: {0}</value>
-  </data>
-  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
-    <value>AI-agenten [{0}]. Aangepaste opslagquota instellen voor AI-agenten: {1}</value>
-  </data>
-  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
-    <value>AI-agenten [{0}]. Standaard opslagquota instellen voor AI-agenten : {1}</value>
-  </data>
-  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
-    <value>AI-agenten [{0}]. Opslagquota voor AI-agenten uitgeschakeld</value>
-  </data>
-  <data name="DeletedServerFromAgent" xml:space="preserve">
-    <value>MCP-server {0} verwijderd uit agent</value>
-  </data>
-  <data name="FileExternalLinkCreated" xml:space="preserve">
-    <value>Bestanden [{0}]. Externe link aangemaakt: {1}. Rol: {2}</value>
-  </data>
-  <data name="FileExternalLinkDeleted" xml:space="preserve">
-    <value>Bestanden [{0}]. Externe link verwijderd: {1}</value>
-  </data>
-  <data name="FileExternalLinkUpdated" xml:space="preserve">
-    <value>Bestanden [{0}]. Externe link bijgewerkt: {1}.c Rol: {2}</value>
-  </data>
-  <data name="FileMarkedAsFavorite" xml:space="preserve">
-    <value>Bestand Gemarkeerd Als Favoriet: {0}</value>
-  </data>
-  <data name="FileRemovedFromFavorite" xml:space="preserve">
-    <value>Bestand Verwijderd Uit Favorieten: {0}</value>
-  </data>
-  <data name="FileRemovedFromList" xml:space="preserve">
-    <value>Bestand verwijderd uit ‘Met mij gedeeld’: {0}</value>
-  </data>
-  <data name="FileUpdatedAccessFor" xml:space="preserve">
-    <value>Bestanden [{0}]. Toegang bijgewerkt voor {1}. Rol: {2}</value>
-  </data>
-  <data name="FolderDownloaded" xml:space="preserve">
-    <value>Map Gedownload: {0}</value>
-  </data>
-  <data name="FolderExternalLinkCreated" xml:space="preserve">
-    <value>Mappen [{0}]. Externe link aangemaakt: {1}. Rol: {2}</value>
-  </data>
-  <data name="FolderExternalLinkDeleted" xml:space="preserve">
-    <value>Mappen [{0}]. Externe link verwijderd: {1}</value>
-  </data>
-  <data name="FolderExternalLinkUpdated" xml:space="preserve">
-    <value>Mappen [{0}]. Externe link bijgewerkt: {1}.c Rol: {2}</value>
-  </data>
-  <data name="FolderRemovedFromList" xml:space="preserve">
-    <value>Map verwijderd uit ‘Met mij gedeeld’: {0}</value>
-  </data>
-  <data name="FolderUpdatedAccessFor" xml:space="preserve">
-    <value>Mappen [{0}]. Toegang bijgewerkt voor {1}. Rol: {2}</value>
-  </data>
-  <data name="LoginSuccessViaOAuth" xml:space="preserve">
-    <value>Succesvol Inloggen via OAuth 2.0</value>
-  </data>
-  <data name="LoginSuccessViaPassword" xml:space="preserve">
-    <value>Succesvol inloggen met gebruikersnaam en wachtwoord</value>
-  </data>
-  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
-    <value>Standaard opslagquota instellen voor AI-agenten: {0}</value>
-  </data>
-  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
-    <value>Standaard opslagquota voor AI-agenten uitgeschakeld</value>
-  </data>
-  <data name="ResetVectorizationSettings" xml:space="preserve">
-    <value>Vectorisatie-instellingen zijn gereset</value>
-  </data>
-  <data name="ResetWebSearchSettings" xml:space="preserve">
-    <value>Instellingen voor zoeken op internet zijn opnieuw ingesteld</value>
-  </data>
-  <data name="RoomExternalLinkRevoked" xml:space="preserve">
-    <value>Externe link ingetrokken: {1}</value>
-  </data>
-  <data name="ServerCreated" xml:space="preserve">
-    <value>MCP-server aangemaakt: {0}</value>
-  </data>
-  <data name="ServerDeleted" xml:space="preserve">
-    <value>MCP-server verwijderd: {0}</value>
-  </data>
-  <data name="ServerDisabled" xml:space="preserve">
-    <value>MCP-server uitgeschakeld: {0}</value>
-  </data>
-  <data name="ServerEnabled" xml:space="preserve">
-    <value>MCP-server ingeschakeld: {0}</value>
-  </data>
-  <data name="ServerUpdated" xml:space="preserve">
-    <value>MCP-server bijgewerkt: {0}</value>
-  </data>
-  <data name="SetVectorizationSettings" xml:space="preserve">
-    <value>Vectorisatie-instellingen zijn geconfigureerd. Provider: {0}</value>
-  </data>
-  <data name="SetWebSearchSettings" xml:space="preserve">
-    <value>Instellingen voor zoeken op internet zijn geconfigureerd. Engine: {0}</value>
-  </data>
-  <data name="BackupCompleted" xml:space="preserve">
-    <value>Back-up voltooid</value>
-  </data>
-  <data name="BackupFailed" xml:space="preserve">
-    <value>Back-up mislukt</value>
-  </data>
-  <data name="ScheduledBackupCompleted" xml:space="preserve">
-    <value>Geplande back-up voltooid</value>
-  </data>
-  <data name="ScheduledBackupFailed" xml:space="preserve">
-    <value>Geplande back-up mislukt</value>
-  </data>
-  <data name="ScheduledBackupStarted" xml:space="preserve">
-    <value>Geplande back-up gestart</value>
   </data>
   <data name="WebpluginDeleted" xml:space="preserve">
     <value>Plug-in verwijderd: {0}</value>

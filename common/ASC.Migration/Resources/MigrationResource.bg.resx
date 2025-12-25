@@ -117,56 +117,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="DataProcessing" xml:space="preserve">
-    <value>Обработка на данни...</value>
-  </data>
-  <data name="DataProcessingCompleted" xml:space="preserve">
-    <value>Обработката на данните е завършена</value>
-  </data>
-  <data name="DumpParse" xml:space="preserve">
-    <value>Разбор на база данни</value>
-  </data>
-  <data name="GroupMigration" xml:space="preserve">
-    <value>Групова миграция {0} ({1}/{2})</value>
-  </data>
-  <data name="MigratingUserFiles" xml:space="preserve">
-    <value>Мигриране на потребителски файлове {0} ({1}/{2})</value>
-  </data>
-  <data name="MigrationCompleted" xml:space="preserve">
-    <value>Миграцията е завършена</value>
-  </data>
-  <data name="PreparingForMigration" xml:space="preserve">
-    <value>Подготовка за миграция</value>
-  </data>
-  <data name="StartOfDataProcessing" xml:space="preserve">
-    <value>Обработката на данните започва...</value>
-  </data>
-  <data name="Unzipping" xml:space="preserve">
-    <value>Разархивиране...</value>
-  </data>
-  <data name="UnzippingFinished" xml:space="preserve">
-    <value>Разархивирането завърши...</value>
-  </data>
-  <data name="UserMigration" xml:space="preserve">
-    <value>Мигриране на потребители {0} ({1}/{2})</value>
-  </data>
-  <data name="MigrationCommonFiles" xml:space="preserve">
-    <value>Общи файлове за миграция</value>
-  </data>
-  <data name="MigrationNotFoundException" xml:space="preserve">
-    <value>Няма такъв доставчик на миграция</value>
-  </data>
-  <data name="MigrationProgressException" xml:space="preserve">
-    <value>Не се извършва миграция</value>
-  </data>
-  <data name="MigrationProjectFiles" xml:space="preserve">
-    <value>Проектни файлове за миграция</value>
-  </data>
   <data name="CanNotAddUserInGroup" xml:space="preserve">
     <value>Не можахме да добавим потребител {0} към група {1}</value>
   </data>
   <data name="CanNotCreateFile" xml:space="preserve">
     <value>Не можахме да се създадем файл {0}</value>
+  </data>
+  <data name="CanNotImportCommonFiles" xml:space="preserve">
+    <value>Не можахме да импортираме файлове на проекта</value>
+  </data>
+  <data name="CanNotImportProjectFiles" xml:space="preserve">
+    <value>Не можахме да импортираме файлове на проекта</value>
   </data>
   <data name="CanNotImportUser" xml:space="preserve">
     <value>Не можахме да импортираме потребител</value>
@@ -198,19 +159,58 @@
   <data name="CreateFolder" xml:space="preserve">
     <value>Създайте папка {0}</value>
   </data>
+  <data name="CreateRootFolder" xml:space="preserve">
+    <value>Създайте основна папка</value>
+  </data>
   <data name="CreateShareRoom" xml:space="preserve">
     <value>създайте споделена стая {0}</value>
   </data>
-  <data name="СreateRootFolder" xml:space="preserve">
-    <value>Създайте основна папка</value>
+  <data name="DataProcessing" xml:space="preserve">
+    <value>Обработка на данни...</value>
   </data>
-  <data name="СanNotImportCommonFiles" xml:space="preserve">
-    <value>Не можахме да импортираме файлове на проекта</value>
+  <data name="DataProcessingCompleted" xml:space="preserve">
+    <value>Обработката на данните е завършена</value>
   </data>
-  <data name="СanNotImportProjectFiles" xml:space="preserve">
-    <value>Не можахме да импортираме файлове на проекта</value>
+  <data name="DumpParse" xml:space="preserve">
+    <value>Разбор на база данни</value>
+  </data>
+  <data name="GroupMigration" xml:space="preserve">
+    <value>Групова миграция {0} ({1}/{2})</value>
   </data>
   <data name="LargeBackup" xml:space="preserve">
     <value>Резервното копие е по-голямо от общия размер на портала</value>
+  </data>
+  <data name="MigratingUserFiles" xml:space="preserve">
+    <value>Мигриране на потребителски файлове {0} ({1}/{2})</value>
+  </data>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>Общи файлове за миграция</value>
+  </data>
+  <data name="MigrationCompleted" xml:space="preserve">
+    <value>Миграцията е завършена</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>Няма такъв доставчик на миграция</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>Не се извършва миграция</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>Проектни файлове за миграция</value>
+  </data>
+  <data name="PreparingForMigration" xml:space="preserve">
+    <value>Подготовка за миграция</value>
+  </data>
+  <data name="StartOfDataProcessing" xml:space="preserve">
+    <value>Обработката на данните започва...</value>
+  </data>
+  <data name="Unzipping" xml:space="preserve">
+    <value>Разархивиране...</value>
+  </data>
+  <data name="UnzippingFinished" xml:space="preserve">
+    <value>Разархивирането завърши...</value>
+  </data>
+  <data name="UserMigration" xml:space="preserve">
+    <value>Мигриране на потребители {0} ({1}/{2})</value>
   </data>
 </root>

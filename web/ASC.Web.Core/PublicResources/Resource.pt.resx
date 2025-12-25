@@ -1,5 +1,64 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -53,16 +112,76 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=7.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=7.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Vetorização</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Contacto</value>
+  </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Crédito</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Moeda</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Débito</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Detalhes</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>Quantidade</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>Ferramentas de IA</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Cópia de segurança</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Espaço em disco</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Recarga de saldo</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>Unidade de Medida</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Tokens</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Cópia de segurança</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>Relatório de operações do cliente ({0}-{1})</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Histórico de transações</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Tipo</value>
+  </data>
   <data name="ActivateMobilePhoneEmptyCode" xml:space="preserve">
     <value>Código de validação não pode estar vazio</value>
   </data>
   <data name="ActivateMobilePhoneEmptyPhoneNumber" xml:space="preserve">
     <value>Digite o número do telemóvel</value>
+  </data>
+  <data name="ActivateTfaAppEmptyCode" xml:space="preserve">
+    <value>Código de validação não pode estar vazio</value>
   </data>
   <data name="AdministratorNotifySenderTypeName" xml:space="preserve">
     <value>Notificações de administrador</value>
@@ -70,233 +189,26 @@
   <data name="AdminMessageSent" xml:space="preserve">
     <value>A sua mensagem foi enviada com sucesso. Será contactado pelo administrador do portal.</value>
   </data>
-  <data name="ChangePortalOwnerMsg" xml:space="preserve">
-    <value>Link para confirmar que a operação foi enviada para: e-mail (o endereço de e-mail do gestor do portal).</value>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>Quota de espaço do agente de IA excedida</value>
   </data>
-  <data name="CustomNamingPeopleSchema" xml:space="preserve">
-    <value>Personalizado</value>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Falha ao definir a quota por agente de IA. O valor introduzido é superior ao armazenamento total do DocSpace.</value>
   </data>
-  <data name="EmailAndPasswordIncorrectEmail" xml:space="preserve">
-    <value>Endereço de e-mail incorreto</value>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Renovação automática</value>
   </data>
-  <data name="ErrorAccessDenied" xml:space="preserve">
-    <value>Não tem permissão para executar esta ação</value>
-  </data>
-  <data name="ErrorEmailAlreadyExists" xml:space="preserve">
-    <value>{!User} com este e-mail já está registado</value>
-  </data>
-  <data name="ErrorEmailEmpty" xml:space="preserve">
-    <value>Campo de e-mail está vazio</value>
-  </data>
-  <data name="ErrorEmailsAreTheSame" xml:space="preserve">
-    <value>O e-mail atual e o novo e-mail são os mesmos</value>
-  </data>
-  <data name="ErrorEmptyFields" xml:space="preserve">
-    <value>Por favor, preencha todos os campos</value>
-  </data>
-  <data name="ErrorEmptyUploadFileSelected" xml:space="preserve">
-    <value>Não foi possível encontrar o ficheiro enviado</value>
-  </data>
-  <data name="ErrorNotCorrectEmail" xml:space="preserve">
-    <value>E-mail inválido</value>
-  </data>
-  <data name="ErrorNotCorrectTrustedDomain" xml:space="preserve">
-    <value>Nome de domínio inválido</value>
-  </data>
-  <data name="ErrorPasswordEmpty" xml:space="preserve">
-    <value>A password está vazia.</value>
-  </data>
-  <data name="ErrorPasswordMessage" xml:space="preserve">
-    <value>A nova palavra-passe está incorrecta. Deve conter</value>
-  </data>
-  <data name="ErrorPasswordNoDigits" xml:space="preserve">
-    <value>dígitos</value>
-  </data>
-  <data name="ErrorPasswordNoSpecialSymbols" xml:space="preserve">
-    <value>caracteres especiais</value>
-  </data>
-  <data name="ErrorPasswordNoUpperCase" xml:space="preserve">
-    <value>letras maiúsculas</value>
-  </data>
-  <data name="ErrorUserNotFound" xml:space="preserve">
-    <value>O utilizadore não pôde ser encontrado</value>
-  </data>
-  <data name="ErrorUserNotFoundByEmail" xml:space="preserve">
-    <value>O utilizador com "{0}" e-mail não foi encontrado</value>
-  </data>
-  <data name="FileSizeMaxExceed" xml:space="preserve">
-    <value>O tamanho máximo do ficheiro foi excedido</value>
-  </data>
-  <data name="FileSizeNote" xml:space="preserve">
-    <value>Nota: o tamanho do ficheiro não pode exceder {1} {0} {2}</value>
-  </data>
-  <data name="FileSizePostfix" xml:space="preserve">
-    <value>bytes,KB,MB,GB</value>
-  </data>
-  <data name="FinishInviteJoinEmailMessage" xml:space="preserve">
-    <value>O link para confirmar a sua conta foi enviado para o e-mail especificado</value>
-  </data>
-  <data name="FirstName" xml:space="preserve">
-    <value>Primeiro nome</value>
-  </data>
-  <data name="LastName" xml:space="preserve">
-    <value>Último nome</value>
-  </data>
-  <data name="MessageEmailChangeInstuctionsSentOnEmail" xml:space="preserve">
-    <value>As instruções de alteração de e-mail foram enviadas para o endereço de email</value>
-  </data>
-  <data name="SmsAuthenticationMessageError" xml:space="preserve">
-    <value>Código incorreto</value>
-  </data>
-  <data name="SmsAuthenticationMessageToUser" xml:space="preserve">
-    <value>O seu código para efetuar login no portal: {0}</value>
-  </data>
-  <data name="SuccessfullySaveGreetingSettingsMessage" xml:space="preserve">
-    <value>Configurações de saudação foram salvas com sucesso</value>
-  </data>
-  <data name="SuccessfullySaveSettingsMessage" xml:space="preserve">
-    <value>As configurações foram atualizadas com sucesso</value>
-  </data>
-  <data name="SuccessfullySentNotificationDeleteUserInfoMessage" xml:space="preserve">
-    <value>Instruções sobre como excluir o seu perfil foram enviadas para o {0} endereço de e-mail</value>
-  </data>
-  <data name="WhatsNewSubscriptionName" xml:space="preserve">
-    <value>O que há de novo</value>
-  </data>
-  <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Rastreio de logins e ações</value>
-  </data>
-  <data name="TariffsFeature_file_size" xml:space="preserve">
-    <value>Tamanho máximo do ficheiro</value>
-  </data>
-  <data name="TariffsFeature_file_size_exception" xml:space="preserve">
-    <value>O tamanho do ficheiro não deve exceder {0}</value>
-  </data>
-  <data name="TariffsFeature_manager_exception" xml:space="preserve">
-    <value>O número de administradores não deve exceder {0}</value>
-  </data>
-  <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>O número de administradores</value>
-  </data>
-  <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Recuperação de dados</value>
-  </data>
-  <data name="TariffsFeature_room" xml:space="preserve">
-    <value>Número ilimitado de salas ativas</value>
-  </data>
-  <data name="TariffsFeature_room_exception" xml:space="preserve">
-    <value>O número de salas não deve exceder {0}</value>
-  </data>
-  <data name="TariffsFeature_sso" xml:space="preserve">
-    <value>SSO</value>
-  </data>
-  <data name="TariffsFeature_total_size_exception" xml:space="preserve">
-    <value>O tamanho do armazenamento utilizado não deve exceder {0}</value>
-  </data>
-  <data name="TariffsFeature_total_size_price_count" xml:space="preserve">
-    <value>Espaço de armazenamento</value>
-  </data>
-  <data name="TariffsFeature_used_room" xml:space="preserve">
-    <value>Salas:</value>
-  </data>
-  <data name="TariffsFeature_used_total_size" xml:space="preserve">
-    <value>Armazenamento utilizado:</value>
-  </data>
-  <data name="TariffsFeature_used_usersInRoom" xml:space="preserve">
-    <value>Utilizadores na sala:</value>
-  </data>
-  <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Número ilimitado de utilizadores e convidados</value>
-  </data>
-  <data name="TariffsFeature_users_exception" xml:space="preserve">
-    <value>O número de utilizadores não deve exceder {0}</value>
-  </data>
-  <data name="TariffsFeature_usersInRoom" xml:space="preserve">
-    <value>Utilizadores na sala</value>
-  </data>
-  <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
-    <value>O número de utilizadores na sala não deve exceder {0}</value>
-  </data>
-  <data name="TariffsFeature_customization" xml:space="preserve">
-    <value>Imagem de Marca e personalização</value>
-  </data>
-  <data name="ConsumersBox" xml:space="preserve">
-    <value>Box</value>
-  </data>
-  <data name="ConsumersClickatell" xml:space="preserve">
-    <value>Clickatell</value>
-  </data>
-  <data name="ConsumersclickatellapiKey" xml:space="preserve">
-    <value>apiKey</value>
-  </data>
-  <data name="ConsumersFirebase" xml:space="preserve">
-    <value>Firebase</value>
-  </data>
-  <data name="Tariffs_startup" xml:space="preserve">
-    <value>Startup</value>
-  </data>
-  <data name="Tariffs_admin" xml:space="preserve">
-    <value>Business</value>
-  </data>
-  <data name="Tariffs_adminyear" xml:space="preserve">
-    <value>Business</value>
-  </data>
-  <data name="ActivateTfaAppEmptyCode" xml:space="preserve">
-    <value>Código de validação não pode estar vazio</value>
-  </data>
-  <data name="ConsumersDocuSign" xml:space="preserve">
-    <value>DocuSign</value>
-  </data>
-  <data name="ConsumersDropBox" xml:space="preserve">
-    <value>DropBox</value>
-  </data>
-  <data name="ConsumersEasyBib" xml:space="preserve">
-    <value>EasyBib</value>
-  </data>
-  <data name="ConsumersFacebook" xml:space="preserve">
-    <value>Facebook</value>
-  </data>
-  <data name="ConsumersGoogle" xml:space="preserve">
-    <value>Google</value>
-  </data>
-  <data name="ConsumersLinkedIn" xml:space="preserve">
-    <value>LinkedIn</value>
-  </data>
-  <data name="ConsumersSkyDrive" xml:space="preserve">
-    <value>OneDrive</value>
-  </data>
-  <data name="ConsumersTelegram" xml:space="preserve">
-    <value>Telegram</value>
-  </data>
-  <data name="ConsumersTwilio" xml:space="preserve">
-    <value>Twilio</value>
-  </data>
-  <data name="ConsumersTwitter" xml:space="preserve">
-    <value>X</value>
-  </data>
-  <data name="ConsumersVk" xml:space="preserve">
-    <value>VK</value>
-  </data>
-  <data name="ConsumersWordpress" xml:space="preserve">
-    <value>WordPress</value>
-  </data>
-  <data name="ConsumersYahoo" xml:space="preserve">
-    <value>Yahoo</value>
-  </data>
-  <data name="ConsumersYandex" xml:space="preserve">
-    <value>Yandex</value>
-  </data>
-  <data name="ConsumersYandexClientSecret" xml:space="preserve">
-    <value>Palavra-passe</value>
-  </data>
-  <data name="ConsumersMicrosoft" xml:space="preserve">
-    <value>Microsoft</value>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Recarga automática</value>
   </data>
   <data name="ButtonSmsEnable" xml:space="preserve">
     <value>Via SMS</value>
   </data>
   <data name="ButtonTfaAppEnable" xml:space="preserve">
     <value>Via app autenticadora</value>
+  </data>
+  <data name="ChangePortalOwnerMsg" xml:space="preserve">
+    <value>Link para confirmar que a operação foi enviada para: e-mail (o endereço de e-mail do gestor do portal).</value>
   </data>
   <data name="Consumersacesskey" xml:space="preserve">
     <value>Chave de acesso S3</value>
@@ -346,6 +258,9 @@
   <data name="ConsumersBitlyInstruction" xml:space="preserve">
     <value>Ative esta aplicação para encurtar as ligações de convites e documentos. {0}Insira o seu login Bitly e chave API abaixo:</value>
   </data>
+  <data name="ConsumersBox" xml:space="preserve">
+    <value>Box</value>
+  </data>
   <data name="ConsumersboxClientId" xml:space="preserve">
     <value>Id da Caixa</value>
   </data>
@@ -358,11 +273,20 @@
   <data name="ConsumersBoxInstruction" xml:space="preserve">
     <value>Ative esta aplicação para conectar sua conta Box ao módulo Documentos. Poderá gerir, editar e compartilhar arquivos do Box com utilizadores da {LogoText}. {0}Entre na sua conta na página de desenvolvedores do Box e crie uma nova aplicação para a integração do {LogoText}. Insira os dados que recebeu abaixo:</value>
   </data>
+  <data name="ConsumersClickatell" xml:space="preserve">
+    <value>Clickatell</value>
+  </data>
+  <data name="ConsumersclickatellapiKey" xml:space="preserve">
+    <value>apiKey</value>
+  </data>
   <data name="ConsumersClickatellDescription" xml:space="preserve">
     <value>Ativar a aplicação para a autenticação de dois fatores através do Clickatell.</value>
   </data>
   <data name="ConsumersClickatellInstruction" xml:space="preserve">
     <value>Utilize esta aplicação para ativar a autenticação de dois fatores com o serviço Clickatell. {0}Inicie sessão na sua conta da Plataforma SMS e crie uma nova integração para o {LogoText}. Copie uma apiKey e insira-a abaixo:</value>
+  </data>
+  <data name="ConsumersDocuSign" xml:space="preserve">
+    <value>DocuSign</value>
   </data>
   <data name="ConsumersdocuSignClientId" xml:space="preserve">
     <value>Chave do DocuSign</value>
@@ -379,6 +303,9 @@
   <data name="ConsumersDocuSignInstruction" xml:space="preserve">
     <value>Ative esta aplicação para assinar digitalmente documentos utilizando o DocuSign. {0}Vá para a sua Consola DocuSign Admin e adicione a integração do {LogoText}. Introduza os dados que recebeu abaixo:</value>
   </data>
+  <data name="ConsumersDropBox" xml:space="preserve">
+    <value>DropBox</value>
+  </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
     <value>Permitir que a aplicação gerencie ficheiros e pastas do Dropbox.</value>
   </data>
@@ -391,6 +318,9 @@
   <data name="ConsumersDropBoxSecret" xml:space="preserve">
     <value>Chave DropBox</value>
   </data>
+  <data name="ConsumersEasyBib" xml:space="preserve">
+    <value>EasyBib</value>
+  </data>
   <data name="ConsumerseasyBibappkey" xml:space="preserve">
     <value>Chave da App</value>
   </data>
@@ -399,6 +329,9 @@
   </data>
   <data name="ConsumersEasyBibInstruction" xml:space="preserve">
     <value>Ative esta aplicação para criar bibliografias no {LogoText} editors. {0}Vá à página de login do EasyBib e preencha o formulário para adicionar a integração com o {LogoText}. Depois de obter a chave da app, cole-a abaixo:</value>
+  </data>
+  <data name="ConsumersFacebook" xml:space="preserve">
+    <value>Facebook</value>
   </data>
   <data name="ConsumersfacebookAccessToken_Default" xml:space="preserve">
     <value>Token da App</value>
@@ -415,6 +348,15 @@
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>Ative esta app para permitir que os utilizadores iniciem sessão no {LogoText} através do Facebook e ligue as contas de Facebook dos clientes ao módulo do CRM. {0}Vá ao Portal Facebook Developers e crie uma nova integração de app para a {LogoText}. Introduza os dados que recebeu abaixo:</value>
   </data>
+  <data name="ConsumersFirebase" xml:space="preserve">
+    <value>Firebase</value>
+  </data>
+  <data name="ConsumersFirebaseDescription" xml:space="preserve">
+    <value>Ative esta aplicação para receber notificações sobre as mensagens que recebeu através do Firebase Cloud Messaging.</value>
+  </data>
+  <data name="ConsumersFirebaseInstruction" xml:space="preserve">
+    <value>Ative esta aplicação para permitir que os seus utilizadores recebam notificações sobre as mensagens mesmo quando estão offline. {0}Vá à consola do Firebase e adicione um novo projeto para a integração da {LogoText}. Introduza os dados que recebeu abaixo:</value>
+  </data>
   <data name="Consumersfirebase_apiKey" xml:space="preserve">
     <value>Chave Web API</value>
   </data>
@@ -427,11 +369,8 @@
   <data name="Consumersfirebase_projectId" xml:space="preserve">
     <value>ID do Projeto</value>
   </data>
-  <data name="ConsumersFirebaseDescription" xml:space="preserve">
-    <value>Ative esta aplicação para receber notificações sobre as mensagens que recebeu através do Firebase Cloud Messaging.</value>
-  </data>
-  <data name="ConsumersFirebaseInstruction" xml:space="preserve">
-    <value>Ative esta aplicação para permitir que os seus utilizadores recebam notificações sobre as mensagens mesmo quando estão offline. {0}Vá à consola do Firebase e adicione um novo projeto para a integração da {LogoText}. Introduza os dados que recebeu abaixo:</value>
+  <data name="ConsumersGoogle" xml:space="preserve">
+    <value>Google</value>
   </data>
   <data name="ConsumersgoogleClientId" xml:space="preserve">
     <value>ID da Google</value>
@@ -443,9 +382,6 @@
     <value>Armazenamento na Nuvem da Google</value>
   </data>
   <data name="ConsumersGoogleCloudbucket" xml:space="preserve">
-    <value>Bucket</value>
-  </data>
-  <data name="ConsumersS3bucket" xml:space="preserve">
     <value>Bucket</value>
   </data>
   <data name="ConsumersGoogleCloudbucketDescription" xml:space="preserve">
@@ -465,6 +401,9 @@
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>Ative esta aplicação para ligar a sua conta Google Drive ao módulo dos Documentos. Poderá gerir, editar, e partilhar ficheiros do Google Drive com utilizadores da {LogoText}.{0}Vá para a Consola de APIs da Google e crie um novo projeto para a integração do {LogoText}. Introduza os dados que recebeu abaixo:</value>
+  </data>
+  <data name="ConsumersLinkedIn" xml:space="preserve">
+    <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
     <value>Ative a aplicação para iniciar sessão no portal utilizando uma conta LinkedIn.</value>
@@ -493,6 +432,9 @@
   <data name="ConsumersMailruInstruction" xml:space="preserve">
     <value>Quando adicionar uma aplicação Mail.ru pode ativar o início de sessão no portal utilizando uma conta Mail.ru na sua página de perfil.</value>
   </data>
+  <data name="ConsumersMicrosoft" xml:space="preserve">
+    <value>Microsoft</value>
+  </data>
   <data name="ConsumersmicrosoftClientId" xml:space="preserve">
     <value>ID da Aplicação do Cliente</value>
   </data>
@@ -517,16 +459,10 @@
   <data name="ConsumersRackspaceprivate_container" xml:space="preserve">
     <value>Contentor Privado</value>
   </data>
-  <data name="ConsumersSelectelprivate_container" xml:space="preserve">
-    <value>Contentor Privado</value>
-  </data>
   <data name="ConsumersRackspaceprivate_containerDescription" xml:space="preserve">
     <value>Introduza o endereço de URL do Contentor Privado do Rackspace para guardar as cópias de segurança.</value>
   </data>
   <data name="ConsumersRackspacepublic_container" xml:space="preserve">
-    <value>Contentor Público</value>
-  </data>
-  <data name="ConsumersSelectelpublic_container" xml:space="preserve">
     <value>Contentor Público</value>
   </data>
   <data name="ConsumersRackspacepublic_containerDescription" xml:space="preserve">
@@ -535,14 +471,14 @@
   <data name="ConsumersRackspaceregion" xml:space="preserve">
     <value>Região</value>
   </data>
-  <data name="ConsumersS3region" xml:space="preserve">
-    <value>Região</value>
-  </data>
   <data name="ConsumersRackspaceregionDescription" xml:space="preserve">
     <value>Introduza a região onde os seus contentores da Rackspace estão localizados.</value>
   </data>
   <data name="ConsumersS3" xml:space="preserve">
     <value>Amazon AWS S3</value>
+  </data>
+  <data name="ConsumersS3bucket" xml:space="preserve">
+    <value>Bucket</value>
   </data>
   <data name="ConsumersS3bucketDescription" xml:space="preserve">
     <value>Introduza o nome único do bucket da Amazon para guardar as cópias de segurança.</value>
@@ -552,6 +488,9 @@
   </data>
   <data name="ConsumersS3Instruction" xml:space="preserve">
     <value>Associe o Amazon AWS S3 para fazer backup e armazenar dados do seu portal. {0}Aceda à Consola de Gestão AWS e crie chaves de acesso para a {LogoText}. Cole os dados que recebeu abaixo:</value>
+  </data>
+  <data name="ConsumersS3region" xml:space="preserve">
+    <value>Região</value>
   </data>
   <data name="ConsumersS3regionDescription" xml:space="preserve">
     <value>Introduza a região AWS onde o seu bucket da Amazon reside.</value>
@@ -574,11 +513,20 @@
   <data name="ConsumersSelectelInstruction" xml:space="preserve">
     <value>Associe o serviço de Armazenamento em Nuvem Selectel para efetuar cópias de segurança e armazenar dados do seu portal. {0}Obtenha os dados de acesso de um utilizador com direitos de leitura/escrita para os contentores onde pretende armazenar as suas cópias de segurança e cole-os abaixo:</value>
   </data>
+  <data name="ConsumersSelectelprivate_container" xml:space="preserve">
+    <value>Contentor Privado</value>
+  </data>
   <data name="ConsumersSelectelprivate_containerDescription" xml:space="preserve">
     <value>Introduza o nome do contentor privado Selectel para armazenar cópias de segurança.</value>
   </data>
+  <data name="ConsumersSelectelpublic_container" xml:space="preserve">
+    <value>Contentor Público</value>
+  </data>
   <data name="ConsumersSelectelpublic_containerDescription" xml:space="preserve">
     <value>Introduza o nome do contentor público Selectel para armazenar cópias de segurança.</value>
+  </data>
+  <data name="ConsumersSkyDrive" xml:space="preserve">
+    <value>OneDrive</value>
   </data>
   <data name="Consumersskydriveappkey" xml:space="preserve">
     <value>ID da aplicação</value>
@@ -607,6 +555,9 @@
   <data name="Consumerssmscpsw" xml:space="preserve">
     <value>Palavra-passe ou palavra-passe MD5 hash em letras minúsculas</value>
   </data>
+  <data name="ConsumersTelegram" xml:space="preserve">
+    <value>Telegram</value>
+  </data>
   <data name="ConsumersTelegramBotName" xml:space="preserve">
     <value>Nome de utilizador do bot</value>
   </data>
@@ -618,6 +569,9 @@
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>Para receber notificações do portal através do Telegram, ative o bot do Telegram. Pode criar um novo bot utilizando o BotFather no ambiente de trabalho do Telegram. Para utilizar este bot, os utilizadores do portal têm de ativar as notificações do Telegram na sua página de perfil. {0}Cole o nome de utilizador do bot e o token que recebeu nos campos abaixo.</value>
+  </data>
+  <data name="ConsumersTwilio" xml:space="preserve">
+    <value>Twilio</value>
   </data>
   <data name="ConsumerstwilioAccountSid" xml:space="preserve">
     <value>Sid da Conta</value>
@@ -634,11 +588,14 @@
   <data name="Consumerstwiliosender" xml:space="preserve">
     <value>Número de telemóvel do Twilio (necessário para a autorização de SMS)</value>
   </data>
-  <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
-    <value>ID do cliente</value>
+  <data name="ConsumersTwitter" xml:space="preserve">
+    <value>X</value>
   </data>
   <data name="ConsumerstwitterAccessTokenSecret_Default" xml:space="preserve">
     <value>Segredo do Cliente</value>
+  </data>
+  <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
+    <value>ID do cliente</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
     <value>Ative esta aplicação para iniciar sessão no portal através de uma conta X.</value>
@@ -655,6 +612,9 @@
   <data name="Consumersusername" xml:space="preserve">
     <value>Nome de utilizador Rackspace</value>
   </data>
+  <data name="ConsumersVk" xml:space="preserve">
+    <value>VK</value>
+  </data>
   <data name="ConsumersVkClientId" xml:space="preserve">
     <value>ID da Aplicação</value>
   </data>
@@ -666,6 +626,24 @@
   </data>
   <data name="ConsumersVkInstruction" xml:space="preserve">
     <value>Quando adiciona a aplicação VK pode ativar o login para o portal através da conta VK na sua página de perfil.</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>ID do cliente</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Segredo do cliente</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Habilite a aplicação para iniciar sessão no portal usando uma conta WeChat.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Habilite a aplicação para iniciar sessão no portal usando uma conta WeChat.</value>
+  </data>
+  <data name="ConsumersWordpress" xml:space="preserve">
+    <value>WordPress</value>
   </data>
   <data name="ConsumersWordpressDescription" xml:space="preserve">
     <value>Ative a aplicação para publicar documentos diretamente no WordPress.</value>
@@ -679,6 +657,9 @@
   <data name="ConsumerswpClientSecret" xml:space="preserve">
     <value>Segredo WordPress</value>
   </data>
+  <data name="ConsumersYahoo" xml:space="preserve">
+    <value>Yahoo</value>
+  </data>
   <data name="ConsumersyahooClientId" xml:space="preserve">
     <value>ID do Cliente</value>
   </data>
@@ -691,8 +672,14 @@
   <data name="ConsumersYahooInstruction" xml:space="preserve">
     <value>Ative esta app para adicionar novos utilizadores do portal através da sua lista de contactos Yahoo. {0}Vá à página Criar Aplicação na Yahoo Developer Network e crie uma nova aplicação para a integração da {LogoText}. Introduza os dados que recebeu abaixo:</value>
   </data>
+  <data name="ConsumersYandex" xml:space="preserve">
+    <value>Yandex</value>
+  </data>
   <data name="ConsumersYandexClientId" xml:space="preserve">
     <value>ID</value>
+  </data>
+  <data name="ConsumersYandexClientSecret" xml:space="preserve">
+    <value>Palavra-passe</value>
   </data>
   <data name="ConsumersYandexDescription" xml:space="preserve">
     <value>Ativar a aplicação para iniciar sessão no portal utilizando uma conta Yandex.</value>
@@ -700,14 +687,56 @@
   <data name="ConsumersYandexInstruction" xml:space="preserve">
     <value>Quando adicionar a aplicação Yandex, pode ativar o login para o portal através da conta Yandex na sua página de perfil.</value>
   </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>ID do cliente Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Segredo do cliente Zoom</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>Habilite o aplicativo para fazer login no portal usando uma conta Zoom.</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>Ative este aplicativo para permitir que seus usuários façam login no {LogoText} usando suas contas Zoom. {0}Acesse o site do Zoom Developers e crie um novo aplicativo de integração com o {LogoText}. Insira os dados que você recebeu abaixo:</value>
+  </data>
   <data name="CouldNotRecoverPasswordForLdapUser" xml:space="preserve">
     <value>A operação de recuperação da palavra-chave está proibida para um utilizador LDAP</value>
   </data>
   <data name="CouldNotRecoverPasswordForSsoUser" xml:space="preserve">
     <value>A operação de recuperação de palavra-passe está proibida para um utilizador SSO</value>
   </data>
+  <data name="CustomNamingPeopleSchema" xml:space="preserve">
+    <value>Personalizado</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>E-mail</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Nome</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Apelido</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Quota do serviço de documentos ({0})</value>
+  </data>
   <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
     <value>ID da Instância Incorreto.</value>
+  </data>
+  <data name="EmailAndPasswordIncorrectEmail" xml:space="preserve">
+    <value>Endereço de e-mail incorreto</value>
+  </data>
+  <data name="ErrorAccessDenied" xml:space="preserve">
+    <value>Não tem permissão para executar esta ação</value>
   </data>
   <data name="ErrorAccessRestricted" xml:space="preserve">
     <value>O acesso ao portal é restrito.</value>
@@ -715,17 +744,41 @@
   <data name="ErrorBadKeys" xml:space="preserve">
     <value>Más chaves</value>
   </data>
+  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
+    <value>O último espaço de acesso completo não pode ser excluído</value>
+  </data>
   <data name="ErrorDisabledProfile" xml:space="preserve">
     <value>O seu perfil está suspenso</value>
+  </data>
+  <data name="ErrorEmailAlreadyExists" xml:space="preserve">
+    <value>{!User} com este e-mail já está registado</value>
   </data>
   <data name="ErrorEmailDomainNotAllowed" xml:space="preserve">
     <value>Os emails deste domínio não são permitidos para se registar</value>
   </data>
+  <data name="ErrorEmailEmpty" xml:space="preserve">
+    <value>Campo de e-mail está vazio</value>
+  </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>Este e-mail é anexado ao usuário {0} como um provedor terceirizado</value>
+  </data>
+  <data name="ErrorEmailsAreTheSame" xml:space="preserve">
+    <value>O e-mail atual e o novo e-mail são os mesmos</value>
+  </data>
+  <data name="ErrorEmptyFields" xml:space="preserve">
+    <value>Por favor, preencha todos os campos</value>
+  </data>
   <data name="ErrorEmptyMessage" xml:space="preserve">
     <value>A mensagem está em branco</value>
   </data>
+  <data name="ErrorEmptyUploadFileSelected" xml:space="preserve">
+    <value>Não foi possível encontrar o ficheiro enviado</value>
+  </data>
   <data name="ErrorFileNotImage" xml:space="preserve">
     <value>Tipo de ficheiro de imagem desconhecido</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>O grupo não foi encontrado</value>
   </data>
   <data name="ErrorImageSize" xml:space="preserve">
     <value>O tamanho da imagem excede os parâmetros permitidos</value>
@@ -736,20 +789,50 @@
   <data name="ErrorIncorrectUserName" xml:space="preserve">
     <value>Primeironome ou últimonome incorretos</value>
   </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>O limite de convites foi excedido</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Adicione pelo menos 1 endereço IP permitido.</value>
+  </data>
   <data name="ErrorIpSecurity" xml:space="preserve">
     <value>O acesso ao portal é restrito</value>
   </data>
   <data name="ErrorNotAllowedOption" xml:space="preserve">
     <value>O seu plano de preço não inclui esta opção</value>
   </data>
+  <data name="ErrorNotCorrectEmail" xml:space="preserve">
+    <value>E-mail inválido</value>
+  </data>
+  <data name="ErrorNotCorrectTrustedDomain" xml:space="preserve">
+    <value>Nome de domínio inválido</value>
+  </data>
+  <data name="ErrorPasswordEmpty" xml:space="preserve">
+    <value>A password está vazia.</value>
+  </data>
   <data name="ErrorPasswordLength" xml:space="preserve">
     <value>Caracteres de {0} a {1}</value>
+  </data>
+  <data name="ErrorPasswordMessage" xml:space="preserve">
+    <value>A nova palavra-passe está incorrecta. Deve conter</value>
+  </data>
+  <data name="ErrorPasswordNoDigits" xml:space="preserve">
+    <value>dígitos</value>
   </data>
   <data name="ErrorPasswordNoSpaces" xml:space="preserve">
     <value>sem espaços</value>
   </data>
+  <data name="ErrorPasswordNoSpecialSymbols" xml:space="preserve">
+    <value>caracteres especiais</value>
+  </data>
+  <data name="ErrorPasswordNoUpperCase" xml:space="preserve">
+    <value>letras maiúsculas</value>
+  </data>
   <data name="ErrorPasswordOnlyLatinLetters" xml:space="preserve">
     <value>apenas letras do latim</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Pagamento requerido</value>
   </data>
   <data name="ErrorRequestLimitExceeded" xml:space="preserve">
     <value>O limite do pedido foi ultrapassado</value>
@@ -760,8 +843,74 @@
   <data name="ErrorTenantTooShortFormat" xml:space="preserve">
     <value>O nome do domínio tem de ter entre {0} e {1} caracteres.</value>
   </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>Muitas tentativas de login. Por favor, tente novamente mais tarde</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Adicione pelo menos 1 domínio confiável.</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Usuário desativado</value>
+  </data>
+  <data name="ErrorUserNotFound" xml:space="preserve">
+    <value>O utilizadore não pôde ser encontrado</value>
+  </data>
+  <data name="ErrorUserNotFoundByEmail" xml:space="preserve">
+    <value>O utilizador com "{0}" e-mail não foi encontrado</value>
+  </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>O URL do webhook não está disponível. O pedido HEAD não está a responder ao estado 200 http.</value>
+  </data>
+  <data name="ErrorWebPluginArchive" xml:space="preserve">
+    <value>Arquivo de plugin errado</value>
+  </data>
+  <data name="ErrorWebPluginExist" xml:space="preserve">
+    <value>O plug-in já existe</value>
+  </data>
+  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
+    <value>Extensão de arquivo errada</value>
+  </data>
+  <data name="ErrorWebPluginFileSize" xml:space="preserve">
+    <value>O tamanho do arquivo excede o limite</value>
+  </data>
+  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
+    <value>São proibidas alterações nos plugins do sistema</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>O número de plug-ins excede o limite</value>
+  </data>
+  <data name="ErrorWebPluginName" xml:space="preserve">
+    <value>Nome de plug-in errado</value>
+  </data>
+  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
+    <value>Nenhum arquivo de entrada</value>
+  </data>
+  <data name="ErrorWebPluginNotFound" xml:space="preserve">
+    <value>Plug-in não encontrado</value>
+  </data>
+  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
+    <value>Para muitos arquivos de entrada</value>
+  </data>
   <data name="EuServerRegion" xml:space="preserve">
     <value>Região EU (Frankfurt)</value>
+  </data>
+  <data name="FileSizeMaxExceed" xml:space="preserve">
+    <value>O tamanho máximo do ficheiro foi excedido</value>
+  </data>
+  <data name="FileSizeNote" xml:space="preserve">
+    <value>Nota: o tamanho do ficheiro não pode exceder {1} {0} {2}</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>bytes,KB,MB,GB</value>
+  </data>
+  <data name="FinishInviteJoinEmailMessage" xml:space="preserve">
+    <value>O link para confirmar a sua conta foi enviado para o e-mail especificado</value>
+  </data>
+  <data name="FirstName" xml:space="preserve">
+    <value>Primeiro nome</value>
+  </data>
+  <data name="LastName" xml:space="preserve">
+    <value>Último nome</value>
   </data>
   <data name="LdapSettingsConnectError" xml:space="preserve">
     <value>Erro de conexão</value>
@@ -916,6 +1065,12 @@
   <data name="LicenseUploadedOverdueSupport" xml:space="preserve">
     <value>Carregado com êxito. {0}O Apoio não está disponível para esta licença desde {2}.{1}</value>
   </data>
+  <data name="MessageEmailChangeInstuctionsSentOnEmail" xml:space="preserve">
+    <value>As instruções de alteração de e-mail foram enviadas para o endereço de email</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>A instrução de alteração de senha foi enviada para o endereço de e-mail {0}.</value>
+  </data>
   <data name="MessageYourPasswordSendedToEmail" xml:space="preserve">
     <value>Se o utilizador com o e-mail {0} existir, as instruções de como alterar a palavra-chave foram enviadas para este endereço eletrónico.</value>
   </data>
@@ -934,14 +1089,29 @@
   <data name="PortalSecurity" xml:space="preserve">
     <value>Acesso ao Portal</value>
   </data>
+  <data name="QuotaGreaterPortalError" xml:space="preserve">
+    <value>Falha ao definir a cota de memória – a cota de memória definida é maior que a cota dos portais.</value>
+  </data>
   <data name="ReassignDataRemoveUserError" xml:space="preserve">
     <value>O processo de reatribuição de dados para {0} não está concluído.</value>
   </data>
   <data name="RecaptchaInvalid" xml:space="preserve">
     <value>Recaptacha Inválido</value>
   </data>
+  <data name="RoomFreeSpaceException" xml:space="preserve">
+    <value>Cota de espaço da sala excedida</value>
+  </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>Falha ao definir cota por quarto. O valor inserido é maior do que o armazenamento total do DocSpace.</value>
+  </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Ásia-Pacífico (Singapura)</value>
+  </data>
+  <data name="SmsAuthenticationMessageError" xml:space="preserve">
+    <value>Código incorreto</value>
+  </data>
+  <data name="SmsAuthenticationMessageToUser" xml:space="preserve">
+    <value>O seu código para efetuar login no portal: {0}</value>
   </data>
   <data name="SmsAuthenticationTimeout" xml:space="preserve">
     <value>O prazo para utilizar o código expirou. Solicite uma nova mensagem de texto.</value>
@@ -967,251 +1137,14 @@
   <data name="SsoSettingsInvalidMapping" xml:space="preserve">
     <value>Mapeamento de campos inválido</value>
   </data>
-  <data name="TariffsFeature_thirdparty" xml:space="preserve">
-    <value>Integrações de terceiros</value>
+  <data name="SuccessfullySaveGreetingSettingsMessage" xml:space="preserve">
+    <value>Configurações de saudação foram salvas com sucesso</value>
   </data>
-  <data name="TfaAppAuthMessageError" xml:space="preserve">
-    <value>Código incorreto</value>
+  <data name="SuccessfullySaveSettingsMessage" xml:space="preserve">
+    <value>As configurações foram atualizadas com sucesso</value>
   </data>
-  <data name="TfaAppNotAvailable" xml:space="preserve">
-    <value>As definições da aplicação TFA não estão disponíveis</value>
-  </data>
-  <data name="TfaTooMuchError" xml:space="preserve">
-    <value>Enviou demasiadas mensagens de texto. Por favor, tente de novo mais tarde.</value>
-  </data>
-  <data name="UsServerRegion" xml:space="preserve">
-    <value>Região Oeste dos EUA (Oregon)</value>
-  </data>
-  <data name="ConsumersZoom" xml:space="preserve">
-    <value>Zoom</value>
-  </data>
-  <data name="ConsumersZoomClientId" xml:space="preserve">
-    <value>ID do cliente Zoom</value>
-  </data>
-  <data name="ConsumersZoomClientSecret" xml:space="preserve">
-    <value>Segredo do cliente Zoom</value>
-  </data>
-  <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Habilite o aplicativo para fazer login no portal usando uma conta Zoom.</value>
-  </data>
-  <data name="ConsumersZoomInstruction" xml:space="preserve">
-    <value>Ative este aplicativo para permitir que seus usuários façam login no {LogoText} usando suas contas Zoom. {0}Acesse o site do Zoom Developers e crie um novo aplicativo de integração com o {LogoText}. Insira os dados que você recebeu abaixo:</value>
-  </data>
-  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
-    <value>Muitas tentativas de login. Por favor, tente novamente mais tarde</value>
-  </data>
-  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
-    <value>O último espaço de acesso completo não pode ser excluído</value>
-  </data>
-  <data name="ErrorWebPluginArchive" xml:space="preserve">
-    <value>Arquivo de plugin errado</value>
-  </data>
-  <data name="ErrorWebPluginExist" xml:space="preserve">
-    <value>O plug-in já existe</value>
-  </data>
-  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
-    <value>Extensão de arquivo errada</value>
-  </data>
-  <data name="ErrorWebPluginFileSize" xml:space="preserve">
-    <value>O tamanho do arquivo excede o limite</value>
-  </data>
-  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
-    <value>São proibidas alterações nos plugins do sistema</value>
-  </data>
-  <data name="ErrorWebPluginName" xml:space="preserve">
-    <value>Nome de plug-in errado</value>
-  </data>
-  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
-    <value>Nenhum arquivo de entrada</value>
-  </data>
-  <data name="ErrorWebPluginNotFound" xml:space="preserve">
-    <value>Plug-in não encontrado</value>
-  </data>
-  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
-    <value>Para muitos arquivos de entrada</value>
-  </data>
-  <data name="QuotaGreaterPortalError" xml:space="preserve">
-    <value>Falha ao definir a cota de memória – a cota de memória definida é maior que a cota dos portais.</value>
-  </data>
-  <data name="RoomFreeSpaceException" xml:space="preserve">
-    <value>Cota de espaço da sala excedida</value>
-  </data>
-  <data name="UserFreeSpaceException" xml:space="preserve">
-    <value>Cota de espaço do usuário excedida</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Administradores adicionados:</value>
-  </data>
-  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
-    <value>O limite de convites foi excedido</value>
-  </data>
-  <data name="ErrorUserDisabled" xml:space="preserve">
-    <value>Usuário desativado</value>
-  </data>
-  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
-    <value>A instrução de alteração de senha foi enviada para o endereço de e-mail {0}.</value>
-  </data>
-  <data name="ErrorEmailLinked" xml:space="preserve">
-    <value>Este e-mail é anexado ao usuário {0} como um provedor terceirizado</value>
-  </data>
-  <data name="TariffsFeature_statistic" xml:space="preserve">
-    <value>Cotas de armazenamento e estatística</value>
-  </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} por administrador e capacidade de adicionar espaço mediante solicitação</value>
-  </data>
-  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Falha ao definir cota por quarto. O valor inserido é maior do que o armazenamento total do DocSpace.</value>
-  </data>
-  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Falha ao definir a cota por utilizador. O valor inserido é maior do que o armazenamento total do DocSpace.</value>
-  </data>
-  <data name="ErrorTrustedMailDomain" xml:space="preserve">
-    <value>Adicione pelo menos 1 domínio confiável.</value>
-  </data>
-  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
-    <value>O número de administradores excede o limite: {0}/{1}.</value>
-  </data>
-  <data name="ErrorIpRestriction" xml:space="preserve">
-    <value>Adicione pelo menos 1 endereço IP permitido.</value>
-  </data>
-  <data name="Tariffs_nonprofit" xml:space="preserve">
-    <value>Sem fins lucrativos</value>
-  </data>
-  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
-    <value>O URL do webhook não está disponível. O pedido HEAD não está a responder ao estado 200 http.</value>
-  </data>
-  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
-    <value>Armazenamento utilizado:</value>
-  </data>
-  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
-    <value>Crédito</value>
-  </data>
-  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
-    <value>Moeda</value>
-  </data>
-  <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>Data</value>
-  </data>
-  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
-    <value>Quantidade</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
-    <value>Espaço em disco</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
-    <value>Recarga de saldo</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
-    <value>Unidade de Medida</value>
-  </data>
-  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
-    <value>Relatório de operações do cliente ({0}-{1})</value>
-  </data>
-  <data name="ErrorGroupNotFound" xml:space="preserve">
-    <value>O grupo não foi encontrado</value>
-  </data>
-  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
-    <value>Armazenamento adicional em disco</value>
-  </data>
-  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
-    <value>Ajuste o armazenamento para a quantidade exata que necessita.</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
-    <value>Cópia de segurança</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>Cópia de segurança</value>
-  </data>
-  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
-    <value>Cópia de segurança</value>
-  </data>
-  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
-    <value>Débito</value>
-  </data>
-  <data name="AccountingCustomerOperationContact" xml:space="preserve">
-    <value>Contacto</value>
-  </data>
-  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
-    <value>Histórico de transações</value>
-  </data>
-  <data name="AutoTopUp" xml:space="preserve">
-    <value>Recarga automática</value>
-  </data>
-  <data name="TariffsFeature_free_backup" xml:space="preserve">
-    <value>{0} backups gratuitos por mês</value>
-  </data>
-  <data name="ErrorPaymentRequired" xml:space="preserve">
-    <value>Pagamento requerido</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
-    <value>GB</value>
-  </data>
-  <data name="AccountingCustomerOperationType" xml:space="preserve">
-    <value>Tipo</value>
-  </data>
-  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
-    <value>Detalhes</value>
-  </data>
-  <data name="AutoRenewal" xml:space="preserve">
-    <value>Renovação automática</value>
-  </data>
-  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
-    <value>O número de backups gratuitos não deve exceder {0} num mês</value>
-  </data>
-  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
-    <value>Active os backups para o seu DocSpace. Os custos serão cobrados automaticamente.</value>
-  </data>
-  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
-    <value>Vetorização</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
-    <value>Ferramentas de IA</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
-    <value>Tokens</value>
-  </data>
-  <data name="AiAgentFreeSpaceException" xml:space="preserve">
-    <value>Quota de espaço do agente de IA excedida</value>
-  </data>
-  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Falha ao definir a quota por agente de IA. O valor introduzido é superior ao armazenamento total do DocSpace.</value>
-  </data>
-  <data name="ConsumersWeixin" xml:space="preserve">
-    <value>WeChat</value>
-  </data>
-  <data name="ConsumersWeixinClientId" xml:space="preserve">
-    <value>ID do cliente</value>
-  </data>
-  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
-    <value>Segredo do cliente</value>
-  </data>
-  <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Habilite a aplicação para iniciar sessão no portal usando uma conta WeChat.</value>
-  </data>
-  <data name="ConsumersWeixinInstruction" xml:space="preserve">
-    <value>Habilite a aplicação para iniciar sessão no portal usando uma conta WeChat.</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
-    <value>Data</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
-    <value>Quota do serviço de documentos ({0})</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
-    <value>Apelido</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
-    <value>ID</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
-    <value>Nome</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
-    <value>E-mail</value>
-  </data>
-  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
-    <value>O número de plug-ins excede o limite</value>
+  <data name="SuccessfullySentNotificationDeleteUserInfoMessage" xml:space="preserve">
+    <value>Instruções sobre como excluir o seu perfil foram enviadas para o {0} endereço de e-mail</value>
   </data>
   <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
     <value>O número de agentes de IA não deve exceder {0}</value>
@@ -1222,16 +1155,142 @@
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
     <value>Ative os recursos de IA no seu DocSpace para aumentar a produtividade.</value>
   </data>
+  <data name="TariffsFeature_audit" xml:space="preserve">
+    <value>Rastreio de logins e ações</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Cópia de segurança</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Active os backups para o seu DocSpace. Os custos serão cobrados automaticamente.</value>
+  </data>
+  <data name="TariffsFeature_customization" xml:space="preserve">
+    <value>Imagem de Marca e personalização</value>
+  </data>
+  <data name="TariffsFeature_file_size" xml:space="preserve">
+    <value>Tamanho máximo do ficheiro</value>
+  </data>
+  <data name="TariffsFeature_file_size_exception" xml:space="preserve">
+    <value>O tamanho do ficheiro não deve exceder {0}</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} backups gratuitos por mês</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>O número de backups gratuitos não deve exceder {0} num mês</value>
+  </data>
+  <data name="TariffsFeature_manager_exception" xml:space="preserve">
+    <value>O número de administradores não deve exceder {0}</value>
+  </data>
+  <data name="TariffsFeature_manager_price_count" xml:space="preserve">
+    <value>O número de administradores</value>
+  </data>
+  <data name="TariffsFeature_restore" xml:space="preserve">
+    <value>Recuperação de dados</value>
+  </data>
+  <data name="TariffsFeature_room" xml:space="preserve">
+    <value>Número ilimitado de salas ativas</value>
+  </data>
+  <data name="TariffsFeature_room_exception" xml:space="preserve">
+    <value>O número de salas não deve exceder {0}</value>
+  </data>
+  <data name="TariffsFeature_sso" xml:space="preserve">
+    <value>SSO</value>
+  </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Cotas de armazenamento e estatística</value>
+  </data>
+  <data name="TariffsFeature_thirdparty" xml:space="preserve">
+    <value>Integrações de terceiros</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} por administrador e capacidade de adicionar espaço mediante solicitação</value>
+  </data>
+  <data name="TariffsFeature_total_size_exception" xml:space="preserve">
+    <value>O tamanho do armazenamento utilizado não deve exceder {0}</value>
+  </data>
+  <data name="TariffsFeature_total_size_price_count" xml:space="preserve">
+    <value>Espaço de armazenamento</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Armazenamento adicional em disco</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Ajuste o armazenamento para a quantidade exata que necessita.</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Administradores adicionados:</value>
+  </data>
+  <data name="TariffsFeature_used_room" xml:space="preserve">
+    <value>Salas:</value>
+  </data>
+  <data name="TariffsFeature_used_total_size" xml:space="preserve">
+    <value>Armazenamento utilizado:</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
+    <value>Armazenamento utilizado:</value>
+  </data>
+  <data name="TariffsFeature_used_usersInRoom" xml:space="preserve">
+    <value>Utilizadores na sala:</value>
+  </data>
+  <data name="TariffsFeature_users" xml:space="preserve">
+    <value>Número ilimitado de utilizadores e convidados</value>
+  </data>
+  <data name="TariffsFeature_usersInRoom" xml:space="preserve">
+    <value>Utilizadores na sala</value>
+  </data>
+  <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
+    <value>O número de utilizadores na sala não deve exceder {0}</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>O número de administradores excede o limite: {0}/{1}.</value>
+  </data>
+  <data name="TariffsFeature_users_exception" xml:space="preserve">
+    <value>O número de utilizadores não deve exceder {0}</value>
+  </data>
   <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
     <value>Pesquisa na web com IA</value>
   </data>
   <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
     <value>Adicione fundos à sua carteira para desbloquear a pesquisa na web com IA.</value>
   </data>
+  <data name="Tariffs_admin" xml:space="preserve">
+    <value>Business</value>
+  </data>
+  <data name="Tariffs_adminyear" xml:space="preserve">
+    <value>Business</value>
+  </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Sem fins lucrativos</value>
+  </data>
+  <data name="Tariffs_startup" xml:space="preserve">
+    <value>Startup</value>
+  </data>
   <data name="TelegramOnGenericError" xml:space="preserve">
     <value>Ocorreu um erro inesperado. Tente novamente.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
     <value>Você conectou com sucesso o Telegram para receber notificações do seu DocSpace.</value>
+  </data>
+  <data name="TfaAppAuthMessageError" xml:space="preserve">
+    <value>Código incorreto</value>
+  </data>
+  <data name="TfaAppNotAvailable" xml:space="preserve">
+    <value>As definições da aplicação TFA não estão disponíveis</value>
+  </data>
+  <data name="TfaTooMuchError" xml:space="preserve">
+    <value>Enviou demasiadas mensagens de texto. Por favor, tente de novo mais tarde.</value>
+  </data>
+  <data name="UserFreeSpaceException" xml:space="preserve">
+    <value>Cota de espaço do usuário excedida</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>Falha ao definir a cota por utilizador. O valor inserido é maior do que o armazenamento total do DocSpace.</value>
+  </data>
+  <data name="UsServerRegion" xml:space="preserve">
+    <value>Região Oeste dos EUA (Oregon)</value>
+  </data>
+  <data name="WhatsNewSubscriptionName" xml:space="preserve">
+    <value>O que há de novo</value>
   </data>
 </root>

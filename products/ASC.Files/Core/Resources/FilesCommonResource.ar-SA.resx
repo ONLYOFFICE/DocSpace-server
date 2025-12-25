@@ -120,11 +120,20 @@
   <data name="AceShareLink" xml:space="preserve">
     <value>البوابة الخارجية</value>
   </data>
+  <data name="AceStatusEnum_Collaborator" xml:space="preserve">
+    <value>متعاون</value>
+  </data>
   <data name="AceStatusEnum_Comment" xml:space="preserve">
     <value>تعليق</value>
   </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>صانع المحتوى</value>
+  </data>
   <data name="AceStatusEnum_CustomFilter" xml:space="preserve">
     <value>تخصيص فلتر</value>
+  </data>
+  <data name="AceStatusEnum_Editing" xml:space="preserve">
+    <value>المحرر</value>
   </data>
   <data name="AceStatusEnum_FillForms" xml:space="preserve">
     <value>تعبئة النموذج</value>
@@ -141,8 +150,14 @@
   <data name="AceStatusEnum_Review" xml:space="preserve">
     <value>مراجعة</value>
   </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>مدير الغرفة</value>
+  </data>
   <data name="Admin" xml:space="preserve">
     <value>المسئول</value>
+  </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>مدير الوكلاء</value>
   </data>
   <data name="AppAccessDenied" xml:space="preserve">
     <value>للعمل على هذا الملف يجب أن يتم منحك الوصول إليه</value>
@@ -198,6 +213,15 @@
   <data name="CommentUpload" xml:space="preserve">
     <value>تم الرفع</value>
   </data>
+  <data name="Date" xml:space="preserve">
+    <value>التاريخ</value>
+  </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>رابط المشاركة</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>رابط الدعوة</value>
+  </data>
   <data name="DocuSignStatusDeclined" xml:space="preserve">
     <value>مرفوض</value>
   </data>
@@ -240,17 +264,32 @@
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>لن يتم نقل الملف إذا تجاوز حجمه {0}</value>
   </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>نقل عدة ملفات إلى غرفة تعبئة النماذج غير مدعوم. قم بنقل نموذج ONLYOFFICE PDF واحد في كل مرة.</value>
+  </data>
   <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
     <value>النسخة الجديدة لا يمكن أن تكون مماثلة للنسخة الحالية</value>
   </data>
   <data name="ErrorMessage_FolderCopyError" xml:space="preserve">
     <value>لا يمكن نسخ المجلد للمجلد الفرعي الخاص به</value>
   </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>نقل المجلدات إلى غرفة تعبئة النموذج غير مدعوم. قم بنقل نموذج ONLYOFFICE PDF واحد في كل مرة.</value>
+  </data>
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>لم يتم العثور على المجلد المطلوب</value>
   </data>
+  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
+    <value>مزود غير صالح</value>
+  </data>
+  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
+    <value>لا يمكن استخدام المجلد لتخزين الغرفة</value>
+  </data>
   <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>عنوان غير صحيح</value>
+  </data>
+  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
+    <value>رابط الدعوة غير صالح أو انتهت صلاحيته</value>
   </data>
   <data name="ErrorMessage_LockedFile" xml:space="preserve">
     <value>الملف مقفل حالياً بواسطة مستخدم آخر</value>
@@ -261,8 +300,20 @@
   <data name="ErrorMessage_ManyDownloads" xml:space="preserve">
     <value>عدد كبير من التنزيلات.</value>
   </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>الحد الأقصى من عدد الروابط من الممكن قد لا يتجاوز {0}</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>لا يمكن نقل الملف إلى هذه الغرفة. يرجى محاولة نقل نموذج ONLYOFFICE PDF.</value>
+  </data>
   <data name="ErrorMessage_NotSupportedFormat" xml:space="preserve">
     <value>نأسف، صيغة الملف غير مدعومة</value>
+  </data>
+  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
+    <value>المزود مرتبط بالفعل بالغرفة</value>
+  </data>
+  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
+    <value>المنصب غير متاح لهذا النوع من المستخدمين</value>
   </data>
   <data name="ErrorMessage_SaveAnonymous" xml:space="preserve">
     <value>مؤلف الملف المحفوظ غير معروف</value>
@@ -276,6 +327,9 @@
   <data name="ErrorMessage_SecurityException" xml:space="preserve">
     <value>لا تمتلك حق الوصول للقيام بالإجراء</value>
   </data>
+  <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
+    <value>لا يوجد لديك أذونات لأرشفة الغرفة</value>
+  </data>
   <data name="ErrorMessage_SecurityException_Auth" xml:space="preserve">
     <value>لا يمكن المصادقة مع المزود {0} من خلال بيانات الدخول.</value>
   </data>
@@ -283,6 +337,9 @@
     <value>ليس لديك الأذونات لنسخ الملف</value>
   </data>
   <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
+    <value>ليس لديك الأذونات لنسخ المجلد</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
     <value>ليس لديك الأذونات لنسخ المجلد</value>
   </data>
   <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
@@ -306,10 +363,19 @@
   <data name="ErrorMessage_SecurityException_EditFileTwice" xml:space="preserve">
     <value>يتم تعديل الملف بواسطتك في علامة  تبويب آخر</value>
   </data>
+  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
+    <value>لا تمتلك الأذونات لتعديل الغرفة</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>لا يمكن حذف النسخة الحالية من الملف</value>
+  </data>
   <data name="ErrorMessage_SecurityException_MoveFile" xml:space="preserve">
     <value>ليس لديك الأذونات لنقل الملف</value>
   </data>
   <data name="ErrorMessage_SecurityException_MoveFolder" xml:space="preserve">
+    <value>ليس لديك الأذونات لنقل المجلد</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
     <value>ليس لديك الأذونات لنقل المجلد</value>
   </data>
   <data name="ErrorMessage_SecurityException_ReadFile" xml:space="preserve">
@@ -324,11 +390,17 @@
   <data name="ErrorMessage_SecurityException_RenameFolder" xml:space="preserve">
     <value>ليس لديك الأذونات لإعادة تسمية المجلد</value>
   </data>
+  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
+    <value>ليس لديك الأذونات لإلغاء أرشفة الغرفة</value>
+  </data>
   <data name="ErrorMessage_SecurityException_UpdateEditingFile" xml:space="preserve">
     <value>لا يمكنك تحديث الملف لأنه مفتوح للتعديل</value>
   </data>
   <data name="ErrorMessage_SecurityException_ViewFolder" xml:space="preserve">
     <value>ليس لديك الأذونات لمعاينة محتوى المجلد</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>فشلت محاولات إدخال كلمة المرور الخاصة بك، الرجاء المحاولة مرة أخرى لاحقاً</value>
   </data>
   <data name="ErrorMessage_SharpBoxException" xml:space="preserve">
     <value>محتوى مجلد الطرف الثالث غير متوفر. حاول إعادة اتصال الحساب.</value>
@@ -336,8 +408,14 @@
   <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>خطأ في بدء تعديل الملف</value>
   </data>
+  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
+    <value>لا يمكنك تعديل الغرف المأرشفة</value>
+  </data>
   <data name="ErrorMessage_UpdateEditingFile" xml:space="preserve">
     <value>لا يمكنك تعديل الملف المفتوح للتعديل</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>لا يمكن تحميل الملف إلى هذه الغرفة. يرجى محاولة تحميل نموذج ONLYOFFICE PDF.</value>
   </data>
   <data name="ErrorMessage_UserNotFound" xml:space="preserve">
     <value>لا يمكن العثور على الملف</value>
@@ -345,44 +423,35 @@
   <data name="ErrorMessage_ViewTrashItem" xml:space="preserve">
     <value>لا يمكنك معاينة الملفات في سلة القمامة</value>
   </data>
-  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
-    <value>مزود غير صالح</value>
-  </data>
-  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
-    <value>لا يمكن استخدام المجلد لتخزين الغرفة</value>
-  </data>
-  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
-    <value>رابط الدعوة غير صالح أو انتهت صلاحيته</value>
-  </data>
-  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
-    <value>المنصب غير متاح لهذا النوع من المستخدمين</value>
-  </data>
-  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
-    <value>المزود مرتبط بالفعل بالغرفة</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
-    <value>ليس لديك الأذونات لنسخ المجلد</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
-    <value>ليس لديك الأذونات لنقل المجلد</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
-    <value>ليس لديك الأذونات لإلغاء أرشفة الغرفة</value>
-  </data>
-  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
-    <value>لا يمكنك تعديل الغرف المأرشفة</value>
-  </data>
   <data name="ErrorrMessage_PinRoom" xml:space="preserve">
     <value>لا يمكنك تثبيت غرفة</value>
   </data>
   <data name="Everyone" xml:space="preserve">
     <value>الجميع</value>
   </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>مستخدم خارجي</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>رابط تعبئة النموذج</value>
+  </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>مستندات المستخدم {0} {1}</value>
+  </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>رقم النموذج</value>
+  </data>
   <data name="Guest" xml:space="preserve">
     <value>مجهول</value>
   </data>
   <data name="IndexTitle" xml:space="preserve">
     <value>البحث في محتوى المستند</value>
+  </data>
+  <data name="KnowledgeFolder" xml:space="preserve">
+    <value>معرفة</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>رابط النموذج</value>
   </data>
   <data name="MessageFileCreated" xml:space="preserve">
     <value>تم انشاء الملف في المجلد "{0}"</value>
@@ -395,6 +464,9 @@
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>الملف لم يعد مسودة للقيام بتعبئة النموذج.</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>افتح الملف</value>
   </data>
   <data name="ProductAdminOpportunities" xml:space="preserve">
     <value>قم بما يقوم به المستخدم |اربط  Dropbox و Box وحسابات أخرى في قسم 'شائع' | ضع حقوق الوصول إلى المستندات والمجلدات في قسم 'شائع'</value>
@@ -415,20 +487,17 @@
   <data name="ProductUserOpportunities" xml:space="preserve">
     <value>أنشئ المستندات الخاصة بك وقم بالتعديل عليها ، كما يمكنك القيام بذلك على المستندات المشتركة مع حقوق الوصول المناسبة قم بمنح أذونات القراءة أو التعديل إلى المستخدمين الآخرين على المستندات والمجلدات Link Dropbox و Box والحسابات الأخرى في قسم ' المستندات'</value>
   </data>
-  <data name="UnknownFirstName" xml:space="preserve">
-    <value>الاسم الأول</value>
+  <data name="ResultStorageFolder" xml:space="preserve">
+    <value>تخزين النتائج</value>
   </data>
-  <data name="UnknownLastName" xml:space="preserve">
-    <value>الاسم الأخير</value>
+  <data name="RoleEnum_Collaborator" xml:space="preserve">
+    <value>متعاون</value>
   </data>
-  <data name="UnlockComment" xml:space="preserve">
-    <value>الملف غير مقفل</value>
+  <data name="RoleEnum_Comment" xml:space="preserve">
+    <value>معلق</value>
   </data>
-  <data name="AceStatusEnum_Editing" xml:space="preserve">
-    <value>المحرر</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
-    <value>لا تمتلك الأذونات لتعديل الغرفة</value>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>صانع المحتوى</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
     <value>مسئول DocSpace</value>
@@ -436,41 +505,26 @@
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>المحرر</value>
   </data>
-  <data name="RoleEnum_User" xml:space="preserve">
-    <value>مستخدم</value>
+  <data name="RoleEnum_FillForms" xml:space="preserve">
+    <value>معبئ للنموذج</value>
+  </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>ضيف</value>
   </data>
   <data name="RoleEnum_Read" xml:space="preserve">
     <value>مشاهد</value>
   </data>
-  <data name="RoleEnum_Comment" xml:space="preserve">
-    <value>معلق</value>
-  </data>
-  <data name="RoleEnum_FillForms" xml:space="preserve">
-    <value>معبئ للنموذج</value>
-  </data>
   <data name="RoleEnum_Review" xml:space="preserve">
     <value>مراجع</value>
   </data>
-  <data name="RoleEnum_Collaborator" xml:space="preserve">
-    <value>متعاون</value>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>مسؤول الغرفة</value>
   </data>
-  <data name="AceStatusEnum_Collaborator" xml:space="preserve">
-    <value>متعاون</value>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>مدير الغرفة</value>
   </data>
-  <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
-    <value>لا يوجد لديك أذونات لأرشفة الغرفة</value>
-  </data>
-  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
-    <value>الحد الأقصى من عدد الروابط من الممكن قد لا يتجاوز {0}</value>
-  </data>
-  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
-    <value>فشلت محاولات إدخال كلمة المرور الخاصة بك، الرجاء المحاولة مرة أخرى لاحقاً</value>
-  </data>
-  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
-    <value>رابط الدعوة</value>
-  </data>
-  <data name="DefaultExternalLinkTitle" xml:space="preserve">
-    <value>رابط المشاركة</value>
+  <data name="RoleEnum_User" xml:space="preserve">
+    <value>مستخدم</value>
   </data>
   <data name="RoomIndex_Author" xml:space="preserve">
     <value>مؤلف</value>
@@ -486,6 +540,9 @@
   </data>
   <data name="RoomIndex_ExportAuthor" xml:space="preserve">
     <value>تصدير المؤلف</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>مجلد</value>
   </data>
   <data name="RoomIndex_Index" xml:space="preserve">
     <value>فِهرِس</value>
@@ -511,79 +568,22 @@
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>النوع</value>
   </data>
-  <data name="RoomIndex_Folder" xml:space="preserve">
-    <value>مجلد</value>
-  </data>
-  <data name="Date" xml:space="preserve">
-    <value>التاريخ</value>
-  </data>
-  <data name="User" xml:space="preserve">
-    <value>مستخدم</value>
-  </data>
-  <data name="LinkToForm" xml:space="preserve">
-    <value>رابط النموذج</value>
-  </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>افتح الملف</value>
-  </data>
-  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>لا يمكن تحميل الملف إلى هذه الغرفة. يرجى محاولة تحميل نموذج ONLYOFFICE PDF.</value>
-  </data>
-  <data name="FillOutExternalLinkTitle" xml:space="preserve">
-    <value>رابط تعبئة النموذج</value>
-  </data>
-  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>نقل عدة ملفات إلى غرفة تعبئة النماذج غير مدعوم. قم بنقل نموذج ONLYOFFICE PDF واحد في كل مرة.</value>
-  </data>
-  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>نقل المجلدات إلى غرفة تعبئة النموذج غير مدعوم. قم بنقل نموذج ONLYOFFICE PDF واحد في كل مرة.</value>
-  </data>
-  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>لا يمكن نقل الملف إلى هذه الغرفة. يرجى محاولة نقل نموذج ONLYOFFICE PDF.</value>
-  </data>
-  <data name="FormNumber" xml:space="preserve">
-    <value>رقم النموذج</value>
-  </data>
-  <data name="ExternalUser" xml:space="preserve">
-    <value>مستخدم خارجي</value>
-  </data>
-  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
-    <value>مدير الغرفة</value>
-  </data>
-  <data name="RoleEnum_RoomManager" xml:space="preserve">
-    <value>مدير الغرفة</value>
-  </data>
-  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
-    <value>صانع المحتوى</value>
-  </data>
-  <data name="RoleEnum_ContentCreator" xml:space="preserve">
-    <value>صانع المحتوى</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
-    <value>لا يمكن حذف النسخة الحالية من الملف</value>
-  </data>
   <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
     <value>مشاركة للتعبئة</value>
   </data>
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>ابدأوا التعبئة</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>مسؤول الغرفة</value>
+  <data name="UnknownFirstName" xml:space="preserve">
+    <value>الاسم الأول</value>
   </data>
-  <data name="RoleEnum_Guest" xml:space="preserve">
-    <value>ضيف</value>
+  <data name="UnknownLastName" xml:space="preserve">
+    <value>الاسم الأخير</value>
   </data>
-  <data name="FolderNameForReassignedData" xml:space="preserve">
-    <value>مستندات المستخدم {0} {1}</value>
+  <data name="UnlockComment" xml:space="preserve">
+    <value>الملف غير مقفل</value>
   </data>
-  <data name="AgentManager" xml:space="preserve">
-    <value>مدير الوكلاء</value>
-  </data>
-  <data name="KnowledgeFolder" xml:space="preserve">
-    <value>معرفة</value>
-  </data>
-  <data name="ResultStorageFolder" xml:space="preserve">
-    <value>تخزين النتائج</value>
+  <data name="User" xml:space="preserve">
+    <value>مستخدم</value>
   </data>
 </root>

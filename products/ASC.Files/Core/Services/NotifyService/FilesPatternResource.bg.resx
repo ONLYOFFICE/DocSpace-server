@@ -1,5 +1,64 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -53,11 +112,23 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>Проверете готовите форми</value>
+  </data>
+  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
+    <value>Нов документ "$DocumentTitle" беше създаден в стаята "$RoomTitle"</value>
+  </data>
+  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
+    <value>Нови файлове бяха качени в стая "$RoomTitle" ($Count)</value>
+  </data>
+  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
+    <value>Нов файл "$DocumentTitle" беше качен в стая "$RoomTitle"</value>
+  </data>
   <data name="pattern_DocuSignComplete" xml:space="preserve">
     <value>h1. Всички подписващи лица завършиха $DocumentTitle
 
@@ -68,12 +139,74 @@
 
 Влезте в своя DocuSign акаунт за повече информация.</value>
   </data>
+  <data name="pattern_EditorMentions" xml:space="preserve">
+    <value>h1. $__AuthorName Ви спомена в коментар на документа
+
+$__AuthorName Ви спомена в коментар към документа "$DocumentTitle":"$DocumentURL" в стаята "$RoomTitle":"$RoomURL":
+
+$Message</value>
+  </data>
+  <data name="pattern_EditorMentions_push" xml:space="preserve">
+    <value>$ToUserName ви спомена в документ $DocumentTitle</value>
+  </data>
+  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
+    <value>Нова папка "$FolderTitle" беше създадена в стая "$RoomTitle"</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. Формулярът $Message е попълнен
+
+Нов формуляр "$DocumentTitle":"$DocumentURL" се попълва в стаята "$RoomTitle":"$RoomURL"
+
+Подател на формуляра: "$FromUserName":"$FromUserLink"
+
+$OrangeButton
+
+&amp;nbsp;</value>
+  </data>
+  <data name="pattern_FormStartedFilling" xml:space="preserve">
+    <value>
+      Известие за дейност. "$FromUserName":"$FromUserLink" започна процеса по попълване на формуляр:  "$DocumentTitle":"$DocumentURL" в стаята: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. Попълнихте формуляра $Message
+
+Попълнихте формуляра "$DocumentTitle":"$DocumentURL" в стаята "$RoomTitle":"$RoomURL"
+
+Управител: "$ToUserName":"$ToUserLink"
+
+$OrangeButton
+
+&amp;nbsp;</value>
+  </data>
+  <data name="pattern_FormSubmitted_push" xml:space="preserve">
+    <value>Формуляр "$DocumentTitle" беше попълнен в стая "$RoomTitle"</value>
+  </data>
+  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+    <value>
+      Известие за дейност. Формулярът "$DocumentTitle":"$DocumentURL" беше изцяло попълнен в стаята: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
+    <value>Бяхте поканени в стая "$RoomTitle"</value>
+  </data>
   <data name="pattern_MailMergeEnd" xml:space="preserve">
     <value>h1. Изпращане на поща
 
 Това е известие по имейл, което ви информира, че сте поискали изпращането на съобщения $MailsCount и процесът е завършен. $Message
 
 Успешно изпратените пощенски съобщения могат да бъдат намерени в папката "Изпратени":"$__VirtualRootPath/ addons/ mail/#sent" на модула Поща.</value>
+  </data>
+  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
+    <value>$FromUserName премести стая "$RoomTitle" в архива</value>
+  </data>
+  <data name="pattern_RoomRemoved" xml:space="preserve">
+    <value>h1. $__AuthorName изтри стая
+
+$__AuthorName изтри стаята: $RoomTitle</value>
+  </data>
+  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
+    <value>Ролята ви в стая "$RoomTitle" беше променена на "$RoomRole"</value>
   </data>
   <data name="pattern_ShareDocument" xml:space="preserve">
     <value>h1. Достъп до документа: "$DocumentTitle":"$DocumentURL"
@@ -89,139 +222,9 @@ $__DateTime "$__AuthorName":"$__AuthorUrl" ви даде достъп до "$Doc
 
 $Message</value>
   </data>
-  <data name="subject_DocuSignComplete" xml:space="preserve">
-    <value>Документи. Всички подписващи лица завършиха $DocumentTitle</value>
-  </data>
-  <data name="subject_DocuSignStatus" xml:space="preserve">
-    <value>Документи. Състоянието на регистрацията се промени</value>
-  </data>
-  <data name="subject_MailMergeEnd" xml:space="preserve">
-    <value>Документи. Изпращането е пълно.</value>
-  </data>
-  <data name="subject_ShareDocument" xml:space="preserve">
-    <value>Документи. Достъп до документа: $DocumentTitle</value>
-  </data>
-  <data name="subject_ShareFolder" xml:space="preserve">
-    <value>Документи. Достъпът до папката: $DocumentTitle</value>
-  </data>
-  <data name="pattern_EditorMentions" xml:space="preserve">
-    <value>h1. $__AuthorName Ви спомена в коментар на документа
-
-$__AuthorName Ви спомена в коментар към документа "$DocumentTitle":"$DocumentURL" в стаята "$RoomTitle":"$RoomURL":
-
-$Message</value>
-  </data>
-  <data name="pattern_RoomRemoved" xml:space="preserve">
-    <value>h1. $__AuthorName изтри стая
-
-$__AuthorName изтри стаята: $RoomTitle</value>
-  </data>
-  <data name="subject_DocuSignComplete_push" xml:space="preserve">
-    <value>Всички подписали попълниха $DocumentTitle</value>
-  </data>
-  <data name="subject_DocuSignStatus_push" xml:space="preserve">
-    <value>Статуса на подписването е променен</value>
-  </data>
-  <data name="subject_EditorMentions" xml:space="preserve">
-    <value>DocSpace известие. Споменато в документа</value>
-  </data>
-  <data name="subject_MailMergeEnd_push" xml:space="preserve">
-    <value>Изпращането по пощата приключи.</value>
-  </data>
-  <data name="subject_RoomRemoved" xml:space="preserve">
-    <value>DocSpace известие. Стаята е изтрита</value>
-  </data>
-  <data name="subject_ShareDocument_push" xml:space="preserve">
-    <value>Предоставен е достъп до документа: $DocumentTitle</value>
-  </data>
-  <data name="subject_ShareEncryptedDocument_push" xml:space="preserve">
-    <value>Предоставен е достъп до криптирания документ: $DocumentTitle</value>
-  </data>
-  <data name="subject_ShareFolder_push" xml:space="preserve">
-    <value>Предоставен е достъп до папката: $DocumentTitle</value>
-  </data>
-  <data name="subject_ShareFolder_tg" xml:space="preserve">
-    <value>Документи. Предоставен е достъп до папката: [$DocumentTitle]($DocumentURL)</value>
-  </data>
-  <data name="subject_DocuSignComplete_tg" xml:space="preserve">
-    <value>Документи. Всички подписали попълниха [$DocumentTitle]($DocumentURL)</value>
-  </data>
-  <data name="subject_ShareDocument_tg" xml:space="preserve">
-    <value>Документи. Предоставен е достъп до криптирания документ [$DocumentTitle]($DocumentURL)</value>
-  </data>
-  <data name="button_CheckReadyForms" xml:space="preserve">
-    <value>Проверете готовите форми</value>
-  </data>
-  <data name="pattern_FormReceived" xml:space="preserve">
-    <value>h1. Формулярът $Message е попълнен
-
-Нов формуляр "$DocumentTitle":"$DocumentURL" се попълва в стаята "$RoomTitle":"$RoomURL"
-
-Подател на формуляра: "$FromUserName":"$FromUserLink"
-
-$OrangeButton
-
-&amp;nbsp;</value>
-  </data>
-  <data name="pattern_FormSubmitted" xml:space="preserve">
-    <value>h1. Попълнихте формуляра $Message
-
-Попълнихте формуляра "$DocumentTitle":"$DocumentURL" в стаята "$RoomTitle":"$RoomURL"
-
-Управител: "$ToUserName":"$ToUserLink"
-
-$OrangeButton
-
-&amp;nbsp;</value>
-  </data>
-  <data name="subject_FormReceived" xml:space="preserve">
-    <value>DocSpace известие. Формулярът е попълнен</value>
-  </data>
-  <data name="subject_FormSubmitted" xml:space="preserve">
-    <value>DocSpace известие. Формулярът е попълнен</value>
-  </data>
-  <data name="pattern_FormSubmitted_push" xml:space="preserve">
-    <value>Формуляр "$DocumentTitle" беше попълнен в стая "$RoomTitle"</value>
-  </data>
-  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
-    <value>$FromUserName премести стая "$RoomTitle" в архива</value>
-  </data>
-  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
-    <value>Бяхте поканени в стая "$RoomTitle"</value>
-  </data>
-  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
-    <value>Ролята ви в стая "$RoomTitle" беше променена на "$RoomRole"</value>
-  </data>
-  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
-    <value>Нов документ "$DocumentTitle" беше създаден в стаята "$RoomTitle"</value>
-  </data>
-  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
-    <value>Нов файл "$DocumentTitle" беше качен в стая "$RoomTitle"</value>
-  </data>
-  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
-    <value>Нови файлове бяха качени в стая "$RoomTitle" ($Count)</value>
-  </data>
-  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
-    <value>Нова папка "$FolderTitle" беше създадена в стая "$RoomTitle"</value>
-  </data>
-  <data name="pattern_EditorMentions_push" xml:space="preserve">
-    <value>$ToUserName ви спомена в документ $DocumentTitle</value>
-  </data>
-  <data name="subject_FormStartedFilling" xml:space="preserve">
-    <value>DocSpace известие.</value>
-  </data>
-  <data name="subject_YourTurnFormFilling" xml:space="preserve">
-    <value>DocSpace известие.</value>
-  </data>
-  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
-    <value>DocSpace известие.</value>
-  </data>
-  <data name="subject_StoppedFormFilling" xml:space="preserve">
-    <value>DocSpace известие.</value>
-  </data>
-  <data name="pattern_FormStartedFilling" xml:space="preserve">
+  <data name="pattern_StoppedFormFilling" xml:space="preserve">
     <value>
-      Известие за дейност. "$FromUserName":"$FromUserLink" започна процеса по попълване на формуляр:  "$DocumentTitle":"$DocumentURL" в стаята: "$RoomTitle":"$RoomURL" — $__DateTime.
+      Известие за дейност. "$FromUserName":"$FromUserLink" спря попълването на формуляра: "$DocumentTitle":"$DocumentURL" в стаята: "$RoomTitle":"$RoomURL" — $__DateTime.
     </value>
   </data>
   <data name="pattern_YourTurnFormFilling" xml:space="preserve">
@@ -229,14 +232,70 @@ $OrangeButton
       Известие за дейност. Ваш ред е! Изисква се попълване на формуляр: "$DocumentTitle":"$DocumentURL" в стаята: "$RoomTitle":"$RoomURL" — $__DateTime.
     </value>
   </data>
-  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
-    <value>
-      Известие за дейност. Формулярът "$DocumentTitle":"$DocumentURL" беше изцяло попълнен в стаята: "$RoomTitle":"$RoomURL" — $__DateTime.
-    </value>
+  <data name="subject_DocuSignComplete" xml:space="preserve">
+    <value>Документи. Всички подписващи лица завършиха $DocumentTitle</value>
   </data>
-  <data name="pattern_StoppedFormFilling" xml:space="preserve">
-    <value>
-      Известие за дейност. "$FromUserName":"$FromUserLink" спря попълването на формуляра: "$DocumentTitle":"$DocumentURL" в стаята: "$RoomTitle":"$RoomURL" — $__DateTime.
-    </value>
+  <data name="subject_DocuSignComplete_push" xml:space="preserve">
+    <value>Всички подписали попълниха $DocumentTitle</value>
+  </data>
+  <data name="subject_DocuSignComplete_tg" xml:space="preserve">
+    <value>Документи. Всички подписали попълниха [$DocumentTitle]($DocumentURL)</value>
+  </data>
+  <data name="subject_DocuSignStatus" xml:space="preserve">
+    <value>Документи. Състоянието на регистрацията се промени</value>
+  </data>
+  <data name="subject_DocuSignStatus_push" xml:space="preserve">
+    <value>Статуса на подписването е променен</value>
+  </data>
+  <data name="subject_EditorMentions" xml:space="preserve">
+    <value>DocSpace известие. Споменато в документа</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>DocSpace известие. Формулярът е попълнен</value>
+  </data>
+  <data name="subject_FormStartedFilling" xml:space="preserve">
+    <value>DocSpace известие.</value>
+  </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>DocSpace известие. Формулярът е попълнен</value>
+  </data>
+  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
+    <value>DocSpace известие.</value>
+  </data>
+  <data name="subject_MailMergeEnd" xml:space="preserve">
+    <value>Документи. Изпращането е пълно.</value>
+  </data>
+  <data name="subject_MailMergeEnd_push" xml:space="preserve">
+    <value>Изпращането по пощата приключи.</value>
+  </data>
+  <data name="subject_RoomRemoved" xml:space="preserve">
+    <value>DocSpace известие. Стаята е изтрита</value>
+  </data>
+  <data name="subject_ShareDocument" xml:space="preserve">
+    <value>Документи. Достъп до документа: $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareDocument_push" xml:space="preserve">
+    <value>Предоставен е достъп до документа: $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareDocument_tg" xml:space="preserve">
+    <value>Документи. Предоставен е достъп до криптирания документ [$DocumentTitle]($DocumentURL)</value>
+  </data>
+  <data name="subject_ShareEncryptedDocument_push" xml:space="preserve">
+    <value>Предоставен е достъп до криптирания документ: $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareFolder" xml:space="preserve">
+    <value>Документи. Достъпът до папката: $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareFolder_push" xml:space="preserve">
+    <value>Предоставен е достъп до папката: $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareFolder_tg" xml:space="preserve">
+    <value>Документи. Предоставен е достъп до папката: [$DocumentTitle]($DocumentURL)</value>
+  </data>
+  <data name="subject_StoppedFormFilling" xml:space="preserve">
+    <value>DocSpace известие.</value>
+  </data>
+  <data name="subject_YourTurnFormFilling" xml:space="preserve">
+    <value>DocSpace известие.</value>
   </data>
 </root>

@@ -1,5 +1,64 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -53,16 +112,25 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ActionCol" xml:space="preserve">
     <value>Akcja</value>
   </data>
+  <data name="ActionIdCol" xml:space="preserve">
+    <value>ID działania</value>
+  </data>
   <data name="ActionTypeCol" xml:space="preserve">
     <value>Typ akcji</value>
+  </data>
+  <data name="AddedRoomTags" xml:space="preserve">
+    <value>Dodane znaczniki: [{1}]</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>Dodano serwer MCP {0} do asystenta</value>
   </data>
   <data name="AdministratorAdded" xml:space="preserve">
     <value>Administrator Dodany: {0}</value>
@@ -76,8 +144,41 @@
   <data name="AdministratorOpenedFullAccess" xml:space="preserve">
     <value>Administratorzy [{0}]. Otwarty pełny dostęp</value>
   </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>Utworzono asystenta</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>Usunięto asystenta</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>Zmieniono nazwę asystenta: {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>Asystenci</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>Utworzono dostawcę AI: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>Usunięto dostawcę AI: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>Zaktualizowano dostawcę AI: {0}</value>
+  </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Utworzono klucz API użytkownika: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Usunięto klucz API użytkownika: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Zaktualizowano klucz API użytkownika: {0}</value>
+  </data>
   <data name="AttachActionType" xml:space="preserve">
     <value>Dołączyć</value>
+  </data>
+  <data name="AuditSettingsUpdated" xml:space="preserve">
+    <value>Zaktualizowano ustawienia okresu przechowywania audytu</value>
   </data>
   <data name="AuditTrailReportDownloaded" xml:space="preserve">
     <value>Raport ze ścieżki audytu został pobrany</value>
@@ -85,11 +186,35 @@
   <data name="AuditTrailReportName" xml:space="preserve">
     <value>Raport ścieżki audytu ({0} - {1})</value>
   </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Link autoryzacyjny został aktywowany</value>
+  </data>
   <data name="AuthorizationKeysSetting" xml:space="preserve">
     <value>Zaktualizowano klucz autoryzacji innej firmy</value>
   </data>
+  <data name="BackupCompleted" xml:space="preserve">
+    <value>Ukończono tworzenie kopii zapasowej</value>
+  </data>
+  <data name="BackupFailed" xml:space="preserve">
+    <value>Nie udało się utworzyć kopii zapasowej</value>
+  </data>
+  <data name="BackupStarted" xml:space="preserve">
+    <value>Uruchom kopię zapasową</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Zmieniono ustawienia widoczności banerów promocyjnych</value>
+  </data>
   <data name="BrowserCol" xml:space="preserve">
     <value>Przeglądarka</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Zmieniono aktywację klienta {0}</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Zmieniono widoczność klienta {0}</value>
+  </data>
+  <data name="CityCol" xml:space="preserve">
+    <value>Miejscowość</value>
   </data>
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Zmieniono temat kolorów</value>
@@ -103,8 +228,62 @@
   <data name="CopyActionType" xml:space="preserve">
     <value>Kopiuj</value>
   </data>
+  <data name="CountryCol" xml:space="preserve">
+    <value>Kraj</value>
+  </data>
   <data name="CreateActionType" xml:space="preserve">
     <value>Stwórz</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Utworzono klienta</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Operacja klienta została wykonana</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Raport operacji klienta został pobrany</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Subskrypcja klienta została zaktualizowana: {0}</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Zaktualizowano ustawienia usług obsługujących portfel klienta</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Portfel klienta został zasilony: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Ustawienia zasilania portfela klienta zostały zaktualizowane</value>
+  </data>
+  <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
+    <value>Zaktualizowano niestandardowe ustawienia nawigacji</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Asystenci AI [{0}]. Ustaw niestandardowy limit pamięci dla asystentów AI : {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>Asystenci AI [{0}]. Ustaw domyślny limit pamięci dla asystentów AI: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Asystenci AI [{0}]. Wyłączono limit pamięci dla asystentów AI</value>
+  </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Pokoje [{0}]. Ustaw niestandardowy limit pamięci dla pokoi: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Pokoje [{0}]. Ustaw domyślny limit pamięci dla pokoi: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Pokoje [{0}]. Wyłączono niestandardowy limit pamięci dla pokoi</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Użytkownicy [{0}]. Ustaw niestandardowy limit pamięci dla użytkowników: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Użytkownicy [{0}]. Ustaw domyślny limit pamięci dla użytkowników: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Użytkownicy [{0}]. Wyłączono limit pamięci dla użytkowników</value>
   </data>
   <data name="DateCol" xml:space="preserve">
     <value>Data</value>
@@ -115,8 +294,20 @@
   <data name="DeleteActionType" xml:space="preserve">
     <value>Usunąć</value>
   </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Usunięto klienta {0}</value>
+  </data>
+  <data name="DeletedRoomTags" xml:space="preserve">
+    <value>Usunięte znaczniki: [{1}]</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>Usunięto serwer MCP {0} z asystenta</value>
+  </data>
   <data name="DetachActionType" xml:space="preserve">
     <value>Odłączyć</value>
+  </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Ustawienia dostępu do narzędzi dla programistów zostały zmienione</value>
   </data>
   <data name="DnsSettingsUpdated" xml:space="preserve">
     <value>Zaktualizowano ustawienia DNS</value>
@@ -124,11 +315,17 @@
   <data name="DocumentServiceLocationSetting" xml:space="preserve">
     <value>Usługa Document Service Location Aktualizacja</value>
   </data>
+  <data name="DocumentsForcesave" xml:space="preserve">
+    <value>Zaktualizowano ustawienia wymuszania zapisywania</value>
+  </data>
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Nadpisywane ustawienia zostały zaktualizowane</value>
   </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Ustawienia</value>
+  </data>
+  <data name="DocumentsStoreForcesave" xml:space="preserve">
+    <value>Zaktualizowano ustawienia przechowywania wymuszonych zapisów</value>
   </data>
   <data name="DocumentsThirdPartySettingsUpdated" xml:space="preserve">
     <value>Zaktualizowano ustawienia strony trzeciej</value>
@@ -160,6 +357,12 @@
   <data name="FileCreatedVersion" xml:space="preserve">
     <value>Pliki [{0}]. Poprawka {1}. Powstała wersja</value>
   </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>Plik: {0}. Filtr niestandardowy wyłączony</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>Plik: {0}. Filtr niestandardowy włączony</value>
+  </data>
   <data name="FileDeleted" xml:space="preserve">
     <value>Usunięty plik: {0}</value>
   </data>
@@ -172,11 +375,26 @@
   <data name="FileDownloadedAs" xml:space="preserve">
     <value>Pliki [{0}]. Pobrany jak: {1}</value>
   </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Pliki [{0}]. Utworzony link zewnętrzny: {1}. Rola: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Pliki [{0}]. Usunięty link zewnętrzny: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Pliki [{0}]. Zaktualizowany link zewnętrzny: {1}. Rola: {2}</value>
+  </data>
   <data name="FileImported" xml:space="preserve">
     <value>Foldery [{0}]. Plik importowany: {1}. Dostawca: {2}</value>
   </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Plik: {0}. Indeks został zmieniony z {1} na {2}</value>
+  </data>
   <data name="FileLocked" xml:space="preserve">
     <value>Plik zablokowany: {0}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Plik dodany do ulubionych: {0}</value>
   </data>
   <data name="FileMoved" xml:space="preserve">
     <value>Pliki [{0}]. Przeniesiony z folderu "{1}" do folderu: "{2}"</value>
@@ -186,6 +404,15 @@
   </data>
   <data name="FileMovedWithOverwriting" xml:space="preserve">
     <value>Pliki [{0}]. Przeniesiony z zastąpieniem z folderu "{1}" do folderu: "{2}"</value>
+  </data>
+  <data name="FileOpenedForChange" xml:space="preserve">
+    <value>Plik otwarty do zmiany: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Plik usunięty z ulubionych: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Plik usunięty z „Udostępnionych mi”: {0}</value>
   </data>
   <data name="FileRenamed" xml:space="preserve">
     <value>Zmieniona nazwa pliku: {0}</value>
@@ -198,6 +425,9 @@
   </data>
   <data name="FileSendAccessLink" xml:space="preserve">
     <value>Wysłano link udostępniony do pliku [{0}]. Odbiorcy: [{1}]</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>bajty,kB,MB,GB</value>
   </data>
   <data name="FilesModule" xml:space="preserve">
     <value>Pliki</value>
@@ -214,11 +444,20 @@
   <data name="FileUpdatedAccess" xml:space="preserve">
     <value>Pliki [{0}]. Dostęp został zaktualizowany</value>
   </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Pliki [{0}]. Zaktualizowano dostęp dla {1}. Rola: {2}</value>
+  </data>
   <data name="FileUpdatedRevisionComment" xml:space="preserve">
     <value>Pliki [{0}]. Poprawka {1}. Zaktualizowany komentarz</value>
   </data>
   <data name="FileUploaded" xml:space="preserve">
     <value>Przesłany plik: {0}</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Plik został przesłany z nadpisaniem: {0}</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>Pliki [{0}]. Usunięta wersja: {1}</value>
   </data>
   <data name="FolderCopied" xml:space="preserve">
     <value>Foldery [{0}]. Skopiowano do folderu: {1}</value>
@@ -232,6 +471,24 @@
   <data name="FolderDeleted" xml:space="preserve">
     <value>Usunięty folder: {0}</value>
   </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Pobrany katalog: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Katalogi [{0}]. Utworzony link zewnętrzny: {1}. Rola: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Katalogi [{0}]. Usunięty link zewnętrzny: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Katalogi [{0}]. Zaktualizowany link zewnętrzny: {1}. Rola: {2}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Katalog: {0}. Indeks został zmieniony z {1} na {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Katalog: {0}. Indeksy zostały uporządkowane</value>
+  </data>
   <data name="FolderMoved" xml:space="preserve">
     <value>Foldery [{0}]. Przeniesiono do folderu: {1}</value>
   </data>
@@ -240,6 +497,9 @@
   </data>
   <data name="FolderMovedWithOverwriting" xml:space="preserve">
     <value>Foldery [{0}]. Przeniesiono z nadpisaniem do folderu: {1}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Katalog usunięty z „Udostępnionych mi”: {0}</value>
   </data>
   <data name="FolderRenamed" xml:space="preserve">
     <value>Folder Zmieniony: {0}</value>
@@ -250,11 +510,38 @@
   <data name="FolderUpdatedAccess" xml:space="preserve">
     <value>Foldery [{0}]. Dostęp został zaktualizowany</value>
   </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Katalogi [{0}]. Zaktualizowano dostęp dla {1}. Rola: {2}</value>
+  </data>
   <data name="FollowActionType" xml:space="preserve">
     <value>Śledzić</value>
   </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Użytkownicy [{0}]. Całkowicie wypełnili formularz: {1}</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>Plik otworzony do wypełnienia: {0}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Użytkownicy [{0}]. Częściowo wypełnili formularz: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Użytkownicy [{0}]. Rozpoczęli wypełnianie: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Użytkownicy [{0}]. Formularz został zatrzymany: {1}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Użytkownicy [{0}]. Przesłany formularz: {1}</value>
+  </data>
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Sfinksy zostały zaktualizowane</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Wygenerowano kod autoryzacji dla klienta {0}</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Wygenerowano osobisty token dostępu dla klienta {0}</value>
   </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Ustawienia strony powitalnej zostały zaktualizowane</value>
@@ -292,14 +579,29 @@
   <data name="LanguageSettingsUpdated" xml:space="preserve">
     <value>Ustawienia językowe zostały zaktualizowane</value>
   </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>Uwierzytelnianie LDAP wyłączone</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>Włączono uwierzytelnianie LDAP</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>Synchronizacja LDAP zakończona</value>
+  </data>
   <data name="LicenseKeyUploaded" xml:space="preserve">
     <value>Klucz licencyjny został przesłany</value>
   </data>
   <data name="LinkActionType" xml:space="preserve">
     <value>plik</value>
   </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Lokalizacja</value>
+  </data>
   <data name="LoginFail" xml:space="preserve">
     <value>Błąd logowania</value>
+  </data>
+  <data name="LoginFailBruteForce" xml:space="preserve">
+    <value>Logowanie nie powiodło się. Zbyt wiele prób</value>
   </data>
   <data name="LoginFailDisabledProfile" xml:space="preserve">
     <value>Błąd logowania. Profil wyłączony</value>
@@ -309,6 +611,9 @@
   </data>
   <data name="LoginFailIpSecurity" xml:space="preserve">
     <value>Zabezpieczenie IP: logowanie nie powiodło się</value>
+  </data>
+  <data name="LoginFailRecaptcha" xml:space="preserve">
+    <value>Logowanie nie powiodło się. Nieprawidłowy kod reCAPTCHA</value>
   </data>
   <data name="LoginFailSocialAccountNotFound" xml:space="preserve">
     <value>Błąd logowania. Powiązane konto społecznościowe nie zostało odnalezione</value>
@@ -322,11 +627,17 @@
   <data name="LoginFailViaApiSocialAccount" xml:space="preserve">
     <value>Logowanie za pośrednictwem API i mediów społecznościowych nie powiodło się</value>
   </data>
+  <data name="LoginFailViaApiTfa" xml:space="preserve">
+    <value>Logowanie za pomocą API i aplikacji uwierzytelniającej nie powiodło się</value>
+  </data>
   <data name="LoginFailViaSms" xml:space="preserve">
     <value>Logowanie się przez SMS nie powiodło się</value>
   </data>
   <data name="LoginFailViaSSO" xml:space="preserve">
     <value>Logowanie się przez SSO nie powiodło się</value>
+  </data>
+  <data name="LoginFailViaTfaApp" xml:space="preserve">
+    <value>Logowanie za pomocą aplikacji uwierzytelniającej nie powiodło się</value>
   </data>
   <data name="LoginHistoryReportDownloaded" xml:space="preserve">
     <value>Raport z historii logowania został pobrany</value>
@@ -337,14 +648,29 @@
   <data name="LoginSuccess" xml:space="preserve">
     <value>Sukces logowania</value>
   </data>
-  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Zaloguj się za pomocą konta społecznościowego: {0}</value>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Zaloguj się za pomocą konta społecznościowego</value>
+  </data>
+  <data name="LoginSuccessSocialApp" xml:space="preserve">
+    <value>Logowanie za pomocą aplikacji społecznościowej powiodło się</value>
   </data>
   <data name="LoginSuccessViaApi" xml:space="preserve">
     <value>Pomyślne logowanie przez interfejs API</value>
   </data>
   <data name="LoginSuccessViaApiSms" xml:space="preserve">
     <value>Pomyślne logowanie za pośrednictwem interfejsu API i SMS</value>
+  </data>
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
+    <value>Zaloguj się za pomocą konta społecznościowego: {0}</value>
+  </data>
+  <data name="LoginSuccessViaApiTfa" xml:space="preserve">
+    <value>Logowanie za pomocą API i aplikacji uwierzytelniającej powiodło się</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Pomyślne logowanie za pośrednictwem OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Pomyślne logowanie za pośrednictwem loginu i hasła</value>
   </data>
   <data name="LoginSuccessViaSms" xml:space="preserve">
     <value>Zaloguj się za pośrednictwem wiadomości SMS</value>
@@ -354,6 +680,9 @@
   </data>
   <data name="LoginSuccessViaSSO" xml:space="preserve">
     <value>Pomyślne logowanie przez SSO</value>
+  </data>
+  <data name="LoginSuccesViaTfaApp" xml:space="preserve">
+    <value>Logowanie za pomocą aplikacji uwierzytelniającej powiodło się</value>
   </data>
   <data name="Logout" xml:space="preserve">
     <value>Wyloguj</value>
@@ -397,6 +726,15 @@
   <data name="PortalDeleted" xml:space="preserve">
     <value>Usunięty portal</value>
   </data>
+  <data name="PortalRenamed" xml:space="preserve">
+    <value>Zmieniono nazwę portalu</value>
+  </data>
+  <data name="PrivacyRoomDisable" xml:space="preserve">
+    <value>Prywatny pokój jest wyłączony</value>
+  </data>
+  <data name="PrivacyRoomEnable" xml:space="preserve">
+    <value>Prywatny pokój jest włączony</value>
+  </data>
   <data name="ProductAccessOpened" xml:space="preserve">
     <value>Produkty [{0}]. Dostęp otwarty</value>
   </data>
@@ -421,14 +759,173 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Lista produktów została zaktualizowana</value>
   </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Ustaw domyślny limit pamięci dla asystentów AI: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Wyłączono limit pamięci dla asystentów AI</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Ustaw domyślny limit pamięci: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Wyłączono domyślny limit pamięci</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Ustaw domyślny limit pamięci dla pokoi: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Wyłączono domyślny limit pamięci dla pokoi</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Ustaw domyślny limit pamięci dla użytkowników: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Wyłączono domyślny limit pamięci dla użytkowników</value>
+  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Ponowne przypisanie</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Wygenerowano ponownie sekret klienta {0}</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>Ustawienia wektoryzacji zostały zresetowane</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>Ustawienia wyszukiwania w internecie zostały zresetowane</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Cofnięto dostęp klienta {0}</value>
+  </data>
+  <data name="RoomArchived" xml:space="preserve">
+    <value>Pokój został zarchiwizowany</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Pokój skopiowany: {0}</value>
+  </data>
+  <data name="RoomCreated" xml:space="preserve">
+    <value>Pokój został utworzony</value>
+  </data>
+  <data name="RoomCreateUser" xml:space="preserve">
+    <value>Dodano użytkownika: {0}. Rola: {1}</value>
+  </data>
+  <data name="RoomDeleted" xml:space="preserve">
+    <value>Pokój został usunięty</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Pokój: {0}. Odmowa pobierania jest wyłączona</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Pokój: {0}. Odmowa pobierania jest włączona</value>
+  </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>Utworzony link zewnętrzny: {0}. Rola: {1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>Usunięty link zewnętrzny: {0}</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Unieważniony link zewnętrzny: {1}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>Zaktualizowany link zewnętrzny: {0}. Rola: {1}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Dodano grupę: {0}. Rola: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Usunięto grupę: {0}</value>
+  </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Eksport indeksu pokoju zapisanego w Dokumentach</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Indeksowanie pokoju jest wyłączone</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Indeksowanie pokoju jest włączone</value>
+  </data>
+  <data name="RoomInvitationLinkCreated" xml:space="preserve">
+    <value>Link został utworzony. Rola: {1}</value>
+  </data>
+  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
+    <value>Link został usunięty</value>
+  </data>
+  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
+    <value>Link został zaktualizowany. Rola: {1}</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Ponownie wysłane zaproszenie: {0}</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>Okres ważności jest wyłączony</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Okres ważności jest włączony. Wartość: {0}. Okres: {1}. Usuń trwale: {2}</value>
+  </data>
+  <data name="RoomLogoCreated" xml:space="preserve">
+    <value>Logo zostało utworzone</value>
+  </data>
+  <data name="RoomLogoDeleted" xml:space="preserve">
+    <value>Logo zostało usunięte</value>
+  </data>
+  <data name="RoomRemoveUser" xml:space="preserve">
+    <value>Usunięty użytkownik: {0}</value>
+  </data>
+  <data name="RoomRenamed" xml:space="preserve">
+    <value>Nazwa pokoju została zmieniona: {0}</value>
+  </data>
+  <data name="RoomsModule" xml:space="preserve">
+    <value>Pokoje</value>
+  </data>
+  <data name="RoomUnarchived" xml:space="preserve">
+    <value>Archiwizacja pokoju została cofnięta</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} został(a) wyznaczony(a) na: {1}</value>
+  </data>
+  <data name="RoomUpdateAccessForUser" xml:space="preserve">
+    <value>{0} został(a) wyznaczony(a) na: {1}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Pokój: {0}. Znak wodny jest wyłączony</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Pokój: {0}. Znak wodny włączony</value>
+  </data>
+  <data name="ScheduledBackupCompleted" xml:space="preserve">
+    <value>Ukończono tworzenie zaplanowanej kopii zapasowej</value>
+  </data>
+  <data name="ScheduledBackupFailed" xml:space="preserve">
+    <value>Nie udało się utworzyć zaplanowanej kopii zapasowej</value>
+  </data>
+  <data name="ScheduledBackupStarted" xml:space="preserve">
+    <value>Rozpoczęto tworzenie zaplanowanej kopii zapasowej</value>
   </data>
   <data name="SendActionType" xml:space="preserve">
     <value>Wysłać</value>
   </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>Użytkownik {0} zaprosił użytkownika {1}, aby dołączył do tego DocSpace</value>
+  </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Zaproś instrukcje wysłane: {0}</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>Utworzony serwer MCP: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>Usunięty serwer MCP: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>Wyłączony serwer MCP: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>Włączony serwer MCP: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>Zaktualizowany serwer MCP: {0}</value>
   </data>
   <data name="SessionCompleted" xml:space="preserve">
     <value>Sesja zakończona</value>
@@ -439,20 +936,38 @@
   <data name="SettingsModule" xml:space="preserve">
     <value>Ustawienia</value>
   </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>Ustawienia wektoryzacji są skonfigurowane. Dostawca: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>Ustawienia wyszukiwania w internecie są skonfigurowane. Usługa: {0}</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>Wyłączona możliwość SSO</value>
   </data>
   <data name="SSOEnabled" xml:space="preserve">
     <value>Włączona możliwość SSO</value>
   </data>
-  <data name="BackupStarted" xml:space="preserve">
-    <value>Uruchom kopię zapasową</value>
+  <data name="StartStorageDecryption" xml:space="preserve">
+    <value>Rozpocznij odszyfrowywanie pamięci</value>
+  </data>
+  <data name="StartStorageEncryption" xml:space="preserve">
+    <value>Rozpocznij szyfrowanie pamięci</value>
   </data>
   <data name="StartTransferSetting" xml:space="preserve">
     <value>Uruchom migrację regionów portalu</value>
   </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>Konto systemowe</value>
+  </data>
+  <data name="TagCreated" xml:space="preserve">
+    <value>Utworzony znacznik: {0}</value>
+  </data>
+  <data name="TagsDeleted" xml:space="preserve">
+    <value>Usunięte znaczniki: {0}</value>
+  </data>
+  <data name="TargetIdCol" xml:space="preserve">
+    <value>ID celu</value>
   </data>
   <data name="TeamTemplateChanged" xml:space="preserve">
     <value>Zmieniono szablon zespołu</value>
@@ -472,8 +987,20 @@
   <data name="TimeZoneSettingsUpdated" xml:space="preserve">
     <value>Zaktualizowano ustawienia strefy czasowej</value>
   </data>
+  <data name="TrashEmptied" xml:space="preserve">
+    <value>Opróżniono kosz</value>
+  </data>
   <data name="TrustedMailDomainSettingsUpdated" xml:space="preserve">
     <value>Ustawienia domen zaufanych poczty zostały zaktualizowane</value>
+  </data>
+  <data name="TwoFactorAuthenticationSettingsDisabled" xml:space="preserve">
+    <value>Zaktualizowano ustawienia uwierzytelniania dwuetapowego: wyłączono uwierzytelnianie dwuetapowe</value>
+  </data>
+  <data name="TwoFactorAuthenticationSettingsEnabledBySms" xml:space="preserve">
+    <value>Zaktualizowano ustawienia uwierzytelniania dwuetapowego: włączono potwierdzenie SMS</value>
+  </data>
+  <data name="TwoFactorAuthenticationSettingsEnabledByTfaApp" xml:space="preserve">
+    <value>Zaktualizowano ustawienia uwierzytelniania dwuetapowego: włączono aplikację uwierzytelniającą</value>
   </data>
   <data name="TwoFactorAuthenticationSettingsUpdated" xml:space="preserve">
     <value>Uaktualnione zostały ustawienia uwierzytelniania dwuskładnikowego</value>
@@ -492,6 +1019,9 @@
   </data>
   <data name="UpdateActionType" xml:space="preserve">
     <value>Aktualizacja</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Zaktualizowano klienta {0}</value>
   </data>
   <data name="UploadActionType" xml:space="preserve">
     <value>Przekazać plik</value>
@@ -513,6 +1043,9 @@
   </data>
   <data name="UserDataReassigns" xml:space="preserve">
     <value>Ponowne przypisanie danych: od użytkownika {0} do użytkownika {1}</value>
+  </data>
+  <data name="UserDataRemoving" xml:space="preserve">
+    <value>Dane użytkownika dla {0} zostały usunięte</value>
   </data>
   <data name="UserDeleted" xml:space="preserve">
     <value>Usunięty użytkownik: {0}</value>
@@ -553,6 +1086,12 @@
   <data name="UsersUpdatedType" xml:space="preserve">
     <value>Użytkownicy [{0}]. Zaktualizowany typ</value>
   </data>
+  <data name="UserTfaDisconnected" xml:space="preserve">
+    <value>Aplikacja uwierzytelniająca została odłączona: {0}</value>
+  </data>
+  <data name="UserTfaGenerateCodes" xml:space="preserve">
+    <value>Tworzone są nowe kody zapasowe</value>
+  </data>
   <data name="UserUnlinkedSocialAccount" xml:space="preserve">
     <value>Konto społecznościowe zostało odłączone. Dostawca: {0}</value>
   </data>
@@ -561,6 +1100,9 @@
   </data>
   <data name="UserUpdatedAvatarThumbnails" xml:space="preserve">
     <value>Użytkownicy [{0}]. Miniatury Avatar zostały zaktualizowane</value>
+  </data>
+  <data name="UserUpdatedEmail" xml:space="preserve">
+    <value>Zaktualizowano adres e-mail</value>
   </data>
   <data name="UserUpdatedLanguage" xml:space="preserve">
     <value>Język został zaktualizowany</value>
@@ -571,318 +1113,6 @@
   <data name="UserUpdatedPassword" xml:space="preserve">
     <value>Hasło zaktualizowane</value>
   </data>
-  <data name="RoomCreated" xml:space="preserve">
-    <value>Pokój został utworzony</value>
-  </data>
-  <data name="RoomsModule" xml:space="preserve">
-    <value>Pokoje</value>
-  </data>
-  <data name="TrashEmptied" xml:space="preserve">
-    <value>Opróżniono kosz</value>
-  </data>
-  <data name="AddedRoomTags" xml:space="preserve">
-    <value>Dodane znaczniki: [{1}]</value>
-  </data>
-  <data name="DeletedRoomTags" xml:space="preserve">
-    <value>Usunięte znaczniki: [{1}]</value>
-  </data>
-  <data name="RoomArchived" xml:space="preserve">
-    <value>Pokój został zarchiwizowany</value>
-  </data>
-  <data name="RoomCreateUser" xml:space="preserve">
-    <value>Dodano użytkownika: {0}. Rola: {1}</value>
-  </data>
-  <data name="RoomDeleted" xml:space="preserve">
-    <value>Pokój został usunięty</value>
-  </data>
-  <data name="RoomInvitationLinkCreated" xml:space="preserve">
-    <value>Link został utworzony. Rola: {1}</value>
-  </data>
-  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
-    <value>Link został usunięty</value>
-  </data>
-  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
-    <value>Link został zaktualizowany. Rola: {1}</value>
-  </data>
-  <data name="RoomLogoCreated" xml:space="preserve">
-    <value>Logo zostało utworzone</value>
-  </data>
-  <data name="RoomLogoDeleted" xml:space="preserve">
-    <value>Logo zostało usunięte</value>
-  </data>
-  <data name="RoomRemoveUser" xml:space="preserve">
-    <value>Usunięty użytkownik: {0}</value>
-  </data>
-  <data name="RoomRenamed" xml:space="preserve">
-    <value>Nazwa pokoju została zmieniona: {0}</value>
-  </data>
-  <data name="RoomUnarchived" xml:space="preserve">
-    <value>Archiwizacja pokoju została cofnięta</value>
-  </data>
-  <data name="RoomUpdateAccessForUser" xml:space="preserve">
-    <value>{0} został(a) wyznaczony(a) na: {1}</value>
-  </data>
-  <data name="TagCreated" xml:space="preserve">
-    <value>Utworzony znacznik: {0}</value>
-  </data>
-  <data name="TagsDeleted" xml:space="preserve">
-    <value>Usunięte znaczniki: {0}</value>
-  </data>
-  <data name="ActionIdCol" xml:space="preserve">
-    <value>ID działania</value>
-  </data>
-  <data name="AuditSettingsUpdated" xml:space="preserve">
-    <value>Zaktualizowano ustawienia okresu przechowywania audytu</value>
-  </data>
-  <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
-    <value>Zaktualizowano niestandardowe ustawienia nawigacji</value>
-  </data>
-  <data name="DocumentsForcesave" xml:space="preserve">
-    <value>Zaktualizowano ustawienia wymuszania zapisywania</value>
-  </data>
-  <data name="DocumentsStoreForcesave" xml:space="preserve">
-    <value>Zaktualizowano ustawienia przechowywania wymuszonych zapisów</value>
-  </data>
-  <data name="LoginFailBruteForce" xml:space="preserve">
-    <value>Logowanie nie powiodło się. Zbyt wiele prób</value>
-  </data>
-  <data name="LoginFailRecaptcha" xml:space="preserve">
-    <value>Logowanie nie powiodło się. Nieprawidłowy kod reCAPTCHA</value>
-  </data>
-  <data name="LoginFailViaApiTfa" xml:space="preserve">
-    <value>Logowanie za pomocą API i aplikacji uwierzytelniającej nie powiodło się</value>
-  </data>
-  <data name="LoginFailViaTfaApp" xml:space="preserve">
-    <value>Logowanie za pomocą aplikacji uwierzytelniającej nie powiodło się</value>
-  </data>
-  <data name="LoginSuccessSocialApp" xml:space="preserve">
-    <value>Logowanie za pomocą aplikacji społecznościowej powiodło się</value>
-  </data>
-  <data name="LoginSuccessViaApiTfa" xml:space="preserve">
-    <value>Logowanie za pomocą API i aplikacji uwierzytelniającej powiodło się</value>
-  </data>
-  <data name="LoginSuccesViaTfaApp" xml:space="preserve">
-    <value>Logowanie za pomocą aplikacji uwierzytelniającej powiodło się</value>
-  </data>
-  <data name="PrivacyRoomDisable" xml:space="preserve">
-    <value>Prywatny pokój jest wyłączony</value>
-  </data>
-  <data name="PrivacyRoomEnable" xml:space="preserve">
-    <value>Prywatny pokój jest włączony</value>
-  </data>
-  <data name="StartStorageDecryption" xml:space="preserve">
-    <value>Rozpocznij odszyfrowywanie pamięci</value>
-  </data>
-  <data name="StartStorageEncryption" xml:space="preserve">
-    <value>Rozpocznij szyfrowanie pamięci</value>
-  </data>
-  <data name="TargetIdCol" xml:space="preserve">
-    <value>ID celu</value>
-  </data>
-  <data name="TwoFactorAuthenticationSettingsDisabled" xml:space="preserve">
-    <value>Zaktualizowano ustawienia uwierzytelniania dwuetapowego: wyłączono uwierzytelnianie dwuetapowe</value>
-  </data>
-  <data name="TwoFactorAuthenticationSettingsEnabledBySms" xml:space="preserve">
-    <value>Zaktualizowano ustawienia uwierzytelniania dwuetapowego: włączono potwierdzenie SMS</value>
-  </data>
-  <data name="TwoFactorAuthenticationSettingsEnabledByTfaApp" xml:space="preserve">
-    <value>Zaktualizowano ustawienia uwierzytelniania dwuetapowego: włączono aplikację uwierzytelniającą</value>
-  </data>
-  <data name="UserDataRemoving" xml:space="preserve">
-    <value>Dane użytkownika dla {0} zostały usunięte</value>
-  </data>
-  <data name="UserTfaDisconnected" xml:space="preserve">
-    <value>Aplikacja uwierzytelniająca została odłączona: {0}</value>
-  </data>
-  <data name="UserTfaGenerateCodes" xml:space="preserve">
-    <value>Tworzone są nowe kody zapasowe</value>
-  </data>
-  <data name="UserUpdatedEmail" xml:space="preserve">
-    <value>Zaktualizowano adres e-mail</value>
-  </data>
-  <data name="CityCol" xml:space="preserve">
-    <value>Miejscowość</value>
-  </data>
-  <data name="CountryCol" xml:space="preserve">
-    <value>Kraj</value>
-  </data>
-  <data name="RoomExternalLinkCreated" xml:space="preserve">
-    <value>Utworzony link zewnętrzny: {0}. Rola: {1}</value>
-  </data>
-  <data name="RoomExternalLinkDeleted" xml:space="preserve">
-    <value>Usunięty link zewnętrzny: {0}</value>
-  </data>
-  <data name="RoomExternalLinkUpdated" xml:space="preserve">
-    <value>Zaktualizowany link zewnętrzny: {0}. Rola: {1}</value>
-  </data>
-  <data name="FileOpenedForChange" xml:space="preserve">
-    <value>Plik otwarty do zmiany: {0}</value>
-  </data>
-  <data name="PortalRenamed" xml:space="preserve">
-    <value>Zmieniono nazwę portalu</value>
-  </data>
-  <data name="FileSizePostfix" xml:space="preserve">
-    <value>bajty,kB,MB,GB</value>
-  </data>
-  <data name="FileUploadedWithOverwriting" xml:space="preserve">
-    <value>Plik został przesłany z nadpisaniem: {0}</value>
-  </data>
-  <data name="QuotaPerPortalChanged" xml:space="preserve">
-    <value>Ustaw domyślny limit pamięci: {0}</value>
-  </data>
-  <data name="QuotaPerPortalDisabled" xml:space="preserve">
-    <value>Wyłączono domyślny limit pamięci</value>
-  </data>
-  <data name="QuotaPerRoomChanged" xml:space="preserve">
-    <value>Ustaw domyślny limit pamięci dla pokoi: {0}</value>
-  </data>
-  <data name="QuotaPerRoomDisabled" xml:space="preserve">
-    <value>Wyłączono domyślny limit pamięci dla pokoi</value>
-  </data>
-  <data name="QuotaPerUserChanged" xml:space="preserve">
-    <value>Ustaw domyślny limit pamięci dla użytkowników: {0}</value>
-  </data>
-  <data name="QuotaPerUserDisabled" xml:space="preserve">
-    <value>Wyłączono domyślny limit pamięci dla użytkowników</value>
-  </data>
-  <data name="RoomCopied" xml:space="preserve">
-    <value>Pokój skopiowany: {0}</value>
-  </data>
-  <data name="RoomGroupAdded" xml:space="preserve">
-    <value>Dodano grupę: {0}. Rola: {1}</value>
-  </data>
-  <data name="RoomGroupRemove" xml:space="preserve">
-    <value>Usunięto grupę: {0}</value>
-  </data>
-  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
-    <value>{0} został(a) wyznaczony(a) na: {1}</value>
-  </data>
-  <data name="SendJoinInvite" xml:space="preserve">
-    <value>Użytkownik {0} zaprosił użytkownika {1}, aby dołączył do tego DocSpace</value>
-  </data>
-  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
-    <value>Pokoje [{0}]. Ustaw niestandardowy limit pamięci dla pokoi: {1}</value>
-  </data>
-  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
-    <value>Pokoje [{0}]. Ustaw domyślny limit pamięci dla pokoi: {1}</value>
-  </data>
-  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
-    <value>Pokoje [{0}]. Wyłączono niestandardowy limit pamięci dla pokoi</value>
-  </data>
-  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
-    <value>Użytkownicy [{0}]. Ustaw niestandardowy limit pamięci dla użytkowników: {1}</value>
-  </data>
-  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
-    <value>Użytkownicy [{0}]. Ustaw domyślny limit pamięci dla użytkowników: {1}</value>
-  </data>
-  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
-    <value>Użytkownicy [{0}]. Wyłączono limit pamięci dla użytkowników</value>
-  </data>
-  <data name="FormOpenedForFilling" xml:space="preserve">
-    <value>Plik otworzony do wypełnienia: {0}</value>
-  </data>
-  <data name="FormSubmit" xml:space="preserve">
-    <value>Użytkownicy [{0}]. Przesłany formularz: {1}</value>
-  </data>
-  <data name="ChangeClientActivation" xml:space="preserve">
-    <value>Zmieniono aktywację klienta {0}</value>
-  </data>
-  <data name="ChangeClientVisibility" xml:space="preserve">
-    <value>Zmieniono widoczność klienta {0}</value>
-  </data>
-  <data name="CreateClient" xml:space="preserve">
-    <value>Utworzono klienta</value>
-  </data>
-  <data name="DeleteClient" xml:space="preserve">
-    <value>Usunięto klienta {0}</value>
-  </data>
-  <data name="FileIndexChanged" xml:space="preserve">
-    <value>Plik: {0}. Indeks został zmieniony z {1} na {2}</value>
-  </data>
-  <data name="FolderIndexChanged" xml:space="preserve">
-    <value>Katalog: {0}. Indeks został zmieniony z {1} na {2}</value>
-  </data>
-  <data name="FolderIndexReordered" xml:space="preserve">
-    <value>Katalog: {0}. Indeksy zostały uporządkowane</value>
-  </data>
-  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
-    <value>Wygenerowano kod autoryzacji dla klienta {0}</value>
-  </data>
-  <data name="GeneratePersonalAccessToken" xml:space="preserve">
-    <value>Wygenerowano osobisty token dostępu dla klienta {0}</value>
-  </data>
-  <data name="RegenerateSecret" xml:space="preserve">
-    <value>Wygenerowano ponownie sekret klienta {0}</value>
-  </data>
-  <data name="RevokeUserClient" xml:space="preserve">
-    <value>Cofnięto dostęp klienta {0}</value>
-  </data>
-  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
-    <value>Pokój: {0}. Odmowa pobierania jest wyłączona</value>
-  </data>
-  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
-    <value>Pokój: {0}. Odmowa pobierania jest włączona</value>
-  </data>
-  <data name="RoomIndexingDisabled" xml:space="preserve">
-    <value>Indeksowanie pokoju jest wyłączone</value>
-  </data>
-  <data name="RoomIndexingEnabled" xml:space="preserve">
-    <value>Indeksowanie pokoju jest włączone</value>
-  </data>
-  <data name="RoomLifeTimeDisabled" xml:space="preserve">
-    <value>Okres ważności jest wyłączony</value>
-  </data>
-  <data name="RoomLifeTimeSet" xml:space="preserve">
-    <value>Okres ważności jest włączony. Wartość: {0}. Okres: {1}. Usuń trwale: {2}</value>
-  </data>
-  <data name="RoomWatermarkDisabled" xml:space="preserve">
-    <value>Pokój: {0}. Znak wodny jest wyłączony</value>
-  </data>
-  <data name="RoomWatermarkSet" xml:space="preserve">
-    <value>Pokój: {0}. Znak wodny włączony</value>
-  </data>
-  <data name="UpdateClient" xml:space="preserve">
-    <value>Zaktualizowano klienta {0}</value>
-  </data>
-  <data name="RoomIndexExportSaved" xml:space="preserve">
-    <value>Eksport indeksu pokoju zapisanego w Dokumentach</value>
-  </data>
-  <data name="RoomInviteResend" xml:space="preserve">
-    <value>Ponownie wysłane zaproszenie: {0}</value>
-  </data>
-  <data name="ApiKeyCreated" xml:space="preserve">
-    <value>Utworzono klucz API użytkownika: {0}</value>
-  </data>
-  <data name="ApiKeyDeleted" xml:space="preserve">
-    <value>Usunięto klucz API użytkownika: {0}</value>
-  </data>
-  <data name="ApiKeyUpdated" xml:space="preserve">
-    <value>Zaktualizowano klucz API użytkownika: {0}</value>
-  </data>
-  <data name="FormCompletelyFilled" xml:space="preserve">
-    <value>Użytkownicy [{0}]. Całkowicie wypełnili formularz: {1}</value>
-  </data>
-  <data name="FormPartiallyFilled" xml:space="preserve">
-    <value>Użytkownicy [{0}]. Częściowo wypełnili formularz: {1}</value>
-  </data>
-  <data name="FormStopped" xml:space="preserve">
-    <value>Użytkownicy [{0}]. Formularz został zatrzymany: {1}</value>
-  </data>
-  <data name="FormStartedToFill" xml:space="preserve">
-    <value>Użytkownicy [{0}]. Rozpoczęli wypełnianie: {1}</value>
-  </data>
-  <data name="FileVersionRemoved" xml:space="preserve">
-    <value>Pliki [{0}]. Usunięta wersja: {1}</value>
-  </data>
-  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
-    <value>Ustawienia dostępu do narzędzi dla programistów zostały zmienione</value>
-  </data>
-  <data name="FileCustomFilterDisabled" xml:space="preserve">
-    <value>Plik: {0}. Filtr niestandardowy wyłączony</value>
-  </data>
-  <data name="FileCustomFilterEnabled" xml:space="preserve">
-    <value>Plik: {0}. Filtr niestandardowy włączony</value>
-  </data>
   <data name="WebhookCreated" xml:space="preserve">
     <value>Webhook został utworzony: {0}</value>
   </data>
@@ -891,177 +1121,6 @@
   </data>
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Webhook został zaktualizowany: {0}</value>
-  </data>
-  <data name="AuthLinkActivated" xml:space="preserve">
-    <value>Link autoryzacyjny został aktywowany</value>
-  </data>
-  <data name="CustomerOperationPerformed" xml:space="preserve">
-    <value>Operacja klienta została wykonana</value>
-  </data>
-  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
-    <value>Raport operacji klienta został pobrany</value>
-  </data>
-  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
-    <value>Subskrypcja klienta została zaktualizowana: {0}</value>
-  </data>
-  <data name="CustomerWalletToppedUp" xml:space="preserve">
-    <value>Portfel klienta został zasilony: {0}</value>
-  </data>
-  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Ustawienia zasilania portfela klienta zostały zaktualizowane</value>
-  </data>
-  <data name="LdapDisabled" xml:space="preserve">
-    <value>Uwierzytelnianie LDAP wyłączone</value>
-  </data>
-  <data name="LdapEnabled" xml:space="preserve">
-    <value>Włączono uwierzytelnianie LDAP</value>
-  </data>
-  <data name="LdapSync" xml:space="preserve">
-    <value>Synchronizacja LDAP zakończona</value>
-  </data>
-  <data name="LocationCol" xml:space="preserve">
-    <value>Lokalizacja</value>
-  </data>
-  <data name="BannerSettingsChanged" xml:space="preserve">
-    <value>Zmieniono ustawienia widoczności banerów promocyjnych</value>
-  </data>
-  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Zaktualizowano ustawienia usług obsługujących portfel klienta</value>
-  </data>
-  <data name="LoginSuccessSocialAccount" xml:space="preserve">
-    <value>Zaloguj się za pomocą konta społecznościowego</value>
-  </data>
-  <data name="AddedServerToAgent" xml:space="preserve">
-    <value>Dodano serwer MCP {0} do asystenta</value>
-  </data>
-  <data name="AgentCreated" xml:space="preserve">
-    <value>Utworzono asystenta</value>
-  </data>
-  <data name="AgentDeleted" xml:space="preserve">
-    <value>Usunięto asystenta</value>
-  </data>
-  <data name="AgentRenamed" xml:space="preserve">
-    <value>Zmieniono nazwę asystenta: {0}</value>
-  </data>
-  <data name="AgentsModule" xml:space="preserve">
-    <value>Asystenci</value>
-  </data>
-  <data name="AIProviderCreated" xml:space="preserve">
-    <value>Utworzono dostawcę AI: {0}</value>
-  </data>
-  <data name="AIProviderDeleted" xml:space="preserve">
-    <value>Usunięto dostawcę AI: {0}</value>
-  </data>
-  <data name="AIProviderUpdated" xml:space="preserve">
-    <value>Zaktualizowano dostawcę AI: {0}</value>
-  </data>
-  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
-    <value>Asystenci AI [{0}]. Ustaw niestandardowy limit pamięci dla asystentów AI : {1}</value>
-  </data>
-  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
-    <value>Asystenci AI [{0}]. Ustaw domyślny limit pamięci dla asystentów AI: {1}</value>
-  </data>
-  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
-    <value>Asystenci AI [{0}]. Wyłączono limit pamięci dla asystentów AI</value>
-  </data>
-  <data name="DeletedServerFromAgent" xml:space="preserve">
-    <value>Usunięto serwer MCP {0} z asystenta</value>
-  </data>
-  <data name="FileExternalLinkCreated" xml:space="preserve">
-    <value>Pliki [{0}]. Utworzony link zewnętrzny: {1}. Rola: {2}</value>
-  </data>
-  <data name="FileExternalLinkDeleted" xml:space="preserve">
-    <value>Pliki [{0}]. Usunięty link zewnętrzny: {1}</value>
-  </data>
-  <data name="FileExternalLinkUpdated" xml:space="preserve">
-    <value>Pliki [{0}]. Zaktualizowany link zewnętrzny: {1}. Rola: {2}</value>
-  </data>
-  <data name="FileMarkedAsFavorite" xml:space="preserve">
-    <value>Plik dodany do ulubionych: {0}</value>
-  </data>
-  <data name="FileRemovedFromFavorite" xml:space="preserve">
-    <value>Plik usunięty z ulubionych: {0}</value>
-  </data>
-  <data name="FileRemovedFromList" xml:space="preserve">
-    <value>Plik usunięty z „Udostępnionych mi”: {0}</value>
-  </data>
-  <data name="FileUpdatedAccessFor" xml:space="preserve">
-    <value>Pliki [{0}]. Zaktualizowano dostęp dla {1}. Rola: {2}</value>
-  </data>
-  <data name="FolderDownloaded" xml:space="preserve">
-    <value>Pobrany katalog: {0}</value>
-  </data>
-  <data name="FolderExternalLinkCreated" xml:space="preserve">
-    <value>Katalogi [{0}]. Utworzony link zewnętrzny: {1}. Rola: {2}</value>
-  </data>
-  <data name="FolderExternalLinkDeleted" xml:space="preserve">
-    <value>Katalogi [{0}]. Usunięty link zewnętrzny: {1}</value>
-  </data>
-  <data name="FolderExternalLinkUpdated" xml:space="preserve">
-    <value>Katalogi [{0}]. Zaktualizowany link zewnętrzny: {1}. Rola: {2}</value>
-  </data>
-  <data name="FolderRemovedFromList" xml:space="preserve">
-    <value>Katalog usunięty z „Udostępnionych mi”: {0}</value>
-  </data>
-  <data name="FolderUpdatedAccessFor" xml:space="preserve">
-    <value>Katalogi [{0}]. Zaktualizowano dostęp dla {1}. Rola: {2}</value>
-  </data>
-  <data name="LoginSuccessViaOAuth" xml:space="preserve">
-    <value>Pomyślne logowanie za pośrednictwem OAuth 2.0</value>
-  </data>
-  <data name="LoginSuccessViaPassword" xml:space="preserve">
-    <value>Pomyślne logowanie za pośrednictwem loginu i hasła</value>
-  </data>
-  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
-    <value>Ustaw domyślny limit pamięci dla asystentów AI: {0}</value>
-  </data>
-  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
-    <value>Wyłączono limit pamięci dla asystentów AI</value>
-  </data>
-  <data name="ResetVectorizationSettings" xml:space="preserve">
-    <value>Ustawienia wektoryzacji zostały zresetowane</value>
-  </data>
-  <data name="ResetWebSearchSettings" xml:space="preserve">
-    <value>Ustawienia wyszukiwania w internecie zostały zresetowane</value>
-  </data>
-  <data name="RoomExternalLinkRevoked" xml:space="preserve">
-    <value>Unieważniony link zewnętrzny: {1}</value>
-  </data>
-  <data name="ServerCreated" xml:space="preserve">
-    <value>Utworzony serwer MCP: {0}</value>
-  </data>
-  <data name="ServerDeleted" xml:space="preserve">
-    <value>Usunięty serwer MCP: {0}</value>
-  </data>
-  <data name="ServerDisabled" xml:space="preserve">
-    <value>Wyłączony serwer MCP: {0}</value>
-  </data>
-  <data name="ServerEnabled" xml:space="preserve">
-    <value>Włączony serwer MCP: {0}</value>
-  </data>
-  <data name="ServerUpdated" xml:space="preserve">
-    <value>Zaktualizowany serwer MCP: {0}</value>
-  </data>
-  <data name="SetVectorizationSettings" xml:space="preserve">
-    <value>Ustawienia wektoryzacji są skonfigurowane. Dostawca: {0}</value>
-  </data>
-  <data name="SetWebSearchSettings" xml:space="preserve">
-    <value>Ustawienia wyszukiwania w internecie są skonfigurowane. Usługa: {0}</value>
-  </data>
-  <data name="BackupCompleted" xml:space="preserve">
-    <value>Ukończono tworzenie kopii zapasowej</value>
-  </data>
-  <data name="BackupFailed" xml:space="preserve">
-    <value>Nie udało się utworzyć kopii zapasowej</value>
-  </data>
-  <data name="ScheduledBackupCompleted" xml:space="preserve">
-    <value>Ukończono tworzenie zaplanowanej kopii zapasowej</value>
-  </data>
-  <data name="ScheduledBackupFailed" xml:space="preserve">
-    <value>Nie udało się utworzyć zaplanowanej kopii zapasowej</value>
-  </data>
-  <data name="ScheduledBackupStarted" xml:space="preserve">
-    <value>Rozpoczęto tworzenie zaplanowanej kopii zapasowej</value>
   </data>
   <data name="WebpluginDeleted" xml:space="preserve">
     <value>Usunięta wtyczka: {0}</value>

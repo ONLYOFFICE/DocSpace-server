@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="TitleNewFilePdfFormText" xml:space="preserve">
+    <value>Formular i ri PDF</value>
+  </data>
   <data name="TitleNewFilePresentation" xml:space="preserve">
     <value>Prezantim i ri</value>
   </data>
@@ -125,8 +128,5 @@
   </data>
   <data name="TitleNewFileText" xml:space="preserve">
     <value>Dokument i ri</value>
-  </data>
-  <data name="TitleNewFilePdfFormText" xml:space="preserve">
-    <value>Formular i ri PDF</value>
   </data>
 </root>

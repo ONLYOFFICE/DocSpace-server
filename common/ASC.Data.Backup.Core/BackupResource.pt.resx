@@ -117,14 +117,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ButtonSetPassword" xml:space="preserve">
-    <value>Definir palavra-passe</value>
-  </data>
-  <data name="BackupNotFound" xml:space="preserve">
-    <value>O ficheiro da cópia de segurança é inválido. Por favor utilize um ficheiro criado no mesmo portal.</value>
-  </data>
-  <data name="LargeBackup" xml:space="preserve">
-    <value>O backup é maior que o tamanho total do portal</value>
+  <data name="AutoBackup" xml:space="preserve">
+    <value>Cópia de segurança automática</value>
   </data>
   <data name="BackupException" xml:space="preserve">
     <value>Algo correu mal durante a criação da cópia de segurança. Tente criá-lo novamente ou contacte o suporte.</value>
@@ -132,11 +126,11 @@
   <data name="BackupInvalid" xml:space="preserve">
     <value>O ficheiro de cópia de segurança é inválido.</value>
   </data>
-  <data name="RestoreException" xml:space="preserve">
-    <value>Algo correu mal durante o restauro da cópia de segurança. Por favor, tente restaurá-lo novamente ou contacte o suporte.</value>
+  <data name="BackupMissingFilesWarning" xml:space="preserve">
+    <value>Alguns ficheiros não foram incluídos na cópia de segurança. Para mais detalhes, verifique {0}</value>
   </data>
-  <data name="AutoBackup" xml:space="preserve">
-    <value>Cópia de segurança automática</value>
+  <data name="BackupNotFound" xml:space="preserve">
+    <value>O ficheiro da cópia de segurança é inválido. Por favor utilize um ficheiro criado no mesmo portal.</value>
   </data>
   <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
     <value>Custom cloud</value>
@@ -156,7 +150,13 @@
   <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
     <value>Recurso de terceiros</value>
   </data>
-  <data name="BackupMissingFilesWarning" xml:space="preserve">
-    <value>Alguns ficheiros não foram incluídos na cópia de segurança. Para mais detalhes, verifique {0}</value>
+  <data name="ButtonSetPassword" xml:space="preserve">
+    <value>Definir palavra-passe</value>
+  </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>O backup é maior que o tamanho total do portal</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>Algo correu mal durante o restauro da cópia de segurança. Por favor, tente restaurá-lo novamente ou contacte o suporte.</value>
   </data>
 </root>

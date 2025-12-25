@@ -120,11 +120,20 @@
   <data name="AceShareLink" xml:space="preserve">
     <value>Cổng ngoài</value>
   </data>
+  <data name="AceStatusEnum_Collaborator" xml:space="preserve">
+    <value>Cộng tác viên</value>
+  </data>
   <data name="AceStatusEnum_Comment" xml:space="preserve">
     <value>Nhận xét</value>
   </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Người tạo nội dung</value>
+  </data>
   <data name="AceStatusEnum_CustomFilter" xml:space="preserve">
     <value>Bộ lọc tùy chỉnh</value>
+  </data>
+  <data name="AceStatusEnum_Editing" xml:space="preserve">
+    <value>Biên tập viên</value>
   </data>
   <data name="AceStatusEnum_FillForms" xml:space="preserve">
     <value>Điền biểu mẫu</value>
@@ -141,8 +150,14 @@
   <data name="AceStatusEnum_Review" xml:space="preserve">
     <value>Xem lại</value>
   </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Quản lý phòng</value>
+  </data>
   <data name="Admin" xml:space="preserve">
     <value>Quản trị viên</value>
+  </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>Quản lý agent</value>
   </data>
   <data name="AppAccessDenied" xml:space="preserve">
     <value>Trao quyền truy cập để làm việc với file này</value>
@@ -198,6 +213,15 @@
   <data name="CommentUpload" xml:space="preserve">
     <value>Đã tải lên</value>
   </data>
+  <data name="Date" xml:space="preserve">
+    <value>Ngày</value>
+  </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>Liên kết được chia sẻ</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Liên kết lời mời</value>
+  </data>
   <data name="DocuSignStatusDeclined" xml:space="preserve">
     <value>Đã từ chối</value>
   </data>
@@ -240,17 +264,32 @@
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Không thể di chuyển file lớn hơn {0}</value>
   </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Không hỗ trợ di chuyển một số tập tin vào phòng Điền Biểu mẫu. Hãy di chuyển từng biểu mẫu ONLYOFFICE một.</value>
+  </data>
   <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
     <value>Phiên bản mới không thể giống với phiên bản hiện tại</value>
   </data>
   <data name="ErrorMessage_FolderCopyError" xml:space="preserve">
     <value>Bạn không thể sao chép thư mục vào thư mục con của nó</value>
   </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Không hỗ trợ di chuyển các thư mục đến phòng Điền Biểu mẫu. Hãy di chuyển từng biểu mẫu ONLYOFFICE PDF một.</value>
+  </data>
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Không tìm thấy thư mục yêu cầu</value>
   </data>
+  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
+    <value>Nhà cung cấp không hợp lệ</value>
+  </data>
+  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
+    <value>Không thể sử dụng thư mục này để lưu trữ phòng</value>
+  </data>
   <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Tiêu đề không hợp lệ</value>
+  </data>
+  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
+    <value>Liên kết lời mời không hợp lệ hoặc tính hợp lệ đã hết hạn</value>
   </data>
   <data name="ErrorMessage_LockedFile" xml:space="preserve">
     <value>File bị khóa bởi người dùng khác</value>
@@ -261,8 +300,20 @@
   <data name="ErrorMessage_ManyDownloads" xml:space="preserve">
     <value>Quá nhiều tập tin đang tải về.</value>
   </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>Số lượng liên kết tối đa không được vượt quá {0}</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Không thể di chuyển tập tin đến phòng này. Xin hãy thử di chuyển biểu mẫu ONLYOFFICE PDF.</value>
+  </data>
   <data name="ErrorMessage_NotSupportedFormat" xml:space="preserve">
     <value>Rất tiếc, định dạng file này không được hỗ trợ</value>
+  </data>
+  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
+    <value>Nhà cung cấp này đã được kết nối với phòng</value>
+  </data>
+  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
+    <value>Vai trò không khả dụng cho loại người dùng này</value>
   </data>
   <data name="ErrorMessage_SaveAnonymous" xml:space="preserve">
     <value>Không rõ tác giả bản lưu này</value>
@@ -276,6 +327,9 @@
   <data name="ErrorMessage_SecurityException" xml:space="preserve">
     <value>Bạn không có đủ thẩm quyền để thực hiện thao tác</value>
   </data>
+  <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
+    <value>Bạn không có đủ quyền để lưu trữ phòng</value>
+  </data>
   <data name="ErrorMessage_SecurityException_Auth" xml:space="preserve">
     <value>Không thể ủy quyền cho nhà cung cấp {0} với thông tin xác thực đã cấp.</value>
   </data>
@@ -284,6 +338,9 @@
   </data>
   <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
     <value>Bạn không có đủ quyền để sao chép thư mục</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
+    <value>Bạn không có quyền sao chép vào thư mục này</value>
   </data>
   <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
     <value>Bạn không có đủ thẩm quyền để tạo</value>
@@ -306,11 +363,20 @@
   <data name="ErrorMessage_SecurityException_EditFileTwice" xml:space="preserve">
     <value>Bạn đang sửa tài liệu này trên thẻ khác</value>
   </data>
+  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
+    <value>Bạn không có quyền chỉnh sửa phòng</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Không thể xóa phiên bản hiện tại của tập tin</value>
+  </data>
   <data name="ErrorMessage_SecurityException_MoveFile" xml:space="preserve">
     <value>Bạn không có đủ quyền để di chuyển tập tin</value>
   </data>
   <data name="ErrorMessage_SecurityException_MoveFolder" xml:space="preserve">
     <value>Bạn không có đủ quyền để di chuyển thư mục</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
+    <value>Bạn không có quyền di chuyển vào thư mục này</value>
   </data>
   <data name="ErrorMessage_SecurityException_ReadFile" xml:space="preserve">
     <value>Bạn không có đủ thẩm quyền để xem file</value>
@@ -324,11 +390,17 @@
   <data name="ErrorMessage_SecurityException_RenameFolder" xml:space="preserve">
     <value>Bạn không có đủ thẩm quyền để đổi tên thư mục</value>
   </data>
+  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
+    <value>Bạn không có đủ quyền để hủy lưu trữ phòng</value>
+  </data>
   <data name="ErrorMessage_SecurityException_UpdateEditingFile" xml:space="preserve">
     <value>Không thể cập nhật file này vì nó được mở cho chỉnh sửa</value>
   </data>
   <data name="ErrorMessage_SecurityException_ViewFolder" xml:space="preserve">
     <value>Bạn không có đủ thẩm quyền để xem nội dung thư mục</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>Bạn đã cố gắng nhập mật khẩu quá nhiều lần. Xin vui lòng thử lại sau</value>
   </data>
   <data name="ErrorMessage_SharpBoxException" xml:space="preserve">
     <value>Không có nội dung thư mục của bên thứ ba. Thử kết nối lại tài khoản.</value>
@@ -336,8 +408,14 @@
   <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>Lỗi khi bắt đầu sửa file</value>
   </data>
+  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
+    <value>Bạn không thể chỉnh sửa phòng đã lưu trữ</value>
+  </data>
   <data name="ErrorMessage_UpdateEditingFile" xml:space="preserve">
     <value>Bạn không thể cập nhật file được mở cho chỉnh sửa</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Không thể tải tập tin lên phòng này. Xin hãy thử tải lên biểu mẫu ONLYOFFICE PDF.</value>
   </data>
   <data name="ErrorMessage_UserNotFound" xml:space="preserve">
     <value>Không tìm thấy người dùng</value>
@@ -345,44 +423,35 @@
   <data name="ErrorMessage_ViewTrashItem" xml:space="preserve">
     <value>Bạn không thể xem trước chi tiết trong Thùng Rác</value>
   </data>
-  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
-    <value>Nhà cung cấp không hợp lệ</value>
-  </data>
-  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
-    <value>Không thể sử dụng thư mục này để lưu trữ phòng</value>
-  </data>
-  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
-    <value>Liên kết lời mời không hợp lệ hoặc tính hợp lệ đã hết hạn</value>
-  </data>
-  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
-    <value>Vai trò không khả dụng cho loại người dùng này</value>
-  </data>
-  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
-    <value>Nhà cung cấp này đã được kết nối với phòng</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
-    <value>Bạn không có quyền sao chép vào thư mục này</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
-    <value>Bạn không có quyền di chuyển vào thư mục này</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
-    <value>Bạn không có đủ quyền để hủy lưu trữ phòng</value>
-  </data>
-  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
-    <value>Bạn không thể chỉnh sửa phòng đã lưu trữ</value>
-  </data>
   <data name="ErrorrMessage_PinRoom" xml:space="preserve">
     <value>Bạn không thể ghim phòng</value>
   </data>
   <data name="Everyone" xml:space="preserve">
     <value>Mọi người</value>
   </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Người dùng bên ngoài</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Liên kết để điền</value>
+  </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>Tài liệu của người dùng {0} {1}</value>
+  </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Số của biểu mẫu</value>
+  </data>
   <data name="Guest" xml:space="preserve">
     <value>Nặc danh</value>
   </data>
   <data name="IndexTitle" xml:space="preserve">
     <value>Tìm trong nội dung tài liệu</value>
+  </data>
+  <data name="KnowledgeFolder" xml:space="preserve">
+    <value>Kiến thức</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Liên kết đến biểu mẫu</value>
   </data>
   <data name="MessageFileCreated" xml:space="preserve">
     <value>File đã được tạo trong thư mục "{0}"</value>
@@ -395,6 +464,9 @@
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Tập tin không còn là bản nháp để điền vào biểu mẫu.</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Mở tập tin</value>
   </data>
   <data name="ProductAdminOpportunities" xml:space="preserve">
     <value>Làm như một người dùng|Liên kết Dropbox, Box và các tài khoản khác trong mục 'Tài liệu Cộng tác'|Thiết lập quyền truy cập tài liệu và thư mục trong mục 'Tài liệu Cộng tác'</value>
@@ -415,20 +487,17 @@ Khả năng tương thích cao nhất với docx, xlsx, pptx.</value>
   <data name="ProductUserOpportunities" xml:space="preserve">
     <value>Tạo và chỉnh sửa tài liệu riêng cũng như tài liệu được chia sẻ với quyền truy cập thích hợp|Trao cho người dùng khác quyền đọc/chỉnh sửa tài liệu và thư mục|Liên kết Dropbox, Box và tài khoản tài khác trong mục 'Tài liệu'</value>
   </data>
-  <data name="UnknownFirstName" xml:space="preserve">
-    <value>Tên</value>
+  <data name="ResultStorageFolder" xml:space="preserve">
+    <value>Lưu trữ kết quả</value>
   </data>
-  <data name="UnknownLastName" xml:space="preserve">
-    <value>Họ</value>
+  <data name="RoleEnum_Collaborator" xml:space="preserve">
+    <value>Cộng tác viên</value>
   </data>
-  <data name="UnlockComment" xml:space="preserve">
-    <value>File được mở khóa</value>
+  <data name="RoleEnum_Comment" xml:space="preserve">
+    <value>Người nhận xét</value>
   </data>
-  <data name="AceStatusEnum_Editing" xml:space="preserve">
-    <value>Biên tập viên</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
-    <value>Bạn không có quyền chỉnh sửa phòng</value>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Người tạo nội dung</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
     <value>Quản trị viên DocSpace</value>
@@ -436,41 +505,26 @@ Khả năng tương thích cao nhất với docx, xlsx, pptx.</value>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Biên tập viên</value>
   </data>
-  <data name="RoleEnum_User" xml:space="preserve">
-    <value>Người dùng</value>
+  <data name="RoleEnum_FillForms" xml:space="preserve">
+    <value>Bộ lọc biểu mẫu</value>
+  </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>Khách</value>
   </data>
   <data name="RoleEnum_Read" xml:space="preserve">
     <value>Người xem</value>
   </data>
-  <data name="RoleEnum_Comment" xml:space="preserve">
-    <value>Người nhận xét</value>
-  </data>
-  <data name="RoleEnum_FillForms" xml:space="preserve">
-    <value>Bộ lọc biểu mẫu</value>
-  </data>
   <data name="RoleEnum_Review" xml:space="preserve">
     <value>Người xem lại</value>
   </data>
-  <data name="RoleEnum_Collaborator" xml:space="preserve">
-    <value>Cộng tác viên</value>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Quản Trị Viên Phòng</value>
   </data>
-  <data name="AceStatusEnum_Collaborator" xml:space="preserve">
-    <value>Cộng tác viên</value>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Quản lý phòng</value>
   </data>
-  <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
-    <value>Bạn không có đủ quyền để lưu trữ phòng</value>
-  </data>
-  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
-    <value>Số lượng liên kết tối đa không được vượt quá {0}</value>
-  </data>
-  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
-    <value>Bạn đã cố gắng nhập mật khẩu quá nhiều lần. Xin vui lòng thử lại sau</value>
-  </data>
-  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
-    <value>Liên kết lời mời</value>
-  </data>
-  <data name="DefaultExternalLinkTitle" xml:space="preserve">
-    <value>Liên kết được chia sẻ</value>
+  <data name="RoleEnum_User" xml:space="preserve">
+    <value>Người dùng</value>
   </data>
   <data name="RoomIndex_Author" xml:space="preserve">
     <value>Tác giả</value>
@@ -486,6 +540,9 @@ Khả năng tương thích cao nhất với docx, xlsx, pptx.</value>
   </data>
   <data name="RoomIndex_ExportAuthor" xml:space="preserve">
     <value>Xuất Tác giả</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Thư Mục</value>
   </data>
   <data name="RoomIndex_Index" xml:space="preserve">
     <value>Danh mục</value>
@@ -511,79 +568,22 @@ Khả năng tương thích cao nhất với docx, xlsx, pptx.</value>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Loại</value>
   </data>
-  <data name="RoomIndex_Folder" xml:space="preserve">
-    <value>Thư Mục</value>
-  </data>
-  <data name="Date" xml:space="preserve">
-    <value>Ngày</value>
-  </data>
-  <data name="User" xml:space="preserve">
-    <value>Người dùng</value>
-  </data>
-  <data name="LinkToForm" xml:space="preserve">
-    <value>Liên kết đến biểu mẫu</value>
-  </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Mở tập tin</value>
-  </data>
-  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Không thể tải tập tin lên phòng này. Xin hãy thử tải lên biểu mẫu ONLYOFFICE PDF.</value>
-  </data>
-  <data name="FillOutExternalLinkTitle" xml:space="preserve">
-    <value>Liên kết để điền</value>
-  </data>
-  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Không hỗ trợ di chuyển một số tập tin vào phòng Điền Biểu mẫu. Hãy di chuyển từng biểu mẫu ONLYOFFICE một.</value>
-  </data>
-  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Không hỗ trợ di chuyển các thư mục đến phòng Điền Biểu mẫu. Hãy di chuyển từng biểu mẫu ONLYOFFICE PDF một.</value>
-  </data>
-  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Không thể di chuyển tập tin đến phòng này. Xin hãy thử di chuyển biểu mẫu ONLYOFFICE PDF.</value>
-  </data>
-  <data name="FormNumber" xml:space="preserve">
-    <value>Số của biểu mẫu</value>
-  </data>
-  <data name="ExternalUser" xml:space="preserve">
-    <value>Người dùng bên ngoài</value>
-  </data>
-  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
-    <value>Quản lý phòng</value>
-  </data>
-  <data name="RoleEnum_RoomManager" xml:space="preserve">
-    <value>Quản lý phòng</value>
-  </data>
-  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
-    <value>Người tạo nội dung</value>
-  </data>
-  <data name="RoleEnum_ContentCreator" xml:space="preserve">
-    <value>Người tạo nội dung</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
-    <value>Không thể xóa phiên bản hiện tại của tập tin</value>
-  </data>
   <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
     <value>Chia sẻ để điền</value>
   </data>
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>Bắt đầu điền</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Quản Trị Viên Phòng</value>
+  <data name="UnknownFirstName" xml:space="preserve">
+    <value>Tên</value>
   </data>
-  <data name="RoleEnum_Guest" xml:space="preserve">
-    <value>Khách</value>
+  <data name="UnknownLastName" xml:space="preserve">
+    <value>Họ</value>
   </data>
-  <data name="AgentManager" xml:space="preserve">
-    <value>Quản lý agent</value>
+  <data name="UnlockComment" xml:space="preserve">
+    <value>File được mở khóa</value>
   </data>
-  <data name="FolderNameForReassignedData" xml:space="preserve">
-    <value>Tài liệu của người dùng {0} {1}</value>
-  </data>
-  <data name="KnowledgeFolder" xml:space="preserve">
-    <value>Kiến thức</value>
-  </data>
-  <data name="ResultStorageFolder" xml:space="preserve">
-    <value>Lưu trữ kết quả</value>
+  <data name="User" xml:space="preserve">
+    <value>Người dùng</value>
   </data>
 </root>

@@ -1,5 +1,64 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -53,11 +112,23 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>Formulaires prêts à vérifier</value>
+  </data>
+  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
+    <value>Un nouveau document "$DocumentTitle" a été créé dans la salle "$RoomTitle"</value>
+  </data>
+  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
+    <value>De nouveaux fichiers ont été téléchargés dans la salle "$RoomTitle" ($Count)</value>
+  </data>
+  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
+    <value>Un nouveau fichier "$DocumentTitle" a été téléchargé dans la salle "$RoomTitle"</value>
+  </data>
   <data name="pattern_DocuSignComplete" xml:space="preserve">
     <value>h1. Tous les signataires ont signé $DocumentTitle
 
@@ -68,12 +139,74 @@ Ce courriel est pour vous informer que tous les signataires ont signé "$Documen
 
 Pour en savoir plus, connectez-vous à votre compte.</value>
   </data>
+  <data name="pattern_EditorMentions" xml:space="preserve">
+    <value>h1. $__AuthorName vous a mentionné dans le commentaire du document
+
+$__AuthorName vous a mentionné dans le commentaire du document "$DocumentTitle":"$DocumentURL" dans la salle "$RoomTitle":"$RoomURL" :
+
+$Message</value>
+  </data>
+  <data name="pattern_EditorMentions_push" xml:space="preserve">
+    <value>$ToUserName vous a mentionné dans le document $DocumentTitle</value>
+  </data>
+  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
+    <value>Un nouveau dossier "$FolderTitle" a été créé dans la salle "$RoomTitle"</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. Le formulaire $Message est rempli
+ 
+Un nouveau formulaire "$DocumentTitle":"$DocumentURL" est rempli dans la salle "$RoomTitle":"$RoomURL".
+ 
+L'expéditeur du formulaire : "$FromUserName":"$FromUserLink"
+ 
+$OrangeButton
+
+&amp;nbsp;</value>
+  </data>
+  <data name="pattern_FormStartedFilling" xml:space="preserve">
+    <value>
+     Notification d'activité. "$FromUserName":"$FromUserLink" a commencé le processus de remplissage du formulaire : "$DocumentTitle":"$DocumentURL" dans la salle : "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. Vous avez rempli le formulaire $Message
+ 
+Vous avez rempli le formulaire "$DocumentTitle":"$DocumentURL" dans la salle "$RoomTitle":"$RoomURL".
+ 
+Responsable : "$ToUserName":"$ToUserLink"
+ 
+$OrangeButton
+
+&amp;nbsp;</value>
+  </data>
+  <data name="pattern_FormSubmitted_push" xml:space="preserve">
+    <value>Le formulaire "$DocumentTitle" a été rempli dans la salle "$RoomTitle"</value>
+  </data>
+  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+    <value>
+      Notification d'activité. Le formulaire "$DocumentTitle":"$DocumentURL" a été entièrement rempli dans la salle : "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
+    <value>Vous avez été invité dans la salle "$RoomTitle"</value>
+  </data>
   <data name="pattern_MailMergeEnd" xml:space="preserve">
     <value>h1. Diffusion terminée
 
 Ce courriel est pour vous informer que la diffusion des messages $MailsCount que vous avez demandée est maintenant terminée. $Message
 
 Vous pouvez vérifier le statut de ces messages dans votre dossier "Envoyés":"$__VirtualRootPath/addons/mail/#sent" du module "Mail".</value>
+  </data>
+  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
+    <value>$FromUserName a déplacé la salle "$RoomTitle" dans l'archive</value>
+  </data>
+  <data name="pattern_RoomRemoved" xml:space="preserve">
+    <value>h1. $__AuthorName a supprimé la salle
+
+$__AuthorName a supprimé la salle : $RoomTitle</value>
+  </data>
+  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
+    <value>Votre rôle dans la salle "$RoomTitle" a été modifié en "$RoomRole"</value>
   </data>
   <data name="pattern_ShareDocument" xml:space="preserve">
     <value>h1. Accès accordé au document : "$DocumentTitle":"$DocumentURL"
@@ -89,134 +222,6 @@ $__DateTime "$__AuthorName":"$__AuthorUrl" vous a accordé l'accès au dossier "
 
 $Message</value>
   </data>
-  <data name="subject_DocuSignComplete" xml:space="preserve">
-    <value>Documents. Tous les signataires ont signé $DocumentTitle</value>
-  </data>
-  <data name="subject_DocuSignComplete_tg" xml:space="preserve">
-    <value>Documents. Tous les signataires ont complété le document [$DocumentTitle]($DocumentURL)</value>
-  </data>
-  <data name="subject_DocuSignStatus" xml:space="preserve">
-    <value>Documents. Le statut de la signature modifié</value>
-  </data>
-  <data name="subject_MailMergeEnd" xml:space="preserve">
-    <value>Documents. Diffusion est terminée.</value>
-  </data>
-  <data name="subject_ShareDocument" xml:space="preserve">
-    <value>Documents. Accès accordé au document $DocumentTitle</value>
-  </data>
-  <data name="subject_ShareDocument_tg" xml:space="preserve">
-    <value>Documents. Accès accordé au document [$DocumentTitle]($DocumentURL)</value>
-  </data>
-  <data name="subject_ShareFolder" xml:space="preserve">
-    <value>Documents. Accès accordé au dossier $DocumentTitle</value>
-  </data>
-  <data name="subject_ShareFolder_tg" xml:space="preserve">
-    <value>Documents. Accès accordé au dossier [$DocumentTitle]($DocumentURL)</value>
-  </data>
-  <data name="pattern_EditorMentions" xml:space="preserve">
-    <value>h1. $__AuthorName vous a mentionné dans le commentaire du document
-
-$__AuthorName vous a mentionné dans le commentaire du document "$DocumentTitle":"$DocumentURL" dans la salle "$RoomTitle":"$RoomURL" :
-
-$Message</value>
-  </data>
-  <data name="pattern_RoomRemoved" xml:space="preserve">
-    <value>h1. $__AuthorName a supprimé la salle
-
-$__AuthorName a supprimé la salle : $RoomTitle</value>
-  </data>
-  <data name="subject_DocuSignComplete_push" xml:space="preserve">
-    <value>Tous les signataires ont rempli $DocumentTitle</value>
-  </data>
-  <data name="subject_DocuSignStatus_push" xml:space="preserve">
-    <value>Changement de statut du signe</value>
-  </data>
-  <data name="subject_EditorMentions" xml:space="preserve">
-    <value>Notification DocSpace. Mentionné dans le document</value>
-  </data>
-  <data name="subject_MailMergeEnd_push" xml:space="preserve">
-    <value>L'envoi est terminé.</value>
-  </data>
-  <data name="subject_RoomRemoved" xml:space="preserve">
-    <value>Notification DocSpace. Salle supprimée</value>
-  </data>
-  <data name="subject_ShareDocument_push" xml:space="preserve">
-    <value>Accès accordé au document : $DocumentTitle</value>
-  </data>
-  <data name="subject_ShareEncryptedDocument_push" xml:space="preserve">
-    <value>Accès accordé au document chiffré : $DocumentTitle</value>
-  </data>
-  <data name="subject_ShareFolder_push" xml:space="preserve">
-    <value>Accès autorisé au dossier : $DocumentTitle</value>
-  </data>
-  <data name="button_CheckReadyForms" xml:space="preserve">
-    <value>Formulaires prêts à vérifier</value>
-  </data>
-  <data name="pattern_FormReceived" xml:space="preserve">
-    <value>h1. Le formulaire $Message est rempli
- 
-Un nouveau formulaire "$DocumentTitle":"$DocumentURL" est rempli dans la salle "$RoomTitle":"$RoomURL".
- 
-L'expéditeur du formulaire : "$FromUserName":"$FromUserLink"
- 
-$OrangeButton
-
-&amp;nbsp;</value>
-  </data>
-  <data name="pattern_FormSubmitted" xml:space="preserve">
-    <value>h1. Vous avez rempli le formulaire $Message
- 
-Vous avez rempli le formulaire "$DocumentTitle":"$DocumentURL" dans la salle "$RoomTitle":"$RoomURL".
- 
-Responsable : "$ToUserName":"$ToUserLink"
- 
-$OrangeButton
-
-&amp;nbsp;</value>
-  </data>
-  <data name="subject_FormReceived" xml:space="preserve">
-    <value>Notification DocSpace. Le formulaire est rempli</value>
-  </data>
-  <data name="subject_FormSubmitted" xml:space="preserve">
-    <value>Notification DocSpace. Le formulaire est rempli</value>
-  </data>
-  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
-    <value>Un nouveau document "$DocumentTitle" a été créé dans la salle "$RoomTitle"</value>
-  </data>
-  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
-    <value>De nouveaux fichiers ont été téléchargés dans la salle "$RoomTitle" ($Count)</value>
-  </data>
-  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
-    <value>Un nouveau fichier "$DocumentTitle" a été téléchargé dans la salle "$RoomTitle"</value>
-  </data>
-  <data name="pattern_EditorMentions_push" xml:space="preserve">
-    <value>$ToUserName vous a mentionné dans le document $DocumentTitle</value>
-  </data>
-  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
-    <value>Un nouveau dossier "$FolderTitle" a été créé dans la salle "$RoomTitle"</value>
-  </data>
-  <data name="pattern_FormStartedFilling" xml:space="preserve">
-    <value>
-     Notification d'activité. "$FromUserName":"$FromUserLink" a commencé le processus de remplissage du formulaire : "$DocumentTitle":"$DocumentURL" dans la salle : "$RoomTitle":"$RoomURL" — $__DateTime.
-    </value>
-  </data>
-  <data name="pattern_FormSubmitted_push" xml:space="preserve">
-    <value>Le formulaire "$DocumentTitle" a été rempli dans la salle "$RoomTitle"</value>
-  </data>
-  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
-    <value>
-      Notification d'activité. Le formulaire "$DocumentTitle":"$DocumentURL" a été entièrement rempli dans la salle : "$RoomTitle":"$RoomURL" — $__DateTime.
-    </value>
-  </data>
-  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
-    <value>Vous avez été invité dans la salle "$RoomTitle"</value>
-  </data>
-  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
-    <value>$FromUserName a déplacé la salle "$RoomTitle" dans l'archive</value>
-  </data>
-  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
-    <value>Votre rôle dans la salle "$RoomTitle" a été modifié en "$RoomRole"</value>
-  </data>
   <data name="pattern_StoppedFormFilling" xml:space="preserve">
     <value>
       Notification d'activité. "$FromUserName":"$FromUserLink" a arrêté le remplissage du formulaire : "$DocumentTitle":"$DocumentURL" dans la salle : "$RoomTitle":"$RoomURL" — $__DateTime.
@@ -227,11 +232,65 @@ $OrangeButton
       Notification d'activité. C'est votre tour ! Le formulaire doit être rempli :  "$DocumentTitle":"$DocumentURL" dans la salle : "$RoomTitle":"$RoomURL" — $__DateTime.
     </value>
   </data>
+  <data name="subject_DocuSignComplete" xml:space="preserve">
+    <value>Documents. Tous les signataires ont signé $DocumentTitle</value>
+  </data>
+  <data name="subject_DocuSignComplete_push" xml:space="preserve">
+    <value>Tous les signataires ont rempli $DocumentTitle</value>
+  </data>
+  <data name="subject_DocuSignComplete_tg" xml:space="preserve">
+    <value>Documents. Tous les signataires ont complété le document [$DocumentTitle]($DocumentURL)</value>
+  </data>
+  <data name="subject_DocuSignStatus" xml:space="preserve">
+    <value>Documents. Le statut de la signature modifié</value>
+  </data>
+  <data name="subject_DocuSignStatus_push" xml:space="preserve">
+    <value>Changement de statut du signe</value>
+  </data>
+  <data name="subject_EditorMentions" xml:space="preserve">
+    <value>Notification DocSpace. Mentionné dans le document</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>Notification DocSpace. Le formulaire est rempli</value>
+  </data>
   <data name="subject_FormStartedFilling" xml:space="preserve">
     <value>Notification de DocSpace.</value>
   </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>Notification DocSpace. Le formulaire est rempli</value>
+  </data>
   <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
     <value>Notification de DocSpace.</value>
+  </data>
+  <data name="subject_MailMergeEnd" xml:space="preserve">
+    <value>Documents. Diffusion est terminée.</value>
+  </data>
+  <data name="subject_MailMergeEnd_push" xml:space="preserve">
+    <value>L'envoi est terminé.</value>
+  </data>
+  <data name="subject_RoomRemoved" xml:space="preserve">
+    <value>Notification DocSpace. Salle supprimée</value>
+  </data>
+  <data name="subject_ShareDocument" xml:space="preserve">
+    <value>Documents. Accès accordé au document $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareDocument_push" xml:space="preserve">
+    <value>Accès accordé au document : $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareDocument_tg" xml:space="preserve">
+    <value>Documents. Accès accordé au document [$DocumentTitle]($DocumentURL)</value>
+  </data>
+  <data name="subject_ShareEncryptedDocument_push" xml:space="preserve">
+    <value>Accès accordé au document chiffré : $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareFolder" xml:space="preserve">
+    <value>Documents. Accès accordé au dossier $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareFolder_push" xml:space="preserve">
+    <value>Accès autorisé au dossier : $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareFolder_tg" xml:space="preserve">
+    <value>Documents. Accès accordé au dossier [$DocumentTitle]($DocumentURL)</value>
   </data>
   <data name="subject_StoppedFormFilling" xml:space="preserve">
     <value>Notification de DocSpace.</value>

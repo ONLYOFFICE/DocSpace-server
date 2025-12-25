@@ -117,14 +117,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ButtonSetPassword" xml:space="preserve">
-    <value>Nastavi geslo</value>
-  </data>
-  <data name="BackupNotFound" xml:space="preserve">
-    <value>Varnostna datoteka ni veljavna. Uporabite datoteko, ustvarjeno na istem portalu.</value>
-  </data>
-  <data name="LargeBackup" xml:space="preserve">
-    <value>Varnostna kopija je večja od celotne velikosti portala</value>
+  <data name="AutoBackup" xml:space="preserve">
+    <value>Samodejno varnostno kopiranje</value>
   </data>
   <data name="BackupException" xml:space="preserve">
     <value>Med ustvarjanjem varnostne kopije je šlo nekaj narobe. Poskusite jo znova ustvariti ali se obrnite na podporo.</value>
@@ -132,11 +126,11 @@
   <data name="BackupInvalid" xml:space="preserve">
     <value>Varnostna datoteka ni veljavna.</value>
   </data>
-  <data name="RestoreException" xml:space="preserve">
-    <value>Med obnavljanjem varnostne kopije je šlo nekaj narobe. Poskusite jo znova obnoviti ali se obrnite na podporo.</value>
+  <data name="BackupMissingFilesWarning" xml:space="preserve">
+    <value>Nekatere datoteke niso bile vključene v varnostno kopijo. Za več podrobnosti preverite {0}</value>
   </data>
-  <data name="AutoBackup" xml:space="preserve">
-    <value>Samodejno varnostno kopiranje</value>
+  <data name="BackupNotFound" xml:space="preserve">
+    <value>Varnostna datoteka ni veljavna. Uporabite datoteko, ustvarjeno na istem portalu.</value>
   </data>
   <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
     <value>Custom cloud</value>
@@ -156,7 +150,13 @@
   <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
     <value>Shranjevanje pri zunanjem ponudniku</value>
   </data>
-  <data name="BackupMissingFilesWarning" xml:space="preserve">
-    <value>Nekatere datoteke niso bile vključene v varnostno kopijo. Za več podrobnosti preverite {0}</value>
+  <data name="ButtonSetPassword" xml:space="preserve">
+    <value>Nastavi geslo</value>
+  </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>Varnostna kopija je večja od celotne velikosti portala</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>Med obnavljanjem varnostne kopije je šlo nekaj narobe. Poskusite jo znova obnoviti ali se obrnite na podporo.</value>
   </data>
 </root>

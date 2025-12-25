@@ -1,5 +1,64 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -53,10 +112,10 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ActionCol" xml:space="preserve">
     <value>Darbība</value>
@@ -66,6 +125,12 @@
   </data>
   <data name="ActionTypeCol" xml:space="preserve">
     <value>Darbības veids</value>
+  </data>
+  <data name="AddedRoomTags" xml:space="preserve">
+    <value>Pievienotas atzīmes: [{1}]</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>MCP serveris {0} pievienots aģentam</value>
   </data>
   <data name="AdministratorAdded" xml:space="preserve">
     <value>Pievienots administrators: {0}</value>
@@ -79,8 +144,41 @@
   <data name="AdministratorOpenedFullAccess" xml:space="preserve">
     <value>Administratori [{0}]. Atvērta pilnā piekļuve</value>
   </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>Aģents izveidots</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>Aģents dzēsts</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>Aģents pārdēvēts: {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>Aģenti</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>MI nodrošinātājs izveidots: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>MI nodrošinātājs dzēsts: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>MI nodrošinātājs atjaunināts: {0}</value>
+  </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Izveidota lietotāja Api atslēga: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Lietotāja Api atslēga Izdzēsta: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Lietotāja Api atslēga Atjaunināts: {0}</value>
+  </data>
   <data name="AttachActionType" xml:space="preserve">
     <value>Pievienot</value>
+  </data>
+  <data name="AuditSettingsUpdated" xml:space="preserve">
+    <value>Audita mūža iestatījumi ir atjaunināti</value>
   </data>
   <data name="AuditTrailReportDownloaded" xml:space="preserve">
     <value>Audita žurnāla atskaite lejupielādēta</value>
@@ -88,11 +186,29 @@
   <data name="AuditTrailReportName" xml:space="preserve">
     <value>Audita žurnāla atskaite ({0}-{1})</value>
   </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Autorizācijas saite ir aktivizēta</value>
+  </data>
   <data name="AuthorizationKeysSetting" xml:space="preserve">
     <value>Trešās puses autorizācijas atslēgas atjauninātas</value>
   </data>
+  <data name="BackupStarted" xml:space="preserve">
+    <value>Uzsākt rezerves kopēšanu</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Reklāmas baneru redzamības iestatījumi ir mainīti</value>
+  </data>
   <data name="BrowserCol" xml:space="preserve">
     <value>Pārlūks</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Klienta {0} aktivizācija ir mainīta</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Klienta {0} redzamība ir mainīta</value>
+  </data>
+  <data name="CityCol" xml:space="preserve">
+    <value>Pilsēta</value>
   </data>
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Mainīta krāsu tēma</value>
@@ -106,11 +222,62 @@
   <data name="CopyActionType" xml:space="preserve">
     <value>Kopēt</value>
   </data>
+  <data name="CountryCol" xml:space="preserve">
+    <value>Valsts</value>
+  </data>
   <data name="CreateActionType" xml:space="preserve">
     <value>Izveidot</value>
   </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Klients ir izveidots</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Klienta darbība veikta</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Klienta darbību ziņojums lejupielādēts</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Klienta abonements atjaunināts: {0}</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Klienta maka iespējoto pakalpojumu iestatījumi ir atjaunināti</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Klienta maks papildināts: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Klienta maka papildināšanas iestatījumi atjaunināti</value>
+  </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>Personalizētās navigācijas uzstādījumi atjaunināti</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>MI aģenti [{0}]. Iestatiet pielāgotu krātuves kvotu MI aģentiem : {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>MI aģenti [{0}]. Iestatiet noklusējuma krātuves kvotu MI aģentiem : {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>MI aģenti [{0}]. Krātuves kvota MI aģentiem atspējota</value>
+  </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Telpas [{0}]. Iestatiet pielāgotu krātuves kvotu telpām: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Telpas [{0}]. Iestatiet noklusējuma krātuves kvotu telpām: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Telpas [{0}]. Atspējota krātuves kvota telpām</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Lietotāji [{0}]. Iestatiet pielāgotu krātuves kvotu lietotājiem: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Lietotāji [{0}]. Iestatiet noklusējuma krātuves kvotu lietotājiem: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Lietotāji [{0}]. Atspējota krātuves kvota lietotājiem</value>
   </data>
   <data name="DateCol" xml:space="preserve">
     <value>Datums</value>
@@ -121,8 +288,20 @@
   <data name="DeleteActionType" xml:space="preserve">
     <value>Dzēst</value>
   </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Klients {0} ir dzēsts</value>
+  </data>
+  <data name="DeletedRoomTags" xml:space="preserve">
+    <value>Izdzēstās atzīmes: [{1}]</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>MCP serveris {0} dzēsts no aģenta</value>
+  </data>
   <data name="DetachActionType" xml:space="preserve">
     <value>Atvienot</value>
+  </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Izstrādātāja rīku piekļuves iestatījumi mainīti</value>
   </data>
   <data name="DnsSettingsUpdated" xml:space="preserve">
     <value>Atjaunināti DNS uzstādījumi</value>
@@ -130,11 +309,17 @@
   <data name="DocumentServiceLocationSetting" xml:space="preserve">
     <value>Dokumentu servisa atrašanās vieta atjaunināta</value>
   </data>
+  <data name="DocumentsForcesave" xml:space="preserve">
+    <value>Piespiedu saglabāšanas iestatījumi ir atjaunināti</value>
+  </data>
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Atjaunināti pārrakstīšanas uzstādījumi</value>
   </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Iestatījumi</value>
+  </data>
+  <data name="DocumentsStoreForcesave" xml:space="preserve">
+    <value>Veikala piespiedu saglabāšanas iestatījumi ir atjaunināti</value>
   </data>
   <data name="DocumentsThirdPartySettingsUpdated" xml:space="preserve">
     <value>Trešās puses pakalpojumi atjaunināti</value>
@@ -166,6 +351,12 @@
   <data name="FileCreatedVersion" xml:space="preserve">
     <value>Faili [{0}]. Revīzija {1}. Izveidota versija</value>
   </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>Failu: {0}. Atslēgts pielāgotais filtrs</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>Failu: {0}. Ieslēgts pielāgotais filtrs</value>
+  </data>
   <data name="FileDeleted" xml:space="preserve">
     <value>Dzēsts fails: {0}</value>
   </data>
@@ -178,11 +369,26 @@
   <data name="FileDownloadedAs" xml:space="preserve">
     <value>Faili [{0}]. Lejupielādēts kā: {1}</value>
   </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Faili [{0}]. Ārējā saite izveidota: {1}. Loma: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Faili [{0}]. Ārējā saite dzēsta: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Faili [{0}]. Ārējā saite atjaunināta: {1}. Loma: {2}</value>
+  </data>
   <data name="FileImported" xml:space="preserve">
     <value>Mapes [{0}]. Fails importēts: {1}. Provaideris: {2}</value>
   </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Fails: {0}. Indekss ir mainīts no {1} uz {2}</value>
+  </data>
   <data name="FileLocked" xml:space="preserve">
     <value>Bloķēts fails: {0}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Fails pievienots izlasei: {0}</value>
   </data>
   <data name="FileMoved" xml:space="preserve">
     <value>Faili [{0}]. Pārvietots no mapes "{1}" mapē: "{2}"</value>
@@ -192,6 +398,15 @@
   </data>
   <data name="FileMovedWithOverwriting" xml:space="preserve">
     <value>Faili [{0}]. Pārvietots ar pārrakstīšanu no mapes "{1}" mapē: "{2}"</value>
+  </data>
+  <data name="FileOpenedForChange" xml:space="preserve">
+    <value>Fails atvērts izmaiņām: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Fails noņemts no izlases: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Fails noņemts no "Kopīgots ar mani": {0}</value>
   </data>
   <data name="FileRenamed" xml:space="preserve">
     <value>Pārdēvēts fails: {0}</value>
@@ -204,6 +419,9 @@
   </data>
   <data name="FileSendAccessLink" xml:space="preserve">
     <value>Nosūtīta piekļuves saite failam [{0}]. Saņēmēji: [{1}]</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>bytes,KB,MB,GB, TB</value>
   </data>
   <data name="FilesModule" xml:space="preserve">
     <value>Faili</value>
@@ -220,11 +438,20 @@
   <data name="FileUpdatedAccess" xml:space="preserve">
     <value>Faili [{0}]. Atjaunināta piekļuve</value>
   </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Faili [{0}]. Piekļuve {1} atjaunināta. Loma: {2}</value>
+  </data>
   <data name="FileUpdatedRevisionComment" xml:space="preserve">
     <value>Faili [{0}]. Revīzija {1}. Komentārs atjaunināts</value>
   </data>
   <data name="FileUploaded" xml:space="preserve">
     <value>Augšupielādēts fails: {0}</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Fails augšupielādēts ar pārrakstīšanu: {0}</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>Faili [{0}]. Versija dzēsta: {1}</value>
   </data>
   <data name="FolderCopied" xml:space="preserve">
     <value>Mapes [{0}]. Iekopētas mapē: {1}</value>
@@ -238,6 +465,24 @@
   <data name="FolderDeleted" xml:space="preserve">
     <value>Mape dzēsta: {0}</value>
   </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Mape lejupielādēta: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Mapes [{0}]. Ārējā saite izveidota: {1}. Loma: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Mapes [{0}]. Ārējā saite dzēsta: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Mapes [{0}]. Ārējā saite atjaunināta: {1}. Loma: {2}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Mape: {0}. Indekss ir mainīts no {1} uz {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Mape: {0}. Indeksi ir pārkārtoti</value>
+  </data>
   <data name="FolderMoved" xml:space="preserve">
     <value>Mapes [{0}]. Pārvietots uz mapi: {1}</value>
   </data>
@@ -246,6 +491,9 @@
   </data>
   <data name="FolderMovedWithOverwriting" xml:space="preserve">
     <value>Mapes [{0}]. Pārvietots ar pārrakstīšanu mapē: {1}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Mape noņemta no "Kopīgots ar mani": {0}</value>
   </data>
   <data name="FolderRenamed" xml:space="preserve">
     <value>Mape pārdēvēta: {0}</value>
@@ -256,11 +504,38 @@
   <data name="FolderUpdatedAccess" xml:space="preserve">
     <value>Mapes [{0}]. Atjaunināta piekļuve</value>
   </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Mapes [{0}]. Piekļuve {1} atjaunināta. Loma: {2}</value>
+  </data>
   <data name="FollowActionType" xml:space="preserve">
     <value>Sekot</value>
   </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Lietotāji [{0}]. Pilnībā aizpildīta veidlapa: {1}</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>Fails ir atvērts aizpildīšanai: {0}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Lietotāji [{0}]. Veidlapas aizpildītā daļa: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Lietotāji [{0}]. Sāka aizpildīšanu: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Lietotāji [{0}]. Veidlapa apturēta: {1}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Lietotāji [{0}]. Veidlapa ir iesniegta: {1}</value>
+  </data>
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Sphinx uzstādījumi atjaunināti</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Autorizācijas kods klientam {0} ir izveidots</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Piekļuves pilnvara klientam {0} ir izveidota</value>
   </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Sagaidīšanas lapas uzstādījumi atjaunināti</value>
@@ -298,14 +573,29 @@
   <data name="LanguageSettingsUpdated" xml:space="preserve">
     <value>Valodas iestatījumi atjaunināti</value>
   </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>LDAP autentifikācija ir atspējota</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>LDAP autentifikācija ir iespējota</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>LDAP sinhronizācija pabeigta</value>
+  </data>
   <data name="LicenseKeyUploaded" xml:space="preserve">
     <value>Licences atslēga ir augšupielādēta</value>
   </data>
   <data name="LinkActionType" xml:space="preserve">
     <value>Saite</value>
   </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Novietojums</value>
+  </data>
   <data name="LoginFail" xml:space="preserve">
     <value>Neizdevusies ieeja</value>
+  </data>
+  <data name="LoginFailBruteForce" xml:space="preserve">
+    <value>Neizdevās pieteikties. Pārāk daudz mēģinājumu</value>
   </data>
   <data name="LoginFailDisabledProfile" xml:space="preserve">
     <value>Ieeja neizdevās. Profils ir atspējots</value>
@@ -315,6 +605,9 @@
   </data>
   <data name="LoginFailIpSecurity" xml:space="preserve">
     <value>IP drošība: neizdevās ieiet</value>
+  </data>
+  <data name="LoginFailRecaptcha" xml:space="preserve">
+    <value>Neizdevās pieteikties. Recaptcha ir nederīgs</value>
   </data>
   <data name="LoginFailSocialAccountNotFound" xml:space="preserve">
     <value>Ieeja neizdevās. Nav atrasts saistītais sociālā tīkla konts</value>
@@ -328,11 +621,17 @@
   <data name="LoginFailViaApiSocialAccount" xml:space="preserve">
     <value>Ieeja ar API un sociālo mediju neizdevās</value>
   </data>
+  <data name="LoginFailViaApiTfa" xml:space="preserve">
+    <value>Neizdevās pieteikties, izmantojot API un autentificētāja lietojumprogrammu</value>
+  </data>
   <data name="LoginFailViaSms" xml:space="preserve">
     <value>Ieeja ar SMS neizdevās</value>
   </data>
   <data name="LoginFailViaSSO" xml:space="preserve">
     <value>Ieeja ar SSO neizdevās</value>
+  </data>
+  <data name="LoginFailViaTfaApp" xml:space="preserve">
+    <value>Pieteikšanās, izmantojot autentificētāja lietojumprogrammu, neizdevās</value>
   </data>
   <data name="LoginHistoryReportDownloaded" xml:space="preserve">
     <value>Pieteikšanās vēstures atskaite lejupielādēta</value>
@@ -343,14 +642,29 @@
   <data name="LoginSuccess" xml:space="preserve">
     <value>Veiksmīga pieteikšanās</value>
   </data>
-  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Ieeja ar sociālā tīkla kontu izdevās: {0}</value>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Ieeja ar sociālā tīkla kontu izdevās</value>
+  </data>
+  <data name="LoginSuccessSocialApp" xml:space="preserve">
+    <value>Veiksmīga pieteikšanās, izmantojot sociālo lietojumprogrammu</value>
   </data>
   <data name="LoginSuccessViaApi" xml:space="preserve">
     <value>Veiksmīga ieeja ar API</value>
   </data>
   <data name="LoginSuccessViaApiSms" xml:space="preserve">
     <value>Veiksmīga ieeja ar API un SMS kodu</value>
+  </data>
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
+    <value>Ieeja ar sociālā tīkla kontu izdevās: {0}</value>
+  </data>
+  <data name="LoginSuccessViaApiTfa" xml:space="preserve">
+    <value>Veiksmīga pieteikšanās, izmantojot API un autentificētāja lietojumprogrammu</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Pierakstīšanās izdevusies, izmantojot OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Pierakstīšanās izdevusies, izmantojot pieteikumvārdu un paroli</value>
   </data>
   <data name="LoginSuccessViaSms" xml:space="preserve">
     <value>Ieeja ar SMS izdevās</value>
@@ -360,6 +674,9 @@
   </data>
   <data name="LoginSuccessViaSSO" xml:space="preserve">
     <value>Veiksmīga ieeja ar SSO</value>
+  </data>
+  <data name="LoginSuccesViaTfaApp" xml:space="preserve">
+    <value>Veiksmīga pieteikšanās, izmantojot autentificētāja lietojumprogrammu</value>
   </data>
   <data name="Logout" xml:space="preserve">
     <value>Iziet</value>
@@ -403,6 +720,15 @@
   <data name="PortalDeleted" xml:space="preserve">
     <value>Portāls dzēsts</value>
   </data>
+  <data name="PortalRenamed" xml:space="preserve">
+    <value>Portāls pārdēvēts</value>
+  </data>
+  <data name="PrivacyRoomDisable" xml:space="preserve">
+    <value>Privāta telpa ir atspējota</value>
+  </data>
+  <data name="PrivacyRoomEnable" xml:space="preserve">
+    <value>Privāta telpa ir iespējota</value>
+  </data>
   <data name="ProductAccessOpened" xml:space="preserve">
     <value>Produkti [{0}]. Atvērta piekļuve</value>
   </data>
@@ -427,14 +753,164 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Produktu saraksts atjaunināts</value>
   </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Iestatiet noklusējuma krātuves kvotu MI aģentiem: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Noklusējuma krātuves kvota MI aģentiem atspējota</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Iestatīt noklusējuma krātuves kvotu: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Atspējota noklusējuma krātuves kvota</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Iestatiet noklusējuma krātuves kvotu telpām: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Atspējota noklusējuma krātuves kvota telpām</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Iestatiet noklusējuma krātuves kvotu lietotājiem: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Atspējota noklusējuma krātuves kvota lietotājiem</value>
+  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Pārzīmēšana</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Privātā atslēga klientam {0} ir izveidota</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>Vektorizācijas iestatījumi ir atiestatīti</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>Iestatījumi meklēšanai tīmeklī ir atiestatīti</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Klienta {0} piekļuve ir anulēta</value>
+  </data>
+  <data name="RoomArchived" xml:space="preserve">
+    <value>Telpa ir arhivēta</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Telpa kopēta: {0}</value>
+  </data>
+  <data name="RoomCreated" xml:space="preserve">
+    <value>Telpa ir izveidota</value>
+  </data>
+  <data name="RoomCreateUser" xml:space="preserve">
+    <value>Pievienots lietotājs: {0}. Loma: {1}</value>
+  </data>
+  <data name="RoomDeleted" xml:space="preserve">
+    <value>Telpa ir izdzēsta</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Istaba: {0}. Aizliegt lejupielādi ir atspējots</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Istaba: {0}. Aizliegt lejupielādi ir iespējots</value>
+  </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>Izveidota ārējā saite: {0}. Loma: {1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>Izdzēsta ārējā saite: {0}</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Ārējā saite atsaukta: {1}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>Atjaunināta ārējā saite: {0}. Loma: {1}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Pievienotā grupa: {0}. Loma: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Dzēsta grupa: {0}</value>
+  </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Dokumentos saglabātā telpas rādītāja eksportēšana</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Telpu indeksēšana ir atspējota</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Telpu indeksēšana ir iespējota</value>
+  </data>
+  <data name="RoomInvitationLinkCreated" xml:space="preserve">
+    <value>Saite ir izveidota. Loma: {1}</value>
+  </data>
+  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
+    <value>Saite ir izdzēsta</value>
+  </data>
+  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
+    <value>Saite ir atjaunināta. Loma: {1}</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Uzaicinājums ir vēlreiz nosūtīts: {0}</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>Lietderīgās lietošanas laiks ir atspējots</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Lietderīgās lietošanas laiks ir iestatīts. Vērtība: {0}. Periods: {1}. Neatgriezeniski dzēst: {2}</value>
+  </data>
+  <data name="RoomLogoCreated" xml:space="preserve">
+    <value>Logotips ir izveidots</value>
+  </data>
+  <data name="RoomLogoDeleted" xml:space="preserve">
+    <value>Logotips ir izdzēsts</value>
+  </data>
+  <data name="RoomRemoveUser" xml:space="preserve">
+    <value>Dzēsts lietotājs: {0}</value>
+  </data>
+  <data name="RoomRenamed" xml:space="preserve">
+    <value>Telpa ir pārdēvēta: {0}</value>
+  </data>
+  <data name="RoomsModule" xml:space="preserve">
+    <value>Telpas</value>
+  </data>
+  <data name="RoomUnarchived" xml:space="preserve">
+    <value>Numurs ir atarhivēts</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} iecelts: {1}</value>
+  </data>
+  <data name="RoomUpdateAccessForUser" xml:space="preserve">
+    <value>{0} iecelts: {1}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Istaba: {0}. Ūdenszīme ir atspējota</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Istaba: {0}. Ūdenszīme ir iespējota</value>
   </data>
   <data name="SendActionType" xml:space="preserve">
     <value>Nosūtīt</value>
   </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>Lietotājs (-a) {0} nosūtīja uzaicinājumu {1} pievienoties šim DocSpace</value>
+  </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Nosūtītas ielūguma instrukcijas: {0}</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>MCP serveris izveidots: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>MCP serveris dzēsts: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>MCP serveris atspējots: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>MCP serveris iespējots: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>MCP serveris atjaunināts: {0}</value>
   </data>
   <data name="SessionCompleted" xml:space="preserve">
     <value>Sesija pabeigta</value>
@@ -445,20 +921,35 @@
   <data name="SettingsModule" xml:space="preserve">
     <value>Iestatījumi</value>
   </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>Vektorizācijas iestatījumi ir konfigurēti. Nodrošinātājs: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>Iestatījumi meklēšanai tīmeklī ir konfigurēti. Meklētājprogramma: {0}</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO atspējots</value>
   </data>
   <data name="SSOEnabled" xml:space="preserve">
     <value>SSO iespējots</value>
   </data>
-  <data name="BackupStarted" xml:space="preserve">
-    <value>Uzsākt rezerves kopēšanu</value>
+  <data name="StartStorageDecryption" xml:space="preserve">
+    <value>Sākt krātuves atšifrēšanu</value>
+  </data>
+  <data name="StartStorageEncryption" xml:space="preserve">
+    <value>Sākt krātuves šifrēšanu</value>
   </data>
   <data name="StartTransferSetting" xml:space="preserve">
     <value>Uzsākt portāla apgabala pārnesi</value>
   </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>Sistēmas konts</value>
+  </data>
+  <data name="TagCreated" xml:space="preserve">
+    <value>Atzīme ir izveidota: {0}</value>
+  </data>
+  <data name="TagsDeleted" xml:space="preserve">
+    <value>Atzīmes ir izdzēstas: {0}</value>
   </data>
   <data name="TargetIdCol" xml:space="preserve">
     <value>Mērķa ID</value>
@@ -481,8 +972,20 @@
   <data name="TimeZoneSettingsUpdated" xml:space="preserve">
     <value>Laika zonas uzstādījumi</value>
   </data>
+  <data name="TrashEmptied" xml:space="preserve">
+    <value>Atkritne iztukšota</value>
+  </data>
   <data name="TrustedMailDomainSettingsUpdated" xml:space="preserve">
     <value>Atjaunināti uzticamo pasta kontu domēnu iestatījumi</value>
+  </data>
+  <data name="TwoFactorAuthenticationSettingsDisabled" xml:space="preserve">
+    <value>Divfaktoru autentifikācijas iestatījumi atjaunināti: divfaktoru autentifikācija tika atspējota</value>
+  </data>
+  <data name="TwoFactorAuthenticationSettingsEnabledBySms" xml:space="preserve">
+    <value>Divfaktoru autentifikācijas iestatījumi ir atjaunināti: SMS apstiprinājums tika iespējots</value>
+  </data>
+  <data name="TwoFactorAuthenticationSettingsEnabledByTfaApp" xml:space="preserve">
+    <value>Divfaktoru autentifikācijas iestatījumi ir atjaunināti: autentifikācijas lietojumprogramma tika iespējota</value>
   </data>
   <data name="TwoFactorAuthenticationSettingsUpdated" xml:space="preserve">
     <value>Divu faktoru autentifikācijas uzstādījumi ir atjaunināti</value>
@@ -501,6 +1004,9 @@
   </data>
   <data name="UpdateActionType" xml:space="preserve">
     <value>Atjaunināt</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Klients {0} ir atjaunināts</value>
   </data>
   <data name="UploadActionType" xml:space="preserve">
     <value>Augšupielādēt</value>
@@ -565,6 +1071,12 @@
   <data name="UsersUpdatedType" xml:space="preserve">
     <value>Lietotāji [{0}]. Atjaunināts veids</value>
   </data>
+  <data name="UserTfaDisconnected" xml:space="preserve">
+    <value>Autentificētāja lietojumprogramma ir atvienota: {0}</value>
+  </data>
+  <data name="UserTfaGenerateCodes" xml:space="preserve">
+    <value>Tiek izveidoti jauni rezerves kodi</value>
+  </data>
   <data name="UserUnlinkedSocialAccount" xml:space="preserve">
     <value>Atvienots sociālā tīkla konts. Provaideris: {0}</value>
   </data>
@@ -573,6 +1085,9 @@
   </data>
   <data name="UserUpdatedAvatarThumbnails" xml:space="preserve">
     <value>Lietotāji [{0}]. Atjaunots avatara sīktēls</value>
+  </data>
+  <data name="UserUpdatedEmail" xml:space="preserve">
+    <value>E-pasta adrese ir atjaunināta</value>
   </data>
   <data name="UserUpdatedLanguage" xml:space="preserve">
     <value>Valoda atjaunināta</value>
@@ -583,306 +1098,6 @@
   <data name="UserUpdatedPassword" xml:space="preserve">
     <value>Parole atjaunināta</value>
   </data>
-  <data name="RoomCreated" xml:space="preserve">
-    <value>Telpa ir izveidota</value>
-  </data>
-  <data name="RoomsModule" xml:space="preserve">
-    <value>Telpas</value>
-  </data>
-  <data name="TrashEmptied" xml:space="preserve">
-    <value>Atkritne iztukšota</value>
-  </data>
-  <data name="AddedRoomTags" xml:space="preserve">
-    <value>Pievienotas atzīmes: [{1}]</value>
-  </data>
-  <data name="DeletedRoomTags" xml:space="preserve">
-    <value>Izdzēstās atzīmes: [{1}]</value>
-  </data>
-  <data name="RoomArchived" xml:space="preserve">
-    <value>Telpa ir arhivēta</value>
-  </data>
-  <data name="RoomCreateUser" xml:space="preserve">
-    <value>Pievienots lietotājs: {0}. Loma: {1}</value>
-  </data>
-  <data name="RoomDeleted" xml:space="preserve">
-    <value>Telpa ir izdzēsta</value>
-  </data>
-  <data name="RoomInvitationLinkCreated" xml:space="preserve">
-    <value>Saite ir izveidota. Loma: {1}</value>
-  </data>
-  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
-    <value>Saite ir izdzēsta</value>
-  </data>
-  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
-    <value>Saite ir atjaunināta. Loma: {1}</value>
-  </data>
-  <data name="RoomLogoCreated" xml:space="preserve">
-    <value>Logotips ir izveidots</value>
-  </data>
-  <data name="RoomLogoDeleted" xml:space="preserve">
-    <value>Logotips ir izdzēsts</value>
-  </data>
-  <data name="RoomRemoveUser" xml:space="preserve">
-    <value>Dzēsts lietotājs: {0}</value>
-  </data>
-  <data name="RoomRenamed" xml:space="preserve">
-    <value>Telpa ir pārdēvēta: {0}</value>
-  </data>
-  <data name="RoomUnarchived" xml:space="preserve">
-    <value>Numurs ir atarhivēts</value>
-  </data>
-  <data name="RoomUpdateAccessForUser" xml:space="preserve">
-    <value>{0} iecelts: {1}</value>
-  </data>
-  <data name="TagCreated" xml:space="preserve">
-    <value>Atzīme ir izveidota: {0}</value>
-  </data>
-  <data name="TagsDeleted" xml:space="preserve">
-    <value>Atzīmes ir izdzēstas: {0}</value>
-  </data>
-  <data name="AuditSettingsUpdated" xml:space="preserve">
-    <value>Audita mūža iestatījumi ir atjaunināti</value>
-  </data>
-  <data name="DocumentsForcesave" xml:space="preserve">
-    <value>Piespiedu saglabāšanas iestatījumi ir atjaunināti</value>
-  </data>
-  <data name="DocumentsStoreForcesave" xml:space="preserve">
-    <value>Veikala piespiedu saglabāšanas iestatījumi ir atjaunināti</value>
-  </data>
-  <data name="LoginFailBruteForce" xml:space="preserve">
-    <value>Neizdevās pieteikties. Pārāk daudz mēģinājumu</value>
-  </data>
-  <data name="LoginFailRecaptcha" xml:space="preserve">
-    <value>Neizdevās pieteikties. Recaptcha ir nederīgs</value>
-  </data>
-  <data name="LoginFailViaApiTfa" xml:space="preserve">
-    <value>Neizdevās pieteikties, izmantojot API un autentificētāja lietojumprogrammu</value>
-  </data>
-  <data name="LoginFailViaTfaApp" xml:space="preserve">
-    <value>Pieteikšanās, izmantojot autentificētāja lietojumprogrammu, neizdevās</value>
-  </data>
-  <data name="LoginSuccessSocialApp" xml:space="preserve">
-    <value>Veiksmīga pieteikšanās, izmantojot sociālo lietojumprogrammu</value>
-  </data>
-  <data name="LoginSuccessViaApiTfa" xml:space="preserve">
-    <value>Veiksmīga pieteikšanās, izmantojot API un autentificētāja lietojumprogrammu</value>
-  </data>
-  <data name="LoginSuccesViaTfaApp" xml:space="preserve">
-    <value>Veiksmīga pieteikšanās, izmantojot autentificētāja lietojumprogrammu</value>
-  </data>
-  <data name="PrivacyRoomDisable" xml:space="preserve">
-    <value>Privāta telpa ir atspējota</value>
-  </data>
-  <data name="PrivacyRoomEnable" xml:space="preserve">
-    <value>Privāta telpa ir iespējota</value>
-  </data>
-  <data name="StartStorageDecryption" xml:space="preserve">
-    <value>Sākt krātuves atšifrēšanu</value>
-  </data>
-  <data name="StartStorageEncryption" xml:space="preserve">
-    <value>Sākt krātuves šifrēšanu</value>
-  </data>
-  <data name="TwoFactorAuthenticationSettingsDisabled" xml:space="preserve">
-    <value>Divfaktoru autentifikācijas iestatījumi atjaunināti: divfaktoru autentifikācija tika atspējota</value>
-  </data>
-  <data name="TwoFactorAuthenticationSettingsEnabledBySms" xml:space="preserve">
-    <value>Divfaktoru autentifikācijas iestatījumi ir atjaunināti: SMS apstiprinājums tika iespējots</value>
-  </data>
-  <data name="TwoFactorAuthenticationSettingsEnabledByTfaApp" xml:space="preserve">
-    <value>Divfaktoru autentifikācijas iestatījumi ir atjaunināti: autentifikācijas lietojumprogramma tika iespējota</value>
-  </data>
-  <data name="UserTfaDisconnected" xml:space="preserve">
-    <value>Autentificētāja lietojumprogramma ir atvienota: {0}</value>
-  </data>
-  <data name="UserTfaGenerateCodes" xml:space="preserve">
-    <value>Tiek izveidoti jauni rezerves kodi</value>
-  </data>
-  <data name="UserUpdatedEmail" xml:space="preserve">
-    <value>E-pasta adrese ir atjaunināta</value>
-  </data>
-  <data name="CityCol" xml:space="preserve">
-    <value>Pilsēta</value>
-  </data>
-  <data name="CountryCol" xml:space="preserve">
-    <value>Valsts</value>
-  </data>
-  <data name="RoomExternalLinkCreated" xml:space="preserve">
-    <value>Izveidota ārējā saite: {0}. Loma: {1}</value>
-  </data>
-  <data name="RoomExternalLinkDeleted" xml:space="preserve">
-    <value>Izdzēsta ārējā saite: {0}</value>
-  </data>
-  <data name="RoomExternalLinkUpdated" xml:space="preserve">
-    <value>Atjaunināta ārējā saite: {0}. Loma: {1}</value>
-  </data>
-  <data name="FileOpenedForChange" xml:space="preserve">
-    <value>Fails atvērts izmaiņām: {0}</value>
-  </data>
-  <data name="PortalRenamed" xml:space="preserve">
-    <value>Portāls pārdēvēts</value>
-  </data>
-  <data name="FileSizePostfix" xml:space="preserve">
-    <value>bytes,KB,MB,GB, TB</value>
-  </data>
-  <data name="FileUploadedWithOverwriting" xml:space="preserve">
-    <value>Fails augšupielādēts ar pārrakstīšanu: {0}</value>
-  </data>
-  <data name="QuotaPerPortalChanged" xml:space="preserve">
-    <value>Iestatīt noklusējuma krātuves kvotu: {0}</value>
-  </data>
-  <data name="QuotaPerPortalDisabled" xml:space="preserve">
-    <value>Atspējota noklusējuma krātuves kvota</value>
-  </data>
-  <data name="QuotaPerRoomChanged" xml:space="preserve">
-    <value>Iestatiet noklusējuma krātuves kvotu telpām: {0}</value>
-  </data>
-  <data name="QuotaPerRoomDisabled" xml:space="preserve">
-    <value>Atspējota noklusējuma krātuves kvota telpām</value>
-  </data>
-  <data name="QuotaPerUserChanged" xml:space="preserve">
-    <value>Iestatiet noklusējuma krātuves kvotu lietotājiem: {0}</value>
-  </data>
-  <data name="QuotaPerUserDisabled" xml:space="preserve">
-    <value>Atspējota noklusējuma krātuves kvota lietotājiem</value>
-  </data>
-  <data name="RoomCopied" xml:space="preserve">
-    <value>Telpa kopēta: {0}</value>
-  </data>
-  <data name="RoomGroupAdded" xml:space="preserve">
-    <value>Pievienotā grupa: {0}. Loma: {1}</value>
-  </data>
-  <data name="RoomGroupRemove" xml:space="preserve">
-    <value>Dzēsta grupa: {0}</value>
-  </data>
-  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
-    <value>{0} iecelts: {1}</value>
-  </data>
-  <data name="SendJoinInvite" xml:space="preserve">
-    <value>Lietotājs (-a) {0} nosūtīja uzaicinājumu {1} pievienoties šim DocSpace</value>
-  </data>
-  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
-    <value>Telpas [{0}]. Iestatiet pielāgotu krātuves kvotu telpām: {1}</value>
-  </data>
-  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
-    <value>Telpas [{0}]. Iestatiet noklusējuma krātuves kvotu telpām: {1}</value>
-  </data>
-  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
-    <value>Telpas [{0}]. Atspējota krātuves kvota telpām</value>
-  </data>
-  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
-    <value>Lietotāji [{0}]. Iestatiet pielāgotu krātuves kvotu lietotājiem: {1}</value>
-  </data>
-  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
-    <value>Lietotāji [{0}]. Iestatiet noklusējuma krātuves kvotu lietotājiem: {1}</value>
-  </data>
-  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
-    <value>Lietotāji [{0}]. Atspējota krātuves kvota lietotājiem</value>
-  </data>
-  <data name="FormOpenedForFilling" xml:space="preserve">
-    <value>Fails ir atvērts aizpildīšanai: {0}</value>
-  </data>
-  <data name="FormSubmit" xml:space="preserve">
-    <value>Lietotāji [{0}]. Veidlapa ir iesniegta: {1}</value>
-  </data>
-  <data name="RoomIndexExportSaved" xml:space="preserve">
-    <value>Dokumentos saglabātā telpas rādītāja eksportēšana</value>
-  </data>
-  <data name="ChangeClientActivation" xml:space="preserve">
-    <value>Klienta {0} aktivizācija ir mainīta</value>
-  </data>
-  <data name="ChangeClientVisibility" xml:space="preserve">
-    <value>Klienta {0} redzamība ir mainīta</value>
-  </data>
-  <data name="CreateClient" xml:space="preserve">
-    <value>Klients ir izveidots</value>
-  </data>
-  <data name="DeleteClient" xml:space="preserve">
-    <value>Klients {0} ir dzēsts</value>
-  </data>
-  <data name="FileIndexChanged" xml:space="preserve">
-    <value>Fails: {0}. Indekss ir mainīts no {1} uz {2}</value>
-  </data>
-  <data name="FolderIndexChanged" xml:space="preserve">
-    <value>Mape: {0}. Indekss ir mainīts no {1} uz {2}</value>
-  </data>
-  <data name="FolderIndexReordered" xml:space="preserve">
-    <value>Mape: {0}. Indeksi ir pārkārtoti</value>
-  </data>
-  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
-    <value>Autorizācijas kods klientam {0} ir izveidots</value>
-  </data>
-  <data name="GeneratePersonalAccessToken" xml:space="preserve">
-    <value>Piekļuves pilnvara klientam {0} ir izveidota</value>
-  </data>
-  <data name="RegenerateSecret" xml:space="preserve">
-    <value>Privātā atslēga klientam {0} ir izveidota</value>
-  </data>
-  <data name="RevokeUserClient" xml:space="preserve">
-    <value>Klienta {0} piekļuve ir anulēta</value>
-  </data>
-  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
-    <value>Istaba: {0}. Aizliegt lejupielādi ir atspējots</value>
-  </data>
-  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
-    <value>Istaba: {0}. Aizliegt lejupielādi ir iespējots</value>
-  </data>
-  <data name="RoomIndexingDisabled" xml:space="preserve">
-    <value>Telpu indeksēšana ir atspējota</value>
-  </data>
-  <data name="RoomIndexingEnabled" xml:space="preserve">
-    <value>Telpu indeksēšana ir iespējota</value>
-  </data>
-  <data name="RoomInviteResend" xml:space="preserve">
-    <value>Uzaicinājums ir vēlreiz nosūtīts: {0}</value>
-  </data>
-  <data name="RoomLifeTimeDisabled" xml:space="preserve">
-    <value>Lietderīgās lietošanas laiks ir atspējots</value>
-  </data>
-  <data name="RoomLifeTimeSet" xml:space="preserve">
-    <value>Lietderīgās lietošanas laiks ir iestatīts. Vērtība: {0}. Periods: {1}. Neatgriezeniski dzēst: {2}</value>
-  </data>
-  <data name="RoomWatermarkDisabled" xml:space="preserve">
-    <value>Istaba: {0}. Ūdenszīme ir atspējota</value>
-  </data>
-  <data name="RoomWatermarkSet" xml:space="preserve">
-    <value>Istaba: {0}. Ūdenszīme ir iespējota</value>
-  </data>
-  <data name="UpdateClient" xml:space="preserve">
-    <value>Klients {0} ir atjaunināts</value>
-  </data>
-  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
-    <value>Izstrādātāja rīku piekļuves iestatījumi mainīti</value>
-  </data>
-  <data name="FileCustomFilterDisabled" xml:space="preserve">
-    <value>Failu: {0}. Atslēgts pielāgotais filtrs</value>
-  </data>
-  <data name="FileCustomFilterEnabled" xml:space="preserve">
-    <value>Failu: {0}. Ieslēgts pielāgotais filtrs</value>
-  </data>
-  <data name="FileVersionRemoved" xml:space="preserve">
-    <value>Faili [{0}]. Versija dzēsta: {1}</value>
-  </data>
-  <data name="ApiKeyCreated" xml:space="preserve">
-    <value>Izveidota lietotāja Api atslēga: {0}</value>
-  </data>
-  <data name="ApiKeyDeleted" xml:space="preserve">
-    <value>Lietotāja Api atslēga Izdzēsta: {0}</value>
-  </data>
-  <data name="ApiKeyUpdated" xml:space="preserve">
-    <value>Lietotāja Api atslēga Atjaunināts: {0}</value>
-  </data>
-  <data name="FormCompletelyFilled" xml:space="preserve">
-    <value>Lietotāji [{0}]. Pilnībā aizpildīta veidlapa: {1}</value>
-  </data>
-  <data name="FormPartiallyFilled" xml:space="preserve">
-    <value>Lietotāji [{0}]. Veidlapas aizpildītā daļa: {1}</value>
-  </data>
-  <data name="FormStopped" xml:space="preserve">
-    <value>Lietotāji [{0}]. Veidlapa apturēta: {1}</value>
-  </data>
-  <data name="FormStartedToFill" xml:space="preserve">
-    <value>Lietotāji [{0}]. Sāka aizpildīšanu: {1}</value>
-  </data>
   <data name="WebhookCreated" xml:space="preserve">
     <value>Tīmekļa aizķere izveidota: {0}</value>
   </data>
@@ -891,161 +1106,5 @@
   </data>
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Tīmekļa aizķere atjaunināta: {0}</value>
-  </data>
-  <data name="AuthLinkActivated" xml:space="preserve">
-    <value>Autorizācijas saite ir aktivizēta</value>
-  </data>
-  <data name="CustomerOperationPerformed" xml:space="preserve">
-    <value>Klienta darbība veikta</value>
-  </data>
-  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
-    <value>Klienta darbību ziņojums lejupielādēts</value>
-  </data>
-  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
-    <value>Klienta abonements atjaunināts: {0}</value>
-  </data>
-  <data name="CustomerWalletToppedUp" xml:space="preserve">
-    <value>Klienta maks papildināts: {0}</value>
-  </data>
-  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Klienta maka papildināšanas iestatījumi atjaunināti</value>
-  </data>
-  <data name="LdapDisabled" xml:space="preserve">
-    <value>LDAP autentifikācija ir atspējota</value>
-  </data>
-  <data name="LdapEnabled" xml:space="preserve">
-    <value>LDAP autentifikācija ir iespējota</value>
-  </data>
-  <data name="LdapSync" xml:space="preserve">
-    <value>LDAP sinhronizācija pabeigta</value>
-  </data>
-  <data name="LocationCol" xml:space="preserve">
-    <value>Novietojums</value>
-  </data>
-  <data name="BannerSettingsChanged" xml:space="preserve">
-    <value>Reklāmas baneru redzamības iestatījumi ir mainīti</value>
-  </data>
-  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Klienta maka iespējoto pakalpojumu iestatījumi ir atjaunināti</value>
-  </data>
-  <data name="LoginSuccessSocialAccount" xml:space="preserve">
-    <value>Ieeja ar sociālā tīkla kontu izdevās</value>
-  </data>
-  <data name="AddedServerToAgent" xml:space="preserve">
-    <value>MCP serveris {0} pievienots aģentam</value>
-  </data>
-  <data name="AgentCreated" xml:space="preserve">
-    <value>Aģents izveidots</value>
-  </data>
-  <data name="AgentDeleted" xml:space="preserve">
-    <value>Aģents dzēsts</value>
-  </data>
-  <data name="AgentRenamed" xml:space="preserve">
-    <value>Aģents pārdēvēts: {0}</value>
-  </data>
-  <data name="AgentsModule" xml:space="preserve">
-    <value>Aģenti</value>
-  </data>
-  <data name="AIProviderCreated" xml:space="preserve">
-    <value>MI nodrošinātājs izveidots: {0}</value>
-  </data>
-  <data name="AIProviderDeleted" xml:space="preserve">
-    <value>MI nodrošinātājs dzēsts: {0}</value>
-  </data>
-  <data name="AIProviderUpdated" xml:space="preserve">
-    <value>MI nodrošinātājs atjaunināts: {0}</value>
-  </data>
-  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
-    <value>MI aģenti [{0}]. Iestatiet pielāgotu krātuves kvotu MI aģentiem : {1}</value>
-  </data>
-  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
-    <value>MI aģenti [{0}]. Iestatiet noklusējuma krātuves kvotu MI aģentiem : {1}</value>
-  </data>
-  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
-    <value>MI aģenti [{0}]. Krātuves kvota MI aģentiem atspējota</value>
-  </data>
-  <data name="DeletedServerFromAgent" xml:space="preserve">
-    <value>MCP serveris {0} dzēsts no aģenta</value>
-  </data>
-  <data name="FileExternalLinkCreated" xml:space="preserve">
-    <value>Faili [{0}]. Ārējā saite izveidota: {1}. Loma: {2}</value>
-  </data>
-  <data name="FileExternalLinkDeleted" xml:space="preserve">
-    <value>Faili [{0}]. Ārējā saite dzēsta: {1}</value>
-  </data>
-  <data name="FileExternalLinkUpdated" xml:space="preserve">
-    <value>Faili [{0}]. Ārējā saite atjaunināta: {1}. Loma: {2}</value>
-  </data>
-  <data name="FileMarkedAsFavorite" xml:space="preserve">
-    <value>Fails pievienots izlasei: {0}</value>
-  </data>
-  <data name="FileRemovedFromFavorite" xml:space="preserve">
-    <value>Fails noņemts no izlases: {0}</value>
-  </data>
-  <data name="FileRemovedFromList" xml:space="preserve">
-    <value>Fails noņemts no "Kopīgots ar mani": {0}</value>
-  </data>
-  <data name="FileUpdatedAccessFor" xml:space="preserve">
-    <value>Faili [{0}]. Piekļuve {1} atjaunināta. Loma: {2}</value>
-  </data>
-  <data name="FolderDownloaded" xml:space="preserve">
-    <value>Mape lejupielādēta: {0}</value>
-  </data>
-  <data name="FolderExternalLinkCreated" xml:space="preserve">
-    <value>Mapes [{0}]. Ārējā saite izveidota: {1}. Loma: {2}</value>
-  </data>
-  <data name="FolderExternalLinkDeleted" xml:space="preserve">
-    <value>Mapes [{0}]. Ārējā saite dzēsta: {1}</value>
-  </data>
-  <data name="FolderExternalLinkUpdated" xml:space="preserve">
-    <value>Mapes [{0}]. Ārējā saite atjaunināta: {1}. Loma: {2}</value>
-  </data>
-  <data name="FolderRemovedFromList" xml:space="preserve">
-    <value>Mape noņemta no "Kopīgots ar mani": {0}</value>
-  </data>
-  <data name="FolderUpdatedAccessFor" xml:space="preserve">
-    <value>Mapes [{0}]. Piekļuve {1} atjaunināta. Loma: {2}</value>
-  </data>
-  <data name="LoginSuccessViaOAuth" xml:space="preserve">
-    <value>Pierakstīšanās izdevusies, izmantojot OAuth 2.0</value>
-  </data>
-  <data name="LoginSuccessViaPassword" xml:space="preserve">
-    <value>Pierakstīšanās izdevusies, izmantojot pieteikumvārdu un paroli</value>
-  </data>
-  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
-    <value>Iestatiet noklusējuma krātuves kvotu MI aģentiem: {0}</value>
-  </data>
-  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
-    <value>Noklusējuma krātuves kvota MI aģentiem atspējota</value>
-  </data>
-  <data name="ResetVectorizationSettings" xml:space="preserve">
-    <value>Vektorizācijas iestatījumi ir atiestatīti</value>
-  </data>
-  <data name="ResetWebSearchSettings" xml:space="preserve">
-    <value>Iestatījumi meklēšanai tīmeklī ir atiestatīti</value>
-  </data>
-  <data name="RoomExternalLinkRevoked" xml:space="preserve">
-    <value>Ārējā saite atsaukta: {1}</value>
-  </data>
-  <data name="ServerCreated" xml:space="preserve">
-    <value>MCP serveris izveidots: {0}</value>
-  </data>
-  <data name="ServerDeleted" xml:space="preserve">
-    <value>MCP serveris dzēsts: {0}</value>
-  </data>
-  <data name="ServerDisabled" xml:space="preserve">
-    <value>MCP serveris atspējots: {0}</value>
-  </data>
-  <data name="ServerEnabled" xml:space="preserve">
-    <value>MCP serveris iespējots: {0}</value>
-  </data>
-  <data name="ServerUpdated" xml:space="preserve">
-    <value>MCP serveris atjaunināts: {0}</value>
-  </data>
-  <data name="SetVectorizationSettings" xml:space="preserve">
-    <value>Vektorizācijas iestatījumi ir konfigurēti. Nodrošinātājs: {0}</value>
-  </data>
-  <data name="SetWebSearchSettings" xml:space="preserve">
-    <value>Iestatījumi meklēšanai tīmeklī ir konfigurēti. Meklētājprogramma: {0}</value>
   </data>
 </root>

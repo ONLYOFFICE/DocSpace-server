@@ -120,11 +120,20 @@
   <data name="AceShareLink" xml:space="preserve">
     <value>Zunanji portal</value>
   </data>
+  <data name="AceStatusEnum_Collaborator" xml:space="preserve">
+    <value>Sodelavec</value>
+  </data>
   <data name="AceStatusEnum_Comment" xml:space="preserve">
     <value>Komentar</value>
   </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Ustvarjalec vsebine</value>
+  </data>
   <data name="AceStatusEnum_CustomFilter" xml:space="preserve">
     <value>Filter po meri</value>
+  </data>
+  <data name="AceStatusEnum_Editing" xml:space="preserve">
+    <value>Urednik</value>
   </data>
   <data name="AceStatusEnum_FillForms" xml:space="preserve">
     <value>Izpolnjevanje obrazca</value>
@@ -141,8 +150,14 @@
   <data name="AceStatusEnum_Review" xml:space="preserve">
     <value>Pregled</value>
   </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Upravljalec sobe</value>
+  </data>
   <data name="Admin" xml:space="preserve">
     <value>Admin</value>
+  </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>Upravitelj Agenta</value>
   </data>
   <data name="AppAccessDenied" xml:space="preserve">
     <value>Za upravljanje dokumenta morate postaviti dostop do njega</value>
@@ -198,6 +213,15 @@
   <data name="CommentUpload" xml:space="preserve">
     <value>Naloženo</value>
   </data>
+  <data name="Date" xml:space="preserve">
+    <value>Datum</value>
+  </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>Povezava v skupni rabi</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Povezava za povabilo</value>
+  </data>
   <data name="DocuSignStatusDeclined" xml:space="preserve">
     <value>Zavrnjeno</value>
   </data>
@@ -240,17 +264,32 @@
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Datoteka, ki je večja od {0}, ne bo premaknjena</value>
   </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Premikanje več datotek hkrati v prostor za izpolnjevanje obrazcev ni podprto. Premaknite po en obrazec ONLYOFFICE PDF hkrati.</value>
+  </data>
   <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
     <value>Nova različica ne more biti enaka trenutni</value>
   </data>
   <data name="ErrorMessage_FolderCopyError" xml:space="preserve">
     <value>Te mape ne morete kopirati v podmapo</value>
   </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Premikanje map v sobo za izpolnjevanje obrazcev ni podprto. Premaknite samo en obrazec ONLYOFFICE PDF hkrati.</value>
+  </data>
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Potrebne mape ni bilo mogoče najti</value>
   </data>
+  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
+    <value>Napačen ponudnik</value>
+  </data>
+  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
+    <value>Te mape ni mogoče uporabiti za shranjevanje sobe</value>
+  </data>
   <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Nepravilen naslov</value>
+  </data>
+  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
+    <value>Povezava s povabilom je neveljavna ali pa je njena veljavnost potekla</value>
   </data>
   <data name="ErrorMessage_LockedFile" xml:space="preserve">
     <value>Datoteko je trenutno zaklenil drug uporabnik</value>
@@ -261,8 +300,20 @@
   <data name="ErrorMessage_ManyDownloads" xml:space="preserve">
     <value>Preveč prenosov.</value>
   </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>Maksimalno število povezav ne sme preseči {0}</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Datoteke ni mogoče premakniti v to sobo. Poskusite premakniti obrazec ONLYOFFICE PDF.</value>
+  </data>
   <data name="ErrorMessage_NotSupportedFormat" xml:space="preserve">
     <value>Oprostite, ta format datoteke ni podprt</value>
+  </data>
+  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
+    <value>Ta ponudnik je že povezan v sobo</value>
+  </data>
+  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
+    <value>Ta vloga ni na voljo za ta tip uporabnika</value>
   </data>
   <data name="ErrorMessage_SaveAnonymous" xml:space="preserve">
     <value>Avtor shranitve je neznan</value>
@@ -276,6 +327,9 @@
   <data name="ErrorMessage_SecurityException" xml:space="preserve">
     <value>Nimate dovolj dovoljenja za izvajanje operacije</value>
   </data>
+  <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
+    <value>Nimate dovoljenja za arhiviranje sobe</value>
+  </data>
   <data name="ErrorMessage_SecurityException_Auth" xml:space="preserve">
     <value>Ne morem dovoliti {0} ponudniku z danimi poverilnicami.</value>
   </data>
@@ -284,6 +338,9 @@
   </data>
   <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
     <value>Nimate dovoljenja za kopiranje mape</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
+    <value>Nimate dovoljenja za kopiranje te mape</value>
   </data>
   <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
     <value>Nimate dovolj dovoljenja za ustvarjanje</value>
@@ -306,11 +363,20 @@
   <data name="ErrorMessage_SecurityException_EditFileTwice" xml:space="preserve">
     <value>Ta dokument urejate vi v drugem zavihku</value>
   </data>
+  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
+    <value>Nimate dovoljenja za urejanje sobe</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Trenutne različice datoteke ni mogoče izbrisati</value>
+  </data>
   <data name="ErrorMessage_SecurityException_MoveFile" xml:space="preserve">
     <value>Nimate dovolj dovoljenj za premikanje datoteke</value>
   </data>
   <data name="ErrorMessage_SecurityException_MoveFolder" xml:space="preserve">
     <value>Nimate dovolj dovoljenj za premikanje mape</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
+    <value>Nimate dovoljenja za premik mape</value>
   </data>
   <data name="ErrorMessage_SecurityException_ReadFile" xml:space="preserve">
     <value>Nimate dovolj dovoljenja za ogled datoteke</value>
@@ -324,11 +390,17 @@
   <data name="ErrorMessage_SecurityException_RenameFolder" xml:space="preserve">
     <value>Nimate dovolj dovoljenja za preimenovanje mape</value>
   </data>
+  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
+    <value>Nimate dovoljenja za odarhiviranje sobe</value>
+  </data>
   <data name="ErrorMessage_SecurityException_UpdateEditingFile" xml:space="preserve">
     <value>Ne morem posodobiti datoteke, saj se odprta za urejanje</value>
   </data>
   <data name="ErrorMessage_SecurityException_ViewFolder" xml:space="preserve">
     <value>Nimate dovolj dovoljenja za ogled vsebine mape</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>Prevečkrat ste poskušali vnesti geslo. Prosimo, poskusite kasneje</value>
   </data>
   <data name="ErrorMessage_SharpBoxException" xml:space="preserve">
     <value>Vsebina mape tretjih strani ni na voljo. Poskusite znova povezati račun.</value>
@@ -336,8 +408,14 @@
   <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>Napaka pri začenjanju urejanja datoteke</value>
   </data>
+  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
+    <value>Ne morete urejati arhiviranih sob</value>
+  </data>
   <data name="ErrorMessage_UpdateEditingFile" xml:space="preserve">
     <value>Ne morete posodobiti datoteke, ki je odprta za urejanje</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Datoteke ni mogoče naložiti v to sobo. Poskusite naložiti obrazec ONLYOFFICE PDF.</value>
   </data>
   <data name="ErrorMessage_UserNotFound" xml:space="preserve">
     <value>Uporabnika ni bilo mogoče najti</value>
@@ -345,44 +423,35 @@
   <data name="ErrorMessage_ViewTrashItem" xml:space="preserve">
     <value>Ni dovoljeno, da si elemente predogledate v košu</value>
   </data>
-  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
-    <value>Napačen ponudnik</value>
-  </data>
-  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
-    <value>Te mape ni mogoče uporabiti za shranjevanje sobe</value>
-  </data>
-  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
-    <value>Povezava s povabilom je neveljavna ali pa je njena veljavnost potekla</value>
-  </data>
-  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
-    <value>Ta vloga ni na voljo za ta tip uporabnika</value>
-  </data>
-  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
-    <value>Ta ponudnik je že povezan v sobo</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
-    <value>Nimate dovoljenja za kopiranje te mape</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
-    <value>Nimate dovoljenja za premik mape</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
-    <value>Nimate dovoljenja za odarhiviranje sobe</value>
-  </data>
-  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
-    <value>Ne morete urejati arhiviranih sob</value>
-  </data>
   <data name="ErrorrMessage_PinRoom" xml:space="preserve">
     <value>Ne morete pripeti sobe</value>
   </data>
   <data name="Everyone" xml:space="preserve">
     <value>vsi</value>
   </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Zunanji uporabnik</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Povezava za izpolnitev</value>
+  </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>Dokumenti uporabnika {0} {1}</value>
+  </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Številka obrazca</value>
+  </data>
   <data name="Guest" xml:space="preserve">
     <value>Gost</value>
   </data>
   <data name="IndexTitle" xml:space="preserve">
     <value>Iskanje po vsebini dokumentov</value>
+  </data>
+  <data name="KnowledgeFolder" xml:space="preserve">
+    <value>Znanje</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Povezava do obrazca</value>
   </data>
   <data name="MessageFileCreated" xml:space="preserve">
     <value>Datoteka ustvarjena v mapi "{0}"</value>
@@ -395,6 +464,9 @@
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Datoteka ni več osnutek za izpolnjevanje obrazca.</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Odpri datoteko</value>
   </data>
   <data name="ProductAdminOpportunities" xml:space="preserve">
     <value>Stori enako kot uporabnik|Poveži Dropbox, Box in druge račune v oddelku 'pogosti dokument'|Ustvarite pravice dostopa za dokumente in mape v oddelku 'pogosti dokumenti'</value>
@@ -415,20 +487,17 @@ Najvišja združljivost z docx, xlsx, pptx.</value>
   <data name="ProductUserOpportunities" xml:space="preserve">
     <value>Svoje dokumente ustvarjajte in urejajte ter deljene dokumente s ustreznimi pravicami dostopa|Drugim uporabnikom dajte pravice branja/urejanja za dokumente in mape|Povežite Dropbox, Box in druge račune v oddelku 'Dokumenti'</value>
   </data>
-  <data name="UnknownFirstName" xml:space="preserve">
-    <value>Ime</value>
+  <data name="ResultStorageFolder" xml:space="preserve">
+    <value>Shranjevanje rezultatov</value>
   </data>
-  <data name="UnknownLastName" xml:space="preserve">
-    <value>Priimek</value>
+  <data name="RoleEnum_Collaborator" xml:space="preserve">
+    <value>Sodelavec</value>
   </data>
-  <data name="UnlockComment" xml:space="preserve">
-    <value>Datoteka je odklenjena</value>
+  <data name="RoleEnum_Comment" xml:space="preserve">
+    <value>Komentator</value>
   </data>
-  <data name="AceStatusEnum_Editing" xml:space="preserve">
-    <value>Urednik</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
-    <value>Nimate dovoljenja za urejanje sobe</value>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Ustvarjalec vsebine</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
     <value>DocSpace Skrbnik</value>
@@ -436,41 +505,26 @@ Najvišja združljivost z docx, xlsx, pptx.</value>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Urednik</value>
   </data>
-  <data name="RoleEnum_User" xml:space="preserve">
-    <value>Uporabnik</value>
+  <data name="RoleEnum_FillForms" xml:space="preserve">
+    <value>Izpolnjevanje obrazcev</value>
+  </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>Gost</value>
   </data>
   <data name="RoleEnum_Read" xml:space="preserve">
     <value>Gledalec</value>
   </data>
-  <data name="RoleEnum_Comment" xml:space="preserve">
-    <value>Komentator</value>
-  </data>
-  <data name="RoleEnum_FillForms" xml:space="preserve">
-    <value>Izpolnjevanje obrazcev</value>
-  </data>
   <data name="RoleEnum_Review" xml:space="preserve">
     <value>Recenzent</value>
   </data>
-  <data name="RoleEnum_Collaborator" xml:space="preserve">
-    <value>Sodelavec</value>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Administrator sobe</value>
   </data>
-  <data name="AceStatusEnum_Collaborator" xml:space="preserve">
-    <value>Sodelavec</value>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Upravljalec sobe</value>
   </data>
-  <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
-    <value>Nimate dovoljenja za arhiviranje sobe</value>
-  </data>
-  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
-    <value>Maksimalno število povezav ne sme preseči {0}</value>
-  </data>
-  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
-    <value>Prevečkrat ste poskušali vnesti geslo. Prosimo, poskusite kasneje</value>
-  </data>
-  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
-    <value>Povezava za povabilo</value>
-  </data>
-  <data name="DefaultExternalLinkTitle" xml:space="preserve">
-    <value>Povezava v skupni rabi</value>
+  <data name="RoleEnum_User" xml:space="preserve">
+    <value>Uporabnik</value>
   </data>
   <data name="RoomIndex_Author" xml:space="preserve">
     <value>Avtor</value>
@@ -486,6 +540,9 @@ Najvišja združljivost z docx, xlsx, pptx.</value>
   </data>
   <data name="RoomIndex_ExportAuthor" xml:space="preserve">
     <value>Avtor izvoza</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Mapa</value>
   </data>
   <data name="RoomIndex_Index" xml:space="preserve">
     <value>Indeks</value>
@@ -511,79 +568,22 @@ Najvišja združljivost z docx, xlsx, pptx.</value>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Tip</value>
   </data>
-  <data name="RoomIndex_Folder" xml:space="preserve">
-    <value>Mapa</value>
-  </data>
-  <data name="Date" xml:space="preserve">
-    <value>Datum</value>
-  </data>
-  <data name="User" xml:space="preserve">
-    <value>Uporabnik</value>
-  </data>
-  <data name="LinkToForm" xml:space="preserve">
-    <value>Povezava do obrazca</value>
-  </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Odpri datoteko</value>
-  </data>
-  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Datoteke ni mogoče naložiti v to sobo. Poskusite naložiti obrazec ONLYOFFICE PDF.</value>
-  </data>
-  <data name="FillOutExternalLinkTitle" xml:space="preserve">
-    <value>Povezava za izpolnitev</value>
-  </data>
-  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Premikanje več datotek hkrati v prostor za izpolnjevanje obrazcev ni podprto. Premaknite po en obrazec ONLYOFFICE PDF hkrati.</value>
-  </data>
-  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Premikanje map v sobo za izpolnjevanje obrazcev ni podprto. Premaknite samo en obrazec ONLYOFFICE PDF hkrati.</value>
-  </data>
-  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Datoteke ni mogoče premakniti v to sobo. Poskusite premakniti obrazec ONLYOFFICE PDF.</value>
-  </data>
-  <data name="FormNumber" xml:space="preserve">
-    <value>Številka obrazca</value>
-  </data>
-  <data name="ExternalUser" xml:space="preserve">
-    <value>Zunanji uporabnik</value>
-  </data>
-  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
-    <value>Upravljalec sobe</value>
-  </data>
-  <data name="RoleEnum_RoomManager" xml:space="preserve">
-    <value>Upravljalec sobe</value>
-  </data>
-  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
-    <value>Ustvarjalec vsebine</value>
-  </data>
-  <data name="RoleEnum_ContentCreator" xml:space="preserve">
-    <value>Ustvarjalec vsebine</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
-    <value>Trenutne različice datoteke ni mogoče izbrisati</value>
-  </data>
   <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
     <value>Deli za izpolnjevanje</value>
   </data>
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>Začni izpolnjevati</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrator sobe</value>
+  <data name="UnknownFirstName" xml:space="preserve">
+    <value>Ime</value>
   </data>
-  <data name="RoleEnum_Guest" xml:space="preserve">
-    <value>Gost</value>
+  <data name="UnknownLastName" xml:space="preserve">
+    <value>Priimek</value>
   </data>
-  <data name="AgentManager" xml:space="preserve">
-    <value>Upravitelj Agenta</value>
+  <data name="UnlockComment" xml:space="preserve">
+    <value>Datoteka je odklenjena</value>
   </data>
-  <data name="FolderNameForReassignedData" xml:space="preserve">
-    <value>Dokumenti uporabnika {0} {1}</value>
-  </data>
-  <data name="KnowledgeFolder" xml:space="preserve">
-    <value>Znanje</value>
-  </data>
-  <data name="ResultStorageFolder" xml:space="preserve">
-    <value>Shranjevanje rezultatov</value>
+  <data name="User" xml:space="preserve">
+    <value>Uporabnik</value>
   </data>
 </root>

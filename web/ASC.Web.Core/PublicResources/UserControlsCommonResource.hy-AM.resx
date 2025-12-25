@@ -126,6 +126,9 @@
   <data name="LicenseKeyNotFound" xml:space="preserve">
     <value>Դուք պետք է մուտքագրեք լիցենզիայի բանալի</value>
   </data>
+  <data name="LicenseTypeNotCorrect" xml:space="preserve">
+    <value>Լիցենզիայի Կոնֆլիկտ՝ խնդրում ենք համոզվել, որ տեղադրել եք {0} DocSpace-ի ճիշտ տարբերակը (Enterprise կամ Developer)։ Եթե ​​ունեք հարցեր, խնդրում ենք կապվել ձեր վաճառքի մենեջերի հետ:</value>
+  </data>
   <data name="NewDocument" xml:space="preserve">
     <value>Նոր փաստաթուղթ</value>
   </data>
@@ -140,8 +143,5 @@
   </data>
   <data name="UnknownLastName" xml:space="preserve">
     <value>Ազգանուն</value>
-  </data>
-  <data name="LicenseTypeNotCorrect" xml:space="preserve">
-    <value>Լիցենզիայի Կոնֆլիկտ՝ խնդրում ենք համոզվել, որ տեղադրել եք {0} DocSpace-ի ճիշտ տարբերակը (Enterprise կամ Developer)։ Եթե ​​ունեք հարցեր, խնդրում ենք կապվել ձեր վաճառքի մենեջերի հետ:</value>
   </data>
 </root>
