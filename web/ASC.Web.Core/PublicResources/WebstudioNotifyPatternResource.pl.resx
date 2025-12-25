@@ -1579,7 +1579,7 @@ $TrulyYours</value>
   <data name="pattern_saas_room_invite_existing_user" xml:space="preserve">
     <value>Witaj!
 
-$__AuthorName zaprosił Cię do pokoju "$Message":"$ InviteLink" na "${__VirtualRootPath}":"${__VirtualRootPath}".
+$__AuthorName zaprosił Cię do pokoju "$Message":"$InviteLink" na "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 $OrangeButton
 
@@ -2067,7 +2067,7 @@ $TrulyYours</value>
   <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
     <value>Witaj!
 
-Użytkownik $__AuthorName zaprosił Cię do asystenta "$Message":"$ InviteLink" w "${__VirtualRootPath}":"${__VirtualRootPath}".
+Użytkownik $__AuthorName zaprosił Cię do asystenta "$Message":"$InviteLink" w "${__VirtualRootPath}":"${__VirtualRootPath}".
 
 $OrangeButton
 
