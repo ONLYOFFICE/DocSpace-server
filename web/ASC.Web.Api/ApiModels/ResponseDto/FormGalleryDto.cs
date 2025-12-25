@@ -42,11 +42,6 @@ public class TemplateGalleryDto
     public required string Domain { get; set; }
 
     /// <summary>
-    /// The template gallery extension.
-    /// </summary>
-    public required string Ext { get; set; }
-
-    /// <summary>
     /// The template gallery upload path.
     /// </summary>
     public required string UploadPath { get; set; }
@@ -55,11 +50,6 @@ public class TemplateGalleryDto
     /// The template gallery upload domain.
     /// </summary>
     public required string UploadDomain { get; set; }
-
-    /// <summary>
-    /// The template gallery upload extension.
-    /// </summary>
-    public required string UploadExt { get; set; }
 
     /// <summary>
     /// The template gallery upload dashboard.
