@@ -171,4 +171,7 @@
   <data name="UnavailableServers" xml:space="preserve">
     <value>MCP-servers zijn niet beschikbaar: {0}. Controleer de verbindingsinstellingen</value>
   </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>Kan bestanden niet verwerken: {0}. Bestanden kunnen beschadigd of versleuteld zijn</value>
+  </data>
 </root>

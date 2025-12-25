@@ -2090,4 +2090,7 @@ $TrulyYours</value>
   <data name="subject_scheduled_backup_failed" xml:space="preserve">
     <value>Неуспешно автоматично резервно копие на вашия DocSpace</value>
   </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace беше изтрит</value>
+  </data>
 </root>
