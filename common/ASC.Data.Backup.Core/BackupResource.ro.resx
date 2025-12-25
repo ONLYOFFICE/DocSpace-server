@@ -117,14 +117,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="LargeBackup" xml:space="preserve">
-    <value>Copia de rezervă este mai mare decât spațiul de stocare total disponibil pe portal</value>
-  </data>
-  <data name="ButtonSetPassword" xml:space="preserve">
-    <value>Setare parolă</value>
-  </data>
-  <data name="BackupNotFound" xml:space="preserve">
-    <value>Fișierul de rezervă nevalid. Vă rugăm să utilizați un fișier creat în același portal.</value>
+  <data name="AutoBackup" xml:space="preserve">
+    <value>Copiere de rezervă automată</value>
   </data>
   <data name="BackupException" xml:space="preserve">
     <value>Ceva nu a mers bine la crearea backup-ului Încercați să-l creați din nou sau contactați serviciul de asistenţă.</value>
@@ -132,11 +126,11 @@
   <data name="BackupInvalid" xml:space="preserve">
     <value>Fișierul de rezervă nevalid.</value>
   </data>
-  <data name="RestoreException" xml:space="preserve">
-    <value>Ceva nu a mers bine la restaurarea backup-ului. Încercați să-l restaurați din nou sau contactați serviciul de asistenţă.</value>
+  <data name="BackupMissingFilesWarning" xml:space="preserve">
+    <value>Unele fișiere nu au fost incluse în copia de rezervă. Pentru informaţii suplimentare accesați {0}</value>
   </data>
-  <data name="AutoBackup" xml:space="preserve">
-    <value>Copiere de rezervă automată</value>
+  <data name="BackupNotFound" xml:space="preserve">
+    <value>Fișierul de rezervă nevalid. Vă rugăm să utilizați un fișier creat în același portal.</value>
   </data>
   <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
     <value>Custom cloud</value>
@@ -156,7 +150,13 @@
   <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
     <value>Resursă terță parte</value>
   </data>
-  <data name="BackupMissingFilesWarning" xml:space="preserve">
-    <value>Unele fișiere nu au fost incluse în copia de rezervă. Pentru informaţii suplimentare accesați {0}</value>
+  <data name="ButtonSetPassword" xml:space="preserve">
+    <value>Setare parolă</value>
+  </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>Copia de rezervă este mai mare decât spațiul de stocare total disponibil pe portal</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>Ceva nu a mers bine la restaurarea backup-ului. Încercați să-l restaurați din nou sau contactați serviciul de asistenţă.</value>
   </data>
 </root>

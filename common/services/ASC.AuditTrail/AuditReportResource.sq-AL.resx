@@ -129,6 +129,9 @@
   <data name="AddedRoomTags" xml:space="preserve">
     <value>Etiketat e shtuara: [{1}]</value>
   </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>U shtua serveri MCP {0} tek agjenti</value>
+  </data>
   <data name="AdministratorAdded" xml:space="preserve">
     <value>Është shtuar administratori: {0}</value>
   </data>
@@ -140,6 +143,36 @@
   </data>
   <data name="AdministratorOpenedFullAccess" xml:space="preserve">
     <value>Administratorët [{0}]. Aksesi i plotë është hapur</value>
+  </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>Agjenti u krijua</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>Agjenti u fshi</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>Agjenti u riemërua: {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>Agjentët</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>Ofruesi AI u krijua: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>Ofruesi AI u fshi: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>Ofruesi AI u përditësua: {0}</value>
+  </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Çelësi API i përdoruesit u krijua: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Çelësi API i përdoruesit u fshi: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Çelësi API i përdoruesit u përditësua: {0}</value>
   </data>
   <data name="AttachActionType" xml:space="preserve">
     <value>Bashkangjitni</value>
@@ -153,8 +186,17 @@
   <data name="AuditTrailReportName" xml:space="preserve">
     <value>Raporti i gjurmës së auditimit ({0}-{1})</value>
   </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Lidhja e autorizimit është aktivizuar</value>
+  </data>
   <data name="AuthorizationKeysSetting" xml:space="preserve">
     <value>Çelësat e autorizimit të palëve të treta janë përditësuar</value>
+  </data>
+  <data name="BackupStarted" xml:space="preserve">
+    <value>Filloni rezervimin</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Cilësimet e dukshmërisë së banerëve promovues janë ndryshuar</value>
   </data>
   <data name="BrowserCol" xml:space="preserve">
     <value>Shfletuesi</value>
@@ -189,8 +231,35 @@
   <data name="CreateClient" xml:space="preserve">
     <value>Klienti ka krijuar</value>
   </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Operacioni i kryer nga klienti</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Raporti i operacioneve të klientit u shkarkua</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Abonimi i klientit është përditësua: {0}</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Shërbimet e aktivizuara për portofolin e klientit</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Portofoli i klientit u rimbush: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Cilësimet e rimbushjes së portofolit të klientit u përditësuan</value>
+  </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>Cilësimet e navigacionit të personalizuar është përditësuar</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Agjentët AI [{0}]. Vendos kuotë të personalizuar të hapësirës për agjentët AI: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>Agjentët AI [{0}]. Vendos kuotë të parazgjedhur të hapësirës për agjentët AI: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Agjentët AI [{0}]. Çaktivizoi kuotën e hapësirës për agjentët AI</value>
   </data>
   <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
     <value>Dhomat [{0}]. Caktoni kuotën e ruajtjes për dhomat: {1}</value>
@@ -225,8 +294,14 @@
   <data name="DeletedRoomTags" xml:space="preserve">
     <value>Etiketat janë fshirë: [{1}]</value>
   </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>U fshi serveri MCP {0} nga agjenti</value>
+  </data>
   <data name="DetachActionType" xml:space="preserve">
     <value>Çmontuar</value>
+  </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Cilësimet e aksesit në mjetet e zhvilluesit janë ndryshuar</value>
   </data>
   <data name="DnsSettingsUpdated" xml:space="preserve">
     <value>Cilësimet e DNS janë përditësuar</value>
@@ -276,6 +351,12 @@
   <data name="FileCreatedVersion" xml:space="preserve">
     <value>Skedarët [{0}]. Rishikim: {1}. Versioni i krijuar</value>
   </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>Skedari: {0}. Filtri i personalizuar u çaktivizua</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>Skedari: {0}. Filtri i personalizuar u aktivizua</value>
+  </data>
   <data name="FileDeleted" xml:space="preserve">
     <value>Skedari është fshirë: {0}</value>
   </data>
@@ -288,6 +369,15 @@
   <data name="FileDownloadedAs" xml:space="preserve">
     <value>Skedarët [{0}]. Është shkaruar si: {1}</value>
   </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Skedarët [{0}]. Lidhja e jashtme u krijua: {1}. Roli: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Skedarët [{0}]. Lidhja e jashtme u fshi: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Skedarët [{0}]. Lidhja e jashtme u përditësua: {1}. Roli: {2}</value>
+  </data>
   <data name="FileImported" xml:space="preserve">
     <value>Dosjet[{0}]. Dosja e importuar: {1}. Ofruesi: {2}</value>
   </data>
@@ -296,6 +386,9 @@
   </data>
   <data name="FileLocked" xml:space="preserve">
     <value>Skedari është mbyllur: {0}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Skedari u shënua si i preferuar: {0}</value>
   </data>
   <data name="FileMoved" xml:space="preserve">
     <value>Skedarët [{0}]. Ka lëvizur nga Dosja "{1}" në Dosjen: "{2}"</value>
@@ -308,6 +401,12 @@
   </data>
   <data name="FileOpenedForChange" xml:space="preserve">
     <value>Skedari i hapur për ndryshim: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Skedari u hoq nga të preferuarat: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Skedari u hoq nga "Të ndara me mua": {0}</value>
   </data>
   <data name="FileRenamed" xml:space="preserve">
     <value>Skedari është riemëruar: {0}</value>
@@ -339,14 +438,23 @@
   <data name="FileUpdatedAccess" xml:space="preserve">
     <value>Skedarët [{0}]. Aksesi është përditësuar</value>
   </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Skedarët [{0}]. Aksesi u përditësua për {1}. Roli: {2}</value>
+  </data>
   <data name="FileUpdatedRevisionComment" xml:space="preserve">
     <value>Skedarët [{0}]. Rishikim {1}. Komenti është përditësuar</value>
   </data>
   <data name="FileUploaded" xml:space="preserve">
     <value>Skedari është ngarkuar: {0}</value>
   </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Skedari u ngarkua me mbishkrim: {0}</value>
+  </data>
   <data name="FileVersionRemoved" xml:space="preserve">
     <value>Skedarët [{0}]. Versioni i fshirë: {1}</value>
+  </data>
+  <data name="FolderCopied" xml:space="preserve">
+    <value>Dosjet [{0}]. U kopjua në dosjen: {1}</value>
   </data>
   <data name="FolderCopiedWithOverwriting" xml:space="preserve">
     <value>Dosjet [{0}]. U kopjuan me mbishkrim në dosjen: {1}</value>
@@ -356,6 +464,18 @@
   </data>
   <data name="FolderDeleted" xml:space="preserve">
     <value>Dosja është fshirë: {0}</value>
+  </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Dosja u shkarkua: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Dosjet [{0}]. Lidhja e jashtme u krijua: {1}. Roli: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Dosjet [{0}]. Lidhja e jashtme u fshi: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Dosjet [{0}]. Lidhja e jashtme u përditësua: {1}. Roli: {2}</value>
   </data>
   <data name="FolderIndexChanged" xml:space="preserve">
     <value>Dosja: {0}. Indeksi ndryshoi nga {1} nč {2}</value>
@@ -372,6 +492,9 @@
   <data name="FolderMovedWithOverwriting" xml:space="preserve">
     <value>Dosjet [{0}]. Është lëvizur me mbishkrim në dosjen: {1}</value>
   </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Dosja u hoq nga "Të ndara me mua": {0}</value>
+  </data>
   <data name="FolderRenamed" xml:space="preserve">
     <value>Dosja është riemëruar: {0}</value>
   </data>
@@ -381,11 +504,26 @@
   <data name="FolderUpdatedAccess" xml:space="preserve">
     <value>Dosjet [{0}]. Aksesi është përditësuar</value>
   </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Dosjet [{0}]. Aksesi u përditësua për {1}. Roli: {2}</value>
+  </data>
   <data name="FollowActionType" xml:space="preserve">
     <value>Ndiqni</value>
   </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Përdoruesit [{0}]. Plotësuan plotësisht formularin: {1}</value>
+  </data>
   <data name="FormOpenedForFilling" xml:space="preserve">
     <value>Skedar i hapur për plotësim: {0}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Përdoruesit [{0}]. Plotësuan pjesërisht formularin: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Përdoruesit [{0}]. Filluan të plotësojnë: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Përdoruesit [{0}]. Ndaluan së plotësuari formularin: {1}</value>
   </data>
   <data name="FormSubmit" xml:space="preserve">
     <value>Përdoruesit [{0}]. Formular i dorëzuar: {1}</value>
@@ -435,11 +573,23 @@
   <data name="LanguageSettingsUpdated" xml:space="preserve">
     <value>Cilësimet e gjuhës janë përmirësuar</value>
   </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>Autentifikimi LDAP u çaktivizua</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>Autentifikimi LDAP u aktivizua</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>Sinkronizimi LDAP u përfundua</value>
+  </data>
   <data name="LicenseKeyUploaded" xml:space="preserve">
     <value>Çelësi i licensës është ngarkuar</value>
   </data>
   <data name="LinkActionType" xml:space="preserve">
     <value>Lidhje</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Vendndodhja</value>
   </data>
   <data name="LoginFail" xml:space="preserve">
     <value>Identifikimi dështoi</value>
@@ -492,6 +642,9 @@
   <data name="LoginSuccess" xml:space="preserve">
     <value>Identifikimi me sukses</value>
   </data>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Identifikimi përmes llogarisë sociale ishte i suksesshëm</value>
+  </data>
   <data name="LoginSuccessSocialApp" xml:space="preserve">
     <value>Hyrja e suksesshme përmes aplikacionit social</value>
   </data>
@@ -506,6 +659,12 @@
   </data>
   <data name="LoginSuccessViaApiTfa" xml:space="preserve">
     <value>Identifikimi i susesshëm përmes API dhe aplikacionit të vërtetimit</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Identifikimi i suksesshëm përmes OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Identifikim i suksesshëm përmes emrit të përdoruesit dhe fjalëkalimit</value>
   </data>
   <data name="LoginSuccessViaSms" xml:space="preserve">
     <value>Hyrjame SMS me sukses</value>
@@ -594,6 +753,12 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Lista e produkteve u përditësua</value>
   </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Vendos kuotën e parazgjedhur të hapësirës për agjentët AI: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Çaktivizoi kuotën e parazgjedhur të hapësirës për agjentët AI</value>
+  </data>
   <data name="QuotaPerPortalChanged" xml:space="preserve">
     <value>Caktoni kuotën e paracaktuar të ruajtje: {0}</value>
   </data>
@@ -617,6 +782,12 @@
   </data>
   <data name="RegenerateSecret" xml:space="preserve">
     <value>Sekreti {0} i klientit u rigjenerua</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>Cilësimet e vectorizimit janë rivendosur</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>Cilësimet e kërkimit në internet janë rivendosur</value>
   </data>
   <data name="RevokeUserClient" xml:space="preserve">
     <value>Aksesi i klientit {0} u anulua</value>
@@ -647,6 +818,9 @@
   </data>
   <data name="RoomExternalLinkDeleted" xml:space="preserve">
     <value>Lidhja e jashtme u fshi: {0}</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Lidhja e jashtme u revokua: {1}</value>
   </data>
   <data name="RoomExternalLinkUpdated" xml:space="preserve">
     <value>Lidhja e jashtme u përditësua: {0}. Roli: {1}</value>
@@ -723,6 +897,21 @@
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Udhëzimet e ftesës u dërguan: {0}</value>
   </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>Serveri MCP u krijua: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>Serveri MCP u fshi: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>Serveri MCP u çaktivizua: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>Serveri MCP u aktivizua: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>Serveri MCP u përditësua: {0}</value>
+  </data>
   <data name="SessionCompleted" xml:space="preserve">
     <value>Sesioni i përfunduar</value>
   </data>
@@ -732,14 +921,17 @@
   <data name="SettingsModule" xml:space="preserve">
     <value>Cilësimet</value>
   </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>Cilësimet e vectorizimit janë konfiguruar. Ofruesi: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>Cilësimet e kërkimit në internet janë konfiguruar. Motorri: {0}</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO u çaktivizua</value>
   </data>
   <data name="SSOEnabled" xml:space="preserve">
     <value>SSO u aktivizua</value>
-  </data>
-  <data name="BackupStarted" xml:space="preserve">
-    <value>Filloni rezervimin</value>
   </data>
   <data name="StartStorageDecryption" xml:space="preserve">
     <value>Filloni deshifrimin e ruajtjes</value>
@@ -906,54 +1098,6 @@
   <data name="UserUpdatedPassword" xml:space="preserve">
     <value>Fjalëkalimi është përditësuar</value>
   </data>
-  <data name="ApiKeyCreated" xml:space="preserve">
-    <value>Çelësi API i përdoruesit u krijua: {0}</value>
-  </data>
-  <data name="ApiKeyDeleted" xml:space="preserve">
-    <value>Çelësi API i përdoruesit u fshi: {0}</value>
-  </data>
-  <data name="ApiKeyUpdated" xml:space="preserve">
-    <value>Çelësi API i përdoruesit u përditësua: {0}</value>
-  </data>
-  <data name="AuthLinkActivated" xml:space="preserve">
-    <value>Lidhja e autorizimit është aktivizuar</value>
-  </data>
-  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
-    <value>Cilësimet e aksesit në mjetet e zhvilluesit janë ndryshuar</value>
-  </data>
-  <data name="FileCustomFilterDisabled" xml:space="preserve">
-    <value>Skedari: {0}. Filtri i personalizuar u çaktivizua</value>
-  </data>
-  <data name="FileCustomFilterEnabled" xml:space="preserve">
-    <value>Skedari: {0}. Filtri i personalizuar u aktivizua</value>
-  </data>
-  <data name="FileUploadedWithOverwriting" xml:space="preserve">
-    <value>Skedari u ngarkua me mbishkrim: {0}</value>
-  </data>
-  <data name="FolderCopied" xml:space="preserve">
-    <value>Dosjet [{0}]. U kopjua në dosjen: {1}</value>
-  </data>
-  <data name="FormCompletelyFilled" xml:space="preserve">
-    <value>Përdoruesit [{0}]. Plotësuan plotësisht formularin: {1}</value>
-  </data>
-  <data name="FormPartiallyFilled" xml:space="preserve">
-    <value>Përdoruesit [{0}]. Plotësuan pjesërisht formularin: {1}</value>
-  </data>
-  <data name="FormStartedToFill" xml:space="preserve">
-    <value>Përdoruesit [{0}]. Filluan të plotësojnë: {1}</value>
-  </data>
-  <data name="FormStopped" xml:space="preserve">
-    <value>Përdoruesit [{0}]. Ndaluan së plotësuari formularin: {1}</value>
-  </data>
-  <data name="LdapDisabled" xml:space="preserve">
-    <value>Autentifikimi LDAP u çaktivizua</value>
-  </data>
-  <data name="LdapEnabled" xml:space="preserve">
-    <value>Autentifikimi LDAP u aktivizua</value>
-  </data>
-  <data name="LdapSync" xml:space="preserve">
-    <value>Sinkronizimi LDAP u përfundua</value>
-  </data>
   <data name="WebhookCreated" xml:space="preserve">
     <value>Webhook u krijua: {0}</value>
   </data>
@@ -962,149 +1106,5 @@
   </data>
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Webhook u perditësua: {0}</value>
-  </data>
-  <data name="BannerSettingsChanged" xml:space="preserve">
-    <value>Cilësimet e dukshmërisë së banerëve promovues janë ndryshuar</value>
-  </data>
-  <data name="CustomerOperationPerformed" xml:space="preserve">
-    <value>Operacioni i kryer nga klienti</value>
-  </data>
-  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
-    <value>Raporti i operacioneve të klientit u shkarkua</value>
-  </data>
-  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
-    <value>Abonimi i klientit është përditësua: {0}</value>
-  </data>
-  <data name="CustomerWalletToppedUp" xml:space="preserve">
-    <value>Portofoli i klientit u rimbush: {0}</value>
-  </data>
-  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Cilësimet e rimbushjes së portofolit të klientit u përditësuan</value>
-  </data>
-  <data name="LocationCol" xml:space="preserve">
-    <value>Vendndodhja</value>
-  </data>
-  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Shërbimet e aktivizuara për portofolin e klientit</value>
-  </data>
-  <data name="LoginSuccessViaOAuth" xml:space="preserve">
-    <value>Identifikimi i suksesshëm përmes OAuth 2.0</value>
-  </data>
-  <data name="LoginSuccessViaPassword" xml:space="preserve">
-    <value>Identifikim i suksesshëm përmes emrit të përdoruesit dhe fjalëkalimit</value>
-  </data>
-  <data name="FileExternalLinkCreated" xml:space="preserve">
-    <value>Skedarët [{0}]. Lidhja e jashtme u krijua: {1}. Roli: {2}</value>
-  </data>
-  <data name="FileExternalLinkDeleted" xml:space="preserve">
-    <value>Skedarët [{0}]. Lidhja e jashtme u fshi: {1}</value>
-  </data>
-  <data name="FileExternalLinkUpdated" xml:space="preserve">
-    <value>Skedarët [{0}]. Lidhja e jashtme u përditësua: {1}. Roli: {2}</value>
-  </data>
-  <data name="FileMarkedAsFavorite" xml:space="preserve">
-    <value>Skedari u shënua si i preferuar: {0}</value>
-  </data>
-  <data name="FileRemovedFromFavorite" xml:space="preserve">
-    <value>Skedari u hoq nga të preferuarat: {0}</value>
-  </data>
-  <data name="FileRemovedFromList" xml:space="preserve">
-    <value>Skedari u hoq nga "Të ndara me mua": {0}</value>
-  </data>
-  <data name="FileUpdatedAccessFor" xml:space="preserve">
-    <value>Skedarët [{0}]. Aksesi u përditësua për {1}. Roli: {2}</value>
-  </data>
-  <data name="FolderDownloaded" xml:space="preserve">
-    <value>Dosja u shkarkua: {0}</value>
-  </data>
-  <data name="FolderExternalLinkCreated" xml:space="preserve">
-    <value>Dosjet [{0}]. Lidhja e jashtme u krijua: {1}. Roli: {2}</value>
-  </data>
-  <data name="FolderExternalLinkDeleted" xml:space="preserve">
-    <value>Dosjet [{0}]. Lidhja e jashtme u fshi: {1}</value>
-  </data>
-  <data name="FolderExternalLinkUpdated" xml:space="preserve">
-    <value>Dosjet [{0}]. Lidhja e jashtme u përditësua: {1}. Roli: {2}</value>
-  </data>
-  <data name="FolderRemovedFromList" xml:space="preserve">
-    <value>Dosja u hoq nga "Të ndara me mua": {0}</value>
-  </data>
-  <data name="FolderUpdatedAccessFor" xml:space="preserve">
-    <value>Dosjet [{0}]. Aksesi u përditësua për {1}. Roli: {2}</value>
-  </data>
-  <data name="RoomExternalLinkRevoked" xml:space="preserve">
-    <value>Lidhja e jashtme u revokua: {1}</value>
-  </data>
-  <data name="AddedServerToAgent" xml:space="preserve">
-    <value>U shtua serveri MCP {0} tek agjenti</value>
-  </data>
-  <data name="AgentCreated" xml:space="preserve">
-    <value>Agjenti u krijua</value>
-  </data>
-  <data name="AgentDeleted" xml:space="preserve">
-    <value>Agjenti u fshi</value>
-  </data>
-  <data name="AgentRenamed" xml:space="preserve">
-    <value>Agjenti u riemërua: {0}</value>
-  </data>
-  <data name="AgentsModule" xml:space="preserve">
-    <value>Agjentët</value>
-  </data>
-  <data name="AIProviderCreated" xml:space="preserve">
-    <value>Ofruesi AI u krijua: {0}</value>
-  </data>
-  <data name="AIProviderDeleted" xml:space="preserve">
-    <value>Ofruesi AI u fshi: {0}</value>
-  </data>
-  <data name="AIProviderUpdated" xml:space="preserve">
-    <value>Ofruesi AI u përditësua: {0}</value>
-  </data>
-  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
-    <value>Agjentët AI [{0}]. Vendos kuotë të personalizuar të hapësirës për agjentët AI: {1}</value>
-  </data>
-  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
-    <value>Agjentët AI [{0}]. Vendos kuotë të parazgjedhur të hapësirës për agjentët AI: {1}</value>
-  </data>
-  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
-    <value>Agjentët AI [{0}]. Çaktivizoi kuotën e hapësirës për agjentët AI</value>
-  </data>
-  <data name="DeletedServerFromAgent" xml:space="preserve">
-    <value>U fshi serveri MCP {0} nga agjenti</value>
-  </data>
-  <data name="LoginSuccessSocialAccount" xml:space="preserve">
-    <value>Identifikimi përmes llogarisë sociale ishte i suksesshëm</value>
-  </data>
-  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
-    <value>Vendos kuotën e parazgjedhur të hapësirës për agjentët AI: {0}</value>
-  </data>
-  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
-    <value>Çaktivizoi kuotën e parazgjedhur të hapësirës për agjentët AI</value>
-  </data>
-  <data name="ResetVectorizationSettings" xml:space="preserve">
-    <value>Cilësimet e vectorizimit janë rivendosur</value>
-  </data>
-  <data name="ResetWebSearchSettings" xml:space="preserve">
-    <value>Cilësimet e kërkimit në internet janë rivendosur</value>
-  </data>
-  <data name="ServerCreated" xml:space="preserve">
-    <value>Serveri MCP u krijua: {0}</value>
-  </data>
-  <data name="ServerDeleted" xml:space="preserve">
-    <value>Serveri MCP u fshi: {0}</value>
-  </data>
-  <data name="ServerDisabled" xml:space="preserve">
-    <value>Serveri MCP u çaktivizua: {0}</value>
-  </data>
-  <data name="ServerEnabled" xml:space="preserve">
-    <value>Serveri MCP u aktivizua: {0}</value>
-  </data>
-  <data name="ServerUpdated" xml:space="preserve">
-    <value>Serveri MCP u përditësua: {0}</value>
-  </data>
-  <data name="SetVectorizationSettings" xml:space="preserve">
-    <value>Cilësimet e vectorizimit janë konfiguruar. Ofruesi: {0}</value>
-  </data>
-  <data name="SetWebSearchSettings" xml:space="preserve">
-    <value>Cilësimet e kërkimit në internet janë konfiguruar. Motorri: {0}</value>
   </data>
 </root>

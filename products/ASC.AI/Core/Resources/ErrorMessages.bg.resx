@@ -120,6 +120,9 @@
   <data name="AiSettingsAccessDenied" xml:space="preserve">
     <value>Нямате разрешение да управлявате AI настройките</value>
   </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>Неуспешна обработка на файлове: {0}. Файловете може да са компрометирани или криптирани</value>
+  </data>
   <data name="ChatAccessDenied" xml:space="preserve">
     <value>Нямате позволение да използвате чат</value>
   </data>
@@ -170,8 +173,5 @@
   </data>
   <data name="UnavailableServers" xml:space="preserve">
     <value>MCP сървърите не са налични: {0}. Проверете настройките за връзка</value>
-  </data>
-  <data name="AttachmentProcessFailed" xml:space="preserve">
-    <value>Неуспешна обработка на файлове: {0}. Файловете може да са компрометирани или криптирани</value>
   </data>
 </root>

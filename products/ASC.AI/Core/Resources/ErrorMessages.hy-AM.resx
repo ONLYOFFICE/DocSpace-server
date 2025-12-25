@@ -120,6 +120,9 @@
   <data name="AiSettingsAccessDenied" xml:space="preserve">
     <value>Դուք չունեք ԱԲ կարգավորումները կառավարելու թույլտվություն</value>
   </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>Հնարավոր չէ մշակել ֆայլերը՝ {0}: Ֆայլերը կարող են վնասված կամ կոդավորված լինել:</value>
+  </data>
   <data name="ChatAccessDenied" xml:space="preserve">
     <value>Դուք չունեք չատն օգտագործելու թույլտվություն</value>
   </data>
@@ -170,8 +173,5 @@
   </data>
   <data name="UnavailableServers" xml:space="preserve">
     <value>MCP սերվերները հասանելի չեն՝ {0}: Ստուգեք կապի կարգավորումները</value>
-  </data>
-  <data name="AttachmentProcessFailed" xml:space="preserve">
-    <value>Հնարավոր չէ մշակել ֆայլերը՝ {0}: Ֆայլերը կարող են վնասված կամ կոդավորված լինել:</value>
   </data>
 </root>

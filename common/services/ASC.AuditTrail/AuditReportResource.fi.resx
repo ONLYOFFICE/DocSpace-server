@@ -1,5 +1,64 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -53,16 +112,25 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ActionCol" xml:space="preserve">
     <value>Tapahtuma</value>
   </data>
+  <data name="ActionIdCol" xml:space="preserve">
+    <value>Toiminto ID</value>
+  </data>
   <data name="ActionTypeCol" xml:space="preserve">
     <value>Tapahtumalaji</value>
+  </data>
+  <data name="AddedRoomTags" xml:space="preserve">
+    <value>Lisätyt merkit: [{1}]</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>Agentille lisätty MCP-palvelin {0}</value>
   </data>
   <data name="AdministratorAdded" xml:space="preserve">
     <value>Järjestelmänvalvoja lisätty: {0}</value>
@@ -76,8 +144,41 @@
   <data name="AdministratorOpenedFullAccess" xml:space="preserve">
     <value>Järjestelmänvalvojat [{0}]. Pääsy sallittu kaikille</value>
   </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>Agentti luotu</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>Agentti poistettu</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>Agentti nimetty uudelleen: {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>Agentit</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>Tekoälytarjoaja luotu: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>Tekoälytarjoaja poistettu: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>Tekoälytarjoaja päivitetty: {0}</value>
+  </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Käyttäjän Api-avain luotu: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Käyttäjän API-avain poistettu: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Käyttäjän Api-avain päivitetty: {0}</value>
+  </data>
   <data name="AttachActionType" xml:space="preserve">
     <value>Liitä</value>
+  </data>
+  <data name="AuditSettingsUpdated" xml:space="preserve">
+    <value>Tarkastuksen käyttöiän asetukset päivitetty</value>
   </data>
   <data name="AuditTrailReportDownloaded" xml:space="preserve">
     <value>Tapahtumien seurantaraportti ladattu</value>
@@ -85,11 +186,29 @@
   <data name="AuditTrailReportName" xml:space="preserve">
     <value>Tapahtumien seurantaraportti ({0}-{1})</value>
   </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Valtuutuslinkki on aktivoitu</value>
+  </data>
   <data name="AuthorizationKeysSetting" xml:space="preserve">
     <value>Kolmannen osapuolen valtuutuksen avaimet ovat päivitetty</value>
   </data>
+  <data name="BackupStarted" xml:space="preserve">
+    <value>Aloita turvatalletus</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Kampanjabannerien näkyvyysasetuksia muutettu</value>
+  </data>
   <data name="BrowserCol" xml:space="preserve">
     <value>Selain</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Asiakasohjelman {0} aktivointi muutettu</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Asiakasohjelman {0} näkyvyys muutettu</value>
+  </data>
+  <data name="CityCol" xml:space="preserve">
+    <value>Kaupunki</value>
   </data>
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Väriteema muutettu</value>
@@ -103,8 +222,62 @@
   <data name="CopyActionType" xml:space="preserve">
     <value>Kopioi</value>
   </data>
+  <data name="CountryCol" xml:space="preserve">
+    <value>Maa</value>
+  </data>
   <data name="CreateActionType" xml:space="preserve">
     <value>Luo</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Asiakasohjelma luotu</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Asiakkaan suorittama toiminto</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Asiakastoimintojen raportti ladattu</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Asiakkaan tilaus päivitetty: {0}</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Asiakkaan lompakkoa käyttävien palveluiden asetukset päivitetty</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Asiakkaan lompakko ladattu: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Asiakkaan lompakon latausasetukset päivitetty</value>
+  </data>
+  <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
+    <value>Mukautetut navigointiasetukset päivitetty</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Tekoälyagentit [{0}]. Aseta mukautettu tallennuskiintiö tekoälyagenteille: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>Tekoälyagentit [{0}]. Aseta oletus tallennuskiintiö tekoälyagenteille: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Tekoälyagentit [{0}]. Tallennuskiintiö tekoälyagenteille poistettu käytöstä</value>
+  </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Huoneet [{0}]. Aseta huoneille mukautettu tallennuskiintiö {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Huoneet [{0}]. Aseta huoneille oletustallennuskiintiö {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Huoneet [{0}]. Huoneiden tallennuskiintiö poistettu käytöstä</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Käyttäjät [{0}]. Aseta käyttäjille mukautettu tallennuskiintiö: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Käyttäjät [{0}]. Aseta käyttäjille oletustallennuskiintiö: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Käyttäjät [{0}]. Käyttäjien tallennuskiintiö poistettu käytöstä</value>
   </data>
   <data name="DateCol" xml:space="preserve">
     <value>Päivämäärä</value>
@@ -115,8 +288,20 @@
   <data name="DeleteActionType" xml:space="preserve">
     <value>Poista</value>
   </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Asiakasohjelma {0} poistettu</value>
+  </data>
+  <data name="DeletedRoomTags" xml:space="preserve">
+    <value>Poistetut merkit: [{1}]</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>Agentilta poistettu MCP-palvelin {0}</value>
+  </data>
   <data name="DetachActionType" xml:space="preserve">
     <value>Irrota</value>
+  </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Kehittäjän työkaluihin pääsyn asetuksia muutettu</value>
   </data>
   <data name="DnsSettingsUpdated" xml:space="preserve">
     <value>Nimipalvelimen asetukset ovat päivitetty</value>
@@ -124,11 +309,17 @@
   <data name="DocumentServiceLocationSetting" xml:space="preserve">
     <value>Asiakirja palvelun sijainti päivitetty</value>
   </data>
+  <data name="DocumentsForcesave" xml:space="preserve">
+    <value>Pakotetun tallennuksen asetukset päivitetty</value>
+  </data>
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Ylikirjoitusasetukset päivitetty</value>
   </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Asetukset</value>
+  </data>
+  <data name="DocumentsStoreForcesave" xml:space="preserve">
+    <value>Kaupan pakotetun tallennuksen asetukset päivitetty</value>
   </data>
   <data name="DocumentsThirdPartySettingsUpdated" xml:space="preserve">
     <value>Kolmannen osapuolen asetukset ovat päivitetty</value>
@@ -160,6 +351,12 @@
   <data name="FileCreatedVersion" xml:space="preserve">
     <value>Asiakirjat [{0}]. Versio {1}. Versio luotu</value>
   </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>Tiedosto: {0}. Mukautettu suodatin ei käytössä</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>Tiedosto: {0}. Mukautettu suodatin käytössä</value>
+  </data>
   <data name="FileDeleted" xml:space="preserve">
     <value>Asiakirjat. Poistettu: {0}</value>
   </data>
@@ -172,11 +369,26 @@
   <data name="FileDownloadedAs" xml:space="preserve">
     <value>Asiakirjat [{0}]. Ladattu: {1}</value>
   </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Tiedostot [{0}]. Ulkoinen linkki luotu: {1}.  Rooli: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Tiedostot [{0}]. Ulkoinen linkki poistettu: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Tiedostot [{0}]. Ulkoinen linkki päivitetty: {1}.  Rooli: {2}</value>
+  </data>
   <data name="FileImported" xml:space="preserve">
     <value>Kansiot [{0}]. Asiakirja tuotu: {1}. Lähde: {2}</value>
   </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Tiedosto: {0}. Hakemisto muutettu {1} :sta {2} :een</value>
+  </data>
   <data name="FileLocked" xml:space="preserve">
     <value>Asiakirjat. Lukittu: {0}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Tiedosto merkitty Suosikiksi: {0}</value>
   </data>
   <data name="FileMoved" xml:space="preserve">
     <value>Asiakirjat [{0}]. Siiretty kansiosta "{1}" kansioon "{2}"</value>
@@ -186,6 +398,15 @@
   </data>
   <data name="FileMovedWithOverwriting" xml:space="preserve">
     <value>Asiakirjat [{0}]. Siiretty kansiosta "{1}" kansioon "{2}"</value>
+  </data>
+  <data name="FileOpenedForChange" xml:space="preserve">
+    <value>Kansio avattu muutosta varten: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Tiedosto poistettu Suosikeista: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Tiedosto poistettu “Kanssani jaetuista”: {0}</value>
   </data>
   <data name="FileRenamed" xml:space="preserve">
     <value>Asiakirjat. Nimetty uudelleen: {0}</value>
@@ -198,6 +419,9 @@
   </data>
   <data name="FileSendAccessLink" xml:space="preserve">
     <value>Lähetetty jaettu linkki [{0}] tiedostoon. Vastaanottajat: [{1}]</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>tavua, kt, Mt, Gt, Tt</value>
   </data>
   <data name="FilesModule" xml:space="preserve">
     <value>Asiakirjat</value>
@@ -214,11 +438,20 @@
   <data name="FileUpdatedAccess" xml:space="preserve">
     <value>Asiakirjat [{0}]. Pääsyoikeudet päivitetty</value>
   </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Tiedostot [{0}]. Pääsy päivitetty {1}:lle. Rooli: {2}</value>
+  </data>
   <data name="FileUpdatedRevisionComment" xml:space="preserve">
     <value>Asiakirjat [{0}]. Versio {1}. Kommentti päivitetty</value>
   </data>
   <data name="FileUploaded" xml:space="preserve">
     <value>Asiakirjat. Tallennettu: {0}</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Tiedosto ladattu uusilla tiedoilla: {0}</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>Tiedostot [{0}]. Versio poistettu: {1}</value>
   </data>
   <data name="FolderCopied" xml:space="preserve">
     <value>Kansiot [{0}]. Kopioitu kansioon: {1}</value>
@@ -232,6 +465,24 @@
   <data name="FolderDeleted" xml:space="preserve">
     <value>Kansiot. Poistettu: {0}</value>
   </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Kansio Ladattu: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Kansiot [{0}]. Ulkoinen linkki luotu: {1}.Rooli: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Kansiot [{0}]. Ulkoinen linkki poistettu: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Kansiot [{0}]. Ulkoinen linkki päivitetty: {1}.Rooli: {2}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Kansio: {0}. Hakemisto muutettu {1} :sta {2} :een</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Kansio: {0}. Hakemistot tilattu uudelleen</value>
+  </data>
   <data name="FolderMoved" xml:space="preserve">
     <value>Kansiot [{0}]. Siiretty kansioon: {1}</value>
   </data>
@@ -240,6 +491,9 @@
   </data>
   <data name="FolderMovedWithOverwriting" xml:space="preserve">
     <value>Kansiot [{0}]. Siiretty (ylikirjoitus) kansioon: {1}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Kansio poistettu “Kanssani jaetuista”: {0}</value>
   </data>
   <data name="FolderRenamed" xml:space="preserve">
     <value>Kansiot. Nimetty uudelleen: {0}</value>
@@ -250,8 +504,38 @@
   <data name="FolderUpdatedAccess" xml:space="preserve">
     <value>Kansiot [{0}]. Pääsyoikeudet päivitetty</value>
   </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Kansiot [{0}]. Pääsy päivitetty {1}:lle. Rooli: {2}</value>
+  </data>
   <data name="FollowActionType" xml:space="preserve">
     <value>Seuraa</value>
+  </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Käyttäjät [{0}]. Täysin täytetty lomake: {1}</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>Tiedosto avattu täytettäväksi: {0}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Käyttäjät [{0}]. Osa lomakkeesta täytetty: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Käyttäjät [{0}]. Täyttäminen aloitettu: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Käyttäjät [{0}]. Lomake pysäytetty: {1}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Käyttäjät [{0}]. Lomake lähetetty: {1}</value>
+  </data>
+  <data name="FullTextSearchSetting" xml:space="preserve">
+    <value>Sphinx-asetukset päivitetty</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Valtuutuskoodi luotu asiakasohjelmalle {0}</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Henkilökohtainen pääsytunnus luotu asiakasohjelmalle {0}</value>
   </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Tervetuloa sivun asetukset päivitetty</value>
@@ -289,14 +573,29 @@
   <data name="LanguageSettingsUpdated" xml:space="preserve">
     <value>Kieliasetukset päivitetty</value>
   </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>LDAP-todennus poistettu käytöstä</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>LDAP-todennus käytössä</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>LDAP-synkronointi valmis</value>
+  </data>
   <data name="LicenseKeyUploaded" xml:space="preserve">
     <value>Lisenssiavain ladattu</value>
   </data>
   <data name="LinkActionType" xml:space="preserve">
     <value>Linkitä</value>
   </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Sijainti</value>
+  </data>
   <data name="LoginFail" xml:space="preserve">
     <value>Kirjautuminen epäonnistui</value>
+  </data>
+  <data name="LoginFailBruteForce" xml:space="preserve">
+    <value>Epäonnistunut sisääkirjautuminen. Liian monta yrityskertaa</value>
   </data>
   <data name="LoginFailDisabledProfile" xml:space="preserve">
     <value>Kirjautuminen epäonnistui. Tunnus estetty</value>
@@ -306,6 +605,9 @@
   </data>
   <data name="LoginFailIpSecurity" xml:space="preserve">
     <value>IP-suodatus: sisäänkirjautuminen kiellettiin</value>
+  </data>
+  <data name="LoginFailRecaptcha" xml:space="preserve">
+    <value>Epäonnistunut sisäänkirjautuminen. Recaptcha ei ole oikein</value>
   </data>
   <data name="LoginFailSocialAccountNotFound" xml:space="preserve">
     <value>Kirjautuminen epäonnistui. Sosiaalisen median tiliä ei löytynyt</value>
@@ -319,11 +621,17 @@
   <data name="LoginFailViaApiSocialAccount" xml:space="preserve">
     <value>Sisäänkirjautuminen API:n &amp; Somen kautta epäonnistui</value>
   </data>
+  <data name="LoginFailViaApiTfa" xml:space="preserve">
+    <value>Epäonnistunut sisäänkirjautuminen API:n &amp; todennussovelluksen kautta</value>
+  </data>
   <data name="LoginFailViaSms" xml:space="preserve">
     <value>Kirjautuminen tekstiviestillä epäonnistui</value>
   </data>
   <data name="LoginFailViaSSO" xml:space="preserve">
     <value>Sisäänkirjautuminen SSO:n kautta epäonnistui</value>
+  </data>
+  <data name="LoginFailViaTfaApp" xml:space="preserve">
+    <value>Epäonnistunut sisäänkirjautuminen todennussovelluksen kautta</value>
   </data>
   <data name="LoginHistoryReportDownloaded" xml:space="preserve">
     <value>Kirjautumishistoriaraportti ladattu</value>
@@ -334,14 +642,29 @@
   <data name="LoginSuccess" xml:space="preserve">
     <value>Kirjautuminen onnistui</value>
   </data>
-  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Kirjautuminen sosiaalisella tilillä onnistui: {0}</value>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Kirjautuminen sosiaalisella tilillä onnistui</value>
+  </data>
+  <data name="LoginSuccessSocialApp" xml:space="preserve">
+    <value>Onnistunut sisäänkirjautuminen sosiaalisen sovelluksen kautta</value>
   </data>
   <data name="LoginSuccessViaApi" xml:space="preserve">
     <value>Onnistunut yhteys API:n kautta</value>
   </data>
   <data name="LoginSuccessViaApiSms" xml:space="preserve">
     <value>Onnistunut yhteys API:n &amp; SMS tekstiviesti tunnuksen kautta</value>
+  </data>
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
+    <value>Kirjautuminen sosiaalisella tilillä onnistui: {0}</value>
+  </data>
+  <data name="LoginSuccessViaApiTfa" xml:space="preserve">
+    <value>Onnistunut sisäänkirjautumien API:n &amp; todennussovelluksen kautta</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Onnistunut sisäänkirjautuminen OAuth 2.0:n kautta</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Onnistunut kirjautuminen käyttäjätunnuksen ja salasanan kautta</value>
   </data>
   <data name="LoginSuccessViaSms" xml:space="preserve">
     <value>Kirjautuminen tekstiviestillä onnistui</value>
@@ -351,6 +674,9 @@
   </data>
   <data name="LoginSuccessViaSSO" xml:space="preserve">
     <value>Onnistunut kertakirjautuminen (SSO)</value>
+  </data>
+  <data name="LoginSuccesViaTfaApp" xml:space="preserve">
+    <value>Onnistunut sisäänkirjautuminen todennussovelluksen kautta</value>
   </data>
   <data name="Logout" xml:space="preserve">
     <value>Uloskirjautuminen</value>
@@ -394,6 +720,15 @@
   <data name="PortalDeleted" xml:space="preserve">
     <value>Sivusto poistettu käytöstä pysyvästi</value>
   </data>
+  <data name="PortalRenamed" xml:space="preserve">
+    <value>Portaali nimetty uudelleen</value>
+  </data>
+  <data name="PrivacyRoomDisable" xml:space="preserve">
+    <value>Yksityinen huone ei ole käytössä</value>
+  </data>
+  <data name="PrivacyRoomEnable" xml:space="preserve">
+    <value>Yksityinen huone on käytössä</value>
+  </data>
   <data name="ProductAccessOpened" xml:space="preserve">
     <value>Tuotteet [{0}]. Pääsy avattu kaikille</value>
   </data>
@@ -418,11 +753,164 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Tuoteluettelo päivitetty</value>
   </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Aseta oletus tallennuskiintiö tekoälyagenteille: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Tekoälyagenttien oletus tallennuskiintiö otettu pois käytöstä</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Aseta oletustallennuskiintiö: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Oletustallennuskiintiö on poistettu käytöstä</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Aseta oletustallennuskiintiö huoneille: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Huoneiden oletustallennuskiintiö poistettu käytöstä</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Aseta oletustallennuskiintiö käyttäjille: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Käyttäjien oletustallennuskiintiö on poistettu käytöstä</value>
+  </data>
+  <data name="ReassignsActionType" xml:space="preserve">
+    <value>Uudelleenmääritykset</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Asiakasohjelman {0} salaisuus luotu uudelleen</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>Vektorisaatioasetukset on nollattu</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>Verkkohakuasetukset on nollattu</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Asiakasohjelman {0} pääsy kumottu</value>
+  </data>
+  <data name="RoomArchived" xml:space="preserve">
+    <value>Huone arkistoitu</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Huone kopioitu: {0}</value>
+  </data>
+  <data name="RoomCreated" xml:space="preserve">
+    <value>Huone luotu</value>
+  </data>
+  <data name="RoomCreateUser" xml:space="preserve">
+    <value>Lisätty käyttäjä: [{0}]. Rooli: {1}</value>
+  </data>
+  <data name="RoomDeleted" xml:space="preserve">
+    <value>Huone poistettu</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Huone: {0}. Latauksen estäminen poistettu käytöstä</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Huone: {0}. Latauksen estäminen otettu käyttöön</value>
+  </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>Ulkoinen linkki luotu: {0}. Rooli: {1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>Ulkoinen linkki poistettu: {0}</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Ulkoinen linkki peruutettu: {1}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>Ulkoinen linkki päivitetty: {0}. Rooli: {1}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Ryhmä lisätty: {0}. Rooli: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Ryhmä poistettu: {0}</value>
+  </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Vie asiakirjoihin tallennetun huoneen hakemisto</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Huoneen indeksointi poistettu käytöstä</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Huoneen indeksointi otettu käyttöön</value>
+  </data>
+  <data name="RoomInvitationLinkCreated" xml:space="preserve">
+    <value>Linkki luotu. Rooli: {1}</value>
+  </data>
+  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
+    <value>Linkki poistettu</value>
+  </data>
+  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
+    <value>Linkki päivitetty. Rooli: {1}</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Kutsut on jälleen lähetetty: {0}</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>Elinikä otetu pois käytöstä</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Elinikä on asetettu. Arvo: {0}. Jakso: {1}. Poista lopullisesti: {2}</value>
+  </data>
+  <data name="RoomLogoCreated" xml:space="preserve">
+    <value>Logo luotu</value>
+  </data>
+  <data name="RoomLogoDeleted" xml:space="preserve">
+    <value>Logo poistettu</value>
+  </data>
+  <data name="RoomRemoveUser" xml:space="preserve">
+    <value>Poistettu käyttäjä: {0}</value>
+  </data>
+  <data name="RoomRenamed" xml:space="preserve">
+    <value>Huone nimetty uudelleen: {0}</value>
+  </data>
+  <data name="RoomsModule" xml:space="preserve">
+    <value>Huoneet</value>
+  </data>
+  <data name="RoomUnarchived" xml:space="preserve">
+    <value>Huone palautettu</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} nimitetty: {1}</value>
+  </data>
+  <data name="RoomUpdateAccessForUser" xml:space="preserve">
+    <value>{0} nimitetty: {1}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Huone: {0}. Vesileima poistettu käytöstä</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Huone: {0}. Vesileima otettu käyttöön</value>
+  </data>
   <data name="SendActionType" xml:space="preserve">
     <value>Lähetä</value>
   </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>Käyttäjä {0} lähetti {1}:lle liittymiskutsun tähän DocSpaceen</value>
+  </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Kutsun ohjeistus lähetetty: {0}</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>MCP-palvelin luotu: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>MCP-palvelin poistettu: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>MCP-palvelin otettu pois käytöstä: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>MCP-palvelin otettu käyttöön: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>MCP-palvelin päivitetty: {0}</value>
   </data>
   <data name="SessionCompleted" xml:space="preserve">
     <value>Istunto lopetettu</value>
@@ -433,20 +921,38 @@
   <data name="SettingsModule" xml:space="preserve">
     <value>Asetukset</value>
   </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>Vektorisaatioasetukset on määritetty. Tarjoaja: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>Verkkohakuasetukset on määritetty. Moottori: {0}</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>Kertakirjautuminen (SSO) poistettu käytöstä</value>
   </data>
   <data name="SSOEnabled" xml:space="preserve">
     <value>Kertakirjautuminen (SSO) otettu käyttöön</value>
   </data>
-  <data name="BackupStarted" xml:space="preserve">
-    <value>Aloita turvatalletus</value>
+  <data name="StartStorageDecryption" xml:space="preserve">
+    <value>Aloita tallennustilan salauksen purku</value>
+  </data>
+  <data name="StartStorageEncryption" xml:space="preserve">
+    <value>Aloita tallennustilan salaus</value>
   </data>
   <data name="StartTransferSetting" xml:space="preserve">
     <value>Aloita portaalin alueen migraatio</value>
   </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>Järjestelmän tili</value>
+  </data>
+  <data name="TagCreated" xml:space="preserve">
+    <value>Merkki luotu: {0}</value>
+  </data>
+  <data name="TagsDeleted" xml:space="preserve">
+    <value>Merkit poistettu: {0}</value>
+  </data>
+  <data name="TargetIdCol" xml:space="preserve">
+    <value>Tavoite ID</value>
   </data>
   <data name="TeamTemplateChanged" xml:space="preserve">
     <value>Tiimin mallipohja muutettu</value>
@@ -466,6 +972,21 @@
   <data name="TimeZoneSettingsUpdated" xml:space="preserve">
     <value>Aikavyöhykkeen asetukset ovat päivitetty</value>
   </data>
+  <data name="TrashEmptied" xml:space="preserve">
+    <value>Roskakori tyhjennetty</value>
+  </data>
+  <data name="TrustedMailDomainSettingsUpdated" xml:space="preserve">
+    <value>Luotetun sähköpostin verkkotunnuksen asetukset päivitetty</value>
+  </data>
+  <data name="TwoFactorAuthenticationSettingsDisabled" xml:space="preserve">
+    <value>Kaksivaiheisen todennuksen asetukset päivitetty: Kaksivaiheinen todennus poistettiin käytöstä</value>
+  </data>
+  <data name="TwoFactorAuthenticationSettingsEnabledBySms" xml:space="preserve">
+    <value>Kaksivaiheisen todennuksen asetukset päivitetty: SMS- vahvistus otettiin käyttöön</value>
+  </data>
+  <data name="TwoFactorAuthenticationSettingsEnabledByTfaApp" xml:space="preserve">
+    <value>Kaksivaiheisen todennuksen asetukset päivitetty: Todennussovellus otettiin käyttöön</value>
+  </data>
   <data name="TwoFactorAuthenticationSettingsUpdated" xml:space="preserve">
     <value>Kaksivaiheisen tunnistuksen asetukset päivitetty</value>
   </data>
@@ -484,6 +1005,9 @@
   <data name="UpdateActionType" xml:space="preserve">
     <value>Päivitä</value>
   </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Asiakasohjelma {0} päivitetty</value>
+  </data>
   <data name="UploadActionType" xml:space="preserve">
     <value>Lisää</value>
   </data>
@@ -501,6 +1025,12 @@
   </data>
   <data name="UserCreatedViaInvite" xml:space="preserve">
     <value>Käyttäjä luotu kutsun kautta: {0}</value>
+  </data>
+  <data name="UserDataReassigns" xml:space="preserve">
+    <value>siirretty: Käyttäjältä {0} käyttäjälle {1}</value>
+  </data>
+  <data name="UserDataRemoving" xml:space="preserve">
+    <value>Käyttäjätiedot {0}:lle on poistettu</value>
   </data>
   <data name="UserDeleted" xml:space="preserve">
     <value>Käyttäjä poistettu: {0}</value>
@@ -541,6 +1071,12 @@
   <data name="UsersUpdatedType" xml:space="preserve">
     <value>Käyttäjät [{0}]. Käyttäjätyyppi päivitetty</value>
   </data>
+  <data name="UserTfaDisconnected" xml:space="preserve">
+    <value>Todennussovellus poistettu käytöstä: {0}</value>
+  </data>
+  <data name="UserTfaGenerateCodes" xml:space="preserve">
+    <value>Uudet varakoodit on luotu</value>
+  </data>
   <data name="UserUnlinkedSocialAccount" xml:space="preserve">
     <value>Some tilistä poistettu linkki. Toimittaja: {0}</value>
   </data>
@@ -549,6 +1085,9 @@
   </data>
   <data name="UserUpdatedAvatarThumbnails" xml:space="preserve">
     <value>Käyttäjät [{0}]. Käyttäjäkuvan pikkukuvakkeet päivitetty</value>
+  </data>
+  <data name="UserUpdatedEmail" xml:space="preserve">
+    <value>Sähköposti päivitetty</value>
   </data>
   <data name="UserUpdatedLanguage" xml:space="preserve">
     <value>Kieli päivitetty</value>
@@ -559,318 +1098,6 @@
   <data name="UserUpdatedPassword" xml:space="preserve">
     <value>Salasana päivitetty</value>
   </data>
-  <data name="RoomCreated" xml:space="preserve">
-    <value>Huone luotu</value>
-  </data>
-  <data name="RoomsModule" xml:space="preserve">
-    <value>Huoneet</value>
-  </data>
-  <data name="TrashEmptied" xml:space="preserve">
-    <value>Roskakori tyhjennetty</value>
-  </data>
-  <data name="AddedRoomTags" xml:space="preserve">
-    <value>Lisätyt merkit: [{1}]</value>
-  </data>
-  <data name="DeletedRoomTags" xml:space="preserve">
-    <value>Poistetut merkit: [{1}]</value>
-  </data>
-  <data name="RoomArchived" xml:space="preserve">
-    <value>Huone arkistoitu</value>
-  </data>
-  <data name="RoomCreateUser" xml:space="preserve">
-    <value>Lisätty käyttäjä: [{0}]. Rooli: {1}</value>
-  </data>
-  <data name="RoomDeleted" xml:space="preserve">
-    <value>Huone poistettu</value>
-  </data>
-  <data name="RoomInvitationLinkCreated" xml:space="preserve">
-    <value>Linkki luotu. Rooli: {1}</value>
-  </data>
-  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
-    <value>Linkki poistettu</value>
-  </data>
-  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
-    <value>Linkki päivitetty. Rooli: {1}</value>
-  </data>
-  <data name="RoomLogoCreated" xml:space="preserve">
-    <value>Logo luotu</value>
-  </data>
-  <data name="RoomLogoDeleted" xml:space="preserve">
-    <value>Logo poistettu</value>
-  </data>
-  <data name="RoomRemoveUser" xml:space="preserve">
-    <value>Poistettu käyttäjä: {0}</value>
-  </data>
-  <data name="RoomRenamed" xml:space="preserve">
-    <value>Huone nimetty uudelleen: {0}</value>
-  </data>
-  <data name="RoomUnarchived" xml:space="preserve">
-    <value>Huone palautettu</value>
-  </data>
-  <data name="RoomUpdateAccessForUser" xml:space="preserve">
-    <value>{0} nimitetty: {1}</value>
-  </data>
-  <data name="TagCreated" xml:space="preserve">
-    <value>Merkki luotu: {0}</value>
-  </data>
-  <data name="TagsDeleted" xml:space="preserve">
-    <value>Merkit poistettu: {0}</value>
-  </data>
-  <data name="ActionIdCol" xml:space="preserve">
-    <value>Toiminto ID</value>
-  </data>
-  <data name="AuditSettingsUpdated" xml:space="preserve">
-    <value>Tarkastuksen käyttöiän asetukset päivitetty</value>
-  </data>
-  <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
-    <value>Mukautetut navigointiasetukset päivitetty</value>
-  </data>
-  <data name="DocumentsForcesave" xml:space="preserve">
-    <value>Pakotetun tallennuksen asetukset päivitetty</value>
-  </data>
-  <data name="DocumentsStoreForcesave" xml:space="preserve">
-    <value>Kaupan pakotetun tallennuksen asetukset päivitetty</value>
-  </data>
-  <data name="FullTextSearchSetting" xml:space="preserve">
-    <value>Sphinx-asetukset päivitetty</value>
-  </data>
-  <data name="LoginFailBruteForce" xml:space="preserve">
-    <value>Epäonnistunut sisääkirjautuminen. Liian monta yrityskertaa</value>
-  </data>
-  <data name="LoginFailRecaptcha" xml:space="preserve">
-    <value>Epäonnistunut sisäänkirjautuminen. Recaptcha ei ole oikein</value>
-  </data>
-  <data name="LoginFailViaApiTfa" xml:space="preserve">
-    <value>Epäonnistunut sisäänkirjautuminen API:n &amp; todennussovelluksen kautta</value>
-  </data>
-  <data name="LoginFailViaTfaApp" xml:space="preserve">
-    <value>Epäonnistunut sisäänkirjautuminen todennussovelluksen kautta</value>
-  </data>
-  <data name="LoginSuccessSocialApp" xml:space="preserve">
-    <value>Onnistunut sisäänkirjautuminen sosiaalisen sovelluksen kautta</value>
-  </data>
-  <data name="LoginSuccessViaApiTfa" xml:space="preserve">
-    <value>Onnistunut sisäänkirjautumien API:n &amp; todennussovelluksen kautta</value>
-  </data>
-  <data name="LoginSuccesViaTfaApp" xml:space="preserve">
-    <value>Onnistunut sisäänkirjautuminen todennussovelluksen kautta</value>
-  </data>
-  <data name="PrivacyRoomDisable" xml:space="preserve">
-    <value>Yksityinen huone ei ole käytössä</value>
-  </data>
-  <data name="PrivacyRoomEnable" xml:space="preserve">
-    <value>Yksityinen huone on käytössä</value>
-  </data>
-  <data name="ReassignsActionType" xml:space="preserve">
-    <value>Uudelleenmääritykset</value>
-  </data>
-  <data name="StartStorageDecryption" xml:space="preserve">
-    <value>Aloita tallennustilan salauksen purku</value>
-  </data>
-  <data name="StartStorageEncryption" xml:space="preserve">
-    <value>Aloita tallennustilan salaus</value>
-  </data>
-  <data name="TargetIdCol" xml:space="preserve">
-    <value>Tavoite ID</value>
-  </data>
-  <data name="TrustedMailDomainSettingsUpdated" xml:space="preserve">
-    <value>Luotetun sähköpostin verkkotunnuksen asetukset päivitetty</value>
-  </data>
-  <data name="TwoFactorAuthenticationSettingsDisabled" xml:space="preserve">
-    <value>Kaksivaiheisen todennuksen asetukset päivitetty: Kaksivaiheinen todennus poistettiin käytöstä</value>
-  </data>
-  <data name="TwoFactorAuthenticationSettingsEnabledBySms" xml:space="preserve">
-    <value>Kaksivaiheisen todennuksen asetukset päivitetty: SMS- vahvistus otettiin käyttöön</value>
-  </data>
-  <data name="TwoFactorAuthenticationSettingsEnabledByTfaApp" xml:space="preserve">
-    <value>Kaksivaiheisen todennuksen asetukset päivitetty: Todennussovellus otettiin käyttöön</value>
-  </data>
-  <data name="UserDataReassigns" xml:space="preserve">
-    <value>siirretty: Käyttäjältä {0} käyttäjälle {1}</value>
-  </data>
-  <data name="UserDataRemoving" xml:space="preserve">
-    <value>Käyttäjätiedot {0}:lle on poistettu</value>
-  </data>
-  <data name="UserTfaDisconnected" xml:space="preserve">
-    <value>Todennussovellus poistettu käytöstä: {0}</value>
-  </data>
-  <data name="UserTfaGenerateCodes" xml:space="preserve">
-    <value>Uudet varakoodit on luotu</value>
-  </data>
-  <data name="UserUpdatedEmail" xml:space="preserve">
-    <value>Sähköposti päivitetty</value>
-  </data>
-  <data name="CityCol" xml:space="preserve">
-    <value>Kaupunki</value>
-  </data>
-  <data name="CountryCol" xml:space="preserve">
-    <value>Maa</value>
-  </data>
-  <data name="RoomExternalLinkCreated" xml:space="preserve">
-    <value>Ulkoinen linkki luotu: {0}. Rooli: {1}</value>
-  </data>
-  <data name="RoomExternalLinkDeleted" xml:space="preserve">
-    <value>Ulkoinen linkki poistettu: {0}</value>
-  </data>
-  <data name="RoomExternalLinkUpdated" xml:space="preserve">
-    <value>Ulkoinen linkki päivitetty: {0}. Rooli: {1}</value>
-  </data>
-  <data name="FileOpenedForChange" xml:space="preserve">
-    <value>Kansio avattu muutosta varten: {0}</value>
-  </data>
-  <data name="PortalRenamed" xml:space="preserve">
-    <value>Portaali nimetty uudelleen</value>
-  </data>
-  <data name="FileSizePostfix" xml:space="preserve">
-    <value>tavua, kt, Mt, Gt, Tt</value>
-  </data>
-  <data name="FileUploadedWithOverwriting" xml:space="preserve">
-    <value>Tiedosto ladattu uusilla tiedoilla: {0}</value>
-  </data>
-  <data name="QuotaPerPortalChanged" xml:space="preserve">
-    <value>Aseta oletustallennuskiintiö: {0}</value>
-  </data>
-  <data name="QuotaPerPortalDisabled" xml:space="preserve">
-    <value>Oletustallennuskiintiö on poistettu käytöstä</value>
-  </data>
-  <data name="QuotaPerRoomChanged" xml:space="preserve">
-    <value>Aseta oletustallennuskiintiö huoneille: {0}</value>
-  </data>
-  <data name="QuotaPerRoomDisabled" xml:space="preserve">
-    <value>Huoneiden oletustallennuskiintiö poistettu käytöstä</value>
-  </data>
-  <data name="QuotaPerUserChanged" xml:space="preserve">
-    <value>Aseta oletustallennuskiintiö käyttäjille: {0}</value>
-  </data>
-  <data name="QuotaPerUserDisabled" xml:space="preserve">
-    <value>Käyttäjien oletustallennuskiintiö on poistettu käytöstä</value>
-  </data>
-  <data name="RoomGroupAdded" xml:space="preserve">
-    <value>Ryhmä lisätty: {0}. Rooli: {1}</value>
-  </data>
-  <data name="RoomGroupRemove" xml:space="preserve">
-    <value>Ryhmä poistettu: {0}</value>
-  </data>
-  <data name="RoomCopied" xml:space="preserve">
-    <value>Huone kopioitu: {0}</value>
-  </data>
-  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
-    <value>{0} nimitetty: {1}</value>
-  </data>
-  <data name="SendJoinInvite" xml:space="preserve">
-    <value>Käyttäjä {0} lähetti {1}:lle liittymiskutsun tähän DocSpaceen</value>
-  </data>
-  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
-    <value>Huoneet [{0}]. Aseta huoneille mukautettu tallennuskiintiö {1}</value>
-  </data>
-  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
-    <value>Huoneet [{0}]. Aseta huoneille oletustallennuskiintiö {1}</value>
-  </data>
-  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
-    <value>Huoneet [{0}]. Huoneiden tallennuskiintiö poistettu käytöstä</value>
-  </data>
-  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
-    <value>Käyttäjät [{0}]. Aseta käyttäjille mukautettu tallennuskiintiö: {1}</value>
-  </data>
-  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
-    <value>Käyttäjät [{0}]. Aseta käyttäjille oletustallennuskiintiö: {1}</value>
-  </data>
-  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
-    <value>Käyttäjät [{0}]. Käyttäjien tallennuskiintiö poistettu käytöstä</value>
-  </data>
-  <data name="FormOpenedForFilling" xml:space="preserve">
-    <value>Tiedosto avattu täytettäväksi: {0}</value>
-  </data>
-  <data name="FormSubmit" xml:space="preserve">
-    <value>Käyttäjät [{0}]. Lomake lähetetty: {1}</value>
-  </data>
-  <data name="RoomIndexExportSaved" xml:space="preserve">
-    <value>Vie asiakirjoihin tallennetun huoneen hakemisto</value>
-  </data>
-  <data name="RoomInviteResend" xml:space="preserve">
-    <value>Kutsut on jälleen lähetetty: {0}</value>
-  </data>
-  <data name="ChangeClientActivation" xml:space="preserve">
-    <value>Asiakasohjelman {0} aktivointi muutettu</value>
-  </data>
-  <data name="ChangeClientVisibility" xml:space="preserve">
-    <value>Asiakasohjelman {0} näkyvyys muutettu</value>
-  </data>
-  <data name="CreateClient" xml:space="preserve">
-    <value>Asiakasohjelma luotu</value>
-  </data>
-  <data name="DeleteClient" xml:space="preserve">
-    <value>Asiakasohjelma {0} poistettu</value>
-  </data>
-  <data name="FileIndexChanged" xml:space="preserve">
-    <value>Tiedosto: {0}. Hakemisto muutettu {1} :sta {2} :een</value>
-  </data>
-  <data name="FolderIndexChanged" xml:space="preserve">
-    <value>Kansio: {0}. Hakemisto muutettu {1} :sta {2} :een</value>
-  </data>
-  <data name="FolderIndexReordered" xml:space="preserve">
-    <value>Kansio: {0}. Hakemistot tilattu uudelleen</value>
-  </data>
-  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
-    <value>Valtuutuskoodi luotu asiakasohjelmalle {0}</value>
-  </data>
-  <data name="GeneratePersonalAccessToken" xml:space="preserve">
-    <value>Henkilökohtainen pääsytunnus luotu asiakasohjelmalle {0}</value>
-  </data>
-  <data name="RegenerateSecret" xml:space="preserve">
-    <value>Asiakasohjelman {0} salaisuus luotu uudelleen</value>
-  </data>
-  <data name="RevokeUserClient" xml:space="preserve">
-    <value>Asiakasohjelman {0} pääsy kumottu</value>
-  </data>
-  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
-    <value>Huone: {0}. Latauksen estäminen poistettu käytöstä</value>
-  </data>
-  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
-    <value>Huone: {0}. Latauksen estäminen otettu käyttöön</value>
-  </data>
-  <data name="RoomIndexingDisabled" xml:space="preserve">
-    <value>Huoneen indeksointi poistettu käytöstä</value>
-  </data>
-  <data name="RoomIndexingEnabled" xml:space="preserve">
-    <value>Huoneen indeksointi otettu käyttöön</value>
-  </data>
-  <data name="RoomLifeTimeDisabled" xml:space="preserve">
-    <value>Elinikä otetu pois käytöstä</value>
-  </data>
-  <data name="RoomLifeTimeSet" xml:space="preserve">
-    <value>Elinikä on asetettu. Arvo: {0}. Jakso: {1}. Poista lopullisesti: {2}</value>
-  </data>
-  <data name="RoomWatermarkDisabled" xml:space="preserve">
-    <value>Huone: {0}. Vesileima poistettu käytöstä</value>
-  </data>
-  <data name="RoomWatermarkSet" xml:space="preserve">
-    <value>Huone: {0}. Vesileima otettu käyttöön</value>
-  </data>
-  <data name="UpdateClient" xml:space="preserve">
-    <value>Asiakasohjelma {0} päivitetty</value>
-  </data>
-  <data name="ApiKeyCreated" xml:space="preserve">
-    <value>Käyttäjän Api-avain luotu: {0}</value>
-  </data>
-  <data name="ApiKeyUpdated" xml:space="preserve">
-    <value>Käyttäjän Api-avain päivitetty: {0}</value>
-  </data>
-  <data name="ApiKeyDeleted" xml:space="preserve">
-    <value>Käyttäjän API-avain poistettu: {0}</value>
-  </data>
-  <data name="FormCompletelyFilled" xml:space="preserve">
-    <value>Käyttäjät [{0}]. Täysin täytetty lomake: {1}</value>
-  </data>
-  <data name="FormPartiallyFilled" xml:space="preserve">
-    <value>Käyttäjät [{0}]. Osa lomakkeesta täytetty: {1}</value>
-  </data>
-  <data name="FormStopped" xml:space="preserve">
-    <value>Käyttäjät [{0}]. Lomake pysäytetty: {1}</value>
-  </data>
-  <data name="FormStartedToFill" xml:space="preserve">
-    <value>Käyttäjät [{0}]. Täyttäminen aloitettu: {1}</value>
-  </data>
   <data name="WebhookCreated" xml:space="preserve">
     <value>Webhook luotu: {0}</value>
   </data>
@@ -879,173 +1106,5 @@
   </data>
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Webhook päivitetty: {0}</value>
-  </data>
-  <data name="FileVersionRemoved" xml:space="preserve">
-    <value>Tiedostot [{0}]. Versio poistettu: {1}</value>
-  </data>
-  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
-    <value>Kehittäjän työkaluihin pääsyn asetuksia muutettu</value>
-  </data>
-  <data name="FileCustomFilterDisabled" xml:space="preserve">
-    <value>Tiedosto: {0}. Mukautettu suodatin ei käytössä</value>
-  </data>
-  <data name="FileCustomFilterEnabled" xml:space="preserve">
-    <value>Tiedosto: {0}. Mukautettu suodatin käytössä</value>
-  </data>
-  <data name="AuthLinkActivated" xml:space="preserve">
-    <value>Valtuutuslinkki on aktivoitu</value>
-  </data>
-  <data name="CustomerOperationPerformed" xml:space="preserve">
-    <value>Asiakkaan suorittama toiminto</value>
-  </data>
-  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
-    <value>Asiakastoimintojen raportti ladattu</value>
-  </data>
-  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
-    <value>Asiakkaan tilaus päivitetty: {0}</value>
-  </data>
-  <data name="CustomerWalletToppedUp" xml:space="preserve">
-    <value>Asiakkaan lompakko ladattu: {0}</value>
-  </data>
-  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Asiakkaan lompakon latausasetukset päivitetty</value>
-  </data>
-  <data name="LdapDisabled" xml:space="preserve">
-    <value>LDAP-todennus poistettu käytöstä</value>
-  </data>
-  <data name="LdapEnabled" xml:space="preserve">
-    <value>LDAP-todennus käytössä</value>
-  </data>
-  <data name="LdapSync" xml:space="preserve">
-    <value>LDAP-synkronointi valmis</value>
-  </data>
-  <data name="LocationCol" xml:space="preserve">
-    <value>Sijainti</value>
-  </data>
-  <data name="BannerSettingsChanged" xml:space="preserve">
-    <value>Kampanjabannerien näkyvyysasetuksia muutettu</value>
-  </data>
-  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Asiakkaan lompakkoa käyttävien palveluiden asetukset päivitetty</value>
-  </data>
-  <data name="LoginSuccessSocialAccount" xml:space="preserve">
-    <value>Kirjautuminen sosiaalisella tilillä onnistui</value>
-  </data>
-  <data name="AddedServerToAgent" xml:space="preserve">
-    <value>Agentille lisätty MCP-palvelin {0}</value>
-  </data>
-  <data name="AgentCreated" xml:space="preserve">
-    <value>Agentti luotu</value>
-  </data>
-  <data name="AgentDeleted" xml:space="preserve">
-    <value>Agentti poistettu</value>
-  </data>
-  <data name="AgentRenamed" xml:space="preserve">
-    <value>Agentti nimetty uudelleen: {0}</value>
-  </data>
-  <data name="AgentsModule" xml:space="preserve">
-    <value>Agentit</value>
-  </data>
-  <data name="AIProviderCreated" xml:space="preserve">
-    <value>Tekoälytarjoaja luotu: {0}</value>
-  </data>
-  <data name="AIProviderDeleted" xml:space="preserve">
-    <value>Tekoälytarjoaja poistettu: {0}</value>
-  </data>
-  <data name="AIProviderUpdated" xml:space="preserve">
-    <value>Tekoälytarjoaja päivitetty: {0}</value>
-  </data>
-  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
-    <value>Tekoälyagentit [{0}]. Aseta mukautettu tallennuskiintiö tekoälyagenteille: {1}</value>
-  </data>
-  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
-    <value>Tekoälyagentit [{0}]. Aseta oletus tallennuskiintiö tekoälyagenteille: {1}</value>
-  </data>
-  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
-    <value>Tekoälyagentit [{0}]. Tallennuskiintiö tekoälyagenteille poistettu käytöstä</value>
-  </data>
-  <data name="DeletedServerFromAgent" xml:space="preserve">
-    <value>Agentilta poistettu MCP-palvelin {0}</value>
-  </data>
-  <data name="FileExternalLinkCreated" xml:space="preserve">
-    <value>Tiedostot [{0}]. Ulkoinen linkki luotu: {1}.  Rooli: {2}</value>
-  </data>
-  <data name="FileExternalLinkDeleted" xml:space="preserve">
-    <value>Tiedostot [{0}]. Ulkoinen linkki poistettu: {1}</value>
-  </data>
-  <data name="FileExternalLinkUpdated" xml:space="preserve">
-    <value>Tiedostot [{0}]. Ulkoinen linkki päivitetty: {1}.  Rooli: {2}</value>
-  </data>
-  <data name="FileMarkedAsFavorite" xml:space="preserve">
-    <value>Tiedosto merkitty Suosikiksi: {0}</value>
-  </data>
-  <data name="FileRemovedFromFavorite" xml:space="preserve">
-    <value>Tiedosto poistettu Suosikeista: {0}</value>
-  </data>
-  <data name="FileRemovedFromList" xml:space="preserve">
-    <value>Tiedosto poistettu “Kanssani jaetuista”: {0}</value>
-  </data>
-  <data name="FileUpdatedAccessFor" xml:space="preserve">
-    <value>Tiedostot [{0}]. Pääsy päivitetty {1}:lle. Rooli: {2}</value>
-  </data>
-  <data name="FolderDownloaded" xml:space="preserve">
-    <value>Kansio Ladattu: {0}</value>
-  </data>
-  <data name="FolderExternalLinkCreated" xml:space="preserve">
-    <value>Kansiot [{0}]. Ulkoinen linkki luotu: {1}.Rooli: {2}</value>
-  </data>
-  <data name="FolderExternalLinkDeleted" xml:space="preserve">
-    <value>Kansiot [{0}]. Ulkoinen linkki poistettu: {1}</value>
-  </data>
-  <data name="FolderExternalLinkUpdated" xml:space="preserve">
-    <value>Kansiot [{0}]. Ulkoinen linkki päivitetty: {1}.Rooli: {2}</value>
-  </data>
-  <data name="FolderRemovedFromList" xml:space="preserve">
-    <value>Kansio poistettu “Kanssani jaetuista”: {0}</value>
-  </data>
-  <data name="FolderUpdatedAccessFor" xml:space="preserve">
-    <value>Kansiot [{0}]. Pääsy päivitetty {1}:lle. Rooli: {2}</value>
-  </data>
-  <data name="LoginSuccessViaOAuth" xml:space="preserve">
-    <value>Onnistunut sisäänkirjautuminen OAuth 2.0:n kautta</value>
-  </data>
-  <data name="LoginSuccessViaPassword" xml:space="preserve">
-    <value>Onnistunut kirjautuminen käyttäjätunnuksen ja salasanan kautta</value>
-  </data>
-  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
-    <value>Aseta oletus tallennuskiintiö tekoälyagenteille: {0}</value>
-  </data>
-  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
-    <value>Tekoälyagenttien oletus tallennuskiintiö otettu pois käytöstä</value>
-  </data>
-  <data name="ResetVectorizationSettings" xml:space="preserve">
-    <value>Vektorisaatioasetukset on nollattu</value>
-  </data>
-  <data name="ResetWebSearchSettings" xml:space="preserve">
-    <value>Verkkohakuasetukset on nollattu</value>
-  </data>
-  <data name="RoomExternalLinkRevoked" xml:space="preserve">
-    <value>Ulkoinen linkki peruutettu: {1}</value>
-  </data>
-  <data name="ServerCreated" xml:space="preserve">
-    <value>MCP-palvelin luotu: {0}</value>
-  </data>
-  <data name="ServerDeleted" xml:space="preserve">
-    <value>MCP-palvelin poistettu: {0}</value>
-  </data>
-  <data name="ServerDisabled" xml:space="preserve">
-    <value>MCP-palvelin otettu pois käytöstä: {0}</value>
-  </data>
-  <data name="ServerEnabled" xml:space="preserve">
-    <value>MCP-palvelin otettu käyttöön: {0}</value>
-  </data>
-  <data name="ServerUpdated" xml:space="preserve">
-    <value>MCP-palvelin päivitetty: {0}</value>
-  </data>
-  <data name="SetVectorizationSettings" xml:space="preserve">
-    <value>Vektorisaatioasetukset on määritetty. Tarjoaja: {0}</value>
-  </data>
-  <data name="SetWebSearchSettings" xml:space="preserve">
-    <value>Verkkohakuasetukset on määritetty. Moottori: {0}</value>
   </data>
 </root>

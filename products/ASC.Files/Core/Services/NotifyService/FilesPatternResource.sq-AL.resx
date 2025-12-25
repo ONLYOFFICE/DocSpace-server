@@ -163,6 +163,11 @@ $OrangeButton
 
 &amp;nbsp;</value>
   </data>
+  <data name="pattern_FormStartedFilling" xml:space="preserve">
+    <value>
+      Njoftim aktiviteti. "$FromUserName":"$FromUserLink" filloi procesin e plotësimit të formularit: "$DocumentTitle":"$DocumentURL" në dhomën: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>h1. Ju keni plotësuar formularin $Message
 
@@ -176,6 +181,11 @@ $OrangeButton
   </data>
   <data name="pattern_FormSubmitted_push" xml:space="preserve">
     <value>Formulari "$DocumentTitle" është plotësuar në dhomën "$RoomTitle"</value>
+  </data>
+  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+    <value>
+      Njoftim aktiviteti. Formulari "$DocumentTitle":"$DocumentURL" ishte plotësuar plotësisht në dhomën: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
   </data>
   <data name="pattern_InvitedToRoom_push" xml:space="preserve">
     <value>Jeni ftuar në dhomën "$RoomTitle"</value>
@@ -212,6 +222,16 @@ $__DateTime "$__AuthorName":"$__AuthorUrl" ju dha akses në dosjen "$DocumentTit
 
 $Message</value>
   </data>
+  <data name="pattern_StoppedFormFilling" xml:space="preserve">
+    <value>
+      Njoftim aktiviteti. "$FromUserName":"$FromUserLink" ndaloi plotësimin e formularit: "$DocumentTitle":"$DocumentURL" në dhomën: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_YourTurnFormFilling" xml:space="preserve">
+    <value>
+      Njoftim aktiviteti. Është radha juaj! Plotësimi i formularit është i detyrueshëm: "$DocumentTitle":"$DocumentURL" në dhomë: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
   <data name="subject_DocuSignComplete" xml:space="preserve">
     <value>Dokumentet. Të gjithë nënshkruesit përfunduan $DocumentTitle</value>
   </data>
@@ -233,19 +253,13 @@ $Message</value>
   <data name="subject_FormReceived" xml:space="preserve">
     <value>Njoftimi i DocSpace. Formulari është i plotësuar</value>
   </data>
-  <data name="subject_FormSubmitted" xml:space="preserve">
-    <value>Njoftimi i DocSpace. Formulari është i plotësuar</value>
-  </data>
   <data name="subject_FormStartedFilling" xml:space="preserve">
     <value>Njoftimi i DocSpace.</value>
   </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>Njoftimi i DocSpace. Formulari është i plotësuar</value>
+  </data>
   <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
-    <value>Njoftimi i DocSpace.</value>
-  </data>
-  <data name="subject_StoppedFormFilling" xml:space="preserve">
-    <value>Njoftimi i DocSpace.</value>
-  </data>
-  <data name="subject_YourTurnFormFilling" xml:space="preserve">
     <value>Njoftimi i DocSpace.</value>
   </data>
   <data name="subject_MailMergeEnd" xml:space="preserve">
@@ -278,24 +292,10 @@ $Message</value>
   <data name="subject_ShareFolder_tg" xml:space="preserve">
     <value>Dokumentet. Lejohet aksesi në dokument : [$DocumentTitle]($DocumentURL)</value>
   </data>
-  <data name="pattern_FormStartedFilling" xml:space="preserve">
-    <value>
-      Njoftim aktiviteti. "$FromUserName":"$FromUserLink" filloi procesin e plotësimit të formularit: "$DocumentTitle":"$DocumentURL" në dhomën: "$RoomTitle":"$RoomURL" — $__DateTime.
-    </value>
+  <data name="subject_StoppedFormFilling" xml:space="preserve">
+    <value>Njoftimi i DocSpace.</value>
   </data>
-  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
-    <value>
-      Njoftim aktiviteti. Formulari "$DocumentTitle":"$DocumentURL" ishte plotësuar plotësisht në dhomën: "$RoomTitle":"$RoomURL" — $__DateTime.
-    </value>
-  </data>
-  <data name="pattern_StoppedFormFilling" xml:space="preserve">
-    <value>
-      Njoftim aktiviteti. "$FromUserName":"$FromUserLink" ndaloi plotësimin e formularit: "$DocumentTitle":"$DocumentURL" në dhomën: "$RoomTitle":"$RoomURL" — $__DateTime.
-    </value>
-  </data>
-  <data name="pattern_YourTurnFormFilling" xml:space="preserve">
-    <value>
-      Njoftim aktiviteti. Është radha juaj! Plotësimi i formularit është i detyrueshëm: "$DocumentTitle":"$DocumentURL" në dhomë: "$RoomTitle":"$RoomURL" — $__DateTime.
-    </value>
+  <data name="subject_YourTurnFormFilling" xml:space="preserve">
+    <value>Njoftimi i DocSpace.</value>
   </data>
 </root>

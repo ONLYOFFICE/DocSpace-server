@@ -1,5 +1,64 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -53,11 +112,68 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=7.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=7.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Vetorização</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Contato</value>
+  </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Crédito</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Moeda</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Débito</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Detalhes</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>Quantidade</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>Ferramentas de IA</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Backup</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Espaço em disco</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Recarga de saldo</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>Unidade de medida</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Tokens</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Backup</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>Relatório de operações do cliente ({0}-{1})</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Histórico de transações</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Tipo</value>
+  </data>
   <data name="ActivateMobilePhoneEmptyCode" xml:space="preserve">
     <value>Campo de código de validação não pode estar vazio</value>
   </data>
@@ -73,6 +189,18 @@
   <data name="AdminMessageSent" xml:space="preserve">
     <value>Sua mensagem foi enviada com sucesso. Você será contatado pelo administrador do portal.</value>
   </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>Cota de espaço do agente de IA excedida</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Falha ao definir a quota por agente de IA. O valor inserido é maior que o armazenamento total do DocSpace.</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Renovação automática</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Recarga automática</value>
+  </data>
   <data name="ButtonSmsEnable" xml:space="preserve">
     <value>Por SMS</value>
   </data>
@@ -82,6 +210,498 @@
   <data name="ChangePortalOwnerMsg" xml:space="preserve">
     <value>Um link para confirmar a operação foi enviado para :email (O endereço de e-mail para o proprietário do portal).</value>
   </data>
+  <data name="Consumersacesskey" xml:space="preserve">
+    <value>Chave de acesso S3</value>
+  </data>
+  <data name="ConsumersapiKey" xml:space="preserve">
+    <value>Rackspace apiKey</value>
+  </data>
+  <data name="ConsumersAppleId" xml:space="preserve">
+    <value>Apple ID</value>
+  </data>
+  <data name="ConsumersappleIdClientId" xml:space="preserve">
+    <value>ID do cliente do aplicativo</value>
+  </data>
+  <data name="ConsumersAppleIdDescription" xml:space="preserve">
+    <value>Habilite o aplicativo para entrar no portal usando uma conta Apple ID.</value>
+  </data>
+  <data name="ConsumersAppleIdInstruction" xml:space="preserve">
+    <value>Habilite este aplicativo para permitir que seus usuários façam login no {LogoText} usando o ID Apple. {0} Acesse o Portal de desenvolvedores da Apple e crie um novo aplicativo de integração com o {LogoText}. Insira os dados que você recebeu abaixo:</value>
+  </data>
+  <data name="ConsumersappleIdKeyId" xml:space="preserve">
+    <value>Um identificador de chave de 10 caracteres gerado para a chave privada Sign in with Apple</value>
+  </data>
+  <data name="ConsumersappleIdPrivateKey" xml:space="preserve">
+    <value>Chave privada baixada do Apple Developer</value>
+  </data>
+  <data name="ConsumersappleIdTeamId" xml:space="preserve">
+    <value>ID da equipe da conta de desenvolvedor de 10 caracteres</value>
+  </data>
+  <data name="ConsumersauthPwd" xml:space="preserve">
+    <value>authPwd Selectel</value>
+  </data>
+  <data name="ConsumersauthUser" xml:space="preserve">
+    <value>authUser Selectel</value>
+  </data>
+  <data name="ConsumersBitly" xml:space="preserve">
+    <value>Bitly</value>
+  </data>
+  <data name="ConsumersbitlyClientId" xml:space="preserve">
+    <value>login</value>
+  </data>
+  <data name="ConsumersbitlyClientSecret" xml:space="preserve">
+    <value>apiKey</value>
+  </data>
+  <data name="ConsumersBitlyDescription" xml:space="preserve">
+    <value>Conecte o serviço Bitly para encurtar os links compartilhados e os links de convite do portal no módulo Documentos.</value>
+  </data>
+  <data name="ConsumersBitlyInstruction" xml:space="preserve">
+    <value>Habilitar este aplicativo para encurtar os links de convite e documento. {0}Inserir seu login Bitly e a chave API abaixo:</value>
+  </data>
+  <data name="ConsumersBox" xml:space="preserve">
+    <value>Box</value>
+  </data>
+  <data name="ConsumersboxClientId" xml:space="preserve">
+    <value>ID da caixa</value>
+  </data>
+  <data name="ConsumersboxClientSecret" xml:space="preserve">
+    <value>Chave da caixa</value>
+  </data>
+  <data name="ConsumersBoxDescription" xml:space="preserve">
+    <value>Conecte o aplicativo para gerenciar os arquivos e pastas da Box.</value>
+  </data>
+  <data name="ConsumersBoxInstruction" xml:space="preserve">
+    <value>Habilite este aplicativo para conectar sua conta Box ao módulo Documentos. Você poderá gerenciar, editar e compartilhar arquivos do Box com usuários {LogoText}. {0}Assine sua conta na página de desenvolvedores do Box e crie um novo aplicativo para integração com o {LogoText}. Insira os dados que você recebeu abaixo:</value>
+  </data>
+  <data name="ConsumersClickatell" xml:space="preserve">
+    <value>Clickatell</value>
+  </data>
+  <data name="ConsumersclickatellapiKey" xml:space="preserve">
+    <value>apiKey</value>
+  </data>
+  <data name="ConsumersClickatellDescription" xml:space="preserve">
+    <value>Habilitar o aplicativo para autenticação de dois fatores via Clickatell.</value>
+  </data>
+  <data name="ConsumersClickatellInstruction" xml:space="preserve">
+    <value>Use este aplicativo para permitir a autenticação de dois fatores com o serviço Clickatell. {0}Ingresse em sua conta da plataforma SMS e crie uma nova integração para {LogoText}. Copie uma apiKey e insira-a abaixo:</value>
+  </data>
+  <data name="ConsumersDocuSign" xml:space="preserve">
+    <value>DocuSign</value>
+  </data>
+  <data name="ConsumersdocuSignClientId" xml:space="preserve">
+    <value>Chave do DocuSign</value>
+  </data>
+  <data name="ConsumersdocuSignClientSecret" xml:space="preserve">
+    <value>Segredo do DocuSign</value>
+  </data>
+  <data name="ConsumersDocuSignDescription" xml:space="preserve">
+    <value>Conectar o aplicativo para adicionar a assinatura eletrônica do DocuSign aos documentos.</value>
+  </data>
+  <data name="ConsumersdocuSignHost" xml:space="preserve">
+    <value>Endpoint de autenticação DocuSign</value>
+  </data>
+  <data name="ConsumersDocuSignInstruction" xml:space="preserve">
+    <value>Habilitar este aplicativo para assinar digitalmente documentos usando DocuSign. {0} Vá para seu DocuSign Admin Console e adicione a integração {LogoText}. Insira os dados que você recebeu abaixo:</value>
+  </data>
+  <data name="ConsumersDropBox" xml:space="preserve">
+    <value>DropBox</value>
+  </data>
+  <data name="ConsumersDropBoxDescription" xml:space="preserve">
+    <value>Conectar o aplicativo para gerenciar arquivos e pastas da Dropbox.</value>
+  </data>
+  <data name="ConsumersDropBoxInstruction" xml:space="preserve">
+    <value>Habilite este aplicativo para conectar sua conta Dropbox ao módulo Documentos. Você será capaz de gerenciar, editar e compartilhar arquivos do Dropbox com usuários {LogoText}. {0}Assine sua conta no website Dropbox Developers e crie um novo aplicativo para integração com o {LogoText}. Insira os dados que você recebeu abaixo:</value>
+  </data>
+  <data name="ConsumersDropBoxKey" xml:space="preserve">
+    <value>DropBox ID</value>
+  </data>
+  <data name="ConsumersDropBoxSecret" xml:space="preserve">
+    <value>Chave da Dropbox</value>
+  </data>
+  <data name="ConsumersEasyBib" xml:space="preserve">
+    <value>EasyBib</value>
+  </data>
+  <data name="ConsumerseasyBibappkey" xml:space="preserve">
+    <value>Chave de aplicação</value>
+  </data>
+  <data name="ConsumersEasyBibDescription" xml:space="preserve">
+    <value>Habilite este aplicativo para criar listas bibliográficas em documentos com EasyBib.</value>
+  </data>
+  <data name="ConsumersEasyBibInstruction" xml:space="preserve">
+    <value>Habilite este aplicativo para criar bibliografias em editores {LogoText}. {0}Vá para a página de inscrição no EasyBib e preencha o formulário para adicionar a integração {LogoText}. Depois de obter uma chave do aplicativo, cole-a abaixo:</value>
+  </data>
+  <data name="ConsumersFacebook" xml:space="preserve">
+    <value>Facebook</value>
+  </data>
+  <data name="ConsumersfacebookAccessToken_Default" xml:space="preserve">
+    <value>Token de aplicativo</value>
+  </data>
+  <data name="ConsumersfacebookClientId" xml:space="preserve">
+    <value>Facebook ID</value>
+  </data>
+  <data name="ConsumersfacebookClientSecret" xml:space="preserve">
+    <value>Chave do Facebook</value>
+  </data>
+  <data name="ConsumersFacebookDescription" xml:space="preserve">
+    <value>Conecte o aplicativo para entrar no portal usando uma conta do Facebook.</value>
+  </data>
+  <data name="ConsumersFacebookInstruction" xml:space="preserve">
+    <value>Habilite este aplicativo para permitir que seus usuários façam login no {LogoText} usando o Facebook e vinculem as contas do Facebook de seus clientes ao módulo CRM. {0}Vá para o Portal de desenvolvedores do Facebook e crie uma nova integração de aplicativo {LogoText}. Insira os dados que você recebeu abaixo:</value>
+  </data>
+  <data name="ConsumersFirebase" xml:space="preserve">
+    <value>Firebase</value>
+  </data>
+  <data name="ConsumersFirebaseDescription" xml:space="preserve">
+    <value>Conecte o serviço de mensagens em nuvem da Firebase para receber notificações sobre as mensagens enviadas para você.</value>
+  </data>
+  <data name="ConsumersFirebaseInstruction" xml:space="preserve">
+    <value>Habilite este aplicativo para permitir que seus usuários recebam notificações sobre as mensagens, mesmo offline. {0}Vá ao console Firebase e adicione um novo projeto para integração {LogoText}. Insira os dados que você recebeu abaixo:</value>
+  </data>
+  <data name="Consumersfirebase_apiKey" xml:space="preserve">
+    <value>Chave API Web</value>
+  </data>
+  <data name="Consumersfirebase_authorization" xml:space="preserve">
+    <value>Chave do servidor</value>
+  </data>
+  <data name="Consumersfirebase_messagingSenderId" xml:space="preserve">
+    <value>ID do remetente</value>
+  </data>
+  <data name="Consumersfirebase_projectId" xml:space="preserve">
+    <value>ID do projeto</value>
+  </data>
+  <data name="ConsumersGoogle" xml:space="preserve">
+    <value>Google</value>
+  </data>
+  <data name="ConsumersgoogleClientId" xml:space="preserve">
+    <value>ID do Google</value>
+  </data>
+  <data name="ConsumersgoogleClientSecret" xml:space="preserve">
+    <value>Chave do Google</value>
+  </data>
+  <data name="ConsumersGoogleCloud" xml:space="preserve">
+    <value>Armazenamento em nuvem do Google</value>
+  </data>
+  <data name="ConsumersGoogleCloudbucket" xml:space="preserve">
+    <value>Balde</value>
+  </data>
+  <data name="ConsumersGoogleCloudbucketDescription" xml:space="preserve">
+    <value>Digite o nome do balde Google Cloud onde você quer armazenar seus backups.</value>
+  </data>
+  <data name="ConsumersGoogleCloudDescription" xml:space="preserve">
+    <value>Conecte o serviço Google Cloud Storage ao backup e armazenamento de dados de seu portal.</value>
+  </data>
+  <data name="ConsumersGoogleCloudInstruction" xml:space="preserve">
+    <value>Conecte o serviço Google Cloud Storage ao backup e armazenamento de dados de seu portal. {0}Vá ao Console da Plataforma Google Cloud e crie uma nova conta de serviço para {LogoText}. Cole os dados que você recebeu abaixo:</value>
+  </data>
+  <data name="ConsumersGoogleCloudjson" xml:space="preserve">
+    <value>GoogleCloud json</value>
+  </data>
+  <data name="ConsumersGoogleDescription" xml:space="preserve">
+    <value>Conecte o projeto para entrar no portal usando uma conta do Google e gerenciar os arquivos e pastas do Google Drive.</value>
+  </data>
+  <data name="ConsumersGoogleInstruction" xml:space="preserve">
+    <value>Habilite este aplicativo para conectar sua conta Google Drive ao módulo Documentos. Você será capaz de gerenciar, editar e compartilhar arquivos do Google Drive com usuários do {LogoText}. {0}Vá ao console das APIs do Google e crie um novo projeto para integração com o {LogoText}. Insira os dados que você recebeu abaixo:</value>
+  </data>
+  <data name="ConsumersLinkedIn" xml:space="preserve">
+    <value>LinkedIn</value>
+  </data>
+  <data name="ConsumersLinkedInDescription" xml:space="preserve">
+    <value>Conecte o aplicativo para entrar no portal usando uma conta do LinkedIn.</value>
+  </data>
+  <data name="ConsumersLinkedInInstruction" xml:space="preserve">
+    <value>Ative este aplicativo para permitir que seus usuários façam login no {LogoText} usando suas contas do LinkedIn. {0}Acesse o site LinkedIn Developers e crie uma nova integração do aplicativo {LogoText}. Insira os dados que você recebeu abaixo:</value>
+  </data>
+  <data name="ConsumersLinkedInKey" xml:space="preserve">
+    <value>ID do Linkedin</value>
+  </data>
+  <data name="ConsumersLinkedInSecret" xml:space="preserve">
+    <value>Chave do Linkedin</value>
+  </data>
+  <data name="ConsumersMailru" xml:space="preserve">
+    <value>Mail.ru</value>
+  </data>
+  <data name="ConsumersMailruClientId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="ConsumersMailruClientSecret" xml:space="preserve">
+    <value>Senha secreta</value>
+  </data>
+  <data name="ConsumersMailruDescription" xml:space="preserve">
+    <value>Habilite o aplicativo a entrar no portal usando uma conta Mail.ru.</value>
+  </data>
+  <data name="ConsumersMailruInstruction" xml:space="preserve">
+    <value>Ao adicionar o aplicativo Mail.ru, você pode ativar o login no portal usando a conta Mail.ru em sua página de perfil.</value>
+  </data>
+  <data name="ConsumersMicrosoft" xml:space="preserve">
+    <value>Microsoft</value>
+  </data>
+  <data name="ConsumersmicrosoftClientId" xml:space="preserve">
+    <value>ID do cliente do aplicativo</value>
+  </data>
+  <data name="ConsumersmicrosoftClientSecret" xml:space="preserve">
+    <value>Segredo de cliente</value>
+  </data>
+  <data name="ConsumersMicrosoftDescription" xml:space="preserve">
+    <value>Habilite o aplicativo para entrar no portal usando uma conta Apple ID.</value>
+  </data>
+  <data name="ConsumersMicrosoftInstruction" xml:space="preserve">
+    <value>Habilite este aplicativo para permitir que seus usuários façam login no {LogoText} usando a Microsoft. {0} Vá para o Microsoft Azure e crie uma nova integração de aplicativo {LogoText}. Insira os dados que você recebeu abaixo:</value>
+  </data>
+  <data name="ConsumersRackspace" xml:space="preserve">
+    <value>Armazenamento em Nuvem Rackspace</value>
+  </data>
+  <data name="ConsumersRackspaceDescription" xml:space="preserve">
+    <value>Conecte o serviço Rackspace Cloud Storage ao backup e armazenamento de dados de seu portal.</value>
+  </data>
+  <data name="ConsumersRackspaceInstruction" xml:space="preserve">
+    <value>Conecte o serviço Rackspace Cloud Storage ao backup e armazenamento de dados de seu portal. {0} Nas configurações de segurança do Painel de Controle do Rackspace Cloud, clique no link Mostrar ao lado da Chave API do Rackspace. Cole os dados que você recebeu abaixo:</value>
+  </data>
+  <data name="ConsumersRackspaceprivate_container" xml:space="preserve">
+    <value>Container privado</value>
+  </data>
+  <data name="ConsumersRackspaceprivate_containerDescription" xml:space="preserve">
+    <value>Digite o endereço URL do contêiner privado do Rackspace onde você deseja armazenar seus backups.</value>
+  </data>
+  <data name="ConsumersRackspacepublic_container" xml:space="preserve">
+    <value>Container público</value>
+  </data>
+  <data name="ConsumersRackspacepublic_containerDescription" xml:space="preserve">
+    <value>Digite o endereço URL do contêiner público do Rackspace onde você deseja armazenar seus backups.</value>
+  </data>
+  <data name="ConsumersRackspaceregion" xml:space="preserve">
+    <value>Região</value>
+  </data>
+  <data name="ConsumersRackspaceregionDescription" xml:space="preserve">
+    <value>Entre na região onde se encontram seus contêineres Rackspace.</value>
+  </data>
+  <data name="ConsumersS3" xml:space="preserve">
+    <value>Amazon AWS S3</value>
+  </data>
+  <data name="ConsumersS3bucket" xml:space="preserve">
+    <value>Bucket</value>
+  </data>
+  <data name="ConsumersS3bucketDescription" xml:space="preserve">
+    <value>Digite o nome exclusivo do bucket da Amazon onde você deseja armazenar seus backups.</value>
+  </data>
+  <data name="ConsumersS3Description" xml:space="preserve">
+    <value>Conecte a Amazon AWS S3 ao backup e armazenamento de dados de seu portal.</value>
+  </data>
+  <data name="ConsumersS3Instruction" xml:space="preserve">
+    <value>Conecte a Amazon AWS S3 ao backup e armazenamento de dados de seu portal. {0}Vá ao Console de Gestão AWS e crie chaves de acesso para {LogoText}. Cole os dados que você recebeu abaixo:</value>
+  </data>
+  <data name="ConsumersS3region" xml:space="preserve">
+    <value>Região</value>
+  </data>
+  <data name="ConsumersS3regionDescription" xml:space="preserve">
+    <value>Digite a região AWS onde reside o seu bucket da Amazon.</value>
+  </data>
+  <data name="Consumerssecretaccesskey" xml:space="preserve">
+    <value>Chave de acesso secreta S3</value>
+  </data>
+  <data name="ConsumersSelectel" xml:space="preserve">
+    <value>Selecione armazenamento em nuvem</value>
+  </data>
+  <data name="ConsumersSelectelauthPwd" xml:space="preserve">
+    <value>Senha para acessar o armazenamento</value>
+  </data>
+  <data name="ConsumersSelectelauthUser" xml:space="preserve">
+    <value>Usuário de autenticação</value>
+  </data>
+  <data name="ConsumersSelectelDescription" xml:space="preserve">
+    <value>Conecte o serviço Selectel Cloud Storage ao backup e armazenamento de dados de seu portal.</value>
+  </data>
+  <data name="ConsumersSelectelInstruction" xml:space="preserve">
+    <value>Conecte o serviço Selectel Cloud Storage ao backup e armazenamento de dados de seu portal. {0} Obtenha os dados de acesso para um usuário com direitos de leitura/gravação de contêineres onde você planeja armazenar seus backups e cole-os abaixo:</value>
+  </data>
+  <data name="ConsumersSelectelprivate_container" xml:space="preserve">
+    <value>Container privado</value>
+  </data>
+  <data name="ConsumersSelectelprivate_containerDescription" xml:space="preserve">
+    <value>Digite o nome do container privado Selectel onde você deseja armazenar seus backups.</value>
+  </data>
+  <data name="ConsumersSelectelpublic_container" xml:space="preserve">
+    <value>Container público</value>
+  </data>
+  <data name="ConsumersSelectelpublic_containerDescription" xml:space="preserve">
+    <value>Digite o nome do recipiente público Selectel onde você deseja armazenar seus backups.</value>
+  </data>
+  <data name="ConsumersSkyDrive" xml:space="preserve">
+    <value>OneDrive</value>
+  </data>
+  <data name="Consumersskydriveappkey" xml:space="preserve">
+    <value>ID da aplicação</value>
+  </data>
+  <data name="Consumersskydriveappsecret" xml:space="preserve">
+    <value>Segredo do cliente</value>
+  </data>
+  <data name="ConsumersSkyDriveDescription" xml:space="preserve">
+    <value>Conecte o aplicativo para gerenciar os arquivos e pastas do OneDrive.</value>
+  </data>
+  <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
+    <value>Habilite este aplicativo para conectar sua conta OneDrive ao módulo Documentos. Você será capaz de gerenciar, editar e compartilhar arquivos da OneDrive com usuários {LogoText}. {0}Ingresse em sua conta Microsoft Azure e crie um novo aplicativo para integração {LogoText}. Insira os dados que você recebeu abaixo:</value>
+  </data>
+  <data name="ConsumersSmsc" xml:space="preserve">
+    <value>Centro de SMS</value>
+  </data>
+  <data name="ConsumersSmscDescription" xml:space="preserve">
+    <value>Habilitar o aplicativo para a autenticação de dois fatores via SMS Center.</value>
+  </data>
+  <data name="ConsumersSmscInstruction" xml:space="preserve">
+    <value>Use este aplicativo para permitir a autenticação de dois fatores com o serviço SMS Center. {0}Inserir login de sua conta smsc e sua senha (ou senha MD5 hash) em minúsculas:</value>
+  </data>
+  <data name="Consumerssmsclogin" xml:space="preserve">
+    <value>Login</value>
+  </data>
+  <data name="Consumerssmscpsw" xml:space="preserve">
+    <value>Senha e hash MD5 de senha em minúscula</value>
+  </data>
+  <data name="ConsumersTelegram" xml:space="preserve">
+    <value>Telegram</value>
+  </data>
+  <data name="ConsumersTelegramBotName" xml:space="preserve">
+    <value>Nome de utilizador do bot</value>
+  </data>
+  <data name="ConsumersTelegramBotToken" xml:space="preserve">
+    <value>Token de bot</value>
+  </data>
+  <data name="ConsumersTelegramDescription" xml:space="preserve">
+    <value>Collega l'account Telegram per ricevere le notifiche del portale tramite Telegram.</value>
+  </data>
+  <data name="ConsumersTelegramInstruction" xml:space="preserve">
+    <value>Para receber notificações do portal via Telegram, habilite o Telegram bot. Você pode criar um novo bot usando BotFather in Telegram Desktop. Para usar este bot, os usuários do portal precisam ativar as notificações por telegrama em sua página de perfil. {0}Colar o nome de usuário do bot e o token que você recebeu nos campos abaixo.</value>
+  </data>
+  <data name="ConsumersTwilio" xml:space="preserve">
+    <value>Twilio</value>
+  </data>
+  <data name="ConsumerstwilioAccountSid" xml:space="preserve">
+    <value>Conta Sid</value>
+  </data>
+  <data name="ConsumerstwilioAuthToken" xml:space="preserve">
+    <value>Token de autenticação</value>
+  </data>
+  <data name="ConsumersTwilioDescription" xml:space="preserve">
+    <value>Adicionar Twilio para poder chamar contatos CRM diretamente do navegador.</value>
+  </data>
+  <data name="ConsumersTwilioInstruction" xml:space="preserve">
+    <value>Habilite este aplicativo para permitir que seus usuários chamem seus contatos a partir do módulo CRM usando o Twilio. {0} Vá para o Twilio Console e cole os seguintes dados abaixo:</value>
+  </data>
+  <data name="Consumerstwiliosender" xml:space="preserve">
+    <value>Número de telefone do Twilio (exigido para autorização SMS)</value>
+  </data>
+  <data name="ConsumersTwitter" xml:space="preserve">
+    <value>X</value>
+  </data>
+  <data name="ConsumerstwitterAccessTokenSecret_Default" xml:space="preserve">
+    <value>Segredo do cliente</value>
+  </data>
+  <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
+    <value>ID do cliente</value>
+  </data>
+  <data name="ConsumersTwitterDescription" xml:space="preserve">
+    <value>Conecte o aplicativo para entrar no portal usando uma conta do X.</value>
+  </data>
+  <data name="ConsumersTwitterInstruction" xml:space="preserve">
+    <value>Habilite este aplicativo para permitir que seus usuários acessem a {LogoText} usando seu X e vinculem as contas de seus clientes no X ao módulo CRM. {0} Vá para o Portal de Desenvolvedores do X e crie um novo aplicativo de integração {LogoText}. Insira os dados que você recebeu abaixo:</value>
+  </data>
+  <data name="ConsumersTwitterKey" xml:space="preserve">
+    <value>Chave API</value>
+  </data>
+  <data name="ConsumersTwitterSecret" xml:space="preserve">
+    <value>Segredo da chave API</value>
+  </data>
+  <data name="Consumersusername" xml:space="preserve">
+    <value>Nome de utilizador da Rackspace</value>
+  </data>
+  <data name="ConsumersVk" xml:space="preserve">
+    <value>VK</value>
+  </data>
+  <data name="ConsumersVkClientId" xml:space="preserve">
+    <value>ID do aplicativo</value>
+  </data>
+  <data name="ConsumersVkClientSecret" xml:space="preserve">
+    <value>Chave de segurança</value>
+  </data>
+  <data name="ConsumersVkDescription" xml:space="preserve">
+    <value>Habilite o aplicativo a entrar no portal usando uma conta VK.</value>
+  </data>
+  <data name="ConsumersVkInstruction" xml:space="preserve">
+    <value>Ao adicionar o aplicativo VK, você pode habilitar a entrada no portal usando a conta VK em sua página de perfil.</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>ID do cliente</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Segredo do cliente</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Habilite o aplicativo para fazer login no portal usando uma conta WeChat.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Habilite o aplicativo para fazer login no portal usando uma conta WeChat.</value>
+  </data>
+  <data name="ConsumersWordpress" xml:space="preserve">
+    <value>WordPress</value>
+  </data>
+  <data name="ConsumersWordpressDescription" xml:space="preserve">
+    <value>Habilitar o aplicativo para publicar documentos diretamente no WordPress.</value>
+  </data>
+  <data name="ConsumersWordpressInstruction" xml:space="preserve">
+    <value>Habilite o aplicativo para publicar facilmente documentos em seu site WordPress. {0}Na página Desenvolvedores do Wordpress, crie um novo aplicativo para integração {LogoText}. Cole os dados que você recebeu abaixo:</value>
+  </data>
+  <data name="ConsumerswpClientId" xml:space="preserve">
+    <value>Chave do WordPress</value>
+  </data>
+  <data name="ConsumerswpClientSecret" xml:space="preserve">
+    <value>Segredo do Wordpress</value>
+  </data>
+  <data name="ConsumersYahoo" xml:space="preserve">
+    <value>Yahoo</value>
+  </data>
+  <data name="ConsumersyahooClientId" xml:space="preserve">
+    <value>ID do cliente</value>
+  </data>
+  <data name="ConsumersyahooClientSecret" xml:space="preserve">
+    <value>Segredo do cliente</value>
+  </data>
+  <data name="ConsumersYahooDescription" xml:space="preserve">
+    <value>Ativar a aplicação para importar utilizadores do serviço Yahoo.</value>
+  </data>
+  <data name="ConsumersYahooInstruction" xml:space="preserve">
+    <value>Habilite este aplicativo para adicionar novos usuários do portal a partir de sua lista de contatos do Yahoo. {0}Vá para a página Criar aplicativo na Rede de Desenvolvedores Yahoo e crie um novo aplicativo para integração {LogoText}. Insira os dados que você recebeu abaixo:</value>
+  </data>
+  <data name="ConsumersYandex" xml:space="preserve">
+    <value>Yandex</value>
+  </data>
+  <data name="ConsumersYandexClientId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="ConsumersYandexClientSecret" xml:space="preserve">
+    <value>Senha</value>
+  </data>
+  <data name="ConsumersYandexDescription" xml:space="preserve">
+    <value>Habilite o aplicativo a entrar no portal usando uma conta Yandex.</value>
+  </data>
+  <data name="ConsumersYandexInstruction" xml:space="preserve">
+    <value>Quando adiciona a aplicação Yandex, pode ativar o início de sessão no portal utilizando a conta Yandex na sua página de perfil.</value>
+  </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>ID do cliente Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Senha do cliente Zoom</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>Habilite o aplicativo para fazer login no portal usando uma conta Zoom.</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>Ative este aplicativo para permitir que seus usuários façam login no {LogoText} usando suas contas Zoom. {0}Acesse o site do Zoom Developers e crie um novo aplicativo de integração com o {LogoText}. Insira os dados que você recebeu abaixo:</value>
+  </data>
   <data name="CouldNotRecoverPasswordForLdapUser" xml:space="preserve">
     <value>Operação de recuperação de senha é proibida para um usuário LDAP</value>
   </data>
@@ -90,6 +710,24 @@
   </data>
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>Personalizado</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>E-mail</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Primeiro nome</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Sobrenome</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Cota de Serviço de Documentos ({0})</value>
   </data>
   <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
     <value>Identificação de instância incorreta.</value>
@@ -106,6 +744,9 @@
   <data name="ErrorBadKeys" xml:space="preserve">
     <value>Más chaves</value>
   </data>
+  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
+    <value>O último espaço de acesso completo não pode ser excluído</value>
+  </data>
   <data name="ErrorDisabledProfile" xml:space="preserve">
     <value>O seu perfil está suspenso</value>
   </data>
@@ -117,6 +758,9 @@
   </data>
   <data name="ErrorEmailEmpty" xml:space="preserve">
     <value>O campo de e-mail está vazio</value>
+  </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>Este e-mail está anexado ao usuário {0} como um provedor terceirizado</value>
   </data>
   <data name="ErrorEmailsAreTheSame" xml:space="preserve">
     <value>O e-mail atual e o novo e-mail são o mesmo</value>
@@ -130,11 +774,26 @@
   <data name="ErrorEmptyUploadFileSelected" xml:space="preserve">
     <value>Não foi possível encontrar o arquivo enviado</value>
   </data>
+  <data name="ErrorFileNotImage" xml:space="preserve">
+    <value>Tipo desconhcido de arquivo de imagem</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>O grupo não foi encontrado</value>
+  </data>
+  <data name="ErrorImageSize" xml:space="preserve">
+    <value>Tamanho da imagem excedeu os parâmetros permitidos</value>
+  </data>
   <data name="ErrorImageWeightLimit" xml:space="preserve">
     <value>O tamanho do arquivo de imagem é muito grande</value>
   </data>
   <data name="ErrorIncorrectUserName" xml:space="preserve">
     <value>Nome ou sobrenome incorreto</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>O limite de convites foi excedido</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Adicione pelo menos 1 endereço IP permitido.</value>
   </data>
   <data name="ErrorIpSecurity" xml:space="preserve">
     <value>O acesso ao portal é restrito</value>
@@ -172,6 +831,9 @@
   <data name="ErrorPasswordOnlyLatinLetters" xml:space="preserve">
     <value>somente letras latinas</value>
   </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Pagamento obrigatório</value>
+  </data>
   <data name="ErrorRequestLimitExceeded" xml:space="preserve">
     <value>O limite de solicitação é excedido</value>
   </data>
@@ -181,11 +843,53 @@
   <data name="ErrorTenantTooShortFormat" xml:space="preserve">
     <value>O nome de domínio deve ter entre {0} e {1} caracteres.</value>
   </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>Muitas tentativas de login. Por favor, tente novamente mais tarde</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Adicione pelo menos um domínio confiável.</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Usuário desativado</value>
+  </data>
   <data name="ErrorUserNotFound" xml:space="preserve">
     <value>O usuário não foi encontrado</value>
   </data>
   <data name="ErrorUserNotFoundByEmail" xml:space="preserve">
     <value>O usuário com o e-mail "{0}" não foi encontrado</value>
+  </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>URL do webhook não está disponível. A solicitação HEAD não responde ao status http 200.</value>
+  </data>
+  <data name="ErrorWebPluginArchive" xml:space="preserve">
+    <value>Arquivo de plugin errado</value>
+  </data>
+  <data name="ErrorWebPluginExist" xml:space="preserve">
+    <value>O plug-in já existe</value>
+  </data>
+  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
+    <value>Extensão de arquivo errada</value>
+  </data>
+  <data name="ErrorWebPluginFileSize" xml:space="preserve">
+    <value>O tamanho do arquivo excede o limite</value>
+  </data>
+  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
+    <value>São proibidas alterações nos plugins do sistema</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>O número de plugins excede o limite</value>
+  </data>
+  <data name="ErrorWebPluginName" xml:space="preserve">
+    <value>Nome do plugin errado</value>
+  </data>
+  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
+    <value>Nenhum arquivo de entrada</value>
+  </data>
+  <data name="ErrorWebPluginNotFound" xml:space="preserve">
+    <value>Plug-in não encontrado</value>
+  </data>
+  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
+    <value>Para muitos arquivos de entrada</value>
   </data>
   <data name="EuServerRegion" xml:space="preserve">
     <value>Região UE (Frankfurt)</value>
@@ -364,6 +1068,9 @@
   <data name="MessageEmailChangeInstuctionsSentOnEmail" xml:space="preserve">
     <value>As instruções de alteração de e-mail foram enviadas com sucesso</value>
   </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>A instrução de alteração de senha foi enviada para o endereço de e-mail {0}.</value>
+  </data>
   <data name="MessageYourPasswordSendedToEmail" xml:space="preserve">
     <value>Se existir um usuário com o e-mail {0}, a instrução de mudança de senha foi enviada para este endereço de e-mail.</value>
   </data>
@@ -376,14 +1083,26 @@
   <data name="Owner" xml:space="preserve">
     <value>Proprietário</value>
   </data>
+  <data name="PortalName" xml:space="preserve">
+    <value>Espaço na nuvem para os documentos do seu escritório</value>
+  </data>
   <data name="PortalSecurity" xml:space="preserve">
     <value>Acesso ao portal</value>
+  </data>
+  <data name="QuotaGreaterPortalError" xml:space="preserve">
+    <value>Falha ao definir a cota de memória – a cota de memória definida é maior que a cota dos portais.</value>
   </data>
   <data name="ReassignDataRemoveUserError" xml:space="preserve">
     <value>O processo de reatribuição de dados para {0} não está completo.</value>
   </data>
   <data name="RecaptchaInvalid" xml:space="preserve">
     <value>Recaptcha inválido</value>
+  </data>
+  <data name="RoomFreeSpaceException" xml:space="preserve">
+    <value>Cota de espaço da sala excedida</value>
+  </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>Falha ao definir a cota por sala. O valor inserido é maior do que o armazenamento total do DocSpace.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Ásia-Pacífico (Cingapura)</value>
@@ -427,32 +1146,38 @@
   <data name="SuccessfullySentNotificationDeleteUserInfoMessage" xml:space="preserve">
     <value>As instruções para desativar seu perfil foram enviadas para o endereço de e-mail {0}</value>
   </data>
-  <data name="TfaAppAuthMessageError" xml:space="preserve">
-    <value>Código incorreto</value>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>O número de agentes de IA não deve exceder {0}</value>
   </data>
-  <data name="TfaAppNotAvailable" xml:space="preserve">
-    <value>As configurações da aplicação TFA não estão disponíveis</value>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>Ferramentas de IA</value>
   </data>
-  <data name="TfaTooMuchError" xml:space="preserve">
-    <value>Você enviou demasiadas mensagens de texto. Tente novamente depois.</value>
-  </data>
-  <data name="UsServerRegion" xml:space="preserve">
-    <value>Região Oeste dos EUA (Oregon)</value>
-  </data>
-  <data name="WhatsNewSubscriptionName" xml:space="preserve">
-    <value>O que há de novo</value>
-  </data>
-  <data name="TariffsFeature_customization" xml:space="preserve">
-    <value>Marca e personalização</value>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Ative as funcionalidades de IA no seu DocSpace para impulsionar a produtividade.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Rastreamento de logins e ações</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Backup</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Habilite backups para o seu DocSpace. Os custos serão cobrados automaticamente.</value>
+  </data>
+  <data name="TariffsFeature_customization" xml:space="preserve">
+    <value>Marca e personalização</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>Tamanho máximo do arquivo</value>
   </data>
   <data name="TariffsFeature_file_size_exception" xml:space="preserve">
     <value>O tamanho do arquivo não deve exceder {0}</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} backups gratuitos por mês</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>O número de backups gratuitos não deve exceder {0} em um mês</value>
   </data>
   <data name="TariffsFeature_manager_exception" xml:space="preserve">
     <value>O número de administradores não deve exceder {0}</value>
@@ -472,16 +1197,37 @@
   <data name="TariffsFeature_sso" xml:space="preserve">
     <value>SSO</value>
   </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Cotas e estatísticas de armazenamento</value>
+  </data>
+  <data name="TariffsFeature_thirdparty" xml:space="preserve">
+    <value>Pro integrações</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} por administrador e capacidade de adicionar espaço mediante solicitação</value>
+  </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>O tamanho de armazenamento usado não deve exceder {0}</value>
   </data>
   <data name="TariffsFeature_total_size_price_count" xml:space="preserve">
     <value>Espaço de armazenamento</value>
   </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Armazenamento em disco adicional</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Ajuste o armazenamento para a quantidade exata necessária.</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Administradores adicionados:</value>
+  </data>
   <data name="TariffsFeature_used_room" xml:space="preserve">
     <value>Salas:</value>
   </data>
   <data name="TariffsFeature_used_total_size" xml:space="preserve">
+    <value>Espaço de armazenamento usado:</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
     <value>Espaço de armazenamento usado:</value>
   </data>
   <data name="TariffsFeature_used_usersInRoom" xml:space="preserve">
@@ -490,362 +1236,23 @@
   <data name="TariffsFeature_users" xml:space="preserve">
     <value>Número ilimitado de usuários e convidados</value>
   </data>
-  <data name="TariffsFeature_users_exception" xml:space="preserve">
-    <value>O número de usuários não deve exceder {0}</value>
-  </data>
   <data name="TariffsFeature_usersInRoom" xml:space="preserve">
     <value>Usuários na sala</value>
   </data>
   <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
     <value>O número de usuários na sala não deve exceder {0}</value>
   </data>
-  <data name="ConsumersAppleId" xml:space="preserve">
-    <value>Apple ID</value>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>O número de administradores excede o limite: {0}/{1}.</value>
   </data>
-  <data name="ConsumersappleIdClientId" xml:space="preserve">
-    <value>ID do cliente do aplicativo</value>
+  <data name="TariffsFeature_users_exception" xml:space="preserve">
+    <value>O número de usuários não deve exceder {0}</value>
   </data>
-  <data name="ConsumersappleIdKeyId" xml:space="preserve">
-    <value>Um identificador de chave de 10 caracteres gerado para a chave privada Sign in with Apple</value>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>Pesquisa web com IA</value>
   </data>
-  <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>Habilite o aplicativo para entrar no portal usando uma conta Apple ID.</value>
-  </data>
-  <data name="ConsumersAppleIdInstruction" xml:space="preserve">
-    <value>Habilite este aplicativo para permitir que seus usuários façam login no {LogoText} usando o ID Apple. {0} Acesse o Portal de desenvolvedores da Apple e crie um novo aplicativo de integração com o {LogoText}. Insira os dados que você recebeu abaixo:</value>
-  </data>
-  <data name="ConsumersappleIdPrivateKey" xml:space="preserve">
-    <value>Chave privada baixada do Apple Developer</value>
-  </data>
-  <data name="ConsumersappleIdTeamId" xml:space="preserve">
-    <value>ID da equipe da conta de desenvolvedor de 10 caracteres</value>
-  </data>
-  <data name="ConsumersauthPwd" xml:space="preserve">
-    <value>authPwd Selectel</value>
-  </data>
-  <data name="ConsumersauthUser" xml:space="preserve">
-    <value>authUser Selectel</value>
-  </data>
-  <data name="ConsumersBitly" xml:space="preserve">
-    <value>Bitly</value>
-  </data>
-  <data name="ConsumersbitlyClientSecret" xml:space="preserve">
-    <value>apiKey</value>
-  </data>
-  <data name="ConsumersbitlyClientId" xml:space="preserve">
-    <value>login</value>
-  </data>
-  <data name="ConsumersBitlyDescription" xml:space="preserve">
-    <value>Conecte o serviço Bitly para encurtar os links compartilhados e os links de convite do portal no módulo Documentos.</value>
-  </data>
-  <data name="ConsumersBitlyInstruction" xml:space="preserve">
-    <value>Habilitar este aplicativo para encurtar os links de convite e documento. {0}Inserir seu login Bitly e a chave API abaixo:</value>
-  </data>
-  <data name="ConsumersBox" xml:space="preserve">
-    <value>Box</value>
-  </data>
-  <data name="ConsumersboxClientId" xml:space="preserve">
-    <value>ID da caixa</value>
-  </data>
-  <data name="ConsumersboxClientSecret" xml:space="preserve">
-    <value>Chave da caixa</value>
-  </data>
-  <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Conecte o aplicativo para gerenciar os arquivos e pastas da Box.</value>
-  </data>
-  <data name="ConsumersBoxInstruction" xml:space="preserve">
-    <value>Habilite este aplicativo para conectar sua conta Box ao módulo Documentos. Você poderá gerenciar, editar e compartilhar arquivos do Box com usuários {LogoText}. {0}Assine sua conta na página de desenvolvedores do Box e crie um novo aplicativo para integração com o {LogoText}. Insira os dados que você recebeu abaixo:</value>
-  </data>
-  <data name="ConsumersClickatell" xml:space="preserve">
-    <value>Clickatell</value>
-  </data>
-  <data name="ConsumersclickatellapiKey" xml:space="preserve">
-    <value>apiKey</value>
-  </data>
-  <data name="ConsumersClickatellDescription" xml:space="preserve">
-    <value>Habilitar o aplicativo para autenticação de dois fatores via Clickatell.</value>
-  </data>
-  <data name="ConsumersClickatellInstruction" xml:space="preserve">
-    <value>Use este aplicativo para permitir a autenticação de dois fatores com o serviço Clickatell. {0}Ingresse em sua conta da plataforma SMS e crie uma nova integração para {LogoText}. Copie uma apiKey e insira-a abaixo:</value>
-  </data>
-  <data name="ConsumersDocuSign" xml:space="preserve">
-    <value>DocuSign</value>
-  </data>
-  <data name="ConsumersdocuSignClientId" xml:space="preserve">
-    <value>Chave do DocuSign</value>
-  </data>
-  <data name="ConsumersDocuSignDescription" xml:space="preserve">
-    <value>Conectar o aplicativo para adicionar a assinatura eletrônica do DocuSign aos documentos.</value>
-  </data>
-  <data name="ConsumersdocuSignHost" xml:space="preserve">
-    <value>Endpoint de autenticação DocuSign</value>
-  </data>
-  <data name="ConsumersDocuSignInstruction" xml:space="preserve">
-    <value>Habilitar este aplicativo para assinar digitalmente documentos usando DocuSign. {0} Vá para seu DocuSign Admin Console e adicione a integração {LogoText}. Insira os dados que você recebeu abaixo:</value>
-  </data>
-  <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Conectar o aplicativo para gerenciar arquivos e pastas da Dropbox.</value>
-  </data>
-  <data name="ConsumersDropBoxInstruction" xml:space="preserve">
-    <value>Habilite este aplicativo para conectar sua conta Dropbox ao módulo Documentos. Você será capaz de gerenciar, editar e compartilhar arquivos do Dropbox com usuários {LogoText}. {0}Assine sua conta no website Dropbox Developers e crie um novo aplicativo para integração com o {LogoText}. Insira os dados que você recebeu abaixo:</value>
-  </data>
-  <data name="ConsumersDropBoxKey" xml:space="preserve">
-    <value>DropBox ID</value>
-  </data>
-  <data name="ConsumerseasyBibappkey" xml:space="preserve">
-    <value>Chave de aplicação</value>
-  </data>
-  <data name="ConsumersEasyBibDescription" xml:space="preserve">
-    <value>Habilite este aplicativo para criar listas bibliográficas em documentos com EasyBib.</value>
-  </data>
-  <data name="ConsumersfacebookAccessToken_Default" xml:space="preserve">
-    <value>Token de aplicativo</value>
-  </data>
-  <data name="ConsumersfacebookClientId" xml:space="preserve">
-    <value>Facebook ID</value>
-  </data>
-  <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Conecte o aplicativo para entrar no portal usando uma conta do Facebook.</value>
-  </data>
-  <data name="ConsumersfacebookClientSecret" xml:space="preserve">
-    <value>Chave do Facebook</value>
-  </data>
-  <data name="ConsumersFirebase" xml:space="preserve">
-    <value>Firebase</value>
-  </data>
-  <data name="Consumersfirebase_apiKey" xml:space="preserve">
-    <value>Chave API Web</value>
-  </data>
-  <data name="Consumersfirebase_authorization" xml:space="preserve">
-    <value>Chave do servidor</value>
-  </data>
-  <data name="ConsumersFirebaseDescription" xml:space="preserve">
-    <value>Conecte o serviço de mensagens em nuvem da Firebase para receber notificações sobre as mensagens enviadas para você.</value>
-  </data>
-  <data name="ConsumersdocuSignClientSecret" xml:space="preserve">
-    <value>Segredo do DocuSign</value>
-  </data>
-  <data name="Consumersfirebase_messagingSenderId" xml:space="preserve">
-    <value>ID do remetente</value>
-  </data>
-  <data name="Consumersfirebase_projectId" xml:space="preserve">
-    <value>ID do projeto</value>
-  </data>
-  <data name="ConsumersGoogleCloudbucketDescription" xml:space="preserve">
-    <value>Digite o nome do balde Google Cloud onde você quer armazenar seus backups.</value>
-  </data>
-  <data name="ConsumersGoogleCloudDescription" xml:space="preserve">
-    <value>Conecte o serviço Google Cloud Storage ao backup e armazenamento de dados de seu portal.</value>
-  </data>
-  <data name="ConsumersGoogleCloudjson" xml:space="preserve">
-    <value>GoogleCloud json</value>
-  </data>
-  <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Conecte o projeto para entrar no portal usando uma conta do Google e gerenciar os arquivos e pastas do Google Drive.</value>
-  </data>
-  <data name="ConsumersGoogleInstruction" xml:space="preserve">
-    <value>Habilite este aplicativo para conectar sua conta Google Drive ao módulo Documentos. Você será capaz de gerenciar, editar e compartilhar arquivos do Google Drive com usuários do {LogoText}. {0}Vá ao console das APIs do Google e crie um novo projeto para integração com o {LogoText}. Insira os dados que você recebeu abaixo:</value>
-  </data>
-  <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>Conecte o aplicativo para entrar no portal usando uma conta do LinkedIn.</value>
-  </data>
-  <data name="ConsumersLinkedInSecret" xml:space="preserve">
-    <value>Chave do Linkedin</value>
-  </data>
-  <data name="ConsumersMailruDescription" xml:space="preserve">
-    <value>Habilite o aplicativo a entrar no portal usando uma conta Mail.ru.</value>
-  </data>
-  <data name="ConsumersmicrosoftClientId" xml:space="preserve">
-    <value>ID do cliente do aplicativo</value>
-  </data>
-  <data name="ConsumersmicrosoftClientSecret" xml:space="preserve">
-    <value>Segredo de cliente</value>
-  </data>
-  <data name="ConsumersMicrosoftDescription" xml:space="preserve">
-    <value>Habilite o aplicativo para entrar no portal usando uma conta Apple ID.</value>
-  </data>
-  <data name="ConsumersMicrosoftInstruction" xml:space="preserve">
-    <value>Habilite este aplicativo para permitir que seus usuários façam login no {LogoText} usando a Microsoft. {0} Vá para o Microsoft Azure e crie uma nova integração de aplicativo {LogoText}. Insira os dados que você recebeu abaixo:</value>
-  </data>
-  <data name="ConsumersRackspaceDescription" xml:space="preserve">
-    <value>Conecte o serviço Rackspace Cloud Storage ao backup e armazenamento de dados de seu portal.</value>
-  </data>
-  <data name="ConsumersRackspaceprivate_container" xml:space="preserve">
-    <value>Container privado</value>
-  </data>
-  <data name="ConsumersRackspaceprivate_containerDescription" xml:space="preserve">
-    <value>Digite o endereço URL do contêiner privado do Rackspace onde você deseja armazenar seus backups.</value>
-  </data>
-  <data name="ConsumersRackspacepublic_container" xml:space="preserve">
-    <value>Container público</value>
-  </data>
-  <data name="ConsumersRackspacepublic_containerDescription" xml:space="preserve">
-    <value>Digite o endereço URL do contêiner público do Rackspace onde você deseja armazenar seus backups.</value>
-  </data>
-  <data name="ConsumersRackspaceregion" xml:space="preserve">
-    <value>Região</value>
-  </data>
-  <data name="ConsumersRackspaceregionDescription" xml:space="preserve">
-    <value>Entre na região onde se encontram seus contêineres Rackspace.</value>
-  </data>
-  <data name="ConsumersS3bucketDescription" xml:space="preserve">
-    <value>Digite o nome exclusivo do bucket da Amazon onde você deseja armazenar seus backups.</value>
-  </data>
-  <data name="ConsumersS3Description" xml:space="preserve">
-    <value>Conecte a Amazon AWS S3 ao backup e armazenamento de dados de seu portal.</value>
-  </data>
-  <data name="ConsumersS3regionDescription" xml:space="preserve">
-    <value>Digite a região AWS onde reside o seu bucket da Amazon.</value>
-  </data>
-  <data name="Consumerssecretaccesskey" xml:space="preserve">
-    <value>Chave de acesso secreta S3</value>
-  </data>
-  <data name="ConsumersSelectelauthPwd" xml:space="preserve">
-    <value>Senha para acessar o armazenamento</value>
-  </data>
-  <data name="ConsumersSelectelDescription" xml:space="preserve">
-    <value>Conecte o serviço Selectel Cloud Storage ao backup e armazenamento de dados de seu portal.</value>
-  </data>
-  <data name="ConsumersSelectelprivate_container" xml:space="preserve">
-    <value>Container privado</value>
-  </data>
-  <data name="ConsumersSelectelprivate_containerDescription" xml:space="preserve">
-    <value>Digite o nome do container privado Selectel onde você deseja armazenar seus backups.</value>
-  </data>
-  <data name="ConsumersSelectelpublic_containerDescription" xml:space="preserve">
-    <value>Digite o nome do recipiente público Selectel onde você deseja armazenar seus backups.</value>
-  </data>
-  <data name="ConsumersSelectelpublic_container" xml:space="preserve">
-    <value>Container público</value>
-  </data>
-  <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>Conecte o aplicativo para gerenciar os arquivos e pastas do OneDrive.</value>
-  </data>
-  <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
-    <value>Habilite este aplicativo para conectar sua conta OneDrive ao módulo Documentos. Você será capaz de gerenciar, editar e compartilhar arquivos da OneDrive com usuários {LogoText}. {0}Ingresse em sua conta Microsoft Azure e crie um novo aplicativo para integração {LogoText}. Insira os dados que você recebeu abaixo:</value>
-  </data>
-  <data name="ConsumersSmscDescription" xml:space="preserve">
-    <value>Habilitar o aplicativo para a autenticação de dois fatores via SMS Center.</value>
-  </data>
-  <data name="ConsumersSmscInstruction" xml:space="preserve">
-    <value>Use este aplicativo para permitir a autenticação de dois fatores com o serviço SMS Center. {0}Inserir login de sua conta smsc e sua senha (ou senha MD5 hash) em minúsculas:</value>
-  </data>
-  <data name="Consumerssmscpsw" xml:space="preserve">
-    <value>Senha e hash MD5 de senha em minúscula</value>
-  </data>
-  <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Collega l'account Telegram per ricevere le notifiche del portale tramite Telegram.</value>
-  </data>
-  <data name="ConsumersTelegramInstruction" xml:space="preserve">
-    <value>Para receber notificações do portal via Telegram, habilite o Telegram bot. Você pode criar um novo bot usando BotFather in Telegram Desktop. Para usar este bot, os usuários do portal precisam ativar as notificações por telegrama em sua página de perfil. {0}Colar o nome de usuário do bot e o token que você recebeu nos campos abaixo.</value>
-  </data>
-  <data name="ConsumersTwilioDescription" xml:space="preserve">
-    <value>Adicionar Twilio para poder chamar contatos CRM diretamente do navegador.</value>
-  </data>
-  <data name="ConsumersTwilioInstruction" xml:space="preserve">
-    <value>Habilite este aplicativo para permitir que seus usuários chamem seus contatos a partir do módulo CRM usando o Twilio. {0} Vá para o Twilio Console e cole os seguintes dados abaixo:</value>
-  </data>
-  <data name="Consumerstwiliosender" xml:space="preserve">
-    <value>Número de telefone do Twilio (exigido para autorização SMS)</value>
-  </data>
-  <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Conecte o aplicativo para entrar no portal usando uma conta do X.</value>
-  </data>
-  <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Habilite este aplicativo para permitir que seus usuários acessem a {LogoText} usando seu X e vinculem as contas de seus clientes no X ao módulo CRM. {0} Vá para o Portal de Desenvolvedores do X e crie um novo aplicativo de integração {LogoText}. Insira os dados que você recebeu abaixo:</value>
-  </data>
-  <data name="ConsumersVkDescription" xml:space="preserve">
-    <value>Habilite o aplicativo a entrar no portal usando uma conta VK.</value>
-  </data>
-  <data name="ConsumersWordpressDescription" xml:space="preserve">
-    <value>Habilitar o aplicativo para publicar documentos diretamente no WordPress.</value>
-  </data>
-  <data name="ConsumersYahooInstruction" xml:space="preserve">
-    <value>Habilite este aplicativo para adicionar novos usuários do portal a partir de sua lista de contatos do Yahoo. {0}Vá para a página Criar aplicativo na Rede de Desenvolvedores Yahoo e crie um novo aplicativo para integração {LogoText}. Insira os dados que você recebeu abaixo:</value>
-  </data>
-  <data name="ConsumersYandexDescription" xml:space="preserve">
-    <value>Habilite o aplicativo a entrar no portal usando uma conta Yandex.</value>
-  </data>
-  <data name="ErrorFileNotImage" xml:space="preserve">
-    <value>Tipo desconhcido de arquivo de imagem</value>
-  </data>
-  <data name="ErrorImageSize" xml:space="preserve">
-    <value>Tamanho da imagem excedeu os parâmetros permitidos</value>
-  </data>
-  <data name="ConsumersDropBoxSecret" xml:space="preserve">
-    <value>Chave da Dropbox</value>
-  </data>
-  <data name="ConsumersGoogle" xml:space="preserve">
-    <value>Google</value>
-  </data>
-  <data name="ConsumersgoogleClientId" xml:space="preserve">
-    <value>ID do Google</value>
-  </data>
-  <data name="ConsumersgoogleClientSecret" xml:space="preserve">
-    <value>Chave do Google</value>
-  </data>
-  <data name="ConsumersEasyBib" xml:space="preserve">
-    <value>EasyBib</value>
-  </data>
-  <data name="ConsumersGoogleCloudbucket" xml:space="preserve">
-    <value>Balde</value>
-  </data>
-  <data name="ConsumersLinkedInKey" xml:space="preserve">
-    <value>ID do Linkedin</value>
-  </data>
-  <data name="ConsumersMailru" xml:space="preserve">
-    <value>Mail.ru</value>
-  </data>
-  <data name="ConsumersMailruClientSecret" xml:space="preserve">
-    <value>Senha secreta</value>
-  </data>
-  <data name="ConsumersMicrosoft" xml:space="preserve">
-    <value>Microsoft</value>
-  </data>
-  <data name="ConsumersS3" xml:space="preserve">
-    <value>Amazon AWS S3</value>
-  </data>
-  <data name="ConsumersSelectelauthUser" xml:space="preserve">
-    <value>Usuário de autenticação</value>
-  </data>
-  <data name="ConsumersSkyDrive" xml:space="preserve">
-    <value>OneDrive</value>
-  </data>
-  <data name="Consumersskydriveappkey" xml:space="preserve">
-    <value>ID da aplicação</value>
-  </data>
-  <data name="Consumerssmsclogin" xml:space="preserve">
-    <value>Login</value>
-  </data>
-  <data name="ConsumersTelegram" xml:space="preserve">
-    <value>Telegram</value>
-  </data>
-  <data name="ConsumersTwilio" xml:space="preserve">
-    <value>Twilio</value>
-  </data>
-  <data name="ConsumerstwilioAccountSid" xml:space="preserve">
-    <value>Conta Sid</value>
-  </data>
-  <data name="ConsumerstwilioAuthToken" xml:space="preserve">
-    <value>Token de autenticação</value>
-  </data>
-  <data name="ConsumersYahoo" xml:space="preserve">
-    <value>Yahoo</value>
-  </data>
-  <data name="ConsumersYandex" xml:space="preserve">
-    <value>Yandex</value>
-  </data>
-  <data name="ConsumersWordpress" xml:space="preserve">
-    <value>WordPress</value>
-  </data>
-  <data name="ConsumersTwitter" xml:space="preserve">
-    <value>X</value>
-  </data>
-  <data name="ConsumersYandexClientSecret" xml:space="preserve">
-    <value>Senha</value>
-  </data>
-  <data name="Tariffs_startup" xml:space="preserve">
-    <value>Startup</value>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Adicione fundos à sua carteira para desbloquear a pesquisa web por IA.</value>
   </data>
   <data name="Tariffs_admin" xml:space="preserve">
     <value>Business</value>
@@ -853,350 +1260,11 @@
   <data name="Tariffs_adminyear" xml:space="preserve">
     <value>Business</value>
   </data>
-  <data name="ConsumersFirebaseInstruction" xml:space="preserve">
-    <value>Habilite este aplicativo para permitir que seus usuários recebam notificações sobre as mensagens, mesmo offline. {0}Vá ao console Firebase e adicione um novo projeto para integração {LogoText}. Insira os dados que você recebeu abaixo:</value>
-  </data>
-  <data name="ConsumersGoogleCloudInstruction" xml:space="preserve">
-    <value>Conecte o serviço Google Cloud Storage ao backup e armazenamento de dados de seu portal. {0}Vá ao Console da Plataforma Google Cloud e crie uma nova conta de serviço para {LogoText}. Cole os dados que você recebeu abaixo:</value>
-  </data>
-  <data name="ConsumersLinkedIn" xml:space="preserve">
-    <value>LinkedIn</value>
-  </data>
-  <data name="ConsumersRackspaceInstruction" xml:space="preserve">
-    <value>Conecte o serviço Rackspace Cloud Storage ao backup e armazenamento de dados de seu portal. {0} Nas configurações de segurança do Painel de Controle do Rackspace Cloud, clique no link Mostrar ao lado da Chave API do Rackspace. Cole os dados que você recebeu abaixo:</value>
-  </data>
-  <data name="ConsumersDropBox" xml:space="preserve">
-    <value>DropBox</value>
-  </data>
-  <data name="ConsumersS3Instruction" xml:space="preserve">
-    <value>Conecte a Amazon AWS S3 ao backup e armazenamento de dados de seu portal. {0}Vá ao Console de Gestão AWS e crie chaves de acesso para {LogoText}. Cole os dados que você recebeu abaixo:</value>
-  </data>
-  <data name="ConsumersSelectelInstruction" xml:space="preserve">
-    <value>Conecte o serviço Selectel Cloud Storage ao backup e armazenamento de dados de seu portal. {0} Obtenha os dados de acesso para um usuário com direitos de leitura/gravação de contêineres onde você planeja armazenar seus backups e cole-os abaixo:</value>
-  </data>
-  <data name="ConsumersWordpressInstruction" xml:space="preserve">
-    <value>Habilite o aplicativo para publicar facilmente documentos em seu site WordPress. {0}Na página Desenvolvedores do Wordpress, crie um novo aplicativo para integração {LogoText}. Cole os dados que você recebeu abaixo:</value>
-  </data>
-  <data name="ConsumersEasyBibInstruction" xml:space="preserve">
-    <value>Habilite este aplicativo para criar bibliografias em editores {LogoText}. {0}Vá para a página de inscrição no EasyBib e preencha o formulário para adicionar a integração {LogoText}. Depois de obter uma chave do aplicativo, cole-a abaixo:</value>
-  </data>
-  <data name="ConsumersVk" xml:space="preserve">
-    <value>VK</value>
-  </data>
-  <data name="ConsumersFacebook" xml:space="preserve">
-    <value>Facebook</value>
-  </data>
-  <data name="Consumersacesskey" xml:space="preserve">
-    <value>Chave de acesso S3</value>
-  </data>
-  <data name="ConsumersapiKey" xml:space="preserve">
-    <value>Rackspace apiKey</value>
-  </data>
-  <data name="ConsumersFacebookInstruction" xml:space="preserve">
-    <value>Habilite este aplicativo para permitir que seus usuários façam login no {LogoText} usando o Facebook e vinculem as contas do Facebook de seus clientes ao módulo CRM. {0}Vá para o Portal de desenvolvedores do Facebook e crie uma nova integração de aplicativo {LogoText}. Insira os dados que você recebeu abaixo:</value>
-  </data>
-  <data name="ConsumersGoogleCloud" xml:space="preserve">
-    <value>Armazenamento em nuvem do Google</value>
-  </data>
-  <data name="ConsumersLinkedInInstruction" xml:space="preserve">
-    <value>Ative este aplicativo para permitir que seus usuários façam login no {LogoText} usando suas contas do LinkedIn. {0}Acesse o site LinkedIn Developers e crie uma nova integração do aplicativo {LogoText}. Insira os dados que você recebeu abaixo:</value>
-  </data>
-  <data name="ConsumersMailruClientId" xml:space="preserve">
-    <value>ID</value>
-  </data>
-  <data name="ConsumersMailruInstruction" xml:space="preserve">
-    <value>Ao adicionar o aplicativo Mail.ru, você pode ativar o login no portal usando a conta Mail.ru em sua página de perfil.</value>
-  </data>
-  <data name="ConsumersRackspace" xml:space="preserve">
-    <value>Armazenamento em Nuvem Rackspace</value>
-  </data>
-  <data name="ConsumersS3bucket" xml:space="preserve">
-    <value>Bucket</value>
-  </data>
-  <data name="ConsumersS3region" xml:space="preserve">
-    <value>Região</value>
-  </data>
-  <data name="ConsumersSelectel" xml:space="preserve">
-    <value>Selecione armazenamento em nuvem</value>
-  </data>
-  <data name="Consumersskydriveappsecret" xml:space="preserve">
-    <value>Segredo do cliente</value>
-  </data>
-  <data name="ConsumerstwitterAccessTokenSecret_Default" xml:space="preserve">
-    <value>Segredo do cliente</value>
-  </data>
-  <data name="ConsumersSmsc" xml:space="preserve">
-    <value>Centro de SMS</value>
-  </data>
-  <data name="ConsumersTelegramBotName" xml:space="preserve">
-    <value>Nome de utilizador do bot</value>
-  </data>
-  <data name="ConsumersTelegramBotToken" xml:space="preserve">
-    <value>Token de bot</value>
-  </data>
-  <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
-    <value>ID do cliente</value>
-  </data>
-  <data name="ConsumersTwitterKey" xml:space="preserve">
-    <value>Chave API</value>
-  </data>
-  <data name="ConsumersTwitterSecret" xml:space="preserve">
-    <value>Segredo da chave API</value>
-  </data>
-  <data name="Consumersusername" xml:space="preserve">
-    <value>Nome de utilizador da Rackspace</value>
-  </data>
-  <data name="ConsumersVkClientId" xml:space="preserve">
-    <value>ID do aplicativo</value>
-  </data>
-  <data name="ConsumersVkClientSecret" xml:space="preserve">
-    <value>Chave de segurança</value>
-  </data>
-  <data name="ConsumersVkInstruction" xml:space="preserve">
-    <value>Ao adicionar o aplicativo VK, você pode habilitar a entrada no portal usando a conta VK em sua página de perfil.</value>
-  </data>
-  <data name="ConsumerswpClientId" xml:space="preserve">
-    <value>Chave do WordPress</value>
-  </data>
-  <data name="ConsumerswpClientSecret" xml:space="preserve">
-    <value>Segredo do Wordpress</value>
-  </data>
-  <data name="ConsumersyahooClientId" xml:space="preserve">
-    <value>ID do cliente</value>
-  </data>
-  <data name="ConsumersyahooClientSecret" xml:space="preserve">
-    <value>Segredo do cliente</value>
-  </data>
-  <data name="ConsumersYahooDescription" xml:space="preserve">
-    <value>Ativar a aplicação para importar utilizadores do serviço Yahoo.</value>
-  </data>
-  <data name="ConsumersYandexClientId" xml:space="preserve">
-    <value>ID</value>
-  </data>
-  <data name="ConsumersYandexInstruction" xml:space="preserve">
-    <value>Quando adiciona a aplicação Yandex, pode ativar o início de sessão no portal utilizando a conta Yandex na sua página de perfil.</value>
-  </data>
-  <data name="PortalName" xml:space="preserve">
-    <value>Espaço na nuvem para os documentos do seu escritório</value>
-  </data>
-  <data name="TariffsFeature_thirdparty" xml:space="preserve">
-    <value>Pro integrações</value>
-  </data>
-  <data name="ConsumersZoom" xml:space="preserve">
-    <value>Zoom</value>
-  </data>
-  <data name="ConsumersZoomClientId" xml:space="preserve">
-    <value>ID do cliente Zoom</value>
-  </data>
-  <data name="ConsumersZoomClientSecret" xml:space="preserve">
-    <value>Senha do cliente Zoom</value>
-  </data>
-  <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Habilite o aplicativo para fazer login no portal usando uma conta Zoom.</value>
-  </data>
-  <data name="ConsumersZoomInstruction" xml:space="preserve">
-    <value>Ative este aplicativo para permitir que seus usuários façam login no {LogoText} usando suas contas Zoom. {0}Acesse o site do Zoom Developers e crie um novo aplicativo de integração com o {LogoText}. Insira os dados que você recebeu abaixo:</value>
-  </data>
-  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
-    <value>Muitas tentativas de login. Por favor, tente novamente mais tarde</value>
-  </data>
-  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
-    <value>O último espaço de acesso completo não pode ser excluído</value>
-  </data>
-  <data name="ErrorWebPluginArchive" xml:space="preserve">
-    <value>Arquivo de plugin errado</value>
-  </data>
-  <data name="ErrorWebPluginExist" xml:space="preserve">
-    <value>O plug-in já existe</value>
-  </data>
-  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
-    <value>Extensão de arquivo errada</value>
-  </data>
-  <data name="ErrorWebPluginFileSize" xml:space="preserve">
-    <value>O tamanho do arquivo excede o limite</value>
-  </data>
-  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
-    <value>São proibidas alterações nos plugins do sistema</value>
-  </data>
-  <data name="ErrorWebPluginName" xml:space="preserve">
-    <value>Nome do plugin errado</value>
-  </data>
-  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
-    <value>Nenhum arquivo de entrada</value>
-  </data>
-  <data name="ErrorWebPluginNotFound" xml:space="preserve">
-    <value>Plug-in não encontrado</value>
-  </data>
-  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
-    <value>Para muitos arquivos de entrada</value>
-  </data>
-  <data name="QuotaGreaterPortalError" xml:space="preserve">
-    <value>Falha ao definir a cota de memória – a cota de memória definida é maior que a cota dos portais.</value>
-  </data>
-  <data name="RoomFreeSpaceException" xml:space="preserve">
-    <value>Cota de espaço da sala excedida</value>
-  </data>
-  <data name="UserFreeSpaceException" xml:space="preserve">
-    <value>Cota de espaço do usuário excedida</value>
-  </data>
-  <data name="TariffsFeature_statistic" xml:space="preserve">
-    <value>Cotas e estatísticas de armazenamento</value>
-  </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} por administrador e capacidade de adicionar espaço mediante solicitação</value>
-  </data>
-  <data name="ErrorUserDisabled" xml:space="preserve">
-    <value>Usuário desativado</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Administradores adicionados:</value>
-  </data>
-  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
-    <value>O limite de convites foi excedido</value>
-  </data>
-  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
-    <value>A instrução de alteração de senha foi enviada para o endereço de e-mail {0}.</value>
-  </data>
-  <data name="ErrorEmailLinked" xml:space="preserve">
-    <value>Este e-mail está anexado ao usuário {0} como um provedor terceirizado</value>
-  </data>
-  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Falha ao definir a cota por sala. O valor inserido é maior do que o armazenamento total do DocSpace.</value>
-  </data>
-  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Falha ao definir a cota por usuário. O valor inserido é maior do que o armazenamento total do DocSpace.</value>
-  </data>
-  <data name="ErrorTrustedMailDomain" xml:space="preserve">
-    <value>Adicione pelo menos um domínio confiável.</value>
-  </data>
-  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
-    <value>O número de administradores excede o limite: {0}/{1}.</value>
-  </data>
-  <data name="ErrorIpRestriction" xml:space="preserve">
-    <value>Adicione pelo menos 1 endereço IP permitido.</value>
-  </data>
   <data name="Tariffs_nonprofit" xml:space="preserve">
     <value>Sem fins lucrativos</value>
   </data>
-  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
-    <value>URL do webhook não está disponível. A solicitação HEAD não responde ao status http 200.</value>
-  </data>
-  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
-    <value>Crédito</value>
-  </data>
-  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
-    <value>Moeda</value>
-  </data>
-  <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>Data</value>
-  </data>
-  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
-    <value>Quantidade</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
-    <value>Unidade de medida</value>
-  </data>
-  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
-    <value>Relatório de operações do cliente ({0}-{1})</value>
-  </data>
-  <data name="ErrorGroupNotFound" xml:space="preserve">
-    <value>O grupo não foi encontrado</value>
-  </data>
-  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
-    <value>Armazenamento em disco adicional</value>
-  </data>
-  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
-    <value>Ajuste o armazenamento para a quantidade exata necessária.</value>
-  </data>
-  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
-    <value>Espaço de armazenamento usado:</value>
-  </data>
-  <data name="AccountingCustomerOperationContact" xml:space="preserve">
-    <value>Contato</value>
-  </data>
-  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
-    <value>Débito</value>
-  </data>
-  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
-    <value>Detalhes</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
-    <value>Backup</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
-    <value>Espaço em disco</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>Backup</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
-    <value>GB</value>
-  </data>
-  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
-    <value>Histórico de transações</value>
-  </data>
-  <data name="AccountingCustomerOperationType" xml:space="preserve">
-    <value>Tipo</value>
-  </data>
-  <data name="AutoRenewal" xml:space="preserve">
-    <value>Renovação automática</value>
-  </data>
-  <data name="AutoTopUp" xml:space="preserve">
-    <value>Recarga automática</value>
-  </data>
-  <data name="ErrorPaymentRequired" xml:space="preserve">
-    <value>Pagamento obrigatório</value>
-  </data>
-  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
-    <value>Backup</value>
-  </data>
-  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
-    <value>Habilite backups para o seu DocSpace. Os custos serão cobrados automaticamente.</value>
-  </data>
-  <data name="TariffsFeature_free_backup" xml:space="preserve">
-    <value>{0} backups gratuitos por mês</value>
-  </data>
-  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
-    <value>O número de backups gratuitos não deve exceder {0} em um mês</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
-    <value>Recarga de saldo</value>
-  </data>
-  <data name="ConsumersWeixin" xml:space="preserve">
-    <value>WeChat</value>
-  </data>
-  <data name="ConsumersWeixinClientId" xml:space="preserve">
-    <value>ID do cliente</value>
-  </data>
-  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
-    <value>Segredo do cliente</value>
-  </data>
-  <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Habilite o aplicativo para fazer login no portal usando uma conta WeChat.</value>
-  </data>
-  <data name="ConsumersWeixinInstruction" xml:space="preserve">
-    <value>Habilite o aplicativo para fazer login no portal usando uma conta WeChat.</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
-    <value>Data</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
-    <value>E-mail</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
-    <value>Primeiro nome</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
-    <value>ID</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
-    <value>Sobrenome</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
-    <value>Cota de Serviço de Documentos ({0})</value>
-  </data>
-  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
-    <value>O número de plugins excede o limite</value>
+  <data name="Tariffs_startup" xml:space="preserve">
+    <value>Startup</value>
   </data>
   <data name="TelegramOnGenericError" xml:space="preserve">
     <value>Ocorreu um erro inesperado. Tente novamente.</value>
@@ -1204,34 +1272,25 @@
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
     <value>Você se conectou com sucesso ao Telegram para receber notificações do seu DocSpace.</value>
   </data>
-  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
-    <value>Vetorização</value>
+  <data name="TfaAppAuthMessageError" xml:space="preserve">
+    <value>Código incorreto</value>
   </data>
-  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
-    <value>Ferramentas de IA</value>
+  <data name="TfaAppNotAvailable" xml:space="preserve">
+    <value>As configurações da aplicação TFA não estão disponíveis</value>
   </data>
-  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
-    <value>Tokens</value>
+  <data name="TfaTooMuchError" xml:space="preserve">
+    <value>Você enviou demasiadas mensagens de texto. Tente novamente depois.</value>
   </data>
-  <data name="AiAgentFreeSpaceException" xml:space="preserve">
-    <value>Cota de espaço do agente de IA excedida</value>
+  <data name="UserFreeSpaceException" xml:space="preserve">
+    <value>Cota de espaço do usuário excedida</value>
   </data>
-  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Falha ao definir a quota por agente de IA. O valor inserido é maior que o armazenamento total do DocSpace.</value>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>Falha ao definir a cota por usuário. O valor inserido é maior do que o armazenamento total do DocSpace.</value>
   </data>
-  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
-    <value>O número de agentes de IA não deve exceder {0}</value>
+  <data name="UsServerRegion" xml:space="preserve">
+    <value>Região Oeste dos EUA (Oregon)</value>
   </data>
-  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>Ferramentas de IA</value>
-  </data>
-  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Ative as funcionalidades de IA no seu DocSpace para impulsionar a produtividade.</value>
-  </data>
-  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
-    <value>Pesquisa web com IA</value>
-  </data>
-  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
-    <value>Adicione fundos à sua carteira para desbloquear a pesquisa web por IA.</value>
+  <data name="WhatsNewSubscriptionName" xml:space="preserve">
+    <value>O que há de novo</value>
   </data>
 </root>

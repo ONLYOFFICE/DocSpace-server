@@ -117,56 +117,56 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="IncorrectServerCredentials" xml:space="preserve">
-    <value>Kimlik doğrulama başarısız. Kimlik bilgilerinizi doğrulayın</value>
+  <data name="AiSettingsAccessDenied" xml:space="preserve">
+    <value>Yapay zekâ ayarlarını yönetme izniniz yok</value>
+  </data>
+  <data name="ChatAccessDenied" xml:space="preserve">
+    <value>Sohbeti kullanma izniniz yok</value>
   </data>
   <data name="ChatNotFound" xml:space="preserve">
     <value>Sohbet bulunamadı</value>
   </data>
-  <data name="ServerFailedConnect" xml:space="preserve">
-    <value>MCP sunucusuna bağlanılamadı</value>
-  </data>
   <data name="IncorrectProvider" xml:space="preserve">
     <value>Hatalı sağlayıcı türü</value>
+  </data>
+  <data name="IncorrectServerCredentials" xml:space="preserve">
+    <value>Kimlik doğrulama başarısız. Kimlik bilgilerinizi doğrulayın</value>
   </data>
   <data name="InvalidAuthCode" xml:space="preserve">
     <value>Geçersiz yetkilendirme kodu</value>
   </data>
-  <data name="InvalidServerName" xml:space="preserve">
-    <value>Geçersiz MCP sunucu adı. Sadece harfler, sayılar, alt çizgi ve tire kullanılabilir</value>
-  </data>
-  <data name="ServersRoomLimit" xml:space="preserve">
-    <value>Oda başına maksimum sunucu sayısı {0}</value>
-  </data>
-  <data name="ServerNameExists" xml:space="preserve">
-    <value>MCP sunucu adı zaten mevcut</value>
-  </data>
-  <data name="ReservedServerName" xml:space="preserve">
-    <value>MCP sunucu adına izin verilmiyor</value>
-  </data>
-  <data name="ServerNotFound" xml:space="preserve">
-    <value>MCP sunucusu bulunamadı</value>
-  </data>
-  <data name="ProviderNotFound" xml:space="preserve">
-    <value>Sağlayıcı bulunamadı</value>
-  </data>
   <data name="InvalidKey" xml:space="preserve">
     <value>Belirtilen API anahtarı geçersiz veya erişim yetkisi yok. Anahtarın doğru olduğunu doğrulayıp tekrar deneyin</value>
+  </data>
+  <data name="InvalidServerName" xml:space="preserve">
+    <value>Geçersiz MCP sunucu adı. Sadece harfler, sayılar, alt çizgi ve tire kullanılabilir</value>
   </data>
   <data name="InvalidUrl" xml:space="preserve">
     <value>Belirtilen URL yolu geçersiz. Lütfen doğru uç noktayı kullandığınızdan emin olun</value>
   </data>
-  <data name="AiSettingsAccessDenied" xml:space="preserve">
-    <value>Yapay zekâ ayarlarını yönetme izniniz yok</value>
+  <data name="ManageProviders" xml:space="preserve">
+    <value>Sağlayıcıları yönetme izniniz yok</value>
   </data>
   <data name="ManageServers" xml:space="preserve">
     <value>MCP sunucularını yönetme izniniz yok</value>
   </data>
-  <data name="ManageProviders" xml:space="preserve">
-    <value>Sağlayıcıları yönetme izniniz yok</value>
+  <data name="ProviderNotFound" xml:space="preserve">
+    <value>Sağlayıcı bulunamadı</value>
   </data>
-  <data name="ChatAccessDenied" xml:space="preserve">
-    <value>Sohbeti kullanma izniniz yok</value>
+  <data name="ReservedServerName" xml:space="preserve">
+    <value>MCP sunucu adına izin verilmiyor</value>
+  </data>
+  <data name="ServerFailedConnect" xml:space="preserve">
+    <value>MCP sunucusuna bağlanılamadı</value>
+  </data>
+  <data name="ServerNameExists" xml:space="preserve">
+    <value>MCP sunucu adı zaten mevcut</value>
+  </data>
+  <data name="ServerNotFound" xml:space="preserve">
+    <value>MCP sunucusu bulunamadı</value>
+  </data>
+  <data name="ServersRoomLimit" xml:space="preserve">
+    <value>Oda başına maksimum sunucu sayısı {0}</value>
   </data>
   <data name="UnavailableServers" xml:space="preserve">
     <value>MCP sunucuları kullanılamıyor: {0}. Bağlantı ayarlarını kontrol edin</value>

@@ -1,5 +1,64 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -53,10 +112,10 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ActionCol" xml:space="preserve">
     <value>Действие</value>
@@ -66,6 +125,12 @@
   </data>
   <data name="ActionTypeCol" xml:space="preserve">
     <value>Тип действие</value>
+  </data>
+  <data name="AddedRoomTags" xml:space="preserve">
+    <value>Добавени тагове: [{1}]</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>Добавен е MCP сървър {0} към агент</value>
   </data>
   <data name="AdministratorAdded" xml:space="preserve">
     <value>Добавен е администратор: {0}</value>
@@ -79,6 +144,36 @@
   <data name="AdministratorOpenedFullAccess" xml:space="preserve">
     <value>Администратори [{0}]. Отворен е пълен достъп</value>
   </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>Агентът е създаден</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>Агентът е изтрит</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>Агентът е преименуван: {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>Агенти</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>AI доставчикът е създаден: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>AI доставчикът е изтрит: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>AI доставчикът е актуализиран: {0}</value>
+  </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Създаден е потребителски Api ключ: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Изтрит потребителски ключ Api: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Потребителски Api ключ актуализиран: {0}</value>
+  </data>
   <data name="AttachActionType" xml:space="preserve">
     <value>Прикрепете</value>
   </data>
@@ -91,11 +186,35 @@
   <data name="AuditTrailReportName" xml:space="preserve">
     <value>Отчет за следата за одит ({0} - {1})</value>
   </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Активиран линк за оторизация</value>
+  </data>
   <data name="AuthorizationKeysSetting" xml:space="preserve">
     <value>Актуализирани са ключовете за оторизация на трети страни</value>
   </data>
+  <data name="BackupCompleted" xml:space="preserve">
+    <value>Архивирането е завършено</value>
+  </data>
+  <data name="BackupFailed" xml:space="preserve">
+    <value>Неуспешно архивиране</value>
+  </data>
+  <data name="BackupStarted" xml:space="preserve">
+    <value>Стартирайте архивиране</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Настройките за видимост на рекламните банери са променени</value>
+  </data>
   <data name="BrowserCol" xml:space="preserve">
     <value>Браузър</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Активирането на {0} на клиента е променено</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Видимостта на {0} на клиента е променена</value>
+  </data>
+  <data name="CityCol" xml:space="preserve">
+    <value>Град</value>
   </data>
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Променена е цветната тема</value>
@@ -109,11 +228,62 @@
   <data name="CopyActionType" xml:space="preserve">
     <value>Копие</value>
   </data>
+  <data name="CountryCol" xml:space="preserve">
+    <value>Държава</value>
+  </data>
   <data name="CreateActionType" xml:space="preserve">
     <value>Създавам</value>
   </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Клиентът е създаден</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Изпълнява се потребителска операция</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Изтеглен отчет за потребителски операции</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Актуализиран потребителски абонамент: {0}</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Актуализирани са настройките за услуги с активиран клиентски портфейл</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Зареден потребителски портфейл: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Актуализирани настройки за зареждане на потребителски портфейл</value>
+  </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>Потребителски настройки за навигация Актуализирани</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>AI агенти [{0}]. Задаване на персонализирана квота за съхранение за AI агенти: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>AI агенти [{0}]. Задаване на квота за съхранение по подразбиране за AI агенти: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>AI агенти [{0}]. Деактивирана квота за съхранение за AI агенти</value>
+  </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Стаи [{0}]. Задайте персонализирана квота за съхранение на стаи: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Стаи [{0}]. Задайте квота за съхранение по подразбиране на стаи: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Стаи [{0}]. Деактивирана квота за съхранение на стаи</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Потребители [{0}]. Задайте персонализирана квота за съхранение на потребители: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Потребители [{0}]. Задайте квота за съхранение по подразбиране на потребители: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Потребители [{0}]. Деактивирана квота за съхранение на потребители</value>
   </data>
   <data name="DateCol" xml:space="preserve">
     <value>Дата</value>
@@ -124,8 +294,20 @@
   <data name="DeleteActionType" xml:space="preserve">
     <value>Изтрий</value>
   </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Клиент {0} е изтрит</value>
+  </data>
+  <data name="DeletedRoomTags" xml:space="preserve">
+    <value>Изтрити тагове: [{1}]</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>MCP сървърът {0} е изтрит от агент</value>
+  </data>
   <data name="DetachActionType" xml:space="preserve">
     <value>Отвързвам</value>
+  </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Настройката за достъп до Програмните инструменти е променена</value>
   </data>
   <data name="DnsSettingsUpdated" xml:space="preserve">
     <value>Актуализирани настройки на DNS</value>
@@ -133,11 +315,17 @@
   <data name="DocumentServiceLocationSetting" xml:space="preserve">
     <value>Местоположение на услугата за документи Актуализирано</value>
   </data>
+  <data name="DocumentsForcesave" xml:space="preserve">
+    <value>Настройките за принудително запаметяване са актуализирани</value>
+  </data>
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Настройки за презаписване Актуализирани</value>
   </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Настройки</value>
+  </data>
+  <data name="DocumentsStoreForcesave" xml:space="preserve">
+    <value>Настройките за принудително запаметяване на магазина Актуализирани</value>
   </data>
   <data name="DocumentsThirdPartySettingsUpdated" xml:space="preserve">
     <value>Настройки на трети страни Актуализирани</value>
@@ -169,6 +357,12 @@
   <data name="FileCreatedVersion" xml:space="preserve">
     <value>Файлове [{0}]. Преразглеждане: {1}. Версия е създадена</value>
   </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>Файл: {0}. Потребителският филтър е изключен</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>Файл: {0}. Потребителският филтър е разрешен</value>
+  </data>
   <data name="FileDeleted" xml:space="preserve">
     <value>Изтрит файл: {0}</value>
   </data>
@@ -181,11 +375,26 @@
   <data name="FileDownloadedAs" xml:space="preserve">
     <value>Файлове [{0}]. Изтегли като: {1}</value>
   </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Файлове [{0}]. Създадена външна връзка: {1}. Роля: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Файлове [{0}]. Изтрит външен линк: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Файлове [{0}]. Актуализиран външен линк: {1}. Роля: {2}</value>
+  </data>
   <data name="FileImported" xml:space="preserve">
     <value>Папки [{0}]. Файл, импортиран: {1}. Доставчик: {2}</value>
   </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Файл: {0}. Индексът е променен от {1} на {2}</value>
+  </data>
   <data name="FileLocked" xml:space="preserve">
     <value>Файлът е заключен: {0}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Файлът е маркиран като любим: {0}</value>
   </data>
   <data name="FileMoved" xml:space="preserve">
     <value>Файлове [{0}]. Преместено от папка "{1}" в папка: "{2}"</value>
@@ -195,6 +404,15 @@
   </data>
   <data name="FileMovedWithOverwriting" xml:space="preserve">
     <value>Файлове [{0}]. Преместен с презапис от папка "{1}" към папка: "{2}"</value>
+  </data>
+  <data name="FileOpenedForChange" xml:space="preserve">
+    <value>Файл, отворен за промяна: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Файлът е премахнат от любими: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Файлът е премахнат от "Споделени с мен": {0}</value>
   </data>
   <data name="FileRenamed" xml:space="preserve">
     <value>Преименуван на файл: {0}</value>
@@ -207,6 +425,9 @@
   </data>
   <data name="FileSendAccessLink" xml:space="preserve">
     <value>Изпратена е споделена връзка към файла [{0}]. Получатели: [{1}]</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>байта, KB, MB, GB, TB</value>
   </data>
   <data name="FilesModule" xml:space="preserve">
     <value>Файлове</value>
@@ -223,11 +444,20 @@
   <data name="FileUpdatedAccess" xml:space="preserve">
     <value>Файлове [{0}]. Достъпът е актуализиран</value>
   </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Файлове [{0}]. Актуализиран достъп за {1}. Роля: {2}</value>
+  </data>
   <data name="FileUpdatedRevisionComment" xml:space="preserve">
     <value>Файлове [{0}]. Версия {1}. Коментар Актуализиран</value>
   </data>
   <data name="FileUploaded" xml:space="preserve">
     <value>Файлът е качен: {0}</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Файлът е качен с презаписване: {0}</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>Файлове [{0}]. Изтрита версия: {1}</value>
   </data>
   <data name="FolderCopied" xml:space="preserve">
     <value>Папки [{0}]. Копирано в папка: {1}</value>
@@ -241,6 +471,24 @@
   <data name="FolderDeleted" xml:space="preserve">
     <value>Изтрита папка: {0}</value>
   </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Изтеглена папка: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Папки [{0}]. Създаден външен линк: {1}. Роля: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Папки [{0}]. Изтрит външен линк: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Папки [{0}]. Актуализиран външен линк: {1}. Роля: {2}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Папка: {0}. Индексът е променен от {1} на {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Папка: {0}. Индексите са пренаредени</value>
+  </data>
   <data name="FolderMoved" xml:space="preserve">
     <value>Папки [{0}]. Преместено в папка: {1}</value>
   </data>
@@ -249,6 +497,9 @@
   </data>
   <data name="FolderMovedWithOverwriting" xml:space="preserve">
     <value>Папки [{0}]. Преместено с презаписване в папка: {1}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Папката е преместена от "Споделени с мен": {0}</value>
   </data>
   <data name="FolderRenamed" xml:space="preserve">
     <value>Преименувана папка: {0}</value>
@@ -259,11 +510,38 @@
   <data name="FolderUpdatedAccess" xml:space="preserve">
     <value>Папки [{0}]. Достъпът е актуализиран</value>
   </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Папки [{0}]. Актуализиран достъп до {1}. Роля: {2}</value>
+  </data>
   <data name="FollowActionType" xml:space="preserve">
     <value>Последвам</value>
   </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Потребители [{0}]. Напълно попълнили формуляр: {1}</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>Файлът е отворен за попълване: {0}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Потребители [{0}]. Попълнили част от формуляр: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Потребители [{0}]. Започнали да попълват: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Потребители [{0}]. Спрян формуляр: {1}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Потребители [{0}]. Формулярът е изпратен: {1}</value>
+  </data>
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Настройките на сфинкса са актуализирани</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Генериран е код за оторизация за клиент {0}</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Генериран е личен токен за достъп за клиент {0}</value>
   </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Актуализирани настройки на началната страница</value>
@@ -301,11 +579,23 @@
   <data name="LanguageSettingsUpdated" xml:space="preserve">
     <value>Езикови настройки Актуализирани</value>
   </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>LDAP удостоверяването е деактивирано</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>LDAP удостоверяването е активирано</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>LDAP синхронизацията е завършена</value>
+  </data>
   <data name="LicenseKeyUploaded" xml:space="preserve">
     <value>Качен е лицензният ключ</value>
   </data>
   <data name="LinkActionType" xml:space="preserve">
     <value>Връзка</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Местоположение</value>
   </data>
   <data name="LoginFail" xml:space="preserve">
     <value>Неуспешно влизане</value>
@@ -322,6 +612,9 @@
   <data name="LoginFailIpSecurity" xml:space="preserve">
     <value>IP Security: Неуспешно влизане</value>
   </data>
+  <data name="LoginFailRecaptcha" xml:space="preserve">
+    <value>Неуспешно вписване. Recaptcha е невалидна</value>
+  </data>
   <data name="LoginFailSocialAccountNotFound" xml:space="preserve">
     <value>Неуспешно влизане. Свързаният социален профил не е намерен</value>
   </data>
@@ -333,6 +626,9 @@
   </data>
   <data name="LoginFailViaApiSocialAccount" xml:space="preserve">
     <value>Вход чрез API и социални медии не успя</value>
+  </data>
+  <data name="LoginFailViaApiTfa" xml:space="preserve">
+    <value>Неуспешно вписване чрез API и приложение за удостоверяване</value>
   </data>
   <data name="LoginFailViaSms" xml:space="preserve">
     <value>Входът чрез SMS е неуспешен</value>
@@ -352,8 +648,8 @@
   <data name="LoginSuccess" xml:space="preserve">
     <value>Вход успех</value>
   </data>
-  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Вход чрез социален профил успешно: {0}</value>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Вход чрез социален профил успешно</value>
   </data>
   <data name="LoginSuccessSocialApp" xml:space="preserve">
     <value>Успешно влизане чрез социално приложение</value>
@@ -363,6 +659,18 @@
   </data>
   <data name="LoginSuccessViaApiSms" xml:space="preserve">
     <value>Успешно влизане чрез API &amp; SMS код</value>
+  </data>
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
+    <value>Вход чрез социален профил успешно: {0}</value>
+  </data>
+  <data name="LoginSuccessViaApiTfa" xml:space="preserve">
+    <value>Успешно вписване чрез API и приложение за удостоверяване</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Успешно влизане чрез OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Успешно влизане чрез потребителско име и парола</value>
   </data>
   <data name="LoginSuccessViaSms" xml:space="preserve">
     <value>Вход чрез SMS успешно</value>
@@ -418,6 +726,15 @@
   <data name="PortalDeleted" xml:space="preserve">
     <value>Порталът е изтрит</value>
   </data>
+  <data name="PortalRenamed" xml:space="preserve">
+    <value>Порталът е преименуван</value>
+  </data>
+  <data name="PrivacyRoomDisable" xml:space="preserve">
+    <value>Самостоятелната стая е деактивирана</value>
+  </data>
+  <data name="PrivacyRoomEnable" xml:space="preserve">
+    <value>Самостоятелната стая е активирана</value>
+  </data>
   <data name="ProductAccessOpened" xml:space="preserve">
     <value>Продукти [{0}]. Достъпът е отворен</value>
   </data>
@@ -442,14 +759,173 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Списък на продуктите актуализиран</value>
   </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Задаване на квота за съхранение по подразбиране за AI агенти: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Деактивирана квота за съхранение по подразбиране за AI агенти</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Задайте квота за съхранение по подразбиране: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Деактивирана квота за съхранение по подразбиране</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Задайте квота за съхранение по подразбиране за стаи: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Деактивирана квота за съхранение по подразбиране за стаи</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Задайте квота за съхранение по подразбиране за потребители: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Деактивирана квота за съхранение по подразбиране за потребители</value>
+  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Преназначава</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Тайната на клиент {0} е регенерирана</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>Настройките за векторизация са нулирани</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>Настройките за уеб търсене са нулирани</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Отменен е достъп до клиент {0}</value>
+  </data>
+  <data name="RoomArchived" xml:space="preserve">
+    <value>Стаята е архивирана</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Стаята е копирана: {0}</value>
+  </data>
+  <data name="RoomCreated" xml:space="preserve">
+    <value>Стаята е създадена</value>
+  </data>
+  <data name="RoomCreateUser" xml:space="preserve">
+    <value>Добавен потребител: {0}. Роля: {1}</value>
+  </data>
+  <data name="RoomDeleted" xml:space="preserve">
+    <value>Стаята е изтрита</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Стая: {0}. Отказът за изтегляне е деактивиран</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Стая: {0}. Отказът за изтегляне е активиран</value>
+  </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>Създаден външен линк: {0}. Роля: {1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>Изтрит външен линк: {0}</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Отменен външен линк: {1}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>Актуализиран външен линк: {0}. Роля: {1}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Добавена група: {0}. Роля: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Изтрита група: {0}</value>
+  </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Експортиране индекса на стаята, запазен в Документи</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Индексирането на стаята е деактивирано</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Индексирането на стаята е активирано</value>
+  </data>
+  <data name="RoomInvitationLinkCreated" xml:space="preserve">
+    <value>Линка е създаден. Роля: {1}</value>
+  </data>
+  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
+    <value>Линка е изтрит</value>
+  </data>
+  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
+    <value>Линка е актуализиран. Роля: {1}</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Повторно изпратени покани: {0}</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>LifeTime е деактивиран</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Времето на живот е зададени. Стойност: {0}. Период: {1}. Окончателно изтриване: {2}</value>
+  </data>
+  <data name="RoomLogoCreated" xml:space="preserve">
+    <value>Логото е създадено</value>
+  </data>
+  <data name="RoomLogoDeleted" xml:space="preserve">
+    <value>Логото е изтрито</value>
+  </data>
+  <data name="RoomRemoveUser" xml:space="preserve">
+    <value>Изтрит потребител: {0}</value>
+  </data>
+  <data name="RoomRenamed" xml:space="preserve">
+    <value>Преименувана стая: {0}</value>
+  </data>
+  <data name="RoomsModule" xml:space="preserve">
+    <value>Стаи</value>
+  </data>
+  <data name="RoomUnarchived" xml:space="preserve">
+    <value>Стаята е деархивирана</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} назначи: {1}</value>
+  </data>
+  <data name="RoomUpdateAccessForUser" xml:space="preserve">
+    <value>{0} назначи: {1}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Стая: {0}. Водният знак е деактивиран</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Стая: {0}. Водният знак е активиран</value>
+  </data>
+  <data name="ScheduledBackupCompleted" xml:space="preserve">
+    <value>Плануваното архивиране е завършено</value>
+  </data>
+  <data name="ScheduledBackupFailed" xml:space="preserve">
+    <value>Неуспешно планувано архивиране</value>
+  </data>
+  <data name="ScheduledBackupStarted" xml:space="preserve">
+    <value>Плануваното архивиране започна</value>
   </data>
   <data name="SendActionType" xml:space="preserve">
     <value>Изпращам</value>
   </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>Потребител {0} изпрати покана до {1} да се присъедини към този DocSpace</value>
+  </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Изпратени са указания за покани: {0}</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>MCP сървър е създаден: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>MCP сървър е изтрит: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>MCP сървър е деактивиран: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>MCP сървър е активиран: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>MCP сървър е актуализиран: {0}</value>
   </data>
   <data name="SessionCompleted" xml:space="preserve">
     <value>Сесията е завършена</value>
@@ -460,20 +936,35 @@
   <data name="SettingsModule" xml:space="preserve">
     <value>Настройки</value>
   </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>Настройките за векторизация са конфигурирани. Доставчик: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>Настройките за уеб търсене са конфигурирани. Търсачка: {0}</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO инвалиди</value>
   </data>
   <data name="SSOEnabled" xml:space="preserve">
     <value>SSO Активирано</value>
   </data>
-  <data name="BackupStarted" xml:space="preserve">
-    <value>Стартирайте архивиране</value>
+  <data name="StartStorageDecryption" xml:space="preserve">
+    <value>Стартирайте дешифрирането на паметта</value>
+  </data>
+  <data name="StartStorageEncryption" xml:space="preserve">
+    <value>Стартирайте криптирането на хранилището</value>
   </data>
   <data name="StartTransferSetting" xml:space="preserve">
     <value>Стартирайте миграцията на региона на портала</value>
   </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>Системен акаунт</value>
+  </data>
+  <data name="TagCreated" xml:space="preserve">
+    <value>Създаден таг: {0}</value>
+  </data>
+  <data name="TagsDeleted" xml:space="preserve">
+    <value>Изтрити тагове: {0}</value>
   </data>
   <data name="TargetIdCol" xml:space="preserve">
     <value>Целеви идентификатор</value>
@@ -495,6 +986,9 @@
   </data>
   <data name="TimeZoneSettingsUpdated" xml:space="preserve">
     <value>Настройки на часовата зона Актуализирани</value>
+  </data>
+  <data name="TrashEmptied" xml:space="preserve">
+    <value>Кошчето е празно</value>
   </data>
   <data name="TrustedMailDomainSettingsUpdated" xml:space="preserve">
     <value>Актуализирани настройки на доверителна поща</value>
@@ -525,6 +1019,9 @@
   </data>
   <data name="UpdateActionType" xml:space="preserve">
     <value>Актуализация</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Клиент {0} е актуализиран</value>
   </data>
   <data name="UploadActionType" xml:space="preserve">
     <value>Качи</value>
@@ -616,258 +1113,6 @@
   <data name="UserUpdatedPassword" xml:space="preserve">
     <value>Актуализирана парола</value>
   </data>
-  <data name="RoomCreated" xml:space="preserve">
-    <value>Стаята е създадена</value>
-  </data>
-  <data name="RoomsModule" xml:space="preserve">
-    <value>Стаи</value>
-  </data>
-  <data name="TrashEmptied" xml:space="preserve">
-    <value>Кошчето е празно</value>
-  </data>
-  <data name="AddedRoomTags" xml:space="preserve">
-    <value>Добавени тагове: [{1}]</value>
-  </data>
-  <data name="DeletedRoomTags" xml:space="preserve">
-    <value>Изтрити тагове: [{1}]</value>
-  </data>
-  <data name="RoomArchived" xml:space="preserve">
-    <value>Стаята е архивирана</value>
-  </data>
-  <data name="RoomCreateUser" xml:space="preserve">
-    <value>Добавен потребител: {0}. Роля: {1}</value>
-  </data>
-  <data name="RoomDeleted" xml:space="preserve">
-    <value>Стаята е изтрита</value>
-  </data>
-  <data name="RoomInvitationLinkCreated" xml:space="preserve">
-    <value>Линка е създаден. Роля: {1}</value>
-  </data>
-  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
-    <value>Линка е изтрит</value>
-  </data>
-  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
-    <value>Линка е актуализиран. Роля: {1}</value>
-  </data>
-  <data name="RoomLogoCreated" xml:space="preserve">
-    <value>Логото е създадено</value>
-  </data>
-  <data name="RoomLogoDeleted" xml:space="preserve">
-    <value>Логото е изтрито</value>
-  </data>
-  <data name="RoomRemoveUser" xml:space="preserve">
-    <value>Изтрит потребител: {0}</value>
-  </data>
-  <data name="RoomRenamed" xml:space="preserve">
-    <value>Преименувана стая: {0}</value>
-  </data>
-  <data name="RoomUnarchived" xml:space="preserve">
-    <value>Стаята е деархивирана</value>
-  </data>
-  <data name="RoomUpdateAccessForUser" xml:space="preserve">
-    <value>{0} назначи: {1}</value>
-  </data>
-  <data name="TagCreated" xml:space="preserve">
-    <value>Създаден таг: {0}</value>
-  </data>
-  <data name="TagsDeleted" xml:space="preserve">
-    <value>Изтрити тагове: {0}</value>
-  </data>
-  <data name="DocumentsForcesave" xml:space="preserve">
-    <value>Настройките за принудително запаметяване са актуализирани</value>
-  </data>
-  <data name="DocumentsStoreForcesave" xml:space="preserve">
-    <value>Настройките за принудително запаметяване на магазина Актуализирани</value>
-  </data>
-  <data name="LoginFailRecaptcha" xml:space="preserve">
-    <value>Неуспешно вписване. Recaptcha е невалидна</value>
-  </data>
-  <data name="LoginFailViaApiTfa" xml:space="preserve">
-    <value>Неуспешно вписване чрез API и приложение за удостоверяване</value>
-  </data>
-  <data name="LoginSuccessViaApiTfa" xml:space="preserve">
-    <value>Успешно вписване чрез API и приложение за удостоверяване</value>
-  </data>
-  <data name="PrivacyRoomDisable" xml:space="preserve">
-    <value>Самостоятелната стая е деактивирана</value>
-  </data>
-  <data name="PrivacyRoomEnable" xml:space="preserve">
-    <value>Самостоятелната стая е активирана</value>
-  </data>
-  <data name="StartStorageDecryption" xml:space="preserve">
-    <value>Стартирайте дешифрирането на паметта</value>
-  </data>
-  <data name="StartStorageEncryption" xml:space="preserve">
-    <value>Стартирайте криптирането на хранилището</value>
-  </data>
-  <data name="CityCol" xml:space="preserve">
-    <value>Град</value>
-  </data>
-  <data name="CountryCol" xml:space="preserve">
-    <value>Държава</value>
-  </data>
-  <data name="RoomExternalLinkCreated" xml:space="preserve">
-    <value>Създаден външен линк: {0}. Роля: {1}</value>
-  </data>
-  <data name="RoomExternalLinkDeleted" xml:space="preserve">
-    <value>Изтрит външен линк: {0}</value>
-  </data>
-  <data name="RoomExternalLinkUpdated" xml:space="preserve">
-    <value>Актуализиран външен линк: {0}. Роля: {1}</value>
-  </data>
-  <data name="PortalRenamed" xml:space="preserve">
-    <value>Порталът е преименуван</value>
-  </data>
-  <data name="FileOpenedForChange" xml:space="preserve">
-    <value>Файл, отворен за промяна: {0}</value>
-  </data>
-  <data name="FileSizePostfix" xml:space="preserve">
-    <value>байта, KB, MB, GB, TB</value>
-  </data>
-  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
-    <value>{0} назначи: {1}</value>
-  </data>
-  <data name="RoomGroupAdded" xml:space="preserve">
-    <value>Добавена група: {0}. Роля: {1}</value>
-  </data>
-  <data name="RoomGroupRemove" xml:space="preserve">
-    <value>Изтрита група: {0}</value>
-  </data>
-  <data name="QuotaPerPortalDisabled" xml:space="preserve">
-    <value>Деактивирана квота за съхранение по подразбиране</value>
-  </data>
-  <data name="QuotaPerRoomDisabled" xml:space="preserve">
-    <value>Деактивирана квота за съхранение по подразбиране за стаи</value>
-  </data>
-  <data name="QuotaPerUserDisabled" xml:space="preserve">
-    <value>Деактивирана квота за съхранение по подразбиране за потребители</value>
-  </data>
-  <data name="FileUploadedWithOverwriting" xml:space="preserve">
-    <value>Файлът е качен с презаписване: {0}</value>
-  </data>
-  <data name="RoomCopied" xml:space="preserve">
-    <value>Стаята е копирана: {0}</value>
-  </data>
-  <data name="QuotaPerRoomChanged" xml:space="preserve">
-    <value>Задайте квота за съхранение по подразбиране за стаи: {0}</value>
-  </data>
-  <data name="QuotaPerUserChanged" xml:space="preserve">
-    <value>Задайте квота за съхранение по подразбиране за потребители: {0}</value>
-  </data>
-  <data name="QuotaPerPortalChanged" xml:space="preserve">
-    <value>Задайте квота за съхранение по подразбиране: {0}</value>
-  </data>
-  <data name="SendJoinInvite" xml:space="preserve">
-    <value>Потребител {0} изпрати покана до {1} да се присъедини към този DocSpace</value>
-  </data>
-  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
-    <value>Стаи [{0}]. Задайте персонализирана квота за съхранение на стаи: {1}</value>
-  </data>
-  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
-    <value>Стаи [{0}]. Задайте квота за съхранение по подразбиране на стаи: {1}</value>
-  </data>
-  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
-    <value>Стаи [{0}]. Деактивирана квота за съхранение на стаи</value>
-  </data>
-  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
-    <value>Потребители [{0}]. Задайте персонализирана квота за съхранение на потребители: {1}</value>
-  </data>
-  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
-    <value>Потребители [{0}]. Задайте квота за съхранение по подразбиране на потребители: {1}</value>
-  </data>
-  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
-    <value>Потребители [{0}]. Деактивирана квота за съхранение на потребители</value>
-  </data>
-  <data name="FormOpenedForFilling" xml:space="preserve">
-    <value>Файлът е отворен за попълване: {0}</value>
-  </data>
-  <data name="FormSubmit" xml:space="preserve">
-    <value>Потребители [{0}]. Формулярът е изпратен: {1}</value>
-  </data>
-  <data name="RoomIndexExportSaved" xml:space="preserve">
-    <value>Експортиране индекса на стаята, запазен в Документи</value>
-  </data>
-  <data name="RoomInviteResend" xml:space="preserve">
-    <value>Повторно изпратени покани: {0}</value>
-  </data>
-  <data name="ChangeClientActivation" xml:space="preserve">
-    <value>Активирането на {0} на клиента е променено</value>
-  </data>
-  <data name="ChangeClientVisibility" xml:space="preserve">
-    <value>Видимостта на {0} на клиента е променена</value>
-  </data>
-  <data name="CreateClient" xml:space="preserve">
-    <value>Клиентът е създаден</value>
-  </data>
-  <data name="DeleteClient" xml:space="preserve">
-    <value>Клиент {0} е изтрит</value>
-  </data>
-  <data name="FileIndexChanged" xml:space="preserve">
-    <value>Файл: {0}. Индексът е променен от {1} на {2}</value>
-  </data>
-  <data name="FolderIndexChanged" xml:space="preserve">
-    <value>Папка: {0}. Индексът е променен от {1} на {2}</value>
-  </data>
-  <data name="FolderIndexReordered" xml:space="preserve">
-    <value>Папка: {0}. Индексите са пренаредени</value>
-  </data>
-  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
-    <value>Генериран е код за оторизация за клиент {0}</value>
-  </data>
-  <data name="GeneratePersonalAccessToken" xml:space="preserve">
-    <value>Генериран е личен токен за достъп за клиент {0}</value>
-  </data>
-  <data name="RegenerateSecret" xml:space="preserve">
-    <value>Тайната на клиент {0} е регенерирана</value>
-  </data>
-  <data name="RevokeUserClient" xml:space="preserve">
-    <value>Отменен е достъп до клиент {0}</value>
-  </data>
-  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
-    <value>Стая: {0}. Отказът за изтегляне е деактивиран</value>
-  </data>
-  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
-    <value>Стая: {0}. Отказът за изтегляне е активиран</value>
-  </data>
-  <data name="RoomIndexingDisabled" xml:space="preserve">
-    <value>Индексирането на стаята е деактивирано</value>
-  </data>
-  <data name="RoomIndexingEnabled" xml:space="preserve">
-    <value>Индексирането на стаята е активирано</value>
-  </data>
-  <data name="RoomLifeTimeDisabled" xml:space="preserve">
-    <value>LifeTime е деактивиран</value>
-  </data>
-  <data name="RoomLifeTimeSet" xml:space="preserve">
-    <value>Времето на живот е зададени. Стойност: {0}. Период: {1}. Окончателно изтриване: {2}</value>
-  </data>
-  <data name="RoomWatermarkDisabled" xml:space="preserve">
-    <value>Стая: {0}. Водният знак е деактивиран</value>
-  </data>
-  <data name="RoomWatermarkSet" xml:space="preserve">
-    <value>Стая: {0}. Водният знак е активиран</value>
-  </data>
-  <data name="UpdateClient" xml:space="preserve">
-    <value>Клиент {0} е актуализиран</value>
-  </data>
-  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
-    <value>Настройката за достъп до Програмните инструменти е променена</value>
-  </data>
-  <data name="FileVersionRemoved" xml:space="preserve">
-    <value>Файлове [{0}]. Изтрита версия: {1}</value>
-  </data>
-  <data name="FormCompletelyFilled" xml:space="preserve">
-    <value>Потребители [{0}]. Напълно попълнили формуляр: {1}</value>
-  </data>
-  <data name="FormPartiallyFilled" xml:space="preserve">
-    <value>Потребители [{0}]. Попълнили част от формуляр: {1}</value>
-  </data>
-  <data name="FormStartedToFill" xml:space="preserve">
-    <value>Потребители [{0}]. Започнали да попълват: {1}</value>
-  </data>
-  <data name="FormStopped" xml:space="preserve">
-    <value>Потребители [{0}]. Спрян формуляр: {1}</value>
-  </data>
   <data name="WebhookCreated" xml:space="preserve">
     <value>Уеб кукичка създадена: {0}</value>
   </data>
@@ -876,192 +1121,6 @@
   </data>
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Уеб кукичка актуализирана: {0}</value>
-  </data>
-  <data name="ApiKeyCreated" xml:space="preserve">
-    <value>Създаден е потребителски Api ключ: {0}</value>
-  </data>
-  <data name="ApiKeyDeleted" xml:space="preserve">
-    <value>Изтрит потребителски ключ Api: {0}</value>
-  </data>
-  <data name="ApiKeyUpdated" xml:space="preserve">
-    <value>Потребителски Api ключ актуализиран: {0}</value>
-  </data>
-  <data name="FileCustomFilterDisabled" xml:space="preserve">
-    <value>Файл: {0}. Потребителският филтър е изключен</value>
-  </data>
-  <data name="FileCustomFilterEnabled" xml:space="preserve">
-    <value>Файл: {0}. Потребителският филтър е разрешен</value>
-  </data>
-  <data name="AuthLinkActivated" xml:space="preserve">
-    <value>Активиран линк за оторизация</value>
-  </data>
-  <data name="CustomerOperationPerformed" xml:space="preserve">
-    <value>Изпълнява се потребителска операция</value>
-  </data>
-  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
-    <value>Изтеглен отчет за потребителски операции</value>
-  </data>
-  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
-    <value>Актуализиран потребителски абонамент: {0}</value>
-  </data>
-  <data name="CustomerWalletToppedUp" xml:space="preserve">
-    <value>Зареден потребителски портфейл: {0}</value>
-  </data>
-  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Актуализирани настройки за зареждане на потребителски портфейл</value>
-  </data>
-  <data name="LdapDisabled" xml:space="preserve">
-    <value>LDAP удостоверяването е деактивирано</value>
-  </data>
-  <data name="LdapEnabled" xml:space="preserve">
-    <value>LDAP удостоверяването е активирано</value>
-  </data>
-  <data name="LdapSync" xml:space="preserve">
-    <value>LDAP синхронизацията е завършена</value>
-  </data>
-  <data name="LocationCol" xml:space="preserve">
-    <value>Местоположение</value>
-  </data>
-  <data name="BannerSettingsChanged" xml:space="preserve">
-    <value>Настройките за видимост на рекламните банери са променени</value>
-  </data>
-  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Актуализирани са настройките за услуги с активиран клиентски портфейл</value>
-  </data>
-  <data name="LoginSuccessSocialAccount" xml:space="preserve">
-    <value>Вход чрез социален профил успешно</value>
-  </data>
-  <data name="AddedServerToAgent" xml:space="preserve">
-    <value>Добавен е MCP сървър {0} към агент</value>
-  </data>
-  <data name="AgentCreated" xml:space="preserve">
-    <value>Агентът е създаден</value>
-  </data>
-  <data name="AgentDeleted" xml:space="preserve">
-    <value>Агентът е изтрит</value>
-  </data>
-  <data name="AgentRenamed" xml:space="preserve">
-    <value>Агентът е преименуван: {0}</value>
-  </data>
-  <data name="AgentsModule" xml:space="preserve">
-    <value>Агенти</value>
-  </data>
-  <data name="AIProviderCreated" xml:space="preserve">
-    <value>AI доставчикът е създаден: {0}</value>
-  </data>
-  <data name="AIProviderDeleted" xml:space="preserve">
-    <value>AI доставчикът е изтрит: {0}</value>
-  </data>
-  <data name="AIProviderUpdated" xml:space="preserve">
-    <value>AI доставчикът е актуализиран: {0}</value>
-  </data>
-  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
-    <value>AI агенти [{0}]. Задаване на персонализирана квота за съхранение за AI агенти: {1}</value>
-  </data>
-  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
-    <value>AI агенти [{0}]. Задаване на квота за съхранение по подразбиране за AI агенти: {1}</value>
-  </data>
-  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
-    <value>AI агенти [{0}]. Деактивирана квота за съхранение за AI агенти</value>
-  </data>
-  <data name="DeletedServerFromAgent" xml:space="preserve">
-    <value>MCP сървърът {0} е изтрит от агент</value>
-  </data>
-  <data name="FileExternalLinkCreated" xml:space="preserve">
-    <value>Файлове [{0}]. Създадена външна връзка: {1}. Роля: {2}</value>
-  </data>
-  <data name="FileExternalLinkDeleted" xml:space="preserve">
-    <value>Файлове [{0}]. Изтрит външен линк: {1}</value>
-  </data>
-  <data name="FileExternalLinkUpdated" xml:space="preserve">
-    <value>Файлове [{0}]. Актуализиран външен линк: {1}. Роля: {2}</value>
-  </data>
-  <data name="FileMarkedAsFavorite" xml:space="preserve">
-    <value>Файлът е маркиран като любим: {0}</value>
-  </data>
-  <data name="FileRemovedFromFavorite" xml:space="preserve">
-    <value>Файлът е премахнат от любими: {0}</value>
-  </data>
-  <data name="FileRemovedFromList" xml:space="preserve">
-    <value>Файлът е премахнат от "Споделени с мен": {0}</value>
-  </data>
-  <data name="FileUpdatedAccessFor" xml:space="preserve">
-    <value>Файлове [{0}]. Актуализиран достъп за {1}. Роля: {2}</value>
-  </data>
-  <data name="FolderDownloaded" xml:space="preserve">
-    <value>Изтеглена папка: {0}</value>
-  </data>
-  <data name="FolderExternalLinkCreated" xml:space="preserve">
-    <value>Папки [{0}]. Създаден външен линк: {1}. Роля: {2}</value>
-  </data>
-  <data name="FolderExternalLinkDeleted" xml:space="preserve">
-    <value>Папки [{0}]. Изтрит външен линк: {1}</value>
-  </data>
-  <data name="FolderExternalLinkUpdated" xml:space="preserve">
-    <value>Папки [{0}]. Актуализиран външен линк: {1}. Роля: {2}</value>
-  </data>
-  <data name="FolderRemovedFromList" xml:space="preserve">
-    <value>Папката е преместена от "Споделени с мен": {0}</value>
-  </data>
-  <data name="FolderUpdatedAccessFor" xml:space="preserve">
-    <value>Папки [{0}]. Актуализиран достъп до {1}. Роля: {2}</value>
-  </data>
-  <data name="LoginSuccessViaOAuth" xml:space="preserve">
-    <value>Успешно влизане чрез OAuth 2.0</value>
-  </data>
-  <data name="LoginSuccessViaPassword" xml:space="preserve">
-    <value>Успешно влизане чрез потребителско име и парола</value>
-  </data>
-  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
-    <value>Задаване на квота за съхранение по подразбиране за AI агенти: {0}</value>
-  </data>
-  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
-    <value>Деактивирана квота за съхранение по подразбиране за AI агенти</value>
-  </data>
-  <data name="ResetVectorizationSettings" xml:space="preserve">
-    <value>Настройките за векторизация са нулирани</value>
-  </data>
-  <data name="ResetWebSearchSettings" xml:space="preserve">
-    <value>Настройките за уеб търсене са нулирани</value>
-  </data>
-  <data name="RoomExternalLinkRevoked" xml:space="preserve">
-    <value>Отменен външен линк: {1}</value>
-  </data>
-  <data name="ServerCreated" xml:space="preserve">
-    <value>MCP сървър е създаден: {0}</value>
-  </data>
-  <data name="ServerDeleted" xml:space="preserve">
-    <value>MCP сървър е изтрит: {0}</value>
-  </data>
-  <data name="ServerDisabled" xml:space="preserve">
-    <value>MCP сървър е деактивиран: {0}</value>
-  </data>
-  <data name="ServerEnabled" xml:space="preserve">
-    <value>MCP сървър е активиран: {0}</value>
-  </data>
-  <data name="ServerUpdated" xml:space="preserve">
-    <value>MCP сървър е актуализиран: {0}</value>
-  </data>
-  <data name="SetVectorizationSettings" xml:space="preserve">
-    <value>Настройките за векторизация са конфигурирани. Доставчик: {0}</value>
-  </data>
-  <data name="SetWebSearchSettings" xml:space="preserve">
-    <value>Настройките за уеб търсене са конфигурирани. Търсачка: {0}</value>
-  </data>
-  <data name="BackupCompleted" xml:space="preserve">
-    <value>Архивирането е завършено</value>
-  </data>
-  <data name="BackupFailed" xml:space="preserve">
-    <value>Неуспешно архивиране</value>
-  </data>
-  <data name="ScheduledBackupCompleted" xml:space="preserve">
-    <value>Плануваното архивиране е завършено</value>
-  </data>
-  <data name="ScheduledBackupFailed" xml:space="preserve">
-    <value>Неуспешно планувано архивиране</value>
-  </data>
-  <data name="ScheduledBackupStarted" xml:space="preserve">
-    <value>Плануваното архивиране започна</value>
   </data>
   <data name="WebpluginDeleted" xml:space="preserve">
     <value>Изтрит плъгин: {0}</value>

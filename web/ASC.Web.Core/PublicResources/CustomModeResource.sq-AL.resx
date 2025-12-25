@@ -117,18 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ProductAdminOpportunitiesCustomMode" xml:space="preserve">
-    <value>Bëni të njëjtën gjë si një përdorues |Link Dropbox, Box dhe llogari të tjera në seksionin e 'Përbashkët'| Konfiguroni të drejtat e aksesit në dokumentet dhe dosjet në seksionin e 'Përbashkët'</value>
-  </data>
-  <data name="ProductUserOpportunitiesCustomMode" xml:space="preserve">
-    <value>Krijoni dhe modifikoni dokumentet tuaja, si dhe dokumentet e përbashkëta me të drejtat e duhura të aksesit|Jepni akses për lexim/redaktim përdoruesve të tjerë në dokumentet dhe dosjet|Lidhni Dropbox, Box dhe llogari të tjera në seksionin 'Dokumentet e mia'</value>
-  </data>
-  <data name="subject_remove_user_data_completed_custom_mode" xml:space="preserve">
-    <value>${LetterLogoText}. Fshirja e të dhënave të përdoruesit ka përfunduar</value>
-  </data>
-  <data name="subject_saas_custom_mode_reg_data" xml:space="preserve">
-    <value>Një portal i ri është regjistruar</value>
-  </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_custom_mode_v1" xml:space="preserve">
     <value>Përshëndetje, $UserName!
 
@@ -164,5 +152,17 @@ Fshirja e të dhënave personale lejohet të çlirojë $DocsSpace</value>
 # Email: $UserEmail
 # Telefoni: $Phone
 # Data e krijimit: $Date</value>
+  </data>
+  <data name="ProductAdminOpportunitiesCustomMode" xml:space="preserve">
+    <value>Bëni të njëjtën gjë si një përdorues |Link Dropbox, Box dhe llogari të tjera në seksionin e 'Përbashkët'| Konfiguroni të drejtat e aksesit në dokumentet dhe dosjet në seksionin e 'Përbashkët'</value>
+  </data>
+  <data name="ProductUserOpportunitiesCustomMode" xml:space="preserve">
+    <value>Krijoni dhe modifikoni dokumentet tuaja, si dhe dokumentet e përbashkëta me të drejtat e duhura të aksesit|Jepni akses për lexim/redaktim përdoruesve të tjerë në dokumentet dhe dosjet|Lidhni Dropbox, Box dhe llogari të tjera në seksionin 'Dokumentet e mia'</value>
+  </data>
+  <data name="subject_remove_user_data_completed_custom_mode" xml:space="preserve">
+    <value>${LetterLogoText}. Fshirja e të dhënave të përdoruesit ka përfunduar</value>
+  </data>
+  <data name="subject_saas_custom_mode_reg_data" xml:space="preserve">
+    <value>Një portal i ri është regjistruar</value>
   </data>
 </root>

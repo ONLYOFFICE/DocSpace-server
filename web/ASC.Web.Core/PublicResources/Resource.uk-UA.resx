@@ -1,5 +1,64 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -53,16 +112,76 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Векторизація</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Контакти</value>
+  </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Зарахування</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Валюта</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>Дата</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Дебет</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Деталі</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>Кількість</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>Інструменти ШІ</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Резервна копія</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Дисковий простір</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Поповнення балансу</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>Одиниця виміру</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Маркери</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Резервна копія</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>ГБ</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>Звіт про клієнтські операції ({0}–{1})</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Історія транзакцій</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Тип</value>
+  </data>
   <data name="ActivateMobilePhoneEmptyCode" xml:space="preserve">
     <value>Поле коду перевірки не може бути порожнім</value>
   </data>
   <data name="ActivateMobilePhoneEmptyPhoneNumber" xml:space="preserve">
     <value>Введіть номер мобільного телефону</value>
+  </data>
+  <data name="ActivateTfaAppEmptyCode" xml:space="preserve">
+    <value>Поле коду підтвердження не може бути порожнім</value>
   </data>
   <data name="AdministratorNotifySenderTypeName" xml:space="preserve">
     <value>Сповіщення адміністраторів</value>
@@ -70,461 +189,26 @@
   <data name="AdminMessageSent" xml:space="preserve">
     <value>Повідомлення було успішно надіслано. Адміністратор порталу зв'яжеться з вами.</value>
   </data>
-  <data name="ChangePortalOwnerMsg" xml:space="preserve">
-    <value>Посилання для підтвердження операції було відправлено ​​на: email (адреса електронної пошти власника порталу).</value>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>Перевищено квоту простору для агента ШІ</value>
   </data>
-  <data name="CouldNotRecoverPasswordForLdapUser" xml:space="preserve">
-    <value>Операція відновлення пароля заборонена для користувача LDAP</value>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Не вдалося задати квоту для агента ШІ. Введене значення більше загального сховища DocSpace.</value>
   </data>
-  <data name="CouldNotRecoverPasswordForSsoUser" xml:space="preserve">
-    <value>Операція відновлення пароля заборонена для користувача SSO</value>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Автоматичне поновлення</value>
   </data>
-  <data name="CustomNamingPeopleSchema" xml:space="preserve">
-    <value>Користувальницький</value>
-  </data>
-  <data name="EmailAndPasswordIncorrectEmail" xml:space="preserve">
-    <value>Неправильна адреса електронної пошти</value>
-  </data>
-  <data name="ErrorAccessDenied" xml:space="preserve">
-    <value>Недостатньо прав для виконання данної операції</value>
-  </data>
-  <data name="ErrorAccessRestricted" xml:space="preserve">
-    <value>Доступ до порталу обмежений.</value>
-  </data>
-  <data name="ErrorBadKeys" xml:space="preserve">
-    <value>Невірні ключі</value>
-  </data>
-  <data name="ErrorDisabledProfile" xml:space="preserve">
-    <value>Ваш профіль заблоковано</value>
-  </data>
-  <data name="ErrorEmailAlreadyExists" xml:space="preserve">
-    <value>{!User} з такою адресою email вже зареєстрований</value>
-  </data>
-  <data name="ErrorEmailDomainNotAllowed" xml:space="preserve">
-    <value>Листи з цього домену не дозволено реєструвати</value>
-  </data>
-  <data name="ErrorEmailEmpty" xml:space="preserve">
-    <value>Не заповнено поле адреси електронної пошти</value>
-  </data>
-  <data name="ErrorEmailsAreTheSame" xml:space="preserve">
-    <value>Поточна адреса електронної пошти збігається з новою адресою</value>
-  </data>
-  <data name="ErrorEmptyFields" xml:space="preserve">
-    <value>Будь ласка, заповніть всі поля</value>
-  </data>
-  <data name="ErrorEmptyUploadFileSelected" xml:space="preserve">
-    <value>Завантажуваний файл не знайдений</value>
-  </data>
-  <data name="ErrorImageWeightLimit" xml:space="preserve">
-    <value>Завеликий файл зображення</value>
-  </data>
-  <data name="ErrorNotAllowedOption" xml:space="preserve">
-    <value>Ваш тарифний план не підтримує цей параметр</value>
-  </data>
-  <data name="ErrorNotCorrectEmail" xml:space="preserve">
-    <value>Неправильна адреса електронної пошти</value>
-  </data>
-  <data name="ErrorNotCorrectTrustedDomain" xml:space="preserve">
-    <value>Неправильне ім'я домену</value>
-  </data>
-  <data name="ErrorPasswordEmpty" xml:space="preserve">
-    <value>Поле Пароль не заповнено.</value>
-  </data>
-  <data name="ErrorPasswordLength" xml:space="preserve">
-    <value>Від {0} до {1} символів</value>
-  </data>
-  <data name="ErrorPasswordMessage" xml:space="preserve">
-    <value>Пароль повинен містити</value>
-  </data>
-  <data name="ErrorPasswordNoDigits" xml:space="preserve">
-    <value>цифри</value>
-  </data>
-  <data name="ErrorPasswordNoSpecialSymbols" xml:space="preserve">
-    <value>Спеціальні символи</value>
-  </data>
-  <data name="ErrorPasswordNoUpperCase" xml:space="preserve">
-    <value>заголовні літери</value>
-  </data>
-  <data name="ErrorUserNotFound" xml:space="preserve">
-    <value>Користувач не знайдений</value>
-  </data>
-  <data name="ErrorUserNotFoundByEmail" xml:space="preserve">
-    <value>Користувача з e-mail "{0}" не знайдено</value>
-  </data>
-  <data name="EuServerRegion" xml:space="preserve">
-    <value>Регіон ЄС (Франкфурт)</value>
-  </data>
-  <data name="FileSizeMaxExceed" xml:space="preserve">
-    <value>Перевищено максимальний розмір файлу</value>
-  </data>
-  <data name="FileSizeNote" xml:space="preserve">
-    <value>Примітка. Розмір файлу не може перевищувати {1}{0}{2}</value>
-  </data>
-  <data name="FileSizePostfix" xml:space="preserve">
-    <value>байт,Кб,Мб,Гб,Тб</value>
-  </data>
-  <data name="FinishInviteJoinEmailMessage" xml:space="preserve">
-    <value>На вказаний email було вислане посилання для підтвердження нового облікового запису</value>
-  </data>
-  <data name="LdapSettingsErrorCantSaveLdapSettings" xml:space="preserve">
-    <value>Сервер не зміг зберегти налаштування.</value>
-  </data>
-  <data name="LdapSettingsTooManyOperations" xml:space="preserve">
-    <value>Занадто багато операцій LDAP.</value>
-  </data>
-  <data name="LicenseError" xml:space="preserve">
-    <value>Невірна ліцензія</value>
-  </data>
-  <data name="LicenseErrorExpired" xml:space="preserve">
-    <value>Термін дії ліцензії минув.</value>
-  </data>
-  <data name="LicenseErrorPortal" xml:space="preserve">
-    <value>Кількість порталів перевищує кількість дозволених ліцензією</value>
-  </data>
-  <data name="LicenseErrorQuota" xml:space="preserve">
-    <value>Кількість користувачів перевищує кількість дозволених ліцензією</value>
-  </data>
-  <data name="LicenseUploaded" xml:space="preserve">
-    <value>Завантаження успішно</value>
-  </data>
-  <data name="MessageEmailChangeInstuctionsSentOnEmail" xml:space="preserve">
-    <value>Інструкції по зміні електронної пошти були відправлені</value>
-  </data>
-  <data name="MobilePhoneMustErase" xml:space="preserve">
-    <value>Для зміни номеру потрібно видалити свій поточний номер телефону</value>
-  </data>
-  <data name="OrgServerRegion" xml:space="preserve">
-    <value>Регіон ORG</value>
-  </data>
-  <data name="Owner" xml:space="preserve">
-    <value>Власник</value>
-  </data>
-  <data name="PortalSecurity" xml:space="preserve">
-    <value>Доступ до порталу</value>
-  </data>
-  <data name="SgServerRegion" xml:space="preserve">
-    <value>Азіатсько-Тихоокеанський регіон (Сінгапур)</value>
-  </data>
-  <data name="SmsAuthenticationMessageError" xml:space="preserve">
-    <value>Неправильний код</value>
-  </data>
-  <data name="SmsAuthenticationMessageToUser" xml:space="preserve">
-    <value>Код для входу на портал: {0}</value>
-  </data>
-  <data name="SmsAuthenticationTimeout" xml:space="preserve">
-    <value>Термін дії коду закінчився. Будь ласка, запитайте нове текстове повідомлення.</value>
-  </data>
-  <data name="SmsNotAvailable" xml:space="preserve">
-    <value>Налаштування Смс недоступні</value>
-  </data>
-  <data name="SmsTooMuchError" xml:space="preserve">
-    <value>Ви надіслали занадто багато текстових повідомлень. Будь ласка, спробуйте пізніше.</value>
-  </data>
-  <data name="SsoSettingsCantSaveSettings" xml:space="preserve">
-    <value>Не вдалося зберегти налаштування</value>
-  </data>
-  <data name="SsoSettingsCouldNotBeNull" xml:space="preserve">
-    <value>Параметри не можуть бути нульовими</value>
-  </data>
-  <data name="SsoSettingsInvalidBinding" xml:space="preserve">
-    <value>Неправильне зв'язування: {0}</value>
-  </data>
-  <data name="SsoSettingsInvalidEntityId" xml:space="preserve">
-    <value>Недійсний ідентифікатор ID</value>
-  </data>
-  <data name="SsoSettingsInvalidMapping" xml:space="preserve">
-    <value>Неправильне відображення полів</value>
-  </data>
-  <data name="SuccessfullySaveGreetingSettingsMessage" xml:space="preserve">
-    <value>Налаштування привітання успішно збережені</value>
-  </data>
-  <data name="SuccessfullySaveSettingsMessage" xml:space="preserve">
-    <value>Налаштування успішно оновлені</value>
-  </data>
-  <data name="SuccessfullySentNotificationDeleteUserInfoMessage" xml:space="preserve">
-    <value>Інструкції з видалення профілю були відправлені на вашу адресу електронної пошти {0}</value>
-  </data>
-  <data name="UsServerRegion" xml:space="preserve">
-    <value>Регіон Заходу США (Орегон)</value>
-  </data>
-  <data name="WhatsNewSubscriptionName" xml:space="preserve">
-    <value>Новеньке</value>
-  </data>
-  <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Відстеження входів та дій</value>
-  </data>
-  <data name="TariffsFeature_file_size" xml:space="preserve">
-    <value>Максимальний розмір файлу</value>
-  </data>
-  <data name="TariffsFeature_file_size_exception" xml:space="preserve">
-    <value>Розмір файлу не повинен перевищувати {0}</value>
-  </data>
-  <data name="TariffsFeature_manager_exception" xml:space="preserve">
-    <value>Кількість адміністраторів не повинна перевищувати {0}</value>
-  </data>
-  <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Кількість адміністраторів</value>
-  </data>
-  <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Відновлення даних</value>
-  </data>
-  <data name="TariffsFeature_room" xml:space="preserve">
-    <value>Необмежена кількість активних кімнат</value>
-  </data>
-  <data name="TariffsFeature_room_exception" xml:space="preserve">
-    <value>Кількість кімнат не повинна перевищувати {0}</value>
-  </data>
-  <data name="TariffsFeature_sso" xml:space="preserve">
-    <value>Єдиний вхід</value>
-  </data>
-  <data name="TariffsFeature_total_size_exception" xml:space="preserve">
-    <value>Використаний обсяг сховища не повинен перевищувати {0}</value>
-  </data>
-  <data name="TariffsFeature_total_size_price_count" xml:space="preserve">
-    <value>Обсяг сховища</value>
-  </data>
-  <data name="TariffsFeature_used_room" xml:space="preserve">
-    <value>Кімнати:</value>
-  </data>
-  <data name="TariffsFeature_used_total_size" xml:space="preserve">
-    <value>Використаний обсяг сховища:</value>
-  </data>
-  <data name="TariffsFeature_used_usersInRoom" xml:space="preserve">
-    <value>Користувачі в кімнаті:</value>
-  </data>
-  <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Необмежена кількість користувачів та гостей</value>
-  </data>
-  <data name="TariffsFeature_users_exception" xml:space="preserve">
-    <value>Кількість користувачів не повинна перевищувати {0}</value>
-  </data>
-  <data name="TariffsFeature_usersInRoom" xml:space="preserve">
-    <value>Користувачі в кімнаті</value>
-  </data>
-  <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
-    <value>Кількість користувачів у кімнаті не повинна перевищувати {0}</value>
-  </data>
-  <data name="TariffsFeature_customization" xml:space="preserve">
-    <value>Брендинг та налаштування</value>
-  </data>
-  <data name="ConsumersBitly" xml:space="preserve">
-    <value>Bitly</value>
-  </data>
-  <data name="ConsumersbitlyClientSecret" xml:space="preserve">
-    <value>apiKey</value>
-  </data>
-  <data name="ConsumersbitlyClientId" xml:space="preserve">
-    <value>логін</value>
-  </data>
-  <data name="ConsumersBitlyDescription" xml:space="preserve">
-    <value>Підключіть службу Bitly, щоб скоротити посилання на портальні запрошення та спільні посилання в модулі Документи.</value>
-  </data>
-  <data name="ConsumersboxClientId" xml:space="preserve">
-    <value>Ідентифікатор Box ID</value>
-  </data>
-  <data name="ConsumersboxClientSecret" xml:space="preserve">
-    <value>Ключ скриньки</value>
-  </data>
-  <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Підключіть програму для управління файлами та папками пошти.</value>
-  </data>
-  <data name="ConsumersClickatell" xml:space="preserve">
-    <value>Clickatell</value>
-  </data>
-  <data name="ConsumersclickatellapiKey" xml:space="preserve">
-    <value>apiKey</value>
-  </data>
-  <data name="ConsumersClickatellDescription" xml:space="preserve">
-    <value>Увімкніть програму для двофакторної аутентифікації за допомогою Clickatell.</value>
-  </data>
-  <data name="ConsumersDocuSign" xml:space="preserve">
-    <value>DocuSign</value>
-  </data>
-  <data name="ConsumersdocuSignClientId" xml:space="preserve">
-    <value>Ключ DocuSign</value>
-  </data>
-  <data name="ConsumersDocuSignDescription" xml:space="preserve">
-    <value>Підключіть програму, щоб додати до документів електронний знак DocuSign.</value>
-  </data>
-  <data name="ConsumersdocuSignHost" xml:space="preserve">
-    <value>Кінцева точка аутентифікації DocuSign</value>
-  </data>
-  <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Підключіть програму для управління файлами та папками Dropbox.</value>
-  </data>
-  <data name="ConsumersDropBoxKey" xml:space="preserve">
-    <value>Ідентифікатор DropBox ID</value>
-  </data>
-  <data name="ConsumersfacebookClientId" xml:space="preserve">
-    <value>Ідентифікатор Facebook ID</value>
-  </data>
-  <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Підключіть програму для входу на портал за допомогою облікового запису Facebook.</value>
-  </data>
-  <data name="ConsumersfacebookClientSecret" xml:space="preserve">
-    <value>Ключ Facebook</value>
-  </data>
-  <data name="ConsumersFirebase" xml:space="preserve">
-    <value>Опорний пункт</value>
-  </data>
-  <data name="Consumersfirebase_apiKey" xml:space="preserve">
-    <value>Ключ веб-API</value>
-  </data>
-  <data name="Consumersfirebase_authorization" xml:space="preserve">
-    <value>Ключ сервера</value>
-  </data>
-  <data name="ConsumersFirebaseDescription" xml:space="preserve">
-    <value>Підключіть Firebase Cloud Messaging, щоб отримувати сповіщення про повідомлення, надіслані вам.</value>
-  </data>
-  <data name="ConsumersdocuSignClientSecret" xml:space="preserve">
-    <value>Таємний DocuSign</value>
-  </data>
-  <data name="Consumersfirebase_messagingSenderId" xml:space="preserve">
-    <value>ID відправника</value>
-  </data>
-  <data name="Consumersfirebase_projectId" xml:space="preserve">
-    <value>ID проекту</value>
-  </data>
-  <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Підключіть проект до входу на портал за допомогою облікового запису Google і управління файлами та папками Google Диска.</value>
-  </data>
-  <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>Підключіть програму для входу на портал за допомогою облікового запису LinkedIn.</value>
-  </data>
-  <data name="ConsumersLinkedInSecret" xml:space="preserve">
-    <value>Ключ Linkedin</value>
-  </data>
-  <data name="ConsumersmicrosoftClientSecret" xml:space="preserve">
-    <value>Таємниця клієнта</value>
-  </data>
-  <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>Підключіть програму для управління файлами та папками OneDrive.</value>
-  </data>
-  <data name="ConsumersSmscDescription" xml:space="preserve">
-    <value>Увімкніть програму для двофакторної аутентифікації за допомогою SMS-центру.</value>
-  </data>
-  <data name="Consumerssmscpsw" xml:space="preserve">
-    <value>Пароль або пароль MD5 хеш у нижньому регістрі</value>
-  </data>
-  <data name="ConsumersTwilioDescription" xml:space="preserve">
-    <value>Додайте Twilio, щоб мати змогу дзвонити за допомогою CRM-контактів прямо з браузера.</value>
-  </data>
-  <data name="Consumerstwiliosender" xml:space="preserve">
-    <value>Номер телефону від Twilio (необхідний для авторизації SMS)</value>
-  </data>
-  <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Підключіть програму для входу на портал за допомогою облікового запису X.</value>
-  </data>
-  <data name="ConsumersYahooDescription" xml:space="preserve">
-    <value>Увімкніть додаток для імпорту контактів Yahoo.</value>
-  </data>
-  <data name="ErrorFileNotImage" xml:space="preserve">
-    <value>Невідомий тип файлу зображення</value>
-  </data>
-  <data name="ErrorImageSize" xml:space="preserve">
-    <value>Розмір зображення перевищує дозволені параметри</value>
-  </data>
-  <data name="ErrorIpSecurity" xml:space="preserve">
-    <value>Доступ до порталу обмежений</value>
-  </data>
-  <data name="FirstName" xml:space="preserve">
-    <value>Ім'я</value>
-  </data>
-  <data name="LastName" xml:space="preserve">
-    <value>Прізвище</value>
-  </data>
-  <data name="LdapSettingsConnectError" xml:space="preserve">
-    <value>Помилка підключення</value>
-  </data>
-  <data name="LdapSettingsErrorCantCreateUsers" xml:space="preserve">
-    <value>Користувачів неможливо створити, отримана дата невірна.</value>
-  </data>
-  <data name="LdapSettingsErrorCantGetLdapSettings" xml:space="preserve">
-    <value>Сервер не зміг отримати налаштування.</value>
-  </data>
-  <data name="LdapSettingsErrorCredentialsNotValid" xml:space="preserve">
-    <value>Неправильний логін або пароль.</value>
-  </data>
-  <data name="LdapSettingsErrorDomainNotFound" xml:space="preserve">
-    <value>Домен LDAP не знайдено.</value>
-  </data>
-  <data name="LdapSettingsErrorGroupsNotFound" xml:space="preserve">
-    <value>Неможливо знайти групи.</value>
-  </data>
-  <data name="LdapSettingsErrorIncorrectLdapFilter" xml:space="preserve">
-    <value>Невірне значення фільтра користувача.</value>
-  </data>
-  <data name="ConsumersDropBoxSecret" xml:space="preserve">
-    <value>Ключ DropBox</value>
-  </data>
-  <data name="ConsumersEasyBib" xml:space="preserve">
-    <value>EasyBib</value>
-  </data>
-  <data name="ConsumersGoogle" xml:space="preserve">
-    <value>Google</value>
-  </data>
-  <data name="ConsumersgoogleClientId" xml:space="preserve">
-    <value>Ідентифікатор Google ID</value>
-  </data>
-  <data name="ConsumersgoogleClientSecret" xml:space="preserve">
-    <value>Ключі Google</value>
-  </data>
-  <data name="ConsumersMailru" xml:space="preserve">
-    <value>Mail.ru</value>
-  </data>
-  <data name="ConsumersMicrosoft" xml:space="preserve">
-    <value>Microsoft</value>
-  </data>
-  <data name="ConsumersSkyDrive" xml:space="preserve">
-    <value>OneDrive</value>
-  </data>
-  <data name="ConsumersSmsc" xml:space="preserve">
-    <value>Смс-центр</value>
-  </data>
-  <data name="Consumerssmsclogin" xml:space="preserve">
-    <value>Логін</value>
-  </data>
-  <data name="ConsumersTelegram" xml:space="preserve">
-    <value>Telegram</value>
-  </data>
-  <data name="ConsumersTwilio" xml:space="preserve">
-    <value>Twilio</value>
-  </data>
-  <data name="ConsumerstwilioAccountSid" xml:space="preserve">
-    <value>Аккаунт Sid</value>
-  </data>
-  <data name="ConsumersYahoo" xml:space="preserve">
-    <value>Yahoo</value>
-  </data>
-  <data name="ConsumersYandex" xml:space="preserve">
-    <value>Yandex</value>
-  </data>
-  <data name="ConsumersWordpress" xml:space="preserve">
-    <value>WordPress</value>
-  </data>
-  <data name="ConsumersTwitter" xml:space="preserve">
-    <value>X</value>
-  </data>
-  <data name="ConsumersYandexClientSecret" xml:space="preserve">
-    <value>Пароль</value>
-  </data>
-  <data name="Tariffs_startup" xml:space="preserve">
-    <value>Startup</value>
-  </data>
-  <data name="Tariffs_admin" xml:space="preserve">
-    <value>Business</value>
-  </data>
-  <data name="Tariffs_adminyear" xml:space="preserve">
-    <value>Business</value>
-  </data>
-  <data name="ActivateTfaAppEmptyCode" xml:space="preserve">
-    <value>Поле коду підтвердження не може бути порожнім</value>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Автоматичне поповнення</value>
   </data>
   <data name="ButtonSmsEnable" xml:space="preserve">
     <value>За допомогою SMS</value>
   </data>
   <data name="ButtonTfaAppEnable" xml:space="preserve">
     <value>За допомогою застосунку для аутентифікації</value>
+  </data>
+  <data name="ChangePortalOwnerMsg" xml:space="preserve">
+    <value>Посилання для підтвердження операції було відправлено ​​на: email (адреса електронної пошти власника порталу).</value>
   </data>
   <data name="Consumersacesskey" xml:space="preserve">
     <value>Ключ доступу S3</value>
@@ -559,17 +243,62 @@
   <data name="ConsumersauthUser" xml:space="preserve">
     <value>Selectel authUser</value>
   </data>
+  <data name="ConsumersBitly" xml:space="preserve">
+    <value>Bitly</value>
+  </data>
+  <data name="ConsumersbitlyClientId" xml:space="preserve">
+    <value>логін</value>
+  </data>
+  <data name="ConsumersbitlyClientSecret" xml:space="preserve">
+    <value>apiKey</value>
+  </data>
+  <data name="ConsumersBitlyDescription" xml:space="preserve">
+    <value>Підключіть службу Bitly, щоб скоротити посилання на портальні запрошення та спільні посилання в модулі Документи.</value>
+  </data>
   <data name="ConsumersBitlyInstruction" xml:space="preserve">
     <value>Увімкніть цей застосунок, щоб скорочувати запрошення та посилання на документи. {0}Вставте свій логін Bitly й ключ API нижче:</value>
   </data>
   <data name="ConsumersBox" xml:space="preserve">
     <value>Box</value>
   </data>
+  <data name="ConsumersboxClientId" xml:space="preserve">
+    <value>Ідентифікатор Box ID</value>
+  </data>
+  <data name="ConsumersboxClientSecret" xml:space="preserve">
+    <value>Ключ скриньки</value>
+  </data>
+  <data name="ConsumersBoxDescription" xml:space="preserve">
+    <value>Підключіть програму для управління файлами та папками пошти.</value>
+  </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
     <value>Увімкніть цей застосунок, щоб під’єднати обліковий запис Box до модуля «Документи». Ви зможете керувати файлами з Box, редагувати їх і ділитися ними з користувачами {LogoText}. {0}Увійдіть до свого облікового запису на сторінці для розробників Box і створіть новий застосунок для інтеграції {LogoText}. Вставте отримані дані нижче:</value>
   </data>
+  <data name="ConsumersClickatell" xml:space="preserve">
+    <value>Clickatell</value>
+  </data>
+  <data name="ConsumersclickatellapiKey" xml:space="preserve">
+    <value>apiKey</value>
+  </data>
+  <data name="ConsumersClickatellDescription" xml:space="preserve">
+    <value>Увімкніть програму для двофакторної аутентифікації за допомогою Clickatell.</value>
+  </data>
   <data name="ConsumersClickatellInstruction" xml:space="preserve">
     <value>Використовуйте цей застосунок, щоб увімкнути двофакторну аутентифікацію за допомогою сервісу Clickatell. {0}Увійдіть до свого облікового запису SMS Platform і створіть нову інтеграцію для {LogoText}. Скопіюйте apiKey і вставте нижче:</value>
+  </data>
+  <data name="ConsumersDocuSign" xml:space="preserve">
+    <value>DocuSign</value>
+  </data>
+  <data name="ConsumersdocuSignClientId" xml:space="preserve">
+    <value>Ключ DocuSign</value>
+  </data>
+  <data name="ConsumersdocuSignClientSecret" xml:space="preserve">
+    <value>Таємний DocuSign</value>
+  </data>
+  <data name="ConsumersDocuSignDescription" xml:space="preserve">
+    <value>Підключіть програму, щоб додати до документів електронний знак DocuSign.</value>
+  </data>
+  <data name="ConsumersdocuSignHost" xml:space="preserve">
+    <value>Кінцева точка аутентифікації DocuSign</value>
   </data>
   <data name="ConsumersDocuSignInstruction" xml:space="preserve">
     <value>Увімкніть цей застосунок, щоб цифровим способом підписувати документи за допомогою DocuSign. {0}Перейдіть до консолі адміністратора DocuSign і додайте інтеграцію {LogoText}. Вставте отримані дані нижче:</value>
@@ -577,8 +306,20 @@
   <data name="ConsumersDropBox" xml:space="preserve">
     <value>DropBox</value>
   </data>
+  <data name="ConsumersDropBoxDescription" xml:space="preserve">
+    <value>Підключіть програму для управління файлами та папками Dropbox.</value>
+  </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
     <value>Увімкніть цей застосунок, щоб під’єднати обліковий запис Dropbox до модуля «Документи». Ви зможете керувати файлами з Dropbox, редагувати їх і ділитися ними з користувачами {LogoText}. {0}Увійдіть до свого облікового запису на вебсайті Dropbox Developers і створіть новий застосунок для інтеграції {LogoText}. Вставте отримані дані нижче:</value>
+  </data>
+  <data name="ConsumersDropBoxKey" xml:space="preserve">
+    <value>Ідентифікатор DropBox ID</value>
+  </data>
+  <data name="ConsumersDropBoxSecret" xml:space="preserve">
+    <value>Ключ DropBox</value>
+  </data>
+  <data name="ConsumersEasyBib" xml:space="preserve">
+    <value>EasyBib</value>
   </data>
   <data name="ConsumerseasyBibappkey" xml:space="preserve">
     <value>Ключ застосунку</value>
@@ -595,11 +336,47 @@
   <data name="ConsumersfacebookAccessToken_Default" xml:space="preserve">
     <value>Маркер застосунку</value>
   </data>
+  <data name="ConsumersfacebookClientId" xml:space="preserve">
+    <value>Ідентифікатор Facebook ID</value>
+  </data>
+  <data name="ConsumersfacebookClientSecret" xml:space="preserve">
+    <value>Ключ Facebook</value>
+  </data>
+  <data name="ConsumersFacebookDescription" xml:space="preserve">
+    <value>Підключіть програму для входу на портал за допомогою облікового запису Facebook.</value>
+  </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>Увімкніть цей застосунок, щоб дозволити користувачам входити до {LogoText} за допомогою Facebook і під’єднувати облікові записи Facebook своїх клієнтів до модуля CRM. {0}Перейдіть до порталу Facebook Developers і створіть новий застосунок для інтеграції {LogoText}. Вставте отримані дані нижче:</value>
   </data>
+  <data name="ConsumersFirebase" xml:space="preserve">
+    <value>Опорний пункт</value>
+  </data>
+  <data name="ConsumersFirebaseDescription" xml:space="preserve">
+    <value>Підключіть Firebase Cloud Messaging, щоб отримувати сповіщення про повідомлення, надіслані вам.</value>
+  </data>
   <data name="ConsumersFirebaseInstruction" xml:space="preserve">
     <value>Увімкніть цей застосунок, щоб дозволити користувачам отримувати сповіщення про повідомлення навіть в автономному режимі. {0}Перейдіть до консолі Firebase і додайте новий проєкт для інтеграції {LogoText}. Вставте отримані дані нижче:</value>
+  </data>
+  <data name="Consumersfirebase_apiKey" xml:space="preserve">
+    <value>Ключ веб-API</value>
+  </data>
+  <data name="Consumersfirebase_authorization" xml:space="preserve">
+    <value>Ключ сервера</value>
+  </data>
+  <data name="Consumersfirebase_messagingSenderId" xml:space="preserve">
+    <value>ID відправника</value>
+  </data>
+  <data name="Consumersfirebase_projectId" xml:space="preserve">
+    <value>ID проекту</value>
+  </data>
+  <data name="ConsumersGoogle" xml:space="preserve">
+    <value>Google</value>
+  </data>
+  <data name="ConsumersgoogleClientId" xml:space="preserve">
+    <value>Ідентифікатор Google ID</value>
+  </data>
+  <data name="ConsumersgoogleClientSecret" xml:space="preserve">
+    <value>Ключі Google</value>
   </data>
   <data name="ConsumersGoogleCloud" xml:space="preserve">
     <value>Google Cloud Storage</value>
@@ -619,11 +396,17 @@
   <data name="ConsumersGoogleCloudjson" xml:space="preserve">
     <value>GoogleCloud json</value>
   </data>
+  <data name="ConsumersGoogleDescription" xml:space="preserve">
+    <value>Підключіть проект до входу на портал за допомогою облікового запису Google і управління файлами та папками Google Диска.</value>
+  </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>Увімкніть цей застосунок, щоб під’єднати обліковий запис Google Диск до модуля «Документи». Ви зможете керувати файлами з Google Диск, редагувати їх і ділитися ними з користувачами {LogoText}. {0}Перейдіть до консолі API Google і створіть новий проєкт для інтеграції {LogoText}. Вставте отримані дані нижче:</value>
   </data>
   <data name="ConsumersLinkedIn" xml:space="preserve">
     <value>LinkedIn</value>
+  </data>
+  <data name="ConsumersLinkedInDescription" xml:space="preserve">
+    <value>Підключіть програму для входу на портал за допомогою облікового запису LinkedIn.</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>Увімкніть цей застосунок, щоб дозволити користувачам входити до {LogoText} за допомогою своїх облікових записів LinkedIn. {0}Перейдіть на вебсайт LinkedIn Developer і створіть новий застосунок для інтеграції {LogoText}. Вставте отримані дані нижче:</value>
@@ -631,38 +414,14 @@
   <data name="ConsumersLinkedInKey" xml:space="preserve">
     <value>Ідентифікатор Linkedin ID</value>
   </data>
+  <data name="ConsumersLinkedInSecret" xml:space="preserve">
+    <value>Ключ Linkedin</value>
+  </data>
+  <data name="ConsumersMailru" xml:space="preserve">
+    <value>Mail.ru</value>
+  </data>
   <data name="ConsumersMailruClientId" xml:space="preserve">
     <value>Ідентифікатор</value>
-  </data>
-  <data name="ConsumersmicrosoftClientId" xml:space="preserve">
-    <value>Ідентифікатор клієнта застосунку</value>
-  </data>
-  <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
-    <value>Ідентифікатор клієнта</value>
-  </data>
-  <data name="ConsumersyahooClientId" xml:space="preserve">
-    <value>Ідентифікатор клієнта</value>
-  </data>
-  <data name="ConsumersVkClientId" xml:space="preserve">
-    <value>Ідентифікатор застосунку</value>
-  </data>
-  <data name="Consumersskydriveappkey" xml:space="preserve">
-    <value>Ідентифікатор застосунку</value>
-  </data>
-  <data name="ConsumersS3regionDescription" xml:space="preserve">
-    <value>Введіть регіон AWS, де знаходиться ваш контейнер Amazon.</value>
-  </data>
-  <data name="ConsumersYandexClientId" xml:space="preserve">
-    <value>Ідентифікатор</value>
-  </data>
-  <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
-    <value>Неправильний ідентифікатор екземпляра.</value>
-  </data>
-  <data name="LdapSettingsWrongSidAttribute" xml:space="preserve">
-    <value>Не вдалося отримати унікальний ідентифікатор для об’єктів користувача/групи. За замовчуванням система намагатиметься зіставити один із таких ідентифікаторів: entryUUID, nsuniqueid, GUID, objectSid. Якщо жоден з атрибутів не відповідає вашому серверу LDAP, укажіть необхідний атрибут у параметрі ldap.unique.id файлу web.appsettings.config.</value>
-  </data>
-  <data name="RecaptchaInvalid" xml:space="preserve">
-    <value>Recaptcha недійсна</value>
   </data>
   <data name="ConsumersMailruClientSecret" xml:space="preserve">
     <value>Секретний ключ</value>
@@ -672,6 +431,15 @@
   </data>
   <data name="ConsumersMailruInstruction" xml:space="preserve">
     <value>Додавши застосунок Mail.ru, ви можете увімкнути вхід до порталу за допомогою облікового запису Mail.ru на сторінці свого профілю.</value>
+  </data>
+  <data name="ConsumersMicrosoft" xml:space="preserve">
+    <value>Microsoft</value>
+  </data>
+  <data name="ConsumersmicrosoftClientId" xml:space="preserve">
+    <value>Ідентифікатор клієнта застосунку</value>
+  </data>
+  <data name="ConsumersmicrosoftClientSecret" xml:space="preserve">
+    <value>Таємниця клієнта</value>
   </data>
   <data name="ConsumersMicrosoftDescription" xml:space="preserve">
     <value>Увімкніть застосунок, щоб входити до порталу за допомогою облікового запису Microsoft.</value>
@@ -691,16 +459,10 @@
   <data name="ConsumersRackspaceprivate_container" xml:space="preserve">
     <value>Приватний контейнер</value>
   </data>
-  <data name="ConsumersSelectelprivate_container" xml:space="preserve">
-    <value>Приватний контейнер</value>
-  </data>
   <data name="ConsumersRackspaceprivate_containerDescription" xml:space="preserve">
     <value>Введіть URL-адресу приватного контейнера Rackspace для зберігання резервних копій.</value>
   </data>
   <data name="ConsumersRackspacepublic_container" xml:space="preserve">
-    <value>Публічний контейнер</value>
-  </data>
-  <data name="ConsumersSelectelpublic_container" xml:space="preserve">
     <value>Публічний контейнер</value>
   </data>
   <data name="ConsumersRackspacepublic_containerDescription" xml:space="preserve">
@@ -730,6 +492,9 @@
   <data name="ConsumersS3region" xml:space="preserve">
     <value>Регіон</value>
   </data>
+  <data name="ConsumersS3regionDescription" xml:space="preserve">
+    <value>Введіть регіон AWS, де знаходиться ваш контейнер Amazon.</value>
+  </data>
   <data name="Consumerssecretaccesskey" xml:space="preserve">
     <value>Секретний ключ доступу S3</value>
   </data>
@@ -748,20 +513,50 @@
   <data name="ConsumersSelectelInstruction" xml:space="preserve">
     <value>Під’єднайте сервіс Selectel Cloud Storage для резервного копіювання та зберігання даних із вашого порталу. {0}Отримайте дані доступу для користувача з правами читання/запису для контейнерів, де ви плануєте зберігати свої резервні копії, і вставте їх нижче:</value>
   </data>
+  <data name="ConsumersSelectelprivate_container" xml:space="preserve">
+    <value>Приватний контейнер</value>
+  </data>
   <data name="ConsumersSelectelprivate_containerDescription" xml:space="preserve">
     <value>Введіть ім’я приватного контейнера Selectel для зберігання резервних копій.</value>
+  </data>
+  <data name="ConsumersSelectelpublic_container" xml:space="preserve">
+    <value>Публічний контейнер</value>
   </data>
   <data name="ConsumersSelectelpublic_containerDescription" xml:space="preserve">
     <value>Введіть ім’я публічного контейнера Selectel для зберігання резервних копій.</value>
   </data>
+  <data name="ConsumersSkyDrive" xml:space="preserve">
+    <value>OneDrive</value>
+  </data>
+  <data name="Consumersskydriveappkey" xml:space="preserve">
+    <value>Ідентифікатор застосунку</value>
+  </data>
   <data name="Consumersskydriveappsecret" xml:space="preserve">
     <value>Секрет клієнта</value>
+  </data>
+  <data name="ConsumersSkyDriveDescription" xml:space="preserve">
+    <value>Підключіть програму для управління файлами та папками OneDrive.</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>Увімкніть цей застосунок, щоб під’єднати обліковий запис OneDrive до модуля «Документи». Ви зможете керувати файлами з OneDrive, редагувати їх і ділитися ними з користувачами {LogoText}. {0}Увійдіть до свого облікового запису Microsoft Azure і створіть новий застосунок для інтеграції {LogoText}. Вставте отримані дані нижче:</value>
   </data>
+  <data name="ConsumersSmsc" xml:space="preserve">
+    <value>Смс-центр</value>
+  </data>
+  <data name="ConsumersSmscDescription" xml:space="preserve">
+    <value>Увімкніть програму для двофакторної аутентифікації за допомогою SMS-центру.</value>
+  </data>
   <data name="ConsumersSmscInstruction" xml:space="preserve">
     <value>Використовуйте цей застосунок, щоб увімкнути двофакторну аутентифікацію за допомогою сервісу SMS Center. {0}Введіть логін свого облікового запису smsc і пароль (або MD5-хеш пароля) у нижньому регістрі:</value>
+  </data>
+  <data name="Consumerssmsclogin" xml:space="preserve">
+    <value>Логін</value>
+  </data>
+  <data name="Consumerssmscpsw" xml:space="preserve">
+    <value>Пароль або пароль MD5 хеш у нижньому регістрі</value>
+  </data>
+  <data name="ConsumersTelegram" xml:space="preserve">
+    <value>Telegram</value>
   </data>
   <data name="ConsumersTelegramBotName" xml:space="preserve">
     <value>Ім’я користувача бота</value>
@@ -769,23 +564,41 @@
   <data name="ConsumersTelegramBotToken" xml:space="preserve">
     <value>Маркер бота</value>
   </data>
-  <data name="ReassignDataRemoveUserError" xml:space="preserve">
-    <value>Процес перепризначення даних для {0} не завершено.</value>
-  </data>
   <data name="ConsumersTelegramDescription" xml:space="preserve">
     <value>Під’єднайте обліковий запис Telegram, щоб отримувати сповіщення порталу в Telegram.</value>
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>Щоб отримувати сповіщення порталу в Telegram, увімкніть Telegram-бота. Ви можете створити нового бота за допомогою BotFather у настільній версії Telegram. Щоб використовувати цього бота, користувачі порталу мають увімкнути сповіщення Telegram на сторінці свого профілю. {0}Вставте ім’я користувача бота та отриманий маркер у поля нижче.</value>
   </data>
+  <data name="ConsumersTwilio" xml:space="preserve">
+    <value>Twilio</value>
+  </data>
+  <data name="ConsumerstwilioAccountSid" xml:space="preserve">
+    <value>Аккаунт Sid</value>
+  </data>
   <data name="ConsumerstwilioAuthToken" xml:space="preserve">
     <value>Маркер аутентифікації</value>
+  </data>
+  <data name="ConsumersTwilioDescription" xml:space="preserve">
+    <value>Додайте Twilio, щоб мати змогу дзвонити за допомогою CRM-контактів прямо з браузера.</value>
   </data>
   <data name="ConsumersTwilioInstruction" xml:space="preserve">
     <value>Увімкніть цей застосунок, щоб дозволити користувачам телефонувати своїм контактам із модуля CRM за допомогою Twilio. {0}Перейдіть до консолі Twilio й вставте такі дані нижче:</value>
   </data>
+  <data name="Consumerstwiliosender" xml:space="preserve">
+    <value>Номер телефону від Twilio (необхідний для авторизації SMS)</value>
+  </data>
+  <data name="ConsumersTwitter" xml:space="preserve">
+    <value>X</value>
+  </data>
   <data name="ConsumerstwitterAccessTokenSecret_Default" xml:space="preserve">
     <value>Секрет клієнта</value>
+  </data>
+  <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
+    <value>Ідентифікатор клієнта</value>
+  </data>
+  <data name="ConsumersTwitterDescription" xml:space="preserve">
+    <value>Підключіть програму для входу на портал за допомогою облікового запису X.</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Увімкніть цей застосунок, щоб дозволити користувачам входити до {LogoText} за допомогою X і пов’язувати облікові записи X своїх клієнтів із модулем CRM. {0}Перейдіть до порталу X Developer і створіть новий застосунок для інтеграції {LogoText}. Вставте отримані дані нижче:</value>
@@ -802,6 +615,9 @@
   <data name="ConsumersVk" xml:space="preserve">
     <value>VK</value>
   </data>
+  <data name="ConsumersVkClientId" xml:space="preserve">
+    <value>Ідентифікатор застосунку</value>
+  </data>
   <data name="ConsumersVkClientSecret" xml:space="preserve">
     <value>Безпечний ключ</value>
   </data>
@@ -810,6 +626,24 @@
   </data>
   <data name="ConsumersVkInstruction" xml:space="preserve">
     <value>Додавши застосунок VK, ви можете увімкнути вхід до порталу за допомогою облікового запису VK на сторінці вашого профілю.</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>Ідентифікатор клієнта</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Секрет клієнта</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Увімкніть застосунок, щоб входити до порталу за допомогою облікового запису WeChat.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Увімкніть застосунок, щоб входити до порталу за допомогою облікового запису WeChat.</value>
+  </data>
+  <data name="ConsumersWordpress" xml:space="preserve">
+    <value>WordPress</value>
   </data>
   <data name="ConsumersWordpressDescription" xml:space="preserve">
     <value>Увімкніть застосунок, щоб публікувати документи прямо у WordPress.</value>
@@ -823,11 +657,29 @@
   <data name="ConsumerswpClientSecret" xml:space="preserve">
     <value>Секрет WordPress</value>
   </data>
+  <data name="ConsumersYahoo" xml:space="preserve">
+    <value>Yahoo</value>
+  </data>
+  <data name="ConsumersyahooClientId" xml:space="preserve">
+    <value>Ідентифікатор клієнта</value>
+  </data>
   <data name="ConsumersyahooClientSecret" xml:space="preserve">
     <value>Секрет клієнта</value>
   </data>
+  <data name="ConsumersYahooDescription" xml:space="preserve">
+    <value>Увімкніть додаток для імпорту контактів Yahoo.</value>
+  </data>
   <data name="ConsumersYahooInstruction" xml:space="preserve">
     <value>Увімкніть цей застосунок, щоб додавати нових користувачів порталу зі списку контактів Yahoo. {0}Перейдіть на сторінку створення застосунку в Yahoo Developer Network і створіть новий застосунок для інтеграції {LogoText}. Вставте отримані дані нижче:</value>
+  </data>
+  <data name="ConsumersYandex" xml:space="preserve">
+    <value>Yandex</value>
+  </data>
+  <data name="ConsumersYandexClientId" xml:space="preserve">
+    <value>Ідентифікатор</value>
+  </data>
+  <data name="ConsumersYandexClientSecret" xml:space="preserve">
+    <value>Пароль</value>
   </data>
   <data name="ConsumersYandexDescription" xml:space="preserve">
     <value>Увімкніть застосунок, щоб входити до порталу за допомогою облікового запису Yandex.</value>
@@ -835,17 +687,152 @@
   <data name="ConsumersYandexInstruction" xml:space="preserve">
     <value>Додавши застосунок Yandex, ви можете увімкнути вхід на портал за допомогою облікового запису Yandex на сторінці вашого профілю.</value>
   </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>Ідентифікатор клієнта Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Секретний ключ клієнта Zoom</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>Увімкніть застосунок, щоб входити до порталу за допомогою облікового запису Zoom.</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>Увімкніть цей застосунок, щоб дозволити користувачам входити до {LogoText} за допомогою облікових записів Zoom. {0}Перейдіть на сайт Zoom для розробників і створіть новий застосунок для інтеграції {LogoText}. Вставте отримані дані нижче:</value>
+  </data>
+  <data name="CouldNotRecoverPasswordForLdapUser" xml:space="preserve">
+    <value>Операція відновлення пароля заборонена для користувача LDAP</value>
+  </data>
+  <data name="CouldNotRecoverPasswordForSsoUser" xml:space="preserve">
+    <value>Операція відновлення пароля заборонена для користувача SSO</value>
+  </data>
+  <data name="CustomNamingPeopleSchema" xml:space="preserve">
+    <value>Користувальницький</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Дата</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>Електронна пошта</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Ім'я</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>Ідентифікатор</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Прізвище</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Квота сервісу документів ({0})</value>
+  </data>
+  <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
+    <value>Неправильний ідентифікатор екземпляра.</value>
+  </data>
+  <data name="EmailAndPasswordIncorrectEmail" xml:space="preserve">
+    <value>Неправильна адреса електронної пошти</value>
+  </data>
+  <data name="ErrorAccessDenied" xml:space="preserve">
+    <value>Недостатньо прав для виконання данної операції</value>
+  </data>
+  <data name="ErrorAccessRestricted" xml:space="preserve">
+    <value>Доступ до порталу обмежений.</value>
+  </data>
+  <data name="ErrorBadKeys" xml:space="preserve">
+    <value>Невірні ключі</value>
+  </data>
+  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
+    <value>Останній простір повного доступу не може бути видалений</value>
+  </data>
+  <data name="ErrorDisabledProfile" xml:space="preserve">
+    <value>Ваш профіль заблоковано</value>
+  </data>
+  <data name="ErrorEmailAlreadyExists" xml:space="preserve">
+    <value>{!User} з такою адресою email вже зареєстрований</value>
+  </data>
+  <data name="ErrorEmailDomainNotAllowed" xml:space="preserve">
+    <value>Листи з цього домену не дозволено реєструвати</value>
+  </data>
+  <data name="ErrorEmailEmpty" xml:space="preserve">
+    <value>Не заповнено поле адреси електронної пошти</value>
+  </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>Ця адреса електронної пошти закріплена за користувачем {0} як стороннім провайдером</value>
+  </data>
+  <data name="ErrorEmailsAreTheSame" xml:space="preserve">
+    <value>Поточна адреса електронної пошти збігається з новою адресою</value>
+  </data>
+  <data name="ErrorEmptyFields" xml:space="preserve">
+    <value>Будь ласка, заповніть всі поля</value>
+  </data>
   <data name="ErrorEmptyMessage" xml:space="preserve">
     <value>Текст повідомлення порожній</value>
+  </data>
+  <data name="ErrorEmptyUploadFileSelected" xml:space="preserve">
+    <value>Завантажуваний файл не знайдений</value>
+  </data>
+  <data name="ErrorFileNotImage" xml:space="preserve">
+    <value>Невідомий тип файлу зображення</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>Групу не знайдено</value>
+  </data>
+  <data name="ErrorImageSize" xml:space="preserve">
+    <value>Розмір зображення перевищує дозволені параметри</value>
+  </data>
+  <data name="ErrorImageWeightLimit" xml:space="preserve">
+    <value>Завеликий файл зображення</value>
   </data>
   <data name="ErrorIncorrectUserName" xml:space="preserve">
     <value>Неправильне ім'я або прізвище</value>
   </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Ліміт запрошень перевищено</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Додайте мінімум 1 дозволену IP-адресу.</value>
+  </data>
+  <data name="ErrorIpSecurity" xml:space="preserve">
+    <value>Доступ до порталу обмежений</value>
+  </data>
+  <data name="ErrorNotAllowedOption" xml:space="preserve">
+    <value>Ваш тарифний план не підтримує цей параметр</value>
+  </data>
+  <data name="ErrorNotCorrectEmail" xml:space="preserve">
+    <value>Неправильна адреса електронної пошти</value>
+  </data>
+  <data name="ErrorNotCorrectTrustedDomain" xml:space="preserve">
+    <value>Неправильне ім'я домену</value>
+  </data>
+  <data name="ErrorPasswordEmpty" xml:space="preserve">
+    <value>Поле Пароль не заповнено.</value>
+  </data>
+  <data name="ErrorPasswordLength" xml:space="preserve">
+    <value>Від {0} до {1} символів</value>
+  </data>
+  <data name="ErrorPasswordMessage" xml:space="preserve">
+    <value>Пароль повинен містити</value>
+  </data>
+  <data name="ErrorPasswordNoDigits" xml:space="preserve">
+    <value>цифри</value>
+  </data>
   <data name="ErrorPasswordNoSpaces" xml:space="preserve">
     <value>немає пробілів</value>
   </data>
+  <data name="ErrorPasswordNoSpecialSymbols" xml:space="preserve">
+    <value>Спеціальні символи</value>
+  </data>
+  <data name="ErrorPasswordNoUpperCase" xml:space="preserve">
+    <value>заголовні літери</value>
+  </data>
   <data name="ErrorPasswordOnlyLatinLetters" xml:space="preserve">
     <value>тільки латинські букви</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Потрібна оплата</value>
   </data>
   <data name="ErrorRequestLimitExceeded" xml:space="preserve">
     <value>Ліміт запитів перевищено</value>
@@ -856,29 +843,98 @@
   <data name="ErrorTenantTooShortFormat" xml:space="preserve">
     <value>Ім’я домену має містити від {0} до {1} символів.</value>
   </data>
-  <data name="LicenseUploadedOverdue" xml:space="preserve">
-    <value>Успішно завантажено. {0}Підтримка й оновлення для цієї ліцензії недоступні з {2}.{1}</value>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>Забагато спроб входу. Повторіть пізніше</value>
   </data>
-  <data name="LicenseUploadedOverdueSupport" xml:space="preserve">
-    <value>Успішно завантажено. {0}Підтримка для цієї ліцензії недоступна з {2}.{1}</value>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Додайте мінімум 1 довірений домен.</value>
   </data>
-  <data name="MessageYourPasswordSendedToEmail" xml:space="preserve">
-    <value>Якщо користувач з адресою електронної пошти {0} існує, інструкцію щодо зміни пароля було надіслано на цю адресу.</value>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Користувача вимкнено</value>
   </data>
-  <data name="PortalName" xml:space="preserve">
-    <value>Хмарний простір для ваших офісних документів</value>
+  <data name="ErrorUserNotFound" xml:space="preserve">
+    <value>Користувач не знайдений</value>
   </data>
-  <data name="TariffsFeature_thirdparty" xml:space="preserve">
-    <value>Сторонні інтеграції</value>
+  <data name="ErrorUserNotFoundByEmail" xml:space="preserve">
+    <value>Користувача з e-mail "{0}" не знайдено</value>
   </data>
-  <data name="TfaAppAuthMessageError" xml:space="preserve">
-    <value>Невірний код</value>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>URL-адреса вебхуку недоступна. Запит HEAD не повертає статус 200 http.</value>
   </data>
-  <data name="TfaAppNotAvailable" xml:space="preserve">
-    <value>Параметри застосунку TFA недоступні</value>
+  <data name="ErrorWebPluginArchive" xml:space="preserve">
+    <value>Неправильний архів плагінів</value>
   </data>
-  <data name="TfaTooMuchError" xml:space="preserve">
-    <value>Ви надіслали забагато текстових повідомлень. Спробуйте пізніше.</value>
+  <data name="ErrorWebPluginExist" xml:space="preserve">
+    <value>Плагін вже існує</value>
+  </data>
+  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
+    <value>Неправильне розширення файлу</value>
+  </data>
+  <data name="ErrorWebPluginFileSize" xml:space="preserve">
+    <value>Розмір файлу перевищує обмеження</value>
+  </data>
+  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
+    <value>Зміни системних плагінів заборонені</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>Кількість плагінів перевищує обмеження</value>
+  </data>
+  <data name="ErrorWebPluginName" xml:space="preserve">
+    <value>Неправильне ім’я плагіна</value>
+  </data>
+  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
+    <value>Немає вхідного файлу</value>
+  </data>
+  <data name="ErrorWebPluginNotFound" xml:space="preserve">
+    <value>Плагін не знайдено</value>
+  </data>
+  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
+    <value>Забагато вхідних файлів</value>
+  </data>
+  <data name="EuServerRegion" xml:space="preserve">
+    <value>Регіон ЄС (Франкфурт)</value>
+  </data>
+  <data name="FileSizeMaxExceed" xml:space="preserve">
+    <value>Перевищено максимальний розмір файлу</value>
+  </data>
+  <data name="FileSizeNote" xml:space="preserve">
+    <value>Примітка. Розмір файлу не може перевищувати {1}{0}{2}</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>байт,Кб,Мб,Гб,Тб</value>
+  </data>
+  <data name="FinishInviteJoinEmailMessage" xml:space="preserve">
+    <value>На вказаний email було вислане посилання для підтвердження нового облікового запису</value>
+  </data>
+  <data name="FirstName" xml:space="preserve">
+    <value>Ім'я</value>
+  </data>
+  <data name="LastName" xml:space="preserve">
+    <value>Прізвище</value>
+  </data>
+  <data name="LdapSettingsConnectError" xml:space="preserve">
+    <value>Помилка підключення</value>
+  </data>
+  <data name="LdapSettingsErrorCantCreateUsers" xml:space="preserve">
+    <value>Користувачів неможливо створити, отримана дата невірна.</value>
+  </data>
+  <data name="LdapSettingsErrorCantGetLdapSettings" xml:space="preserve">
+    <value>Сервер не зміг отримати налаштування.</value>
+  </data>
+  <data name="LdapSettingsErrorCantSaveLdapSettings" xml:space="preserve">
+    <value>Сервер не зміг зберегти налаштування.</value>
+  </data>
+  <data name="LdapSettingsErrorCredentialsNotValid" xml:space="preserve">
+    <value>Неправильний логін або пароль.</value>
+  </data>
+  <data name="LdapSettingsErrorDomainNotFound" xml:space="preserve">
+    <value>Домен LDAP не знайдено.</value>
+  </data>
+  <data name="LdapSettingsErrorGroupsNotFound" xml:space="preserve">
+    <value>Неможливо знайти групи.</value>
+  </data>
+  <data name="LdapSettingsErrorIncorrectLdapFilter" xml:space="preserve">
+    <value>Невірне значення фільтра користувача.</value>
   </data>
   <data name="LdapSettingsErrorLostRights" xml:space="preserve">
     <value>Ви намагалися позбавити себе прав адміністратора. Ваші права адміністратора не були змінені.</value>
@@ -934,6 +990,9 @@
   <data name="LdapSettingsStatusGettingUsersFromLdap" xml:space="preserve">
     <value>Отримання списку користувачів із сервера LDAP</value>
   </data>
+  <data name="LdapSettingsStatusGivingRights" xml:space="preserve">
+    <value>Призначення користувача {0} адміністратором {1}</value>
+  </data>
   <data name="LdapSettingsStatusLoadingBaseInfo" xml:space="preserve">
     <value>Завантаження інформації про базу LDAP</value>
   </data>
@@ -942,9 +1001,6 @@
   </data>
   <data name="LdapSettingsStatusRemovingOldGroups" xml:space="preserve">
     <value>Видалення застарілих груп, які раніше були завантажені через LDAP</value>
-  </data>
-  <data name="LdapSettingsStatusGivingRights" xml:space="preserve">
-    <value>Призначення користувача {0} адміністратором {1}</value>
   </data>
   <data name="LdapSettingsStatusRemovingOldRights" xml:space="preserve">
     <value>Видалення застарілих прав доступу, які раніше були завантажені через LDAP</value>
@@ -982,236 +1038,113 @@
   <data name="LdapSettingsTlsNotSupported" xml:space="preserve">
     <value>StartTLS не підтримується для поточного сервера LDAP.</value>
   </data>
-  <data name="ConsumersZoom" xml:space="preserve">
-    <value>Zoom</value>
+  <data name="LdapSettingsTooManyOperations" xml:space="preserve">
+    <value>Занадто багато операцій LDAP.</value>
   </data>
-  <data name="ConsumersZoomClientId" xml:space="preserve">
-    <value>Ідентифікатор клієнта Zoom</value>
+  <data name="LdapSettingsWrongSidAttribute" xml:space="preserve">
+    <value>Не вдалося отримати унікальний ідентифікатор для об’єктів користувача/групи. За замовчуванням система намагатиметься зіставити один із таких ідентифікаторів: entryUUID, nsuniqueid, GUID, objectSid. Якщо жоден з атрибутів не відповідає вашому серверу LDAP, укажіть необхідний атрибут у параметрі ldap.unique.id файлу web.appsettings.config.</value>
   </data>
-  <data name="ConsumersZoomClientSecret" xml:space="preserve">
-    <value>Секретний ключ клієнта Zoom</value>
+  <data name="LicenseError" xml:space="preserve">
+    <value>Невірна ліцензія</value>
   </data>
-  <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Увімкніть застосунок, щоб входити до порталу за допомогою облікового запису Zoom.</value>
+  <data name="LicenseErrorExpired" xml:space="preserve">
+    <value>Термін дії ліцензії минув.</value>
   </data>
-  <data name="ConsumersZoomInstruction" xml:space="preserve">
-    <value>Увімкніть цей застосунок, щоб дозволити користувачам входити до {LogoText} за допомогою облікових записів Zoom. {0}Перейдіть на сайт Zoom для розробників і створіть новий застосунок для інтеграції {LogoText}. Вставте отримані дані нижче:</value>
+  <data name="LicenseErrorPortal" xml:space="preserve">
+    <value>Кількість порталів перевищує кількість дозволених ліцензією</value>
   </data>
-  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
-    <value>Забагато спроб входу. Повторіть пізніше</value>
+  <data name="LicenseErrorQuota" xml:space="preserve">
+    <value>Кількість користувачів перевищує кількість дозволених ліцензією</value>
   </data>
-  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
-    <value>Останній простір повного доступу не може бути видалений</value>
+  <data name="LicenseUploaded" xml:space="preserve">
+    <value>Завантаження успішно</value>
   </data>
-  <data name="ErrorWebPluginArchive" xml:space="preserve">
-    <value>Неправильний архів плагінів</value>
+  <data name="LicenseUploadedOverdue" xml:space="preserve">
+    <value>Успішно завантажено. {0}Підтримка й оновлення для цієї ліцензії недоступні з {2}.{1}</value>
   </data>
-  <data name="ErrorWebPluginExist" xml:space="preserve">
-    <value>Плагін вже існує</value>
+  <data name="LicenseUploadedOverdueSupport" xml:space="preserve">
+    <value>Успішно завантажено. {0}Підтримка для цієї ліцензії недоступна з {2}.{1}</value>
   </data>
-  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
-    <value>Неправильне розширення файлу</value>
-  </data>
-  <data name="ErrorWebPluginFileSize" xml:space="preserve">
-    <value>Розмір файлу перевищує обмеження</value>
-  </data>
-  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
-    <value>Зміни системних плагінів заборонені</value>
-  </data>
-  <data name="ErrorWebPluginName" xml:space="preserve">
-    <value>Неправильне ім’я плагіна</value>
-  </data>
-  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
-    <value>Немає вхідного файлу</value>
-  </data>
-  <data name="ErrorWebPluginNotFound" xml:space="preserve">
-    <value>Плагін не знайдено</value>
-  </data>
-  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
-    <value>Забагато вхідних файлів</value>
-  </data>
-  <data name="QuotaGreaterPortalError" xml:space="preserve">
-    <value>Не вдалося встановити квоту пам’яті: установлена вами квота пам’яті перевищує квоту порталу.</value>
-  </data>
-  <data name="RoomFreeSpaceException" xml:space="preserve">
-    <value>Перевищено квоту простору кімнати</value>
-  </data>
-  <data name="UserFreeSpaceException" xml:space="preserve">
-    <value>Перевищено квоту простору кімнати</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Додані адміністратори:</value>
-  </data>
-  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
-    <value>Ліміт запрошень перевищено</value>
-  </data>
-  <data name="ErrorUserDisabled" xml:space="preserve">
-    <value>Користувача вимкнено</value>
+  <data name="MessageEmailChangeInstuctionsSentOnEmail" xml:space="preserve">
+    <value>Інструкції по зміні електронної пошти були відправлені</value>
   </data>
   <data name="MessagePasswordSendedToEmail" xml:space="preserve">
     <value>Інструкцію зі зміни пароля надіслано на адресу {0}.</value>
   </data>
-  <data name="ErrorEmailLinked" xml:space="preserve">
-    <value>Ця адреса електронної пошти закріплена за користувачем {0} як стороннім провайдером</value>
+  <data name="MessageYourPasswordSendedToEmail" xml:space="preserve">
+    <value>Якщо користувач з адресою електронної пошти {0} існує, інструкцію щодо зміни пароля було надіслано на цю адресу.</value>
   </data>
-  <data name="TariffsFeature_statistic" xml:space="preserve">
-    <value>Квота пам'яті й статистика</value>
+  <data name="MobilePhoneMustErase" xml:space="preserve">
+    <value>Для зміни номеру потрібно видалити свій поточний номер телефону</value>
   </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} на адміністратора та можливість додавати простір за запитом</value>
+  <data name="OrgServerRegion" xml:space="preserve">
+    <value>Регіон ORG</value>
+  </data>
+  <data name="Owner" xml:space="preserve">
+    <value>Власник</value>
+  </data>
+  <data name="PortalName" xml:space="preserve">
+    <value>Хмарний простір для ваших офісних документів</value>
+  </data>
+  <data name="PortalSecurity" xml:space="preserve">
+    <value>Доступ до порталу</value>
+  </data>
+  <data name="QuotaGreaterPortalError" xml:space="preserve">
+    <value>Не вдалося встановити квоту пам’яті: установлена вами квота пам’яті перевищує квоту порталу.</value>
+  </data>
+  <data name="ReassignDataRemoveUserError" xml:space="preserve">
+    <value>Процес перепризначення даних для {0} не завершено.</value>
+  </data>
+  <data name="RecaptchaInvalid" xml:space="preserve">
+    <value>Recaptcha недійсна</value>
+  </data>
+  <data name="RoomFreeSpaceException" xml:space="preserve">
+    <value>Перевищено квоту простору кімнати</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
     <value>Не вдалося задати квоту на кімнату. Введене значення більше загального сховища DocSpace.</value>
   </data>
-  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Не вдалося задати квоту на користувача. Введене значення більше загального сховища DocSpace.</value>
+  <data name="SgServerRegion" xml:space="preserve">
+    <value>Азіатсько-Тихоокеанський регіон (Сінгапур)</value>
   </data>
-  <data name="ErrorTrustedMailDomain" xml:space="preserve">
-    <value>Додайте мінімум 1 довірений домен.</value>
+  <data name="SmsAuthenticationMessageError" xml:space="preserve">
+    <value>Неправильний код</value>
   </data>
-  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
-    <value>Кількість адміністраторів перевищує обмеження: {0}/{1}.</value>
+  <data name="SmsAuthenticationMessageToUser" xml:space="preserve">
+    <value>Код для входу на портал: {0}</value>
   </data>
-  <data name="Tariffs_nonprofit" xml:space="preserve">
-    <value>Некомерційний</value>
+  <data name="SmsAuthenticationTimeout" xml:space="preserve">
+    <value>Термін дії коду закінчився. Будь ласка, запитайте нове текстове повідомлення.</value>
   </data>
-  <data name="ErrorIpRestriction" xml:space="preserve">
-    <value>Додайте мінімум 1 дозволену IP-адресу.</value>
+  <data name="SmsNotAvailable" xml:space="preserve">
+    <value>Налаштування Смс недоступні</value>
   </data>
-  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
-    <value>URL-адреса вебхуку недоступна. Запит HEAD не повертає статус 200 http.</value>
+  <data name="SmsTooMuchError" xml:space="preserve">
+    <value>Ви надіслали занадто багато текстових повідомлень. Будь ласка, спробуйте пізніше.</value>
   </data>
-  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
-    <value>Зарахування</value>
+  <data name="SsoSettingsCantSaveSettings" xml:space="preserve">
+    <value>Не вдалося зберегти налаштування</value>
   </data>
-  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
-    <value>Валюта</value>
+  <data name="SsoSettingsCouldNotBeNull" xml:space="preserve">
+    <value>Параметри не можуть бути нульовими</value>
   </data>
-  <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>Дата</value>
+  <data name="SsoSettingsInvalidBinding" xml:space="preserve">
+    <value>Неправильне зв'язування: {0}</value>
   </data>
-  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
-    <value>Кількість</value>
+  <data name="SsoSettingsInvalidEntityId" xml:space="preserve">
+    <value>Недійсний ідентифікатор ID</value>
   </data>
-  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
-    <value>Дисковий простір</value>
+  <data name="SsoSettingsInvalidMapping" xml:space="preserve">
+    <value>Неправильне відображення полів</value>
   </data>
-  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
-    <value>Поповнення балансу</value>
+  <data name="SuccessfullySaveGreetingSettingsMessage" xml:space="preserve">
+    <value>Налаштування привітання успішно збережені</value>
   </data>
-  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
-    <value>Одиниця виміру</value>
+  <data name="SuccessfullySaveSettingsMessage" xml:space="preserve">
+    <value>Налаштування успішно оновлені</value>
   </data>
-  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
-    <value>Звіт про клієнтські операції ({0}–{1})</value>
-  </data>
-  <data name="ErrorGroupNotFound" xml:space="preserve">
-    <value>Групу не знайдено</value>
-  </data>
-  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
-    <value>Додатковий дисковий простір</value>
-  </data>
-  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
-    <value>Скорегуйте обсяг сховища відповідно до ваших потреб.</value>
-  </data>
-  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
-    <value>Використаний обсяг сховища:</value>
-  </data>
-  <data name="AutoRenewal" xml:space="preserve">
-    <value>Автоматичне поновлення</value>
-  </data>
-  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
-    <value>Резервна копія</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>Резервна копія</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
-    <value>Резервна копія</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
-    <value>ГБ</value>
-  </data>
-  <data name="AccountingCustomerOperationType" xml:space="preserve">
-    <value>Тип</value>
-  </data>
-  <data name="ErrorPaymentRequired" xml:space="preserve">
-    <value>Потрібна оплата</value>
-  </data>
-  <data name="TariffsFeature_free_backup" xml:space="preserve">
-    <value>{0} безкоштовних резервних копій на місяць</value>
-  </data>
-  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
-    <value>Деталі</value>
-  </data>
-  <data name="AccountingCustomerOperationContact" xml:space="preserve">
-    <value>Контакти</value>
-  </data>
-  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
-    <value>Дебет</value>
-  </data>
-  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
-    <value>Історія транзакцій</value>
-  </data>
-  <data name="AutoTopUp" xml:space="preserve">
-    <value>Автоматичне поповнення</value>
-  </data>
-  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
-    <value>Увімкніть резервне копіювання для вашого DocSpace. Витрати стягуватимуться автоматично.</value>
-  </data>
-  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
-    <value>Кількість безкоштовних резервних копій не повинна перевищувати {0} протягом місяця</value>
-  </data>
-  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
-    <value>Векторизація</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
-    <value>Інструменти ШІ</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
-    <value>Маркери</value>
-  </data>
-  <data name="AiAgentFreeSpaceException" xml:space="preserve">
-    <value>Перевищено квоту простору для агента ШІ</value>
-  </data>
-  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Не вдалося задати квоту для агента ШІ. Введене значення більше загального сховища DocSpace.</value>
-  </data>
-  <data name="ConsumersWeixin" xml:space="preserve">
-    <value>WeChat</value>
-  </data>
-  <data name="ConsumersWeixinClientId" xml:space="preserve">
-    <value>Ідентифікатор клієнта</value>
-  </data>
-  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
-    <value>Секрет клієнта</value>
-  </data>
-  <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Увімкніть застосунок, щоб входити до порталу за допомогою облікового запису WeChat.</value>
-  </data>
-  <data name="ConsumersWeixinInstruction" xml:space="preserve">
-    <value>Увімкніть застосунок, щоб входити до порталу за допомогою облікового запису WeChat.</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
-    <value>Дата</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
-    <value>Електронна пошта</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
-    <value>Ім'я</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
-    <value>Ідентифікатор</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
-    <value>Прізвище</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
-    <value>Квота сервісу документів ({0})</value>
-  </data>
-  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
-    <value>Кількість плагінів перевищує обмеження</value>
+  <data name="SuccessfullySentNotificationDeleteUserInfoMessage" xml:space="preserve">
+    <value>Інструкції з видалення профілю були відправлені на вашу адресу електронної пошти {0}</value>
   </data>
   <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
     <value>Кількість агентів ШІ не повинна перевищувати {0}</value>
@@ -1222,16 +1155,142 @@
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
     <value>Увімкніть функції ШІ у вашому просторі DocSpace, щоб збільшити продуктивність.</value>
   </data>
+  <data name="TariffsFeature_audit" xml:space="preserve">
+    <value>Відстеження входів та дій</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Резервна копія</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Увімкніть резервне копіювання для вашого DocSpace. Витрати стягуватимуться автоматично.</value>
+  </data>
+  <data name="TariffsFeature_customization" xml:space="preserve">
+    <value>Брендинг та налаштування</value>
+  </data>
+  <data name="TariffsFeature_file_size" xml:space="preserve">
+    <value>Максимальний розмір файлу</value>
+  </data>
+  <data name="TariffsFeature_file_size_exception" xml:space="preserve">
+    <value>Розмір файлу не повинен перевищувати {0}</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} безкоштовних резервних копій на місяць</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Кількість безкоштовних резервних копій не повинна перевищувати {0} протягом місяця</value>
+  </data>
+  <data name="TariffsFeature_manager_exception" xml:space="preserve">
+    <value>Кількість адміністраторів не повинна перевищувати {0}</value>
+  </data>
+  <data name="TariffsFeature_manager_price_count" xml:space="preserve">
+    <value>Кількість адміністраторів</value>
+  </data>
+  <data name="TariffsFeature_restore" xml:space="preserve">
+    <value>Відновлення даних</value>
+  </data>
+  <data name="TariffsFeature_room" xml:space="preserve">
+    <value>Необмежена кількість активних кімнат</value>
+  </data>
+  <data name="TariffsFeature_room_exception" xml:space="preserve">
+    <value>Кількість кімнат не повинна перевищувати {0}</value>
+  </data>
+  <data name="TariffsFeature_sso" xml:space="preserve">
+    <value>Єдиний вхід</value>
+  </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Квота пам'яті й статистика</value>
+  </data>
+  <data name="TariffsFeature_thirdparty" xml:space="preserve">
+    <value>Сторонні інтеграції</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} на адміністратора та можливість додавати простір за запитом</value>
+  </data>
+  <data name="TariffsFeature_total_size_exception" xml:space="preserve">
+    <value>Використаний обсяг сховища не повинен перевищувати {0}</value>
+  </data>
+  <data name="TariffsFeature_total_size_price_count" xml:space="preserve">
+    <value>Обсяг сховища</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Додатковий дисковий простір</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Скорегуйте обсяг сховища відповідно до ваших потреб.</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Додані адміністратори:</value>
+  </data>
+  <data name="TariffsFeature_used_room" xml:space="preserve">
+    <value>Кімнати:</value>
+  </data>
+  <data name="TariffsFeature_used_total_size" xml:space="preserve">
+    <value>Використаний обсяг сховища:</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
+    <value>Використаний обсяг сховища:</value>
+  </data>
+  <data name="TariffsFeature_used_usersInRoom" xml:space="preserve">
+    <value>Користувачі в кімнаті:</value>
+  </data>
+  <data name="TariffsFeature_users" xml:space="preserve">
+    <value>Необмежена кількість користувачів та гостей</value>
+  </data>
+  <data name="TariffsFeature_usersInRoom" xml:space="preserve">
+    <value>Користувачі в кімнаті</value>
+  </data>
+  <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
+    <value>Кількість користувачів у кімнаті не повинна перевищувати {0}</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Кількість адміністраторів перевищує обмеження: {0}/{1}.</value>
+  </data>
+  <data name="TariffsFeature_users_exception" xml:space="preserve">
+    <value>Кількість користувачів не повинна перевищувати {0}</value>
+  </data>
   <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
     <value>Вебпошук на основі ШІ</value>
   </data>
   <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
     <value>Поповніть гаманець, щоб розблокувати вебпошук на основі ШІ.</value>
   </data>
+  <data name="Tariffs_admin" xml:space="preserve">
+    <value>Business</value>
+  </data>
+  <data name="Tariffs_adminyear" xml:space="preserve">
+    <value>Business</value>
+  </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Некомерційний</value>
+  </data>
+  <data name="Tariffs_startup" xml:space="preserve">
+    <value>Startup</value>
+  </data>
   <data name="TelegramOnGenericError" xml:space="preserve">
     <value>Сталася неочікувана помилка. Повторіть спробу.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
     <value>Ви успішно під'єднали Telegram для отримання сповіщень з вашого простору DocSpace.</value>
+  </data>
+  <data name="TfaAppAuthMessageError" xml:space="preserve">
+    <value>Невірний код</value>
+  </data>
+  <data name="TfaAppNotAvailable" xml:space="preserve">
+    <value>Параметри застосунку TFA недоступні</value>
+  </data>
+  <data name="TfaTooMuchError" xml:space="preserve">
+    <value>Ви надіслали забагато текстових повідомлень. Спробуйте пізніше.</value>
+  </data>
+  <data name="UserFreeSpaceException" xml:space="preserve">
+    <value>Перевищено квоту простору кімнати</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>Не вдалося задати квоту на користувача. Введене значення більше загального сховища DocSpace.</value>
+  </data>
+  <data name="UsServerRegion" xml:space="preserve">
+    <value>Регіон Заходу США (Орегон)</value>
+  </data>
+  <data name="WhatsNewSubscriptionName" xml:space="preserve">
+    <value>Новеньке</value>
   </data>
 </root>

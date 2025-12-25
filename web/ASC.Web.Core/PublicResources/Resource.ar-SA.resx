@@ -117,6 +117,63 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>التحويل المتجهي (Vectorization)</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>اتصال</value>
+  </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>مصداقية</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>عملة</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>التاريخ</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>الخصم</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>تفاصيل</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>كمية</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>أدوات الذكاء الاصطناعي</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>دعم</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>مساحة القرص</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>تعبئة الرصيد</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>وحدة القياس</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>الرموز (Tokens)</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>دعم</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>تقرير عمليات العملاء ({0}-{1})</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>تاريخ المعاملات</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>نوع</value>
+  </data>
   <data name="ActivateMobilePhoneEmptyCode" xml:space="preserve">
     <value>لا يمكن ترك حقل رمز التحقق فارغ</value>
   </data>
@@ -132,11 +189,26 @@
   <data name="AdminMessageSent" xml:space="preserve">
     <value>تم ارسال الرسالة بنجاح. سيتم التواصل معك من قبل مسئول البوابة.</value>
   </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>تم تجاوز حصة مساحة وكيل الذكاء الاصطناعي</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>فشل تعيين الحصة لكل وكيل ذكاء اصطناعي. القيمة المدخلة أكبر من إجمالي تخزين DocSpace.</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>التجديد التلقائي</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>التعبئة التلقائية</value>
+  </data>
   <data name="ButtonSmsEnable" xml:space="preserve">
     <value>بواسطة الرسائل القصيرة</value>
   </data>
   <data name="ButtonTfaAppEnable" xml:space="preserve">
     <value>بواسطة تطبيق المصادقة</value>
+  </data>
+  <data name="ChangePortalOwnerMsg" xml:space="preserve">
+    <value>تم ارسال رابط لتأكيد العملية إلى: البريد(عنوان بريد مالك البوابة).</value>
   </data>
   <data name="Consumersacesskey" xml:space="preserve">
     <value>مفتاح الوصول S3</value>
@@ -279,6 +351,12 @@
   <data name="ConsumersFirebase" xml:space="preserve">
     <value>Firebase</value>
   </data>
+  <data name="ConsumersFirebaseDescription" xml:space="preserve">
+    <value>قم بتمكين هذا التطبيق لاستلام اشعارات عن المستلمة من المراسلة السحابية من Firebase.</value>
+  </data>
+  <data name="ConsumersFirebaseInstruction" xml:space="preserve">
+    <value>قم بتمكين هذا التطبيق للسماح للمستخدمين بتلقي إشعارات حول الرسائل حتى في وضع عدم الاتصال. {0} انتقل إلى وحدة تحكم Firebase وأضف مشروعاً جديداً لتكامل {LogoText}. أدخل البيانات التي تلقيتها أدناه:</value>
+  </data>
   <data name="Consumersfirebase_apiKey" xml:space="preserve">
     <value>مفتاح Web API</value>
   </data>
@@ -290,12 +368,6 @@
   </data>
   <data name="Consumersfirebase_projectId" xml:space="preserve">
     <value>معرف المشروع</value>
-  </data>
-  <data name="ConsumersFirebaseDescription" xml:space="preserve">
-    <value>قم بتمكين هذا التطبيق لاستلام اشعارات عن المستلمة من المراسلة السحابية من Firebase.</value>
-  </data>
-  <data name="ConsumersFirebaseInstruction" xml:space="preserve">
-    <value>قم بتمكين هذا التطبيق للسماح للمستخدمين بتلقي إشعارات حول الرسائل حتى في وضع عدم الاتصال. {0} انتقل إلى وحدة تحكم Firebase وأضف مشروعاً جديداً لتكامل {LogoText}. أدخل البيانات التي تلقيتها أدناه:</value>
   </data>
   <data name="ConsumersGoogle" xml:space="preserve">
     <value>جوجل</value>
@@ -310,9 +382,6 @@
     <value>ذاكرة جوجل السحابية</value>
   </data>
   <data name="ConsumersGoogleCloudbucket" xml:space="preserve">
-    <value>Bucket</value>
-  </data>
-  <data name="ConsumersS3bucket" xml:space="preserve">
     <value>Bucket</value>
   </data>
   <data name="ConsumersGoogleCloudbucketDescription" xml:space="preserve">
@@ -396,12 +465,6 @@
   <data name="ConsumersRackspacepublic_container" xml:space="preserve">
     <value>حاوية عامة</value>
   </data>
-  <data name="ConsumersSelectelpublic_container" xml:space="preserve">
-    <value>حاوية عامة</value>
-  </data>
-  <data name="ConsumersSelectelprivate_container" xml:space="preserve">
-    <value>حاوية خاصة</value>
-  </data>
   <data name="ConsumersRackspacepublic_containerDescription" xml:space="preserve">
     <value>أدخل عنوان URL للحاوية العامة Rackspace لتخزين النسخ الاحتياطية.</value>
   </data>
@@ -413,6 +476,9 @@
   </data>
   <data name="ConsumersS3" xml:space="preserve">
     <value>أمازون AWS S3</value>
+  </data>
+  <data name="ConsumersS3bucket" xml:space="preserve">
+    <value>Bucket</value>
   </data>
   <data name="ConsumersS3bucketDescription" xml:space="preserve">
     <value>أدخل الاسم الفريد لحاوية أمازون لتخزين النسخ الاحتياطية.</value>
@@ -447,8 +513,14 @@
   <data name="ConsumersSelectelInstruction" xml:space="preserve">
     <value>قم بتوصيل خدمة التخزين السحابي Selectel للنسخ الاحتياطي وتخزين البيانات من البوابة الإلكترونية. {0} احصل على بيانات الوصول لمستخدم لديه حقوق القراءة أو الكتابة للحاويات التي تخطط لتخزين نسخك الاحتياطية الخاصة بها وثم إلصقها أدناه:</value>
   </data>
+  <data name="ConsumersSelectelprivate_container" xml:space="preserve">
+    <value>حاوية خاصة</value>
+  </data>
   <data name="ConsumersSelectelprivate_containerDescription" xml:space="preserve">
     <value>أدخل اسم حاوية Selectel الخاصة لتخزين النسخ الاحتياطية.</value>
+  </data>
+  <data name="ConsumersSelectelpublic_container" xml:space="preserve">
+    <value>حاوية عامة</value>
   </data>
   <data name="ConsumersSelectelpublic_containerDescription" xml:space="preserve">
     <value>أدخل اسم حاوية Selectel العامة لتخزين النسخ الاحتياطية.</value>
@@ -519,11 +591,11 @@
   <data name="ConsumersTwitter" xml:space="preserve">
     <value>X</value>
   </data>
-  <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
-    <value>معرف العميل</value>
-  </data>
   <data name="ConsumerstwitterAccessTokenSecret_Default" xml:space="preserve">
     <value>خصوصية العميل</value>
+  </data>
+  <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
+    <value>معرف العميل</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
     <value>قم بتمكين التطبيق لتسجيل الدخول إلى البوابة باستخدام حساب تويتر والبحث عن جهات الاتصال.</value>
@@ -554,6 +626,21 @@
   </data>
   <data name="ConsumersVkInstruction" xml:space="preserve">
     <value>عند إضافة تطبيق VK، يمكنك تمكين تسجيل الدخول إلى البوابة باستخدام حساب VK في صفحة ملفك الشخصي.</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>معرف العميل</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>مفتاح العميل السري</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>تمكين التطبيق من تسجيل الدخول إلى البوابة باستخدام حساب WeChat.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>تمكين التطبيق من تسجيل الدخول إلى البوابة باستخدام حساب WeChat.</value>
   </data>
   <data name="ConsumersWordpress" xml:space="preserve">
     <value>WordPress</value>
@@ -603,6 +690,18 @@
   <data name="ConsumersZoom" xml:space="preserve">
     <value>Zoom</value>
   </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>معرف مستخدم الزووم</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>الرمز السري لمستخدم الزووم</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>تفعيل التطبيق لتسجيل الدخول للبوابة باستخدام حساب الزووم.</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>قم بتمكين هذا التطبيق للسماح للمستخدمين بتسجيل الدخول إلى {LogoText} باستخدام حسابات الزووم الخاصة بهم.  {0}انتقل إلى موقع ويب Zoom Developers وأنشئ تطبيقًا جديدًا متكاملاً مع {LogoText}. أدخل البيانات التي تلقيتها أدناه:</value>
+  </data>
   <data name="CouldNotRecoverPasswordForLdapUser" xml:space="preserve">
     <value>عملية استرداد كلمة المرور ممنوعة لمستخدم LDAP</value>
   </data>
@@ -611,6 +710,24 @@
   </data>
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>تخصيص</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>التاريخ</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>البريد الإلكتروني</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>الاسم الأول</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>المعرف</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>اسم العائلة</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>حصص خدمة المستندات ({0})</value>
   </data>
   <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
     <value>هوية غير صحيحة.</value>
@@ -627,6 +744,9 @@
   <data name="ErrorBadKeys" xml:space="preserve">
     <value>المفتاح غير فعّال</value>
   </data>
+  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
+    <value>لا يمكن حذف آخر مساحة وصول كاملة</value>
+  </data>
   <data name="ErrorDisabledProfile" xml:space="preserve">
     <value>تم تعليق ملفك الشخصي</value>
   </data>
@@ -638,6 +758,9 @@
   </data>
   <data name="ErrorEmailEmpty" xml:space="preserve">
     <value>الحقل الخاص بالبريد الالكتروني فارغ</value>
+  </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>تم إرفاق هذا البريد الإلكتروني للمستخدم {0} كمزود طرف ثالث</value>
   </data>
   <data name="ErrorEmailsAreTheSame" xml:space="preserve">
     <value>البريد الإلكتروني الحالي والبريد الإلكتروني الجديد متماثلان</value>
@@ -654,6 +777,9 @@
   <data name="ErrorFileNotImage" xml:space="preserve">
     <value>نوع ملف صورة غير معروف</value>
   </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>لم يتم العثور على المجموعة</value>
+  </data>
   <data name="ErrorImageSize" xml:space="preserve">
     <value>حجم الصورة يتجاوز المقاييس المسموح بها</value>
   </data>
@@ -662,6 +788,12 @@
   </data>
   <data name="ErrorIncorrectUserName" xml:space="preserve">
     <value>الاسم الأول أو الأخير غير صحيح</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>لقد تجاوزت حد الدعوات المسموح به</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>قم بإضافة عنوان IP واحد مسموح به على الأقل.</value>
   </data>
   <data name="ErrorIpSecurity" xml:space="preserve">
     <value>الوصول إلى البوابة مقيد</value>
@@ -699,6 +831,9 @@
   <data name="ErrorPasswordOnlyLatinLetters" xml:space="preserve">
     <value>أحرف لاتينية فقط</value>
   </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>الدفع مطلوب</value>
+  </data>
   <data name="ErrorRequestLimitExceeded" xml:space="preserve">
     <value>تم تجاوز حد الطلب</value>
   </data>
@@ -708,11 +843,53 @@
   <data name="ErrorTenantTooShortFormat" xml:space="preserve">
     <value>يجب أن يكون طول اسم المجال بين {0} و {1} حرف.</value>
   </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>فشلت محاولات تسجيل الدخول. يرحى المحاولة لاحقاً</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>أضف على الأقل نطاقًا موثوقًا واحدًا.</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>تعطيل المستخدم</value>
+  </data>
   <data name="ErrorUserNotFound" xml:space="preserve">
     <value>لا يمكن العثور على اسم المستخدم</value>
   </data>
   <data name="ErrorUserNotFoundByEmail" xml:space="preserve">
     <value>لا يمكن العثور على المستخدم صاحب البريد الالكتروني "{0}"</value>
+  </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>تعذّر الوصول إلى رابط Webhook لأن طلب HEAD لم يُرجِع رمز الحالة 200.</value>
+  </data>
+  <data name="ErrorWebPluginArchive" xml:space="preserve">
+    <value>أرشيف الاضافة خاطئ</value>
+  </data>
+  <data name="ErrorWebPluginExist" xml:space="preserve">
+    <value>الاضافة موجودة بالفعل</value>
+  </data>
+  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
+    <value>ملحق الملف خاطئ</value>
+  </data>
+  <data name="ErrorWebPluginFileSize" xml:space="preserve">
+    <value>حجم الملف يتجاوز الحد</value>
+  </data>
+  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
+    <value>يحظر استخدام المكونات الإضافية للنظام</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>عدد الإضافات يتجاوز الحد المسموح به</value>
+  </data>
+  <data name="ErrorWebPluginName" xml:space="preserve">
+    <value>اسم الاضافة غير صحيح</value>
+  </data>
+  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
+    <value>لا يوجد ملف إدخال</value>
+  </data>
+  <data name="ErrorWebPluginNotFound" xml:space="preserve">
+    <value>لم يتم العثور على الاضافة</value>
+  </data>
+  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
+    <value>إلى العديد من ملفات الإدخال</value>
   </data>
   <data name="EuServerRegion" xml:space="preserve">
     <value>منطقة أوروبا (فرانكفورت)</value>
@@ -891,6 +1068,9 @@
   <data name="MessageEmailChangeInstuctionsSentOnEmail" xml:space="preserve">
     <value>تم إرسال تعليمات تغيير البريد الإلكتروني بنجاح</value>
   </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>تم إرسال تعليمات تغيير كلمة المرور إلى عنوان البريد الإلكتروني {0}.</value>
+  </data>
   <data name="MessageYourPasswordSendedToEmail" xml:space="preserve">
     <value>إذا كان هناك مستخدم يحمل البريد الإلكتروني {0}، فقد تم إرسال تعليمات تغيير كلمة المرور إلى عنوان البريد الإلكتروني هذا.</value>
   </data>
@@ -909,11 +1089,20 @@
   <data name="PortalSecurity" xml:space="preserve">
     <value>الوصول للبوابة</value>
   </data>
+  <data name="QuotaGreaterPortalError" xml:space="preserve">
+    <value>فشل تعيين الحصة النسبية للذاكرة - الحصة النسبية للذاكرة التي قمت بتعيينها أكبر من حصة المداخل.</value>
+  </data>
   <data name="ReassignDataRemoveUserError" xml:space="preserve">
     <value>لم تكتمل عملية إعادة تخصيص البيانات لـ {0}.</value>
   </data>
   <data name="RecaptchaInvalid" xml:space="preserve">
     <value>تحقق غير صالح</value>
+  </data>
+  <data name="RoomFreeSpaceException" xml:space="preserve">
+    <value>تم تجاوز حصة مساحة الغرفة</value>
+  </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>فشل في تحديد حصة لكل غرفة. القيمة المدخلة تتجاوز السعة الإجمالية لـ DocSpace.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>آسيا والمحيط الهادئ (سنغافورة)</value>
@@ -957,23 +1146,38 @@
   <data name="SuccessfullySentNotificationDeleteUserInfoMessage" xml:space="preserve">
     <value>تم إرسال تعليمات بحذف ملفك الشخصي إلى عنوان البريد الإلكتروني {0}</value>
   </data>
-  <data name="Tariffs_admin" xml:space="preserve">
-    <value>تجاري</value>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>يجب ألا يتجاوز عدد وكلاء الذكاء الاصطناعي {0}</value>
   </data>
-  <data name="Tariffs_adminyear" xml:space="preserve">
-    <value>تجاري</value>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>أدوات الذكاء الاصطناعي</value>
   </data>
-  <data name="Tariffs_startup" xml:space="preserve">
-    <value>شركة ناشئة</value>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>قوموا بتمكين ميزات الذكاء الاصطناعي في DocSpace الخاص بكم لتعزيز الإنتاجية.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>تتبع عمليات تسجيل الدخول والإجراءات</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>دعم</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>تمكين النسخ الاحتياطية لـ DocSpace الخاص بك. سيتم تحصيل التكاليف تلقائيًا.</value>
+  </data>
+  <data name="TariffsFeature_customization" xml:space="preserve">
+    <value>العلامة التجارية والتخصيص</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>الحد الأقصى لحجم الملف</value>
   </data>
   <data name="TariffsFeature_file_size_exception" xml:space="preserve">
     <value>لا ينبغي أن يتجاوز حجم الملف {0}</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} نسخ احتياطية مجانية شهريًا</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>يجب ألا يتجاوز عدد النسخ الاحتياطية المجانية {0} خلال شهر واحد</value>
   </data>
   <data name="TariffsFeature_manager_exception" xml:space="preserve">
     <value>لا ينبغي أن يتجاوز عدد المسؤولين {0}</value>
@@ -993,16 +1197,37 @@
   <data name="TariffsFeature_sso" xml:space="preserve">
     <value>بوابة الدخول الموحد</value>
   </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>حصص التخزين والإحصائيات</value>
+  </data>
+  <data name="TariffsFeature_thirdparty" xml:space="preserve">
+    <value>عمليات دمج الجهات الخارجية</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} لكل مسؤول إمكانية إضافة مساحة عند الطلب</value>
+  </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>لا ينبغي أن يتجاوز حجم التخزين المستخدم {0}</value>
   </data>
   <data name="TariffsFeature_total_size_price_count" xml:space="preserve">
     <value>مساحة التخزين</value>
   </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>مساحة تخزين إضافية على القرص</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>اضبط مساحة التخزين على الكمية التي تحتاجها بالضبط.</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>تمت إضافة المشرفين:</value>
+  </data>
   <data name="TariffsFeature_used_room" xml:space="preserve">
     <value>الغرف:</value>
   </data>
   <data name="TariffsFeature_used_total_size" xml:space="preserve">
+    <value>مساحة التخزين المستخدمة:</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
     <value>مساحة التخزين المستخدمة:</value>
   </data>
   <data name="TariffsFeature_used_usersInRoom" xml:space="preserve">
@@ -1011,17 +1236,41 @@
   <data name="TariffsFeature_users" xml:space="preserve">
     <value>عدد غير محدود من المستخدمين والضيوف</value>
   </data>
-  <data name="TariffsFeature_users_exception" xml:space="preserve">
-    <value>يجب ألا يتجاوز عدد المستخدمين {0}</value>
-  </data>
   <data name="TariffsFeature_usersInRoom" xml:space="preserve">
     <value>مستخدمون في الغرفة</value>
   </data>
   <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
     <value>يجب ألا يتجاوز عدد المستخدمين في الغرفة {0}</value>
   </data>
-  <data name="TariffsFeature_customization" xml:space="preserve">
-    <value>العلامة التجارية والتخصيص</value>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>عدد المسؤولين يتجاوز الحد المسموح به: {0}/{1}.</value>
+  </data>
+  <data name="TariffsFeature_users_exception" xml:space="preserve">
+    <value>يجب ألا يتجاوز عدد المستخدمين {0}</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>بحث الويب بالذكاء الاصطناعي</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>أضيفوا أموالاً إلى محفظتكم لفتح بحث الويب بالذكاء الاصطناعي.</value>
+  </data>
+  <data name="Tariffs_admin" xml:space="preserve">
+    <value>تجاري</value>
+  </data>
+  <data name="Tariffs_adminyear" xml:space="preserve">
+    <value>تجاري</value>
+  </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>غير ربحية</value>
+  </data>
+  <data name="Tariffs_startup" xml:space="preserve">
+    <value>شركة ناشئة</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>لقد تم توصيل Telegram بنجاح لتلقي الإشعارات من DocSpace الخاص بكم.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>رمز غير صحيح</value>
@@ -1032,265 +1281,16 @@
   <data name="TfaTooMuchError" xml:space="preserve">
     <value>لقد أرسلت الكثير من الرسائل النصية. الرجاء معاودة المحاولة في وقت لاحق.</value>
   </data>
+  <data name="UserFreeSpaceException" xml:space="preserve">
+    <value>تم تجاوز حصة مساحة المستخدم</value>
+  </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>فشل في تحديد حصة لكل مستخدم. القيمة المدخلة تتجاوز السعة الإجمالية لـ DocSpace.</value>
+  </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>منطقة غرب الولايات المتحدة (أوريغون)</value>
   </data>
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>جديدنا</value>
-  </data>
-  <data name="TariffsFeature_thirdparty" xml:space="preserve">
-    <value>عمليات دمج الجهات الخارجية</value>
-  </data>
-  <data name="ChangePortalOwnerMsg" xml:space="preserve">
-    <value>تم ارسال رابط لتأكيد العملية إلى: البريد(عنوان بريد مالك البوابة).</value>
-  </data>
-  <data name="ConsumersZoomClientId" xml:space="preserve">
-    <value>معرف مستخدم الزووم</value>
-  </data>
-  <data name="ConsumersZoomClientSecret" xml:space="preserve">
-    <value>الرمز السري لمستخدم الزووم</value>
-  </data>
-  <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>تفعيل التطبيق لتسجيل الدخول للبوابة باستخدام حساب الزووم.</value>
-  </data>
-  <data name="ConsumersZoomInstruction" xml:space="preserve">
-    <value>قم بتمكين هذا التطبيق للسماح للمستخدمين بتسجيل الدخول إلى {LogoText} باستخدام حسابات الزووم الخاصة بهم.  {0}انتقل إلى موقع ويب Zoom Developers وأنشئ تطبيقًا جديدًا متكاملاً مع {LogoText}. أدخل البيانات التي تلقيتها أدناه:</value>
-  </data>
-  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
-    <value>فشلت محاولات تسجيل الدخول. يرحى المحاولة لاحقاً</value>
-  </data>
-  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
-    <value>لا يمكن حذف آخر مساحة وصول كاملة</value>
-  </data>
-  <data name="ErrorWebPluginArchive" xml:space="preserve">
-    <value>أرشيف الاضافة خاطئ</value>
-  </data>
-  <data name="ErrorWebPluginExist" xml:space="preserve">
-    <value>الاضافة موجودة بالفعل</value>
-  </data>
-  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
-    <value>ملحق الملف خاطئ</value>
-  </data>
-  <data name="ErrorWebPluginFileSize" xml:space="preserve">
-    <value>حجم الملف يتجاوز الحد</value>
-  </data>
-  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
-    <value>يحظر استخدام المكونات الإضافية للنظام</value>
-  </data>
-  <data name="ErrorWebPluginName" xml:space="preserve">
-    <value>اسم الاضافة غير صحيح</value>
-  </data>
-  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
-    <value>لا يوجد ملف إدخال</value>
-  </data>
-  <data name="ErrorWebPluginNotFound" xml:space="preserve">
-    <value>لم يتم العثور على الاضافة</value>
-  </data>
-  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
-    <value>إلى العديد من ملفات الإدخال</value>
-  </data>
-  <data name="QuotaGreaterPortalError" xml:space="preserve">
-    <value>فشل تعيين الحصة النسبية للذاكرة - الحصة النسبية للذاكرة التي قمت بتعيينها أكبر من حصة المداخل.</value>
-  </data>
-  <data name="RoomFreeSpaceException" xml:space="preserve">
-    <value>تم تجاوز حصة مساحة الغرفة</value>
-  </data>
-  <data name="UserFreeSpaceException" xml:space="preserve">
-    <value>تم تجاوز حصة مساحة المستخدم</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>تمت إضافة المشرفين:</value>
-  </data>
-  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
-    <value>لقد تجاوزت حد الدعوات المسموح به</value>
-  </data>
-  <data name="ErrorUserDisabled" xml:space="preserve">
-    <value>تعطيل المستخدم</value>
-  </data>
-  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
-    <value>تم إرسال تعليمات تغيير كلمة المرور إلى عنوان البريد الإلكتروني {0}.</value>
-  </data>
-  <data name="ErrorEmailLinked" xml:space="preserve">
-    <value>تم إرفاق هذا البريد الإلكتروني للمستخدم {0} كمزود طرف ثالث</value>
-  </data>
-  <data name="TariffsFeature_statistic" xml:space="preserve">
-    <value>حصص التخزين والإحصائيات</value>
-  </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} لكل مسؤول إمكانية إضافة مساحة عند الطلب</value>
-  </data>
-  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>فشل في تحديد حصة لكل غرفة. القيمة المدخلة تتجاوز السعة الإجمالية لـ DocSpace.</value>
-  </data>
-  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>فشل في تحديد حصة لكل مستخدم. القيمة المدخلة تتجاوز السعة الإجمالية لـ DocSpace.</value>
-  </data>
-  <data name="ErrorTrustedMailDomain" xml:space="preserve">
-    <value>أضف على الأقل نطاقًا موثوقًا واحدًا.</value>
-  </data>
-  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
-    <value>عدد المسؤولين يتجاوز الحد المسموح به: {0}/{1}.</value>
-  </data>
-  <data name="ErrorIpRestriction" xml:space="preserve">
-    <value>قم بإضافة عنوان IP واحد مسموح به على الأقل.</value>
-  </data>
-  <data name="Tariffs_nonprofit" xml:space="preserve">
-    <value>غير ربحية</value>
-  </data>
-  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
-    <value>تعذّر الوصول إلى رابط Webhook لأن طلب HEAD لم يُرجِع رمز الحالة 200.</value>
-  </data>
-  <data name="ErrorGroupNotFound" xml:space="preserve">
-    <value>لم يتم العثور على المجموعة</value>
-  </data>
-  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
-    <value>مساحة تخزين إضافية على القرص</value>
-  </data>
-  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
-    <value>اضبط مساحة التخزين على الكمية التي تحتاجها بالضبط.</value>
-  </data>
-  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
-    <value>مساحة التخزين المستخدمة:</value>
-  </data>
-  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
-    <value>مصداقية</value>
-  </data>
-  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
-    <value>عملة</value>
-  </data>
-  <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>التاريخ</value>
-  </data>
-  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
-    <value>كمية</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
-    <value>مساحة القرص</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
-    <value>تعبئة الرصيد</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
-    <value>وحدة القياس</value>
-  </data>
-  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
-    <value>تقرير عمليات العملاء ({0}-{1})</value>
-  </data>
-  <data name="AutoRenewal" xml:space="preserve">
-    <value>التجديد التلقائي</value>
-  </data>
-  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
-    <value>يجب ألا يتجاوز عدد النسخ الاحتياطية المجانية {0} خلال شهر واحد</value>
-  </data>
-  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
-    <value>تمكين النسخ الاحتياطية لـ DocSpace الخاص بك. سيتم تحصيل التكاليف تلقائيًا.</value>
-  </data>
-  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
-    <value>دعم</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>دعم</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
-    <value>دعم</value>
-  </data>
-  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
-    <value>الخصم</value>
-  </data>
-  <data name="AccountingCustomerOperationContact" xml:space="preserve">
-    <value>اتصال</value>
-  </data>
-  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
-    <value>تاريخ المعاملات</value>
-  </data>
-  <data name="AutoTopUp" xml:space="preserve">
-    <value>التعبئة التلقائية</value>
-  </data>
-  <data name="TariffsFeature_free_backup" xml:space="preserve">
-    <value>{0} نسخ احتياطية مجانية شهريًا</value>
-  </data>
-  <data name="ErrorPaymentRequired" xml:space="preserve">
-    <value>الدفع مطلوب</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
-    <value>GB</value>
-  </data>
-  <data name="AccountingCustomerOperationType" xml:space="preserve">
-    <value>نوع</value>
-  </data>
-  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
-    <value>تفاصيل</value>
-  </data>
-  <data name="ConsumersWeixin" xml:space="preserve">
-    <value>WeChat</value>
-  </data>
-  <data name="ConsumersWeixinClientId" xml:space="preserve">
-    <value>معرف العميل</value>
-  </data>
-  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
-    <value>مفتاح العميل السري</value>
-  </data>
-  <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>تمكين التطبيق من تسجيل الدخول إلى البوابة باستخدام حساب WeChat.</value>
-  </data>
-  <data name="ConsumersWeixinInstruction" xml:space="preserve">
-    <value>تمكين التطبيق من تسجيل الدخول إلى البوابة باستخدام حساب WeChat.</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
-    <value>التاريخ</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
-    <value>البريد الإلكتروني</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
-    <value>الاسم الأول</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
-    <value>المعرف</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
-    <value>اسم العائلة</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
-    <value>حصص خدمة المستندات ({0})</value>
-  </data>
-  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
-    <value>عدد الإضافات يتجاوز الحد المسموح به</value>
-  </data>
-  <data name="TelegramOnGenericError" xml:space="preserve">
-    <value>حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.</value>
-  </data>
-  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>لقد تم توصيل Telegram بنجاح لتلقي الإشعارات من DocSpace الخاص بكم.</value>
-  </data>
-  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
-    <value>التحويل المتجهي (Vectorization)</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
-    <value>الرموز (Tokens)</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
-    <value>أدوات الذكاء الاصطناعي</value>
-  </data>
-  <data name="AiAgentFreeSpaceException" xml:space="preserve">
-    <value>تم تجاوز حصة مساحة وكيل الذكاء الاصطناعي</value>
-  </data>
-  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>فشل تعيين الحصة لكل وكيل ذكاء اصطناعي. القيمة المدخلة أكبر من إجمالي تخزين DocSpace.</value>
-  </data>
-  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
-    <value>يجب ألا يتجاوز عدد وكلاء الذكاء الاصطناعي {0}</value>
-  </data>
-  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>أدوات الذكاء الاصطناعي</value>
-  </data>
-  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>قوموا بتمكين ميزات الذكاء الاصطناعي في DocSpace الخاص بكم لتعزيز الإنتاجية.</value>
-  </data>
-  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
-    <value>بحث الويب بالذكاء الاصطناعي</value>
-  </data>
-  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
-    <value>أضيفوا أموالاً إلى محفظتكم لفتح بحث الويب بالذكاء الاصطناعي.</value>
   </data>
 </root>

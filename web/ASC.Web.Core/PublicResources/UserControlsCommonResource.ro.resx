@@ -126,6 +126,9 @@
   <data name="LicenseKeyNotFound" xml:space="preserve">
     <value>Trebuie introdusă o cheie de licență</value>
   </data>
+  <data name="LicenseTypeNotCorrect" xml:space="preserve">
+    <value>Conflict de licențe. Asigurați-vă că aţi instalat o ediție corectă de {0} DocSpace (Enterprise sau Dezvoltator). Dacă aveți întrebări, nu ezitați să contactați managerul de vânzări al dvs.</value>
+  </data>
   <data name="NewDocument" xml:space="preserve">
     <value>Document nou</value>
   </data>
@@ -140,8 +143,5 @@
   </data>
   <data name="UnknownLastName" xml:space="preserve">
     <value>Nume</value>
-  </data>
-  <data name="LicenseTypeNotCorrect" xml:space="preserve">
-    <value>Conflict de licențe. Asigurați-vă că aţi instalat o ediție corectă de {0} DocSpace (Enterprise sau Dezvoltator). Dacă aveți întrebări, nu ezitați să contactați managerul de vânzări al dvs.</value>
   </data>
 </root>

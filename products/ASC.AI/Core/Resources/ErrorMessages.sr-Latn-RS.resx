@@ -120,6 +120,9 @@
   <data name="AiSettingsAccessDenied" xml:space="preserve">
     <value>Nemate dozvolu da upravljate AI podešavanjima</value>
   </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>Nije moguće obraditi fajlove: {0}. Fajlovi mogu biti oštećeni ili šifrovani</value>
+  </data>
   <data name="ChatAccessDenied" xml:space="preserve">
     <value>Nemate dozvolu da koristite čet</value>
   </data>
@@ -170,8 +173,5 @@
   </data>
   <data name="UnavailableServers" xml:space="preserve">
     <value>MCP serveri nisu dostupni: {0}. Proverite podešavanja veze</value>
-  </data>
-  <data name="AttachmentProcessFailed" xml:space="preserve">
-    <value>Nije moguće obraditi fajlove: {0}. Fajlovi mogu biti oštećeni ili šifrovani</value>
   </data>
 </root>

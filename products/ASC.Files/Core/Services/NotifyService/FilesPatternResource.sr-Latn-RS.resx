@@ -117,6 +117,18 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>Proveri spremne formulare</value>
+  </data>
+  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
+    <value>Novi dokument "$DocumentTitle" je kreiran u prostoriji "$RoomTitle"</value>
+  </data>
+  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
+    <value>Nove datoteke su otpremljene u prostoriju "$RoomTitle" ($Count)</value>
+  </data>
+  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
+    <value>Nova datoteka "$DocumentTitle" je otpremljena u prostoriju "$RoomTitle"</value>
+  </data>
   <data name="pattern_DocuSignComplete" xml:space="preserve">
     <value>h1. Svi potpisnici završili $DocumentTitle
 
@@ -126,6 +138,99 @@ Ovo je email notifikacija da vas obavesti da su svi potpisnici završili "$Docum
     <value>h1. $Message: $DocumentTitle
 
 Prijavi se na svoj DocuSign nalog za više informacija.</value>
+  </data>
+  <data name="pattern_EditorMentions" xml:space="preserve">
+    <value>h1. $__AuthorName vas je pomenuo u komentaru dokumenta
+
+$__AuthorName vas je pomenuo u komentaru "$DocumentTitle":"$DocumentURL" dokumenta u sobi "$RoomTitle":"$RoomURL":
+
+$Message</value>
+  </data>
+  <data name="pattern_EditorMentions_push" xml:space="preserve">
+    <value>$ToUserName vas je pomenuo u dokumentu $DocumentTitle</value>
+  </data>
+  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
+    <value>Nova fascikla "$FolderTitle" je kreirana u prostoriji "$RoomTitle"</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. Formular $Message je popunjen
+ 
+Novi formular "$DocumentTitle":"$DocumentURL" je popunjen u prostoriji "$RoomTitle":"$RoomURL"
+ 
+Podnosilac formulara: "$FromUserName":"$FromUserLink"
+ 
+$OrangeButton
+
+&amp;nbsp;</value>
+  </data>
+  <data name="pattern_FormStartedFilling" xml:space="preserve">
+    <value>
+      Obaveštenje o aktivnosti. "$FromUserName":"$FromUserLink" je započeo popunjavanje obrasca: "$DocumentTitle":"$DocumentURL" u prostoriji: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. Popunili ste formular $Message
+ 
+Popunili ste formular "$DocumentTitle":"$DocumentURL" u prostoriji "$RoomTitle":"$RoomURL"
+ 
+Menadžer: "$ToUserName":"$ToUserLink"
+ 
+$OrangeButton
+
+&amp;nbsp;</value>
+  </data>
+  <data name="pattern_FormSubmitted_push" xml:space="preserve">
+    <value>Obrazac "$DocumentTitle" je popunjen u prostoriji "$RoomTitle"</value>
+  </data>
+  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+    <value>
+      Obaveštenje o aktivnosti. Obrazac "$DocumentTitle":"$DocumentURL" je potpuno popunjen u prostoriji: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
+    <value>Pozvani ste u sobu "$RoomTitle"</value>
+  </data>
+  <data name="pattern_MailMergeEnd" xml:space="preserve">
+    <value>h1. Slanje završeno
+
+Ovo je email notifikacija da vas obavesti da ste tražili slanje $MailsCount poruka i proces je sada kompletan. $Message
+
+Uspešno poslate mail poruke sada mogu biti pronađene u vašem "Poslato":"$__VirtualRootPath/addons/mail/#sent" folderu Mail modula.</value>
+  </data>
+  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
+    <value>$FromUserName je premestio prostoriju "$RoomTitle" u arhivu</value>
+  </data>
+  <data name="pattern_RoomRemoved" xml:space="preserve">
+    <value>h1. $__AuthorName je izbrisao sobu
+
+$__AuthorName je izbrisao sobu: $RoomTitle</value>
+  </data>
+  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
+    <value>Vaša uloga u prostoriji "$RoomTitle" je promenjena u "$RoomRole"</value>
+  </data>
+  <data name="pattern_ShareDocument" xml:space="preserve">
+    <value>h1. Pristup dozvoljen dokumentu: "$DocumentTitle":"$DocumentURL"
+
+$__DateTime "$__AuthorName":"$__AuthorUrl" vam je dozvolio pristup "$DocumentTitle":"$DocumentURL" dokumentu sa sledećim pravima pristupa: "$AccessRights". 
+
+$Message</value>
+  </data>
+  <data name="pattern_ShareFolder" xml:space="preserve">
+    <value>h1. Pristup dozvoljen folderu: "$DocumentTitle":"$DocumentURL"
+
+$__DateTime "$__AuthorName":"$__AuthorUrl" vam je dozvolio pristup "$DocumentTitle":"$DocumentURL" folderu sa sledećim pravima pristupa: "$AccessRights". 
+
+$Message</value>
+  </data>
+  <data name="pattern_StoppedFormFilling" xml:space="preserve">
+    <value>
+      Obaveštenje o aktivnosti. "$FromUserName":"$FromUserLink" je prekinuo popunjavanje obrasca: "$DocumentTitle":"$DocumentURL" u prostoriji: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_YourTurnFormFilling" xml:space="preserve">
+    <value>
+       Obaveštenje o aktivnosti. Na vama je red! Potrebno je popunjavanje obrasca: "$DocumentTitle":"$DocumentURL" u prostoriji: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
   </data>
   <data name="subject_DocuSignComplete" xml:space="preserve">
     <value>Dokumenti. Svi potpisnici završili $DocumentTitle</value>
@@ -144,6 +249,18 @@ Prijavi se na svoj DocuSign nalog za više informacija.</value>
   </data>
   <data name="subject_EditorMentions" xml:space="preserve">
     <value>DocSpace notifikacija. Spomenuto u dokumentu</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>DocSpace notifikacija. Formular je popunjen</value>
+  </data>
+  <data name="subject_FormStartedFilling" xml:space="preserve">
+    <value>Obaveštenje iz DocSpace-a.</value>
+  </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>DocSpace notifikacija. Formular je popunjen</value>
+  </data>
+  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
+    <value>Obaveštenje iz DocSpace-a.</value>
   </data>
   <data name="subject_MailMergeEnd" xml:space="preserve">
     <value>Dokumenti. Slanje je završeno.</value>
@@ -175,127 +292,10 @@ Prijavi se na svoj DocuSign nalog za više informacija.</value>
   <data name="subject_ShareFolder_tg" xml:space="preserve">
     <value>Dokumenti. Pristup dozvoljen folderu: [$DocumentTitle]($DocumentURL)</value>
   </data>
-  <data name="pattern_EditorMentions" xml:space="preserve">
-    <value>h1. $__AuthorName vas je pomenuo u komentaru dokumenta
-
-$__AuthorName vas je pomenuo u komentaru "$DocumentTitle":"$DocumentURL" dokumenta u sobi "$RoomTitle":"$RoomURL":
-
-$Message</value>
-  </data>
-  <data name="pattern_MailMergeEnd" xml:space="preserve">
-    <value>h1. Slanje završeno
-
-Ovo je email notifikacija da vas obavesti da ste tražili slanje $MailsCount poruka i proces je sada kompletan. $Message
-
-Uspešno poslate mail poruke sada mogu biti pronađene u vašem "Poslato":"$__VirtualRootPath/addons/mail/#sent" folderu Mail modula.</value>
-  </data>
-  <data name="pattern_ShareDocument" xml:space="preserve">
-    <value>h1. Pristup dozvoljen dokumentu: "$DocumentTitle":"$DocumentURL"
-
-$__DateTime "$__AuthorName":"$__AuthorUrl" vam je dozvolio pristup "$DocumentTitle":"$DocumentURL" dokumentu sa sledećim pravima pristupa: "$AccessRights". 
-
-$Message</value>
-  </data>
-  <data name="pattern_ShareFolder" xml:space="preserve">
-    <value>h1. Pristup dozvoljen folderu: "$DocumentTitle":"$DocumentURL"
-
-$__DateTime "$__AuthorName":"$__AuthorUrl" vam je dozvolio pristup "$DocumentTitle":"$DocumentURL" folderu sa sledećim pravima pristupa: "$AccessRights". 
-
-$Message</value>
-  </data>
-  <data name="pattern_RoomRemoved" xml:space="preserve">
-    <value>h1. $__AuthorName je izbrisao sobu
-
-$__AuthorName je izbrisao sobu: $RoomTitle</value>
-  </data>
-  <data name="button_CheckReadyForms" xml:space="preserve">
-    <value>Proveri spremne formulare</value>
-  </data>
-  <data name="pattern_FormReceived" xml:space="preserve">
-    <value>h1. Formular $Message je popunjen
- 
-Novi formular "$DocumentTitle":"$DocumentURL" je popunjen u prostoriji "$RoomTitle":"$RoomURL"
- 
-Podnosilac formulara: "$FromUserName":"$FromUserLink"
- 
-$OrangeButton
-
-&amp;nbsp;</value>
-  </data>
-  <data name="pattern_FormSubmitted" xml:space="preserve">
-    <value>h1. Popunili ste formular $Message
- 
-Popunili ste formular "$DocumentTitle":"$DocumentURL" u prostoriji "$RoomTitle":"$RoomURL"
- 
-Menadžer: "$ToUserName":"$ToUserLink"
- 
-$OrangeButton
-
-&amp;nbsp;</value>
-  </data>
-  <data name="subject_FormReceived" xml:space="preserve">
-    <value>DocSpace notifikacija. Formular je popunjen</value>
-  </data>
-  <data name="subject_FormSubmitted" xml:space="preserve">
-    <value>DocSpace notifikacija. Formular je popunjen</value>
-  </data>
-  <data name="subject_FormStartedFilling" xml:space="preserve">
-    <value>Obaveštenje iz DocSpace-a.</value>
-  </data>
-  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
-    <value>Obaveštenje iz DocSpace-a.</value>
-  </data>
   <data name="subject_StoppedFormFilling" xml:space="preserve">
     <value>Obaveštenje iz DocSpace-a.</value>
   </data>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
     <value>Obaveštenje iz DocSpace-a.</value>
-  </data>
-  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
-    <value>Novi dokument "$DocumentTitle" je kreiran u prostoriji "$RoomTitle"</value>
-  </data>
-  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
-    <value>Nove datoteke su otpremljene u prostoriju "$RoomTitle" ($Count)</value>
-  </data>
-  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
-    <value>Nova datoteka "$DocumentTitle" je otpremljena u prostoriju "$RoomTitle"</value>
-  </data>
-  <data name="pattern_EditorMentions_push" xml:space="preserve">
-    <value>$ToUserName vas je pomenuo u dokumentu $DocumentTitle</value>
-  </data>
-  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
-    <value>Nova fascikla "$FolderTitle" je kreirana u prostoriji "$RoomTitle"</value>
-  </data>
-  <data name="pattern_FormStartedFilling" xml:space="preserve">
-    <value>
-      Obaveštenje o aktivnosti. "$FromUserName":"$FromUserLink" je započeo popunjavanje obrasca: "$DocumentTitle":"$DocumentURL" u prostoriji: "$RoomTitle":"$RoomURL" — $__DateTime.
-    </value>
-  </data>
-  <data name="pattern_FormSubmitted_push" xml:space="preserve">
-    <value>Obrazac "$DocumentTitle" je popunjen u prostoriji "$RoomTitle"</value>
-  </data>
-  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
-    <value>
-      Obaveštenje o aktivnosti. Obrazac "$DocumentTitle":"$DocumentURL" je potpuno popunjen u prostoriji: "$RoomTitle":"$RoomURL" — $__DateTime.
-    </value>
-  </data>
-  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
-    <value>$FromUserName je premestio prostoriju "$RoomTitle" u arhivu</value>
-  </data>
-  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
-    <value>Vaša uloga u prostoriji "$RoomTitle" je promenjena u "$RoomRole"</value>
-  </data>
-  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
-    <value>Pozvani ste u sobu "$RoomTitle"</value>
-  </data>
-  <data name="pattern_StoppedFormFilling" xml:space="preserve">
-    <value>
-      Obaveštenje o aktivnosti. "$FromUserName":"$FromUserLink" je prekinuo popunjavanje obrasca: "$DocumentTitle":"$DocumentURL" u prostoriji: "$RoomTitle":"$RoomURL" — $__DateTime.
-    </value>
-  </data>
-  <data name="pattern_YourTurnFormFilling" xml:space="preserve">
-    <value>
-       Obaveštenje o aktivnosti. Na vama je red! Potrebno je popunjavanje obrasca: "$DocumentTitle":"$DocumentURL" u prostoriji: "$RoomTitle":"$RoomURL" — $__DateTime.
-    </value>
   </data>
 </root>

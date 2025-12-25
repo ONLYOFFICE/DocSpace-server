@@ -117,6 +117,18 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>Ստուգել պատրաստի ձևերը</value>
+  </data>
+  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
+    <value>Նոր փաստաթուղթ "$DocumentTitle"-ը ստեղծվել է "$RoomTitle" սենյակում</value>
+  </data>
+  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
+    <value>Նոր ֆայլ է ավելացվել սենյակում "$RoomTitle" ($Count)</value>
+  </data>
+  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
+    <value>Նոր ֆայլ "$DocumentTitle" վերբեռնվել է սենյակ "$RoomTitle"</value>
+  </data>
   <data name="pattern_DocuSignComplete" xml:space="preserve">
     <value>հ1. Բոլոր ստորագրողները լրացրել են $DocumentTitle
 
@@ -134,6 +146,50 @@ $__AuthorName նշել է ձեզ "$DocumentTitle":"$DocumentURL" փաստաթղ�
 
 $Message</value>
   </data>
+  <data name="pattern_EditorMentions_push" xml:space="preserve">
+    <value>$ToUserName նշել է ձեզ փաստաթղթում $DocumentTitle</value>
+  </data>
+  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
+    <value>Նոր պանակ "$FolderTitle" ստեղծվել է սենյակում "$RoomTitle"</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. $Message ձևը լրացված է
+
+Սենյակում լրացվում է նոր ձև՝ "$DocumentTitle":"$DocumentURL" "$RoomTitle":"$RoomURL"
+
+Ձևաթուղթ ներկայացնող՝ "$FromUserName":"$FromUserLink"
+
+$OrangeButton
+
+&amp;nbsp;</value>
+  </data>
+  <data name="pattern_FormStartedFilling" xml:space="preserve">
+    <value>
+      Գործունեության ծանուցում։ "$FromUserName":"$FromUserLink" սկսել է ձևի լրացման գործընթացը՝ "$DocumentTitle":"$DocumentURL" սենյակում՝ "$RoomTitle":"$RoomURL" — $__DateTime։
+    </value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. Դուք լրացրել եք ձևը $Message
+
+Դուք լրացրել եք ձևաթուղթը "$DocumentTitle":"$DocumentURL" սենյակում "$RoomTitle":"$RoomURL"
+
+Մենեջեր: "$ToUserName":"$ToUserLink"
+
+$OrangeButton
+
+&amp;nbsp;</value>
+  </data>
+  <data name="pattern_FormSubmitted_push" xml:space="preserve">
+    <value>Ձևը "$DocumentTitle" լրացվել է "$RoomTitle" սենյակում։</value>
+  </data>
+  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+    <value>
+      Գործունեության ծանուցում։ Ձևը "$DocumentTitle":"$DocumentURL" ամբողջությամբ լրացվել է "$RoomTitle":"$RoomURL" սենյակում — $__DateTime։
+    </value>
+  </data>
+  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
+    <value>Դուք հրավիրվել եք "$RoomTitle" սենյակ։</value>
+  </data>
   <data name="pattern_MailMergeEnd" xml:space="preserve">
     <value>հ1. Փոստի ուղարկումն ավարտված է
 
@@ -141,10 +197,16 @@ $Message</value>
 
 աջողությամբ ուղարկված փոստի հաղորդագրությունները կարելի է գտնել ձեր "Ուղարկված":"$__VirtualRootPath/addons/mail/#sent" Փոստի մոդուլի թղթապանակը.</value>
   </data>
+  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
+    <value>$FromUserName տեղափոխել է "$RoomTitle" արխիվ</value>
+  </data>
   <data name="pattern_RoomRemoved" xml:space="preserve">
     <value>h1. $__AuthorName ջնջել է սենյակ
 
 $__AuthorName ջնջել է սենյակ: $RoomTitle</value>
+  </data>
+  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
+    <value>Քո դերը սենյակում "$RoomTitle" փոխվել է "$RoomRole"</value>
   </data>
   <data name="pattern_ShareDocument" xml:space="preserve">
     <value>հ1. Փաստաթղթի մուտքը տրված է: "$DocumentTitle":"$DocumentURL"
@@ -159,6 +221,16 @@ $Message</value>
 $__DateTime "$__AuthorName":"$__AuthorUrl" Ձեզ տրամադրել է մուտք դեպի "$DocumentTitle":"$DocumentURL" թղթապանակ հետևյալ մուտքի իրավունքներով: "$AccessRights".
 
 $Message</value>
+  </data>
+  <data name="pattern_StoppedFormFilling" xml:space="preserve">
+    <value>
+      Գործունեության ծանուցում։ "$FromUserName":"$FromUserLink" դադարեցրել է ձևի լրացումը՝ "$DocumentTitle":"$DocumentURL" սենյակում՝ "$RoomTitle":"$RoomURL" — $__DateTime։
+    </value>
+  </data>
+  <data name="pattern_YourTurnFormFilling" xml:space="preserve">
+    <value>
+      Գործունեության ծանուցում։ Ձեր հերթն է։ Անհրաժեշտ է լրացնել ձևը՝ "$DocumentTitle":"$DocumentURL" սենյակում՝ "$RoomTitle":"$RoomURL" — $__DateTime։
+    </value>
   </data>
   <data name="subject_DocuSignComplete" xml:space="preserve">
     <value>Փաստաթղթեր. Բոլոր ստորագրողները լրացրել են $DocumentTitle</value>
@@ -177,6 +249,18 @@ $Message</value>
   </data>
   <data name="subject_EditorMentions" xml:space="preserve">
     <value>DocSpace ծանուցում. Նշված է փաստաթղթում</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>DocSpace ծանուցում՝ Ձևաթուղթը լրացված է</value>
+  </data>
+  <data name="subject_FormStartedFilling" xml:space="preserve">
+    <value>Դոկսպեյս ծանուցում</value>
+  </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>DocSpace ծանուցում՝ Ձևաթուղթը լրացված է</value>
+  </data>
+  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
+    <value>Դոկսպեյս ծանուցում</value>
   </data>
   <data name="subject_MailMergeEnd" xml:space="preserve">
     <value>Փաստաթղթեր. Փոստի ուղարկումն ավարտված է.</value>
@@ -207,90 +291,6 @@ $Message</value>
   </data>
   <data name="subject_ShareFolder_tg" xml:space="preserve">
     <value>Փաստաթղթեր. Մատչումը տրված է թղթապանակին: [$DocumentTitle]($DocumentURL)</value>
-  </data>
-  <data name="button_CheckReadyForms" xml:space="preserve">
-    <value>Ստուգել պատրաստի ձևերը</value>
-  </data>
-  <data name="pattern_FormReceived" xml:space="preserve">
-    <value>h1. $Message ձևը լրացված է
-
-Սենյակում լրացվում է նոր ձև՝ "$DocumentTitle":"$DocumentURL" "$RoomTitle":"$RoomURL"
-
-Ձևաթուղթ ներկայացնող՝ "$FromUserName":"$FromUserLink"
-
-$OrangeButton
-
-&amp;nbsp;</value>
-  </data>
-  <data name="pattern_FormSubmitted" xml:space="preserve">
-    <value>h1. Դուք լրացրել եք ձևը $Message
-
-Դուք լրացրել եք ձևաթուղթը "$DocumentTitle":"$DocumentURL" սենյակում "$RoomTitle":"$RoomURL"
-
-Մենեջեր: "$ToUserName":"$ToUserLink"
-
-$OrangeButton
-
-&amp;nbsp;</value>
-  </data>
-  <data name="subject_FormReceived" xml:space="preserve">
-    <value>DocSpace ծանուցում՝ Ձևաթուղթը լրացված է</value>
-  </data>
-  <data name="subject_FormSubmitted" xml:space="preserve">
-    <value>DocSpace ծանուցում՝ Ձևաթուղթը լրացված է</value>
-  </data>
-  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
-    <value>Նոր փաստաթուղթ "$DocumentTitle"-ը ստեղծվել է "$RoomTitle" սենյակում</value>
-  </data>
-  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
-    <value>Նոր ֆայլ է ավելացվել սենյակում "$RoomTitle" ($Count)</value>
-  </data>
-  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
-    <value>Նոր ֆայլ "$DocumentTitle" վերբեռնվել է սենյակ "$RoomTitle"</value>
-  </data>
-  <data name="pattern_EditorMentions_push" xml:space="preserve">
-    <value>$ToUserName նշել է ձեզ փաստաթղթում $DocumentTitle</value>
-  </data>
-  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
-    <value>Նոր պանակ "$FolderTitle" ստեղծվել է սենյակում "$RoomTitle"</value>
-  </data>
-  <data name="pattern_FormStartedFilling" xml:space="preserve">
-    <value>
-      Գործունեության ծանուցում։ "$FromUserName":"$FromUserLink" սկսել է ձևի լրացման գործընթացը՝ "$DocumentTitle":"$DocumentURL" սենյակում՝ "$RoomTitle":"$RoomURL" — $__DateTime։
-    </value>
-  </data>
-  <data name="pattern_FormSubmitted_push" xml:space="preserve">
-    <value>Ձևը "$DocumentTitle" լրացվել է "$RoomTitle" սենյակում։</value>
-  </data>
-  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
-    <value>
-      Գործունեության ծանուցում։ Ձևը "$DocumentTitle":"$DocumentURL" ամբողջությամբ լրացվել է "$RoomTitle":"$RoomURL" սենյակում — $__DateTime։
-    </value>
-  </data>
-  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
-    <value>Դուք հրավիրվել եք "$RoomTitle" սենյակ։</value>
-  </data>
-  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
-    <value>$FromUserName տեղափոխել է "$RoomTitle" արխիվ</value>
-  </data>
-  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
-    <value>Քո դերը սենյակում "$RoomTitle" փոխվել է "$RoomRole"</value>
-  </data>
-  <data name="pattern_StoppedFormFilling" xml:space="preserve">
-    <value>
-      Գործունեության ծանուցում։ "$FromUserName":"$FromUserLink" դադարեցրել է ձևի լրացումը՝ "$DocumentTitle":"$DocumentURL" սենյակում՝ "$RoomTitle":"$RoomURL" — $__DateTime։
-    </value>
-  </data>
-  <data name="pattern_YourTurnFormFilling" xml:space="preserve">
-    <value>
-      Գործունեության ծանուցում։ Ձեր հերթն է։ Անհրաժեշտ է լրացնել ձևը՝ "$DocumentTitle":"$DocumentURL" սենյակում՝ "$RoomTitle":"$RoomURL" — $__DateTime։
-    </value>
-  </data>
-  <data name="subject_FormStartedFilling" xml:space="preserve">
-    <value>Դոկսպեյս ծանուցում</value>
-  </data>
-  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
-    <value>Դոկսպեյս ծանուցում</value>
   </data>
   <data name="subject_StoppedFormFilling" xml:space="preserve">
     <value>Դոկսպեյս ծանուցում</value>
