@@ -37,17 +37,17 @@
     <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Hosting.Systemd" Version="10.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.1" />
-    <PackageVersion Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.14.0" />
+    <PackageVersion Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.15.0" />
     <PackageVersion Include="NLog.Targets.ElasticSearch" Version="7.7.0" />
     <PackageVersion Include="NLog.Web.AspNetCore" Version="5.5.0" />
-    <PackageVersion Include="OpenTelemetry" Version="1.13.1" />
-    <PackageVersion Include="OpenTelemetry.Api" Version="1.13.1" />
+    <PackageVersion Include="OpenTelemetry" Version="1.14.0" />
+    <PackageVersion Include="OpenTelemetry.Api" Version="1.14.0" />
     <PackageVersion Include="OpenTelemetry.Exporter.InfluxDB" Version="1.0.0-alpha.4" />
-    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.13.1" />
-    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.13.1" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.13.0" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.13.0" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.13.0" />
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.14.0" />
+    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.14.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.14.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.14.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.14.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Process" Version="1.10.0-beta.1" />
     <PackageVersion Include="RedisRateLimiting" Version="1.2.0" />
     <PackageVersion Include="RedisRateLimiting.AspNetCore" Version="1.2.0" />
@@ -58,9 +58,9 @@
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="9.0.6" />
     <PackageVersion Include="Swashbuckle.AspNetCore.Annotations" Version="9.0.6" />
     <PackageVersion Include="Swashbuckle.AspNetCore.SwaggerGen" Version="9.0.6" />
-    <PackageVersion Include="ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis" Version="2.4.0" />
-    <PackageVersion Include="ZiggyCreatures.FusionCache.OpenTelemetry" Version="2.4.0" />
-    <PackageVersion Include="ZiggyCreatures.FusionCache.Serialization.SystemTextJson" Version="2.4.0" />
+    <PackageVersion Include="ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis" Version="2.5.0" />
+    <PackageVersion Include="ZiggyCreatures.FusionCache.OpenTelemetry" Version="2.5.0" />
+    <PackageVersion Include="ZiggyCreatures.FusionCache.Serialization.SystemTextJson" Version="2.5.0" />
     <!-- Centralized from ASC.Common -->
     <PackageVersion Include="ARSoft.Tools.NetStandard.DXSdata" Version="1.0.0" />
     <PackageVersion Include="Autofac.Configuration" Version="7.0.0" />
@@ -80,20 +80,20 @@
     <PackageVersion Include="NLog.Targets.Syslog" Version="7.0.0" />
     <PackageVersion Include="NVelocity" Version="1.2.0" />
     <PackageVersion Include="protobuf-net" Version="3.2.56" />
-    <PackageVersion Include="Riok.Mapperly" Version="4.3.0" />
+    <PackageVersion Include="Riok.Mapperly" Version="4.3.1" />
     <PackageVersion Include="RabbitMQ.Client" Version="7.2.0" />
     <PackageVersion Include="StackExchange.Redis" Version="2.10.1" />
     <PackageVersion Include="StackExchange.Redis.Extensions.Core" Version="11.0.0" />
-    <PackageVersion Include="ZiggyCreatures.FusionCache" Version="2.4.0" />
+    <PackageVersion Include="ZiggyCreatures.FusionCache" Version="2.5.0" />
     <!-- Additional packages centralized from various projects -->
     <PackageVersion Include="Amazon.Extensions.S3.Encryption" Version="4.0.0" />
     <PackageVersion Include="Anthropic.SDK" Version="5.8.0" />
     <PackageVersion Include="Apache.NMS.AMQP" Version="2.4.0" />
-    <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.0.2" />
-    <PackageVersion Include="Aspire.Hosting.MySql" Version="13.0.2" />
+    <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.1.0" />
+    <PackageVersion Include="Aspire.Hosting.MySql" Version="13.1.0" />
     <PackageVersion Include="Aspire.Hosting.NodeJs" Version="9.5.2" />
-    <PackageVersion Include="Aspire.Hosting.RabbitMQ" Version="13.0.2" />
-    <PackageVersion Include="Aspire.Hosting.Redis" Version="13.0.0" />
+    <PackageVersion Include="Aspire.Hosting.RabbitMQ" Version="13.1.0" />
+    <PackageVersion Include="Aspire.Hosting.Redis" Version="13.1.0" />
     <PackageVersion Include="AspNetCore.HealthChecks.UI" Version="9.0.0" />
     <PackageVersion Include="AspNetCore.HealthChecks.UI.InMemory.Storage" Version="9.0.0" />
     <PackageVersion Include="AWSSDK.CloudFront" Version="4.0.10.4" />
@@ -111,12 +111,12 @@
     <PackageVersion Include="FirebaseAdmin" Version="3.4.0" />
     <PackageVersion Include="FluentAssertions" Version="7.0.0" />
     <PackageVersion Include="FolkerKinzel.VCards" Version="8.1.1" />
-    <PackageVersion Include="Google.Api.Gax" Version="4.12.1" />
-    <PackageVersion Include="Google.Api.Gax.Rest" Version="4.12.1" />
-    <PackageVersion Include="Google.Apis.Auth" Version="1.72.0" />
-    <PackageVersion Include="Google.Apis.Core" Version="1.72.0" />
-    <PackageVersion Include="Google.Apis.Drive.v3" Version="1.72.0.3938" />
-    <PackageVersion Include="Google.Apis.Storage.v1" Version="1.71.0.3920" />
+    <PackageVersion Include="Google.Api.Gax" Version="4.13.0" />
+    <PackageVersion Include="Google.Api.Gax.Rest" Version="4.13.0" />
+    <PackageVersion Include="Google.Apis.Auth" Version="1.73.0" />
+    <PackageVersion Include="Google.Apis.Core" Version="1.73.0" />
+    <PackageVersion Include="Google.Apis.Drive.v3" Version="1.73.0.3996" />
+    <PackageVersion Include="Google.Apis.Storage.v1" Version="1.73.0.3974" />
     <PackageVersion Include="Google.Cloud.Storage.V1" Version="4.13.0" />
     <PackageVersion Include="GoogleAuthenticator" Version="3.2.0" />
     <PackageVersion Include="Grpc" Version="2.46.6" />
@@ -135,8 +135,8 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.10" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.8" />
-    <PackageVersion Include="Microsoft.Extensions.AI" Version="10.1.0" />
-    <PackageVersion Include="Microsoft.Extensions.AI.Abstractions" Version="10.1.0" />
+    <PackageVersion Include="Microsoft.Extensions.AI" Version="10.1.1" />
+    <PackageVersion Include="Microsoft.Extensions.AI.Abstractions" Version="10.1.1" />
     <PackageVersion Include="Microsoft.Extensions.AI.OpenAI" Version="9.10.1-preview.1.25521.4" />
     <PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.CommandLine" Version="10.0.1" />
@@ -148,7 +148,7 @@
     <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.1" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.0" />
     <PackageVersion Include="Microsoft.OneDriveSDK" Version="2.1.0" />
-    <PackageVersion Include="Microsoft.SemanticKernel.Core" Version="1.67.1" />
+    <PackageVersion Include="Microsoft.SemanticKernel.Core" Version="1.68.0" />
     <PackageVersion Include="Microsoft.SharePoint.Client" Version="14.0.4762.1000" />
     <PackageVersion Include="ModelContextProtocol" Version="0.4.0-preview.3" />
     <PackageVersion Include="Moq" Version="4.18.4" />
@@ -172,9 +172,9 @@
     <PackageVersion Include="SkiaSharp.NativeAssets.Linux" Version="3.119.1" />
     <PackageVersion Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="3.119.1" />
     <PackageVersion Include="SkiaSharp.Svg" Version="1.60.0" />
-    <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
+    <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
     <PackageVersion Include="System.ServiceModel.Primitives" Version="10.0.652802" />
-    <PackageVersion Include="Telegram.Bot" Version="22.7.4" />
+    <PackageVersion Include="Telegram.Bot" Version="22.7.6" />
     <PackageVersion Include="Testcontainers" Version="4.8.1" />
     <PackageVersion Include="Testcontainers.MySql" Version="4.8.1" />
     <PackageVersion Include="Testcontainers.OpenSearch" Version="4.8.1" />

@@ -52,7 +52,6 @@ public class AuthenticationController(
     ProviderManager providerManager,
     AccountLinker accountLinker,
     CoreBaseSettings coreBaseSettings,
-    UserManagerWrapper userManagerWrapper,
     Signature signature,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     StudioSmsNotificationSettingsHelper studioSmsNotificationSettingsHelper,
@@ -675,68 +674,7 @@ public class AuthenticationController(
             throw;
         }
     }
-
-    private async Task<UserInfo> JoinByThirdPartyAccount(LoginProfile loginProfile)
-    {
-        if (string.IsNullOrEmpty(loginProfile.EMail))
-        {
-            throw new Exception(Resource.ErrorNotCorrectEmail);
-        }
-
-        var userInfo = await userManager.GetUserByEmailAsync(loginProfile.EMail);
-        if (!await userManager.UserExistsAsync(userInfo.Id))
-        {
-            var newUserInfo = ProfileToUserInfo(loginProfile);
-
-            try
-            {
-                await securityContext.AuthenticateMeWithoutCookieAsync(ASC.Core.Configuration.Constants.CoreSystem);
-                userInfo = await userManagerWrapper.AddUserAsync(newUserInfo, UserManagerWrapper.GeneratePassword());
-                await socketManager.AddGuestAsync(userInfo);
-            }
-            finally
-            {
-                securityContext.Logout();
-            }
-        }
-
-        await accountLinker.AddLinkAsync(userInfo.Id, loginProfile);
-
-        return userInfo;
-    }
-
-    private UserInfo ProfileToUserInfo(LoginProfile loginProfile)
-    {
-        if (string.IsNullOrEmpty(loginProfile.EMail))
-        {
-            throw new Exception(Resource.ErrorNotCorrectEmail);
-        }
-
-        var firstName = loginProfile.FirstName;
-        if (string.IsNullOrEmpty(firstName))
-        {
-            firstName = loginProfile.DisplayName;
-        }
-
-        var userInfo = new UserInfo
-        {
-            FirstName = string.IsNullOrEmpty(firstName) ? UserControlsCommonResource.UnknownFirstName : firstName,
-            LastName = string.IsNullOrEmpty(loginProfile.LastName) ? UserControlsCommonResource.UnknownLastName : loginProfile.LastName,
-            Email = loginProfile.EMail,
-            Title = string.Empty,
-            Location = string.Empty,
-            CultureName = coreBaseSettings.CustomMode ? "ru-RU" : Thread.CurrentThread.CurrentUICulture.Name,
-            ActivationStatus = EmployeeActivationStatus.Activated
-        };
-
-        var gender = loginProfile.Gender;
-        if (!string.IsNullOrEmpty(gender))
-        {
-            userInfo.Sex = gender == "male";
-        }
-
-        return userInfo;
-    }
+    
 
     private async Task<(bool, Guid)> TryGetUserByHashAsync(string hashId)
     {

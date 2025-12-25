@@ -24,13 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Notify.Patterns;
+namespace ASC.Web.Core.Log;
 
-public interface IPattern
+internal static partial class StudioNotifyWorkerLogger
 {
-    Func<string> Subject { get; }
-    Func<string> Body { get; }
-    Type Styler { get; }
+    [LoggerMessage(LogLevel.Warning, "NotifyActionListType {notifyActionListType} not found")]
+    public static partial void LogNotifyNotFound(this ILogger<StudioNotifyWorker> logger, string notifyActionListType);
     
-    string ContentType => "html";
+    [LoggerMessage(LogLevel.Warning, "NotifyActionListType {notifyActionListType} with id {id} not found")]
+    public static partial void LogNotifyNotFound(this ILogger<StudioNotifyWorker> logger, string notifyActionListType, string id);
 }

@@ -37,7 +37,6 @@ public abstract class Migrator(
     GlobalFolderHelper globalFolderHelper,
     IServiceProvider serviceProvider,
     IDaoFactory daoFactory,
-    EntryManager entryManager,
     MigrationLogger migrationLogger,
     AuthContext authContext,
     DisplayUserSettingsHelper displayUserSettingsHelper,
@@ -54,7 +53,6 @@ public abstract class Migrator(
     private GlobalFolderHelper GlobalFolderHelper { get; } = globalFolderHelper;
     private IServiceProvider ServiceProvider { get; } = serviceProvider;
     private IDaoFactory DaoFactory { get; } = daoFactory;
-    private EntryManager EntryManager { get; } = entryManager;
     protected MigrationLogger MigrationLogger { get; } = migrationLogger;
     private AuthContext AuthContext { get; } = authContext;
     protected DisplayUserSettingsHelper DisplayUserSettingsHelper { get; } = displayUserSettingsHelper;

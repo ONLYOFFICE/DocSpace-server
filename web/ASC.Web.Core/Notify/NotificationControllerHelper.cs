@@ -30,7 +30,8 @@ public class NotificationControllerHelper(
     StudioNotifyHelper studioNotifyHelper,
     AuthContext authContext,
     BadgesSettingsHelper badgesSettingsHelper,
-    NotificationChannelsHelper notificationChannelsHelper)
+    NotificationChannelsHelper notificationChannelsHelper,
+    Actions actions)
 {
     private readonly Guid _userId = authContext.CurrentAccount.ID;
 
@@ -48,13 +49,13 @@ public class NotificationControllerHelper(
             case NotificationType.Badges:
                 return await badgesSettingsHelper.GetEnabledForCurrentUserAsync();
             case NotificationType.RoomsActivity:
-                isEnabled = await studioNotifyHelper.IsSubscribedToNotifyAsync(_userId, Actions.RoomsActivity);
+                isEnabled = await studioNotifyHelper.IsSubscribedToNotifyAsync(_userId, actions.RoomsActivity);
                 return isEnabled;
             case NotificationType.DailyFeed:
-                isEnabled = await studioNotifyHelper.IsSubscribedToNotifyAsync(_userId, Actions.SendWhatsNew);
+                isEnabled = await studioNotifyHelper.IsSubscribedToNotifyAsync(_userId, actions.SendWhatsNew);
                 return isEnabled;
             case NotificationType.UsefullTips:
-                isEnabled = await studioNotifyHelper.IsSubscribedToNotifyAsync(_userId, Actions.PeriodicNotify);
+                isEnabled = await studioNotifyHelper.IsSubscribedToNotifyAsync(_userId, actions.PeriodicNotify);
                 return isEnabled;
             default:
                 throw new Exception("Incorrect parameters");
@@ -69,13 +70,13 @@ public class NotificationControllerHelper(
                 await badgesSettingsHelper.SetEnabledForCurrentUserAsync(isEnabled);
                 break;
             case NotificationType.RoomsActivity:
-                await studioNotifyHelper.SubscribeToNotifyAsync(_userId, Actions.RoomsActivity, isEnabled);
+                await studioNotifyHelper.SubscribeToNotifyAsync(_userId, actions.RoomsActivity, isEnabled);
                 break;
             case NotificationType.DailyFeed:
-                await studioNotifyHelper.SubscribeToNotifyAsync(_userId, Actions.SendWhatsNew, isEnabled);
+                await studioNotifyHelper.SubscribeToNotifyAsync(_userId, actions.SendWhatsNew, isEnabled);
                 break;
             case NotificationType.UsefullTips:
-                await studioNotifyHelper.SubscribeToNotifyAsync(_userId, Actions.PeriodicNotify, isEnabled);
+                await studioNotifyHelper.SubscribeToNotifyAsync(_userId, actions.PeriodicNotify, isEnabled);
                 break;
         }
     }

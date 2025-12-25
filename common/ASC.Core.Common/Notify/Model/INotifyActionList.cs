@@ -24,13 +24,23 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Notify.Patterns;
+namespace ASC.Core.Common.Notify.Model;
 
-public interface IPattern
+public interface INotifyActionList
 {
-    Func<string> Subject { get; }
-    Func<string> Body { get; }
-    Type Styler { get; }
-    
-    string ContentType => "html";
+    INotifyAction GetById(string id)
+    {
+        var fields = GetType().GetFields(BindingFlags.Public | BindingFlags.Instance)
+            .Where(f => f.FieldType == typeof(INotifyAction));
+        
+        foreach (var field in fields)
+        {
+            var action = (INotifyAction)field.GetValue(this);
+            if (action?.ID == id)
+            {
+                return action;
+            }
+        }
+        return null;
+    }
 }
