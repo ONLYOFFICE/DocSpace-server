@@ -672,6 +672,12 @@ public class S3Storage(TempStream tempStream,
         };
 
         var response = await client.ListObjectsAsync(request);
+
+        if (response.S3Objects == null)
+        {
+            return;
+        }
+
         foreach (var s3Object in response.S3Objects)
         {
             await CopyFileAsync(client, s3Object.Key, s3Object.Key.Replace(srckey, dstkey), newDomain);
@@ -941,7 +947,7 @@ public class S3Storage(TempStream tempStream,
         var request = new ListObjectsRequest { BucketName = _bucket, Prefix = MakePath(domain, path) };
         var response = await client.ListObjectsAsync(request);
 
-        return response.S3Objects.Count > 0;
+        return response.S3Objects != null && response.S3Objects.Count > 0;
     }
 
     public override async Task DeleteDirectoryAsync(string domain, string path)
@@ -958,7 +964,7 @@ public class S3Storage(TempStream tempStream,
         using var client = GetClient();
         var request = new ListObjectsRequest { BucketName = _bucket, Prefix = MakePath(domain, path) };
         var response = await client.ListObjectsAsync(request);
-        if (response.S3Objects.Count > 0)
+        if (response.S3Objects != null && response.S3Objects.Count > 0)
         {
             return response.S3Objects[0].Size.GetValueOrDefault();
         }
@@ -1021,6 +1027,12 @@ public class S3Storage(TempStream tempStream,
         var request = new ListObjectsRequest { BucketName = _bucket, Prefix = srckey };
 
         var response = await client.ListObjectsAsync(request);
+
+        if (response.S3Objects == null)
+        {
+            return;
+        }
+
         foreach (var s3Object in response.S3Objects)
         {
             await CopyFileAsync(client, s3Object.Key, s3Object.Key.Replace(srckey, dstkey), newDomain);
@@ -1279,7 +1291,10 @@ public class S3Storage(TempStream tempStream,
         do
         {
             response = await client.ListObjectsAsync(request);
-            objects.AddRange(response.S3Objects.Where(entry => CheckKey(domain, entry.Key)));
+            if (response.S3Objects != null)
+            {
+                objects.AddRange(response.S3Objects.Where(entry => CheckKey(domain, entry.Key)));
+            }
             request.Marker = response.NextMarker;
         } while (response.IsTruncated.GetValueOrDefault());
         return objects;
