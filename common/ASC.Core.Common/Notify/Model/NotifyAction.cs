@@ -25,35 +25,24 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Common.IntegrationEvents.Events;
-using ASC.Core.Common.Notify.Model;
 
 namespace ASC.Notify.Model;
 
-public class NotifyAction(string id, INotifyActionList list) : INotifyAction
+public class NotifyAction(List<ITagValue> tags) : INotifyAction
 {
-    private readonly INotifyActionList _list = list;
-    public string ID { get; } = id ?? throw new ArgumentNullException(nameof(id));
-    public List<Pattern> Patterns { get; set; } = [];
-
+    public string ID { get; }
+    public virtual List<Pattern> Patterns { get; set; } = [];
+    
+    public List<ITagValue> Tags { get; set; } = tags;
+    
     public static implicit operator NotifyActionItem(NotifyAction cache)
     {
         return new NotifyActionItem
         {
-            Id = cache.ID,
-            NotifyActionListType = cache._list.GetType().FullName
+            NotifyActionType = cache.GetType().FullName
         };
     }
-
-    public override bool Equals(object obj)
-    {
-        return obj is INotifyAction a && a.ID == ID;
-    }
-
-    public override int GetHashCode()
-    {
-        return ID.GetHashCode();
-    }
-
+    
     public override string ToString()
     {
         return $"action: {ID}";

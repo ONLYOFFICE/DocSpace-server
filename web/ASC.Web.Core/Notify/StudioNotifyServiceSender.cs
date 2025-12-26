@@ -116,30 +116,28 @@ public partial class StudioNotifyWorker(
         }
 
         var client = workContext.RegisterClient(serviceProvider, studioNotifyHelper.NotifySource);
-        var type = Type.GetType(item.Action.NotifyActionListType);
-        if(type == null)
+        var actionType = Type.GetType(item.Action.NotifyActionType);
+        if(actionType == null)
         {
-            logger.LogNotifyNotFound(item.Action.NotifyActionListType);
+            logger.LogNotifyNotFound(item.Action.NotifyActionType);
             return;
         }
+        
 
-        var list = (INotifyActionList)serviceProvider.GetService(type);
-
-        var action = list?.GetById(item.Action.Id);
+        var action = (INotifyAction)serviceProvider.GetService(actionType);
         if (action == null)
         {
-            logger.LogNotifyNotFound(item.Action.NotifyActionListType, item.Action.Id);
+            logger.LogNotifyNotFound(item.Action.NotifyActionType, item.Action.Id);
             return;
         }
+
+        action.Tags = item.Tags.Select(ITagValue (r) => new TagValue(r.Key, r.Value)).ToList();
         
         await client.SendNoticeToAsync(
             action,
             item.ObjectId,
             item.Recipients?.Select(r => r.IsGroup ? new RecipientsGroup(r.Id, r.Name) : (IRecipient)new DirectRecipient(r.Id, r.Name, r.Addresses?.ToArray(), r.CheckActivation)).ToArray(),
             item.SenderNames is { Count: > 0 } ? item.SenderNames.ToArray() : null,
-            item.CheckSubsciption,
-            item.Tags?
-                .Select(ITagValue (r) => new TagValue(r.Key, r.Value))
-                .ToArray());
+            item.CheckSubsciption);
     }
 }

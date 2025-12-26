@@ -25,8 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using HtmlAgilityPack;
-
-using Actions = ASC.Web.Studio.Core.Notify.Actions;
 using ConfigurationConstants = ASC.Core.Configuration.Constants;
 
 namespace ASC.Files.Core.Services.NotifyService;
@@ -50,7 +48,6 @@ public class NotifyClient(
     FileSecurity fileSecurity,
     GlobalFolder globalFolder,
     NotifyConstants notifyConstants,
-    Actions actions,
     IServiceProvider serviceProvider)
 {
     public async Task SendDocuSignCompleteAsync<T>(File<T> file, string sourceTitle)
@@ -267,7 +264,7 @@ public class NotifyClient(
                 new TagValue(NotifyConstants.TagDocumentTitle, file.Title),
                 new TagValue(NotifyConstants.TagDocumentUrl, baseCommonLinkUtility.GetFullAbsolutePath(documentUrl)),
                 new TagValue(NotifyConstants.TagMessage, plainText),
-                new TagValue(Tags.ToUserName, currentUser.DisplayUserName(displayUserSettingsHelper)),
+                new TagValue(CommonTags.ToUserName, currentUser.DisplayUserName(displayUserSettingsHelper)),
                 new TagValue(NotifyConstants.RoomTitle, folderTitle),
                 new TagValue(NotifyConstants.RoomUrl, folderUrl),
                 new AdditionalSenderTag("push.sender")
@@ -323,8 +320,8 @@ public class NotifyClient(
             new TagValue(NotifyConstants.TagDocumentUrl, documentUrl),
             new TagValue(NotifyConstants.RoomTitle, room.Title),
             new TagValue(NotifyConstants.RoomUrl, roomUrl),
-            new TagValue(Tags.ToUserName, manager.DisplayUserName(displayUserSettingsHelper)),
-            new TagValue(Tags.ToUserLink, managerUrl),
+            new TagValue(CommonTags.ToUserName, manager.DisplayUserName(displayUserSettingsHelper)),
+            new TagValue(CommonTags.ToUserLink, managerUrl),
             new TagValue(CommonTags.Culture, userCulture.Name),
             TagValues.OrangeButton(userButtonText, documentParentUrl)
             );
@@ -339,8 +336,8 @@ public class NotifyClient(
             new TagValue(NotifyConstants.TagDocumentUrl, documentUrl),
             new TagValue(NotifyConstants.RoomTitle, room.Title),
             new TagValue(NotifyConstants.RoomUrl, roomUrl),
-            new TagValue(Tags.FromUserName, userName),
-            new TagValue(Tags.FromUserLink, userUrl),
+            new TagValue(CommonTags.FromUserName, userName),
+            new TagValue(CommonTags.FromUserLink, userUrl),
             new TagValue(CommonTags.Culture, managerCulture.Name),
             TagValues.OrangeButton(managerButtonText, documentParentUrl)
             );
@@ -434,7 +431,7 @@ public class NotifyClient(
                 recipients,
                 ConfigurationConstants.NotifyPushSenderSysName,
                 new TagValue(NotifyConstants.RoomTitle, room.Title),
-                new TagValue(Tags.FromUserName, user.DisplayUserName(displayUserSettingsHelper)),
+                new TagValue(CommonTags.FromUserName, user.DisplayUserName(displayUserSettingsHelper)),
                 new TagValue(NotifyConstants.TagFolderID, room.Id),
                 new TagValue(NotifyConstants.TagFolderParentId, room.ParentId),
                 new TagValue(NotifyConstants.TagFolderRootFolderType, room.RootFolderType)
@@ -480,7 +477,7 @@ public class NotifyClient(
             new TagValue(NotifyConstants.TagFolderID, room.Id),
             new TagValue(NotifyConstants.TagFolderParentId, room.ParentId),
             new TagValue(NotifyConstants.TagFolderRootFolderType, room.RootFolderType),
-            new TagValue(Tags.RoomRole, accessString)
+            new TagValue(CommonTags.RoomRole, accessString)
             );
     }
     public async Task SendDocumentCreatedInRoom<T>(Folder<T> room, IEnumerable<Guid> aces, FileEntry<T> file, Guid userId)
@@ -551,7 +548,7 @@ public class NotifyClient(
                     new TagValue(NotifyConstants.TagFolderParentId, room.ParentId),
                     new TagValue(NotifyConstants.TagFolderRootFolderType, room.RootFolderType),
                     new TagValue(NotifyConstants.RoomTitle, room.Title),
-                    new TagValue(Tags.Count, count)
+                    new TagValue(CommonTags.Count, count)
             );
     }
     public async Task SendFolderCreatedInRoom<T>(Folder<T> room, IEnumerable<Guid> aces, Folder<T> folder, Guid userId)
@@ -638,8 +635,8 @@ public class NotifyClient(
                 new TagValue(NotifyConstants.TagDocumentTitle, file.Title),
                 new TagValue(NotifyConstants.RoomTitle, room.Title),
                 new TagValue(NotifyConstants.RoomUrl, roomUrl),
-                new TagValue(Tags.FromUserName, userName),
-                new TagValue(Tags.FromUserLink, userUrl)
+                new TagValue(CommonTags.FromUserName, userName),
+                new TagValue(CommonTags.FromUserLink, userUrl)
                 );
         }
     }

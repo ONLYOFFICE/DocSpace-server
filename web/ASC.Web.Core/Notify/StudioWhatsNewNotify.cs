@@ -40,7 +40,6 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
     AuditEventsRepository auditEventsRepository,
     WebItemManager webItemManager,
     DisplayUserSettingsHelper displayUserSettingsHelper,
-    Actions actions,
     IServiceProvider serviceProvider)
 {
     private readonly ILogger _log = optionsMonitor.CreateLogger("ASC.Notify");
@@ -161,17 +160,19 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
 
                 _log.Debug($"SendMsgWhatsNew userActivities count : {userActivities.Count}");//temp
 
-                var action = whatsNewType == WhatsNewType.RoomsActivity ? actions.RoomsActivity : actions.SendWhatsNew;
+                List<ITagValue> tags =
+                [
+                    new TagValue(CommonTags.Activities, userActivities),
+                    new TagValue(CommonTags.Date, DateToString(scheduleDate, whatsNewType)),
+                    new TagValue(CommonTags.Priority, 1)
+                ];
+                
+                INotifyAction action = whatsNewType == WhatsNewType.RoomsActivity ? new RoomsActivityNotifyAction(tags) : new SendWhatsNewNotifyAction(tags);
 
                 if (userActivities.Count != 0)
                 {
                     _log.InformationSendWhatsNewTo(user.Email);
-                    await client.SendNoticeAsync(
-                        action, null, user,
-                        new TagValue(Tags.Activities, userActivities),
-                        new TagValue(Tags.Date, DateToString(scheduleDate, whatsNewType)),
-                        new TagValue(CommonTags.Priority, 1)
-                    );
+                    await client.SendNoticeAsync(action, null, user);
                 }
             }
         }
@@ -323,13 +324,13 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
     private async Task<bool> CheckSubscriptionAsync(UserInfo user, WhatsNewType whatsNewType)
     {
         if (whatsNewType == WhatsNewType.DailyFeed &&
-            await studioNotifyHelper.IsSubscribedToNotifyAsync(user, actions.SendWhatsNew))
+            await studioNotifyHelper.IsSubscribedToNotifyAsync(user, new SendWhatsNewNotifyAction([])))
         {
             return true;
         }
 
         if (whatsNewType == WhatsNewType.RoomsActivity &&
-            await studioNotifyHelper.IsSubscribedToNotifyAsync(user, actions.RoomsActivity))
+            await studioNotifyHelper.IsSubscribedToNotifyAsync(user, new RoomsActivityNotifyAction([])))
         {
             return true;
         }

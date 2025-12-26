@@ -26,8 +26,6 @@
 
 using System.ComponentModel;
 
-using Actions = ASC.Web.Studio.Core.Notify.Actions;
-
 namespace ASC.Files.Core.Security;
 
 [Scope]
@@ -56,8 +54,7 @@ public class FileSecurity(
     AuthManager authManager,
     VectorizationGlobalSettings vectorizationGlobalSettings,
     VectorizationHelper vectorizationHelper,
-    AiAccessibility aiAccessibility,
-    Actions actions)
+    AiAccessibility aiAccessibility)
     : IFileSecurity
 {
     public readonly FileShare DefaultMyShare = FileShare.Restrict;

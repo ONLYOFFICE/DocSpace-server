@@ -37,8 +37,7 @@ public class TipsController(
     SetupInfo setupInfo,
     IFusionCache fusionCache,
     IHttpClientFactory clientFactory,
-    TenantManager tenantManager,
-    Actions actions)
+    TenantManager tenantManager)
     : BaseSettingsController(fusionCache, webItemManager)
 {
     private readonly ILogger _log = option.CreateLogger("ASC.Api");

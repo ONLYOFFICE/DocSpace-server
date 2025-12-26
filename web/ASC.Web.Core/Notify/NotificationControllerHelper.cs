@@ -30,8 +30,7 @@ public class NotificationControllerHelper(
     StudioNotifyHelper studioNotifyHelper,
     AuthContext authContext,
     BadgesSettingsHelper badgesSettingsHelper,
-    NotificationChannelsHelper notificationChannelsHelper,
-    Actions actions)
+    NotificationChannelsHelper notificationChannelsHelper)
 {
     private readonly Guid _userId = authContext.CurrentAccount.ID;
 
@@ -76,7 +75,7 @@ public class NotificationControllerHelper(
                 await studioNotifyHelper.SubscribeToNotifyAsync(_userId, actions.SendWhatsNew, isEnabled);
                 break;
             case NotificationType.UsefullTips:
-                await studioNotifyHelper.SubscribeToNotifyAsync(_userId, actions.PeriodicNotify, isEnabled);
+                await studioNotifyHelper.SubscribeToNotifyAsync(_userId, new PeriodicNotifyAction(), isEnabled);
                 break;
         }
     }

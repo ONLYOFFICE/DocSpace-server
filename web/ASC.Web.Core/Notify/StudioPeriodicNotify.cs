@@ -52,8 +52,7 @@ public class StudioPeriodicNotify(
     IFusionCache hybridCache,
     IEventBus eventBus,
     IdentityClient identityClient,
-    SecurityContext securityContext,
-    Actions actions)
+    SecurityContext securityContext)
 {
     private readonly ILogger _log = log.CreateLogger("ASC.Notify");
 
@@ -502,12 +501,12 @@ public class StudioPeriodicNotify(
                         u,
                         senderName,
                         new TagValue(CommonTags.Culture, culture.Name),
-                        new TagValue(Tags.UserName, u.FirstName.HtmlEncode()),
-                        new TagValue(Tags.ActiveUsers, (await userManager.GetUsersAsync()).Length),
-                        new TagValue(Tags.Price, rquota.Price),
-                        new TagValue(Tags.PricePeriod, rquota.Year ? UserControlsCommonResource.TariffPerYear : UserControlsCommonResource.TariffPerMonth),
-                        //new TagValue(Tags.DueDate, dueDate.ToLongDateString()),
-                        //new TagValue(Tags.DelayDueDate, (delayDueDateIsNotMax ? delayDueDate : dueDate).ToLongDateString()),
+                        new TagValue(CommonTags.UserName, u.FirstName.HtmlEncode()),
+                        new TagValue(CommonTags.ActiveUsers, (await userManager.GetUsersAsync()).Length),
+                        new TagValue(CommonTags.Price, rquota.Price),
+                        new TagValue(CommonTags.PricePeriod, rquota.Year ? UserControlsCommonResource.TariffPerYear : UserControlsCommonResource.TariffPerMonth),
+                        //new TagValue(CommonTags.DueDate, dueDate.ToLongDateString()),
+                        //new TagValue(CommonTags.DelayDueDate, (delayDueDateIsNotMax ? delayDueDate : dueDate).ToLongDateString()),
                         TagValues.OrangeButton(orangeButtonText(culture), orangeButtonUrl(culture)),
                         TagValues.OrangeButton(orangeButtonText1(culture), orangeButtonUrl1(culture), "OrangeButton1"),
                         TagValues.OrangeButton(orangeButtonText2(culture), orangeButtonUrl2(culture), "OrangeButton2"),
@@ -537,7 +536,7 @@ public class StudioPeriodicNotify(
                         new TagValue("URL13", url13(culture)),
                         new TagValue("URL14", url14(culture)),
                         new TagValue(CommonTags.TopGif, topGif),
-                        new TagValue(Tags.PaymentDelay, tariffService.GetPaymentDelay()),
+                        new TagValue(CommonTags.PaymentDelay, tariffService.GetPaymentDelay()),
                         new TagValue(CommonTags.Footer, await userManager.IsDocSpaceAdminAsync(u) ? "common" : "social"));
                 }
             }
@@ -771,13 +770,13 @@ public class StudioPeriodicNotify(
                         u,
                         senderName,
                         new TagValue(CommonTags.Culture, culture.Name),
-                        new TagValue(Tags.UserName, u.FirstName.HtmlEncode()),
-                        new TagValue(Tags.ActiveUsers, (await userManager.GetUsersAsync()).Length),
-                        new TagValue(Tags.Price, rquota.Price),
-                        new TagValue(Tags.PricePeriod, rquota.Year ? UserControlsCommonResource.TariffPerYear : UserControlsCommonResource.TariffPerMonth),
-                        new TagValue(Tags.PaymentDelay, tariffService.GetPaymentDelay()),
-                        //new TagValue(Tags.DueDate, dueDate.ToLongDateString()),
-                        //new TagValue(Tags.DelayDueDate, (delayDueDateIsNotMax ? delayDueDate : dueDate).ToLongDateString()),
+                        new TagValue(CommonTags.UserName, u.FirstName.HtmlEncode()),
+                        new TagValue(CommonTags.ActiveUsers, (await userManager.GetUsersAsync()).Length),
+                        new TagValue(CommonTags.Price, rquota.Price),
+                        new TagValue(CommonTags.PricePeriod, rquota.Year ? UserControlsCommonResource.TariffPerYear : UserControlsCommonResource.TariffPerMonth),
+                        new TagValue(CommonTags.PaymentDelay, tariffService.GetPaymentDelay()),
+                        //new TagValue(CommonTags.DueDate, dueDate.ToLongDateString()),
+                        //new TagValue(CommonTags.DelayDueDate, (delayDueDateIsNotMax ? delayDueDate : dueDate).ToLongDateString()),
                         TagValues.OrangeButton(orangeButtonText(culture), orangeButtonUrl(culture)),
                         TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours(culture), trulyYoursAsTableRow),
                         new TagValue("IMG1", img1),
@@ -866,7 +865,7 @@ public class StudioPeriodicNotify(
                             u,
                             senderName,
                             new TagValue(CommonTags.Culture, culture.Name),
-                            new TagValue(Tags.UserName, u.DisplayUserName(displayUserSettingsHelper)),
+                            new TagValue(CommonTags.UserName, u.DisplayUserName(displayUserSettingsHelper)),
                             new TagValue(CommonTags.Footer, "opensource"),
                             TagValues.OrangeButton(orangeButtonText(culture), orangeButtonUrl),
                             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours(culture), true),

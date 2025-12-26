@@ -74,7 +74,7 @@ public record NotifyActionItem
     public string Id { get; init; }
     
     [ProtoMember(2)]
-    public string NotifyActionListType { get; init; }
+    public string NotifyActionType { get; init; }
 }
 
 [ProtoContract]

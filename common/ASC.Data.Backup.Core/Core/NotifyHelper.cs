@@ -35,15 +35,11 @@ public class NotifyHelper(
     UserManager userManager,
     StudioNotifyHelper studioNotifyHelper,
     StudioNotifySource studioNotifySource,
-    DisplayUserSettingsHelper displayUserSettingsHelper,
     TenantManager tenantManager,
     AuthManager authManager,
     WorkContext workContext,
-    ExternalResourceSettingsHelper externalResourceSettingsHelper,
     CommonLinkUtility commonLinkUtility,
     TenantLogoManager tenantLogoManager,
-    IUrlShortener urlShortener,
-    Actions actions,
     IServiceProvider serviceProvider)
 {
     public void SetServerBaseUri(string uri)
@@ -76,50 +72,33 @@ public class NotifyHelper(
         var user = await userManager.GetUsersAsync(userId);
 
         var client = workContext.RegisterClient(serviceProvider, studioNotifySource);
-
-        var culture = user.GetCulture();
-
-        var bestReagardsTxt = WebstudioNotifyPatternResource.ResourceManager.GetString("BestRegardsText", culture);
-
-        await client.SendNoticeToAsync(
-            actions.BackupCreated,
-            user,
-            StudioNotifyService.EMailSenderName,
-            new TagValue(Tags.OwnerName, user.DisplayUserName(displayUserSettingsHelper)),
-            new TagValue("URL1", externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("creatingbackup", culture)),
-            TagValues.TrulyYours(studioNotifyHelper, bestReagardsTxt));
+        var action = serviceProvider.GetService<BackupCreatedNotifyAction>();
+        action.Init(user);
+        
+        await client.SendNoticeToAsync(action, user, StudioNotifyService.EMailSenderName);
     }
 
     public async Task SendAboutBackupFailedAsync(int tenantId, Guid userId, string errorMessage)
     {
-        var tenant = await tenantManager.SetCurrentTenantAsync(tenantId);
+        await tenantManager.SetCurrentTenantAsync(tenantId);
 
         var admins = userId != Guid.Empty
             ? [await userManager.GetUsersAsync(userId)]
             : await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupAdmin.ID, EmployeeStatus.Active);
 
         var client = workContext.RegisterClient(serviceProvider, studioNotifySource);
-
+        var backupFailedNotifyAction = serviceProvider.GetService<BackupFailedNotifyAction>();
+        
         foreach (var user in admins.Where(r => r.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated)))
         {
-            var culture = user.GetCulture();
-
-            var bestReagardsTxt = WebstudioNotifyPatternResource.ResourceManager.GetString("BestRegardsText", culture);
-
-            await client.SendNoticeToAsync(
-                actions.BackupFailed,
-                user,
-                StudioNotifyService.EMailSenderName,
-                new TagValue(CommonTags.Culture, culture.Name),
-                new TagValue(Tags.UserName, user.DisplayUserName(displayUserSettingsHelper)),
-                new TagValue(Tags.Message, errorMessage),
-                TagValues.TrulyYours(studioNotifyHelper, bestReagardsTxt));
+            backupFailedNotifyAction.Init(user, errorMessage);
+            await client.SendNoticeToAsync(backupFailedNotifyAction, user, StudioNotifyService.EMailSenderName);
         }
     }
 
     public async Task SendAboutScheduledBackupFailedAsync(int tenantId, string errorMessage)
     {
-        var tenant = await tenantManager.SetCurrentTenantAsync(tenantId);
+        await tenantManager.SetCurrentTenantAsync(tenantId);
 
         var admins = await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupAdmin.ID, EmployeeStatus.Active);
 
@@ -127,18 +106,10 @@ public class NotifyHelper(
 
         foreach (var user in admins.Where(r => r.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated)))
         {
-            var culture = user.GetCulture();
-
-            var bestReagardsTxt = WebstudioNotifyPatternResource.ResourceManager.GetString("BestRegardsText", culture);
-
-            await client.SendNoticeToAsync(
-                actions.ScheduledBackupFailed,
-                user,
-                StudioNotifyService.EMailSenderName,
-                new TagValue(CommonTags.Culture, culture.Name),
-                new TagValue(Tags.UserName, user.DisplayUserName(displayUserSettingsHelper)),
-                new TagValue(Tags.Message, errorMessage),
-                TagValues.TrulyYours(studioNotifyHelper, bestReagardsTxt));
+            var scheduledBackupFailedNotifyAction = serviceProvider.GetService<ScheduledBackupFailedNotifyAction>();
+            scheduledBackupFailedNotifyAction.Init(user, errorMessage);
+            
+            await client.SendNoticeToAsync(scheduledBackupFailedNotifyAction, user, StudioNotifyService.EMailSenderName);
         }
     }
 
@@ -148,20 +119,16 @@ public class NotifyHelper(
 
         var client = workContext.RegisterClient(serviceProvider, studioNotifySource);
 
-        var users =
-            notifyAllUsers
+        var users = notifyAllUsers
                 ? await userManager.GetUsersAsync(EmployeeStatus.Active)
                 : [await userManager.GetUsersAsync(tenant.OwnerId)];
 
         foreach (var user in users.Where(r => r.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated)))
         {
-            var bestReagardsTxt = WebstudioNotifyPatternResource.ResourceManager.GetString("BestRegardsText", user.GetCulture());
-
-            await client.SendNoticeToAsync(
-                actions.RestoreStarted,
-                user,
-                StudioNotifyService.EMailSenderName,
-                TagValues.TrulyYours(studioNotifyHelper, bestReagardsTxt));
+            var restoreStartedNotifyAction = serviceProvider.GetService<RestoreStartedNotifyAction>();
+            restoreStartedNotifyAction.Init(user);
+            
+            await client.SendNoticeToAsync(restoreStartedNotifyAction, user, StudioNotifyService.EMailSenderName);
         }
     }
 
@@ -177,16 +144,10 @@ public class NotifyHelper(
 
         foreach (var user in users.Where(r => r.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated)))
         {
-            var hash = (await authManager.GetUserPasswordStampAsync(user.Id)).ToString("s", CultureInfo.InvariantCulture);
-            var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.PasswordChange, hash, user.Id);
+            var restoreCompletedV115NotifyAction = serviceProvider.GetService<RestoreCompletedV115NotifyAction>();
+            await restoreCompletedV115NotifyAction.InitAsync(user);
 
-            var orangeButtonText = BackupResource.ResourceManager.GetString("ButtonSetPassword", user.GetCulture());
-
-            await client.SendNoticeToAsync(
-                actions.RestoreCompletedV115,
-                user,
-                StudioNotifyService.EMailSenderName,
-                TagValues.OrangeButton(orangeButtonText, await urlShortener.GetShortenLinkAsync(confirmationUrl)));
+            await client.SendNoticeToAsync(restoreCompletedV115NotifyAction, user, StudioNotifyService.EMailSenderName);
         }
     }
 
@@ -247,8 +208,8 @@ public class NotifyHelper(
     {
         var args = new List<ITagValue>
         {
-                        new TagValue(Tags.RegionName, TransferResourceHelper.GetRegionDescription(region)),
-                        new TagValue(Tags.PortalUrl, url)
+                        new TagValue(CommonTags.RegionName, TransferResourceHelper.GetRegionDescription(region)),
+                        new TagValue(CommonTags.PortalUrl, url)
                     };
 
         if (!string.IsNullOrEmpty(url))
@@ -273,5 +234,153 @@ public class NotifyHelper(
         }
 
         return args;
+    }
+}
+
+[Scope]
+public sealed class BackupCreatedNotifyAction(DisplayUserSettingsHelper displayUserSettingsHelper, ExternalResourceSettingsHelper externalResourceSettingsHelper, StudioNotifyHelper studioNotifyHelper) : INotifyAction
+{
+    public string ID { get => "backup_created"; }
+    public List<ITagValue> Tags { get; set; }
+
+    public List<Pattern> Patterns
+    {
+        get =>
+        [
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_backup_created, () => WebstudioNotifyPatternResource.pattern_backup_created),
+            new TelegramPattern(() => WebstudioNotifyPatternResource.pattern_backup_created_tg)
+        ];
+    }
+
+    public void Init(UserInfo user)
+    {
+        var culture = user.GetCulture();
+
+        var bestRegardsTxt = WebstudioNotifyPatternResource.ResourceManager.GetString("BestRegardsText", culture);
+
+        Tags =
+        [
+            new TagValue(CommonTags.OwnerName, user.DisplayUserName(displayUserSettingsHelper)),
+            new TagValue("URL1", externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("creatingbackup", culture)),
+            TagValues.TrulyYours(studioNotifyHelper, bestRegardsTxt)
+        ];
+    }
+}
+
+[Scope]
+public sealed class BackupFailedNotifyAction(DisplayUserSettingsHelper displayUserSettingsHelper, StudioNotifyHelper studioNotifyHelper) : INotifyAction
+{
+    public string ID => "backup_failed";
+    
+    public List<ITagValue> Tags { get; set; }
+    
+    public List<Pattern> Patterns
+    {
+        get =>
+        [
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_backup_failed, () => WebstudioNotifyPatternResource.pattern_backup_failed),
+            new TelegramPattern(() => WebstudioNotifyPatternResource.pattern_backup_failed_tg)
+        ];
+    }
+    
+    public void Init(UserInfo user, string errorMessage)
+    {
+        var culture = user.GetCulture();
+
+        var bestRegardsTxt = WebstudioNotifyPatternResource.ResourceManager.GetString("BestRegardsText", culture);
+
+        Tags =
+        [
+            new TagValue(CommonTags.Culture, culture.Name),
+            new TagValue(CommonTags.UserName, user.DisplayUserName(displayUserSettingsHelper)),
+            new TagValue(CommonTags.Message, errorMessage),
+            TagValues.TrulyYours(studioNotifyHelper, bestRegardsTxt)
+        ];
+    }
+}
+
+public sealed class ScheduledBackupFailedNotifyAction(DisplayUserSettingsHelper displayUserSettingsHelper, StudioNotifyHelper studioNotifyHelper) : INotifyAction
+{
+    public string ID => "scheduled_backup_failed";
+
+    public List<ITagValue> Tags { get; set; }
+    public List<Pattern> Patterns
+    {
+        get =>
+        [
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_scheduled_backup_failed, () => WebstudioNotifyPatternResource.pattern_scheduled_backup_failed),
+            new TelegramPattern(() => WebstudioNotifyPatternResource.pattern_scheduled_backup_failed_tg)
+        ];
+    }
+    
+    public void Init(UserInfo user, string errorMessage)
+    {
+        var culture = user.GetCulture();
+
+        var bestRegardsTxt = WebstudioNotifyPatternResource.ResourceManager.GetString("BestRegardsText", culture);
+
+        Tags =
+        [
+            new TagValue(CommonTags.Culture, culture.Name),
+            new TagValue(CommonTags.UserName, user.DisplayUserName(displayUserSettingsHelper)),
+            new TagValue(CommonTags.Message, errorMessage),
+            TagValues.TrulyYours(studioNotifyHelper, bestRegardsTxt)
+        ];
+    }
+}
+
+[Scope]
+public sealed class RestoreStartedNotifyAction(StudioNotifyHelper studioNotifyHelper) : INotifyAction
+{
+    public string ID => "restore_started";
+    
+    public List<ITagValue> Tags { get; set; }
+    public List<Pattern> Patterns
+    {
+        get =>
+        [
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_restore_started, () => WebstudioNotifyPatternResource.pattern_restore_started),
+            new TelegramPattern(() => WebstudioNotifyPatternResource.pattern_restore_started)
+        ];
+    }
+    
+    public void Init(UserInfo user)
+    {
+        var culture = user.GetCulture();
+
+        var bestRegardsTxt = WebstudioNotifyPatternResource.ResourceManager.GetString("BestRegardsText", culture);
+
+        Tags =
+        [
+            TagValues.TrulyYours(studioNotifyHelper, bestRegardsTxt)
+        ];
+    }
+}
+
+public sealed class RestoreCompletedV115NotifyAction(AuthManager authManager, CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener) : INotifyAction
+{
+    public string ID => "restore_completed_v115";
+    
+    public List<ITagValue> Tags { get; set; }
+    public List<Pattern> Patterns
+    {
+        get =>
+        [
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_restore_completed, () => WebstudioNotifyPatternResource.pattern_restore_completed_v115),
+            new TelegramPattern(() => WebstudioNotifyPatternResource.pattern_restore_completed_v115)
+        ];
+    }
+    
+    public async Task InitAsync(UserInfo user)
+    {
+        var hash = (await authManager.GetUserPasswordStampAsync(user.Id)).ToString("s", CultureInfo.InvariantCulture);
+        var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.PasswordChange, hash, user.Id);
+
+        var orangeButtonText = BackupResource.ResourceManager.GetString("ButtonSetPassword", user.GetCulture());
+
+        Tags =
+        [
+            TagValues.OrangeButton(orangeButtonText, await urlShortener.GetShortenLinkAsync(confirmationUrl))
+        ];
     }
 }

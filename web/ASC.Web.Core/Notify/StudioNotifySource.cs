@@ -27,20 +27,15 @@
 namespace ASC.Web.Studio.Core.Notify;
 
 [Scope]
-public class StudioNotifySource(
-    UserManager userManager, 
-    IRecipientProvider 
-        recipientsProvider, 
-    SubscriptionManager subscriptionManager, 
-    Actions actions)
+public class StudioNotifySource(UserManager userManager, IRecipientProvider recipientsProvider, SubscriptionManager subscriptionManager)
     : NotifySource("asc.web.studio", userManager, recipientsProvider, subscriptionManager)
 {
     protected override ISubscriptionProvider CreateSubscriptionProvider()
     {
-        return new AdminNotifySubscriptionProvider(base.CreateSubscriptionProvider(), actions);
+        return new AdminNotifySubscriptionProvider(base.CreateSubscriptionProvider());
     }
 
-    private sealed class AdminNotifySubscriptionProvider(ISubscriptionProvider provider, Actions actions) : ISubscriptionProvider
+    private sealed class AdminNotifySubscriptionProvider(ISubscriptionProvider provider) : ISubscriptionProvider
     {
         public async Task<object> GetSubscriptionRecordAsync(INotifyAction action, IRecipient recipient, string objectID)
         {
