@@ -38,4 +38,7 @@ internal static partial class RestoreProgressItemLogger
 
     [LoggerMessage(LogLevel.Error, "DeleteFiles")]
     public static partial void ErrorDeleteFiles(this ILogger<RestoreProgressItem> logger, Exception exception);
+
+    [LoggerMessage(LogLevel.Error, "Clear2faSettings")]
+    public static partial void ErrorClear2faSettings(this ILogger<RestoreProgressItem> logger, Exception exception);
 }

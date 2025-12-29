@@ -1,5 +1,64 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -53,11 +112,23 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>Kiểm tra các biểu mẫu đã sẵn sàng</value>
+  </data>
+  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
+    <value>Một tài liệu mới "$DocumentTitle" đã được tạo trong phòng "$RoomTitle"</value>
+  </data>
+  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
+    <value>Một tập tin mới đã được tải lên phòng "$RoomTitle" ($Count)</value>
+  </data>
+  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
+    <value>Một tập tin mới "$DocumentTitle" đã được tải lên phòng "$RoomTitle"</value>
+  </data>
   <data name="pattern_DocuSignComplete" xml:space="preserve">
     <value>h1. Tất cả đã hoàn tất ký tên vào $DocumentTitle
 
@@ -68,12 +139,74 @@ Email này thông báo tới bạn rằng tất cả đã hoàn tất ký tên v
 
 Đăng nhập vào tài khoản DocuSign của bạn để biết thêm thông tin.</value>
   </data>
+  <data name="pattern_EditorMentions" xml:space="preserve">
+    <value>h1. $__AuthorName đã nhắc đến bạn trong nhận xét tài liệu
+
+$__AuthorName đã nhắc đến bạn trong nhận xét trong tài liệu "$DocumentTitle":"$DocumentURL" trong phòng "$RoomTitle":"$RoomURL":
+
+$Message</value>
+  </data>
+  <data name="pattern_EditorMentions_push" xml:space="preserve">
+    <value>$ToUserName đã nhắc đến bạn trong tài liệu  $DocumentTitle</value>
+  </data>
+  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
+    <value>Một thư mục mới "$FolderTitle" đã được tạo trong phòng "$RoomTitle"</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. Biểu mẫu $Message đã được điền
+
+Một biểu mẫu mới "$DocumentTitle":"$DocumentURL" đã được điền trong phòng "$RoomTitle":"$RoomURL"
+
+Người gửi biểu mẫu: "$FromUserName":"$FromUserLink"
+
+$OrangeButton
+
+&amp;nbsp;</value>
+  </data>
+  <data name="pattern_FormStartedFilling" xml:space="preserve">
+    <value>
+      Thông báo hoạt động. "$FromUserName":"$FromUserLink" đã bắt đầu quá trình điền biểu mẫu: "$DocumentTitle":"$DocumentURL" trong phòng: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. Bạn đã điền vào biểu mẫu $Message
+
+Bạn đã điền vào biểu mẫu "$DocumentTitle":"$DocumentURL" trong phòng "$RoomTitle":"$RoomURL"
+
+Người quản lý: "$ToUserName":"$ToUserLink"
+
+$OrangeButton
+
+&amp;nbsp;</value>
+  </data>
+  <data name="pattern_FormSubmitted_push" xml:space="preserve">
+    <value>Biểu mẫu "$DocumentTitle" đã được điền trong phòng "$RoomTitle"</value>
+  </data>
+  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+    <value>
+      Thông báo hoạt động. Biểu mẫu "$DocumentTitle":"$DocumentURL" đã được điền đầy đủ trong phòng: "$RoomTitle":"$RoomURL" — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
+    <value>Bạn đã được mời vào phòng "$RoomTitle"</value>
+  </data>
   <data name="pattern_MailMergeEnd" xml:space="preserve">
     <value>h1. Đã gửi thư thành công
 
 Email này thông báo tới bạn rằng bạn đã yêu cầu gửi $MailsCount tin nhắn và tiến trình này hiện đã hoàn tất. $Message
 
 Bạn có thể tìm thấy các tin nhắn đã được gửi thành công trong thư mục "Đã gửi":"$__VirtualRootPath/addons/mail/#sent" của mô-đun Thư.</value>
+  </data>
+  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
+    <value>$FromUserName đã chuyển phòng "$RoomTitle" vào sao lưu</value>
+  </data>
+  <data name="pattern_RoomRemoved" xml:space="preserve">
+    <value>h1. $__AuthorName đã xóa một phòng
+
+$__AuthorName đã xóa phòng: $RoomTitle</value>
+  </data>
+  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
+    <value>Vai trò của bạn trong phòng "$RoomTitle" đã được thay đổi thành "$RoomRole"</value>
   </data>
   <data name="pattern_ShareDocument" xml:space="preserve">
     <value>h1. Đã cấp quyền truy cập cho tài liệu: "$DocumentTitle":"$DocumentURL"
@@ -89,141 +222,6 @@ $__DateTime "$__AuthorName":"$__AuthorUrl" đã cấp cho bạn quyền truy c�
 
 $Message</value>
   </data>
-  <data name="subject_DocuSignComplete" xml:space="preserve">
-    <value>Tài liệu. Tất cả đã hoàn tất ký tên vào $DocumentTitle</value>
-  </data>
-  <data name="subject_DocuSignStatus" xml:space="preserve">
-    <value>Tài liệu. Trạng thái ký tên đã thay đổi</value>
-  </data>
-  <data name="subject_MailMergeEnd" xml:space="preserve">
-    <value>Tài liệu. Đã gửi thư thành công.</value>
-  </data>
-  <data name="subject_ShareDocument" xml:space="preserve">
-    <value>Tài liệu. Đã cấp quyền truy cập cho tài liệu: $DocumentTitle</value>
-  </data>
-  <data name="subject_ShareFolder" xml:space="preserve">
-    <value>Tài liệu. Đã cấp quyền truy cập cho thư mục: $DocumentTitle</value>
-  </data>
-  <data name="pattern_EditorMentions" xml:space="preserve">
-    <value>h1. $__AuthorName đã nhắc đến bạn trong nhận xét tài liệu
-
-$__AuthorName đã nhắc đến bạn trong nhận xét trong tài liệu "$DocumentTitle":"$DocumentURL" trong phòng "$RoomTitle":"$RoomURL":
-
-$Message</value>
-  </data>
-  <data name="pattern_RoomRemoved" xml:space="preserve">
-    <value>h1. $__AuthorName đã xóa một phòng
-
-$__AuthorName đã xóa phòng: $RoomTitle</value>
-  </data>
-  <data name="subject_DocuSignStatus_push" xml:space="preserve">
-    <value>Trạng thái ký tên đã thay đổi</value>
-  </data>
-  <data name="subject_MailMergeEnd_push" xml:space="preserve">
-    <value>Gửi thư đã xong.</value>
-  </data>
-  <data name="subject_ShareDocument_push" xml:space="preserve">
-    <value>Đã cấp quyền truy cập vào tài liệu: $DocumentTitle</value>
-  </data>
-  <data name="subject_ShareFolder_push" xml:space="preserve">
-    <value>Đã cấp quyền truy cập vào thư mục: $DocumentTitle</value>
-  </data>
-  <data name="subject_ShareEncryptedDocument_push" xml:space="preserve">
-    <value>Đã cấp quyền truy cập vào tài liệu được mã hóa: $DocumentTitle</value>
-  </data>
-  <data name="subject_RoomRemoved" xml:space="preserve">
-    <value>Thông báo DocSpace. Đã xóa phòng</value>
-  </data>
-  <data name="subject_EditorMentions" xml:space="preserve">
-    <value>Thông báo DocSpace. Được nhắc đến trong tài liệu</value>
-  </data>
-  <data name="subject_DocuSignComplete_push" xml:space="preserve">
-    <value>Tất cả người ký tên đã hoàn thành $DocumentTitle</value>
-  </data>
-  <data name="subject_DocuSignComplete_tg" xml:space="preserve">
-    <value>Tài liệu. Tất cả người ký tên đã hoàn thành [$DocumentTitle]($DocumentURL)</value>
-  </data>
-  <data name="subject_ShareFolder_tg" xml:space="preserve">
-    <value>Tài liệu. Đã cấp quyền truy cập vào thư mục: [$DocumentTitle]($DocumentURL)</value>
-  </data>
-  <data name="subject_ShareDocument_tg" xml:space="preserve">
-    <value>Tài liệu. Đã cấp quyền truy cập vào tài liệu: [$DocumentTitle]($DocumentURL)</value>
-  </data>
-  <data name="button_CheckReadyForms" xml:space="preserve">
-    <value>Kiểm tra các biểu mẫu đã sẵn sàng</value>
-  </data>
-  <data name="pattern_FormReceived" xml:space="preserve">
-    <value>h1. Biểu mẫu $Message đã được điền
-
-Một biểu mẫu mới "$DocumentTitle":"$DocumentURL" đã được điền trong phòng "$RoomTitle":"$RoomURL"
-
-Người gửi biểu mẫu: "$FromUserName":"$FromUserLink"
-
-$OrangeButton
-
-&amp;nbsp;</value>
-  </data>
-  <data name="pattern_FormSubmitted" xml:space="preserve">
-    <value>h1. Bạn đã điền vào biểu mẫu $Message
-
-Bạn đã điền vào biểu mẫu "$DocumentTitle":"$DocumentURL" trong phòng "$RoomTitle":"$RoomURL"
-
-Người quản lý: "$ToUserName":"$ToUserLink"
-
-$OrangeButton
-
-&amp;nbsp;</value>
-  </data>
-  <data name="subject_FormReceived" xml:space="preserve">
-    <value>Thông báo DocSpace. Biểu mẫu đã được điền</value>
-  </data>
-  <data name="subject_FormSubmitted" xml:space="preserve">
-    <value>Thông báo DocSpace. Biểu mẫu đã được điền</value>
-  </data>
-  <data name="pattern_FormSubmitted_push" xml:space="preserve">
-    <value>Biểu mẫu "$DocumentTitle" đã được điền trong phòng "$RoomTitle"</value>
-  </data>
-  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
-    <value>Bạn đã được mời vào phòng "$RoomTitle"</value>
-  </data>
-  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
-    <value>Vai trò của bạn trong phòng "$RoomTitle" đã được thay đổi thành "$RoomRole"</value>
-  </data>
-  <data name="subject_YourTurnFormFilling" xml:space="preserve">
-    <value>Thông báo DocSpace.</value>
-  </data>
-  <data name="subject_StoppedFormFilling" xml:space="preserve">
-    <value>Thông báo DocSpace.</value>
-  </data>
-  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
-    <value>Thông báo DocSpace.</value>
-  </data>
-  <data name="subject_FormStartedFilling" xml:space="preserve">
-    <value>Thông báo DocSpace.</value>
-  </data>
-  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
-    <value>$FromUserName đã chuyển phòng "$RoomTitle" vào sao lưu</value>
-  </data>
-  <data name="pattern_EditorMentions_push" xml:space="preserve">
-    <value>$ToUserName đã nhắc đến bạn trong tài liệu  $DocumentTitle</value>
-  </data>
-  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
-    <value>Một tài liệu mới "$DocumentTitle" đã được tạo trong phòng "$RoomTitle"</value>
-  </data>
-  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
-    <value>Một tập tin mới "$DocumentTitle" đã được tải lên phòng "$RoomTitle"</value>
-  </data>
-  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
-    <value>Một tập tin mới đã được tải lên phòng "$RoomTitle" ($Count)</value>
-  </data>
-  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
-    <value>Một thư mục mới "$FolderTitle" đã được tạo trong phòng "$RoomTitle"</value>
-  </data>
-  <data name="pattern_FormStartedFilling" xml:space="preserve">
-    <value>
-      Thông báo hoạt động. "$FromUserName":"$FromUserLink" đã bắt đầu quá trình điền biểu mẫu: "$DocumentTitle":"$DocumentURL" trong phòng: "$RoomTitle":"$RoomURL" — $__DateTime.
-    </value>
-  </data>
   <data name="pattern_StoppedFormFilling" xml:space="preserve">
     <value>
       Thông báo hoạt động. "$FromUserName":"$FromUserLink" đã dừng điền biểu mẫu: "$DocumentTitle":"$DocumentURL" trong phòng: "$RoomTitle":"$RoomURL" — $__DateTime.
@@ -234,9 +232,70 @@ $OrangeButton
       Thông báo hoạt động. Đến lượt bạn! Yêu cầu điền biểu mẫu: "$DocumentTitle":"$DocumentURL" trong phòng: "$RoomTitle":"$RoomURL" — $__DateTime.
     </value>
   </data>
-  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
-    <value>
-      Thông báo hoạt động. Biểu mẫu "$DocumentTitle":"$DocumentURL" đã được điền đầy đủ trong phòng: "$RoomTitle":"$RoomURL" — $__DateTime.
-    </value>
+  <data name="subject_DocuSignComplete" xml:space="preserve">
+    <value>Tài liệu. Tất cả đã hoàn tất ký tên vào $DocumentTitle</value>
+  </data>
+  <data name="subject_DocuSignComplete_push" xml:space="preserve">
+    <value>Tất cả người ký tên đã hoàn thành $DocumentTitle</value>
+  </data>
+  <data name="subject_DocuSignComplete_tg" xml:space="preserve">
+    <value>Tài liệu. Tất cả người ký tên đã hoàn thành [$DocumentTitle]($DocumentURL)</value>
+  </data>
+  <data name="subject_DocuSignStatus" xml:space="preserve">
+    <value>Tài liệu. Trạng thái ký tên đã thay đổi</value>
+  </data>
+  <data name="subject_DocuSignStatus_push" xml:space="preserve">
+    <value>Trạng thái ký tên đã thay đổi</value>
+  </data>
+  <data name="subject_EditorMentions" xml:space="preserve">
+    <value>Thông báo DocSpace. Được nhắc đến trong tài liệu</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>Thông báo DocSpace. Biểu mẫu đã được điền</value>
+  </data>
+  <data name="subject_FormStartedFilling" xml:space="preserve">
+    <value>Thông báo DocSpace.</value>
+  </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>Thông báo DocSpace. Biểu mẫu đã được điền</value>
+  </data>
+  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
+    <value>Thông báo DocSpace.</value>
+  </data>
+  <data name="subject_MailMergeEnd" xml:space="preserve">
+    <value>Tài liệu. Đã gửi thư thành công.</value>
+  </data>
+  <data name="subject_MailMergeEnd_push" xml:space="preserve">
+    <value>Gửi thư đã xong.</value>
+  </data>
+  <data name="subject_RoomRemoved" xml:space="preserve">
+    <value>Thông báo DocSpace. Đã xóa phòng</value>
+  </data>
+  <data name="subject_ShareDocument" xml:space="preserve">
+    <value>Tài liệu. Đã cấp quyền truy cập cho tài liệu: $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareDocument_push" xml:space="preserve">
+    <value>Đã cấp quyền truy cập vào tài liệu: $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareDocument_tg" xml:space="preserve">
+    <value>Tài liệu. Đã cấp quyền truy cập vào tài liệu: [$DocumentTitle]($DocumentURL)</value>
+  </data>
+  <data name="subject_ShareEncryptedDocument_push" xml:space="preserve">
+    <value>Đã cấp quyền truy cập vào tài liệu được mã hóa: $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareFolder" xml:space="preserve">
+    <value>Tài liệu. Đã cấp quyền truy cập cho thư mục: $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareFolder_push" xml:space="preserve">
+    <value>Đã cấp quyền truy cập vào thư mục: $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareFolder_tg" xml:space="preserve">
+    <value>Tài liệu. Đã cấp quyền truy cập vào thư mục: [$DocumentTitle]($DocumentURL)</value>
+  </data>
+  <data name="subject_StoppedFormFilling" xml:space="preserve">
+    <value>Thông báo DocSpace.</value>
+  </data>
+  <data name="subject_YourTurnFormFilling" xml:space="preserve">
+    <value>Thông báo DocSpace.</value>
   </data>
 </root>

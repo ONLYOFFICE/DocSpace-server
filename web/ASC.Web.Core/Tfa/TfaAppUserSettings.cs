@@ -96,8 +96,11 @@ public class TfaAppUserSettings : ISettings<TfaAppUserSettings>
         var tfaLastEnabled = await settingsManager.LoadAsync<TfaAppUserSettings>(userId);
         if (tfaLastEnabled != null)
         {
-            var tfaLastDisabled = (await auditEventsRepository.GetByFilterAsync(action: MessageAction.TwoFactorAuthenticationDisabled, limit: 1)).FirstOrDefault();
-            if (tfaLastDisabled != null)
+            var tfaLastChange = (await auditEventsRepository
+                .GetByFilterWithActionsAsync(actions: [MessageAction.TwoFactorAuthenticationEnabledByTfaApp, MessageAction.TwoFactorAuthenticationDisabled], limit: 1))
+                .FirstOrDefault();
+
+            if (tfaLastChange is { Action: (int)MessageAction.TwoFactorAuthenticationDisabled })
             {
                 tfaExpired = tfaLastEnabled.LastModified.AddDays(1) < DateTime.UtcNow;
                 if (tfaExpired)

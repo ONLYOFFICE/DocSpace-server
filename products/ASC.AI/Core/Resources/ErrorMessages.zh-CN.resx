@@ -120,6 +120,9 @@
   <data name="AiSettingsAccessDenied" xml:space="preserve">
     <value>您没有管理 AI 设置的权限</value>
   </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>无法处理文件：{0}。文件可能已损坏或加密</value>
+  </data>
   <data name="ChatAccessDenied" xml:space="preserve">
     <value>您没有使用对话功能的权限</value>
   </data>
@@ -170,8 +173,5 @@
   </data>
   <data name="UnavailableServers" xml:space="preserve">
     <value>MCP 服务器不可用：{0}。请检查连接设置</value>
-  </data>
-  <data name="AttachmentProcessFailed" xml:space="preserve">
-    <value>无法处理文件：{0}。文件可能已损坏或加密</value>
   </data>
 </root>

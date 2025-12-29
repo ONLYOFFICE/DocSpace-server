@@ -117,56 +117,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="DataProcessing" xml:space="preserve">
-    <value>معالجة البيانات...</value>
-  </data>
-  <data name="DataProcessingCompleted" xml:space="preserve">
-    <value>تم اكتمال معالجة البيانات</value>
-  </data>
-  <data name="DumpParse" xml:space="preserve">
-    <value>تحليل قاعدة البيانات</value>
-  </data>
-  <data name="GroupMigration" xml:space="preserve">
-    <value>ترحيل مجموعة {0} ({1}/{2})</value>
-  </data>
-  <data name="MigratingUserFiles" xml:space="preserve">
-    <value>ترحيل ملفات المستخدم {0} ({1}/{2})</value>
-  </data>
-  <data name="MigrationCompleted" xml:space="preserve">
-    <value>تم اكتمال الترحيل</value>
-  </data>
-  <data name="PreparingForMigration" xml:space="preserve">
-    <value>التجهيز للترحيل</value>
-  </data>
-  <data name="StartOfDataProcessing" xml:space="preserve">
-    <value>بدء معالجة البيانات...</value>
-  </data>
-  <data name="Unzipping" xml:space="preserve">
-    <value>فك الضغط...</value>
-  </data>
-  <data name="UnzippingFinished" xml:space="preserve">
-    <value>تم اكتمال فك الضغط...</value>
-  </data>
-  <data name="UserMigration" xml:space="preserve">
-    <value>ترحيل المستخدم {0} ({1}/{2})</value>
-  </data>
-  <data name="MigrationCommonFiles" xml:space="preserve">
-    <value>ترحيل الملفات الشائعة</value>
-  </data>
-  <data name="MigrationNotFoundException" xml:space="preserve">
-    <value>لا يوجد مزود ترحيل من هذا القبيل</value>
-  </data>
-  <data name="MigrationProgressException" xml:space="preserve">
-    <value>لا توجد عملية ترحيل قيد التقدم</value>
-  </data>
-  <data name="MigrationProjectFiles" xml:space="preserve">
-    <value>ترحيل ملفات المشروع</value>
-  </data>
   <data name="CanNotAddUserInGroup" xml:space="preserve">
     <value>لم يتم إضافة مستخدم {0} للمجموعة {1}</value>
   </data>
   <data name="CanNotCreateFile" xml:space="preserve">
     <value>لم يتم إنشاء ملف {0}</value>
+  </data>
+  <data name="CanNotImportCommonFiles" xml:space="preserve">
+    <value>لم يتم استيراد الملفات المشتركة</value>
+  </data>
+  <data name="CanNotImportProjectFiles" xml:space="preserve">
+    <value>لم يتم استيراد ملفات المشروع</value>
   </data>
   <data name="CanNotImportUser" xml:space="preserve">
     <value>لم يتم استيراد المستخدم</value>
@@ -198,19 +159,58 @@
   <data name="CreateFolder" xml:space="preserve">
     <value>إنشاء مجلد {0}</value>
   </data>
+  <data name="CreateRootFolder" xml:space="preserve">
+    <value>إنشاء مجلد الرئيسي</value>
+  </data>
   <data name="CreateShareRoom" xml:space="preserve">
     <value>إنشاء غرفة مشاركة {0}</value>
   </data>
-  <data name="СanNotImportCommonFiles" xml:space="preserve">
-    <value>لم يتم استيراد الملفات المشتركة</value>
+  <data name="DataProcessing" xml:space="preserve">
+    <value>معالجة البيانات...</value>
   </data>
-  <data name="СanNotImportProjectFiles" xml:space="preserve">
-    <value>لم يتم استيراد ملفات المشروع</value>
+  <data name="DataProcessingCompleted" xml:space="preserve">
+    <value>تم اكتمال معالجة البيانات</value>
   </data>
-  <data name="СreateRootFolder" xml:space="preserve">
-    <value>إنشاء مجلد الرئيسي</value>
+  <data name="DumpParse" xml:space="preserve">
+    <value>تحليل قاعدة البيانات</value>
+  </data>
+  <data name="GroupMigration" xml:space="preserve">
+    <value>ترحيل مجموعة {0} ({1}/{2})</value>
   </data>
   <data name="LargeBackup" xml:space="preserve">
     <value>النسخ الاحتياطي أكبر من الحجم الفعلي للبوابة</value>
+  </data>
+  <data name="MigratingUserFiles" xml:space="preserve">
+    <value>ترحيل ملفات المستخدم {0} ({1}/{2})</value>
+  </data>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>ترحيل الملفات الشائعة</value>
+  </data>
+  <data name="MigrationCompleted" xml:space="preserve">
+    <value>تم اكتمال الترحيل</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>لا يوجد مزود ترحيل من هذا القبيل</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>لا توجد عملية ترحيل قيد التقدم</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>ترحيل ملفات المشروع</value>
+  </data>
+  <data name="PreparingForMigration" xml:space="preserve">
+    <value>التجهيز للترحيل</value>
+  </data>
+  <data name="StartOfDataProcessing" xml:space="preserve">
+    <value>بدء معالجة البيانات...</value>
+  </data>
+  <data name="Unzipping" xml:space="preserve">
+    <value>فك الضغط...</value>
+  </data>
+  <data name="UnzippingFinished" xml:space="preserve">
+    <value>تم اكتمال فك الضغط...</value>
+  </data>
+  <data name="UserMigration" xml:space="preserve">
+    <value>ترحيل المستخدم {0} ({1}/{2})</value>
   </data>
 </root>

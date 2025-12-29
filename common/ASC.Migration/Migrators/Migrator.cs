@@ -37,7 +37,6 @@ public abstract class Migrator(
     GlobalFolderHelper globalFolderHelper,
     IServiceProvider serviceProvider,
     IDaoFactory daoFactory,
-    EntryManager entryManager,
     MigrationLogger migrationLogger,
     AuthContext authContext,
     DisplayUserSettingsHelper displayUserSettingsHelper,
@@ -54,7 +53,6 @@ public abstract class Migrator(
     private GlobalFolderHelper GlobalFolderHelper { get; } = globalFolderHelper;
     private IServiceProvider ServiceProvider { get; } = serviceProvider;
     private IDaoFactory DaoFactory { get; } = daoFactory;
-    private EntryManager EntryManager { get; } = entryManager;
     protected MigrationLogger MigrationLogger { get; } = migrationLogger;
     private AuthContext AuthContext { get; } = authContext;
     protected DisplayUserSettingsHelper DisplayUserSettingsHelper { get; } = displayUserSettingsHelper;
@@ -144,8 +142,8 @@ public abstract class Migrator(
             }
             catch (Exception e)
             {
-                Log(MigrationResource.СanNotImportCommonFiles, e);
-                MigrationInfo.Errors.Add(MigrationResource.СanNotImportCommonFiles);
+                Log(MigrationResource.CanNotImportCommonFiles, e);
+                MigrationInfo.Errors.Add(MigrationResource.CanNotImportCommonFiles);
             }
         }
 
@@ -158,8 +156,8 @@ public abstract class Migrator(
             }
             catch (Exception e)
             {
-                Log(MigrationResource.СanNotImportProjectFiles, e);
-                MigrationInfo.Errors.Add(MigrationResource.СanNotImportProjectFiles);
+                Log(MigrationResource.CanNotImportProjectFiles, e);
+                MigrationInfo.Errors.Add(MigrationResource.CanNotImportProjectFiles);
             }
         }
 
@@ -327,7 +325,7 @@ public abstract class Migrator(
             newFolder = storage.Type == FolderType.USER
             ? await FileStorageService.CreateFolderAsync(await GlobalFolderHelper.FolderMyAsync, $"ASC migration files {DateTime.Now:dd.MM.yyyy}")
                     : await FileStorageService.CreateRoomAsync($"ASC migration common files {DateTime.Now:dd.MM.yyyy}", RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null, null, null);
-            Log(MigrationResource.СreateRootFolder);
+            Log(MigrationResource.CreateRootFolder);
         }
         else
         {

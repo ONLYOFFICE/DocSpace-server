@@ -120,11 +120,20 @@
   <data name="AceShareLink" xml:space="preserve">
     <value>Giden Portali</value>
   </data>
+  <data name="AceStatusEnum_Collaborator" xml:space="preserve">
+    <value>Ortak çalışan</value>
+  </data>
   <data name="AceStatusEnum_Comment" xml:space="preserve">
     <value>Yorum</value>
   </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>İçerik oluşturucu</value>
+  </data>
   <data name="AceStatusEnum_CustomFilter" xml:space="preserve">
     <value>Özel Filtre</value>
+  </data>
+  <data name="AceStatusEnum_Editing" xml:space="preserve">
+    <value>Editör</value>
   </data>
   <data name="AceStatusEnum_FillForms" xml:space="preserve">
     <value>Form Doldurma</value>
@@ -141,8 +150,14 @@
   <data name="AceStatusEnum_Review" xml:space="preserve">
     <value>Önizleme</value>
   </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Oda yöneticisi</value>
+  </data>
   <data name="Admin" xml:space="preserve">
     <value>Yönetici</value>
+  </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>Ajan Yöneticisi</value>
   </data>
   <data name="AppAccessDenied" xml:space="preserve">
     <value>Dosyayla çalışmak için dosyaya erişim vermelisiniz</value>
@@ -198,6 +213,15 @@
   <data name="CommentUpload" xml:space="preserve">
     <value>Yüklendi</value>
   </data>
+  <data name="Date" xml:space="preserve">
+    <value>Tarih</value>
+  </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>Paylaşılan bağlantı</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Davetiye bağlantısı</value>
+  </data>
   <data name="DocuSignStatusDeclined" xml:space="preserve">
     <value>Reddedildi</value>
   </data>
@@ -240,17 +264,32 @@
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>{0} boyutundan büyük dosya taşınmayacak</value>
   </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Birden fazla dosyanın Form Doldurma odasına taşınması desteklenmemektedir. Bir seferde bir ONLYOFFICE PDF formu taşıyın.</value>
+  </data>
   <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
     <value>Yeni sürüm, mevcut sürümle aynı olamaz</value>
   </data>
   <data name="ErrorMessage_FolderCopyError" xml:space="preserve">
     <value>Klasörü kopyalayamazsınız</value>
   </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Klasörlerin Form Doldurma odasına taşınması desteklenmemektedir. Bir seferde bir ONLYOFFICE PDF formu taşıyın.</value>
+  </data>
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Gerekli klasör bulunamadı</value>
   </data>
+  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
+    <value>Geçersiz sağlayıcı</value>
+  </data>
+  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
+    <value>Odayı saklamak için bu klasörü kullanmak mümkün değil</value>
+  </data>
   <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Gecersiz Baslik</value>
+  </data>
+  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
+    <value>Davet bağlantısı geçersiz veya geçerliliği sona ermiş</value>
   </data>
   <data name="ErrorMessage_LockedFile" xml:space="preserve">
     <value>Dosya başka bir kullanıcı tarafından kilitlenmiş</value>
@@ -261,8 +300,20 @@
   <data name="ErrorMessage_ManyDownloads" xml:space="preserve">
     <value>Çok fazla indirme.</value>
   </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>Maksimum bağlantı sayısı {0} sayısını aşamaz</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Dosya bu odaya taşınamıyor. Lütfen ONLYOFFICE PDF formunu taşımayı deneyin.</value>
+  </data>
   <data name="ErrorMessage_NotSupportedFormat" xml:space="preserve">
     <value>Üzgünüm, bu dosya biçimi desteklenmiyor</value>
+  </data>
+  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
+    <value>Bu sağlayıcı odaya zaten bağlı</value>
+  </data>
+  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
+    <value>Rol, bu kullanıcı türü için mevcut değil</value>
   </data>
   <data name="ErrorMessage_SaveAnonymous" xml:space="preserve">
     <value>Kaydetmenin yayıncısı bilinmiyor</value>
@@ -276,6 +327,9 @@
   <data name="ErrorMessage_SecurityException" xml:space="preserve">
     <value>Bu işlemi gerçekleştirmek için yeterli izniniz yok</value>
   </data>
+  <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
+    <value>Odayı arşivlemek için yeterli izniniz yok</value>
+  </data>
   <data name="ErrorMessage_SecurityException_Auth" xml:space="preserve">
     <value>{0} sunulan ehliyetle yetkilendirilemiyor.</value>
   </data>
@@ -284,6 +338,9 @@
   </data>
   <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
     <value>Klasörü kopyalamak için yeterli izniniz yok</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
+    <value>Bu klasöre kopyalama izniniz yok</value>
   </data>
   <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
     <value>Oluşturma için yeterli izniniz yok</value>
@@ -306,11 +363,20 @@
   <data name="ErrorMessage_SecurityException_EditFileTwice" xml:space="preserve">
     <value>Dosya başka bir sekmede sizin tarafınızdan düzenleniyor</value>
   </data>
+  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
+    <value>Odayı düzenleme izniniz yok</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Dosyanın mevcut sürümü silinemiyor</value>
+  </data>
   <data name="ErrorMessage_SecurityException_MoveFile" xml:space="preserve">
     <value>Dosyayı taşımak için yeterli izniniz yok</value>
   </data>
   <data name="ErrorMessage_SecurityException_MoveFolder" xml:space="preserve">
     <value>Klasörü taşımak için yeterli izniniz yok</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
+    <value>Bu klasöre taşıma izniniz yok</value>
   </data>
   <data name="ErrorMessage_SecurityException_ReadFile" xml:space="preserve">
     <value>Dosyayı görüntülemek için yeterli izniniz yok</value>
@@ -324,11 +390,17 @@
   <data name="ErrorMessage_SecurityException_RenameFolder" xml:space="preserve">
     <value>Klasörü yeniden adlandırmak için yeterli izniniz yok</value>
   </data>
+  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
+    <value>Odayı arşivden çıkarmak için yeterli izniniz yok</value>
+  </data>
   <data name="ErrorMessage_SecurityException_UpdateEditingFile" xml:space="preserve">
     <value>Düzenleme için açılan dosya nedeniyle güncelleme yapılamaz</value>
   </data>
   <data name="ErrorMessage_SecurityException_ViewFolder" xml:space="preserve">
     <value>Klasör içeriğini görüntülemek için yeterli izniniz yok</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>Çok defa şifre girmeyi denediniz. Lütfen daha sonra tekrar deneyin</value>
   </data>
   <data name="ErrorMessage_SharpBoxException" xml:space="preserve">
     <value>Ucuncu parti icerik klasorune ulasilamiyor, hesabiniza tekrar baglanmayi deneyin.</value>
@@ -336,8 +408,14 @@
   <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>Dosya düzenleme başlangıç hatası</value>
   </data>
+  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
+    <value>Arşivlenmiş odaları düzenleyemezsiniz</value>
+  </data>
   <data name="ErrorMessage_UpdateEditingFile" xml:space="preserve">
     <value>Düzenleme için açılan bir dosyayı güncellemenize izin verilmiyor</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Dosya bu odaya yüklenemiyor. Lütfen ONLYOFFICE PDF formunu yüklemeyi deneyin.</value>
   </data>
   <data name="ErrorMessage_UserNotFound" xml:space="preserve">
     <value>Kullanıcı bulunamadı</value>
@@ -345,44 +423,35 @@
   <data name="ErrorMessage_ViewTrashItem" xml:space="preserve">
     <value>Çöp kutusu öğelerini önizlenize izin verilmiyor</value>
   </data>
-  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
-    <value>Geçersiz sağlayıcı</value>
-  </data>
-  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
-    <value>Odayı saklamak için bu klasörü kullanmak mümkün değil</value>
-  </data>
-  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
-    <value>Davet bağlantısı geçersiz veya geçerliliği sona ermiş</value>
-  </data>
-  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
-    <value>Rol, bu kullanıcı türü için mevcut değil</value>
-  </data>
-  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
-    <value>Bu sağlayıcı odaya zaten bağlı</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
-    <value>Bu klasöre kopyalama izniniz yok</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
-    <value>Bu klasöre taşıma izniniz yok</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
-    <value>Odayı arşivden çıkarmak için yeterli izniniz yok</value>
-  </data>
-  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
-    <value>Arşivlenmiş odaları düzenleyemezsiniz</value>
-  </data>
   <data name="ErrorrMessage_PinRoom" xml:space="preserve">
     <value>Bir odayı sabitleyemezsiniz</value>
   </data>
   <data name="Everyone" xml:space="preserve">
     <value>Herkes</value>
   </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Harici kullanıcı</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Doldurulacak bağlantı</value>
+  </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>Kullanıcı {0} {1} belgeleri</value>
+  </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Form numarası</value>
+  </data>
   <data name="Guest" xml:space="preserve">
     <value>Anonim</value>
   </data>
   <data name="IndexTitle" xml:space="preserve">
     <value>Belge içeriğinde ara</value>
+  </data>
+  <data name="KnowledgeFolder" xml:space="preserve">
+    <value>Bilgi</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Form bağlantısı</value>
   </data>
   <data name="MessageFileCreated" xml:space="preserve">
     <value>"{0}" klasöründe dosya oluşturuldu</value>
@@ -395,6 +464,9 @@
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Dosya artık formu doldurmak için bir taslak değildir.</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Dosyayı açın</value>
   </data>
   <data name="ProductAdminOpportunities" xml:space="preserve">
     <value>Kullanıcı olarak aynısını yap|Dropbox,Box ve diğer hesapları "Ortak Dökümanlar" bölümünden bağlantılayın|Dökümanlara ve klasörlere erişim haklarını "Ortak Dökümanlar" bölümünden düzenleyin</value>
@@ -415,20 +487,17 @@ docx, xlsx, pptx ile en yüksek uyumluluk.</value>
   <data name="ProductUserOpportunities" xml:space="preserve">
     <value>Uygun erişim haklarıyla ortak dökümanları yaratıp düzenlediğiniz gibi kendi dosyalarınızı yaratın ve düzenleyin|Dökümanlara ve klasörlere diğer kullanıcılara okuma/düzenleme hakkı verin|Dropbox, Box ve diğer hesapların bağlantılarını "Belgeler" bölümünden yapın</value>
   </data>
-  <data name="UnknownFirstName" xml:space="preserve">
-    <value>Ad</value>
+  <data name="ResultStorageFolder" xml:space="preserve">
+    <value>Sonuç Depolama</value>
   </data>
-  <data name="UnknownLastName" xml:space="preserve">
-    <value>Soyad</value>
+  <data name="RoleEnum_Collaborator" xml:space="preserve">
+    <value>Ortak çalışan</value>
   </data>
-  <data name="UnlockComment" xml:space="preserve">
-    <value>Dosyanın kilidi kaldırıldı</value>
+  <data name="RoleEnum_Comment" xml:space="preserve">
+    <value>Yorumcu</value>
   </data>
-  <data name="AceStatusEnum_Editing" xml:space="preserve">
-    <value>Editör</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
-    <value>Odayı düzenleme izniniz yok</value>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>İçerik oluşturucu</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
     <value>DocSpace Yöneticisi</value>
@@ -436,41 +505,26 @@ docx, xlsx, pptx ile en yüksek uyumluluk.</value>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Editör</value>
   </data>
-  <data name="RoleEnum_User" xml:space="preserve">
-    <value>Kullanıcı</value>
+  <data name="RoleEnum_FillForms" xml:space="preserve">
+    <value>Form doldurucu</value>
+  </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>Misafir</value>
   </data>
   <data name="RoleEnum_Read" xml:space="preserve">
     <value>Görüntüleyici</value>
   </data>
-  <data name="RoleEnum_Comment" xml:space="preserve">
-    <value>Yorumcu</value>
-  </data>
-  <data name="RoleEnum_FillForms" xml:space="preserve">
-    <value>Form doldurucu</value>
-  </data>
   <data name="RoleEnum_Review" xml:space="preserve">
     <value>İnceleyen</value>
   </data>
-  <data name="RoleEnum_Collaborator" xml:space="preserve">
-    <value>Ortak çalışan</value>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Oda Yöneticisi</value>
   </data>
-  <data name="AceStatusEnum_Collaborator" xml:space="preserve">
-    <value>Ortak çalışan</value>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Oda yöneticisi</value>
   </data>
-  <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
-    <value>Odayı arşivlemek için yeterli izniniz yok</value>
-  </data>
-  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
-    <value>Maksimum bağlantı sayısı {0} sayısını aşamaz</value>
-  </data>
-  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
-    <value>Çok defa şifre girmeyi denediniz. Lütfen daha sonra tekrar deneyin</value>
-  </data>
-  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
-    <value>Davetiye bağlantısı</value>
-  </data>
-  <data name="DefaultExternalLinkTitle" xml:space="preserve">
-    <value>Paylaşılan bağlantı</value>
+  <data name="RoleEnum_User" xml:space="preserve">
+    <value>Kullanıcı</value>
   </data>
   <data name="RoomIndex_Author" xml:space="preserve">
     <value>Yazar</value>
@@ -486,6 +540,9 @@ docx, xlsx, pptx ile en yüksek uyumluluk.</value>
   </data>
   <data name="RoomIndex_ExportAuthor" xml:space="preserve">
     <value>Yazarı Dışa Aktar</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Dosya</value>
   </data>
   <data name="RoomIndex_Index" xml:space="preserve">
     <value>Dizin</value>
@@ -511,79 +568,22 @@ docx, xlsx, pptx ile en yüksek uyumluluk.</value>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Tip</value>
   </data>
-  <data name="RoomIndex_Folder" xml:space="preserve">
-    <value>Dosya</value>
-  </data>
-  <data name="Date" xml:space="preserve">
-    <value>Tarih</value>
-  </data>
-  <data name="User" xml:space="preserve">
-    <value>Kullanıcı</value>
-  </data>
-  <data name="LinkToForm" xml:space="preserve">
-    <value>Form bağlantısı</value>
-  </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Dosyayı açın</value>
-  </data>
-  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Dosya bu odaya yüklenemiyor. Lütfen ONLYOFFICE PDF formunu yüklemeyi deneyin.</value>
-  </data>
-  <data name="FillOutExternalLinkTitle" xml:space="preserve">
-    <value>Doldurulacak bağlantı</value>
-  </data>
-  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Birden fazla dosyanın Form Doldurma odasına taşınması desteklenmemektedir. Bir seferde bir ONLYOFFICE PDF formu taşıyın.</value>
-  </data>
-  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Klasörlerin Form Doldurma odasına taşınması desteklenmemektedir. Bir seferde bir ONLYOFFICE PDF formu taşıyın.</value>
-  </data>
-  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Dosya bu odaya taşınamıyor. Lütfen ONLYOFFICE PDF formunu taşımayı deneyin.</value>
-  </data>
-  <data name="FormNumber" xml:space="preserve">
-    <value>Form numarası</value>
-  </data>
-  <data name="ExternalUser" xml:space="preserve">
-    <value>Harici kullanıcı</value>
-  </data>
-  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
-    <value>Oda yöneticisi</value>
-  </data>
-  <data name="RoleEnum_RoomManager" xml:space="preserve">
-    <value>Oda yöneticisi</value>
-  </data>
-  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
-    <value>İçerik oluşturucu</value>
-  </data>
-  <data name="RoleEnum_ContentCreator" xml:space="preserve">
-    <value>İçerik oluşturucu</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
-    <value>Dosyanın mevcut sürümü silinemiyor</value>
-  </data>
   <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
     <value>Doldurulması için paylaş</value>
   </data>
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>Doldurmaya başla</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Oda Yöneticisi</value>
+  <data name="UnknownFirstName" xml:space="preserve">
+    <value>Ad</value>
   </data>
-  <data name="RoleEnum_Guest" xml:space="preserve">
-    <value>Misafir</value>
+  <data name="UnknownLastName" xml:space="preserve">
+    <value>Soyad</value>
   </data>
-  <data name="AgentManager" xml:space="preserve">
-    <value>Ajan Yöneticisi</value>
+  <data name="UnlockComment" xml:space="preserve">
+    <value>Dosyanın kilidi kaldırıldı</value>
   </data>
-  <data name="FolderNameForReassignedData" xml:space="preserve">
-    <value>Kullanıcı {0} {1} belgeleri</value>
-  </data>
-  <data name="KnowledgeFolder" xml:space="preserve">
-    <value>Bilgi</value>
-  </data>
-  <data name="ResultStorageFolder" xml:space="preserve">
-    <value>Sonuç Depolama</value>
+  <data name="User" xml:space="preserve">
+    <value>Kullanıcı</value>
   </data>
 </root>

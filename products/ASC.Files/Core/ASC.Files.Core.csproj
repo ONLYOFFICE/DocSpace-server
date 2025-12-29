@@ -420,7 +420,6 @@
     <EmbeddedResource Include="Services\DocumentBuilderService\ScriptTemplates\CustomerOperationsReport.docbuilder" />
     <EmbeddedResource Include="Services\DocumentBuilderService\ScriptTemplates\FormFillingReport.docbuilder" />
     <EmbeddedResource Include="Services\DocumentBuilderService\ScriptTemplates\RoomIndexExport.docbuilder" />
-    <EmbeddedResource Include="Services\NotifyService\patterns.xml" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="Resources\FilesCommonResource.de.resx">

@@ -117,18 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ProductAdminOpportunitiesCustomMode" xml:space="preserve">
-    <value>قم بما يقوم به مستخدمينا | اربط Dropbox أو Box أو حسابات أخرى في قسم 'شائع' | قم بتعيين أذونات الوصول للمستندات والمجلدات في قسم 'شائع'</value>
-  </data>
-  <data name="ProductUserOpportunitiesCustomMode" xml:space="preserve">
-    <value>أنشئ وحرر مستنداتك الخاصة وقم بمشاركتها من خلال أذونات الوصول المعطاة | قم بإعطاء أذونات للقراءة أو التعديل للمستخدمين على المستند و المجلد | قم بربط Dropbox، Boxأو حسابات أخرى في قسم 'مستنداتي'</value>
-  </data>
-  <data name="subject_remove_user_data_completed_custom_mode" xml:space="preserve">
-    <value>${LetterLogoText}. تم اكتمال إزالة بيانات المستخدم</value>
-  </data>
-  <data name="subject_saas_custom_mode_reg_data" xml:space="preserve">
-    <value>تم تسجيل بوابة جديدة</value>
-  </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_custom_mode_v1" xml:space="preserve">
     <value>مرحبا، $UserName!
 
@@ -164,5 +152,17 @@ $TrulyYours</value>
 # البريد الالكتروني: $UserEmail
 #رقم الهاتف: $Phone
 #تاريخ الانشاء: $Date</value>
+  </data>
+  <data name="ProductAdminOpportunitiesCustomMode" xml:space="preserve">
+    <value>قم بما يقوم به مستخدمينا | اربط Dropbox أو Box أو حسابات أخرى في قسم 'شائع' | قم بتعيين أذونات الوصول للمستندات والمجلدات في قسم 'شائع'</value>
+  </data>
+  <data name="ProductUserOpportunitiesCustomMode" xml:space="preserve">
+    <value>أنشئ وحرر مستنداتك الخاصة وقم بمشاركتها من خلال أذونات الوصول المعطاة | قم بإعطاء أذونات للقراءة أو التعديل للمستخدمين على المستند و المجلد | قم بربط Dropbox، Boxأو حسابات أخرى في قسم 'مستنداتي'</value>
+  </data>
+  <data name="subject_remove_user_data_completed_custom_mode" xml:space="preserve">
+    <value>${LetterLogoText}. تم اكتمال إزالة بيانات المستخدم</value>
+  </data>
+  <data name="subject_saas_custom_mode_reg_data" xml:space="preserve">
+    <value>تم تسجيل بوابة جديدة</value>
   </data>
 </root>

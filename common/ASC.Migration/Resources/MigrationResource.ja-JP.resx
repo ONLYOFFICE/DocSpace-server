@@ -117,61 +117,16 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="DataProcessing" xml:space="preserve">
-    <value>データ処理中...</value>
-  </data>
-  <data name="DataProcessingCompleted" xml:space="preserve">
-    <value>データ処理完了</value>
-  </data>
-  <data name="DumpParse" xml:space="preserve">
-    <value>データベースの解析</value>
-  </data>
-  <data name="GroupMigration" xml:space="preserve">
-    <value>グループ移行 {0} ({1}/{2})</value>
-  </data>
-  <data name="MigratingUserFiles" xml:space="preserve">
-    <value>ユーザーファイルの移行 {0} ({1}/{2})</value>
-  </data>
-  <data name="MigrationCompleted" xml:space="preserve">
-    <value>移行完了</value>
-  </data>
-  <data name="PreparingForMigration" xml:space="preserve">
-    <value>移行準備</value>
-  </data>
-  <data name="StartOfDataProcessing" xml:space="preserve">
-    <value>データ処理開始...</value>
-  </data>
-  <data name="Unzipping" xml:space="preserve">
-    <value>解凍中...</value>
-  </data>
-  <data name="UnzippingFinished" xml:space="preserve">
-    <value>解凍完了...</value>
-  </data>
-  <data name="UserMigration" xml:space="preserve">
-    <value>ユーザー移行 {0} ({1}/{2})</value>
-  </data>
-  <data name="MigrationCommonFiles" xml:space="preserve">
-    <value>一般的な移行ファイル</value>
-  </data>
-  <data name="MigrationNotFoundException" xml:space="preserve">
-    <value>このような移行プロバイダーはありません</value>
-  </data>
-  <data name="MigrationProgressException" xml:space="preserve">
-    <value>進行中の移行はありません</value>
-  </data>
-  <data name="MigrationProjectFiles" xml:space="preserve">
-    <value>移行プロジェクトファイル</value>
-  </data>
   <data name="CanNotAddUserInGroup" xml:space="preserve">
     <value>ユーザー {0} をグループ {1} に追加できませんでした</value>
   </data>
   <data name="CanNotCreateFile" xml:space="preserve">
     <value>ファイル {0} を作成できませんでした</value>
   </data>
-  <data name="СanNotImportCommonFiles" xml:space="preserve">
+  <data name="CanNotImportCommonFiles" xml:space="preserve">
     <value>共通ファイルをインポートできませんでした</value>
   </data>
-  <data name="СanNotImportProjectFiles" xml:space="preserve">
+  <data name="CanNotImportProjectFiles" xml:space="preserve">
     <value>プロジェクト ファイルをインポートできませんでした</value>
   </data>
   <data name="CanNotImportUser" xml:space="preserve">
@@ -192,6 +147,9 @@
   <data name="CanNotReadInfoFile" xml:space="preserve">
     <value>{0} の info ファイルを読めませんでした</value>
   </data>
+  <data name="CanNotShare" xml:space="preserve">
+    <value>{0} から {1} までのエントリを共有できませんでした</value>
+  </data>
   <data name="CanNotToUnzip" xml:space="preserve">
     <value>{0} を解凍できませんでした</value>
   </data>
@@ -201,16 +159,58 @@
   <data name="CreateFolder" xml:space="preserve">
     <value>フォルダ {0} の作成</value>
   </data>
-  <data name="СreateRootFolder" xml:space="preserve">
+  <data name="CreateRootFolder" xml:space="preserve">
     <value>ルートフォルダの作成</value>
   </data>
   <data name="CreateShareRoom" xml:space="preserve">
     <value>共有ルーム {0} の作成</value>
   </data>
-  <data name="CanNotShare" xml:space="preserve">
-    <value>{0} から {1} までのエントリを共有できませんでした</value>
+  <data name="DataProcessing" xml:space="preserve">
+    <value>データ処理中...</value>
+  </data>
+  <data name="DataProcessingCompleted" xml:space="preserve">
+    <value>データ処理完了</value>
+  </data>
+  <data name="DumpParse" xml:space="preserve">
+    <value>データベースの解析</value>
+  </data>
+  <data name="GroupMigration" xml:space="preserve">
+    <value>グループ移行 {0} ({1}/{2})</value>
   </data>
   <data name="LargeBackup" xml:space="preserve">
     <value>バックアップがポータルの合計サイズより大きいです</value>
+  </data>
+  <data name="MigratingUserFiles" xml:space="preserve">
+    <value>ユーザーファイルの移行 {0} ({1}/{2})</value>
+  </data>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>一般的な移行ファイル</value>
+  </data>
+  <data name="MigrationCompleted" xml:space="preserve">
+    <value>移行完了</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>このような移行プロバイダーはありません</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>進行中の移行はありません</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>移行プロジェクトファイル</value>
+  </data>
+  <data name="PreparingForMigration" xml:space="preserve">
+    <value>移行準備</value>
+  </data>
+  <data name="StartOfDataProcessing" xml:space="preserve">
+    <value>データ処理開始...</value>
+  </data>
+  <data name="Unzipping" xml:space="preserve">
+    <value>解凍中...</value>
+  </data>
+  <data name="UnzippingFinished" xml:space="preserve">
+    <value>解凍完了...</value>
+  </data>
+  <data name="UserMigration" xml:space="preserve">
+    <value>ユーザー移行 {0} ({1}/{2})</value>
   </data>
 </root>

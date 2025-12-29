@@ -39,7 +39,6 @@ public class ExternalShare(
     private ExternalSessionSnapshot _snapshot;
     private string _dbKey;
     private const string RoomLinkPattern = "rooms/share?key={0}";
-    private const string PersonalFolderLinkPattern = "rooms/personal/filter?key={0}";
 
     public async Task<LinkData> GetLinkDataAsync<T>(FileEntry<T> entry, Guid linkId)
     {
@@ -64,7 +63,7 @@ public class ExternalShare(
 
                 url = QueryHelpers.AddQueryString(url, FilesLinkUtility.ShareKey, key);
                 break;
-            case Folder<T> folder when folder.IsRoom:
+            case Folder<T> { IsRoom: true }:
                 url = string.Format(RoomLinkPattern, key);
                 break;
             case Folder<T> { RootFolderType: FolderType.VirtualRooms or FolderType.USER } folder:
