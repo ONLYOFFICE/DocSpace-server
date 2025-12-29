@@ -33,13 +33,10 @@ namespace ASC.Data.Backup;
 [Scope]
 public class NotifyHelper(
     UserManager userManager,
-    StudioNotifyHelper studioNotifyHelper,
     StudioNotifySource studioNotifySource,
     TenantManager tenantManager,
-    AuthManager authManager,
     WorkContext workContext,
     CommonLinkUtility commonLinkUtility,
-    TenantLogoManager tenantLogoManager,
     IServiceProvider serviceProvider)
 {
     public void SetServerBaseUri(string uri)
@@ -52,17 +49,88 @@ public class NotifyHelper(
 
     public async Task SendAboutTransferStartAsync(Tenant tenant, string targetRegion, bool notifyUsers)
     {
-        await MigrationNotifyAsync(tenant, actions.MigrationPortalStart, targetRegion, string.Empty, notifyUsers);
+        tenantManager.SetCurrentTenant(tenant);
+
+        var client = workContext.RegisterClient(serviceProvider, studioNotifySource);
+
+        var users = (notifyUsers
+            ? await userManager.GetUsersAsync(EmployeeStatus.Active)
+            : [await userManager.GetUsersAsync(tenant.OwnerId)])
+            .Where(u => u.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated))
+            .ToArray();
+
+        if (users.Length == 0)
+        {
+            return;
+        }
+        
+        var migrationPortalStartNotifyAction = serviceProvider.GetService<MigrationPortalStartNotifyAction>();
+        migrationPortalStartNotifyAction.Init(targetRegion);
+
+        await client.SendNoticeToAsync(
+            migrationPortalStartNotifyAction,
+            users.Cast<IRecipient>().ToArray(),
+            [StudioNotifyService.EMailSenderName]);
+        
     }
 
     public async Task SendAboutTransferCompleteAsync(Tenant tenant, string targetRegion, string targetAddress, bool notifyOnlyOwner, int toTenantId)
     {
-        await MigrationNotifyAsync(tenant, actions.MigrationPortalSuccessV115, targetRegion, targetAddress, !notifyOnlyOwner, toTenantId);
+        tenantManager.SetCurrentTenant(tenant);
+
+        var client = workContext.RegisterClient(serviceProvider, studioNotifySource);
+
+        var users = (!notifyOnlyOwner
+            ? await userManager.GetUsersAsync(EmployeeStatus.Active)
+            : [await userManager.GetUsersAsync(tenant.OwnerId)])
+            .Where(u => u.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated))
+            .ToArray();
+
+        if (users.Length == 0)
+        {
+            return;
+        }
+        
+        var migrationPortalSuccessV115NotifyAction = serviceProvider.GetService<MigrationPortalSuccessV115NotifyAction>();
+        
+        foreach (var user in users)
+        {        
+            await migrationPortalSuccessV115NotifyAction.Init(user, targetRegion, targetAddress, toTenantId);
+            
+            await client.SendNoticeToAsync(
+                migrationPortalSuccessV115NotifyAction,
+                [user],
+                [StudioNotifyService.EMailSenderName]);
+        }
     }
 
     public async Task SendAboutTransferErrorAsync(Tenant tenant, string targetRegion, string resultAddress, bool notifyOnlyOwner)
     {
-        await MigrationNotifyAsync(tenant, !string.IsNullOrEmpty(targetRegion) ? actions.MigrationPortalError : actions.MigrationPortalServerFailure, targetRegion, resultAddress, !notifyOnlyOwner);
+        tenantManager.SetCurrentTenant(tenant);
+
+        var client = workContext.RegisterClient(serviceProvider, studioNotifySource);
+
+        var users = (!notifyOnlyOwner
+            ? await userManager.GetUsersAsync(EmployeeStatus.Active)
+            : [await userManager.GetUsersAsync(tenant.OwnerId)])
+            .Where(u => u.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated))
+            .ToArray();
+
+        if (users.Length == 0)
+        {
+            return;
+        }
+        
+        var migrationPortalErrorNotifyAction = serviceProvider.GetService<MigrationPortalErrorNotifyAction>();
+        migrationPortalErrorNotifyAction.Init(targetRegion, resultAddress);
+        
+        var migrationPortalServerFailureNotifyAction = serviceProvider.GetService<MigrationPortalServerFailureNotifyAction>();
+        migrationPortalServerFailureNotifyAction.Init(targetRegion, resultAddress);
+        
+        await client.SendNoticeToAsync(
+            !string.IsNullOrEmpty(targetRegion) ? migrationPortalErrorNotifyAction : migrationPortalServerFailureNotifyAction,
+            users.Cast<IRecipient>().ToArray(),
+            [StudioNotifyService.EMailSenderName]);
     }
 
     public async Task SendAboutBackupCompletedAsync(int tenantId, Guid userId)
@@ -149,91 +217,6 @@ public class NotifyHelper(
 
             await client.SendNoticeToAsync(restoreCompletedV115NotifyAction, user, StudioNotifyService.EMailSenderName);
         }
-    }
-
-    private async Task MigrationNotifyAsync(Tenant tenant, INotifyAction action, string region, string url, bool notify, int? toTenantId = null)
-    {
-        tenantManager.SetCurrentTenant(tenant);
-
-        var client = workContext.RegisterClient(serviceProvider, studioNotifySource);
-
-        var users = (notify
-            ? await userManager.GetUsersAsync(EmployeeStatus.Active)
-            : [await userManager.GetUsersAsync(tenant.OwnerId)])
-            .Where(u => u.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated))
-            .ToArray();
-
-        if (users.Length != 0)
-        {
-            var args = CreateArgsAsync(region, url);
-            if (action.Equals(actions.MigrationPortalSuccessV115))
-            {
-                foreach (var user in users)
-                {
-                    var currentArgs = new List<ITagValue>(args);
-
-                    var newTenantId = toTenantId ?? tenant.Id;
-                    var hash = (await authManager.GetUserPasswordStampAsync(user.Id)).ToString("s", CultureInfo.InvariantCulture);
-                    var confirmationUrl = url + "/" + commonLinkUtility.GetConfirmationUrlRelative(newTenantId, user.Email, ConfirmType.PasswordChange, hash, user.Id);
-                    var culture = user.GetCulture();
-
-                    var orangeButtonText = BackupResource.ResourceManager.GetString("ButtonSetPassword", culture);
-                    currentArgs.Add(TagValues.OrangeButton(orangeButtonText, confirmationUrl));
-
-                    var bestReagardsTxt = WebstudioNotifyPatternResource.ResourceManager.GetString("BestRegardsText", culture);
-                    currentArgs.Add(TagValues.TrulyYours(studioNotifyHelper, bestReagardsTxt));
-
-                    var logoArgs = await CreateLogoArgsAsync(culture);
-                    currentArgs.AddRange(logoArgs);
-
-                    await client.SendNoticeToAsync(
-                        action,
-                        [user],
-                        [StudioNotifyService.EMailSenderName],
-                        currentArgs.ToArray());
-                }
-            }
-            else
-            {
-                await client.SendNoticeToAsync(
-                    action,
-                    users.Cast<IRecipient>().ToArray(),
-                    [StudioNotifyService.EMailSenderName],
-                    args.ToArray());
-            }
-        }
-    }
-
-    private List<ITagValue> CreateArgsAsync(string region, string url)
-    {
-        var args = new List<ITagValue>
-        {
-                        new TagValue(CommonTags.RegionName, TransferResourceHelper.GetRegionDescription(region)),
-                        new TagValue(CommonTags.PortalUrl, url)
-                    };
-
-        if (!string.IsNullOrEmpty(url))
-        {
-            args.Add(new TagValue(CommonTags.VirtualRootPath, url));
-            args.Add(new TagValue(CommonTags.ProfileUrl, url + commonLinkUtility.GetMyStaff()));
-        }
-
-        return args;
-    }
-
-    private async Task<List<ITagValue>> CreateLogoArgsAsync(CultureInfo cultureInfo)
-    {
-        var args = new List<ITagValue>();
-
-        var attachment = await tenantLogoManager.GetMailLogoAsAttachmentAsync(cultureInfo);
-
-        if (attachment != null)
-        {
-            args.Add(new TagValue(CommonTags.LetterLogo, "cid:" + attachment.ContentId));
-            args.Add(new TagValue(CommonTags.EmbeddedAttachments, new[] { attachment }));
-        }
-
-        return args;
     }
 }
 
@@ -382,5 +365,68 @@ public sealed class RestoreCompletedV115NotifyAction(AuthManager authManager, Co
         [
             TagValues.OrangeButton(orangeButtonText, await urlShortener.GetShortenLinkAsync(confirmationUrl))
         ];
+    }
+}
+
+[Scope]
+public sealed class MigrationPortalSuccessV115NotifyAction(CommonLinkUtility commonLinkUtility, AuthManager authManager, StudioNotifyHelper studioNotifyHelper, TenantLogoManager tenantLogoManager) : INotifyAction
+{
+    public string ID => "migration_success_v115";
+
+    public List<Pattern> Patterns
+    {
+        get =>
+        [
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_migration_success, () => WebstudioNotifyPatternResource.pattern_migration_success_v115)
+        ];
+    }
+
+    public List<ITagValue> Tags { get; set; }
+    
+    public async Task Init(UserInfo user, string region, string url, int toTenantId)
+    {
+        var args = new List<ITagValue>
+        {
+            new TagValue(CommonTags.RegionName, TransferResourceHelper.GetRegionDescription(region)),
+            new TagValue(CommonTags.PortalUrl, url)
+        };
+
+        if (!string.IsNullOrEmpty(url))
+        {
+            args.Add(new TagValue(CommonTags.VirtualRootPath, url));
+            args.Add(new TagValue(CommonTags.ProfileUrl, url + commonLinkUtility.GetMyStaff()));
+        }
+
+        var newTenantId = toTenantId;
+        var hash = (await authManager.GetUserPasswordStampAsync(user.Id)).ToString("s", CultureInfo.InvariantCulture);
+        var confirmationUrl = url + "/" + commonLinkUtility.GetConfirmationUrlRelative(newTenantId, user.Email, ConfirmType.PasswordChange, hash, user.Id);
+        var culture = user.GetCulture();
+
+        var orangeButtonText = BackupResource.ResourceManager.GetString("ButtonSetPassword", culture);
+        args.Add(TagValues.OrangeButton(orangeButtonText, confirmationUrl));
+
+        var bestReagardsTxt = WebstudioNotifyPatternResource.ResourceManager.GetString("BestRegardsText", culture);
+        args.Add(TagValues.TrulyYours(studioNotifyHelper, bestReagardsTxt));
+
+        var logoArgs = await CreateLogoArgsAsync(culture);
+        args.AddRange(logoArgs);
+        
+        Tags = args;
+
+    }
+    
+    private async Task<List<ITagValue>> CreateLogoArgsAsync(CultureInfo cultureInfo)
+    {
+        var args = new List<ITagValue>();
+
+        var attachment = await tenantLogoManager.GetMailLogoAsAttachmentAsync(cultureInfo);
+
+        if (attachment != null)
+        {
+            args.Add(new TagValue(CommonTags.LetterLogo, "cid:" + attachment.ContentId));
+            args.Add(new TagValue(CommonTags.EmbeddedAttachments, new[] { attachment }));
+        }
+
+        return args;
     }
 }

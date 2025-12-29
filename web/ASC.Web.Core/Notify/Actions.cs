@@ -871,24 +871,20 @@ public sealed class MigrationPortalStartNotifyAction : INotifyAction
     }
 
     public List<ITagValue> Tags { get; set; }
-}
-
-public sealed class MigrationPortalSuccessV115NotifyAction : INotifyAction
-{
-    public string ID => "migration_success_v115";
-
-    public List<Pattern> Patterns
+    
+    public void Init(string region)
     {
-        get =>
+        Tags =
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_migration_success, () => WebstudioNotifyPatternResource.pattern_migration_success_v115)
+            new TagValue(CommonTags.RegionName, TransferResourceHelper.GetRegionDescription(region)),
+            new TagValue(CommonTags.PortalUrl, string.Empty)
         ];
     }
-
-    public List<ITagValue> Tags { get; set; }
 }
 
-public sealed class MigrationPortalErrorNotifyAction : INotifyAction
+
+
+public sealed class MigrationPortalErrorNotifyAction(CommonLinkUtility commonLinkUtility) : INotifyAction
 {
     public string ID => "migration_error";
 
@@ -901,9 +897,26 @@ public sealed class MigrationPortalErrorNotifyAction : INotifyAction
     }
 
     public List<ITagValue> Tags { get; set; }
+    
+    public void Init(string region, string url)
+    {
+        var args = new List<ITagValue>
+        {
+            new TagValue(CommonTags.RegionName, TransferResourceHelper.GetRegionDescription(region)),
+            new TagValue(CommonTags.PortalUrl, url)
+        };
+
+        if (!string.IsNullOrEmpty(url))
+        {
+            args.Add(new TagValue(CommonTags.VirtualRootPath, url));
+            args.Add(new TagValue(CommonTags.ProfileUrl, url + commonLinkUtility.GetMyStaff()));
+        }
+
+        Tags = args;
+    }
 }
 
-public sealed class MigrationPortalServerFailureNotifyAction : INotifyAction
+public sealed class MigrationPortalServerFailureNotifyAction(CommonLinkUtility commonLinkUtility) : INotifyAction
 {
     public string ID => "migration_server_failure";
 
@@ -916,6 +929,23 @@ public sealed class MigrationPortalServerFailureNotifyAction : INotifyAction
     }
 
     public List<ITagValue> Tags { get; set; }
+    
+    public void Init(string region, string url)
+    {
+        var args = new List<ITagValue>
+        {
+            new TagValue(CommonTags.RegionName, TransferResourceHelper.GetRegionDescription(region)),
+            new TagValue(CommonTags.PortalUrl, url)
+        };
+
+        if (!string.IsNullOrEmpty(url))
+        {
+            args.Add(new TagValue(CommonTags.VirtualRootPath, url));
+            args.Add(new TagValue(CommonTags.ProfileUrl, url + commonLinkUtility.GetMyStaff()));
+        }
+
+        Tags = args;
+    }
 }
 
 public sealed class PortalRenameNotifyAction(DisplayUserSettingsHelper displayUserSettingsHelper) : INotifyAction
@@ -1430,6 +1460,14 @@ public sealed class StorageEncryptionStartNotifyAction : INotifyAction
     }
 
     public List<ITagValue> Tags { get; set; }
+    
+    public void Init(UserInfo u, string serverRootPath)
+    {        
+        Tags = [
+            new TagValue(CommonTags.UserName, u.FirstName.HtmlEncode()),
+            new TagValue(CommonTags.PortalUrl, serverRootPath)
+        ];
+    }
 }
 
 public sealed class StorageEncryptionSuccessNotifyAction : INotifyAction
@@ -1445,6 +1483,14 @@ public sealed class StorageEncryptionSuccessNotifyAction : INotifyAction
     }
 
     public List<ITagValue> Tags { get; set; }
+    
+    public void Init(UserInfo u, string serverRootPath)
+    {        
+        Tags = [
+            new TagValue(CommonTags.UserName, u.FirstName.HtmlEncode()),
+            new TagValue(CommonTags.PortalUrl, serverRootPath)
+        ];
+    }
 }
 
 public sealed class StorageEncryptionErrorNotifyAction : INotifyAction
@@ -1460,6 +1506,14 @@ public sealed class StorageEncryptionErrorNotifyAction : INotifyAction
     }
 
     public List<ITagValue> Tags { get; set; }
+    
+    public void Init(UserInfo u, string serverRootPath)
+    {        
+        Tags = [
+            new TagValue(CommonTags.UserName, u.FirstName.HtmlEncode()),
+            new TagValue(CommonTags.PortalUrl, serverRootPath)
+        ];
+    }
 }
 
 public sealed class StorageDecryptionStartNotifyAction : INotifyAction
@@ -1475,6 +1529,14 @@ public sealed class StorageDecryptionStartNotifyAction : INotifyAction
     }
 
     public List<ITagValue> Tags { get; set; }
+    
+    public void Init(UserInfo u, string serverRootPath)
+    {        
+        Tags = [
+            new TagValue(CommonTags.UserName, u.FirstName.HtmlEncode()),
+            new TagValue(CommonTags.PortalUrl, serverRootPath)
+        ];
+    }
 }
 
 public sealed class StorageDecryptionSuccessNotifyAction : INotifyAction
@@ -1490,6 +1552,14 @@ public sealed class StorageDecryptionSuccessNotifyAction : INotifyAction
     }
 
     public List<ITagValue> Tags { get; set; }
+    
+    public void Init(UserInfo u, string serverRootPath)
+    {        
+        Tags = [
+            new TagValue(CommonTags.UserName, u.FirstName.HtmlEncode()),
+            new TagValue(CommonTags.PortalUrl, serverRootPath)
+        ];
+    }
 }
 
 public sealed class StorageDecryptionErrorNotifyAction : INotifyAction
@@ -1505,6 +1575,14 @@ public sealed class StorageDecryptionErrorNotifyAction : INotifyAction
     }
 
     public List<ITagValue> Tags { get; set; }
+    
+    public void Init(UserInfo u, string serverRootPath)
+    {        
+        Tags = [
+            new TagValue(CommonTags.UserName, u.FirstName.HtmlEncode()),
+            new TagValue(CommonTags.PortalUrl, serverRootPath)
+        ];
+    }
 }
 
 public sealed class SaasRoomInviteNotifyAction(StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : INotifyAction
@@ -1765,7 +1843,7 @@ public sealed class SaasDocSpaceRegistrationNotifyAction(StudioNotifyHelper stud
     }
 }
 
-public sealed class SaasAdminActivationV1NotifyAction : INotifyAction
+public sealed class SaasAdminActivationV1NotifyAction(StudioNotifyHelper studioNotifyHelper, CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener, TenantManager tenantManager) : INotifyAction
 {
     public string ID => "saas_admin_activation_v1";
 
@@ -1778,9 +1856,45 @@ public sealed class SaasAdminActivationV1NotifyAction : INotifyAction
     }
 
     public List<ITagValue> Tags { get; set; }
+    
+    public async Task Init(UserInfo u)
+    {        
+        var culture = GetCulture(u);
+
+        ITagValue orangeButton = new TagValue("OrangeButton", "");
+
+        if (u.ActivationStatus != EmployeeActivationStatus.Activated)
+        {
+            var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(u.Email, ConfirmType.EmailActivation, null, u.Id);
+            var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonConfirm", culture);
+            orangeButton = TagValues.OrangeButton(orangeButtonText, await urlShortener.GetShortenLinkAsync(confirmationUrl));
+        }
+
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
+        
+        Tags = [
+            new TagValue(CommonTags.UserName, u.FirstName.HtmlEncode()),
+            orangeButton,
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
+            new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
+            new TagValue(CommonTags.Footer, "common")
+        ];
+    }
+    
+    private CultureInfo GetCulture(UserInfo user)
+    {
+        CultureInfo culture = null;
+
+        if (user != null && !string.IsNullOrEmpty(user.CultureName))
+        {
+            culture = user.GetCulture();
+        }
+
+        return culture ?? tenantManager.GetCurrentTenant(false)?.GetCulture() ?? CultureInfo.CurrentUICulture;
+    }
 }
 
-public sealed class EnterpriseAdminActivationV1NotifyAction : INotifyAction
+public sealed class EnterpriseAdminActivationV1NotifyAction(StudioNotifyHelper studioNotifyHelper, CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener, TenantManager tenantManager) : INotifyAction
 {
     public string ID => "enterprise_admin_activation_v1";
 
@@ -1793,9 +1907,45 @@ public sealed class EnterpriseAdminActivationV1NotifyAction : INotifyAction
     }
 
     public List<ITagValue> Tags { get; set; }
+    
+    public async Task Init(UserInfo u)
+    {        
+        var culture = GetCulture(u);
+
+        ITagValue orangeButton = new TagValue("OrangeButton", "");
+
+        if (u.ActivationStatus != EmployeeActivationStatus.Activated)
+        {
+            var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(u.Email, ConfirmType.EmailActivation, null, u.Id);
+            var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonConfirm", culture);
+            orangeButton = TagValues.OrangeButton(orangeButtonText, await urlShortener.GetShortenLinkAsync(confirmationUrl));
+        }
+
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
+        
+        Tags = [
+            new TagValue(CommonTags.UserName, u.FirstName.HtmlEncode()),
+            orangeButton,
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
+            new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
+            new TagValue(CommonTags.Footer, null)
+        ];
+    }
+    
+    private CultureInfo GetCulture(UserInfo user)
+    {
+        CultureInfo culture = null;
+
+        if (user != null && !string.IsNullOrEmpty(user.CultureName))
+        {
+            culture = user.GetCulture();
+        }
+
+        return culture ?? tenantManager.GetCurrentTenant(false)?.GetCulture() ?? CultureInfo.CurrentUICulture;
+    }
 }
 
-public sealed class EnterpriseWhitelabelAdminActivationV1NotifyAction : INotifyAction
+public sealed class EnterpriseWhitelabelAdminActivationV1NotifyAction(StudioNotifyHelper studioNotifyHelper, CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener, TenantManager tenantManager)  : INotifyAction
 {
     public string ID => "enterprise_whitelabel_admin_activation_v1";
 
@@ -1808,9 +1958,45 @@ public sealed class EnterpriseWhitelabelAdminActivationV1NotifyAction : INotifyA
     }
 
     public List<ITagValue> Tags { get; set; }
+    
+    public async Task Init(UserInfo u)
+    {        
+        var culture = GetCulture(u);
+
+        ITagValue orangeButton = new TagValue("OrangeButton", "");
+
+        if (u.ActivationStatus != EmployeeActivationStatus.Activated)
+        {
+            var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(u.Email, ConfirmType.EmailActivation, null, u.Id);
+            var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonConfirm", culture);
+            orangeButton = TagValues.OrangeButton(orangeButtonText, await urlShortener.GetShortenLinkAsync(confirmationUrl));
+        }
+
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
+        
+        Tags = [
+            new TagValue(CommonTags.UserName, u.FirstName.HtmlEncode()),
+            orangeButton,
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
+            new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
+            new TagValue(CommonTags.Footer, null)
+        ];
+    }
+    
+    private CultureInfo GetCulture(UserInfo user)
+    {
+        CultureInfo culture = null;
+
+        if (user != null && !string.IsNullOrEmpty(user.CultureName))
+        {
+            culture = user.GetCulture();
+        }
+
+        return culture ?? tenantManager.GetCurrentTenant(false)?.GetCulture() ?? CultureInfo.CurrentUICulture;
+    }
 }
 
-public sealed class OpensourceAdminActivationV1NotifyAction : INotifyAction
+public sealed class OpensourceAdminActivationV1NotifyAction(StudioNotifyHelper studioNotifyHelper, CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener, TenantManager tenantManager)  : INotifyAction
 {
     public string ID => "opensource_admin_activation_v1";
 
@@ -1823,6 +2009,42 @@ public sealed class OpensourceAdminActivationV1NotifyAction : INotifyAction
     }
 
     public List<ITagValue> Tags { get; set; }
+    
+    public async Task Init(UserInfo u)
+    {        
+        var culture = GetCulture(u);
+
+        ITagValue orangeButton = new TagValue("OrangeButton", "");
+
+        if (u.ActivationStatus != EmployeeActivationStatus.Activated)
+        {
+            var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(u.Email, ConfirmType.EmailActivation, null, u.Id);
+            var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonConfirm", culture);
+            orangeButton = TagValues.OrangeButton(orangeButtonText, await urlShortener.GetShortenLinkAsync(confirmationUrl));
+        }
+
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
+        
+        Tags = [
+            new TagValue(CommonTags.UserName, u.FirstName.HtmlEncode()),
+            orangeButton,
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
+            new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
+            new TagValue(CommonTags.Footer, "opensource")
+        ];
+    }
+    
+    private CultureInfo GetCulture(UserInfo user)
+    {
+        CultureInfo culture = null;
+
+        if (user != null && !string.IsNullOrEmpty(user.CultureName))
+        {
+            culture = user.GetCulture();
+        }
+
+        return culture ?? tenantManager.GetCurrentTenant(false)?.GetCulture() ?? CultureInfo.CurrentUICulture;
+    }
 }
 
 public sealed class SaasAdminWelcomeV1NotifyAction(CommonLinkUtility commonLinkUtility, StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : INotifyAction

@@ -582,48 +582,38 @@ public class StudioNotifyService(
         try
         {
             INotifyAction notifyAction;
-            var footer = "common";
 
             if (tenantExtra.Enterprise)
             {
+                var enterpriseAdminActivationV1NotifyAction = serviceProvider.GetService<EnterpriseAdminActivationV1NotifyAction>();
+                await enterpriseAdminActivationV1NotifyAction.Init(u);
+                
+                var enterpriseWhitelabelAdminActivationV1NotifyAction = serviceProvider.GetService<EnterpriseWhitelabelAdminActivationV1NotifyAction>();
+                await enterpriseWhitelabelAdminActivationV1NotifyAction.Init(u);
+                
                 var defaultRebranding = await MailWhiteLabelSettings.IsDefaultAsync(settingsManager);
-                notifyAction = defaultRebranding ? actions.EnterpriseAdminActivationV1 : actions.EnterpriseWhitelabelAdminActivationV1;
-                footer = null;
+                notifyAction = defaultRebranding ? enterpriseAdminActivationV1NotifyAction : enterpriseWhitelabelAdminActivationV1NotifyAction;
             }
             else if (tenantExtra.Opensource)
             {
-                notifyAction = actions.OpensourceAdminActivationV1;
-                footer = "opensource";
+                var opensourceAdminActivationV1NotifyAction = serviceProvider.GetService<OpensourceAdminActivationV1NotifyAction>();
+                await opensourceAdminActivationV1NotifyAction.Init(u);
+                notifyAction = opensourceAdminActivationV1NotifyAction;
             }
             else
             {
-                notifyAction = actions.SaasAdminActivationV1;
+                var saasAdminActivationV1NotifyAction = serviceProvider.GetService<SaasAdminActivationV1NotifyAction>();
+                await saasAdminActivationV1NotifyAction.Init(u);
+                notifyAction = saasAdminActivationV1NotifyAction;
             }
-
-            var culture = GetCulture(u);
-
-            ITagValue orangeButton = new TagValue("OrangeButton", "");
 
             if (u.ActivationStatus != EmployeeActivationStatus.Activated)
             {
-                var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(u.Email, ConfirmType.EmailActivation, null, u.Id);
-                var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonConfirm", culture);
-                orangeButton = TagValues.OrangeButton(orangeButtonText, await urlShortener.GetShortenLinkAsync(confirmationUrl));
-
                 await settingsManager.SaveAsync(new FirstEmailConfirmSettings { IsFirst = true });
             }
 
-            var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
-            await studioNotifyServiceHelper.SendNoticeToAsync(
-            notifyAction,
-            await studioNotifyHelper.RecipientFromEmailAsync(u.Email, false),
-            [EMailSenderName],
-            new TagValue(CommonTags.UserName, u.FirstName.HtmlEncode()),
-            orangeButton,
-            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
-            new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
-            new TagValue(CommonTags.Footer, footer));
+            await studioNotifyServiceHelper.SendNoticeToAsync(notifyAction, await studioNotifyHelper.RecipientFromEmailAsync(u.Email, false), [EMailSenderName]);
         }
         catch (Exception error)
         {
@@ -713,49 +703,96 @@ public class StudioNotifyService(
 
     public async Task SendStorageEncryptionStartAsync(string serverRootPath)
     {
-        await SendStorageEncryptionNotifyAsync(actions.StorageEncryptionStart, false, serverRootPath);
+        var storageEncryptionStartNotifyAction = serviceProvider.GetService<StorageEncryptionStartNotifyAction>();
+        
+        var users = (await userManager.GetUsersAsync()).Where(u => u.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated));
+
+        foreach (var u in users)
+        {        
+            storageEncryptionStartNotifyAction.Init(u, serverRootPath);
+            
+            await studioNotifyServiceHelper.SendNoticeToAsync(storageEncryptionStartNotifyAction, [await studioNotifyHelper.ToRecipientAsync(u.Id)], [EMailSenderName]);
+        }
     }
 
     public async Task SendStorageEncryptionSuccessAsync(string serverRootPath)
     {
-        await SendStorageEncryptionNotifyAsync(actions.StorageEncryptionSuccess, false, serverRootPath);
+        var storageEncryptionSuccessNotifyAction = serviceProvider.GetService<StorageEncryptionSuccessNotifyAction>();
+        
+        var users = (await userManager.GetUsersAsync()).Where(u => u.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated));
+
+        foreach (var u in users)
+        {           
+            storageEncryptionSuccessNotifyAction.Init(u, serverRootPath);
+            
+            await studioNotifyServiceHelper.SendNoticeToAsync(storageEncryptionSuccessNotifyAction, [await studioNotifyHelper.ToRecipientAsync(u.Id)], [EMailSenderName]);
+        }
     }
 
     public async Task SendStorageEncryptionErrorAsync(string serverRootPath)
     {
-        await SendStorageEncryptionNotifyAsync(actions.StorageEncryptionError, true, serverRootPath);
+        var storageEncryptionErrorNotifyAction = serviceProvider.GetService<StorageEncryptionErrorNotifyAction>();
+        
+        var users =  await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupAdmin.ID);
+
+        foreach (var u in users)
+        {
+            storageEncryptionErrorNotifyAction.Init(u, serverRootPath);
+            
+            await studioNotifyServiceHelper.SendNoticeToAsync(
+                storageEncryptionErrorNotifyAction,
+                [await studioNotifyHelper.ToRecipientAsync(u.Id)],
+                [EMailSenderName]);
+        }
     }
 
     public async Task SendStorageDecryptionStartAsync(string serverRootPath)
     {
-        await SendStorageEncryptionNotifyAsync(actions.StorageDecryptionStart, false, serverRootPath);
+        var storageDecryptionStartNotifyAction = serviceProvider.GetService<StorageDecryptionStartNotifyAction>();
+        
+        var users = (await userManager.GetUsersAsync()).Where(u => u.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated));
+
+        foreach (var u in users)
+        {
+            storageDecryptionStartNotifyAction.Init(u, serverRootPath);
+            
+            await studioNotifyServiceHelper.SendNoticeToAsync(
+                storageDecryptionStartNotifyAction,
+                [await studioNotifyHelper.ToRecipientAsync(u.Id)],
+                [EMailSenderName]);
+        }
     }
 
     public async Task SendStorageDecryptionSuccessAsync(string serverRootPath)
     {
-        await SendStorageEncryptionNotifyAsync(actions.StorageDecryptionSuccess, false, serverRootPath);
+        var storageDecryptionSuccessNotifyAction = serviceProvider.GetService<StorageDecryptionSuccessNotifyAction>();
+        
+        var users = (await userManager.GetUsersAsync()).Where(u => u.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated));
+
+        foreach (var u in users)
+        {
+            storageDecryptionSuccessNotifyAction.Init(u, serverRootPath);
+            
+            await studioNotifyServiceHelper.SendNoticeToAsync(
+                storageDecryptionSuccessNotifyAction,
+                [await studioNotifyHelper.ToRecipientAsync(u.Id)],
+                [EMailSenderName]);
+        }
     }
 
     public async Task SendStorageDecryptionErrorAsync(string serverRootPath)
     {
-        await SendStorageEncryptionNotifyAsync(actions.StorageDecryptionError, true, serverRootPath);
-    }
-
-    private async Task SendStorageEncryptionNotifyAsync(INotifyAction action, bool notifyAdminsOnly, string serverRootPath)
-    {
-        var users = notifyAdminsOnly
-                    ? await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupAdmin.ID)
-                    : (await userManager.GetUsersAsync()).Where(u => u.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated));
+        var storageDecryptionErrorNotifyAction = serviceProvider.GetService<StorageDecryptionErrorNotifyAction>();
+        
+        var users = await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupAdmin.ID);
 
         foreach (var u in users)
-        {
+        {            
+            storageDecryptionErrorNotifyAction.Init(u, serverRootPath);
             await studioNotifyServiceHelper.SendNoticeToAsync(
-            action,
-            null,
-            [await studioNotifyHelper.ToRecipientAsync(u.Id)],
-            [EMailSenderName],
-            new TagValue(CommonTags.UserName, u.FirstName.HtmlEncode()),
-            new TagValue(CommonTags.PortalUrl, serverRootPath));
+                storageDecryptionErrorNotifyAction,
+                [await studioNotifyHelper.ToRecipientAsync(u.Id)],
+                [EMailSenderName]);
         }
     }
 
