@@ -25,6 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Core.Common.Notify.Model;
+using ASC.Web.Core.Utility;
 
 namespace ASC.ActiveDirectory.Base;
 
@@ -34,18 +35,7 @@ public class NotifyConstants : INotifyActionList
     public static readonly string TagUserEmail = "UserEmail";
     public static readonly string TagMyStaffLink = "MyStaffLink";
 
-    public readonly INotifyAction ActionLdapActivation;
-
-    public NotifyConstants()
-    {
-        ActionLdapActivation = new NotifyAction("user_ldap_activation", this)
-        {
-            Patterns = [
-                new EmailPattern(() => WebstudioNotifyPatternResource.subject_user_ldap_activation, () => WebstudioNotifyPatternResource.pattern_user_ldap_activation)
-            ]
-        };
-    }
-
+    
     public static ITagValue TagOrangeButton(string btnText, string btnUrl)
     {
         var sb = new StringBuilder();
@@ -83,4 +73,30 @@ public static class NotifyCommonTags
     public static string MasterTemplate = "MasterTemplate";
 
     public static readonly string WithoutUnsubscribe = "WithoutUnsubscribe";
+}
+
+[Scope]
+public class LdapActivationNotifyAction(CommonLinkUtility commonLinkUtility, DisplayUserSettingsHelper displayUserSettingsHelper, IUrlShortener urlShortener) : INotifyAction
+{
+    public string ID  => "user_ldap_activation";
+
+    public List<Pattern> Patterns =>
+    [
+        new EmailPattern(() => WebstudioNotifyPatternResource.subject_user_ldap_activation, () => WebstudioNotifyPatternResource.pattern_user_ldap_activation)
+    ];
+    
+    public List<ITagValue> Tags { get; set; }
+
+    public async Task Init(UserInfo ldapUserInfo, LdapLocalization resource)
+    {                   
+        var confirmLink = commonLinkUtility.GetConfirmationEmailUrl(ldapUserInfo.Email, ConfirmType.EmailActivation);
+        Tags =
+        [
+            new TagValue(NotifyConstants.TagUserName, ldapUserInfo.DisplayUserName(displayUserSettingsHelper)),
+            new TagValue(NotifyConstants.TagUserEmail, ldapUserInfo.Email),
+            new TagValue(NotifyConstants.TagMyStaffLink, commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetMyStaff())),
+            NotifyConstants.TagOrangeButton(resource.NotifyButtonJoin, await urlShortener.GetShortenLinkAsync(confirmLink)),
+            new TagValue(NotifyCommonTags.WithoutUnsubscribe, true)
+        ];
+    }
 }

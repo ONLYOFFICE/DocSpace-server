@@ -2743,6 +2743,22 @@ public sealed class RoomsActivityNotifyAction : INotifyAction
     }
 
     public List<ITagValue> Tags { get; set; }
+    
+    public void Init(DateTime scheduleDate, WhatsNewType whatsNewType, HashSet<string> userActivities)
+    {        
+        Tags = [
+                new TagValue(CommonTags.Activities, userActivities),
+                new TagValue(CommonTags.Date, DateToString(scheduleDate, whatsNewType)),
+                new TagValue(CommonTags.Priority, 1)
+        ];
+    }
+    
+    private static string DateToString(DateTime d, WhatsNewType type)
+    {
+        d = type == WhatsNewType.DailyFeed ? d.AddDays(-1) : d.AddHours(-1);
+
+        return d.ConvertNumerals("M");
+    }
 }
 
 public sealed class SendWhatsNewNotifyAction : INotifyAction
@@ -2759,6 +2775,22 @@ public sealed class SendWhatsNewNotifyAction : INotifyAction
     }
 
     public List<ITagValue> Tags { get; set; }
+    
+    public void Init(DateTime scheduleDate, WhatsNewType whatsNewType, HashSet<string> userActivities)
+    {        
+        Tags = [
+            new TagValue(CommonTags.Activities, userActivities),
+            new TagValue(CommonTags.Date, DateToString(scheduleDate, whatsNewType)),
+            new TagValue(CommonTags.Priority, 1)
+        ];
+    }
+    
+    private static string DateToString(DateTime d, WhatsNewType type)
+    {
+        d = type == WhatsNewType.DailyFeed ? d.AddDays(-1) : d.AddHours(-1);
+
+        return d.ConvertNumerals("M");
+    }
 }
 
 public sealed class SaasOwnerPaymentWarningGracePeriodBeforeActivationNotifyAction : INotifyAction
@@ -3335,7 +3367,7 @@ public sealed class ApiKeyExpiredNotifyAction(StudioNotifyHelper studioNotifyHel
     }
 }
 
-public sealed class AdminNotifyNotifyAction : INotifyAction
+public sealed class AdminNotifyAction : INotifyAction
 {
     public string ID => "admin_notify";
 
@@ -3346,6 +3378,18 @@ public sealed class AdminNotifyNotifyAction : INotifyAction
             //new EmailPattern("admin_notify", () => WebstudioNotifyPatternResource.subject_admin_notify, () => WebstudioNotifyPatternResource.pattern_admin_notify)
         ];
     }
+
+    public List<ITagValue> Tags { get; set; }
+};
+public sealed class SelfProfileUpdatedNotifyAction : INotifyAction
+{
+    public string ID => "self_profile_updated";
+
+    public List<Pattern> Patterns =>
+    [
+        new EmailPattern(() => WebstudioNotifyPatternResource.subject_self_profile_updated, () => WebstudioNotifyPatternResource.pattern_self_profile_updated),
+        new TelegramPattern(() => WebstudioNotifyPatternResource.pattern_self_profile_updated_tg)
+    ];
 
     public List<ITagValue> Tags { get; set; }
 };

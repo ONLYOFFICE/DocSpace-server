@@ -159,15 +159,14 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
                 }
 
                 _log.Debug($"SendMsgWhatsNew userActivities count : {userActivities.Count}");//temp
-
-                List<ITagValue> tags =
-                [
-                    new TagValue(CommonTags.Activities, userActivities),
-                    new TagValue(CommonTags.Date, DateToString(scheduleDate, whatsNewType)),
-                    new TagValue(CommonTags.Priority, 1)
-                ];
                 
-                INotifyAction action = whatsNewType == WhatsNewType.RoomsActivity ? new RoomsActivityNotifyAction(tags) : new SendWhatsNewNotifyAction(tags);
+                var roomsActivityNotifyAction = serviceProvider.GetService<RoomsActivityNotifyAction>();
+                roomsActivityNotifyAction.Init(scheduleDate, whatsNewType, userActivities);
+                
+                var sendWhatsNewNotifyAction = serviceProvider.GetService<SendWhatsNewNotifyAction>();
+                sendWhatsNewNotifyAction.Init(scheduleDate, whatsNewType, userActivities);
+                
+                INotifyAction action = whatsNewType == WhatsNewType.RoomsActivity ? roomsActivityNotifyAction : sendWhatsNewNotifyAction;
 
                 if (userActivities.Count != 0)
                 {
@@ -324,13 +323,13 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
     private async Task<bool> CheckSubscriptionAsync(UserInfo user, WhatsNewType whatsNewType)
     {
         if (whatsNewType == WhatsNewType.DailyFeed &&
-            await studioNotifyHelper.IsSubscribedToNotifyAsync(user, new SendWhatsNewNotifyAction([])))
+            await studioNotifyHelper.IsSubscribedToNotifyAsync(user, serviceProvider.GetService<SendWhatsNewNotifyAction>()))
         {
             return true;
         }
 
         if (whatsNewType == WhatsNewType.RoomsActivity &&
-            await studioNotifyHelper.IsSubscribedToNotifyAsync(user, new RoomsActivityNotifyAction([])))
+            await studioNotifyHelper.IsSubscribedToNotifyAsync(user, serviceProvider.GetService<RoomsActivityNotifyAction>()))
         {
             return true;
         }
@@ -351,13 +350,6 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
             hourToSend = hour;
         }
         return currentTime.Hour == hourToSend;
-    }
-
-    private static string DateToString(DateTime d, WhatsNewType type)
-    {
-        d = type == WhatsNewType.DailyFeed ? d.AddDays(-1) : d.AddHours(-1);
-
-        return d.ConvertNumerals("M");
     }
 }
 

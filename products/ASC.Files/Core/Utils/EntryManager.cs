@@ -2257,12 +2257,12 @@ public class EntryManager(IDaoFactory daoFactory,
                     await fileTracker.RemoveAsync(form.Id);
                     await socketManager.StopEditAsync(form.Id);
                     await filesMessageService.SendAsync(MessageAction.FormCompletelyFilled, form, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
-                    await notifyClient.SendFormFillingEvent(room, form, allRoles.Select(role => role.UserId).ToList(), notifyConstants.EventFormWasCompletelyFilled);
+                    await notifyClient.SendFormFillingEvent(room, form, allRoles.Select(role => role.UserId).ToList(), typeof(FormWasCompletelyFilledNotifyAction));
                 }
                 else if (nextRoleUserIds.Count != 0)
                 {
                     await filesMessageService.SendAsync(MessageAction.FormPartiallyFilled, form, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
-                    await notifyClient.SendFormFillingEvent(room, form, nextRoleUserIds, notifyConstants.EventYourTurnFormFilling);
+                    await notifyClient.SendFormFillingEvent(room, form, nextRoleUserIds,  typeof(YourTurnFormFillingNotifyAction));
                 }
             }
         }

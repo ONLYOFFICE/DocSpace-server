@@ -54,7 +54,8 @@ public class FileSecurity(
     AuthManager authManager,
     VectorizationGlobalSettings vectorizationGlobalSettings,
     VectorizationHelper vectorizationHelper,
-    AiAccessibility aiAccessibility)
+    AiAccessibility aiAccessibility,
+    IServiceProvider serviceProvider)
     : IFileSecurity
 {
     public readonly FileShare DefaultMyShare = FileShare.Restrict;
@@ -3392,8 +3393,8 @@ public class FileSecurity(
         var userId = authContext.CurrentAccount.ID;
 
         if (!await badgesSettingsHelper.GetEnabledForCurrentUserAsync()
-            && !await studioNotifyHelper.IsSubscribedToNotifyAsync(userId, actions.RoomsActivity)
-            && !await studioNotifyHelper.IsSubscribedToNotifyAsync(userId, actions.SendWhatsNew))
+            && !await studioNotifyHelper.IsSubscribedToNotifyAsync(userId, serviceProvider.GetService<RoomsActivityNotifyAction>())
+            && !await studioNotifyHelper.IsSubscribedToNotifyAsync(userId, serviceProvider.GetService<SendWhatsNewNotifyAction>()))
         {
             return true;
         }

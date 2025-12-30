@@ -24,12 +24,10 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Core.Common.Notify.Model;
-
 namespace ASC.Files.Core.Services.NotifyService;
 
 [Scope]
-public sealed class DocuSignCompleteNotifyAction : INotifyAction
+public sealed class DocuSignCompleteNotifyAction(BaseCommonLinkUtility baseCommonLinkUtility, FilesLinkUtility filesLinkUtility, FileUtility fileUtility) : INotifyAction
 {
     public string ID => "DocuSignComplete";
 
@@ -39,6 +37,15 @@ public sealed class DocuSignCompleteNotifyAction : INotifyAction
     [
         new EmailPattern(() => FilesPatternResource.subject_DocuSignComplete, () => FilesPatternResource.pattern_DocuSignComplete)
     ];
+
+    public void Init<T>(File<T> file, string sourceTitle)
+    {
+        Tags = [ 
+            new TagValue(NotifyConstants.TagDocumentUrl, baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id))),
+            new TagValue(NotifyConstants.TagDocumentTitle, file.Title),
+            new TagValue(NotifyConstants.TagMessage, sourceTitle)
+        ];
+    }
 }
 
 [Scope]
@@ -52,6 +59,15 @@ public sealed class DocuSignStatusNotifyAction : INotifyAction
     [
         new EmailPattern(() => FilesPatternResource.subject_DocuSignStatus, () => FilesPatternResource.pattern_DocuSignStatus)
     ];
+
+    public void Init(string subject, string status)
+    {
+        Tags =
+        [
+            new TagValue(NotifyConstants.TagDocumentTitle, subject),
+            new TagValue(NotifyConstants.TagMessage, status)
+        ];
+    }
 }
 
 [Scope]
@@ -65,41 +81,71 @@ public sealed class MailMergeEndNotifyAction : INotifyAction
     [
         new EmailPattern(() => FilesPatternResource.subject_MailMergeEnd, () => FilesPatternResource.pattern_MailMergeEnd)
     ];
+    
+    public void Init(int countMails, int countError)
+    {
+        Tags =
+        [
+            new TagValue(NotifyConstants.TagMailsCount, countMails),
+            new TagValue(NotifyConstants.TagMessage, countError > 0 ? string.Format(FilesCommonResource.ErrorMessage_MailMergeCount, countError) : string.Empty)
+        ];
+    }
+    
 }
 
 [Scope]
-public sealed class ShareDocumentNotifyAction : INotifyAction
+public class ShareDocumentNotifyAction(BaseCommonLinkUtility baseCommonLinkUtility, StudioNotifyHelper studioNotifyHelper) : INotifyAction
 {
-    public string ID => "ShareDocument";
+    public virtual string ID => "ShareDocument";
 
     public List<ITagValue> Tags { get; set; }
 
-    public List<Pattern> Patterns =>
+    public virtual List<Pattern> Patterns =>
     [
         new EmailPattern(() => FilesPatternResource.subject_ShareDocument, () => FilesPatternResource.pattern_ShareDocument),
         new TelegramPattern(() => FilesPatternResource.pattern_ShareDocument),
         new PushPattern(() => FilesPatternResource.subject_ShareDocument_push)
     ];
+
+    public void Init<T>(FileEntry<T> fileEntry, Folder<T> folder, string url, string fileExtension, string aceString, string message, string culture)
+    {
+        List<ITagValue> tags =
+        [
+            new TagValue(NotifyConstants.TagDocumentTitle, fileEntry.Title),
+            new TagValue(NotifyConstants.TagDocumentUrl, baseCommonLinkUtility.GetFullAbsolutePath(url)),
+            new TagValue(NotifyConstants.TagDocumentExtension, fileExtension),
+            new TagValue(NotifyConstants.TagAccessRights, aceString),
+            new TagValue(NotifyConstants.TagMessage, message == null ? string.Empty : message.HtmlEncode()),
+            new TagValue(NotifyConstants.TagFolderID, folder.Id),
+            new TagValue(NotifyConstants.TagFolderParentId, folder.RootId),
+            new TagValue(NotifyConstants.TagFolderRootFolderType, folder.RootFolderType),
+            TagValues.Image(studioNotifyHelper, 0, "privacy.png"),
+            new AdditionalSenderTag("push.sender")
+        ];
+        
+        if (!string.IsNullOrEmpty(culture))
+        {
+            tags.Add(new TagValue(CommonTags.Culture, culture));
+        }
+        
+        Tags = tags;
+    }
 }
 
 [Scope]
-public sealed class ShareEncryptedDocumentNotifyAction : INotifyAction
+public sealed class ShareEncryptedDocumentNotifyAction(BaseCommonLinkUtility baseCommonLinkUtility, StudioNotifyHelper studioNotifyHelper) : ShareDocumentNotifyAction(baseCommonLinkUtility, studioNotifyHelper)
 {
-    public string ID => "ShareEncryptedDocument";
+    public override string ID => "ShareEncryptedDocument";
 
-    public List<ITagValue> Tags { get; set; }
-
-    public List<Pattern> Patterns => [];
+    public override List<Pattern> Patterns => [];
 }
 
 [Scope]
-public sealed class ShareFolderNotifyAction : INotifyAction
+public sealed class ShareFolderNotifyAction (BaseCommonLinkUtility baseCommonLinkUtility, StudioNotifyHelper studioNotifyHelper) : ShareDocumentNotifyAction(baseCommonLinkUtility, studioNotifyHelper)
 {
-    public string ID => "ShareFolder";
+    public override string ID => "ShareFolder";
 
-    public List<ITagValue> Tags { get; set; }
-
-    public List<Pattern> Patterns =>
+    public override List<Pattern> Patterns =>
     [
         new EmailPattern(() => FilesPatternResource.subject_ShareFolder, () => FilesPatternResource.pattern_ShareFolder),
         new TelegramPattern(() => FilesPatternResource.pattern_ShareFolder),
@@ -108,7 +154,7 @@ public sealed class ShareFolderNotifyAction : INotifyAction
 }
 
 [Scope]
-public sealed class EditorMentionsNotifyAction : INotifyAction
+public sealed class EditorMentionsNotifyAction(BaseCommonLinkUtility baseCommonLinkUtility, DisplayUserSettingsHelper displayUserSettingsHelper) : INotifyAction
 {
     public string ID => "EditorMentions";
 
@@ -120,30 +166,51 @@ public sealed class EditorMentionsNotifyAction : INotifyAction
         new TelegramPattern(() => FilesPatternResource.pattern_EditorMentions),
         new PushPattern(() => FilesPatternResource.pattern_EditorMentions_push)
     ];
+
+    public void Init(FileEntry file, string plainText, UserInfo currentUser, string documentUrl, string folderTitle, string folderUrl)
+    {
+        Tags =
+        [
+            new TagValue(NotifyConstants.TagDocumentTitle, file.Title),
+            new TagValue(NotifyConstants.TagDocumentUrl, baseCommonLinkUtility.GetFullAbsolutePath(documentUrl)),
+            new TagValue(NotifyConstants.TagMessage, plainText),
+            new TagValue(CommonTags.ToUserName, currentUser.DisplayUserName(displayUserSettingsHelper)),
+            new TagValue(NotifyConstants.RoomTitle, folderTitle),
+            new TagValue(NotifyConstants.RoomUrl, folderUrl),
+            new AdditionalSenderTag("push.sender")
+        ];
+    }
 }
 
 [Scope]
-public sealed class RoomRemovedNotifyAction : INotifyAction
+public class RoomRemovedNotifyAction : INotifyAction
 {
-    public string ID => "RoomRemoved";
+    public virtual string ID => "RoomRemoved";
 
     public List<ITagValue> Tags { get; set; }
 
-    public List<Pattern> Patterns =>
+    public virtual List<Pattern> Patterns =>
     [
         new EmailPattern(() => FilesPatternResource.subject_RoomRemoved, () => FilesPatternResource.pattern_RoomRemoved),
         new TelegramPattern(() => FilesPatternResource.pattern_RoomRemoved)
     ];
+    
+    public void Init(string roomTitle, string roomUrl)
+    {
+        Tags =
+        [
+            new TagValue(NotifyConstants.RoomTitle, roomTitle),
+            new TagValue(NotifyConstants.RoomUrl, roomUrl)
+        ];
+    }
 }
 
 [Scope]
-public sealed class AgentRemovedNotifyAction : INotifyAction
+public sealed class AgentRemovedNotifyAction : RoomRemovedNotifyAction
 {
-    public string ID => "AgentRemoved";
+    public override string ID => "AgentRemoved";
 
-    public List<ITagValue> Tags { get; set; }
-
-    public List<Pattern> Patterns =>
+    public override List<Pattern> Patterns =>
     [
         new EmailPattern(() => FilesPatternResource.subject_AgentRemoved, () => FilesPatternResource.pattern_AgentRemoved),
         new TelegramPattern(() => FilesPatternResource.pattern_AgentRemoved)
@@ -151,7 +218,7 @@ public sealed class AgentRemovedNotifyAction : INotifyAction
 }
 
 [Scope]
-public sealed class FormSubmittedNotifyAction : INotifyAction
+public sealed class FormSubmittedNotifyAction(DisplayUserSettingsHelper displayUserSettingsHelper) : INotifyAction
 {
     public string ID => "FormSubmitted";
 
@@ -163,10 +230,39 @@ public sealed class FormSubmittedNotifyAction : INotifyAction
         new TelegramPattern(() => FilesPatternResource.pattern_FormSubmitted),
         new PushPattern(() => FilesPatternResource.pattern_FormSubmitted_push)
     ];
+
+    public void Init<T>(Folder<T> room, FileEntry<T> originalForm, FileEntry<T> filledForm, string documentUrl, string documentParentUrl, string roomUrl, UserInfo manager, string managerUrl, CultureInfo userCulture, string userButtonText)
+    {
+        Tags =
+        [
+            new TagValue(NotifyConstants.TagMessage, originalForm.Title),
+            new TagValue(NotifyConstants.TagDocumentTitle, filledForm.Title),
+            new TagValue(NotifyConstants.TagDocumentUrl, documentUrl),
+            new TagValue(NotifyConstants.RoomTitle, room.Title),
+            new TagValue(NotifyConstants.RoomUrl, roomUrl),
+            new TagValue(CommonTags.ToUserName, manager.DisplayUserName(displayUserSettingsHelper)),
+            new TagValue(CommonTags.ToUserLink, managerUrl),
+            new TagValue(CommonTags.Culture, userCulture.Name),
+            TagValues.OrangeButton(userButtonText, documentParentUrl)
+        ];
+    }
+
+    public void Init<T>(Folder<T> room, FileEntry<T> filledForm, CultureInfo userCulture)
+    {
+        Tags =
+        [
+            new TagValue(NotifyConstants.TagDocumentTitle, filledForm.Title),
+            new TagValue(NotifyConstants.RoomTitle, room.Title),
+            new TagValue(NotifyConstants.TagFolderID, room.Id),
+            new TagValue(NotifyConstants.TagFolderParentId, room.ParentId),
+            new TagValue(NotifyConstants.TagFolderRootFolderType, room.RootFolderType),
+            new TagValue(CommonTags.Culture, userCulture.Name)
+        ];
+    }
 }
 
 [Scope]
-public sealed class FormReceivedNotifyAction : INotifyAction
+public sealed class FormReceivedNotifyAction(DisplayUserSettingsHelper displayUserSettingsHelper) : INotifyAction
 {
     public string ID => "FormReceived";
 
@@ -177,10 +273,26 @@ public sealed class FormReceivedNotifyAction : INotifyAction
         new EmailPattern(() => FilesPatternResource.subject_FormReceived, () => FilesPatternResource.pattern_FormReceived),
         new TelegramPattern(() => FilesPatternResource.pattern_FormReceived)
     ];
+
+    public void Init<T>(Folder<T> room, FileEntry<T> originalForm, FileEntry<T> filledForm, string documentUrl, string documentParentUrl, string roomUrl, string userName, string userUrl, CultureInfo managerCulture, string managerButtonText)
+    {
+        Tags =
+        [
+            new TagValue(NotifyConstants.TagMessage, originalForm.Title),
+            new TagValue(NotifyConstants.TagDocumentTitle, filledForm.Title),
+            new TagValue(NotifyConstants.TagDocumentUrl, documentUrl),
+            new TagValue(NotifyConstants.RoomTitle, room.Title),
+            new TagValue(NotifyConstants.RoomUrl, roomUrl),
+            new TagValue(CommonTags.FromUserName, userName),
+            new TagValue(CommonTags.FromUserLink, userUrl),
+            new TagValue(CommonTags.Culture, managerCulture.Name),
+            TagValues.OrangeButton(managerButtonText, documentParentUrl)
+        ];
+    }
 }
 
 [Scope]
-public sealed class RoomMovedArchiveNotifyAction : INotifyAction
+public sealed class RoomMovedArchiveNotifyAction(DisplayUserSettingsHelper displayUserSettingsHelper) : INotifyAction
 {
     public string ID => "RoomMovedArchive";
 
@@ -190,55 +302,88 @@ public sealed class RoomMovedArchiveNotifyAction : INotifyAction
     [
         new PushPattern(() => FilesPatternResource.pattern_RoomMovedArchive_push)
     ];
+    
+    public void Init<T>(FileEntry<T> room, UserInfo user)
+    {
+        Tags =
+        [
+            new TagValue(NotifyConstants.RoomTitle, room.Title),
+            new TagValue(CommonTags.FromUserName, user.DisplayUserName(displayUserSettingsHelper)),
+            new TagValue(NotifyConstants.TagFolderID, room.Id),
+            new TagValue(NotifyConstants.TagFolderParentId, room.ParentId),
+            new TagValue(NotifyConstants.TagFolderRootFolderType, room.RootFolderType)
+        ];
+    }
 }
 
 [Scope]
-public sealed class InvitedToRoomNotifyAction : INotifyAction
+public class InvitedToRoomNotifyAction : INotifyAction
 {
-    public string ID => "InvitedToRoom";
+    public virtual string ID => "InvitedToRoom";
 
     public List<ITagValue> Tags { get; set; }
 
-    public List<Pattern> Patterns =>
+    public virtual List<Pattern> Patterns =>
     [
         new PushPattern(() => FilesPatternResource.pattern_InvitedToRoom_push)
     ];
+    
+    public void Init<T>(FileEntry<T> room)
+    {
+        Tags =
+        [
+            new TagValue(NotifyConstants.TagFolderID, room.Id),
+            new TagValue(NotifyConstants.TagFolderParentId, room.ParentId),
+            new TagValue(NotifyConstants.TagFolderRootFolderType, room.RootFolderType),
+            new TagValue(NotifyConstants.RoomTitle, room.Title)
+        ];
+    }
 }
 
 [Scope]
-public sealed class InvitedToAgentNotifyAction : INotifyAction
+public sealed class InvitedToAgentNotifyAction : InvitedToRoomNotifyAction
 {
-    public string ID => "InvitedToAgent";
+    public override string ID => "InvitedToAgent";
 
-    public List<ITagValue> Tags { get; set; }
-
-    public List<Pattern> Patterns =>
+    public override List<Pattern> Patterns =>
     [
         new PushPattern(() => FilesPatternResource.pattern_InvitedToAgent_push)
     ];
 }
 
 [Scope]
-public sealed class RoomUpdateAccessForUserNotifyAction : INotifyAction
+public class RoomUpdateAccessForUserNotifyAction : INotifyAction
 {
-    public string ID => "RoomUpdateAccessForUser";
+    public virtual string ID => "RoomUpdateAccessForUser";
 
     public List<ITagValue> Tags { get; set; }
 
-    public List<Pattern> Patterns =>
+    public virtual List<Pattern> Patterns =>
     [
         new PushPattern(() => FilesPatternResource.pattern_RoomUpdateAccessForUser_push)
     ];
+
+    public void Init<T>(FileEntry<T> room, string accessString)
+    {
+        Tags =
+        [
+            new TagValue(NotifyConstants.RoomTitle, room.Title),
+            new TagValue(NotifyConstants.TagFolderID, room.Id),
+            new TagValue(NotifyConstants.TagFolderParentId, room.ParentId),
+            new TagValue(NotifyConstants.TagFolderRootFolderType, room.RootFolderType),
+            new TagValue(CommonTags.RoomRole, accessString)
+        ];
+    }
 }
 
 [Scope]
-public sealed class AgentUpdateAccessForUserNotifyAction : INotifyAction
+public sealed class AgentUpdateAccessForUserNotifyAction : RoomUpdateAccessForUserNotifyAction
 {
-    public string ID => "AgentUpdateAccessForUser";
+    public override string ID => "AgentUpdateAccessForUser";
 
     public List<ITagValue> Tags { get; set; }
 
-    public List<Pattern> Patterns =>
+    public override List<Pattern> Patterns =>
     [
         new PushPattern(() => FilesPatternResource.pattern_AgentUpdateAccessForUser_push)
     ];
@@ -255,6 +400,19 @@ public sealed class DocumentCreatedInRoomNotifyAction : INotifyAction
     [
         new PushPattern(() => FilesPatternResource.pattern_DocumentCreatedInRoom_push)
     ];
+
+    public void Init<T>(Folder<T> room, FileEntry<T> file)
+    {
+        Tags =
+        [
+            new TagValue(NotifyConstants.RoomTitle, room.Title),
+            new TagValue(NotifyConstants.TagDocumentTitle, file.Title),
+            new TagValue(NotifyConstants.TagDocumentExtension, Path.GetExtension(file.Title)),
+            new TagValue(NotifyConstants.TagFolderID, room.Id),
+            new TagValue(NotifyConstants.TagFolderParentId, room.ParentId),
+            new TagValue(NotifyConstants.TagFolderRootFolderType, room.RootFolderType)
+        ];
+    }
 }
 
 [Scope]
@@ -268,6 +426,19 @@ public sealed class DocumentUploadedToRoomNotifyAction : INotifyAction
     [
         new PushPattern(() => FilesPatternResource.pattern_DocumentUploadedTo_push)
     ];
+
+    public void Init<T>(Folder<T> room, FileEntry<T> file)
+    {
+        Tags =
+        [
+            new TagValue(NotifyConstants.TagDocumentTitle, file.Title),
+            new TagValue(NotifyConstants.TagDocumentExtension, Path.GetExtension(file.Title)),
+            new TagValue(NotifyConstants.TagFolderID, room.Id),
+            new TagValue(NotifyConstants.RoomTitle, room.Title),
+            new TagValue(NotifyConstants.TagFolderParentId, room.ParentId),
+            new TagValue(NotifyConstants.TagFolderRootFolderType, room.RootFolderType)
+        ];
+    }
 }
 
 [Scope]
@@ -281,6 +452,18 @@ public sealed class DocumentsUploadedToRoomNotifyAction : INotifyAction
     [
         new PushPattern(() => FilesPatternResource.pattern_DocumentsUploadedTo_push)
     ];
+
+    public void Init<T>(Folder<T> room, int count)
+    {
+        Tags =
+        [
+            new TagValue(NotifyConstants.TagFolderID, room.Id),
+            new TagValue(NotifyConstants.TagFolderParentId, room.ParentId),
+            new TagValue(NotifyConstants.TagFolderRootFolderType, room.RootFolderType),
+            new TagValue(NotifyConstants.RoomTitle, room.Title),
+            new TagValue(CommonTags.Count, count)
+        ];
+    }
 }
 
 [Scope]
@@ -294,30 +477,53 @@ public sealed class FolderCreatedInRoomNotifyAction : INotifyAction
     [
         new PushPattern(() => FilesPatternResource.pattern_FolderCreatedInRoom_push)
     ];
+
+    public void Init<T>(Folder<T> room, Folder<T> folder)
+    {
+        Tags =
+        [
+            new TagValue(NotifyConstants.RoomTitle, room.Title),
+            new TagValue(NotifyConstants.FolderTitle, folder.Title),
+            new TagValue(NotifyConstants.TagFolderID, folder.Id),
+            new TagValue(NotifyConstants.TagFolderParentId, folder.ParentId),
+            new TagValue(NotifyConstants.TagFolderRootFolderType, folder.RootFolderType)
+        ];
+    }
 }
 
 [Scope]
-public sealed class FormStartedFillingNotifyAction : INotifyAction
+public class FormStartedFillingNotifyAction(BaseCommonLinkUtility baseCommonLinkUtility, FilesLinkUtility filesLinkUtility, FileUtility fileUtility) : INotifyAction
 {
-    public string ID => "FormStartedFilling";
+    public virtual string ID => "FormStartedFilling";
 
     public List<ITagValue> Tags { get; set; }
 
-    public List<Pattern> Patterns =>
+    public virtual List<Pattern> Patterns =>
     [
         new EmailPattern(() => FilesPatternResource.subject_FormStartedFilling, () => FilesPatternResource.pattern_FormStartedFilling),
         new TelegramPattern(() => FilesPatternResource.pattern_FormStartedFilling)
     ];
+
+    public void Init<T>(FileEntry<T> room, File<T> file, string userName, string userUrl, string roomUrl)
+    {
+        Tags =
+        [
+            new TagValue(NotifyConstants.TagDocumentUrl, baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id))),
+            new TagValue(NotifyConstants.TagDocumentTitle, file.Title),
+            new TagValue(NotifyConstants.RoomTitle, room.Title),
+            new TagValue(NotifyConstants.RoomUrl, roomUrl),
+            new TagValue(CommonTags.FromUserName, userName),
+            new TagValue(CommonTags.FromUserLink, userUrl)
+        ];
+    }
 }
 
 [Scope]
-public sealed class YourTurnFormFillingNotifyAction : INotifyAction
+public sealed class YourTurnFormFillingNotifyAction(BaseCommonLinkUtility baseCommonLinkUtility, FilesLinkUtility filesLinkUtility, FileUtility fileUtility) : FormStartedFillingNotifyAction(baseCommonLinkUtility, filesLinkUtility,fileUtility)
 {
-    public string ID => "YourTurnFormFilling";
+    public override string ID => "YourTurnFormFilling";
 
-    public List<ITagValue> Tags { get; set; }
-
-    public List<Pattern> Patterns =>
+    public override List<Pattern> Patterns =>
     [
         new EmailPattern(() => FilesPatternResource.subject_YourTurnFormFilling, () => FilesPatternResource.pattern_YourTurnFormFilling),
         new TelegramPattern(() => FilesPatternResource.pattern_YourTurnFormFilling)
@@ -325,13 +531,11 @@ public sealed class YourTurnFormFillingNotifyAction : INotifyAction
 }
 
 [Scope]
-public sealed class FormWasCompletelyFilledNotifyAction : INotifyAction
+public sealed class FormWasCompletelyFilledNotifyAction(BaseCommonLinkUtility baseCommonLinkUtility, FilesLinkUtility filesLinkUtility, FileUtility fileUtility) : FormStartedFillingNotifyAction(baseCommonLinkUtility, filesLinkUtility,fileUtility)
 {
-    public string ID => "FormWasCompletelyFilled";
+    public override string ID => "FormWasCompletelyFilled";
 
-    public List<ITagValue> Tags { get; set; }
-
-    public List<Pattern> Patterns =>
+    public override List<Pattern> Patterns =>
     [
         new EmailPattern(() => FilesPatternResource.subject_FormWasCompletelyFilled, () => FilesPatternResource.pattern_FormWasCompletelyFilled),
         new TelegramPattern(() => FilesPatternResource.pattern_FormWasCompletelyFilled)
@@ -339,75 +543,20 @@ public sealed class FormWasCompletelyFilledNotifyAction : INotifyAction
 }
 
 [Scope]
-public sealed class StoppedFormFillingNotifyAction : INotifyAction
+public sealed class StoppedFormFillingNotifyAction(BaseCommonLinkUtility baseCommonLinkUtility, FilesLinkUtility filesLinkUtility, FileUtility fileUtility) : FormStartedFillingNotifyAction(baseCommonLinkUtility, filesLinkUtility,fileUtility)
 {
-    public string ID => "StoppedFormFilling";
-
-    public List<ITagValue> Tags { get; set; }
-
-    public List<Pattern> Patterns =>
+    public override string ID => "StoppedFormFilling";
+    
+    public override List<Pattern> Patterns =>
     [
         new EmailPattern(() => FilesPatternResource.subject_StoppedFormFilling, () => FilesPatternResource.pattern_StoppedFormFilling),
         new TelegramPattern(() => FilesPatternResource.pattern_StoppedFormFilling)
     ];
 }
 
-[Singleton]
-public class NotifyConstants(
-    DocuSignCompleteNotifyAction docuSignComplete,
-    DocuSignStatusNotifyAction docuSignStatus,
-    MailMergeEndNotifyAction mailMergeEnd,
-    ShareDocumentNotifyAction shareDocument,
-    ShareEncryptedDocumentNotifyAction shareEncryptedDocument,
-    ShareFolderNotifyAction shareFolder,
-    EditorMentionsNotifyAction editorMentions,
-    RoomRemovedNotifyAction roomRemoved,
-    AgentRemovedNotifyAction agentRemoved,
-    FormSubmittedNotifyAction formSubmitted,
-    FormReceivedNotifyAction formReceived,
-    RoomMovedArchiveNotifyAction roomMovedArchive,
-    InvitedToRoomNotifyAction invitedToRoom,
-    InvitedToAgentNotifyAction invitedToAgent,
-    RoomUpdateAccessForUserNotifyAction roomUpdateAccessForUser,
-    AgentUpdateAccessForUserNotifyAction agentUpdateAccessForUser,
-    DocumentCreatedInRoomNotifyAction documentCreatedInRoom,
-    DocumentUploadedToRoomNotifyAction documentUploadedToRoom,
-    DocumentsUploadedToRoomNotifyAction documentsUploadedToRoom,
-    FolderCreatedInRoomNotifyAction folderCreatedInRoom,
-    FormStartedFillingNotifyAction formStartedFilling,
-    YourTurnFormFillingNotifyAction yourTurnFormFilling,
-    FormWasCompletelyFilledNotifyAction formWasCompletelyFilled,
-    StoppedFormFillingNotifyAction stoppedFormFilling)
+public class NotifyConstants
 {
-    #region Events
-
-    public readonly INotifyAction EventDocuSignComplete = docuSignComplete;
-    public readonly INotifyAction EventDocuSignStatus = docuSignStatus;
-    public readonly INotifyAction EventMailMergeEnd = mailMergeEnd;
-    public readonly INotifyAction EventShareDocument = shareDocument;
-    public readonly INotifyAction EventShareEncryptedDocument = shareEncryptedDocument;
-    public readonly INotifyAction EventShareFolder = shareFolder;
-    public readonly INotifyAction EventEditorMentions = editorMentions;
-    public readonly INotifyAction EventRoomRemoved = roomRemoved;
-    public readonly INotifyAction EventAgentRemoved = agentRemoved;
-    public readonly INotifyAction EventFormSubmitted = formSubmitted;
-    public readonly INotifyAction EventFormReceived = formReceived;
-    public readonly INotifyAction EventRoomMovedArchive = roomMovedArchive;
-    public readonly INotifyAction EventInvitedToRoom = invitedToRoom;
-    public readonly INotifyAction EventInvitedToAgent = invitedToAgent;
-    public readonly INotifyAction EventRoomUpdateAccessForUser = roomUpdateAccessForUser;
-    public readonly INotifyAction EventAgentUpdateAccessForUser = agentUpdateAccessForUser;
-    public readonly INotifyAction EventDocumentCreatedInRoom = documentCreatedInRoom;
-    public readonly INotifyAction EventDocumentUploadedToRoom = documentUploadedToRoom;
-    public readonly INotifyAction EventDocumentsUploadedToRoom = documentsUploadedToRoom;
-    public readonly INotifyAction EventFolderCreatedInRoom = folderCreatedInRoom;
-    public readonly INotifyAction EventFormStartedFilling = formStartedFilling;
-    public readonly INotifyAction EventYourTurnFormFilling = yourTurnFormFilling;
-    public readonly INotifyAction EventFormWasCompletelyFilled = formWasCompletelyFilled;
-    public readonly INotifyAction EventStoppedFormFilling = stoppedFormFilling;
-
-    #endregion
-
+    
     #region  Tags
 
     public static readonly string TagFolderID = "FolderID";

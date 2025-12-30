@@ -27,15 +27,15 @@
 namespace ASC.Web.Studio.Core.Notify;
 
 [Scope]
-public class StudioNotifySource(UserManager userManager, IRecipientProvider recipientsProvider, SubscriptionManager subscriptionManager)
+public class StudioNotifySource(UserManager userManager, IRecipientProvider recipientsProvider, SubscriptionManager subscriptionManager, IServiceProvider serviceProvider)
     : NotifySource("asc.web.studio", userManager, recipientsProvider, subscriptionManager)
 {
     protected override ISubscriptionProvider CreateSubscriptionProvider()
     {
-        return new AdminNotifySubscriptionProvider(base.CreateSubscriptionProvider());
+        return new AdminNotifySubscriptionProvider(base.CreateSubscriptionProvider(), serviceProvider);
     }
 
-    private sealed class AdminNotifySubscriptionProvider(ISubscriptionProvider provider) : ISubscriptionProvider
+    private sealed class AdminNotifySubscriptionProvider(ISubscriptionProvider provider, IServiceProvider serviceProvider) : ISubscriptionProvider
     {
         public async Task<object> GetSubscriptionRecordAsync(INotifyAction action, IRecipient recipient, string objectID)
         {
@@ -94,13 +94,12 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
 
         private INotifyAction GetAdminAction(INotifyAction action)
         {
-            if (actions.SelfProfileUpdated.ID == action.ID ||
-                actions.UserHasJoin.ID == action.ID ||
-                actions.UserMessageToAdmin.ID == action.ID ||
-                actions.ProfileHasDeletedItself.ID == action.ID
-               )
+            if (serviceProvider.GetService<SelfProfileUpdatedNotifyAction>().ID == action.ID ||
+                serviceProvider.GetService<UserHasJoinNotifyAction>().ID == action.ID ||
+                serviceProvider.GetService<UserMessageToAdminNotifyAction>().ID == action.ID ||
+                serviceProvider.GetService<ProfileHasDeletedItselfNotifyAction>().ID == action.ID)
             {
-                return actions.AdminNotify;
+                return serviceProvider.GetService<AdminNotifyAction>();
             }
 
             return action;
