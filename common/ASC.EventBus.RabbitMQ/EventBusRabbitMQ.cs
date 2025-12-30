@@ -24,18 +24,19 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Microsoft.Extensions.DependencyInjection;
+
 namespace ASC.EventBus.RabbitMQ;
 
 public class EventBusRabbitMQ : IEventBus, IDisposable
 {
     const string EXCHANGE_NAME = "asc_event_bus";
     const string DEAD_LETTER_EXCHANGE_NAME = "asc_event_bus_dlx";
-    const string AUTOFAC_SCOPE_NAME = "asc_event_bus";
 
     private readonly IRabbitMQPersistentConnection _persistentConnection;
     private readonly ILogger<EventBusRabbitMQ> _logger;
     private readonly IEventBusSubscriptionsManager _subsManager;
-    private readonly ILifetimeScope _autofac;
+    private readonly IServiceProvider _serviceProvider;
     private readonly int _retryCount;
     private readonly IIntegrationEventSerializer _serializer;
 
@@ -50,7 +51,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
 
     public EventBusRabbitMQ(IRabbitMQPersistentConnection persistentConnection,
                             ILogger<EventBusRabbitMQ> logger,
-                            ILifetimeScope autofac,
+                            IServiceProvider serviceProvider,
                             IEventBusSubscriptionsManager subsManager,
                             IIntegrationEventSerializer serializer,
                             string queueName = null,
@@ -61,7 +62,8 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
         _subsManager = subsManager ?? new InMemoryEventBusSubscriptionsManager();
         _queueName = queueName;
         _deadLetterQueueName = $"{_queueName}_dlx";
-        _autofac = autofac;
+        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+
         _retryCount = retryCount;
         _subsManager.OnEventRemoved += async (s, e) =>
                                                     {
@@ -448,14 +450,15 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
 
         PreProcessEvent(@event);
 
-        await using var scope = _autofac.BeginLifetimeScope(AUTOFAC_SCOPE_NAME);
+        await using var scope = _serviceProvider.CreateAsyncScope();
         var subscriptions = _subsManager.GetHandlersForEvent(eventName);
 
         foreach (var subscription in subscriptions)
         {
             if (subscription.IsDynamic)
             {
-                if (scope.ResolveOptional(subscription.HandlerType) is not IDynamicIntegrationEventHandler handler)
+                
+                if (scope.ServiceProvider.GetService(subscription.HandlerType) is not IDynamicIntegrationEventHandler handler)
                 {
                     continue;
                 }
@@ -466,7 +469,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable
             }
             else
             {
-                var handler = scope.ResolveOptional(subscription.HandlerType);
+                var handler = scope.ServiceProvider.GetService(subscription.HandlerType);
                 if (handler == null)
                 {
                     continue;
