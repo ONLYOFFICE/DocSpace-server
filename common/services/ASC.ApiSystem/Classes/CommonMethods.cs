@@ -59,6 +59,7 @@ public class CommonMethods(
             name = t.Name == "" ? Resource.PortalName : t.Name,
             ownerId = t.OwnerId,
             paymentId = t.PaymentId,
+            partnerId = t.PartnerId,
             portalName = t.Alias,
             status = t.Status.ToStringFast(),
             tenantId = t.Id,

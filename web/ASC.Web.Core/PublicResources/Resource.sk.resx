@@ -1,5 +1,64 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -53,16 +112,76 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=7.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=7.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Vektorizácia</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Kontakt</value>
+  </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Kredit</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Mena</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>Dátum</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Debet</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Detaily</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>Množstvo</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>Nástroje AI</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Záloha</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Miesto na disku</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Dobitie zostatku</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>Jednotka merania</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Tokeny</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Záloha</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>Hlásenie o operáciách zákazníka ({0}-{1})</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>História transakcií</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Typ</value>
+  </data>
   <data name="ActivateMobilePhoneEmptyCode" xml:space="preserve">
     <value>Pole validačného kódu nemôže byť prázdne</value>
   </data>
   <data name="ActivateMobilePhoneEmptyPhoneNumber" xml:space="preserve">
     <value>Zadajte číslo mobilného telefónu</value>
+  </data>
+  <data name="ActivateTfaAppEmptyCode" xml:space="preserve">
+    <value>Pole s kódom overenia nemôže byť prázdne</value>
   </data>
   <data name="AdministratorNotifySenderTypeName" xml:space="preserve">
     <value>Upozornenia správcu</value>
@@ -70,11 +189,518 @@
   <data name="AdminMessageSent" xml:space="preserve">
     <value>Vaša správa bola úspešne odoslaná. Správca portálu vás bude kontaktovať.</value>
   </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>Kvóta priestoru AI agenta bola prekročená</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Nepodarilo sa nastaviť kvótu pre agenta AI. Zadaná hodnota je väčšia ako celková kapacita úložiska DocSpace.</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Automatické obnovenie</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Automatické dobíjanie</value>
+  </data>
   <data name="ButtonSmsEnable" xml:space="preserve">
     <value>Zapnúť</value>
   </data>
+  <data name="ButtonTfaAppEnable" xml:space="preserve">
+    <value>Podľa aplikácie autentifikátora</value>
+  </data>
   <data name="ChangePortalOwnerMsg" xml:space="preserve">
     <value>Odkaz na potvrdenie operácie bol odoslaný na: email (e-mailová adresa majiteľa portálu).</value>
+  </data>
+  <data name="Consumersacesskey" xml:space="preserve">
+    <value>Prístupový kľúč S3</value>
+  </data>
+  <data name="ConsumersapiKey" xml:space="preserve">
+    <value>Rackspace apiKey</value>
+  </data>
+  <data name="ConsumersAppleId" xml:space="preserve">
+    <value>Apple ID</value>
+  </data>
+  <data name="ConsumersappleIdClientId" xml:space="preserve">
+    <value>ID klienta aplikácie</value>
+  </data>
+  <data name="ConsumersAppleIdDescription" xml:space="preserve">
+    <value>Aktivujte aplikáciu na prihlásenie do portálu pomocou účtu Apple ID.</value>
+  </data>
+  <data name="ConsumersAppleIdInstruction" xml:space="preserve">
+    <value>Aktivujte túto aplikáciu, aby ste umožnili používateľom prihlásiť sa na portál {LogoText} pomocou Apple ID. {0}Prejdite na Apple Developers Portal a vytvorte novú aplikáciu na integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
+  </data>
+  <data name="ConsumersappleIdKeyId" xml:space="preserve">
+    <value>10-znakový identifikačný kľúč vygenerovaný pre prihlásenie pomocou osobného kľúča Apple</value>
+  </data>
+  <data name="ConsumersappleIdPrivateKey" xml:space="preserve">
+    <value>Osobný kľúč stiahnutý z Apple Developer</value>
+  </data>
+  <data name="ConsumersappleIdTeamId" xml:space="preserve">
+    <value>10-miestny Team ID vývojárskeho účtu</value>
+  </data>
+  <data name="ConsumersauthPwd" xml:space="preserve">
+    <value>Selectel authPwd</value>
+  </data>
+  <data name="ConsumersauthUser" xml:space="preserve">
+    <value>Selectel authUser</value>
+  </data>
+  <data name="ConsumersBitly" xml:space="preserve">
+    <value>Bitly</value>
+  </data>
+  <data name="ConsumersbitlyClientId" xml:space="preserve">
+    <value>prihlásenie</value>
+  </data>
+  <data name="ConsumersbitlyClientSecret" xml:space="preserve">
+    <value>apiKey</value>
+  </data>
+  <data name="ConsumersBitlyDescription" xml:space="preserve">
+    <value>Pripojte službu Bitly, aby ste skrátili odkazy na pozvánky na portál a zdieľané odkazy v module Dokumenty.</value>
+  </data>
+  <data name="ConsumersBitlyInstruction" xml:space="preserve">
+    <value>Aktivujte túto aplikáciu, aby ste skrátili odkazy na pozvánky a dokumenty. {0}Vložte svoje prihlasovacie meno do služby Bitly a kľúč API nižšie:</value>
+  </data>
+  <data name="ConsumersBox" xml:space="preserve">
+    <value>Box</value>
+  </data>
+  <data name="ConsumersboxClientId" xml:space="preserve">
+    <value>Box ID</value>
+  </data>
+  <data name="ConsumersboxClientSecret" xml:space="preserve">
+    <value>Box kľúč</value>
+  </data>
+  <data name="ConsumersBoxDescription" xml:space="preserve">
+    <value>Pripojte aplikáciu a spravujte súbory a priečinky.</value>
+  </data>
+  <data name="ConsumersBoxInstruction" xml:space="preserve">
+    <value>Aktivujte túto aplikáciu, aby ste prepojili svoje konto Box s modulom Dokumenty. Budete môcť spravovať, upravovať a zdieľať súbory zo služby Box s používateľmi služby {LogoText}. {0}Prihláste sa do svojho účtu na stránke vývojárov služby Box a vytvorte novú aplikáciu pre integráciu s {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
+  </data>
+  <data name="ConsumersClickatell" xml:space="preserve">
+    <value>Clickatell</value>
+  </data>
+  <data name="ConsumersclickatellapiKey" xml:space="preserve">
+    <value>apiKey</value>
+  </data>
+  <data name="ConsumersClickatellDescription" xml:space="preserve">
+    <value>Povoliť aplikáciu pre dvojfaktorovú autentifikáciu cez Clickatell.</value>
+  </data>
+  <data name="ConsumersClickatellInstruction" xml:space="preserve">
+    <value>Pomocou tejto aplikácie môžete aktivovať dvojfaktorové overovanie so službou Clickatell. {0}Prihláste sa do svojho účtu SMS Platform a vytvorte novú integráciu pre {LogoText}. Skopírujte apiKey a vložte ho nižšie:</value>
+  </data>
+  <data name="ConsumersDocuSign" xml:space="preserve">
+    <value>DocuSign</value>
+  </data>
+  <data name="ConsumersdocuSignClientId" xml:space="preserve">
+    <value>DocuSign Kľúč</value>
+  </data>
+  <data name="ConsumersdocuSignClientSecret" xml:space="preserve">
+    <value>Tajný kľúč DocuSign</value>
+  </data>
+  <data name="ConsumersDocuSignDescription" xml:space="preserve">
+    <value>Pripojte aplikáciu pre pridanie elektronického podpisu DocuSign do dokumentov.</value>
+  </data>
+  <data name="ConsumersdocuSignHost" xml:space="preserve">
+    <value>Koncový bod autentifikácie DocuSign</value>
+  </data>
+  <data name="ConsumersDocuSignInstruction" xml:space="preserve">
+    <value>Aktivujte túto aplikáciu, aby ste mohli podpisovať dokumenty pomocou DocuSign. {0}Prejdite do svojej konzoly DocuSign Admin a pridajte integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
+  </data>
+  <data name="ConsumersDropBox" xml:space="preserve">
+    <value>DropBox</value>
+  </data>
+  <data name="ConsumersDropBoxDescription" xml:space="preserve">
+    <value>Pripojte aplikáciu na správu Dropbox súborov a priečinkov.</value>
+  </data>
+  <data name="ConsumersDropBoxInstruction" xml:space="preserve">
+    <value>Aktivujte túto aplikáciu, aby ste pripojili účet Dropbox k modulu Dokumenty. Budete môcť spravovať, upravovať a zdieľať súbory z Dropbox s používateľmi {LogoText}. {0}Prihláste sa do svojho účtu na webovej stránke Dropbox Developers a vytvorte novú aplikáciu pre integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
+  </data>
+  <data name="ConsumersDropBoxKey" xml:space="preserve">
+    <value>DropBox ID</value>
+  </data>
+  <data name="ConsumersDropBoxSecret" xml:space="preserve">
+    <value>DropBox Kľúč</value>
+  </data>
+  <data name="ConsumersEasyBib" xml:space="preserve">
+    <value>EasyBib</value>
+  </data>
+  <data name="ConsumerseasyBibappkey" xml:space="preserve">
+    <value>Kľúč aplikácie</value>
+  </data>
+  <data name="ConsumersEasyBibDescription" xml:space="preserve">
+    <value>Aktivujte túto aplikáciu, aby ste mohli vytvárať bibliografické zoznamy v dokumentoch pomocou EasyBib.</value>
+  </data>
+  <data name="ConsumersEasyBibInstruction" xml:space="preserve">
+    <value>Aktivujte túto aplikáciu, aby ste mohli vytvárať bibliografií v editoroch {LogoText}. {0}Prejdite na registračnú stránku EasyBib a vyplňte formulár na integráciu {LogoText}. Po získaní kľúča aplikácie ho vložte nižšie:</value>
+  </data>
+  <data name="ConsumersFacebook" xml:space="preserve">
+    <value>Facebook</value>
+  </data>
+  <data name="ConsumersfacebookAccessToken_Default" xml:space="preserve">
+    <value>Token aplikácie</value>
+  </data>
+  <data name="ConsumersfacebookClientId" xml:space="preserve">
+    <value>Facebook ID</value>
+  </data>
+  <data name="ConsumersfacebookClientSecret" xml:space="preserve">
+    <value>Facebook kľúč</value>
+  </data>
+  <data name="ConsumersFacebookDescription" xml:space="preserve">
+    <value>Pripojte aplikáciu a prihláste sa na portál pomocou účtu Facebook.</value>
+  </data>
+  <data name="ConsumersFacebookInstruction" xml:space="preserve">
+    <value>Aktivujte túto aplikáciu, aby sa vaši používatelia mohli prihlásiť do {LogoText} pomocou Facebooku a prepojiť účty ich zákazníkov na Facebooku s modulom CRM. {0}Prejdite na Facebook Developers Portal a vytvorte novú aplikáciu na integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
+  </data>
+  <data name="ConsumersFirebase" xml:space="preserve">
+    <value>Firebase</value>
+  </data>
+  <data name="ConsumersFirebaseDescription" xml:space="preserve">
+    <value>Aktivujte túto aplikáciu, aby ste dostávali oznámenia o správach odoslaných cez Firebase Cloud Messaging.</value>
+  </data>
+  <data name="ConsumersFirebaseInstruction" xml:space="preserve">
+    <value>Aktivujte túto aplikáciu, aby vaši používatelia mohli dostávať oznámenia o správach aj v režime offline. {0}Prejdite do konzoly Firebase a pridajte nový projekt pre integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
+  </data>
+  <data name="Consumersfirebase_apiKey" xml:space="preserve">
+    <value>Api kľúč</value>
+  </data>
+  <data name="Consumersfirebase_authorization" xml:space="preserve">
+    <value>Serverový kľúč</value>
+  </data>
+  <data name="Consumersfirebase_messagingSenderId" xml:space="preserve">
+    <value>ID odosielateľa</value>
+  </data>
+  <data name="Consumersfirebase_projectId" xml:space="preserve">
+    <value>ID projektu</value>
+  </data>
+  <data name="ConsumersGoogle" xml:space="preserve">
+    <value>Google</value>
+  </data>
+  <data name="ConsumersgoogleClientId" xml:space="preserve">
+    <value>Google ID</value>
+  </data>
+  <data name="ConsumersgoogleClientSecret" xml:space="preserve">
+    <value>Google Kľúč</value>
+  </data>
+  <data name="ConsumersGoogleCloud" xml:space="preserve">
+    <value>Google Cloud Storage</value>
+  </data>
+  <data name="ConsumersGoogleCloudbucket" xml:space="preserve">
+    <value>Bucket</value>
+  </data>
+  <data name="ConsumersGoogleCloudbucketDescription" xml:space="preserve">
+    <value>Zadajte názov Google Cloud Bucket na ukladanie záloh.</value>
+  </data>
+  <data name="ConsumersGoogleCloudDescription" xml:space="preserve">
+    <value>Pripojte službu Google Cloud Storage na zálohovanie a ukladanie údajov z portálu.</value>
+  </data>
+  <data name="ConsumersGoogleCloudInstruction" xml:space="preserve">
+    <value>Pripojte službu Google Cloud Storage na zálohovanie a ukladanie údajov z portálu. {0}Prejdite do konzoly Google Cloud Platform a vytvorte nový servisný účet {LogoText}. Nižšie vložte údaje, ktoré ste dostali:</value>
+  </data>
+  <data name="ConsumersGoogleCloudjson" xml:space="preserve">
+    <value>GoogleCloud json</value>
+  </data>
+  <data name="ConsumersGoogleDescription" xml:space="preserve">
+    <value>Pripojte projekt, aby ste sa mohli prihlásiť na portál pomocou účtu Google a spravovať súbory a priečinky na disku Google.</value>
+  </data>
+  <data name="ConsumersGoogleInstruction" xml:space="preserve">
+    <value>Aktivujte túto aplikáciu, aby ste prepojili svoj účet Google Drive s modulom Dokumenty. Budete môcť spravovať, upravovať a zdieľať súbory z Disku Google s používateľmi {LogoText}. {0}Prejdite do konzoly Google API a vytvorte nový projekt pre integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
+  </data>
+  <data name="ConsumersLinkedIn" xml:space="preserve">
+    <value>LinkedIn</value>
+  </data>
+  <data name="ConsumersLinkedInDescription" xml:space="preserve">
+    <value>Pripojte aplikáciu a prihláste sa na portál pomocou účtu LinkedIn.</value>
+  </data>
+  <data name="ConsumersLinkedInInstruction" xml:space="preserve">
+    <value>Aktivujte túto aplikáciu, aby sa vaši používatelia mohli prihlásiť do {LogoText} pomocou svojich účtov LinkedIn. {0}Prejdite na webovú stránku LinkedIn Developers a vytvorte novú aplikáciu na integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
+  </data>
+  <data name="ConsumersLinkedInKey" xml:space="preserve">
+    <value>Linkedin ID</value>
+  </data>
+  <data name="ConsumersLinkedInSecret" xml:space="preserve">
+    <value>Linkedin Kľúč</value>
+  </data>
+  <data name="ConsumersMailru" xml:space="preserve">
+    <value>Mail.ru</value>
+  </data>
+  <data name="ConsumersMailruClientId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="ConsumersMailruClientSecret" xml:space="preserve">
+    <value>Tajný kľúč</value>
+  </data>
+  <data name="ConsumersMailruDescription" xml:space="preserve">
+    <value>Aktivujte aplikáciu, aby ste sa mohli prihlásiť do portálu pomocou účtu Mail.ru.</value>
+  </data>
+  <data name="ConsumersMailruInstruction" xml:space="preserve">
+    <value>Po pridaní aplikácie Mail.ru môžete na stránke svojho profilu povoliť prihlasovanie do portálu pomocou účtu Mail.ru.</value>
+  </data>
+  <data name="ConsumersMicrosoft" xml:space="preserve">
+    <value>Microsoft</value>
+  </data>
+  <data name="ConsumersmicrosoftClientId" xml:space="preserve">
+    <value>ID klienta aplikácie</value>
+  </data>
+  <data name="ConsumersmicrosoftClientSecret" xml:space="preserve">
+    <value>Klientské tajomnstvo</value>
+  </data>
+  <data name="ConsumersMicrosoftDescription" xml:space="preserve">
+    <value>Aktivujte aplikáciu, aby ste sa mohli prihlásiť do portálu pomocou účtu Microsoft.</value>
+  </data>
+  <data name="ConsumersMicrosoftInstruction" xml:space="preserve">
+    <value>Aktivujte túto aplikáciu, aby sa vaši používatelia mohli prihlásiť do {LogoText} pomocou služby Microsoft. {0}Prejdite na Microsoft Azure a vytvorte novú aplikáciu na integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
+  </data>
+  <data name="ConsumersRackspace" xml:space="preserve">
+    <value>Rackspace Cloud Storage</value>
+  </data>
+  <data name="ConsumersRackspaceDescription" xml:space="preserve">
+    <value>Pripojte službu Rackspace Cloud Storage na zálohovanie a ukladanie údajov z portálu.</value>
+  </data>
+  <data name="ConsumersRackspaceInstruction" xml:space="preserve">
+    <value>Pripojte službu Rackspace Cloud Storage na zálohovanie a ukladanie údajov z portálu. {0}V bezpečnostných nastaveniach ovládacieho panela služby Rackspace Cloud kliknite na odkaz Show vedľa položky Rackspace API Key. Nižšie vložte údaje, ktoré ste dostali:</value>
+  </data>
+  <data name="ConsumersRackspaceprivate_container" xml:space="preserve">
+    <value>Súkromný kontajner</value>
+  </data>
+  <data name="ConsumersRackspaceprivate_containerDescription" xml:space="preserve">
+    <value>Zadajte adresu URL súkromného kontajnera Rackspace na ukladanie záloh.</value>
+  </data>
+  <data name="ConsumersRackspacepublic_container" xml:space="preserve">
+    <value>Verejný kontajner</value>
+  </data>
+  <data name="ConsumersRackspacepublic_containerDescription" xml:space="preserve">
+    <value>Zadajte adresu URL verejného kontajnera Rackspace na ukladanie záloh.</value>
+  </data>
+  <data name="ConsumersRackspaceregion" xml:space="preserve">
+    <value>Región</value>
+  </data>
+  <data name="ConsumersRackspaceregionDescription" xml:space="preserve">
+    <value>Zadajte región, v ktorom sa nachádzajú vaše kontajnery Rackspace.</value>
+  </data>
+  <data name="ConsumersS3" xml:space="preserve">
+    <value>Amazon AWS S3</value>
+  </data>
+  <data name="ConsumersS3bucket" xml:space="preserve">
+    <value>Bucket</value>
+  </data>
+  <data name="ConsumersS3bucketDescription" xml:space="preserve">
+    <value>Zadajte jedinečný názov Amazon bucket na ukladanie záloh.</value>
+  </data>
+  <data name="ConsumersS3Description" xml:space="preserve">
+    <value>Pripojte Amazon AWS S3 na zálohovanie a ukladanie údajov z portálu.</value>
+  </data>
+  <data name="ConsumersS3Instruction" xml:space="preserve">
+    <value>Pripojte Amazon AWS S3 na zálohovanie a ukladanie údajov z portálu. {0}Prejdite do konzoly AWS Management a vytvorte prístupové kľúče pre {LogoText}. Nižšie vložte údaje, ktoré ste dostali:</value>
+  </data>
+  <data name="ConsumersS3region" xml:space="preserve">
+    <value>Región</value>
+  </data>
+  <data name="ConsumersS3regionDescription" xml:space="preserve">
+    <value>Zadajte región AWS, v ktorom sa nachádza váš Amazon bucket.</value>
+  </data>
+  <data name="Consumerssecretaccesskey" xml:space="preserve">
+    <value>Tajný prístupový kľúč S3</value>
+  </data>
+  <data name="ConsumersSelectel" xml:space="preserve">
+    <value>Selectel Cloud Storage</value>
+  </data>
+  <data name="ConsumersSelectelauthPwd" xml:space="preserve">
+    <value>Heslo na prístup k úložisku</value>
+  </data>
+  <data name="ConsumersSelectelauthUser" xml:space="preserve">
+    <value>Auth User</value>
+  </data>
+  <data name="ConsumersSelectelDescription" xml:space="preserve">
+    <value>Pripojte službu Selectel Cloud Storage na zálohovanie a ukladanie údajov z portálu.</value>
+  </data>
+  <data name="ConsumersSelectelInstruction" xml:space="preserve">
+    <value>Pripojte službu Selectel Cloud Storage na zálohovanie a ukladanie údajov z portálu. {0}Získajte prístupové údaje používateľa s právami na čítanie/zápis pre kontajnery, do ktorých plánujete ukladať zálohy, a vložte ich nižšie:</value>
+  </data>
+  <data name="ConsumersSelectelprivate_container" xml:space="preserve">
+    <value>Súkromný kontajner</value>
+  </data>
+  <data name="ConsumersSelectelprivate_containerDescription" xml:space="preserve">
+    <value>Zadajte názov súkromného kontajnera Selectel na ukladanie záloh.</value>
+  </data>
+  <data name="ConsumersSelectelpublic_container" xml:space="preserve">
+    <value>Verejný kontajner</value>
+  </data>
+  <data name="ConsumersSelectelpublic_containerDescription" xml:space="preserve">
+    <value>Zadajte názov verejného kontajnera Selectel na ukladanie záloh.</value>
+  </data>
+  <data name="ConsumersSkyDrive" xml:space="preserve">
+    <value>OneDrive</value>
+  </data>
+  <data name="Consumersskydriveappkey" xml:space="preserve">
+    <value>ID aplikácie</value>
+  </data>
+  <data name="Consumersskydriveappsecret" xml:space="preserve">
+    <value>Tajomstvo klienta</value>
+  </data>
+  <data name="ConsumersSkyDriveDescription" xml:space="preserve">
+    <value>Pripojte aplikáciu na správu súborov a priečinkov OneDrive.</value>
+  </data>
+  <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
+    <value>Aktivujte túto aplikáciu, aby ste prepojili svoj účet OneDrive s modulom Dokumenty. Budete môcť spravovať, upravovať a zdieľať súbory zo služby OneDrive s používateľmi {LogoText}. {0}Prihláste sa do svojho účtu Microsoft Azure a vytvorte novú aplikáciu pre integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
+  </data>
+  <data name="ConsumersSmsc" xml:space="preserve">
+    <value>SMS centrum</value>
+  </data>
+  <data name="ConsumersSmscDescription" xml:space="preserve">
+    <value>Povoliť aplikáciu na dvojfaktorové overenie prostredníctvom centra SMS.</value>
+  </data>
+  <data name="ConsumersSmscInstruction" xml:space="preserve">
+    <value>Pomocou tejto aplikácie môžete zapnúť dvojfaktorové overovanie prostredníctvom služby Centrum SMS. {0}Vložte svoje prihlasovacie meno k účtu smsc a heslo (alebo heslo hash MD5) malými písmenami:</value>
+  </data>
+  <data name="Consumerssmsclogin" xml:space="preserve">
+    <value>Prihlásenie</value>
+  </data>
+  <data name="Consumerssmscpsw" xml:space="preserve">
+    <value>Heslo alebo heslo MD5 hash malými písmenami</value>
+  </data>
+  <data name="ConsumersTelegram" xml:space="preserve">
+    <value>Telegram</value>
+  </data>
+  <data name="ConsumersTelegramBotName" xml:space="preserve">
+    <value>Meno bota</value>
+  </data>
+  <data name="ConsumersTelegramBotToken" xml:space="preserve">
+    <value>Token bota</value>
+  </data>
+  <data name="ConsumersTelegramDescription" xml:space="preserve">
+    <value>Pripojte účet Telegram, aby ste mohli dostávať oznámenia z portálu cez Telegram.</value>
+  </data>
+  <data name="ConsumersTelegramInstruction" xml:space="preserve">
+    <value>Ak chcete dostávať oznámenia portálu v Telegrame, povoľte funkciu Telegram bot. Nového bota môžete vytvoriť pomocou funkcie BotFather v Telegram Desktop. Ak chcú používatelia portálu využívať tento bot, musia na svojej profilovej stránke povoliť upozornenia Telegram. {0}Vložte používateľské meno bota a token, ktorý ste dostali, do poličiek nižšie.</value>
+  </data>
+  <data name="ConsumersTwilio" xml:space="preserve">
+    <value>Twilio</value>
+  </data>
+  <data name="ConsumerstwilioAccountSid" xml:space="preserve">
+    <value>Účet Sid</value>
+  </data>
+  <data name="ConsumerstwilioAuthToken" xml:space="preserve">
+    <value>Auth Token</value>
+  </data>
+  <data name="ConsumersTwilioDescription" xml:space="preserve">
+    <value>Pridajte službu Twilio, aby ste mohli volať CRM kontakty priamo z prehliadača.</value>
+  </data>
+  <data name="ConsumersTwilioInstruction" xml:space="preserve">
+    <value>Aktivujte túto aplikáciu, aby vaši používatelia mohli volať svojim kontaktom z modulu CRM cez službu Twilio. {0}Prejdite do konzoly Twilio a vložte nasledujúce údaje:</value>
+  </data>
+  <data name="Consumerstwiliosender" xml:space="preserve">
+    <value>Telefónne číslo od spoločnosti Twilio (vyžadované pre autorizáciu prostredníctvom SMS)</value>
+  </data>
+  <data name="ConsumersTwitter" xml:space="preserve">
+    <value>Twitter</value>
+  </data>
+  <data name="ConsumerstwitterAccessTokenSecret_Default" xml:space="preserve">
+    <value>Tajomstvo klienta</value>
+  </data>
+  <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
+    <value>ID klienta</value>
+  </data>
+  <data name="ConsumersTwitterDescription" xml:space="preserve">
+    <value>Pripojte aplikáciu a prihláste sa na portál pomocou účtu Twitter.</value>
+  </data>
+  <data name="ConsumersTwitterInstruction" xml:space="preserve">
+    <value>Aktivujte túto aplikáciu, aby sa vaši používatelia mohli prihlásiť do {LogoText} pomocou svojho Twitteru a prepojiť účty svojich zákazníkov na Twitteri s modulom CRM. {0}Prejdite na Twitter Developers Portal a vytvorte novú aplikáciu pre integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
+  </data>
+  <data name="ConsumersTwitterKey" xml:space="preserve">
+    <value>Kľúč API</value>
+  </data>
+  <data name="ConsumersTwitterSecret" xml:space="preserve">
+    <value>Tajný kľúč API</value>
+  </data>
+  <data name="Consumersusername" xml:space="preserve">
+    <value>Používateľské meno Rackspace</value>
+  </data>
+  <data name="ConsumersVk" xml:space="preserve">
+    <value>VK</value>
+  </data>
+  <data name="ConsumersVkClientId" xml:space="preserve">
+    <value>ID aplikácie</value>
+  </data>
+  <data name="ConsumersVkClientSecret" xml:space="preserve">
+    <value>Bezpečnostný kľúč</value>
+  </data>
+  <data name="ConsumersVkDescription" xml:space="preserve">
+    <value>Aktivujte aplikáciu, aby ste sa mohli prihlásiť do portálu pomocou účtu VK.</value>
+  </data>
+  <data name="ConsumersVkInstruction" xml:space="preserve">
+    <value>Po pridaní aplikácie VK môžete na stránke svojho profilu povoliť prihlasovanie na portál pomocou účtu VK.</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>ID klienta</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Tajný kľúč klienta</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Povoliť aplikácii prihlásenie do portálu pomocou účtu WeChat.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Povoliť aplikácii prihlásenie do portálu pomocou účtu WeChat.</value>
+  </data>
+  <data name="ConsumersWordpress" xml:space="preserve">
+    <value>WordPress</value>
+  </data>
+  <data name="ConsumersWordpressDescription" xml:space="preserve">
+    <value>Aktivujte aplikáciu, aby ste mohli publikovať dokumenty priamo vo WordPress.</value>
+  </data>
+  <data name="ConsumersWordpressInstruction" xml:space="preserve">
+    <value>Aktivujte aplikáciu, aby ste mohli jednoducho publikovať dokumenty na svojej webovej stránke WordPress. {0}Na stránke Wordpress Developers vytvorte novú aplikáciu pre integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
+  </data>
+  <data name="ConsumerswpClientId" xml:space="preserve">
+    <value>WordPress kľúč</value>
+  </data>
+  <data name="ConsumerswpClientSecret" xml:space="preserve">
+    <value>Tajný kód WordPress</value>
+  </data>
+  <data name="ConsumersYahoo" xml:space="preserve">
+    <value>Yahoo</value>
+  </data>
+  <data name="ConsumersyahooClientId" xml:space="preserve">
+    <value>ID klienta</value>
+  </data>
+  <data name="ConsumersyahooClientSecret" xml:space="preserve">
+    <value>Tajný kód klienta</value>
+  </data>
+  <data name="ConsumersYahooDescription" xml:space="preserve">
+    <value>Povoliť aplikáciu pre import kontaktov Yahoo.</value>
+  </data>
+  <data name="ConsumersYahooInstruction" xml:space="preserve">
+    <value>Aktivujte túto aplikáciu, aby ste mohli pridávať nových používateľov portálu zo zoznamu kontaktov Yahoo. {0}Prejdite na stránku Create Application v Yahoo Developer Network a vytvorte novú aplikáciu pre integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
+  </data>
+  <data name="ConsumersYandex" xml:space="preserve">
+    <value>Yandex</value>
+  </data>
+  <data name="ConsumersYandexClientId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="ConsumersYandexClientSecret" xml:space="preserve">
+    <value>Heslo</value>
+  </data>
+  <data name="ConsumersYandexDescription" xml:space="preserve">
+    <value>Aktivujte aplikáciu, aby ste sa mohli prihlásiť na portál pomocou účtu Yandex.</value>
+  </data>
+  <data name="ConsumersYandexInstruction" xml:space="preserve">
+    <value>Po pridaní aplikácie Yandex môžete na stránke svojho profilu povoliť prihlasovanie do portálu pomocou účtu Yandex.</value>
+  </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>Id klienta Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Tajomstvo klienta Zoom</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>Umožnite aplikácii prihlásiť sa na portál pomocou účtu Zoom.</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>Aktivujte túto aplikáciu, aby sa vaši používatelia mohli prihlásiť do {LogoText} cez svoje účty Zoom. {0}Prejdite na webovú stránku Zoom Developers a vytvorte novú integráciu aplikácie {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
   </data>
   <data name="CouldNotRecoverPasswordForLdapUser" xml:space="preserve">
     <value>Obnova hesla pre používateľa LDAP je zakázaná</value>
@@ -84,6 +710,27 @@
   </data>
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>Vlastný</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Dátum</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>E-mail</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Meno</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Priezvisko</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Kvóta služby dokumentov ({0})</value>
+  </data>
+  <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
+    <value>Nesprávne Instance ID.</value>
   </data>
   <data name="EmailAndPasswordIncorrectEmail" xml:space="preserve">
     <value>Nesprávna e-mailová adresa</value>
@@ -97,6 +744,9 @@
   <data name="ErrorBadKeys" xml:space="preserve">
     <value>Zlé kľúče</value>
   </data>
+  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
+    <value>Posledný plný prístupový priestor nie je možné odstrániť</value>
+  </data>
   <data name="ErrorDisabledProfile" xml:space="preserve">
     <value>Váš profil je pozastavený</value>
   </data>
@@ -109,17 +759,41 @@
   <data name="ErrorEmailEmpty" xml:space="preserve">
     <value>Pole e-mail je prázdne</value>
   </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>Tento e-mail je priradený používateľovi {0} ako poskytovateľovi tretej strany</value>
+  </data>
   <data name="ErrorEmailsAreTheSame" xml:space="preserve">
     <value>Aktuálny e-mail a nový e-mail sú rovnaké</value>
   </data>
   <data name="ErrorEmptyFields" xml:space="preserve">
     <value>Vyplňte prosím všetky polia</value>
   </data>
+  <data name="ErrorEmptyMessage" xml:space="preserve">
+    <value>Políčko Text správy je prázdne</value>
+  </data>
   <data name="ErrorEmptyUploadFileSelected" xml:space="preserve">
     <value>Nahraný súbor sa nenašiel</value>
   </data>
+  <data name="ErrorFileNotImage" xml:space="preserve">
+    <value>Neznámy typ súboru obrázka</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>Skupinu sa nepodarilo nájsť</value>
+  </data>
+  <data name="ErrorImageSize" xml:space="preserve">
+    <value>Veľkosť obrázka prekračuje povolené parametre</value>
+  </data>
   <data name="ErrorImageWeightLimit" xml:space="preserve">
     <value>Veľkosť súboru obrázka je príliš veľká</value>
+  </data>
+  <data name="ErrorIncorrectUserName" xml:space="preserve">
+    <value>Nesprávne meno alebo priezvisko</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Limit pozvaní je prekročený</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Pridajte aspoň 1 povolenú IP adresu.</value>
   </data>
   <data name="ErrorIpSecurity" xml:space="preserve">
     <value>Prístup do portálu je obmedzený</value>
@@ -145,17 +819,77 @@
   <data name="ErrorPasswordNoDigits" xml:space="preserve">
     <value>číslice</value>
   </data>
+  <data name="ErrorPasswordNoSpaces" xml:space="preserve">
+    <value>žiadne medzery</value>
+  </data>
   <data name="ErrorPasswordNoSpecialSymbols" xml:space="preserve">
     <value>špeciálne znaky</value>
   </data>
   <data name="ErrorPasswordNoUpperCase" xml:space="preserve">
     <value>veľké písmená</value>
   </data>
+  <data name="ErrorPasswordOnlyLatinLetters" xml:space="preserve">
+    <value>iba latinské písmená</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Vyžaduje sa platba</value>
+  </data>
+  <data name="ErrorRequestLimitExceeded" xml:space="preserve">
+    <value>Limit požiadaviek je prekročený</value>
+  </data>
+  <data name="ErrorTenantTooShort" xml:space="preserve">
+    <value>Doména užívateľa nemôže byť prázdna.</value>
+  </data>
+  <data name="ErrorTenantTooShortFormat" xml:space="preserve">
+    <value>Názov domény musí byť dlhý od {0} do {1} znakov.</value>
+  </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>Príliš veľa pokusov o prihlásenie. Prosím, skúste to znova neskôr</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Pridajte aspoň 1 dôveryhodnú doménu.</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Používateľ je deaktivovaný</value>
+  </data>
   <data name="ErrorUserNotFound" xml:space="preserve">
     <value>Používateľa sa nepodarilo nájsť</value>
   </data>
   <data name="ErrorUserNotFoundByEmail" xml:space="preserve">
     <value>Používateľ s e-mailom "{0}" nebol nájdený</value>
+  </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>Webhook URL nie je dostupná. HEAD požiadavka nevrátila HTTP status 200.</value>
+  </data>
+  <data name="ErrorWebPluginArchive" xml:space="preserve">
+    <value>Nesprávny archív pluginu</value>
+  </data>
+  <data name="ErrorWebPluginExist" xml:space="preserve">
+    <value>Plugin už existuje</value>
+  </data>
+  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
+    <value>Nesprávna prípona súboru</value>
+  </data>
+  <data name="ErrorWebPluginFileSize" xml:space="preserve">
+    <value>Veľkosť súboru prekračuje limit</value>
+  </data>
+  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
+    <value>Zmeny systémových pluginov sú zakázané</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>Počet pluginov prekračuje limit</value>
+  </data>
+  <data name="ErrorWebPluginName" xml:space="preserve">
+    <value>Nesprávny názov pluginu</value>
+  </data>
+  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
+    <value>Žiadny vstupný súbor</value>
+  </data>
+  <data name="ErrorWebPluginNotFound" xml:space="preserve">
+    <value>Plugin sa nenašiel</value>
+  </data>
+  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
+    <value>K mnohým vstupným súborom</value>
   </data>
   <data name="EuServerRegion" xml:space="preserve">
     <value>EÚ Región (Frankfurt)</value>
@@ -201,6 +935,12 @@
   </data>
   <data name="LdapSettingsErrorIncorrectLdapFilter" xml:space="preserve">
     <value>Neplatná hodnota používateľského filtra.</value>
+  </data>
+  <data name="LdapSettingsErrorLostRights" xml:space="preserve">
+    <value>Pokúsili ste sa sami sebe odobrať práva administrátora. Vaše administrátorské práva neboli ovplyvnené.</value>
+  </data>
+  <data name="LdapSettingsErrorRemovedYourself" xml:space="preserve">
+    <value>Váš účet nie je prepojený s adresárom LDAP a vaše heslo LDAP už nie je aktívne. Zmeňte alebo nastavte heslo k svojmu účtu na stránke s nastaveniami profilu.</value>
   </data>
   <data name="LdapSettingsErrorUnknownError" xml:space="preserve">
     <value>Neznáma chyba.</value>
@@ -250,6 +990,9 @@
   <data name="LdapSettingsStatusGettingUsersFromLdap" xml:space="preserve">
     <value>Načítanie zoznamu používateľov zo servera LDAP</value>
   </data>
+  <data name="LdapSettingsStatusGivingRights" xml:space="preserve">
+    <value>Nastavenie používateľa {0} ako {1} administrátora</value>
+  </data>
   <data name="LdapSettingsStatusLoadingBaseInfo" xml:space="preserve">
     <value>Načítanie základných informácií LDAP</value>
   </data>
@@ -258,6 +1001,9 @@
   </data>
   <data name="LdapSettingsStatusRemovingOldGroups" xml:space="preserve">
     <value>Odstránenie zastaraných skupín, ktoré boli skôr nahraté pomocou LDAP</value>
+  </data>
+  <data name="LdapSettingsStatusRemovingOldRights" xml:space="preserve">
+    <value>Odstránenie neaktuálnych prístupových práv, ktoré boli predtým načítané prostredníctvom LDAP</value>
   </data>
   <data name="LdapSettingsStatusRemovingOldUsers" xml:space="preserve">
     <value>Odstránenie zastaraných používateľských profilov, ktoré boli skôr nahrané pomocou LDAP</value>
@@ -268,11 +1014,20 @@
   <data name="LdapSettingsStatusSavingSettings" xml:space="preserve">
     <value>Ukladanie nastavení</value>
   </data>
+  <data name="LdapSettingsStatusSavingUserPhoto" xml:space="preserve">
+    <value>Uloženie fotografie</value>
+  </data>
   <data name="LdapSettingsStatusSavingUsers" xml:space="preserve">
     <value>Ukladanie používateľov</value>
   </data>
   <data name="LdapSettingsStatusSyncingUsers" xml:space="preserve">
     <value>Synchronizácia používateľov</value>
+  </data>
+  <data name="LdapSettingsStatusUpdatingAccessRights" xml:space="preserve">
+    <value>Aktualizácia prístupových práv užívateľov</value>
+  </data>
+  <data name="LdapSettingsStatusUpdatingUserPhotos" xml:space="preserve">
+    <value>Aktualizácia fotografií užívateľov</value>
   </data>
   <data name="LdapSettingsStrongAuthRequired" xml:space="preserve">
     <value>Je požadovaný bezpečnejší typ autentifikácie. Použite šifrované pripojenie alebo povoľte na serveri jednoduché overovanie.</value>
@@ -304,8 +1059,20 @@
   <data name="LicenseUploaded" xml:space="preserve">
     <value>Nahranie úspešné</value>
   </data>
+  <data name="LicenseUploadedOverdue" xml:space="preserve">
+    <value>Úspešne nahrané. {0}Podpora a aktualizácie nie sú dostupné pre túto licenciu od {2}.{1}</value>
+  </data>
+  <data name="LicenseUploadedOverdueSupport" xml:space="preserve">
+    <value>Úspešne nahrané. {0}Podpora pre túto licenciu nie je dostupná od {2}.{1}</value>
+  </data>
   <data name="MessageEmailChangeInstuctionsSentOnEmail" xml:space="preserve">
     <value>Pokyny na zmenu e-mailu boli úspešne odoslané</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Pokyn na zmenu hesla bol odoslaný na e-mailovú adresu {0}.</value>
+  </data>
+  <data name="MessageYourPasswordSendedToEmail" xml:space="preserve">
+    <value>Ak existuje užívateľ s e-mailom {0}, na túto e-mailovú adresu bol odoslaný pokyn na zmenu hesla.</value>
   </data>
   <data name="MobilePhoneMustErase" xml:space="preserve">
     <value>Ak chcete zmeniť číslo, musíte odstrániť Vaše aktuálne telefónne číslo</value>
@@ -316,11 +1083,26 @@
   <data name="Owner" xml:space="preserve">
     <value>Majiteľ</value>
   </data>
+  <data name="PortalName" xml:space="preserve">
+    <value>Priestor v cloude pre vaše pracovné dokumenty</value>
+  </data>
   <data name="PortalSecurity" xml:space="preserve">
     <value>Prístup k portálu</value>
   </data>
+  <data name="QuotaGreaterPortalError" xml:space="preserve">
+    <value>Nepodarilo sa nastaviť kvótu pamäte – kvóta pamäte, ktorú ste nastavili, je väčšia ako kvóta portálu.</value>
+  </data>
   <data name="ReassignDataRemoveUserError" xml:space="preserve">
     <value>Preradenie údajov pre {0} nie je dokončené.</value>
+  </data>
+  <data name="RecaptchaInvalid" xml:space="preserve">
+    <value>Neplatná Recaptcha</value>
+  </data>
+  <data name="RoomFreeSpaceException" xml:space="preserve">
+    <value>Kvóta priestoru v miestnosti bola prekročená</value>
+  </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>Nepodarilo sa nastaviť kvótu pre miestnosť. Zadaná hodnota je väčšia ako celkové úložisko DocSpace.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Ázia Pacifik (Singapur)</value>
@@ -364,20 +1146,38 @@
   <data name="SuccessfullySentNotificationDeleteUserInfoMessage" xml:space="preserve">
     <value>Pokyny k zmazaniu Vášho profilu boli odoslané na e-mailovú adresu {0}</value>
   </data>
-  <data name="UsServerRegion" xml:space="preserve">
-    <value>Región Západ USA (Oregon)</value>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>Počet agentov AI by nemal prekročiť {0}</value>
   </data>
-  <data name="WhatsNewSubscriptionName" xml:space="preserve">
-    <value>Čo je nové</value>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>Nástroje AI</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Aktivujte funkcie AI vo vašom DocSpace a zvýšte produktivitu.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Sledovanie prihlásení a akcií</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Záloha</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Povoľte zálohovanie pre váš DocSpace. Náklady budú účtované automaticky.</value>
+  </data>
+  <data name="TariffsFeature_customization" xml:space="preserve">
+    <value>Branding a personalizácia</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>Maximálna veľkosť súboru</value>
   </data>
   <data name="TariffsFeature_file_size_exception" xml:space="preserve">
     <value>Veľkosť súboru by nemala presahovať {0}</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} bezplatných záloh mesačne</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Počet bezplatných záloh by nemal prekročiť {0} za mesiac</value>
   </data>
   <data name="TariffsFeature_manager_exception" xml:space="preserve">
     <value>Počet administrátorov by nemal presahovať {0}</value>
@@ -397,16 +1197,37 @@
   <data name="TariffsFeature_sso" xml:space="preserve">
     <value>SSO</value>
   </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Kvóty a štatistiky úložiska</value>
+  </data>
+  <data name="TariffsFeature_thirdparty" xml:space="preserve">
+    <value>Integrácie tretích strán</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} na administrátora a možnosť pridať priestor na požiadanie</value>
+  </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>Použitý objem úložiska by nemal presahovať {0}</value>
   </data>
   <data name="TariffsFeature_total_size_price_count" xml:space="preserve">
     <value>Úložného priestoru</value>
   </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Dodatočné úložisko na disku</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Upravte si úložný priestor presne podľa potreby.</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Pridaní administrátori:</value>
+  </data>
   <data name="TariffsFeature_used_room" xml:space="preserve">
     <value>Miestnosti:</value>
   </data>
   <data name="TariffsFeature_used_total_size" xml:space="preserve">
+    <value>Použitý objem úložiska:</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
     <value>Použitý objem úložiska:</value>
   </data>
   <data name="TariffsFeature_used_usersInRoom" xml:space="preserve">
@@ -415,182 +1236,23 @@
   <data name="TariffsFeature_users" xml:space="preserve">
     <value>Neobmedzený počet používateľov a hostí</value>
   </data>
-  <data name="TariffsFeature_users_exception" xml:space="preserve">
-    <value>Počet používateľov by nemal presahovať {0}</value>
-  </data>
   <data name="TariffsFeature_usersInRoom" xml:space="preserve">
     <value>Používateľov v miestnosti</value>
   </data>
   <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
     <value>Počet používateľov v miestnosti by nemal presahovať {0}</value>
   </data>
-  <data name="TariffsFeature_customization" xml:space="preserve">
-    <value>Branding a personalizácia</value>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Počet administrátorov prekročil limit: {0}/{1}.</value>
   </data>
-  <data name="ConsumersBitly" xml:space="preserve">
-    <value>Bitly</value>
+  <data name="TariffsFeature_users_exception" xml:space="preserve">
+    <value>Počet používateľov by nemal presahovať {0}</value>
   </data>
-  <data name="ConsumersbitlyClientSecret" xml:space="preserve">
-    <value>apiKey</value>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>AI vyhľadávanie na webe</value>
   </data>
-  <data name="ConsumersbitlyClientId" xml:space="preserve">
-    <value>prihlásenie</value>
-  </data>
-  <data name="ConsumersBitlyDescription" xml:space="preserve">
-    <value>Pripojte službu Bitly, aby ste skrátili odkazy na pozvánky na portál a zdieľané odkazy v module Dokumenty.</value>
-  </data>
-  <data name="ConsumersboxClientId" xml:space="preserve">
-    <value>Box ID</value>
-  </data>
-  <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Pripojte aplikáciu a spravujte súbory a priečinky.</value>
-  </data>
-  <data name="ConsumersClickatell" xml:space="preserve">
-    <value>Clickatell</value>
-  </data>
-  <data name="ConsumersclickatellapiKey" xml:space="preserve">
-    <value>apiKey</value>
-  </data>
-  <data name="ConsumersClickatellDescription" xml:space="preserve">
-    <value>Povoliť aplikáciu pre dvojfaktorovú autentifikáciu cez Clickatell.</value>
-  </data>
-  <data name="ConsumersDocuSign" xml:space="preserve">
-    <value>DocuSign</value>
-  </data>
-  <data name="ConsumersdocuSignClientId" xml:space="preserve">
-    <value>DocuSign Kľúč</value>
-  </data>
-  <data name="ConsumersDocuSignDescription" xml:space="preserve">
-    <value>Pripojte aplikáciu pre pridanie elektronického podpisu DocuSign do dokumentov.</value>
-  </data>
-  <data name="ConsumersdocuSignHost" xml:space="preserve">
-    <value>Koncový bod autentifikácie DocuSign</value>
-  </data>
-  <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Pripojte aplikáciu na správu Dropbox súborov a priečinkov.</value>
-  </data>
-  <data name="ConsumersDropBoxKey" xml:space="preserve">
-    <value>DropBox ID</value>
-  </data>
-  <data name="ConsumersfacebookClientId" xml:space="preserve">
-    <value>Facebook ID</value>
-  </data>
-  <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Pripojte aplikáciu a prihláste sa na portál pomocou účtu Facebook.</value>
-  </data>
-  <data name="ConsumersfacebookClientSecret" xml:space="preserve">
-    <value>Facebook kľúč</value>
-  </data>
-  <data name="ConsumersFirebase" xml:space="preserve">
-    <value>Firebase</value>
-  </data>
-  <data name="Consumersfirebase_apiKey" xml:space="preserve">
-    <value>Api kľúč</value>
-  </data>
-  <data name="Consumersfirebase_authorization" xml:space="preserve">
-    <value>Serverový kľúč</value>
-  </data>
-  <data name="ConsumersdocuSignClientSecret" xml:space="preserve">
-    <value>Tajný kľúč DocuSign</value>
-  </data>
-  <data name="Consumersfirebase_messagingSenderId" xml:space="preserve">
-    <value>ID odosielateľa</value>
-  </data>
-  <data name="Consumersfirebase_projectId" xml:space="preserve">
-    <value>ID projektu</value>
-  </data>
-  <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>Pripojte aplikáciu a prihláste sa na portál pomocou účtu LinkedIn.</value>
-  </data>
-  <data name="ConsumersLinkedInSecret" xml:space="preserve">
-    <value>Linkedin Kľúč</value>
-  </data>
-  <data name="ConsumersmicrosoftClientSecret" xml:space="preserve">
-    <value>Klientské tajomnstvo</value>
-  </data>
-  <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>Pripojte aplikáciu na správu súborov a priečinkov OneDrive.</value>
-  </data>
-  <data name="ConsumersSmscDescription" xml:space="preserve">
-    <value>Povoliť aplikáciu na dvojfaktorové overenie prostredníctvom centra SMS.</value>
-  </data>
-  <data name="Consumerssmscpsw" xml:space="preserve">
-    <value>Heslo alebo heslo MD5 hash malými písmenami</value>
-  </data>
-  <data name="ConsumersTwilioDescription" xml:space="preserve">
-    <value>Pridajte službu Twilio, aby ste mohli volať CRM kontakty priamo z prehliadača.</value>
-  </data>
-  <data name="Consumerstwiliosender" xml:space="preserve">
-    <value>Telefónne číslo od spoločnosti Twilio (vyžadované pre autorizáciu prostredníctvom SMS)</value>
-  </data>
-  <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Pripojte aplikáciu a prihláste sa na portál pomocou účtu Twitter.</value>
-  </data>
-  <data name="ConsumersYahooDescription" xml:space="preserve">
-    <value>Povoliť aplikáciu pre import kontaktov Yahoo.</value>
-  </data>
-  <data name="ErrorFileNotImage" xml:space="preserve">
-    <value>Neznámy typ súboru obrázka</value>
-  </data>
-  <data name="ErrorImageSize" xml:space="preserve">
-    <value>Veľkosť obrázka prekračuje povolené parametre</value>
-  </data>
-  <data name="ConsumersDropBoxSecret" xml:space="preserve">
-    <value>DropBox Kľúč</value>
-  </data>
-  <data name="ConsumersEasyBib" xml:space="preserve">
-    <value>EasyBib</value>
-  </data>
-  <data name="ConsumersGoogle" xml:space="preserve">
-    <value>Google</value>
-  </data>
-  <data name="ConsumersgoogleClientId" xml:space="preserve">
-    <value>Google ID</value>
-  </data>
-  <data name="ConsumersgoogleClientSecret" xml:space="preserve">
-    <value>Google Kľúč</value>
-  </data>
-  <data name="ConsumersMailru" xml:space="preserve">
-    <value>Mail.ru</value>
-  </data>
-  <data name="ConsumersMicrosoft" xml:space="preserve">
-    <value>Microsoft</value>
-  </data>
-  <data name="ConsumersSkyDrive" xml:space="preserve">
-    <value>OneDrive</value>
-  </data>
-  <data name="ConsumersSmsc" xml:space="preserve">
-    <value>SMS centrum</value>
-  </data>
-  <data name="Consumerssmsclogin" xml:space="preserve">
-    <value>Prihlásenie</value>
-  </data>
-  <data name="ConsumersTelegram" xml:space="preserve">
-    <value>Telegram</value>
-  </data>
-  <data name="ConsumersTwilio" xml:space="preserve">
-    <value>Twilio</value>
-  </data>
-  <data name="ConsumerstwilioAccountSid" xml:space="preserve">
-    <value>Účet Sid</value>
-  </data>
-  <data name="ConsumersYahoo" xml:space="preserve">
-    <value>Yahoo</value>
-  </data>
-  <data name="ConsumersYandex" xml:space="preserve">
-    <value>Yandex</value>
-  </data>
-  <data name="ConsumersWordpress" xml:space="preserve">
-    <value>WordPress</value>
-  </data>
-  <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
-  </data>
-  <data name="ConsumersYandexClientSecret" xml:space="preserve">
-    <value>Heslo</value>
-  </data>
-  <data name="Tariffs_startup" xml:space="preserve">
-    <value>Startup</value>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Dobite si peňaženku a odomknite vyhľadávanie na webe pomocou AI.</value>
   </data>
   <data name="Tariffs_admin" xml:space="preserve">
     <value>Business</value>
@@ -598,380 +1260,17 @@
   <data name="Tariffs_adminyear" xml:space="preserve">
     <value>Business</value>
   </data>
-  <data name="ConsumersBox" xml:space="preserve">
-    <value>Box</value>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Nezisková</value>
   </data>
-  <data name="ConsumersDropBox" xml:space="preserve">
-    <value>DropBox</value>
+  <data name="Tariffs_startup" xml:space="preserve">
+    <value>Startup</value>
   </data>
-  <data name="ConsumersFacebook" xml:space="preserve">
-    <value>Facebook</value>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>Došlo k neočakávanej chybe. Skúste to znovu.</value>
   </data>
-  <data name="ConsumersLinkedIn" xml:space="preserve">
-    <value>LinkedIn</value>
-  </data>
-  <data name="ConsumersVk" xml:space="preserve">
-    <value>VK</value>
-  </data>
-  <data name="ActivateTfaAppEmptyCode" xml:space="preserve">
-    <value>Pole s kódom overenia nemôže byť prázdne</value>
-  </data>
-  <data name="ButtonTfaAppEnable" xml:space="preserve">
-    <value>Podľa aplikácie autentifikátora</value>
-  </data>
-  <data name="Consumersacesskey" xml:space="preserve">
-    <value>Prístupový kľúč S3</value>
-  </data>
-  <data name="ConsumersapiKey" xml:space="preserve">
-    <value>Rackspace apiKey</value>
-  </data>
-  <data name="ConsumersAppleId" xml:space="preserve">
-    <value>Apple ID</value>
-  </data>
-  <data name="ConsumersappleIdClientId" xml:space="preserve">
-    <value>ID klienta aplikácie</value>
-  </data>
-  <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>Aktivujte aplikáciu na prihlásenie do portálu pomocou účtu Apple ID.</value>
-  </data>
-  <data name="ConsumersAppleIdInstruction" xml:space="preserve">
-    <value>Aktivujte túto aplikáciu, aby ste umožnili používateľom prihlásiť sa na portál {LogoText} pomocou Apple ID. {0}Prejdite na Apple Developers Portal a vytvorte novú aplikáciu na integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
-  </data>
-  <data name="ConsumersappleIdKeyId" xml:space="preserve">
-    <value>10-znakový identifikačný kľúč vygenerovaný pre prihlásenie pomocou osobného kľúča Apple</value>
-  </data>
-  <data name="ConsumersappleIdPrivateKey" xml:space="preserve">
-    <value>Osobný kľúč stiahnutý z Apple Developer</value>
-  </data>
-  <data name="ConsumersappleIdTeamId" xml:space="preserve">
-    <value>10-miestny Team ID vývojárskeho účtu</value>
-  </data>
-  <data name="ConsumersauthPwd" xml:space="preserve">
-    <value>Selectel authPwd</value>
-  </data>
-  <data name="ConsumersauthUser" xml:space="preserve">
-    <value>Selectel authUser</value>
-  </data>
-  <data name="ConsumersBitlyInstruction" xml:space="preserve">
-    <value>Aktivujte túto aplikáciu, aby ste skrátili odkazy na pozvánky a dokumenty. {0}Vložte svoje prihlasovacie meno do služby Bitly a kľúč API nižšie:</value>
-  </data>
-  <data name="ConsumersboxClientSecret" xml:space="preserve">
-    <value>Box kľúč</value>
-  </data>
-  <data name="ConsumersBoxInstruction" xml:space="preserve">
-    <value>Aktivujte túto aplikáciu, aby ste prepojili svoje konto Box s modulom Dokumenty. Budete môcť spravovať, upravovať a zdieľať súbory zo služby Box s používateľmi služby {LogoText}. {0}Prihláste sa do svojho účtu na stránke vývojárov služby Box a vytvorte novú aplikáciu pre integráciu s {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
-  </data>
-  <data name="ConsumersClickatellInstruction" xml:space="preserve">
-    <value>Pomocou tejto aplikácie môžete aktivovať dvojfaktorové overovanie so službou Clickatell. {0}Prihláste sa do svojho účtu SMS Platform a vytvorte novú integráciu pre {LogoText}. Skopírujte apiKey a vložte ho nižšie:</value>
-  </data>
-  <data name="ConsumersDocuSignInstruction" xml:space="preserve">
-    <value>Aktivujte túto aplikáciu, aby ste mohli podpisovať dokumenty pomocou DocuSign. {0}Prejdite do svojej konzoly DocuSign Admin a pridajte integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
-  </data>
-  <data name="ConsumersDropBoxInstruction" xml:space="preserve">
-    <value>Aktivujte túto aplikáciu, aby ste pripojili účet Dropbox k modulu Dokumenty. Budete môcť spravovať, upravovať a zdieľať súbory z Dropbox s používateľmi {LogoText}. {0}Prihláste sa do svojho účtu na webovej stránke Dropbox Developers a vytvorte novú aplikáciu pre integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
-  </data>
-  <data name="ConsumerseasyBibappkey" xml:space="preserve">
-    <value>Kľúč aplikácie</value>
-  </data>
-  <data name="ConsumersEasyBibDescription" xml:space="preserve">
-    <value>Aktivujte túto aplikáciu, aby ste mohli vytvárať bibliografické zoznamy v dokumentoch pomocou EasyBib.</value>
-  </data>
-  <data name="ConsumersEasyBibInstruction" xml:space="preserve">
-    <value>Aktivujte túto aplikáciu, aby ste mohli vytvárať bibliografií v editoroch {LogoText}. {0}Prejdite na registračnú stránku EasyBib a vyplňte formulár na integráciu {LogoText}. Po získaní kľúča aplikácie ho vložte nižšie:</value>
-  </data>
-  <data name="ConsumersfacebookAccessToken_Default" xml:space="preserve">
-    <value>Token aplikácie</value>
-  </data>
-  <data name="ConsumersFacebookInstruction" xml:space="preserve">
-    <value>Aktivujte túto aplikáciu, aby sa vaši používatelia mohli prihlásiť do {LogoText} pomocou Facebooku a prepojiť účty ich zákazníkov na Facebooku s modulom CRM. {0}Prejdite na Facebook Developers Portal a vytvorte novú aplikáciu na integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
-  </data>
-  <data name="ConsumersFirebaseDescription" xml:space="preserve">
-    <value>Aktivujte túto aplikáciu, aby ste dostávali oznámenia o správach odoslaných cez Firebase Cloud Messaging.</value>
-  </data>
-  <data name="ConsumersFirebaseInstruction" xml:space="preserve">
-    <value>Aktivujte túto aplikáciu, aby vaši používatelia mohli dostávať oznámenia o správach aj v režime offline. {0}Prejdite do konzoly Firebase a pridajte nový projekt pre integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
-  </data>
-  <data name="ConsumersGoogleCloud" xml:space="preserve">
-    <value>Google Cloud Storage</value>
-  </data>
-  <data name="ConsumersGoogleCloudbucket" xml:space="preserve">
-    <value>Bucket</value>
-  </data>
-  <data name="ConsumersS3bucket" xml:space="preserve">
-    <value>Bucket</value>
-  </data>
-  <data name="ConsumersGoogleCloudbucketDescription" xml:space="preserve">
-    <value>Zadajte názov Google Cloud Bucket na ukladanie záloh.</value>
-  </data>
-  <data name="ConsumersGoogleCloudDescription" xml:space="preserve">
-    <value>Pripojte službu Google Cloud Storage na zálohovanie a ukladanie údajov z portálu.</value>
-  </data>
-  <data name="ConsumersGoogleCloudInstruction" xml:space="preserve">
-    <value>Pripojte službu Google Cloud Storage na zálohovanie a ukladanie údajov z portálu. {0}Prejdite do konzoly Google Cloud Platform a vytvorte nový servisný účet {LogoText}. Nižšie vložte údaje, ktoré ste dostali:</value>
-  </data>
-  <data name="ConsumersGoogleCloudjson" xml:space="preserve">
-    <value>GoogleCloud json</value>
-  </data>
-  <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Pripojte projekt, aby ste sa mohli prihlásiť na portál pomocou účtu Google a spravovať súbory a priečinky na disku Google.</value>
-  </data>
-  <data name="ConsumersGoogleInstruction" xml:space="preserve">
-    <value>Aktivujte túto aplikáciu, aby ste prepojili svoj účet Google Drive s modulom Dokumenty. Budete môcť spravovať, upravovať a zdieľať súbory z Disku Google s používateľmi {LogoText}. {0}Prejdite do konzoly Google API a vytvorte nový projekt pre integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
-  </data>
-  <data name="ConsumersLinkedInInstruction" xml:space="preserve">
-    <value>Aktivujte túto aplikáciu, aby sa vaši používatelia mohli prihlásiť do {LogoText} pomocou svojich účtov LinkedIn. {0}Prejdite na webovú stránku LinkedIn Developers a vytvorte novú aplikáciu na integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
-  </data>
-  <data name="ConsumersLinkedInKey" xml:space="preserve">
-    <value>Linkedin ID</value>
-  </data>
-  <data name="ConsumersMailruClientId" xml:space="preserve">
-    <value>ID</value>
-  </data>
-  <data name="ConsumersMailruClientSecret" xml:space="preserve">
-    <value>Tajný kľúč</value>
-  </data>
-  <data name="ConsumersMailruDescription" xml:space="preserve">
-    <value>Aktivujte aplikáciu, aby ste sa mohli prihlásiť do portálu pomocou účtu Mail.ru.</value>
-  </data>
-  <data name="ConsumersMailruInstruction" xml:space="preserve">
-    <value>Po pridaní aplikácie Mail.ru môžete na stránke svojho profilu povoliť prihlasovanie do portálu pomocou účtu Mail.ru.</value>
-  </data>
-  <data name="ConsumersmicrosoftClientId" xml:space="preserve">
-    <value>ID klienta aplikácie</value>
-  </data>
-  <data name="ConsumersMicrosoftDescription" xml:space="preserve">
-    <value>Aktivujte aplikáciu, aby ste sa mohli prihlásiť do portálu pomocou účtu Microsoft.</value>
-  </data>
-  <data name="ConsumersMicrosoftInstruction" xml:space="preserve">
-    <value>Aktivujte túto aplikáciu, aby sa vaši používatelia mohli prihlásiť do {LogoText} pomocou služby Microsoft. {0}Prejdite na Microsoft Azure a vytvorte novú aplikáciu na integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
-  </data>
-  <data name="ConsumersRackspace" xml:space="preserve">
-    <value>Rackspace Cloud Storage</value>
-  </data>
-  <data name="ConsumersRackspaceDescription" xml:space="preserve">
-    <value>Pripojte službu Rackspace Cloud Storage na zálohovanie a ukladanie údajov z portálu.</value>
-  </data>
-  <data name="ConsumersRackspaceInstruction" xml:space="preserve">
-    <value>Pripojte službu Rackspace Cloud Storage na zálohovanie a ukladanie údajov z portálu. {0}V bezpečnostných nastaveniach ovládacieho panela služby Rackspace Cloud kliknite na odkaz Show vedľa položky Rackspace API Key. Nižšie vložte údaje, ktoré ste dostali:</value>
-  </data>
-  <data name="ConsumersRackspaceprivate_container" xml:space="preserve">
-    <value>Súkromný kontajner</value>
-  </data>
-  <data name="ConsumersSelectelprivate_container" xml:space="preserve">
-    <value>Súkromný kontajner</value>
-  </data>
-  <data name="ConsumersRackspaceprivate_containerDescription" xml:space="preserve">
-    <value>Zadajte adresu URL súkromného kontajnera Rackspace na ukladanie záloh.</value>
-  </data>
-  <data name="ConsumersRackspacepublic_container" xml:space="preserve">
-    <value>Verejný kontajner</value>
-  </data>
-  <data name="ConsumersSelectelpublic_container" xml:space="preserve">
-    <value>Verejný kontajner</value>
-  </data>
-  <data name="ConsumersRackspacepublic_containerDescription" xml:space="preserve">
-    <value>Zadajte adresu URL verejného kontajnera Rackspace na ukladanie záloh.</value>
-  </data>
-  <data name="ConsumersRackspaceregion" xml:space="preserve">
-    <value>Región</value>
-  </data>
-  <data name="ConsumersRackspaceregionDescription" xml:space="preserve">
-    <value>Zadajte región, v ktorom sa nachádzajú vaše kontajnery Rackspace.</value>
-  </data>
-  <data name="ConsumersS3" xml:space="preserve">
-    <value>Amazon AWS S3</value>
-  </data>
-  <data name="ConsumersS3bucketDescription" xml:space="preserve">
-    <value>Zadajte jedinečný názov Amazon bucket na ukladanie záloh.</value>
-  </data>
-  <data name="ConsumersS3Description" xml:space="preserve">
-    <value>Pripojte Amazon AWS S3 na zálohovanie a ukladanie údajov z portálu.</value>
-  </data>
-  <data name="ConsumersS3Instruction" xml:space="preserve">
-    <value>Pripojte Amazon AWS S3 na zálohovanie a ukladanie údajov z portálu. {0}Prejdite do konzoly AWS Management a vytvorte prístupové kľúče pre {LogoText}. Nižšie vložte údaje, ktoré ste dostali:</value>
-  </data>
-  <data name="ConsumersS3region" xml:space="preserve">
-    <value>Región</value>
-  </data>
-  <data name="ConsumersS3regionDescription" xml:space="preserve">
-    <value>Zadajte región AWS, v ktorom sa nachádza váš Amazon bucket.</value>
-  </data>
-  <data name="Consumerssecretaccesskey" xml:space="preserve">
-    <value>Tajný prístupový kľúč S3</value>
-  </data>
-  <data name="ConsumersSelectel" xml:space="preserve">
-    <value>Selectel Cloud Storage</value>
-  </data>
-  <data name="ConsumersSelectelauthPwd" xml:space="preserve">
-    <value>Heslo na prístup k úložisku</value>
-  </data>
-  <data name="ConsumersSelectelauthUser" xml:space="preserve">
-    <value>Auth User</value>
-  </data>
-  <data name="ConsumersSelectelDescription" xml:space="preserve">
-    <value>Pripojte službu Selectel Cloud Storage na zálohovanie a ukladanie údajov z portálu.</value>
-  </data>
-  <data name="ConsumersSelectelInstruction" xml:space="preserve">
-    <value>Pripojte službu Selectel Cloud Storage na zálohovanie a ukladanie údajov z portálu. {0}Získajte prístupové údaje používateľa s právami na čítanie/zápis pre kontajnery, do ktorých plánujete ukladať zálohy, a vložte ich nižšie:</value>
-  </data>
-  <data name="ConsumersSelectelprivate_containerDescription" xml:space="preserve">
-    <value>Zadajte názov súkromného kontajnera Selectel na ukladanie záloh.</value>
-  </data>
-  <data name="ConsumersSelectelpublic_containerDescription" xml:space="preserve">
-    <value>Zadajte názov verejného kontajnera Selectel na ukladanie záloh.</value>
-  </data>
-  <data name="Consumersskydriveappkey" xml:space="preserve">
-    <value>ID aplikácie</value>
-  </data>
-  <data name="Consumersskydriveappsecret" xml:space="preserve">
-    <value>Tajomstvo klienta</value>
-  </data>
-  <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
-    <value>Aktivujte túto aplikáciu, aby ste prepojili svoj účet OneDrive s modulom Dokumenty. Budete môcť spravovať, upravovať a zdieľať súbory zo služby OneDrive s používateľmi {LogoText}. {0}Prihláste sa do svojho účtu Microsoft Azure a vytvorte novú aplikáciu pre integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
-  </data>
-  <data name="ConsumersSmscInstruction" xml:space="preserve">
-    <value>Pomocou tejto aplikácie môžete zapnúť dvojfaktorové overovanie prostredníctvom služby Centrum SMS. {0}Vložte svoje prihlasovacie meno k účtu smsc a heslo (alebo heslo hash MD5) malými písmenami:</value>
-  </data>
-  <data name="ConsumersTelegramBotName" xml:space="preserve">
-    <value>Meno bota</value>
-  </data>
-  <data name="ConsumersTelegramBotToken" xml:space="preserve">
-    <value>Token bota</value>
-  </data>
-  <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Pripojte účet Telegram, aby ste mohli dostávať oznámenia z portálu cez Telegram.</value>
-  </data>
-  <data name="ConsumersTelegramInstruction" xml:space="preserve">
-    <value>Ak chcete dostávať oznámenia portálu v Telegrame, povoľte funkciu Telegram bot. Nového bota môžete vytvoriť pomocou funkcie BotFather v Telegram Desktop. Ak chcú používatelia portálu využívať tento bot, musia na svojej profilovej stránke povoliť upozornenia Telegram. {0}Vložte používateľské meno bota a token, ktorý ste dostali, do poličiek nižšie.</value>
-  </data>
-  <data name="ConsumerstwilioAuthToken" xml:space="preserve">
-    <value>Auth Token</value>
-  </data>
-  <data name="ConsumersTwilioInstruction" xml:space="preserve">
-    <value>Aktivujte túto aplikáciu, aby vaši používatelia mohli volať svojim kontaktom z modulu CRM cez službu Twilio. {0}Prejdite do konzoly Twilio a vložte nasledujúce údaje:</value>
-  </data>
-  <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
-    <value>ID klienta</value>
-  </data>
-  <data name="ConsumerstwitterAccessTokenSecret_Default" xml:space="preserve">
-    <value>Tajomstvo klienta</value>
-  </data>
-  <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Aktivujte túto aplikáciu, aby sa vaši používatelia mohli prihlásiť do {LogoText} pomocou svojho Twitteru a prepojiť účty svojich zákazníkov na Twitteri s modulom CRM. {0}Prejdite na Twitter Developers Portal a vytvorte novú aplikáciu pre integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
-  </data>
-  <data name="ConsumersTwitterKey" xml:space="preserve">
-    <value>Kľúč API</value>
-  </data>
-  <data name="ConsumersTwitterSecret" xml:space="preserve">
-    <value>Tajný kľúč API</value>
-  </data>
-  <data name="Consumersusername" xml:space="preserve">
-    <value>Používateľské meno Rackspace</value>
-  </data>
-  <data name="ConsumersVkClientId" xml:space="preserve">
-    <value>ID aplikácie</value>
-  </data>
-  <data name="ConsumersVkClientSecret" xml:space="preserve">
-    <value>Bezpečnostný kľúč</value>
-  </data>
-  <data name="ConsumersVkDescription" xml:space="preserve">
-    <value>Aktivujte aplikáciu, aby ste sa mohli prihlásiť do portálu pomocou účtu VK.</value>
-  </data>
-  <data name="ConsumersVkInstruction" xml:space="preserve">
-    <value>Po pridaní aplikácie VK môžete na stránke svojho profilu povoliť prihlasovanie na portál pomocou účtu VK.</value>
-  </data>
-  <data name="ConsumersWordpressDescription" xml:space="preserve">
-    <value>Aktivujte aplikáciu, aby ste mohli publikovať dokumenty priamo vo WordPress.</value>
-  </data>
-  <data name="ConsumersWordpressInstruction" xml:space="preserve">
-    <value>Aktivujte aplikáciu, aby ste mohli jednoducho publikovať dokumenty na svojej webovej stránke WordPress. {0}Na stránke Wordpress Developers vytvorte novú aplikáciu pre integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
-  </data>
-  <data name="ConsumerswpClientId" xml:space="preserve">
-    <value>WordPress kľúč</value>
-  </data>
-  <data name="ConsumerswpClientSecret" xml:space="preserve">
-    <value>Tajný kód WordPress</value>
-  </data>
-  <data name="ConsumersyahooClientId" xml:space="preserve">
-    <value>ID klienta</value>
-  </data>
-  <data name="ConsumersyahooClientSecret" xml:space="preserve">
-    <value>Tajný kód klienta</value>
-  </data>
-  <data name="ConsumersYahooInstruction" xml:space="preserve">
-    <value>Aktivujte túto aplikáciu, aby ste mohli pridávať nových používateľov portálu zo zoznamu kontaktov Yahoo. {0}Prejdite na stránku Create Application v Yahoo Developer Network a vytvorte novú aplikáciu pre integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
-  </data>
-  <data name="ConsumersYandexClientId" xml:space="preserve">
-    <value>ID</value>
-  </data>
-  <data name="ConsumersYandexDescription" xml:space="preserve">
-    <value>Aktivujte aplikáciu, aby ste sa mohli prihlásiť na portál pomocou účtu Yandex.</value>
-  </data>
-  <data name="ConsumersYandexInstruction" xml:space="preserve">
-    <value>Po pridaní aplikácie Yandex môžete na stránke svojho profilu povoliť prihlasovanie do portálu pomocou účtu Yandex.</value>
-  </data>
-  <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
-    <value>Nesprávne Instance ID.</value>
-  </data>
-  <data name="ErrorEmptyMessage" xml:space="preserve">
-    <value>Políčko Text správy je prázdne</value>
-  </data>
-  <data name="ErrorIncorrectUserName" xml:space="preserve">
-    <value>Nesprávne meno alebo priezvisko</value>
-  </data>
-  <data name="ErrorPasswordNoSpaces" xml:space="preserve">
-    <value>žiadne medzery</value>
-  </data>
-  <data name="ErrorPasswordOnlyLatinLetters" xml:space="preserve">
-    <value>iba latinské písmená</value>
-  </data>
-  <data name="ErrorRequestLimitExceeded" xml:space="preserve">
-    <value>Limit požiadaviek je prekročený</value>
-  </data>
-  <data name="ErrorTenantTooShort" xml:space="preserve">
-    <value>Doména užívateľa nemôže byť prázdna.</value>
-  </data>
-  <data name="ErrorTenantTooShortFormat" xml:space="preserve">
-    <value>Názov domény musí byť dlhý od {0} do {1} znakov.</value>
-  </data>
-  <data name="LdapSettingsErrorLostRights" xml:space="preserve">
-    <value>Pokúsili ste sa sami sebe odobrať práva administrátora. Vaše administrátorské práva neboli ovplyvnené.</value>
-  </data>
-  <data name="LdapSettingsErrorRemovedYourself" xml:space="preserve">
-    <value>Váš účet nie je prepojený s adresárom LDAP a vaše heslo LDAP už nie je aktívne. Zmeňte alebo nastavte heslo k svojmu účtu na stránke s nastaveniami profilu.</value>
-  </data>
-  <data name="LdapSettingsStatusGivingRights" xml:space="preserve">
-    <value>Nastavenie používateľa {0} ako {1} administrátora</value>
-  </data>
-  <data name="LdapSettingsStatusRemovingOldRights" xml:space="preserve">
-    <value>Odstránenie neaktuálnych prístupových práv, ktoré boli predtým načítané prostredníctvom LDAP</value>
-  </data>
-  <data name="LdapSettingsStatusSavingUserPhoto" xml:space="preserve">
-    <value>Uloženie fotografie</value>
-  </data>
-  <data name="LdapSettingsStatusUpdatingAccessRights" xml:space="preserve">
-    <value>Aktualizácia prístupových práv užívateľov</value>
-  </data>
-  <data name="LdapSettingsStatusUpdatingUserPhotos" xml:space="preserve">
-    <value>Aktualizácia fotografií užívateľov</value>
-  </data>
-  <data name="LicenseUploadedOverdue" xml:space="preserve">
-    <value>Úspešne nahrané. {0}Podpora a aktualizácie nie sú dostupné pre túto licenciu od {2}.{1}</value>
-  </data>
-  <data name="LicenseUploadedOverdueSupport" xml:space="preserve">
-    <value>Úspešne nahrané. {0}Podpora pre túto licenciu nie je dostupná od {2}.{1}</value>
-  </data>
-  <data name="MessageYourPasswordSendedToEmail" xml:space="preserve">
-    <value>Ak existuje užívateľ s e-mailom {0}, na túto e-mailovú adresu bol odoslaný pokyn na zmenu hesla.</value>
-  </data>
-  <data name="PortalName" xml:space="preserve">
-    <value>Priestor v cloude pre vaše pracovné dokumenty</value>
-  </data>
-  <data name="RecaptchaInvalid" xml:space="preserve">
-    <value>Neplatná Recaptcha</value>
-  </data>
-  <data name="TariffsFeature_thirdparty" xml:space="preserve">
-    <value>Integrácie tretích strán</value>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>Úspešne ste sa pripojili k aplikácii Telegram, aby ste mohli prijímať oznámenia z DocSpace.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Nesprávny kód</value>
@@ -982,256 +1281,16 @@
   <data name="TfaTooMuchError" xml:space="preserve">
     <value>Odoslali ste príliš veľa textových správ. Skúste to prosím neskôr.</value>
   </data>
-  <data name="ConsumersZoom" xml:space="preserve">
-    <value>Zoom</value>
-  </data>
-  <data name="ConsumersZoomClientId" xml:space="preserve">
-    <value>Id klienta Zoom</value>
-  </data>
-  <data name="ConsumersZoomClientSecret" xml:space="preserve">
-    <value>Tajomstvo klienta Zoom</value>
-  </data>
-  <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Umožnite aplikácii prihlásiť sa na portál pomocou účtu Zoom.</value>
-  </data>
-  <data name="ConsumersZoomInstruction" xml:space="preserve">
-    <value>Aktivujte túto aplikáciu, aby sa vaši používatelia mohli prihlásiť do {LogoText} cez svoje účty Zoom. {0}Prejdite na webovú stránku Zoom Developers a vytvorte novú integráciu aplikácie {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
-  </data>
-  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
-    <value>Príliš veľa pokusov o prihlásenie. Prosím, skúste to znova neskôr</value>
-  </data>
-  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
-    <value>Posledný plný prístupový priestor nie je možné odstrániť</value>
-  </data>
-  <data name="ErrorWebPluginArchive" xml:space="preserve">
-    <value>Nesprávny archív pluginu</value>
-  </data>
-  <data name="ErrorWebPluginExist" xml:space="preserve">
-    <value>Plugin už existuje</value>
-  </data>
-  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
-    <value>Nesprávna prípona súboru</value>
-  </data>
-  <data name="ErrorWebPluginFileSize" xml:space="preserve">
-    <value>Veľkosť súboru prekračuje limit</value>
-  </data>
-  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
-    <value>Zmeny systémových pluginov sú zakázané</value>
-  </data>
-  <data name="ErrorWebPluginName" xml:space="preserve">
-    <value>Nesprávny názov pluginu</value>
-  </data>
-  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
-    <value>Žiadny vstupný súbor</value>
-  </data>
-  <data name="ErrorWebPluginNotFound" xml:space="preserve">
-    <value>Plugin sa nenašiel</value>
-  </data>
-  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
-    <value>K mnohým vstupným súborom</value>
-  </data>
-  <data name="QuotaGreaterPortalError" xml:space="preserve">
-    <value>Nepodarilo sa nastaviť kvótu pamäte – kvóta pamäte, ktorú ste nastavili, je väčšia ako kvóta portálu.</value>
-  </data>
-  <data name="RoomFreeSpaceException" xml:space="preserve">
-    <value>Kvóta priestoru v miestnosti bola prekročená</value>
-  </data>
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>Kvóta priestoru v miestnosti bola prekročená</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Pridaní administrátori:</value>
-  </data>
-  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
-    <value>Limit pozvaní je prekročený</value>
-  </data>
-  <data name="ErrorUserDisabled" xml:space="preserve">
-    <value>Používateľ je deaktivovaný</value>
-  </data>
-  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
-    <value>Pokyn na zmenu hesla bol odoslaný na e-mailovú adresu {0}.</value>
-  </data>
-  <data name="ErrorEmailLinked" xml:space="preserve">
-    <value>Tento e-mail je priradený používateľovi {0} ako poskytovateľovi tretej strany</value>
-  </data>
-  <data name="TariffsFeature_statistic" xml:space="preserve">
-    <value>Kvóty a štatistiky úložiska</value>
-  </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} na administrátora a možnosť pridať priestor na požiadanie</value>
-  </data>
-  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Nepodarilo sa nastaviť kvótu pre miestnosť. Zadaná hodnota je väčšia ako celkové úložisko DocSpace.</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
     <value>Nepodarilo sa nastaviť kvótu pre používateľa. Zadaná hodnota je väčšia ako celkové úložisko DocSpace.</value>
   </data>
-  <data name="ErrorTrustedMailDomain" xml:space="preserve">
-    <value>Pridajte aspoň 1 dôveryhodnú doménu.</value>
+  <data name="UsServerRegion" xml:space="preserve">
+    <value>Región Západ USA (Oregon)</value>
   </data>
-  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
-    <value>Počet administrátorov prekročil limit: {0}/{1}.</value>
-  </data>
-  <data name="Tariffs_nonprofit" xml:space="preserve">
-    <value>Nezisková</value>
-  </data>
-  <data name="ErrorIpRestriction" xml:space="preserve">
-    <value>Pridajte aspoň 1 povolenú IP adresu.</value>
-  </data>
-  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
-    <value>Webhook URL nie je dostupná. HEAD požiadavka nevrátila HTTP status 200.</value>
-  </data>
-  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
-    <value>Kredit</value>
-  </data>
-  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
-    <value>Mena</value>
-  </data>
-  <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>Dátum</value>
-  </data>
-  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
-    <value>Množstvo</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
-    <value>Miesto na disku</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
-    <value>Dobitie zostatku</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
-    <value>Jednotka merania</value>
-  </data>
-  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
-    <value>Hlásenie o operáciách zákazníka ({0}-{1})</value>
-  </data>
-  <data name="AutoRenewal" xml:space="preserve">
-    <value>Automatické obnovenie</value>
-  </data>
-  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
-    <value>Počet bezplatných záloh by nemal prekročiť {0} za mesiac</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>Záloha</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
-    <value>GB</value>
-  </data>
-  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
-    <value>Dodatočné úložisko na disku</value>
-  </data>
-  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
-    <value>Upravte si úložný priestor presne podľa potreby.</value>
-  </data>
-  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
-    <value>Záloha</value>
-  </data>
-  <data name="ErrorGroupNotFound" xml:space="preserve">
-    <value>Skupinu sa nepodarilo nájsť</value>
-  </data>
-  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
-    <value>Použitý objem úložiska:</value>
-  </data>
-  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
-    <value>Detaily</value>
-  </data>
-  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
-    <value>Debet</value>
-  </data>
-  <data name="AccountingCustomerOperationContact" xml:space="preserve">
-    <value>Kontakt</value>
-  </data>
-  <data name="AccountingCustomerOperationType" xml:space="preserve">
-    <value>Typ</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
-    <value>Záloha</value>
-  </data>
-  <data name="TariffsFeature_free_backup" xml:space="preserve">
-    <value>{0} bezplatných záloh mesačne</value>
-  </data>
-  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
-    <value>História transakcií</value>
-  </data>
-  <data name="AutoTopUp" xml:space="preserve">
-    <value>Automatické dobíjanie</value>
-  </data>
-  <data name="ErrorPaymentRequired" xml:space="preserve">
-    <value>Vyžaduje sa platba</value>
-  </data>
-  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
-    <value>Povoľte zálohovanie pre váš DocSpace. Náklady budú účtované automaticky.</value>
-  </data>
-  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
-    <value>Vektorizácia</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
-    <value>Nástroje AI</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
-    <value>Tokeny</value>
-  </data>
-  <data name="AiAgentFreeSpaceException" xml:space="preserve">
-    <value>Kvóta priestoru AI agenta bola prekročená</value>
-  </data>
-  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Nepodarilo sa nastaviť kvótu pre agenta AI. Zadaná hodnota je väčšia ako celková kapacita úložiska DocSpace.</value>
-  </data>
-  <data name="ConsumersWeixin" xml:space="preserve">
-    <value>WeChat</value>
-  </data>
-  <data name="ConsumersWeixinClientId" xml:space="preserve">
-    <value>ID klienta</value>
-  </data>
-  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
-    <value>Tajný kľúč klienta</value>
-  </data>
-  <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Povoliť aplikácii prihlásenie do portálu pomocou účtu WeChat.</value>
-  </data>
-  <data name="ConsumersWeixinInstruction" xml:space="preserve">
-    <value>Povoliť aplikácii prihlásenie do portálu pomocou účtu WeChat.</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
-    <value>Dátum</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
-    <value>E-mail</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
-    <value>Meno</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
-    <value>ID</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
-    <value>Priezvisko</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
-    <value>Kvóta služby dokumentov ({0})</value>
-  </data>
-  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
-    <value>Počet pluginov prekračuje limit</value>
-  </data>
-  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
-    <value>Počet agentov AI by nemal prekročiť {0}</value>
-  </data>
-  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>Nástroje AI</value>
-  </data>
-  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Aktivujte funkcie AI vo vašom DocSpace a zvýšte produktivitu.</value>
-  </data>
-  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
-    <value>AI vyhľadávanie na webe</value>
-  </data>
-  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
-    <value>Dobite si peňaženku a odomknite vyhľadávanie na webe pomocou AI.</value>
-  </data>
-  <data name="TelegramOnGenericError" xml:space="preserve">
-    <value>Došlo k neočakávanej chybe. Skúste to znovu.</value>
-  </data>
-  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>Úspešne ste sa pripojili k aplikácii Telegram, aby ste mohli prijímať oznámenia z DocSpace.</value>
+  <data name="WhatsNewSubscriptionName" xml:space="preserve">
+    <value>Čo je nové</value>
   </data>
 </root>

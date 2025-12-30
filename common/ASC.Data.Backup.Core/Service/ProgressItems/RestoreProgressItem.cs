@@ -203,6 +203,26 @@ public class RestoreProgressItem : BaseBackupProgressItem
             }
 
             Percentage = 75;
+
+            try
+            {
+                var webstudioDbContextFactory = scope.ServiceProvider.GetService<IDbContextFactory<WebstudioDbContext>>();
+
+                var tfaSettings = new[] { TfaAppAuthSettings.ID, TfaAppUserSettings.ID, StudioSmsNotificationSettings.ID };
+
+                await using var webstudioContext = await webstudioDbContextFactory.CreateDbContextAsync();
+
+                await webstudioContext.WebstudioSettings
+                    .Where(s => (restoreTask.Dump || s.TenantId == TenantId) && tfaSettings.Contains(s.Id))
+                    .ExecuteDeleteAsync();
+
+                await webstudioContext.SaveChangesAsync();
+            }
+            catch (Exception error)
+            {
+                _logger.ErrorClear2faSettings(error);
+            }
+
             try
             {
                 await _socketManager.RestoreProgressAsync(socketTenant, Dump, (int)Percentage);

@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Core.Common;
-
 namespace ASC.Files.Service.IntegrationEvents.EventHandling;
 
 [Scope]
@@ -35,8 +33,6 @@ public class ThumbnailRequestedIntegrationEventHandler : IIntegrationEventHandle
     private readonly ChannelWriter<FileData<int>> _channelWriter;
     private readonly ITariffService _tariffService;
     private readonly TenantManager _tenantManager;
-    private readonly IDbContextFactory<FilesDbContext> _dbContextFactory;
-    private readonly BaseCommonLinkUtility _baseCommonLinkUtility;
 
     private ThumbnailRequestedIntegrationEventHandler()
     {
@@ -45,18 +41,14 @@ public class ThumbnailRequestedIntegrationEventHandler : IIntegrationEventHandle
 
     public ThumbnailRequestedIntegrationEventHandler(
         ILogger<ThumbnailRequestedIntegrationEventHandler> logger,
-        IDbContextFactory<FilesDbContext> dbContextFactory,
         ITariffService tariffService,
         TenantManager tenantManager,
-        ChannelWriter<FileData<int>> channelWriter,
-        BaseCommonLinkUtility baseCommonLinkUtility)
+        ChannelWriter<FileData<int>> channelWriter)
     {
         _logger = logger;
         _channelWriter = channelWriter;
         _tariffService = tariffService;
         _tenantManager = tenantManager;
-        _dbContextFactory = dbContextFactory;
-        _baseCommonLinkUtility = baseCommonLinkUtility;
     }
 
     public async Task Handle(ThumbnailRequestedIntegrationEvent @event)

@@ -42,16 +42,7 @@ public class LdapNotifySource(LdapNotifyService ldapNotifyHelper) : INotifySourc
     {
         await ldapNotifyHelper.AutoSyncAsync(_tenant);
     }
-
-    public Task<IActionProvider> GetActionProvider(NotifyRequest r)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<IPatternProvider> GetPatternProvider(NotifyRequest r)
-    {
-        throw new NotImplementedException();
-    }
+    
 
     public IRecipientProvider GetRecipientsProvider()
     {

@@ -747,10 +747,12 @@ public class UserController(
     [HttpDelete("guests")]
     public async Task DeleteGuests(UpdateMembersRequestDto inDto)
     {
+        ArgumentNullException.ThrowIfNull(inDto?.UserIds);
+
         var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
         var type = await _userManager.GetUserTypeAsync(currentUser.Id);
-        if (type != EmployeeType.RoomAdmin)
+        if (type is not (EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin))
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }

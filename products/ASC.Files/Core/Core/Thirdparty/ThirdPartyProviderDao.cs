@@ -731,14 +731,6 @@ static file class Queries
             (FilesDbContext ctx) =>
                 ctx.Tag.AsQueryable());
 
-    public static readonly Func<FilesDbContext, string, Task<string>>
-        IdAsync = EF.CompileAsyncQuery(
-            (FilesDbContext ctx, string hashId) =>
-                ctx.ThirdpartyIdMapping
-                    .Where(r => r.HashId == hashId)
-                    .Select(r => r.Id)
-                    .FirstOrDefault());
-
     public static readonly Func<FilesDbContext, int, string, IAsyncEnumerable<string>> IdsAsync =
         EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, string idStart) =>

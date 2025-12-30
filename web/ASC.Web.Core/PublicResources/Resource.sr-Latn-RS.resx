@@ -117,6 +117,63 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Vektorizacija</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Kontakt</value>
+  </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Kredit</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Valuta</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>Datum</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Zaduženje</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Detalji</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>Količina</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>AI alati</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Bekap</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Prostor na disku</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Dopuna stanja</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>Jedinica mere</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Tokeni</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Bekap</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>Izveštaj o korisničkim operacijama ({0}-{1})</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Istorija transakcija</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Tip</value>
+  </data>
   <data name="ActivateMobilePhoneEmptyCode" xml:space="preserve">
     <value>Polje za validaciju koda ne može biti prazno</value>
   </data>
@@ -131,6 +188,18 @@
   </data>
   <data name="AdminMessageSent" xml:space="preserve">
     <value>Vaša poruka je uspešno poslata. Bićete kontaktirani od strane administratora za portal.</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>Kvota prostora AI agenta je prekoračena</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Neuspešno podešavanje kvote po AI agentu. Uneta vrednost je veća od ukupnog DocSpace skladišta.</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Automatska obnova</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Automatsko dopunjavanje</value>
   </data>
   <data name="ButtonSmsEnable" xml:space="preserve">
     <value>Putem SMS-a</value>
@@ -282,6 +351,12 @@
   <data name="ConsumersFirebase" xml:space="preserve">
     <value>Firebase</value>
   </data>
+  <data name="ConsumersFirebaseDescription" xml:space="preserve">
+    <value>Omogućite ovu aplikaciju da prima obaveštenja o porukama koje su vam poslate pomoću Firebase Cloud Messaging.</value>
+  </data>
+  <data name="ConsumersFirebaseInstruction" xml:space="preserve">
+    <value>Omogućite ovu aplikaciju da biste svojim korisnicima omogućili da primaju obaveštenja o porukama čak i van mreže. {0}Idite na Firebase konzolu i dodajte novi projekat za {LogoText} integraciju. Unesite podatke koje ste dobili ispod:</value>
+  </data>
   <data name="Consumersfirebase_apiKey" xml:space="preserve">
     <value>Web API key</value>
   </data>
@@ -293,12 +368,6 @@
   </data>
   <data name="Consumersfirebase_projectId" xml:space="preserve">
     <value>ID projekta</value>
-  </data>
-  <data name="ConsumersFirebaseDescription" xml:space="preserve">
-    <value>Omogućite ovu aplikaciju da prima obaveštenja o porukama koje su vam poslate pomoću Firebase Cloud Messaging.</value>
-  </data>
-  <data name="ConsumersFirebaseInstruction" xml:space="preserve">
-    <value>Omogućite ovu aplikaciju da biste svojim korisnicima omogućili da primaju obaveštenja o porukama čak i van mreže. {0}Idite na Firebase konzolu i dodajte novi projekat za {LogoText} integraciju. Unesite podatke koje ste dobili ispod:</value>
   </data>
   <data name="ConsumersGoogle" xml:space="preserve">
     <value>Google</value>
@@ -522,11 +591,11 @@
   <data name="ConsumersTwitter" xml:space="preserve">
     <value>X</value>
   </data>
-  <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
-    <value>ID klijenta</value>
-  </data>
   <data name="ConsumerstwitterAccessTokenSecret_Default" xml:space="preserve">
     <value>Tajna klijenta</value>
+  </data>
+  <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
+    <value>ID klijenta</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
     <value>Omogućite aplikaciju da biste se prijavili na portal koristeći X nalog.</value>
@@ -557,6 +626,21 @@
   </data>
   <data name="ConsumersVkInstruction" xml:space="preserve">
     <value>Kada dodate VK aplikaciju, možete omogućiti prijavljivanje na portal koristeći VK nalog na stranici vašeg profila.</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>ID klijenta</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Tajna klijenta</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Omogući aplikaciji da se prijavi na portal pomoću WeChat naloga.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Omogući aplikaciji da se prijavi na portal pomoću WeChat naloga.</value>
   </data>
   <data name="ConsumersWordpress" xml:space="preserve">
     <value>WordPress</value>
@@ -624,11 +708,29 @@
   <data name="CouldNotRecoverPasswordForSsoUser" xml:space="preserve">
     <value>Operacija povratka lozinke je zabranjena za SSO korisnika</value>
   </data>
-  <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
-    <value>Netačan ID Instance.</value>
-  </data>
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>Prilagođeni</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Datum</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Ime</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>Id</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Prezime</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Kvote za Document Service ({0})</value>
+  </data>
+  <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
+    <value>Netačan ID Instance.</value>
   </data>
   <data name="EmailAndPasswordIncorrectEmail" xml:space="preserve">
     <value>Netačna email adresa</value>
@@ -657,6 +759,9 @@
   <data name="ErrorEmailEmpty" xml:space="preserve">
     <value>Email polje je prazno</value>
   </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>Ova email adresa je povezana sa korisnikom {0} kao pružalac usluga treće strane</value>
+  </data>
   <data name="ErrorEmailsAreTheSame" xml:space="preserve">
     <value>Trenutni email i novi email su isti</value>
   </data>
@@ -672,6 +777,9 @@
   <data name="ErrorFileNotImage" xml:space="preserve">
     <value>Nepoznati tip datoteke slike</value>
   </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>Grupa nije pronađena</value>
+  </data>
   <data name="ErrorImageSize" xml:space="preserve">
     <value>Veličina slike prevazilazi dozvoljene parametre</value>
   </data>
@@ -680,6 +788,12 @@
   </data>
   <data name="ErrorIncorrectUserName" xml:space="preserve">
     <value>Netačno ime ili prezime</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Limit za pozivnicu je prekoračen</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Dodajte najmanje 1 dozvoljenu IP adresu.</value>
   </data>
   <data name="ErrorIpSecurity" xml:space="preserve">
     <value>Pristup portalu je ograničen</value>
@@ -717,6 +831,9 @@
   <data name="ErrorPasswordOnlyLatinLetters" xml:space="preserve">
     <value>samo slova latinice</value>
   </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Plaćanje je obavezno</value>
+  </data>
   <data name="ErrorRequestLimitExceeded" xml:space="preserve">
     <value>Ograničenje zahteva je prekoračeno</value>
   </data>
@@ -729,11 +846,20 @@
   <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
     <value>Previše pokušaja prijave. Molimo pokušajte ponovo kasnije</value>
   </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Dodajte barem jedan pouzdani domen.</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Korisnik onemogućen</value>
+  </data>
   <data name="ErrorUserNotFound" xml:space="preserve">
     <value>Korisnik nije mogao biti pronađen</value>
   </data>
   <data name="ErrorUserNotFoundByEmail" xml:space="preserve">
     <value>Korisnik sa "{0}" email-om nije mogao biti pronađen</value>
+  </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>URL adresa Webhook-a nije dostupna. HEAD zahtev nije vratio HTTP status 200.</value>
   </data>
   <data name="ErrorWebPluginArchive" xml:space="preserve">
     <value>Pogrešna arhiva dodataka</value>
@@ -749,6 +875,9 @@
   </data>
   <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
     <value>Promene sistemskih dodataka su zabranjene</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>Broj dodataka premašuje ograničenje</value>
   </data>
   <data name="ErrorWebPluginName" xml:space="preserve">
     <value>Pogrešno ime dodatka</value>
@@ -939,6 +1068,9 @@
   <data name="MessageEmailChangeInstuctionsSentOnEmail" xml:space="preserve">
     <value>Instrukcije za promenu email-a su uspešno poslate</value>
   </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Instrukcija za promenu lozinke je poslata na {0} email adresu.</value>
+  </data>
   <data name="MessageYourPasswordSendedToEmail" xml:space="preserve">
     <value>Ako korisnik sa {0} email-om postoji, instrukcije za promenu lozinke su poslate na ovu email adresu.</value>
   </data>
@@ -968,6 +1100,9 @@
   </data>
   <data name="RoomFreeSpaceException" xml:space="preserve">
     <value>Kvota prostora za sobu prekoračena</value>
+  </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>Podešavanje kvote po sobi nije uspelo. Unesena vrednost je veća od ukupnog DocSpace skladišta.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Azija Pacifik (Singapur)</value>
@@ -1011,23 +1146,38 @@
   <data name="SuccessfullySentNotificationDeleteUserInfoMessage" xml:space="preserve">
     <value>Instrukcije za brisanje vašeg profila su poslate na {0} email adresu</value>
   </data>
-  <data name="Tariffs_admin" xml:space="preserve">
-    <value>Business</value>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>Broj AI agenata ne sme preći {0}</value>
   </data>
-  <data name="Tariffs_adminyear" xml:space="preserve">
-    <value>Business</value>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>AI alati</value>
   </data>
-  <data name="Tariffs_startup" xml:space="preserve">
-    <value>Startup</value>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Omogućite AI funkcije u vašem DocSpace-u da biste povećali produktivnost.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Praćenje prijava i radnji</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Bekap</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Omogući bekape za svoj DocSpace. Troškovi će biti naplaćeni automatski.</value>
+  </data>
+  <data name="TariffsFeature_customization" xml:space="preserve">
+    <value>Brendiranje i prilagođavanje</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>Maksimalna veličina datoteke</value>
   </data>
   <data name="TariffsFeature_file_size_exception" xml:space="preserve">
     <value>Veličina datoteke ne bi trebalo da prekorači {0}</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} besplatnih bekapa mesečno</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Broj besplatnih bekapa ne sme da prelazi {0} u toku meseca</value>
   </data>
   <data name="TariffsFeature_manager_exception" xml:space="preserve">
     <value>Broj admina ne bi trebalo da prekorači {0}</value>
@@ -1047,8 +1197,14 @@
   <data name="TariffsFeature_sso" xml:space="preserve">
     <value>SSO</value>
   </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Kvote za skladištenje i statistika</value>
+  </data>
   <data name="TariffsFeature_thirdparty" xml:space="preserve">
     <value>Integracije treće strane</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} po administratoru i mogućnost dodavanja prostora na zahtev</value>
   </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>Korišćena veličina skladišta ne bi trebalo da prekorači {0}</value>
@@ -1056,10 +1212,22 @@
   <data name="TariffsFeature_total_size_price_count" xml:space="preserve">
     <value>Skladišni prostor</value>
   </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Dodatni prostor na disku</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Podesite prostor za skladištenje na tačnu količinu koju vam je potrebna.</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Administratori dodati:</value>
+  </data>
   <data name="TariffsFeature_used_room" xml:space="preserve">
     <value>Sobe:</value>
   </data>
   <data name="TariffsFeature_used_total_size" xml:space="preserve">
+    <value>Skladišni prostor iskorišćen:</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
     <value>Skladišni prostor iskorišćen:</value>
   </data>
   <data name="TariffsFeature_used_usersInRoom" xml:space="preserve">
@@ -1068,17 +1236,41 @@
   <data name="TariffsFeature_users" xml:space="preserve">
     <value>Neograničen broj korisnika i gostiju</value>
   </data>
-  <data name="TariffsFeature_users_exception" xml:space="preserve">
-    <value>Broj korisnika ne bi trebalo da prekorači {0}</value>
-  </data>
   <data name="TariffsFeature_usersInRoom" xml:space="preserve">
     <value>Korisnici u sobi</value>
   </data>
   <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
     <value>Broj korisnika u sobi ne bi trebalo da prekorači {0}</value>
   </data>
-  <data name="TariffsFeature_customization" xml:space="preserve">
-    <value>Brendiranje i prilagođavanje</value>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Broj administratora premašuje limit: {0}/{1}.</value>
+  </data>
+  <data name="TariffsFeature_users_exception" xml:space="preserve">
+    <value>Broj korisnika ne bi trebalo da prekorači {0}</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>AI veb pretraga</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Dodajte sredstva u novčanik da otključate AI veb pretragu.</value>
+  </data>
+  <data name="Tariffs_admin" xml:space="preserve">
+    <value>Business</value>
+  </data>
+  <data name="Tariffs_adminyear" xml:space="preserve">
+    <value>Business</value>
+  </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Neprofitabilno</value>
+  </data>
+  <data name="Tariffs_startup" xml:space="preserve">
+    <value>Startup</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>Došlo je do neočekivane greške. Molimo pokušajte ponovo.</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>Uspešno ste povezali Telegram da primate obaveštenja iz svog DocSpace-a.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Netačan kod</value>
@@ -1092,205 +1284,13 @@
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>Korisnička kvota prostora prekoračena</value>
   </data>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>Podešavanje kvote po sobi nije uspelo. Unesena vrednost je veća od ukupnog DocSpace skladišta.</value>
+  </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>Zapadna Regija SAD (Oregon)</value>
   </data>
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>Šta je novo</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Administratori dodati:</value>
-  </data>
-  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
-    <value>Limit za pozivnicu je prekoračen</value>
-  </data>
-  <data name="ErrorUserDisabled" xml:space="preserve">
-    <value>Korisnik onemogućen</value>
-  </data>
-  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
-    <value>Instrukcija za promenu lozinke je poslata na {0} email adresu.</value>
-  </data>
-  <data name="TariffsFeature_statistic" xml:space="preserve">
-    <value>Kvote za skladištenje i statistika</value>
-  </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} po administratoru i mogućnost dodavanja prostora na zahtev</value>
-  </data>
-  <data name="ErrorEmailLinked" xml:space="preserve">
-    <value>Ova email adresa je povezana sa korisnikom {0} kao pružalac usluga treće strane</value>
-  </data>
-  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Podešavanje kvote po sobi nije uspelo. Unesena vrednost je veća od ukupnog DocSpace skladišta.</value>
-  </data>
-  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Podešavanje kvote po sobi nije uspelo. Unesena vrednost je veća od ukupnog DocSpace skladišta.</value>
-  </data>
-  <data name="ErrorTrustedMailDomain" xml:space="preserve">
-    <value>Dodajte barem jedan pouzdani domen.</value>
-  </data>
-  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
-    <value>Broj administratora premašuje limit: {0}/{1}.</value>
-  </data>
-  <data name="ErrorIpRestriction" xml:space="preserve">
-    <value>Dodajte najmanje 1 dozvoljenu IP adresu.</value>
-  </data>
-  <data name="Tariffs_nonprofit" xml:space="preserve">
-    <value>Neprofitabilno</value>
-  </data>
-  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
-    <value>URL adresa Webhook-a nije dostupna. HEAD zahtev nije vratio HTTP status 200.</value>
-  </data>
-  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
-    <value>Kredit</value>
-  </data>
-  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
-    <value>Valuta</value>
-  </data>
-  <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>Datum</value>
-  </data>
-  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
-    <value>Količina</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
-    <value>Jedinica mere</value>
-  </data>
-  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
-    <value>Izveštaj o korisničkim operacijama ({0}-{1})</value>
-  </data>
-  <data name="ErrorGroupNotFound" xml:space="preserve">
-    <value>Grupa nije pronađena</value>
-  </data>
-  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
-    <value>Dodatni prostor na disku</value>
-  </data>
-  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
-    <value>Podesite prostor za skladištenje na tačnu količinu koju vam je potrebna.</value>
-  </data>
-  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
-    <value>Skladišni prostor iskorišćen:</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
-    <value>Prostor na disku</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
-    <value>Dopuna stanja</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
-    <value>Bekap</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>Bekap</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
-    <value>GB</value>
-  </data>
-  <data name="AccountingCustomerOperationContact" xml:space="preserve">
-    <value>Kontakt</value>
-  </data>
-  <data name="AccountingCustomerOperationType" xml:space="preserve">
-    <value>Tip</value>
-  </data>
-  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
-    <value>Detalji</value>
-  </data>
-  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
-    <value>Zaduženje</value>
-  </data>
-  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
-    <value>Istorija transakcija</value>
-  </data>
-  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
-    <value>Bekap</value>
-  </data>
-  <data name="AutoRenewal" xml:space="preserve">
-    <value>Automatska obnova</value>
-  </data>
-  <data name="ErrorPaymentRequired" xml:space="preserve">
-    <value>Plaćanje je obavezno</value>
-  </data>
-  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
-    <value>Omogući bekape za svoj DocSpace. Troškovi će biti naplaćeni automatski.</value>
-  </data>
-  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
-    <value>Broj besplatnih bekapa ne sme da prelazi {0} u toku meseca</value>
-  </data>
-  <data name="TariffsFeature_free_backup" xml:space="preserve">
-    <value>{0} besplatnih bekapa mesečno</value>
-  </data>
-  <data name="AutoTopUp" xml:space="preserve">
-    <value>Automatsko dopunjavanje</value>
-  </data>
-  <data name="ConsumersWeixin" xml:space="preserve">
-    <value>WeChat</value>
-  </data>
-  <data name="ConsumersWeixinClientId" xml:space="preserve">
-    <value>ID klijenta</value>
-  </data>
-  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
-    <value>Tajna klijenta</value>
-  </data>
-  <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Omogući aplikaciji da se prijavi na portal pomoću WeChat naloga.</value>
-  </data>
-  <data name="ConsumersWeixinInstruction" xml:space="preserve">
-    <value>Omogući aplikaciji da se prijavi na portal pomoću WeChat naloga.</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
-    <value>Datum</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
-    <value>Email</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
-    <value>Ime</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
-    <value>Id</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
-    <value>Prezime</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
-    <value>Kvote za Document Service ({0})</value>
-  </data>
-  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
-    <value>Broj dodataka premašuje ograničenje</value>
-  </data>
-  <data name="TelegramOnGenericError" xml:space="preserve">
-    <value>Došlo je do neočekivane greške. Molimo pokušajte ponovo.</value>
-  </data>
-  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>Uspešno ste povezali Telegram da primate obaveštenja iz svog DocSpace-a.</value>
-  </data>
-  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
-    <value>Vektorizacija</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
-    <value>AI alati</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
-    <value>Tokeni</value>
-  </data>
-  <data name="AiAgentFreeSpaceException" xml:space="preserve">
-    <value>Kvota prostora AI agenta je prekoračena</value>
-  </data>
-  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Neuspešno podešavanje kvote po AI agentu. Uneta vrednost je veća od ukupnog DocSpace skladišta.</value>
-  </data>
-  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
-    <value>Broj AI agenata ne sme preći {0}</value>
-  </data>
-  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>AI alati</value>
-  </data>
-  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Omogućite AI funkcije u vašem DocSpace-u da biste povećali produktivnost.</value>
-  </data>
-  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
-    <value>AI veb pretraga</value>
-  </data>
-  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
-    <value>Dodajte sredstva u novčanik da otključate AI veb pretragu.</value>
   </data>
 </root>

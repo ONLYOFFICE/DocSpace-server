@@ -18,7 +18,6 @@
   <ItemGroup>
     <EmbeddedResource Include="PublicResources\logo.png" />
     <EmbeddedResource Include="PublicResources\logozh-cn.png" />
-    <EmbeddedResource Include="PublicResources\webstudio_patterns.xml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\common\ASC.Core.Common\ASC.Core.Common.csproj" />
@@ -28,19 +27,6 @@
     <ProjectReference Include="..\..\common\ASC.MessagingSystem\ASC.MessagingSystem.csproj" />
     <ProjectReference Include="..\..\common\services\ASC.AuditTrail\ASC.AuditTrail.csproj" />
     <ProjectReference Include="..\..\common\services\ASC.ElasticSearch\ASC.ElasticSearch.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Update="PublicResources\WebPatternResource.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>WebPatternResource.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Update="PublicResources\WebPatternResource.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>WebPatternResource.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Compile Update="PublicResources\NamingPeopleResource.Designer.cs">

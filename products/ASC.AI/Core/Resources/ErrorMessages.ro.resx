@@ -120,6 +120,9 @@
   <data name="AiSettingsAccessDenied" xml:space="preserve">
     <value>Nu aveți permisiunea pentru a gestiona setările IA</value>
   </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>Procesarea fișierelor imposibilă {0}. Fişiere pot fi deteriorate sau criptate</value>
+  </data>
   <data name="ChatAccessDenied" xml:space="preserve">
     <value>Nu aveți permisiunea pentru a folosi chat-ul</value>
   </data>
@@ -170,8 +173,5 @@
   </data>
   <data name="UnavailableServers" xml:space="preserve">
     <value>Serverele MCP nu sunt disponibile: {0}. Verificați setările de conexiune</value>
-  </data>
-  <data name="AttachmentProcessFailed" xml:space="preserve">
-    <value>Procesarea fișierelor imposibilă {0}. Fişiere pot fi deteriorate sau criptate</value>
   </data>
 </root>
