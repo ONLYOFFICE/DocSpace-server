@@ -282,6 +282,7 @@ public sealed class BackupFailedNotifyAction(DisplayUserSettingsHelper displayUs
     }
 }
 
+[Scope]
 public sealed class ScheduledBackupFailedNotifyAction(DisplayUserSettingsHelper displayUserSettingsHelper, StudioNotifyHelper studioNotifyHelper) : INotifyAction
 {
     public string ID => "scheduled_backup_failed";
@@ -340,6 +341,7 @@ public sealed class RestoreStartedNotifyAction(StudioNotifyHelper studioNotifyHe
     }
 }
 
+[Scope]
 public sealed class RestoreCompletedV115NotifyAction(AuthManager authManager, CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener) : INotifyAction
 {
     public string ID => "restore_completed_v115";

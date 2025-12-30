@@ -262,7 +262,7 @@ public sealed class FormSubmittedNotifyAction(DisplayUserSettingsHelper displayU
 }
 
 [Scope]
-public sealed class FormReceivedNotifyAction(DisplayUserSettingsHelper displayUserSettingsHelper) : INotifyAction
+public sealed class FormReceivedNotifyAction : INotifyAction
 {
     public string ID => "FormReceived";
 
@@ -380,8 +380,6 @@ public class RoomUpdateAccessForUserNotifyAction : INotifyAction
 public sealed class AgentUpdateAccessForUserNotifyAction : RoomUpdateAccessForUserNotifyAction
 {
     public override string ID => "AgentUpdateAccessForUser";
-
-    public List<ITagValue> Tags { get; set; }
 
     public override List<Pattern> Patterns =>
     [
@@ -554,11 +552,8 @@ public sealed class StoppedFormFillingNotifyAction(BaseCommonLinkUtility baseCom
     ];
 }
 
-public class NotifyConstants
+public static class NotifyConstants
 {
-    
-    #region  Tags
-
     public static readonly string TagFolderID = "FolderID";
     public static readonly string TagFolderParentId = "FolderParentId";
     public static readonly string TagFolderRootFolderType = "FolderRootFolderType";
@@ -571,6 +566,4 @@ public class NotifyConstants
     public static readonly string RoomTitle = "RoomTitle";
     public static readonly string RoomUrl = "RoomURL";
     public static readonly string FolderTitle = "FolderTitle";
-
-    #endregion
 }

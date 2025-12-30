@@ -71,6 +71,7 @@ public sealed class PortalDeactivateNotifyAction(StudioNotifyHelper studioNotify
     }
 }
 
+[Scope]
 public sealed class PortalDeleteNotifyAction(StudioNotifyHelper studioNotifyHelper, DisplayUserSettingsHelper displayUserSettingsHelper, TenantManager tenantManager) : INotifyAction
 {
     public string ID => "portal_delete";
@@ -113,6 +114,7 @@ public sealed class PortalDeleteNotifyAction(StudioNotifyHelper studioNotifyHelp
     }
 }
 
+[Scope]
 public sealed class PortalDeleteSuccessV1NotifyAction(StudioNotifyHelper studioNotifyHelper, DisplayUserSettingsHelper displayUserSettingsHelper, ExternalResourceSettingsHelper externalResourceSettingsHelper, TenantManager tenantManager) : INotifyAction
 {
     public string ID => "portal_delete_success_v1";
@@ -156,6 +158,7 @@ public sealed class PortalDeleteSuccessV1NotifyAction(StudioNotifyHelper studioN
     }
 }
 
+[Scope]
 public sealed class PortalDeletedToSupportNotifyAction(DisplayUserSettingsHelper displayUserSettingsHelper) : INotifyAction
 {
     public string ID => "portal_deleted_to_support";
@@ -226,6 +229,7 @@ public sealed class ProfileDeleteNotifyAction(CommonLinkUtility commonLinkUtilit
     }
 }
 
+[Scope]
 public sealed class ProfileHasDeletedItselfNotifyAction(DisplayUserSettingsHelper displayUserSettingsHelper, CommonLinkUtility commonLinkUtility) : INotifyAction
 {
     public string ID => "profile_has_deleted_itself";
@@ -258,6 +262,7 @@ public sealed class ProfileHasDeletedItselfNotifyAction(DisplayUserSettingsHelpe
     }
 }
 
+[Scope]
 public sealed class ReassignsCompletedNotifyAction(DisplayUserSettingsHelper displayUserSettingsHelper, CommonLinkUtility commonLinkUtility) : INotifyAction
 {
     public string ID => "reassigns_completed";
@@ -289,6 +294,7 @@ public sealed class ReassignsCompletedNotifyAction(DisplayUserSettingsHelper dis
     }
 }
 
+[Scope]
 public sealed class ReassignsFailedNotifyAction(DisplayUserSettingsHelper displayUserSettingsHelper, CommonLinkUtility commonLinkUtility) : INotifyAction
 {
     public string ID => "reassigns_failed";
@@ -321,6 +327,7 @@ public sealed class ReassignsFailedNotifyAction(DisplayUserSettingsHelper displa
     }
 }
 
+[Scope]
 public sealed class RemoveUserDataCompletedNotifyAction(DisplayUserSettingsHelper displayUserSettingsHelper, CommonLinkUtility commonLinkUtility) : INotifyAction
 {
     public string ID => "remove_user_data_completed";
@@ -354,6 +361,7 @@ public sealed class RemoveUserDataCompletedNotifyAction(DisplayUserSettingsHelpe
     }
 }
 
+[Scope]
 public sealed class RemoveUserDataCompletedCustomModeNotifyAction(DisplayUserSettingsHelper displayUserSettingsHelper, CommonLinkUtility commonLinkUtility) : INotifyAction
 {
     public string ID => "remove_user_data_completed_custom_mode";
@@ -488,6 +496,7 @@ public sealed class ActivateEmailNotifyAction(DisplayUserSettingsHelper displayU
     }
 }
 
+[Scope]
 public sealed class EmailChangeV115NotifyAction(CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener, TenantManager tenantManager) : INotifyAction
 {
     public string ID => "change_email_v115";
@@ -529,6 +538,7 @@ public sealed class EmailChangeV115NotifyAction(CommonLinkUtility commonLinkUtil
     }
 }
 
+[Scope]
 public sealed class UserMessageToAdminNotifyAction: INotifyAction 
 {
     public string ID => "for_admin_notify";
@@ -561,6 +571,7 @@ public sealed class UserMessageToAdminNotifyAction: INotifyAction
     }
 };
 
+[Scope]
 public sealed class UserMessageToSalesNotifyAction: INotifyAction 
 {
     public string ID => "for_sales_notify";
@@ -586,6 +597,7 @@ public sealed class UserMessageToSalesNotifyAction: INotifyAction
     }
 };
 
+[Scope]
 public sealed class PasswordChangeV115NotifyAction(CommonLinkUtility commonLinkUtility, TenantManager tenantManager, IUrlShortener urlShortener) : INotifyAction
 {
     public string ID => "change_password_v115";
@@ -684,6 +696,7 @@ public sealed class PasswordChangedNotifyAction(CommonLinkUtility commonLinkUtil
     }
 }
 
+[Scope]
 public sealed class PasswordSetNotifyAction(CommonLinkUtility commonLinkUtility, TenantManager tenantManager, IUrlShortener urlShortener) : INotifyAction
 {
     public string ID => "set_password";
@@ -725,6 +738,7 @@ public sealed class PasswordSetNotifyAction(CommonLinkUtility commonLinkUtility,
     }
 }
 
+[Scope]
 public sealed class PhoneChangeNotifyAction(CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener, TenantManager tenantManager) : INotifyAction
 {
     public string ID => "change_phone";
@@ -764,6 +778,7 @@ public sealed class PhoneChangeNotifyAction(CommonLinkUtility commonLinkUtility,
     }
 }
 
+[Scope]
 public sealed class TfaChangeNotifyAction(CommonLinkUtility commonLinkUtility, TenantManager tenantManager)  : INotifyAction
 {
     public string ID => "change_tfa";
@@ -858,6 +873,7 @@ public sealed class JoinUsersNotifyAction(CommonLinkUtility commonLinkUtility, I
     }
 }
 
+[Scope]
 public sealed class MigrationPortalStartNotifyAction : INotifyAction
 {
     public string ID => "migration_start";
@@ -882,8 +898,7 @@ public sealed class MigrationPortalStartNotifyAction : INotifyAction
     }
 }
 
-
-
+[Scope]
 public sealed class MigrationPortalErrorNotifyAction(CommonLinkUtility commonLinkUtility) : INotifyAction
 {
     public string ID => "migration_error";
@@ -916,6 +931,7 @@ public sealed class MigrationPortalErrorNotifyAction(CommonLinkUtility commonLin
     }
 }
 
+[Scope]
 public sealed class MigrationPortalServerFailureNotifyAction(CommonLinkUtility commonLinkUtility) : INotifyAction
 {
     public string ID => "migration_server_failure";
@@ -948,6 +964,7 @@ public sealed class MigrationPortalServerFailureNotifyAction(CommonLinkUtility c
     }
 }
 
+[Scope]
 public sealed class PortalRenameNotifyAction(DisplayUserSettingsHelper displayUserSettingsHelper) : INotifyAction
 {
     public string ID => "portal_rename";
@@ -971,6 +988,7 @@ public sealed class PortalRenameNotifyAction(DisplayUserSettingsHelper displayUs
     }
 }
 
+[Scope]
 public sealed class SaasGuestActivationV115NotifyAction(StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager, CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener) : INotifyAction
 {
     public string ID => "saas_guest_activation_v115";
@@ -1022,6 +1040,7 @@ public sealed class SaasGuestActivationV115NotifyAction(StudioNotifyHelper studi
     }
 }
 
+[Scope]
 public sealed class EnterpriseGuestActivationV10NotifyAction(StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager, CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener) : INotifyAction
 {
     public string ID => "enterprise_guest_activation_v10";
@@ -1073,6 +1092,7 @@ public sealed class EnterpriseGuestActivationV10NotifyAction(StudioNotifyHelper 
     }
 }
 
+[Scope]
 public sealed class EnterpriseWhitelabelGuestActivationV10NotifyAction(StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager, CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener) : INotifyAction
 {
     public string ID => "enterprise_whitelabel_guest_activation_v10";
@@ -1124,6 +1144,7 @@ public sealed class EnterpriseWhitelabelGuestActivationV10NotifyAction(StudioNot
     }
 }
 
+[Scope]
 public sealed class OpensourceGuestActivationV11NotifyAction(StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager, CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener) : INotifyAction
 {
     public string ID => "opensource_guest_activation_v11";
@@ -1175,6 +1196,7 @@ public sealed class OpensourceGuestActivationV11NotifyAction(StudioNotifyHelper 
     }
 }
 
+[Scope]
 public sealed class SaasGuestWelcomeV1NotifyAction(StudioNotifyHelper studioNotifyHelper, ExternalResourceSettingsHelper externalResourceSettingsHelper, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : INotifyAction
 {
     public string ID => "saas_guest_welcome_v1";
@@ -1236,6 +1258,7 @@ public sealed class SaasGuestWelcomeV1NotifyAction(StudioNotifyHelper studioNoti
     }
 }
 
+[Scope]
 public sealed class EnterpriseGuestWelcomeV1NotifyAction(StudioNotifyHelper studioNotifyHelper, ExternalResourceSettingsHelper externalResourceSettingsHelper, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : INotifyAction
 {
     public string ID => "enterprise_guest_welcome_v1";
@@ -1297,6 +1320,7 @@ public sealed class EnterpriseGuestWelcomeV1NotifyAction(StudioNotifyHelper stud
     }
 }
 
+[Scope]
 public sealed class EnterpriseWhitelabelGuestWelcomeV1NotifyAction(StudioNotifyHelper studioNotifyHelper, ExternalResourceSettingsHelper externalResourceSettingsHelper, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : INotifyAction
 {
     public string ID => "enterprise_whitelabel_guest_welcome_v1";
@@ -1358,6 +1382,7 @@ public sealed class EnterpriseWhitelabelGuestWelcomeV1NotifyAction(StudioNotifyH
     }
 }
 
+[Scope]
 public sealed class OpensourceGuestWelcomeV1NotifyAction (StudioNotifyHelper studioNotifyHelper, ExternalResourceSettingsHelper externalResourceSettingsHelper, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : INotifyAction
 {
     public string ID => "opensource_guest_welcome_v1";
@@ -1419,6 +1444,7 @@ public sealed class OpensourceGuestWelcomeV1NotifyAction (StudioNotifyHelper stu
     }
 }
 
+[Scope]
 public sealed class SaasCustomModeRegDataNotifyAction : INotifyAction
 {
     public string ID => "saas_custom_mode_reg_data";
@@ -1447,6 +1473,7 @@ public sealed class SaasCustomModeRegDataNotifyAction : INotifyAction
     }
 }
 
+[Scope]
 public sealed class StorageEncryptionStartNotifyAction : INotifyAction
 {
     public string ID => "storage_encryption_start";
@@ -1470,6 +1497,7 @@ public sealed class StorageEncryptionStartNotifyAction : INotifyAction
     }
 }
 
+[Scope]
 public sealed class StorageEncryptionSuccessNotifyAction : INotifyAction
 {
     public string ID => "storage_encryption_success";
@@ -1493,6 +1521,7 @@ public sealed class StorageEncryptionSuccessNotifyAction : INotifyAction
     }
 }
 
+[Scope]
 public sealed class StorageEncryptionErrorNotifyAction : INotifyAction
 {
     public string ID => "storage_encryption_error";
@@ -1516,6 +1545,7 @@ public sealed class StorageEncryptionErrorNotifyAction : INotifyAction
     }
 }
 
+[Scope]
 public sealed class StorageDecryptionStartNotifyAction : INotifyAction
 {
     public string ID => "storage_decryption_start";
@@ -1539,6 +1569,7 @@ public sealed class StorageDecryptionStartNotifyAction : INotifyAction
     }
 }
 
+[Scope]
 public sealed class StorageDecryptionSuccessNotifyAction : INotifyAction
 {
     public string ID => "storage_decryption_success";
@@ -1562,6 +1593,7 @@ public sealed class StorageDecryptionSuccessNotifyAction : INotifyAction
     }
 }
 
+[Scope]
 public sealed class StorageDecryptionErrorNotifyAction : INotifyAction
 {
     public string ID => "storage_decryption_error";
@@ -1585,6 +1617,7 @@ public sealed class StorageDecryptionErrorNotifyAction : INotifyAction
     }
 }
 
+[Scope]
 public sealed class SaasRoomInviteNotifyAction(StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : INotifyAction
 {
     public string ID => "saas_room_invite";
@@ -1628,6 +1661,7 @@ public sealed class SaasRoomInviteNotifyAction(StudioNotifyHelper studioNotifyHe
     }
 }
 
+[Scope]
 public sealed class SaasAgentInviteNotifyAction(StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : INotifyAction
 {
     public string ID => "saas_agent_invite";
@@ -1671,6 +1705,7 @@ public sealed class SaasAgentInviteNotifyAction(StudioNotifyHelper studioNotifyH
     }
 }
 
+[Scope]
 public sealed class SaasRoomInviteExistingUserNotifyAction(StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : INotifyAction
 {
     public string ID => "saas_room_invite_existing_user";
@@ -1713,6 +1748,7 @@ public sealed class SaasRoomInviteExistingUserNotifyAction(StudioNotifyHelper st
     }
 }
 
+[Scope]
 public sealed class SaasAgentInviteExistingUserNotifyAction(StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : INotifyAction
 {
     public string ID => "saas_agent_invite_existing_user";
@@ -1843,6 +1879,7 @@ public sealed class SaasDocSpaceRegistrationNotifyAction(StudioNotifyHelper stud
     }
 }
 
+[Scope]
 public sealed class SaasAdminActivationV1NotifyAction(StudioNotifyHelper studioNotifyHelper, CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener, TenantManager tenantManager) : INotifyAction
 {
     public string ID => "saas_admin_activation_v1";
@@ -1894,6 +1931,7 @@ public sealed class SaasAdminActivationV1NotifyAction(StudioNotifyHelper studioN
     }
 }
 
+[Scope]
 public sealed class EnterpriseAdminActivationV1NotifyAction(StudioNotifyHelper studioNotifyHelper, CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener, TenantManager tenantManager) : INotifyAction
 {
     public string ID => "enterprise_admin_activation_v1";
@@ -1945,6 +1983,7 @@ public sealed class EnterpriseAdminActivationV1NotifyAction(StudioNotifyHelper s
     }
 }
 
+[Scope]
 public sealed class EnterpriseWhitelabelAdminActivationV1NotifyAction(StudioNotifyHelper studioNotifyHelper, CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener, TenantManager tenantManager)  : INotifyAction
 {
     public string ID => "enterprise_whitelabel_admin_activation_v1";
@@ -1996,6 +2035,7 @@ public sealed class EnterpriseWhitelabelAdminActivationV1NotifyAction(StudioNoti
     }
 }
 
+[Scope]
 public sealed class OpensourceAdminActivationV1NotifyAction(StudioNotifyHelper studioNotifyHelper, CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener, TenantManager tenantManager)  : INotifyAction
 {
     public string ID => "opensource_admin_activation_v1";
@@ -2047,6 +2087,7 @@ public sealed class OpensourceAdminActivationV1NotifyAction(StudioNotifyHelper s
     }
 }
 
+[Scope]
 public sealed class SaasAdminWelcomeV1NotifyAction(CommonLinkUtility commonLinkUtility, StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : INotifyAction
 {
     public string ID => "saas_admin_welcome_v1";
@@ -2089,6 +2130,7 @@ public sealed class SaasAdminWelcomeV1NotifyAction(CommonLinkUtility commonLinkU
     }
 }
 
+[Scope]
 public sealed class EnterpriseAdminWelcomeV1NotifyAction : INotifyAction
 {
     public string ID => "enterprise_admin_welcome_v1";
@@ -2104,6 +2146,7 @@ public sealed class EnterpriseAdminWelcomeV1NotifyAction : INotifyAction
     public List<ITagValue> Tags { get; set; }
 }
 
+[Scope]
 public sealed class EnterpriseWhitelabelAdminWelcomeV1NotifyAction : INotifyAction
 {
     public string ID => "enterprise_whitelabel_admin_welcome_v1";
@@ -2119,6 +2162,7 @@ public sealed class EnterpriseWhitelabelAdminWelcomeV1NotifyAction : INotifyActi
     public List<ITagValue> Tags { get; set; }
 }
 
+[Scope]
 public sealed class OpensourceAdminWelcomeV1NotifyAction : INotifyAction
 {
     public string ID => "opensource_admin_welcome_v1";
@@ -2134,11 +2178,13 @@ public sealed class OpensourceAdminWelcomeV1NotifyAction : INotifyAction
     public List<ITagValue> Tags { get; set; }
 }
 
-public sealed class DocsTipsNotifyAction : INotifyAction
+[Scope]
+public sealed class DocsTipsNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, DisplayUserSettingsHelper displayUserSettingsHelper) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService)
 {
-    public string ID => "docs_tips";
+    private readonly StudioNotifyHelper _studioNotifyHelper = studioNotifyHelper;
+    public override string ID => "docs_tips";
 
-    public List<Pattern> Patterns
+    public override List<Pattern> Patterns
     {
         get =>
         [
@@ -2146,40 +2192,78 @@ public sealed class DocsTipsNotifyAction : INotifyAction
         ];
     }
 
-    public List<ITagValue> Tags { get; set; }
+    public void Init(  
+        CultureInfo culture, 
+        UserInfo u,
+        Func<CultureInfo, string> orangeButtonText,
+        string orangeButtonUrl,
+        Func<CultureInfo, string> txtTrulyYours,
+        string img1,
+        string img2,
+        string img3,
+        string img4,
+        string img5,
+        Func<CultureInfo, string> url1,
+        Func<CultureInfo, string> url2,
+        Func<CultureInfo, string> url3,
+        Func<CultureInfo, string> url4,
+        Func<CultureInfo, string> url5,
+        Func<CultureInfo, string> url6,
+        string topGif)
+    {
+        Tags =
+        [
+            new TagValue(CommonTags.Culture, culture.Name),
+            new TagValue(CommonTags.UserName, u.DisplayUserName(displayUserSettingsHelper)),
+            new TagValue(CommonTags.Footer, "opensource"),
+            TagValues.OrangeButton(orangeButtonText(culture), orangeButtonUrl),
+            TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours(culture), true),
+            new TagValue("IMG1", img1),
+            new TagValue("IMG2", img2),
+            new TagValue("IMG3", img3),
+            new TagValue("IMG4", img4),
+            new TagValue("IMG5", img5),
+            new TagValue("URL1", url1(culture)),
+            new TagValue("URL2", url2(culture)),
+            new TagValue("URL3", url3(culture)),
+            new TagValue("URL4", url4(culture)),
+            new TagValue("URL5", url5(culture)),
+            new TagValue("URL6", url6(culture)),
+            new TagValue(CommonTags.TopGif, topGif)
+        ];
+    }
 }
 
-public sealed class SaasAdminTrialWarningAfterHalfYearV1NotifyAction : INotifyAction
+[Scope]
+public sealed class SaasAdminTrialWarningAfterHalfYearV1NotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService)
 {
-    public string ID => "saas_admin_trial_warning_after_half_year_v1";
+    public override string ID => "saas_admin_trial_warning_after_half_year_v1";
 
-    public List<Pattern> Patterns
+    public override List<Pattern> Patterns
     {
         get =>
         [
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_trial_warning_after_half_year_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_trial_warning_after_half_year_v1)
         ];
     }
-
-    public List<ITagValue> Tags { get; set; }
 }
 
-public sealed class SaasAdminStartupWarningAfterYearV1NotifyAction : INotifyAction
+[Scope]
+public sealed class SaasAdminStartupWarningAfterYearV1NotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService)
 {
-    public string ID => "saas_admin_startup_warning_after_year_v1";
+    public override string ID => "saas_admin_startup_warning_after_year_v1";
 
-    public List<Pattern> Patterns
+    public override List<Pattern> Patterns
     {
         get =>
         [
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_startup_warning_after_year_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_startup_warning_after_year_v1)
         ];
     }
-
-    public List<ITagValue> Tags { get; set; }
 }
 
 
+[Scope]
 public sealed class SaasUserWelcomeV1NotifyAction(StudioNotifyHelper studioNotifyHelper, ExternalResourceSettingsHelper externalResourceSettingsHelper, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : INotifyAction
 {
     public string ID => "saas_user_welcome_v1";
@@ -2240,6 +2324,7 @@ public sealed class SaasUserWelcomeV1NotifyAction(StudioNotifyHelper studioNotif
     }
 }
 
+[Scope]
 public sealed class EnterpriseUserWelcomeV1NotifyAction(StudioNotifyHelper studioNotifyHelper, ExternalResourceSettingsHelper externalResourceSettingsHelper, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : INotifyAction
 {
     public string ID => "enterprise_user_welcome_v1";
@@ -2300,6 +2385,7 @@ public sealed class EnterpriseUserWelcomeV1NotifyAction(StudioNotifyHelper studi
     }
 }
 
+[Scope]
 public sealed class EnterpriseWhitelabelUserWelcomeV1NotifyAction(StudioNotifyHelper studioNotifyHelper, ExternalResourceSettingsHelper externalResourceSettingsHelper, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : INotifyAction
 {
     public string ID => "enterprise_whitelabel_user_welcome_v1";
@@ -2360,6 +2446,7 @@ public sealed class EnterpriseWhitelabelUserWelcomeV1NotifyAction(StudioNotifyHe
     }
 }
 
+[Scope]
 public sealed class EnterpriseWhitelabelUserWelcomeCustomModeV1NotifyAction(StudioNotifyHelper studioNotifyHelper, ExternalResourceSettingsHelper externalResourceSettingsHelper, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : INotifyAction
 {
     public string ID => "enterprise_whitelabel_user_welcome_custom_mode_v1";
@@ -2420,6 +2507,7 @@ public sealed class EnterpriseWhitelabelUserWelcomeCustomModeV1NotifyAction(Stud
     }
 }
 
+[Scope]
 public sealed class OpensourceUserWelcomeV1NotifyAction(StudioNotifyHelper studioNotifyHelper, ExternalResourceSettingsHelper externalResourceSettingsHelper, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : INotifyAction
 {
     public string ID => "opensource_user_welcome_v1";
@@ -2480,6 +2568,7 @@ public sealed class OpensourceUserWelcomeV1NotifyAction(StudioNotifyHelper studi
     }
 }
 
+[Scope]
 public sealed class SaasUserActivationV1NotifyAction(StudioNotifyHelper studioNotifyHelper, IUrlShortener urlShortener, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : INotifyAction
 {
     public string ID => "saas_user_activation_v1";
@@ -2531,6 +2620,7 @@ public sealed class SaasUserActivationV1NotifyAction(StudioNotifyHelper studioNo
     }
 }
 
+[Scope]
 public sealed class EnterpriseUserActivationV1NotifyAction(StudioNotifyHelper studioNotifyHelper, IUrlShortener urlShortener, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : INotifyAction
 {
     public string ID => "enterprise_user_activation_v1";
@@ -2582,6 +2672,7 @@ public sealed class EnterpriseUserActivationV1NotifyAction(StudioNotifyHelper st
     }
 }
 
+[Scope]
 public sealed class EnterpriseWhitelabelUserActivationV1NotifyAction(StudioNotifyHelper studioNotifyHelper, IUrlShortener urlShortener, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : INotifyAction
 {
     public string ID => "enterprise_whitelabel_user_activation_v1";
@@ -2633,6 +2724,7 @@ public sealed class EnterpriseWhitelabelUserActivationV1NotifyAction(StudioNotif
     }
 }
 
+[Scope]
 public sealed class OpensourceUserActivationV1NotifyAction(StudioNotifyHelper studioNotifyHelper, IUrlShortener urlShortener, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : INotifyAction
 {
     public string ID => "opensource_user_activation_v1";
@@ -2684,51 +2776,191 @@ public sealed class OpensourceUserActivationV1NotifyAction(StudioNotifyHelper st
     }
 }
 
-public sealed class SaasAdminModulesV1NotifyAction : INotifyAction
+public abstract class BasePeriodicNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService) : INotifyAction
 {
-    public string ID => "saas_admin_modules_v1";
+    public abstract string ID { get; }
 
-    public List<Pattern> Patterns
+    public abstract List<Pattern> Patterns { get; }
+
+    public List<ITagValue> Tags { get; set; }
+
+    public async Task Init(
+        CultureInfo culture, 
+        UserInfo u, 
+        TenantQuota rquota,
+        Func<CultureInfo, string> orangeButtonText,
+        Func<CultureInfo, string> orangeButtonText1,
+        Func<CultureInfo, string> orangeButtonText2,
+        Func<CultureInfo, string> orangeButtonText3,
+        Func<CultureInfo, string> orangeButtonText4,
+        Func<CultureInfo, string> orangeButtonText5,
+        Func<CultureInfo, string> orangeButtonUrl,
+        Func<CultureInfo, string> orangeButtonUrl1,
+        Func<CultureInfo, string> orangeButtonUrl2,
+        Func<CultureInfo, string> orangeButtonUrl3,
+        Func<CultureInfo, string> orangeButtonUrl4,
+        Func<CultureInfo, string> orangeButtonUrl5,
+        Func<CultureInfo, string> txtTrulyYours,
+        bool trulyYoursAsTableRow,
+        string img1,
+        string img2,
+        string img3,
+        string img4,
+        string img5,
+        string img6,
+        string img7,
+        Func<CultureInfo, string> url1,
+        Func<CultureInfo, string> url2,
+        Func<CultureInfo, string> url3,
+        Func<CultureInfo, string> url4,
+        Func<CultureInfo, string> url5,
+        Func<CultureInfo, string> url6,
+        Func<CultureInfo, string> url7,
+        Func<CultureInfo, string> url8,
+        Func<CultureInfo, string> url9,
+        Func<CultureInfo, string> url10,
+        Func<CultureInfo, string> url11,
+        Func<CultureInfo, string> url12,
+        Func<CultureInfo, string> url13,
+        Func<CultureInfo, string> url14,
+        string topGif)
+    {
+        Tags =
+        [
+            new TagValue(CommonTags.Culture, culture.Name),
+            new TagValue(CommonTags.UserName, u.FirstName.HtmlEncode()),
+            new TagValue(CommonTags.ActiveUsers, (await userManager.GetUsersAsync()).Length),
+            new TagValue(CommonTags.Price, rquota.Price),
+            new TagValue(CommonTags.PricePeriod, rquota.Year ? UserControlsCommonResource.TariffPerYear : UserControlsCommonResource.TariffPerMonth),
+            //new TagValue(CommonTags.DueDate, dueDate.ToLongDateString()),
+            //new TagValue(CommonTags.DelayDueDate, (delayDueDateIsNotMax ? delayDueDate : dueDate).ToLongDateString()),
+            TagValues.OrangeButton(orangeButtonText(culture), orangeButtonUrl(culture)),
+            TagValues.OrangeButton(orangeButtonText1(culture), orangeButtonUrl1(culture), "OrangeButton1"),
+            TagValues.OrangeButton(orangeButtonText2(culture), orangeButtonUrl2(culture), "OrangeButton2"),
+            TagValues.OrangeButton(orangeButtonText3(culture), orangeButtonUrl3(culture), "OrangeButton3"),
+            TagValues.OrangeButton(orangeButtonText4(culture), orangeButtonUrl4(culture), "OrangeButton4"),
+            TagValues.OrangeButton(orangeButtonText5(culture), orangeButtonUrl5(culture), "OrangeButton5"),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours(culture), trulyYoursAsTableRow),
+            new TagValue("IMG1", img1),
+            new TagValue("IMG2", img2),
+            new TagValue("IMG3", img3),
+            new TagValue("IMG4", img4),
+            new TagValue("IMG5", img5),
+            new TagValue("IMG6", img6),
+            new TagValue("IMG7", img7),
+            new TagValue("URL1", url1(culture)),
+            new TagValue("URL2", url2(culture)),
+            new TagValue("URL3", url3(culture)),
+            new TagValue("URL4", url4(culture)),
+            new TagValue("URL5", url5(culture)),
+            new TagValue("URL6", url6(culture)),
+            new TagValue("URL7", url7(culture)),
+            new TagValue("URL8", url8(culture)),
+            new TagValue("URL9", url9(culture)),
+            new TagValue("URL10", url10(culture)),
+            new TagValue("URL11", url11(culture)),
+            new TagValue("URL12", url12(culture)),
+            new TagValue("URL13", url13(culture)),
+            new TagValue("URL14", url14(culture)),
+            new TagValue(CommonTags.TopGif, topGif),
+            new TagValue(CommonTags.PaymentDelay, tariffService.GetPaymentDelay()),
+            new TagValue(CommonTags.Footer, await userManager.IsDocSpaceAdminAsync(u) ? "common" : "social")
+        ];
+    }
+    
+    public async Task Init(
+        CultureInfo culture, 
+        UserInfo u, 
+        TenantQuota rquota,
+        Func<CultureInfo, string> orangeButtonText,
+        Func<CultureInfo, string> orangeButtonUrl,
+        Func<CultureInfo, string> txtTrulyYours,
+        bool trulyYoursAsTableRow,
+        string img1,
+        string img2,
+        string img3,
+        string img4,
+        string img5,
+        Func<CultureInfo, string> url1,
+        Func<CultureInfo, string> url2,
+        Func<CultureInfo, string> url3,
+        Func<CultureInfo, string> url4,
+        Func<CultureInfo, string> url5,
+        Func<CultureInfo, string> url6,
+        string topGif)
+    {
+        Tags =
+        [
+            new TagValue(CommonTags.Culture, culture.Name),
+            new TagValue(CommonTags.UserName, u.FirstName.HtmlEncode()),
+            new TagValue(CommonTags.ActiveUsers, (await userManager.GetUsersAsync()).Length),
+            new TagValue(CommonTags.PaymentDelay, tariffService.GetPaymentDelay()),
+            new TagValue(CommonTags.Price, rquota.Price),
+            new TagValue(CommonTags.PricePeriod, rquota.Year ? UserControlsCommonResource.TariffPerYear : UserControlsCommonResource.TariffPerMonth),
+            //new TagValue(CommonTags.DueDate, dueDate.ToLongDateString()),
+            //new TagValue(CommonTags.DelayDueDate, (delayDueDateIsNotMax ? delayDueDate : dueDate).ToLongDateString()),
+            TagValues.OrangeButton(orangeButtonText(culture), orangeButtonUrl(culture)),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours(culture), trulyYoursAsTableRow),
+            new TagValue("IMG1", img1),
+            new TagValue("IMG2", img2),
+            new TagValue("IMG3", img3),
+            new TagValue("IMG4", img4),
+            new TagValue("IMG5", img5),
+            new TagValue("URL1", url1(culture)),
+            new TagValue("URL2", url2(culture)),
+            new TagValue("URL3", url3(culture)),
+            new TagValue("URL4", url4(culture)),
+            new TagValue("URL5", url5(culture)),
+            new TagValue("URL6", url6(culture)),
+            new TagValue(CommonTags.TopGif, topGif)
+        ];
+    }
+}
+
+
+[Scope]
+public sealed class SaasAdminModulesV1NotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService)
+{
+    public override string ID => "saas_admin_modules_v1";
+
+    public override List<Pattern> Patterns
     {
         get =>
         [
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_modules_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_modules_v1)
         ];
     }
-
-    public List<ITagValue> Tags { get; set; }
 }
 
-public sealed class SaasAdminUserAppsTipsV1NotifyAction : INotifyAction
+[Scope]
+public sealed class SaasAdminUserAppsTipsV1NotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService)
 {
-    public string ID => "saas_admin_user_apps_tips_v1";
+    public override string ID => "saas_admin_user_apps_tips_v1";
 
-    public List<Pattern> Patterns
+    public override List<Pattern> Patterns
     {
         get =>
         [
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_user_apps_tips_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_user_apps_tips_v1)
         ];
     }
-
-    public List<ITagValue> Tags { get; set; }
 }
 
-public sealed class EnterpriseAdminUserAppsTipsV1NotifyAction : INotifyAction
+[Scope]
+public sealed class EnterpriseAdminUserAppsTipsV1NotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService)
 {
-    public string ID => "enterprise_admin_user_apps_tips_v1";
+    public override string ID => "enterprise_admin_user_apps_tips_v1";
 
-    public List<Pattern> Patterns
+    public override List<Pattern> Patterns
     {
         get =>
         [
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_admin_user_apps_tips_v1, () => WebstudioNotifyPatternResource.pattern_enterprise_admin_user_apps_tips_v1)
         ];
     }
-
-    public List<ITagValue> Tags { get; set; }
 }
 
+[Scope]
 public sealed class RoomsActivityNotifyAction : INotifyAction
 {
     public string ID => "rooms_activity";
@@ -2761,6 +2993,7 @@ public sealed class RoomsActivityNotifyAction : INotifyAction
     }
 }
 
+[Scope]
 public sealed class SendWhatsNewNotifyAction : INotifyAction
 {
     public string ID => "send_whats_new";
@@ -2793,96 +3026,91 @@ public sealed class SendWhatsNewNotifyAction : INotifyAction
     }
 }
 
-public sealed class SaasOwnerPaymentWarningGracePeriodBeforeActivationNotifyAction : INotifyAction
+[Scope]
+public sealed class SaasOwnerPaymentWarningGracePeriodBeforeActivationNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService)
 {
-    public string ID => "saas_owner_payment_warning_grace_period_before_activation";
+    public override string ID => "saas_owner_payment_warning_grace_period_before_activation";
 
-    public List<Pattern> Patterns
+    public override List<Pattern> Patterns
     {
         get =>
         [
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_owner_payment_warning_grace_period_before_activation, () => WebstudioNotifyPatternResource.pattern_saas_owner_payment_warning_grace_period_before_activation)
         ];
     }
-
-    public List<ITagValue> Tags { get; set; }
 }
 
-public sealed class SaasOwnerPaymentWarningGracePeriodActivationNotifyAction : INotifyAction
+[Scope]
+public sealed class SaasOwnerPaymentWarningGracePeriodActivationNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService)
 {
-    public string ID => "saas_owner_payment_warning_grace_period_activation";
+    public override string ID => "saas_owner_payment_warning_grace_period_activation";
 
-    public List<Pattern> Patterns
+    public override List<Pattern> Patterns
     {
         get =>
         [
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_owner_payment_warning_grace_period_activation, () => WebstudioNotifyPatternResource.pattern_saas_owner_payment_warning_grace_period_activation)
         ];
     }
-
-    public List<ITagValue> Tags { get; set; }
 }
 
-public sealed class SaasOwnerPaymentWarningGracePeriodLastDayNotifyAction : INotifyAction
+[Scope]
+public sealed class SaasOwnerPaymentWarningGracePeriodLastDayNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService)
 {
-    public string ID => "saas_owner_payment_warning_grace_period_last_day";
+    public override string ID => "saas_owner_payment_warning_grace_period_last_day";
 
-    public List<Pattern> Patterns
+    public override List<Pattern> Patterns
     {
         get =>
         [
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_owner_payment_warning_grace_period_last_day, () => WebstudioNotifyPatternResource.pattern_saas_owner_payment_warning_grace_period_last_day)
         ];
     }
-
-    public List<ITagValue> Tags { get; set; }
 }
 
-public sealed class SaasOwnerPaymentWarningGracePeriodExpiredNotifyAction : INotifyAction
+[Scope]
+public sealed class SaasOwnerPaymentWarningGracePeriodExpiredNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService)
 {
-    public string ID => "saas_owner_payment_warning_grace_period_expired";
+    public override string ID => "saas_owner_payment_warning_grace_period_expired";
 
-    public List<Pattern> Patterns
+    public override List<Pattern> Patterns
     {
         get =>
         [
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_owner_payment_warning_grace_period_expired, () => WebstudioNotifyPatternResource.pattern_saas_owner_payment_warning_grace_period_expired)
         ];
     }
-
-    public List<ITagValue> Tags { get; set; }
 }
 
-public sealed class SaasAdminVideoGuidesNotifyAction : INotifyAction
+[Scope]
+public sealed class SaasAdminVideoGuidesNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService)
 {
-    public string ID => "saas_video_guides_v1";
+    public override string ID => "saas_video_guides_v1";
 
-    public List<Pattern> Patterns
+    public override List<Pattern> Patterns
     {
         get =>
         [
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_video_guides_v1, () => WebstudioNotifyPatternResource.pattern_saas_video_guides_v1)
         ];
     }
-
-    public List<ITagValue> Tags { get; set; }
 }
 
-public sealed class SaasAdminIntegrationsNotifyAction : INotifyAction
+[Scope]
+public sealed class SaasAdminIntegrationsNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService)
 {
-    public string ID => "saas_admin_integrations_v1";
+    public override string ID => "saas_admin_integrations_v1";
 
-    public List<Pattern> Patterns
+    public override List<Pattern> Patterns
     {
         get =>
         [
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_integrations_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_integrations_v1)
         ];
     }
-
-    public List<ITagValue> Tags { get; set; }
 }
 
+[Scope]
 public sealed class ZoomWelcomeNotifyAction(StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : INotifyAction
 {
     public string ID => "zoom_welcome";
@@ -2923,6 +3151,7 @@ public sealed class ZoomWelcomeNotifyAction(StudioNotifyHelper studioNotifyHelpe
     }
 }
 
+[Scope]
 public sealed class MigrationPersonalToDocspaceNotifyAction(CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener, StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : INotifyAction
 {
     public string ID => "migration_personal_to_docspace";
@@ -2970,157 +3199,148 @@ public sealed class MigrationPersonalToDocspaceNotifyAction(CommonLinkUtility co
     }
 }
 
-public sealed class EnterpriseAdminPaymentWarningGracePeriodBeforeActivationNotifyAction : INotifyAction
+[Scope]
+public sealed class EnterpriseAdminPaymentWarningGracePeriodBeforeActivationNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService)
 {
-    public string ID => "enterprise_admin_payment_warning_grace_period_before_activation";
+    public override string ID => "enterprise_admin_payment_warning_grace_period_before_activation";
 
-    public List<Pattern> Patterns
+    public override List<Pattern> Patterns
     {
         get =>
         [
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_admin_payment_warning_grace_period_before_activation, () => WebstudioNotifyPatternResource.pattern_enterprise_admin_payment_warning_grace_period_before_activation)
         ];
     }
-
-    public List<ITagValue> Tags { get; set; }
 }
 
-public sealed class EnterpriseAdminPaymentWarningGracePeriodActivationNotifyAction : INotifyAction
+[Scope]
+public sealed class EnterpriseAdminPaymentWarningGracePeriodActivationNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService)
 {
-    public string ID => "enterprise_admin_payment_warning_grace_period_activation";
+    public override string ID => "enterprise_admin_payment_warning_grace_period_activation";
 
-    public List<Pattern> Patterns
+    public override List<Pattern> Patterns
     {
         get =>
         [
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_admin_payment_warning_grace_period_activation, () => WebstudioNotifyPatternResource.pattern_enterprise_admin_payment_warning_grace_period_activation)
         ];
     }
-
-    public List<ITagValue> Tags { get; set; }
 }
 
-public sealed class EnterpriseAdminPaymentWarningGracePeriodBeforeExpirationNotifyAction : INotifyAction
+[Scope]
+public sealed class EnterpriseAdminPaymentWarningGracePeriodBeforeExpirationNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService)
 {
-    public string ID => "enterprise_admin_payment_warning_grace_period_before_expiration";
+    public override string ID => "enterprise_admin_payment_warning_grace_period_before_expiration";
 
-    public List<Pattern> Patterns
+    public override List<Pattern> Patterns
     {
         get =>
         [
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_admin_payment_warning_grace_period_before_expiration, () => WebstudioNotifyPatternResource.pattern_enterprise_admin_payment_warning_grace_period_before_expiration)
         ];
     }
-
-    public List<ITagValue> Tags { get; set; }
 }
 
-public sealed class EnterpriseAdminPaymentWarningGracePeriodExpirationNotifyAction : INotifyAction
+[Scope]
+public sealed class EnterpriseAdminPaymentWarningGracePeriodExpirationNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService)
 {
-    public string ID => "enterprise_admin_payment_warning_grace_period_expiration";
+    public override string ID => "enterprise_admin_payment_warning_grace_period_expiration";
 
-    public List<Pattern> Patterns
+    public override List<Pattern> Patterns
     {
         get =>
         [
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_admin_payment_warning_grace_period_expiration, () => WebstudioNotifyPatternResource.pattern_enterprise_admin_payment_warning_grace_period_expiration)
         ];
     }
-
-    public List<ITagValue> Tags { get; set; }
 }
 
-public sealed class EnterpriseAdminPaymentWarningLifetimeBeforeExpirationNotifyAction : INotifyAction
+[Scope]
+public sealed class EnterpriseAdminPaymentWarningLifetimeBeforeExpirationNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService)
 {
-    public string ID => "enterprise_admin_payment_warning_lifetime_before_expiration";
+    public override string ID => "enterprise_admin_payment_warning_lifetime_before_expiration";
 
-    public List<Pattern> Patterns
+    public override List<Pattern> Patterns
     {
         get =>
         [
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_admin_payment_warning_lifetime_before_expiration, () => WebstudioNotifyPatternResource.pattern_enterprise_admin_payment_warning_lifetime_before_expiration)
         ];
     }
-
-    public List<ITagValue> Tags { get; set; }
 }
 
-public sealed class EnterpriseAdminPaymentWarningLifetimeExpirationNotifyAction : INotifyAction
+[Scope]
+public sealed class EnterpriseAdminPaymentWarningLifetimeExpirationNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService)
 {
-    public string ID => "enterprise_admin_payment_warning_lifetime_expiration";
+    public override string ID => "enterprise_admin_payment_warning_lifetime_expiration";
 
-    public List<Pattern> Patterns
+    public override List<Pattern> Patterns
     {
         get =>
         [
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_admin_payment_warning_lifetime_expiration, () => WebstudioNotifyPatternResource.pattern_enterprise_admin_payment_warning_lifetime_expiration)
         ];
     }
-
-    public List<ITagValue> Tags { get; set; }
 }
 
-public sealed class DeveloperAdminPaymentWarningGracePeriodBeforeActivationNotifyAction : INotifyAction
+[Scope]
+public sealed class DeveloperAdminPaymentWarningGracePeriodBeforeActivationNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService)
 {
-    public string ID => "developer_admin_payment_warning_grace_period_before_activation";
+    public override string ID => "developer_admin_payment_warning_grace_period_before_activation";
 
-    public List<Pattern> Patterns
+    public override List<Pattern> Patterns
     {
         get =>
         [
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_developer_admin_payment_warning_grace_period_before_activation, () => WebstudioNotifyPatternResource.pattern_developer_admin_payment_warning_grace_period_before_activation)
         ];
     }
-
-    public List<ITagValue> Tags { get; set; }
 }
 
-public sealed class DeveloperAdminPaymentWarningGracePeriodActivationNotifyAction : INotifyAction
+[Scope]
+public sealed class DeveloperAdminPaymentWarningGracePeriodActivationNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService)
 {
-    public string ID => "developer_admin_payment_warning_grace_period_activation";
+    public override string ID => "developer_admin_payment_warning_grace_period_activation";
 
-    public List<Pattern> Patterns
+    public override List<Pattern> Patterns
     {
         get =>
         [
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_developer_admin_payment_warning_grace_period_activation, () => WebstudioNotifyPatternResource.pattern_developer_admin_payment_warning_grace_period_activation)
         ];
     }
-
-    public List<ITagValue> Tags { get; set; }
 }
 
-public sealed class DeveloperAdminPaymentWarningGracePeriodBeforeExpirationNotifyAction : INotifyAction
+[Scope]
+public sealed class DeveloperAdminPaymentWarningGracePeriodBeforeExpirationNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService)
 {
-    public string ID => "developer_admin_payment_warning_grace_period_before_expiration";
+    public override string ID => "developer_admin_payment_warning_grace_period_before_expiration";
 
-    public List<Pattern> Patterns
+    public override List<Pattern> Patterns
     {
         get =>
         [
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_developer_admin_payment_warning_grace_period_before_expiration, () => WebstudioNotifyPatternResource.pattern_developer_admin_payment_warning_grace_period_before_expiration)
         ];
     }
-
-    public List<ITagValue> Tags { get; set; }
 }
 
-public sealed class DeveloperAdminPaymentWarningGracePeriodExpirationNotifyAction : INotifyAction
+[Scope]
+public sealed class DeveloperAdminPaymentWarningGracePeriodExpirationNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService)
 {
-    public string ID => "developer_admin_payment_warning_grace_period_expiration";
+    public override string ID => "developer_admin_payment_warning_grace_period_expiration";
 
-    public List<Pattern> Patterns
+    public override List<Pattern> Patterns
     {
         get =>
         [
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_developer_admin_payment_warning_grace_period_expiration, () => WebstudioNotifyPatternResource.pattern_developer_admin_payment_warning_grace_period_expiration)
         ];
     }
-
-    public List<ITagValue> Tags { get; set; }
 }
 
-public sealed class UserTypeChangedNotifyAction(StudioNotifyHelper studioNotifyHelper, DisplayUserSettingsHelper displayUserSettingsHelper, ExternalResourceSettingsHelper externalResourceSettingsHelper, TenantManager tenantManager) : INotifyAction
+[Scope]
+public sealed class UserTypeChangedNotifyAction(StudioNotifyHelper studioNotifyHelper, ExternalResourceSettingsHelper externalResourceSettingsHelper, TenantManager tenantManager) : INotifyAction
 {
     public string ID => "user_type_changed";
 
@@ -3160,6 +3380,7 @@ public sealed class UserTypeChangedNotifyAction(StudioNotifyHelper studioNotifyH
     }
 }
 
+[Scope]
 public sealed class UserRoleChangedNotifyAction(ExternalResourceSettingsHelper externalResourceSettingsHelper, StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : INotifyAction
 {
     public string ID => "user_role_changed";
@@ -3202,6 +3423,7 @@ public sealed class UserRoleChangedNotifyAction(ExternalResourceSettingsHelper e
     }
 }
 
+[Scope]
 public sealed class UserAgentRoleChangedNotifyAction(ExternalResourceSettingsHelper externalResourceSettingsHelper, StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : INotifyAction
 {
     public string ID => "user_agent_role_changed";
@@ -3244,6 +3466,7 @@ public sealed class UserAgentRoleChangedNotifyAction(ExternalResourceSettingsHel
     }
 }
 
+[Scope]
 public sealed class TopUpWalletErrorNotifyAction(CommonLinkUtility commonLinkUtility, StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : INotifyAction
 {
     public string ID => "top_up_wallet_error";
@@ -3285,6 +3508,7 @@ public sealed class TopUpWalletErrorNotifyAction(CommonLinkUtility commonLinkUti
     }
 }
 
+[Scope]
 public sealed class RenewSubscriptionErrorNotifyAction(CommonLinkUtility commonLinkUtility, StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : INotifyAction
 {
     public string ID => "renew_subscription_error";
@@ -3326,6 +3550,7 @@ public sealed class RenewSubscriptionErrorNotifyAction(CommonLinkUtility commonL
     }
 }
 
+[Scope]
 public sealed class ApiKeyExpiredNotifyAction(StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : INotifyAction
 {
     public string ID => "api_key_expired";
@@ -3367,6 +3592,7 @@ public sealed class ApiKeyExpiredNotifyAction(StudioNotifyHelper studioNotifyHel
     }
 }
 
+[Scope]
 public sealed class AdminNotifyAction : INotifyAction
 {
     public string ID => "admin_notify";
@@ -3381,6 +3607,8 @@ public sealed class AdminNotifyAction : INotifyAction
 
     public List<ITagValue> Tags { get; set; }
 };
+
+[Scope]
 public sealed class SelfProfileUpdatedNotifyAction : INotifyAction
 {
     public string ID => "self_profile_updated";
@@ -3394,6 +3622,7 @@ public sealed class SelfProfileUpdatedNotifyAction : INotifyAction
     public List<ITagValue> Tags { get; set; }
 };
 
+[Scope]
 public sealed class PeriodicNotifyAction : INotifyAction
 {
     public string ID => "periodic_notify";

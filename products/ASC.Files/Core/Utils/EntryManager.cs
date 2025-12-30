@@ -320,8 +320,7 @@ public class EntryManager(IDaoFactory daoFactory,
     NotifyClient notifyClient,
     ExternalShare externalShare,
     FileSharingAceHelper fileSharingAceHelper,
-    DisplayUserSettingsHelper displayUserSettingsHelper,
-    NotifyConstants notifyConstants)
+    DisplayUserSettingsHelper displayUserSettingsHelper)
 {
     private const string UpdateList = "filesUpdateList";
 

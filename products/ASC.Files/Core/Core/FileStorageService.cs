@@ -101,8 +101,7 @@ public class FileStorageService //: IFileStorageService
     WebhookManager webhookManager,
     FileSharingHelper fileSharingHelper,
     AiGateway gateway,
-    FormFillingReportCreator formFillingReportCreator,
-    NotifyConstants notifyConstants)
+    FormFillingReportCreator formFillingReportCreator)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
 
