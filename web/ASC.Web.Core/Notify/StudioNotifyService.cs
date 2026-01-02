@@ -574,7 +574,7 @@ public class StudioNotifyService(
         var confirmOwnerChangeNotifyAction = serviceProvider.GetService<ConfirmOwnerChangeNotifyAction>();
         confirmOwnerChangeNotifyAction.Init(owner, newOwner, confirmOwnerUpdateUrl);
         
-        await studioNotifyServiceHelper.SendNoticeToAsync(confirmOwnerChangeNotifyAction, null, [owner], [EMailSenderName]);
+        await studioNotifyServiceHelper.SendNoticeToAsync(confirmOwnerChangeNotifyAction, [owner], [EMailSenderName]);
     }
 
     public async Task SendCongratulationsAsync(UserInfo u)
