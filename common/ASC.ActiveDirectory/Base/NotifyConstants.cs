@@ -29,7 +29,7 @@ using ASC.Web.Core.Utility;
 
 namespace ASC.ActiveDirectory.Base;
 
-public class NotifyConstants : INotifyActionList
+public class NotifyConstants
 {
     public static readonly string TagUserName = "UserName";
     public static readonly string TagUserEmail = "UserEmail";
@@ -76,16 +76,14 @@ public static class NotifyCommonTags
 }
 
 [Scope]
-public class LdapActivationNotifyAction(CommonLinkUtility commonLinkUtility, DisplayUserSettingsHelper displayUserSettingsHelper, IUrlShortener urlShortener) : INotifyAction
+public class LdapActivationNotifyAction(CommonLinkUtility commonLinkUtility, DisplayUserSettingsHelper displayUserSettingsHelper, IUrlShortener urlShortener, TenantManager manager) : NotifyAction(manager)
 {
-    public string ID  => "user_ldap_activation";
+    public override string ID  => "user_ldap_activation";
 
-    public List<Pattern> Patterns =>
+    public override List<Pattern> Patterns =>
     [
         new EmailPattern(() => WebstudioNotifyPatternResource.subject_user_ldap_activation, () => WebstudioNotifyPatternResource.pattern_user_ldap_activation)
     ];
-    
-    public List<ITagValue> Tags { get; set; }
 
     public async Task Init(UserInfo ldapUserInfo, LdapLocalization resource)
     {                   

@@ -27,13 +27,11 @@
 namespace ASC.Files.Core.Services.NotifyService;
 
 [Scope]
-public sealed class DocuSignCompleteNotifyAction(BaseCommonLinkUtility baseCommonLinkUtility, FilesLinkUtility filesLinkUtility, FileUtility fileUtility) : INotifyAction
+public sealed class DocuSignCompleteNotifyAction(TenantManager tenantManager, BaseCommonLinkUtility baseCommonLinkUtility, FilesLinkUtility filesLinkUtility, FileUtility fileUtility) : NotifyAction(tenantManager)
 {
-    public string ID => "DocuSignComplete";
+    public override string ID => "DocuSignComplete";
 
-    public List<ITagValue> Tags { get; set; }
-
-    public List<Pattern> Patterns =>
+    public override List<Pattern> Patterns =>
     [
         new EmailPattern(() => FilesPatternResource.subject_DocuSignComplete, () => FilesPatternResource.pattern_DocuSignComplete)
     ];
@@ -49,13 +47,11 @@ public sealed class DocuSignCompleteNotifyAction(BaseCommonLinkUtility baseCommo
 }
 
 [Scope]
-public sealed class DocuSignStatusNotifyAction : INotifyAction
+public sealed class DocuSignStatusNotifyAction(TenantManager tenantManager) : NotifyAction(tenantManager)
 {
-    public string ID => "DocuSignStatus";
+    public override string ID => "DocuSignStatus";
 
-    public List<ITagValue> Tags { get; set; }
-
-    public List<Pattern> Patterns =>
+    public override List<Pattern> Patterns =>
     [
         new EmailPattern(() => FilesPatternResource.subject_DocuSignStatus, () => FilesPatternResource.pattern_DocuSignStatus)
     ];
@@ -71,13 +67,11 @@ public sealed class DocuSignStatusNotifyAction : INotifyAction
 }
 
 [Scope]
-public sealed class MailMergeEndNotifyAction : INotifyAction
+public sealed class MailMergeEndNotifyAction(TenantManager tenantManager) : NotifyAction(tenantManager)
 {
-    public string ID => "MailMergeEnd";
+    public override string ID => "MailMergeEnd";
 
-    public List<ITagValue> Tags { get; set; }
-
-    public List<Pattern> Patterns =>
+    public override List<Pattern> Patterns =>
     [
         new EmailPattern(() => FilesPatternResource.subject_MailMergeEnd, () => FilesPatternResource.pattern_MailMergeEnd)
     ];
@@ -94,13 +88,11 @@ public sealed class MailMergeEndNotifyAction : INotifyAction
 }
 
 [Scope]
-public class ShareDocumentNotifyAction(BaseCommonLinkUtility baseCommonLinkUtility, StudioNotifyHelper studioNotifyHelper) : INotifyAction
+public class ShareDocumentNotifyAction(TenantManager tenantManager, BaseCommonLinkUtility baseCommonLinkUtility, StudioNotifyHelper studioNotifyHelper) : NotifyAction(tenantManager)
 {
-    public virtual string ID => "ShareDocument";
+    public override string ID => "ShareDocument";
 
-    public List<ITagValue> Tags { get; set; }
-
-    public virtual List<Pattern> Patterns =>
+    public override List<Pattern> Patterns =>
     [
         new EmailPattern(() => FilesPatternResource.subject_ShareDocument, () => FilesPatternResource.pattern_ShareDocument),
         new TelegramPattern(() => FilesPatternResource.pattern_ShareDocument),
@@ -133,7 +125,7 @@ public class ShareDocumentNotifyAction(BaseCommonLinkUtility baseCommonLinkUtili
 }
 
 [Scope]
-public sealed class ShareEncryptedDocumentNotifyAction(BaseCommonLinkUtility baseCommonLinkUtility, StudioNotifyHelper studioNotifyHelper) : ShareDocumentNotifyAction(baseCommonLinkUtility, studioNotifyHelper)
+public sealed class ShareEncryptedDocumentNotifyAction(TenantManager tenantManager, BaseCommonLinkUtility baseCommonLinkUtility, StudioNotifyHelper studioNotifyHelper) : ShareDocumentNotifyAction(tenantManager, baseCommonLinkUtility, studioNotifyHelper)
 {
     public override string ID => "ShareEncryptedDocument";
 
@@ -141,7 +133,7 @@ public sealed class ShareEncryptedDocumentNotifyAction(BaseCommonLinkUtility bas
 }
 
 [Scope]
-public sealed class ShareFolderNotifyAction (BaseCommonLinkUtility baseCommonLinkUtility, StudioNotifyHelper studioNotifyHelper) : ShareDocumentNotifyAction(baseCommonLinkUtility, studioNotifyHelper)
+public sealed class ShareFolderNotifyAction (TenantManager tenantManager, BaseCommonLinkUtility baseCommonLinkUtility, StudioNotifyHelper studioNotifyHelper) : ShareDocumentNotifyAction(tenantManager, baseCommonLinkUtility, studioNotifyHelper)
 {
     public override string ID => "ShareFolder";
 
@@ -154,13 +146,11 @@ public sealed class ShareFolderNotifyAction (BaseCommonLinkUtility baseCommonLin
 }
 
 [Scope]
-public sealed class EditorMentionsNotifyAction(BaseCommonLinkUtility baseCommonLinkUtility, DisplayUserSettingsHelper displayUserSettingsHelper) : INotifyAction
+public sealed class EditorMentionsNotifyAction(TenantManager tenantManager, BaseCommonLinkUtility baseCommonLinkUtility, DisplayUserSettingsHelper displayUserSettingsHelper) : NotifyAction(tenantManager)
 {
-    public string ID => "EditorMentions";
+    public override string ID => "EditorMentions";
 
-    public List<ITagValue> Tags { get; set; }
-
-    public List<Pattern> Patterns =>
+    public override List<Pattern> Patterns =>
     [
         new EmailPattern(() => FilesPatternResource.subject_EditorMentions, () => FilesPatternResource.pattern_EditorMentions),
         new TelegramPattern(() => FilesPatternResource.pattern_EditorMentions),
@@ -183,13 +173,11 @@ public sealed class EditorMentionsNotifyAction(BaseCommonLinkUtility baseCommonL
 }
 
 [Scope]
-public class RoomRemovedNotifyAction : INotifyAction
+public class RoomRemovedNotifyAction(TenantManager tenantManager) : NotifyAction(tenantManager)
 {
-    public virtual string ID => "RoomRemoved";
+    public override string ID => "RoomRemoved";
 
-    public List<ITagValue> Tags { get; set; }
-
-    public virtual List<Pattern> Patterns =>
+    public override List<Pattern> Patterns =>
     [
         new EmailPattern(() => FilesPatternResource.subject_RoomRemoved, () => FilesPatternResource.pattern_RoomRemoved),
         new TelegramPattern(() => FilesPatternResource.pattern_RoomRemoved)
@@ -206,7 +194,7 @@ public class RoomRemovedNotifyAction : INotifyAction
 }
 
 [Scope]
-public sealed class AgentRemovedNotifyAction : RoomRemovedNotifyAction
+public sealed class AgentRemovedNotifyAction(TenantManager tenantManager) : RoomRemovedNotifyAction(tenantManager)
 {
     public override string ID => "AgentRemoved";
 
@@ -218,13 +206,11 @@ public sealed class AgentRemovedNotifyAction : RoomRemovedNotifyAction
 }
 
 [Scope]
-public sealed class FormSubmittedNotifyAction(DisplayUserSettingsHelper displayUserSettingsHelper) : INotifyAction
+public sealed class FormSubmittedNotifyAction(TenantManager tenantManager, DisplayUserSettingsHelper displayUserSettingsHelper) : NotifyAction(tenantManager)
 {
-    public string ID => "FormSubmitted";
+    public override string ID => "FormSubmitted";
 
-    public List<ITagValue> Tags { get; set; }
-
-    public List<Pattern> Patterns =>
+    public override List<Pattern> Patterns =>
     [
         new EmailPattern(() => FilesPatternResource.subject_FormSubmitted, () => FilesPatternResource.pattern_FormSubmitted),
         new TelegramPattern(() => FilesPatternResource.pattern_FormSubmitted),
@@ -262,13 +248,11 @@ public sealed class FormSubmittedNotifyAction(DisplayUserSettingsHelper displayU
 }
 
 [Scope]
-public sealed class FormReceivedNotifyAction : INotifyAction
+public sealed class FormReceivedNotifyAction(TenantManager tenantManager) : NotifyAction(tenantManager)
 {
-    public string ID => "FormReceived";
+    public override string ID => "FormReceived";
 
-    public List<ITagValue> Tags { get; set; }
-
-    public List<Pattern> Patterns =>
+    public override List<Pattern> Patterns =>
     [
         new EmailPattern(() => FilesPatternResource.subject_FormReceived, () => FilesPatternResource.pattern_FormReceived),
         new TelegramPattern(() => FilesPatternResource.pattern_FormReceived)
@@ -292,13 +276,11 @@ public sealed class FormReceivedNotifyAction : INotifyAction
 }
 
 [Scope]
-public sealed class RoomMovedArchiveNotifyAction(DisplayUserSettingsHelper displayUserSettingsHelper) : INotifyAction
+public sealed class RoomMovedArchiveNotifyAction(TenantManager tenantManager, DisplayUserSettingsHelper displayUserSettingsHelper) : NotifyAction(tenantManager)
 {
-    public string ID => "RoomMovedArchive";
+    public override string ID => "RoomMovedArchive";
 
-    public List<ITagValue> Tags { get; set; }
-
-    public List<Pattern> Patterns =>
+    public override List<Pattern> Patterns =>
     [
         new PushPattern(() => FilesPatternResource.pattern_RoomMovedArchive_push)
     ];
@@ -317,13 +299,11 @@ public sealed class RoomMovedArchiveNotifyAction(DisplayUserSettingsHelper displ
 }
 
 [Scope]
-public class InvitedToRoomNotifyAction : INotifyAction
+public class InvitedToRoomNotifyAction(TenantManager tenantManager) : NotifyAction(tenantManager)
 {
-    public virtual string ID => "InvitedToRoom";
+    public override string ID => "InvitedToRoom";
 
-    public List<ITagValue> Tags { get; set; }
-
-    public virtual List<Pattern> Patterns =>
+    public override List<Pattern> Patterns =>
     [
         new PushPattern(() => FilesPatternResource.pattern_InvitedToRoom_push)
     ];
@@ -341,7 +321,7 @@ public class InvitedToRoomNotifyAction : INotifyAction
 }
 
 [Scope]
-public sealed class InvitedToAgentNotifyAction : InvitedToRoomNotifyAction
+public sealed class InvitedToAgentNotifyAction(TenantManager tenantManager) : InvitedToRoomNotifyAction(tenantManager)
 {
     public override string ID => "InvitedToAgent";
 
@@ -352,13 +332,11 @@ public sealed class InvitedToAgentNotifyAction : InvitedToRoomNotifyAction
 }
 
 [Scope]
-public class RoomUpdateAccessForUserNotifyAction : INotifyAction
+public class RoomUpdateAccessForUserNotifyAction(TenantManager tenantManager) : NotifyAction(tenantManager)
 {
-    public virtual string ID => "RoomUpdateAccessForUser";
+    public override string ID => "RoomUpdateAccessForUser";
 
-    public List<ITagValue> Tags { get; set; }
-
-    public virtual List<Pattern> Patterns =>
+    public override List<Pattern> Patterns =>
     [
         new PushPattern(() => FilesPatternResource.pattern_RoomUpdateAccessForUser_push)
     ];
@@ -377,7 +355,7 @@ public class RoomUpdateAccessForUserNotifyAction : INotifyAction
 }
 
 [Scope]
-public sealed class AgentUpdateAccessForUserNotifyAction : RoomUpdateAccessForUserNotifyAction
+public sealed class AgentUpdateAccessForUserNotifyAction(TenantManager tenantManager) : RoomUpdateAccessForUserNotifyAction(tenantManager)
 {
     public override string ID => "AgentUpdateAccessForUser";
 
@@ -388,13 +366,11 @@ public sealed class AgentUpdateAccessForUserNotifyAction : RoomUpdateAccessForUs
 }
 
 [Scope]
-public sealed class DocumentCreatedInRoomNotifyAction : INotifyAction
+public sealed class DocumentCreatedInRoomNotifyAction(TenantManager tenantManager) : NotifyAction(tenantManager)
 {
-    public string ID => "DocumentCreatedInRoom";
+    public override string ID => "DocumentCreatedInRoom";
 
-    public List<ITagValue> Tags { get; set; }
-
-    public List<Pattern> Patterns =>
+    public override List<Pattern> Patterns =>
     [
         new PushPattern(() => FilesPatternResource.pattern_DocumentCreatedInRoom_push)
     ];
@@ -414,13 +390,11 @@ public sealed class DocumentCreatedInRoomNotifyAction : INotifyAction
 }
 
 [Scope]
-public sealed class DocumentUploadedToRoomNotifyAction : INotifyAction
+public sealed class DocumentUploadedToRoomNotifyAction(TenantManager tenantManager) : NotifyAction(tenantManager)
 {
-    public string ID => "DocumentUploadedTo";
+    public override string ID => "DocumentUploadedTo";
 
-    public List<ITagValue> Tags { get; set; }
-
-    public List<Pattern> Patterns =>
+    public override List<Pattern> Patterns =>
     [
         new PushPattern(() => FilesPatternResource.pattern_DocumentUploadedTo_push)
     ];
@@ -440,13 +414,11 @@ public sealed class DocumentUploadedToRoomNotifyAction : INotifyAction
 }
 
 [Scope]
-public sealed class DocumentsUploadedToRoomNotifyAction : INotifyAction
+public sealed class DocumentsUploadedToRoomNotifyAction(TenantManager tenantManager) : NotifyAction(tenantManager)
 {
-    public string ID => "DocumentsUploadedTo";
+    public override string ID => "DocumentsUploadedTo";
 
-    public List<ITagValue> Tags { get; set; }
-
-    public List<Pattern> Patterns =>
+    public override List<Pattern> Patterns =>
     [
         new PushPattern(() => FilesPatternResource.pattern_DocumentsUploadedTo_push)
     ];
@@ -465,13 +437,11 @@ public sealed class DocumentsUploadedToRoomNotifyAction : INotifyAction
 }
 
 [Scope]
-public sealed class FolderCreatedInRoomNotifyAction : INotifyAction
+public sealed class FolderCreatedInRoomNotifyAction(TenantManager tenantManager) : NotifyAction(tenantManager)
 {
-    public string ID => "FolderCreatedInRoom";
+    public override string ID => "FolderCreatedInRoom";
 
-    public List<ITagValue> Tags { get; set; }
-
-    public List<Pattern> Patterns =>
+    public override List<Pattern> Patterns =>
     [
         new PushPattern(() => FilesPatternResource.pattern_FolderCreatedInRoom_push)
     ];
@@ -490,13 +460,11 @@ public sealed class FolderCreatedInRoomNotifyAction : INotifyAction
 }
 
 [Scope]
-public class FormStartedFillingNotifyAction(BaseCommonLinkUtility baseCommonLinkUtility, FilesLinkUtility filesLinkUtility, FileUtility fileUtility) : INotifyAction
+public class FormStartedFillingNotifyAction(TenantManager tenantManager, BaseCommonLinkUtility baseCommonLinkUtility, FilesLinkUtility filesLinkUtility, FileUtility fileUtility) : NotifyAction(tenantManager)
 {
-    public virtual string ID => "FormStartedFilling";
+    public override string ID => "FormStartedFilling";
 
-    public List<ITagValue> Tags { get; set; }
-
-    public virtual List<Pattern> Patterns =>
+    public override List<Pattern> Patterns =>
     [
         new EmailPattern(() => FilesPatternResource.subject_FormStartedFilling, () => FilesPatternResource.pattern_FormStartedFilling),
         new TelegramPattern(() => FilesPatternResource.pattern_FormStartedFilling)
@@ -517,7 +485,7 @@ public class FormStartedFillingNotifyAction(BaseCommonLinkUtility baseCommonLink
 }
 
 [Scope]
-public sealed class YourTurnFormFillingNotifyAction(BaseCommonLinkUtility baseCommonLinkUtility, FilesLinkUtility filesLinkUtility, FileUtility fileUtility) : FormStartedFillingNotifyAction(baseCommonLinkUtility, filesLinkUtility,fileUtility)
+public sealed class YourTurnFormFillingNotifyAction(TenantManager tenantManager, BaseCommonLinkUtility baseCommonLinkUtility, FilesLinkUtility filesLinkUtility, FileUtility fileUtility) : FormStartedFillingNotifyAction(tenantManager, baseCommonLinkUtility, filesLinkUtility, fileUtility)
 {
     public override string ID => "YourTurnFormFilling";
 
@@ -529,7 +497,7 @@ public sealed class YourTurnFormFillingNotifyAction(BaseCommonLinkUtility baseCo
 }
 
 [Scope]
-public sealed class FormWasCompletelyFilledNotifyAction(BaseCommonLinkUtility baseCommonLinkUtility, FilesLinkUtility filesLinkUtility, FileUtility fileUtility) : FormStartedFillingNotifyAction(baseCommonLinkUtility, filesLinkUtility,fileUtility)
+public sealed class FormWasCompletelyFilledNotifyAction(TenantManager tenantManager, BaseCommonLinkUtility baseCommonLinkUtility, FilesLinkUtility filesLinkUtility, FileUtility fileUtility) : FormStartedFillingNotifyAction(tenantManager, baseCommonLinkUtility, filesLinkUtility, fileUtility)
 {
     public override string ID => "FormWasCompletelyFilled";
 
@@ -541,7 +509,7 @@ public sealed class FormWasCompletelyFilledNotifyAction(BaseCommonLinkUtility ba
 }
 
 [Scope]
-public sealed class StoppedFormFillingNotifyAction(BaseCommonLinkUtility baseCommonLinkUtility, FilesLinkUtility filesLinkUtility, FileUtility fileUtility) : FormStartedFillingNotifyAction(baseCommonLinkUtility, filesLinkUtility,fileUtility)
+public sealed class StoppedFormFillingNotifyAction(TenantManager tenantManager, BaseCommonLinkUtility baseCommonLinkUtility, FilesLinkUtility filesLinkUtility, FileUtility fileUtility) : FormStartedFillingNotifyAction(tenantManager, baseCommonLinkUtility, filesLinkUtility, fileUtility)
 {
     public override string ID => "StoppedFormFilling";
     

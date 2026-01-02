@@ -221,12 +221,11 @@ public class NotifyHelper(
 }
 
 [Scope]
-public sealed class BackupCreatedNotifyAction(DisplayUserSettingsHelper displayUserSettingsHelper, ExternalResourceSettingsHelper externalResourceSettingsHelper, StudioNotifyHelper studioNotifyHelper) : INotifyAction
+public sealed class BackupCreatedNotifyAction(TenantManager tenantManager, DisplayUserSettingsHelper displayUserSettingsHelper, ExternalResourceSettingsHelper externalResourceSettingsHelper, StudioNotifyHelper studioNotifyHelper) : NotifyAction(tenantManager)
 {
-    public string ID { get => "backup_created"; }
-    public List<ITagValue> Tags { get; set; }
+    public override string ID { get => "backup_created"; }
 
-    public List<Pattern> Patterns
+    public override List<Pattern> Patterns
     {
         get =>
         [
@@ -251,13 +250,11 @@ public sealed class BackupCreatedNotifyAction(DisplayUserSettingsHelper displayU
 }
 
 [Scope]
-public sealed class BackupFailedNotifyAction(DisplayUserSettingsHelper displayUserSettingsHelper, StudioNotifyHelper studioNotifyHelper) : INotifyAction
+public sealed class BackupFailedNotifyAction(TenantManager tenantManager, DisplayUserSettingsHelper displayUserSettingsHelper, StudioNotifyHelper studioNotifyHelper) : NotifyAction(tenantManager)
 {
-    public string ID => "backup_failed";
-    
-    public List<ITagValue> Tags { get; set; }
-    
-    public List<Pattern> Patterns
+    public override string ID => "backup_failed";
+
+    public override List<Pattern> Patterns
     {
         get =>
         [
@@ -283,12 +280,11 @@ public sealed class BackupFailedNotifyAction(DisplayUserSettingsHelper displayUs
 }
 
 [Scope]
-public sealed class ScheduledBackupFailedNotifyAction(DisplayUserSettingsHelper displayUserSettingsHelper, StudioNotifyHelper studioNotifyHelper) : INotifyAction
+public sealed class ScheduledBackupFailedNotifyAction(TenantManager tenantManager, DisplayUserSettingsHelper displayUserSettingsHelper, StudioNotifyHelper studioNotifyHelper) : NotifyAction(tenantManager)
 {
-    public string ID => "scheduled_backup_failed";
+    public override string ID => "scheduled_backup_failed";
 
-    public List<ITagValue> Tags { get; set; }
-    public List<Pattern> Patterns
+    public override List<Pattern> Patterns
     {
         get =>
         [
@@ -314,12 +310,11 @@ public sealed class ScheduledBackupFailedNotifyAction(DisplayUserSettingsHelper 
 }
 
 [Scope]
-public sealed class RestoreStartedNotifyAction(StudioNotifyHelper studioNotifyHelper) : INotifyAction
+public sealed class RestoreStartedNotifyAction(TenantManager tenantManager, StudioNotifyHelper studioNotifyHelper) : NotifyAction(tenantManager)
 {
-    public string ID => "restore_started";
-    
-    public List<ITagValue> Tags { get; set; }
-    public List<Pattern> Patterns
+    public override string ID => "restore_started";
+
+    public override List<Pattern> Patterns
     {
         get =>
         [
@@ -342,12 +337,11 @@ public sealed class RestoreStartedNotifyAction(StudioNotifyHelper studioNotifyHe
 }
 
 [Scope]
-public sealed class RestoreCompletedV115NotifyAction(AuthManager authManager, CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener) : INotifyAction
+public sealed class RestoreCompletedV115NotifyAction(TenantManager tenantManager, AuthManager authManager, CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener) : NotifyAction(tenantManager)
 {
-    public string ID => "restore_completed_v115";
-    
-    public List<ITagValue> Tags { get; set; }
-    public List<Pattern> Patterns
+    public override string ID => "restore_completed_v115";
+
+    public override List<Pattern> Patterns
     {
         get =>
         [
@@ -371,19 +365,17 @@ public sealed class RestoreCompletedV115NotifyAction(AuthManager authManager, Co
 }
 
 [Scope]
-public sealed class MigrationPortalSuccessV115NotifyAction(CommonLinkUtility commonLinkUtility, AuthManager authManager, StudioNotifyHelper studioNotifyHelper, TenantLogoManager tenantLogoManager) : INotifyAction
+public sealed class MigrationPortalSuccessV115NotifyAction(TenantManager tenantManager, CommonLinkUtility commonLinkUtility, AuthManager authManager, StudioNotifyHelper studioNotifyHelper, TenantLogoManager tenantLogoManager) : NotifyAction(tenantManager)
 {
-    public string ID => "migration_success_v115";
+    public override string ID => "migration_success_v115";
 
-    public List<Pattern> Patterns
+    public override List<Pattern> Patterns
     {
         get =>
         [
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_migration_success, () => WebstudioNotifyPatternResource.pattern_migration_success_v115)
         ];
     }
-
-    public List<ITagValue> Tags { get; set; }
     
     public async Task Init(UserInfo user, string region, string url, int toTenantId)
     {
@@ -414,7 +406,6 @@ public sealed class MigrationPortalSuccessV115NotifyAction(CommonLinkUtility com
         args.AddRange(logoArgs);
         
         Tags = args;
-
     }
     
     private async Task<List<ITagValue>> CreateLogoArgsAsync(CultureInfo cultureInfo)

@@ -28,12 +28,12 @@ using ASC.Common.IntegrationEvents.Events;
 
 namespace ASC.Notify.Model;
 
-public class NotifyAction(List<ITagValue> tags) : INotifyAction
+public abstract class NotifyAction(TenantManager tenantManager) : INotifyAction
 {
-    public string ID { get; }
-    public virtual List<Pattern> Patterns { get; set; } = [];
+    public abstract string ID { get; }
+    public abstract List<Pattern> Patterns { get; }
     
-    public List<ITagValue> Tags { get; set; } = tags;
+    public List<ITagValue> Tags { get; set; }
     
     public static implicit operator NotifyActionItem(NotifyAction cache)
     {
@@ -41,6 +41,18 @@ public class NotifyAction(List<ITagValue> tags) : INotifyAction
         {
             NotifyActionType = cache.GetType().FullName
         };
+    }
+    
+    protected CultureInfo GetCulture(UserInfo user)
+    {
+        CultureInfo culture = null;
+
+        if (user != null && !string.IsNullOrEmpty(user.CultureName))
+        {
+            culture = user.GetCulture();
+        }
+
+        return culture ?? tenantManager.GetCurrentTenant(false)?.GetCulture() ?? CultureInfo.CurrentUICulture;
     }
     
     public override string ToString()
