@@ -141,6 +141,7 @@ public class ProjectConfigurator(
             var resourceBuilder = builder
                 .AddDockerfile(name, path)
                 .WithImageTag("dev")
+                .WithEnvironment("log:dir", "/logs")
                 .WithEnvironment("log:name", "socketIO")
                 .WithEnvironment("API_HOST", new UriBuilder(Uri.UriSchemeHttp, Constants.OpenRestyContainer, Constants.RestyPort).ToString())
                 .WithEnvironment("Redis:Hosts:0:Host", () => ConnectionStringManager.SubstituteLocalhost(connectionManager.RedisHost) ?? string.Empty)
@@ -150,15 +151,18 @@ public class ProjectConfigurator(
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
             AddBaseBind(resourceBuilder);
+            connectionManager.AddWaitFor(resourceBuilder);
         }
         else
         {
-            builder.AddNpmApp(name, path, "start:build")
+            var resourceBuilder = builder.AddNpmApp(name, path, "start:build")
                 .WithEnvironment("Redis:Hosts:0:Host", () => connectionManager.RedisHost ?? string.Empty)
                 .WithEnvironment("Redis:Hosts:0:Port", () => connectionManager.RedisPort ?? string.Empty)
                 .WithHttpEndpoint(targetPort: port)
                 .WithHttpHealthCheck("/health")
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
+            
+            connectionManager.AddWaitFor(resourceBuilder);
         }
 
         return this;
@@ -175,6 +179,7 @@ public class ProjectConfigurator(
             var resourceBuilder = builder
                 .AddDockerfile(name, path)
                 .WithImageTag("dev")
+                .WithEnvironment("log:dir", "/logs")
                 .WithEnvironment("log:name", "ssoAuth")
                 .WithEnvironment("API_HOST",  new UriBuilder(Uri.UriSchemeHttp, Constants.OpenRestyContainer, Constants.RestyPort).ToString())
                 .WithEnvironment("app:appsettings", "/buildtools/config")
@@ -206,6 +211,7 @@ public class ProjectConfigurator(
             var resourceBuilder = builder
                 .AddDockerfile(name, path)
                 .WithImageTag("dev")
+                .WithEnvironment("log:dir", "/logs")
                 .WithEnvironment("log:name", "webDav")
                 .WithHttpEndpoint(port, port, isProxied: false)
                 .WithHttpHealthCheck("/health")
