@@ -54,7 +54,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.dao.OptimisticLockingFailureException;
-import org.springframework.stereotype.Component;
 
 /**
  * ClientUpdateCommandHandler handles the updates of the existing clients. This component
@@ -62,20 +61,19 @@ import org.springframework.stereotype.Component;
  * event publisher.
  */
 @Slf4j
-@Component
 @RequiredArgsConstructor
 public class ClientUpdateCommandHandler {
   private static final String OPTIMISTIC_LOCKING_RETRY = "optimisticLockingRetry";
 
-  private final AuthorizationMessagePublisher<ClientRemovedEvent> clientMessagePublisher;
-  private final ClientDataMapper clientDataMapper;
-  private final RetryExecutor retryExecutor;
+  private final ClientCommandRepository clientCommandRepository;
+  private final ClientQueryRepository clientQueryRepository;
 
   private final ClientDomainService clientDomainService;
   private final EncryptionService encryptionService;
 
-  private final ClientCommandRepository clientCommandRepository;
-  private final ClientQueryRepository clientQueryRepository;
+  private final AuthorizationMessagePublisher<ClientRemovedEvent> clientMessagePublisher;
+  private final ClientDataMapper clientDataMapper;
+  private final RetryExecutor retryExecutor;
 
   /**
    * Regenerates and encrypts the client secret.

@@ -77,7 +77,7 @@ public interface ClientApplicationService {
    * @param clientId the unique identifier of the client.
    * @return a {@link ClientResponse} containing the detailed information of the specified client.
    */
-  ClientResponse getClient(@Valid String clientId);
+  ClientResponse getClient(@NotBlank String clientId);
 
   /**
    * Retrieves basic client information based on the provided query.

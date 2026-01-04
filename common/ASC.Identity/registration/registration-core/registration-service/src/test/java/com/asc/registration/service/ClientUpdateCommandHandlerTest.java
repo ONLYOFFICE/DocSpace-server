@@ -56,6 +56,7 @@ import com.asc.registration.core.domain.value.ClientTenantInfo;
 import com.asc.registration.service.mapper.ClientDataMapper;
 import com.asc.registration.service.ports.output.repository.ClientCommandRepository;
 import com.asc.registration.service.ports.output.repository.ClientQueryRepository;
+import com.asc.registration.service.ports.output.resilience.RetryExecutor;
 import com.asc.registration.service.transfer.request.update.*;
 import com.asc.registration.service.transfer.response.ClientSecretResponse;
 import java.time.ZoneId;
@@ -79,6 +80,7 @@ public class ClientUpdateCommandHandlerTest {
   @Mock private ClientQueryRepository clientQueryRepository;
   @Mock private ClientCommandRepository clientCommandRepository;
   @Mock private ClientDataMapper clientDataMapper;
+  @Mock private RetryExecutor retryExecutor;
 
   private Audit audit;
   private Client client;
@@ -88,6 +90,30 @@ public class ClientUpdateCommandHandlerTest {
   @BeforeEach
   public void setUp() {
     MockitoAnnotations.openMocks(this);
+
+    doAnswer(
+            invocation -> {
+              var operation = invocation.getArgument(1, Runnable.class);
+              operation.run();
+              return null;
+            })
+        .when(retryExecutor)
+        .executeWithRetry(
+            anyString(),
+            any(Runnable.class),
+            any(Class.class),
+            any(java.util.function.Supplier.class));
+    doAnswer(
+            invocation -> {
+              var operation = invocation.getArgument(1, java.util.function.Supplier.class);
+              return operation.get();
+            })
+        .when(retryExecutor)
+        .executeWithRetry(
+            anyString(),
+            any(java.util.function.Supplier.class),
+            any(Class.class),
+            any(java.util.function.Supplier.class));
 
     audit =
         Audit.Builder.builder()

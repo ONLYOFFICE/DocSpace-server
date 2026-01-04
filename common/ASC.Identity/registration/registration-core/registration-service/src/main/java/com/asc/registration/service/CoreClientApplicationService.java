@@ -44,26 +44,41 @@ import com.asc.registration.service.transfer.request.update.*;
 import com.asc.registration.service.transfer.response.ClientInfoResponse;
 import com.asc.registration.service.transfer.response.ClientSecretResponse;
 import com.asc.registration.service.transfer.response.PageableResponse;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
 
 /**
  * Service class providing core client application functionalities. This service handles client
  * creation, update, deletion, and retrieval operations. It also manages client consent, visibility,
  * and activation states.
  */
-@Service
-@Validated
 @RequiredArgsConstructor
 public class CoreClientApplicationService implements ClientApplicationService {
+  private final Validator validator;
+
   private final AuthorizationMessagePublisher<TenantClientsRemovedEvent>
       tenantClientsMessagePublisher;
   private final AuthorizationMessagePublisher<UserClientsRemovedEvent> userClientsMessagePublisher;
+
   private final ClientCreateCommandHandler clientCreateCommandHandler;
   private final ClientUpdateCommandHandler clientUpdateCommandHandler;
   private final ClientQueryHandler clientQueryHandler;
+
+  /**
+   * Validates an object using Jakarta Bean Validation and throws ConstraintViolationException if
+   * validation fails.
+   *
+   * @param object the object to validate
+   * @param <T> the type of the object
+   * @throws ConstraintViolationException if validation fails
+   */
+  private <T> void validate(T object) {
+    if (object == null) return;
+    var violations = validator.validate(object);
+    if (!violations.isEmpty()) throw new ConstraintViolationException(violations);
+  }
 
   /**
    * Retrieves detailed client information for a specific tenant and client.
@@ -72,6 +87,7 @@ public class CoreClientApplicationService implements ClientApplicationService {
    * @return A {@link ClientResponse} containing detailed client information.
    */
   public ClientResponse getClient(Role role, TenantClientQuery query) {
+    validate(query);
     return clientQueryHandler.getClient(role, query);
   }
 
@@ -92,6 +108,7 @@ public class CoreClientApplicationService implements ClientApplicationService {
    * @return A {@link ClientInfoResponse} containing basic client information.
    */
   public ClientInfoResponse getClientInfo(Role role, ClientInfoQuery query) {
+    validate(query);
     return clientQueryHandler.getClientInfo(role, query);
   }
 
@@ -113,6 +130,7 @@ public class CoreClientApplicationService implements ClientApplicationService {
    */
   public PageableResponse<ClientInfoResponse> getClientsInfo(
       Role role, ClientInfoPaginationQuery query) {
+    validate(query);
     return clientQueryHandler.getClientsInfo(role, query);
   }
 
@@ -124,9 +142,16 @@ public class CoreClientApplicationService implements ClientApplicationService {
    */
   public PageableResponse<ClientResponse> getClients(
       Role role, TenantClientsPaginationQuery query) {
+    validate(query);
     return clientQueryHandler.getClients(role, query);
   }
 
+  /**
+   * Retrieves a list of clients by their identifiers.
+   *
+   * @param clientIds The list of client identifiers to retrieve.
+   * @return A list of {@link ClientResponse} containing the requested clients' information.
+   */
   public List<ClientResponse> getClients(List<ClientId> clientIds) {
     return clientQueryHandler.getClients(clientIds);
   }
@@ -139,6 +164,7 @@ public class CoreClientApplicationService implements ClientApplicationService {
    * @return A {@link ClientResponse} containing the created client's information.
    */
   public ClientResponse createClient(Audit audit, CreateTenantClientCommand command) {
+    validate(command);
     return clientCreateCommandHandler.createClient(audit, command);
   }
 
@@ -151,6 +177,7 @@ public class CoreClientApplicationService implements ClientApplicationService {
    */
   public ClientSecretResponse regenerateSecret(
       Audit audit, Role role, RegenerateTenantClientSecretCommand command) {
+    validate(command);
     return clientUpdateCommandHandler.regenerateSecret(audit, role, command);
   }
 
@@ -162,6 +189,7 @@ public class CoreClientApplicationService implements ClientApplicationService {
    */
   public void changeActivation(
       Audit audit, Role role, ChangeTenantClientActivationCommand command) {
+    validate(command);
     clientUpdateCommandHandler.changeActivation(audit, role, command);
   }
 
@@ -173,6 +201,7 @@ public class CoreClientApplicationService implements ClientApplicationService {
    */
   public void changeVisibility(
       Audit audit, Role role, ChangeTenantClientVisibilityCommand command) {
+    validate(command);
     clientUpdateCommandHandler.changeVisibility(audit, role, command);
   }
 
@@ -184,6 +213,7 @@ public class CoreClientApplicationService implements ClientApplicationService {
    * @return A {@link ClientResponse} containing the updated client's information.
    */
   public ClientResponse updateClient(Audit audit, Role role, UpdateTenantClientCommand command) {
+    validate(command);
     return clientUpdateCommandHandler.updateClient(audit, role, command);
   }
 
@@ -195,6 +225,7 @@ public class CoreClientApplicationService implements ClientApplicationService {
    * @return the result of the delete operation, the number of rows affected.
    */
   public int deleteClient(Audit audit, Role role, DeleteTenantClientCommand command) {
+    validate(command);
     return clientUpdateCommandHandler.deleteClient(audit, role, command);
   }
 
@@ -205,6 +236,7 @@ public class CoreClientApplicationService implements ClientApplicationService {
    * @return The number of clients deleted.
    */
   public int deleteUserClients(DeleteUserClientsCommand command) {
+    validate(command);
     userClientsMessagePublisher.publish(
         UserClientsRemovedEvent.builder().userId(command.getUserId()).build());
     return clientUpdateCommandHandler.deleteUserClients(command);
@@ -217,6 +249,7 @@ public class CoreClientApplicationService implements ClientApplicationService {
    * @return The number of clients deleted.
    */
   public int deleteTenantClients(DeleteTenantClientsCommand command) {
+    validate(command);
     tenantClientsMessagePublisher.publish(
         TenantClientsRemovedEvent.builder().tenantId(command.getTenantId()).build());
     return clientUpdateCommandHandler.deleteTenantClients(command.getTenantId());

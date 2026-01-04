@@ -32,15 +32,11 @@ import com.asc.registration.service.transfer.response.ScopeResponse;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
 
 /**
  * CoreScopeApplicationService implements the {@link ScopeApplicationService} interface, providing
  * core business logic for managing scopes.
  */
-@Service
-@Validated
 @RequiredArgsConstructor
 public class CoreScopeApplicationService implements ScopeApplicationService {
   private final ScopeQueryHandler queryHandler;

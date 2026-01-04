@@ -36,18 +36,16 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * ScopeQueryHandler handles query operations related to scopes. It retrieves scope information from
  * the repository and maps it to response objects.
  */
 @Slf4j
-@Component
 @RequiredArgsConstructor
 public class ScopeQueryHandler {
   private final ScopeQueryRepository queryRepository;
+
   private final ScopeDataMapper dataMapper;
 
   /**
@@ -57,7 +55,6 @@ public class ScopeQueryHandler {
    * @return a {@link ScopeResponse} representing the requested scope.
    * @throws ScopeNotFoundException if the scope with the specified name is not found.
    */
-  @Transactional(timeout = 2)
   public ScopeResponse getScope(String name) {
     log.info("Trying to get scope by name: {}", name);
 
@@ -77,7 +74,6 @@ public class ScopeQueryHandler {
    *
    * @return a set of {@link ScopeResponse} representing all scopes.
    */
-  @Transactional(timeout = 2)
   public Set<ScopeResponse> getScopes() {
     log.info("Trying to get scopes");
 

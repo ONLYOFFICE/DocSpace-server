@@ -42,14 +42,12 @@ import com.asc.registration.service.transfer.response.ClientInfoResponse;
 import com.asc.registration.service.transfer.response.ClientSecretResponse;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.springframework.stereotype.Component;
 
 /**
  * ClientDataMapper is responsible for mapping data transfer objects (DTOs) to domain objects and
  * vice versa. This component handles the transformation logic for creating, updating, and
  * retrieving client-related information.
  */
-@Component
 public class ClientDataMapper {
 
   /**

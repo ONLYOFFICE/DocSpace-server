@@ -52,7 +52,6 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 /**
  * Handles queries related to client information retrieval.
@@ -62,12 +61,13 @@ import org.springframework.stereotype.Component;
  * limited to clients they have created or that are publicly visible.
  */
 @Slf4j
-@Component
 @RequiredArgsConstructor
 public class ClientQueryHandler {
-  private final ClientDataMapper clientDataMapper;
   private final ClientQueryRepository clientQueryRepository;
+
   private final EncryptionService encryptionService;
+
+  private final ClientDataMapper clientDataMapper;
 
   /**
    * Helper method to convert a String client id into a {@link ClientId} by wrapping
