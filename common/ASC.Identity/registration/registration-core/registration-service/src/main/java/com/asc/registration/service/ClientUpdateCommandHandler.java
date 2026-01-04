@@ -41,6 +41,7 @@ import com.asc.registration.core.domain.ClientDomainService;
 import com.asc.registration.core.domain.entity.Client;
 import com.asc.registration.core.domain.exception.ClientDomainException;
 import com.asc.registration.core.domain.exception.ClientNotFoundException;
+import com.asc.registration.core.domain.exception.OptimisticLockingException;
 import com.asc.registration.core.domain.value.ClientInfo;
 import com.asc.registration.core.domain.value.ClientRedirectInfo;
 import com.asc.registration.service.mapper.ClientDataMapper;
@@ -53,7 +54,6 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
-import org.springframework.dao.OptimisticLockingFailureException;
 
 /**
  * ClientUpdateCommandHandler handles the updates of the existing clients. This component
@@ -104,7 +104,7 @@ public class ClientUpdateCommandHandler {
           response.setClientSecret(clientSecret);
           return response;
         },
-        OptimisticLockingFailureException.class,
+        OptimisticLockingException.class,
         () ->
             new ClientDomainException(
                 String.format(
@@ -139,7 +139,7 @@ public class ClientUpdateCommandHandler {
                 event, client.getClientTenantInfo().tenantId(), client.getId(), command.isPublic());
           }
         },
-        OptimisticLockingFailureException.class,
+        OptimisticLockingException.class,
         () ->
             new ClientDomainException(
                 String.format(
@@ -180,7 +180,7 @@ public class ClientUpdateCommandHandler {
                 command.isEnabled());
           }
         },
-        OptimisticLockingFailureException.class,
+        OptimisticLockingException.class,
         () ->
             new ClientDomainException(
                 String.format(
@@ -234,7 +234,7 @@ public class ClientUpdateCommandHandler {
           return clientDataMapper.toClientResponse(
               clientCommandRepository.updateClient(event, client));
         },
-        OptimisticLockingFailureException.class,
+        OptimisticLockingException.class,
         () ->
             new ClientDomainException(
                 String.format(
@@ -263,7 +263,7 @@ public class ClientUpdateCommandHandler {
           return clientCommandRepository.deleteByTenantIdAndClientId(
               event, client.getClientTenantInfo().tenantId(), client.getId());
         },
-        OptimisticLockingFailureException.class,
+        OptimisticLockingException.class,
         () ->
             new ClientDomainException(
                 String.format(
@@ -288,7 +288,7 @@ public class ClientUpdateCommandHandler {
           return clientCommandRepository.deleteAllByTenantIdAndCreatedBy(
               new TenantId(command.getTenantId()), new UserId(command.getUserId()));
         },
-        OptimisticLockingFailureException.class,
+        OptimisticLockingException.class,
         () ->
             new ClientDomainException(
                 String.format(
@@ -312,7 +312,7 @@ public class ClientUpdateCommandHandler {
           log.info("Trying to remove tenant clients");
           return clientCommandRepository.deleteAllByTenantId(new TenantId(tenantId));
         },
-        OptimisticLockingFailureException.class,
+        OptimisticLockingException.class,
         () ->
             new ClientDomainException(
                 String.format(

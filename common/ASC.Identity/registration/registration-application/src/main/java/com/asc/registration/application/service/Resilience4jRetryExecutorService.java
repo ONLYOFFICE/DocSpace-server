@@ -27,12 +27,14 @@
 
 package com.asc.registration.application.service;
 
+import com.asc.registration.core.domain.exception.OptimisticLockingException;
 import com.asc.registration.service.ports.output.resilience.RetryExecutor;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryRegistry;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Component;
 
 /**
@@ -104,13 +106,22 @@ public class Resilience4jRetryExecutorService implements RetryExecutor {
       Exception e,
       Class<? extends Exception> catchType,
       Supplier<? extends RuntimeException> exceptionSupplier) {
-    if (catchType.isInstance(e)) {
+    var translatedException = translateException(e);
+
+    if (catchType.isInstance(translatedException)) {
       log.warn("Retry exhausted for operation, throwing domain exception", e);
       throw exceptionSupplier.get();
     }
 
-    if (e instanceof RuntimeException re) throw re;
+    if (translatedException instanceof RuntimeException re) throw re;
 
-    throw new RuntimeException(e);
+    throw new RuntimeException(translatedException);
+  }
+
+  private Exception translateException(Exception e) {
+    if (e instanceof OptimisticLockingFailureException)
+      return new OptimisticLockingException(
+          "Optimistic locking failure occurred due to concurrent access", e);
+    return e;
   }
 }
