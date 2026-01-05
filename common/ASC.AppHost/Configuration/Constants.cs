@@ -53,4 +53,5 @@ public static class Constants
     public const string SocketIoContainer = "asc-socketIO";
     public const string IdentityRegistrationContainer = "asc-identity-registration";
     public const string IdentityAuthorizationContainer = "asc-identity-authorization";
+    public const string MailDevContainer = "maildev";
 }
