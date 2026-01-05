@@ -117,56 +117,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="DataProcessing" xml:space="preserve">
-    <value>Przetwarzanie danych...</value>
-  </data>
-  <data name="DataProcessingCompleted" xml:space="preserve">
-    <value>Zakończono przetwarzanie danych</value>
-  </data>
-  <data name="DumpParse" xml:space="preserve">
-    <value>Analizowanie bazy danych</value>
-  </data>
-  <data name="GroupMigration" xml:space="preserve">
-    <value>Migracja grupy {0} ({1}/{2})</value>
-  </data>
-  <data name="MigratingUserFiles" xml:space="preserve">
-    <value>Migrowanie plików użytkownika {0} ({1}/{2})</value>
-  </data>
-  <data name="MigrationCompleted" xml:space="preserve">
-    <value>Migracja została zakończona</value>
-  </data>
-  <data name="PreparingForMigration" xml:space="preserve">
-    <value>Przygotowanie do migracji</value>
-  </data>
-  <data name="StartOfDataProcessing" xml:space="preserve">
-    <value>Rozpoczynamy przetwarzanie danych...</value>
-  </data>
-  <data name="Unzipping" xml:space="preserve">
-    <value>Rozpakowywanie...</value>
-  </data>
-  <data name="UnzippingFinished" xml:space="preserve">
-    <value>Rozpakowywanie zakończone...</value>
-  </data>
-  <data name="UserMigration" xml:space="preserve">
-    <value>Migracja użytkownika {0} ({1}/{2})</value>
-  </data>
-  <data name="MigrationCommonFiles" xml:space="preserve">
-    <value>Migracja wspólnych plików</value>
-  </data>
-  <data name="MigrationNotFoundException" xml:space="preserve">
-    <value>Nie ma takiego dostawcy migracji</value>
-  </data>
-  <data name="MigrationProgressException" xml:space="preserve">
-    <value>Brak migracji w toku</value>
-  </data>
-  <data name="MigrationProjectFiles" xml:space="preserve">
-    <value>Migracja plików z projektów</value>
-  </data>
   <data name="CanNotAddUserInGroup" xml:space="preserve">
     <value>Nie udało się dodać użytkownika {0} do grupy {1}</value>
   </data>
   <data name="CanNotCreateFile" xml:space="preserve">
     <value>Nie udało się utworzyć pliku {0}</value>
+  </data>
+  <data name="CanNotImportCommonFiles" xml:space="preserve">
+    <value>Nie udało się zaimportować wspólnych plików</value>
+  </data>
+  <data name="CanNotImportProjectFiles" xml:space="preserve">
+    <value>Nie udało się zaimportować plików projektu</value>
   </data>
   <data name="CanNotImportUser" xml:space="preserve">
     <value>Nie udało się zaimportować użytkownika</value>
@@ -198,19 +159,58 @@
   <data name="CreateFolder" xml:space="preserve">
     <value>Utwórz katalog {0}</value>
   </data>
+  <data name="CreateRootFolder" xml:space="preserve">
+    <value>Utwórz katalog główny</value>
+  </data>
   <data name="CreateShareRoom" xml:space="preserve">
     <value>utwórz pokój współdzielony {0}</value>
   </data>
-  <data name="СanNotImportCommonFiles" xml:space="preserve">
-    <value>Nie udało się zaimportować wspólnych plików</value>
+  <data name="DataProcessing" xml:space="preserve">
+    <value>Przetwarzanie danych...</value>
   </data>
-  <data name="СanNotImportProjectFiles" xml:space="preserve">
-    <value>Nie udało się zaimportować plików projektu</value>
+  <data name="DataProcessingCompleted" xml:space="preserve">
+    <value>Zakończono przetwarzanie danych</value>
   </data>
-  <data name="СreateRootFolder" xml:space="preserve">
-    <value>Utwórz katalog główny</value>
+  <data name="DumpParse" xml:space="preserve">
+    <value>Analizowanie bazy danych</value>
+  </data>
+  <data name="GroupMigration" xml:space="preserve">
+    <value>Migracja grupy {0} ({1}/{2})</value>
   </data>
   <data name="LargeBackup" xml:space="preserve">
     <value>Kopia zapasowa jest większa od całkowitego rozmiaru portalu</value>
+  </data>
+  <data name="MigratingUserFiles" xml:space="preserve">
+    <value>Migrowanie plików użytkownika {0} ({1}/{2})</value>
+  </data>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>Migracja wspólnych plików</value>
+  </data>
+  <data name="MigrationCompleted" xml:space="preserve">
+    <value>Migracja została zakończona</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>Nie ma takiego dostawcy migracji</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>Brak migracji w toku</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>Migracja plików z projektów</value>
+  </data>
+  <data name="PreparingForMigration" xml:space="preserve">
+    <value>Przygotowanie do migracji</value>
+  </data>
+  <data name="StartOfDataProcessing" xml:space="preserve">
+    <value>Rozpoczynamy przetwarzanie danych...</value>
+  </data>
+  <data name="Unzipping" xml:space="preserve">
+    <value>Rozpakowywanie...</value>
+  </data>
+  <data name="UnzippingFinished" xml:space="preserve">
+    <value>Rozpakowywanie zakończone...</value>
+  </data>
+  <data name="UserMigration" xml:space="preserve">
+    <value>Migracja użytkownika {0} ({1}/{2})</value>
   </data>
 </root>

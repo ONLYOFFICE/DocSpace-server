@@ -91,12 +91,15 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
 
     public ConnectionStringManager AddRedis()
     {
+#pragma warning disable ASPIRECERTIFICATES001
         RedisResource = builder
             .AddRedis("cache")
             .WithPassword(null)
+            .WithoutHttpsCertificate()
             .WithLifetime(ContainerLifetime.Persistent);
 //.WithRedisInsight();
-
+#pragma warning restore ASPIRECERTIFICATES001
+        
         builder.Eventing.Subscribe(RedisResource.Resource, async (ConnectionStringAvailableEvent _, CancellationToken ct) =>
         {
             var connectionString = await RedisResource.Resource.ConnectionStringExpression.GetValueAsync(ct).ConfigureAwait(false);

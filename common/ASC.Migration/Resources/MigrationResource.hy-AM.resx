@@ -117,59 +117,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="DataProcessing" xml:space="preserve">
-    <value>Տվյալների մշակում...</value>
-  </data>
-  <data name="DataProcessingCompleted" xml:space="preserve">
-    <value>Տվյալների մշակումն ավարտված է</value>
-  </data>
-  <data name="DumpParse" xml:space="preserve">
-    <value>Տվյալների բազայի վերլուծություն</value>
-  </data>
-  <data name="GroupMigration" xml:space="preserve">
-    <value>Խմբային միգրացիա {0} ({1}/{2})</value>
-  </data>
-  <data name="MigratingUserFiles" xml:space="preserve">
-    <value>Օգտվողի ֆայլերի տեղափոխում {0} ({1}/{2})</value>
-  </data>
-  <data name="MigrationCompleted" xml:space="preserve">
-    <value>Միգրացիան ավարտված է</value>
-  </data>
-  <data name="PreparingForMigration" xml:space="preserve">
-    <value>Պատրաստվում է միգրացիայի</value>
-  </data>
-  <data name="StartOfDataProcessing" xml:space="preserve">
-    <value>Սկսվում է տվյալների մշակումը...</value>
-  </data>
-  <data name="Unzipping" xml:space="preserve">
-    <value>Ապանեղմում...</value>
-  </data>
-  <data name="UnzippingFinished" xml:space="preserve">
-    <value>Ապանեղմումը ավարտված է...</value>
-  </data>
-  <data name="UserMigration" xml:space="preserve">
-    <value>Օգտվողների միգրացիա {0} ({1}/{2})</value>
-  </data>
-  <data name="MigrationCommonFiles" xml:space="preserve">
-    <value>Ընդհանուր ֆայլերի միգրացիա</value>
-  </data>
-  <data name="MigrationNotFoundException" xml:space="preserve">
-    <value>Նման միգրացիոն մատակարար չկա</value>
-  </data>
-  <data name="MigrationProgressException" xml:space="preserve">
-    <value>Ոչ մի միգրացիա չի ընթանում</value>
-  </data>
-  <data name="MigrationProjectFiles" xml:space="preserve">
-    <value>Միգրացիոն նախագծի ֆայլեր</value>
-  </data>
-  <data name="CanNotShare" xml:space="preserve">
-    <value>Չհաջողվեց կիսվել {0} գրառումով {1}-ի հետ</value>
-  </data>
   <data name="CanNotAddUserInGroup" xml:space="preserve">
     <value>Չհաջողվեց օգտվողին ավելացնել {0}  խմբին {1}</value>
   </data>
   <data name="CanNotCreateFile" xml:space="preserve">
     <value>Չհաջողվեց ֆայլ ստեղծել {0}</value>
+  </data>
+  <data name="CanNotImportCommonFiles" xml:space="preserve">
+    <value>Չհաջողվեց ներմուծել ընդհանուր ֆայլերը</value>
+  </data>
+  <data name="CanNotImportProjectFiles" xml:space="preserve">
+    <value>Չհաջողվեց ներմուծել նախագծի ֆայլերը</value>
   </data>
   <data name="CanNotImportUser" xml:space="preserve">
     <value>Չհաջողվեց ներմուծել օգտվողին</value>
@@ -189,6 +147,9 @@
   <data name="CanNotReadInfoFile" xml:space="preserve">
     <value>Չհաջողվեց կարդալ ֆայլի տեղեկատվությունը {0}</value>
   </data>
+  <data name="CanNotShare" xml:space="preserve">
+    <value>Չհաջողվեց կիսվել {0} գրառումով {1}-ի հետ</value>
+  </data>
   <data name="CanNotToUnzip" xml:space="preserve">
     <value>Չհաջողվեց բացել {0}</value>
   </data>
@@ -198,19 +159,58 @@
   <data name="CreateFolder" xml:space="preserve">
     <value>Ստեղծել պանակ {0}</value>
   </data>
+  <data name="CreateRootFolder" xml:space="preserve">
+    <value>Ստեղծել արմատական թղթապանակ</value>
+  </data>
   <data name="CreateShareRoom" xml:space="preserve">
     <value>ստեղծել ընդհանուր սենյակ {0}</value>
   </data>
-  <data name="СanNotImportCommonFiles" xml:space="preserve">
-    <value>Չհաջողվեց ներմուծել ընդհանուր ֆայլերը</value>
+  <data name="DataProcessing" xml:space="preserve">
+    <value>Տվյալների մշակում...</value>
   </data>
-  <data name="СanNotImportProjectFiles" xml:space="preserve">
-    <value>Չհաջողվեց ներմուծել նախագծի ֆայլերը</value>
+  <data name="DataProcessingCompleted" xml:space="preserve">
+    <value>Տվյալների մշակումն ավարտված է</value>
   </data>
-  <data name="СreateRootFolder" xml:space="preserve">
-    <value>Ստեղծել արմատական թղթապանակ</value>
+  <data name="DumpParse" xml:space="preserve">
+    <value>Տվյալների բազայի վերլուծություն</value>
+  </data>
+  <data name="GroupMigration" xml:space="preserve">
+    <value>Խմբային միգրացիա {0} ({1}/{2})</value>
   </data>
   <data name="LargeBackup" xml:space="preserve">
     <value>Պահուստավորումն ավելի մեծ է, քան պորտալի ընդհանուր չափը</value>
+  </data>
+  <data name="MigratingUserFiles" xml:space="preserve">
+    <value>Օգտվողի ֆայլերի տեղափոխում {0} ({1}/{2})</value>
+  </data>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>Ընդհանուր ֆայլերի միգրացիա</value>
+  </data>
+  <data name="MigrationCompleted" xml:space="preserve">
+    <value>Միգրացիան ավարտված է</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>Նման միգրացիոն մատակարար չկա</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>Ոչ մի միգրացիա չի ընթանում</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>Միգրացիոն նախագծի ֆայլեր</value>
+  </data>
+  <data name="PreparingForMigration" xml:space="preserve">
+    <value>Պատրաստվում է միգրացիայի</value>
+  </data>
+  <data name="StartOfDataProcessing" xml:space="preserve">
+    <value>Սկսվում է տվյալների մշակումը...</value>
+  </data>
+  <data name="Unzipping" xml:space="preserve">
+    <value>Ապանեղմում...</value>
+  </data>
+  <data name="UnzippingFinished" xml:space="preserve">
+    <value>Ապանեղմումը ավարտված է...</value>
+  </data>
+  <data name="UserMigration" xml:space="preserve">
+    <value>Օգտվողների միգրացիա {0} ({1}/{2})</value>
   </data>
 </root>

@@ -89,7 +89,14 @@ public class Login(
             return;
         }
 
-        _params = JsonSerializer.Deserialize<Dictionary<string, string>>(Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(context.Request.Query["p"])));
+        try
+        {
+            _params = JsonSerializer.Deserialize<Dictionary<string, string>>(Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(context.Request.Query["p"])));
+        }
+        catch (Exception e)
+        {
+            throw new ArgumentException(e.Message);
+        }
 
         if (!string.IsNullOrEmpty(Auth))
         {

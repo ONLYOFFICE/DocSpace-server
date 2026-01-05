@@ -117,56 +117,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="DataProcessing" xml:space="preserve">
-    <value>Obrada podataka...</value>
-  </data>
-  <data name="DataProcessingCompleted" xml:space="preserve">
-    <value>Obrada podataka završena</value>
-  </data>
-  <data name="DumpParse" xml:space="preserve">
-    <value>Raščlanjivanje baze podataka</value>
-  </data>
-  <data name="GroupMigration" xml:space="preserve">
-    <value>Migracija grupe {0} ({1}/{2})</value>
-  </data>
-  <data name="MigratingUserFiles" xml:space="preserve">
-    <value>Migracija korisničkih datoteka {0} ({1}/{2})</value>
-  </data>
-  <data name="MigrationCommonFiles" xml:space="preserve">
-    <value>Migracija zajedničkih datoteka</value>
-  </data>
-  <data name="MigrationCompleted" xml:space="preserve">
-    <value>Migracija završena</value>
-  </data>
-  <data name="MigrationNotFoundException" xml:space="preserve">
-    <value>Ne postoji takav provajder migracije</value>
-  </data>
-  <data name="MigrationProgressException" xml:space="preserve">
-    <value>Nema migracije u progresu</value>
-  </data>
-  <data name="MigrationProjectFiles" xml:space="preserve">
-    <value>Migracija projektnih datoteka</value>
-  </data>
-  <data name="PreparingForMigration" xml:space="preserve">
-    <value>Priprema za migraciju</value>
-  </data>
-  <data name="StartOfDataProcessing" xml:space="preserve">
-    <value>Početak obrade podataka...</value>
-  </data>
-  <data name="Unzipping" xml:space="preserve">
-    <value>Razrešavanje (dekompresovanje)...</value>
-  </data>
-  <data name="UserMigration" xml:space="preserve">
-    <value>Migracija korisnika {0} ({1}/{2})</value>
-  </data>
-  <data name="UnzippingFinished" xml:space="preserve">
-    <value>Razrešavanje (dekompresovanje) završeno...</value>
-  </data>
   <data name="CanNotAddUserInGroup" xml:space="preserve">
     <value>Nije moguće dodati korisnika {0} u grupu {1}</value>
   </data>
   <data name="CanNotCreateFile" xml:space="preserve">
     <value>Nije moguće kreirati datoteku {0}</value>
+  </data>
+  <data name="CanNotImportCommonFiles" xml:space="preserve">
+    <value>Nije moguće uvesti zajedničke datoteke</value>
+  </data>
+  <data name="CanNotImportProjectFiles" xml:space="preserve">
+    <value>Nije moguće uvesti datoteke projekta</value>
   </data>
   <data name="CanNotImportUser" xml:space="preserve">
     <value>Nije moguće uvesti korisnika</value>
@@ -198,19 +159,58 @@
   <data name="CreateFolder" xml:space="preserve">
     <value>Kreiraj folder {0}</value>
   </data>
+  <data name="CreateRootFolder" xml:space="preserve">
+    <value>Kreiraj root folder</value>
+  </data>
   <data name="CreateShareRoom" xml:space="preserve">
     <value>kreiraj zajedničku prostoriju {0}</value>
   </data>
-  <data name="СanNotImportCommonFiles" xml:space="preserve">
-    <value>Nije moguće uvesti zajedničke datoteke</value>
+  <data name="DataProcessing" xml:space="preserve">
+    <value>Obrada podataka...</value>
   </data>
-  <data name="СanNotImportProjectFiles" xml:space="preserve">
-    <value>Nije moguće uvesti datoteke projekta</value>
+  <data name="DataProcessingCompleted" xml:space="preserve">
+    <value>Obrada podataka završena</value>
   </data>
-  <data name="СreateRootFolder" xml:space="preserve">
-    <value>Kreiraj root folder</value>
+  <data name="DumpParse" xml:space="preserve">
+    <value>Raščlanjivanje baze podataka</value>
+  </data>
+  <data name="GroupMigration" xml:space="preserve">
+    <value>Migracija grupe {0} ({1}/{2})</value>
   </data>
   <data name="LargeBackup" xml:space="preserve">
     <value>Rezervna kopija je veća nego celokupna veličina portala</value>
+  </data>
+  <data name="MigratingUserFiles" xml:space="preserve">
+    <value>Migracija korisničkih datoteka {0} ({1}/{2})</value>
+  </data>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>Migracija zajedničkih datoteka</value>
+  </data>
+  <data name="MigrationCompleted" xml:space="preserve">
+    <value>Migracija završena</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>Ne postoji takav provajder migracije</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>Nema migracije u progresu</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>Migracija projektnih datoteka</value>
+  </data>
+  <data name="PreparingForMigration" xml:space="preserve">
+    <value>Priprema za migraciju</value>
+  </data>
+  <data name="StartOfDataProcessing" xml:space="preserve">
+    <value>Početak obrade podataka...</value>
+  </data>
+  <data name="Unzipping" xml:space="preserve">
+    <value>Razrešavanje (dekompresovanje)...</value>
+  </data>
+  <data name="UnzippingFinished" xml:space="preserve">
+    <value>Razrešavanje (dekompresovanje) završeno...</value>
+  </data>
+  <data name="UserMigration" xml:space="preserve">
+    <value>Migracija korisnika {0} ({1}/{2})</value>
   </data>
 </root>
