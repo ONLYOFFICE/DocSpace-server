@@ -131,8 +131,8 @@ public partial class StudioNotifyWorker(
             return;
         }
 
-        action.Tags = item.Tags.Select(ITagValue (r) => new TagValue(r.Key, r.Value)).ToList();
-        
+        action.Tags = item.Tags != null ? item.Tags.Select(ITagValue (r) => new TagValue(r.Key, r.Value)).ToList() : [];
+
         await client.SendNoticeToAsync(
             action,
             item.ObjectId,

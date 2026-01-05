@@ -89,7 +89,11 @@ public class StudioNotifyServiceHelper(StudioNotifyHelper studioNotifyHelper,
         {
             item.SenderNames = senderNames.ToList();
         }
-        
+
+        if (action.Tags != null)
+        {
+            item.Tags = action.Tags != null ? action.Tags.Select(Tag (r) => new Tag{ Key = r.Tag, Value = r.Value?.ToString() }).ToList() : [];
+        }
 
         await eventBus.PublishAsync(item);
     }

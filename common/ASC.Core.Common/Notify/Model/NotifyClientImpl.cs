@@ -130,6 +130,11 @@ class NotifyClientImpl(
             _isNeedCheckSubscriptions = checkSubsciption
         };
         
+        if (action.Tags != null)
+        {
+            request.Arguments.AddRange(action.Tags);
+        }
+        
         return request;
     }
 }
