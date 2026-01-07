@@ -45,6 +45,7 @@ import com.asc.registration.service.ports.output.repository.ClientQueryRepositor
 import com.asc.registration.service.ports.output.repository.ScopeQueryRepository;
 import com.asc.registration.service.ports.output.resilience.ClientCacheService;
 import com.asc.registration.service.ports.output.resilience.RetryExecutor;
+import com.asc.registration.service.ports.output.resilience.ScopeCacheService;
 import jakarta.validation.Validator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -216,11 +217,13 @@ public class BeanConfiguration {
    * Creates and registers a {@link ScopeApplicationService} bean as the main entry point for
    * scope-related operations.
    *
+   * @param scopeCacheService the caching service.
    * @param scopeQueryHandler the handler for scope query operations.
    * @return a new instance of {@link CoreScopeApplicationService}.
    */
   @Bean
-  public ScopeApplicationService scopeApplicationService(ScopeQueryHandler scopeQueryHandler) {
-    return new CoreScopeApplicationService(scopeQueryHandler);
+  public ScopeApplicationService scopeApplicationService(
+      ScopeCacheService scopeCacheService, ScopeQueryHandler scopeQueryHandler) {
+    return new CoreScopeApplicationService(scopeCacheService, scopeQueryHandler);
   }
 }

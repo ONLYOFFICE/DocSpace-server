@@ -25,61 +25,56 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.registration.service;
+package com.asc.registration.service.ports.output.resilience;
 
-import com.asc.registration.service.ports.input.service.ScopeApplicationService;
-import com.asc.registration.service.ports.output.resilience.ScopeCacheService;
 import com.asc.registration.service.transfer.response.ScopeResponse;
+import java.util.Optional;
 import java.util.Set;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 /**
- * CoreScopeApplicationService implements the {@link ScopeApplicationService} interface, providing
- * core business logic for managing scopes.
+ * Service interface for managing scope cache operations.
+ *
+ * <p>This service provides methods to store, retrieve, and evict scope responses from an in-memory
+ * cache to improve performance for frequently accessed scope data.
  */
-@Slf4j
-@RequiredArgsConstructor
-public class CoreScopeApplicationService implements ScopeApplicationService {
-  private final ScopeCacheService scopeCacheService;
-  private final ScopeQueryHandler queryHandler;
+public interface ScopeCacheService {
 
   /**
-   * Retrieves all available scopes.
+   * Stores a scope in the cache.
    *
-   * @return a set of {@link ScopeResponse} representing all scopes.
+   * @param scope The scope response to cache. Must not be null and must have a non-null name.
    */
-  public Set<ScopeResponse> getScopes() {
-    log.debug("Retrieving all scopes");
-
-    var cached = scopeCacheService.getAll().orElse(null);
-    if (cached != null) {
-      log.debug("Returning {} scopes from cache", cached.size());
-      return cached;
-    }
-
-    var scopes = queryHandler.getScopes();
-    scopeCacheService.putAll(scopes);
-    return scopes;
-  }
+  void put(ScopeResponse scope);
 
   /**
-   * Retrieves a specific scope by its name.
+   * Stores all scopes in the cache.
    *
-   * @param name the name of the scope to retrieve.
-   * @return a {@link ScopeResponse} representing the requested scope.
+   * @param scopes The set of scope responses to cache.
    */
-  public ScopeResponse getScope(String name) {
-    log.debug("Retrieving scope by name: {}", name);
+  void putAll(Set<ScopeResponse> scopes);
 
-    var cached = scopeCacheService.get(name).orElse(null);
-    if (cached != null) {
-      log.debug("Returning scope {} from cache", name);
-      return cached;
-    }
+  /**
+   * Retrieves a scope from the cache by its name.
+   *
+   * @param name The name of the scope to retrieve. If null, returns empty Optional.
+   * @return An Optional containing the scope if found, or empty if not found or name is null.
+   */
+  Optional<ScopeResponse> get(String name);
 
-    getScopes();
+  /**
+   * Retrieves all scopes from the cache.
+   *
+   * @return An Optional containing all scopes if cached, or empty if not cached.
+   */
+  Optional<Set<ScopeResponse>> getAll();
 
-    return scopeCacheService.get(name).orElseGet(() -> queryHandler.getScope(name));
-  }
+  /**
+   * Removes a scope from the cache by its name.
+   *
+   * @param name The name of the scope to evict. If null, no operation is performed.
+   */
+  void evict(String name);
+
+  /** Clears the entire scope cache. */
+  void clear();
 }

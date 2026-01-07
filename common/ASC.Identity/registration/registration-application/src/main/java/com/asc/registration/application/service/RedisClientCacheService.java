@@ -50,7 +50,7 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-public class RedisCacheService implements ClientCacheService {
+public class RedisClientCacheService implements ClientCacheService {
   private static final String CACHE_KEY_SEPARATOR = ":";
   private static final String CACHE_KEY_TENANT_CLIENT_SEPARATOR = "_";
   private static final String CACHE_PREFIX = "identity:registration:client";
@@ -64,7 +64,7 @@ public class RedisCacheService implements ClientCacheService {
    *
    * @param redisTemplate The Redis template for cache operations.
    */
-  public RedisCacheService(
+  public RedisClientCacheService(
       @Qualifier("clientCacheRedisTemplate") RedisTemplate<String, Object> redisTemplate) {
     this.redisTemplate = redisTemplate;
   }

@@ -25,61 +25,40 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.registration.service;
+package com.asc.registration.application.configuration;
 
 import com.asc.registration.service.ports.input.service.ScopeApplicationService;
-import com.asc.registration.service.ports.output.resilience.ScopeCacheService;
-import com.asc.registration.service.transfer.response.ScopeResponse;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.EventListener;
 
 /**
- * CoreScopeApplicationService implements the {@link ScopeApplicationService} interface, providing
- * core business logic for managing scopes.
+ * ScopeCacheInitializer pre-loads all scopes into the in-memory cache on application startup.
+ *
+ * <p>Since scopes are static configuration data that rarely changes, they are loaded once at
+ * startup and cached permanently in memory for fast access throughout the application lifecycle.
  */
 @Slf4j
+@Configuration
 @RequiredArgsConstructor
-public class CoreScopeApplicationService implements ScopeApplicationService {
-  private final ScopeCacheService scopeCacheService;
-  private final ScopeQueryHandler queryHandler;
+public class ScopeCacheInitializer {
+  private final ScopeApplicationService scopeApplicationService;
 
   /**
-   * Retrieves all available scopes.
+   * Initializes the scope cache when the application is ready.
    *
-   * @return a set of {@link ScopeResponse} representing all scopes.
+   * <p>This method is triggered by the {@link ApplicationReadyEvent}, ensuring that all scopes are
+   * loaded into cache before the application starts serving requests.
    */
-  public Set<ScopeResponse> getScopes() {
-    log.debug("Retrieving all scopes");
-
-    var cached = scopeCacheService.getAll().orElse(null);
-    if (cached != null) {
-      log.debug("Returning {} scopes from cache", cached.size());
-      return cached;
+  @EventListener(ApplicationReadyEvent.class)
+  public void initializeScopeCache() {
+    try {
+      var scopes = scopeApplicationService.getScopes();
+      log.info("Successfully pre-loaded {} scopes into cache", scopes.size());
+    } catch (Exception e) {
+      log.error("Failed to initialize scope cache on startup", e);
     }
-
-    var scopes = queryHandler.getScopes();
-    scopeCacheService.putAll(scopes);
-    return scopes;
-  }
-
-  /**
-   * Retrieves a specific scope by its name.
-   *
-   * @param name the name of the scope to retrieve.
-   * @return a {@link ScopeResponse} representing the requested scope.
-   */
-  public ScopeResponse getScope(String name) {
-    log.debug("Retrieving scope by name: {}", name);
-
-    var cached = scopeCacheService.get(name).orElse(null);
-    if (cached != null) {
-      log.debug("Returning scope {} from cache", name);
-      return cached;
-    }
-
-    getScopes();
-
-    return scopeCacheService.get(name).orElseGet(() -> queryHandler.getScope(name));
   }
 }
