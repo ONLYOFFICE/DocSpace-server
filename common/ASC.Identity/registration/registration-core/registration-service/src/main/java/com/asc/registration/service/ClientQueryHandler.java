@@ -38,6 +38,7 @@ import com.asc.registration.core.domain.entity.Client;
 import com.asc.registration.core.domain.exception.ClientNotFoundException;
 import com.asc.registration.service.mapper.ClientDataMapper;
 import com.asc.registration.service.ports.output.repository.ClientQueryRepository;
+import com.asc.registration.service.ports.output.resilience.ClientCacheService;
 import com.asc.registration.service.transfer.request.fetch.ClientInfoPaginationQuery;
 import com.asc.registration.service.transfer.request.fetch.ClientInfoQuery;
 import com.asc.registration.service.transfer.request.fetch.TenantClientQuery;
@@ -65,6 +66,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ClientQueryHandler {
   private final ClientQueryRepository clientQueryRepository;
 
+  private final ClientCacheService clientCacheService;
   private final EncryptionService encryptionService;
 
   private final ClientDataMapper clientDataMapper;
@@ -114,28 +116,38 @@ public class ClientQueryHandler {
               "Client with ID %s for tenant %s was not found",
               query.getClientId(), query.getTenantId()));
 
-    var client =
-        role.equals(Role.ROLE_ADMIN)
-            ? (clientQueryRepository
-                .findByClientIdAndTenantId(
-                    toClientId(query.getClientId()), new TenantId(query.getTenantId()))
-                .orElseThrow(
-                    () ->
-                        new ClientNotFoundException(
-                            String.format(
-                                "Client with ID %s for tenant %s was not found",
-                                query.getClientId(), query.getTenantId()))))
-            : (clientQueryRepository
-                .findByClientIdAndTenantIdAndCreatorId(
-                    toClientId(query.getClientId()),
-                    new TenantId(query.getTenantId()),
-                    new UserId(query.getUserId()))
-                .orElseThrow(
-                    () ->
-                        new ClientNotFoundException(
-                            String.format(
-                                "Client with ID %s for tenant %s and user %s was not found",
-                                query.getClientId(), query.getTenantId(), query.getUserId()))));
+    var clientId = toClientId(query.getClientId());
+    var tenantId = new TenantId(query.getTenantId());
+    var client = clientCacheService.get(clientId, tenantId).orElse(null);
+    if (client != null && !role.equals(Role.ROLE_ADMIN)) {
+      var userId = new UserId(query.getUserId());
+      if (client.getClientCreationInfo() == null
+          || !client.getClientCreationInfo().getCreatedBy().equals(userId)) client = null;
+    }
+
+    if (client == null) {
+      client =
+          role.equals(Role.ROLE_ADMIN)
+              ? (clientQueryRepository
+                  .findByClientIdAndTenantId(clientId, tenantId)
+                  .orElseThrow(
+                      () ->
+                          new ClientNotFoundException(
+                              String.format(
+                                  "Client with ID %s for tenant %s was not found",
+                                  query.getClientId(), query.getTenantId()))))
+              : (clientQueryRepository
+                  .findByClientIdAndTenantIdAndCreatorId(
+                      clientId, tenantId, new UserId(query.getUserId()))
+                  .orElseThrow(
+                      () ->
+                          new ClientNotFoundException(
+                              String.format(
+                                  "Client with ID %s for tenant %s and user %s was not found",
+                                  query.getClientId(), query.getTenantId(), query.getUserId()))));
+
+      clientCacheService.put(client);
+    }
 
     return decryptAndMapClientResponse(client);
   }
@@ -144,7 +156,8 @@ public class ClientQueryHandler {
    * Retrieves detailed client information based solely on the client identifier.
    *
    * <p>This method bypasses tenant and creator checks, assuming that the client ID is sufficient to
-   * uniquely identify the client.
+   * uniquely identify the client. It attempts cache lookup across all tenants before querying the
+   * database.
    *
    * @param clientId the unique client identifier as a string
    * @return a {@link ClientResponse} containing the detailed client information, including a
@@ -154,13 +167,19 @@ public class ClientQueryHandler {
   public ClientResponse getClient(String clientId) {
     log.info("Retrieving client details for client ID: {}", clientId);
 
-    var client =
-        clientQueryRepository
-            .findById(toClientId(clientId))
-            .orElseThrow(
-                () ->
-                    new ClientNotFoundException(
-                        String.format("Client with ID %s was not found", clientId)));
+    var cid = toClientId(clientId);
+    var client = clientCacheService.getAnyTenant(cid).orElse(null);
+    if (client == null) {
+      client =
+          clientQueryRepository
+              .findById(cid)
+              .orElseThrow(
+                  () ->
+                      new ClientNotFoundException(
+                          String.format("Client with ID %s was not found", clientId)));
+
+      clientCacheService.put(client);
+    }
 
     return decryptAndMapClientResponse(client);
   }
@@ -207,28 +226,38 @@ public class ClientQueryHandler {
               "Client with ID %s for tenant %s was not found",
               query.getClientId(), query.getTenantId()));
 
-    var client =
-        role.equals(Role.ROLE_ADMIN)
-            ? (clientQueryRepository
-                .findByClientIdAndTenantId(
-                    toClientId(query.getClientId()), new TenantId(query.getTenantId()))
-                .orElseThrow(
-                    () ->
-                        new ClientNotFoundException(
-                            String.format(
-                                "Client with ID %s for tenant %s was not found",
-                                query.getClientId(), query.getTenantId()))))
-            : (clientQueryRepository
-                .findByClientIdAndTenantIdAndCreatorId(
-                    toClientId(query.getClientId()),
-                    new TenantId(query.getTenantId()),
-                    new UserId(query.getUserId()))
-                .orElseThrow(
-                    () ->
-                        new ClientNotFoundException(
-                            String.format(
-                                "Client with ID %s for tenant %s and user %s was not found",
-                                query.getClientId(), query.getTenantId(), query.getUserId()))));
+    var clientId = toClientId(query.getClientId());
+    var tenantId = new TenantId(query.getTenantId());
+    var client = clientCacheService.get(clientId, tenantId).orElse(null);
+    if (client != null && !role.equals(Role.ROLE_ADMIN)) {
+      var userId = new UserId(query.getUserId());
+      if (client.getClientCreationInfo() == null
+          || !client.getClientCreationInfo().getCreatedBy().equals(userId)) client = null;
+    }
+
+    if (client == null) {
+      client =
+          role.equals(Role.ROLE_ADMIN)
+              ? (clientQueryRepository
+                  .findByClientIdAndTenantId(clientId, tenantId)
+                  .orElseThrow(
+                      () ->
+                          new ClientNotFoundException(
+                              String.format(
+                                  "Client with ID %s for tenant %s was not found",
+                                  query.getClientId(), query.getTenantId()))))
+              : (clientQueryRepository
+                  .findByClientIdAndTenantIdAndCreatorId(
+                      clientId, tenantId, new UserId(query.getUserId()))
+                  .orElseThrow(
+                      () ->
+                          new ClientNotFoundException(
+                              String.format(
+                                  "Client with ID %s for tenant %s and user %s was not found",
+                                  query.getClientId(), query.getTenantId(), query.getUserId()))));
+
+      clientCacheService.put(client);
+    }
 
     var clientTenant = client.getClientTenantInfo().tenantId().getValue();
     var clientVisibility = client.getVisibility();
@@ -303,7 +332,7 @@ public class ClientQueryHandler {
    * Retrieves basic client information based solely on the client identifier.
    *
    * <p>This method provides a lightweight version of client details without tenant or creator
-   * verification.
+   * verification. It attempts cache lookup across all tenants before querying the database.
    *
    * @param clientId the unique client identifier as a string
    * @return a {@link ClientInfoResponse} containing basic client details
@@ -312,13 +341,19 @@ public class ClientQueryHandler {
   public ClientInfoResponse getClientInfo(String clientId) {
     log.info("Retrieving client basic information by client id: {}", clientId);
 
-    var client =
-        clientQueryRepository
-            .findById(toClientId(clientId))
-            .orElseThrow(
-                () ->
-                    new ClientNotFoundException(
-                        String.format("Client with id %s was not found", clientId)));
+    var cid = toClientId(clientId);
+    var client = clientCacheService.getAnyTenant(cid).orElse(null);
+    if (client == null) {
+      client =
+          clientQueryRepository
+              .findById(cid)
+              .orElseThrow(
+                  () ->
+                      new ClientNotFoundException(
+                          String.format("Client with id %s was not found", clientId)));
+
+      clientCacheService.put(client);
+    }
 
     return clientDataMapper.toClientInfoResponse(client);
   }

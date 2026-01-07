@@ -28,6 +28,7 @@
 package com.asc.registration.container;
 
 import com.asc.common.service.ports.output.message.publisher.AuthorizationMessagePublisher;
+import com.asc.common.service.transfer.message.ClientCacheTenantRemoveEvent;
 import com.asc.common.service.transfer.message.ClientRemovedEvent;
 import com.asc.common.service.transfer.message.TenantClientsRemovedEvent;
 import com.asc.common.service.transfer.message.UserClientsRemovedEvent;
@@ -42,6 +43,7 @@ import com.asc.registration.service.ports.input.service.ScopeApplicationService;
 import com.asc.registration.service.ports.output.repository.ClientCommandRepository;
 import com.asc.registration.service.ports.output.repository.ClientQueryRepository;
 import com.asc.registration.service.ports.output.repository.ScopeQueryRepository;
+import com.asc.registration.service.ports.output.resilience.ClientCacheService;
 import com.asc.registration.service.ports.output.resilience.RetryExecutor;
 import jakarta.validation.Validator;
 import org.springframework.context.annotation.Bean;
@@ -112,6 +114,7 @@ public class BeanConfiguration {
    * Creates and registers a {@link ClientQueryHandler} bean for handling client query operations.
    *
    * @param clientQueryRepository the repository for querying client data.
+   * @param clientCacheService the cache service for retrieving cached client data.
    * @param encryptionService the service for decrypting sensitive client data.
    * @param clientDataMapper the mapper for converting between domain objects and DTOs.
    * @return a new instance of {@link ClientQueryHandler}.
@@ -119,9 +122,11 @@ public class BeanConfiguration {
   @Bean
   public ClientQueryHandler clientQueryHandler(
       ClientQueryRepository clientQueryRepository,
+      ClientCacheService clientCacheService,
       EncryptionService encryptionService,
       ClientDataMapper clientDataMapper) {
-    return new ClientQueryHandler(clientQueryRepository, encryptionService, clientDataMapper);
+    return new ClientQueryHandler(
+        clientQueryRepository, clientCacheService, encryptionService, clientDataMapper);
   }
 
   /**
@@ -186,17 +191,22 @@ public class BeanConfiguration {
   @Bean
   public ClientApplicationService clientApplicationService(
       Validator validator,
+      ClientCacheService clientCacheService,
       AuthorizationMessagePublisher<TenantClientsRemovedEvent>
           tenantClientsRemovedEventAuthorizationMessagePublisher,
       AuthorizationMessagePublisher<UserClientsRemovedEvent>
           userClientsRemovedEventAuthorizationMessagePublisher,
+      AuthorizationMessagePublisher<ClientCacheTenantRemoveEvent>
+          clientCacheTenantRemoveEventAuthorizationMessagePublisher,
       ClientCreateCommandHandler clientCreateCommandHandler,
       ClientUpdateCommandHandler clientUpdateCommandHandler,
       ClientQueryHandler clientQueryHandler) {
     return new CoreClientApplicationService(
         validator,
+        clientCacheService,
         tenantClientsRemovedEventAuthorizationMessagePublisher,
         userClientsRemovedEventAuthorizationMessagePublisher,
+        clientCacheTenantRemoveEventAuthorizationMessagePublisher,
         clientCreateCommandHandler,
         clientUpdateCommandHandler,
         clientQueryHandler);

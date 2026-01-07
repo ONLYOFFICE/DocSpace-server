@@ -29,6 +29,7 @@ spring:
     type: caffeine
   config:
     import:
+      - "classpath:application-cache.yml"
       - "classpath:application-datasource.yml"
       - "classpath:application-resilience.yml"
       - "classpath:application-rabbitmq.yml"

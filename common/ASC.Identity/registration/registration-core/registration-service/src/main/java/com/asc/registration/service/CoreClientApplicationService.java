@@ -30,11 +30,14 @@ package com.asc.registration.service;
 import com.asc.common.core.domain.entity.Audit;
 import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.core.domain.value.Role;
+import com.asc.common.core.domain.value.TenantId;
 import com.asc.common.service.ports.output.message.publisher.AuthorizationMessagePublisher;
+import com.asc.common.service.transfer.message.ClientCacheTenantRemoveEvent;
 import com.asc.common.service.transfer.message.TenantClientsRemovedEvent;
 import com.asc.common.service.transfer.message.UserClientsRemovedEvent;
 import com.asc.common.service.transfer.response.ClientResponse;
 import com.asc.registration.service.ports.input.service.ClientApplicationService;
+import com.asc.registration.service.ports.output.resilience.ClientCacheService;
 import com.asc.registration.service.transfer.request.create.CreateTenantClientCommand;
 import com.asc.registration.service.transfer.request.fetch.ClientInfoPaginationQuery;
 import com.asc.registration.service.transfer.request.fetch.ClientInfoQuery;
@@ -57,10 +60,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CoreClientApplicationService implements ClientApplicationService {
   private final Validator validator;
+  private final ClientCacheService clientCacheService;
 
   private final AuthorizationMessagePublisher<TenantClientsRemovedEvent>
       tenantClientsMessagePublisher;
   private final AuthorizationMessagePublisher<UserClientsRemovedEvent> userClientsMessagePublisher;
+  private final AuthorizationMessagePublisher<ClientCacheTenantRemoveEvent>
+      clientCacheTenantRemoveMessagePublisher;
 
   private final ClientCreateCommandHandler clientCreateCommandHandler;
   private final ClientUpdateCommandHandler clientUpdateCommandHandler;
@@ -250,8 +256,14 @@ public class CoreClientApplicationService implements ClientApplicationService {
    */
   public int deleteTenantClients(DeleteTenantClientsCommand command) {
     validate(command);
+
+    clientCacheService.evictAllByTenantId(new TenantId(command.getTenantId()));
+
+    clientCacheTenantRemoveMessagePublisher.publish(
+        ClientCacheTenantRemoveEvent.builder().tenantId(command.getTenantId()).build());
     tenantClientsMessagePublisher.publish(
         TenantClientsRemovedEvent.builder().tenantId(command.getTenantId()).build());
+
     return clientUpdateCommandHandler.deleteTenantClients(command.getTenantId());
   }
 }

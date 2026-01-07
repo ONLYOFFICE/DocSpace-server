@@ -78,6 +78,8 @@ public class RabbitListenerContainerFactoryConfiguration {
         Map.of(
             "audit", AuditMessage.class,
             "clientRemoved", ClientRemovedEvent.class,
+            "clientCacheRemove", ClientCacheRemoveEvent.class,
+            "clientCacheTenantRemove", ClientCacheTenantRemoveEvent.class,
             "retrieveAuthorization", RetrieveAuthorizationMessage.class,
             "saveAuthorization", SaveAuthorizationMessage.class,
             "tenantClientsRemoved", TenantClientsRemovedEvent.class,
