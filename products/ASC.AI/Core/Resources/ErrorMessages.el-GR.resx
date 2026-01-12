@@ -171,4 +171,7 @@
   <data name="UnavailableServers" xml:space="preserve">
     <value>Οι διακομιστές MCP δεν είναι διαθέσιμοι: {0}. Ελέγξτε τις ρυθμίσεις σύνδεσης</value>
   </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>Δεν είναι δυνατή η επεξεργασία των αρχείων: {0}. Τα αρχεία ενδέχεται να είναι κατεστραμμένα ή κρυπτογραφημένα</value>
+  </data>
 </root>

@@ -1193,11 +1193,11 @@ $OrangeButton
   <data name="pattern_profile_updated_tg" xml:space="preserve">
     <value>Το προφίλ σας στο [${__VirtualRootPath}](${__VirtualRootPath}) έχει αλλάξει
 
-Αγαπητέ $UserName,
+Αγαπητέ/ή $UserName,
 
-Τα στοιχεία του προφίλ χρήστη σας στο [${__VirtualRootPath}](${__VirtualRootPath}) έχουν αλλάξει από τον χρήστη [$__AuthorName]($__AuthorUrl).
+Τα στοιχεία του προφίλ χρήστη σας στο [${__VirtualRootPath}](${__VirtualRootPath}) έχουν αλλάξει από τον/την [$__AuthorName]($__AuthorUrl).
 
-Για να δείτε το προφίλ σας, ακολουθήστε τον παρακάτω σύνδεσμο:
+Για να δείτε το προφίλ σας, πατήστε τον παρακάτω σύνδεσμο:
 [$UserName]($MyStaffLink)</value>
   </data>
   <data name="pattern_reassigns_completed" xml:space="preserve">
@@ -2153,5 +2153,44 @@ $TrulyYours</value>
   </data>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>Με εκτίμηση, Η Ομάδα του ${LetterLogoText}</value>
+  </data>
+  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
+    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; ανέβασε ένα νέο έγγραφο: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; στη βάση γνώσεων του παράγοντα τεχνητής νοημοσύνης: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>Το ${LetterLogoText} DocSpace έχει διαγραφεί.
+
+*Portal:* ${PortalUrl}
+*Owner:* ${UserName} ${UserEmail}
+*Customer:* ${OwnerName}
+
+Βεβαιωθείτε ότι η αυτόματη χρέωση είναι απενεργοποιημένη. Ελέγξτε την κατάσταση της αυτόματης χρέωσης στον λογαριασμό Stripe του πελάτη.</value>
+  </data>
+  <data name="pattern_user_agent_role_changed" xml:space="preserve">
+    <value>Γεια σας!
+
+Σας έχει ανατεθεί ένας νέος ρόλος στον παράγοντα τεχνητής νοημοσύνης DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+Μάθετε περισσότερα σχετικά με τους ρόλους και τα δικαιώματα δωματίου στο "Κέντρο βοήθειας":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_api_key_expired" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace: Το κλειδί API σας έχει λήξει</value>
+  </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>Το ${LetterLogoText} DocSpace έχει διαγραφεί</value>
+  </data>
+  <data name="subject_user_agent_role_changed" xml:space="preserve">
+    <value>Ο ρόλος σας σε έναν πράκτορα τεχνητής νοημοσύνης του DocSpace έχει αλλάξει</value>
+  </data>
+  <data name="pattern_api_key_expired" xml:space="preserve">
+    <value>Γεια σας, $UserName!
+
+Με αυτό το μήνυμα ηλεκτρονικού ταχυδρομείου σας ενημερώνουμε ότι το κλειδί API σας "*$Message*" έχει λήξει και έχει απενεργοποιηθεί.
+
+Μπορείτε να δημιουργήσετε ένα νέο κλειδί API στα "Εργαλεία Προγραμματιστή": "${__VirtualRootPath}/developer-tools/api-keys".
+
+$TrulyYours</value>
   </data>
 </root>

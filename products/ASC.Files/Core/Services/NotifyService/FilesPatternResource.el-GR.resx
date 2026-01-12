@@ -298,4 +298,18 @@ $Message</value>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
     <value>Ειδοποίηση DocSpace.</value>
   </data>
+  <data name="pattern_AgentRemoved" xml:space="preserve">
+    <value>h1. Ο $__AuthorName διέγραψε έναν πράκτορα AI
+
+Ο $__AuthorName διέγραψε τον πράκτορα AI: $RoomTitle</value>
+  </data>
+  <data name="pattern_AgentUpdateAccessForUser_push" xml:space="preserve">
+    <value>Ο ρόλος σας στον παράγοντα AI "$RoomTitle" έχει αλλάξει σε "$RoomRole"</value>
+  </data>
+  <data name="pattern_InvitedToAgent_push" xml:space="preserve">
+    <value>Έχετε προσκληθεί στον παράγοντα AI "$RoomTitle"</value>
+  </data>
+  <data name="subject_AgentRemoved" xml:space="preserve">
+    <value>Ειδοποίηση DocSpace. Ο πράκτορας τεχνητής νοημοσύνης διαγράφηκε</value>
+  </data>
 </root>
