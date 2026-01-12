@@ -1972,7 +1972,7 @@ public class S3Storage(TempStream tempStream,
             return null;
         }
 
-        var cfg = new AmazonS3CryptoConfigurationV2(SecurityProfile.V2AndLegacy)
+        var cfg = new AmazonS3CryptoConfigurationV2(SecurityProfile.V2AndLegacy, CommitmentPolicy.ForbidEncryptAllowDecrypt, ContentEncryptionAlgorithm.AesGcm)
         {
             StorageMode = CryptoStorageMode.ObjectMetadata,
             MaxErrorRetry = 3
