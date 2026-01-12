@@ -117,6 +117,63 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Vectorizimi</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Kontakt</value>
+  </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Kredit</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Monedha</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Debitim</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Detaje</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>Sasia</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>Mjetet AI</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Kopje rezervë</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Hapësira në disk</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Rimbushje e balancës</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>Njësia e matjes</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Tokenët</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Kopje rezervë</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>Raporti i operacioneve të klientit ({0}-{1})</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Historiku i transaksioneve</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Lloji</value>
+  </data>
   <data name="ActivateMobilePhoneEmptyCode" xml:space="preserve">
     <value>Fusha e kodit të verifikimit nuk mund të jetë bosh</value>
   </data>
@@ -131,6 +188,18 @@
   </data>
   <data name="AdminMessageSent" xml:space="preserve">
     <value>Mesazhi juaj u dërgua me sukses. Do të kontaktoheni nga administratori i portalit.</value>
+  </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>Kuota e hapësirës së agjentit AI tejkalohet</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Dështoi vendosja e kuotës për agjent AI. Vlera e futur është më e madhe se gjithsej hapësira DocSpace.</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Rinovim automatik</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Kreditim automatik</value>
   </data>
   <data name="ButtonSmsEnable" xml:space="preserve">
     <value>Mes SMS</value>
@@ -282,6 +351,12 @@
   <data name="ConsumersFirebase" xml:space="preserve">
     <value>Firebase</value>
   </data>
+  <data name="ConsumersFirebaseDescription" xml:space="preserve">
+    <value>Aktivizoni këtë aplikacion për të marrë njoftime për mesazhet që ju dërgohen me mesazhet e resë së Firebase.</value>
+  </data>
+  <data name="ConsumersFirebaseInstruction" xml:space="preserve">
+    <value>Aktivizoni këtë aplikacionin për të lejuar përdoruesit të marrin njoftime për mesazhet dhe jashtë linje. {0}Shkoni te konsola e Firebase dhe shtoni një projekt të ri për integrimin e {LogoText}. Futni të dhënat që keni marrë më poshtë:</value>
+  </data>
   <data name="Consumersfirebase_apiKey" xml:space="preserve">
     <value>Çelësi i API në faqen e internetit</value>
   </data>
@@ -293,12 +368,6 @@
   </data>
   <data name="Consumersfirebase_projectId" xml:space="preserve">
     <value>ID-ja e projektit</value>
-  </data>
-  <data name="ConsumersFirebaseDescription" xml:space="preserve">
-    <value>Aktivizoni këtë aplikacion për të marrë njoftime për mesazhet që ju dërgohen me mesazhet e resë së Firebase.</value>
-  </data>
-  <data name="ConsumersFirebaseInstruction" xml:space="preserve">
-    <value>Aktivizoni këtë aplikacionin për të lejuar përdoruesit të marrin njoftime për mesazhet dhe jashtë linje. {0}Shkoni te konsola e Firebase dhe shtoni një projekt të ri për integrimin e {LogoText}. Futni të dhënat që keni marrë më poshtë:</value>
   </data>
   <data name="ConsumersGoogle" xml:space="preserve">
     <value>Google</value>
@@ -522,11 +591,11 @@
   <data name="ConsumersTwitter" xml:space="preserve">
     <value>X</value>
   </data>
-  <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
-    <value>ID-ja e klientit</value>
-  </data>
   <data name="ConsumerstwitterAccessTokenSecret_Default" xml:space="preserve">
     <value>Sekreti i klientit</value>
+  </data>
+  <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
+    <value>ID-ja e klientit</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
     <value>Aktivizoni aplikacionin të identifikohet në portal duke përdorur një llogari X.</value>
@@ -557,6 +626,21 @@
   </data>
   <data name="ConsumersVkInstruction" xml:space="preserve">
     <value>Kur të shtoni aplikacionin VK, mund të aktivizoni hyrjen në portal duke përdorur llogarinë VK në faqen e profilit tuaj.</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>ID e klientit</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Sekreti i klientit</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Aktivizoni aplikacionin për të hyrë në portal duke përdorur një llogari WeChat.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Aktivizoni aplikacionin për të hyrë në portal duke përdorur një llogari WeChat.</value>
   </data>
   <data name="ConsumersWordpress" xml:space="preserve">
     <value>WordPress</value>
@@ -627,6 +711,24 @@
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>I personalizuar</value>
   </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Emri</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>Id</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Mbiemri</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Kuota e Shërbimit të Dokumenteve ({0})</value>
+  </data>
   <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
     <value>Instancë e gabuar e ID.</value>
   </data>
@@ -674,6 +776,9 @@
   </data>
   <data name="ErrorFileNotImage" xml:space="preserve">
     <value>Lloji i skedarit të imazhit i panjohur</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>Grupi nuk u gjend</value>
   </data>
   <data name="ErrorImageSize" xml:space="preserve">
     <value>Madhësia e imazhit tejkalon parametrat e lejuar</value>
@@ -726,6 +831,9 @@
   <data name="ErrorPasswordOnlyLatinLetters" xml:space="preserve">
     <value>vetëm shkronja latine</value>
   </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Kërkohet pagesë</value>
+  </data>
   <data name="ErrorRequestLimitExceeded" xml:space="preserve">
     <value>Kufiri i kërkesës është tejkaluar</value>
   </data>
@@ -750,6 +858,9 @@
   <data name="ErrorUserNotFoundByEmail" xml:space="preserve">
     <value>Përdoruesi me email "{0}" nuk mund të gjendej</value>
   </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>URL-ja e Webhook nuk është e disponueshme. Kërkesa HEAD nuk ka kthyer një status 200 http.</value>
+  </data>
   <data name="ErrorWebPluginArchive" xml:space="preserve">
     <value>Arkivi i gabuar i shtojcave</value>
   </data>
@@ -764,6 +875,9 @@
   </data>
   <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
     <value>Ndryshimet në shtojcat e sistemit janë të ndaluara</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>Numri i shtojcave e kalon limitin</value>
   </data>
   <data name="ErrorWebPluginName" xml:space="preserve">
     <value>Emri i gabuar i shtojcës</value>
@@ -1032,20 +1146,23 @@
   <data name="SuccessfullySentNotificationDeleteUserInfoMessage" xml:space="preserve">
     <value>Udhëzimet për të çaktivizuar profilin tuaj janë dërguar në adresën e email-it {0}</value>
   </data>
-  <data name="Tariffs_admin" xml:space="preserve">
-    <value>Business</value>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>Numri i agjentëve AI nuk duhet të tejkalojë {0}</value>
   </data>
-  <data name="Tariffs_adminyear" xml:space="preserve">
-    <value>Business</value>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>Mjetet AI</value>
   </data>
-  <data name="Tariffs_nonprofit" xml:space="preserve">
-    <value>Jofitimprurëse</value>
-  </data>
-  <data name="Tariffs_startup" xml:space="preserve">
-    <value>Fillimi</value>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Aktivizoni funksionalitetet AI në DocSpace për të rritur produktivitetin.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Gjurmimi i hyrjeve dhe veprimeve</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Kopje rezervë</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Aktivizoni kopjen rezervë për DocSpace-in tënd. Kostot do të faturohen automatikisht.</value>
   </data>
   <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Branding &amp; personalizim</value>
@@ -1055,6 +1172,12 @@
   </data>
   <data name="TariffsFeature_file_size_exception" xml:space="preserve">
     <value>Madhësia e skedarit nuk duhet të kalojë {0}</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} kopje rezervë falas në muaj</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Numri i kopjeve rezervë falas nuk duhet të kalojë {0} brenda një muaji</value>
   </data>
   <data name="TariffsFeature_manager_exception" xml:space="preserve">
     <value>Numri i administratorëve nuk duhet të kalojë {0}</value>
@@ -1089,6 +1212,12 @@
   <data name="TariffsFeature_total_size_price_count" xml:space="preserve">
     <value>Hapësirë ruajtjes</value>
   </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Hapësirë shtesë në disk</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Përshtatni hapësirën me saktësinë që kërkoni.</value>
+  </data>
   <data name="TariffsFeature_used_manager" xml:space="preserve">
     <value>Administratorët e shtuar:</value>
   </data>
@@ -1098,14 +1227,14 @@
   <data name="TariffsFeature_used_total_size" xml:space="preserve">
     <value>Hapësira e ruajtjes së përdorur:</value>
   </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
+    <value>Hapësira e ruajtjes së përdorur:</value>
+  </data>
   <data name="TariffsFeature_used_usersInRoom" xml:space="preserve">
     <value>Përdoruesit në dhomë:</value>
   </data>
   <data name="TariffsFeature_users" xml:space="preserve">
     <value>Numri i pakufizuar përdoruesish dhe të ftuarish</value>
-  </data>
-  <data name="TariffsFeature_users_exception" xml:space="preserve">
-    <value>Numri i përdoruesve nuk duhet të kalojë {0}</value>
   </data>
   <data name="TariffsFeature_usersInRoom" xml:space="preserve">
     <value>Përdoruesit në dhomë</value>
@@ -1115,6 +1244,33 @@
   </data>
   <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
     <value>Numri i administratorëve e kalon kufirin: {0}/{1}.</value>
+  </data>
+  <data name="TariffsFeature_users_exception" xml:space="preserve">
+    <value>Numri i përdoruesve nuk duhet të kalojë {0}</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>Kërkimi në internet AI</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Shtoni fonde në portofolin tuaj për të aktivizuar kërkimin në internet AI.</value>
+  </data>
+  <data name="Tariffs_admin" xml:space="preserve">
+    <value>Business</value>
+  </data>
+  <data name="Tariffs_adminyear" xml:space="preserve">
+    <value>Business</value>
+  </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Jofitimprurëse</value>
+  </data>
+  <data name="Tariffs_startup" xml:space="preserve">
+    <value>Fillimi</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>Ndodhi një gabim i papritur. Ju lutemi provoni sërish.</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>Ju jeni lidhur me sukses me Telegram për të marrë njoftime nga DocSpace.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Kodi i pasaktë</value>
@@ -1136,161 +1292,5 @@
   </data>
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>Çfarë ka të re</value>
-  </data>
-  <data name="ErrorGroupNotFound" xml:space="preserve">
-    <value>Grupi nuk u gjend</value>
-  </data>
-  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
-    <value>URL-ja e Webhook nuk është e disponueshme. Kërkesa HEAD nuk ka kthyer një status 200 http.</value>
-  </data>
-  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
-    <value>Kredit</value>
-  </data>
-  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
-    <value>Monedha</value>
-  </data>
-  <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>Data</value>
-  </data>
-  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
-    <value>Sasia</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
-    <value>Hapësira në disk</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
-    <value>Rimbushje e balancës</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
-    <value>Njësia e matjes</value>
-  </data>
-  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
-    <value>Raporti i operacioneve të klientit ({0}-{1})</value>
-  </data>
-  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
-    <value>Hapësirë shtesë në disk</value>
-  </data>
-  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
-    <value>Përshtatni hapësirën me saktësinë që kërkoni.</value>
-  </data>
-  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
-    <value>Hapësira e ruajtjes së përdorur:</value>
-  </data>
-  <data name="AutoRenewal" xml:space="preserve">
-    <value>Rinovim automatik</value>
-  </data>
-  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
-    <value>Numri i kopjeve rezervë falas nuk duhet të kalojë {0} brenda një muaji</value>
-  </data>
-  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
-    <value>Aktivizoni kopjen rezervë për DocSpace-in tënd. Kostot do të faturohen automatikisht.</value>
-  </data>
-  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
-    <value>Kopje rezervë</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>Kopje rezervë</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
-    <value>Kopje rezervë</value>
-  </data>
-  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
-    <value>Detaje</value>
-  </data>
-  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
-    <value>Debitim</value>
-  </data>
-  <data name="AccountingCustomerOperationContact" xml:space="preserve">
-    <value>Kontakt</value>
-  </data>
-  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
-    <value>Historiku i transaksioneve</value>
-  </data>
-  <data name="AutoTopUp" xml:space="preserve">
-    <value>Kreditim automatik</value>
-  </data>
-  <data name="TariffsFeature_free_backup" xml:space="preserve">
-    <value>{0} kopje rezervë falas në muaj</value>
-  </data>
-  <data name="ErrorPaymentRequired" xml:space="preserve">
-    <value>Kërkohet pagesë</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
-    <value>GB</value>
-  </data>
-  <data name="AccountingCustomerOperationType" xml:space="preserve">
-    <value>Lloji</value>
-  </data>
-  <data name="ConsumersWeixin" xml:space="preserve">
-    <value>WeChat</value>
-  </data>
-  <data name="ConsumersWeixinClientId" xml:space="preserve">
-    <value>ID e klientit</value>
-  </data>
-  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
-    <value>Sekreti i klientit</value>
-  </data>
-  <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Aktivizoni aplikacionin për të hyrë në portal duke përdorur një llogari WeChat.</value>
-  </data>
-  <data name="ConsumersWeixinInstruction" xml:space="preserve">
-    <value>Aktivizoni aplikacionin për të hyrë në portal duke përdorur një llogari WeChat.</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
-    <value>Data</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
-    <value>Email</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
-    <value>Emri</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
-    <value>Id</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
-    <value>Mbiemri</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
-    <value>Kuota e Shërbimit të Dokumenteve ({0})</value>
-  </data>
-  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
-    <value>Numri i shtojcave e kalon limitin</value>
-  </data>
-  <data name="TelegramOnGenericError" xml:space="preserve">
-    <value>Ndodhi një gabim i papritur. Ju lutemi provoni sërish.</value>
-  </data>
-  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>Ju jeni lidhur me sukses me Telegram për të marrë njoftime nga DocSpace.</value>
-  </data>
-  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
-    <value>Vectorizimi</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
-    <value>Mjetet AI</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
-    <value>Tokenët</value>
-  </data>
-  <data name="AiAgentFreeSpaceException" xml:space="preserve">
-    <value>Kuota e hapësirës së agjentit AI tejkalohet</value>
-  </data>
-  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Dështoi vendosja e kuotës për agjent AI. Vlera e futur është më e madhe se gjithsej hapësira DocSpace.</value>
-  </data>
-  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
-    <value>Numri i agjentëve AI nuk duhet të tejkalojë {0}</value>
-  </data>
-  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>Mjetet AI</value>
-  </data>
-  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Aktivizoni funksionalitetet AI në DocSpace për të rritur produktivitetin.</value>
-  </data>
-  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
-    <value>Kërkimi në internet AI</value>
-  </data>
-  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
-    <value>Shtoni fonde në portofolin tuaj për të aktivizuar kërkimin në internet AI.</value>
   </data>
 </root>

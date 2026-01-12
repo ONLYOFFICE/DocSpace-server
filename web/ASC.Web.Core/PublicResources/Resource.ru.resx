@@ -1,5 +1,64 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -53,11 +112,68 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=7.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=7.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Векторизация</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Контакт</value>
+  </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Кредит</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Валюта</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>Дата</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Дебет</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Подробнее</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>Количество</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>ИИ-инструменты</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Резервное копирование</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Место на диске</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Пополнение баланса</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>Единица измерения</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Токены</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Резервное копирование</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>Гб</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>Отчет об операциях клиента ({0}-{1})</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>История транзакций</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Тип</value>
+  </data>
   <data name="ActivateMobilePhoneEmptyCode" xml:space="preserve">
     <value>Поле кода подтверждения не может быть пустым</value>
   </data>
@@ -73,6 +189,18 @@
   <data name="AdminMessageSent" xml:space="preserve">
     <value>Ваше сообщение успешно отправлено. Администратор портала с Вами свяжется.</value>
   </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>Квота пространства для ИИ-агентов превышена</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Не удалось установить квоту на одного ИИ-агента. Введенное значение превышает общий объем хранилища DocSpace.</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Автоматическое продление</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Автоматическое пополнение</value>
+  </data>
   <data name="ButtonSmsEnable" xml:space="preserve">
     <value>С помощью SMS</value>
   </data>
@@ -87,6 +215,27 @@
   </data>
   <data name="ConsumersapiKey" xml:space="preserve">
     <value>Ключ API Rackspace</value>
+  </data>
+  <data name="ConsumersAppleId" xml:space="preserve">
+    <value>Apple ID</value>
+  </data>
+  <data name="ConsumersappleIdClientId" xml:space="preserve">
+    <value>ID клиента приложения</value>
+  </data>
+  <data name="ConsumersAppleIdDescription" xml:space="preserve">
+    <value>Подключите приложение для входа на портал по учетной записи Apple ID.</value>
+  </data>
+  <data name="ConsumersAppleIdInstruction" xml:space="preserve">
+    <value>Подключите это приложение, чтобы пользователи могли входить в {LogoText}, используя Apple ID. {0}Перейдите на портал Apple Developers и создайте новое приложение для интеграции {LogoText}. Вставьте полученные данные ниже:</value>
+  </data>
+  <data name="ConsumersappleIdKeyId" xml:space="preserve">
+    <value>10-значный идентификатор ключа, сгенерированный для входа в систему с помощью приватного ключа Apple</value>
+  </data>
+  <data name="ConsumersappleIdPrivateKey" xml:space="preserve">
+    <value>Приватный ключ, скачанный с Apple Developer</value>
+  </data>
+  <data name="ConsumersappleIdTeamId" xml:space="preserve">
+    <value>10-значный Team ID аккаунта разработчика</value>
   </data>
   <data name="ConsumersauthPwd" xml:space="preserve">
     <value>authPwd Selectel</value>
@@ -178,6 +327,9 @@
   <data name="ConsumersEasyBibDescription" xml:space="preserve">
     <value>Подключите это приложение для создания библиографических списков в документах с помощью сервиса EasyBib.</value>
   </data>
+  <data name="ConsumersEasyBibInstruction" xml:space="preserve">
+    <value>Подключите это приложение, чтобы создавать библиографические списки в редакторах {LogoText}. {0}Перейдите на страницу регистрации EasyBib и заполните форму, чтобы добавить интеграцию {LogoText}. После получения ключа приложения вставьте его ниже:</value>
+  </data>
   <data name="ConsumersFacebook" xml:space="preserve">
     <value>Facebook</value>
   </data>
@@ -199,6 +351,12 @@
   <data name="ConsumersFirebase" xml:space="preserve">
     <value>Firebase</value>
   </data>
+  <data name="ConsumersFirebaseDescription" xml:space="preserve">
+    <value>Подключите это приложение для получения оповещений об отправленных вам сообщениях с помощью сервиса Firebase Cloud Messaging.</value>
+  </data>
+  <data name="ConsumersFirebaseInstruction" xml:space="preserve">
+    <value>Подключите это приложение, чтобы пользователи могли получать оповещения об отправленных им сообщениях даже офлайн. {0}Перейдите в консоль Firebase и добавьте новый проект для интеграции {LogoText}. Вставьте полученные данные ниже:</value>
+  </data>
   <data name="Consumersfirebase_apiKey" xml:space="preserve">
     <value>Ключ API для веб-приложения</value>
   </data>
@@ -210,9 +368,6 @@
   </data>
   <data name="Consumersfirebase_projectId" xml:space="preserve">
     <value>Идентификатор проекта</value>
-  </data>
-  <data name="ConsumersFirebaseDescription" xml:space="preserve">
-    <value>Подключите это приложение для получения оповещений об отправленных вам сообщениях с помощью сервиса Firebase Cloud Messaging.</value>
   </data>
   <data name="ConsumersGoogle" xml:space="preserve">
     <value>Google</value>
@@ -234,6 +389,9 @@
   </data>
   <data name="ConsumersGoogleCloudDescription" xml:space="preserve">
     <value>Подключите сервис Google Cloud Storage для резервного копирования и хранения данных портала.</value>
+  </data>
+  <data name="ConsumersGoogleCloudInstruction" xml:space="preserve">
+    <value>Подключите сервис Google Cloud Storage для резервного копирования и хранения данных портала. {0}Перейдите в консоль Google Cloud Platform и создайте новый сервисный аккаунт для {LogoText}. Вставьте полученные данные ниже:</value>
   </data>
   <data name="ConsumersGoogleCloudjson" xml:space="preserve">
     <value>json-файл GoogleCloud</value>
@@ -274,11 +432,29 @@
   <data name="ConsumersMailruInstruction" xml:space="preserve">
     <value>Добавив приложение сервиса Mail.ru Вы сможете на странице своего профиля подключить вход на портал используя аккаунт Mail.ru.</value>
   </data>
+  <data name="ConsumersMicrosoft" xml:space="preserve">
+    <value>Microsoft</value>
+  </data>
+  <data name="ConsumersmicrosoftClientId" xml:space="preserve">
+    <value>ID клиента приложения</value>
+  </data>
+  <data name="ConsumersmicrosoftClientSecret" xml:space="preserve">
+    <value>Секрет клиента</value>
+  </data>
+  <data name="ConsumersMicrosoftDescription" xml:space="preserve">
+    <value>Подключите приложение для входа на портал по учетной записи Microsoft.</value>
+  </data>
+  <data name="ConsumersMicrosoftInstruction" xml:space="preserve">
+    <value>Подключите это приложение, чтобы пользователи могли входить в {LogoText}, используя Microsoft. {0}Перейдите в Microsoft Azure и создайте новое приложение для интеграции {LogoText}. Вставьте полученные данные ниже:</value>
+  </data>
   <data name="ConsumersRackspace" xml:space="preserve">
     <value>Rackspace Cloud Storage</value>
   </data>
   <data name="ConsumersRackspaceDescription" xml:space="preserve">
     <value>Подключите сервис Rackspace Cloud Storage для резервного копирования и хранения данных портала.</value>
+  </data>
+  <data name="ConsumersRackspaceInstruction" xml:space="preserve">
+    <value>Подключите сервис Rackspace Cloud Storage для резервного копирования и хранения данных портала. {0}В настройках безопасности панели управления Rackspace Cloud, нажмите на ссылку Show рядом с Rackspace API Key. Вставьте полученные данные ниже:</value>
   </data>
   <data name="ConsumersRackspaceprivate_container" xml:space="preserve">
     <value>Приватный контейнер</value>
@@ -310,6 +486,9 @@
   <data name="ConsumersS3Description" xml:space="preserve">
     <value>Подключите Amazon AWS S3 для резервного копирования и хранения данных портала.</value>
   </data>
+  <data name="ConsumersS3Instruction" xml:space="preserve">
+    <value>Подключите Amazon AWS S3 для резервного копирования и хранения данных портала. {0}Перейдите в AWS Management Console и создайте ключи доступа для {LogoText}. Вставьте полученные данные ниже:</value>
+  </data>
   <data name="ConsumersS3region" xml:space="preserve">
     <value>Регион</value>
   </data>
@@ -330,6 +509,9 @@
   </data>
   <data name="ConsumersSelectelDescription" xml:space="preserve">
     <value>Подключите сервис Selectel Облачное хранилище для резервного копирования и хранения данных портала.</value>
+  </data>
+  <data name="ConsumersSelectelInstruction" xml:space="preserve">
+    <value>Подключите сервис Selectel Cloud Storage для резервного копирования и хранения данных портала. {0}Получите имя и пароль пользователя с доступом "Чтение и запись" к контейнерам, которые будут использоваться для хранения резервных копий, и вставьте эти данные ниже:</value>
   </data>
   <data name="ConsumersSelectelprivate_container" xml:space="preserve">
     <value>Приватный контейнер</value>
@@ -373,6 +555,21 @@
   <data name="Consumerssmscpsw" xml:space="preserve">
     <value>Пароль или MD5 хэш от пароля в нижнем регистре</value>
   </data>
+  <data name="ConsumersTelegram" xml:space="preserve">
+    <value>Telegram</value>
+  </data>
+  <data name="ConsumersTelegramBotName" xml:space="preserve">
+    <value>Имя пользователя бота</value>
+  </data>
+  <data name="ConsumersTelegramBotToken" xml:space="preserve">
+    <value>Токен бота</value>
+  </data>
+  <data name="ConsumersTelegramDescription" xml:space="preserve">
+    <value>Подключите аккаунт Telegram для получения оповещений портала через Telegram.</value>
+  </data>
+  <data name="ConsumersTelegramInstruction" xml:space="preserve">
+    <value>Чтобы получать оповещения портала через Telegram, включите бота Telegram. Вы можете создать нового бота, используя BotFather в десктопном приложении Telegram. Чтобы использовать этого бота, пользователи портала должны включить оповещения Telegram на странице своего профиля. {0}Вставьте полученные имя пользователя бота и токен в поля ниже.</value>
+  </data>
   <data name="ConsumersTwilio" xml:space="preserve">
     <value>Twilio</value>
   </data>
@@ -394,11 +591,11 @@
   <data name="ConsumersTwitter" xml:space="preserve">
     <value>X</value>
   </data>
-  <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
-    <value>ID клиента</value>
-  </data>
   <data name="ConsumerstwitterAccessTokenSecret_Default" xml:space="preserve">
     <value>Секрет клиента</value>
+  </data>
+  <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
+    <value>ID клиента</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
     <value>Подключите приложение для входа на портал по учетной записи X.</value>
@@ -430,11 +627,29 @@
   <data name="ConsumersVkInstruction" xml:space="preserve">
     <value>Добавив приложение сервиса ВКонтакте Вы сможете на странице своего профиля подключить вход на портал используя аккаунт ВКонтакте.</value>
   </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>ID клиента</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Секрет клиента</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Подключите приложение для входа на портал по учетной записи WeChat .</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Подключите приложение для входа на портал по учетной записи WeChat .</value>
+  </data>
   <data name="ConsumersWordpress" xml:space="preserve">
     <value>WordPress</value>
   </data>
   <data name="ConsumersWordpressDescription" xml:space="preserve">
     <value>Подключите приложение для публикации документов прямо в WordPress.</value>
+  </data>
+  <data name="ConsumersWordpressInstruction" xml:space="preserve">
+    <value>Подключите это приложение, чтобы легко публиковать документы на сайте WordPress. {0}На странице Wordpress Developers создайте новое приложение для интеграции {LogoText}. Вставьте полученные данные ниже:</value>
   </data>
   <data name="ConsumerswpClientId" xml:space="preserve">
     <value>Ключ WordPress</value>
@@ -472,6 +687,21 @@
   <data name="ConsumersYandexInstruction" xml:space="preserve">
     <value>Добавив приложение сервиса Yandex Вы сможете на странице своего профиля подключить вход на портал используя аккаунт Yandex.</value>
   </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>ID клиента Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Секрет клиента Zoom</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>Подключите приложение для входа на портал по учетной записи Zoom.</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>Подключите это приложение, чтобы пользователи могли входить в {LogoText}, используя Zoom. {0}Перейдите на сайт Сеть разработчиков Zoom и создайте новое приложение для интеграции {LogoText}. Вставьте полученные данные ниже:</value>
+  </data>
   <data name="CouldNotRecoverPasswordForLdapUser" xml:space="preserve">
     <value>Операция восстановления пароля запрещена для пользователя LDAP</value>
   </data>
@@ -480,6 +710,24 @@
   </data>
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>Пользовательский</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Дата</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>Электронная почта</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Имя</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>Id</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Фамилия</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Квота сервиса документов ({0})</value>
   </data>
   <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
     <value>Неправильный ID экземпляра.</value>
@@ -496,6 +744,9 @@
   <data name="ErrorBadKeys" xml:space="preserve">
     <value>Неверные ключи</value>
   </data>
+  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
+    <value>Последнее пространство с полным доступом не может быть удалено</value>
+  </data>
   <data name="ErrorDisabledProfile" xml:space="preserve">
     <value>Действие Вашего профиля приостановлено</value>
   </data>
@@ -507,6 +758,9 @@
   </data>
   <data name="ErrorEmailEmpty" xml:space="preserve">
     <value>Не заполнено поле адреса электронной почты</value>
+  </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>Этот адрес электронной почты прикреплен к пользователю {0} в качестве стороннего провайдера</value>
   </data>
   <data name="ErrorEmailsAreTheSame" xml:space="preserve">
     <value>Текущий адрес электронной почты совпадает с новым адресом</value>
@@ -520,11 +774,26 @@
   <data name="ErrorEmptyUploadFileSelected" xml:space="preserve">
     <value>Загружаемый файл не найден</value>
   </data>
+  <data name="ErrorFileNotImage" xml:space="preserve">
+    <value>Неизвестный тип файла изображения</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>Группа не найдена</value>
+  </data>
+  <data name="ErrorImageSize" xml:space="preserve">
+    <value>Размер изображения превышает допустимые параметры</value>
+  </data>
   <data name="ErrorImageWeightLimit" xml:space="preserve">
     <value>Размер файла изображения слишком большой</value>
   </data>
   <data name="ErrorIncorrectUserName" xml:space="preserve">
     <value>Некорректное имя или фамилия</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Превышен лимит приглашений</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Добавьте хотя бы 1 разрешенный IP-адрес.</value>
   </data>
   <data name="ErrorIpSecurity" xml:space="preserve">
     <value>Доступ к порталу ограничен</value>
@@ -562,6 +831,9 @@
   <data name="ErrorPasswordOnlyLatinLetters" xml:space="preserve">
     <value>только латинские буквы</value>
   </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Требуется оплата</value>
+  </data>
   <data name="ErrorRequestLimitExceeded" xml:space="preserve">
     <value>Превышен лимит запросов</value>
   </data>
@@ -571,11 +843,53 @@
   <data name="ErrorTenantTooShortFormat" xml:space="preserve">
     <value>Доменное имя должно содержать от {0} до {1} символов.</value>
   </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>Слишком много попыток входа. Пожалуйста, попробуйте позже</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Добавьте хотя бы 1 доверенный домен.</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Пользователь отключен</value>
+  </data>
   <data name="ErrorUserNotFound" xml:space="preserve">
     <value>Пользователь не найден</value>
   </data>
   <data name="ErrorUserNotFoundByEmail" xml:space="preserve">
     <value>Пользователь с e-mail "{0}" не найден</value>
+  </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>URL-адрес вебхука недоступен. Не приходит статус 200 в ответ на http-запрос с методом HEAD.</value>
+  </data>
+  <data name="ErrorWebPluginArchive" xml:space="preserve">
+    <value>Неправильный архив плагина</value>
+  </data>
+  <data name="ErrorWebPluginExist" xml:space="preserve">
+    <value>Плагин уже существует</value>
+  </data>
+  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
+    <value>Неправильное расширение файла</value>
+  </data>
+  <data name="ErrorWebPluginFileSize" xml:space="preserve">
+    <value>Размер файла превышает ограничение</value>
+  </data>
+  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
+    <value>Изменения в системных плагинах запрещены</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>Количество плагинов превышает лимит</value>
+  </data>
+  <data name="ErrorWebPluginName" xml:space="preserve">
+    <value>Неправильное имя плагина</value>
+  </data>
+  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
+    <value>Нет исходного файла</value>
+  </data>
+  <data name="ErrorWebPluginNotFound" xml:space="preserve">
+    <value>Плагин не найден</value>
+  </data>
+  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
+    <value>Слишком много исходных файлов</value>
   </data>
   <data name="EuServerRegion" xml:space="preserve">
     <value>Европа (Франкфурт)</value>
@@ -754,6 +1068,9 @@
   <data name="MessageEmailChangeInstuctionsSentOnEmail" xml:space="preserve">
     <value>Инструкции по изменению электронной почты были успешно отправлены</value>
   </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Инструкция по смене пароля была отправлена ​​на адрес электронной почты {0}.</value>
+  </data>
   <data name="MessageYourPasswordSendedToEmail" xml:space="preserve">
     <value>Если пользователь с почтой {0} существует, то на этот адрес была отправлена инструкция по смене пароля.</value>
   </data>
@@ -766,14 +1083,26 @@
   <data name="Owner" xml:space="preserve">
     <value>Владелец</value>
   </data>
+  <data name="PortalName" xml:space="preserve">
+    <value>Облачное пространство для ваших офисных документов</value>
+  </data>
   <data name="PortalSecurity" xml:space="preserve">
     <value>Доступ к порталу</value>
+  </data>
+  <data name="QuotaGreaterPortalError" xml:space="preserve">
+    <value>Не удалось установить квоту памяти: установленная вами квота памяти превышает квоту порталов.</value>
   </data>
   <data name="ReassignDataRemoveUserError" xml:space="preserve">
     <value>Процесс передачи данных для {0} не завершен.</value>
   </data>
   <data name="RecaptchaInvalid" xml:space="preserve">
     <value>Неверный код Recaptcha</value>
+  </data>
+  <data name="RoomFreeSpaceException" xml:space="preserve">
+    <value>Превышена квота пространства на комнату</value>
+  </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>Не удалось установить квоту на комнату. Введенное значение превышает объем хранилища DocSpace.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>АТР (Сингапур)</value>
@@ -817,32 +1146,38 @@
   <data name="SuccessfullySentNotificationDeleteUserInfoMessage" xml:space="preserve">
     <value>Инструкции по отключению профиля были отправлены на адрес {0}</value>
   </data>
-  <data name="TfaAppAuthMessageError" xml:space="preserve">
-    <value>Неправильный код</value>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>Количество ИИ-агентов не должно превышать {0}</value>
   </data>
-  <data name="TfaAppNotAvailable" xml:space="preserve">
-    <value>Настройки приложения для аутентификации недоступны</value>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>ИИ-инструменты</value>
   </data>
-  <data name="TfaTooMuchError" xml:space="preserve">
-    <value>Вы отправили слишком много текстовых сообщений. Повторите попытку позже.</value>
-  </data>
-  <data name="UsServerRegion" xml:space="preserve">
-    <value>Запад США (Орегон)</value>
-  </data>
-  <data name="WhatsNewSubscriptionName" xml:space="preserve">
-    <value>Новенькое</value>
-  </data>
-  <data name="TariffsFeature_customization" xml:space="preserve">
-    <value>Брендинг и кастомизация</value>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Включите функции ИИ в вашем DocSpace для повышения производительности.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Отслеживание входов и действий</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Резервное копирование</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Включить резервное копирование для вашего DocSpace. Оплата будет списываться автоматически.</value>
+  </data>
+  <data name="TariffsFeature_customization" xml:space="preserve">
+    <value>Брендинг и кастомизация</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>Максимальный размер файла</value>
   </data>
   <data name="TariffsFeature_file_size_exception" xml:space="preserve">
     <value>Размер файла не должен превышать {0}</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} бесплатных резервных копий в месяц</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Количество бесплатных резервных копий не должно превышать {0} в течение месяца</value>
   </data>
   <data name="TariffsFeature_manager_exception" xml:space="preserve">
     <value>Количество администраторов не должно превышать {0}</value>
@@ -862,16 +1197,37 @@
   <data name="TariffsFeature_sso" xml:space="preserve">
     <value>SSO</value>
   </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Квота хранилища и статистика</value>
+  </data>
+  <data name="TariffsFeature_thirdparty" xml:space="preserve">
+    <value>Сторонние интеграции</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} на администратора и возможность добавлять пространство по запросу</value>
+  </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>Используемое дисковое пространство не должно превышать {0}</value>
   </data>
   <data name="TariffsFeature_total_size_price_count" xml:space="preserve">
     <value>Дисковое пространство</value>
   </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Дополнительное дисковое хранилище</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Настройте необходимый объем хранилища.</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Добавлено администраторов:</value>
+  </data>
   <data name="TariffsFeature_used_room" xml:space="preserve">
     <value>Комнат:</value>
   </data>
   <data name="TariffsFeature_used_total_size" xml:space="preserve">
+    <value>Используемое дисковое пространство:</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
     <value>Используемое дисковое пространство:</value>
   </data>
   <data name="TariffsFeature_used_usersInRoom" xml:space="preserve">
@@ -880,53 +1236,23 @@
   <data name="TariffsFeature_users" xml:space="preserve">
     <value>Неограниченное количество пользователей и гостей</value>
   </data>
-  <data name="TariffsFeature_users_exception" xml:space="preserve">
-    <value>Количество пользователей не должно превышать {0}</value>
-  </data>
   <data name="TariffsFeature_usersInRoom" xml:space="preserve">
     <value>Пользователей в комнате</value>
   </data>
   <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
     <value>Количество пользователей в комнате не должно превышать {0}</value>
   </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Добавлено администраторов:</value>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Количество администраторов превышает лимит: {0}/{1}.</value>
   </data>
-  <data name="ConsumersappleIdClientId" xml:space="preserve">
-    <value>ID клиента приложения</value>
+  <data name="TariffsFeature_users_exception" xml:space="preserve">
+    <value>Количество пользователей не должно превышать {0}</value>
   </data>
-  <data name="ConsumersappleIdKeyId" xml:space="preserve">
-    <value>10-значный идентификатор ключа, сгенерированный для входа в систему с помощью приватного ключа Apple</value>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>Веб-поиск на основе ИИ</value>
   </data>
-  <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>Подключите приложение для входа на портал по учетной записи Apple ID.</value>
-  </data>
-  <data name="ConsumersAppleIdInstruction" xml:space="preserve">
-    <value>Подключите это приложение, чтобы пользователи могли входить в {LogoText}, используя Apple ID. {0}Перейдите на портал Apple Developers и создайте новое приложение для интеграции {LogoText}. Вставьте полученные данные ниже:</value>
-  </data>
-  <data name="ConsumersappleIdPrivateKey" xml:space="preserve">
-    <value>Приватный ключ, скачанный с Apple Developer</value>
-  </data>
-  <data name="ConsumersappleIdTeamId" xml:space="preserve">
-    <value>10-значный Team ID аккаунта разработчика</value>
-  </data>
-  <data name="ConsumersmicrosoftClientSecret" xml:space="preserve">
-    <value>Секрет клиента</value>
-  </data>
-  <data name="ErrorFileNotImage" xml:space="preserve">
-    <value>Неизвестный тип файла изображения</value>
-  </data>
-  <data name="ErrorImageSize" xml:space="preserve">
-    <value>Размер изображения превышает допустимые параметры</value>
-  </data>
-  <data name="ConsumersMicrosoft" xml:space="preserve">
-    <value>Microsoft</value>
-  </data>
-  <data name="ConsumersTelegram" xml:space="preserve">
-    <value>Telegram</value>
-  </data>
-  <data name="Tariffs_startup" xml:space="preserve">
-    <value>Startup</value>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Пополните свой кошелек, чтобы разблокировать веб-поиск на основе ИИ.</value>
   </data>
   <data name="Tariffs_admin" xml:space="preserve">
     <value>Business</value>
@@ -934,269 +1260,11 @@
   <data name="Tariffs_adminyear" xml:space="preserve">
     <value>Business</value>
   </data>
-  <data name="ConsumersAppleId" xml:space="preserve">
-    <value>Apple ID</value>
-  </data>
-  <data name="ConsumersMicrosoftInstruction" xml:space="preserve">
-    <value>Подключите это приложение, чтобы пользователи могли входить в {LogoText}, используя Microsoft. {0}Перейдите в Microsoft Azure и создайте новое приложение для интеграции {LogoText}. Вставьте полученные данные ниже:</value>
-  </data>
-  <data name="ConsumersTelegramBotName" xml:space="preserve">
-    <value>Имя пользователя бота</value>
-  </data>
-  <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Подключите аккаунт Telegram для получения оповещений портала через Telegram.</value>
-  </data>
-  <data name="PortalName" xml:space="preserve">
-    <value>Облачное пространство для ваших офисных документов</value>
-  </data>
-  <data name="ConsumersTelegramInstruction" xml:space="preserve">
-    <value>Чтобы получать оповещения портала через Telegram, включите бота Telegram. Вы можете создать нового бота, используя BotFather в десктопном приложении Telegram. Чтобы использовать этого бота, пользователи портала должны включить оповещения Telegram на странице своего профиля. {0}Вставьте полученные имя пользователя бота и токен в поля ниже.</value>
-  </data>
-  <data name="ConsumersTelegramBotToken" xml:space="preserve">
-    <value>Токен бота</value>
-  </data>
-  <data name="ConsumersMicrosoftDescription" xml:space="preserve">
-    <value>Подключите приложение для входа на портал по учетной записи Microsoft.</value>
-  </data>
-  <data name="ConsumersmicrosoftClientId" xml:space="preserve">
-    <value>ID клиента приложения</value>
-  </data>
-  <data name="ConsumersGoogleCloudInstruction" xml:space="preserve">
-    <value>Подключите сервис Google Cloud Storage для резервного копирования и хранения данных портала. {0}Перейдите в консоль Google Cloud Platform и создайте новый сервисный аккаунт для {LogoText}. Вставьте полученные данные ниже:</value>
-  </data>
-  <data name="ConsumersFirebaseInstruction" xml:space="preserve">
-    <value>Подключите это приложение, чтобы пользователи могли получать оповещения об отправленных им сообщениях даже офлайн. {0}Перейдите в консоль Firebase и добавьте новый проект для интеграции {LogoText}. Вставьте полученные данные ниже:</value>
-  </data>
-  <data name="ConsumersEasyBibInstruction" xml:space="preserve">
-    <value>Подключите это приложение, чтобы создавать библиографические списки в редакторах {LogoText}. {0}Перейдите на страницу регистрации EasyBib и заполните форму, чтобы добавить интеграцию {LogoText}. После получения ключа приложения вставьте его ниже:</value>
-  </data>
-  <data name="ConsumersRackspaceInstruction" xml:space="preserve">
-    <value>Подключите сервис Rackspace Cloud Storage для резервного копирования и хранения данных портала. {0}В настройках безопасности панели управления Rackspace Cloud, нажмите на ссылку Show рядом с Rackspace API Key. Вставьте полученные данные ниже:</value>
-  </data>
-  <data name="ConsumersS3Instruction" xml:space="preserve">
-    <value>Подключите Amazon AWS S3 для резервного копирования и хранения данных портала. {0}Перейдите в AWS Management Console и создайте ключи доступа для {LogoText}. Вставьте полученные данные ниже:</value>
-  </data>
-  <data name="ConsumersSelectelInstruction" xml:space="preserve">
-    <value>Подключите сервис Selectel Cloud Storage для резервного копирования и хранения данных портала. {0}Получите имя и пароль пользователя с доступом "Чтение и запись" к контейнерам, которые будут использоваться для хранения резервных копий, и вставьте эти данные ниже:</value>
-  </data>
-  <data name="ConsumersWordpressInstruction" xml:space="preserve">
-    <value>Подключите это приложение, чтобы легко публиковать документы на сайте WordPress. {0}На странице Wordpress Developers создайте новое приложение для интеграции {LogoText}. Вставьте полученные данные ниже:</value>
-  </data>
-  <data name="TariffsFeature_thirdparty" xml:space="preserve">
-    <value>Сторонние интеграции</value>
-  </data>
-  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
-    <value>Слишком много попыток входа. Пожалуйста, попробуйте позже</value>
-  </data>
-  <data name="ConsumersZoom" xml:space="preserve">
-    <value>Zoom</value>
-  </data>
-  <data name="ConsumersZoomClientId" xml:space="preserve">
-    <value>ID клиента Zoom</value>
-  </data>
-  <data name="ConsumersZoomClientSecret" xml:space="preserve">
-    <value>Секрет клиента Zoom</value>
-  </data>
-  <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Подключите приложение для входа на портал по учетной записи Zoom.</value>
-  </data>
-  <data name="ConsumersZoomInstruction" xml:space="preserve">
-    <value>Подключите это приложение, чтобы пользователи могли входить в {LogoText}, используя Zoom. {0}Перейдите на сайт Сеть разработчиков Zoom и создайте новое приложение для интеграции {LogoText}. Вставьте полученные данные ниже:</value>
-  </data>
-  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
-    <value>Последнее пространство с полным доступом не может быть удалено</value>
-  </data>
-  <data name="ErrorWebPluginArchive" xml:space="preserve">
-    <value>Неправильный архив плагина</value>
-  </data>
-  <data name="ErrorWebPluginExist" xml:space="preserve">
-    <value>Плагин уже существует</value>
-  </data>
-  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
-    <value>Неправильное расширение файла</value>
-  </data>
-  <data name="ErrorWebPluginFileSize" xml:space="preserve">
-    <value>Размер файла превышает ограничение</value>
-  </data>
-  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
-    <value>Изменения в системных плагинах запрещены</value>
-  </data>
-  <data name="ErrorWebPluginName" xml:space="preserve">
-    <value>Неправильное имя плагина</value>
-  </data>
-  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
-    <value>Нет исходного файла</value>
-  </data>
-  <data name="ErrorWebPluginNotFound" xml:space="preserve">
-    <value>Плагин не найден</value>
-  </data>
-  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
-    <value>Слишком много исходных файлов</value>
-  </data>
-  <data name="QuotaGreaterPortalError" xml:space="preserve">
-    <value>Не удалось установить квоту памяти: установленная вами квота памяти превышает квоту порталов.</value>
-  </data>
-  <data name="RoomFreeSpaceException" xml:space="preserve">
-    <value>Превышена квота пространства на комнату</value>
-  </data>
-  <data name="UserFreeSpaceException" xml:space="preserve">
-    <value>Превышена квота пространства на пользователя</value>
-  </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} на администратора и возможность добавлять пространство по запросу</value>
-  </data>
-  <data name="TariffsFeature_statistic" xml:space="preserve">
-    <value>Квота хранилища и статистика</value>
-  </data>
-  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
-    <value>Превышен лимит приглашений</value>
-  </data>
-  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
-    <value>Инструкция по смене пароля была отправлена ​​на адрес электронной почты {0}.</value>
-  </data>
-  <data name="ErrorUserDisabled" xml:space="preserve">
-    <value>Пользователь отключен</value>
-  </data>
-  <data name="ErrorEmailLinked" xml:space="preserve">
-    <value>Этот адрес электронной почты прикреплен к пользователю {0} в качестве стороннего провайдера</value>
-  </data>
-  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Не удалось установить квоту на комнату. Введенное значение превышает объем хранилища DocSpace.</value>
-  </data>
-  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Не удалось установить квоту на пользователя. Введенное значение превышает объем хранилища DocSpace.</value>
-  </data>
-  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
-    <value>Количество администраторов превышает лимит: {0}/{1}.</value>
-  </data>
-  <data name="ErrorIpRestriction" xml:space="preserve">
-    <value>Добавьте хотя бы 1 разрешенный IP-адрес.</value>
-  </data>
-  <data name="ErrorTrustedMailDomain" xml:space="preserve">
-    <value>Добавьте хотя бы 1 доверенный домен.</value>
-  </data>
   <data name="Tariffs_nonprofit" xml:space="preserve">
     <value>Некоммерческий</value>
   </data>
-  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
-    <value>URL-адрес вебхука недоступен. Не приходит статус 200 в ответ на http-запрос с методом HEAD.</value>
-  </data>
-  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
-    <value>Кредит</value>
-  </data>
-  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
-    <value>Валюта</value>
-  </data>
-  <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>Дата</value>
-  </data>
-  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
-    <value>Количество</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
-    <value>Единица измерения</value>
-  </data>
-  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
-    <value>Отчет об операциях клиента ({0}-{1})</value>
-  </data>
-  <data name="ErrorGroupNotFound" xml:space="preserve">
-    <value>Группа не найдена</value>
-  </data>
-  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
-    <value>Дополнительное дисковое хранилище</value>
-  </data>
-  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
-    <value>Настройте необходимый объем хранилища.</value>
-  </data>
-  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
-    <value>Используемое дисковое пространство:</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
-    <value>Место на диске</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
-    <value>Пополнение баланса</value>
-  </data>
-  <data name="AutoRenewal" xml:space="preserve">
-    <value>Автоматическое продление</value>
-  </data>
-  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
-    <value>Количество бесплатных резервных копий не должно превышать {0} в течение месяца</value>
-  </data>
-  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
-    <value>Включить резервное копирование для вашего DocSpace. Оплата будет списываться автоматически.</value>
-  </data>
-  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
-    <value>Резервное копирование</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
-    <value>Резервное копирование</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
-    <value>Гб</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>Резервное копирование</value>
-  </data>
-  <data name="AccountingCustomerOperationContact" xml:space="preserve">
-    <value>Контакт</value>
-  </data>
-  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
-    <value>Дебет</value>
-  </data>
-  <data name="ErrorPaymentRequired" xml:space="preserve">
-    <value>Требуется оплата</value>
-  </data>
-  <data name="AutoTopUp" xml:space="preserve">
-    <value>Автоматическое пополнение</value>
-  </data>
-  <data name="AccountingCustomerOperationType" xml:space="preserve">
-    <value>Тип</value>
-  </data>
-  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
-    <value>Подробнее</value>
-  </data>
-  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
-    <value>История транзакций</value>
-  </data>
-  <data name="TariffsFeature_free_backup" xml:space="preserve">
-    <value>{0} бесплатных резервных копий в месяц</value>
-  </data>
-  <data name="ConsumersWeixin" xml:space="preserve">
-    <value>WeChat</value>
-  </data>
-  <data name="ConsumersWeixinClientId" xml:space="preserve">
-    <value>ID клиента</value>
-  </data>
-  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
-    <value>Секрет клиента</value>
-  </data>
-  <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Подключите приложение для входа на портал по учетной записи WeChat .</value>
-  </data>
-  <data name="ConsumersWeixinInstruction" xml:space="preserve">
-    <value>Подключите приложение для входа на портал по учетной записи WeChat .</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
-    <value>Дата</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
-    <value>Электронная почта</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
-    <value>Имя</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
-    <value>Id</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
-    <value>Фамилия</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
-    <value>Квота сервиса документов ({0})</value>
-  </data>
-  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
-    <value>Количество плагинов превышает лимит</value>
+  <data name="Tariffs_startup" xml:space="preserve">
+    <value>Startup</value>
   </data>
   <data name="TelegramOnGenericError" xml:space="preserve">
     <value>Произошла непредвиденная ошибка. Попробуйте еще раз.</value>
@@ -1204,34 +1272,25 @@
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
     <value>Вы успешно подключились к Telegram для получения уведомлений от вашего DocSpace.</value>
   </data>
-  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
-    <value>Векторизация</value>
+  <data name="TfaAppAuthMessageError" xml:space="preserve">
+    <value>Неправильный код</value>
   </data>
-  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
-    <value>ИИ-инструменты</value>
+  <data name="TfaAppNotAvailable" xml:space="preserve">
+    <value>Настройки приложения для аутентификации недоступны</value>
   </data>
-  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
-    <value>Токены</value>
+  <data name="TfaTooMuchError" xml:space="preserve">
+    <value>Вы отправили слишком много текстовых сообщений. Повторите попытку позже.</value>
   </data>
-  <data name="AiAgentFreeSpaceException" xml:space="preserve">
-    <value>Квота пространства для ИИ-агентов превышена</value>
+  <data name="UserFreeSpaceException" xml:space="preserve">
+    <value>Превышена квота пространства на пользователя</value>
   </data>
-  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Не удалось установить квоту на одного ИИ-агента. Введенное значение превышает общий объем хранилища DocSpace.</value>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>Не удалось установить квоту на пользователя. Введенное значение превышает объем хранилища DocSpace.</value>
   </data>
-  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
-    <value>Количество ИИ-агентов не должно превышать {0}</value>
+  <data name="UsServerRegion" xml:space="preserve">
+    <value>Запад США (Орегон)</value>
   </data>
-  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>ИИ-инструменты</value>
-  </data>
-  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Включите функции ИИ в вашем DocSpace для повышения производительности.</value>
-  </data>
-  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
-    <value>Веб-поиск на основе ИИ</value>
-  </data>
-  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
-    <value>Пополните свой кошелек, чтобы разблокировать веб-поиск на основе ИИ.</value>
+  <data name="WhatsNewSubscriptionName" xml:space="preserve">
+    <value>Новенькое</value>
   </data>
 </root>

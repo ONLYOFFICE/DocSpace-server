@@ -117,14 +117,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="BackupNotFound" xml:space="preserve">
-    <value>备份文件无效。请使用在同一个门户中创建的文件。</value>
-  </data>
-  <data name="ButtonSetPassword" xml:space="preserve">
-    <value>设置密码</value>
-  </data>
-  <data name="LargeBackup" xml:space="preserve">
-    <value>备份超过门户空间总限制</value>
+  <data name="AutoBackup" xml:space="preserve">
+    <value>自动备份</value>
   </data>
   <data name="BackupException" xml:space="preserve">
     <value>创建备份时发生错误，请重试或联系技术支持。</value>
@@ -132,11 +126,11 @@
   <data name="BackupInvalid" xml:space="preserve">
     <value>备份文件无效。</value>
   </data>
-  <data name="RestoreException" xml:space="preserve">
-    <value>恢复备份时发生错误，请重试或联系技术支持。</value>
+  <data name="BackupMissingFilesWarning" xml:space="preserve">
+    <value>某些文件未包含在备份中。详情请查看 {0}</value>
   </data>
-  <data name="AutoBackup" xml:space="preserve">
-    <value>自动备份</value>
+  <data name="BackupNotFound" xml:space="preserve">
+    <value>备份文件无效。请使用在同一个门户中创建的文件。</value>
   </data>
   <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
     <value>Custom cloud</value>
@@ -156,7 +150,13 @@
   <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
     <value>第三方资源</value>
   </data>
-  <data name="BackupMissingFilesWarning" xml:space="preserve">
-    <value>某些文件未包含在备份中。详情请查看 {0}</value>
+  <data name="ButtonSetPassword" xml:space="preserve">
+    <value>设置密码</value>
+  </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>备份超过门户空间总限制</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>恢复备份时发生错误，请重试或联系技术支持。</value>
   </data>
 </root>

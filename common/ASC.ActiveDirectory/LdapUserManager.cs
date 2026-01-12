@@ -276,11 +276,12 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
                     var workContext = scope.ServiceProvider.GetRequiredService<WorkContext>();
                     var client = workContext.RegisterClient(scope.ServiceProvider, source);
                     var urlShortener = scope.ServiceProvider.GetRequiredService<IUrlShortener>();
+                    var notifyConstants = scope.ServiceProvider.GetRequiredService<NotifyConstants>();
 
                     var confirmLink = commonLinkUtility.GetConfirmationEmailUrl(ldapUserInfo.Email, ConfirmType.EmailActivation);
 
                     await client.SendNoticeToAsync(
-                        NotifyConstants.ActionLdapActivation,
+                        notifyConstants.ActionLdapActivation,
                         [new DirectRecipient(ldapUserInfo.Email, null, [ldapUserInfo.Email], false)],
                         [Core.Configuration.Constants.NotifyEMailSenderSysName],
                         null,

@@ -123,6 +123,12 @@
   <data name="CanNotCreateFile" xml:space="preserve">
     <value>Skedari {0} nuk mund të krijohej</value>
   </data>
+  <data name="CanNotImportCommonFiles" xml:space="preserve">
+    <value>Skedarët e përbashkët nuk mund të importoheshin</value>
+  </data>
+  <data name="CanNotImportProjectFiles" xml:space="preserve">
+    <value>Skedarët e projektit nuk mund të importoheshin</value>
+  </data>
   <data name="CanNotImportUser" xml:space="preserve">
     <value>Përdoruesi nuk mund të importohej</value>
   </data>
@@ -153,6 +159,9 @@
   <data name="CreateFolder" xml:space="preserve">
     <value>Krijoni dosjen {0}</value>
   </data>
+  <data name="CreateRootFolder" xml:space="preserve">
+    <value>Krijoni dosje rrënjësore</value>
+  </data>
   <data name="CreateShareRoom" xml:space="preserve">
     <value>krijoni dhomë të përbashkët {0}</value>
   </data>
@@ -167,6 +176,9 @@
   </data>
   <data name="GroupMigration" xml:space="preserve">
     <value>Migrimi në grup {0} ({1}/{2})</value>
+  </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>Rezervimi është më i madh se madhësia totale e portalit</value>
   </data>
   <data name="MigratingUserFiles" xml:space="preserve">
     <value>Skedarët e përdoruesive po migrojnë {0} ({1}/{2})</value>
@@ -200,17 +212,5 @@
   </data>
   <data name="UserMigration" xml:space="preserve">
     <value>Migrimi i përdoruesit {0} ({1}/{2})</value>
-  </data>
-  <data name="СanNotImportCommonFiles" xml:space="preserve">
-    <value>Skedarët e përbashkët nuk mund të importoheshin</value>
-  </data>
-  <data name="СanNotImportProjectFiles" xml:space="preserve">
-    <value>Skedarët e projektit nuk mund të importoheshin</value>
-  </data>
-  <data name="СreateRootFolder" xml:space="preserve">
-    <value>Krijoni dosje rrënjësore</value>
-  </data>
-  <data name="LargeBackup" xml:space="preserve">
-    <value>Rezervimi është më i madh se madhësia totale e portalit</value>
   </data>
 </root>

@@ -126,6 +126,12 @@
   <data name="ActionTypeCol" xml:space="preserve">
     <value>Action Type</value>
   </data>
+  <data name="AddedRoomTags" xml:space="preserve">
+    <value>Added tags: [{1}]</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>Added MCP server {0} to AI agent</value>
+  </data>
   <data name="AdministratorAdded" xml:space="preserve">
     <value>Administrator Added: {0}</value>
   </data>
@@ -137,6 +143,36 @@
   </data>
   <data name="AdministratorOpenedFullAccess" xml:space="preserve">
     <value>Administrators [{0}]. Full Access Opened</value>
+  </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>AI agent created</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>AI agent deleted</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>AI agent renamed: {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>AI agents</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>AI provider created: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>AI provider deleted: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>AI provider updated: {0}</value>
+  </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>User Api Key Created: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>User Api Key Deleted: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>User Api Key Updated: {0}</value>
   </data>
   <data name="AttachActionType" xml:space="preserve">
     <value>Attach</value>
@@ -150,14 +186,41 @@
   <data name="AuditTrailReportName" xml:space="preserve">
     <value>Audit Trail Report ({0}-{1})</value>
   </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>The authorization link has been activated</value>
+  </data>
   <data name="AuthorizationKeysSetting" xml:space="preserve">
     <value>Third-party authorization keys updated</value>
+  </data>
+  <data name="BackupCompleted" xml:space="preserve">
+    <value>Backup completed</value>
+  </data>
+  <data name="BackupFailed" xml:space="preserve">
+    <value>Backup failed</value>
+  </data>
+  <data name="BackupStarted" xml:space="preserve">
+    <value>Backup started</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Promotional banners visibility settings changed</value>
   </data>
   <data name="BrowserCol" xml:space="preserve">
     <value>Browser</value>
   </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Client's {0} activation changed</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Client's {0} visibility changed</value>
+  </data>
+  <data name="CityCol" xml:space="preserve">
+    <value>City</value>
+  </data>
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Color Theme Changed</value>
+  </data>
+  <data name="ContactsModule" xml:space="preserve">
+    <value>Contacts</value>
   </data>
   <data name="CookieSettingsUpdated" xml:space="preserve">
     <value>Cookie Settings Updated</value>
@@ -165,11 +228,62 @@
   <data name="CopyActionType" xml:space="preserve">
     <value>Copy</value>
   </data>
+  <data name="CountryCol" xml:space="preserve">
+    <value>Country</value>
+  </data>
   <data name="CreateActionType" xml:space="preserve">
     <value>Create</value>
   </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Client created</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Customer operation performed</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Customer operations report downloaded</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Customer subscription updated: {0}</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Customer wallet enabled services settings updated</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Customer wallet topped up: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Customer wallet top up settings updated</value>
+  </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>Custom Navigation Settings Updated</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>AI agents [{0}]. Set custom storage quota for AI agents : {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>AI agents [{0}]. Set default storage quota for AI agents : {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>AI agents [{0}]. Disabled storage quota for AI agents</value>
+  </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Rooms [{0}]. Set custom storage quota for rooms: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Rooms [{0}]. Set default storage quota for rooms: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Rooms [{0}]. Disabled storage quota for rooms</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Users [{0}]. Set custom storage quota for users: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Users [{0}]. Set default storage quota for users: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Users [{0}]. Disabled storage quota for users</value>
   </data>
   <data name="DateCol" xml:space="preserve">
     <value>Date</value>
@@ -180,8 +294,20 @@
   <data name="DeleteActionType" xml:space="preserve">
     <value>Delete</value>
   </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Client {0} deleted</value>
+  </data>
+  <data name="DeletedRoomTags" xml:space="preserve">
+    <value>Deleted tags: [{1}]</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>Deleted MCP server {0} from AI agent</value>
+  </data>
   <data name="DetachActionType" xml:space="preserve">
     <value>Detach</value>
+  </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Developer Tools access settings changed</value>
   </data>
   <data name="DnsSettingsUpdated" xml:space="preserve">
     <value>DNS Settings Updated</value>
@@ -231,6 +357,12 @@
   <data name="FileCreatedVersion" xml:space="preserve">
     <value>Files [{0}]. Revision: {1}. Version Created</value>
   </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>File: {0}. Custom filter disabled</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>File: {0}. Custom filter enabled</value>
+  </data>
   <data name="FileDeleted" xml:space="preserve">
     <value>File Deleted: {0}</value>
   </data>
@@ -243,11 +375,26 @@
   <data name="FileDownloadedAs" xml:space="preserve">
     <value>Files [{0}]. Downloaded As: {1}</value>
   </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Files [{0}]. External link created: {1}. Role: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Files [{0}]. External link deleted: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Files [{0}]. External link updated: {1}. Role: {2}</value>
+  </data>
   <data name="FileImported" xml:space="preserve">
     <value>Folders [{0}]. File Imported: {1}. Provider: {2}</value>
   </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>File: {0}. Index changed from {1} to {2}</value>
+  </data>
   <data name="FileLocked" xml:space="preserve">
     <value>File Locked: {0}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>File Marked As Favorite: {0}</value>
   </data>
   <data name="FileMoved" xml:space="preserve">
     <value>Files [{0}]. Moved From Folder "{1}" To Folder: "{2}"</value>
@@ -257,6 +404,15 @@
   </data>
   <data name="FileMovedWithOverwriting" xml:space="preserve">
     <value>Files [{0}]. Moved With Overwriting From Folder "{1}" To Folder: "{2}"</value>
+  </data>
+  <data name="FileOpenedForChange" xml:space="preserve">
+    <value>File Opened For Change: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>File Removed From Favorite: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>File removed from "Shared with me": {0}</value>
   </data>
   <data name="FileRenamed" xml:space="preserve">
     <value>File Renamed: {0}</value>
@@ -269,6 +425,9 @@
   </data>
   <data name="FileSendAccessLink" xml:space="preserve">
     <value>Sent shared link to the [{0}] file. Recipients: [{1}]</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>bytes,KB,MB,GB,TB</value>
   </data>
   <data name="FilesModule" xml:space="preserve">
     <value>Files</value>
@@ -285,11 +444,20 @@
   <data name="FileUpdatedAccess" xml:space="preserve">
     <value>Files [{0}]. Access Updated</value>
   </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Files [{0}]. Access Updated for {1}. Role: {2}</value>
+  </data>
   <data name="FileUpdatedRevisionComment" xml:space="preserve">
     <value>Files [{0}]. Revision {1}. Comment Updated</value>
   </data>
   <data name="FileUploaded" xml:space="preserve">
     <value>File Uploaded: {0}</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>File uploaded with overwriting: {0}</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>Files [{0}]. Version Deleted: {1}</value>
   </data>
   <data name="FolderCopied" xml:space="preserve">
     <value>Folders [{0}]. Copied To Folder: {1}</value>
@@ -303,6 +471,24 @@
   <data name="FolderDeleted" xml:space="preserve">
     <value>Folder Deleted: {0}</value>
   </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Folder Downloaded: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Folders [{0}]. External link created: {1}. Role: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Folders [{0}]. External link deleted: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Folders [{0}]. External link updated: {1}. Role: {2}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Folder: {0}. Index changed from {1} to {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Folder: {0}. Indexes reordered</value>
+  </data>
   <data name="FolderMoved" xml:space="preserve">
     <value>Folders [{0}]. Moved To Folder: {1}</value>
   </data>
@@ -311,6 +497,9 @@
   </data>
   <data name="FolderMovedWithOverwriting" xml:space="preserve">
     <value>Folders [{0}]. Moved With Overwriting To Folder: {1}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Folder removed from "Shared with me": {0}</value>
   </data>
   <data name="FolderRenamed" xml:space="preserve">
     <value>Folder Renamed: {0}</value>
@@ -321,11 +510,38 @@
   <data name="FolderUpdatedAccess" xml:space="preserve">
     <value>Folders [{0}]. Access Updated</value>
   </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Folders [{0}]. Access Updated for {1}. Role: {2}</value>
+  </data>
   <data name="FollowActionType" xml:space="preserve">
     <value>Follow</value>
   </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Users [{0}]. Completely filled out form: {1}</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>File Opened For Filling: {0}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Users [{0}]. Filled out part of form: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Users [{0}]. Started to fill: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Users [{0}]. Form stopped: {1}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Users [{0}]. Form submitted: {1}</value>
+  </data>
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Sphinx settings updated</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Generated authorization code for client {0}</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Generated personal access token for client {0}</value>
   </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Welcome Page Settings Updated</value>
@@ -363,11 +579,23 @@
   <data name="LanguageSettingsUpdated" xml:space="preserve">
     <value>Language Settings Updated</value>
   </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>LDAP authentication disabled</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>LDAP authentication enabled</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>LDAP synchronization completed</value>
+  </data>
   <data name="LicenseKeyUploaded" xml:space="preserve">
     <value>License key uploaded</value>
   </data>
   <data name="LinkActionType" xml:space="preserve">
     <value>Link</value>
+  </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Location</value>
   </data>
   <data name="LoginFail" xml:space="preserve">
     <value>Login Fail</value>
@@ -420,8 +648,8 @@
   <data name="LoginSuccess" xml:space="preserve">
     <value>Login Success</value>
   </data>
-  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Login Via Social Account Success: {0}</value>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Login Via Social Account Success</value>
   </data>
   <data name="LoginSuccessSocialApp" xml:space="preserve">
     <value>Successful login via social application</value>
@@ -432,8 +660,17 @@
   <data name="LoginSuccessViaApiSms" xml:space="preserve">
     <value>Successful Login via API &amp; SMS Code</value>
   </data>
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
+    <value>Login Via Social Account Success: {0}</value>
+  </data>
   <data name="LoginSuccessViaApiTfa" xml:space="preserve">
     <value>Successful Login via API &amp; authenticator application</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Successful Login via OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Login success via login and password</value>
   </data>
   <data name="LoginSuccessViaSms" xml:space="preserve">
     <value>Login via SMS successful</value>
@@ -489,6 +726,9 @@
   <data name="PortalDeleted" xml:space="preserve">
     <value>Portal Deleted</value>
   </data>
+  <data name="PortalRenamed" xml:space="preserve">
+    <value>Portal Renamed</value>
+  </data>
   <data name="PrivacyRoomDisable" xml:space="preserve">
     <value>Private Room is disabled</value>
   </data>
@@ -519,20 +759,188 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Products List Updated</value>
   </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Set default storage quota for AI agents: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Disabled default storage quota for AI agents</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Set default storage quota: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Disabled default storage quota</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Set default storage quota for rooms: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Disabled default storage quota for rooms</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Set default storage quota for users: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Disabled default storage quota for users</value>
+  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Reassigns</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Client's {0} secret regenerated</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>Vectorization settings have been reset</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>Web search settings have been reset</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Revoked client {0} access</value>
+  </data>
+  <data name="RoomArchived" xml:space="preserve">
+    <value>Room archived</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Room copied: {0}</value>
+  </data>
+  <data name="RoomCreated" xml:space="preserve">
+    <value>Room created</value>
+  </data>
+  <data name="RoomCreateUser" xml:space="preserve">
+    <value>Added user: {0}. Role: {1}</value>
+  </data>
+  <data name="RoomDeleted" xml:space="preserve">
+    <value>Room deleted</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Room: {0}. Deny download disabled</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Room: {0}. Deny download enabled</value>
+  </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>External link created: {0}. Role: {1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>External link deleted: {0}</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>External link revoked: {1}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>External link updated: {0}. Role: {1}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Added group: {0}. Role: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Deleted group: {0}</value>
+  </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Export of the room index saved to Documents</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Room indexing disabled</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Room indexing enabled</value>
+  </data>
+  <data name="RoomInvitationLinkCreated" xml:space="preserve">
+    <value>Link created. Role: {1}</value>
+  </data>
+  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
+    <value>Link deleted</value>
+  </data>
+  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
+    <value>Link updated. Role: {1}</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Invitation sent again: {0}</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>LifeTime disabled</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Life time is set. Value: {0}. Period: {1}. Permanently Delete: {2}</value>
+  </data>
+  <data name="RoomLogoCreated" xml:space="preserve">
+    <value>Logo created</value>
+  </data>
+  <data name="RoomLogoDeleted" xml:space="preserve">
+    <value>Logo deleted</value>
+  </data>
+  <data name="RoomRemoveUser" xml:space="preserve">
+    <value>Deleted user: {0}</value>
+  </data>
+  <data name="RoomRenamed" xml:space="preserve">
+    <value>Room renamed: {0}</value>
+  </data>
+  <data name="RoomsModule" xml:space="preserve">
+    <value>Rooms</value>
+  </data>
+  <data name="RoomUnarchived" xml:space="preserve">
+    <value>Room unarchived</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} appointed: {1}</value>
+  </data>
+  <data name="RoomUpdateAccessForUser" xml:space="preserve">
+    <value>{0} appointed: {1}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Room: {0}. Watermark disabled</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Room: {0}. Watermark enabled</value>
+  </data>
+  <data name="ScheduledBackupCompleted" xml:space="preserve">
+    <value>Scheduled backup completed</value>
+  </data>
+  <data name="ScheduledBackupFailed" xml:space="preserve">
+    <value>Scheduled backup failed</value>
+  </data>
+  <data name="ScheduledBackupStarted" xml:space="preserve">
+    <value>Scheduled backup started</value>
   </data>
   <data name="SendActionType" xml:space="preserve">
     <value>Send</value>
   </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>User {0} sent an invitation to {1} to join this DocSpace</value>
+  </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Invite Instructions Sent: {0}</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>MCP server created: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>MCP server deleted: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>MCP server disabled: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>MCP server enabled: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>MCP server updated: {0}</value>
   </data>
   <data name="SessionCompleted" xml:space="preserve">
     <value>Session Completed</value>
   </data>
   <data name="SessionStarted" xml:space="preserve">
     <value>Session Started</value>
+  </data>
+  <data name="SettingsModule" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>Vectorization settings are configured. Provider: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>Web search settings are configured. Engine: {0}</value>
   </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO Disabled</value>
@@ -551,6 +959,12 @@
   </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>System Account</value>
+  </data>
+  <data name="TagCreated" xml:space="preserve">
+    <value>Tag created: {0}</value>
+  </data>
+  <data name="TagsDeleted" xml:space="preserve">
+    <value>Tags deleted: {0}</value>
   </data>
   <data name="TargetIdCol" xml:space="preserve">
     <value>Target ID</value>
@@ -572,6 +986,9 @@
   </data>
   <data name="TimeZoneSettingsUpdated" xml:space="preserve">
     <value>Time Zone Settings Updated</value>
+  </data>
+  <data name="TrashEmptied" xml:space="preserve">
+    <value>Trash emptied</value>
   </data>
   <data name="TrustedMailDomainSettingsUpdated" xml:space="preserve">
     <value>Trusted mail domain settings updated</value>
@@ -602,6 +1019,9 @@
   </data>
   <data name="UpdateActionType" xml:space="preserve">
     <value>Update</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Client {0} updated</value>
   </data>
   <data name="UploadActionType" xml:space="preserve">
     <value>Upload</value>
@@ -693,219 +1113,6 @@
   <data name="UserUpdatedPassword" xml:space="preserve">
     <value>Password Updated</value>
   </data>
-  <data name="RoomCreated" xml:space="preserve">
-    <value>Room created</value>
-  </data>
-  <data name="RoomArchived" xml:space="preserve">
-    <value>Room archived</value>
-  </data>
-  <data name="RoomUnarchived" xml:space="preserve">
-    <value>Room unarchived</value>
-  </data>
-  <data name="RoomRenamed" xml:space="preserve">
-    <value>Room renamed: {0}</value>
-  </data>
-  <data name="RoomLogoCreated" xml:space="preserve">
-    <value>Logo created</value>
-  </data>
-  <data name="RoomLogoDeleted" xml:space="preserve">
-    <value>Logo deleted</value>
-  </data>
-  <data name="RoomUpdateAccessForUser" xml:space="preserve">
-    <value>{0} appointed: {1}</value>
-  </data>
-  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
-    <value>Link updated. Role: {1}</value>
-  </data>
-  <data name="RoomDeleted" xml:space="preserve">
-    <value>Room deleted</value>
-  </data>
-  <data name="AddedRoomTags" xml:space="preserve">
-    <value>Added tags: [{1}]</value>
-  </data>
-  <data name="DeletedRoomTags" xml:space="preserve">
-    <value>Deleted tags: [{1}]</value>
-  </data>
-  <data name="TagCreated" xml:space="preserve">
-    <value>Tag created: {0}</value>
-  </data>
-  <data name="TagsDeleted" xml:space="preserve">
-    <value>Tags deleted: {0}</value>
-  </data>
-  <data name="RoomCreateUser" xml:space="preserve">
-    <value>Added user: {0}. Role: {1}</value>
-  </data>
-  <data name="RoomRemoveUser" xml:space="preserve">
-    <value>Deleted user: {0}</value>
-  </data>
-  <data name="RoomInvitationLinkCreated" xml:space="preserve">
-    <value>Link created. Role: {1}</value>
-  </data>
-  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
-    <value>Link deleted</value>
-  </data>
-  <data name="RoomsModule" xml:space="preserve">
-    <value>Rooms</value>
-  </data>
-  <data name="TrashEmptied" xml:space="preserve">
-    <value>Trash emptied</value>
-  </data>
-  <data name="CityCol" xml:space="preserve">
-    <value>City</value>
-  </data>
-  <data name="CountryCol" xml:space="preserve">
-    <value>Country</value>
-  </data>
-  <data name="RoomExternalLinkCreated" xml:space="preserve">
-    <value>External link created: {0}. Role: {1}</value>
-  </data>
-  <data name="RoomExternalLinkDeleted" xml:space="preserve">
-    <value>External link deleted: {0}</value>
-  </data>
-  <data name="RoomExternalLinkUpdated" xml:space="preserve">
-    <value>External link updated: {0}. Role: {1}</value>
-  </data>
-  <data name="FileOpenedForChange" xml:space="preserve">
-    <value>File Opened For Change: {0}</value>
-  </data>
-  <data name="PortalRenamed" xml:space="preserve">
-    <value>Portal Renamed</value>
-  </data>
-  <data name="SendJoinInvite" xml:space="preserve">
-    <value>User {0} sent an invitation to {1} to join this DocSpace</value>
-  </data>
-  <data name="RoomGroupAdded" xml:space="preserve">
-    <value>Added group: {0}. Role: {1}</value>
-  </data>
-  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
-    <value>{0} appointed: {1}</value>
-  </data>
-  <data name="RoomGroupRemove" xml:space="preserve">
-    <value>Deleted group: {0}</value>
-  </data>
-  <data name="FileUploadedWithOverwriting" xml:space="preserve">
-    <value>File uploaded with overwriting: {0}</value>
-  </data>
-  <data name="QuotaPerRoomChanged" xml:space="preserve">
-    <value>Set default storage quota for rooms: {0}</value>
-  </data>
-  <data name="QuotaPerRoomDisabled" xml:space="preserve">
-    <value>Disabled default storage quota for rooms</value>
-  </data>
-  <data name="QuotaPerUserChanged" xml:space="preserve">
-    <value>Set default storage quota for users: {0}</value>
-  </data>
-  <data name="QuotaPerUserDisabled" xml:space="preserve">
-    <value>Disabled default storage quota for users</value>
-  </data>
-  <data name="QuotaPerPortalChanged" xml:space="preserve">
-    <value>Set default storage quota: {0}</value>
-  </data>
-  <data name="QuotaPerPortalDisabled" xml:space="preserve">
-    <value>Disabled default storage quota</value>
-  </data>
-  <data name="FileSizePostfix" xml:space="preserve">
-    <value>bytes,KB,MB,GB,TB</value>
-  </data>
-  <data name="RoomCopied" xml:space="preserve">
-    <value>Room copied: {0}</value>
-  </data>
-  <data name="FormSubmit" xml:space="preserve">
-    <value>Users [{0}]. Form submitted: {1}</value>
-  </data>
-  <data name="FormOpenedForFilling" xml:space="preserve">
-    <value>File Opened For Filling: {0}</value>
-  </data>
-  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
-    <value>Rooms [{0}]. Set custom storage quota for rooms: {1}</value>
-  </data>
-  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
-    <value>Rooms [{0}]. Set default storage quota for rooms: {1}</value>
-  </data>
-  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
-    <value>Rooms [{0}]. Disabled storage quota for rooms</value>
-  </data>
-  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
-    <value>Users [{0}]. Set custom storage quota for users: {1}</value>
-  </data>
-  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
-    <value>Users [{0}]. Set default storage quota for users: {1}</value>
-  </data>
-  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
-    <value>Users [{0}]. Disabled storage quota for users</value>
-  </data>
-  <data name="RoomIndexingEnabled" xml:space="preserve">
-    <value>Room indexing enabled</value>
-  </data>
-  <data name="RoomIndexingDisabled" xml:space="preserve">
-    <value>Room indexing disabled</value>
-  </data>
-  <data name="RoomLifeTimeSet" xml:space="preserve">
-    <value>Life time is set. Value: {0}. Period: {1}. Permanently Delete: {2}</value>
-  </data>
-  <data name="RoomLifeTimeDisabled" xml:space="preserve">
-    <value>LifeTime disabled</value>
-  </data>
-  <data name="FolderIndexChanged" xml:space="preserve">
-    <value>Folder: {0}. Index changed from {1} to {2}</value>
-  </data>
-  <data name="FileIndexChanged" xml:space="preserve">
-    <value>File: {0}. Index changed from {1} to {2}</value>
-  </data>
-  <data name="FolderIndexReordered" xml:space="preserve">
-    <value>Folder: {0}. Indexes reordered</value>
-  </data>
-  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
-    <value>Room: {0}. Deny download enabled</value>
-  </data>
-  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
-    <value>Room: {0}. Deny download disabled</value>
-  </data>
-  <data name="RoomWatermarkSet" xml:space="preserve">
-    <value>Room: {0}. Watermark enabled</value>
-  </data>
-  <data name="RoomWatermarkDisabled" xml:space="preserve">
-    <value>Room: {0}. Watermark disabled</value>
-  </data>
-  <data name="RoomIndexExportSaved" xml:space="preserve">
-    <value>Export of the room index saved to Documents</value>
-  </data>
-  <data name="RoomInviteResend" xml:space="preserve">
-    <value>Invitation sent again: {0}</value>
-  </data>
-  <data name="CreateClient" xml:space="preserve">
-    <value>Client created</value>
-  </data>
-  <data name="UpdateClient" xml:space="preserve">
-    <value>Client {0} updated</value>
-  </data>
-  <data name="RegenerateSecret" xml:space="preserve">
-    <value>Client's {0} secret regenerated</value>
-  </data>
-  <data name="DeleteClient" xml:space="preserve">
-    <value>Client {0} deleted</value>
-  </data>
-  <data name="ChangeClientActivation" xml:space="preserve">
-    <value>Client's {0} activation changed</value>
-  </data>
-  <data name="ChangeClientVisibility" xml:space="preserve">
-    <value>Client's {0} visibility changed</value>
-  </data>
-  <data name="RevokeUserClient" xml:space="preserve">
-    <value>Revoked client {0} access</value>
-  </data>
-  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
-    <value>Generated authorization code for client {0}</value>
-  </data>
-  <data name="GeneratePersonalAccessToken" xml:space="preserve">
-    <value>Generated personal access token for client {0}</value>
-  </data>
-  <data name="FileVersionRemoved" xml:space="preserve">
-    <value>Files [{0}]. Version Deleted: {1}</value>
-  </data>
-  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
-    <value>Developer Tools access settings changed</value>
-  </data>
   <data name="WebhookCreated" xml:space="preserve">
     <value>Webhook created: {0}</value>
   </data>
@@ -914,213 +1121,6 @@
   </data>
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Webhook updated: {0}</value>
-  </data>
-  <data name="LdapEnabled" xml:space="preserve">
-    <value>LDAP authentication enabled</value>
-  </data>
-  <data name="LdapDisabled" xml:space="preserve">
-    <value>LDAP authentication disabled</value>
-  </data>
-  <data name="LdapSync" xml:space="preserve">
-    <value>LDAP synchronization completed</value>
-  </data>
-  <data name="FormStartedToFill" xml:space="preserve">
-    <value>Users [{0}]. Started to fill: {1}</value>
-  </data>
-  <data name="FormPartiallyFilled" xml:space="preserve">
-    <value>Users [{0}]. Filled out part of form: {1}</value>
-  </data>
-  <data name="FormCompletelyFilled" xml:space="preserve">
-    <value>Users [{0}]. Completely filled out form: {1}</value>
-  </data>
-  <data name="FormStopped" xml:space="preserve">
-    <value>Users [{0}]. Form stopped: {1}</value>
-  </data>
-  <data name="FileCustomFilterDisabled" xml:space="preserve">
-    <value>File: {0}. Custom filter disabled</value>
-  </data>
-  <data name="FileCustomFilterEnabled" xml:space="preserve">
-    <value>File: {0}. Custom filter enabled</value>
-  </data>
-  <data name="ApiKeyCreated" xml:space="preserve">
-    <value>User Api Key Created: {0}</value>
-  </data>
-  <data name="ApiKeyUpdated" xml:space="preserve">
-    <value>User Api Key Updated: {0}</value>
-  </data>
-  <data name="ApiKeyDeleted" xml:space="preserve">
-    <value>User Api Key Deleted: {0}</value>
-  </data>
-  <data name="AuthLinkActivated" xml:space="preserve">
-    <value>The authorization link has been activated</value>
-  </data>
-  <data name="CustomerOperationPerformed" xml:space="preserve">
-    <value>Customer operation performed</value>
-  </data>
-  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
-    <value>Customer operations report downloaded</value>
-  </data>
-  <data name="CustomerWalletToppedUp" xml:space="preserve">
-    <value>Customer wallet topped up: {0}</value>
-  </data>
-  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Customer wallet top up settings updated</value>
-  </data>
-  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
-    <value>Customer subscription updated: {0}</value>
-  </data>
-  <data name="BannerSettingsChanged" xml:space="preserve">
-    <value>Promotional banners visibility settings changed</value>
-  </data>
-  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Customer wallet enabled services settings updated</value>
-  </data>
-  <data name="LocationCol" xml:space="preserve">
-    <value>Location</value>
-  </data>
-  <data name="LoginSuccessViaOAuth" xml:space="preserve">
-    <value>Successful Login via OAuth 2.0</value>
-  </data>
-  <data name="LoginSuccessViaPassword" xml:space="preserve">
-    <value>Login success via login and password</value>
-  </data>
-  <data name="FileExternalLinkCreated" xml:space="preserve">
-    <value>Files [{0}]. External link created: {1}. Role: {2}</value>
-  </data>
-  <data name="FileExternalLinkDeleted" xml:space="preserve">
-    <value>Files [{0}]. External link deleted: {1}</value>
-  </data>
-  <data name="FileExternalLinkUpdated" xml:space="preserve">
-    <value>Files [{0}]. External link updated: {1}. Role: {2}</value>
-  </data>
-  <data name="FileUpdatedAccessFor" xml:space="preserve">
-    <value>Files [{0}]. Access Updated for {1}. Role: {2}</value>
-  </data>
-  <data name="FolderExternalLinkCreated" xml:space="preserve">
-    <value>Folders [{0}]. External link created: {1}. Role: {2}</value>
-  </data>
-  <data name="FolderExternalLinkDeleted" xml:space="preserve">
-    <value>Folders [{0}]. External link deleted: {1}</value>
-  </data>
-  <data name="FolderExternalLinkUpdated" xml:space="preserve">
-    <value>Folders [{0}]. External link updated: {1}. Role: {2}</value>
-  </data>
-  <data name="FolderUpdatedAccessFor" xml:space="preserve">
-    <value>Folders [{0}]. Access Updated for {1}. Role: {2}</value>
-  </data>
-  <data name="RoomExternalLinkRevoked" xml:space="preserve">
-    <value>External link revoked: {1}</value>
-  </data>
-  <data name="FileMarkedAsFavorite" xml:space="preserve">
-    <value>File Marked As Favorite: {0}</value>
-  </data>
-  <data name="FileRemovedFromFavorite" xml:space="preserve">
-    <value>File Removed From Favorite: {0}</value>
-  </data>
-  <data name="FolderDownloaded" xml:space="preserve">
-    <value>Folder Downloaded: {0}</value>
-  </data>
-  <data name="FileRemovedFromList" xml:space="preserve">
-    <value>File removed from "Shared with me": {0}</value>
-  </data>
-  <data name="FolderRemovedFromList" xml:space="preserve">
-    <value>Folder removed from "Shared with me": {0}</value>
-  </data>
-  <data name="ContactsModule" xml:space="preserve">
-    <value>Contacts</value>
-  </data>
-  <data name="SettingsModule" xml:space="preserve">
-    <value>Settings</value>
-  </data>
-  <data name="LoginSuccessSocialAccount" xml:space="preserve">
-    <value>Login Via Social Account Success</value>
-  </data>
-  <data name="AgentCreated" xml:space="preserve">
-    <value>AI agent created</value>
-  </data>
-  <data name="AgentRenamed" xml:space="preserve">
-    <value>AI agent renamed: {0}</value>
-  </data>
-  <data name="AgentsModule" xml:space="preserve">
-    <value>AI agents</value>
-  </data>
-  <data name="AgentDeleted" xml:space="preserve">
-    <value>AI agent deleted</value>
-  </data>
-  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
-    <value>Set default storage quota for AI agents: {0}</value>
-  </data>
-  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
-    <value>Disabled default storage quota for AI agents</value>
-  </data>
-  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
-    <value>AI agents [{0}]. Set custom storage quota for AI agents : {1}</value>
-  </data>
-  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
-    <value>AI agents [{0}]. Set default storage quota for AI agents : {1}</value>
-  </data>
-  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
-    <value>AI agents [{0}]. Disabled storage quota for AI agents</value>
-  </data>
-  <data name="AIProviderCreated" xml:space="preserve">
-    <value>AI provider created: {0}</value>
-  </data>
-  <data name="AIProviderDeleted" xml:space="preserve">
-    <value>AI provider deleted: {0}</value>
-  </data>
-  <data name="AIProviderUpdated" xml:space="preserve">
-    <value>AI provider updated: {0}</value>
-  </data>
-  <data name="ServerCreated" xml:space="preserve">
-    <value>MCP server created: {0}</value>
-  </data>
-  <data name="ServerUpdated" xml:space="preserve">
-    <value>MCP server updated: {0}</value>
-  </data>
-  <data name="ServerDeleted" xml:space="preserve">
-    <value>MCP server deleted: {0}</value>
-  </data>
-  <data name="ServerEnabled" xml:space="preserve">
-    <value>MCP server enabled: {0}</value>
-  </data>
-  <data name="ServerDisabled" xml:space="preserve">
-    <value>MCP server disabled: {0}</value>
-  </data>
-  <data name="AddedServerToAgent" xml:space="preserve">
-    <value>Added MCP server {0} to AI agent</value>
-  </data>
-  <data name="DeletedServerFromAgent" xml:space="preserve">
-    <value>Deleted MCP server {0} from AI agent</value>
-  </data>
-  <data name="SetWebSearchSettings" xml:space="preserve">
-    <value>Web search settings are configured. Engine: {0}</value>
-  </data>
-  <data name="ResetWebSearchSettings" xml:space="preserve">
-    <value>Web search settings have been reset</value>
-  </data>
-  <data name="SetVectorizationSettings" xml:space="preserve">
-    <value>Vectorization settings are configured. Provider: {0}</value>
-  </data>
-  <data name="ResetVectorizationSettings" xml:space="preserve">
-    <value>Vectorization settings have been reset</value>
-  </data>
-  <data name="BackupCompleted" xml:space="preserve">
-    <value>Backup completed</value>
-  </data>
-  <data name="BackupFailed" xml:space="preserve">
-    <value>Backup failed</value>
-  </data>
-  <data name="BackupStarted" xml:space="preserve">
-    <value>Backup started</value>
-  </data>
-  <data name="ScheduledBackupCompleted" xml:space="preserve">
-    <value>Scheduled backup completed</value>
-  </data>
-  <data name="ScheduledBackupFailed" xml:space="preserve">
-    <value>Scheduled backup failed</value>
-  </data>
-  <data name="ScheduledBackupStarted" xml:space="preserve">
-    <value>Scheduled backup started</value>
   </data>
   <data name="WebpluginDeleted" xml:space="preserve">
     <value>Plugin deleted: {0}</value>

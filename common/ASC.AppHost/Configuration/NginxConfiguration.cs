@@ -54,7 +54,9 @@ public static class NginxConfiguration
         }
 
         openResty.WithArgs("/bin/sh", "-c",
-            $"envsubst '{string.Join(',', serviceUrls.Select(r => $"${r.Key}"))}' < /etc/nginx/templates/upstream-aspire.conf.template > /etc/nginx/includes/onlyoffice-upstream.conf && /usr/local/openresty/bin/openresty -g 'daemon off;'");
+            $"envsubst '{string.Join(',', serviceUrls.Select(r => $"${r.Key}"))}' < /etc/nginx/includes/onlyoffice-upstream-map.conf > /etc/nginx/includes/onlyoffice-upstream.conf && " +
+            $"mv /etc/nginx/includes/onlyoffice-upstream.conf /etc/nginx/includes/onlyoffice-upstream-map.conf && " +
+            $"/usr/local/openresty/bin/openresty -g 'daemon off;'");
 
         return openResty;
     }
@@ -63,55 +65,59 @@ public static class NginxConfiguration
     {
         return new Dictionary<string, string>
         {
-            { "client_service_env", $"http://{Constants.HostDockerInternal}:5001" },
-            { "doceditor_service_env", $"http://{Constants.HostDockerInternal}:5013" },
-            { "doceditor_env", $"http://{Constants.EditorsContainer}" },
-            { "management_service_env", $"http://{Constants.HostDockerInternal}:5015" },
+            { "SERVICE_CLIENT", $"http://{Constants.HostDockerInternal}:5001" },
+            { "SERVICE_DOCEDITOR", $"http://{Constants.HostDockerInternal}:5013" },
+            { "DOCUMENT_SERVER_URL_EXTERNAL", $"http://{Constants.EditorsContainer}" },
+            { "DOCUMENT_CONTAINER_NAME", $"http://{Constants.EditorsContainer}" },
+            { "SERVICE_MANAGEMENT", $"http://{Constants.HostDockerInternal}:5015" },
             {
-                "people_service_env", isDocker
+                "SERVICE_PEOPLE_SERVER", isDocker
                     ? $"http://{ProjectConfigurator.GetProjectName<ASC_People>()}:{Constants.PeoplePort}"
                     : $"http://{Constants.HostDockerInternal}:{Constants.PeoplePort}"
             },
             {
-                "files_service_env", isDocker
+                "SERVICE_FILES", isDocker
                     ? $"http://{ProjectConfigurator.GetProjectName<ASC_Files>()}:{Constants.FilesPort}"
                     : $"http://{Constants.HostDockerInternal}:{Constants.FilesPort}"
             },
             {
-                "webapi_service_env", isDocker
+                "SERVICE_API", isDocker
                     ? $"http://{ProjectConfigurator.GetProjectName<ASC_Web_Api>()}:{Constants.WebApiPort}"
                     : $"http://{Constants.HostDockerInternal}:{Constants.WebApiPort}"
             },
             {
-                "api_system_env", isDocker
+                "SERVICE_API_SYSTEM", isDocker
                     ? $"http://{ProjectConfigurator.GetProjectName<ASC_ApiSystem>()}:{Constants.ApiSystemPort}"
                     : $"http://{Constants.HostDockerInternal}:{Constants.ApiSystemPort}"
             },
             {
-                "backup_service_env", isDocker
+                "SERVICE_BACKUP", isDocker
                     ? $"http://{ProjectConfigurator.GetProjectName<ASC_Data_Backup>()}:{Constants.BackupPort}"
                     : $"http://{Constants.HostDockerInternal}:{Constants.BackupPort}"
             },
             {
-                "webstudio_service_env", isDocker
+                "SERVICE_STUDIO", isDocker
                     ? $"http://{ProjectConfigurator.GetProjectName<ASC_Web_Studio>()}:{Constants.WebstudioPort}"
                     : $"http://{Constants.HostDockerInternal}:{Constants.WebstudioPort}"
             },
             {
-                "ai_service_env", isDocker
+                "SERVICE_AI", isDocker
                     ? $"http://{ProjectConfigurator.GetProjectName<ASC_AI>()}:{Constants.AiPort}"
                     : $"http://{Constants.HostDockerInternal}:{Constants.AiPort}"
             },
-            { "sockjs_node_env", $"http://{Constants.HostDockerInternal}:5001" },
-            { "plugins_service_env", $"http://{Constants.HostDockerInternal}:5014" },
-            { "clients_service_env", $"http://{Constants.IdentityRegistrationContainer}:{Constants.IdentityRegistrationPort}" },
-            { "oauth2_service_env", $"http://{Constants.IdentityAuthorizationContainer}:{Constants.IdentityAuthorizationPort}" },
-            { "sso_service_env", $"http://{Constants.HostDockerInternal}:9834" },
-            { "socket_io_env", $"http://{Constants.HostDockerInternal}:9899" },
-            { "api_cache_env", $"http://{Constants.HostDockerInternal}:5100" },
-            { "health_checks_env", $"http://{Constants.HostDockerInternal}:5033" },
-            { "login_service_env", $"http://{Constants.HostDockerInternal}:5011" },
-            { "migration_service_env", $"http://{Constants.HostDockerInternal}:5034" }
+            //{ "sockjs_node_env", $"http://{Constants.HostDockerInternal}:5001" },
+            { "SERVICE_PLUGINS", $"http://{Constants.HostDockerInternal}:5014" },
+            { "SERVICE_IDENTITY_API", $"http://{Constants.IdentityRegistrationContainer}:{Constants.IdentityRegistrationPort}" },
+            { "SERVICE_IDENTITY", $"http://{Constants.IdentityAuthorizationContainer}:{Constants.IdentityAuthorizationPort}" },
+            { "SERVICE_SSOAUTH", $"http://{Constants.HostDockerInternal}:9834" },
+            { "SERVICE_SOCKET", $"http://{Constants.HostDockerInternal}:9899" },
+            { "SERVICE_API_CACHE", $"http://{Constants.HostDockerInternal}:5100" },
+            { "SERVICE_HELTHCHECKS", $"http://{Constants.HostDockerInternal}:5033" },
+            { "SERVICE_LOGIN", $"http://{Constants.HostDockerInternal}:5011" },
+            { "SERVICE_MIGRATION", $"http://{Constants.HostDockerInternal}:5034" },
+            { "SERVICE_SDK", $"http://{Constants.HostDockerInternal}:5099" },
+            { "DASHBOARDS_CONTAINER_NAME", $"http://{Constants.HostDockerInternal}:5601" },
+            { "DNS_NAMESERVER", "127.0.0.11" },
         };
     }
 }
