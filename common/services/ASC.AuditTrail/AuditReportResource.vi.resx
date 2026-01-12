@@ -1,5 +1,64 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -53,10 +112,10 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ActionCol" xml:space="preserve">
     <value>Hoạt động</value>
@@ -66,6 +125,12 @@
   </data>
   <data name="ActionTypeCol" xml:space="preserve">
     <value>Loại hoạt động</value>
+  </data>
+  <data name="AddedRoomTags" xml:space="preserve">
+    <value>Thẻ đã thêm: [{1}]</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>Đã thêm máy chủ MCP {0} vào agent</value>
   </data>
   <data name="AdministratorAdded" xml:space="preserve">
     <value>Đã thêm Quản trị viên: {0}</value>
@@ -79,8 +144,41 @@
   <data name="AdministratorOpenedFullAccess" xml:space="preserve">
     <value>Quản trị viên [{0}]. Đã mở truy cập đầy đủ</value>
   </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>Agent đã được tạo</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>Agent đã được xóa</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>Agent đã được đổi tên: {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>Các Agent</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>Nhà cung cấp AI đã được tạo: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>Nhà cung cấp AI đã bị xóa: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>Nhà cung cấp AI đã được cập nhật: {0}</value>
+  </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Khóa API của người dùng đã được tạo: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Khóa API của người dùng đã bị xóa: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Khóa API của người dùng đã cập nhật: {0}</value>
+  </data>
   <data name="AttachActionType" xml:space="preserve">
     <value>Đính kèm</value>
+  </data>
+  <data name="AuditSettingsUpdated" xml:space="preserve">
+    <value>Đã cập nhật cài đặt chu kỳ kiểm tra</value>
   </data>
   <data name="AuditTrailReportDownloaded" xml:space="preserve">
     <value>Đã tải Báo cáo Kiểm tra Truy nguyên</value>
@@ -88,11 +186,29 @@
   <data name="AuditTrailReportName" xml:space="preserve">
     <value>Báo cáo Kiểm tra Truy nguyên ({0}-{1})</value>
   </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Liên kết ủy quyền đã được kích hoạt</value>
+  </data>
   <data name="AuthorizationKeysSetting" xml:space="preserve">
     <value>Đã cập nhật key ủy quyền bên thứ ba</value>
   </data>
+  <data name="BackupStarted" xml:space="preserve">
+    <value>Bắt đầu sao lưu</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Cài đặt hiển thị biểu ngữ quảng cáo đã thay đổi</value>
+  </data>
   <data name="BrowserCol" xml:space="preserve">
     <value>Trình duyệt</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Kích hoạt máy khách {0} đã thay đổi</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Khả năng hiển thị máy khách {0} đã thay đổi</value>
+  </data>
+  <data name="CityCol" xml:space="preserve">
+    <value>Thành phố</value>
   </data>
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Đã thay đổi màu theme</value>
@@ -106,8 +222,62 @@
   <data name="CopyActionType" xml:space="preserve">
     <value>Sao chép</value>
   </data>
+  <data name="CountryCol" xml:space="preserve">
+    <value>Quốc gia</value>
+  </data>
   <data name="CreateActionType" xml:space="preserve">
     <value>Tạo</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Khách đã được tạo</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Hoạt động của khách hàng đã được thực hiện</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Đã tải báo cáo hoạt động khách hàng xuống</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Đã cập nhật gói đăng ký của khách hàng: {0}</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Đã cập nhật cài đặt dịch vụ hỗ trợ ví của khách hàng</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Ví của khách hang đã được nạp tiền: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Đã cập nhật cài đặt nạp tiền vào ví của khách hàng</value>
+  </data>
+  <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
+    <value>Đã cập nhật Cài đặt Điều hướng Tùy chỉnh</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>AI agent [{0}]. Đặt hạn mức lưu trữ tùy chỉnh cho AI agent: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>AI agent  [{0}]. Đặt hạn mức lưu trữ mặc định cho AI agent: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>AI agent  [{0}]. Hạn mức lưu trữ bị vô hiệu hóa cho AI agent</value>
+  </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Phòng [{0}]. Đã đặt hạn mức lưu trữ tùy chỉnh cho các phòng: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Phòng [{0}]. Đã đặt hạn mức lưu trữ mặc định cho các phòng: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Phòng [{0}]. Đã tắt hạn mức lưu trữ cho các phòng</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Người dùng [{0}]. Đã đặt hạn mức lưu trữ tùy chỉnh cho người dùng: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Người dùng [{0}]. Đã đặt hạn mức lưu trữ mặc định cho người dùng: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Người dùng [{0}]. Đã tắt hạn mức lưu trữ cho người dùng</value>
   </data>
   <data name="DateCol" xml:space="preserve">
     <value>Ngày</value>
@@ -118,8 +288,20 @@
   <data name="DeleteActionType" xml:space="preserve">
     <value>Xóa</value>
   </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Khách {0} đã bị xóa</value>
+  </data>
+  <data name="DeletedRoomTags" xml:space="preserve">
+    <value>Thẻ đã xóa: [{1}]</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>Đã xóa máy chủ MCP {0} khỏi agent</value>
+  </data>
   <data name="DetachActionType" xml:space="preserve">
     <value>Tách</value>
+  </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Đã thay đổi cài đặt quyền truy cập Công Cụ Dành Cho Nhà Phát Triển</value>
   </data>
   <data name="DnsSettingsUpdated" xml:space="preserve">
     <value>Đã cập nhật Cài đặt DNS</value>
@@ -127,11 +309,17 @@
   <data name="DocumentServiceLocationSetting" xml:space="preserve">
     <value>Đã cập nhật Địa điểm Dịch vụ Tài liệu</value>
   </data>
+  <data name="DocumentsForcesave" xml:space="preserve">
+    <value>Đã cập nhật cài đặt Lưu bắt buộc (Forcesave)</value>
+  </data>
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Đã cập nhật Thiết lập Ghi đè</value>
   </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Cài đặt</value>
+  </data>
+  <data name="DocumentsStoreForcesave" xml:space="preserve">
+    <value>Đã cập nhật cài đặt lưu bắt buộc cho cửa hàng</value>
   </data>
   <data name="DocumentsThirdPartySettingsUpdated" xml:space="preserve">
     <value>Đã cập nhật Cài đặt Bên thứ ba</value>
@@ -163,6 +351,12 @@
   <data name="FileCreatedVersion" xml:space="preserve">
     <value>File [{0}]. Bản sửa đổi: {1}. Đã tạo phiên bản</value>
   </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>File: {0}. Bộ lọc tùy chỉnh đã bị vô hiệu hóa</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>File: {0}. Bộ lọc tùy chỉnh được bật</value>
+  </data>
   <data name="FileDeleted" xml:space="preserve">
     <value>Đã xóa File: {0}</value>
   </data>
@@ -175,11 +369,26 @@
   <data name="FileDownloadedAs" xml:space="preserve">
     <value>File [{0}]. Được tải về dưới dạng: {1}</value>
   </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Tập tin [{0}]. Đã tạo liên kết bên ngoài: {1}. Vai trò: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Tập tin [{0}]. Đã xóa liên kết bên ngoài: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Tập tin [{0}]. Đã cập nhật liên kết bên ngoài: {1}. Vai trò: {2}</value>
+  </data>
   <data name="FileImported" xml:space="preserve">
     <value>Thư mục [{0}]. Đã nhập file: {1}. Nhà cung cấp: {2}</value>
   </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Tập tin: {0}. Chỉ mục đã thay đổi từ {1} thành {2}</value>
+  </data>
   <data name="FileLocked" xml:space="preserve">
     <value>Đã khóa File: {0}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Tập tin đã được đánh dấu được Yêu thích: {0}</value>
   </data>
   <data name="FileMoved" xml:space="preserve">
     <value>File [{0}]. Được chuyển từ thư mục "{1}" tới thư mục: "{2}"</value>
@@ -189,6 +398,15 @@
   </data>
   <data name="FileMovedWithOverwriting" xml:space="preserve">
     <value>File [{0}]. Được chuyển bằng ghi đè từ thư mục "{1}" tới thư mục: "{2}"</value>
+  </data>
+  <data name="FileOpenedForChange" xml:space="preserve">
+    <value>Tập tin được Mở để Thay đổi: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Tập tin đã bị xóa khỏi Yêu thích: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Tập tin đã bị xóa khỏi "Đã chia sẻ với tôi": {0}</value>
   </data>
   <data name="FileRenamed" xml:space="preserve">
     <value>Đã đổi tên File: {0}</value>
@@ -201,6 +419,9 @@
   </data>
   <data name="FileSendAccessLink" xml:space="preserve">
     <value>Đã gửi liên kết được chia sẻ tới file [{0}]. Người nhận: [{1}]</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>bytes,KB,MB,GB,TB</value>
   </data>
   <data name="FilesModule" xml:space="preserve">
     <value>File</value>
@@ -217,11 +438,20 @@
   <data name="FileUpdatedAccess" xml:space="preserve">
     <value>File [{0}]. Đã cập nhật truy cập</value>
   </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Tập tin [{0}]. Đã cập nhật quyền truy cập cho {1}. Vai trò: {2}</value>
+  </data>
   <data name="FileUpdatedRevisionComment" xml:space="preserve">
     <value>File [{0}]. Bản sửa đổi {1}. Đã cập nhật bình luận</value>
   </data>
   <data name="FileUploaded" xml:space="preserve">
     <value>Đã cập nhật file: {0}</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Tập tin được tải lên với ghi đè: {0}</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>Tập tin [{0}]. Đã xóa Phiên bản: {1}</value>
   </data>
   <data name="FolderCopied" xml:space="preserve">
     <value>Thư mục [{0}]. Đã sao chép tới thư mục: {1}</value>
@@ -235,6 +465,24 @@
   <data name="FolderDeleted" xml:space="preserve">
     <value>Đã xóa Thư mục: {0}</value>
   </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Đã tải xuống thư mục: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Thư mục [{0}]. Đã tạo liên kết bên ngoài: {1}. Vai trò: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Thư mục [{0}]. Đã xóa liên kết bên ngoài: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Thư mục [{0}]. Đã cập nhật liên kết bên ngoài: {1}. Vai trò: {2}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Thư mục: {0}. Chỉ mục đã thay đổi từ {1} thành {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Thư mục: {0}. Đã sắp xếp lại các chỉ mục</value>
+  </data>
   <data name="FolderMoved" xml:space="preserve">
     <value>Thư mục [{0}]. Đã chuyển vào thư mục: {1}</value>
   </data>
@@ -243,6 +491,9 @@
   </data>
   <data name="FolderMovedWithOverwriting" xml:space="preserve">
     <value>Thư mục [{0}]. Đã chuyển bằng ghi đè lên thư mục: {1}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Đã xóa thư mục khỏi "Đã chia sẻ với tôi": {0}</value>
   </data>
   <data name="FolderRenamed" xml:space="preserve">
     <value>Đã đổi tên thư mục: {0}</value>
@@ -253,11 +504,38 @@
   <data name="FolderUpdatedAccess" xml:space="preserve">
     <value>Thư mục [{0}]. Đã cập nhật truy cập</value>
   </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Thư mục [{0}]. Đã cập nhật quyền truy cập cho {1}. Vai trò: {2}</value>
+  </data>
   <data name="FollowActionType" xml:space="preserve">
     <value>Theo dõi</value>
   </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Người dùng [{0}]. Đã điền đầy đủ thông tin vào biểu mẫu: {1}</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>Tập tin được mở để điền: {0}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Người dùng [{0}]. Đã điền vào một phần của biểu mẫu: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Người dùng [{0}]. Bắt đầu điền: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Người dùng [{0}]. Biểu mẫu đã dừng: {1}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Người dùng [{0}]. Đã gửi biểu mẫu: {1}</value>
+  </data>
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Đã cập nhật cài đặt Sphinx</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Đã tạo mã ủy quyền cho máy khách {0}</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Mã token truy cập cá nhân đã được tạo cho máy khách {0}</value>
   </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Đã cập nhật Thiết lập Trang Chào Mừng</value>
@@ -295,14 +573,29 @@
   <data name="LanguageSettingsUpdated" xml:space="preserve">
     <value>Đã cập nhật Cài đặt Ngôn ngữ</value>
   </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>Xác thực LDAP đã bị vô hiệu hóa</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>Xác thực LDAP được bật</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>Đồng bộ hóa LDAP đã hoàn tất</value>
+  </data>
   <data name="LicenseKeyUploaded" xml:space="preserve">
     <value>Đã tải lên license key</value>
   </data>
   <data name="LinkActionType" xml:space="preserve">
     <value>Liên kết</value>
   </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Địa điểm</value>
+  </data>
   <data name="LoginFail" xml:space="preserve">
     <value>Đăng nhập không thành công</value>
+  </data>
+  <data name="LoginFailBruteForce" xml:space="preserve">
+    <value>Đăng nhập không thành công. Thử quá nhiều lần</value>
   </data>
   <data name="LoginFailDisabledProfile" xml:space="preserve">
     <value>Đăng nhập không thành công. Hồ sơ không hoạt động</value>
@@ -312,6 +605,9 @@
   </data>
   <data name="LoginFailIpSecurity" xml:space="preserve">
     <value>Bảo mật IP: Đăng nhập không thành công</value>
+  </data>
+  <data name="LoginFailRecaptcha" xml:space="preserve">
+    <value>Đăng nhập không thành công. Recaptcha không hợp lệ</value>
   </data>
   <data name="LoginFailSocialAccountNotFound" xml:space="preserve">
     <value>Đăng nhập không thành công. Không tìm thấy Tài khoản Xã hội được Liên kết</value>
@@ -325,11 +621,17 @@
   <data name="LoginFailViaApiSocialAccount" xml:space="preserve">
     <value>Đăng nhập qua API &amp; Truyền thông Xã hội không thành công</value>
   </data>
+  <data name="LoginFailViaApiTfa" xml:space="preserve">
+    <value>Đăng nhập qua API &amp; ứng dụng xác thực không thành công</value>
+  </data>
   <data name="LoginFailViaSms" xml:space="preserve">
     <value>Đăng nhập qua SMS không thành công</value>
   </data>
   <data name="LoginFailViaSSO" xml:space="preserve">
     <value>Đăng nhập qua SSO không thành công</value>
+  </data>
+  <data name="LoginFailViaTfaApp" xml:space="preserve">
+    <value>Đăng nhập qua ứng dụng xác thực không thành công</value>
   </data>
   <data name="LoginHistoryReportDownloaded" xml:space="preserve">
     <value>Đã Tải về Báo cáo Lịch sử Đăng nhập</value>
@@ -340,14 +642,29 @@
   <data name="LoginSuccess" xml:space="preserve">
     <value>Đăng nhập thành công</value>
   </data>
-  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Đăng nhập qua Tài khoản Xã hội thành công: {0}</value>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Đăng nhập qua Tài khoản Xã hội thành công</value>
+  </data>
+  <data name="LoginSuccessSocialApp" xml:space="preserve">
+    <value>Đăng nhập thông qua ứng dụng xã hội thành công</value>
   </data>
   <data name="LoginSuccessViaApi" xml:space="preserve">
     <value>Đăng nhập thành công qua API</value>
   </data>
   <data name="LoginSuccessViaApiSms" xml:space="preserve">
     <value>Đăng nhập thành công qua API &amp; Mã SMS</value>
+  </data>
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
+    <value>Đăng nhập qua Tài khoản Xã hội thành công: {0}</value>
+  </data>
+  <data name="LoginSuccessViaApiTfa" xml:space="preserve">
+    <value>Đăng nhập qua API &amp; ứng dụng xác thực thành công</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Đăng nhập thành công qua OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Đăng nhập thành công thông qua đăng nhập và mật khẩu</value>
   </data>
   <data name="LoginSuccessViaSms" xml:space="preserve">
     <value>Đăng nhập qua SMS thành công</value>
@@ -357,6 +674,9 @@
   </data>
   <data name="LoginSuccessViaSSO" xml:space="preserve">
     <value>Đăng nhập thành công qua SSO</value>
+  </data>
+  <data name="LoginSuccesViaTfaApp" xml:space="preserve">
+    <value>Đăng nhập qua ứng dụng xác thực thành công</value>
   </data>
   <data name="Logout" xml:space="preserve">
     <value>Đăng xuất</value>
@@ -400,6 +720,15 @@
   <data name="PortalDeleted" xml:space="preserve">
     <value>Cổng đã được xóa</value>
   </data>
+  <data name="PortalRenamed" xml:space="preserve">
+    <value>Cổng thông tin đã được đổi tên</value>
+  </data>
+  <data name="PrivacyRoomDisable" xml:space="preserve">
+    <value>Phòng riêng bị vô hiệu hóa</value>
+  </data>
+  <data name="PrivacyRoomEnable" xml:space="preserve">
+    <value>Đã bật Phòng riêng</value>
+  </data>
   <data name="ProductAccessOpened" xml:space="preserve">
     <value>Sản phẩm [{0}]. Đã mở truy cập</value>
   </data>
@@ -424,14 +753,164 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Đã cập nhật Danh sách Sản phẩm</value>
   </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Đặt hạn mức lưu trữ mặc định cho AI agent: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Hạn mức mặc định bị vô hiệu hóa cho AI agent</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Đặt hạn mức lưu trữ mặc định: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Đã tăt hạn mức lưu trữ mặc định</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Đặt hạn mức lưu trữ mặc định cho các phòng: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Đã tắt hạn mức lưu trữ mặc định cho các phòng</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Đặt hạn mức lưu trữ mặc định cho người dùng: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Đã tắt hạn mức lưu trữ mặc định cho người dùng</value>
+  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Phân bổ lại</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Đã tạo lại bí mật của máy khách {0}</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>Cài đặt véc-tơ hóa đã được đặt lại</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>Cài đặt tìm kiếm trên web đã được đặt lại</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Đã thu hồi quyền truy cập máy khách {0}</value>
+  </data>
+  <data name="RoomArchived" xml:space="preserve">
+    <value>Phòng đã lưu trữ</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Phòng đã sao chép: {0}</value>
+  </data>
+  <data name="RoomCreated" xml:space="preserve">
+    <value>Đã tạo phòng</value>
+  </data>
+  <data name="RoomCreateUser" xml:space="preserve">
+    <value>Người dùng đã thêm: {0}. Vai trò: {1}</value>
+  </data>
+  <data name="RoomDeleted" xml:space="preserve">
+    <value>Đã xóa phòng</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Phòng: {0}. Đã tắt từ chối tải xuống</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Phòng: {0}. Đã bật từ chối tải xuống</value>
+  </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>Đã tạo liên kết bên ngoài: {0}. Vai trò: {1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>Đã xóa liên kết bên ngoài: {0}</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Đã thu hồi liên kết bên ngoài: {1}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>Đã cập nhật liên kết bên ngoài: {0}. Vai trò: {1}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Đã thêm nhóm: {0}. Vai trò: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Đã xóa nhóm: {0}</value>
+  </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Xuất chỉ mục phòng đã lưu vào Tài liệu</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Đã tắt lập chỉ mục phòng</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Đã bật lập chỉ mục phòng</value>
+  </data>
+  <data name="RoomInvitationLinkCreated" xml:space="preserve">
+    <value>Đã tạo liên kết. Vai trò: {1}</value>
+  </data>
+  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
+    <value>Đã xóa liên kết</value>
+  </data>
+  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
+    <value>Đã cập nhật liên kết. Vai trò: {1}</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Đã gửi lại lời mời: {0}</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>Đã tắt Thời gian tồn tại</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Đã thiết lập thời gian tồn tại. Giá trị: {0}. Khoảng thời gian: {1}. Xóa Vĩnh viễn: {2}</value>
+  </data>
+  <data name="RoomLogoCreated" xml:space="preserve">
+    <value>Đã tạo logo</value>
+  </data>
+  <data name="RoomLogoDeleted" xml:space="preserve">
+    <value>Đã xóa logo</value>
+  </data>
+  <data name="RoomRemoveUser" xml:space="preserve">
+    <value>Người dùng đã xóa: {0}</value>
+  </data>
+  <data name="RoomRenamed" xml:space="preserve">
+    <value>Đã đổi tên phòng: {0}</value>
+  </data>
+  <data name="RoomsModule" xml:space="preserve">
+    <value>Phòng</value>
+  </data>
+  <data name="RoomUnarchived" xml:space="preserve">
+    <value>Phòng chưa được lưu trữ</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} được chỉ định: {1}</value>
+  </data>
+  <data name="RoomUpdateAccessForUser" xml:space="preserve">
+    <value>{0} được chỉ định: {1}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Phòng: {0}. Đã tắt Watermark</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Phòng: {0}. Đã bật Watermark</value>
   </data>
   <data name="SendActionType" xml:space="preserve">
     <value>Gửi</value>
   </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>Người dùng {0} đã gửi lời mời đến {1} để tham gia DocSpace này</value>
+  </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Đã gửi hướng dẫn mời: {0}</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>Đã tạo máy chủ MCP: {0}</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>Đã xóa máy chủ MCP: {0}</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>Đã vô hiệu hóa máy chủ MCP: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>Đã bật máy chủ MCP: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>Đã cập nhật máy chủ MCP: {0}</value>
   </data>
   <data name="SessionCompleted" xml:space="preserve">
     <value>Đã hoàn thành phiên làm việc</value>
@@ -442,20 +921,35 @@
   <data name="SettingsModule" xml:space="preserve">
     <value>Cài đặt</value>
   </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>Cài đặt véc-tơ hóa được định cấu hình. Nhà cung cấp: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>Cài đặt tìm kiếm trên web đã được định cấu hình. Cỗ máy: {0}</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>Đã tắt SSO</value>
   </data>
   <data name="SSOEnabled" xml:space="preserve">
     <value>Đã bật SSO</value>
   </data>
-  <data name="BackupStarted" xml:space="preserve">
-    <value>Bắt đầu sao lưu</value>
+  <data name="StartStorageDecryption" xml:space="preserve">
+    <value>Bắt đầu giải mã bộ nhớ</value>
+  </data>
+  <data name="StartStorageEncryption" xml:space="preserve">
+    <value>Bắt đầu mã hóa bộ nhớ</value>
   </data>
   <data name="StartTransferSetting" xml:space="preserve">
     <value>Bắt đầu di chuyển vùng cổng thông tin</value>
   </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>Tài khoản Hệ thống</value>
+  </data>
+  <data name="TagCreated" xml:space="preserve">
+    <value>Đã tạo thẻ: {0}</value>
+  </data>
+  <data name="TagsDeleted" xml:space="preserve">
+    <value>Đã xóa thẻ: {0}</value>
   </data>
   <data name="TargetIdCol" xml:space="preserve">
     <value>ID Đích</value>
@@ -478,8 +972,20 @@
   <data name="TimeZoneSettingsUpdated" xml:space="preserve">
     <value>Đã cập nhật Cài đặt Múi giờ</value>
   </data>
+  <data name="TrashEmptied" xml:space="preserve">
+    <value>Đã dọn sạch thùng rác</value>
+  </data>
   <data name="TrustedMailDomainSettingsUpdated" xml:space="preserve">
     <value>Đã cập nhật Cài đặt Tên miền Mail được tin cậy</value>
+  </data>
+  <data name="TwoFactorAuthenticationSettingsDisabled" xml:space="preserve">
+    <value>Cài đặt Xác thực hai yếu tố được cập nhật: Xác thực hai yếu tố đã bị tắt</value>
+  </data>
+  <data name="TwoFactorAuthenticationSettingsEnabledBySms" xml:space="preserve">
+    <value>Cài đặt Xác thực hai yếu tố được cập nhật: Xác nhận SMS đã được bật</value>
+  </data>
+  <data name="TwoFactorAuthenticationSettingsEnabledByTfaApp" xml:space="preserve">
+    <value>Cài đặt Xác thực hai yếu tố được cập nhật: Ứng dụng xác thực đã được bật</value>
   </data>
   <data name="TwoFactorAuthenticationSettingsUpdated" xml:space="preserve">
     <value>Đã cập nhật Cài đặt Xác thực Hai yếu tố</value>
@@ -498,6 +1004,9 @@
   </data>
   <data name="UpdateActionType" xml:space="preserve">
     <value>Cập nhật</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Đã cập nhật máy khách {0}</value>
   </data>
   <data name="UploadActionType" xml:space="preserve">
     <value>Tải lên</value>
@@ -519,6 +1028,9 @@
   </data>
   <data name="UserDataReassigns" xml:space="preserve">
     <value>Dữ liệu được phân bổ lại: từ người dùng {0} cho người dùng {1}</value>
+  </data>
+  <data name="UserDataRemoving" xml:space="preserve">
+    <value>Dữ liệu người dùng cho {0} đã bị xóa</value>
   </data>
   <data name="UserDeleted" xml:space="preserve">
     <value>Đã xóa người dùng: {0}</value>
@@ -559,6 +1071,12 @@
   <data name="UsersUpdatedType" xml:space="preserve">
     <value>Người dùng [{0}]. Đã cập nhật Loại</value>
   </data>
+  <data name="UserTfaDisconnected" xml:space="preserve">
+    <value>Ứng dụng xác thực bị ngắt kết nối: {0}</value>
+  </data>
+  <data name="UserTfaGenerateCodes" xml:space="preserve">
+    <value>Đã tạo mã dự phòng mới</value>
+  </data>
   <data name="UserUnlinkedSocialAccount" xml:space="preserve">
     <value>Đã hủy liên kết Tài khoản Xã hội. Nhà cung cấp: {0}</value>
   </data>
@@ -567,6 +1085,9 @@
   </data>
   <data name="UserUpdatedAvatarThumbnails" xml:space="preserve">
     <value>Người dùng [{0}]. Đã cập nhật Avatar Thumbnail</value>
+  </data>
+  <data name="UserUpdatedEmail" xml:space="preserve">
+    <value>Email được cập nhật</value>
   </data>
   <data name="UserUpdatedLanguage" xml:space="preserve">
     <value>Đã cập nhật ngôn ngữ</value>
@@ -577,312 +1098,6 @@
   <data name="UserUpdatedPassword" xml:space="preserve">
     <value>Mật khẩu được cập nhật</value>
   </data>
-  <data name="RoomCreated" xml:space="preserve">
-    <value>Đã tạo phòng</value>
-  </data>
-  <data name="RoomsModule" xml:space="preserve">
-    <value>Phòng</value>
-  </data>
-  <data name="TrashEmptied" xml:space="preserve">
-    <value>Đã dọn sạch thùng rác</value>
-  </data>
-  <data name="AddedRoomTags" xml:space="preserve">
-    <value>Thẻ đã thêm: [{1}]</value>
-  </data>
-  <data name="DeletedRoomTags" xml:space="preserve">
-    <value>Thẻ đã xóa: [{1}]</value>
-  </data>
-  <data name="RoomArchived" xml:space="preserve">
-    <value>Phòng đã lưu trữ</value>
-  </data>
-  <data name="RoomCreateUser" xml:space="preserve">
-    <value>Người dùng đã thêm: {0}. Vai trò: {1}</value>
-  </data>
-  <data name="RoomDeleted" xml:space="preserve">
-    <value>Đã xóa phòng</value>
-  </data>
-  <data name="RoomInvitationLinkCreated" xml:space="preserve">
-    <value>Đã tạo liên kết. Vai trò: {1}</value>
-  </data>
-  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
-    <value>Đã xóa liên kết</value>
-  </data>
-  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
-    <value>Đã cập nhật liên kết. Vai trò: {1}</value>
-  </data>
-  <data name="RoomLogoCreated" xml:space="preserve">
-    <value>Đã tạo logo</value>
-  </data>
-  <data name="RoomLogoDeleted" xml:space="preserve">
-    <value>Đã xóa logo</value>
-  </data>
-  <data name="RoomRemoveUser" xml:space="preserve">
-    <value>Người dùng đã xóa: {0}</value>
-  </data>
-  <data name="RoomRenamed" xml:space="preserve">
-    <value>Đã đổi tên phòng: {0}</value>
-  </data>
-  <data name="RoomUnarchived" xml:space="preserve">
-    <value>Phòng chưa được lưu trữ</value>
-  </data>
-  <data name="RoomUpdateAccessForUser" xml:space="preserve">
-    <value>{0} được chỉ định: {1}</value>
-  </data>
-  <data name="TagCreated" xml:space="preserve">
-    <value>Đã tạo thẻ: {0}</value>
-  </data>
-  <data name="TagsDeleted" xml:space="preserve">
-    <value>Đã xóa thẻ: {0}</value>
-  </data>
-  <data name="AuditSettingsUpdated" xml:space="preserve">
-    <value>Đã cập nhật cài đặt chu kỳ kiểm tra</value>
-  </data>
-  <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
-    <value>Đã cập nhật Cài đặt Điều hướng Tùy chỉnh</value>
-  </data>
-  <data name="DocumentsForcesave" xml:space="preserve">
-    <value>Đã cập nhật cài đặt Lưu bắt buộc (Forcesave)</value>
-  </data>
-  <data name="DocumentsStoreForcesave" xml:space="preserve">
-    <value>Đã cập nhật cài đặt lưu bắt buộc cho cửa hàng</value>
-  </data>
-  <data name="LoginFailBruteForce" xml:space="preserve">
-    <value>Đăng nhập không thành công. Thử quá nhiều lần</value>
-  </data>
-  <data name="LoginFailRecaptcha" xml:space="preserve">
-    <value>Đăng nhập không thành công. Recaptcha không hợp lệ</value>
-  </data>
-  <data name="LoginFailViaApiTfa" xml:space="preserve">
-    <value>Đăng nhập qua API &amp; ứng dụng xác thực không thành công</value>
-  </data>
-  <data name="LoginFailViaTfaApp" xml:space="preserve">
-    <value>Đăng nhập qua ứng dụng xác thực không thành công</value>
-  </data>
-  <data name="LoginSuccessSocialApp" xml:space="preserve">
-    <value>Đăng nhập thông qua ứng dụng xã hội thành công</value>
-  </data>
-  <data name="LoginSuccessViaApiTfa" xml:space="preserve">
-    <value>Đăng nhập qua API &amp; ứng dụng xác thực thành công</value>
-  </data>
-  <data name="LoginSuccesViaTfaApp" xml:space="preserve">
-    <value>Đăng nhập qua ứng dụng xác thực thành công</value>
-  </data>
-  <data name="PrivacyRoomDisable" xml:space="preserve">
-    <value>Phòng riêng bị vô hiệu hóa</value>
-  </data>
-  <data name="PrivacyRoomEnable" xml:space="preserve">
-    <value>Đã bật Phòng riêng</value>
-  </data>
-  <data name="StartStorageDecryption" xml:space="preserve">
-    <value>Bắt đầu giải mã bộ nhớ</value>
-  </data>
-  <data name="StartStorageEncryption" xml:space="preserve">
-    <value>Bắt đầu mã hóa bộ nhớ</value>
-  </data>
-  <data name="TwoFactorAuthenticationSettingsDisabled" xml:space="preserve">
-    <value>Cài đặt Xác thực hai yếu tố được cập nhật: Xác thực hai yếu tố đã bị tắt</value>
-  </data>
-  <data name="TwoFactorAuthenticationSettingsEnabledBySms" xml:space="preserve">
-    <value>Cài đặt Xác thực hai yếu tố được cập nhật: Xác nhận SMS đã được bật</value>
-  </data>
-  <data name="TwoFactorAuthenticationSettingsEnabledByTfaApp" xml:space="preserve">
-    <value>Cài đặt Xác thực hai yếu tố được cập nhật: Ứng dụng xác thực đã được bật</value>
-  </data>
-  <data name="UserDataRemoving" xml:space="preserve">
-    <value>Dữ liệu người dùng cho {0} đã bị xóa</value>
-  </data>
-  <data name="UserTfaDisconnected" xml:space="preserve">
-    <value>Ứng dụng xác thực bị ngắt kết nối: {0}</value>
-  </data>
-  <data name="UserTfaGenerateCodes" xml:space="preserve">
-    <value>Đã tạo mã dự phòng mới</value>
-  </data>
-  <data name="UserUpdatedEmail" xml:space="preserve">
-    <value>Email được cập nhật</value>
-  </data>
-  <data name="CityCol" xml:space="preserve">
-    <value>Thành phố</value>
-  </data>
-  <data name="CountryCol" xml:space="preserve">
-    <value>Quốc gia</value>
-  </data>
-  <data name="RoomExternalLinkCreated" xml:space="preserve">
-    <value>Đã tạo liên kết bên ngoài: {0}. Vai trò: {1}</value>
-  </data>
-  <data name="RoomExternalLinkDeleted" xml:space="preserve">
-    <value>Đã xóa liên kết bên ngoài: {0}</value>
-  </data>
-  <data name="RoomExternalLinkUpdated" xml:space="preserve">
-    <value>Đã cập nhật liên kết bên ngoài: {0}. Vai trò: {1}</value>
-  </data>
-  <data name="FileOpenedForChange" xml:space="preserve">
-    <value>Tập tin được Mở để Thay đổi: {0}</value>
-  </data>
-  <data name="PortalRenamed" xml:space="preserve">
-    <value>Cổng thông tin đã được đổi tên</value>
-  </data>
-  <data name="FileSizePostfix" xml:space="preserve">
-    <value>bytes,KB,MB,GB,TB</value>
-  </data>
-  <data name="FileUploadedWithOverwriting" xml:space="preserve">
-    <value>Tập tin được tải lên với ghi đè: {0}</value>
-  </data>
-  <data name="QuotaPerPortalChanged" xml:space="preserve">
-    <value>Đặt hạn mức lưu trữ mặc định: {0}</value>
-  </data>
-  <data name="QuotaPerPortalDisabled" xml:space="preserve">
-    <value>Đã tăt hạn mức lưu trữ mặc định</value>
-  </data>
-  <data name="QuotaPerRoomChanged" xml:space="preserve">
-    <value>Đặt hạn mức lưu trữ mặc định cho các phòng: {0}</value>
-  </data>
-  <data name="QuotaPerRoomDisabled" xml:space="preserve">
-    <value>Đã tắt hạn mức lưu trữ mặc định cho các phòng</value>
-  </data>
-  <data name="QuotaPerUserChanged" xml:space="preserve">
-    <value>Đặt hạn mức lưu trữ mặc định cho người dùng: {0}</value>
-  </data>
-  <data name="QuotaPerUserDisabled" xml:space="preserve">
-    <value>Đã tắt hạn mức lưu trữ mặc định cho người dùng</value>
-  </data>
-  <data name="RoomCopied" xml:space="preserve">
-    <value>Phòng đã sao chép: {0}</value>
-  </data>
-  <data name="RoomGroupAdded" xml:space="preserve">
-    <value>Đã thêm nhóm: {0}. Vai trò: {1}</value>
-  </data>
-  <data name="RoomGroupRemove" xml:space="preserve">
-    <value>Đã xóa nhóm: {0}</value>
-  </data>
-  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
-    <value>{0} được chỉ định: {1}</value>
-  </data>
-  <data name="SendJoinInvite" xml:space="preserve">
-    <value>Người dùng {0} đã gửi lời mời đến {1} để tham gia DocSpace này</value>
-  </data>
-  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
-    <value>Phòng [{0}]. Đã đặt hạn mức lưu trữ tùy chỉnh cho các phòng: {1}</value>
-  </data>
-  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
-    <value>Phòng [{0}]. Đã đặt hạn mức lưu trữ mặc định cho các phòng: {1}</value>
-  </data>
-  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
-    <value>Phòng [{0}]. Đã tắt hạn mức lưu trữ cho các phòng</value>
-  </data>
-  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
-    <value>Người dùng [{0}]. Đã đặt hạn mức lưu trữ tùy chỉnh cho người dùng: {1}</value>
-  </data>
-  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
-    <value>Người dùng [{0}]. Đã đặt hạn mức lưu trữ mặc định cho người dùng: {1}</value>
-  </data>
-  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
-    <value>Người dùng [{0}]. Đã tắt hạn mức lưu trữ cho người dùng</value>
-  </data>
-  <data name="FormOpenedForFilling" xml:space="preserve">
-    <value>Tập tin được mở để điền: {0}</value>
-  </data>
-  <data name="FormSubmit" xml:space="preserve">
-    <value>Người dùng [{0}]. Đã gửi biểu mẫu: {1}</value>
-  </data>
-  <data name="RoomIndexExportSaved" xml:space="preserve">
-    <value>Xuất chỉ mục phòng đã lưu vào Tài liệu</value>
-  </data>
-  <data name="RoomInviteResend" xml:space="preserve">
-    <value>Đã gửi lại lời mời: {0}</value>
-  </data>
-  <data name="ChangeClientActivation" xml:space="preserve">
-    <value>Kích hoạt máy khách {0} đã thay đổi</value>
-  </data>
-  <data name="ChangeClientVisibility" xml:space="preserve">
-    <value>Khả năng hiển thị máy khách {0} đã thay đổi</value>
-  </data>
-  <data name="CreateClient" xml:space="preserve">
-    <value>Khách đã được tạo</value>
-  </data>
-  <data name="DeleteClient" xml:space="preserve">
-    <value>Khách {0} đã bị xóa</value>
-  </data>
-  <data name="FileIndexChanged" xml:space="preserve">
-    <value>Tập tin: {0}. Chỉ mục đã thay đổi từ {1} thành {2}</value>
-  </data>
-  <data name="FolderIndexChanged" xml:space="preserve">
-    <value>Thư mục: {0}. Chỉ mục đã thay đổi từ {1} thành {2}</value>
-  </data>
-  <data name="FolderIndexReordered" xml:space="preserve">
-    <value>Thư mục: {0}. Đã sắp xếp lại các chỉ mục</value>
-  </data>
-  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
-    <value>Đã tạo mã ủy quyền cho máy khách {0}</value>
-  </data>
-  <data name="GeneratePersonalAccessToken" xml:space="preserve">
-    <value>Mã token truy cập cá nhân đã được tạo cho máy khách {0}</value>
-  </data>
-  <data name="RegenerateSecret" xml:space="preserve">
-    <value>Đã tạo lại bí mật của máy khách {0}</value>
-  </data>
-  <data name="RevokeUserClient" xml:space="preserve">
-    <value>Đã thu hồi quyền truy cập máy khách {0}</value>
-  </data>
-  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
-    <value>Phòng: {0}. Đã tắt từ chối tải xuống</value>
-  </data>
-  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
-    <value>Phòng: {0}. Đã bật từ chối tải xuống</value>
-  </data>
-  <data name="RoomIndexingDisabled" xml:space="preserve">
-    <value>Đã tắt lập chỉ mục phòng</value>
-  </data>
-  <data name="RoomIndexingEnabled" xml:space="preserve">
-    <value>Đã bật lập chỉ mục phòng</value>
-  </data>
-  <data name="RoomLifeTimeDisabled" xml:space="preserve">
-    <value>Đã tắt Thời gian tồn tại</value>
-  </data>
-  <data name="RoomLifeTimeSet" xml:space="preserve">
-    <value>Đã thiết lập thời gian tồn tại. Giá trị: {0}. Khoảng thời gian: {1}. Xóa Vĩnh viễn: {2}</value>
-  </data>
-  <data name="RoomWatermarkDisabled" xml:space="preserve">
-    <value>Phòng: {0}. Đã tắt Watermark</value>
-  </data>
-  <data name="RoomWatermarkSet" xml:space="preserve">
-    <value>Phòng: {0}. Đã bật Watermark</value>
-  </data>
-  <data name="UpdateClient" xml:space="preserve">
-    <value>Đã cập nhật máy khách {0}</value>
-  </data>
-  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
-    <value>Đã thay đổi cài đặt quyền truy cập Công Cụ Dành Cho Nhà Phát Triển</value>
-  </data>
-  <data name="FileCustomFilterDisabled" xml:space="preserve">
-    <value>File: {0}. Bộ lọc tùy chỉnh đã bị vô hiệu hóa</value>
-  </data>
-  <data name="FileCustomFilterEnabled" xml:space="preserve">
-    <value>File: {0}. Bộ lọc tùy chỉnh được bật</value>
-  </data>
-  <data name="FileVersionRemoved" xml:space="preserve">
-    <value>Tập tin [{0}]. Đã xóa Phiên bản: {1}</value>
-  </data>
-  <data name="ApiKeyCreated" xml:space="preserve">
-    <value>Khóa API của người dùng đã được tạo: {0}</value>
-  </data>
-  <data name="ApiKeyDeleted" xml:space="preserve">
-    <value>Khóa API của người dùng đã bị xóa: {0}</value>
-  </data>
-  <data name="ApiKeyUpdated" xml:space="preserve">
-    <value>Khóa API của người dùng đã cập nhật: {0}</value>
-  </data>
-  <data name="FormCompletelyFilled" xml:space="preserve">
-    <value>Người dùng [{0}]. Đã điền đầy đủ thông tin vào biểu mẫu: {1}</value>
-  </data>
-  <data name="FormPartiallyFilled" xml:space="preserve">
-    <value>Người dùng [{0}]. Đã điền vào một phần của biểu mẫu: {1}</value>
-  </data>
-  <data name="FormStopped" xml:space="preserve">
-    <value>Người dùng [{0}]. Biểu mẫu đã dừng: {1}</value>
-  </data>
-  <data name="FormStartedToFill" xml:space="preserve">
-    <value>Người dùng [{0}]. Bắt đầu điền: {1}</value>
-  </data>
   <data name="WebhookCreated" xml:space="preserve">
     <value>Webhook đã được tạo: {0}</value>
   </data>
@@ -891,161 +1106,5 @@
   </data>
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Webhook đã được cập nhật: {0}</value>
-  </data>
-  <data name="AuthLinkActivated" xml:space="preserve">
-    <value>Liên kết ủy quyền đã được kích hoạt</value>
-  </data>
-  <data name="CustomerOperationPerformed" xml:space="preserve">
-    <value>Hoạt động của khách hàng đã được thực hiện</value>
-  </data>
-  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
-    <value>Đã tải báo cáo hoạt động khách hàng xuống</value>
-  </data>
-  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
-    <value>Đã cập nhật gói đăng ký của khách hàng: {0}</value>
-  </data>
-  <data name="CustomerWalletToppedUp" xml:space="preserve">
-    <value>Ví của khách hang đã được nạp tiền: {0}</value>
-  </data>
-  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Đã cập nhật cài đặt nạp tiền vào ví của khách hàng</value>
-  </data>
-  <data name="LdapDisabled" xml:space="preserve">
-    <value>Xác thực LDAP đã bị vô hiệu hóa</value>
-  </data>
-  <data name="LdapEnabled" xml:space="preserve">
-    <value>Xác thực LDAP được bật</value>
-  </data>
-  <data name="LdapSync" xml:space="preserve">
-    <value>Đồng bộ hóa LDAP đã hoàn tất</value>
-  </data>
-  <data name="LocationCol" xml:space="preserve">
-    <value>Địa điểm</value>
-  </data>
-  <data name="BannerSettingsChanged" xml:space="preserve">
-    <value>Cài đặt hiển thị biểu ngữ quảng cáo đã thay đổi</value>
-  </data>
-  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Đã cập nhật cài đặt dịch vụ hỗ trợ ví của khách hàng</value>
-  </data>
-  <data name="LoginSuccessSocialAccount" xml:space="preserve">
-    <value>Đăng nhập qua Tài khoản Xã hội thành công</value>
-  </data>
-  <data name="AddedServerToAgent" xml:space="preserve">
-    <value>Đã thêm máy chủ MCP {0} vào agent</value>
-  </data>
-  <data name="AgentCreated" xml:space="preserve">
-    <value>Agent đã được tạo</value>
-  </data>
-  <data name="AgentDeleted" xml:space="preserve">
-    <value>Agent đã được xóa</value>
-  </data>
-  <data name="AgentRenamed" xml:space="preserve">
-    <value>Agent đã được đổi tên: {0}</value>
-  </data>
-  <data name="AgentsModule" xml:space="preserve">
-    <value>Các Agent</value>
-  </data>
-  <data name="AIProviderCreated" xml:space="preserve">
-    <value>Nhà cung cấp AI đã được tạo: {0}</value>
-  </data>
-  <data name="AIProviderDeleted" xml:space="preserve">
-    <value>Nhà cung cấp AI đã bị xóa: {0}</value>
-  </data>
-  <data name="AIProviderUpdated" xml:space="preserve">
-    <value>Nhà cung cấp AI đã được cập nhật: {0}</value>
-  </data>
-  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
-    <value>AI agent [{0}]. Đặt hạn mức lưu trữ tùy chỉnh cho AI agent: {1}</value>
-  </data>
-  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
-    <value>AI agent  [{0}]. Đặt hạn mức lưu trữ mặc định cho AI agent: {1}</value>
-  </data>
-  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
-    <value>AI agent  [{0}]. Hạn mức lưu trữ bị vô hiệu hóa cho AI agent</value>
-  </data>
-  <data name="DeletedServerFromAgent" xml:space="preserve">
-    <value>Đã xóa máy chủ MCP {0} khỏi agent</value>
-  </data>
-  <data name="FileExternalLinkCreated" xml:space="preserve">
-    <value>Tập tin [{0}]. Đã tạo liên kết bên ngoài: {1}. Vai trò: {2}</value>
-  </data>
-  <data name="FileExternalLinkDeleted" xml:space="preserve">
-    <value>Tập tin [{0}]. Đã xóa liên kết bên ngoài: {1}</value>
-  </data>
-  <data name="FileExternalLinkUpdated" xml:space="preserve">
-    <value>Tập tin [{0}]. Đã cập nhật liên kết bên ngoài: {1}. Vai trò: {2}</value>
-  </data>
-  <data name="FileMarkedAsFavorite" xml:space="preserve">
-    <value>Tập tin đã được đánh dấu được Yêu thích: {0}</value>
-  </data>
-  <data name="FileRemovedFromFavorite" xml:space="preserve">
-    <value>Tập tin đã bị xóa khỏi Yêu thích: {0}</value>
-  </data>
-  <data name="FileRemovedFromList" xml:space="preserve">
-    <value>Tập tin đã bị xóa khỏi "Đã chia sẻ với tôi": {0}</value>
-  </data>
-  <data name="FileUpdatedAccessFor" xml:space="preserve">
-    <value>Tập tin [{0}]. Đã cập nhật quyền truy cập cho {1}. Vai trò: {2}</value>
-  </data>
-  <data name="FolderDownloaded" xml:space="preserve">
-    <value>Đã tải xuống thư mục: {0}</value>
-  </data>
-  <data name="FolderExternalLinkCreated" xml:space="preserve">
-    <value>Thư mục [{0}]. Đã tạo liên kết bên ngoài: {1}. Vai trò: {2}</value>
-  </data>
-  <data name="FolderExternalLinkDeleted" xml:space="preserve">
-    <value>Thư mục [{0}]. Đã xóa liên kết bên ngoài: {1}</value>
-  </data>
-  <data name="FolderExternalLinkUpdated" xml:space="preserve">
-    <value>Thư mục [{0}]. Đã cập nhật liên kết bên ngoài: {1}. Vai trò: {2}</value>
-  </data>
-  <data name="FolderRemovedFromList" xml:space="preserve">
-    <value>Đã xóa thư mục khỏi "Đã chia sẻ với tôi": {0}</value>
-  </data>
-  <data name="FolderUpdatedAccessFor" xml:space="preserve">
-    <value>Thư mục [{0}]. Đã cập nhật quyền truy cập cho {1}. Vai trò: {2}</value>
-  </data>
-  <data name="LoginSuccessViaOAuth" xml:space="preserve">
-    <value>Đăng nhập thành công qua OAuth 2.0</value>
-  </data>
-  <data name="LoginSuccessViaPassword" xml:space="preserve">
-    <value>Đăng nhập thành công thông qua đăng nhập và mật khẩu</value>
-  </data>
-  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
-    <value>Đặt hạn mức lưu trữ mặc định cho AI agent: {0}</value>
-  </data>
-  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
-    <value>Hạn mức mặc định bị vô hiệu hóa cho AI agent</value>
-  </data>
-  <data name="ResetVectorizationSettings" xml:space="preserve">
-    <value>Cài đặt véc-tơ hóa đã được đặt lại</value>
-  </data>
-  <data name="ResetWebSearchSettings" xml:space="preserve">
-    <value>Cài đặt tìm kiếm trên web đã được đặt lại</value>
-  </data>
-  <data name="RoomExternalLinkRevoked" xml:space="preserve">
-    <value>Đã thu hồi liên kết bên ngoài: {1}</value>
-  </data>
-  <data name="ServerCreated" xml:space="preserve">
-    <value>Đã tạo máy chủ MCP: {0}</value>
-  </data>
-  <data name="ServerDeleted" xml:space="preserve">
-    <value>Đã xóa máy chủ MCP: {0}</value>
-  </data>
-  <data name="ServerDisabled" xml:space="preserve">
-    <value>Đã vô hiệu hóa máy chủ MCP: {0}</value>
-  </data>
-  <data name="ServerEnabled" xml:space="preserve">
-    <value>Đã bật máy chủ MCP: {0}</value>
-  </data>
-  <data name="ServerUpdated" xml:space="preserve">
-    <value>Đã cập nhật máy chủ MCP: {0}</value>
-  </data>
-  <data name="SetVectorizationSettings" xml:space="preserve">
-    <value>Cài đặt véc-tơ hóa được định cấu hình. Nhà cung cấp: {0}</value>
-  </data>
-  <data name="SetWebSearchSettings" xml:space="preserve">
-    <value>Cài đặt tìm kiếm trên web đã được định cấu hình. Cỗ máy: {0}</value>
   </data>
 </root>

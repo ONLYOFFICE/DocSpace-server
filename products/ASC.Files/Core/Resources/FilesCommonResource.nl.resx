@@ -120,11 +120,20 @@
   <data name="AceShareLink" xml:space="preserve">
     <value>Buiten portal</value>
   </data>
+  <data name="AceStatusEnum_Collaborator" xml:space="preserve">
+    <value>Collega</value>
+  </data>
   <data name="AceStatusEnum_Comment" xml:space="preserve">
     <value>Commentaar</value>
   </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Content maker</value>
+  </data>
   <data name="AceStatusEnum_CustomFilter" xml:space="preserve">
     <value>Aangepaste filter</value>
+  </data>
+  <data name="AceStatusEnum_Editing" xml:space="preserve">
+    <value>Editor</value>
   </data>
   <data name="AceStatusEnum_FillForms" xml:space="preserve">
     <value>Formulier invullen</value>
@@ -141,8 +150,14 @@
   <data name="AceStatusEnum_Review" xml:space="preserve">
     <value>Beoordelen</value>
   </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Kamer Beheerder</value>
+  </data>
   <data name="Admin" xml:space="preserve">
     <value>Beheer</value>
+  </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>Agent Manager</value>
   </data>
   <data name="AppAccessDenied" xml:space="preserve">
     <value>Om te werken met dit bestand moet je toegangsrechten geven</value>
@@ -198,6 +213,15 @@
   <data name="CommentUpload" xml:space="preserve">
     <value>Geupload</value>
   </data>
+  <data name="Date" xml:space="preserve">
+    <value>Datum</value>
+  </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>Gedeelde link</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Uitnodiging link</value>
+  </data>
   <data name="DocuSignStatusDeclined" xml:space="preserve">
     <value>Afgewezen</value>
   </data>
@@ -240,17 +264,32 @@
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Bestand groter dan {0} wordt niet verplaatst</value>
   </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Het verplaatsen van meerdere bestanden naar de kamer voor het invullen van formulieren wordt niet ondersteund. Verplaats één ONLYOFFICE PDF formulier tegelijk.</value>
+  </data>
   <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
     <value>De nieuwe versie kan niet hetzelfde zijn als de huidige</value>
   </data>
   <data name="ErrorMessage_FolderCopyError" xml:space="preserve">
     <value>U kunt de map niet kopiëren naar de submap</value>
   </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Het verplaatsen van mappen naar de kamer voor het invullen van formulieren wordt niet ondersteund. Verplaats één ONLYOFFICE PDF formulier tegelijk.</value>
+  </data>
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>De vereiste map is niet gevonden</value>
   </data>
+  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
+    <value>Ongeldige provider</value>
+  </data>
+  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
+    <value>Het is niet mogelijk om in deze map de kamer op te slaan</value>
+  </data>
   <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Onjuiste titel</value>
+  </data>
+  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
+    <value>De uitnodigingslink is ongeldig of de geldigheidsduur ervan is verstreken</value>
   </data>
   <data name="ErrorMessage_LockedFile" xml:space="preserve">
     <value>Het bestand is momenteel vergrendeld door een andere gebruiker</value>
@@ -261,8 +300,20 @@
   <data name="ErrorMessage_ManyDownloads" xml:space="preserve">
     <value>Te veel downloads.</value>
   </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>Het maximum aantal links mag niet groter zijn dan {0}</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Het bestand kan niet naar deze kamer worden verplaatst. Probeer het ONLYOFFICE PDF formulier te verplaatsen.</value>
+  </data>
   <data name="ErrorMessage_NotSupportedFormat" xml:space="preserve">
     <value>Sorry, deze bestandsindeling wordt niet ondersteund</value>
+  </data>
+  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
+    <value>Deze provider is al verbonden met de kamer</value>
+  </data>
+  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
+    <value>De rol is niet beschikbaar voor dit gebruikerstype</value>
   </data>
   <data name="ErrorMessage_SaveAnonymous" xml:space="preserve">
     <value>Auteur van het bestand is onbekend</value>
@@ -276,6 +327,9 @@
   <data name="ErrorMessage_SecurityException" xml:space="preserve">
     <value>U heeft onvoldoende rechten om deze bewerking uit te voeren</value>
   </data>
+  <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
+    <value>U heeft geen toestemming om de kamer te archiveren</value>
+  </data>
   <data name="ErrorMessage_SecurityException_Auth" xml:space="preserve">
     <value>Met de verstrekte logingegevens werd geen toegang verleend tot {0}.</value>
   </data>
@@ -284,6 +338,9 @@
   </data>
   <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
     <value>U heeft geen toestemming om de map te kopiëren</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
+    <value>U heeft geen toestemming om naar deze map te kopiëren</value>
   </data>
   <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
     <value>U heeft geen voldoende aanmaak rechten</value>
@@ -306,11 +363,20 @@
   <data name="ErrorMessage_SecurityException_EditFileTwice" xml:space="preserve">
     <value>Dit document wordt al bewerkt door jou in een ander tabblad</value>
   </data>
+  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
+    <value>U heeft geen toestemming om de kamer te bewerken</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Kan huidige versie van bestand niet verwijderen</value>
+  </data>
   <data name="ErrorMessage_SecurityException_MoveFile" xml:space="preserve">
     <value>U heeft onvoldoende machtiging om het bestand te verplaatsen</value>
   </data>
   <data name="ErrorMessage_SecurityException_MoveFolder" xml:space="preserve">
     <value>U heeft onvoldoende machtiging om de map te verplaatsen</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
+    <value>U heeft geen toestemming om naar deze map te verplaatsen</value>
   </data>
   <data name="ErrorMessage_SecurityException_ReadFile" xml:space="preserve">
     <value>U heeft onvoldoende rechten om het bestand te bekijken</value>
@@ -324,11 +390,17 @@
   <data name="ErrorMessage_SecurityException_RenameFolder" xml:space="preserve">
     <value>U heeft onvoldoende rechten om de map te hernoemen</value>
   </data>
+  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
+    <value>U heeft geen toestemming om de kamer niet meer te archiveren</value>
+  </data>
   <data name="ErrorMessage_SecurityException_UpdateEditingFile" xml:space="preserve">
     <value>Kan het bestand niet updaten omdat deze is geopend om te bewerken</value>
   </data>
   <data name="ErrorMessage_SecurityException_ViewFolder" xml:space="preserve">
     <value>U heeft onvoldoende rechten om de inhoud te bekijken</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>U hebt te vaak geprobeerd uw wachtwoord in te voeren. Probeer het later opnieuw</value>
   </data>
   <data name="ErrorMessage_SharpBoxException" xml:space="preserve">
     <value>De inhoud van de externe map is niet beschikbaar. Probeer het account opnieuw te verbinden.</value>
@@ -336,8 +408,14 @@
   <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>Fout bij bewerken van het bestand</value>
   </data>
+  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
+    <value>U kunt gearchiveerde ruimtes niet bewerken</value>
+  </data>
   <data name="ErrorMessage_UpdateEditingFile" xml:space="preserve">
     <value>U kunt een bestand welke geopend is voor bewerking niet bijwerken</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Het bestand kan niet worden geüpload naar deze kamer. Probeer het ONLYOFFICE PDF formulier te uploaden.</value>
   </data>
   <data name="ErrorMessage_UserNotFound" xml:space="preserve">
     <value>Gebruiker kon niet gevonden worden</value>
@@ -345,44 +423,35 @@
   <data name="ErrorMessage_ViewTrashItem" xml:space="preserve">
     <value>Het is niet toegestaan om elementen in de prullenbak te bekijken</value>
   </data>
-  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
-    <value>Ongeldige provider</value>
-  </data>
-  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
-    <value>Het is niet mogelijk om in deze map de kamer op te slaan</value>
-  </data>
-  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
-    <value>De uitnodigingslink is ongeldig of de geldigheidsduur ervan is verstreken</value>
-  </data>
-  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
-    <value>De rol is niet beschikbaar voor dit gebruikerstype</value>
-  </data>
-  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
-    <value>Deze provider is al verbonden met de kamer</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
-    <value>U heeft geen toestemming om naar deze map te kopiëren</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
-    <value>U heeft geen toestemming om naar deze map te verplaatsen</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
-    <value>U heeft geen toestemming om de kamer niet meer te archiveren</value>
-  </data>
-  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
-    <value>U kunt gearchiveerde ruimtes niet bewerken</value>
-  </data>
   <data name="ErrorrMessage_PinRoom" xml:space="preserve">
     <value>U kunt geen kamer vastpinnen</value>
   </data>
   <data name="Everyone" xml:space="preserve">
     <value>Iedereen</value>
   </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Externe gebruiker</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Link om in te vullen</value>
+  </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>Documenten van gebruiker {0} {1}</value>
+  </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Formuliernummer</value>
+  </data>
   <data name="Guest" xml:space="preserve">
     <value>Anoniem</value>
   </data>
   <data name="IndexTitle" xml:space="preserve">
     <value>Doorzoek inhoud van documenten</value>
+  </data>
+  <data name="KnowledgeFolder" xml:space="preserve">
+    <value>Kennis</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Link naar formulier</value>
   </data>
   <data name="MessageFileCreated" xml:space="preserve">
     <value>Bestand gecreeerd in map "{0}"</value>
@@ -395,6 +464,9 @@
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Het bestand is niet langer een concept om het formulier in te vullen.</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Open bestand</value>
   </data>
   <data name="ProductAdminOpportunities" xml:space="preserve">
     <value>Doe hetzelfde als een gebruiker|Koppel Dropbox, Box en andere accounts in de 'Algemene Documenten' sectie|Stel de machtigingen in voor documenten en folders in de 'Algemene Documenten' sectie</value>
@@ -415,20 +487,17 @@ Het beste geschikt voor docx, xlsx, pptx.</value>
   <data name="ProductUserOpportunities" xml:space="preserve">
     <value>Maak en wijzig eigen documenten evenals gedeelde documenten met de juiste machtigingen|Geef lees/schrijf machtiging voor documenten en folders aan andere gebruikers|Koppel Dropbox, Box en andere accounts in de 'Documenten'-sectie</value>
   </data>
-  <data name="UnknownFirstName" xml:space="preserve">
-    <value>Voornaam</value>
+  <data name="ResultStorageFolder" xml:space="preserve">
+    <value>Resultaat Opslag</value>
   </data>
-  <data name="UnknownLastName" xml:space="preserve">
-    <value>Achternaam</value>
+  <data name="RoleEnum_Collaborator" xml:space="preserve">
+    <value>Collega</value>
   </data>
-  <data name="UnlockComment" xml:space="preserve">
-    <value>Het bestand is ontgrendeld</value>
+  <data name="RoleEnum_Comment" xml:space="preserve">
+    <value>Opmerkingen gever</value>
   </data>
-  <data name="AceStatusEnum_Editing" xml:space="preserve">
-    <value>Editor</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
-    <value>U heeft geen toestemming om de kamer te bewerken</value>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Content maker</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
     <value>DocSpace Beheerder</value>
@@ -436,41 +505,26 @@ Het beste geschikt voor docx, xlsx, pptx.</value>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Editor</value>
   </data>
-  <data name="RoleEnum_User" xml:space="preserve">
-    <value>Gebruiker</value>
+  <data name="RoleEnum_FillForms" xml:space="preserve">
+    <value>Formuliervuller</value>
+  </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>Gast</value>
   </data>
   <data name="RoleEnum_Read" xml:space="preserve">
     <value>Kijker</value>
   </data>
-  <data name="RoleEnum_Comment" xml:space="preserve">
-    <value>Opmerkingen gever</value>
-  </data>
-  <data name="RoleEnum_FillForms" xml:space="preserve">
-    <value>Formuliervuller</value>
-  </data>
   <data name="RoleEnum_Review" xml:space="preserve">
     <value>Beoordelaar</value>
   </data>
-  <data name="RoleEnum_Collaborator" xml:space="preserve">
-    <value>Collega</value>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Kamerbeheerder</value>
   </data>
-  <data name="AceStatusEnum_Collaborator" xml:space="preserve">
-    <value>Collega</value>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Kamer Beheerder</value>
   </data>
-  <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
-    <value>U heeft geen toestemming om de kamer te archiveren</value>
-  </data>
-  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
-    <value>Het maximum aantal links mag niet groter zijn dan {0}</value>
-  </data>
-  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
-    <value>U hebt te vaak geprobeerd uw wachtwoord in te voeren. Probeer het later opnieuw</value>
-  </data>
-  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
-    <value>Uitnodiging link</value>
-  </data>
-  <data name="DefaultExternalLinkTitle" xml:space="preserve">
-    <value>Gedeelde link</value>
+  <data name="RoleEnum_User" xml:space="preserve">
+    <value>Gebruiker</value>
   </data>
   <data name="RoomIndex_Author" xml:space="preserve">
     <value>Auteur</value>
@@ -486,6 +540,9 @@ Het beste geschikt voor docx, xlsx, pptx.</value>
   </data>
   <data name="RoomIndex_ExportAuthor" xml:space="preserve">
     <value>Exporteer Auteur</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Map</value>
   </data>
   <data name="RoomIndex_Index" xml:space="preserve">
     <value>Index</value>
@@ -511,79 +568,22 @@ Het beste geschikt voor docx, xlsx, pptx.</value>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Type</value>
   </data>
-  <data name="RoomIndex_Folder" xml:space="preserve">
-    <value>Map</value>
-  </data>
-  <data name="Date" xml:space="preserve">
-    <value>Datum</value>
-  </data>
-  <data name="User" xml:space="preserve">
-    <value>Gebruiker</value>
-  </data>
-  <data name="LinkToForm" xml:space="preserve">
-    <value>Link naar formulier</value>
-  </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Open bestand</value>
-  </data>
-  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Het bestand kan niet worden geüpload naar deze kamer. Probeer het ONLYOFFICE PDF formulier te uploaden.</value>
-  </data>
-  <data name="FillOutExternalLinkTitle" xml:space="preserve">
-    <value>Link om in te vullen</value>
-  </data>
-  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Het verplaatsen van meerdere bestanden naar de kamer voor het invullen van formulieren wordt niet ondersteund. Verplaats één ONLYOFFICE PDF formulier tegelijk.</value>
-  </data>
-  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Het verplaatsen van mappen naar de kamer voor het invullen van formulieren wordt niet ondersteund. Verplaats één ONLYOFFICE PDF formulier tegelijk.</value>
-  </data>
-  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Het bestand kan niet naar deze kamer worden verplaatst. Probeer het ONLYOFFICE PDF formulier te verplaatsen.</value>
-  </data>
-  <data name="FormNumber" xml:space="preserve">
-    <value>Formuliernummer</value>
-  </data>
-  <data name="ExternalUser" xml:space="preserve">
-    <value>Externe gebruiker</value>
-  </data>
-  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
-    <value>Kamer Beheerder</value>
-  </data>
-  <data name="RoleEnum_RoomManager" xml:space="preserve">
-    <value>Kamer Beheerder</value>
-  </data>
-  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
-    <value>Content maker</value>
-  </data>
-  <data name="RoleEnum_ContentCreator" xml:space="preserve">
-    <value>Content maker</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
-    <value>Kan huidige versie van bestand niet verwijderen</value>
-  </data>
   <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
     <value>Deel om in te vullen</value>
   </data>
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>Begin met invullen</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Kamerbeheerder</value>
+  <data name="UnknownFirstName" xml:space="preserve">
+    <value>Voornaam</value>
   </data>
-  <data name="RoleEnum_Guest" xml:space="preserve">
-    <value>Gast</value>
+  <data name="UnknownLastName" xml:space="preserve">
+    <value>Achternaam</value>
   </data>
-  <data name="AgentManager" xml:space="preserve">
-    <value>Agent Manager</value>
+  <data name="UnlockComment" xml:space="preserve">
+    <value>Het bestand is ontgrendeld</value>
   </data>
-  <data name="FolderNameForReassignedData" xml:space="preserve">
-    <value>Documenten van gebruiker {0} {1}</value>
-  </data>
-  <data name="KnowledgeFolder" xml:space="preserve">
-    <value>Kennis</value>
-  </data>
-  <data name="ResultStorageFolder" xml:space="preserve">
-    <value>Resultaat Opslag</value>
+  <data name="User" xml:space="preserve">
+    <value>Gebruiker</value>
   </data>
 </root>

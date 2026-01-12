@@ -36,7 +36,7 @@ public class CommonMethods(
     CoreSettings coreSettings,
     CommonLinkUtility commonLinkUtility,
     EmailValidationKeyProvider emailValidationKeyProvider,
-    TimeZoneConverter timeZoneConverter, CommonConstants commonConstants,
+    CommonConstants commonConstants,
     IMemoryCache memoryCache,
     HostedSolution hostedSolution,
     CoreBaseSettings coreBaseSettings,
@@ -47,6 +47,7 @@ public class CommonMethods(
     {
         var tenantQuotaSettings = hostedSolution.GetTenantQuotaSettings(t.Id).Result;
         var tariffMaxTotalSize = hostedSolution.GetTenantQuotaAsync(t.Id).Result.MaxTotalSize;
+        var timeZone = TimeZoneConverter.GetTimeZone(t.TimeZone);
         return new
         {
             created = t.CreationDateTime,
@@ -58,10 +59,12 @@ public class CommonMethods(
             name = t.Name == "" ? Resource.PortalName : t.Name,
             ownerId = t.OwnerId,
             paymentId = t.PaymentId,
+            partnerId = t.PartnerId,
             portalName = t.Alias,
             status = t.Status.ToStringFast(),
             tenantId = t.Id,
-            timeZoneName = timeZoneConverter.GetTimeZone(t.TimeZone).DisplayName,
+            timeZoneId = TimeZoneConverter.GetIanaTimeZoneId(timeZone),
+            timeZoneName = timeZone.DisplayName,
             quotaUsage,
             customQuota = tenantQuotaSettings.EnableQuota && tenantQuotaSettings.Quota <= tariffMaxTotalSize ?
                     tenantQuotaSettings.Quota :

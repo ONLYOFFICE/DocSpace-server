@@ -120,6 +120,9 @@
   <data name="AiSettingsAccessDenied" xml:space="preserve">
     <value>Vous n'avez pas la permission de gérer les paramètres IA</value>
   </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>Impossible de traiter les fichiers : {0}. Les fichiers peuvent être corrompus ou chiffrés</value>
+  </data>
   <data name="ChatAccessDenied" xml:space="preserve">
     <value>Vous n'avez pas la permission d'utiliser le chat</value>
   </data>
@@ -135,43 +138,40 @@
   <data name="InvalidAuthCode" xml:space="preserve">
     <value>Code d'autorisation non valide</value>
   </data>
-  <data name="ManageProviders" xml:space="preserve">
-    <value>Vous n'avez pas la permission de gérer les fournisseurs</value>
-  </data>
-  <data name="InvalidUrl" xml:space="preserve">
-    <value>Le chemin d'URL spécifié n'est pas valide. Veuillez vous assurer que l'endpoint correct est utilisé</value>
+  <data name="InvalidKey" xml:space="preserve">
+    <value>La clé API spécifiée n'est pas valide ou ne dispose pas des droits d'accès. Vérifiez que la clé est correcte et réessayez</value>
   </data>
   <data name="InvalidServerName" xml:space="preserve">
     <value>Nom de serveur MCP non valide. Seules les lettres, chiffres, tirets bas et traits d'union sont autorisés</value>
   </data>
-  <data name="InvalidKey" xml:space="preserve">
-    <value>La clé API spécifiée n'est pas valide ou ne dispose pas des droits d'accès. Vérifiez que la clé est correcte et réessayez</value>
+  <data name="InvalidUrl" xml:space="preserve">
+    <value>Le chemin d'URL spécifié n'est pas valide. Veuillez vous assurer que l'endpoint correct est utilisé</value>
+  </data>
+  <data name="ManageProviders" xml:space="preserve">
+    <value>Vous n'avez pas la permission de gérer les fournisseurs</value>
   </data>
   <data name="ManageServers" xml:space="preserve">
     <value>Vous n'avez pas la permission de gérer les serveurs MCP</value>
   </data>
-  <data name="ServerNotFound" xml:space="preserve">
-    <value>Serveur MCP introuvable</value>
-  </data>
-  <data name="ServerNameExists" xml:space="preserve">
-    <value>Le nom de serveur MCP existe déjà</value>
-  </data>
-  <data name="ServerFailedConnect" xml:space="preserve">
-    <value>Échec de la connexion au serveur MCP</value>
+  <data name="ProviderNotFound" xml:space="preserve">
+    <value>Fournisseur introuvable</value>
   </data>
   <data name="ReservedServerName" xml:space="preserve">
     <value>Nom de serveur MCP non autorisé</value>
   </data>
-  <data name="ProviderNotFound" xml:space="preserve">
-    <value>Fournisseur introuvable</value>
+  <data name="ServerFailedConnect" xml:space="preserve">
+    <value>Échec de la connexion au serveur MCP</value>
+  </data>
+  <data name="ServerNameExists" xml:space="preserve">
+    <value>Le nom de serveur MCP existe déjà</value>
+  </data>
+  <data name="ServerNotFound" xml:space="preserve">
+    <value>Serveur MCP introuvable</value>
   </data>
   <data name="ServersRoomLimit" xml:space="preserve">
     <value>Nombre maximum de serveurs par salle : {0}</value>
   </data>
   <data name="UnavailableServers" xml:space="preserve">
     <value>Les serveurs MCP sont indisponibles : {0}. Veuillez vérifier les paramètres de connexion</value>
-  </data>
-  <data name="AttachmentProcessFailed" xml:space="preserve">
-    <value>Impossible de traiter les fichiers : {0}. Les fichiers peuvent être corrompus ou chiffrés</value>
   </data>
 </root>

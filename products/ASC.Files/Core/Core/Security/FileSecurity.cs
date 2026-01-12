@@ -56,7 +56,8 @@ public class FileSecurity(
     AuthManager authManager,
     VectorizationGlobalSettings vectorizationGlobalSettings,
     VectorizationHelper vectorizationHelper,
-    AiAccessibility aiAccessibility)
+    AiAccessibility aiAccessibility,
+    Actions actions)
     : IFileSecurity
 {
     public readonly FileShare DefaultMyShare = FileShare.Restrict;
@@ -1187,7 +1188,7 @@ public class FileSecurity(
             return false;
         }
 
-        if (file != null && action == FilesSecurityActions.SubmitToFormGallery && !file.IsForm)
+        if (file != null && action == FilesSecurityActions.SubmitToFormGallery && ((FilterType)file.Category is not (FilterType.DocumentsOnly or FilterType.PresentationsOnly or FilterType.SpreadsheetsOnly or FilterType.PdfForm)))
         {
             return false;
         }
@@ -3394,8 +3395,8 @@ public class FileSecurity(
         var userId = authContext.CurrentAccount.ID;
 
         if (!await badgesSettingsHelper.GetEnabledForCurrentUserAsync()
-            && !await studioNotifyHelper.IsSubscribedToNotifyAsync(userId, Actions.RoomsActivity)
-            && !await studioNotifyHelper.IsSubscribedToNotifyAsync(userId, Actions.SendWhatsNew))
+            && !await studioNotifyHelper.IsSubscribedToNotifyAsync(userId, actions.RoomsActivity)
+            && !await studioNotifyHelper.IsSubscribedToNotifyAsync(userId, actions.SendWhatsNew))
         {
             return true;
         }

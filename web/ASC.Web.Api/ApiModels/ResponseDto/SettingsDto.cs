@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core;
+
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 /// <summary>
@@ -245,4 +247,9 @@ public class SettingsDto
     /// The external resources settings.
     /// </summary>
     public CultureSpecificExternalResources ExternalResources { get; set; }
+
+    /// <summary>
+    /// Specifies the default folder type for the current settings.
+    /// </summary>
+    public FolderType DefaultFolderType { get; set; }
 }

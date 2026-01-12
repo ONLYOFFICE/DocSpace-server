@@ -257,8 +257,6 @@ public class SecurityController(
             itemList.TryAdd(item.Key, item.Value);
         }
 
-        var defaultPageSettings = await settingsManager.LoadAsync<StudioDefaultPageSettings>();
-
         foreach (var item in itemList)
         {
             Guid[] subjects = null;
@@ -277,10 +275,6 @@ public class SecurityController(
                         subjects = selectedUsers.ToArray();
                     }
                 }
-            }
-            else if (productId == defaultPageSettings.DefaultProductID)
-            {
-                await settingsManager.SaveAsync(settingsManager.GetDefault<StudioDefaultPageSettings>());
             }
 
             await webItemSecurity.SetSecurityAsync(item.Key, item.Value, subjects);

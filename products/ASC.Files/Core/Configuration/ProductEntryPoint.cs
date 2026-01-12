@@ -197,6 +197,7 @@ public class ProductEntryPoint : Product
 
             activityInfo.TargetUsers = additionalInfo.UserIds;
             activityInfo.IsAgent = additionalInfo.IsAgent.HasValue && additionalInfo.IsAgent.Value;
+            activityInfo.IsKnowledge = additionalInfo.ParentType.HasValue && additionalInfo.ParentType.Value == (int)FolderType.Knowledge;
 
             switch (e.Action)
             {
@@ -323,8 +324,9 @@ public class ProductEntryPoint : Product
             }
         }
         var virtualRoomsFolderId = await _globalFolder.GetFolderVirtualRoomsAsync(_daoFactory);
+        var aiAgentsFolderId = await _globalFolder.GetFolderAiAgentsAsync(_daoFactory);
 
-        var myRooms = await folderDao.GetRoomsAsync(null, null, null, userId, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, null, new List<int> { virtualRoomsFolderId }).ToListAsync();
+        var myRooms = await folderDao.GetRoomsAsync(null, null, null, userId, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, null, new List<int> { virtualRoomsFolderId, aiAgentsFolderId }).ToListAsync();
 
         foreach (var room in myRooms)
         {

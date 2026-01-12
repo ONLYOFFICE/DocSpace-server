@@ -47,13 +47,13 @@ public abstract class PatternFormatter : IPatternFormatter
         _doformat = formatMessage;
     }
 
-    public string[] GetTags(IPattern pattern)
+    public List<string> GetTags(IPattern pattern)
     {
         ArgumentNullException.ThrowIfNull(pattern);
 
-        var findedTags = new List<string>(SearchTags(pattern.Body));
-        Array.ForEach(SearchTags(pattern.Subject), tag => { if (!findedTags.Contains(tag)) { findedTags.Add(tag); } });
-        return findedTags.ToArray();
+        var findedTags = new List<string>(SearchTags(pattern.Body()));
+        findedTags.AddRange(SearchTags(pattern.Subject()));
+        return findedTags.Distinct().ToList();
     }
 
     public void FormatMessage(INoticeMessage message, ITagValue[] tagsValues)
@@ -64,8 +64,8 @@ public abstract class PatternFormatter : IPatternFormatter
 
         BeforeFormat(message, tagsValues);
 
-        message.Subject = FormatText(_doformat ? message.Subject : message.Pattern.Subject, tagsValues);
-        message.Body = FormatText(_doformat ? message.Body : message.Pattern.Body, tagsValues);
+        message.Subject = FormatText(_doformat ? message.Subject : message.Pattern.Subject(), tagsValues);
+        message.Body = FormatText(_doformat ? message.Body : message.Pattern.Body(), tagsValues);
 
         AfterFormat(message);
     }
@@ -76,7 +76,7 @@ public abstract class PatternFormatter : IPatternFormatter
 
     protected virtual void AfterFormat(INoticeMessage message) { }
 
-    protected string[] SearchTags(string text)
+    private List<string> SearchTags(string text)
     {
         if (string.IsNullOrEmpty(text) || string.IsNullOrEmpty(_tagSearchPattern))
         {
@@ -94,6 +94,6 @@ public abstract class PatternFormatter : IPatternFormatter
             }
         }
 
-        return findedTags.ToArray();
+        return findedTags;
     }
 }

@@ -120,11 +120,20 @@
   <data name="AceShareLink" xml:space="preserve">
     <value>Portal externo</value>
   </data>
+  <data name="AceStatusEnum_Collaborator" xml:space="preserve">
+    <value>Colaborador</value>
+  </data>
   <data name="AceStatusEnum_Comment" xml:space="preserve">
     <value>Comente</value>
   </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Criador do conteúdo</value>
+  </data>
   <data name="AceStatusEnum_CustomFilter" xml:space="preserve">
     <value>Filtro personalizado</value>
+  </data>
+  <data name="AceStatusEnum_Editing" xml:space="preserve">
+    <value>Editor</value>
   </data>
   <data name="AceStatusEnum_FillForms" xml:space="preserve">
     <value>Preenchimento Do Formulário</value>
@@ -141,8 +150,14 @@
   <data name="AceStatusEnum_Review" xml:space="preserve">
     <value>Revisar</value>
   </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Gerente da sala</value>
+  </data>
   <data name="Admin" xml:space="preserve">
     <value>Administrador</value>
+  </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>Gerenciador de Agentes</value>
   </data>
   <data name="AppAccessDenied" xml:space="preserve">
     <value>Para trabalhar com o arquivo, você deve conceder acesso a ele</value>
@@ -198,6 +213,15 @@
   <data name="CommentUpload" xml:space="preserve">
     <value>Carregado</value>
   </data>
+  <data name="Date" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>Link compartilhado</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Link de convite</value>
+  </data>
   <data name="DocuSignStatusDeclined" xml:space="preserve">
     <value>Recusado</value>
   </data>
@@ -240,17 +264,32 @@
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Arquivo maior que {0} não será movido</value>
   </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Não é possível mover vários arquivos para a sala Preenchimento de formulários. Mova um formulário PDF do ONLYOFFICE por vez.</value>
+  </data>
   <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
     <value>A nova versão não pode ser igual à atual</value>
   </data>
   <data name="ErrorMessage_FolderCopyError" xml:space="preserve">
     <value>Você não pode copiar a pasta para esta subpasta</value>
   </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Não há suporte para mover pastas para a sala Preenchimento de formulários. Mova um formulário PDF do ONLYOFFICE por vez.</value>
+  </data>
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>A pasta solicitada não foi encontrada</value>
   </data>
+  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
+    <value>Provedor inválido</value>
+  </data>
+  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
+    <value>Não é possível usar esta pasta para armazenar a sala</value>
+  </data>
   <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Título incorreto</value>
+  </data>
+  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
+    <value>O link do convite é inválido ou sua validade expirou</value>
   </data>
   <data name="ErrorMessage_LockedFile" xml:space="preserve">
     <value>O arquivo está atualmente bloqueado por outro usuário</value>
@@ -261,8 +300,20 @@
   <data name="ErrorMessage_ManyDownloads" xml:space="preserve">
     <value>Muitos downloads.</value>
   </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>O número máximo de links não pode exceder {0}</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>O arquivo não pode ser movido para esta sala. Tente mover o formulário PDF do ONLYOFFICE.</value>
+  </data>
   <data name="ErrorMessage_NotSupportedFormat" xml:space="preserve">
     <value>Lamentamos, este tipo arquivo não é suportado</value>
+  </data>
+  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
+    <value>Este provedor já está conectado à sala</value>
+  </data>
+  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
+    <value>A função não está disponível para este tipo de usuário</value>
   </data>
   <data name="ErrorMessage_SaveAnonymous" xml:space="preserve">
     <value>Autor do salvamento é desconhecido</value>
@@ -276,6 +327,9 @@
   <data name="ErrorMessage_SecurityException" xml:space="preserve">
     <value>Você não tem permissão suficiente para executar a operação</value>
   </data>
+  <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
+    <value>Você não tem permissão suficiente para arquivar a sala</value>
+  </data>
   <data name="ErrorMessage_SecurityException_Auth" xml:space="preserve">
     <value>Não foi possível autorizar no provedor {0} com as credenciais fornecidas.</value>
   </data>
@@ -284,6 +338,9 @@
   </data>
   <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
     <value>Você não tem permissão suficiente para copiar a pasta</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
+    <value>Você não tem permissão para copiar para esta pasta</value>
   </data>
   <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
     <value>Você não tem permissão suficiente para criar</value>
@@ -306,11 +363,20 @@
   <data name="ErrorMessage_SecurityException_EditFileTwice" xml:space="preserve">
     <value>Este documento está sendo editado por você em outra aba</value>
   </data>
+  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
+    <value>Você não tem permissão para editar a sala</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Não é possível excluir a versão atual do arquivo</value>
+  </data>
   <data name="ErrorMessage_SecurityException_MoveFile" xml:space="preserve">
     <value>Você não tem permissão suficiente para mover o arquivo</value>
   </data>
   <data name="ErrorMessage_SecurityException_MoveFolder" xml:space="preserve">
     <value>Você não tem permissão suficiente para mover a pasta</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
+    <value>Você não tem permissão para mover para esta pasta</value>
   </data>
   <data name="ErrorMessage_SecurityException_ReadFile" xml:space="preserve">
     <value>Você não tem permissão suficiente para visualizar o arquivo</value>
@@ -324,11 +390,17 @@
   <data name="ErrorMessage_SecurityException_RenameFolder" xml:space="preserve">
     <value>Você não tem permissão suficiente para renomear a pasta</value>
   </data>
+  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
+    <value>Você não tem permissão suficiente para desarquivar a sala</value>
+  </data>
   <data name="ErrorMessage_SecurityException_UpdateEditingFile" xml:space="preserve">
     <value>Não é possível atualizar o arquivo por que ele está aberto para edição</value>
   </data>
   <data name="ErrorMessage_SecurityException_ViewFolder" xml:space="preserve">
     <value>Você não tem permissão suficiente para exibir o conteúdo da pasta</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>Você tentou muitas vezes inserir sua senha. Por favor, tente novamente mais tarde</value>
   </data>
   <data name="ErrorMessage_SharpBoxException" xml:space="preserve">
     <value>O conteúdo da pasta de terceiros não está disponível. Tente reconectar a conta.</value>
@@ -336,8 +408,14 @@
   <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>Erro no início da edição do arquivo</value>
   </data>
+  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
+    <value>Você não pode editar salas arquivadas</value>
+  </data>
   <data name="ErrorMessage_UpdateEditingFile" xml:space="preserve">
     <value>Você não pode atualizar um arquivo que está aberto para edição</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>O arquivo não pode ser carregado nesta sala. Tente fazer upload do formulário PDF do ONLYOFFICE.</value>
   </data>
   <data name="ErrorMessage_UserNotFound" xml:space="preserve">
     <value>Usuário não pôde ser encontrado</value>
@@ -345,44 +423,35 @@
   <data name="ErrorMessage_ViewTrashItem" xml:space="preserve">
     <value>Você não tem permissão para visualizar os elementos na Lixeira</value>
   </data>
-  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
-    <value>Provedor inválido</value>
-  </data>
-  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
-    <value>Não é possível usar esta pasta para armazenar a sala</value>
-  </data>
-  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
-    <value>O link do convite é inválido ou sua validade expirou</value>
-  </data>
-  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
-    <value>A função não está disponível para este tipo de usuário</value>
-  </data>
-  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
-    <value>Este provedor já está conectado à sala</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
-    <value>Você não tem permissão para copiar para esta pasta</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
-    <value>Você não tem permissão para mover para esta pasta</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
-    <value>Você não tem permissão suficiente para desarquivar a sala</value>
-  </data>
-  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
-    <value>Você não pode editar salas arquivadas</value>
-  </data>
   <data name="ErrorrMessage_PinRoom" xml:space="preserve">
     <value>Você não pode marcar uma sala</value>
   </data>
   <data name="Everyone" xml:space="preserve">
     <value>Todos</value>
   </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Usuário externo</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Link para preencher</value>
+  </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>Documentos do usuário {0} {1}</value>
+  </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Número do formulário</value>
+  </data>
   <data name="Guest" xml:space="preserve">
     <value>Anônimo</value>
   </data>
   <data name="IndexTitle" xml:space="preserve">
     <value>Pesquisar em conteúdo de documentos</value>
+  </data>
+  <data name="KnowledgeFolder" xml:space="preserve">
+    <value>Conhecimento</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Link para formulário</value>
   </data>
   <data name="MessageFileCreated" xml:space="preserve">
     <value>Arquivo criado na pasta "{0}"</value>
@@ -395,6 +464,9 @@
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>O arquivo não é mais um rascunho para preencher o formulário.</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Abrir arquivo</value>
   </data>
   <data name="ProductAdminOpportunities" xml:space="preserve">
     <value>Faça o mesmo como um usuário|Conecte ao Dropbox, Box e outras contas na seção "Documentos comuns"|Configure o acesso direto aos documentos e pastas na seção "Documentos comuns"</value>
@@ -415,20 +487,17 @@
   <data name="ProductUserOpportunities" xml:space="preserve">
     <value>Crie e edite documentos próprios bem como documentos compartilhados com os direitos de acesso adequados|Forneça acesso de leitura/gravação para outros usuários aos documentos e pastas|Conecte a Dropbox, Box e outras contas na seção "Documentos"</value>
   </data>
-  <data name="UnknownFirstName" xml:space="preserve">
-    <value>Nome</value>
+  <data name="ResultStorageFolder" xml:space="preserve">
+    <value>Armazenamento de resultados</value>
   </data>
-  <data name="UnknownLastName" xml:space="preserve">
-    <value>Sobrenome</value>
+  <data name="RoleEnum_Collaborator" xml:space="preserve">
+    <value>Colaborador</value>
   </data>
-  <data name="UnlockComment" xml:space="preserve">
-    <value>O arquivo está desbloqueado</value>
+  <data name="RoleEnum_Comment" xml:space="preserve">
+    <value>Comentarista</value>
   </data>
-  <data name="AceStatusEnum_Editing" xml:space="preserve">
-    <value>Editor</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
-    <value>Você não tem permissão para editar a sala</value>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Criador do conteúdo</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
     <value>DocSpace Administrador</value>
@@ -436,41 +505,26 @@
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Editor</value>
   </data>
-  <data name="RoleEnum_User" xml:space="preserve">
-    <value>Usuário</value>
+  <data name="RoleEnum_FillForms" xml:space="preserve">
+    <value>Preenchedor de formulário</value>
+  </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>Hóspede</value>
   </data>
   <data name="RoleEnum_Read" xml:space="preserve">
     <value>Visualizador</value>
   </data>
-  <data name="RoleEnum_Comment" xml:space="preserve">
-    <value>Comentarista</value>
-  </data>
-  <data name="RoleEnum_FillForms" xml:space="preserve">
-    <value>Preenchedor de formulário</value>
-  </data>
   <data name="RoleEnum_Review" xml:space="preserve">
     <value>Revisor</value>
   </data>
-  <data name="RoleEnum_Collaborator" xml:space="preserve">
-    <value>Colaborador</value>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Administrador da sala</value>
   </data>
-  <data name="AceStatusEnum_Collaborator" xml:space="preserve">
-    <value>Colaborador</value>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Gerente da sala</value>
   </data>
-  <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
-    <value>Você não tem permissão suficiente para arquivar a sala</value>
-  </data>
-  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
-    <value>O número máximo de links não pode exceder {0}</value>
-  </data>
-  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
-    <value>Você tentou muitas vezes inserir sua senha. Por favor, tente novamente mais tarde</value>
-  </data>
-  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
-    <value>Link de convite</value>
-  </data>
-  <data name="DefaultExternalLinkTitle" xml:space="preserve">
-    <value>Link compartilhado</value>
+  <data name="RoleEnum_User" xml:space="preserve">
+    <value>Usuário</value>
   </data>
   <data name="RoomIndex_Author" xml:space="preserve">
     <value>Autor</value>
@@ -486,6 +540,9 @@
   </data>
   <data name="RoomIndex_ExportAuthor" xml:space="preserve">
     <value>Autor de exportação</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Pasta</value>
   </data>
   <data name="RoomIndex_Index" xml:space="preserve">
     <value>Índice</value>
@@ -511,79 +568,22 @@
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Tipo</value>
   </data>
-  <data name="RoomIndex_Folder" xml:space="preserve">
-    <value>Pasta</value>
-  </data>
-  <data name="Date" xml:space="preserve">
-    <value>Data</value>
-  </data>
-  <data name="User" xml:space="preserve">
-    <value>Usuário</value>
-  </data>
-  <data name="LinkToForm" xml:space="preserve">
-    <value>Link para formulário</value>
-  </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Abrir arquivo</value>
-  </data>
-  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>O arquivo não pode ser carregado nesta sala. Tente fazer upload do formulário PDF do ONLYOFFICE.</value>
-  </data>
-  <data name="FillOutExternalLinkTitle" xml:space="preserve">
-    <value>Link para preencher</value>
-  </data>
-  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Não é possível mover vários arquivos para a sala Preenchimento de formulários. Mova um formulário PDF do ONLYOFFICE por vez.</value>
-  </data>
-  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Não há suporte para mover pastas para a sala Preenchimento de formulários. Mova um formulário PDF do ONLYOFFICE por vez.</value>
-  </data>
-  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>O arquivo não pode ser movido para esta sala. Tente mover o formulário PDF do ONLYOFFICE.</value>
-  </data>
-  <data name="FormNumber" xml:space="preserve">
-    <value>Número do formulário</value>
-  </data>
-  <data name="ExternalUser" xml:space="preserve">
-    <value>Usuário externo</value>
-  </data>
-  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
-    <value>Gerente da sala</value>
-  </data>
-  <data name="RoleEnum_RoomManager" xml:space="preserve">
-    <value>Gerente da sala</value>
-  </data>
-  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
-    <value>Criador do conteúdo</value>
-  </data>
-  <data name="RoleEnum_ContentCreator" xml:space="preserve">
-    <value>Criador do conteúdo</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
-    <value>Não é possível excluir a versão atual do arquivo</value>
-  </data>
   <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
     <value>Compartilhe para preencher</value>
   </data>
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>Comece a encher</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrador da sala</value>
+  <data name="UnknownFirstName" xml:space="preserve">
+    <value>Nome</value>
   </data>
-  <data name="RoleEnum_Guest" xml:space="preserve">
-    <value>Hóspede</value>
+  <data name="UnknownLastName" xml:space="preserve">
+    <value>Sobrenome</value>
   </data>
-  <data name="FolderNameForReassignedData" xml:space="preserve">
-    <value>Documentos do usuário {0} {1}</value>
+  <data name="UnlockComment" xml:space="preserve">
+    <value>O arquivo está desbloqueado</value>
   </data>
-  <data name="AgentManager" xml:space="preserve">
-    <value>Gerenciador de Agentes</value>
-  </data>
-  <data name="KnowledgeFolder" xml:space="preserve">
-    <value>Conhecimento</value>
-  </data>
-  <data name="ResultStorageFolder" xml:space="preserve">
-    <value>Armazenamento de resultados</value>
+  <data name="User" xml:space="preserve">
+    <value>Usuário</value>
   </data>
 </root>

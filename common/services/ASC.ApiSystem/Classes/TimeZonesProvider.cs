@@ -27,33 +27,32 @@
 namespace ASC.ApiSystem.Classes;
 
 [Singleton]
-public class TimeZonesProvider(ILogger<TimeZonesProvider> logger, CommonConstants commonConstants)
+public class TimeZonesProvider(CommonConstants commonConstants)
 {
     #region Private
 
-    private static readonly Dictionary<string, KeyValuePair<string, string>> _timeZones = new()
+    private static readonly Dictionary<string, string> _timeZoneMap = new()
     {
-        { "", new KeyValuePair<string, string>("Europe/London", "GMT Standard Time") },
-        { "fr", new KeyValuePair<string, string>("Europe/Paris", "Romance Standard Time") },
-        { "es", new KeyValuePair<string, string>("Europe/Madrid", "Romance Standard Time")},
-        { "de", new KeyValuePair<string, string>("Europe/Berlin", "W. Europe Standard Time") },
-        { "ru", new KeyValuePair<string, string>("Europe/Moscow", "Russian Standard Time") },
-        { "lv", new KeyValuePair<string, string>("Europe/Riga", "FLE Standard Time") },
-        { "pt", new KeyValuePair<string, string>("America/Cuiaba", "Central Brazilian Standard Time") },
-        { "it", new KeyValuePair<string, string>("Europe/Rome", "Central European Standard Time") },
-        { "tr", new KeyValuePair<string, string>("Europe/Istanbul", "GTB Standard Time") },
-
-        { "id", new KeyValuePair<string, string>("Europe/London", "GMT Standard Time") },
-        { "zh", new KeyValuePair<string, string>("Asia/Shanghai", "China Standard Time") },
-        { "ja", new KeyValuePair<string, string>("Asia/Tokyo", "Tokyo Standard Time") },
-        { "ko", new KeyValuePair<string, string>("Asia/Seoul", "Korea Standard Time") },
-        { "az", new KeyValuePair<string, string>("Asia/Baku", "Azerbaijan Standard Time") },
-        { "cs", new KeyValuePair<string, string>("Europe/Warsaw", "Central European Standard Time") },
-        { "el", new KeyValuePair<string, string>("Europe/Warsaw", "Central European Standard Time") },
-        { "fi", new KeyValuePair<string, string>("Europe/Warsaw", "Central European Standard Time") },
-        { "pl", new KeyValuePair<string, string>("Europe/Warsaw", "Central European Standard Time") },
-        { "uk", new KeyValuePair<string, string>("Europe/Kiev", "FLE Standard Time") },
-        { "vi", new KeyValuePair<string, string>("Asia/Shanghai", "China Standard Time") }
+        { "", "Europe/London" },
+        { "fr", "Europe/Paris" },
+        { "es", "Europe/Madrid" },
+        { "de", "Europe/Berlin" },
+        { "ru", "Europe/Moscow" },
+        { "lv", "Europe/Riga" },
+        { "pt", "America/Cuiaba" },
+        { "it", "Europe/Rome" },
+        { "tr", "Europe/Istanbul" },
+        { "id", "Europe/London" },
+        { "zh", "Asia/Shanghai" },
+        { "ja", "Asia/Tokyo" },
+        { "ko", "Asia/Seoul" },
+        { "az", "Asia/Baku" },
+        { "cs", "Europe/Warsaw" },
+        { "el", "Europe/Warsaw" },
+        { "fi", "Europe/Warsaw" },
+        { "pl", "Europe/Warsaw" },
+        { "uk", "Europe/Kiev" },
+        { "vi", "Asia/Shanghai" }
     };
 
     private static readonly Dictionary<string, CultureInfo> _cultureUiMap = new()
@@ -97,24 +96,9 @@ public class TimeZonesProvider(ILogger<TimeZonesProvider> logger, CommonConstant
 
     public TimeZoneInfo GetCurrentTimeZoneInfo(string languageKey)
     {
-        var time = _timeZones.TryGetValue(languageKey, out var zone) ? zone : _timeZones[""];
-        try
-        {
-            try
-            {
-                return TimeZoneInfo.FindSystemTimeZoneById(time.Value);
-            }
-            catch (TimeZoneNotFoundException)
-            {
-                return TimeZoneInfo.FindSystemTimeZoneById(time.Key);
-            }
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e, "GetCurrentTimeZoneInfo");
+        var timeZoneId = _timeZoneMap.TryGetValue(languageKey, out var id) ? id : _timeZoneMap[""];
 
-            return TimeZoneInfo.Utc;
-        }
+        return TimeZoneConverter.GetTimeZone(timeZoneId);
     }
 
     public CultureInfo GetCurrentCulture(string languageKey)

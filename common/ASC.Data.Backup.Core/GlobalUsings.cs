@@ -51,6 +51,7 @@ global using ASC.Core;
 global using ASC.Core.Billing;
 global using ASC.Core.ChunkedUploader;
 global using ASC.Core.Common.EF;
+global using ASC.Core.Common.EF.Context;
 global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
@@ -86,6 +87,8 @@ global using ASC.Web.Core.WhiteLabel;
 global using ASC.Web.Files.Utils;
 global using ASC.Web.Studio.Core;
 global using ASC.Web.Studio.Core.Notify;
+global using ASC.Web.Studio.Core.SMS;
+global using ASC.Web.Studio.Core.TFA;
 global using ASC.Web.Studio.Utility;
 
 global using Microsoft.AspNetCore.Builder;

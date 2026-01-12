@@ -117,29 +117,47 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="IncorrectServerCredentials" xml:space="preserve">
-    <value>Doğrulama uğursuz oldu. Məlumatlarınızı təsdiqləyin</value>
+  <data name="AiSettingsAccessDenied" xml:space="preserve">
+    <value>AI parametrlərini idarə etmək icazəniz yoxdur</value>
+  </data>
+  <data name="ChatAccessDenied" xml:space="preserve">
+    <value>Çatdan istifadə etmək icazəniz yoxdur</value>
   </data>
   <data name="ChatNotFound" xml:space="preserve">
     <value>Çat tapılmadı</value>
   </data>
-  <data name="ServerFailedConnect" xml:space="preserve">
-    <value>MCP serverinə qoşulmaq mümkün olmadı</value>
-  </data>
   <data name="IncorrectProvider" xml:space="preserve">
     <value>Yanlış provayder növü</value>
+  </data>
+  <data name="IncorrectServerCredentials" xml:space="preserve">
+    <value>Doğrulama uğursuz oldu. Məlumatlarınızı təsdiqləyin</value>
   </data>
   <data name="InvalidAuthCode" xml:space="preserve">
     <value>Yanlış avtorizasiya kodu</value>
   </data>
+  <data name="InvalidKey" xml:space="preserve">
+    <value>Göstərilən API açarı etibarsızdır və ya giriş hüquqları yoxdur. Açarın düzgün olduğunu yoxlayın və yenidən cəhd edin</value>
+  </data>
   <data name="InvalidServerName" xml:space="preserve">
     <value>Yanlış MCP server adı. Yalnız hərflər, rəqəmlər, alt xətt və tirelərə icazə verilir</value>
   </data>
-  <data name="ServersRoomLimit" xml:space="preserve">
-    <value>Hər otaq üçün maksimum server sayı {0}</value>
+  <data name="InvalidUrl" xml:space="preserve">
+    <value>Göstərilən URL yolu yanlışdır. Lütfən, düzgün endpoint istifadə olunduğundan əmin olun</value>
+  </data>
+  <data name="ManageProviders" xml:space="preserve">
+    <value>Provayderləri idarə etmək icazəniz yoxdur</value>
+  </data>
+  <data name="ManageServers" xml:space="preserve">
+    <value>MCP serverlərini idarə etmək icazəniz yoxdur</value>
+  </data>
+  <data name="ProviderNotFound" xml:space="preserve">
+    <value>Provayder tapılmadı</value>
   </data>
   <data name="ReservedServerName" xml:space="preserve">
     <value>MCP server adına icazə verilmir</value>
+  </data>
+  <data name="ServerFailedConnect" xml:space="preserve">
+    <value>MCP serverinə qoşulmaq mümkün olmadı</value>
   </data>
   <data name="ServerNameExists" xml:space="preserve">
     <value>MCP server adı artıq mövcuddur</value>
@@ -147,26 +165,8 @@
   <data name="ServerNotFound" xml:space="preserve">
     <value>MCP server tapılmadı</value>
   </data>
-  <data name="ProviderNotFound" xml:space="preserve">
-    <value>Provayder tapılmadı</value>
-  </data>
-  <data name="InvalidKey" xml:space="preserve">
-    <value>Göstərilən API açarı etibarsızdır və ya giriş hüquqları yoxdur. Açarın düzgün olduğunu yoxlayın və yenidən cəhd edin</value>
-  </data>
-  <data name="InvalidUrl" xml:space="preserve">
-    <value>Göstərilən URL yolu yanlışdır. Lütfən, düzgün endpoint istifadə olunduğundan əmin olun</value>
-  </data>
-  <data name="AiSettingsAccessDenied" xml:space="preserve">
-    <value>AI parametrlərini idarə etmək icazəniz yoxdur</value>
-  </data>
-  <data name="ManageServers" xml:space="preserve">
-    <value>MCP serverlərini idarə etmək icazəniz yoxdur</value>
-  </data>
-  <data name="ManageProviders" xml:space="preserve">
-    <value>Provayderləri idarə etmək icazəniz yoxdur</value>
-  </data>
-  <data name="ChatAccessDenied" xml:space="preserve">
-    <value>Çatdan istifadə etmək icazəniz yoxdur</value>
+  <data name="ServersRoomLimit" xml:space="preserve">
+    <value>Hər otaq üçün maksimum server sayı {0}</value>
   </data>
   <data name="UnavailableServers" xml:space="preserve">
     <value>MCP serverləri mövcud deyil: {0}. Əlaqə parametrlərini yoxlayın</value>

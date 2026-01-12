@@ -52,14 +52,12 @@ public class AuthenticationController(
     ProviderManager providerManager,
     AccountLinker accountLinker,
     CoreBaseSettings coreBaseSettings,
-    UserManagerWrapper userManagerWrapper,
     Signature signature,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     StudioSmsNotificationSettingsHelper studioSmsNotificationSettingsHelper,
     SettingsManager settingsManager,
     SmsManager smsManager,
     TfaManager tfaManager,
-    TimeZoneConverter timeZoneConverter,
     SmsKeyStorage smsKeyStorage,
     CommonLinkUtility commonLinkUtility,
     AuthContext authContext,
@@ -155,7 +153,7 @@ public class AuthenticationController(
             var result = new AuthenticationTokenDto
             {
                 Token = token,
-                Expires = new ApiDateTime(tenantManager, timeZoneConverter, expires)
+                Expires = new ApiDateTime(tenantManager, expires)
             };
 
             if (sms)
@@ -232,7 +230,7 @@ public class AuthenticationController(
             {
                 Sms = true,
                 PhoneNoise = SmsSender.BuildPhoneNoise(user.MobilePhone),
-                Expires = new ApiDateTime(tenantManager, timeZoneConverter, DateTime.UtcNow.Add(smsKeyStorage.StoreInterval)),
+                Expires = new ApiDateTime(tenantManager, DateTime.UtcNow.Add(smsKeyStorage.StoreInterval)),
                 ConfirmUrl = commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.PhoneAuth)
             };
         }
@@ -308,7 +306,7 @@ public class AuthenticationController(
                 var tenant = tenantManager.GetCurrentTenantId();
                 var expires = await tenantCookieSettingsHelper.GetExpiresTimeAsync(tenant);
 
-                outDto.Expires = new ApiDateTime(tenantManager, timeZoneConverter, expires);
+                outDto.Expires = new ApiDateTime(tenantManager, expires);
             }
 
             return outDto;
@@ -449,7 +447,7 @@ public class AuthenticationController(
         {
             Sms = true,
             PhoneNoise = SmsSender.BuildPhoneNoise(inDto.MobilePhone),
-            Expires = new ApiDateTime(tenantManager, timeZoneConverter, DateTime.UtcNow.Add(smsKeyStorage.StoreInterval))
+            Expires = new ApiDateTime(tenantManager, DateTime.UtcNow.Add(smsKeyStorage.StoreInterval))
         };
     }
 
@@ -487,7 +485,7 @@ public class AuthenticationController(
         {
             Sms = true,
             PhoneNoise = SmsSender.BuildPhoneNoise(user.MobilePhone),
-            Expires = new ApiDateTime(tenantManager, timeZoneConverter, DateTime.UtcNow.Add(smsKeyStorage.StoreInterval))
+            Expires = new ApiDateTime(tenantManager, DateTime.UtcNow.Add(smsKeyStorage.StoreInterval))
         };
     }
 
@@ -676,68 +674,7 @@ public class AuthenticationController(
             throw;
         }
     }
-
-    private async Task<UserInfo> JoinByThirdPartyAccount(LoginProfile loginProfile)
-    {
-        if (string.IsNullOrEmpty(loginProfile.EMail))
-        {
-            throw new Exception(Resource.ErrorNotCorrectEmail);
-        }
-
-        var userInfo = await userManager.GetUserByEmailAsync(loginProfile.EMail);
-        if (!await userManager.UserExistsAsync(userInfo.Id))
-        {
-            var newUserInfo = ProfileToUserInfo(loginProfile);
-
-            try
-            {
-                await securityContext.AuthenticateMeWithoutCookieAsync(ASC.Core.Configuration.Constants.CoreSystem);
-                userInfo = await userManagerWrapper.AddUserAsync(newUserInfo, UserManagerWrapper.GeneratePassword());
-                await socketManager.AddGuestAsync(userInfo);
-            }
-            finally
-            {
-                securityContext.Logout();
-            }
-        }
-
-        await accountLinker.AddLinkAsync(userInfo.Id, loginProfile);
-
-        return userInfo;
-    }
-
-    private UserInfo ProfileToUserInfo(LoginProfile loginProfile)
-    {
-        if (string.IsNullOrEmpty(loginProfile.EMail))
-        {
-            throw new Exception(Resource.ErrorNotCorrectEmail);
-        }
-
-        var firstName = loginProfile.FirstName;
-        if (string.IsNullOrEmpty(firstName))
-        {
-            firstName = loginProfile.DisplayName;
-        }
-
-        var userInfo = new UserInfo
-        {
-            FirstName = string.IsNullOrEmpty(firstName) ? UserControlsCommonResource.UnknownFirstName : firstName,
-            LastName = string.IsNullOrEmpty(loginProfile.LastName) ? UserControlsCommonResource.UnknownLastName : loginProfile.LastName,
-            Email = loginProfile.EMail,
-            Title = string.Empty,
-            Location = string.Empty,
-            CultureName = coreBaseSettings.CustomMode ? "ru-RU" : Thread.CurrentThread.CurrentUICulture.Name,
-            ActivationStatus = EmployeeActivationStatus.Activated
-        };
-
-        var gender = loginProfile.Gender;
-        if (!string.IsNullOrEmpty(gender))
-        {
-            userInfo.Sex = gender == "male";
-        }
-
-        return userInfo;
-    }
+    
 
     private async Task<(bool, Guid)> TryGetUserByHashAsync(string hashId)
     {

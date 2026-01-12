@@ -65,7 +65,7 @@ public class MyTypeScriptAxiosCodegen extends TypeScriptAxiosClientCodegen {
     @Override
     public void processOpts() {
         super.processOpts();
-        this.outputFolder = "generated-code/my-typescript-axios";
+        this.outputFolder = "../../../sdk/docspace-api-sdk-typescript";
 
         if (openAPI.getServers() != null && !openAPI.getServers().isEmpty()) {
             Server server = openAPI.getServers().get(0);

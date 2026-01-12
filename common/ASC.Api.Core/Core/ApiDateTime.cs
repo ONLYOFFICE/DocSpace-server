@@ -58,26 +58,17 @@ public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
     ];
 
     private readonly TenantManager _tenantManager;
-    private readonly TimeZoneConverter _timeZoneConverter;
 
-    public ApiDateTime() : this(null, null, null) { }
+    public ApiDateTime() : this(null, null) { }
 
-    public ApiDateTime(
-        TenantManager tenantManager,
-        TimeZoneConverter timeZoneConverter,
-        DateTime? dateTime)
-        : this(tenantManager, dateTime, null, timeZoneConverter) { }
+    public ApiDateTime(TenantManager tenantManager, DateTime? dateTime)
+        : this(tenantManager, dateTime, null) { }
 
-    public ApiDateTime(
-        TenantManager tenantManager,
-        DateTime? dateTime,
-        TimeZoneInfo timeZone,
-        TimeZoneConverter timeZoneConverter)
+    public ApiDateTime(TenantManager tenantManager, DateTime? dateTime, TimeZoneInfo timeZone)
     {
         if (dateTime.HasValue && dateTime.Value > DateTime.MinValue && dateTime.Value < DateTime.MaxValue)
         {
             _tenantManager = tenantManager;
-            _timeZoneConverter = timeZoneConverter;
             SetDate(dateTime.Value, timeZone);
         }
         else
@@ -93,12 +84,12 @@ public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
         TimeZoneOffset = offset;
     }
 
-    public static ApiDateTime Parse(string data, TenantManager tenantManager, TimeZoneConverter timeZoneConverter)
+    public static ApiDateTime Parse(string data, TenantManager tenantManager)
     {
-        return Parse(data, null, tenantManager, timeZoneConverter);
+        return Parse(data, null, tenantManager);
     }
 
-    public static ApiDateTime Parse(string data, TimeZoneInfo tz, TenantManager tenantManager, TimeZoneConverter timeZoneConverter)
+    public static ApiDateTime Parse(string data, TimeZoneInfo tz, TenantManager tenantManager)
     {
         ArgumentException.ThrowIfNullOrEmpty(data);
 
@@ -114,7 +105,7 @@ public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
 
             if (!data.EndsWith('Z'))
             {
-                tz ??= GetTimeZoneInfo(tenantManager, timeZoneConverter);
+                tz ??= GetTimeZoneInfo(tenantManager);
 
                 tzOffset = tz.GetUtcOffset(dateTime);
                 dateTime = dateTime.Subtract(tzOffset);
@@ -132,7 +123,7 @@ public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
         TimeZoneOffset = TimeSpan.Zero;
         UtcTime = DateTime.MinValue;
 
-        timeZone ??= GetTimeZoneInfo(_tenantManager, _timeZoneConverter);
+        timeZone ??= GetTimeZoneInfo(_tenantManager);
 
         //Hack
         if (timeZone.IsInvalidTime(new DateTime(value.Ticks, DateTimeKind.Unspecified)))
@@ -157,19 +148,9 @@ public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
         }
     }
 
-    private static TimeZoneInfo GetTimeZoneInfo(TenantManager tenantManager, TimeZoneConverter timeZoneConverter)
+    private static TimeZoneInfo GetTimeZoneInfo(TenantManager tenantManager)
     {
-        var timeZone = TimeZoneInfo.Local;
-        try
-        {
-            timeZone = timeZoneConverter.GetTimeZone(tenantManager.GetCurrentTenant().TimeZone);
-        }
-        catch (Exception)
-        {
-            //Tenant failed
-        }
-
-        return timeZone;
+        return TimeZoneConverter.GetTimeZone(tenantManager.GetCurrentTenant().TimeZone);
     }
 
     private string ToRoundTripString(DateTime date, TimeSpan offset)
@@ -182,18 +163,18 @@ public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
         return dateString + offsetString;
     }
 
-    public static ApiDateTime FromDate(TenantManager tenantManager, TimeZoneConverter timeZoneConverter, DateTime d)
+    public static ApiDateTime FromDate(TenantManager tenantManager, DateTime d)
     {
-        var date = new ApiDateTime(tenantManager, timeZoneConverter, d);
+        var date = new ApiDateTime(tenantManager, d);
 
         return date;
     }
 
-    public static ApiDateTime FromDate(TenantManager tenantManager, TimeZoneConverter timeZoneConverter, DateTime? d)
+    public static ApiDateTime FromDate(TenantManager tenantManager, DateTime? d)
     {
         if (d.HasValue)
         {
-            var date = new ApiDateTime(tenantManager, timeZoneConverter, d);
+            var date = new ApiDateTime(tenantManager, d);
 
             return date;
         }
@@ -271,7 +252,7 @@ public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
 
     public int CompareTo(DateTime other)
     {
-        return CompareTo(new ApiDateTime(_tenantManager, _timeZoneConverter, other));
+        return CompareTo(new ApiDateTime(_tenantManager, other));
     }
 
     public int CompareTo(ApiDateTime other)
@@ -369,11 +350,11 @@ public class ApiDateTimeTypeConverter : DateTimeConverter
     {
         if (value is string @string)
         {
-            return ApiDateTime.Parse(@string, null, null);
+            return ApiDateTime.Parse(@string, null);
         }
         if (value is DateTime time)
         {
-            return new ApiDateTime(null, null, time);
+            return new ApiDateTime(null, time);
         }
 
         return base.ConvertFrom(context, culture, value);
@@ -410,10 +391,10 @@ public class ApiDateTimeConverter : JsonConverter<ApiDateTime>
 }
 
 [Scope]
-public class ApiDateTimeHelper(TenantManager tenantManager, TimeZoneConverter timeZoneConverter)
+public class ApiDateTimeHelper(TenantManager tenantManager)
 {
     public ApiDateTime Get(DateTime? from)
     {
-        return ApiDateTime.FromDate(tenantManager, timeZoneConverter, from);
+        return ApiDateTime.FromDate(tenantManager, from);
     }
 }

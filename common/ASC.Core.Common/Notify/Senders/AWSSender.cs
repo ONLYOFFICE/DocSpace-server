@@ -138,7 +138,7 @@ public class AWSSender : SmtpSender, IDisposable
 
         var request = new SendRawEmailRequest(new RawMessage(ms));
 
-        ThrottleIfNeeded();
+        await ThrottleIfNeeded();
 
         var response = await _amazonEmailServiceClient.SendRawEmailAsync(request);
 
@@ -148,7 +148,7 @@ public class AWSSender : SmtpSender, IDisposable
     }
 
 
-    private void ThrottleIfNeeded()
+    private async Task ThrottleIfNeeded()
     {
         //Check last send and throttle if needed
         if (_sendWindow != TimeSpan.MinValue && DateTime.UtcNow - _lastSend <= _sendWindow)
@@ -156,7 +156,7 @@ public class AWSSender : SmtpSender, IDisposable
             //Possible BUG: at high frequncies maybe bug with to little differences
             //This means that time passed from last send is less then message per second
             _logger.DebugSendRate(_sendWindow);
-            Thread.Sleep(_sendWindow);
+            await Task.Delay(_sendWindow);
         }
     }
 
@@ -178,8 +178,11 @@ public class AWSSender : SmtpSender, IDisposable
             {
                 var r = new GetSendQuotaRequest();
                 _quota = await _amazonEmailServiceClient.GetSendQuotaAsync(r);
-                _sendWindow = TimeSpan.FromSeconds(1.0 / _quota.MaxSendRate);
-                _logger.DebugQuota(_quota.SentLast24Hours, _quota.Max24HourSend, _quota.MaxSendRate, _sendWindow);
+                if (_quota.MaxSendRate.HasValue)
+                {
+                    _sendWindow = TimeSpan.FromSeconds(1.0 / _quota.MaxSendRate.Value);
+                    _logger.DebugQuota(_quota.SentLast24Hours, _quota.Max24HourSend, _quota.MaxSendRate.Value, _sendWindow);
+                }
             }
             catch (Exception e)
             {
