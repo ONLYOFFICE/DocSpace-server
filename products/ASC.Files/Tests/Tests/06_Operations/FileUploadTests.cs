@@ -55,7 +55,7 @@ public class FileUploadTests(
         await using var stream = assembly.GetManifestResourceStream($"ASC.Files.Tests.Data.{fileName}")!;
         var contentLength = stream.Length;
         
-        var createdSession = (await _filesOperationsApi.CreateUploadSessionInFolderAsync(myFolder, fileName, contentLength, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var createdSession = (await _filesOperationsApi.CreateUploadSessionInFolderAsync(myFolder, new SessionRequest( fileName, contentLength), cancellationToken: TestContext.Current.CancellationToken)).Response;
         createdSession.Should().NotBeNull();
         createdSession.Id.Should().NotBeEmpty();
         
