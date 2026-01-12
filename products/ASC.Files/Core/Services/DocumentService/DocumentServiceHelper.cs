@@ -566,6 +566,22 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         result.CanStartFilling = false;
 
+        if (!edit && properties?.FormFilling?.OriginalFormVersion == 0 )
+        {
+            properties.FormFilling.OriginalFormVersion = file.Version;
+            await fileDao.SaveProperties(file.Id, properties);
+        }
+        if (!edit && properties?.FormFilling?.OriginalFormVersion != file.Version)
+        {
+            await linkDao.DeleteAllLinkAsync(file.Id);
+            properties.FormFilling.ToFolderId = default(T);
+            properties.FormFilling.ResultsFolderId = default(T);
+            properties.FormFilling.ResultsFileID = default(T);
+            properties.FormFilling.ResultFormNumber = 0;
+            properties.FormFilling.OriginalFormVersion = file.Version;
+            await fileDao.SaveProperties(file.Id, properties);
+        }
+
         if (securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
         {
             result.CanFill = true;
@@ -578,9 +594,6 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         if (edit)
         {
-            await linkDao.DeleteAllLinkAsync(file.Id);
-            await fileDao.SaveProperties(file.Id, null);
-
             result.CanEdit = true;
             result.EditorType = editorType;
             return result;

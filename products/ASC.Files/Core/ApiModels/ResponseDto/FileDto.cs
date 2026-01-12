@@ -482,7 +482,7 @@ public class FileDtoHelper(
                 result.IsForm = await fileChecker.IsFormPDFFile(file);
             }
 
-            if (DocSpaceHelper.IsFormsFillingSystemFolder(currentFolder.FolderType) || currentFolder.FolderType == FolderType.FillingFormsRoom)
+            if (DocSpaceHelper.IsFormsFillingSystemFolder(currentFolder.FolderType))
             {
                 result.Security[FileSecurity.FilesSecurityActions.Edit] = false;
             }
