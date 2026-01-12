@@ -269,14 +269,18 @@ public class BackupProgressItem : BaseBackupProgressItem, IDisposable
         }
         catch (Exception error)
         {
-            if (!CancellationToken.IsCancellationRequested) 
-            {
-                _logger.ErrorRunJob(Id, TenantId, tempFile, _storageBasePath, error);
-            }
             Exception = error;
             IsCompleted = true;
 
-            SaveAuditEvent(messageService, _isScheduled ? MessageAction.ScheduledBackupFailed : MessageAction.BackupFailed);
+            if (!CancellationToken.IsCancellationRequested)
+            {
+                _logger.ErrorRunJob(Id, TenantId, tempFile, _storageBasePath, error);
+                SaveAuditEvent(messageService, _isScheduled ? MessageAction.ScheduledBackupFailed : MessageAction.BackupFailed);
+            }
+            else
+            {
+                SaveAuditEvent(messageService, _isScheduled ? MessageAction.ScheduledBackupCancelled : MessageAction.BackupCancelled);
+            }
 
             try
             {
@@ -289,8 +293,11 @@ public class BackupProgressItem : BaseBackupProgressItem, IDisposable
 
             try
             {
-                _notifyHelper.SetServerBaseUri(_serverBaseUri);
-                await _notifyHelper.SendAboutBackupFailedAsync(TenantId, _userId, error.Message);
+                if (!CancellationToken.IsCancellationRequested)
+                {
+                    _notifyHelper.SetServerBaseUri(_serverBaseUri);
+                    await _notifyHelper.SendAboutBackupFailedAsync(TenantId, _userId, error.Message);
+                }
             }
             catch (Exception notifyError)
             {

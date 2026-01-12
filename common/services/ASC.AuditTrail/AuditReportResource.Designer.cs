@@ -286,6 +286,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Backup cancelled.
+        /// </summary>
+        public static string BackupCancelled {
+            get {
+                return ResourceManager.GetString("BackupCancelled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Backup completed.
         /// </summary>
         public static string BackupCompleted {
@@ -2388,6 +2397,15 @@ namespace ASC.AuditTrail {
         public static string RoomWatermarkSet {
             get {
                 return ResourceManager.GetString("RoomWatermarkSet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Scheduled backup cancelled.
+        /// </summary>
+        public static string ScheduledBackupCancelled {
+            get {
+                return ResourceManager.GetString("ScheduledBackupCancelled", resourceCulture);
             }
         }
         

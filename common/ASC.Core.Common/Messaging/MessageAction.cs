@@ -837,6 +837,12 @@ public enum MessageAction
     [SwaggerEnum("Scheduled backup failed")]
     ScheduledBackupFailed = 5129,
 
+    [SwaggerEnum("Backup cancelled")]
+    BackupCancelled = 5130,
+
+    [SwaggerEnum("Scheduled backup cancelled")]
+    ScheduledBackupCancelled = 5131,
+
     [SwaggerEnum("License key uploaded")]
     LicenseKeyUploaded = 5042,
 

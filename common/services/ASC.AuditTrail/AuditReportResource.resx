@@ -192,6 +192,9 @@
   <data name="AuthorizationKeysSetting" xml:space="preserve">
     <value>Third-party authorization keys updated</value>
   </data>
+  <data name="BackupCancelled" xml:space="preserve">
+    <value>Backup cancelled</value>
+  </data>
   <data name="BackupCompleted" xml:space="preserve">
     <value>Backup completed</value>
   </data>
@@ -893,6 +896,9 @@
   </data>
   <data name="RoomWatermarkSet" xml:space="preserve">
     <value>Room: {0}. Watermark enabled</value>
+  </data>
+  <data name="ScheduledBackupCancelled" xml:space="preserve">
+    <value>Scheduled backup cancelled</value>
   </data>
   <data name="ScheduledBackupCompleted" xml:space="preserve">
     <value>Scheduled backup completed</value>
