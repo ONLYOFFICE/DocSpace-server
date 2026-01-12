@@ -120,9 +120,9 @@ public abstract class UploadController<T>(
     [Tags("Files / Operations")]
     [SwaggerResponse(200)]
     [HttpPost("{folderId}/session")]
-    public async Task<ChunkedUploadSessionResponse<T>> CreateUploadSessionInFolder(SessionRequestInFolderDto<T> inDto)
+    public async Task<ChunkedUploadSessionResponse<T>> CreateUploadSessionInFolder(SessionRequestDto<T> inDto)
     {
-        return await filesControllerHelper.CreateUploadSessionAsync(inDto.FolderId, inDto.FileName, inDto.FileSize, inDto.RelativePath, inDto.Encrypted, inDto.CreateOn, inDto.CreateNewIfExist);
+        return await filesControllerHelper.CreateUploadSessionAsync(inDto.FolderId, inDto.Session.FileName, inDto.Session.FileSize, inDto.Session.RelativePath, inDto.Session.Encrypted, inDto.Session.CreateOn, inDto.Session.CreateNewIfExist);
     }
     
     [Tags("Files / Operations")]
