@@ -19,7 +19,7 @@ namespace ASC.Files.Core.Services.NotifyService {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class FilesPatternResource {
@@ -339,22 +339,6 @@ namespace ASC.Files.Core.Services.NotifyService {
         public static string pattern_YourTurnFormFilling {
             get {
                 return ResourceManager.GetString("pattern_YourTurnFormFilling", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;patterns&gt;
-        ///  &lt;formatter type=&quot;ASC.Notify.Patterns.NVelocityPatternFormatter, ASC.Core.Common&quot; /&gt;
-        ///
-        ///  &lt;pattern id=&quot;DocuSignComplete&quot; sender=&quot;email.sender&quot;&gt;
-        ///    &lt;subject resource=&quot;|subject_DocuSignComplete|ASC.Files.Core.Services.NotifyService.FilesPatternResource,ASC.Files.Core&quot; /&gt;
-        ///    &lt;body styler=&quot;ASC.Notify.Textile.TextileStyler,ASC.Core.Common&quot; resource=&quot;|pattern_DocuSignComplete|ASC.Files.Core.Services.NotifyService.FilesPatternResource,ASC.Files.Core&quot; /&gt;
-        ///  &lt;/pattern&gt;
-        ///  &lt;pattern id=&quot;DocuSignComple [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string patterns {
-            get {
-                return ResourceManager.GetString("patterns", resourceCulture);
             }
         }
         

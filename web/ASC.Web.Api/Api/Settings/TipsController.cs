@@ -37,7 +37,8 @@ public class TipsController(
     SetupInfo setupInfo,
     IFusionCache fusionCache,
     IHttpClientFactory clientFactory,
-    TenantManager tenantManager)
+    TenantManager tenantManager,
+    Actions actions)
     : BaseSettingsController(fusionCache, webItemManager)
 {
     private readonly ILogger _log = option.CreateLogger("ASC.Api");
@@ -96,7 +97,13 @@ public class TipsController(
     [HttpPut("change/subscription")]
     public async Task<bool> UpdateTipsSubscription()
     {
-        return await StudioPeriodicNotify.ChangeSubscriptionAsync(authContext.CurrentAccount.ID, studioNotifyHelper);
+        var recipient = await studioNotifyHelper.ToRecipientAsync(authContext.CurrentAccount.ID);
+
+        var isSubscribe = await studioNotifyHelper.IsSubscribedToNotifyAsync(recipient, actions.PeriodicNotify);
+
+        await studioNotifyHelper.SubscribeToNotifyAsync(recipient, actions.PeriodicNotify, !isSubscribe);
+
+        return !isSubscribe;
     }
 
     /// <summary>
@@ -109,6 +116,6 @@ public class TipsController(
     [HttpGet("subscription")]
     public async Task<bool> GetTipsSubscription()
     {
-        return await studioNotifyHelper.IsSubscribedToNotifyAsync(authContext.CurrentAccount.ID, Actions.PeriodicNotify);
+        return await studioNotifyHelper.IsSubscribedToNotifyAsync(authContext.CurrentAccount.ID, actions.PeriodicNotify);
     }
 }

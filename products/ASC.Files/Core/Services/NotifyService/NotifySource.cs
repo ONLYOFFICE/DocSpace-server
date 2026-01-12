@@ -29,19 +29,5 @@ using NotifySourceBase = ASC.Core.Notify.NotifySource;
 namespace ASC.Files.Core.Services.NotifyService;
 
 [Scope]
-public class NotifySource(UserManager userManager, IRecipientProvider recipientsProvider,
-        SubscriptionManager subscriptionManager, TenantManager tenantManager)
-    : NotifySourceBase(new Guid("6FE286A4-479E-4c25-A8D9-0156E332B0C0"), userManager, recipientsProvider, subscriptionManager, tenantManager)
-{
-    protected override IActionProvider CreateActionProvider()
-    {
-        return new ConstActionProvider(
-            NotifyConstants.EventShareFolder,
-            NotifyConstants.EventShareDocument);
-    }
-
-    protected override IPatternProvider CreatePatternsProvider()
-    {
-        return new XmlPatternProvider2(FilesPatternResource.patterns);
-    }
-}
+public class NotifySource(UserManager userManager, IRecipientProvider recipientsProvider, SubscriptionManager subscriptionManager)
+    : NotifySourceBase(new Guid("6FE286A4-479E-4c25-A8D9-0156E332B0C0"), userManager, recipientsProvider, subscriptionManager);

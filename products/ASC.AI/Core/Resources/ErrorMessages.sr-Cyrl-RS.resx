@@ -120,6 +120,9 @@
   <data name="AiSettingsAccessDenied" xml:space="preserve">
     <value>Немате дозволу да управљате AI подешавањима</value>
   </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>Није могуће обрадити датотеке: {0}. Датотеке су можда оштећене или шифроване</value>
+  </data>
   <data name="ChatAccessDenied" xml:space="preserve">
     <value>Немате дозволу да користите чет</value>
   </data>
@@ -170,8 +173,5 @@
   </data>
   <data name="UnavailableServers" xml:space="preserve">
     <value>MCP сервери нису доступни: {0}. Проверите подешавања везе</value>
-  </data>
-  <data name="AttachmentProcessFailed" xml:space="preserve">
-    <value>Није могуће обрадити датотеке: {0}. Датотеке су можда оштећене или шифроване</value>
   </data>
 </root>

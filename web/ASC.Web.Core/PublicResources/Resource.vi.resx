@@ -1,5 +1,64 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -53,16 +112,76 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=7.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=7.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Véc-tơ hóa</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Liên hệ</value>
+  </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Tín dụng</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Loại tiền</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>Ngày</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Ghi nợ</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Chi tiết</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>Số lượng</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>Công cụ AI</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Sao lưu</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Dung lượng ổ đĩa</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Tiền nạp thêm vào tài khoản</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>Đơn vị đo</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Token</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Sao lưu</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>Báo cáo hoạt động khách hàng ({0}-{1})</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Lịch sử giao dịch</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Kiểu</value>
+  </data>
   <data name="ActivateMobilePhoneEmptyCode" xml:space="preserve">
     <value>Trường mã xác nhận không được để trống</value>
   </data>
   <data name="ActivateMobilePhoneEmptyPhoneNumber" xml:space="preserve">
     <value>Nhập số điện thoại di động</value>
+  </data>
+  <data name="ActivateTfaAppEmptyCode" xml:space="preserve">
+    <value>Trường mã xác thực không được để trống</value>
   </data>
   <data name="AdministratorNotifySenderTypeName" xml:space="preserve">
     <value>Thông báo từ Quản trị viên</value>
@@ -70,8 +189,518 @@
   <data name="AdminMessageSent" xml:space="preserve">
     <value>Tin nhắn của bạn đã được gửi thành công. Quản trị viên sẽ sớm liên lạc với bạn.</value>
   </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>Đã vượt quá hạn mức không gian AI agent</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Không thể đặt hạn mức cho mỗi ai agent. Giá trị đã nhập lớn hơn tổng dung lượng lưu trữ DocSpace.</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Tự động gia hạn</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Nạp tiền tự động</value>
+  </data>
+  <data name="ButtonSmsEnable" xml:space="preserve">
+    <value>Qua tin nhắn SMS</value>
+  </data>
+  <data name="ButtonTfaAppEnable" xml:space="preserve">
+    <value>Qua ứng dụng xác thực</value>
+  </data>
   <data name="ChangePortalOwnerMsg" xml:space="preserve">
     <value>Một liên kết xác nhận hoạt động này đã được gửi đến: email (địa chỉ email của người sở hữu cổng).</value>
+  </data>
+  <data name="Consumersacesskey" xml:space="preserve">
+    <value>S3 accesskey</value>
+  </data>
+  <data name="ConsumersapiKey" xml:space="preserve">
+    <value>Rackspace apiKey</value>
+  </data>
+  <data name="ConsumersAppleId" xml:space="preserve">
+    <value>Apple ID</value>
+  </data>
+  <data name="ConsumersappleIdClientId" xml:space="preserve">
+    <value>ID ứng dụng khách</value>
+  </data>
+  <data name="ConsumersAppleIdDescription" xml:space="preserve">
+    <value>Cho phép ứng dụng đăng nhập vào cổng thông tin bằng tài khoản Apple ID.</value>
+  </data>
+  <data name="ConsumersAppleIdInstruction" xml:space="preserve">
+    <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào {LogoText} bằng Apple ID. {0}Truy cập Cổng thông tin Nhà phát triển Apple và tạo tích hợp ứng dụng {LogoText} mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
+  </data>
+  <data name="ConsumersappleIdKeyId" xml:space="preserve">
+    <value>Mã định danh khóa 10 ký tự đã được tạo cho Đăng nhập bằng khóa riêng của Apple</value>
+  </data>
+  <data name="ConsumersappleIdPrivateKey" xml:space="preserve">
+    <value>Khóa riêng được tải xuống từ Nhà phát triển Apple</value>
+  </data>
+  <data name="ConsumersappleIdTeamId" xml:space="preserve">
+    <value>ID nhóm tài khoản nhà phát triển gồm 10 ký tự</value>
+  </data>
+  <data name="ConsumersauthPwd" xml:space="preserve">
+    <value>Selectel authPwd</value>
+  </data>
+  <data name="ConsumersauthUser" xml:space="preserve">
+    <value>Selectel authUser</value>
+  </data>
+  <data name="ConsumersBitly" xml:space="preserve">
+    <value>Bitly</value>
+  </data>
+  <data name="ConsumersbitlyClientId" xml:space="preserve">
+    <value>đăng nhập</value>
+  </data>
+  <data name="ConsumersbitlyClientSecret" xml:space="preserve">
+    <value>apiKey</value>
+  </data>
+  <data name="ConsumersBitlyDescription" xml:space="preserve">
+    <value>Kết nối dịch vụ Bitly để rút gọn các liên kết lời mời của cổng thông tin và các liên kết được chia sẻ trong mô-đun Tài liệu.</value>
+  </data>
+  <data name="ConsumersBitlyInstruction" xml:space="preserve">
+    <value>Bật ứng dụng này để rút ngắn liên kết tài liệu và lời mời. {0}Chèn khóa API và đăng nhập Bitly của bạn bên dưới:</value>
+  </data>
+  <data name="ConsumersBox" xml:space="preserve">
+    <value>Box</value>
+  </data>
+  <data name="ConsumersboxClientId" xml:space="preserve">
+    <value>Box ID</value>
+  </data>
+  <data name="ConsumersboxClientSecret" xml:space="preserve">
+    <value>Box Key</value>
+  </data>
+  <data name="ConsumersBoxDescription" xml:space="preserve">
+    <value>Kết nối ứng dụng để quản lý các file và thư mục Box.</value>
+  </data>
+  <data name="ConsumersBoxInstruction" xml:space="preserve">
+    <value>Bật ứng dụng này để kết nối tài khoản Box của bạn với mô-đun Tài liệu. Bạn sẽ có thể quản lý, chỉnh sửa và chia sẻ tệp từ Box với người dùng {LogoText}. {0}Đăng nhập vào tài khoản của bạn trên trang Nhà phát triển Box và tạo một ứng dụng mới để tích hợp {LogoText}. Chèn dữ liệu bạn nhận được bên dưới:</value>
+  </data>
+  <data name="ConsumersClickatell" xml:space="preserve">
+    <value>Clickatell</value>
+  </data>
+  <data name="ConsumersclickatellapiKey" xml:space="preserve">
+    <value>apiKey</value>
+  </data>
+  <data name="ConsumersClickatellDescription" xml:space="preserve">
+    <value>Bật ứng dụng cho phép xác thực hai yếu tố thông qua Clickatell.</value>
+  </data>
+  <data name="ConsumersClickatellInstruction" xml:space="preserve">
+    <value>Sử dụng ứng dụng này để bật xác thực hai yếu tố với dịch vụ Clickatell. {0}Đăng nhập vào tài khoản Nền tảng SMS của bạn và tạo tích hợp mới cho {LogoText}. Sao chép một apiKey và chèn nó dưới đây:</value>
+  </data>
+  <data name="ConsumersDocuSign" xml:space="preserve">
+    <value>DocuSign</value>
+  </data>
+  <data name="ConsumersdocuSignClientId" xml:space="preserve">
+    <value>DocuSign Key</value>
+  </data>
+  <data name="ConsumersdocuSignClientSecret" xml:space="preserve">
+    <value>DocuSign Secret</value>
+  </data>
+  <data name="ConsumersDocuSignDescription" xml:space="preserve">
+    <value>Kết nối ứng dụng để thêm chữ ký điện tử DocuSign vào tài liệu.</value>
+  </data>
+  <data name="ConsumersdocuSignHost" xml:space="preserve">
+    <value>Điểm cuối xác thực DocuSign</value>
+  </data>
+  <data name="ConsumersDocuSignInstruction" xml:space="preserve">
+    <value>Kích hoạt ứng dụng này để ký điện tử các tài liệu bằng DocuSign. {0}Chuyển đến Bảng điều khiển quản trị DocuSign của bạn và thêm tích hợp {LogoText}. Chèn dữ liệu bạn nhận được bên dưới:</value>
+  </data>
+  <data name="ConsumersDropBox" xml:space="preserve">
+    <value>DropBox</value>
+  </data>
+  <data name="ConsumersDropBoxDescription" xml:space="preserve">
+    <value>Kết nối ứng dụng để quản lý các file và thư mục Dropbox.</value>
+  </data>
+  <data name="ConsumersDropBoxInstruction" xml:space="preserve">
+    <value>Bật ứng dụng này để kết nối tài khoản Dropbox của bạn với mô-đun Tài liệu. Bạn sẽ có thể quản lý, chỉnh sửa và chia sẻ tập tin từ Dropbox với người dùng {LogoText}. {0}Đăng nhập vào tài khoản của bạn trên trang Nhà phát triển Dropbox và tạo một ứng dụng mới để tích hợp {LogoText}. Chèn dữ liệu bạn nhận được bên dưới:</value>
+  </data>
+  <data name="ConsumersDropBoxKey" xml:space="preserve">
+    <value>DropBox ID</value>
+  </data>
+  <data name="ConsumersDropBoxSecret" xml:space="preserve">
+    <value>DropBox Key</value>
+  </data>
+  <data name="ConsumersEasyBib" xml:space="preserve">
+    <value>EasyBib</value>
+  </data>
+  <data name="ConsumerseasyBibappkey" xml:space="preserve">
+    <value>App key</value>
+  </data>
+  <data name="ConsumersEasyBibDescription" xml:space="preserve">
+    <value>Bật ứng dụng này để tạo danh sách thư mục trong tài liệu với EasyBib.</value>
+  </data>
+  <data name="ConsumersEasyBibInstruction" xml:space="preserve">
+    <value>Bật ứng dụng này để tạo thư mục trong trình chỉnh sửa {LogoText}. {0}Chuyển đến trang đăng ký EasyBib và điền vào biểu mẫu để thêm tích hợp {LogoText}. Sau khi bạn nhận được app key, hãy dán nó vào bên dưới:</value>
+  </data>
+  <data name="ConsumersFacebook" xml:space="preserve">
+    <value>Facebook</value>
+  </data>
+  <data name="ConsumersfacebookAccessToken_Default" xml:space="preserve">
+    <value>App Token</value>
+  </data>
+  <data name="ConsumersfacebookClientId" xml:space="preserve">
+    <value>Facebook ID</value>
+  </data>
+  <data name="ConsumersfacebookClientSecret" xml:space="preserve">
+    <value>Facebook Key</value>
+  </data>
+  <data name="ConsumersFacebookDescription" xml:space="preserve">
+    <value>Kết nối ứng dụng để đăng nhập vào hệ thống bằng tài khoản Facebook.</value>
+  </data>
+  <data name="ConsumersFacebookInstruction" xml:space="preserve">
+    <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào {LogoText} bằng Facebook và liên kết tài khoản Facebook của khách hàng với mô-đun CRM. {0}Truy cập Cổng thông tin Nhà phát triển Facebook và tạo tích hợp ứng dụng {LogoText} mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
+  </data>
+  <data name="ConsumersFirebase" xml:space="preserve">
+    <value>Firebase</value>
+  </data>
+  <data name="ConsumersFirebaseDescription" xml:space="preserve">
+    <value>Kết nối Dịch vụ Tin nhắn đám mây Firebase để nhận thông báo về tin nhắn được gửi cho bạn.</value>
+  </data>
+  <data name="ConsumersFirebaseInstruction" xml:space="preserve">
+    <value>Bật ứng dụng này để cho phép người dùng của bạn nhận thông báo về tin nhắn ngay cả khi ngoại tuyến. {0}Chuyển đến bảng điều khiển Firebase và thêm một dự án mới để tích hợp {LogoText}. Chèn dữ liệu bạn nhận được bên dưới:</value>
+  </data>
+  <data name="Consumersfirebase_apiKey" xml:space="preserve">
+    <value>Web API key</value>
+  </data>
+  <data name="Consumersfirebase_authorization" xml:space="preserve">
+    <value>Server key</value>
+  </data>
+  <data name="Consumersfirebase_messagingSenderId" xml:space="preserve">
+    <value>ID người gửi</value>
+  </data>
+  <data name="Consumersfirebase_projectId" xml:space="preserve">
+    <value>ID dự án</value>
+  </data>
+  <data name="ConsumersGoogle" xml:space="preserve">
+    <value>Google</value>
+  </data>
+  <data name="ConsumersgoogleClientId" xml:space="preserve">
+    <value>Google ID</value>
+  </data>
+  <data name="ConsumersgoogleClientSecret" xml:space="preserve">
+    <value>Google Key</value>
+  </data>
+  <data name="ConsumersGoogleCloud" xml:space="preserve">
+    <value>Google Cloud Storage</value>
+  </data>
+  <data name="ConsumersGoogleCloudbucket" xml:space="preserve">
+    <value>Bucket</value>
+  </data>
+  <data name="ConsumersGoogleCloudbucketDescription" xml:space="preserve">
+    <value>Nhập tên của Google Cloud bucket để lưu trữ các bản sao lưu.</value>
+  </data>
+  <data name="ConsumersGoogleCloudDescription" xml:space="preserve">
+    <value>Kết nối dịch vụ Google Cloud Storage để sao lưu và lưu trữ dữ liệu từ cổng thông tin của bạn.</value>
+  </data>
+  <data name="ConsumersGoogleCloudInstruction" xml:space="preserve">
+    <value>Kết nối dịch vụ Google Cloud Storage để sao lưu và lưu trữ dữ liệu từ cổng thông tin của bạn. {0}Truy cập Bảng điều khiển nền tảng Google Cloud và tạo tài khoản dịch vụ mới cho {LogoText}. Dán dữ liệu bạn nhận được bên dưới:</value>
+  </data>
+  <data name="ConsumersGoogleCloudjson" xml:space="preserve">
+    <value>GoogleCloud json</value>
+  </data>
+  <data name="ConsumersGoogleDescription" xml:space="preserve">
+    <value>Kết nối dự án để đăng nhập vào cổng thông tin bằng tài khoản Google và quản lý file và thư mục Google Drive.</value>
+  </data>
+  <data name="ConsumersGoogleInstruction" xml:space="preserve">
+    <value>Bật ứng dụng này để kết nối tài khoản Google Drive của bạn với mô-đun Tài liệu. Bạn sẽ có thể quản lý, chỉnh sửa và chia sẻ tệp từ Google Drive với người dùng {LogoText}. {0}Chuyển đến bảng điều khiển Google APIs và tạo một dự án mới để tích hợp {LogoText}. Chèn dữ liệu bạn nhận được bên dưới:</value>
+  </data>
+  <data name="ConsumersLinkedIn" xml:space="preserve">
+    <value>LinkedIn</value>
+  </data>
+  <data name="ConsumersLinkedInDescription" xml:space="preserve">
+    <value>Kết nối ứng dụng để đăng nhập vào hệ thống bằng tài khoản LinkedIn.</value>
+  </data>
+  <data name="ConsumersLinkedInInstruction" xml:space="preserve">
+    <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào {LogoText} bằng tài khoản LinkedIn của họ. {0}Truy cập trang web của Nhà phát triển LinkedIn và tạo tích hợp ứng dụng {LogoText} mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
+  </data>
+  <data name="ConsumersLinkedInKey" xml:space="preserve">
+    <value>Linkedin ID</value>
+  </data>
+  <data name="ConsumersLinkedInSecret" xml:space="preserve">
+    <value>Linkedin Key</value>
+  </data>
+  <data name="ConsumersMailru" xml:space="preserve">
+    <value>Mail.ru</value>
+  </data>
+  <data name="ConsumersMailruClientId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="ConsumersMailruClientSecret" xml:space="preserve">
+    <value>Secret key</value>
+  </data>
+  <data name="ConsumersMailruDescription" xml:space="preserve">
+    <value>Cho phép ứng dụng đăng nhập vào cổng thông tin bằng tài khoản Mail.ru.</value>
+  </data>
+  <data name="ConsumersMailruInstruction" xml:space="preserve">
+    <value>Khi bạn thêm ứng dụng Mail.ru, bạn có thể cho phép đăng nhập vào cổng thông tin bằng cách sử dụng tài khoản Mail.ru trên trang hồ sơ của bạn.</value>
+  </data>
+  <data name="ConsumersMicrosoft" xml:space="preserve">
+    <value>Microsoft</value>
+  </data>
+  <data name="ConsumersmicrosoftClientId" xml:space="preserve">
+    <value>ID ứng dụng khách</value>
+  </data>
+  <data name="ConsumersmicrosoftClientSecret" xml:space="preserve">
+    <value>Client Secret</value>
+  </data>
+  <data name="ConsumersMicrosoftDescription" xml:space="preserve">
+    <value>Cho phép ứng dụng đăng nhập vào cổng thông tin bằng tài khoản Microsoft.</value>
+  </data>
+  <data name="ConsumersMicrosoftInstruction" xml:space="preserve">
+    <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào {LogoText} bằng Microsoft. {0}Truy cập Microsoft Azure và tạo tích hợp ứng dụng {LogoText} mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
+  </data>
+  <data name="ConsumersRackspace" xml:space="preserve">
+    <value>Rackspace Cloud Storage</value>
+  </data>
+  <data name="ConsumersRackspaceDescription" xml:space="preserve">
+    <value>Kết nối dịch vụ lưu trữ đám mây Rackspace Cloud Storage để sao lưu và lưu trữ dữ liệu từ cổng thông tin của bạn.</value>
+  </data>
+  <data name="ConsumersRackspaceInstruction" xml:space="preserve">
+    <value>Kết nối dịch vụ lưu trữ đám mây Rackspace Cloud Storage để sao lưu và lưu trữ dữ liệu từ cổng thông tin của bạn. {0}Trong cài đặt bảo mật của Rackspace Cloud Control Panel, hãy nhấp vào liên kết Show bên cạnh Rackspace API Key. Dán dữ liệu bạn nhận được bên dưới:</value>
+  </data>
+  <data name="ConsumersRackspaceprivate_container" xml:space="preserve">
+    <value>Private Container</value>
+  </data>
+  <data name="ConsumersRackspaceprivate_containerDescription" xml:space="preserve">
+    <value>Nhập địa chỉ URL của Rackspace private container để lưu trữ các bản sao lưu.</value>
+  </data>
+  <data name="ConsumersRackspacepublic_container" xml:space="preserve">
+    <value>Public Container</value>
+  </data>
+  <data name="ConsumersRackspacepublic_containerDescription" xml:space="preserve">
+    <value>Nhập địa chỉ URL của Rackspace public container để lưu trữ các bản sao lưu.</value>
+  </data>
+  <data name="ConsumersRackspaceregion" xml:space="preserve">
+    <value>Region</value>
+  </data>
+  <data name="ConsumersRackspaceregionDescription" xml:space="preserve">
+    <value>Nhập Region nơi các Rackspace container của bạn được đặt.</value>
+  </data>
+  <data name="ConsumersS3" xml:space="preserve">
+    <value>Amazon AWS S3</value>
+  </data>
+  <data name="ConsumersS3bucket" xml:space="preserve">
+    <value>Bucket</value>
+  </data>
+  <data name="ConsumersS3bucketDescription" xml:space="preserve">
+    <value>Nhập tên riêng của Amazon bucket để lưu trữ các bản sao lưu.</value>
+  </data>
+  <data name="ConsumersS3Description" xml:space="preserve">
+    <value>Kết nối Amazon AWS S3 để sao lưu và lưu trữ dữ liệu từ cổng thông tin của bạn.</value>
+  </data>
+  <data name="ConsumersS3Instruction" xml:space="preserve">
+    <value>Kết nối Amazon AWS S3 để sao lưu và lưu trữ dữ liệu từ cổng thông tin của bạn. {0}Chuyển đến Bảng điều khiển AWS Management Console và tạo khóa truy cập cho {LogoText}. Dán dữ liệu bạn nhận được bên dưới:</value>
+  </data>
+  <data name="ConsumersS3region" xml:space="preserve">
+    <value>Region</value>
+  </data>
+  <data name="ConsumersS3regionDescription" xml:space="preserve">
+    <value>Nhập AWS region nơi Amazon bucket của bạn được đặt.</value>
+  </data>
+  <data name="Consumerssecretaccesskey" xml:space="preserve">
+    <value>Khóa truy cập bí mật S3</value>
+  </data>
+  <data name="ConsumersSelectel" xml:space="preserve">
+    <value>Selectel Cloud Storage</value>
+  </data>
+  <data name="ConsumersSelectelauthPwd" xml:space="preserve">
+    <value>Mật khẩu để truy cập bộ nhớ</value>
+  </data>
+  <data name="ConsumersSelectelauthUser" xml:space="preserve">
+    <value>Auth User</value>
+  </data>
+  <data name="ConsumersSelectelDescription" xml:space="preserve">
+    <value>Kết nối dịch vụ lưu trữ đám mây Selectel Cloud Storage để sao lưu và lưu trữ dữ liệu từ cổng thông tin của bạn.</value>
+  </data>
+  <data name="ConsumersSelectelInstruction" xml:space="preserve">
+    <value>Kết nối dịch vụ lưu trữ đám mây Selectel Cloud Storage để sao lưu và lưu trữ dữ liệu từ cổng thông tin của bạn. {0}Lấy dữ liệu truy cập cho người dùng có quyền Đọc/Ghi cho các container nơi bạn dự định lưu trữ các bản sao lưu của mình và dán nó bên dưới:</value>
+  </data>
+  <data name="ConsumersSelectelprivate_container" xml:space="preserve">
+    <value>Private Container</value>
+  </data>
+  <data name="ConsumersSelectelprivate_containerDescription" xml:space="preserve">
+    <value>Nhập tên của Selectel private container để lưu trữ các bản sao lưu.</value>
+  </data>
+  <data name="ConsumersSelectelpublic_container" xml:space="preserve">
+    <value>Public Container</value>
+  </data>
+  <data name="ConsumersSelectelpublic_containerDescription" xml:space="preserve">
+    <value>Nhập tên của Selectel public container để lưu trữ các bản sao lưu.</value>
+  </data>
+  <data name="ConsumersSkyDrive" xml:space="preserve">
+    <value>OneDrive</value>
+  </data>
+  <data name="Consumersskydriveappkey" xml:space="preserve">
+    <value>ID Ứng dụng</value>
+  </data>
+  <data name="Consumersskydriveappsecret" xml:space="preserve">
+    <value>Client secret</value>
+  </data>
+  <data name="ConsumersSkyDriveDescription" xml:space="preserve">
+    <value>Kết nối ứng dụng để quản lý file và thư mục OneDrive.</value>
+  </data>
+  <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
+    <value>Bật ứng dụng này để kết nối tài khoản OneDrive của bạn với mô-đun Tài liệu. Bạn sẽ có thể quản lý, chỉnh sửa và chia sẻ tập tin từ OneDrive với người dùng {LogoText}. {0}Đăng nhập vào tài khoản Microsoft Azure của bạn và tạo một ứng dụng mới để tích hợp {LogoText}. Chèn dữ liệu bạn nhận được bên dưới:</value>
+  </data>
+  <data name="ConsumersSmsc" xml:space="preserve">
+    <value>Trung tâm SMS</value>
+  </data>
+  <data name="ConsumersSmscDescription" xml:space="preserve">
+    <value>Kích hoạt ứng dụng cho phép xác thực hai yếu tố thông qua Trung tâm SMS.</value>
+  </data>
+  <data name="ConsumersSmscInstruction" xml:space="preserve">
+    <value>Sử dụng ứng dụng này để bật xác thực hai yếu tố với dịch vụ SMS Center. {0}Chèn thông tin đăng nhập tài khoản smsc và mật khẩu của bạn (hoặc hàm băm MD5 của mật khẩu) bằng chữ thường:</value>
+  </data>
+  <data name="Consumerssmsclogin" xml:space="preserve">
+    <value>Đăng nhập</value>
+  </data>
+  <data name="Consumerssmscpsw" xml:space="preserve">
+    <value>Mật khẩu hoặc mật khẩu MD5 hash bằng chữ thường</value>
+  </data>
+  <data name="ConsumersTelegram" xml:space="preserve">
+    <value>Telegram</value>
+  </data>
+  <data name="ConsumersTelegramBotName" xml:space="preserve">
+    <value>Tên người dùng bot</value>
+  </data>
+  <data name="ConsumersTelegramBotToken" xml:space="preserve">
+    <value>Token Bot</value>
+  </data>
+  <data name="ConsumersTelegramDescription" xml:space="preserve">
+    <value>Kết nối tài khoản Telegram để nhận thông báo cổng thông tin qua Telegram.</value>
+  </data>
+  <data name="ConsumersTelegramInstruction" xml:space="preserve">
+    <value>Để nhận thông báo cổng thông tin qua Telegram, hãy bật Telegram bot. Bạn có thể tạo một bot mới bằng cách sử dụng BotFather trong Telegram cho máy tính. Để sử dụng bot này, người dùng cổng thông tin cần bật thông báo Telegram trên Trang hồ sơ của họ. {0}Dán tên người dùng bot và mã token bạn nhận được trong các trường bên dưới.</value>
+  </data>
+  <data name="ConsumersTwilio" xml:space="preserve">
+    <value>Twilio</value>
+  </data>
+  <data name="ConsumerstwilioAccountSid" xml:space="preserve">
+    <value>Tài khoản Sid</value>
+  </data>
+  <data name="ConsumerstwilioAuthToken" xml:space="preserve">
+    <value>Token xác thực</value>
+  </data>
+  <data name="ConsumersTwilioDescription" xml:space="preserve">
+    <value>Thêm Twilio để có thể gọi cho các liên hệ CRM ngay từ trình duyệt.</value>
+  </data>
+  <data name="ConsumersTwilioInstruction" xml:space="preserve">
+    <value>Bật ứng dụng này để cho phép người dùng của bạn gọi danh bạ của họ từ mô-đun CRM bằng Twilio. {0}Đi đến Bảng điều khiển Twilio và dán dữ liệu sau vào bên dưới:</value>
+  </data>
+  <data name="Consumerstwiliosender" xml:space="preserve">
+    <value>Số điện thoại từ Twilio (được yêu cầu để cho phép gửi SMS)</value>
+  </data>
+  <data name="ConsumersTwitter" xml:space="preserve">
+    <value>X</value>
+  </data>
+  <data name="ConsumerstwitterAccessTokenSecret_Default" xml:space="preserve">
+    <value>Client Secret</value>
+  </data>
+  <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
+    <value>Client ID</value>
+  </data>
+  <data name="ConsumersTwitterDescription" xml:space="preserve">
+    <value>Kết nối ứng dụng để đăng nhập vào hệ thống bằng tài khoản X.</value>
+  </data>
+  <data name="ConsumersTwitterInstruction" xml:space="preserve">
+    <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào {LogoText} bằng X và liên kết tài khoản X của khách hàng với mô-đun CRM. {0}Truy cập Cổng thông tin Nhà phát triển X và tạo tích hợp ứng dụng {LogoText} mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
+  </data>
+  <data name="ConsumersTwitterKey" xml:space="preserve">
+    <value>API Key</value>
+  </data>
+  <data name="ConsumersTwitterSecret" xml:space="preserve">
+    <value>API Key Secret</value>
+  </data>
+  <data name="Consumersusername" xml:space="preserve">
+    <value>Tên người dùng Rackspace</value>
+  </data>
+  <data name="ConsumersVk" xml:space="preserve">
+    <value>VK</value>
+  </data>
+  <data name="ConsumersVkClientId" xml:space="preserve">
+    <value>ID Ứng dụng</value>
+  </data>
+  <data name="ConsumersVkClientSecret" xml:space="preserve">
+    <value>Khóa bảo mật</value>
+  </data>
+  <data name="ConsumersVkDescription" xml:space="preserve">
+    <value>Cho phép ứng dụng đăng nhập vào cổng thông tin bằng tài khoản VK.</value>
+  </data>
+  <data name="ConsumersVkInstruction" xml:space="preserve">
+    <value>Khi bạn thêm ứng dụng VK, bạn có thể cho phép đăng nhập vào cổng thông tin bằng cách sử dụng tài khoản VK trên trang hồ sơ của bạn.</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>ID Khách hàng</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Client Secret</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Cho phép ứng dụng đăng nhập vào cổng thông tin bằng tài khoản WeChat.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Cho phép ứng dụng đăng nhập vào cổng thông tin bằng tài khoản WeChat.</value>
+  </data>
+  <data name="ConsumersWordpress" xml:space="preserve">
+    <value>WordPress</value>
+  </data>
+  <data name="ConsumersWordpressDescription" xml:space="preserve">
+    <value>Cho phép ứng dụng xuất bản tài liệu trực tiếp trong WordPress.</value>
+  </data>
+  <data name="ConsumersWordpressInstruction" xml:space="preserve">
+    <value>Cho phép ứng dụng dễ dàng xuất bản tài liệu lên trang web WordPress của bạn. {0}Trên trang Nhà phát triển Wordpress, tạo một ứng dụng mới để tích hợp {LogoText}. Dán dữ liệu bạn nhận được bên dưới:</value>
+  </data>
+  <data name="ConsumerswpClientId" xml:space="preserve">
+    <value>Khóa WordPress</value>
+  </data>
+  <data name="ConsumerswpClientSecret" xml:space="preserve">
+    <value>WordPress Secret</value>
+  </data>
+  <data name="ConsumersYahoo" xml:space="preserve">
+    <value>Yahoo</value>
+  </data>
+  <data name="ConsumersyahooClientId" xml:space="preserve">
+    <value>Client ID</value>
+  </data>
+  <data name="ConsumersyahooClientSecret" xml:space="preserve">
+    <value>Client Secret</value>
+  </data>
+  <data name="ConsumersYahooDescription" xml:space="preserve">
+    <value>Bật ứng dụng cho phép nhập liên hệ từ Yahoo.</value>
+  </data>
+  <data name="ConsumersYahooInstruction" xml:space="preserve">
+    <value>Bật ứng dụng này để thêm người dùng cổng thông tin mới từ danh sách liên hệ Yahoo của bạn. {0}Truy cập trang Tạo ứng dụng trong Mạng Nhà phát triển Yahoo và tạo một ứng dụng mới để tích hợp {LogoText}. Chèn dữ liệu bạn nhận được bên dưới:</value>
+  </data>
+  <data name="ConsumersYandex" xml:space="preserve">
+    <value>Yandex</value>
+  </data>
+  <data name="ConsumersYandexClientId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="ConsumersYandexClientSecret" xml:space="preserve">
+    <value>Mật khẩu</value>
+  </data>
+  <data name="ConsumersYandexDescription" xml:space="preserve">
+    <value>Cho phép ứng dụng đăng nhập vào cổng thông tin bằng tài khoản Yandex.</value>
+  </data>
+  <data name="ConsumersYandexInstruction" xml:space="preserve">
+    <value>Khi bạn thêm ứng dụng Yandex, bạn có thể cho phép đăng nhập vào cổng thông tin bằng cách sử dụng tài khoản Yandextrên trang hồ sơ của bạn.</value>
+  </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>id Zoom khách</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Zoom client secret</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>Cho phép ứng dụng đăng nhập vào cổng thông tin bằng tài khoản Zoom.</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào {LogoText} bằng tài khoản Zoom của họ. {0}Truy cập trang web của Nhà phát triển Zoom và tạo tích hợp ứng dụng {LogoText} mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
   </data>
   <data name="CouldNotRecoverPasswordForLdapUser" xml:space="preserve">
     <value>Thao tác khôi phục mật khẩu bị cấm đối với người dùng LDAP</value>
@@ -81,6 +710,27 @@
   </data>
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>Tuỳ chỉnh</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Ngày</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Tên</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>Id</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Họ</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Hạn mức dịch vụ tài liệu ({0})</value>
+  </data>
+  <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
+    <value>Id sao chép không chính xác.</value>
   </data>
   <data name="EmailAndPasswordIncorrectEmail" xml:space="preserve">
     <value>Địa chỉ email không chính xác</value>
@@ -94,6 +744,9 @@
   <data name="ErrorBadKeys" xml:space="preserve">
     <value>Bad keys</value>
   </data>
+  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
+    <value>Không thể xóa không gian truy cập đầy đủ cuối cùng</value>
+  </data>
   <data name="ErrorDisabledProfile" xml:space="preserve">
     <value>Hồ sơ của bạn bị treo</value>
   </data>
@@ -106,17 +759,41 @@
   <data name="ErrorEmailEmpty" xml:space="preserve">
     <value>Trường email không được để trống</value>
   </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>Email này được gắn với người dùng {0} như là nhà cung cấp bên thứ ba</value>
+  </data>
   <data name="ErrorEmailsAreTheSame" xml:space="preserve">
     <value>Email hiện tại và email mới trùng nhau</value>
   </data>
   <data name="ErrorEmptyFields" xml:space="preserve">
     <value>Vui lòng điền vào tất cả các trường</value>
   </data>
+  <data name="ErrorEmptyMessage" xml:space="preserve">
+    <value>Tin nhắn không có nội dung</value>
+  </data>
   <data name="ErrorEmptyUploadFileSelected" xml:space="preserve">
     <value>Không tìm thấy file được tải lên</value>
   </data>
+  <data name="ErrorFileNotImage" xml:space="preserve">
+    <value>Loại file ảnh không xác định</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>Không tìm thấy nhóm</value>
+  </data>
+  <data name="ErrorImageSize" xml:space="preserve">
+    <value>Kích thước hình ảnh vượt quá thông số cho phép</value>
+  </data>
   <data name="ErrorImageWeightLimit" xml:space="preserve">
     <value>Kích thước file hình ảnh quá lớn</value>
+  </data>
+  <data name="ErrorIncorrectUserName" xml:space="preserve">
+    <value>Tên hoặc họ không chính xác</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Đã vượt quá giới hạn lời mời</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Thêm ít nhất 1 địa chỉ IP được phép.</value>
   </data>
   <data name="ErrorIpSecurity" xml:space="preserve">
     <value>Truy cập vào cổng này bị giới hạn</value>
@@ -142,17 +819,77 @@
   <data name="ErrorPasswordNoDigits" xml:space="preserve">
     <value>chữ số</value>
   </data>
+  <data name="ErrorPasswordNoSpaces" xml:space="preserve">
+    <value>không có dấu cách</value>
+  </data>
   <data name="ErrorPasswordNoSpecialSymbols" xml:space="preserve">
     <value>Ký tự đặc biệt</value>
   </data>
   <data name="ErrorPasswordNoUpperCase" xml:space="preserve">
     <value>chữ viết hoa</value>
   </data>
+  <data name="ErrorPasswordOnlyLatinLetters" xml:space="preserve">
+    <value>chỉ các chữ cái Latinh</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Yêu cầu thanh toán</value>
+  </data>
+  <data name="ErrorRequestLimitExceeded" xml:space="preserve">
+    <value>Đã vượt quá giới hạn yêu cầu</value>
+  </data>
+  <data name="ErrorTenantTooShort" xml:space="preserve">
+    <value>Miền của người thuê không được để trống.</value>
+  </data>
+  <data name="ErrorTenantTooShortFormat" xml:space="preserve">
+    <value>Tên miền phải dài từ {0} đến {1} ký tự.</value>
+  </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>Quá nhiều lần đăng nhập. Xin vui lòng thử lại sau</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Thêm ít nhất 1 tên miền đáng tin cậy.</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Người dùng đã bị vô hiệu</value>
+  </data>
   <data name="ErrorUserNotFound" xml:space="preserve">
     <value>Không tìm thấy người dùng này</value>
   </data>
   <data name="ErrorUserNotFoundByEmail" xml:space="preserve">
     <value>Không tìm thấy người dùng với thư điện tử "{0}"</value>
+  </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>URL Webhook không khả dụng. Yêu cầu HEAD không nhận được mã trạng thái HTTP 200.</value>
+  </data>
+  <data name="ErrorWebPluginArchive" xml:space="preserve">
+    <value>Lưu trữ plugin sai</value>
+  </data>
+  <data name="ErrorWebPluginExist" xml:space="preserve">
+    <value>Plugin đã tồn tại</value>
+  </data>
+  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
+    <value>Phần mở rộng tập tin sai</value>
+  </data>
+  <data name="ErrorWebPluginFileSize" xml:space="preserve">
+    <value>Tập tin vượt quá giới hạn</value>
+  </data>
+  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
+    <value>Các thay đổi đối với plugin hệ thống đều bị cấm</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>Số lượng plugin vượt quá giới hạn</value>
+  </data>
+  <data name="ErrorWebPluginName" xml:space="preserve">
+    <value>Tên plugin sai</value>
+  </data>
+  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
+    <value>Không có tập tin đầu vào</value>
+  </data>
+  <data name="ErrorWebPluginNotFound" xml:space="preserve">
+    <value>Không tìm thấy plugin</value>
+  </data>
+  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
+    <value>Quá nhiều tập tin đầu vào</value>
   </data>
   <data name="EuServerRegion" xml:space="preserve">
     <value>Vùng châu Âu (Frankfurt)</value>
@@ -198,6 +935,12 @@
   </data>
   <data name="LdapSettingsErrorIncorrectLdapFilter" xml:space="preserve">
     <value>Giá trị Lọc Người dùng không hợp lệ.</value>
+  </data>
+  <data name="LdapSettingsErrorLostRights" xml:space="preserve">
+    <value>Bạn đã cố gắng lấy đi quyền quản trị từ chính mình. Quyền quản trị của bạn không bị ảnh hưởng.</value>
+  </data>
+  <data name="LdapSettingsErrorRemovedYourself" xml:space="preserve">
+    <value>Tài khoản của bạn không được liên kết với thư mục LDAP và mật khẩu LDAP của bạn không còn hoạt động. Vui lòng thay đổi hoặc đặt mật khẩu cho tài khoản của bạn tại trang cài đặt hồ sơ.</value>
   </data>
   <data name="LdapSettingsErrorUnknownError" xml:space="preserve">
     <value>Lỗi không xác định.</value>
@@ -247,6 +990,9 @@
   <data name="LdapSettingsStatusGettingUsersFromLdap" xml:space="preserve">
     <value>Đang truy xuất danh sách người dùng từ LDAP server</value>
   </data>
+  <data name="LdapSettingsStatusGivingRights" xml:space="preserve">
+    <value>Lập người dùng {0} làm quản trị viên {1}</value>
+  </data>
   <data name="LdapSettingsStatusLoadingBaseInfo" xml:space="preserve">
     <value>Đang tải thông tin cơ bản về LDAP</value>
   </data>
@@ -255,6 +1001,9 @@
   </data>
   <data name="LdapSettingsStatusRemovingOldGroups" xml:space="preserve">
     <value>Đang loại bỏ các nhóm đã lỗi thời được tải qua LDAP trước đó</value>
+  </data>
+  <data name="LdapSettingsStatusRemovingOldRights" xml:space="preserve">
+    <value>Loại bỏ các quyền truy cập lỗi thời đã được tải qua LDAP trước đó</value>
   </data>
   <data name="LdapSettingsStatusRemovingOldUsers" xml:space="preserve">
     <value>Đang loại bỏ hồ sơ người dùng đã lỗi thời được tải qua LDAP trước đó</value>
@@ -265,11 +1014,20 @@
   <data name="LdapSettingsStatusSavingSettings" xml:space="preserve">
     <value>Đang lưu cài đặt</value>
   </data>
+  <data name="LdapSettingsStatusSavingUserPhoto" xml:space="preserve">
+    <value>Đang lưu ảnh</value>
+  </data>
   <data name="LdapSettingsStatusSavingUsers" xml:space="preserve">
     <value>Đang lưu người dùng</value>
   </data>
   <data name="LdapSettingsStatusSyncingUsers" xml:space="preserve">
     <value>Đang đồng bộ người dùng</value>
+  </data>
+  <data name="LdapSettingsStatusUpdatingAccessRights" xml:space="preserve">
+    <value>Đang cập nhật quyền truy cập của người dùng</value>
+  </data>
+  <data name="LdapSettingsStatusUpdatingUserPhotos" xml:space="preserve">
+    <value>Đang cập nhật ảnh người dùng</value>
   </data>
   <data name="LdapSettingsStrongAuthRequired" xml:space="preserve">
     <value>Yêu cầu hình thức xác thực bảo mật hơn. Vui lòng sử dụng kết nối được mã hóa hoặc cho phép xác thực cơ bản trên server.</value>
@@ -301,8 +1059,20 @@
   <data name="LicenseUploaded" xml:space="preserve">
     <value>Đã tải lên thành công</value>
   </data>
+  <data name="LicenseUploadedOverdue" xml:space="preserve">
+    <value>Tải lên thành công. {0}Hỗ trợ và cập nhật không có sẵn cho giấy phép này kể từ {2}.{1}</value>
+  </data>
+  <data name="LicenseUploadedOverdueSupport" xml:space="preserve">
+    <value>Tải lên thành công. {0}Hỗ trợ không khả dụng cho giấy phép này kể từ {2}.{1}</value>
+  </data>
   <data name="MessageEmailChangeInstuctionsSentOnEmail" xml:space="preserve">
     <value>Hướng dẫn thay đổi email đã được gửi thành công</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Hướng dẫn thay đổi mật khẩu đã được gửi đến địa chỉ email {0}.</value>
+  </data>
+  <data name="MessageYourPasswordSendedToEmail" xml:space="preserve">
+    <value>Nếu tồn tại người dùng có email {0}, hướng dẫn thay đổi mật khẩu đã được gửi đến địa chỉ email này.</value>
   </data>
   <data name="MobilePhoneMustErase" xml:space="preserve">
     <value>Để thay đổi số, bạn cần xoá số điện thoại hiện tại của bạn</value>
@@ -313,11 +1083,26 @@
   <data name="Owner" xml:space="preserve">
     <value>Người sở hữu</value>
   </data>
+  <data name="PortalName" xml:space="preserve">
+    <value>Không gian đám mây cho tài liệu văn phòng của bạn</value>
+  </data>
   <data name="PortalSecurity" xml:space="preserve">
     <value>Truy cập Cổng</value>
   </data>
+  <data name="QuotaGreaterPortalError" xml:space="preserve">
+    <value>Không thể đặt hạn mức bộ nhớ - hạn mức bộ nhớ bạn đặt lớn hơn hạn mức cổng thông tin.</value>
+  </data>
   <data name="ReassignDataRemoveUserError" xml:space="preserve">
     <value>Quá trình phân bổ lại dữ liệu cho {0} không được hoàn thành.</value>
+  </data>
+  <data name="RecaptchaInvalid" xml:space="preserve">
+    <value>Recaptcha không hợp lệ</value>
+  </data>
+  <data name="RoomFreeSpaceException" xml:space="preserve">
+    <value>Đã vượt quá hạn mức không gian phòng</value>
+  </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>Không thể đặt hạn mức cho mỗi phòng. Giá trị đã nhập lớn hơn tổng dung lượng lưu trữ DocSpace.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Châu Á-Thái Bình Dương (Singapore)</value>
@@ -361,20 +1146,38 @@
   <data name="SuccessfullySentNotificationDeleteUserInfoMessage" xml:space="preserve">
     <value>Hướng dẫn xóa hồ sơ của bạn đã được gửi đến địa chỉ email {0}</value>
   </data>
-  <data name="UsServerRegion" xml:space="preserve">
-    <value>Vùng Tây Hoa Kỳ (Oregon)</value>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>Số lượng AI agent không được vượt quá {0}</value>
   </data>
-  <data name="WhatsNewSubscriptionName" xml:space="preserve">
-    <value>Tin tức mới</value>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>Công cụ AI</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Bật các tính năng AI trong DocSpace của bạn để tăng năng suất.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Theo dõi đăng nhập và hành động</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Sao lưu</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Bật tính năng sao lưu cho DocSpace của bạn. Chi phí sẽ được tự động tính phí.</value>
+  </data>
+  <data name="TariffsFeature_customization" xml:space="preserve">
+    <value>Xây dựng thương hiệu &amp; tùy chỉnh</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>Kích thước tập tin tối đa</value>
   </data>
   <data name="TariffsFeature_file_size_exception" xml:space="preserve">
     <value>Kích thước tập tin không được vượt quá {0}</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} bản sao lưu miễn phí mỗi tháng</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Số lượng bản sao lưu miễn phí không được vượt quá {0} trong vòng một tháng</value>
   </data>
   <data name="TariffsFeature_manager_exception" xml:space="preserve">
     <value>Số lượng quản trị viên không được vượt quá {0}</value>
@@ -394,16 +1197,37 @@
   <data name="TariffsFeature_sso" xml:space="preserve">
     <value>SSO</value>
   </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Hạn mức lưu trữ &amp; thống kê</value>
+  </data>
+  <data name="TariffsFeature_thirdparty" xml:space="preserve">
+    <value>Tích hợp bên thứ ba</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} mỗi quản trị viên và khả năng thêm không gian theo yêu cầu</value>
+  </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>Kích thước lưu trữ đã sử dụng không được vượt quá {0}</value>
   </data>
   <data name="TariffsFeature_total_size_price_count" xml:space="preserve">
     <value>Không gian lưu trữ</value>
   </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Lưu trữ đĩa bổ sung</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Điều chỉnh dung lượng lưu trữ theo đúng nhu cầu của bạn.</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Quản trị viên đã thêm:</value>
+  </data>
   <data name="TariffsFeature_used_room" xml:space="preserve">
     <value>Số phòng:</value>
   </data>
   <data name="TariffsFeature_used_total_size" xml:space="preserve">
+    <value>Không gian lưu trữ đã dùng:</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
     <value>Không gian lưu trữ đã dùng:</value>
   </data>
   <data name="TariffsFeature_used_usersInRoom" xml:space="preserve">
@@ -412,179 +1236,23 @@
   <data name="TariffsFeature_users" xml:space="preserve">
     <value>Số lượng người dùng và khách không giới hạn</value>
   </data>
-  <data name="TariffsFeature_users_exception" xml:space="preserve">
-    <value>Số lượng người dùng không được vượt quá {0}</value>
-  </data>
   <data name="TariffsFeature_usersInRoom" xml:space="preserve">
     <value>Người dùng trong phòng</value>
   </data>
   <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
     <value>Số lượng người dùng trong phòng không được vượt quá {0}</value>
   </data>
-  <data name="TariffsFeature_customization" xml:space="preserve">
-    <value>Xây dựng thương hiệu &amp; tùy chỉnh</value>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Số lượng quản trị viên vượt quá giới hạn: {0}/{1}.</value>
   </data>
-  <data name="ConsumersBitly" xml:space="preserve">
-    <value>Bitly</value>
+  <data name="TariffsFeature_users_exception" xml:space="preserve">
+    <value>Số lượng người dùng không được vượt quá {0}</value>
   </data>
-  <data name="ConsumersbitlyClientSecret" xml:space="preserve">
-    <value>apiKey</value>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>Tìm kiếm web AI</value>
   </data>
-  <data name="ConsumersbitlyClientId" xml:space="preserve">
-    <value>đăng nhập</value>
-  </data>
-  <data name="ConsumersBitlyDescription" xml:space="preserve">
-    <value>Kết nối dịch vụ Bitly để rút gọn các liên kết lời mời của cổng thông tin và các liên kết được chia sẻ trong mô-đun Tài liệu.</value>
-  </data>
-  <data name="ConsumersboxClientId" xml:space="preserve">
-    <value>Box ID</value>
-  </data>
-  <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Kết nối ứng dụng để quản lý các file và thư mục Box.</value>
-  </data>
-  <data name="ConsumersClickatell" xml:space="preserve">
-    <value>Clickatell</value>
-  </data>
-  <data name="ConsumersclickatellapiKey" xml:space="preserve">
-    <value>apiKey</value>
-  </data>
-  <data name="ConsumersClickatellDescription" xml:space="preserve">
-    <value>Bật ứng dụng cho phép xác thực hai yếu tố thông qua Clickatell.</value>
-  </data>
-  <data name="ConsumersDocuSign" xml:space="preserve">
-    <value>DocuSign</value>
-  </data>
-  <data name="ConsumersdocuSignClientId" xml:space="preserve">
-    <value>DocuSign Key</value>
-  </data>
-  <data name="ConsumersDocuSignDescription" xml:space="preserve">
-    <value>Kết nối ứng dụng để thêm chữ ký điện tử DocuSign vào tài liệu.</value>
-  </data>
-  <data name="ConsumersdocuSignHost" xml:space="preserve">
-    <value>Điểm cuối xác thực DocuSign</value>
-  </data>
-  <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Kết nối ứng dụng để quản lý các file và thư mục Dropbox.</value>
-  </data>
-  <data name="ConsumersDropBoxKey" xml:space="preserve">
-    <value>DropBox ID</value>
-  </data>
-  <data name="ConsumersfacebookClientId" xml:space="preserve">
-    <value>Facebook ID</value>
-  </data>
-  <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Kết nối ứng dụng để đăng nhập vào hệ thống bằng tài khoản Facebook.</value>
-  </data>
-  <data name="ConsumersfacebookClientSecret" xml:space="preserve">
-    <value>Facebook Key</value>
-  </data>
-  <data name="ConsumersFirebase" xml:space="preserve">
-    <value>Firebase</value>
-  </data>
-  <data name="Consumersfirebase_apiKey" xml:space="preserve">
-    <value>Web API key</value>
-  </data>
-  <data name="ConsumersFirebaseDescription" xml:space="preserve">
-    <value>Kết nối Dịch vụ Tin nhắn đám mây Firebase để nhận thông báo về tin nhắn được gửi cho bạn.</value>
-  </data>
-  <data name="Consumersfirebase_messagingSenderId" xml:space="preserve">
-    <value>ID người gửi</value>
-  </data>
-  <data name="Consumersfirebase_projectId" xml:space="preserve">
-    <value>ID dự án</value>
-  </data>
-  <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Kết nối dự án để đăng nhập vào cổng thông tin bằng tài khoản Google và quản lý file và thư mục Google Drive.</value>
-  </data>
-  <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>Kết nối ứng dụng để đăng nhập vào hệ thống bằng tài khoản LinkedIn.</value>
-  </data>
-  <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>Kết nối ứng dụng để quản lý file và thư mục OneDrive.</value>
-  </data>
-  <data name="ConsumersSmscDescription" xml:space="preserve">
-    <value>Kích hoạt ứng dụng cho phép xác thực hai yếu tố thông qua Trung tâm SMS.</value>
-  </data>
-  <data name="Consumerssmscpsw" xml:space="preserve">
-    <value>Mật khẩu hoặc mật khẩu MD5 hash bằng chữ thường</value>
-  </data>
-  <data name="ConsumersTwilioDescription" xml:space="preserve">
-    <value>Thêm Twilio để có thể gọi cho các liên hệ CRM ngay từ trình duyệt.</value>
-  </data>
-  <data name="Consumerstwiliosender" xml:space="preserve">
-    <value>Số điện thoại từ Twilio (được yêu cầu để cho phép gửi SMS)</value>
-  </data>
-  <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Kết nối ứng dụng để đăng nhập vào hệ thống bằng tài khoản X.</value>
-  </data>
-  <data name="ConsumersYahooDescription" xml:space="preserve">
-    <value>Bật ứng dụng cho phép nhập liên hệ từ Yahoo.</value>
-  </data>
-  <data name="ErrorFileNotImage" xml:space="preserve">
-    <value>Loại file ảnh không xác định</value>
-  </data>
-  <data name="ErrorImageSize" xml:space="preserve">
-    <value>Kích thước hình ảnh vượt quá thông số cho phép</value>
-  </data>
-  <data name="ConsumersDropBoxSecret" xml:space="preserve">
-    <value>DropBox Key</value>
-  </data>
-  <data name="ConsumersEasyBib" xml:space="preserve">
-    <value>EasyBib</value>
-  </data>
-  <data name="ConsumersGoogle" xml:space="preserve">
-    <value>Google</value>
-  </data>
-  <data name="ConsumersgoogleClientId" xml:space="preserve">
-    <value>Google ID</value>
-  </data>
-  <data name="ConsumersgoogleClientSecret" xml:space="preserve">
-    <value>Google Key</value>
-  </data>
-  <data name="ConsumersMailru" xml:space="preserve">
-    <value>Mail.ru</value>
-  </data>
-  <data name="ConsumersMicrosoft" xml:space="preserve">
-    <value>Microsoft</value>
-  </data>
-  <data name="ConsumersSkyDrive" xml:space="preserve">
-    <value>OneDrive</value>
-  </data>
-  <data name="ConsumersSmsc" xml:space="preserve">
-    <value>Trung tâm SMS</value>
-  </data>
-  <data name="Consumerssmsclogin" xml:space="preserve">
-    <value>Đăng nhập</value>
-  </data>
-  <data name="ConsumersTelegram" xml:space="preserve">
-    <value>Telegram</value>
-  </data>
-  <data name="ConsumersTwilio" xml:space="preserve">
-    <value>Twilio</value>
-  </data>
-  <data name="ConsumerstwilioAccountSid" xml:space="preserve">
-    <value>Tài khoản Sid</value>
-  </data>
-  <data name="ConsumerstwilioAuthToken" xml:space="preserve">
-    <value>Token xác thực</value>
-  </data>
-  <data name="ConsumersYahoo" xml:space="preserve">
-    <value>Yahoo</value>
-  </data>
-  <data name="ConsumersYandex" xml:space="preserve">
-    <value>Yandex</value>
-  </data>
-  <data name="ConsumersWordpress" xml:space="preserve">
-    <value>WordPress</value>
-  </data>
-  <data name="ConsumersTwitter" xml:space="preserve">
-    <value>X</value>
-  </data>
-  <data name="ConsumersYandexClientSecret" xml:space="preserve">
-    <value>Mật khẩu</value>
-  </data>
-  <data name="ConsumersdocuSignClientSecret" xml:space="preserve">
-    <value>DocuSign Secret</value>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Nạp tiền vào ví để mở khóa tìm kiếm web AI.</value>
   </data>
   <data name="Tariffs_admin" xml:space="preserve">
     <value>Business</value>
@@ -592,386 +1260,17 @@
   <data name="Tariffs_adminyear" xml:space="preserve">
     <value>Business</value>
   </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Phi lợi nhuận</value>
+  </data>
   <data name="Tariffs_startup" xml:space="preserve">
     <value>Startup</value>
   </data>
-  <data name="ActivateTfaAppEmptyCode" xml:space="preserve">
-    <value>Trường mã xác thực không được để trống</value>
-  </data>
-  <data name="ButtonSmsEnable" xml:space="preserve">
-    <value>Qua tin nhắn SMS</value>
-  </data>
-  <data name="ButtonTfaAppEnable" xml:space="preserve">
-    <value>Qua ứng dụng xác thực</value>
-  </data>
-  <data name="Consumersacesskey" xml:space="preserve">
-    <value>S3 accesskey</value>
-  </data>
-  <data name="ConsumersapiKey" xml:space="preserve">
-    <value>Rackspace apiKey</value>
-  </data>
-  <data name="ConsumersAppleId" xml:space="preserve">
-    <value>Apple ID</value>
-  </data>
-  <data name="ConsumersappleIdClientId" xml:space="preserve">
-    <value>ID ứng dụng khách</value>
-  </data>
-  <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>Cho phép ứng dụng đăng nhập vào cổng thông tin bằng tài khoản Apple ID.</value>
-  </data>
-  <data name="ConsumersAppleIdInstruction" xml:space="preserve">
-    <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào {LogoText} bằng Apple ID. {0}Truy cập Cổng thông tin Nhà phát triển Apple và tạo tích hợp ứng dụng {LogoText} mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
-  </data>
-  <data name="ConsumersappleIdKeyId" xml:space="preserve">
-    <value>Mã định danh khóa 10 ký tự đã được tạo cho Đăng nhập bằng khóa riêng của Apple</value>
-  </data>
-  <data name="ConsumersappleIdPrivateKey" xml:space="preserve">
-    <value>Khóa riêng được tải xuống từ Nhà phát triển Apple</value>
-  </data>
-  <data name="ConsumersappleIdTeamId" xml:space="preserve">
-    <value>ID nhóm tài khoản nhà phát triển gồm 10 ký tự</value>
-  </data>
-  <data name="ConsumersauthPwd" xml:space="preserve">
-    <value>Selectel authPwd</value>
-  </data>
-  <data name="ConsumersauthUser" xml:space="preserve">
-    <value>Selectel authUser</value>
-  </data>
-  <data name="ConsumersBitlyInstruction" xml:space="preserve">
-    <value>Bật ứng dụng này để rút ngắn liên kết tài liệu và lời mời. {0}Chèn khóa API và đăng nhập Bitly của bạn bên dưới:</value>
-  </data>
-  <data name="ConsumersBox" xml:space="preserve">
-    <value>Box</value>
-  </data>
-  <data name="ConsumersboxClientSecret" xml:space="preserve">
-    <value>Box Key</value>
-  </data>
-  <data name="ConsumersBoxInstruction" xml:space="preserve">
-    <value>Bật ứng dụng này để kết nối tài khoản Box của bạn với mô-đun Tài liệu. Bạn sẽ có thể quản lý, chỉnh sửa và chia sẻ tệp từ Box với người dùng {LogoText}. {0}Đăng nhập vào tài khoản của bạn trên trang Nhà phát triển Box và tạo một ứng dụng mới để tích hợp {LogoText}. Chèn dữ liệu bạn nhận được bên dưới:</value>
-  </data>
-  <data name="ConsumersClickatellInstruction" xml:space="preserve">
-    <value>Sử dụng ứng dụng này để bật xác thực hai yếu tố với dịch vụ Clickatell. {0}Đăng nhập vào tài khoản Nền tảng SMS của bạn và tạo tích hợp mới cho {LogoText}. Sao chép một apiKey và chèn nó dưới đây:</value>
-  </data>
-  <data name="ConsumersDocuSignInstruction" xml:space="preserve">
-    <value>Kích hoạt ứng dụng này để ký điện tử các tài liệu bằng DocuSign. {0}Chuyển đến Bảng điều khiển quản trị DocuSign của bạn và thêm tích hợp {LogoText}. Chèn dữ liệu bạn nhận được bên dưới:</value>
-  </data>
-  <data name="ConsumersDropBox" xml:space="preserve">
-    <value>DropBox</value>
-  </data>
-  <data name="ConsumersDropBoxInstruction" xml:space="preserve">
-    <value>Bật ứng dụng này để kết nối tài khoản Dropbox của bạn với mô-đun Tài liệu. Bạn sẽ có thể quản lý, chỉnh sửa và chia sẻ tập tin từ Dropbox với người dùng {LogoText}. {0}Đăng nhập vào tài khoản của bạn trên trang Nhà phát triển Dropbox và tạo một ứng dụng mới để tích hợp {LogoText}. Chèn dữ liệu bạn nhận được bên dưới:</value>
-  </data>
-  <data name="ConsumerseasyBibappkey" xml:space="preserve">
-    <value>App key</value>
-  </data>
-  <data name="ConsumersEasyBibDescription" xml:space="preserve">
-    <value>Bật ứng dụng này để tạo danh sách thư mục trong tài liệu với EasyBib.</value>
-  </data>
-  <data name="ConsumersEasyBibInstruction" xml:space="preserve">
-    <value>Bật ứng dụng này để tạo thư mục trong trình chỉnh sửa {LogoText}. {0}Chuyển đến trang đăng ký EasyBib và điền vào biểu mẫu để thêm tích hợp {LogoText}. Sau khi bạn nhận được app key, hãy dán nó vào bên dưới:</value>
-  </data>
-  <data name="ConsumersFacebook" xml:space="preserve">
-    <value>Facebook</value>
-  </data>
-  <data name="ConsumersfacebookAccessToken_Default" xml:space="preserve">
-    <value>App Token</value>
-  </data>
-  <data name="ConsumersFacebookInstruction" xml:space="preserve">
-    <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào {LogoText} bằng Facebook và liên kết tài khoản Facebook của khách hàng với mô-đun CRM. {0}Truy cập Cổng thông tin Nhà phát triển Facebook và tạo tích hợp ứng dụng {LogoText} mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
-  </data>
-  <data name="Consumersfirebase_authorization" xml:space="preserve">
-    <value>Server key</value>
-  </data>
-  <data name="ConsumersFirebaseInstruction" xml:space="preserve">
-    <value>Bật ứng dụng này để cho phép người dùng của bạn nhận thông báo về tin nhắn ngay cả khi ngoại tuyến. {0}Chuyển đến bảng điều khiển Firebase và thêm một dự án mới để tích hợp {LogoText}. Chèn dữ liệu bạn nhận được bên dưới:</value>
-  </data>
-  <data name="ConsumersGoogleCloud" xml:space="preserve">
-    <value>Google Cloud Storage</value>
-  </data>
-  <data name="ConsumersGoogleCloudbucket" xml:space="preserve">
-    <value>Bucket</value>
-  </data>
-  <data name="ConsumersGoogleCloudbucketDescription" xml:space="preserve">
-    <value>Nhập tên của Google Cloud bucket để lưu trữ các bản sao lưu.</value>
-  </data>
-  <data name="ConsumersGoogleCloudDescription" xml:space="preserve">
-    <value>Kết nối dịch vụ Google Cloud Storage để sao lưu và lưu trữ dữ liệu từ cổng thông tin của bạn.</value>
-  </data>
-  <data name="ConsumersGoogleCloudInstruction" xml:space="preserve">
-    <value>Kết nối dịch vụ Google Cloud Storage để sao lưu và lưu trữ dữ liệu từ cổng thông tin của bạn. {0}Truy cập Bảng điều khiển nền tảng Google Cloud và tạo tài khoản dịch vụ mới cho {LogoText}. Dán dữ liệu bạn nhận được bên dưới:</value>
-  </data>
-  <data name="ConsumersGoogleCloudjson" xml:space="preserve">
-    <value>GoogleCloud json</value>
-  </data>
-  <data name="ConsumersGoogleInstruction" xml:space="preserve">
-    <value>Bật ứng dụng này để kết nối tài khoản Google Drive của bạn với mô-đun Tài liệu. Bạn sẽ có thể quản lý, chỉnh sửa và chia sẻ tệp từ Google Drive với người dùng {LogoText}. {0}Chuyển đến bảng điều khiển Google APIs và tạo một dự án mới để tích hợp {LogoText}. Chèn dữ liệu bạn nhận được bên dưới:</value>
-  </data>
-  <data name="ConsumersLinkedIn" xml:space="preserve">
-    <value>LinkedIn</value>
-  </data>
-  <data name="ConsumersLinkedInInstruction" xml:space="preserve">
-    <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào {LogoText} bằng tài khoản LinkedIn của họ. {0}Truy cập trang web của Nhà phát triển LinkedIn và tạo tích hợp ứng dụng {LogoText} mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
-  </data>
-  <data name="ConsumersLinkedInKey" xml:space="preserve">
-    <value>Linkedin ID</value>
-  </data>
-  <data name="ConsumersLinkedInSecret" xml:space="preserve">
-    <value>Linkedin Key</value>
-  </data>
-  <data name="ConsumersMailruClientId" xml:space="preserve">
-    <value>ID</value>
-  </data>
-  <data name="ConsumersMailruClientSecret" xml:space="preserve">
-    <value>Secret key</value>
-  </data>
-  <data name="ConsumersMailruDescription" xml:space="preserve">
-    <value>Cho phép ứng dụng đăng nhập vào cổng thông tin bằng tài khoản Mail.ru.</value>
-  </data>
-  <data name="ConsumersMailruInstruction" xml:space="preserve">
-    <value>Khi bạn thêm ứng dụng Mail.ru, bạn có thể cho phép đăng nhập vào cổng thông tin bằng cách sử dụng tài khoản Mail.ru trên trang hồ sơ của bạn.</value>
-  </data>
-  <data name="ConsumersmicrosoftClientId" xml:space="preserve">
-    <value>ID ứng dụng khách</value>
-  </data>
-  <data name="ConsumersmicrosoftClientSecret" xml:space="preserve">
-    <value>Client Secret</value>
-  </data>
-  <data name="ConsumersMicrosoftDescription" xml:space="preserve">
-    <value>Cho phép ứng dụng đăng nhập vào cổng thông tin bằng tài khoản Microsoft.</value>
-  </data>
-  <data name="ConsumersMicrosoftInstruction" xml:space="preserve">
-    <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào {LogoText} bằng Microsoft. {0}Truy cập Microsoft Azure và tạo tích hợp ứng dụng {LogoText} mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
-  </data>
-  <data name="ConsumersRackspace" xml:space="preserve">
-    <value>Rackspace Cloud Storage</value>
-  </data>
-  <data name="ConsumersRackspaceDescription" xml:space="preserve">
-    <value>Kết nối dịch vụ lưu trữ đám mây Rackspace Cloud Storage để sao lưu và lưu trữ dữ liệu từ cổng thông tin của bạn.</value>
-  </data>
-  <data name="ConsumersRackspaceInstruction" xml:space="preserve">
-    <value>Kết nối dịch vụ lưu trữ đám mây Rackspace Cloud Storage để sao lưu và lưu trữ dữ liệu từ cổng thông tin của bạn. {0}Trong cài đặt bảo mật của Rackspace Cloud Control Panel, hãy nhấp vào liên kết Show bên cạnh Rackspace API Key. Dán dữ liệu bạn nhận được bên dưới:</value>
-  </data>
-  <data name="ConsumersRackspaceprivate_container" xml:space="preserve">
-    <value>Private Container</value>
-  </data>
-  <data name="ConsumersSelectelprivate_container" xml:space="preserve">
-    <value>Private Container</value>
-  </data>
-  <data name="ConsumersRackspaceprivate_containerDescription" xml:space="preserve">
-    <value>Nhập địa chỉ URL của Rackspace private container để lưu trữ các bản sao lưu.</value>
-  </data>
-  <data name="ConsumersRackspacepublic_container" xml:space="preserve">
-    <value>Public Container</value>
-  </data>
-  <data name="ConsumersSelectelpublic_container" xml:space="preserve">
-    <value>Public Container</value>
-  </data>
-  <data name="ConsumersRackspacepublic_containerDescription" xml:space="preserve">
-    <value>Nhập địa chỉ URL của Rackspace public container để lưu trữ các bản sao lưu.</value>
-  </data>
-  <data name="ConsumersRackspaceregion" xml:space="preserve">
-    <value>Region</value>
-  </data>
-  <data name="ConsumersS3region" xml:space="preserve">
-    <value>Region</value>
-  </data>
-  <data name="ConsumersRackspaceregionDescription" xml:space="preserve">
-    <value>Nhập Region nơi các Rackspace container của bạn được đặt.</value>
-  </data>
-  <data name="ConsumersS3" xml:space="preserve">
-    <value>Amazon AWS S3</value>
-  </data>
-  <data name="ConsumersS3bucket" xml:space="preserve">
-    <value>Bucket</value>
-  </data>
-  <data name="ConsumersS3bucketDescription" xml:space="preserve">
-    <value>Nhập tên riêng của Amazon bucket để lưu trữ các bản sao lưu.</value>
-  </data>
-  <data name="ConsumersS3Description" xml:space="preserve">
-    <value>Kết nối Amazon AWS S3 để sao lưu và lưu trữ dữ liệu từ cổng thông tin của bạn.</value>
-  </data>
-  <data name="ConsumersS3Instruction" xml:space="preserve">
-    <value>Kết nối Amazon AWS S3 để sao lưu và lưu trữ dữ liệu từ cổng thông tin của bạn. {0}Chuyển đến Bảng điều khiển AWS Management Console và tạo khóa truy cập cho {LogoText}. Dán dữ liệu bạn nhận được bên dưới:</value>
-  </data>
-  <data name="ConsumersS3regionDescription" xml:space="preserve">
-    <value>Nhập AWS region nơi Amazon bucket của bạn được đặt.</value>
-  </data>
-  <data name="Consumerssecretaccesskey" xml:space="preserve">
-    <value>Khóa truy cập bí mật S3</value>
-  </data>
-  <data name="ConsumersSelectel" xml:space="preserve">
-    <value>Selectel Cloud Storage</value>
-  </data>
-  <data name="ConsumersSelectelauthPwd" xml:space="preserve">
-    <value>Mật khẩu để truy cập bộ nhớ</value>
-  </data>
-  <data name="ConsumersSelectelauthUser" xml:space="preserve">
-    <value>Auth User</value>
-  </data>
-  <data name="ConsumersSelectelDescription" xml:space="preserve">
-    <value>Kết nối dịch vụ lưu trữ đám mây Selectel Cloud Storage để sao lưu và lưu trữ dữ liệu từ cổng thông tin của bạn.</value>
-  </data>
-  <data name="ConsumersSelectelInstruction" xml:space="preserve">
-    <value>Kết nối dịch vụ lưu trữ đám mây Selectel Cloud Storage để sao lưu và lưu trữ dữ liệu từ cổng thông tin của bạn. {0}Lấy dữ liệu truy cập cho người dùng có quyền Đọc/Ghi cho các container nơi bạn dự định lưu trữ các bản sao lưu của mình và dán nó bên dưới:</value>
-  </data>
-  <data name="ConsumersSelectelprivate_containerDescription" xml:space="preserve">
-    <value>Nhập tên của Selectel private container để lưu trữ các bản sao lưu.</value>
-  </data>
-  <data name="ConsumersSelectelpublic_containerDescription" xml:space="preserve">
-    <value>Nhập tên của Selectel public container để lưu trữ các bản sao lưu.</value>
-  </data>
-  <data name="Consumersskydriveappkey" xml:space="preserve">
-    <value>ID Ứng dụng</value>
-  </data>
-  <data name="Consumersskydriveappsecret" xml:space="preserve">
-    <value>Client secret</value>
-  </data>
-  <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
-    <value>Bật ứng dụng này để kết nối tài khoản OneDrive của bạn với mô-đun Tài liệu. Bạn sẽ có thể quản lý, chỉnh sửa và chia sẻ tập tin từ OneDrive với người dùng {LogoText}. {0}Đăng nhập vào tài khoản Microsoft Azure của bạn và tạo một ứng dụng mới để tích hợp {LogoText}. Chèn dữ liệu bạn nhận được bên dưới:</value>
-  </data>
-  <data name="ConsumersSmscInstruction" xml:space="preserve">
-    <value>Sử dụng ứng dụng này để bật xác thực hai yếu tố với dịch vụ SMS Center. {0}Chèn thông tin đăng nhập tài khoản smsc và mật khẩu của bạn (hoặc hàm băm MD5 của mật khẩu) bằng chữ thường:</value>
-  </data>
-  <data name="ConsumersTelegramBotName" xml:space="preserve">
-    <value>Tên người dùng bot</value>
-  </data>
-  <data name="ConsumersTelegramBotToken" xml:space="preserve">
-    <value>Token Bot</value>
-  </data>
-  <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Kết nối tài khoản Telegram để nhận thông báo cổng thông tin qua Telegram.</value>
-  </data>
-  <data name="ConsumersTelegramInstruction" xml:space="preserve">
-    <value>Để nhận thông báo cổng thông tin qua Telegram, hãy bật Telegram bot. Bạn có thể tạo một bot mới bằng cách sử dụng BotFather trong Telegram cho máy tính. Để sử dụng bot này, người dùng cổng thông tin cần bật thông báo Telegram trên Trang hồ sơ của họ. {0}Dán tên người dùng bot và mã token bạn nhận được trong các trường bên dưới.</value>
-  </data>
-  <data name="ConsumersTwilioInstruction" xml:space="preserve">
-    <value>Bật ứng dụng này để cho phép người dùng của bạn gọi danh bạ của họ từ mô-đun CRM bằng Twilio. {0}Đi đến Bảng điều khiển Twilio và dán dữ liệu sau vào bên dưới:</value>
-  </data>
-  <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
-    <value>Client ID</value>
-  </data>
-  <data name="ConsumerstwitterAccessTokenSecret_Default" xml:space="preserve">
-    <value>Client Secret</value>
-  </data>
-  <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào {LogoText} bằng X và liên kết tài khoản X của khách hàng với mô-đun CRM. {0}Truy cập Cổng thông tin Nhà phát triển X và tạo tích hợp ứng dụng {LogoText} mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
-  </data>
-  <data name="ConsumersTwitterKey" xml:space="preserve">
-    <value>API Key</value>
-  </data>
-  <data name="ConsumersTwitterSecret" xml:space="preserve">
-    <value>API Key Secret</value>
-  </data>
-  <data name="Consumersusername" xml:space="preserve">
-    <value>Tên người dùng Rackspace</value>
-  </data>
-  <data name="ConsumersVk" xml:space="preserve">
-    <value>VK</value>
-  </data>
-  <data name="ConsumersVkClientId" xml:space="preserve">
-    <value>ID Ứng dụng</value>
-  </data>
-  <data name="ConsumersVkClientSecret" xml:space="preserve">
-    <value>Khóa bảo mật</value>
-  </data>
-  <data name="ConsumersVkDescription" xml:space="preserve">
-    <value>Cho phép ứng dụng đăng nhập vào cổng thông tin bằng tài khoản VK.</value>
-  </data>
-  <data name="ConsumersVkInstruction" xml:space="preserve">
-    <value>Khi bạn thêm ứng dụng VK, bạn có thể cho phép đăng nhập vào cổng thông tin bằng cách sử dụng tài khoản VK trên trang hồ sơ của bạn.</value>
-  </data>
-  <data name="ConsumersWordpressDescription" xml:space="preserve">
-    <value>Cho phép ứng dụng xuất bản tài liệu trực tiếp trong WordPress.</value>
-  </data>
-  <data name="ConsumersWordpressInstruction" xml:space="preserve">
-    <value>Cho phép ứng dụng dễ dàng xuất bản tài liệu lên trang web WordPress của bạn. {0}Trên trang Nhà phát triển Wordpress, tạo một ứng dụng mới để tích hợp {LogoText}. Dán dữ liệu bạn nhận được bên dưới:</value>
-  </data>
-  <data name="ConsumerswpClientId" xml:space="preserve">
-    <value>Khóa WordPress</value>
-  </data>
-  <data name="ConsumerswpClientSecret" xml:space="preserve">
-    <value>WordPress Secret</value>
-  </data>
-  <data name="ConsumersyahooClientId" xml:space="preserve">
-    <value>Client ID</value>
-  </data>
-  <data name="ConsumersyahooClientSecret" xml:space="preserve">
-    <value>Client Secret</value>
-  </data>
-  <data name="ConsumersYahooInstruction" xml:space="preserve">
-    <value>Bật ứng dụng này để thêm người dùng cổng thông tin mới từ danh sách liên hệ Yahoo của bạn. {0}Truy cập trang Tạo ứng dụng trong Mạng Nhà phát triển Yahoo và tạo một ứng dụng mới để tích hợp {LogoText}. Chèn dữ liệu bạn nhận được bên dưới:</value>
-  </data>
-  <data name="ConsumersYandexClientId" xml:space="preserve">
-    <value>ID</value>
-  </data>
-  <data name="ConsumersYandexDescription" xml:space="preserve">
-    <value>Cho phép ứng dụng đăng nhập vào cổng thông tin bằng tài khoản Yandex.</value>
-  </data>
-  <data name="ConsumersYandexInstruction" xml:space="preserve">
-    <value>Khi bạn thêm ứng dụng Yandex, bạn có thể cho phép đăng nhập vào cổng thông tin bằng cách sử dụng tài khoản Yandextrên trang hồ sơ của bạn.</value>
-  </data>
-  <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
-    <value>Id sao chép không chính xác.</value>
-  </data>
-  <data name="ErrorEmptyMessage" xml:space="preserve">
-    <value>Tin nhắn không có nội dung</value>
-  </data>
-  <data name="ErrorIncorrectUserName" xml:space="preserve">
-    <value>Tên hoặc họ không chính xác</value>
-  </data>
-  <data name="ErrorPasswordNoSpaces" xml:space="preserve">
-    <value>không có dấu cách</value>
-  </data>
-  <data name="ErrorPasswordOnlyLatinLetters" xml:space="preserve">
-    <value>chỉ các chữ cái Latinh</value>
-  </data>
-  <data name="ErrorRequestLimitExceeded" xml:space="preserve">
-    <value>Đã vượt quá giới hạn yêu cầu</value>
-  </data>
-  <data name="ErrorTenantTooShort" xml:space="preserve">
-    <value>Miền của người thuê không được để trống.</value>
-  </data>
-  <data name="ErrorTenantTooShortFormat" xml:space="preserve">
-    <value>Tên miền phải dài từ {0} đến {1} ký tự.</value>
-  </data>
-  <data name="LdapSettingsErrorLostRights" xml:space="preserve">
-    <value>Bạn đã cố gắng lấy đi quyền quản trị từ chính mình. Quyền quản trị của bạn không bị ảnh hưởng.</value>
-  </data>
-  <data name="LdapSettingsErrorRemovedYourself" xml:space="preserve">
-    <value>Tài khoản của bạn không được liên kết với thư mục LDAP và mật khẩu LDAP của bạn không còn hoạt động. Vui lòng thay đổi hoặc đặt mật khẩu cho tài khoản của bạn tại trang cài đặt hồ sơ.</value>
-  </data>
-  <data name="LdapSettingsStatusGivingRights" xml:space="preserve">
-    <value>Lập người dùng {0} làm quản trị viên {1}</value>
-  </data>
-  <data name="LdapSettingsStatusRemovingOldRights" xml:space="preserve">
-    <value>Loại bỏ các quyền truy cập lỗi thời đã được tải qua LDAP trước đó</value>
-  </data>
-  <data name="LdapSettingsStatusSavingUserPhoto" xml:space="preserve">
-    <value>Đang lưu ảnh</value>
-  </data>
-  <data name="LdapSettingsStatusUpdatingAccessRights" xml:space="preserve">
-    <value>Đang cập nhật quyền truy cập của người dùng</value>
-  </data>
-  <data name="LdapSettingsStatusUpdatingUserPhotos" xml:space="preserve">
-    <value>Đang cập nhật ảnh người dùng</value>
-  </data>
-  <data name="LicenseUploadedOverdue" xml:space="preserve">
-    <value>Tải lên thành công. {0}Hỗ trợ và cập nhật không có sẵn cho giấy phép này kể từ {2}.{1}</value>
-  </data>
-  <data name="LicenseUploadedOverdueSupport" xml:space="preserve">
-    <value>Tải lên thành công. {0}Hỗ trợ không khả dụng cho giấy phép này kể từ {2}.{1}</value>
-  </data>
-  <data name="MessageYourPasswordSendedToEmail" xml:space="preserve">
-    <value>Nếu tồn tại người dùng có email {0}, hướng dẫn thay đổi mật khẩu đã được gửi đến địa chỉ email này.</value>
-  </data>
-  <data name="PortalName" xml:space="preserve">
-    <value>Không gian đám mây cho tài liệu văn phòng của bạn</value>
-  </data>
-  <data name="RecaptchaInvalid" xml:space="preserve">
-    <value>Recaptcha không hợp lệ</value>
-  </data>
-  <data name="TariffsFeature_thirdparty" xml:space="preserve">
-    <value>Tích hợp bên thứ ba</value>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>Đã xảy ra lỗi ngoài dự kiến. Xin hãy thử lại.</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>Bạn đã được kết nối thành công với Telegram để nhận thông báo từ DocSpace của bạn.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Mã không chính xác</value>
@@ -982,256 +1281,16 @@
   <data name="TfaTooMuchError" xml:space="preserve">
     <value>Bạn đã gửi quá nhiều tin nhắn văn bản. Vui lòng thử lại sau.</value>
   </data>
-  <data name="ConsumersZoom" xml:space="preserve">
-    <value>Zoom</value>
-  </data>
-  <data name="ConsumersZoomClientId" xml:space="preserve">
-    <value>id Zoom khách</value>
-  </data>
-  <data name="ConsumersZoomClientSecret" xml:space="preserve">
-    <value>Zoom client secret</value>
-  </data>
-  <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Cho phép ứng dụng đăng nhập vào cổng thông tin bằng tài khoản Zoom.</value>
-  </data>
-  <data name="ConsumersZoomInstruction" xml:space="preserve">
-    <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào {LogoText} bằng tài khoản Zoom của họ. {0}Truy cập trang web của Nhà phát triển Zoom và tạo tích hợp ứng dụng {LogoText} mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
-  </data>
-  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
-    <value>Quá nhiều lần đăng nhập. Xin vui lòng thử lại sau</value>
-  </data>
-  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
-    <value>Không thể xóa không gian truy cập đầy đủ cuối cùng</value>
-  </data>
-  <data name="ErrorWebPluginArchive" xml:space="preserve">
-    <value>Lưu trữ plugin sai</value>
-  </data>
-  <data name="ErrorWebPluginExist" xml:space="preserve">
-    <value>Plugin đã tồn tại</value>
-  </data>
-  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
-    <value>Phần mở rộng tập tin sai</value>
-  </data>
-  <data name="ErrorWebPluginFileSize" xml:space="preserve">
-    <value>Tập tin vượt quá giới hạn</value>
-  </data>
-  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
-    <value>Các thay đổi đối với plugin hệ thống đều bị cấm</value>
-  </data>
-  <data name="ErrorWebPluginName" xml:space="preserve">
-    <value>Tên plugin sai</value>
-  </data>
-  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
-    <value>Không có tập tin đầu vào</value>
-  </data>
-  <data name="ErrorWebPluginNotFound" xml:space="preserve">
-    <value>Không tìm thấy plugin</value>
-  </data>
-  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
-    <value>Quá nhiều tập tin đầu vào</value>
-  </data>
-  <data name="QuotaGreaterPortalError" xml:space="preserve">
-    <value>Không thể đặt hạn mức bộ nhớ - hạn mức bộ nhớ bạn đặt lớn hơn hạn mức cổng thông tin.</value>
-  </data>
-  <data name="RoomFreeSpaceException" xml:space="preserve">
-    <value>Đã vượt quá hạn mức không gian phòng</value>
-  </data>
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>Đã vượt quá hạn mức không gian người dùng</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Quản trị viên đã thêm:</value>
-  </data>
-  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
-    <value>Đã vượt quá giới hạn lời mời</value>
-  </data>
-  <data name="ErrorUserDisabled" xml:space="preserve">
-    <value>Người dùng đã bị vô hiệu</value>
-  </data>
-  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
-    <value>Hướng dẫn thay đổi mật khẩu đã được gửi đến địa chỉ email {0}.</value>
-  </data>
-  <data name="ErrorEmailLinked" xml:space="preserve">
-    <value>Email này được gắn với người dùng {0} như là nhà cung cấp bên thứ ba</value>
-  </data>
-  <data name="TariffsFeature_statistic" xml:space="preserve">
-    <value>Hạn mức lưu trữ &amp; thống kê</value>
-  </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} mỗi quản trị viên và khả năng thêm không gian theo yêu cầu</value>
-  </data>
-  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Không thể đặt hạn mức cho mỗi phòng. Giá trị đã nhập lớn hơn tổng dung lượng lưu trữ DocSpace.</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
     <value>Không thể đặt hạn mức cho mỗi người dùng. Giá trị đã nhập lớn hơn tổng dung lượng lưu trữ DocSpace.</value>
   </data>
-  <data name="ErrorTrustedMailDomain" xml:space="preserve">
-    <value>Thêm ít nhất 1 tên miền đáng tin cậy.</value>
+  <data name="UsServerRegion" xml:space="preserve">
+    <value>Vùng Tây Hoa Kỳ (Oregon)</value>
   </data>
-  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
-    <value>Số lượng quản trị viên vượt quá giới hạn: {0}/{1}.</value>
-  </data>
-  <data name="Tariffs_nonprofit" xml:space="preserve">
-    <value>Phi lợi nhuận</value>
-  </data>
-  <data name="ErrorIpRestriction" xml:space="preserve">
-    <value>Thêm ít nhất 1 địa chỉ IP được phép.</value>
-  </data>
-  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
-    <value>URL Webhook không khả dụng. Yêu cầu HEAD không nhận được mã trạng thái HTTP 200.</value>
-  </data>
-  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
-    <value>Tín dụng</value>
-  </data>
-  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
-    <value>Loại tiền</value>
-  </data>
-  <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>Ngày</value>
-  </data>
-  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
-    <value>Số lượng</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
-    <value>Dung lượng ổ đĩa</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
-    <value>Tiền nạp thêm vào tài khoản</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
-    <value>Đơn vị đo</value>
-  </data>
-  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
-    <value>Báo cáo hoạt động khách hàng ({0}-{1})</value>
-  </data>
-  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
-    <value>Không gian lưu trữ đã dùng:</value>
-  </data>
-  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
-    <value>Điều chỉnh dung lượng lưu trữ theo đúng nhu cầu của bạn.</value>
-  </data>
-  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
-    <value>Lưu trữ đĩa bổ sung</value>
-  </data>
-  <data name="ErrorGroupNotFound" xml:space="preserve">
-    <value>Không tìm thấy nhóm</value>
-  </data>
-  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
-    <value>Sao lưu</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>Sao lưu</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
-    <value>Sao lưu</value>
-  </data>
-  <data name="AutoRenewal" xml:space="preserve">
-    <value>Tự động gia hạn</value>
-  </data>
-  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
-    <value>Số lượng bản sao lưu miễn phí không được vượt quá {0} trong vòng một tháng</value>
-  </data>
-  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
-    <value>Bật tính năng sao lưu cho DocSpace của bạn. Chi phí sẽ được tự động tính phí.</value>
-  </data>
-  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
-    <value>Ghi nợ</value>
-  </data>
-  <data name="AccountingCustomerOperationContact" xml:space="preserve">
-    <value>Liên hệ</value>
-  </data>
-  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
-    <value>Lịch sử giao dịch</value>
-  </data>
-  <data name="AutoTopUp" xml:space="preserve">
-    <value>Nạp tiền tự động</value>
-  </data>
-  <data name="ErrorPaymentRequired" xml:space="preserve">
-    <value>Yêu cầu thanh toán</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
-    <value>GB</value>
-  </data>
-  <data name="AccountingCustomerOperationType" xml:space="preserve">
-    <value>Kiểu</value>
-  </data>
-  <data name="TariffsFeature_free_backup" xml:space="preserve">
-    <value>{0} bản sao lưu miễn phí mỗi tháng</value>
-  </data>
-  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
-    <value>Chi tiết</value>
-  </data>
-  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
-    <value>Véc-tơ hóa</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
-    <value>Công cụ AI</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
-    <value>Token</value>
-  </data>
-  <data name="AiAgentFreeSpaceException" xml:space="preserve">
-    <value>Đã vượt quá hạn mức không gian AI agent</value>
-  </data>
-  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Không thể đặt hạn mức cho mỗi ai agent. Giá trị đã nhập lớn hơn tổng dung lượng lưu trữ DocSpace.</value>
-  </data>
-  <data name="ConsumersWeixin" xml:space="preserve">
-    <value>WeChat</value>
-  </data>
-  <data name="ConsumersWeixinClientId" xml:space="preserve">
-    <value>ID Khách hàng</value>
-  </data>
-  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
-    <value>Client Secret</value>
-  </data>
-  <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Cho phép ứng dụng đăng nhập vào cổng thông tin bằng tài khoản WeChat.</value>
-  </data>
-  <data name="ConsumersWeixinInstruction" xml:space="preserve">
-    <value>Cho phép ứng dụng đăng nhập vào cổng thông tin bằng tài khoản WeChat.</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
-    <value>Ngày</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
-    <value>Email</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
-    <value>Tên</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
-    <value>Id</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
-    <value>Họ</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
-    <value>Hạn mức dịch vụ tài liệu ({0})</value>
-  </data>
-  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
-    <value>Số lượng plugin vượt quá giới hạn</value>
-  </data>
-  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
-    <value>Số lượng AI agent không được vượt quá {0}</value>
-  </data>
-  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>Công cụ AI</value>
-  </data>
-  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Bật các tính năng AI trong DocSpace của bạn để tăng năng suất.</value>
-  </data>
-  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
-    <value>Tìm kiếm web AI</value>
-  </data>
-  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
-    <value>Nạp tiền vào ví để mở khóa tìm kiếm web AI.</value>
-  </data>
-  <data name="TelegramOnGenericError" xml:space="preserve">
-    <value>Đã xảy ra lỗi ngoài dự kiến. Xin hãy thử lại.</value>
-  </data>
-  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>Bạn đã được kết nối thành công với Telegram để nhận thông báo từ DocSpace của bạn.</value>
+  <data name="WhatsNewSubscriptionName" xml:space="preserve">
+    <value>Tin tức mới</value>
   </data>
 </root>

@@ -43,9 +43,7 @@ public class SubscriptionMethod
 
     [ProtoMember(5)]
     public string[] Methods { get; set; }
-
-    private static readonly char[] _separator = ['|'];
-
+    
     public static implicit operator SubscriptionMethod(SubscriptionMethodCache cache)
     {
         return new SubscriptionMethod

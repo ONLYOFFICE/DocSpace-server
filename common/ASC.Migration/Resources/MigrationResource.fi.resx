@@ -117,56 +117,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="DataProcessing" xml:space="preserve">
-    <value>Tietojen käsittely...</value>
-  </data>
-  <data name="DataProcessingCompleted" xml:space="preserve">
-    <value>Tietojen käsittely suoritettu</value>
-  </data>
-  <data name="DumpParse" xml:space="preserve">
-    <value>Tietokannan jäsennys</value>
-  </data>
-  <data name="GroupMigration" xml:space="preserve">
-    <value>Ryhmän siirto {0} ({1}/{2})</value>
-  </data>
-  <data name="MigratingUserFiles" xml:space="preserve">
-    <value>Siirretään käyttäjätiedostoja {0} ({1}/{2})</value>
-  </data>
-  <data name="MigrationCompleted" xml:space="preserve">
-    <value>Siirtäminen suoritettu</value>
-  </data>
-  <data name="PreparingForMigration" xml:space="preserve">
-    <value>Valmistaudutaan siirtoon</value>
-  </data>
-  <data name="StartOfDataProcessing" xml:space="preserve">
-    <value>Aloitetaan tietojenkäsittelyä...</value>
-  </data>
-  <data name="Unzipping" xml:space="preserve">
-    <value>Puretaan...</value>
-  </data>
-  <data name="UnzippingFinished" xml:space="preserve">
-    <value>Purkaminen suoritettu...</value>
-  </data>
-  <data name="UserMigration" xml:space="preserve">
-    <value>Käyttäjien siirto {0} ({1}/{2})</value>
-  </data>
-  <data name="MigrationCommonFiles" xml:space="preserve">
-    <value>Yleisten tiedostojen siirto</value>
-  </data>
-  <data name="MigrationNotFoundException" xml:space="preserve">
-    <value>Annettua siirtopalveluntarjoajaa ei löydy</value>
-  </data>
-  <data name="MigrationProgressException" xml:space="preserve">
-    <value>Siirto ei ole käynnissä</value>
-  </data>
-  <data name="MigrationProjectFiles" xml:space="preserve">
-    <value>Siirtoprojektitiedostot</value>
-  </data>
   <data name="CanNotAddUserInGroup" xml:space="preserve">
     <value>Käyttäjän {0} lisääminen ryhmään {1} ei onnistunut</value>
   </data>
   <data name="CanNotCreateFile" xml:space="preserve">
     <value>Tiedoston {0} luonti ei onnistunut</value>
+  </data>
+  <data name="CanNotImportCommonFiles" xml:space="preserve">
+    <value>Yleisten tiedostojen tuonti ei onnistunut</value>
+  </data>
+  <data name="CanNotImportProjectFiles" xml:space="preserve">
+    <value>Projektitiedostojen tuonti ei onnistunut</value>
   </data>
   <data name="CanNotImportUser" xml:space="preserve">
     <value>Käyttäjän tuonti ei onnistunut</value>
@@ -198,19 +159,58 @@
   <data name="CreateFolder" xml:space="preserve">
     <value>Luo kansio {0}</value>
   </data>
+  <data name="CreateRootFolder" xml:space="preserve">
+    <value>Luo juuritiedosto</value>
+  </data>
   <data name="CreateShareRoom" xml:space="preserve">
     <value>luo jaettu huone {0}</value>
   </data>
-  <data name="СanNotImportCommonFiles" xml:space="preserve">
-    <value>Yleisten tiedostojen tuonti ei onnistunut</value>
+  <data name="DataProcessing" xml:space="preserve">
+    <value>Tietojen käsittely...</value>
   </data>
-  <data name="СanNotImportProjectFiles" xml:space="preserve">
-    <value>Projektitiedostojen tuonti ei onnistunut</value>
+  <data name="DataProcessingCompleted" xml:space="preserve">
+    <value>Tietojen käsittely suoritettu</value>
   </data>
-  <data name="СreateRootFolder" xml:space="preserve">
-    <value>Luo juuritiedosto</value>
+  <data name="DumpParse" xml:space="preserve">
+    <value>Tietokannan jäsennys</value>
+  </data>
+  <data name="GroupMigration" xml:space="preserve">
+    <value>Ryhmän siirto {0} ({1}/{2})</value>
   </data>
   <data name="LargeBackup" xml:space="preserve">
     <value>Varmuuskopio on suurempi kuin portaalin koko</value>
+  </data>
+  <data name="MigratingUserFiles" xml:space="preserve">
+    <value>Siirretään käyttäjätiedostoja {0} ({1}/{2})</value>
+  </data>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>Yleisten tiedostojen siirto</value>
+  </data>
+  <data name="MigrationCompleted" xml:space="preserve">
+    <value>Siirtäminen suoritettu</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>Annettua siirtopalveluntarjoajaa ei löydy</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>Siirto ei ole käynnissä</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>Siirtoprojektitiedostot</value>
+  </data>
+  <data name="PreparingForMigration" xml:space="preserve">
+    <value>Valmistaudutaan siirtoon</value>
+  </data>
+  <data name="StartOfDataProcessing" xml:space="preserve">
+    <value>Aloitetaan tietojenkäsittelyä...</value>
+  </data>
+  <data name="Unzipping" xml:space="preserve">
+    <value>Puretaan...</value>
+  </data>
+  <data name="UnzippingFinished" xml:space="preserve">
+    <value>Purkaminen suoritettu...</value>
+  </data>
+  <data name="UserMigration" xml:space="preserve">
+    <value>Käyttäjien siirto {0} ({1}/{2})</value>
   </data>
 </root>

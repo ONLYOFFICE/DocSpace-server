@@ -54,7 +54,7 @@ public static class NginxConfiguration
         }
 
         openResty.WithArgs("/bin/sh", "-c",
-            $"envsubst '{string.Join(',', serviceUrls.Select(r => $"${r.Key}"))}' < /etc/nginx/templates/upstream-aspire.conf.template > /etc/nginx/includes/onlyoffice-upstream.conf && /usr/local/openresty/bin/openresty -g 'daemon off;'");
+            $"envsubst '{string.Join(',', serviceUrls.Select(r => $"${r.Key}"))}' < /etc/nginx/templates/upstream-aspire.conf.template > /etc/nginx/includes/onlyoffice-upstream-map.conf && /usr/local/openresty/bin/openresty -g 'daemon off;'");
 
         return openResty;
     }

@@ -25,13 +25,15 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Common.IntegrationEvents.Events;
+using ASC.Core.Common.Notify.Model;
 
 using Constants = ASC.Core.Configuration.Constants;
 
 namespace ASC.Web.Studio.Core.Notify;
 
 [Singleton]
-public class StudioNotifyServiceSender(IServiceScopeFactory serviceProvider,
+public class StudioNotifyServiceSender(
+    IServiceScopeFactory serviceProvider,
     IConfiguration configuration,
     WorkContext workContext,
     TenantExtraConfig tenantExtraConfig)
@@ -94,11 +96,13 @@ public class StudioNotifyServiceSender(IServiceScopeFactory serviceProvider,
 }
 
 [Scope]
-public class StudioNotifyWorker(TenantManager tenantManager,
+public partial class StudioNotifyWorker(
+    TenantManager tenantManager,
     SecurityContext securityContext,
     StudioNotifyHelper studioNotifyHelper,
     CommonLinkUtility baseCommonLinkUtility,
     WorkContext workContext,
+    ILogger<StudioNotifyWorker> logger,
     IServiceProvider serviceProvider)
 {
     public async Task OnMessageAsync(NotifyItemIntegrationEvent item)
@@ -112,9 +116,24 @@ public class StudioNotifyWorker(TenantManager tenantManager,
         }
 
         var client = workContext.RegisterClient(serviceProvider, studioNotifyHelper.NotifySource);
+        var type = Type.GetType(item.Action.NotifyActionListType);
+        if(type == null)
+        {
+            logger.LogNotifyNotFound(item.Action.NotifyActionListType);
+            return;
+        }
 
+        var list = (INotifyActionList)serviceProvider.GetService(type);
+
+        var action = list?.GetById(item.Action.Id);
+        if (action == null)
+        {
+            logger.LogNotifyNotFound(item.Action.NotifyActionListType, item.Action.Id);
+            return;
+        }
+        
         await client.SendNoticeToAsync(
-            (NotifyAction)item.Action,
+            action,
             item.ObjectId,
             item.Recipients?.Select(r => r.IsGroup ? new RecipientsGroup(r.Id, r.Name) : (IRecipient)new DirectRecipient(r.Id, r.Name, r.Addresses?.ToArray(), r.CheckActivation)).ToArray(),
             item.SenderNames is { Count: > 0 } ? item.SenderNames.ToArray() : null,
