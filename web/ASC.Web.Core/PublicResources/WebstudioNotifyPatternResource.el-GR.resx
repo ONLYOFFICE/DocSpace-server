@@ -138,6 +138,9 @@
   <data name="ActionFileUploaded" xml:space="preserve">
     <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; μεταφόρτωσε ένα νέο έγγραφο: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; στο δωμάτιο: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
+  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
+    <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; ανέβασε ένα νέο έγγραφο: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; στη βάση γνώσεων του παράγοντα τεχνητής νοημοσύνης: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
   <data name="ActionNewComment" xml:space="preserve">
     <value>Ο χρήστης &lt;b&gt;{0}&lt;/b&gt; πρόσθεσε ένα νέο σχόλιο στην έκδοση του εγγράφου: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; στο δωμάτιο: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
@@ -310,6 +313,15 @@
 $OrangeButton
 
 Αυτός ο σύνδεσμος ισχύει μόνο για 7 ημέρες. Ολοκληρώστε την ενεργοποίηση του email σας εντός αυτής της περιόδου.</value>
+  </data>
+  <data name="pattern_api_key_expired" xml:space="preserve">
+    <value>Γεια σας, $UserName!
+
+Με αυτό το μήνυμα ηλεκτρονικού ταχυδρομείου σας ενημερώνουμε ότι το κλειδί API σας "*$Message*" έχει λήξει και έχει απενεργοποιηθεί.
+
+Μπορείτε να δημιουργήσετε ένα νέο κλειδί API στα "Εργαλεία Προγραμματιστή":"${__VirtualRootPath}/developer-tools/api-keys".
+
+$TrulyYours</value>
   </data>
   <data name="pattern_backup_created" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" δημιουργήθηκε αντίγραφο ασφαλείας πύλης
@@ -1117,6 +1129,15 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>Το ${LetterLogoText} DocSpace έχει διαγραφεί.
+
+*Portal:* ${PortalUrl}
+*Owner:* ${UserName} ${UserEmail}
+*Customer:* ${OwnerName}
+
+Βεβαιωθείτε ότι η αυτόματη χρέωση είναι απενεργοποιημένη. Ελέγξτε την κατάσταση της αυτόματης χρέωσης στον λογαριασμό Stripe του πελάτη.</value>
+  </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Το ${LetterLogoText} DocSpace έχει &lt;span style="color: #FF6F3D;"&gt;διαγραφεί&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
@@ -1193,11 +1214,11 @@ $OrangeButton
   <data name="pattern_profile_updated_tg" xml:space="preserve">
     <value>Το προφίλ σας στο [${__VirtualRootPath}](${__VirtualRootPath}) έχει αλλάξει
 
-Αγαπητέ $UserName,
+Αγαπητέ/ή $UserName,
 
-Τα στοιχεία του προφίλ χρήστη σας στο [${__VirtualRootPath}](${__VirtualRootPath}) έχουν αλλάξει από τον χρήστη [$__AuthorName]($__AuthorUrl).
+Τα στοιχεία του προφίλ χρήστη σας στο [${__VirtualRootPath}](${__VirtualRootPath}) έχουν αλλάξει από τον/την [$__AuthorName]($__AuthorUrl).
 
-Για να δείτε το προφίλ σας, ακολουθήστε τον παρακάτω σύνδεσμο:
+Για να δείτε το προφίλ σας, πατήστε τον παρακάτω σύνδεσμο:
 [$UserName]($MyStaffLink)</value>
   </data>
   <data name="pattern_reassigns_completed" xml:space="preserve">
@@ -1779,6 +1800,15 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_user_agent_role_changed" xml:space="preserve">
+    <value>Γεια σας!
+
+Σας έχει ανατεθεί ένας νέος ρόλος στον παράγοντα τεχνητής νοημοσύνης DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+Μάθετε περισσότερα σχετικά με τους ρόλους και τα δικαιώματα δωματίου στο "Κέντρο βοήθειας":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_user_has_join" xml:space="preserve">
     <value>h1.Προστέθηκε νέος χρήστης στην πύλη "${__VirtualRootPath}":"${__VirtualRootPath}"
 
@@ -1838,6 +1868,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_activate_email" xml:space="preserve">
     <value>${LetterLogoText}. Παρακαλώ ενεργοποιείστε την διεύθυνση email</value>
+  </data>
+  <data name="subject_api_key_expired" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace: Το κλειδί API σας έχει λήξει</value>
   </data>
   <data name="subject_backup_created" xml:space="preserve">
     <value>${LetterLogoText}. ${__VirtualRootHost} δημιουργία αντιγράφου ασφαλείας πύλης</value>
@@ -1989,6 +2022,9 @@ $TrulyYours</value>
   <data name="subject_portal_delete" xml:space="preserve">
     <value>Διαγραφή της πύλης ${__VirtualRootHost}</value>
   </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>Το ${LetterLogoText} DocSpace έχει διαγραφεί</value>
+  </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
     <value>Το ${LetterLogoText} DocSpace έχει διαγραφεί</value>
   </data>
@@ -2135,6 +2171,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>Απαιτείται ενέργεια: Δεν είναι δυνατή η αυτόματη ανανέωση του υπολοίπου του Πορτοφολιού στο DocSpace ${LetterLogoText}</value>
+  </data>
+  <data name="subject_user_agent_role_changed" xml:space="preserve">
+    <value>Ο ρόλος σας σε έναν πράκτορα τεχνητής νοημοσύνης του DocSpace έχει αλλάξει</value>
   </data>
   <data name="subject_user_has_join" xml:space="preserve">
     <value>Νέος χρήστης προστέθηκε στην πύλη ${LetterLogoText}</value>
