@@ -78,7 +78,7 @@ public class Tariff
     /// <summary>
     /// The list of overdue tariff quotas.
     /// </summary>
-    [ProtoMember(7)]
+    [ProtoMember(8)]
     public List<Quota> OverdueQuotas { get; set; }
 
     public override int GetHashCode()
@@ -140,7 +140,6 @@ public class Quota : IEquatable<Quota>
     /// <summary>
     /// The quota state.
     /// </summary>
-    [ProtoMember(6)]
     public QuotaState? State => DueDate.HasValue ? DueDate.Value < DateTime.UtcNow ? QuotaState.Overdue : QuotaState.Active : null;
 
     public Quota()
