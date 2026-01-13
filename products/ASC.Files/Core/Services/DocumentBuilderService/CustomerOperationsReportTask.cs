@@ -200,7 +200,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
 
             yield return report.Collection;
 
-            if (report.CurrentPage == report.TotalPage)
+            if (report.CurrentPage >= report.TotalPage)
             {
                 break;
             }
