@@ -25,43 +25,44 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.common.service.transfer.message;
+package com.asc.authorization.application.configuration.serialization;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import java.io.Serializable;
-import lombok.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.data.redis.serializer.RedisSerializer;
+import org.springframework.data.redis.serializer.SerializationException;
 
 /**
- * Message object containing a key pair from a remote region.
+ * Custom Redis serializer for cache objects using Jackson ObjectMapper.
  *
- * <p>This DTO is used to return the signing key from a remote region for cross-region token
- * signing. The private key is encrypted during transit.
+ * <p>This serializer uses a configured ObjectMapper with type information to properly serialize and
+ * deserialize objects for Redis cache, ensuring type safety during deserialization.
  */
-@Builder
-@Getter
-@Setter
-@ToString
-@EqualsAndHashCode
-@NoArgsConstructor
-@AllArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class KeyPairRetrievedEvent implements Serializable {
-  @JsonProperty(value = "id")
-  private String id;
+public class CacheObjectSerializer implements RedisSerializer<Object> {
+  private final ObjectMapper objectMapper;
 
-  @JsonProperty(value = "public_key")
-  private String publicKey;
+  public CacheObjectSerializer(ObjectMapper objectMapper) {
+    this.objectMapper = objectMapper;
+  }
 
-  @JsonProperty(value = "private_key")
-  private String privateKey;
+  @NotNull
+  public byte[] serialize(Object value) throws SerializationException {
+    if (value == null) return new byte[0];
 
-  @JsonProperty(value = "pair_type")
-  private String pairType;
+    try {
+      return objectMapper.writeValueAsBytes(value);
+    } catch (Exception e) {
+      throw new SerializationException("Could not serialize: " + e.getMessage(), e);
+    }
+  }
 
-  @JsonProperty(value = "created_at")
-  private String createdAt;
+  public Object deserialize(byte[] bytes) throws SerializationException {
+    if (bytes == null || bytes.length == 0) return null;
 
-  @JsonProperty(value = "success")
-  private boolean success;
+    try {
+      return objectMapper.readValue(bytes, Object.class);
+    } catch (Exception e) {
+      throw new SerializationException("Could not deserialize: " + e.getMessage(), e);
+    }
+  }
 }

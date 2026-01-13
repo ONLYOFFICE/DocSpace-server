@@ -198,6 +198,8 @@ public class AuthorizationMessagingRPCListener {
           .publicKey(latestKeyPair.getPublicKey())
           .privateKey(latestKeyPair.getPrivateKey())
           .pairType(latestKeyPair.getPairType().name())
+          .createdAt(
+              latestKeyPair.getCreatedAt() != null ? latestKeyPair.getCreatedAt().toString() : null)
           .build();
     } catch (Exception e) {
       log.error("Error retrieving key pair for remote region", e);

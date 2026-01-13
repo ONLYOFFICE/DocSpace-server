@@ -61,7 +61,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.cache.caffeine.CaffeineCacheManager;
+import org.springframework.cache.CacheManager;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -87,7 +87,7 @@ public class KeyPairRepositoryJWKSource
   @Value("${spring.application.region}")
   private String region;
 
-  private final CaffeineCacheManager cacheManager;
+  private final CacheManager cacheManager;
 
   private final Environment environment;
   private final RegisteredClientConfigurationProperties registeredClientConfiguration;
@@ -239,6 +239,10 @@ public class KeyPairRepositoryJWKSource
           .publicKey(keyPairRetrievedEvent.getPublicKey())
           .privateKey(encryptionService.decrypt(keyPairRetrievedEvent.getPrivateKey()))
           .pairType(KeyPairType.valueOf(keyPairRetrievedEvent.getPairType()))
+          .createdAt(
+              keyPairRetrievedEvent.getCreatedAt() != null
+                  ? ZonedDateTime.parse(keyPairRetrievedEvent.getCreatedAt())
+                  : null)
           .build();
     } catch (Exception e) {
       log.error("Error fetching key pair from remote region: {}", region, e);
@@ -269,16 +273,18 @@ public class KeyPairRepositoryJWKSource
           region,
           tokenRegion);
 
-      var cache = cacheManager.getCache("key_pair");
-      var cached = cache.get(tokenRegion, KeyPair.class);
+      var cache = cacheManager.getCache("remote_keypairs");
+      var cacheKey = "key_pair_" + tokenRegion;
+      var cached = cache != null ? cache.get(cacheKey, KeyPair.class) : null;
 
       if (cached != null) {
         log.debug("Found a key pair in cache");
         activeKeyPair = cached;
       } else {
         activeKeyPair = fetchFromRemoteRegion(tokenRegion);
-        if (activeKeyPair != null) cache.put(tokenRegion, activeKeyPair);
-        else throw new UnsupportedOperationException("Could not find any suitable keypair");
+        if (activeKeyPair != null && cache != null) cache.put(cacheKey, activeKeyPair);
+        else if (activeKeyPair == null)
+          throw new UnsupportedOperationException("Could not find any suitable keypair");
       }
 
       remoteKeyPairHolder.set(activeKeyPair);
