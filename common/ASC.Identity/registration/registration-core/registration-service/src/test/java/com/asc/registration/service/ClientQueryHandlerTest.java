@@ -86,7 +86,6 @@ public class ClientQueryHandlerTest {
     when(clientCacheService.get(any(ClientId.class), any(TenantId.class)))
         .thenReturn(Optional.empty());
     when(clientCacheService.getAnyTenant(any(ClientId.class))).thenReturn(Optional.empty());
-    doNothing().when(clientCacheService).put(any(Client.class));
 
     client =
         Client.Builder.builder()
