@@ -3,8 +3,11 @@ com.example.codegen.MyTypeScriptK6Codegen
 com.example.codegen.MyPythonCodegen
 com.example.codegen.MyPostmanCollectionCodegen
 com.example.codegen.MyCSharpCodegen
-com.example.codegen.MyJavaScriptCodegen
+com.example.codegen.MyJavaClientCodegen
 com.example.codegen.MyK6Codegen
+com.example.codegen.MyPHPClientCodegen
+com.example.codegen.MySwift6ClientCodegen
+com.example.codegen.MyKotlinClientCodegen
 org.openapitools.codegen.languages.AdaCodegen
 org.openapitools.codegen.languages.AdaServerCodegen
 org.openapitools.codegen.languages.AndroidClientCodegen

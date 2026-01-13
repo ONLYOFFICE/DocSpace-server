@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,7 +42,7 @@ public static class CommonPhotoManager
 
         var alignWidth = minSide == realWidth;
 
-        var scaleFactor = alignWidth ? (realWidth / (1.0 * width)) : (realHeight / (1.0 * height));
+        var scaleFactor = alignWidth ? realWidth / (1.0 * width) : realHeight / (1.0 * height);
 
         if (scaleFactor < 1)
         {

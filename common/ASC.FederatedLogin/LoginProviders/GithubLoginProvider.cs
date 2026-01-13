@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,15 +35,10 @@ public class GithubLoginProvider : OauthProvider
     public override string ClientID => this["githubClientId"];
     public override string ClientSecret => this["githubClientSecret"];
 
-    public override bool IsEnabled
-    {
-        get
-        {
-            return !string.IsNullOrEmpty(ClientID) &&
-                   !string.IsNullOrEmpty(ClientSecret) &&
-                   !string.IsNullOrEmpty(RedirectUri);
-        }
-    }
+    public override bool IsEnabled =>
+        !string.IsNullOrEmpty(ClientID) &&
+        !string.IsNullOrEmpty(ClientSecret) &&
+        !string.IsNullOrEmpty(RedirectUri);
 
     public GithubLoginProvider() { }
 
@@ -56,6 +51,7 @@ public class GithubLoginProvider : OauthProvider
         ConsumerFactory consumerFactory,
         string name, 
         int order, 
+        bool paid, 
         Dictionary<string, string> props, 
         Dictionary<string, string> additional = null) 
         : base(tenantManager, 
@@ -66,6 +62,7 @@ public class GithubLoginProvider : OauthProvider
             consumerFactory, 
             name, 
             order, 
+            paid,
             props,
             additional)
     { }

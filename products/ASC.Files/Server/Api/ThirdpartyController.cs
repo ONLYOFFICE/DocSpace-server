@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -325,14 +325,14 @@ public class ThirdpartyController(
     [Tags("Files / Third-party integration")]
     [SwaggerResponse(200, "List of provider", typeof(List<ProviderDto>))]
     [HttpGet("thirdparty/providers")]
-    public async Task<List<ProviderDto>> GetAllProviders()
+    public async Task<List<ProviderDto>> GetAllProviders(GetProvidersRequestDto inDto)
     {
         if (!await CheckAccessAsync())
         {
             return [];
         }
 
-        return thirdPartyConfiguration.GetAllProviders();
+        return thirdPartyConfiguration.GetAllProviders(inDto.ExcludeWebDav);
     }
 
     private async Task<bool> CheckAccessAsync()

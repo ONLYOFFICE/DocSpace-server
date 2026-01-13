@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Security;
+
 namespace ASC.Migration.Core.Migrators;
 
 public abstract class Migrator(
@@ -35,7 +37,6 @@ public abstract class Migrator(
     GlobalFolderHelper globalFolderHelper,
     IServiceProvider serviceProvider,
     IDaoFactory daoFactory,
-    EntryManager entryManager,
     MigrationLogger migrationLogger,
     AuthContext authContext,
     DisplayUserSettingsHelper displayUserSettingsHelper,
@@ -52,7 +53,6 @@ public abstract class Migrator(
     private GlobalFolderHelper GlobalFolderHelper { get; } = globalFolderHelper;
     private IServiceProvider ServiceProvider { get; } = serviceProvider;
     private IDaoFactory DaoFactory { get; } = daoFactory;
-    private EntryManager EntryManager { get; } = entryManager;
     protected MigrationLogger MigrationLogger { get; } = migrationLogger;
     private AuthContext AuthContext { get; } = authContext;
     protected DisplayUserSettingsHelper DisplayUserSettingsHelper { get; } = displayUserSettingsHelper;
@@ -142,8 +142,8 @@ public abstract class Migrator(
             }
             catch (Exception e)
             {
-                Log(MigrationResource.СanNotImportCommonFiles, e);
-                MigrationInfo.Errors.Add(MigrationResource.СanNotImportCommonFiles);
+                Log(MigrationResource.CanNotImportCommonFiles, e);
+                MigrationInfo.Errors.Add(MigrationResource.CanNotImportCommonFiles);
             }
         }
 
@@ -156,8 +156,8 @@ public abstract class Migrator(
             }
             catch (Exception e)
             {
-                Log(MigrationResource.СanNotImportProjectFiles, e);
-                MigrationInfo.Errors.Add(MigrationResource.СanNotImportProjectFiles);
+                Log(MigrationResource.CanNotImportProjectFiles, e);
+                MigrationInfo.Errors.Add(MigrationResource.CanNotImportProjectFiles);
             }
         }
 
@@ -325,7 +325,7 @@ public abstract class Migrator(
             newFolder = storage.Type == FolderType.USER
             ? await FileStorageService.CreateFolderAsync(await GlobalFolderHelper.FolderMyAsync, $"ASC migration files {DateTime.Now:dd.MM.yyyy}")
                     : await FileStorageService.CreateRoomAsync($"ASC migration common files {DateTime.Now:dd.MM.yyyy}", RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null, null, null);
-            Log(MigrationResource.СreateRootFolder);
+            Log(MigrationResource.CreateRootFolder);
         }
         else
         {
@@ -345,7 +345,7 @@ public abstract class Migrator(
                     newFolder = await FileStorageService.CreateRoomAsync(folder.Title, folder.Private ? RoomType.EditingRoom : RoomType.CustomRoom, false, false, null, 0, null, false, null, null, null, null, null);
 
                     var owner = MigrationInfo.Users[folder.Owner];
-                    if (owner.UserType is EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin)
+                    if (owner.UserType is EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin && newFolder.CreateBy != owner.Info.Id)
                     {
                         await FileStorageService.ChangeOwnerAsync([newFolder.Id], [], owner.Info.Id).ToListAsync();
                     }
@@ -410,6 +410,7 @@ public abstract class Migrator(
             return;
         }
 
+        var fileSecurity = ServiceProvider.GetService<FileSecurity>();
         var orderedSecurity = storage.Securities.OrderBy(s => OrderSecurity(storage, s));
         foreach (var security in orderedSecurity)
         {
@@ -447,7 +448,7 @@ public abstract class Migrator(
                     {
                         migrationGroup = new MigrationGroup
                         {
-                            Info = new GroupInfo()
+                            Info = new GroupInfo
                             {
                                 ID = Constants.GroupEveryone.ID,
                                 Name = Constants.GroupEveryone.Name
@@ -458,7 +459,7 @@ public abstract class Migrator(
                     {
                         migrationGroup = new MigrationGroup
                         {
-                            Info = new GroupInfo()
+                            Info = new GroupInfo
                             {
                                 ID = Constants.GroupAdmin.ID,
                                 Name = Constants.GroupAdmin.Name
@@ -471,7 +472,12 @@ public abstract class Migrator(
                     }
                 }
 
-                var ace = new AceWrapper()
+                if (migrationUser != null && entry.CreateBy == migrationUser.Info.Id)
+                {
+                    continue;
+                }
+
+                var ace = new AceWrapper
                 {
                     Access = (Files.Core.Security.FileShare)security.Security,
                     Id = migrationUser != null ? migrationUser.Info.Id : migrationGroup.Info.ID
@@ -485,7 +491,36 @@ public abstract class Migrator(
                     Message = null
                 };
 
-                await FileStorageService.SetAceObjectAsync(aceCollection, false);
+                try
+                {
+                    await FileStorageService.SetAceObjectAsync(aceCollection, false);
+                }
+                catch (InvalidOperationException)
+                {
+                    if (ace.Access is Files.Core.Security.FileShare.None or Files.Core.Security.FileShare.Restrict)
+                    {
+                        throw;
+                    }
+
+                    var accesses = entryIsFile
+                        ? await fileSecurity.GetAccesses((File<int>)entry)
+                        : await fileSecurity.GetAccesses((Folder<int>)entry);
+
+                    var type = migrationUser != null ? SubjectType.User : SubjectType.Group;
+
+                    if (accesses.TryGetValue(type, out var availableShareRights) &&
+                        !availableShareRights.Contains(ace.Access))
+                    {
+                        ace.Access = availableShareRights
+                            .LastOrDefault(s => s is not (Files.Core.Security.FileShare.None or Files.Core.Security.FileShare.Restrict));
+
+                        await FileStorageService.SetAceObjectAsync(aceCollection, false);
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
             }
             catch (Exception ex)
             {

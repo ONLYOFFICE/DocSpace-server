@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -69,6 +69,7 @@ public class OauthProvider : Consumer, IOAuthProvider
         ConsumerFactory consumerFactory,
         string name, 
         int order, 
+        bool paid,
         Dictionary<string, string> props, 
         Dictionary<string, string> additional = null) 
         : base(tenantManager, 
@@ -79,6 +80,7 @@ public class OauthProvider : Consumer, IOAuthProvider
             consumerFactory, 
             name, 
             order, 
+            paid,
             props,
             additional)
     { }

@@ -29,6 +29,7 @@ package com.asc.authorization.application.mapper;
 
 import com.asc.authorization.application.security.oauth.service.AuthorizationService;
 import com.asc.authorization.data.authorization.entity.AuthorizationEntity;
+import com.asc.common.service.transfer.message.SaveAuthorizationMessage;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -169,6 +170,94 @@ public class AuthorizationMapper {
   public AuthorizationEntity toEntity(OAuth2Authorization authorization) {
     var builder =
         AuthorizationEntity.builder()
+            .id(authorization.getId())
+            .registeredClientId(authorization.getRegisteredClientId())
+            .principalId(authorization.getPrincipalName())
+            .authorizationGrantType(authorization.getAuthorizationGrantType().getValue())
+            .authorizedScopes(
+                StringUtils.collectionToCommaDelimitedString(authorization.getAuthorizedScopes()))
+            .attributes(writeMap(authorization.getAttributes()));
+
+    if (authorization.getAttribute(OAuth2ParameterNames.STATE) != null)
+      builder.state(authorization.getAttribute(OAuth2ParameterNames.STATE));
+
+    var authorizationCode = authorization.getToken(OAuth2AuthorizationCode.class);
+    if (authorizationCode != null) {
+      builder
+          .authorizationCodeValue(authorizationCode.getToken().getTokenValue())
+          .authorizationCodeIssuedAt(
+              authorizationCode.getToken().getIssuedAt() != null
+                  ? ZonedDateTime.ofInstant(
+                      authorizationCode.getToken().getIssuedAt(), ZoneId.of(UTC))
+                  : null)
+          .authorizationCodeExpiresAt(
+              authorizationCode.getToken().getExpiresAt() != null
+                  ? ZonedDateTime.ofInstant(
+                      authorizationCode.getToken().getExpiresAt(), ZoneId.of(UTC))
+                  : null)
+          .authorizationCodeMetadata(writeMap(authorizationCode.getMetadata()));
+    }
+
+    var accessToken = authorization.getToken(OAuth2AccessToken.class);
+    if (accessToken != null) {
+      builder
+          .accessTokenValue(accessToken.getToken().getTokenValue())
+          .accessTokenIssuedAt(
+              accessToken.getToken().getIssuedAt() != null
+                  ? ZonedDateTime.ofInstant(accessToken.getToken().getIssuedAt(), ZoneId.of(UTC))
+                  : null)
+          .accessTokenExpiresAt(
+              accessToken.getToken().getExpiresAt() != null
+                  ? ZonedDateTime.ofInstant(accessToken.getToken().getExpiresAt(), ZoneId.of(UTC))
+                  : null)
+          .accessTokenMetadata(writeMap(accessToken.getMetadata()))
+          .accessTokenType(accessToken.getToken().getTokenType().getValue())
+          .accessTokenScopes(
+              StringUtils.collectionToCommaDelimitedString(accessToken.getToken().getScopes()));
+    }
+
+    var refreshToken = authorization.getToken(OAuth2RefreshToken.class);
+    if (refreshToken != null) {
+      builder
+          .refreshTokenValue(refreshToken.getToken().getTokenValue())
+          .refreshTokenIssuedAt(
+              refreshToken.getToken().getIssuedAt() != null
+                  ? ZonedDateTime.ofInstant(refreshToken.getToken().getIssuedAt(), ZoneId.of(UTC))
+                  : null)
+          .refreshTokenExpiresAt(
+              refreshToken.getToken().getExpiresAt() != null
+                  ? ZonedDateTime.ofInstant(refreshToken.getToken().getExpiresAt(), ZoneId.of(UTC))
+                  : null)
+          .refreshTokenMetadata(writeMap(refreshToken.getMetadata()));
+    }
+
+    var idToken = authorization.getToken(OidcIdToken.class);
+    if (idToken != null)
+      builder
+          .idTokenValue(idToken.getToken().getTokenValue())
+          .idTokenClaims(writeMap(idToken.getClaims()))
+          .idTokenMetadata(writeMap(idToken.getMetadata()))
+          .idTokenIssuedAt(
+              idToken.getToken().getIssuedAt() != null
+                  ? ZonedDateTime.ofInstant(idToken.getToken().getIssuedAt(), ZoneId.of(UTC))
+                  : null)
+          .idTokenExpiresAt(
+              idToken.getToken().getExpiresAt() != null
+                  ? ZonedDateTime.ofInstant(idToken.getToken().getExpiresAt(), ZoneId.of(UTC))
+                  : null);
+
+    return builder.build();
+  }
+
+  /**
+   * Converts an {@link OAuth2Authorization} to a {@link SaveAuthorizationMessage}.
+   *
+   * @param authorization the {@link OAuth2Authorization} to convert.
+   * @return the converted {@link SaveAuthorizationMessage}.
+   */
+  public SaveAuthorizationMessage toMessage(OAuth2Authorization authorization) {
+    var builder =
+        SaveAuthorizationMessage.builder()
             .id(authorization.getId())
             .registeredClientId(authorization.getRegisteredClientId())
             .principalId(authorization.getPrincipalName())

@@ -6,25 +6,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
+    <PackageReference Include="Spectre.Console.Cli" />
     <PackageReference Include="YamlDotNet" />
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="ASC.ApiSystem">
-      <HintPath>..\..\..\services\ASC.ApiSystem\bin\Debug\ASC.ApiSystem.dll</HintPath>
-    </Reference>
-    <Reference Include="ASC.Data.Backup">
-      <HintPath>..\..\..\services\ASC.Data.Backup\bin\Debug\ASC.Data.Backup.dll</HintPath>
-    </Reference>
-    <Reference Include="ASC.Files">
-      <HintPath>..\..\..\..\products\ASC.Files\Server\bin\Debug\ASC.Files.dll</HintPath>
-    </Reference>
-    <Reference Include="ASC.People">
-      <HintPath>..\..\..\..\products\ASC.People\Server\bin\Debug\ASC.People.dll</HintPath>
-    </Reference>
-    <Reference Include="ASC.Web.Api">
-      <HintPath>..\..\..\..\web\ASC.Web.Api\bin\Debug\ASC.Web.Api.dll</HintPath>
-    </Reference>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,11 +35,7 @@ public class TenantQuotaSettings : ISettings<TenantQuotaSettings>
     /// <summary>
     /// The tenant ID.
     /// </summary>
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{62609D95-35D3-4F14-A6BA-2118979E04EA}"); }
-    }
+    public static Guid ID => new("{62609D95-35D3-4F14-A6BA-2118979E04EA}");
 
     /// <summary>
     /// Specifies if the tenant quota is enabled or not.

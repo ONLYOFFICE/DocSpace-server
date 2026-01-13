@@ -30,6 +30,93 @@
         <Generator>ResXFileCodeGenerator</Generator>
         <LastGenOutput>ErrorMessages.Designer.cs</LastGenOutput>
       </EmbeddedResource>
+      <EmbeddedResource Update="Resources\ErrorMessages.ar-SA.resx">
+        <DependentUpon>ErrorMessages.resx</DependentUpon>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\ErrorMessages.az.resx">
+        <DependentUpon>ErrorMessages.resx</DependentUpon>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\ErrorMessages.bg.resx">
+        <DependentUpon>ErrorMessages.resx</DependentUpon>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\ErrorMessages.cs.resx">
+        <DependentUpon>ErrorMessages.resx</DependentUpon>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\ErrorMessages.de.resx">
+        <DependentUpon>ErrorMessages.resx</DependentUpon>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\ErrorMessages.el-GR.resx">
+        <DependentUpon>ErrorMessages.resx</DependentUpon>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\ErrorMessages.es.resx">
+        <DependentUpon>ErrorMessages.resx</DependentUpon>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\ErrorMessages.fi.resx">
+        <DependentUpon>ErrorMessages.resx</DependentUpon>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\ErrorMessages.fr.resx">
+        <DependentUpon>ErrorMessages.resx</DependentUpon>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\ErrorMessages.hy-AM.resx">
+        <DependentUpon>ErrorMessages.resx</DependentUpon>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\ErrorMessages.it.resx">
+        <DependentUpon>ErrorMessages.resx</DependentUpon>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\ErrorMessages.ja-JP.resx">
+        <DependentUpon>ErrorMessages.resx</DependentUpon>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\ErrorMessages.ko-KR.resx">
+        <DependentUpon>ErrorMessages.resx</DependentUpon>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\ErrorMessages.lv.resx">
+        <DependentUpon>ErrorMessages.resx</DependentUpon>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\ErrorMessages.nl.resx">
+        <DependentUpon>ErrorMessages.resx</DependentUpon>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\ErrorMessages.pl.resx">
+        <DependentUpon>ErrorMessages.resx</DependentUpon>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\ErrorMessages.pt.resx">
+        <DependentUpon>ErrorMessages.resx</DependentUpon>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\ErrorMessages.pt-BR.resx">
+        <DependentUpon>ErrorMessages.resx</DependentUpon>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\ErrorMessages.ro.resx">
+        <DependentUpon>ErrorMessages.resx</DependentUpon>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\ErrorMessages.ru.resx">
+        <DependentUpon>ErrorMessages.resx</DependentUpon>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\ErrorMessages.sk.resx">
+        <DependentUpon>ErrorMessages.resx</DependentUpon>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\ErrorMessages.sl.resx">
+        <DependentUpon>ErrorMessages.resx</DependentUpon>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\ErrorMessages.sq-AL.resx">
+        <DependentUpon>ErrorMessages.resx</DependentUpon>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\ErrorMessages.sr-Cyrl-RS.resx">
+        <DependentUpon>ErrorMessages.resx</DependentUpon>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\ErrorMessages.sr-Latn-RS.resx">
+        <DependentUpon>ErrorMessages.resx</DependentUpon>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\ErrorMessages.tr.resx">
+        <DependentUpon>ErrorMessages.resx</DependentUpon>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\ErrorMessages.uk-UA.resx">
+        <DependentUpon>ErrorMessages.resx</DependentUpon>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\ErrorMessages.vi.resx">
+        <DependentUpon>ErrorMessages.resx</DependentUpon>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\ErrorMessages.zh-CN.resx">
+        <DependentUpon>ErrorMessages.resx</DependentUpon>
+      </EmbeddedResource>
     </ItemGroup>
 
     <ItemGroup>

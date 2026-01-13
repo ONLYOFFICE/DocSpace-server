@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -67,11 +67,7 @@ public class TenantWalletSettings : ISettings<TenantWalletSettings>
     public string Currency { get; set; }
 
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{40069709-492A-4F41-988C-F1A053A8A560}"); }
-    }
+    public static Guid ID => new("{40069709-492A-4F41-988C-F1A053A8A560}");
 
     public TenantWalletSettings GetDefault()
     {

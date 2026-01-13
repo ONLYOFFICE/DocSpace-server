@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,7 +28,7 @@ namespace ASC.Notify.Engine;
 
 class SingleRecipientInterceptor : ISendInterceptor
 {
-    private const string Prefix = "__singlerecipientinterceptor";
+    //private const string Prefix = "__singlerecipientinterceptor";
     private readonly List<IRecipient> _sendedTo = new(10);
 
     public string Name { get; private set; }

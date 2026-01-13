@@ -2,8 +2,8 @@
 
 from {{packageName}} import Configuration, ApiClient, AuthenticationApi, FoldersApi, BackupApi, RoomsApi
 from {{packageName}}.api.authentication.authentication_api import AuthenticationApi
-from {{packageName}}.api.backup.backup_api import FoldersApi
-from {{packageName}}.api.files.folders_api import BackupApi
+from {{packageName}}.api.backup.backup_api import BackupApi
+from {{packageName}}.api.files.folders_api import FoldersApi
 from {{packageName}}.models.auth_requests_dto import AuthRequestsDto
 from {{packageName}}.models.create_folder import CreateFolder
 from {{packageName}}.models.delete_folder import DeleteFolder
@@ -59,7 +59,7 @@ def main():
             backup_instanse = BackupApi(api_client)
             backup_data = BackupDto()
             backup_data.dump = False
-            backup_data.storage_type = BackupStorageType.NUMBER_4
+            backup_data.storage_type = BackupStorageType.DataStore
             createBackup = backup_instanse.start_backup(backup_dto=backup_data, _headers=custom_headers)
             if createBackup.status_code == 200:
                 print("Backup started")

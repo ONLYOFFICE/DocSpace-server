@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -39,7 +39,6 @@ public class ExternalShare(
     private ExternalSessionSnapshot _snapshot;
     private string _dbKey;
     private const string RoomLinkPattern = "rooms/share?key={0}";
-    private const string PersonalFolderLinkPattern = "rooms/personal/filter?key={0}";
 
     public async Task<LinkData> GetLinkDataAsync<T>(FileEntry<T> entry, Guid linkId)
     {
@@ -64,7 +63,7 @@ public class ExternalShare(
 
                 url = QueryHelpers.AddQueryString(url, FilesLinkUtility.ShareKey, key);
                 break;
-            case Folder<T> folder when DocSpaceHelper.IsRoom(folder.FolderType):
+            case Folder<T> { IsRoom: true }:
                 url = string.Format(RoomLinkPattern, key);
                 break;
             case Folder<T> { RootFolderType: FolderType.VirtualRooms or FolderType.USER } folder:
@@ -443,9 +442,9 @@ public class ExternalSessionSnapshot
 
     public ExternalSessionSnapshot(Guid linkId, Guid sessionId, string passwordKey)
     {
-        this.LinkId = linkId;
-        this.SessionId = sessionId;
-        this.PasswordKey = passwordKey;
+        LinkId = linkId;
+        SessionId = sessionId;
+        PasswordKey = passwordKey;
     }
 
     [ProtoMember(1)]

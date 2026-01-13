@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,7 +36,7 @@ internal class SelectorFactory(IServiceProvider serviceProvider)
     public IDaoSelector GetSelector(string id)
     {
         var selector = Match(id);
-        return selector == string.Empty && int.TryParse(id, out var _) ? null : GetSelectorInternal(selector);
+        return selector == string.Empty && int.TryParse(id, out _) ? null : GetSelectorInternal(selector);
     }
 
     private IDaoSelector GetSelectorInternal(string selector)

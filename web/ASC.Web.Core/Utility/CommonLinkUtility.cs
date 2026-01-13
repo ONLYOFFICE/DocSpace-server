@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -74,10 +74,7 @@ public class CommonLinkUtility(
     public const string AbsoluteAccountsPath = "/accounts/";
     public const string VirtualAccountsPath = "~/accounts/";
 
-    public string Logout
-    {
-        get { return ToAbsolute("~/auth.aspx") + "?t=logout"; }
-    }
+    public string Logout => ToAbsolute("~/auth.aspx") + "?t=logout";
 
     public string GetDefault()
     {

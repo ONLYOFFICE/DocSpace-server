@@ -18,6 +18,7 @@ import static org.openapitools.codegen.utils.StringUtils.camelize;
 import org.openapitools.codegen.model.ApiInfoMap;
 import io.swagger.v3.oas.models.media.Schema;
 import org.openapitools.codegen.utils.ModelUtils;
+import org.openapitools.codegen.utils.StringUtils;
 import org.openapitools.codegen.CodegenProperty;
 
 import java.util.List;
@@ -33,6 +34,7 @@ import java.util.LinkedHashMap;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Collections;
 
 public class MyPythonCodegen extends PythonClientCodegen {
 
@@ -59,7 +61,7 @@ public class MyPythonCodegen extends PythonClientCodegen {
     @Override
     public void processOpts() {
         super.processOpts();
-        this.outputFolder = "generated-code/my-python";
+        this.outputFolder = "../../../sdk/docspace-api-sdk-python";
 
         if (openAPI.getServers() != null && !openAPI.getServers().isEmpty()) {
             Server server = openAPI.getServers().get(0);
@@ -73,7 +75,9 @@ public class MyPythonCodegen extends PythonClientCodegen {
         }
 
         supportingFiles.removeIf(f -> f.getTemplateFile().equals("git_push.sh.mustache") || 
-            f.getDestinationFilename().equals(".openapi-generator-ignore")
+            f.getDestinationFilename().equals(".openapi-generator-ignore") || 
+            f.getTemplateFile().equals("setup.mustache") ||
+            f.getTemplateFile().equals("setup_cfg.mustache")
         );
 
         if(Boolean.TRUE.equals(additionalProperties.get("excludeTests")))
@@ -180,7 +184,7 @@ public class MyPythonCodegen extends PythonClientCodegen {
             String folder = tagParts.folderPart;
             String classname = tagParts.classPart + apiNameSuffix;
 
-            api.put("x-folder", folder);
+            api.put("x-folder", underscore(folder));
             api.put("x-folder-api", underscore(tagParts.classPart + apiNameSuffix));
             api.put("x-classname", classname);
 

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -247,7 +247,7 @@ public class PaymentController(
         var quota = (await quotaService.GetTenantQuotasAsync())
             .FirstOrDefault(q => !string.IsNullOrEmpty(q.ProductId) && q.Name == productName);
 
-        if (quota == null || !quota.Wallet)
+        if (quota is not { Wallet: true })
         {
             return false;
         }
@@ -279,7 +279,7 @@ public class PaymentController(
 
         // inDto.ProductQuantityType === ProductQuantityType.Add
 
-        if (!productQty.HasValue || productQty <= 0)
+        if (productQty is null or <= 0)
         {
             return false;
         }
@@ -363,12 +363,12 @@ public class PaymentController(
         var quota = (await quotaService.GetTenantQuotasAsync())
             .FirstOrDefault(q => !string.IsNullOrEmpty(q.ProductId) && q.Name == productName);
 
-        if (quota == null || !quota.Wallet)
+        if (quota is not { Wallet: true })
         {
             return null;
         }
 
-        if (!productQty.HasValue || productQty <= 0)
+        if (productQty is null or <= 0)
         {
             return null;
         }
@@ -529,11 +529,6 @@ public class PaymentController(
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        if (!tariffService.IsConfigured())
-        {
-            return null;
-        }
-
         var quotaList = await quotaService.GetTenantQuotasAsync();
         var quota = quotaList.FirstOrDefault(q => q.Wallet && q.TenantId == (int)inDto.Service);
         if (quota == null)
@@ -602,11 +597,11 @@ public class PaymentController(
     /// <short>
     /// Get the checkout setup page URL
     /// </short>
-    /// <path>api/2.0/portal/payment/chechoutsetupurl</path>
+    /// <path>api/2.0/portal/payment/checkoutsetupurl</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The URL to the checkout setup page", typeof(Uri))]
     [SwaggerResponse(403, "No permissions to perform this action")]
-    [HttpGet("chechoutsetupurl")]
+    [HttpGet("checkoutsetupurl")]
     public async Task<Uri> GetCheckoutSetupUrl(CheckoutSetupUrlRequestsDto inDto)
     {
         await DemandAdminAsync();
@@ -712,7 +707,7 @@ public class PaymentController(
         var tenant = tenantManager.GetCurrentTenant();
 
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
-        if (customerInfo == null || customerInfo.PaymentMethodStatus != PaymentMethodStatus.Set)
+        if (customerInfo is not { PaymentMethodStatus: PaymentMethodStatus.Set })
         {
             return false;
         }

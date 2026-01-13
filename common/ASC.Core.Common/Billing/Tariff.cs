@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -141,13 +141,7 @@ public class Quota : IEquatable<Quota>
     /// The quota state.
     /// </summary>
     [ProtoMember(6)]
-    public QuotaState? State
-    {
-        get
-        {
-            return DueDate.HasValue ? DueDate.Value < DateTime.UtcNow ? QuotaState.Overdue : QuotaState.Active : null;
-        }
-    }
+    public QuotaState? State => DueDate.HasValue ? DueDate.Value < DateTime.UtcNow ? QuotaState.Overdue : QuotaState.Active : null;
 
     public Quota()
     {

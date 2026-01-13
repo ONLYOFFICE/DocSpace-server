@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,6 +34,7 @@ namespace ASC.Api.Migration;
 [ApiController]
 [ControllerName("migration")]
 public class MigrationController(
+    TenantManager tenantManager,
     UserManager userManager,
     AuthContext authContext,
     StudioNotifyService studioNotifyService,
@@ -161,7 +162,35 @@ public class MigrationController(
     [HttpPost("migrate")]
     public async Task StartMigration(MigrationApiInfo info)
     {
+        ArgumentNullException.ThrowIfNull(info);
+
         await DemandPermissionAsync();
+
+        var tenant = tenantManager.GetCurrentTenant();
+        var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+
+        if (user.IsOwner(tenant))
+        {
+            await migrationCore.StartAsync(info);
+            return;
+        }
+
+        var adminEmailsToImport = (info.Users ?? [])
+            .Where(u => u.ShouldImport && u.UserType == EmployeeType.DocSpaceAdmin)
+            .Select(x => x.Email)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        if (adminEmailsToImport.Count > 0)
+        {
+            var admins = (await userManager.GetUsersAsync(EmployeeStatus.All, EmployeeType.DocSpaceAdmin))
+                .Select(x => x.Email)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            if (!adminEmailsToImport.IsSubsetOf(admins))
+            {
+                throw new SecurityException(Resource.ErrorAccessDenied);
+            }
+        }
 
         await migrationCore.StartAsync(info);
     }

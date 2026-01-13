@@ -2,7 +2,8 @@
 name = "{{{packageName}}}"
 version = "{{{packageVersion}}}"
 description = "A simple Python SDK for integrating with the ONLYOFFICE DocSpace API"
-authors = ["Ascensio System SIA <integration@onlyoffice.com> (https://www.onlyoffice.com)"]
+authors = ["Ascensio System SIA <integration@onlyoffice.com>"]
+homepage = "https://www.onlyoffice.com"
 license = "{{{licenseName}}}"
 readme = "README.md"
 repository = "{{repositoryUrl}}"
@@ -38,8 +39,8 @@ mypy = ">= 1.5"
 
 
 [build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.pylint.'MESSAGES CONTROL']
 extension-pkg-whitelist = "pydantic"

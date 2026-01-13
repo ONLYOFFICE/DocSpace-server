@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -81,7 +81,7 @@ public class RoomLogoManager(
         var folderDao = daoFactory.GetFolderDao<T>();
         var room = await folderDao.GetFolderAsync(id);
 
-        if (room == null || !DocSpaceHelper.IsRoom(room.FolderType))
+        if (room is not { IsRoom: true })
         {
             throw new ItemNotFoundException();
         }
@@ -357,7 +357,7 @@ public class RoomLogoManager(
     {
         var folderDao = daoFactory.GetFolderDao<T>();
         var room = await folderDao.GetFolderAsync(id);
-        if (room == null || !DocSpaceHelper.IsRoom(room.FolderType))
+        if (room is not { IsRoom: true })
         {
             throw new ItemNotFoundException();
         }
@@ -442,7 +442,7 @@ public class RoomLogoManager(
     private async Task RemoveTempAsync(IDataStore store, string fileName)
     {
         var index = fileName.LastIndexOf('.');
-        var fileNameWithoutExt = (index != -1) ? fileName[..index] : fileName;
+        var fileNameWithoutExt = index != -1 ? fileName[..index] : fileName;
 
         try
         {
@@ -558,7 +558,7 @@ public class RoomLogoManager(
     private async Task<byte[]> GetTempAsync(IDataStore store, string fileName)
     {
         var index = fileName.LastIndexOf('.');
-        var fileNameWithoutExt = (index != -1) ? fileName[..index] : fileName;
+        var fileNameWithoutExt = index != -1 ? fileName[..index] : fileName;
 
         var fileNameParts = fileNameWithoutExt.Split(LogosPathSplitter);
 

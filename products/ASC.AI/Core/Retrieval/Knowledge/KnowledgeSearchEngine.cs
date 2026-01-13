@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,6 +35,10 @@ public class KnowledgeSearchEngine(
 {
     public async Task<List<KnowledgeSearchResult>> SearchAsync(int roomId, string query)
     {
+        query = query.Trim();
+        
+        ArgumentException.ThrowIfNullOrEmpty(query);
+        
         var tenantId = tenantManager.GetCurrentTenantId();
 
         var generator = await embeddingGeneratorFactory.CreateAsync();

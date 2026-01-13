@@ -20,7 +20,10 @@
     <springProperty scope="context" name="cwBatchSize" source="logging.cloudwatch.batch-size"/>
 
     <springProfile name="default,development,dev,d">
-        <if condition='!isDefined("LOG_FILE_PATH")'>
+        <condition class="com.asc.common.autoconfigurations.condition.PropertyIsNotDefinedCondition">
+            <key>LOG_FILE_PATH</key>
+        </condition>
+        <if>
             <then>
                 <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
                     <encoder>
@@ -37,7 +40,10 @@
     </springProfile>
 
     <springProfile name="default,development,dev,d">
-        <if condition='isDefined("LOG_FILE_PATH")'>
+        <condition class="com.asc.common.autoconfigurations.condition.PropertyIsDefinedCondition">
+            <key>LOG_FILE_PATH</key>
+        </condition>
+        <if>
             <then>
                 <appender name="JSON_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
                     <file>${LOG_FILE_PATH}</file>
@@ -70,7 +76,10 @@
 
     <springProfile name="staging,stage,s">
         <springProfile name="!saas">
-            <if condition='!isDefined("LOG_FILE_PATH")'>
+            <condition class="com.asc.common.autoconfigurations.condition.PropertyIsNotDefinedCondition">
+                <key>LOG_FILE_PATH</key>
+            </condition>
+            <if>
                 <then>
                     <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
                         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
@@ -101,7 +110,10 @@
 
     <springProfile name="staging,stage,s">
         <springProfile name="!saas">
-            <if condition='isDefined("LOG_FILE_PATH")'>
+            <condition class="com.asc.common.autoconfigurations.condition.PropertyIsDefinedCondition">
+                <key>LOG_FILE_PATH</key>
+            </condition>
+            <if>
                 <then>
                     <appender name="JSON_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
                         <file>${LOG_FILE_PATH}</file>
@@ -173,7 +185,10 @@
 
     <springProfile name="production,prod,p">
         <springProfile name="!saas">
-            <if condition='!isDefined("LOG_FILE_PATH")'>
+            <condition class="com.asc.common.autoconfigurations.condition.PropertyIsNotDefinedCondition">
+                <key>LOG_FILE_PATH</key>
+            </condition>
+            <if>
                 <then>
                     <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
                         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
@@ -204,7 +219,10 @@
 
     <springProfile name="production,prod,p">
         <springProfile name="!saas">
-            <if condition='isDefined("LOG_FILE_PATH")'>
+            <condition class="com.asc.common.autoconfigurations.condition.PropertyIsDefinedCondition">
+                <key>LOG_FILE_PATH</key>
+            </condition>
+            <if>
                 <then>
                     <appender name="JSON_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
                         <file>${LOG_FILE_PATH}</file>
@@ -282,7 +300,10 @@
     <logger name="org.hibernate.engine" level="OFF" />
 
     <springProfile name="default,development,dev,d">
-        <if condition='isDefined("LOG_FILE_PATH")'>
+        <condition class="com.asc.common.autoconfigurations.condition.PropertyIsDefinedCondition">
+            <key>LOG_FILE_PATH</key>
+        </condition>
+        <if>
             <then>
                 <root level="DEBUG">
                     <appender-ref ref="JSON_FILE"/>
@@ -298,7 +319,10 @@
 
     <springProfile name="staging,stage,s">
         <springProfile name="!saas">
-            <if condition='isDefined("LOG_FILE_PATH")'>
+            <condition class="com.asc.common.autoconfigurations.condition.PropertyIsDefinedCondition">
+                <key>LOG_FILE_PATH</key>
+            </condition>
+            <if>
                 <then>
                     <root level="INFO">
                         <appender-ref ref="JSON_FILE"/>
@@ -323,7 +347,10 @@
 
     <springProfile name="production,prod,p">
         <springProfile name="!saas">
-            <if condition='isDefined("LOG_FILE_PATH")'>
+            <condition class="com.asc.common.autoconfigurations.condition.PropertyIsDefinedCondition">
+                <key>LOG_FILE_PATH</key>
+            </condition>
+            <if>
                 <then>
                     <root level="ERROR">
                         <appender-ref ref="JSON_FILE"/>

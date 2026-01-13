@@ -27,11 +27,14 @@
 
 package com.asc.authorization.application.configuration.cryptography;
 
+import com.asc.authorization.application.security.oauth.generator.PrefixedRefreshTokenGenerator;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.security.oauth2.core.OAuth2Token;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
@@ -49,6 +52,11 @@ import org.springframework.security.oauth2.server.authorization.token.*;
 @Configuration
 @RequiredArgsConstructor
 public class GeneratorConfiguration {
+  @Value("${spring.application.region}")
+  private String region;
+
+  private final Environment environment;
+
   private final JWKSource<SecurityContext> jwkSource;
   private final OAuth2TokenCustomizer<JwtEncodingContext> jwtCustomizer;
 
@@ -83,6 +91,9 @@ public class GeneratorConfiguration {
    * tokens, and JWTs. It integrates a custom JWT encoder and supports token customization via the
    * provided {@link OAuth2TokenCustomizer}.
    *
+   * <p>The refresh token generator is configured with a region-based prefix for multi-region
+   * support.
+   *
    * @return a configured {@link OAuth2TokenGenerator} instance.
    */
   @Bean
@@ -90,7 +101,7 @@ public class GeneratorConfiguration {
     var generator = new JwtGenerator(jwtEncoder());
     generator.setJwtCustomizer(jwtCustomizer);
     var accessTokenGenerator = new OAuth2AccessTokenGenerator();
-    var refreshTokenGenerator = new OAuth2RefreshTokenGenerator();
+    var refreshTokenGenerator = new PrefixedRefreshTokenGenerator(environment, region);
     return new DelegatingOAuth2TokenGenerator(
         generator, accessTokenGenerator, refreshTokenGenerator);
   }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -67,7 +67,7 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient, ILogger<RedisCac
     {
         Task.Run(async () => await _redis.SubscribeAsync<RedisCachePubSubItem<T>>(GetChannelName(), i =>
         {
-            if (i.Id != _instanceId && (i.Action == action || Enum.IsDefined(typeof(CacheNotifyAction), (i.Action & action))))
+            if (i.Id != _instanceId && (i.Action == action || Enum.IsDefined(i.Action & action)))
             {
                 try
                 {
@@ -89,7 +89,7 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient, ILogger<RedisCac
     {
         Task.Run(async () => await _redis.SubscribeAsync<RedisCachePubSubItem<T>>(GetChannelName(), async i =>
         {
-            if (i.Id != _instanceId && (i.Action == action || Enum.IsDefined(typeof(CacheNotifyAction), (i.Action & action))))
+            if (i.Id != _instanceId && (i.Action == action || Enum.IsDefined(i.Action & action)))
             {
                 try
                 {
@@ -129,7 +129,7 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient, ILogger<RedisCac
 
         foreach (var val in Enum.GetValues<CacheNotifyAction>())
         {
-            if (!(val == action || Enum.IsDefined(typeof(CacheNotifyAction), (val & action))))
+            if (!(val == action || Enum.IsDefined(val & action)))
             {
                 continue;
             }
@@ -150,7 +150,7 @@ public class RedisCacheNotify<T>(IRedisClient redisCacheClient, ILogger<RedisCac
 
         foreach (var val in Enum.GetValues<CacheNotifyAction>())
         {
-            if (!(val == action || Enum.IsDefined(typeof(CacheNotifyAction), (val & action))))
+            if (!(val == action || Enum.IsDefined(val & action)))
             {
                 continue;
             }

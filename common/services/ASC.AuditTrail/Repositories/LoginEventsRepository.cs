@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -77,8 +77,8 @@ public class LoginEventsRepository(
             query = query.Where(r => r.Event.Action == (int)action);
         }
 
-        var hasFromFilter = (fromDate.HasValue && fromDate.Value != DateTime.MinValue);
-        var hasToFilter = (to.HasValue && to.Value != DateTime.MinValue);
+        var hasFromFilter = fromDate.HasValue && fromDate.Value != DateTime.MinValue;
+        var hasToFilter = to.HasValue && to.Value != DateTime.MinValue;
 
         if (hasFromFilter || hasToFilter)
         {

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -149,6 +149,12 @@ public class UserSocketManager(ITariffService tariffService,
         {
             await MakeRequest("delete-guest", new { tenantId, room = admin.Id, guestId = userId });
         }
+    }
+
+    public async Task ConnectTelegram(int tenantId, Guid userId)
+    {
+        _ = await _tenantManager.SetCurrentTenantAsync(tenantId);
+        await MakeRequest("telegram", new { tenantId, userId });
     }
 
     public async Task UpdateTelegram(int tenantId, Guid userId, string username)

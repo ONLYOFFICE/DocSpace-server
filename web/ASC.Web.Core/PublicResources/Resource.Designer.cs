@@ -19,7 +19,7 @@ namespace ASC.Web.Core.PublicResources {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class Resource {
@@ -286,7 +286,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to set quota per ai agent. The entered value is greater than the total DocSpace storage..
+        ///   Looks up a localized string similar to Failed to set quota per AI agent. The entered value is greater than the total DocSpace storage..
         /// </summary>
         public static string AiAgentQuotaGreaterPortalError {
             get {
@@ -1474,7 +1474,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Twitter.
+        ///   Looks up a localized string similar to X.
         /// </summary>
         public static string ConsumersTwitter {
             get {
@@ -1501,7 +1501,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enable the application to sign in to the portal using a Twitter account..
+        ///   Looks up a localized string similar to Enable the application to sign in to the portal using a X account..
         /// </summary>
         public static string ConsumersTwitterDescription {
             get {
@@ -1510,7 +1510,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enable this app to allow your users to sign in to {LogoText} using their Twitter and link their customers’ Twitter accounts to the CRM module. {0}Go to Twitter Developers Portal and create a new app {LogoText} integration. Insert the data you received below:.
+        ///   Looks up a localized string similar to Enable this app to allow your users to sign in to {LogoText} using their X and link their customers’ X accounts to the CRM module. {0}Go to X Developers Portal and create a new app {LogoText} integration. Insert the data you received below:.
         /// </summary>
         public static string ConsumersTwitterInstruction {
             get {
@@ -3346,7 +3346,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Third-party integrations.
+        ///   Looks up a localized string similar to Pro integrations.
         /// </summary>
         public static string TariffsFeature_thirdparty {
             get {

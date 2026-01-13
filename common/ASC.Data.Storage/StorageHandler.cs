@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -61,7 +61,7 @@ public class StorageHandler(string storagePath, string module, string domain, bo
         }
 
         if (checkAuth && !authContext.IsAuthenticated && !SecureHelper.CheckSecureKeyHeader(header, path, emailValidationKeyProvider) && !fromPublicRoom
-            || module == "backup" && (!authContext.IsAuthenticated || !(await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))))
+            || module == "backup" && (!authContext.IsAuthenticated || !await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID)))
         {
             context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
             return;

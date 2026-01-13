@@ -186,6 +186,13 @@ public class ClientCommandRepositoryDynamoDomainAdapter implements ClientCommand
         : 0;
   }
 
+  /**
+   * Deletes all clients for a specific tenant and user in the DynamoDB repository.
+   *
+   * @param tenantId the tenant ID
+   * @param userId the user ID of the client creator
+   * @return 1 indicating the deletion operation was executed
+   */
   @Transactional(readOnly = true)
   public int deleteAllByTenantIdAndCreatedBy(TenantId tenantId, UserId userId) {
     log.debug(
@@ -197,6 +204,12 @@ public class ClientCommandRepositoryDynamoDomainAdapter implements ClientCommand
     return 1;
   }
 
+  /**
+   * Deletes all clients for a specific tenant in the DynamoDB repository.
+   *
+   * @param tenantId the tenant ID
+   * @return 1 indicating the deletion operation was executed
+   */
   @Transactional(readOnly = true)
   public int deleteAllByTenantId(TenantId tenantId) {
     log.debug("Deleting all clients for current tenant {}", tenantId.getValue());

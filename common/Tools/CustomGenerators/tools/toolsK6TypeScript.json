@@ -9,7 +9,7 @@
   "outputDir": "typescript-k6-sdk",
   "additionalProperties": {
     "packageName": "@onlyoffice/docspace-api-sdk-k6",
-    "packageVersion": "3.5.0",
+    "packageVersion": "3.6.0",
     "licenseName": "Apache-2.0",
     "repositoryUrl": "https://github.com/ONLYOFFICE/docspace-api-sdk-typescript",
     "withSeparateModelsAndApi": true,

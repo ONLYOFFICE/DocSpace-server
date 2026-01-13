@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -107,7 +107,7 @@ public class WebhookSender(
 
                 var pipeline = resiliencePipelineProvider.GetPipeline<HttpResponseMessage>(WebhookPipelineName);
 
-                var response = await pipeline.ExecuteAsync(async (context) =>
+                var response = await pipeline.ExecuteAsync(async context =>
                 {
                     var request = new HttpRequestMessage(HttpMethod.Post, entry.Config.Uri);
 

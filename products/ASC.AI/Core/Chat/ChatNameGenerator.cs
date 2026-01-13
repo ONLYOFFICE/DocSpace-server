@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -60,16 +60,15 @@ public class ChatNameGenerator(
     
     private static readonly ChatMessage _systemMessage = new(ChatRole.System, _instruction);
     
-    public async Task<string?> GenerateAsync(ChatExecutionContext context)
+    public async Task<string?> GenerateAsync(string userMessage, ChatClientOptions options)
     {
-        ArgumentNullException.ThrowIfNull(context.UserMessage);
-        ArgumentException.ThrowIfNullOrEmpty(context.RawMessage);
+        ArgumentException.ThrowIfNullOrEmpty(userMessage);
         
         try
         {
-            var client = chatClientFactory.Create(context.ClientOptions);
+            var client = chatClientFactory.Create(options);
 
-            var messages = new List<ChatMessage> { _systemMessage, context.UserMessage };
+            var messages = new List<ChatMessage> { _systemMessage, new(ChatRole.User, userMessage) };
 
             var response = await client.GetResponseAsync(messages);
             var message = response.Messages.First();

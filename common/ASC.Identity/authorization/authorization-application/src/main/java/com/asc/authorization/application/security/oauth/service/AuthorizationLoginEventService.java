@@ -64,7 +64,6 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @RequiredArgsConstructor
 public class AuthorizationLoginEventService implements AuthorizationLoginEventRegistrationService {
-
   private final PlatformTransactionManager transactionManager;
   private final AuditMapper auditMapper;
   private final LoginEventMapper loginEventMapper;

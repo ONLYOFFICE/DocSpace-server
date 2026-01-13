@@ -31,6 +31,7 @@ import com.asc.authorization.application.security.filter.BasicSignatureAuthentic
 import com.asc.authorization.application.security.filter.RateLimiterFilter;
 import com.asc.authorization.application.security.oauth.converter.FallbackScopeAuthorizationCodeRequestConverter;
 import com.asc.authorization.application.security.oauth.converter.PersonalAccessTokenAuthenticationConverter;
+import com.asc.authorization.application.security.oauth.generator.PrefixedAuthorizationCodeGenerator;
 import com.asc.authorization.application.security.oauth.provider.PersonalAccessTokenAuthenticationProvider;
 import com.asc.authorization.application.security.oauth.provider.TokenIntrospectionAuthenticationProvider;
 import com.asc.authorization.application.security.provider.SignatureAuthenticationProvider;
@@ -39,16 +40,21 @@ import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.Environment;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationCodeRequestAuthenticationProvider;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationConsentAuthenticationProvider;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
@@ -72,6 +78,11 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @RequiredArgsConstructor
 public class AuthorizationServerConfiguration {
+  @Value("${spring.application.region}")
+  private String region;
+
+  @Autowired private Environment environment;
+
   private static final String CLIENT_SECRET_BASIC = "client_secret_basic";
   private static final String CLIENT_SECRET_POST = "client_secret_post";
 
@@ -109,6 +120,7 @@ public class AuthorizationServerConfiguration {
   @Order(Ordered.HIGHEST_PRECEDENCE)
   @SneakyThrows
   public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) {
+    var prefixedCodeGenerator = new PrefixedAuthorizationCodeGenerator(environment, region);
     var authorizationServerConfigurer = new OAuth2AuthorizationServerConfigurer();
     var endpointsMatcher = authorizationServerConfigurer.getEndpointsMatcher();
     var supportedScopes =
@@ -121,7 +133,7 @@ public class AuthorizationServerConfiguration {
     http.securityMatcher(endpointsMatcher)
         .authorizeHttpRequests(
             authorize -> {
-              authorize.requestMatchers("oauth2/introspect").permitAll();
+              authorize.requestMatchers("/oauth2/introspect").permitAll();
               authorize.anyRequest().authenticated();
             })
         .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
@@ -207,6 +219,19 @@ public class AuthorizationServerConfiguration {
               e.consentPage(formConfiguration.getConsent());
               e.authorizationRequestConverter(fallbackScopeAuthorizationCodeRequestConverter);
               e.authenticationProvider(codeAuthenticationProvider);
+              e.authenticationProviders(
+                  providers -> {
+                    for (var provider : providers) {
+                      if (provider
+                          instanceof
+                          OAuth2AuthorizationCodeRequestAuthenticationProvider codeProvider)
+                        codeProvider.setAuthorizationCodeGenerator(prefixedCodeGenerator);
+                      if (provider
+                          instanceof
+                          OAuth2AuthorizationConsentAuthenticationProvider consentProvider)
+                        consentProvider.setAuthorizationCodeGenerator(prefixedCodeGenerator);
+                    }
+                  });
               e.authorizationResponseHandler(authenticationSuccessHandler);
               e.errorResponseHandler(authenticationFailureHandler);
             })

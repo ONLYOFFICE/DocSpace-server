@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -78,10 +78,7 @@ public class VirtualRoomsInternalController(
     public async Task<FolderDto<int>> CreateRoom(CreateRoomRequestDto inDto)
     {
         var lifetime = inDto.Lifetime.Map();
-        if (lifetime != null)
-        {
-            lifetime.StartDate = DateTime.UtcNow;
-        }
+        lifetime?.StartDate = DateTime.UtcNow;
 
         var room = await _fileStorageService.CreateRoomAsync(inDto.Title, inDto.RoomType, inDto.Private, 
             inDto.Indexing, inDto.Share, inDto.Quota, lifetime, inDto.DenyDownload, inDto.Watermark, inDto.Color, inDto.Cover, 
@@ -448,7 +445,7 @@ public abstract class VirtualRoomsController<T>(
 
         var result = new RoomSecurityDto();
 
-        if (inDto.RoomInvitation.Invitations == null || !inDto.RoomInvitation.Invitations.Any())
+        if (inDto.RoomInvitation.Invitations == null || inDto.RoomInvitation.Invitations.Count == 0)
         {
             return result;
         }

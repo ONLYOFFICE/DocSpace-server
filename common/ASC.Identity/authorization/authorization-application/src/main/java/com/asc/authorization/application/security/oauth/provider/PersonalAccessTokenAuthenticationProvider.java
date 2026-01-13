@@ -234,6 +234,13 @@ public class PersonalAccessTokenAuthenticationProvider implements Authentication
     return PersonalAccessTokenAuthenticationToken.class.equals(authentication);
   }
 
+  /**
+   * Extracts and validates the authenticated OAuth2 client from the authentication principal.
+   *
+   * @param authentication the {@link Authentication} object containing the client principal.
+   * @return the authenticated {@link OAuth2ClientAuthenticationToken}.
+   * @throws OAuth2AuthenticationException if the client is not authenticated or invalid.
+   */
   private static OAuth2ClientAuthenticationToken getAuthenticatedClientElseThrowInvalidClient(
       Authentication authentication) {
     OAuth2ClientAuthenticationToken clientPrincipal = null;
@@ -244,6 +251,20 @@ public class PersonalAccessTokenAuthenticationProvider implements Authentication
     throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_CLIENT);
   }
 
+  /**
+   * Creates an OAuth2 access token and associates it with the authorization builder.
+   *
+   * <p>This method constructs an {@link OAuth2AccessToken} from the generated token, attaches
+   * metadata including claims (if available), invalidation status, and token format, then adds it
+   * to the authorization builder.
+   *
+   * @param <T> the type of the generated token, extending {@link OAuth2Token}.
+   * @param builder the {@link OAuth2Authorization.Builder} to attach the token to.
+   * @param token the generated token containing the token value and timestamps.
+   * @param accessTokenContext the {@link OAuth2TokenContext} providing authorized scopes and
+   *     registered client settings.
+   * @return the constructed {@link OAuth2AccessToken}.
+   */
   private static <T extends OAuth2Token> OAuth2AccessToken accessToken(
       OAuth2Authorization.Builder builder, T token, OAuth2TokenContext accessTokenContext) {
     var accessToken =

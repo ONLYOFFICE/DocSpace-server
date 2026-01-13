@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,7 +36,7 @@ public class CommonMethods(
     CoreSettings coreSettings,
     CommonLinkUtility commonLinkUtility,
     EmailValidationKeyProvider emailValidationKeyProvider,
-    TimeZoneConverter timeZoneConverter, CommonConstants commonConstants,
+    CommonConstants commonConstants,
     IMemoryCache memoryCache,
     HostedSolution hostedSolution,
     CoreBaseSettings coreBaseSettings,
@@ -47,6 +47,7 @@ public class CommonMethods(
     {
         var tenantQuotaSettings = hostedSolution.GetTenantQuotaSettings(t.Id).Result;
         var tariffMaxTotalSize = hostedSolution.GetTenantQuotaAsync(t.Id).Result.MaxTotalSize;
+        var timeZone = TimeZoneConverter.GetTimeZone(t.TimeZone);
         return new
         {
             created = t.CreationDateTime,
@@ -58,10 +59,12 @@ public class CommonMethods(
             name = t.Name == "" ? Resource.PortalName : t.Name,
             ownerId = t.OwnerId,
             paymentId = t.PaymentId,
+            partnerId = t.PartnerId,
             portalName = t.Alias,
             status = t.Status.ToStringFast(),
             tenantId = t.Id,
-            timeZoneName = timeZoneConverter.GetTimeZone(t.TimeZone).DisplayName,
+            timeZoneId = TimeZoneConverter.GetIanaTimeZoneId(timeZone),
+            timeZoneName = timeZone.DisplayName,
             quotaUsage,
             customQuota = tenantQuotaSettings.EnableQuota && tenantQuotaSettings.Quota <= tariffMaxTotalSize ?
                     tenantQuotaSettings.Quota :
@@ -139,7 +142,7 @@ public class CommonMethods(
     public async Task<(bool, Tenant)> TryGetTenantAsync(IModel model)
     {
         Tenant tenant;
-        if (coreBaseSettings.Standalone && model != null && !string.IsNullOrWhiteSpace((model.PortalName ?? "")))
+        if (coreBaseSettings.Standalone && model != null && !string.IsNullOrWhiteSpace(model.PortalName ?? ""))
         {
             tenant = await tenantManager.GetTenantAsync((model.PortalName ?? "").Trim());
             return (true, tenant);
@@ -151,9 +154,9 @@ public class CommonMethods(
             return (true, tenant);
         }
 
-        if (model != null && !string.IsNullOrWhiteSpace((model.PortalName ?? "")))
+        if (model != null && !string.IsNullOrWhiteSpace(model.PortalName ?? ""))
         {
-            tenant = (await hostedSolution.GetTenantAsync((model.PortalName ?? "").Trim()));
+            tenant = await hostedSolution.GetTenantAsync((model.PortalName ?? "").Trim());
             return (true, tenant);
         }
 
@@ -165,16 +168,16 @@ public class CommonMethods(
         var tenants = new List<Tenant>();
         var empty = true;
 
-        if (!string.IsNullOrWhiteSpace((model.Email ?? "")))
+        if (!string.IsNullOrWhiteSpace(model.Email ?? ""))
         {
             empty = false;
             tenants.AddRange(await hostedSolution.FindTenantsAsync((model.Email ?? "").Trim()));
         }
 
-        if (!string.IsNullOrWhiteSpace((model.PortalName ?? "")))
+        if (!string.IsNullOrWhiteSpace(model.PortalName ?? ""))
         {
             empty = false;
-            var tenant = (await hostedSolution.GetTenantAsync((model.PortalName ?? "").Trim()));
+            var tenant = await hostedSolution.GetTenantAsync((model.PortalName ?? "").Trim());
 
             if (tenant != null)
             {

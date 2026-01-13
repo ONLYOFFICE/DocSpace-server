@@ -50,7 +50,7 @@ public class MyCSharpCodegen extends CSharpClientCodegen {
     public void processOpts() {
         super.processOpts();
 
-        this.outputFolder = "generated-code/my-csharp";
+        this.outputFolder = "../../../sdk/docspace-api-sdk-csharp";
 
         String baseURL = openAPI.getServers().get(0).getUrl();
         if (openAPI.getServers() != null && !openAPI.getServers().isEmpty()) {
@@ -93,6 +93,10 @@ public class MyCSharpCodegen extends CSharpClientCodegen {
 
         supportingFiles.add(new SupportingFile(
             "CHANGELOG.mustache", "", "CHANGELOG.md"
+        ));
+
+        supportingFiles.add(new SupportingFile(
+            "README_nuget.mustache", "docs", "README_nuget.md"
         ));
     }
 

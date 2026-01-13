@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -84,13 +84,13 @@ internal static class OpenSearchVectorMapper
     
     private static bool IsVectorPropertyTypeValid(Type type)
     {
-        return (type == typeof(ReadOnlyMemory<float>)) ||
-               (type == typeof(ReadOnlyMemory<float>?)) ||
-               (type == typeof(IEnumerable<float>)) ||
-               (type == typeof(IReadOnlyCollection<float>)) ||
-               (type == typeof(ICollection<float>)) ||
-               (type == typeof(IReadOnlyList<float>)) ||
-               (type == typeof(IList<float>)) ||
-               (type == typeof(float[]));
+        return type == typeof(ReadOnlyMemory<float>) ||
+               type == typeof(ReadOnlyMemory<float>?) ||
+               type == typeof(IEnumerable<float>) ||
+               type == typeof(IReadOnlyCollection<float>) ||
+               type == typeof(ICollection<float>) ||
+               type == typeof(IReadOnlyList<float>) ||
+               type == typeof(IList<float>) ||
+               type == typeof(float[]);
     }
 }

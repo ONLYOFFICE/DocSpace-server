@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -65,15 +65,10 @@ public class AuthData(string url = null, string login = null, string password = 
     {
         get
         {
-            return _token ??= OAuth20Token.FromJson(RawToken);
+            return field ??= OAuth20Token.FromJson(RawToken);
         }
-        set
-        {
-            _token = value;
-        }
+        set;
     }
-
-    private OAuth20Token _token;
 
     public bool IsEmpty()
     {

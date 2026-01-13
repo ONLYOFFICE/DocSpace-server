@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,18 +34,21 @@ namespace ASC.Api.Core.Cors.Middlewares;
 // Extension method used to add the middleware to the HTTP request pipeline.
 public static class DynamicCorsPolicyMiddlewareExtensions
 {
-    public static IApplicationBuilder UseDynamicCorsMiddleware(this IApplicationBuilder app)
+    extension(IApplicationBuilder app)
     {
-        ArgumentNullException.ThrowIfNull(app);
+        public IApplicationBuilder UseDynamicCorsMiddleware()
+        {
+            ArgumentNullException.ThrowIfNull(app);
 
-        return app.UseMiddleware<DynamicCorsPolicyMiddleware>();
-    }
+            return app.UseMiddleware<DynamicCorsPolicyMiddleware>();
+        }
 
-    public static IApplicationBuilder UseDynamicCorsMiddleware(this IApplicationBuilder app, string policyName)
-    {
-        ArgumentNullException.ThrowIfNull(app);
+        public IApplicationBuilder UseDynamicCorsMiddleware(string policyName)
+        {
+            ArgumentNullException.ThrowIfNull(app);
 
-        return app.UseMiddleware<DynamicCorsPolicyMiddleware>(policyName);
+            return app.UseMiddleware<DynamicCorsPolicyMiddleware>(policyName);
+        }
     }
 
 

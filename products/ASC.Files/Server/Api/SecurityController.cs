@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -171,7 +171,7 @@ public abstract class SecurityController<T>(
     /// <summary>
     /// Returns the group members with their folder security information.
     /// </summary>
-    /// <short>Get group members with security information</short>
+    /// <short>Get folder group members with security information</short>
     /// <path>api/2.0/files/folder/{folderId}/group/{groupId}/share</path>
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
@@ -205,7 +205,7 @@ public abstract class SecurityController<T>(
     /// <summary>
     /// Returns the group members with their file security information.
     /// </summary>
-    /// <short>Get group members with security information</short>
+    /// <short>Get file group members with security information</short>
     /// <path>api/2.0/files/file/{fileId}/group/{groupId}/share</path>
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<GroupMemberSecurityRequestDto>))]

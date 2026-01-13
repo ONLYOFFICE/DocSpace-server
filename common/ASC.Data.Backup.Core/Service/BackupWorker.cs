@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -216,10 +216,7 @@ public class BackupWorker(
         await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
             var progress = (await _backupProgressQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId);
-            if (progress != null)
-            {
-                progress.Exception = null;
-            }
+            progress?.Exception = null;
         }
     }
 
@@ -228,10 +225,7 @@ public class BackupWorker(
         await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
         {
             var progress = (await _restoreProgressQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId);
-            if (progress != null)
-            {
-                progress.Exception = null;
-            }
+            progress?.Exception = null;
         }
     }
 
@@ -340,11 +334,7 @@ public class BackupWorker(
 
     private BackupProgress ToBackupProgress(BaseBackupProgressItem progressItem)
     {
-        if (progressItem == null)
-        {
-            return null;
-        }
-        return progressItem.ToBackupProgress();
+        return progressItem?.ToBackupProgress();
     }
 
     public async Task<bool> IsBackupInstanceTooBusy()

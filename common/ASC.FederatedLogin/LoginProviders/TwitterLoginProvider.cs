@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,24 +36,19 @@ namespace ASC.FederatedLogin.LoginProviders;
 
 public class TwitterLoginProvider : BaseLoginProvider<TwitterLoginProvider>
 {
-    public override string AccessTokenUrl { get { return "https://api.twitter.com/oauth/access_token"; } }
-    public override string RedirectUri { get { return this["twitterRedirectUrl"]; } }
-    public override string ClientID { get { return this["twitterKey"]; } }
-    public override string ClientSecret { get { return this["twitterSecret"]; } }
-    public override string CodeUrl { get { return "https://api.twitter.com/oauth/request_token"; } }
+    public override string AccessTokenUrl => "https://api.twitter.com/oauth/access_token";
+    public override string RedirectUri => this["twitterRedirectUrl"];
+    public override string ClientID => this["twitterKey"];
+    public override string ClientSecret => this["twitterSecret"];
+    public override string CodeUrl => "https://api.twitter.com/oauth/request_token";
 
     private static readonly LocalAuthenticationRequestStore _myAuthRequestStore = new();
     private readonly IFusionCache _hybridCache;
     private readonly InstanceCrypto _instanceCrypto;
 
-    public override bool IsEnabled
-    {
-        get
-        {
-            return !string.IsNullOrEmpty(ClientID) &&
-                   !string.IsNullOrEmpty(ClientSecret);
-        }
-    }
+    public override bool IsEnabled =>
+        !string.IsNullOrEmpty(ClientID) &&
+        !string.IsNullOrEmpty(ClientSecret);
 
     public TwitterLoginProvider() { }
     public TwitterLoginProvider(
@@ -66,8 +61,8 @@ public class TwitterLoginProvider : BaseLoginProvider<TwitterLoginProvider>
         ConsumerFactory consumerFactory,
         InstanceCrypto instanceCrypto,
         IFusionCache hybridCache,
-        string name, int order, Dictionary<string, string> props, Dictionary<string, string> additional = null)
-            : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, props, additional)
+        string name, int order, bool paid, Dictionary<string, string> props, Dictionary<string, string> additional = null)
+            : base(oAuth20TokenHelper, tenantManager, coreBaseSettings, coreSettings, configuration, cache, consumerFactory, name, order, paid, props, additional)
     {
         _hybridCache = hybridCache;
         _instanceCrypto = instanceCrypto;

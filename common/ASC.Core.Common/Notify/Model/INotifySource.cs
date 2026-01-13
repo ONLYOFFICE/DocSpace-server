@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,8 +29,6 @@ namespace ASC.Notify.Model;
 public interface INotifySource
 {
     string Id { get; }
-    Task<IActionProvider> GetActionProvider(NotifyRequest r);
-    Task<IPatternProvider> GetPatternProvider(NotifyRequest r);
     IRecipientProvider GetRecipientsProvider();
     ISubscriptionProvider GetSubscriptionProvider();
 }

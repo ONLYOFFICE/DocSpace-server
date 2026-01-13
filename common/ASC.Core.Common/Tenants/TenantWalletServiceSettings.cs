@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,11 +38,7 @@ public class TenantWalletServiceSettings : ISettings<TenantWalletServiceSettings
     /// </summary>
     public List<TenantWalletService> EnabledServices { get; set; }
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{1285F7B0-9927-4911-9DA1-4F5D1F90FE73}"); }
-    }
+    public static Guid ID => new("{1285F7B0-9927-4911-9DA1-4F5D1F90FE73}");
 
     public TenantWalletServiceSettings GetDefault()
     {

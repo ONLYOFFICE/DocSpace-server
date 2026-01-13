@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -44,8 +44,7 @@ public abstract class EngineConfig
 
 public class EncryptedWebSearchSettings : ISettings<EncryptedWebSearchSettings>
 {
-    [JsonIgnore]
-    public Guid ID => new("{B2FC4410-5538-46E0-959A-AF1BEEAC9E20}");
+    public static Guid ID => new("{B2FC4410-5538-46E0-959A-AF1BEEAC9E20}");
     public bool Enabled { get; set; }
     public EngineType Type { get; set; }
     public string? Config { get; set; }

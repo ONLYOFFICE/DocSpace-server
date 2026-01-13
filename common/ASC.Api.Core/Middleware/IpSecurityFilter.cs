@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,7 +35,7 @@ public class IpSecurityFilter(
 {
     public async Task OnResourceExecutionAsync(ResourceExecutingContext context, ResourceExecutionDelegate next)
     {
-        if (authContext.IsAuthenticated && !(await ipSecurity.VerifyAsync()))
+        if (authContext.IsAuthenticated && !await ipSecurity.VerifyAsync())
         {
             context.Result = new ObjectResult(Resource.ErrorIpSecurity)
             {

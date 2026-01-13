@@ -135,10 +135,10 @@
   <data name="ProductDescription" xml:space="preserve">
     <value>Yeni istifadəçilər əlavə et, onları dəvət və ya import et. İstifadəçiləri idarə et və onlar haqqında ayrıntılı bilgiyə bax.</value>
   </data>
-  <data name="ProductUserOpportunities" xml:space="preserve">
-    <value>Profil və qruplara baxın</value>
-  </data>
   <data name="ProductName" xml:space="preserve">
     <value>Adamlar</value>
+  </data>
+  <data name="ProductUserOpportunities" xml:space="preserve">
+    <value>Profil və qruplara baxın</value>
   </data>
 </root>

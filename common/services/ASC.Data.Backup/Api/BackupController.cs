@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -264,7 +264,7 @@ public class BackupController(
             return await backupService.GetBackupProgressAsync(inDto.Dump);
 
         }
-        catch (Exception ex) when (ex is AccountingPaymentRequiredException || ex is AccountingCustomerNotFoundException)
+        catch (Exception ex) when (ex is AccountingPaymentRequiredException or AccountingCustomerNotFoundException)
         {
             throw new BillingException(Resource.ErrorPaymentRequired);
         }

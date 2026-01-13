@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -756,5 +756,41 @@ public class FolderShareTests(
         sharedFolderAsUser1 = (await _foldersApi.GetFolderByFolderIdAsync(shareFolder, cancellationToken: TestContext.Current.CancellationToken)).Response;
         sharedFolderAsUser1.Should().NotBeNull();
         sharedFolderAsUser1.Folders.Should().Contain(r => r.Title == folder.Title && r.Access == FileShare.Read);
+    }
+    
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "78968")]
+    public async Task FolderWithShare_SubFolderWithShare_FolderUsesParentPermissions()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+        var user1 = await Initializer.InviteContact(EmployeeType.User);
+        
+        var folder = await CreateFolderInMy("folder", Initializer.Owner);
+        var subFolder = await CreateFolder("subfolder", folder.Id);
+        var subSubFolder = await CreateFolder("subsubfolder", subFolder.Id);
+        
+        var securityRequest = new SecurityInfoSimpleRequestDto
+        {
+            Share = [new() { ShareTo = user1.Id, Access = FileShare.Read }]
+        };
+        
+        await _sharingApi.SetFolderSecurityInfoAsync(folder.Id, securityRequest, TestContext.Current.CancellationToken);   
+        
+        securityRequest = new SecurityInfoSimpleRequestDto
+        {
+            Share = [new() { ShareTo = user1.Id, Access = FileShare.ReadWrite }]
+        };
+        
+        await _sharingApi.SetFolderSecurityInfoAsync(subFolder.Id, securityRequest, TestContext.Current.CancellationToken);
+        
+        //Act
+        await _filesClient.Authenticate(user1);
+        var folderUser = (await _foldersApi.GetFolderInfoAsync(subSubFolder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        folderUser.Should().NotBeNull();
+        folderUser.Access.Should().Be(FileShare.ReadWrite);
     }
 }

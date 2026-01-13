@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -287,8 +287,8 @@ public class OperationController(
 
         var filesTask = GetFilesDto(entries).ToListAsync();
 
-        var result = inDto.FileIds.Count() - entries.Count != 0 ?
-                     (entries.Count != 0 ? CheckDestFolderResult.PartAllowed : CheckDestFolderResult.NoneAllowed) : CheckDestFolderResult.AllAllowed;
+        var result = inDto.FileIds.Count - entries.Count != 0 ?
+                     entries.Count != 0 ? CheckDestFolderResult.PartAllowed : CheckDestFolderResult.NoneAllowed : CheckDestFolderResult.AllAllowed;
 
         return new CheckDestFolderDto
         {

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -57,6 +57,11 @@ public class AuthServiceRequestsDto
     public bool CanSet { get; set; }
 
     /// <summary>
+    /// Specifies whether the authorization service is paid or not.
+    /// </summary>
+    public bool Paid { get; set; }
+
+    /// <summary>
     /// The collection of authorization keys associated with the authorization service.
     /// </summary>
     public List<AuthKey> Props { get; set; }
@@ -70,7 +75,8 @@ public class AuthServiceRequestsDto
             Title = authService.Title,
             Description = authService.Description,
             Instruction = authService.Instruction,
-            CanSet = authService.CanSet
+            CanSet = authService.CanSet,
+            Paid = authService.Paid
         };
 
         if (consumer.CanSet)

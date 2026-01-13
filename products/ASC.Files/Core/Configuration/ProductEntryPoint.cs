@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -150,14 +150,16 @@ public class ProductEntryPoint : Product
 
         var docSpaceAdmin = await _userManager.IsDocSpaceAdminAsync(userId);
 
-        var disabledRooms = await _roomsNotificationSettingsHelper.GetDisabledRoomsForCurrentUserAsync();
+        var disabledRooms = (await _roomsNotificationSettingsHelper.GetDisabledRoomsForCurrentUserAsync())
+            .Select(id=> $"folder_{id}");
 
-        var userRoomsWithRole = await GetUserRoomsWithRoleAsync(userId, docSpaceAdmin);
-
-        var userRoomsWithRoleForSend = userRoomsWithRole.Where(r => !disabledRooms.Contains(r.Key)).ToList();
-        var userRoomsForSend = userRoomsWithRoleForSend.Select(r => r.Key).ToList();
+        var userSecurityWithRoleForSend = (await GetUserSecurityWithRoleAsync(userId, docSpaceAdmin))
+            .Where(r => !disabledRooms.Contains(r.Key))
+            .ToDictionary();
 
         var result = new List<ActivityInfo>();
+
+        var filesOutsideRooms = new List<KeyValuePair<int, ActivityInfo>>();
 
         foreach (var e in events)
         {
@@ -165,16 +167,19 @@ public class ProductEntryPoint : Product
             {
                 UserId = e.UserId,
                 Action = (MessageAction)e.Action,
-                Data = e.Date,
+                Date = e.Date,
                 FileTitle = e.Action != (int)MessageAction.UserFileUpdated ? e.Description[0] : e.Description[1]
             };
+
+            string fileId = null;
 
             switch (e.Action)
             {
                 case (int)MessageAction.RoomCreated or (int)MessageAction.AgentCreated when !docSpaceAdmin:
                     continue;
                 case (int)MessageAction.FileCreated or (int)MessageAction.FileUpdatedRevisionComment or (int)MessageAction.FileUploaded or (int)MessageAction.UserFileUpdated:
-                    activityInfo.FileUrl = _commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.GetFileWebEditorUrl(e.Target.GetItems().FirstOrDefault()));
+                    fileId = e.Target.GetItems().FirstOrDefault();
+                    activityInfo.FileUrl = _commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.GetFileWebEditorUrl(fileId));
                     break;
             }
 
@@ -192,6 +197,7 @@ public class ProductEntryPoint : Product
 
             activityInfo.TargetUsers = additionalInfo.UserIds;
             activityInfo.IsAgent = additionalInfo.IsAgent.HasValue && additionalInfo.IsAgent.Value;
+            activityInfo.IsKnowledge = additionalInfo.ParentType.HasValue && additionalInfo.ParentType.Value == (int)FolderType.Knowledge;
 
             switch (e.Action)
             {
@@ -222,17 +228,19 @@ public class ProductEntryPoint : Product
                 _ => 0
             };
 
+            if (roomId <= 0 && additionalInfo.ParentType == (int)FolderType.USER && int.TryParse(fileId, out var fileIdInt))
+            {
+                filesOutsideRooms.Add(new KeyValuePair<int, ActivityInfo>(fileIdInt, activityInfo));
+                continue;
+            }
+
             if (e.Action != (int)MessageAction.RoomCreated && e.Action != (int)MessageAction.AgentCreated)
             {
-                if (roomId <= 0 || !userRoomsForSend.Contains(roomId.ToString()))
+                var uniqRoomId = $"folder_{roomId}";
+                if (roomId <= 0 || !userSecurityWithRoleForSend.TryGetValue(uniqRoomId, out var isRoomAdmin))
                 {
                     continue;
                 }
-
-                var isRoomAdmin = userRoomsWithRoleForSend
-                    .Where(r => r.Key == roomId.ToString())
-                    .Select(r => r.Value)
-                    .FirstOrDefault();
 
                 if (!CheckRightsToReceive(userId, (MessageAction)e.Action, isRoomAdmin, activityInfo.TargetUsers))
                 {
@@ -255,6 +263,31 @@ public class ProductEntryPoint : Product
             result.Add(activityInfo);
         }
 
+        if (filesOutsideRooms.Count > 0)
+        {
+            var folderDao = _daoFactory.GetFolderDao<int>();
+            var fileDao = _daoFactory.GetFileDao<int>();
+
+            var sharedFolderId = await _globalFolder.GetFolderShareAsync(_daoFactory);
+            var sharedFolder = await folderDao.GetFolderAsync(sharedFolderId);
+            var sharedFolderUrl = _pathProvider.GetFolderUrl(sharedFolder);
+
+            var fileIds = filesOutsideRooms.Select(kv => kv.Key).Distinct();
+            var filteredFileIds = await _fileSecurity.FilterReadAsync(fileDao.GetFilesAsync(fileIds)).Select(f => f.Id).ToListAsync();
+
+            foreach (var file in filesOutsideRooms)
+            {
+                if (!filteredFileIds.Contains(file.Key))
+                {
+                    continue;
+                }
+
+                file.Value.RoomUri = sharedFolderUrl;
+                file.Value.RoomTitle = FilesUCResource.SharedForMe;
+                result.Add(file.Value);
+            }
+        }
+
         return result;
     }
 
@@ -268,7 +301,7 @@ public class ProductEntryPoint : Product
     public override ProductContext Context => _productContext;
     public override string ApiURL => string.Empty;
 
-    private async Task<Dictionary<string, bool>> GetUserRoomsWithRoleAsync(Guid userId, bool isDocSpaceAdmin)
+    private async Task<Dictionary<string, bool>> GetUserSecurityWithRoleAsync(Guid userId, bool isDocSpaceAdmin)
     {
         var result = new Dictionary<string, bool>();
 
@@ -280,35 +313,35 @@ public class ProductEntryPoint : Product
 
         foreach (var record in currentUsersRecords)
         {
+            var uniqId = $"{record.EntryType.ToStringLowerFast()}_{record.EntryId}";
             if (record.Owner == userId || record.Share == FileShare.RoomManager)
             {
-                result.TryAdd(record.EntryId, true);
+                result.TryAdd(uniqId, true);
             }
             else if (record.Share != FileShare.Restrict)
             {
-                result.TryAdd(record.EntryId, false);
+                result.TryAdd(uniqId, false);
             }
         }
         var virtualRoomsFolderId = await _globalFolder.GetFolderVirtualRoomsAsync(_daoFactory);
+        var aiAgentsFolderId = await _globalFolder.GetFolderAiAgentsAsync(_daoFactory);
 
-        var myRooms = await folderDao.GetRoomsAsync(null, null, null, userId, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, null, new List<int> { virtualRoomsFolderId }).ToListAsync();
+        var myRooms = await folderDao.GetRoomsAsync(null, null, null, userId, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, null, new List<int> { virtualRoomsFolderId, aiAgentsFolderId }).ToListAsync();
 
         foreach (var room in myRooms)
         {
-            var roomId = room.Id.ToString();
-            result.TryAdd(roomId, true);
+            result.TryAdd(room.UniqID, true);
         }
 
         if (isDocSpaceAdmin)
         {
             var archiveFolderId = await _globalFolder.GetFolderArchiveAsync(_daoFactory);
 
-            var rooms = await folderDao.GetRoomsAsync(new List<int> { archiveFolderId }, null, null, Guid.Empty, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, null).ToListAsync();
+            var rooms = await folderDao.GetRoomsAsync([archiveFolderId], null, null, Guid.Empty, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, null).ToListAsync();
 
             foreach (var room in rooms)
             {
-                var roomId = room.Id.ToString();
-                result.TryAdd(roomId, true);
+                result.TryAdd(room.UniqID, true);
             }
         }
 
@@ -340,7 +373,8 @@ public class ProductEntryPoint : Product
         {
             if (action is MessageAction.RoomRenamed or 
                 MessageAction.RoomArchived or 
-                MessageAction.RoomCreateUser or 
+                MessageAction.RoomCreateUser or
+                MessageAction.RoomChangeOwner or
                 MessageAction.RoomRemoveUser or 
                 MessageAction.AgentRenamed)
             {

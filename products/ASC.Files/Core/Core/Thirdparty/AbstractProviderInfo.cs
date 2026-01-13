@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -234,7 +234,7 @@ public class ProviderInfoHelper(IFusionCacheProvider cacheProvider)
             {
                 CacheExtention.GetProviderTag(selector, id),
                 CacheExtention.GetProviderFolderTag(selector, id, folderId),
-                CacheExtention.GetProviderFolderItemsTag(selector, id, folderId),
+                CacheExtention.GetProviderFolderItemsTag(selector, id, folderId)
             };
 
             foreach (var item in items)
