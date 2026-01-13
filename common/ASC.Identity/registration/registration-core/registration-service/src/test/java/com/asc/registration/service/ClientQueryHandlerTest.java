@@ -48,6 +48,7 @@ import com.asc.registration.core.domain.value.ClientRedirectInfo;
 import com.asc.registration.core.domain.value.ClientTenantInfo;
 import com.asc.registration.service.mapper.ClientDataMapper;
 import com.asc.registration.service.ports.output.repository.ClientQueryRepository;
+import com.asc.registration.service.ports.output.resilience.ClientCacheService;
 import com.asc.registration.service.transfer.request.fetch.ClientInfoPaginationQuery;
 import com.asc.registration.service.transfer.request.fetch.ClientInfoQuery;
 import com.asc.registration.service.transfer.request.fetch.TenantClientQuery;
@@ -71,6 +72,7 @@ public class ClientQueryHandlerTest {
   @InjectMocks private ClientQueryHandler clientQueryHandler;
   @Mock private EncryptionService encryptionService;
   @Mock private ClientQueryRepository clientQueryRepository;
+  @Mock private ClientCacheService clientCacheService;
   @Mock private ClientDataMapper clientDataMapper;
 
   private Client client;
@@ -80,6 +82,11 @@ public class ClientQueryHandlerTest {
   @BeforeEach
   public void setUp() {
     MockitoAnnotations.openMocks(this);
+
+    when(clientCacheService.get(any(ClientId.class), any(TenantId.class)))
+        .thenReturn(Optional.empty());
+    when(clientCacheService.getAnyTenant(any(ClientId.class))).thenReturn(Optional.empty());
+    doNothing().when(clientCacheService).put(any(Client.class));
 
     client =
         Client.Builder.builder()
