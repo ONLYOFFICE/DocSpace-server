@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,36 +24,45 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Provider;
+namespace ASC.AI.Core.Chat;
 
-[Singleton]
-public class ProviderSettings
+public class GoogleAiChatClient(IChatClient innerClient) : IChatClient
 {
-    private readonly FrozenDictionary<ProviderType, ProviderSettingsData> _settings;
-
-    public ProviderSettings(IConfiguration configuration, CoreBaseSettings coreBaseSettings)
+    public Task<ChatResponse> GetResponseAsync(
+        IEnumerable<ChatMessage> messages, 
+        ChatOptions? options = null,
+        CancellationToken cancellationToken = new())
     {
-        var section = configuration.GetSection("ai:providers");
-        var providers = section.Get<List<ProviderSettingsData>>() ?? [];
-        _settings = coreBaseSettings.Standalone 
-            ? providers.ToFrozenDictionary(p => p.Type) 
-            : providers.Where(p => p.Type != ProviderType.OpenAiCompatible)
-                .ToFrozenDictionary(p => p.Type);
+        return innerClient.GetResponseAsync(messages, options, cancellationToken);
     }
 
-    public ProviderSettingsData? Get(ProviderType type)
+    public async IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(
+        IEnumerable<ChatMessage> messages, 
+        ChatOptions? options = null,
+        [EnumeratorCancellation] CancellationToken cancellationToken = new())
     {
-        var provider = _settings.GetValueOrDefault(type);
-        return provider is { Enabled: true } ? provider : null;
+        await foreach (var response in innerClient.GetStreamingResponseAsync(messages, options, cancellationToken))
+        {
+            for (var i = 0; i < response.Contents.Count; i++)
+            {
+                var content = response.Contents[i];
+                if (content is TextReasoningContent textReasoningContent)
+                {
+                    response.Contents[i] = new TextContent(textReasoningContent.Text);
+                }
+            }
+
+            yield return response;
+        }
     }
 
-    public IEnumerable<ProviderSettingsData> GetAvailableProviders()
+    public object? GetService(Type serviceType, object? serviceKey = null)
     {
-        return _settings.Values.Where(x => x.Enabled);
+        return innerClient.GetService(serviceType, serviceKey);
     }
     
-    public HashSet<string>? GetSupportedModels(ProviderType type)
+    public void Dispose()
     {
-        return _settings.GetValueOrDefault(type)?.Models;
+        innerClient.Dispose();
     }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,36 +24,38 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Provider;
+using Mscc.GenerativeAI;
 
-[Singleton]
-public class ProviderSettings
+namespace ASC.AI.Core.Provider.Model;
+
+public class GoogleModelClient(IHttpClientFactory httpClientFactory, string apiKey) : IModelClient
 {
-    private readonly FrozenDictionary<ProviderType, ProviderSettingsData> _settings;
-
-    public ProviderSettings(IConfiguration configuration, CoreBaseSettings coreBaseSettings)
-    {
-        var section = configuration.GetSection("ai:providers");
-        var providers = section.Get<List<ProviderSettingsData>>() ?? [];
-        _settings = coreBaseSettings.Standalone 
-            ? providers.ToFrozenDictionary(p => p.Type) 
-            : providers.Where(p => p.Type != ProviderType.OpenAiCompatible)
-                .ToFrozenDictionary(p => p.Type);
-    }
-
-    public ProviderSettingsData? Get(ProviderType type)
-    {
-        var provider = _settings.GetValueOrDefault(type);
-        return provider is { Enabled: true } ? provider : null;
-    }
-
-    public IEnumerable<ProviderSettingsData> GetAvailableProviders()
-    {
-        return _settings.Values.Where(x => x.Enabled);
-    }
+    private readonly GenerativeModel _generativeModel =
+        new GoogleAI(apiKey: apiKey, httpClientFactory: httpClientFactory).GenerativeModel();
     
-    public HashSet<string>? GetSupportedModels(ProviderType type)
+    public Task PingAsync()
     {
-        return _settings.GetValueOrDefault(type)?.Models;
+        return _generativeModel.ListModels(pageSize: 1);
+    }
+
+    public async Task<IEnumerable<ModelInfo>> ListModelsAsync(Scope? scope = null)
+    {
+        IEnumerable<ModelResponse> models = await _generativeModel.ListModels(pageSize: 1000);
+
+        models = models.Where(x => !string.IsNullOrEmpty(x.Name));
+        
+        if (scope == Scope.Chat)
+        {
+            models = models.Where(
+                x => x.SupportedGenerationMethods != null && x.SupportedGenerationMethods.Contains(Method.GenerateContent));
+        }
+
+        models = models.OrderByDescending(x => x.UpdateTime);
+        
+        return models.Select(x => new ModelInfo
+        {
+            Id = x.Name!, 
+            Created = 0
+        });
     }
 }
