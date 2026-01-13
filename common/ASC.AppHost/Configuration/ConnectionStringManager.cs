@@ -96,8 +96,8 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
             .AddRedis("cache")
             .WithPassword(null)
             .WithoutHttpsCertificate()
-            .WithLifetime(ContainerLifetime.Persistent);
-//.WithRedisInsight();
+            .WithLifetime(ContainerLifetime.Persistent)
+            .WithRedisInsight();
 #pragma warning restore ASPIRECERTIFICATES001
         
         builder.Eventing.Subscribe(RedisResource.Resource, async (ConnectionStringAvailableEvent _, CancellationToken ct) =>
@@ -190,12 +190,15 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
             resourceBuilder.WithEnvironment("files:docservice:url:internal", $"http://{Constants.EditorsContainer}");
         }
 
-        resourceBuilder
-            .WithEnvironment("RabbitMQ:Hostname", () => RabbitMqUri != null ? isDocker ? $"{SubstituteLocalhost(RabbitMqUri.Host)}" : RabbitMqUri.Host : "")
-            .WithEnvironment("RabbitMQ:Port", () => RabbitMqUri != null ? $"{RabbitMqUri.Port}" : "")
-            .WithEnvironment("RabbitMQ:UserName", () => RabbitMqUri != null ? $"{RabbitMqUri.UserInfo.Split(':')[0]}" : "")
-            .WithEnvironment("RabbitMQ:Password", () => RabbitMqUri != null ? $"{RabbitMqUri.UserInfo.Split(':')[1]}" : "")
-            .WithEnvironment("RabbitMQ:VirtualHost", () => RabbitMqUri != null ? $"{RabbitMqUri.PathAndQuery}" : "");
+        if (RabbitMqUri != null)
+        {
+            resourceBuilder
+                .WithEnvironment("RabbitMQ:Hostname", () =>   isDocker ? $"{SubstituteLocalhost(RabbitMqUri.Host)}" : RabbitMqUri.Host)
+                .WithEnvironment("RabbitMQ:Port", () => $"{RabbitMqUri.Port}")
+                .WithEnvironment("RabbitMQ:UserName", () =>  $"{RabbitMqUri.UserInfo.Split(':')[0]}" )
+                .WithEnvironment("RabbitMQ:Password", () =>  $"{RabbitMqUri.UserInfo.Split(':')[1]}" )
+                .WithEnvironment("RabbitMQ:VirtualHost", () =>  $"{RabbitMqUri.PathAndQuery}");
+        }
 
         resourceBuilder
             .WithEnvironment("Redis:Hosts:0:Host", () => (isDocker ? SubstituteLocalhost(RedisHost) : RedisHost) ?? string.Empty)
