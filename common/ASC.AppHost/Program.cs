@@ -30,6 +30,7 @@ var connectionManager = new ConnectionStringManager(builder)
     .AddMySql()
     .AddRabbitMq()
     .AddRedis()
+    .AddOpensearch()
     .AddEditors();
 
 
