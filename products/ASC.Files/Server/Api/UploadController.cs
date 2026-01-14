@@ -167,6 +167,7 @@ public abstract class UploadController<T>(
                 ? MessageAction.FileUploadedWithOverwriting
                 : MessageAction.FileUploaded, resumedSession.File, resumedSession.File.Title);
 
+            this.HttpContext.Response.StatusCode = 201;
             await webhookManager.PublishAsync(WebhookTrigger.FileUploaded, resumedSession.File);
 
             await socketManager.CreateFileAsync(resumedSession.File);
@@ -264,7 +265,8 @@ public abstract class UploadController<T>(
         }
 
         await socketManager.CreateFileAsync(session.File);
-
+        this.HttpContext.Response.StatusCode = 201;
+        
         return new UploadSessionResponseDto<T>
         {
             ID = session.File.Id,
