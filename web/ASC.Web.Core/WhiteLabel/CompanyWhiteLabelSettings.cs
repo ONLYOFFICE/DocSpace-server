@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -103,11 +103,7 @@ public class CompanyWhiteLabelSettings : ISettings<CompanyWhiteLabelSettings>
 
     #region ISettings Members
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{C3C5A846-01A3-476D-A962-1CFD78C04ADB}"); }
-    }
+    public static Guid ID => new("{C3C5A846-01A3-476D-A962-1CFD78C04ADB}");
 
 
     public CompanyWhiteLabelSettings GetDefault()

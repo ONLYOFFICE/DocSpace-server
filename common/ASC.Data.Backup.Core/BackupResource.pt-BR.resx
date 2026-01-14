@@ -117,14 +117,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ButtonSetPassword" xml:space="preserve">
-    <value>Definir senha</value>
-  </data>
-  <data name="BackupNotFound" xml:space="preserve">
-    <value>O arquivo de backup é inválido. Use o arquivo criado no mesmo portal.</value>
-  </data>
-  <data name="LargeBackup" xml:space="preserve">
-    <value>O backup é maior que o tamanho total do portal</value>
+  <data name="AutoBackup" xml:space="preserve">
+    <value>Backup automático</value>
   </data>
   <data name="BackupException" xml:space="preserve">
     <value>Algo deu errado ao criar o backup. Tente criá-lo novamente ou entre em contato com o suporte.</value>
@@ -132,11 +126,11 @@
   <data name="BackupInvalid" xml:space="preserve">
     <value>O arquivo de backup é inválido.</value>
   </data>
-  <data name="RestoreException" xml:space="preserve">
-    <value>Algo deu errado ao restaurar o backup. Tente restaurá-lo novamente ou entre em contato com o suporte.</value>
+  <data name="BackupMissingFilesWarning" xml:space="preserve">
+    <value>Alguns arquivos não foram incluídos no backup. Para mais detalhes, verifique {0}</value>
   </data>
-  <data name="AutoBackup" xml:space="preserve">
-    <value>Backup automático</value>
+  <data name="BackupNotFound" xml:space="preserve">
+    <value>O arquivo de backup é inválido. Use o arquivo criado no mesmo portal.</value>
   </data>
   <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
     <value>Custom cloud</value>
@@ -156,7 +150,13 @@
   <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
     <value>Recurso de terceiros</value>
   </data>
-  <data name="BackupMissingFilesWarning" xml:space="preserve">
-    <value>Alguns arquivos não foram incluídos no backup. Para mais detalhes, verifique {0}</value>
+  <data name="ButtonSetPassword" xml:space="preserve">
+    <value>Definir senha</value>
+  </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>O backup é maior que o tamanho total do portal</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>Algo deu errado ao restaurar o backup. Tente restaurá-lo novamente ou entre em contato com o suporte.</value>
   </data>
 </root>

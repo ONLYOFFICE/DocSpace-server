@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,11 +31,14 @@ public class ProviderSettings
 {
     private readonly FrozenDictionary<ProviderType, ProviderSettingsData> _settings;
 
-    public ProviderSettings(IConfiguration configuration)
+    public ProviderSettings(IConfiguration configuration, CoreBaseSettings coreBaseSettings)
     {
         var section = configuration.GetSection("ai:providers");
         var providers = section.Get<List<ProviderSettingsData>>() ?? [];
-        _settings = providers.ToFrozenDictionary(p => p.Type);
+        _settings = coreBaseSettings.Standalone 
+            ? providers.ToFrozenDictionary(p => p.Type) 
+            : providers.Where(p => p.Type != ProviderType.OpenAiCompatible)
+                .ToFrozenDictionary(p => p.Type);
     }
 
     public ProviderSettingsData? Get(ProviderType type)

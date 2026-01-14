@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,7 +33,10 @@ public enum ProviderType
     TogetherAi = 2,
     OpenAiCompatible = 3,
     Anthropic = 4,
-    OpenRouter = 5
+    OpenRouter = 5,
+    DeepSeek = 6,
+    XAi = 7,
+    GoogleAi = 8
 }
 
 public class DbAiProvider : BaseEntity

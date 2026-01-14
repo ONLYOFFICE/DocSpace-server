@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,24 +24,23 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Common.Log;
-internal static partial class TimeZoneConverterLogger
+namespace ASC.Core.Common.Notify.Model;
+
+public interface INotifyActionList
 {
-    [LoggerMessage(LogLevel.Information, "TimeZone {timeZoneId} not found")]
-    public static partial void InformationTimeZoneNotFound(this ILogger<TimeZoneConverter> logger, string timeZoneId);
-
-    [LoggerMessage(LogLevel.Error, "OlsonTimeZone {olsonTimeZoneId} not found")]
-    public static partial void ErrorOlsonTimeZoneNotFound(this ILogger<TimeZoneConverter> logger, string olsonTimeZoneId);
-
-    [LoggerMessage(LogLevel.Error, "WindowsTimeZone {windowsTimeZoneId} not found")]
-    public static partial void ErrorWindowsTimeZoneNotFound(this ILogger<TimeZoneConverter> logger, string windowsTimeZoneId);
-
-    [LoggerMessage(LogLevel.Error, "GetTimeZone")]
-    public static partial void ErrorGetTimeZone(this ILogger<TimeZoneConverter> logger, Exception exception);
-
-    [LoggerMessage(LogLevel.Error, "InitMapZones")]
-    public static partial void ErrorInitMapZones(this ILogger<TimeZoneConverter> logger, Exception exception);
-
-    [LoggerMessage(LogLevel.Error, "InitTranslations")]
-    public static partial void ErrorInitTranslations(this ILogger<TimeZoneConverter> logger, Exception exception);
+    INotifyAction GetById(string id)
+    {
+        var fields = GetType().GetFields(BindingFlags.Public | BindingFlags.Instance)
+            .Where(f => f.FieldType == typeof(INotifyAction));
+        
+        foreach (var field in fields)
+        {
+            var action = (INotifyAction)field.GetValue(this);
+            if (action?.ID == id)
+            {
+                return action;
+            }
+        }
+        return null;
+    }
 }

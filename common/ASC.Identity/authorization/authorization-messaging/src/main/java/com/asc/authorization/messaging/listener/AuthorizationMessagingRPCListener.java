@@ -29,8 +29,16 @@ package com.asc.authorization.messaging.listener;
 
 import com.asc.authorization.data.authorization.entity.AuthorizationEntity;
 import com.asc.authorization.data.authorization.repository.JpaAuthorizationRepository;
+import com.asc.authorization.data.key.entity.KeyPair;
+import com.asc.authorization.data.key.repository.JpaKeyPairRepository;
+import com.asc.authorization.messaging.configuration.KeyPairConfigurationProperties;
+import com.asc.common.service.transfer.message.KeyPairRetrievedEvent;
 import com.asc.common.service.transfer.message.RetrieveAuthorizationMessage;
+import com.asc.common.service.transfer.message.RetrieveKeyPairMessage;
 import com.asc.common.service.transfer.message.SaveAuthorizationMessage;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.Comparator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
@@ -53,7 +61,10 @@ import org.springframework.stereotype.Component;
     queues = "asc_identity_authorization_rpc_${spring.application.region}_queue",
     containerFactory = "rabbitRpcContainerFactory")
 public class AuthorizationMessagingRPCListener {
+  private final KeyPairConfigurationProperties keyPairConfigurationProperties;
+
   private final JpaAuthorizationRepository jpaAuthorizationRepository;
+  private final JpaKeyPairRepository jpaKeyPairRepository;
 
   /**
    * Handles authorization retrieval RPC requests.
@@ -147,6 +158,50 @@ public class AuthorizationMessagingRPCListener {
     } catch (Exception e) {
       log.error("Failed to save authorization in remote region", e);
       return false;
+    }
+  }
+
+  /**
+   * Handles key pair retrieval RPC requests from remote regions.
+   *
+   * <p>Returns the latest active key pair for signing tokens in cross-region scenarios. The private
+   * key is returned encrypted for security during transit.
+   *
+   * @param request the key pair request
+   * @return the key pair response containing the signing key
+   */
+  @RabbitHandler
+  public KeyPairRetrievedEvent receiveKeyPairRetrieval(RetrieveKeyPairMessage request) {
+    log.debug("Received cross-region key pair request");
+
+    try {
+      var cutoffTime =
+          ZonedDateTime.now(ZoneOffset.UTC)
+              .minus(keyPairConfigurationProperties.getRotationPeriod())
+              .minus(keyPairConfigurationProperties.getDeprecationPeriod());
+
+      var latestKeyPair =
+          jpaKeyPairRepository.findActiveKeyPairs(cutoffTime).stream()
+              .max(Comparator.comparing(KeyPair::getCreatedAt))
+              .orElse(null);
+
+      if (latestKeyPair == null) {
+        log.warn("No active key pair found");
+        return KeyPairRetrievedEvent.builder().success(false).build();
+      }
+
+      log.debug("Returning key pair with id: {}", latestKeyPair.getId());
+
+      return KeyPairRetrievedEvent.builder()
+          .success(true)
+          .id(latestKeyPair.getId())
+          .publicKey(latestKeyPair.getPublicKey())
+          .privateKey(latestKeyPair.getPrivateKey())
+          .pairType(latestKeyPair.getPairType().name())
+          .build();
+    } catch (Exception e) {
+      log.error("Error retrieving key pair for remote region", e);
+      return KeyPairRetrievedEvent.builder().success(false).build();
     }
   }
 }

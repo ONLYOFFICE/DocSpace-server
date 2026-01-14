@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -741,10 +741,12 @@ public class UserController(
     [HttpDelete("guests")]
     public async Task DeleteGuests(UpdateMembersRequestDto inDto)
     {
+        ArgumentNullException.ThrowIfNull(inDto?.UserIds);
+
         var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
         var type = await _userManager.GetUserTypeAsync(currentUser.Id);
-        if (type != EmployeeType.RoomAdmin)
+        if (type is not (EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin))
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
@@ -954,7 +956,7 @@ public class UserController(
         var isConfirmLink = _httpContextAccessor.HttpContext!.User.Claims
             .Any(role => role.Type == ClaimTypes.Role &&
                 ConfirmTypeExtensions.TryParse(role.Value, out var confirmType) &&
-                (confirmType == ConfirmType.LinkInvite || confirmType == ConfirmType.GuestShareLink));
+                confirmType is ConfirmType.LinkInvite or ConfirmType.GuestShareLink);
 
         if (user.Id == Constants.LostUser.Id)
         {
@@ -1626,7 +1628,7 @@ public class UserController(
         if (authContext.IsAuthenticated)
         {
             var currentUser = await _userManager.GetUserByEmailAsync(inDto.Email);
-            if (currentUser.Id != authContext.CurrentAccount.ID && !(await _userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID)))
+            if (currentUser.Id != authContext.CurrentAccount.ID && !await _userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
             {
                 throw new InvalidOperationException(Resource.ErrorAccessDenied);
             }
@@ -2404,7 +2406,7 @@ public class UserController(
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
-        var isDocSpaceAdmin = (await _userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID)) ||
+        var isDocSpaceAdmin = await _userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID) ||
                       await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, securityContext.CurrentAccount.ID);
 
         var excludeGroups = new List<Guid>();

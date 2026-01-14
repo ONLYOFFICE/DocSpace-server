@@ -566,8 +566,8 @@ module.exports = (io) => {
     filesIO.to(userRoom).emit("s:update-chat", { chatId, chatTitle });
   }
 
-  function exportChat({ room, resultFile }) {
-    filesIO.to(room).emit("s:export-chat", { resultFile });
+  function exportChat({ room, resultFile, error }) {
+    filesIO.to(room).emit("s:export-chat", { resultFile, error });
   }
 
   function changeAccessRightsForFile({ id, room, data, userId } = {}) {

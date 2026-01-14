@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,7 +28,7 @@ namespace ASC.Core.Common.Settings;
 
 public interface ISettings<out T> where T : ISettings<T>
 {
-    Guid ID { get; }
+    static abstract Guid ID { get; }
     T GetDefault();
     DateTime LastModified { get; set; }
 }

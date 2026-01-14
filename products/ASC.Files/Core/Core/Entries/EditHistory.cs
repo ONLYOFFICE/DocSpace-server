@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -206,8 +206,6 @@ public class EditHistoryAuthor(UserManager userManager, DisplayUserSettingsHelpe
     /// </summary>
     public required string Id { get; init; }
 
-    private readonly string _name;
-
     /// <summary>
     /// The author name.
     /// </summary>
@@ -217,20 +215,20 @@ public class EditHistoryAuthor(UserManager userManager, DisplayUserSettingsHelpe
         {
             if (!Guid.TryParse(Id, out var idInternal))
             {
-                return _name;
+                return field;
             }
 
             UserInfo user;
             return
                 idInternal.Equals(Guid.Empty)
-                      || idInternal.Equals(ASC.Core.Configuration.Constants.Guest.ID)
-                      || (user = userManager.GetUsers(idInternal)).Equals(Constants.LostUser)
-                          ? string.IsNullOrEmpty(_name)
-                                ? FilesCommonResource.Guest
-                                : _name
-                          : user.DisplayUserName(false, displayUserSettingsHelper);
+                || idInternal.Equals(ASC.Core.Configuration.Constants.Guest.ID)
+                || (user = userManager.GetUsers(idInternal)).Equals(Constants.LostUser)
+                    ? string.IsNullOrEmpty(field)
+                        ? FilesCommonResource.Guest
+                        : field
+                    : user.DisplayUserName(false, displayUserSettingsHelper);
         }
-        init => _name = value;
+        init;
     }
 }
 

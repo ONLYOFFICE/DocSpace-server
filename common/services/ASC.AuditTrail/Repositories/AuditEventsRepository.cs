@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -128,7 +128,7 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
             if (isFindActionType || isNeedFindEntry)
             {
                 actionsList = actionsList
-                        .Where(a => (!isFindActionType || a.Value.ActionType == actionType.Value) && (!isNeedFindEntry || (entry.Value == a.Value.EntryType1) || entry.Value == a.Value.EntryType2))
+                        .Where(a => (!isFindActionType || a.Value.ActionType == actionType.Value) && (!isNeedFindEntry || entry.Value == a.Value.EntryType1 || entry.Value == a.Value.EntryType2))
                         .ToList();
             }
 
@@ -143,8 +143,8 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
             }
         }
 
-        var hasFromFilter = (from.HasValue && from.Value != DateTime.MinValue);
-        var hasToFilter = (to.HasValue && to.Value != DateTime.MinValue);
+        var hasFromFilter = from.HasValue && from.Value != DateTime.MinValue;
+        var hasToFilter = to.HasValue && to.Value != DateTime.MinValue;
 
         if (hasFromFilter || hasToFilter)
         {

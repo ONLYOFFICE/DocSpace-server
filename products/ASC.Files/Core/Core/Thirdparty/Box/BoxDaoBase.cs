@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -90,7 +90,7 @@ internal class BoxDaoBase(
 
     public override string MakeId(string path = null)
     {
-        var p = string.IsNullOrEmpty(path) || path == "0" ? "" : ("-|" + path.TrimStart('/'));
+        var p = string.IsNullOrEmpty(path) || path == "0" ? "" : "-|" + path.TrimStart('/');
 
         return $"{PathPrefix}{p}";
     }
@@ -131,8 +131,8 @@ internal class BoxDaoBase(
 
         folder.Id = MakeId(boxFolder.Id);
         folder.ParentId = isRoot ? null : MakeId(GetParentFolderId(boxFolder));
-        folder.CreateOn = isRoot ? ProviderInfo.CreateOn : (boxFolder.CreatedAt?.UtcDateTime ?? default);
-        folder.ModifiedOn = isRoot ? ProviderInfo.ModifiedOn : (boxFolder.ModifiedAt?.UtcDateTime ?? default);
+        folder.CreateOn = isRoot ? ProviderInfo.CreateOn : boxFolder.CreatedAt?.UtcDateTime ?? default;
+        folder.ModifiedOn = isRoot ? ProviderInfo.ModifiedOn : boxFolder.ModifiedAt?.UtcDateTime ?? default;
 
         folder.Title = MakeFolderTitle(boxFolder);
         folder.FilesCount = boxFolder.ItemCollection != null ? boxFolder.ItemCollection.Entries.Count(item => item is BoxFile) : 0;

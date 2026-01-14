@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -163,7 +163,7 @@ public abstract class EditorController<T>(
                 _ => new FormOpenSetup<T>
                 {
                     CanEdit = !inDto.Fill,
-                    CanFill = inDto.Fill,
+                    CanFill = inDto.Fill
                 }
             };
 

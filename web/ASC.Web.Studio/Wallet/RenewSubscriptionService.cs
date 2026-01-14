@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -171,7 +171,7 @@ public class RenewSubscriptionService(
 
                         var walletQuotaSize = walletQuota.GetFeature<long>(feature.Name).Value; // wallet quota size by database
 
-                        if (walletQuotaSize > 0 && usedSize > tenantQuotaSize + (walletQuotaSize * nextQuantity))
+                        if (walletQuotaSize > 0 && usedSize > tenantQuotaSize + walletQuotaSize * nextQuantity)
                         {
                             var oversize = usedSize - tenantQuotaSize;
                             nextQuantity = (int)((oversize + walletQuotaSize - 1) / walletQuotaSize); // round up

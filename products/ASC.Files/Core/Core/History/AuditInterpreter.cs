@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -75,6 +75,7 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
         { (int)MessageAction.RoomCreateUser, new RoomUserAddedInterpreter() },
         { (int)MessageAction.RoomUpdateAccessForUser, new RoomUserUpdatedAccessInterpreter() },
         { (int)MessageAction.RoomRemoveUser, new RoomUserRemovedInterpreter() },
+        { (int)MessageAction.RoomChangeOwner, new ChangeRoomOwnerInterpreter() },
         { (int)MessageAction.RoomGroupAdded, new RoomGroupAddedInterpreter() },
         { (int)MessageAction.RoomUpdateAccessForGroup, new RoomGroupAccessUpdatedInterpreter() },
         { (int)MessageAction.RoomGroupRemove, new RoomRemovedGroupInterpreter() },

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -104,14 +104,8 @@ public class TenantQuota
     /// </summary>
     public string Features
     {
-        get
-        {
-            return string.Join(",", _featuresList);
-        }
-        set
-        {
-            _featuresList = value != null ? value.Split(' ', ',', ';').ToList() : [];
-        }
+        get => string.Join(",", _featuresList);
+        set => _featuresList = value != null ? value.Split(' ', ',', ';').ToList() : [];
     }
 
     private readonly MaxFileSizeFeature _maxFileSizeFeature;

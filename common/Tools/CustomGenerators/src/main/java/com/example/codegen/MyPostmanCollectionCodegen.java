@@ -32,7 +32,7 @@ public class MyPostmanCollectionCodegen extends PostmanCollectionCodegen {
     @Override
     public void processOpts() {
         super.processOpts();
-        this.outputFolder = "generated-code/my-postman-collection";
+        this.outputFolder = "../../../sdk/docspace-api-postman-collections";
 
         String baseURL = openAPI.getServers().get(0).getUrl();
         if (openAPI.getServers() != null && !openAPI.getServers().isEmpty()) {

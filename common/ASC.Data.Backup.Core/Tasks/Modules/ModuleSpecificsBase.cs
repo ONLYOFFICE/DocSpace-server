@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,9 +32,8 @@ public abstract class ModuleSpecificsBase(Helpers helpers) : IModuleSpecifics
     public abstract IEnumerable<TableInfo> Tables { get; }
     public abstract IEnumerable<RelationInfo> TableRelations { get; }
     public virtual string ConnectionStringName
-        => _connectionStringName ??= ModuleName.ToString().ToLower();
+        => field ??= ModuleName.ToString().ToLower();
 
-    private string _connectionStringName;
     protected Helpers Helpers => helpers;
 
     public IEnumerable<TableInfo> GetTablesOrdered()

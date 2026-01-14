@@ -117,26 +117,20 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ButtonSetPassword" xml:space="preserve">
-    <value>Establecer contraseña</value>
-  </data>
-  <data name="BackupNotFound" xml:space="preserve">
-    <value>El archivo de copia de seguridad no es válido. Utilice el archivo creado en el mismo portal.</value>
-  </data>
-  <data name="LargeBackup" xml:space="preserve">
-    <value>La copia de seguridad es mayor que el tamaño total del portal</value>
+  <data name="AutoBackup" xml:space="preserve">
+    <value>Copia de seguridad automática</value>
   </data>
   <data name="BackupException" xml:space="preserve">
     <value>Se ha producido un error al crear la copia de seguridad. Por favor, intente crearla de nuevo o póngase en contacto con el equipo de soporte.</value>
   </data>
-  <data name="RestoreException" xml:space="preserve">
-    <value>Se ha producido un error al restaurar la copia de seguridad. Por favor, intente restaurarla de nuevo o póngase en contacto con el equipo de soporte.</value>
-  </data>
   <data name="BackupInvalid" xml:space="preserve">
     <value>El archivo de copia de seguridad no es válido.</value>
   </data>
-  <data name="AutoBackup" xml:space="preserve">
-    <value>Copia de seguridad automática</value>
+  <data name="BackupMissingFilesWarning" xml:space="preserve">
+    <value>Algunos archivos no se han incluido en la copia de seguridad. Para más detalles, consulte {0}</value>
+  </data>
+  <data name="BackupNotFound" xml:space="preserve">
+    <value>El archivo de copia de seguridad no es válido. Utilice el archivo creado en el mismo portal.</value>
   </data>
   <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
     <value>Custom cloud</value>
@@ -156,7 +150,13 @@
   <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
     <value>Recurso de terceros</value>
   </data>
-  <data name="BackupMissingFilesWarning" xml:space="preserve">
-    <value>Algunos archivos no se han incluido en la copia de seguridad. Para más detalles, consulte {0}</value>
+  <data name="ButtonSetPassword" xml:space="preserve">
+    <value>Establecer contraseña</value>
+  </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>La copia de seguridad es mayor que el tamaño total del portal</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>Se ha producido un error al restaurar la copia de seguridad. Por favor, intente restaurarla de nuevo o póngase en contacto con el equipo de soporte.</value>
   </data>
 </root>

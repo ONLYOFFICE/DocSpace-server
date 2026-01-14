@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -435,7 +435,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         var parentFolderId = dao.GetParentFolderId(thirdFolder);
         var renamedThirdFolder = thirdFolder;
 
-        if (dao.IsRoot(thirdFolder) || DocSpaceHelper.IsRoom(folder.FolderType))
+        if (dao.IsRoot(thirdFolder) || folder.IsRoom)
         {
             await daoSelector.RenameProviderAsync(_providerInfo, newTitle);
         }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,13 +35,7 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
     private IConnection _connection;
     private bool _disposed;
 
-    public bool IsConnected
-    {
-        get
-        {
-            return _connection is { IsOpen: true } && !_disposed;
-        }
-    }
+    public bool IsConnected => _connection is { IsOpen: true } && !_disposed;
 
     public async Task<IChannel> CreateModelAsync()
     {
@@ -107,7 +101,7 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
             }
         }).Build();
 
-        await pipeline.ExecuteAsync(async (_) =>
+        await pipeline.ExecuteAsync(async _ =>
         {
             _connection = await _connectionFactory.CreateConnectionAsync();
         });

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -153,7 +153,7 @@ public class ReassignController(
 
         if (inDto.Type is EmployeeType.Guest && !result)
         {
-            result = (await fileStorageService.GetSharedEntriesCountAsync(inDto.UserId)) > 0;
+            result = await fileStorageService.GetSharedEntriesCountAsync(inDto.UserId) > 0;
         }
 
         return result;

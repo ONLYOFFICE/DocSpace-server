@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -54,8 +54,7 @@ public class TenantCookieSettings : ISettings<TenantCookieSettings>
         };
     }
 
-    [JsonIgnore]
-    public Guid ID => new("{16FB8E67-E96D-4B22-B217-C80F25C5DE1B}");
+    public static Guid ID => new("{16FB8E67-E96D-4B22-B217-C80F25C5DE1B}");
 }
 
 [Singleton]

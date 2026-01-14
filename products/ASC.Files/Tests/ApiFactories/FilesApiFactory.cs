@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -68,9 +68,7 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
             Tag = "17.2"
         };
         
-        _postgresSqlContainer = new PostgreSqlBuilder()
-            .WithImage($"{postgresSqlContainer.Image}:{postgresSqlContainer.Tag}")
-            .Build();
+        _postgresSqlContainer = new PostgreSqlBuilder($"{postgresSqlContainer.Image}:{postgresSqlContainer.Tag}").Build();
         
         var redisContainer = containers.FirstOrDefault(r => r.Name == "redis") ?? new Container
         {
@@ -78,9 +76,7 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
             Image = "redis",
             Tag = "7.0"
         };
-        _redisContainer = new RedisBuilder()
-            .WithImage($"{redisContainer.Image}:{redisContainer.Tag}")
-            .Build();
+        _redisContainer = new RedisBuilder($"{redisContainer.Image}:{redisContainer.Tag}").Build();
 
         var rabbitMqContainer = containers.FirstOrDefault(r => r.Name == "rabbitmq") ?? new Container
         {
@@ -89,9 +85,7 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
             Tag = "3.13"
         };
         
-        _rabbitMqContainer = new RabbitMqBuilder()
-            .WithImage($"{rabbitMqContainer.Image}:{rabbitMqContainer.Tag}")
-            .Build();
+        _rabbitMqContainer = new RabbitMqBuilder($"{rabbitMqContainer.Image}:{rabbitMqContainer.Tag}").Build();
 
         var openSearchContainer = containers.FirstOrDefault(r => r.Name == "opensearch") ?? new Container
         {
@@ -100,8 +94,7 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
             Tag = "2.18.0"
         };
         
-        _openSearchContainer = new OpenSearchBuilder()
-            .WithImage($"{openSearchContainer.Image}:{openSearchContainer.Tag}")
+        _openSearchContainer = new OpenSearchBuilder($"{openSearchContainer.Image}:{openSearchContainer.Tag}")
             .WithSecurityEnabled(false)
             .Build();
 
@@ -112,9 +105,7 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
             Tag = "8.4.3"
         };
         
-        _mySqlContainer = new MySqlBuilder()
-            .WithImage($"{mysqlContainer.Image}:{mysqlContainer.Tag}")
-            .Build();
+        _mySqlContainer = new MySqlBuilder($"{mysqlContainer.Image}:{mysqlContainer.Tag}").Build();
         
         _providerInfo = GetProviderInfo(config.GetValue<Provider>("dbProviderType"));
     }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,7 +38,7 @@ public static class DocSpaceHelper
         FolderType.AiRoom
     ];
 
-    public static bool IsRoom(FolderType folderType)
+    public static bool IsRoom(this FolderType folderType)
     {
         return RoomTypes.Contains(folderType);
     }
@@ -154,7 +154,7 @@ public static class DocSpaceHelper
 
     public static async Task<Folder<T>> GetParentRoom<T>(FileEntry<T> file, IFolderDao<T> folderDao)
     {
-        return await folderDao.GetParentFoldersAsync(file.ParentId).FirstOrDefaultAsync(f => IsRoom(f.FolderType));
+        return await folderDao.GetParentFoldersAsync(file.ParentId).FirstOrDefaultAsync(f => f.IsRoom);
     }
 
     public static async ValueTask<bool> IsFormOrCompletedForm<T>(File<T> file, IDaoFactory daoFactory)

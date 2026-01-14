@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -195,8 +195,8 @@ public class FileDto<T> : FileEntryDto<T>
     /// <summary>
     /// The file entry type.
     /// </summary>
-    public override FileEntryType FileEntryType { get => FileEntryType.File; }
-    
+    public override FileEntryType FileEntryType => FileEntryType.File;
+
     /// <summary>
     /// The vectorization status of the file.
     /// </summary>
@@ -321,11 +321,6 @@ public class FileDtoHelper(
             {
                 result.OriginRoomTitle = result.OriginTitle;
             }
-            else if(result.RootFolderType == FolderType.USER)
-            {
-                result.OriginRoomTitle = FilesUCResource.SharedForMe;
-                
-            }
         }
         
         var currentUserId = authContext.CurrentAccount.ID;
@@ -359,6 +354,11 @@ public class FileDtoHelper(
                         result.FolderId = folderShareAsync;
                     }
 
+                    if (contextFolder is {FolderType: FolderType.Recent}  or { FolderType: FolderType.Favorites })
+                    {
+                        result.OriginRoomTitle = FilesUCResource.SharedForMe;
+                    }
+                    
                     break;
             }
         }
@@ -457,7 +457,7 @@ public class FileDtoHelper(
             var currentFolder = currentFolderTask.Result;
 
             Folder<T> currentRoom;
-            if (!DocSpaceHelper.IsRoom(currentFolder.FolderType) && file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates)
+            if (!currentFolder.IsRoom && file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates)
             {
                 currentRoom = await DocSpaceHelper.GetParentRoom(file, folderDao) ?? currentFolder;
             }
@@ -577,7 +577,7 @@ public class FileDtoHelper(
 
         if (file.Order != 0)
         {
-            if (string.IsNullOrEmpty(order) && (contextFolder == null || !DocSpaceHelper.IsRoom(contextFolder.FolderType)))
+            if (string.IsNullOrEmpty(order) && contextFolder is not { IsRoom: true })
             {
                 order = await breadCrumbsManager.GetBreadCrumbsOrderAsync(file.ParentId);
             }
@@ -609,7 +609,7 @@ public class FileDtoHelper(
                     result.RootFolderType = FolderType.SHARE;
                 }
             
-                var room = parents.FirstOrDefault(f => DocSpaceHelper.IsRoom(f.FolderType));
+                var room = parents.FirstOrDefault(f => f.IsRoom);
                 if (room != null)
                 {
                     result.OwnedBy = await _employeeWrapperHelper.GetAsync(room.CreateBy);

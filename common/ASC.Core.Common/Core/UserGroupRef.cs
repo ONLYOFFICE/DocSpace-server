@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -59,7 +59,7 @@ public class UserGroupRef
 
     public static string CreateKey(int tenant, Guid userId, Guid groupId, UserGroupRefType refType)
     {
-        return tenant + userId.ToString("N") + groupId.ToString("N") + ((int)refType);
+        return tenant + userId.ToString("N") + groupId.ToString("N") + (int)refType;
     }
 
     public string CreateKey()

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -451,7 +451,7 @@ internal abstract class ThirdPartyProviderDao<TFile, TFolder, TItem>(
     protected IProviderInfo<TFile, TFolder, TItem> ProviderInfo { get; set; }
     protected string PathPrefix { get; set; }
 
-    protected string Id { get => ProviderInfo.Selector.Id; }
+    protected string Id => ProviderInfo.Selector.Id;
 
     protected Folder<string> GetFolder()
     {
@@ -730,14 +730,6 @@ static file class Queries
         AllTagsAsync = EF.CompileAsyncQuery(
             (FilesDbContext ctx) =>
                 ctx.Tag.AsQueryable());
-
-    public static readonly Func<FilesDbContext, string, Task<string>>
-        IdAsync = EF.CompileAsyncQuery(
-            (FilesDbContext ctx, string hashId) =>
-                ctx.ThirdpartyIdMapping
-                    .Where(r => r.HashId == hashId)
-                    .Select(r => r.Id)
-                    .FirstOrDefault());
 
     public static readonly Func<FilesDbContext, int, string, IAsyncEnumerable<string>> IdsAsync =
         EF.CompileAsyncQuery(

@@ -29,11 +29,15 @@ package com.asc.authorization.application.security.oauth.jwks;
 
 import com.asc.authorization.application.configuration.properties.RegisteredClientConfigurationProperties;
 import com.asc.authorization.application.mapper.KeyPairMapper;
+import com.asc.authorization.application.security.RegionUtils;
 import com.asc.authorization.application.security.authentication.TenantAuthority;
 import com.asc.authorization.application.security.oauth.service.KeyPairService;
 import com.asc.authorization.data.key.entity.KeyPair;
 import com.asc.common.core.domain.value.KeyPairType;
-import com.asc.common.utilities.RegionUtils;
+import com.asc.common.messaging.configuration.AuthorizationMessagingConfiguration;
+import com.asc.common.service.transfer.message.KeyPairRetrievedEvent;
+import com.asc.common.service.transfer.message.RetrieveKeyPairMessage;
+import com.asc.common.utilities.crypto.EncryptionService;
 import com.nimbusds.jose.KeySourceException;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSelector;
@@ -52,8 +56,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.slf4j.MDC;
+import org.springframework.amqp.core.MessageProperties;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -74,16 +82,23 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class KeyPairRepositoryJWKSource
     implements JWKSource<SecurityContext>, OAuth2TokenCustomizer<JwtEncodingContext> {
+  private static final ThreadLocal<KeyPair> remoteKeyPairHolder = new ThreadLocal<>();
 
   @Value("${spring.application.region}")
   private String region;
 
+  private final CaffeineCacheManager cacheManager;
+
   private final Environment environment;
   private final RegisteredClientConfigurationProperties registeredClientConfiguration;
+
+  private final RabbitTemplate rpcRabbitTemplate;
+  private final MessageConverter messageConverter;
 
   private final KeyPairMapper keyPairMapper;
 
   private final KeyPairService keyPairService;
+  private final EncryptionService encryptionService;
 
   @Resource(name = "${spring.application.signature.jwks}")
   private JwksKeyPairGenerator keyPairGenerator;
@@ -149,6 +164,20 @@ public class KeyPairRepositoryJWKSource
   public List<JWK> get(JWKSelector jwkSelector, SecurityContext securityContext)
       throws KeySourceException {
     log.debug("Trying to get JWK");
+
+    var remoteKeyPair = remoteKeyPairHolder.get();
+    if (remoteKeyPair != null) {
+      try {
+        var remoteJwk = buildJwk(remoteKeyPair);
+        if (remoteJwk != null && jwkSelector.getMatcher().matches(remoteJwk)) {
+          log.debug("Using remote key pair for cross-region signing: {}", remoteKeyPair.getId());
+          return List.of(remoteJwk);
+        }
+      } finally {
+        remoteKeyPairHolder.remove();
+      }
+    }
+
     var result =
         getActiveKeyPairs().stream()
             .filter(
@@ -170,6 +199,54 @@ public class KeyPairRepositoryJWKSource
   }
 
   /**
+   * Fetches the latest active key pair from a remote region via RPC.
+   *
+   * @param region the region to fetch the key from
+   * @return the key pair from the remote region, or null if not available
+   */
+  private KeyPair fetchFromRemoteRegion(String region) {
+    try {
+      log.debug("Fetching key pair from remote region: {}", region);
+
+      var routingKey =
+          AuthorizationMessagingConfiguration.AUTHORIZATION_RPC_ROUTING_KEY_PREFIX + region;
+
+      var request = RetrieveKeyPairMessage.builder().build();
+      var response =
+          rpcRabbitTemplate.sendAndReceive(
+              AuthorizationMessagingConfiguration.AUTHORIZATION_RPC_EXCHANGE,
+              routingKey,
+              messageConverter.toMessage(request, new MessageProperties()));
+
+      if (response == null) {
+        log.warn("No response received from remote region: {}", region);
+        return null;
+      }
+
+      var responseData = messageConverter.fromMessage(response);
+      if (!(responseData instanceof KeyPairRetrievedEvent keyPairRetrievedEvent)) {
+        log.error("Unexpected response type from remote region: {}", responseData.getClass());
+        return null;
+      }
+
+      if (!keyPairRetrievedEvent.isSuccess()) return null;
+
+      log.debug(
+          "Successfully fetched key pair {} from region {}", keyPairRetrievedEvent.getId(), region);
+
+      return KeyPair.builder()
+          .id(keyPairRetrievedEvent.getId())
+          .publicKey(keyPairRetrievedEvent.getPublicKey())
+          .privateKey(encryptionService.decrypt(keyPairRetrievedEvent.getPrivateKey()))
+          .pairType(KeyPairType.valueOf(keyPairRetrievedEvent.getPairType()))
+          .build();
+    } catch (Exception e) {
+      log.error("Error fetching key pair from remote region: {}", region, e);
+      return null;
+    }
+  }
+
+  /**
    * Customizes the JWT encoding context with additional claims and header information.
    *
    * <p>Includes client ID, tenant details, region, issuer, and audience claims.
@@ -177,7 +254,38 @@ public class KeyPairRepositoryJWKSource
    * @param context the {@link JwtEncodingContext}.
    */
   public void customize(JwtEncodingContext context) {
-    var activeKeyPair = getLatestActiveKeyPair();
+    var tokenRegion = getRegionFromContext(context);
+    var isSaaS =
+        Arrays.stream(environment.getActiveProfiles())
+            .anyMatch(profile -> profile.equalsIgnoreCase("saas"));
+
+    KeyPair activeKeyPair;
+    if (isSaaS
+        && tokenRegion != null
+        && !tokenRegion.isBlank()
+        && !tokenRegion.equalsIgnoreCase(region)) {
+      log.info(
+          "Cross-region token generation detected. Current region: {}, Token region: {}",
+          region,
+          tokenRegion);
+
+      var cache = cacheManager.getCache("key_pair");
+      var cached = cache.get(tokenRegion, KeyPair.class);
+
+      if (cached != null) {
+        log.debug("Found a key pair in cache");
+        activeKeyPair = cached;
+      } else {
+        activeKeyPair = fetchFromRemoteRegion(tokenRegion);
+        if (activeKeyPair != null) cache.put(tokenRegion, activeKeyPair);
+        else throw new UnsupportedOperationException("Could not find any suitable keypair");
+      }
+
+      remoteKeyPairHolder.set(activeKeyPair);
+    } else {
+      activeKeyPair = getLatestActiveKeyPair();
+    }
+
     if (activeKeyPair == null)
       throw new UnsupportedOperationException("Could not find any suitable keypair");
 
@@ -201,11 +309,7 @@ public class KeyPairRepositoryJWKSource
           .claim("tid", tenantAuthority.getTenantId())
           .audience(Collections.singletonList(tenantAuthority.getAuthority()));
 
-    var tokenRegion = getRegionFromContext(context);
-    if (tokenRegion != null
-        && !tokenRegion.isBlank()
-        && Arrays.stream(environment.getActiveProfiles())
-            .anyMatch(profile -> profile.equalsIgnoreCase("saas")))
+    if (tokenRegion != null && !tokenRegion.isBlank() && isSaaS)
       context.getClaims().claim("region", tokenRegion);
 
     context

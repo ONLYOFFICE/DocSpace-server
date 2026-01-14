@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,11 +32,7 @@ public class OpensourceGiftSettings : ISettings<OpensourceGiftSettings>
 
     #region ISettings Members
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{1F4FEA2C-2D9F-47A6-ADEF-CEC4D1E1E243}"); }
-    }
+    public static Guid ID => new("{1F4FEA2C-2D9F-47A6-ADEF-CEC4D1E1E243}");
 
     public OpensourceGiftSettings GetDefault()
     {

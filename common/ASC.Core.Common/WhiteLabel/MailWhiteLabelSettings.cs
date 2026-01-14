@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -53,8 +53,7 @@ public class MailWhiteLabelSettings : ISettings<MailWhiteLabelSettings>
     public bool FooterSocialEnabled { get; set; }
 
 
-    [JsonIgnore]
-    public Guid ID => new("{C3602052-5BA2-452A-BD2A-ADD0FAF8EB88}");
+    public static Guid ID => new("{C3602052-5BA2-452A-BD2A-ADD0FAF8EB88}");
 
     public MailWhiteLabelSettings()
     {

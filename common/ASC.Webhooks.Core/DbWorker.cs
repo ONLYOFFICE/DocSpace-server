@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -231,10 +231,7 @@ public class DbWorker(
 
         var fromDb = await webhooksDbContext.WebhooksLogAsync(tenantId, id);
 
-        if (fromDb != null)
-        {
-            fromDb.Log.Config = fromDb.Config;
-        }
+        fromDb?.Log.Config = fromDb.Config;
 
         return fromDb?.Log;
     }
