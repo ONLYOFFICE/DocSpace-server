@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,13 +29,11 @@ package com.asc.registration.service.mapper;
 
 import com.asc.registration.core.domain.entity.Scope;
 import com.asc.registration.service.transfer.response.ScopeResponse;
-import org.springframework.stereotype.Component;
 
 /**
  * Mapper class to convert between {@link Scope} domain entity and {@link ScopeResponse} transfer
  * object.
  */
-@Component
 public class ScopeDataMapper {
 
   /**

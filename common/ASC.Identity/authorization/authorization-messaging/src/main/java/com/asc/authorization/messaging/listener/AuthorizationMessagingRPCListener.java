@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -198,6 +198,8 @@ public class AuthorizationMessagingRPCListener {
           .publicKey(latestKeyPair.getPublicKey())
           .privateKey(latestKeyPair.getPrivateKey())
           .pairType(latestKeyPair.getPairType().name())
+          .createdAt(
+              latestKeyPair.getCreatedAt() != null ? latestKeyPair.getCreatedAt().toString() : null)
           .build();
     } catch (Exception e) {
       log.error("Error retrieving key pair for remote region", e);

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -2524,7 +2524,7 @@ public class FileStorageService //: IFileStorageService
         try
         {
             var newFiles = await fileMarker.MarkedItemsAsync(folder)
-                .Where(x => x.FileEntryType == FileEntryType.File)
+                .Where(x => folder.FolderType == FolderType.SHARE || x.FileEntryType == FileEntryType.File)
                 .ToListAsync();
             if (newFiles.Count == 0)
             {
