@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2026
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,33 +24,19 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Text.Encodings.Web;
+global using System.Collections.Concurrent;
+global using System.Net.Sockets;
+global using System.Text.Json;
 
-namespace ASC.Studio.Notify;
+global using ASC.EventBus.Abstractions;
+global using ASC.EventBus.Events;
+global using ASC.EventBus.Exceptions;
+global using ASC.EventBus.Serializers;
+global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Logging;
 
-public class Startup : BaseWorkerStartup
-{
-    public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
-        : base(configuration, hostEnvironment)
-    {
-        if (configuration.GetSection("RabbitMQ").GetChildren().Any() && 
-            String.IsNullOrEmpty(configuration["RabbitMQ:ClientProvidedName"]))
-        {
-            configuration["RabbitMQ:ClientProvidedName"] = Program.AppName;
-        }
-    }
+global using Polly;
+global using Polly.Retry;
 
-    public override async Task ConfigureServices(WebApplicationBuilder builder)
-    {
-        await base.ConfigureServices(builder);
+global using StackExchange.Redis;
 
-        var services = builder.Services;
-        services.AddHttpClient();
-        services.AddHostedService<ServiceLauncher>();
-        services.AddScoped<IWebItem, ProductEntryPoint>();
-        services.AddBaseDbContextPool<FilesDbContext>();
-        services.AddActivePassiveHostedService<NotifySchedulerService>(Configuration, "StudioNotifySchedulerService");
-        services.RegisterQuotaFeature();
-        services.AddScoped(_ => UrlEncoder.Default);
-    }
-}
