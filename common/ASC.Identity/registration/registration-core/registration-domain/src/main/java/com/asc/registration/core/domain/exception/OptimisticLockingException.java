@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,45 +24,34 @@
 // writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-package com.asc.transfer.entity;
 
-import java.io.Serializable;
-import lombok.*;
+package com.asc.registration.core.domain.exception;
+
+import com.asc.common.core.domain.exception.DomainException;
 
 /**
- * Represents a scope within the client.
- *
- * <p>This entity encapsulates the details of a scope, including its unique name, associated group,
- * and type. Scopes are used to define and manage access permissions or operational boundaries
- * within the client.
- *
- * <p>All fields are expected to be non-null and unique in the context of their usage.
+ * OptimisticLockingException represents an exception that is thrown when an optimistic locking
+ * failure occurs during concurrent access to a resource. It extends the {@link DomainException}
+ * class and provides constructors to create exceptions with a message and an optional cause.
  */
-@Getter
-@Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class ScopeEntity implements Serializable {
+public class OptimisticLockingException extends DomainException {
 
   /**
-   * The name of the scope.
+   * Constructs an OptimisticLockingException with the specified detail message.
    *
-   * <p>This field is used as the primary key in the database and must be unique and non-null.
+   * @param message the detail message
    */
-  private String name;
+  public OptimisticLockingException(String message) {
+    super(message);
+  }
 
   /**
-   * The group to which the scope belongs.
+   * Constructs an OptimisticLockingException with the specified detail message and cause.
    *
-   * <p>This field must be unique and non-null.
+   * @param message the detail message
+   * @param cause the cause of the exception
    */
-  private String group;
-
-  /**
-   * The type of the scope.
-   *
-   * <p>This field must be unique and non-null.
-   */
-  private String type;
+  public OptimisticLockingException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,41 +24,41 @@
 // writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-package com.asc.transfer.configuration;
 
-import javax.sql.DataSource;
-import org.springframework.boot.autoconfigure.batch.BatchDataSource;
-import org.springframework.context.annotation.Bean;
+package com.asc.registration.application.configuration;
+
+import com.asc.registration.service.ports.input.service.ScopeApplicationService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
+import org.springframework.context.event.EventListener;
 
 /**
- * Configuration class for setting up the batch {@link DataSource} used by Spring Batch.
+ * ScopeCacheInitializer pre-loads all scopes into the in-memory cache on application startup.
  *
- * <p>This configuration creates an embedded H2 database for batch processing and initializes it
- * with the Spring Batch schema SQL script. The {@code @BatchDataSource} annotation ensures that
- * this DataSource is used exclusively by Spring Batch.
+ * <p>Since scopes are static configuration data that rarely changes, they are loaded once at
+ * startup and cached permanently in memory for fast access throughout the application lifecycle.
  */
+@Slf4j
 @Configuration
-public class BatchDataSourceConfiguration {
+@RequiredArgsConstructor
+public class ScopeCacheInitializer {
+  private final ScopeApplicationService scopeApplicationService;
 
   /**
-   * Creates and configures the batch {@link DataSource}.
+   * Initializes the scope cache when the application is ready.
    *
-   * <p>This method builds an embedded H2 database and initializes it with the Spring Batch schema
-   * by executing the script located at {@code
-   * classpath:org/springframework/batch/core/schema-h2.sql}.
-   *
-   * @return an embedded H2 DataSource with the Spring Batch schema loaded
+   * <p>This method is triggered by the {@link ApplicationReadyEvent}, ensuring that all scopes are
+   * loaded into cache before the application starts serving requests.
    */
-  @Bean
-  @BatchDataSource
-  public DataSource batchDataSource() {
-    return new EmbeddedDatabaseBuilder()
-        .setType(EmbeddedDatabaseType.H2)
-        .setName("batchTransfer")
-        .addScript("classpath:org/springframework/batch/core/schema-h2.sql")
-        .build();
+  @EventListener(ApplicationReadyEvent.class)
+  public void initializeScopeCache() {
+    try {
+      var scopes = scopeApplicationService.getScopes();
+      log.info("Successfully pre-loaded {} scopes into cache", scopes.size());
+    } catch (Exception e) {
+      log.error("Failed to initialize scope cache on startup", e);
+    }
   }
 }

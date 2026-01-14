@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,22 +25,45 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-package com.asc.registration.application.transfer;
+package com.asc.registration.application.configuration.serialization;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.*;
+import com.asc.registration.core.domain.entity.Client;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.data.redis.serializer.RedisSerializer;
+import org.springframework.data.redis.serializer.SerializationException;
 
 /**
- * This class represents an error response. It contains a single field, reason, which provides a
- * human-readable explanation of the error.
+ * Custom serializer that uses a configured ObjectMapper with Client deserializer.
+ *
+ * <p>This serializer specifically handles {@link Client} objects and uses the custom {@link
+ * ClientDeserializer} for deserialization.
  */
-@Getter
-@Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@Schema(description = "Error response containing a human-readable explanation of the error")
-public class ErrorResponse {
-  /** The reason for the error. */
-  private String reason;
+public class ClientSerializer implements RedisSerializer<Object> {
+  private final ObjectMapper objectMapper;
+
+  public ClientSerializer(ObjectMapper objectMapper) {
+    this.objectMapper = objectMapper;
+  }
+
+  @NotNull
+  public byte[] serialize(Object value) throws SerializationException {
+    if (value == null) return new byte[0];
+
+    try {
+      return objectMapper.writeValueAsBytes(value);
+    } catch (Exception e) {
+      throw new SerializationException("Could not serialize: " + e.getMessage(), e);
+    }
+  }
+
+  public Object deserialize(byte[] bytes) throws SerializationException {
+    if (bytes == null || bytes.length == 0) return null;
+
+    try {
+      return objectMapper.readValue(bytes, Client.class);
+    } catch (Exception e) {
+      throw new SerializationException("Could not deserialize: " + e.getMessage(), e);
+    }
+  }
 }

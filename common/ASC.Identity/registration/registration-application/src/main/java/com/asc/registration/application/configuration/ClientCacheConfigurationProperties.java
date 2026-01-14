@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,30 +24,35 @@
 // writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-package com.asc.transfer;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+package com.asc.registration.application.configuration;
+
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * The main entry point for the Data Transfer Application.
- *
- * <p>This Spring Boot application is responsible for transferring client data from a relational
- * database to DynamoDB using a Spring Batch job. It bootstraps the application context and starts
- * all the configured beans, including job launchers and batch jobs.
- *
- * <p>Upon startup, the {@code main} method initializes the Spring ApplicationContext by calling
- * {@link SpringApplication#run(Class, String...)}.
+ * Configuration properties for client cache Redis connection. Provides settings for Redis
+ * connection that can be customized via application properties using the `client.cache.redis`
+ * prefix.
  */
-@SpringBootApplication
-public class DataTransferApplication {
+@Data
+@ConfigurationProperties(prefix = "client.cache.redis")
+public class ClientCacheConfigurationProperties {
+  /** The host of the Redis server. Defaults to localhost. */
+  private String host = "localhost";
 
-  /**
-   * The entry point of the Data Transfer Application.
-   *
-   * @param args the command-line arguments passed to the application
-   */
-  public static void main(String[] args) {
-    SpringApplication.run(DataTransferApplication.class, args);
-  }
+  /** The port of the Redis server. Defaults to 6379. */
+  private int port = 6379;
+
+  /** The Redis database index to use. Defaults to 0. */
+  private int database = 0;
+
+  /** The username for authenticating with the Redis server. Optional. */
+  private String username;
+
+  /** The password for authenticating with the Redis server. Optional. */
+  private String password;
+
+  /** Indicates whether SSL is enabled for the Redis connection. Defaults to false. */
+  private boolean ssl = false;
 }

@@ -1,0 +1,10 @@
+client:
+  cache:
+    redis:
+      enabled: ${CLIENT_CACHE_REDIS_ENABLED:true}
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      database: ${REDIS_DB:0}
+      username: ${REDIS_USERNAME:}
+      password: ${REDIS_PASSWORD:}
+      ssl: ${REDIS_SSL:false}

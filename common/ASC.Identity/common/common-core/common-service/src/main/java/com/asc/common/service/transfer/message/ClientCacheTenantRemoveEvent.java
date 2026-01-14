@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,47 +24,29 @@
 // writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-package com.asc.transfer.configuration;
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+package com.asc.common.service.transfer.message;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
+import lombok.*;
 
 /**
- * Configuration properties for the application's data source.
- *
- * <p>This class binds properties with the prefix {@code spring.datasource} defined in external
- * configuration sources (e.g., application.properties or application.yml) to configure the data
- * source. It provides the necessary information such as the JDBC driver class name, database URL,
- * username, and password.
- *
- * <p>Example configuration in application.properties:
- *
- * <pre>
- * spring.datasource.driverClassName=com.mysql.cj.jdbc.Driver
- * spring.datasource.url=jdbc:mysql://localhost:3306/mydb
- * spring.datasource.username=myuser
- * spring.datasource.password=mypassword
- * </pre>
+ * Event message class representing notification about tenant-wide client cache removal. This class
+ * is used for communication between services when all client cache entries for a specific tenant
+ * need to be invalidated across regions.
  */
-@Data
+@Builder
 @Getter
 @Setter
-@Configuration
-@ConfigurationProperties(prefix = "spring.datasource")
-public class DataSourceConfigurationProperties {
-
-  /** The fully qualified class name of the JDBC driver. */
-  private String driverClassName;
-
-  /** The JDBC URL to connect to the database. */
-  private String url;
-
-  /** The username used for the database connection. */
-  private String username;
-
-  /** The password used for the database connection. */
-  private String password;
+@ToString
+@EqualsAndHashCode
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class ClientCacheTenantRemoveEvent implements Serializable {
+  /** The unique identifier of the tenant whose clients should be removed from cache. */
+  @JsonProperty(value = "tenant_id", required = true)
+  private Long tenantId;
 }

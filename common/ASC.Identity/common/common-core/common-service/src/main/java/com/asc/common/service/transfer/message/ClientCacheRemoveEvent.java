@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,45 +24,33 @@
 // writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-package com.asc.transfer.configuration;
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+package com.asc.common.service.transfer.message;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
+import lombok.*;
 
 /**
- * Configuration properties for Spring Batch processing.
- *
- * <p>This class binds properties with the prefix {@code spring.batch.processing} from external
- * configuration sources (such as application.properties or application.yml) to configure batch
- * processing settings in the application.
- *
- * <p>Default values:
- *
- * <ul>
- *   <li>{@code pageSize} - Number of items to process per page (default is 100).
- *   <li>{@code batchSize} - Number of items to process per batch (default is 100).
- * </ul>
- *
- * <p>Example configuration:
- *
- * <pre>
- * spring.batch.processing.pageSize=100
- * spring.batch.processing.batchSize=100
- * </pre>
+ * Event message class representing notification about single client cache removal. This class is
+ * used for communication between services when a specific client cache entry needs to be
+ * invalidated across regions.
  */
-@Configuration
-@ConfigurationProperties(prefix = "spring.batch.processing")
-@Data
+@Builder
 @Getter
 @Setter
-public class BatchProcessingConfiguration {
+@ToString
+@EqualsAndHashCode
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class ClientCacheRemoveEvent implements Serializable {
+  /** The unique identifier of the client to remove from cache. */
+  @JsonProperty(value = "client_id", required = true)
+  private String clientId;
 
-  /** The number of items to process in each page during batch processing. Defaults to 100. */
-  private int pageSize = 100;
-
-  /** The number of items to process in each batch. Defaults to 100. */
-  private int batchSize = 100;
+  /** The tenant ID to which the client belongs. */
+  @JsonProperty(value = "tenant_id", required = true)
+  private Long tenantId;
 }

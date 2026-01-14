@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,47 +24,44 @@
 // writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-package com.asc.transfer.configuration;
 
-import javax.sql.DataSource;
-import lombok.RequiredArgsConstructor;
-import org.springframework.boot.jdbc.DataSourceBuilder;
+package com.asc.registration.application.configuration;
+
+import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.module.blackbird.BlackbirdModule;
 
 /**
- * Primary data source configuration class.
+ * Configuration class for customizing JSON serialization and deserialization behavior.
  *
- * <p>This configuration class defines the primary {@link DataSource} bean using properties
- * specified under {@code spring.datasource} in the application's configuration files. It utilizes
- * the {@link DataSourceConfigurationProperties} to retrieve the necessary data source settings such
- * as driver class name, URL, username, and password.
+ * <p>This configuration applies application-wide Jackson ObjectMapper settings to enhance
+ * performance and adjust deserialization behavior for handling null values in primitives.
  */
 @Configuration
-@RequiredArgsConstructor
-public class PrimaryDataSourceConfiguration {
-  /** The configuration properties for the data source. */
-  private final DataSourceConfigurationProperties configurationProperties;
+public class SerializationConfiguration {
 
   /**
-   * Creates the primary {@link DataSource} bean.
+   * Customizes the Jackson ObjectMapper builder with performance optimizations and deserialization
+   * settings.
    *
-   * <p>This bean is marked as primary with the {@code @Primary} annotation, ensuring that it is
-   * preferred when multiple data source beans are present in the application context. The method
-   * builds the data source using the driver class name, URL, username, and password obtained from
-   * {@link DataSourceConfigurationProperties}.
+   * <p>Applies the following customizations:
    *
-   * @return the configured primary {@link DataSource}
+   * <ul>
+   *   <li>Registers the Blackbird module for improved serialization/deserialization performance
+   *       through bytecode generation
+   *   <li>Disables {@link DeserializationFeature#FAIL_ON_NULL_FOR_PRIMITIVES} to allow null values
+   *       to be deserialized as default primitive values (e.g., null → 0 for int)
+   * </ul>
+   *
+   * @return a customizer that configures the Jackson ObjectMapper builder
    */
   @Bean
-  @Primary
-  public DataSource dataSource() {
-    return DataSourceBuilder.create()
-        .driverClassName(configurationProperties.getDriverClassName())
-        .url(configurationProperties.getUrl())
-        .username(configurationProperties.getUsername())
-        .password(configurationProperties.getPassword())
-        .build();
+  JsonMapperBuilderCustomizer jacksonCustomizer() {
+    return builder ->
+        builder
+            .addModule(new BlackbirdModule())
+            .disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES);
   }
 }
