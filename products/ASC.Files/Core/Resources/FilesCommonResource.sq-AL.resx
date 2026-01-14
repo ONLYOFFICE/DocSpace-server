@@ -156,6 +156,9 @@
   <data name="Admin" xml:space="preserve">
     <value>Administratori</value>
   </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>Menaxheri i agjentit</value>
+  </data>
   <data name="AppAccessDenied" xml:space="preserve">
     <value>Për të punuar me skedarin, duhet të jepni akses në të</value>
   </data>
@@ -246,9 +249,6 @@
   <data name="ErrorMessage_DocServiceException" xml:space="preserve">
     <value>Ndodhi një gabim në shërbimin e dokumenteve</value>
   </data>
-  <data name="ErrorMessage_EditingCoauth" xml:space="preserve">
-    <value>Skedari hapet për redaktim nga {0}. Aktualisht, veçoria e bashkë-redaktimit nuk mbështetet për këtë format skedari.</value>
-  </data>
   <data name="ErrorMessage_EditingMobile" xml:space="preserve">
     <value>Skedari është i hapur për modifikim në një aplikacion celular nga {0}</value>
   </data>
@@ -265,7 +265,7 @@
     <value>Skedari më i madh se {0} nuk do të zhvendoset</value>
   </data>
   <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Zhvendosja e disa skedarëve në dhomën e plotësimit të formularit nuk mbështetet. Lëvizni një formular PDF {0} në të njëjtën kohë.</value>
+    <value>Zhvendosja e disa skedarëve në dhomën e plotësimit të formularit nuk mbështetet. Lëvizni një formular PDF ONLYOFFICE në të njëjtën kohë.</value>
   </data>
   <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
     <value>Versioni i ri nuk mund të jetë i njëjtë me atë aktual</value>
@@ -274,7 +274,7 @@
     <value>Nuk mund ta kopjoni dosjen në nënfolderin e saj</value>
   </data>
   <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Zhvendosja e dosjeve në dhomën e plotësimit të formularit nuk mbështetet. Lëvizni një formular PDF {0} në të njëjtën kohë.</value>
+    <value>Zhvendosja e dosjeve në dhomën e plotësimit të formularit nuk mbështetet. Lëvizni një formular PDF ONLYOFFICE në të njëjtën kohë.</value>
   </data>
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Dosja e kërkuar nuk u gjet</value>
@@ -304,7 +304,7 @@
     <value>Numri maksimal i lidhjeve nuk mund të kalojë {0}</value>
   </data>
   <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Skedari nuk mund të zhvendoset në këtë dhomë. Ju lutemi provoni të zhvendosni formularin PDF {0}.</value>
+    <value>Skedari nuk mund të zhvendoset në këtë dhomë. Ju lutemi provoni të zhvendosni formularin PDF ONLYOFFICE.</value>
   </data>
   <data name="ErrorMessage_NotSupportedFormat" xml:space="preserve">
     <value>Na vjen keq, ky format skedari nuk mbështetet</value>
@@ -415,7 +415,7 @@
     <value>Ju nuk mund të përditësoni një skedar që hapet për redaktim</value>
   </data>
   <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Skedari nuk mund të ngarkohet në këtë dhomë. Ju lutem provoni të ngarkoni formularin PDF {0}.</value>
+    <value>Skedari nuk mund të ngarkohet në këtë dhomë. Ju lutem provoni të ngarkoni formularin PDF ONLYOFFICE.</value>
   </data>
   <data name="ErrorMessage_UserNotFound" xml:space="preserve">
     <value>Përdoruesi nuk mund të gjendej</value>
@@ -435,6 +435,9 @@
   <data name="FillOutExternalLinkTitle" xml:space="preserve">
     <value>Lidhje për të plotësuar</value>
   </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>Dokumentet e përdoruesit {0} {1}</value>
+  </data>
   <data name="FormNumber" xml:space="preserve">
     <value>Numri i formularit</value>
   </data>
@@ -443,6 +446,12 @@
   </data>
   <data name="IndexTitle" xml:space="preserve">
     <value>Kërkoni në përmbajtjen e dokumenteve</value>
+  </data>
+  <data name="KnowledgeFolder" xml:space="preserve">
+    <value>Njohuri</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Lidhja për formularin</value>
   </data>
   <data name="MessageFileCreated" xml:space="preserve">
     <value>Skedari u krijua në dosjen "{0}"</value>
@@ -478,6 +487,9 @@ Përputhshmëria më e lartë me docx, xlsx, pptx.</value>
   <data name="ProductUserOpportunities" xml:space="preserve">
     <value>Krijoni dhe modifikoni dokumentet e veta, si dhe dokumentet e përbashkëta me të drejtat e duhura të aksesit |Jepni akses për lexim/redaktim përdoruesve të tjerë në dokumente dhe dosje|Link Dropbox, Box dhe llogari të tjera në seksionin 'Dokumentet'</value>
   </data>
+  <data name="ResultStorageFolder" xml:space="preserve">
+    <value>Ruajtja e rezultateve</value>
+  </data>
   <data name="RoleEnum_Collaborator" xml:space="preserve">
     <value>Bashkëpunëtor</value>
   </data>
@@ -496,11 +508,17 @@ Përputhshmëria më e lartë me docx, xlsx, pptx.</value>
   <data name="RoleEnum_FillForms" xml:space="preserve">
     <value>Mbushës i formës</value>
   </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>Mysafir</value>
+  </data>
   <data name="RoleEnum_Read" xml:space="preserve">
     <value>Shikuesi</value>
   </data>
   <data name="RoleEnum_Review" xml:space="preserve">
     <value>Rishikuesi</value>
+  </data>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Administratori i dhomës</value>
   </data>
   <data name="RoleEnum_RoomManager" xml:space="preserve">
     <value>Menaxher i dhomës</value>
@@ -550,6 +568,12 @@ Përputhshmëria më e lartë me docx, xlsx, pptx.</value>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Lloji</value>
   </data>
+  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
+    <value>Shpërndajeni për plotësim</value>
+  </data>
+  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
+    <value>Filloni plotësimin</value>
+  </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>Emri</value>
   </data>
@@ -561,14 +585,5 @@ Përputhshmëria më e lartë me docx, xlsx, pptx.</value>
   </data>
   <data name="User" xml:space="preserve">
     <value>Përdoruesi</value>
-  </data>
-  <data name="LinkToForm" xml:space="preserve">
-    <value>Lidhja për formularin</value>
-  </data>
-  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
-    <value>Shpërndajeni për plotësim</value>
-  </data>
-  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
-    <value>Filloni plotësimin</value>
   </data>
 </root>

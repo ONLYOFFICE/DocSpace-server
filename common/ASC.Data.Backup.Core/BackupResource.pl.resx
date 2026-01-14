@@ -117,22 +117,46 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ButtonSetPassword" xml:space="preserve">
-    <value>Ustaw hasło</value>
-  </data>
-  <data name="BackupNotFound" xml:space="preserve">
-    <value>Plik kopii zapasowej jest nieprawidłowy. Użyj pliku utworzonego w tym samym portalu.</value>
-  </data>
-  <data name="LargeBackup" xml:space="preserve">
-    <value>Kopia zapasowa jest większa od całkowitego rozmiaru portalu</value>
+  <data name="AutoBackup" xml:space="preserve">
+    <value>Automatyczna kopia zapasowa</value>
   </data>
   <data name="BackupException" xml:space="preserve">
     <value>Coś poszło nie tak, podczas tworzenia kopii zapasowej. Spróbuj utworzyć ją ponownie lub skontaktuj się z działem wsparcia.</value>
   </data>
-  <data name="RestoreException" xml:space="preserve">
-    <value>Coś poszło nie tak, podczas odzyskiwania kopii zapasowej. Spróbuj odzyskać ją ponownie lub skontaktuj się z działem wsparcia.</value>
-  </data>
   <data name="BackupInvalid" xml:space="preserve">
     <value>Plik kopii zapasowej jest nieprawidłowy.</value>
+  </data>
+  <data name="BackupMissingFilesWarning" xml:space="preserve">
+    <value>Niektóre pliki nie zostały uwzględnione w kopii zapasowej. Aby dowiedzieć się więcej, sprawdź {0}</value>
+  </data>
+  <data name="BackupNotFound" xml:space="preserve">
+    <value>Plik kopii zapasowej jest nieprawidłowy. Użyj pliku utworzonego w tym samym portalu.</value>
+  </data>
+  <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
+    <value>Custom cloud</value>
+  </data>
+  <data name="BackupStorageTypeDataStore" xml:space="preserve">
+    <value>Tymczasowe miejsce przechowywania</value>
+  </data>
+  <data name="BackupStorageTypeDocuments" xml:space="preserve">
+    <value>Stwórz kopię zapasową pokoju</value>
+  </data>
+  <data name="BackupStorageTypeLocal" xml:space="preserve">
+    <value>Plik lokalny</value>
+  </data>
+  <data name="BackupStorageTypeThirdPartyConsumer" xml:space="preserve">
+    <value>Przechowywanie przez strony trzecie</value>
+  </data>
+  <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
+    <value>Zasób strony trzeciej</value>
+  </data>
+  <data name="ButtonSetPassword" xml:space="preserve">
+    <value>Ustaw hasło</value>
+  </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>Kopia zapasowa jest większa od całkowitego rozmiaru portalu</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>Coś poszło nie tak, podczas odzyskiwania kopii zapasowej. Spróbuj odzyskać ją ponownie lub skontaktuj się z działem wsparcia.</value>
   </data>
 </root>

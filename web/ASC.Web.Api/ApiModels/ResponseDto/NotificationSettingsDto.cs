@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,7 +29,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 ///<summary>
 /// The notification settings parameters.
 ///</summary>
-public class NotificationSettingsDto : IMapFrom<NotificationSettingsRequestsDto>
+public class NotificationSettingsDto
 {
     /// <summary>
     /// The notification type.
@@ -40,4 +40,10 @@ public class NotificationSettingsDto : IMapFrom<NotificationSettingsRequestsDto>
     /// Specifies if the notification type is enabled or not.
     /// </summary>
     public bool IsEnabled { get; set; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class NotificationSettingsDtoMapper
+{
+    public static partial NotificationSettingsDto Map(this NotificationSettingsRequestsDto source);
 }

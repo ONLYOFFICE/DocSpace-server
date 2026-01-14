@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,8 +23,6 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-
-using Profile = AutoMapper.Profile;
 
 namespace ASC.Files.Core;
 
@@ -75,7 +73,7 @@ public enum TagType
 /// The tag information.
 /// </summary>
 [DebuggerDisplay("{Name} ({Id}) entry {EntryType} ({EntryId})")]
-public sealed class Tag : IMapFrom<DbFilesTag>
+public sealed class Tag
 {
     /// <summary>
     /// The tag name.
@@ -205,10 +203,12 @@ public sealed class Tag : IMapFrom<DbFilesTag>
     {
         return (Id + EntryType + EntryId.ToString()).GetHashCode();
     }
+}
 
-    public void Mapping(Profile profile)
-    {
-        profile.CreateMap<DbFilesTag, Tag>();
-        profile.CreateMap<DbFilesTagLink, Tag>();
-    }
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class TagMapper
+{
+    public static partial Tag Map(this DbFilesTag source);
+
+    public static partial void ApplyUpdate(DbFilesTagLink link, Tag tag);
 }

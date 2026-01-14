@@ -3,27 +3,27 @@
     "Kestrel WebServer": {
       "commandName": "Project",
       "launchBrowser": false,
-      "launchUrl": "http://localhost:5012/api/2.0/backup/backuptmp",
+      "applicationUrl": "http://localhost:5012",
+      "launchUrl": "http://localhost:5012",
       "environmentVariables": {
         "$STORAGE_ROOT": "../../../../Data",
         "log__name": "backup",
         "log__dir": "../../../../Logs",
         "core__products__folder": "../../../products",
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "ASPNETCORE_URLS": "http://localhost:5012"
+        "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
     "WSL 2 : Ubuntu 20.04": {
       "commandName": "WSL2",
       "launchBrowser": false,
-      "launchUrl": "http://localhost:5012/api/2.0/backup/backuptmp",
+      "applicationUrl": "http://localhost:5012",
+      "launchUrl": "http://localhost:5012",
       "environmentVariables": {
         "$STORAGE_ROOT": "../../../../Data",
         "log__name": "backup",
         "log__dir": "../../../../Logs",
         "core__products__folder": "../../../products",
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "ASPNETCORE_URLS": "http://localhost:5012"
+        "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "distributionName": "Ubuntu-20.04"
     }

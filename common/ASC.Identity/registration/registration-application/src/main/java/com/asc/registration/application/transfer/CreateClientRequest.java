@@ -172,6 +172,10 @@ public class CreateClientRequest implements Serializable {
   @JsonProperty("redirect_uris")
   @NotNull
   @URLCollection
+  @Size(
+      min = 1,
+      max = 12,
+      message = "redirect uris must contain at least 1 and at most 12 addresses")
   @Schema(
       description = "The redirect URIs for the client",
       example = "[\"http://example.com/redirect\"]")
@@ -181,6 +185,10 @@ public class CreateClientRequest implements Serializable {
   @JsonProperty("allowed_origins")
   @NotNull
   @URLCollection
+  @Size(
+      min = 1,
+      max = 12,
+      message = "allowed origins must contain at least 1 and at most 12 addresses")
   @Schema(description = "The allowed origins for the client", example = "[\"http://example.com\"]")
   private Set<String> allowedOrigins;
 

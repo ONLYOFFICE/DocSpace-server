@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -81,13 +81,13 @@ public class EmailValidationKeyProvider
         {
             validVisitLinkInterval = TimeSpan.FromMinutes(15);
         }
-       
+
         ValidEmailKeyInterval = validInterval;
         ValidAuthKeyInterval = authValidInterval;
         ValidVisitLinkInterval = validVisitLinkInterval;
         _logger = logger;
     }
-    
+
 
     public string GetEmailKey(string email, int? tenantId = null)
     {
@@ -130,7 +130,7 @@ public class EmailValidationKeyProvider
         return result;
     }
 
-    private ValidationResult ValidateEmailKey(string email, string key, TimeSpan validInterval, int tenantId)
+    public ValidationResult ValidateEmailKey(string email, string key, TimeSpan validInterval, int tenantId)
     {
         ArgumentException.ThrowIfNullOrEmpty(email);
         ArgumentNullException.ThrowIfNull(key);
@@ -200,6 +200,11 @@ public class EmailValidationKeyModel
     public string Email { get; init; }
 
     /// <summary>
+    /// The encrypted email address.
+    /// </summary>
+    public string EncEmail { get; init; }
+
+    /// <summary>
     /// The user ID.
     /// </summary>
     public Guid? UiD { get; init; }
@@ -219,8 +224,8 @@ public class EmailValidationKeyModel
     /// </summary>
     public string RoomId { get; init; }
 
-    public void Deconstruct(out string key, out EmployeeType? emplType, out string email, out Guid? uiD, out ConfirmType? type, out string first)
+    public void Deconstruct(out string key, out EmployeeType? emplType, out string email, out Guid? uiD, out ConfirmType? type, out string first, out string encEmail)
     {
-        (key, emplType, email, uiD, type, first) = (Key, EmplType, Email, UiD, Type, First);
+        (key, emplType, email, uiD, type, first, encEmail) = (Key, EmplType, Email, UiD, Type, First, EncEmail);
     }
 }

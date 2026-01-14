@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,21 +32,15 @@ namespace ASC.AuditTrail.Types;
 [EnumExtensions]
 public enum ProductType
 {
-    [SwaggerEnum("None")]
-    None = 0,
-
     [SwaggerEnum("Documents")]
     Documents = 2,
 
     [SwaggerEnum("Login")]
     Login = 3,
 
-    [SwaggerEnum("Others")]
-    Others = 4,
-
-    [SwaggerEnum("People")]
-    People = 5,
-
     [SwaggerEnum("Settings")]
-    Settings = 7
+    Settings = 7,
+
+    [SwaggerEnum("Contacts")]
+    Contacts = 8
 }

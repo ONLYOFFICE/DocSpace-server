@@ -32,6 +32,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Set;
 import lombok.AllArgsConstructor;
@@ -84,5 +85,9 @@ public class UpdateTenantClientCommand implements Serializable {
   /** The allowed origins for the client. Each must be a valid URL. */
   @URLCollection
   @JsonProperty("allowed_origins")
+  @Size(
+      min = 1,
+      max = 12,
+      message = "allowed origins must contain at least 1 and at most 12 addresses")
   private Set<String> allowedOrigins;
 }

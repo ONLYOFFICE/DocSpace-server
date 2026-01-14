@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,15 +34,18 @@ public class SalesRequestsDto
     /// <summary>
     /// The name of the user submitting the sales request.
     /// </summary>
+    [MaxLength(255)]
     public string UserName { get; set; }
 
     /// <summary>
     /// The contact email address for the sales inquiry.
     /// </summary>
+    [MaxLength(64)]
     public required string Email { get; set; }
 
     /// <summary>
     /// The details of the sales inquiry or payment request.
     /// </summary>
+    [MaxLength(255)]
     public required string Message { get; set; }
 }

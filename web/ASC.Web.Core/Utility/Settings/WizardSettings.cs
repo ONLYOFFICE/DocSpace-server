@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -39,11 +39,7 @@ public class WizardSettings : ISettings<WizardSettings>
     /// <summary>
     /// The tenant ID.
     /// </summary>
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{9A925891-1F92-4ed7-B277-D6F649739F06}"); }
-    }
+    public static Guid ID => new("{9A925891-1F92-4ed7-B277-D6F649739F06}");
 
 
     public WizardSettings GetDefault()
@@ -53,6 +49,6 @@ public class WizardSettings : ISettings<WizardSettings>
             Completed = true
         };
     }
-    
+
     public DateTime LastModified { get; set; }
 }

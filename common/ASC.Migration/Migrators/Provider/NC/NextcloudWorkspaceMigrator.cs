@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -37,7 +37,8 @@ public class NextcloudWorkspaceMigrator : Migrator
     private readonly Regex _emailRegex = new(@"(\S*@\S*\.\S*)");
     private readonly Regex _phoneRegex = new(@"(\+?\d+)");
 
-    public NextcloudWorkspaceMigrator(SecurityContext securityContext,
+    public NextcloudWorkspaceMigrator(
+        SecurityContext securityContext,
         UserManager userManager,
         TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
         QuotaSocketManager quotaSocketManager,
@@ -45,12 +46,11 @@ public class NextcloudWorkspaceMigrator : Migrator
         GlobalFolderHelper globalFolderHelper,
         IServiceProvider serviceProvider,
         IDaoFactory daoFactory,
-        EntryManager entryManager,
         MigrationLogger migrationLogger,
         AuthContext authContext,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         UserManagerWrapper userManagerWrapper,
-        UserSocketManager socketManager) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, entryManager, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper, socketManager)
+        UserSocketManager socketManager) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper, socketManager)
     {
         MigrationInfo = new MigrationInfo { Name = "Nextcloud" };
     }
@@ -191,7 +191,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                             {
                                 continue;
                             }
-                            if (!ascUser.Equals(ASC.Core.Users.Constants.LostUser))
+                            if (!ascUser.Equals(Constants.LostUser))
                             {
                                 MigrationInfo.ExistUsers.Add(user.Key, user.Value);
                             }
@@ -213,7 +213,7 @@ public class NextcloudWorkspaceMigrator : Migrator
             }
             DbExtractGroup(dbFile);
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             MigrationInfo.FailedArchives.Add(Path.GetFileName(_takeout));
             var error = string.Format(MigrationResource.CanNotParseArchive, Path.GetFileNameWithoutExtension(_takeout));
@@ -365,12 +365,8 @@ public class NextcloudWorkspaceMigrator : Migrator
                            .Select(s => s.Trim('\'')).ToArray();
                 var uid = values[1].Split(':').Last();
                 usersData.TryGetValue(uid, out var user);
-                if (user == null)
-                {
-                    continue;
-                }
 
-                user.Storage.RootKey = values[0];
+                user?.Storage.RootKey = values[0];
             }
         }
         return usersData;
@@ -420,12 +416,8 @@ public class NextcloudWorkspaceMigrator : Migrator
                            .Select(s => s.Trim('\'')).ToArray();
                 var fileId = int.Parse(values[10]);
                 var file = filesAndFolders.FirstOrDefault(ff => ff.FileId == fileId);
-                if (file == null)
-                {
-                    continue;
-                }
 
-                file.Share.Add(new NCShare
+                file?.Share.Add(new NCShare
                 {
                     Id = int.Parse(values[0]),
                     ShareWith = values[2],
@@ -462,7 +454,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                         {
                             Id = entry.FileId,
                             Level = j++,
-                            ParentId = split.Length > 1 ? filesAndFolders.FirstOrDefault(ff => ff.Path == string.Join('/',split[..(split.Length - 1)])).FileId : int.Parse(user.Storage.RootKey),
+                            ParentId = split.Length > 1 ? filesAndFolders.FirstOrDefault(ff => ff.Path == string.Join('/', split[..(split.Length - 1)])).FileId : int.Parse(user.Storage.RootKey),
                             Title = split.Last()
                         };
                         user.Storage.Folders.Add(folder);

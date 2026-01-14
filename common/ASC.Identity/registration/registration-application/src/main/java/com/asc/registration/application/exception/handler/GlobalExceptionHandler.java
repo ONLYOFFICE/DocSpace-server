@@ -44,6 +44,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -334,6 +335,25 @@ public class GlobalExceptionHandler {
       RequestNotPermitted ex, HttpServletRequest request) {
     return new ResponseEntity<>(
         ErrorResponse.builder().reason("too many requests").build(), HttpStatus.TOO_MANY_REQUESTS);
+  }
+
+  /**
+   * Handles {@link HttpMediaTypeNotSupportedException} exceptions thrown when a request contains a
+   * media type that is not supported by the endpoint.
+   *
+   * <p>This method returns an error response with an HTTP status of {@code 415 Unsupported Media
+   * Type} and includes the exception's message detailing the unsupported media type.
+   *
+   * @param ex the {@link HttpMediaTypeNotSupportedException} that was raised.
+   * @param request the {@link HttpServletRequest} associated with the current request.
+   * @return a {@link ResponseEntity} containing an {@link ErrorResponse} with the exception's
+   *     message about the unsupported media type.
+   */
+  @ExceptionHandler(value = HttpMediaTypeNotSupportedException.class)
+  public ResponseEntity<ErrorResponse> handleNotSupportedMediaType(
+      HttpMediaTypeNotSupportedException ex, HttpServletRequest request) {
+    return new ResponseEntity<>(
+        ErrorResponse.builder().reason(ex.getMessage()).build(), HttpStatus.UNSUPPORTED_MEDIA_TYPE);
   }
 
   /**

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,20 +27,19 @@
 namespace ASC.Web.Api.Controllers.Settings;
 
 [Scope]
-public class RadicaleController(RadicaleClient radicaleClient,
-        DbRadicale dbRadicale,
-        CardDavAddressbook cardDavAddressbook,
-        TenantManager tenantManager,
-        ILogger<RadicaleController> logger,
-        InstanceCrypto crypto,
-        UserManager userManager,
-        AuthContext authContext,
-        WebItemSecurity webItemSecurity,
-        ApiContext apiContext,
-        IFusionCache fusionCache,
-        WebItemManager webItemManager,
-        IHttpContextAccessor httpContextAccessor)
-    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+public class RadicaleController(
+    RadicaleClient radicaleClient,
+    DbRadicale dbRadicale,
+    CardDavAddressbook cardDavAddressbook,
+    TenantManager tenantManager,
+    ILogger<RadicaleController> logger,
+    InstanceCrypto crypto,
+    UserManager userManager,
+    AuthContext authContext,
+    WebItemSecurity webItemSecurity,
+    IFusionCache fusionCache,
+    WebItemManager webItemManager)
+    : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <summary>
     /// Creates a CardDav address book for a user with all portal users and returns a link to this address book.

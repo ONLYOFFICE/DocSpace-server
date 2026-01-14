@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,10 +34,10 @@ public class CspDto
     /// <summary>
     /// The list of CSP domains.
     /// </summary>
-    public IEnumerable<string> Domains { get; set; }
+    public required IEnumerable<string> Domains { get; set; }
 
     /// <summary>
     /// The CSP header.
     /// </summary>
-    public string Header { get; set; }
+    public required string Header { get; set; }
 }

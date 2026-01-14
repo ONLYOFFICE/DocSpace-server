@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -147,9 +147,10 @@ public class CachedUserService : IUserService
 
     public async Task<UserInfo> SaveUserAsync(int tenant, UserInfo user)
     {
+        var tag = CacheExtention.GetUserTag(tenant, user.Id);
+
         user = await _service.SaveUserAsync(tenant, user);
 
-        var tag = CacheExtention.GetUserTag(tenant, user.Id);
         await _cache.RemoveByTagAsync(tag);
 
         return user;
@@ -246,9 +247,10 @@ public class CachedUserService : IUserService
 
     public async Task<Group> SaveGroupAsync(int tenant, Group group)
     {
+        var tag = CacheExtention.GetGroupTag(tenant, group.Id);
+
         group = await _service.SaveGroupAsync(tenant, group);
 
-        var tag = CacheExtention.GetGroupTag(tenant, group.Id);
         await _cache.RemoveByTagAsync(tag);
 
         return group;
@@ -271,13 +273,7 @@ public class CachedUserService : IUserService
         {
             var refs = await _service.GetUserGroupRefsAsync(tenant);
 
-            var tags = new List<string>();
-            foreach (var r in refs)
-            {
-                tags.Add(CacheExtention.GetGroupRefTag(tenant, r.Value.GroupId));
-            }
-
-            ctx.Tags = tags.ToArray();
+            ctx.Tags = [CacheExtention.GetGroupRefsTag(tenant)];
 
             return ctx.Modified(new UserGroupRefStore(refs));
         }, _cacheExpiration);
@@ -293,7 +289,7 @@ public class CachedUserService : IUserService
         {
             var groupRef = await _service.GetUserGroupRefAsync(tenant, groupId, refType);
 
-            ctx.Tags = [CacheExtention.GetGroupRefTag(tenant, groupId)];
+            ctx.Tags = [CacheExtention.GetGroupRefsTag(tenant)];
 
             return ctx.Modified(groupRef, lastModified: DateTime.UtcNow);
         }, _cacheExpiration);
@@ -305,7 +301,7 @@ public class CachedUserService : IUserService
     {
         r = await _service.SaveUserGroupRefAsync(tenant, r);
 
-        var tag = CacheExtention.GetGroupRefTag(tenant, r.GroupId);
+        var tag = CacheExtention.GetGroupRefsTag(tenant);
         await _cache.RemoveByTagAsync(tag);
 
         return r;
@@ -317,7 +313,7 @@ public class CachedUserService : IUserService
 
         var r = new UserGroupRef(userId, groupId, refType) { TenantId = tenant, Removed = true };
 
-        var tag = CacheExtention.GetGroupRefTag(tenant, groupId);
+        var tag = CacheExtention.GetGroupRefsTag(tenant);
         await _cache.RemoveByTagAsync(tag);
     }
 
@@ -330,7 +326,7 @@ public class CachedUserService : IUserService
         {
             var users = await _service.GetUsersAsync(tenant);
 
-            ctx.Tags = users.Select(u => CacheExtention.GetUserTag(tenant, u.Id)).ToArray();
+            ctx.Tags = [CacheExtention.GetUserTag(tenant, Guid.Empty), .. users.Select(u => CacheExtention.GetUserTag(tenant, u.Id))];
 
             return ctx.Modified(users);
         }, _cacheExpiration);
@@ -345,7 +341,7 @@ public class CachedUserService : IUserService
         var groups = await _cache.GetOrSetAsync<IEnumerable<Group>>(key, async (ctx, token) =>
         {
             var groups = await _service.GetGroupsAsync(tenant);
-            ctx.Tags = groups.Select(g => CacheExtention.GetGroupTag(tenant, g.Id)).ToArray();
+            ctx.Tags = [CacheExtention.GetGroupTag(tenant, Guid.Empty), .. groups.Select(g => CacheExtention.GetGroupTag(tenant, g.Id))];
 
             return ctx.Modified(groups);
         }, _cacheExpiration);

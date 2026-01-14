@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -95,10 +95,7 @@ public class CoEditingConfig
     /// <summary>
     /// The co-editing mode (fast or strict).
     /// </summary>
-    public CoEditingConfigMode Mode
-    {
-        get { return Fast ? CoEditingConfigMode.Fast : CoEditingConfigMode.Strict; }
-    }
+    public CoEditingConfigMode Mode => Fast ? CoEditingConfigMode.Fast : CoEditingConfigMode.Strict;
 }
 
 /// <summary>
@@ -129,7 +126,8 @@ public class Configuration<T>(
         { FileType.Document, "word" },
         { FileType.Spreadsheet, "cell" },
         { FileType.Presentation, "slide" },
-        { FileType.Pdf, "pdf" }
+        { FileType.Pdf, "pdf" },
+        { FileType.Diagram, "diagram" }
     };
 
     /// <summary>
@@ -165,7 +163,7 @@ public class Configuration<T>(
         set => Document.Info.Type = value;
         get => Document.Info.Type;
     }
-    
+
     public string Error { get; set; }
 
     /// <summary>
@@ -193,13 +191,12 @@ public class Configuration<T>(
 [Transient(GenericArguments = [typeof(int)])]
 [Transient(GenericArguments = [typeof(string)])]
 public class DocumentConfig<T>(
-    DocumentServiceConnector documentServiceConnector, 
-    PathProvider pathProvider, 
-    InfoConfig<T> infoConfig, 
+    DocumentServiceConnector documentServiceConnector,
+    PathProvider pathProvider,
+    InfoConfig<T> infoConfig,
     TenantManager tenantManager)
 {
     private string _fileUri;
-    private string _key = string.Empty;
     private FileReferenceData _referenceData;
     public string GetFileType(File<T> file) => file.ConvertedExtension.Trim('.');
     public InfoConfig<T> Info { get; } = infoConfig;
@@ -207,21 +204,21 @@ public class DocumentConfig<T>(
 
     public string Key
     {
-        set => _key = value;
-        get => DocumentServiceConnector.GenerateRevisionId(_key);
-    }
+        set;
+        get => DocumentServiceConnector.GenerateRevisionId(field);
+    } = string.Empty;
 
     public PermissionsConfig Permissions { get; set; } = new();
-    
-	public Options Options { get; set; }
+
+    public Options Options { get; set; }
     public string SharedLinkParam { get; set; }
     public string SharedLinkKey { get; set; }
     public FileReferenceData GetReferenceData(File<T> file)
     {
         return _referenceData ??= new FileReferenceData
         {
-            FileKey = file.Id.ToString(), 
-            InstanceId = (tenantManager.GetCurrentTenantId()).ToString()
+            FileKey = file.Id.ToString(),
+            InstanceId = tenantManager.GetCurrentTenantId().ToString()
         };
     }
 
@@ -231,7 +228,7 @@ public class DocumentConfig<T>(
     {
         _fileUri = documentServiceConnector.ReplaceCommunityAddress(val);
     }
-    
+
     public string GetUrl(File<T> file)
     {
         if (!string.IsNullOrEmpty(_fileUri))
@@ -261,9 +258,12 @@ public class EditorConfiguration<T>(
     FilesSettingsHelper filesSettingsHelper,
     IDaoFactory daoFactory,
     EntryManager entryManager,
-    DocumentServiceTrackerHelper documentServiceTrackerHelper, 
+    DocumentServiceTrackerHelper documentServiceTrackerHelper,
     ExternalShare externalShare,
-    UserPhotoManager userPhotoManager)
+    UserPhotoManager userPhotoManager,
+    GlobalFolderHelper globalFolderHelper,
+    TariffService tariffService,
+    TenantManager tenantManager)
 {
     public PluginsConfig Plugins { get; } = pluginsConfig;
     public CustomizationConfig<T> Customization { get; } = customizationConfig;
@@ -274,28 +274,26 @@ public class EditorConfiguration<T>(
     public string Mode => ModeWrite ? "edit" : "view";
 
     public bool ModeWrite { get; set; }
-    
-    private UserInfo _userInfo;
-    private UserInfo UserInfo => _userInfo ??= userManager.GetUsers(authContext.CurrentAccount.ID);
+
+    private UserInfo UserInfo => field ??= userManager.GetUsers(authContext.CurrentAccount.ID);
 
     private UserConfig _user;
     public async Task<UserConfig> GetUserAsync()
     {
-        if (_user != null)
+        if (_user != null || UserInfo.Id.Equals(ASC.Core.Configuration.Constants.Guest.ID))
         {
             return _user;
-
         }
 
-        if (!UserInfo.Id.Equals(ASC.Core.Configuration.Constants.Guest.ID))
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenantManager.GetCurrentTenantId());
+            
+        _user = new UserConfig
         {
-            _user = new UserConfig
-            {
-                Id = UserInfo.Id.ToString(),
-                Name = UserInfo.DisplayUserName(false, displayUserSettingsHelper),
-                Image = baseCommonLinkUtility.GetFullAbsolutePath(await UserInfo.GetMediumPhotoURLAsync(userPhotoManager))
-            };
-        }
+            Id = UserInfo.Id.ToString(),
+            Name = UserInfo.DisplayUserName(false, displayUserSettingsHelper),
+            Image = baseCommonLinkUtility.GetFullAbsolutePath(await UserInfo.GetMediumPhotoURLAsync(userPhotoManager)),
+            CustomerId = customerInfo?.PortalId
+        };
 
         return _user;
     }
@@ -308,6 +306,11 @@ public class EditorConfiguration<T>(
         }
 
         var callbackUrl = documentServiceTrackerHelper.GetCallbackUrl(file.Id.ToString());
+
+        if (!string.IsNullOrEmpty(file.FormInfo?.FillingSessionId))
+        {
+            callbackUrl = externalShare.GetUrlWithFillingSessionId(callbackUrl, file.FormInfo.FillingSessionId);
+        }
 
         if (file.ShareRecord is not { IsLink: true } || string.IsNullOrEmpty(file.ShareRecord.Options?.Password))
         {
@@ -355,6 +358,10 @@ public class EditorConfiguration<T>(
                 title = FilesJSResource.TitleNewFilePresentation;
                 break;
 
+            case FileType.Pdf:
+                title = FilesJSResource.TitleNewFilePdfFormText;
+                break;
+
             default:
                 return null;
         }
@@ -366,12 +373,12 @@ public class EditorConfiguration<T>(
                + "&doctype=" + documentType
                + "&" + FilesLinkUtility.FileTitle + "=" + HttpUtility.UrlEncode(title);
     }
-    
+
     public EmbeddedConfig GetEmbedded(EditorType editorType)
     {
         return editorType == EditorType.Embedded ? embeddedConfig : null;
     }
-    
+
     public async IAsyncEnumerable<RecentConfig> GetRecent(FileType fileType, T fileId)
     {
         if (!authContext.IsAuthenticated || await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
@@ -390,63 +397,81 @@ public class EditorConfiguration<T>(
             FileType.Pdf => FilterType.Pdf,
             FileType.Spreadsheet => FilterType.SpreadsheetsOnly,
             FileType.Presentation => FilterType.PresentationsOnly,
+            FileType.Diagram => FilterType.DiagramsOnly,
             _ => FilterType.FilesOnly
         };
 
         var folderDao = daoFactory.GetFolderDao<int>();
-        var files = (await entryManager.GetRecentAsync(filter, false, Guid.Empty, string.Empty, null, false))
+        var recentId = await globalFolderHelper.FolderRecentAsync;
+        var recent = await folderDao.GetFolderAsync(recentId);
+
+        var (entries, _) = await entryManager.GetEntriesAsync(recent, null, 0, 10, [filter], false, Guid.Empty, Guid.Empty, String.Empty, null, false, false, new OrderBy(SortedByType.LastOpened, false));
+
+        var files = entries
             .Cast<File<int>>()
             .Where(file => file != null && !Equals(fileId, file.Id))
             .ToList();
 
         var parentIds = files.Select(r => r.ParentId).Distinct().ToList();
         var parentFolders = await folderDao.GetFoldersAsync(parentIds).ToListAsync();
-        
+
+
+
         foreach (var file in files)
         {
+            var externalMediaAccess = file.ShareRecord is { SubjectType: SubjectType.PrimaryExternalLink or SubjectType.ExternalLink };
+            var requestToken = "";
+            if (externalMediaAccess)
+            {
+                requestToken = await externalShare.CreateShareKeyAsync(file.ShareRecord.Subject);
+            }
+
+            var webUrl = externalShare.GetUrlWithShare(baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version, externalMediaAccess)), requestToken);
+
             yield return new RecentConfig
             {
                 Folder = parentFolders.FirstOrDefault(r => file.ParentId == r.Id)?.Title,
                 Title = file.Title,
-                Url = baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id))
+                Url = baseCommonLinkUtility.GetFullAbsolutePath(webUrl)
             };
         }
     }
 
     public async Task<List<TemplatesConfig>> GetTemplates(FileType fileType, string title)
     {
-            if (!authContext.IsAuthenticated || await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
-            {
-                return null;
-            }
+        if (!authContext.IsAuthenticated || await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
+        {
+            return null;
+        }
 
-            if (!await filesSettingsHelper.GetTemplatesSection())
-            {
-                return null;
-            }
+        if (!await filesSettingsHelper.GetTemplatesSection())
+        {
+            return null;
+        }
 
-            var extension = fileUtility.GetInternalExtension(title).TrimStart('.');
-            var filter = fileType switch
-            {
-                FileType.Document => FilterType.DocumentsOnly,
-                FileType.Pdf => FilterType.Pdf,
-                FileType.Spreadsheet => FilterType.SpreadsheetsOnly,
-                FileType.Presentation => FilterType.PresentationsOnly,
-                _ => FilterType.FilesOnly
-            };
+        var extension = fileUtility.GetInternalExtension(title).TrimStart('.');
+        var filter = fileType switch
+        {
+            FileType.Document => FilterType.DocumentsOnly,
+            FileType.Pdf => FilterType.Pdf,
+            FileType.Spreadsheet => FilterType.SpreadsheetsOnly,
+            FileType.Presentation => FilterType.PresentationsOnly,
+            FileType.Diagram => FilterType.DiagramsOnly,
+            _ => FilterType.FilesOnly
+        };
 
-            var folderDao = daoFactory.GetFolderDao<int>();
-            var fileDao = daoFactory.GetFileDao<int>();
-            var files = await entryManager.GetTemplatesAsync(folderDao, fileDao, filter, false, Guid.Empty, string.Empty, null, false).ToListAsync();
-            var listTemplates = from file in files
-                                select
-                                    new TemplatesConfig
-                                    {
-                                        Image = baseCommonLinkUtility.GetFullAbsolutePath("skins/default/images/filetype/thumb/" + extension + ".png"),
-                                        Title = file.Title,
-                                        Url = baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id))
-                                    };
-            return listTemplates.ToList();
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var fileDao = daoFactory.GetFileDao<int>();
+        var files = await entryManager.GetTemplatesAsync(folderDao, fileDao, filter, false, Guid.Empty, string.Empty, null, false).ToListAsync();
+        var listTemplates = from file in files
+                            select
+                                new TemplatesConfig
+                                {
+                                    Image = baseCommonLinkUtility.GetFullAbsolutePath("skins/default/images/filetype/thumb/" + extension + ".png"),
+                                    Title = file.Title,
+                                    Url = baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id))
+                                };
+        return listTemplates.ToList();
     }
 }
 
@@ -535,11 +560,6 @@ public class InfoConfig<T>(
 public class PermissionsConfig
 {
     /// <summary>
-    /// Specifies whether to display the "Restore" button when using the "onRequestRestore" event.
-    /// </summary>
-    public bool ChangeHistory { get; set; }
-
-    /// <summary>
     /// Defines if the document can be commented or not.
     /// </summary>
     public bool Comment { get; set; } = true;
@@ -581,11 +601,6 @@ public class PermissionsConfig
     public bool Print { get; set; } = true;
 
     /// <summary>
-    /// Specifies whether to display the "Rename..." button when using the "onRequestRename" event.
-    /// </summary>
-    public bool Rename { get; set; }
-
-    /// <summary>
     /// Defines if the document can be reviewed or not.
     /// </summary>
     public bool Review { get; set; } = true;
@@ -618,7 +633,7 @@ public class Options
 
         _ = stringBuilder.Append(WatermarkOnDraw.Width.ToString(CultureInfo.InvariantCulture));
         _ = stringBuilder.Append(WatermarkOnDraw.Height.ToString(CultureInfo.InvariantCulture));
-        _ = stringBuilder.Append(string.Join(',',WatermarkOnDraw.Margins));
+        _ = stringBuilder.Append(string.Join(',', WatermarkOnDraw.Margins));
         _ = stringBuilder.Append(WatermarkOnDraw.Fill);
         _ = stringBuilder.Append(WatermarkOnDraw.Rotate);
         _ = stringBuilder.Append(WatermarkOnDraw.Transparent.ToString(CultureInfo.InvariantCulture));
@@ -812,6 +827,11 @@ public class FileReferenceData
     /// Room ID
     /// </summary>
     public string RoomId { get; set; }
+
+    /// <summary>
+    /// Specifies if the room can be edited out or not.
+    /// </summary>
+    public bool CanEditRoom { get; set; }
 }
 
 #endregion Nested Classes
@@ -842,6 +862,7 @@ public class CustomerConfig(
 [Transient(GenericArguments = [typeof(string)])]
 public class CustomizationConfig<T>(
     CoreBaseSettings coreBaseSettings,
+    TenantManager tenantManager,
     SettingsManager settingsManager,
     FileUtility fileUtility,
     FilesSettingsHelper filesSettingsHelper,
@@ -853,12 +874,29 @@ public class CustomizationConfig<T>(
     CustomerConfig customerConfig,
     LogoConfig logoConfig,
     FileSharing fileSharing,
-    CommonLinkUtility commonLinkUtility)
+    CommonLinkUtility commonLinkUtility,
+    ExternalShare externalShare,
+    ExternalLinkHelper externalLinkHelper)
 {
     [JsonIgnore]
     public string GobackUrl;
 
-    public bool About => !coreBaseSettings.Standalone && !coreBaseSettings.CustomMode;
+    public async Task<bool> IsAboutPageVisible()
+    {
+        if (!coreBaseSettings.Standalone && !coreBaseSettings.CustomMode)
+        {
+            return true;
+        }
+
+        var quota = await tenantManager.GetCurrentTenantQuotaAsync();
+        if (!quota.Branding)
+        {
+            return true;
+        }
+
+        var companyWhiteLabelSettings = await settingsManager.LoadForDefaultTenantAsync<CompanyWhiteLabelSettings>();
+        return !companyWhiteLabelSettings.HideAbout;
+    }
 
     public CustomerConfig Customer { get; set; } = customerConfig;
 
@@ -891,15 +929,6 @@ public class CustomizationConfig<T>(
 
     public async Task<GobackConfig> GetGoBack(EditorType editorType, File<T> file)
     {
-        if (editorType == EditorType.Embedded)
-        {
-            return null;
-        }
-
-        if (!authContext.IsAuthenticated)
-        {
-            return null;
-        }
         if (GobackUrl != null)
         {
             return new GobackConfig
@@ -908,42 +937,78 @@ public class CustomizationConfig<T>(
             };
         }
 
-        var folderDao = daoFactory.GetFolderDao<T>();
+        Folder<T> parent;
+        var folderDao = daoFactory.GetCacheFolderDao<T>();
+        var (shareRight, key) = await CheckLinkAsync(file);
+
+        if (!authContext.IsAuthenticated)
+        {
+            if (shareRight != FileShare.Restrict && !string.IsNullOrEmpty(key))
+            {
+                parent = await folderDao.GetFolderAsync(file.ParentId);
+                return new GobackConfig
+                {
+                    Url = pathProvider.GetFolderUrl(parent, key)
+                };
+            }
+        }
+
         try
         {
-            var parent = await folderDao.GetFolderAsync(file.ParentId);
-            if (file.RootFolderType == FolderType.USER && 
-                !Equals(file.RootId, await globalFolderHelper.FolderMyAsync) && 
-                !await fileSecurity.CanReadAsync(parent))
+
+            parent = await folderDao.GetFolderAsync(file.ParentId);
+
+            if (file.RootFolderType == FolderType.USER && !Equals(file.RootId, await globalFolderHelper.FolderMyAsync))
             {
-                if (await fileSecurity.CanReadAsync(file))
+                if (!await fileSecurity.CanReadAsync(file))
                 {
-                    return new GobackConfig
-                    {
-                        Url = await pathProvider.GetFolderUrlByIdAsync(await globalFolderHelper.FolderShareAsync)
-                    };
+                    return null;
                 }
 
-                return null;
+                string url;
+
+                if (parent.FolderType != FolderType.USER && await fileSecurity.CanReadAsync(parent))
+                {
+                    parent.RootFolderType = FolderType.SHARE;
+                    url = pathProvider.GetFolderUrl(parent, key);
+                    parent.RootFolderType = FolderType.USER;
+                }
+                else
+                {
+                    url = pathProvider.GetFolderUrl(await folderDao.GetFolderAsync(await globalFolderHelper.GetFolderShareAsync<T>()), key);
+                }
+
+                return new GobackConfig
+                {
+                    Url = url
+                };
             }
 
-            if (file.Encrypted && 
-                file.RootFolderType == FolderType.Privacy && 
-                !await fileSecurity.CanReadAsync(parent))
+            var canReadParent = await fileSecurity.CanReadAsync(parent);
+
+            if (file.Encrypted &&
+                file.RootFolderType == FolderType.Privacy &&
+                !canReadParent)
             {
                 parent = await folderDao.GetFolderAsync(await globalFolderHelper.GetFolderPrivacyAsync<T>());
             }
 
+            if (file.RootFolderType == FolderType.VirtualRooms &&
+                !canReadParent)
+            {
+                parent = await folderDao.GetFolderAsync(await globalFolderHelper.GetFolderShareAsync<T>());
+            }
+
             return new GobackConfig
             {
-                Url = await pathProvider.GetFolderUrlAsync(parent)
+                Url = pathProvider.GetFolderUrl(parent, key)
             };
         }
         catch (Exception)
         {
             return null;
         }
-        
+
     }
 
     public LogoConfig Logo { get; set; } = logoConfig;
@@ -952,25 +1017,51 @@ public class CustomizationConfig<T>(
     {
         return authContext.IsAuthenticated
                && !file.Encrypted
-               && await FileSharing.CanSetAccessAsync(file);
+               && await fileSharing.CanSetAccessAsync(file);
     }
 
-    public string GetReviewDisplay(bool modeWrite)
+    public ReviewConfig GetReview(bool modeWrite)
     {
-        return modeWrite ? null : "markup";
+        return modeWrite ? null : new ReviewConfig { ReviewDisplayEnum = ReviewDisplayEnum.Markup };
     }
 
     public async Task<SubmitForm> GetSubmitForm(File<T> file)
     {
+        if (!file.IsForm)
+        {
+            return null;
+        }
         var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
         return new SubmitForm
         {
-            Visible = file.RootFolderType != FolderType.Archive && await fileSecurity.CanFillFormsAsync(file) && (properties is { FormFilling.StartFilling: true } or { FormFilling.CollectFillForm: true }),
+            Visible = file.RootFolderType != FolderType.Archive && await fileSecurity.CanFillFormAsync(file, authContext.CurrentAccount.ID) && properties is { FormFilling.StartFilling: true } or { FormFilling.CollectFillForm: true },
             ResultMessage = ""
         };
     }
 
-    private FileSharing FileSharing { get; } = fileSharing;
+    private async Task<(FileShare, string)> CheckLinkAsync(File<T> file)
+    {
+        var linkRight = FileShare.Restrict;
+
+        var key = externalShare.GetKey();
+        if (string.IsNullOrEmpty(key))
+        {
+            return (linkRight, key);
+        }
+
+        var result = await externalLinkHelper.ValidateAsync(key);
+        if (result.Access == FileShare.Restrict)
+        {
+            return (linkRight, key);
+        }
+
+        if (file != null && await fileSecurity.CanDownloadAsync(file))
+        {
+            linkRight = result.Access;
+        }
+
+        return (linkRight, key);
+    }
 }
 
 /// <summary>
@@ -982,7 +1073,11 @@ public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLi
     /// <summary>
     /// The absolute URL to the document serving as a source file for the document embedded into the web page.
     /// </summary>
-    public string EmbedUrl => ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey, StringComparison.Ordinal) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=embedded" + ShareLinkParam) : null;
+    public string EmbedUrl
+    {
+        get => field ?? (ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey, StringComparison.Ordinal) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=embedded" + ShareLinkParam) : null);
+        set;
+    }
 
     /// <summary>
     /// The absolute URL that will allow the document to be saved onto the user personal computer.
@@ -997,7 +1092,11 @@ public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLi
     /// <summary>
     /// The absolute URL that will allow other users to share this document.
     /// </summary>
-    public string ShareUrl => ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=view" + ShareLinkParam) : null;
+    public string ShareUrl
+    {
+        get => field ?? (ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=view" + ShareLinkParam) : null);
+        set;
+    }
 
     /// <summary>
     /// The place for the embedded viewer toolbar, can be either "top" or "bottom".
@@ -1039,7 +1138,7 @@ public class FeedbackConfig
     /// <summary>
     /// Shows or hides the "Feedback &amp; Support" menu button.
     /// </summary>
-    public bool Visible { get => true; }
+    public bool Visible => true;
 }
 
 /// <summary>
@@ -1053,35 +1152,63 @@ public class GobackConfig
     public string Url { get; set; }
 }
 
+public class ReviewConfig
+{
+    public string ReviewDisplay { get; private set; }
+
+    [JsonIgnore]
+    public ReviewDisplayEnum ReviewDisplayEnum { set => ReviewDisplay = value.ToStringLowerFast(); }
+}
+
+[EnumExtensions]
+public enum ReviewDisplayEnum
+{
+    Markup,
+    Simple,
+    Final,
+    Original
+}
+
 [Transient]
 public class LogoConfig(
     CommonLinkUtility commonLinkUtility,
     TenantLogoHelper tenantLogoHelper)
 {
 
-    public async Task<string> GetImage(EditorType editorType)
+    public async Task<string> GetImage(FileType fileType, EditorType editorType)
     {
-        return editorType == EditorType.Embedded
-                ? commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditorEmbed))
-                : commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditor));
+        var logoType = WhiteLabelLogoTypeHelper.GetEditorLogoType(fileType, editorType == EditorType.Embedded);
+
+        return commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(logoType));
     }
 
-    public async Task<string> GetImageDark()
+    public async Task<string> GetImageLight(FileType fileType)
     {
-        return commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditor));
+        var logoType = WhiteLabelLogoTypeHelper.GetEditorLogoType(fileType, embed: true);
+
+        return commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(logoType));
     }
 
-    public async Task<string> GetImageEmbedded(EditorType editorType)
+    public async Task<string> GetImageDark(FileType fileType)
     {
-        return editorType != EditorType.Embedded
-                ? null
-                : commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(WhiteLabelLogoType.DocsEditorEmbed));
+        var logoType = WhiteLabelLogoTypeHelper.GetEditorLogoType(fileType, embed: false);
+
+        return commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(logoType));
     }
 
-    public string Url
+    public async Task<string> GetImageEmbedded(FileType fileType, EditorType editorType)
     {
-        get => commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetDefault());
+        if (editorType != EditorType.Embedded)
+        {
+            return null;
+        }
+
+        var logoType = WhiteLabelLogoTypeHelper.GetEditorLogoType(fileType, true);
+
+        return commonLinkUtility.GetFullAbsolutePath(await tenantLogoHelper.GetLogo(logoType));
     }
+
+    public string Url => commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetDefault());
 
     public bool GetVisible(EditorType editorType)
     {
@@ -1094,10 +1221,10 @@ public class LogoConfig(
 /// </summary>
 [Transient]
 public class PluginsConfig
-    // ConsumerFactory consumerFactory,
-    // BaseCommonLinkUtility baseCommonLinkUtility,
-    // CoreBaseSettings coreBaseSettings,
-    // TenantManager tenantManager)
+// ConsumerFactory consumerFactory,
+// BaseCommonLinkUtility baseCommonLinkUtility,
+// CoreBaseSettings coreBaseSettings,
+// TenantManager tenantManager)
 {
     // private readonly BaseCommonLinkUtility _baseCommonLinkUtility = baseCommonLinkUtility;
     //
@@ -1109,34 +1236,25 @@ public class PluginsConfig
     /// <summary>
     /// The array of absolute URLs to the plugin configuration files.
     /// </summary>
-    public string[] PluginsData
-    {
-        get
-        {
-            //var plugins = new List<string>();
-
-            //if (_coreBaseSettings.Standalone || !_tenantManager.GetCurrentTenantQuota().Free)
-            //{
-            //    var easyBibHelper = _consumerFactory.Get<EasyBibHelper>();
-            //    if (!string.IsNullOrEmpty(easyBibHelper.AppKey))
-            //    {
-            //        plugins.Add(_baseCommonLinkUtility.GetFullAbsolutePath("ThirdParty/plugin/easybib/config.json"));
-            //    }
-
-            //    var wordpressLoginProvider = _consumerFactory.Get<WordpressLoginProvider>();
-            //    if (!string.IsNullOrEmpty(wordpressLoginProvider.ClientID) &&
-            //        !string.IsNullOrEmpty(wordpressLoginProvider.ClientSecret) &&
-            //        !string.IsNullOrEmpty(wordpressLoginProvider.RedirectUri))
-            //    {
-            //        plugins.Add(_baseCommonLinkUtility.GetFullAbsolutePath("ThirdParty/plugin/wordpress/config.json"));
-            //    }
-            //}
-
-            //return plugins.ToArray();
-
-            return [];
-        }
-    }
+    public string[] PluginsData =>
+        //var plugins = new List<string>();
+        //if (_coreBaseSettings.Standalone || !_tenantManager.GetCurrentTenantQuota().Free)
+        //{
+        //    var easyBibHelper = _consumerFactory.Get<EasyBibHelper>();
+        //    if (!string.IsNullOrEmpty(easyBibHelper.AppKey))
+        //    {
+        //        plugins.Add(_baseCommonLinkUtility.GetFullAbsolutePath("ThirdParty/plugin/easybib/config.json"));
+        //    }
+        //    var wordpressLoginProvider = _consumerFactory.Get<WordpressLoginProvider>();
+        //    if (!string.IsNullOrEmpty(wordpressLoginProvider.ClientID) &&
+        //        !string.IsNullOrEmpty(wordpressLoginProvider.ClientSecret) &&
+        //        !string.IsNullOrEmpty(wordpressLoginProvider.RedirectUri))
+        //    {
+        //        plugins.Add(_baseCommonLinkUtility.GetFullAbsolutePath("ThirdParty/plugin/wordpress/config.json"));
+        //    }
+        //}
+        //return plugins.ToArray();
+        [];
 }
 
 /// <summary>
@@ -1207,4 +1325,6 @@ public class UserConfig
     /// Roles
     /// </summary>
     public List<string> Roles { get; set; }
+    
+    public string CustomerId { get; set; }
 }

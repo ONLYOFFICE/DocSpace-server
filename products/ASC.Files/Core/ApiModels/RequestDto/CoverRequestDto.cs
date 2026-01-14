@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -57,5 +57,5 @@ public class CoverRequestDto<T>
     /// The request parameters to change the room cover.
     /// </summary>
     [FromBody]
-    public CoverRequestDto Cover { get; set; } = null;
+    public required CoverRequestDto Cover { get; set; } = null;
 }

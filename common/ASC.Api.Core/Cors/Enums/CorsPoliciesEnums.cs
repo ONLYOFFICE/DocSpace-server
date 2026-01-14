@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,5 +28,5 @@ namespace ASC.Api.Core.Cors.Enums;
 public static class CorsPoliciesEnums
 {
     public const string AllowAllCorsPolicyName = "AllowAllCorsPolicyName";
-    public const string DynamicCorsPolicyName = "DynamicCorsPolicy";   
+    public const string DynamicCorsPolicyName = "DynamicCorsPolicy";
 }

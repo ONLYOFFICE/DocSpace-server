@@ -120,11 +120,14 @@
   <data name="AceShareLink" xml:space="preserve">
     <value>Spoljašnji portal</value>
   </data>
+  <data name="AceStatusEnum_Collaborator" xml:space="preserve">
+    <value>Saradnik</value>
+  </data>
   <data name="AceStatusEnum_Comment" xml:space="preserve">
     <value>Komentar</value>
   </data>
-  <data name="AceStatusEnum_Collaborator" xml:space="preserve">
-    <value>Saradnik</value>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Kreator sadržaja</value>
   </data>
   <data name="AceStatusEnum_CustomFilter" xml:space="preserve">
     <value>Prilagođeni filter</value>
@@ -147,8 +150,14 @@
   <data name="AceStatusEnum_Review" xml:space="preserve">
     <value>Pregled</value>
   </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Menadžer sobe</value>
+  </data>
   <data name="Admin" xml:space="preserve">
     <value>Administrator</value>
+  </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>Menadžer agenata</value>
   </data>
   <data name="AppAccessDenied" xml:space="preserve">
     <value>Da biste radili sa datotekom morate odobriti pristup</value>
@@ -159,11 +168,11 @@
   <data name="CommentAutosave" xml:space="preserve">
     <value>Automatski sačuvano</value>
   </data>
-  <data name="CommentConvert" xml:space="preserve">
-    <value>Konvertovano od {0}</value>
-  </data>
   <data name="CommentChangeOwner" xml:space="preserve">
     <value>Promenjen vlasnik</value>
+  </data>
+  <data name="CommentConvert" xml:space="preserve">
+    <value>Konvertovano od {0}</value>
   </data>
   <data name="CommentCopy" xml:space="preserve">
     <value>Kopirano</value>
@@ -204,14 +213,17 @@
   <data name="CommentUpload" xml:space="preserve">
     <value>Otpremljeno</value>
   </data>
-  <data name="DocuSignStatusDeclined" xml:space="preserve">
-    <value>Odbijeno</value>
+  <data name="Date" xml:space="preserve">
+    <value>Datum</value>
   </data>
   <data name="DefaultExternalLinkTitle" xml:space="preserve">
     <value>Deljeni link</value>
   </data>
   <data name="DefaultInvitationLinkTitle" xml:space="preserve">
     <value>Pozivni link</value>
+  </data>
+  <data name="DocuSignStatusDeclined" xml:space="preserve">
+    <value>Odbijeno</value>
   </data>
   <data name="DocuSignStatusError" xml:space="preserve">
     <value>Bila je greška u toku pošalji operacije</value>
@@ -237,9 +249,6 @@
   <data name="ErrorMessage_DocServiceException" xml:space="preserve">
     <value>Došlo je do greške u Servisu za dokumente</value>
   </data>
-  <data name="ErrorMessage_EditingCoauth" xml:space="preserve">
-    <value>Datoteka je otvorena za uređivanje {0}. Trenutno, funkcija zajedničkog uređivanja nije podržana za ovaj format datoteke.</value>
-  </data>
   <data name="ErrorMessage_EditingMobile" xml:space="preserve">
     <value>Datoteka je otvorena za uređivanje u mobilnoj aplikaciji od strane {0}</value>
   </data>
@@ -255,11 +264,17 @@
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Datoteka veća od {0} neće biti pomerena</value>
   </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Pomeranje nekoliko datoteka u prostoriju za Popunjavanje Formulara nije podržano. Pomerajte jedan po jedan ONLYOFFICE PDF.</value>
+  </data>
   <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
     <value>Nova verzija ne može biti ista kao trenutna</value>
   </data>
   <data name="ErrorMessage_FolderCopyError" xml:space="preserve">
     <value>Ne možete kopirati folder u njegov podfolder</value>
+  </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Pomeranje foldera u prostoriju za Popunjavanje Formulara nije podržano. Pomerajte jedan po jedan ONLYOFFICE PDF.</value>
   </data>
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Potreban folder nije pronađen</value>
@@ -287,6 +302,9 @@
   </data>
   <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
     <value>Maksimalni broj linkova možda neće prekoračiti {0}</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Datoteka ne može biti pomerena u ovu prostoriju. Molimo pokušajte da pomerite ONLYOFFICE PDF formular.</value>
   </data>
   <data name="ErrorMessage_NotSupportedFormat" xml:space="preserve">
     <value>Žao nam je, ovaj format nije podržan</value>
@@ -348,6 +366,9 @@
   <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
     <value>Nemate dozvolu da uredite sobu</value>
   </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Nije moguće obrisati trenutnu verziju fajla</value>
+  </data>
   <data name="ErrorMessage_SecurityException_MoveFile" xml:space="preserve">
     <value>Nemate dovoljno dozvola da pomerite datoteku</value>
   </data>
@@ -393,6 +414,9 @@
   <data name="ErrorMessage_UpdateEditingFile" xml:space="preserve">
     <value>Ne možete ažurirati datoteku koja je otvorena za uređivanje</value>
   </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Datoteka ne može biti otpremljena u ovu prostoriju. Molimo pokušajte da otpremite ONLYOFFICE PDF formular.</value>
+  </data>
   <data name="ErrorMessage_UserNotFound" xml:space="preserve">
     <value>Korisnik nije pronađen</value>
   </data>
@@ -405,11 +429,29 @@
   <data name="Everyone" xml:space="preserve">
     <value>Svi</value>
   </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Spoljni korisnik</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Link za popunjavanje</value>
+  </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>Dokumenti korisnika {0} {1}</value>
+  </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Broj formulara</value>
+  </data>
   <data name="Guest" xml:space="preserve">
     <value>Anonimno</value>
   </data>
   <data name="IndexTitle" xml:space="preserve">
     <value>Pretraži u sadržaju dokumenta</value>
+  </data>
+  <data name="KnowledgeFolder" xml:space="preserve">
+    <value>Znanje</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Link ka formularu</value>
   </data>
   <data name="MessageFileCreated" xml:space="preserve">
     <value>Datoteka kreirana u folderu "{0}"</value>
@@ -422,6 +464,9 @@
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Datoteka više nije nacrt za popunjavanje obrasca.</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Otvori fajl</value>
   </data>
   <data name="ProductAdminOpportunities" xml:space="preserve">
     <value>Uradite isto kao korisnik|Povežite Dropbox, Box i druge naloge u "Zajedničkom" odeljku|Postavite prava pristupa dokumentima i folderima u "Zajedničkom" odeljku</value>
@@ -442,11 +487,17 @@ Najviša kompatibilnost sa docx, xlsx, pptx.</value>
   <data name="ProductUserOpportunities" xml:space="preserve">
     <value>Kreirajte i uređujte sopstvene dokumente kao i deljene dokumente sa odgovarajućim pravima pristupa|Omogućite pristup za čitanje/uređivanje drugim korisnicima dokumentima i folderima|Povežite Dropbox, Box i druge naloge u odeljku 'Dokumenti'</value>
   </data>
+  <data name="ResultStorageFolder" xml:space="preserve">
+    <value>Skladištenje rezultata</value>
+  </data>
   <data name="RoleEnum_Collaborator" xml:space="preserve">
     <value>Saradnik</value>
   </data>
   <data name="RoleEnum_Comment" xml:space="preserve">
     <value>Komentator</value>
+  </data>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Kreator sadržaja</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
     <value>DocSpace Administrator</value>
@@ -457,11 +508,20 @@ Najviša kompatibilnost sa docx, xlsx, pptx.</value>
   <data name="RoleEnum_FillForms" xml:space="preserve">
     <value>Popunjivač obrasca</value>
   </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>Gost</value>
+  </data>
   <data name="RoleEnum_Read" xml:space="preserve">
     <value>Posmatrač</value>
   </data>
   <data name="RoleEnum_Review" xml:space="preserve">
     <value>Pregledač</value>
+  </data>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Administrator sobe</value>
+  </data>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Menadžer sobe</value>
   </data>
   <data name="RoleEnum_User" xml:space="preserve">
     <value>Korisnik</value>
@@ -508,6 +568,12 @@ Najviša kompatibilnost sa docx, xlsx, pptx.</value>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Tip</value>
   </data>
+  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
+    <value>Podeli za popunjavanje</value>
+  </data>
+  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
+    <value>Započni popunjavanje</value>
+  </data>
   <data name="UnknownFirstName" xml:space="preserve">
     <value>Ime</value>
   </data>
@@ -517,58 +583,7 @@ Najviša kompatibilnost sa docx, xlsx, pptx.</value>
   <data name="UnlockComment" xml:space="preserve">
     <value>Datoteka je otključana</value>
   </data>
-  <data name="Date" xml:space="preserve">
-    <value>Datum</value>
-  </data>
   <data name="User" xml:space="preserve">
     <value>Korisnik</value>
-  </data>
-  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Pomeranje nekoliko datoteka u prostoriju za Popunjavanje Formulara nije podržano. Pomerajte jedan po jedan {0} PDF.</value>
-  </data>
-  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Pomeranje foldera u prostoriju za Popunjavanje Formulara nije podržano. Pomerajte jedan po jedan {0} PDF.</value>
-  </data>
-  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Datoteka ne može biti pomerena u ovu prostoriju. Molimo pokušajte da pomerite {0} PDF formular.</value>
-  </data>
-  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Datoteka ne može biti otpremljena u ovu prostoriju. Molimo pokušajte da otpremite {0} PDF formular.</value>
-  </data>
-  <data name="FillOutExternalLinkTitle" xml:space="preserve">
-    <value>Link za popunjavanje</value>
-  </data>
-  <data name="LinkToForm" xml:space="preserve">
-    <value>Link ka formularu</value>
-  </data>
-  <data name="FormNumber" xml:space="preserve">
-    <value>Broj formulara</value>
-  </data>
-  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
-    <value>Menadžer sobe</value>
-  </data>
-  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
-    <value>Kreator sadržaja</value>
-  </data>
-  <data name="ExternalUser" xml:space="preserve">
-    <value>Spoljni korisnik</value>
-  </data>
-  <data name="RoleEnum_RoomManager" xml:space="preserve">
-    <value>Menadžer sobe</value>
-  </data>
-  <data name="RoleEnum_ContentCreator" xml:space="preserve">
-    <value>Kreator sadržaja</value>
-  </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Otvori fajl</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
-    <value>Nije moguće obrisati trenutnu verziju fajla</value>
-  </data>
-  <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
-    <value>Podeli za popunjavanje</value>
-  </data>
-  <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
-    <value>Započni popunjavanje</value>
   </data>
 </root>

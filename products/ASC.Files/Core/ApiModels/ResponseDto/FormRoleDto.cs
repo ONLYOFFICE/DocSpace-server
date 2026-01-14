@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,13 +30,13 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 /// The form role parameters.
 /// </summary>
 public class FormRoleDto
-{ 
+{
 
     /// <summary>
     /// The role name.
     /// </summary>
-    public string RoleName { get; set; }
-    
+    public required string RoleName { get; set; }
+
     /// <summary>
     /// The role color.
     /// </summary>
@@ -50,12 +50,12 @@ public class FormRoleDto
     /// <summary>
     /// The role sequence.
     /// </summary>
-    public int Sequence { get; set; }
+    public required int Sequence { get; set; }
 
     /// <summary>
     /// Specifies if the role is submitted.
     /// </summary>
-    public bool Submitted { get; set; }
+    public required bool Submitted { get; set; }
 
     /// <summary>
     /// The user who stopped the role.

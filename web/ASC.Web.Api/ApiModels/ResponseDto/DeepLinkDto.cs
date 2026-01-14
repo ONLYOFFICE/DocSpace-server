@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,15 +34,15 @@ public class DeepLinkDto
     /// <summary>
     /// The Android package name.
     /// </summary>
-    public string AndroidPackageName { get; set; }
+    public required string AndroidPackageName { get; set; }
 
     /// <summary>
     /// The deep link URL. 
     /// </summary>
-    public string Url { get; set; }
+    public required string Url { get; set; }
 
     /// <summary>
     /// The deep link IOS package ID.
     /// </summary>
-    public string IosPackageId { get; set; }
+    public required string IosPackageId { get; set; }
 }

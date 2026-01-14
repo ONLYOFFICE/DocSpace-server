@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,10 +34,10 @@ public class CoversResultDto
     /// <summary>
     /// The cover unique identifier.
     /// </summary>
-    public string Id { get; set; }
+    public required string Id { get; set; }
 
     /// <summary>
     /// The cover image data.
     /// </summary>
-    public string Data { get; set; }
+    public required string Data { get; set; }
 }

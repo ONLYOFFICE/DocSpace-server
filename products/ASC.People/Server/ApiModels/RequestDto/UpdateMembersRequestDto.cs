@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -57,7 +57,7 @@ public class UpdateMemberStatusRequestDto
     /// The request parameters for updating the user information.
     /// </summary>
     [FromBody]
-    public UpdateMembersRequestDto UpdateMembers { get; set; }
+    public required UpdateMembersRequestDto UpdateMembers { get; set; }
 }
 
 /// <summary>
@@ -75,7 +75,7 @@ public class UpdateMemberTypeRequestDto
     /// The request parameters for updating the user information.
     /// </summary>
     [FromBody]
-    public UpdateMembersRequestDto UpdateMembers { get; set; }
+    public required UpdateMembersRequestDto UpdateMembers { get; set; }
 }
 
 /// <summary>
@@ -93,5 +93,5 @@ public class UpdateMemberActivationStatusRequestDto
     /// The request parameters for updating the user information.
     /// </summary>
     [FromBody]
-    public UpdateMembersRequestDto UpdateMembers { get; set; }
+    public required UpdateMembersRequestDto UpdateMembers { get; set; }
 }

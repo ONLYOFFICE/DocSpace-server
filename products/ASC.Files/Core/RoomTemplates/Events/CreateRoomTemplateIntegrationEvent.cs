@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -45,7 +45,7 @@ public record CreateRoomTemplateIntegrationEvent : IntegrationEvent
     public IEnumerable<string> Emails { get; set; }
 
     [ProtoMember(11)]
-    public IEnumerable<Guid> Groups { get; set; } 
+    public IEnumerable<Guid> Groups { get; set; }
     [ProtoMember(12)]
     public string TaskId { get; set; }
 

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,21 +33,14 @@ namespace ASC.Files.Core;
 /// </summary>
 public abstract class FileEntry : ICloneable
 {
-    /// <summary>
-    /// The file entry helper.
-    /// </summary>
     [JsonIgnore]
-    public FileHelper FileHelper { get; set; }
-
-    [JsonIgnore] 
-    private Global Global { get; }
+    public IServiceProvider ServiceProvider { get; set; }
 
     protected FileEntry() { }
 
-    protected FileEntry(FileHelper fileHelper, Global global)
+    protected FileEntry(IServiceProvider serviceProvider)
     {
-        FileHelper = fileHelper;
-        Global = global;
+        ServiceProvider = serviceProvider;
     }
 
     /// <summary>
@@ -61,13 +54,18 @@ public abstract class FileEntry : ICloneable
     public Guid CreateBy { get; set; }
 
     /// <summary>
+    /// Identifies the user who has shared the file entry.
+    /// </summary>
+    public Guid? SharedBy { get; set; }
+
+    /// <summary>
     /// The name of the user who created the file entry.
     /// </summary>
     [JsonIgnore]
     public string CreateByString
     {
-        get => !CreateBy.Equals(Guid.Empty) ? Global.GetUserNameAsync(CreateBy).Result : _createByString;
-        set => _createByString = value;
+        get => !CreateBy.Equals(Guid.Empty) ? ServiceProvider.GetService<Global>().GetUserNameAsync(CreateBy).Result : field;
+        set;
     }
 
     /// <summary>
@@ -81,8 +79,8 @@ public abstract class FileEntry : ICloneable
     [JsonIgnore]
     public string ModifiedByString
     {
-        get => !ModifiedBy.Equals(Guid.Empty) ? Global.GetUserNameAsync(ModifiedBy).Result : _modifiedByString;
-        set => _modifiedByString = value;
+        get => !ModifiedBy.Equals(Guid.Empty) ? ServiceProvider.GetService<Global>().GetUserNameAsync(ModifiedBy).Result : field;
+        set;
     }
 
     /// <summary>
@@ -108,9 +106,22 @@ public abstract class FileEntry : ICloneable
     public FileShare Access { get; set; }
 
     /// <summary>
-    /// Specifies if the file entry shared or not.
+    /// Specifies if the file entry shared via link or not.
     /// </summary>
     public bool Shared { get; set; }
+
+    /// <summary>
+    /// Specifies if the file entry shared for user or not.
+    /// </summary>
+    public bool SharedForUser { get; set; }
+
+    /// <summary>
+    /// Indicates whether the parent entity is shared.
+    /// </summary>
+    public bool ParentShared { get; set; }
+
+    [JsonIgnore]
+    public bool FullShared => Shared || ParentShared;
 
     /// <summary>
     /// The provider ID.
@@ -149,6 +160,11 @@ public abstract class FileEntry : ICloneable
     public FolderType? ParentRoomType { get; set; }
 
     /// <summary>
+    /// Indicates the unique identifier of the user who created the parent room, if applicable.
+    /// </summary>
+    public Guid? ParentRoomCreatedBy { get; set; }
+
+    /// <summary>
     /// The ID of the user who created the root folder of the file entry.
     /// </summary>
     public Guid RootCreateBy { get; set; }
@@ -182,9 +198,6 @@ public abstract class FileEntry : ICloneable
     /// The order of the file entry.
     /// </summary>
     public int Order { get; set; }
-
-    private string _modifiedByString;
-    private string _createByString;
 
     /// <summary>
     /// Converts the file entry object to the string.
@@ -243,17 +256,13 @@ public abstract class FileEntry<T> : FileEntry, IEquatable<FileEntry<T>>
     /// </summary>
     public IDictionary<FilesSecurityActions, bool> Security { get; set; }
 
-    private T _folderIdDisplay;
-    private readonly SecurityContext _securityContext;
+    public IDictionary<Guid, IDictionary<FilesSecurityActions, bool>> SecurityByUsers { get; set; } = new Dictionary<Guid, IDictionary<FilesSecurityActions, bool>>();
+
 
     protected FileEntry() { }
 
-    protected FileEntry(
-        FileHelper fileHelper,
-        Global global,
-        SecurityContext securityContext) : base(fileHelper, global)
+    protected FileEntry(IServiceProvider serviceProvider) : base(serviceProvider)
     {
-        _securityContext = securityContext;
     }
 
     /// <summary>
@@ -261,8 +270,8 @@ public abstract class FileEntry<T> : FileEntry, IEquatable<FileEntry<T>>
     /// </summary>
     public T FolderIdDisplay
     {
-        get => !EqualityComparer<T>.Default.Equals(_folderIdDisplay, default) ? _folderIdDisplay : ParentId;
-        set => _folderIdDisplay = value;
+        get => !EqualityComparer<T>.Default.Equals(field, default) ? field : ParentId;
+        set;
     }
 
     /// <summary>
@@ -302,7 +311,7 @@ public abstract class FileEntry<T> : FileEntry, IEquatable<FileEntry<T>>
                 RootFolderType is FolderType.USER or FolderType.DEFAULT or FolderType.TRASH ?
                     RootCreateBy :
 
-                    RootFolderType == FolderType.Privacy && CreateBy == _securityContext.CurrentAccount.ID ?
+                    RootFolderType == FolderType.Privacy && CreateBy == ServiceProvider.GetService<SecurityContext>().CurrentAccount.ID ?
                         CreateBy :
                         ASC.Core.Configuration.Constants.CoreSystem.ID;
 

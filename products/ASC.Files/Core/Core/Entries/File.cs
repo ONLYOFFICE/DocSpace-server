@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,6 +23,8 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+using ASC.Files.Core.Mapping;
 
 namespace ASC.Files.Core;
 
@@ -64,7 +66,7 @@ public enum FileStatus
 }
 
 /// <summary>
-/// The file parameters.
+/// Represents a file with associated metadata and operations.
 /// </summary>
 [Transient(GenericArguments = [typeof(int)])]
 [Transient(GenericArguments = [typeof(string)])]
@@ -73,16 +75,15 @@ public class File<T> : FileEntry<T>
 {
     private FileStatus _status;
 
-    public File()
+    [JsonConstructor]
+    protected File()
     {
         Version = 1;
         VersionGroup = 1;
         FileEntryType = FileEntryType.File;
     }
 
-    public File(
-        FileHelper fileHelper,
-        Global global, SecurityContext securityContext) : base(fileHelper, global, securityContext)
+    public File(IServiceProvider provider) : base(provider)
     {
         Version = 1;
         VersionGroup = 1;
@@ -91,8 +92,8 @@ public class File<T> : FileEntry<T>
 
     public FileStatus FileStatus
     {
-        get { return _status; }
-        set { _status = value; }
+        get => _status;
+        set => _status = value;
     }
     /// <summary>
     /// The file version.
@@ -107,6 +108,7 @@ public class File<T> : FileEntry<T>
     /// <summary>
     /// The file comment.
     /// </summary>
+    [JsonIgnore]
     public string Comment { get; set; }
 
     /// <summary>
@@ -137,27 +139,18 @@ public class File<T> : FileEntry<T>
     {
         get
         {
-            switch (FileUtility.GetFileTypeByFileName(Title))
+            return FileUtility.GetFileTypeByFileName(Title) switch
             {
-                case FileType.Image:
-                    return FilterType.ImagesOnly;
-                case FileType.Document:
-                    return FilterType.DocumentsOnly;
-                case FileType.Presentation:
-                    return FilterType.PresentationsOnly;
-                case FileType.Spreadsheet:
-                    return FilterType.SpreadsheetsOnly;
-                case FileType.Archive:
-                    return FilterType.ArchiveOnly;
-                case FileType.Audio:
-                case FileType.Video:
-                    return FilterType.MediaOnly;
-                case FileType.Pdf:
-                    return this.IsForm ? FilterType.PdfForm : FilterType.Pdf;
-                   
-            }
-
-            return FilterType.None;
+                FileType.Image => FilterType.ImagesOnly,
+                FileType.Document => FilterType.DocumentsOnly,
+                FileType.Presentation => FilterType.PresentationsOnly,
+                FileType.Spreadsheet => FilterType.SpreadsheetsOnly,
+                FileType.Archive => FilterType.ArchiveOnly,
+                FileType.Audio or FileType.Video => FilterType.MediaOnly,
+                FileType.Pdf => IsForm ? FilterType.PdfForm : FilterType.Pdf,
+                FileType.Diagram => FilterType.DiagramsOnly,
+                _ => FilterType.None
+            };
         }
     }
     /// <summary>
@@ -165,7 +158,7 @@ public class File<T> : FileEntry<T>
     /// </summary>
     public async Task<FileStatus> GetFileStatus()
     {
-        _status = await FileHelper.GetFileStatus(this, _status);
+        _status = await ServiceProvider.GetService<FileHelper>().GetFileStatus(this, _status);
         return _status;
     }
 
@@ -183,19 +176,22 @@ public class File<T> : FileEntry<T>
     /// The file title.
     /// </summary>
     [JsonIgnore]
-    public override string Title => FileHelper.GetTitle(this);
+    public override string Title =>
+        string.IsNullOrEmpty(ConvertedType)
+            ? PureTitle
+            : FileUtility.ReplaceFileExtension(PureTitle, ServiceProvider.GetService<FileUtility>().GetInternalExtension(PureTitle));
 
     /// <summary>
     /// The file download URL.
     /// </summary>
     [JsonIgnore]
-    public string DownloadUrl => FileHelper.GetDownloadUrl(this);
+    public string DownloadUrl => ServiceProvider.GetService<FileHelper>().GetDownloadUrl(this);
 
     /// <summary>
     /// Specifies whether the file is locked or not.
     /// </summary>
     public bool Locked { get; set; }
-    
+
     /// <summary>
     /// The name of the user who locked the file.
     /// </summary>
@@ -204,12 +200,7 @@ public class File<T> : FileEntry<T>
     /// <summary>
     /// Specifies if the file is a form or not.
     /// </summary>
-    public bool IsForm {
-        get
-        {
-            return (FilterType)Category == FilterType.PdfForm;
-        }
-    }
+    public bool IsForm => (FilterType)Category == FilterType.PdfForm;
 
     /// <summary>
     /// Specifies if a Custom Filter editing mode is enabled for a file or not.
@@ -350,7 +341,7 @@ public class File<T> : FileEntry<T>
             };
         }
     }
-    
+
     /// <summary>
     /// The date and time when the file was last opened.
     /// </summary>
@@ -360,6 +351,8 @@ public class File<T> : FileEntry<T>
     /// The file form information.
     /// </summary>
     public FormInfo<T> FormInfo { get; set; }
+    
+    public VectorizationStatus? VectorizationStatus { get; set; }
 }
 
 /// <summary>
@@ -376,9 +369,51 @@ public record FormInfo<T>
     /// The form properties.
     /// </summary>
     public EntryProperties<T> Properties { get; init; }
-    
+
+    /// <summary>
+    /// The file filling session ID.
+    /// </summary>
+    public string FillingSessionId { get; set; }
+
     /// <summary>
     /// The empty form information.
     /// </summary>
     public static FormInfo<T> Empty => new();
+}
+
+[Scope]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public partial class FileMapper(IServiceProvider serviceProvider, TenantDateTimeConverter tenantDateTimeConverter, SecurityTreeRecordMapper treeRecordMapper)
+{
+    private partial File<int> Map(DbFileQuery source);
+
+    [MapProperty(nameof(DbFile.Title), nameof(File<int>.PureTitle))]
+    private partial void ApplyChanges(DbFile source, File<int> target);
+
+    [UserMapping(Default = true)]
+    public File<int> MapDbFileQueryToDbFileInternal(DbFileQuery dbFileQuery)
+    {
+        if (dbFileQuery == null)
+        {
+            return null;
+        }
+
+        var result = Map(dbFileQuery);
+        ApplyChanges(dbFileQuery.File, result);
+        result.CreateOn = tenantDateTimeConverter.Convert(dbFileQuery.File.CreateOn);
+        result.ModifiedOn = tenantDateTimeConverter.Convert(dbFileQuery.File.ModifiedOn);
+        result.LastOpened = tenantDateTimeConverter.Convert(dbFileQuery.LastOpened);
+        result.ShareRecord = treeRecordMapper.MapToInternal(dbFileQuery.SharedRecord);
+
+        if (dbFileQuery.UserShared != null)
+        {
+            result.Shared = dbFileQuery.UserShared.Any(r => r is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink);
+            result.SharedForUser = dbFileQuery.UserShared.Any(r => r is SubjectType.Group or SubjectType.User);
+        }
+
+        return result;
+    }
+
+    [ObjectFactory]
+    private File<int> CreateFile() => serviceProvider.GetService<File<int>>();
 }

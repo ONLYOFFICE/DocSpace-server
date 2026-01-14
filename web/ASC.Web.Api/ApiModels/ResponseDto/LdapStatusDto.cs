@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,7 +29,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// The status parameters of the synchronization with LDAP server.
 /// </summary>
-public class LdapStatusDto : IMapFrom<LdapOperationStatus>
+public class LdapStatusDto
 {
     /// <summary>
     /// Specifies if the LDAP synchronization is completed or not.
@@ -75,9 +75,10 @@ public class LdapStatusDto : IMapFrom<LdapOperationStatus>
     /// The LDAP operation type.
     /// </summary>
     public string OperationType { get; set; }
+}
 
-    public void Mapping(Profile profile)
-    {
-        profile.CreateMap<LdapOperationStatus, LdapStatusDto>();
-    }
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class LdapStatusDtoMapper
+{
+    public static partial LdapStatusDto MapToDto(this LdapOperationStatus source);
 }

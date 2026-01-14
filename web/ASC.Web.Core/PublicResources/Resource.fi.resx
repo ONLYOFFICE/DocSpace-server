@@ -1,5 +1,64 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -53,16 +112,76 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=7.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=7.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Vektorisaatio</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Yhteystiedot</value>
+  </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Luotto</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Valuutta</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>Päivämäärä</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Debet</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Yksityiskohdat</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>Määrä</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>Tekoälytyökalut</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Varmuuskopio</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Levytila</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Saldon latuas</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>Mittayksikkö</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Tokenit</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Varmuuskopio</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>Asiakastoimintojen raportti ({0}-{1})</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Tapahtumahistoria</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Tyyppi</value>
+  </data>
   <data name="ActivateMobilePhoneEmptyCode" xml:space="preserve">
     <value>Vahvistuskoodi-kenttä ei voi olla tyhjä</value>
   </data>
   <data name="ActivateMobilePhoneEmptyPhoneNumber" xml:space="preserve">
     <value>Kirjoita matkapuhelimen numero</value>
+  </data>
+  <data name="ActivateTfaAppEmptyCode" xml:space="preserve">
+    <value>Vahvistuskoodikenttä ei voi olla tyhjä</value>
   </data>
   <data name="AdministratorNotifySenderTypeName" xml:space="preserve">
     <value>Järjestelmänvalvojan ilmoitukset</value>
@@ -70,11 +189,548 @@
   <data name="AdminMessageSent" xml:space="preserve">
     <value>Viestisi lähetettiin onnistuneesti. Sivuston omistaja ottaa sinuun yhteyttä mahdollisimman pian.</value>
   </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>Tekoälyagenttitilan kiintiö ylitetty</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Kiintiön asetus per tekoälyagentti epäonnistui. Syötetty arvo on suurempi kuin DocSpace tila yhteensä.</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Automaattinen uusiminen</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Automaattinen täyttö</value>
+  </data>
+  <data name="ButtonSmsEnable" xml:space="preserve">
+    <value>Tekstiviestinä</value>
+  </data>
+  <data name="ButtonTfaAppEnable" xml:space="preserve">
+    <value>Todennussovelluksen kautta</value>
+  </data>
   <data name="ChangePortalOwnerMsg" xml:space="preserve">
     <value>Vahvistuslinkki on lähetetty sivuston omistajan sähköpostiosoitteeseen.</value>
   </data>
+  <data name="Consumersacesskey" xml:space="preserve">
+    <value>S3 pääsyavain</value>
+  </data>
+  <data name="ConsumersapiKey" xml:space="preserve">
+    <value>Rackspace apiKey</value>
+  </data>
+  <data name="ConsumersAppleId" xml:space="preserve">
+    <value>Apple ID</value>
+  </data>
+  <data name="ConsumersappleIdClientId" xml:space="preserve">
+    <value>Sovelluksen Client ID</value>
+  </data>
+  <data name="ConsumersAppleIdDescription" xml:space="preserve">
+    <value>Ota sovellus käyttöön kirjautuaksesi sisään portaaliin käyttäen Apple ID-tiliä.</value>
+  </data>
+  <data name="ConsumersAppleIdInstruction" xml:space="preserve">
+    <value>Ota tämä sovellus käyttöön antaaksesi käyttäjillesi mahdollisuuden kirjautua {LogoText}:en käyttäen Apple ID:tä. {0} Mene Apple-kehittäjät-portaaliin ja luo uusi sovellus {LogoText}-integraatioon. Syötä alle saamasi tiedot:</value>
+  </data>
+  <data name="ConsumersappleIdKeyId" xml:space="preserve">
+    <value>10-merkkinen avaimen tunniste, joka on luotu Applen yksityisellä avaimella kirjautumiseen</value>
+  </data>
+  <data name="ConsumersappleIdPrivateKey" xml:space="preserve">
+    <value>Yksityinen avain ladattu Apple-kehittäjältä</value>
+  </data>
+  <data name="ConsumersappleIdTeamId" xml:space="preserve">
+    <value>10-merkkinen kehittäjätili-tiimi ID</value>
+  </data>
+  <data name="ConsumersauthPwd" xml:space="preserve">
+    <value>Selectel authPwd</value>
+  </data>
+  <data name="ConsumersauthUser" xml:space="preserve">
+    <value>Selectel authUser</value>
+  </data>
+  <data name="ConsumersBitly" xml:space="preserve">
+    <value>Bitly</value>
+  </data>
+  <data name="ConsumersbitlyClientId" xml:space="preserve">
+    <value>sisäänkirjautuminen</value>
+  </data>
+  <data name="ConsumersbitlyClientSecret" xml:space="preserve">
+    <value>API avain</value>
+  </data>
+  <data name="ConsumersBitlyDescription" xml:space="preserve">
+    <value>Yhdistä Bitly palveluun, jotta voit lyhentää portaalin kutsun linkkejä ja jaettuja linkkejä asiakirjojen moduulissa.</value>
+  </data>
+  <data name="ConsumersBitlyInstruction" xml:space="preserve">
+    <value>Ota tämä sovellus käyttöön lyhentääksesi kutsua ja asiakirjan linkkejä. {0} Syötä Bitly käyttäjätietosi ja API-avain alle:</value>
+  </data>
+  <data name="ConsumersBox" xml:space="preserve">
+    <value>Box</value>
+  </data>
+  <data name="ConsumersboxClientId" xml:space="preserve">
+    <value>Laatikon tunnus</value>
+  </data>
+  <data name="ConsumersboxClientSecret" xml:space="preserve">
+    <value>Laatikon avain</value>
+  </data>
+  <data name="ConsumersBoxDescription" xml:space="preserve">
+    <value>Yhdistä sovellus jotta voi hallita Laatikon tiedostoja ja kansioita.</value>
+  </data>
+  <data name="ConsumersBoxInstruction" xml:space="preserve">
+    <value>Ota tämä sovellus käyttöön yhdistääksesi Box-tilisi Asiakirjat-moduuliin. Pystyt hallinnoimaan, muokkaamaan ja jakamaan tiedostoja Boxista {LogoText}-käyttäjien kanssa. {0} Kirjaudu sisään tiliisi Boxin kehittäjät-sivulla ja luo uusi sovellus {LogoText}- integraatioon. Syötä saamasi tiedot alle:</value>
+  </data>
+  <data name="ConsumersClickatell" xml:space="preserve">
+    <value>Clickatell</value>
+  </data>
+  <data name="ConsumersclickatellapiKey" xml:space="preserve">
+    <value>API avain</value>
+  </data>
+  <data name="ConsumersClickatellDescription" xml:space="preserve">
+    <value>Ota sovellus käyttöön kaksivaiheista todennusta varten Clickatellin kautta.</value>
+  </data>
+  <data name="ConsumersClickatellInstruction" xml:space="preserve">
+    <value>Käytä tätä sovellusta ottaaksesi käyttöön kaksivaiheisen todennuksen Clickatell-palvelussa. {0} Kirjaudu sisään tekstiviesti-alustallesi ja luo uusi integraario {LogoText}:lle. Kopioi ApiKey ja syötä se alle:</value>
+  </data>
+  <data name="ConsumersDocuSign" xml:space="preserve">
+    <value>DocuSign</value>
+  </data>
+  <data name="ConsumersdocuSignClientId" xml:space="preserve">
+    <value>DocuSign Avain</value>
+  </data>
+  <data name="ConsumersdocuSignClientSecret" xml:space="preserve">
+    <value>DocuSign Salainen tunnus</value>
+  </data>
+  <data name="ConsumersDocuSignDescription" xml:space="preserve">
+    <value>Yhdistä sovellus, jotta voit lisätä sähköisen DocuSign allekirjoituksen asiakirjoihin.</value>
+  </data>
+  <data name="ConsumersdocuSignHost" xml:space="preserve">
+    <value>DocuSign valtuutuksen päätepiste</value>
+  </data>
+  <data name="ConsumersDocuSignInstruction" xml:space="preserve">
+    <value>Ota tämä sovellus käyttöön allekirjoittaaksesi asiakirjoja sähköisesti DocuSignin avulla. {0}Mene DocuSign-pääkäyttäjäkonsoliin ja lisää {LogoText}-integraatio. Syötä saamasi tieto alle:</value>
+  </data>
+  <data name="ConsumersDropBox" xml:space="preserve">
+    <value>DropBox</value>
+  </data>
+  <data name="ConsumersDropBoxDescription" xml:space="preserve">
+    <value>Yhdistä sovellus jotta voit hallita Dropbox tiedostoja ja kansioita.</value>
+  </data>
+  <data name="ConsumersDropBoxInstruction" xml:space="preserve">
+    <value>Ota tämä sovellus käyttöön yhdistääksesi DropBox-tilisi Asiakirjat-mobuulissa. Pystyt hallitsemaan, muokkaamaan ja jakamaan tiedostoja DropBoxista {LogoText}-käyttäjien kanssa. {0}Kirjaudu sisään tilillesi Dropboxin Kehittäjät-verkkosivustolla ja luo uusi sovellus {LogoText}-integraatioon. Syötä saamasi tiedot alle:</value>
+  </data>
+  <data name="ConsumersDropBoxKey" xml:space="preserve">
+    <value>DropBox ID</value>
+  </data>
+  <data name="ConsumersDropBoxSecret" xml:space="preserve">
+    <value>Dropbox avain</value>
+  </data>
+  <data name="ConsumersEasyBib" xml:space="preserve">
+    <value>EasyBib</value>
+  </data>
+  <data name="ConsumerseasyBibappkey" xml:space="preserve">
+    <value>Sovellusavain</value>
+  </data>
+  <data name="ConsumersEasyBibDescription" xml:space="preserve">
+    <value>Ota tämä sovellus käyttöön luodaksesi EasyBibillä bibliografisia listoja asiakirjoissa.</value>
+  </data>
+  <data name="ConsumersEasyBibInstruction" xml:space="preserve">
+    <value>Ota tämä sovellus käyttöön luodaksesi bibliographeja {LogoText} editoreissa. {0}Mene EasyBib-kirjautumissivulle ja täytä lomake lisätäksesi {LogoText}-integraation. Syötä saamasi sovellusavain alle:</value>
+  </data>
+  <data name="ConsumersFacebook" xml:space="preserve">
+    <value>Facebook</value>
+  </data>
+  <data name="ConsumersfacebookAccessToken_Default" xml:space="preserve">
+    <value>Sovellustunnus</value>
+  </data>
+  <data name="ConsumersfacebookClientId" xml:space="preserve">
+    <value>Facebook ID</value>
+  </data>
+  <data name="ConsumersfacebookClientSecret" xml:space="preserve">
+    <value>Facebook avain</value>
+  </data>
+  <data name="ConsumersFacebookDescription" xml:space="preserve">
+    <value>Yhdistä sovellus jotta voit kirjautua portaaliin Facebook tilin kautta.</value>
+  </data>
+  <data name="ConsumersFacebookInstruction" xml:space="preserve">
+    <value>Ota tämä sovellus käyttöön antaaksesi käyttäjiesi kirjautua sisään {LogoText}:een käyttäen Facebookia ja linkittää heidän asiakkaidensa Facebook-tilejä CRM-moduuliin. {0}Mene Facebookin Kehittäjät-portaaliit ja luo uusi sovellus {LogoText}-integraatioon. Syötä saamasi tiedot alle:</value>
+  </data>
+  <data name="ConsumersFirebase" xml:space="preserve">
+    <value>Firebase</value>
+  </data>
+  <data name="ConsumersFirebaseDescription" xml:space="preserve">
+    <value>Ota tämä sovellus käyttöön saadaksesi ilmoituksia sinulle lähetetyistä viesteistä Firebase Cloudissa.</value>
+  </data>
+  <data name="ConsumersFirebaseInstruction" xml:space="preserve">
+    <value>Ota tämä sovellus käyttöön, jotta käyttäjäsi saavat ilmoituksia viesteistä jopa offlinessa. {0}Mene Firebase-konsoliin ja lisää uusi projekti {LogoText}-integraatiota varten. Syötä saamasi tiedot alle:</value>
+  </data>
+  <data name="Consumersfirebase_apiKey" xml:space="preserve">
+    <value>Web API-avain</value>
+  </data>
+  <data name="Consumersfirebase_authorization" xml:space="preserve">
+    <value>Palvelinavain</value>
+  </data>
+  <data name="Consumersfirebase_messagingSenderId" xml:space="preserve">
+    <value>Lähettäjän ID</value>
+  </data>
+  <data name="Consumersfirebase_projectId" xml:space="preserve">
+    <value>Projekti-ID</value>
+  </data>
+  <data name="ConsumersGoogle" xml:space="preserve">
+    <value>Google</value>
+  </data>
+  <data name="ConsumersgoogleClientId" xml:space="preserve">
+    <value>Google ID</value>
+  </data>
+  <data name="ConsumersgoogleClientSecret" xml:space="preserve">
+    <value>Google avain</value>
+  </data>
+  <data name="ConsumersGoogleCloud" xml:space="preserve">
+    <value>Google Cloud Storage</value>
+  </data>
+  <data name="ConsumersGoogleCloudbucket" xml:space="preserve">
+    <value>Bucket</value>
+  </data>
+  <data name="ConsumersGoogleCloudbucketDescription" xml:space="preserve">
+    <value>Syötä Google Cloud bucketin nimi varmuuskopioiden tallentamiseen.</value>
+  </data>
+  <data name="ConsumersGoogleCloudDescription" xml:space="preserve">
+    <value>Yhdistä Google Cloud Storage-palvelu varmuuskopioidaksesi ja tallentaaksesi tietoja portaalistasi.</value>
+  </data>
+  <data name="ConsumersGoogleCloudInstruction" xml:space="preserve">
+    <value>Yhdistä Google Cloud Storage-palvelu varmuuskopioidaksesi ja tallentaaksesi dataa portaalistasi. {0}Mene Google Cloud Platform-konsoliin ja luo uusi palvelutili {LogoText}:lle. Syötä saamasi tiedot alle:</value>
+  </data>
+  <data name="ConsumersGoogleCloudjson" xml:space="preserve">
+    <value>GoogleCloud json</value>
+  </data>
+  <data name="ConsumersGoogleDescription" xml:space="preserve">
+    <value>Yhdistä projekti, jotta voi kirjautua sisään käyttämällä Google tiliä ja hallinnoida Google Drive tiedostoja ja kansioita.</value>
+  </data>
+  <data name="ConsumersGoogleInstruction" xml:space="preserve">
+    <value>Ota käyttöön tämä sovellus yhdistääksesi Google Drive-tilisi Asiakirjat-moduulissa. Pystyt hallinnoimaan, muokkaamaan ja jakamaan kansioita Google Drivesta {LogoText}-käyttäjille. {0}Mene Google APIs-konsoliin ja luo uusi projekti {LogoText}-integraatiolle. Syötä saamasi tiedot alle:</value>
+  </data>
+  <data name="ConsumersLinkedIn" xml:space="preserve">
+    <value>LinkedIn</value>
+  </data>
+  <data name="ConsumersLinkedInDescription" xml:space="preserve">
+    <value>Yhdistä sovellus jotta voit kirjautua sisään käyttämällä LinkedIn tiliä.</value>
+  </data>
+  <data name="ConsumersLinkedInInstruction" xml:space="preserve">
+    <value>Ota käyttöön tämä sovellus saadaksesi ystäväsi kirjautumaan {LogoText}:en käyttäen LinkedIn-tiliä. {0}Mene LinkedIn-kehittäjät verkkosivustolle ja luo uusi sovellus {LogoText}-integraatiolle. Syötä saamasi tiedot alle:</value>
+  </data>
+  <data name="ConsumersLinkedInKey" xml:space="preserve">
+    <value>Linkedin ID</value>
+  </data>
+  <data name="ConsumersLinkedInSecret" xml:space="preserve">
+    <value>Linkedin avain</value>
+  </data>
+  <data name="ConsumersMailru" xml:space="preserve">
+    <value>Mail.ru</value>
+  </data>
+  <data name="ConsumersMailruClientId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="ConsumersMailruClientSecret" xml:space="preserve">
+    <value>Salainen avain</value>
+  </data>
+  <data name="ConsumersMailruDescription" xml:space="preserve">
+    <value>Ota sovellus käyttöön kirjautuaksesi sisään portaaliin käyttäen Mail.ru-tiliä.</value>
+  </data>
+  <data name="ConsumersMailruInstruction" xml:space="preserve">
+    <value>Kun lisäät Mail.ru-sovelluksen voit ottaa käyttöön portaaliin sisäänkirjautumisen käyttäen Mail.ru-tiliä profiilisivullasi.</value>
+  </data>
+  <data name="ConsumersMicrosoft" xml:space="preserve">
+    <value>Microsoft</value>
+  </data>
+  <data name="ConsumersmicrosoftClientId" xml:space="preserve">
+    <value>Sovelluksen Client ID</value>
+  </data>
+  <data name="ConsumersmicrosoftClientSecret" xml:space="preserve">
+    <value>Client Secret</value>
+  </data>
+  <data name="ConsumersMicrosoftDescription" xml:space="preserve">
+    <value>Ota käyttöön sovellus kirjautuaksesi sisään portaaliin käyttäen Microsoft-tiliä.</value>
+  </data>
+  <data name="ConsumersMicrosoftInstruction" xml:space="preserve">
+    <value>Ota tämä sovellus käyttöön antaaksesi käyttäjille mahdollisuuden kirjautua sisään {LogoText}:en Microsoftin kautta. {0} Mene Microsoft Azureen ja luo uusi sovellus {LogoText}-integraatiolle. Syötä saamasi data alle:</value>
+  </data>
+  <data name="ConsumersRackspace" xml:space="preserve">
+    <value>Rackspace-pilvipalvelu</value>
+  </data>
+  <data name="ConsumersRackspaceDescription" xml:space="preserve">
+    <value>Yhdistä Rackspace-pilvipalvelu varmuuskopioimaan ja tallentamaan tietoa portaalistasi.</value>
+  </data>
+  <data name="ConsumersRackspaceInstruction" xml:space="preserve">
+    <value>Yhdistä Rackspace-pilvipalvelu varmuuskopioimaan ja tallentamaan tietoa portaalistasi. {0}Rackspace-pilvipalvelun ohjauspaneelin turvallisuusasetuksissa klikkaa näytä linkki Racksppace API-avaimen vieressä. Liitä saamasi tiedot alle:</value>
+  </data>
+  <data name="ConsumersRackspaceprivate_container" xml:space="preserve">
+    <value>Yksityinen sisältö</value>
+  </data>
+  <data name="ConsumersRackspaceprivate_containerDescription" xml:space="preserve">
+    <value>Syötä Rackspacen yksityisen sisällön URL-osoite varmuuskopioiden tallentamista varten.</value>
+  </data>
+  <data name="ConsumersRackspacepublic_container" xml:space="preserve">
+    <value>Yleinen sisältö</value>
+  </data>
+  <data name="ConsumersRackspacepublic_containerDescription" xml:space="preserve">
+    <value>Syötä Rackspacen julkisen sisällön URL-osoite varmuuskopioiden tallentamista varten.</value>
+  </data>
+  <data name="ConsumersRackspaceregion" xml:space="preserve">
+    <value>Alue</value>
+  </data>
+  <data name="ConsumersRackspaceregionDescription" xml:space="preserve">
+    <value>Syötä alue, jossa Rackspace-sisällöt sijaitsevat.</value>
+  </data>
+  <data name="ConsumersS3" xml:space="preserve">
+    <value>Amazon AWS S3</value>
+  </data>
+  <data name="ConsumersS3bucket" xml:space="preserve">
+    <value>Bucket</value>
+  </data>
+  <data name="ConsumersS3bucketDescription" xml:space="preserve">
+    <value>Syötä Amazon bucketin ainutlaatuinen nimi varmuuskopioiden tallentamista varten.</value>
+  </data>
+  <data name="ConsumersS3Description" xml:space="preserve">
+    <value>Yhdistä Amazon AWS S3 portaalisi varmuuskopiointia ja tiedon tallentamista varten.</value>
+  </data>
+  <data name="ConsumersS3Instruction" xml:space="preserve">
+    <value>Yhdistä Amazon AWS S3 varmuuskopioidaksesi ja tallentaaksesi tietoa portaalistasi. {0}Mene AWS hallintakonsoliin ja luo pääsyavaimet {LogoText}:lle. Syötä saamasi tiedot alle:</value>
+  </data>
+  <data name="ConsumersS3region" xml:space="preserve">
+    <value>Alue</value>
+  </data>
+  <data name="ConsumersS3regionDescription" xml:space="preserve">
+    <value>Syötä AWS-alue, jossa Amazon-bucket sijaitsee.</value>
+  </data>
+  <data name="Consumerssecretaccesskey" xml:space="preserve">
+    <value>S3 salainen pääsyavain</value>
+  </data>
+  <data name="ConsumersSelectel" xml:space="preserve">
+    <value>Selectel-pilvipalvelu</value>
+  </data>
+  <data name="ConsumersSelectelauthPwd" xml:space="preserve">
+    <value>Salasana muistiin pääsyä varten</value>
+  </data>
+  <data name="ConsumersSelectelauthUser" xml:space="preserve">
+    <value>Valtuutettu käyttäjä</value>
+  </data>
+  <data name="ConsumersSelectelDescription" xml:space="preserve">
+    <value>Yhdistä Selectel-pilvipalvelu varmuuskopioidaksesi ja tallentaaksesi tietoa portaalistasi.</value>
+  </data>
+  <data name="ConsumersSelectelInstruction" xml:space="preserve">
+    <value>Yhdistä Selectel-pilvipalvelu varmuuskopioidaksesi ja tallentaaksesi tietoa portaalistasi. {0}Hanki pääsytiedot sisältöjen luku/kirjoitusoikeuksiin käyttäjälle ja syötä se alle:</value>
+  </data>
+  <data name="ConsumersSelectelprivate_container" xml:space="preserve">
+    <value>Yksityinen sisältö</value>
+  </data>
+  <data name="ConsumersSelectelprivate_containerDescription" xml:space="preserve">
+    <value>Syötä Selectel-yksityisen sisällön nimi varmuuskopioiden jakamiseen.</value>
+  </data>
+  <data name="ConsumersSelectelpublic_container" xml:space="preserve">
+    <value>Yleinen sisältö</value>
+  </data>
+  <data name="ConsumersSelectelpublic_containerDescription" xml:space="preserve">
+    <value>Syötä Selectel- julkisen sisällön nimi varmuuskopioiden tallentamiseen.</value>
+  </data>
+  <data name="ConsumersSkyDrive" xml:space="preserve">
+    <value>OneDrive</value>
+  </data>
+  <data name="Consumersskydriveappkey" xml:space="preserve">
+    <value>SovellusID</value>
+  </data>
+  <data name="Consumersskydriveappsecret" xml:space="preserve">
+    <value>Client secret</value>
+  </data>
+  <data name="ConsumersSkyDriveDescription" xml:space="preserve">
+    <value>Yhdistä sovellus jotta voit hallita OneDrive tiedostoja ja kansioita.</value>
+  </data>
+  <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
+    <value>Ota tämä sovellus käyttöön OneDrive-tilisi Asiakirjat-moduulissa. Pystyt hallitsemaan, ja jakamaan tiedostoja OneDrivestä {LogoText}-käyttäjien kanssa. {0}Kirjaudu sisään Microsoft Azure-tiliisi ja luo uusi sovellus {LogoText}-integraatiolle. Syötä alle saamasi tiedot:</value>
+  </data>
+  <data name="ConsumersSmsc" xml:space="preserve">
+    <value>Tekstiviestikeskus</value>
+  </data>
+  <data name="ConsumersSmscDescription" xml:space="preserve">
+    <value>Ota käyttöön sovellus kaksivaiheista todennusta varten tekstiviestikeskuksen kautta.</value>
+  </data>
+  <data name="ConsumersSmscInstruction" xml:space="preserve">
+    <value>Käytä tätä sovellusta ottaaksesi käyttöön kaksivaiheinen todennus tekstiviestikeskuspalvelun kanssa.  {0}Syötä tekstiviestikeskustilisi sisäänkirjautumistiedot (tai salasana MD5 hash) pienillä kirjaimilla:</value>
+  </data>
+  <data name="Consumerssmsclogin" xml:space="preserve">
+    <value>Sisäänkirjautuminen</value>
+  </data>
+  <data name="Consumerssmscpsw" xml:space="preserve">
+    <value>Salasana tai salasana MD5 has pienillä kirjaimilla</value>
+  </data>
+  <data name="ConsumersTelegram" xml:space="preserve">
+    <value>Telegram</value>
+  </data>
+  <data name="ConsumersTelegramBotName" xml:space="preserve">
+    <value>Bot-käyttäjänimi</value>
+  </data>
+  <data name="ConsumersTelegramBotToken" xml:space="preserve">
+    <value>Bot-merkki</value>
+  </data>
+  <data name="ConsumersTelegramDescription" xml:space="preserve">
+    <value>Yhdistä Telegram-tili saadaksesi ilmoituksia Telegramin kautta.</value>
+  </data>
+  <data name="ConsumersTelegramInstruction" xml:space="preserve">
+    <value>Ota käyttöön Telegram-botti saadaksesi ilmoituksia Telegramin kautta. Voit luoda uuden botin käyttäen BotFatheria Telegramin työpöydällä. Käyttäjien tulee ottaa käyttöön Telegram-ilmoitukset profiilisivullaan käyttääkseen tätä bottia. {0} Syötä botin käyttäjänimi ja saamasi merkki alla oleviin kenttiin.</value>
+  </data>
+  <data name="ConsumersTwilio" xml:space="preserve">
+    <value>Twilio</value>
+  </data>
+  <data name="ConsumerstwilioAccountSid" xml:space="preserve">
+    <value>Tilin Sid arvo</value>
+  </data>
+  <data name="ConsumerstwilioAuthToken" xml:space="preserve">
+    <value>Valtuutuksen merkkijono</value>
+  </data>
+  <data name="ConsumersTwilioDescription" xml:space="preserve">
+    <value>Yhdistä Twilio ja voit soittaa Asiakkuudenhallinnan kontakteja suoraan selaimessa.</value>
+  </data>
+  <data name="ConsumersTwilioInstruction" xml:space="preserve">
+    <value>Ota tämä sovellus käyttöön, jotta käyttäjät voivat soittaa kontakteilleen CRM-moduulin kautta käyttäen Twilio. {0}Mene Twilion konsoliin ja syötä alla olevat tiedot:</value>
+  </data>
+  <data name="Consumerstwiliosender" xml:space="preserve">
+    <value>Puhelinnumero Twiliosta (vaaditaan tekstiviestivaltuutusta varten)</value>
+  </data>
+  <data name="ConsumersTwitter" xml:space="preserve">
+    <value>X</value>
+  </data>
+  <data name="ConsumerstwitterAccessTokenSecret_Default" xml:space="preserve">
+    <value>Client Secret</value>
+  </data>
+  <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
+    <value>Client ID</value>
+  </data>
+  <data name="ConsumersTwitterDescription" xml:space="preserve">
+    <value>Yhdistä sovellus jotta voit kirjautua sisään käyttämällä X tiliä.</value>
+  </data>
+  <data name="ConsumersTwitterInstruction" xml:space="preserve">
+    <value>Ota tämä sovellus käyttöön, jotta käyttäjäsi voivat kirjautua sisään {LogoText}:en käyttämällä X ja linkittää heidän asiakkaidensa X-tilit CRM-moduuliin. {0} Mene X-kehittäjien portaaliin ja luo uusi sovellus {LogoText}-integraatiolle. Syötä alle saamasi tiedot:</value>
+  </data>
+  <data name="ConsumersTwitterKey" xml:space="preserve">
+    <value>API-avain</value>
+  </data>
+  <data name="ConsumersTwitterSecret" xml:space="preserve">
+    <value>API-avainsalaus</value>
+  </data>
+  <data name="Consumersusername" xml:space="preserve">
+    <value>Rackspace käyttäjänimi</value>
+  </data>
+  <data name="ConsumersVk" xml:space="preserve">
+    <value>VK</value>
+  </data>
+  <data name="ConsumersVkClientId" xml:space="preserve">
+    <value>Sovellus ID</value>
+  </data>
+  <data name="ConsumersVkClientSecret" xml:space="preserve">
+    <value>Suojattu avain</value>
+  </data>
+  <data name="ConsumersVkDescription" xml:space="preserve">
+    <value>Ota sovellus käyttöön kirjautuaksesi portaaliin käyttäen VK-tiliä.</value>
+  </data>
+  <data name="ConsumersVkInstruction" xml:space="preserve">
+    <value>Kun lisäät VK-sovelluksen, voit kirjautua portaaliin käyttäen VK-tiliä profiilisivullasi.</value>
+  </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>Asiakas ID</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Asiakassalaisuus</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Ota sovellus käyttöön kirjautuaksesi portaaliin käyttäen WeChat-tiliä.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Ota sovellus käyttöön kirjautuaksesi portaaliin käyttäen WeChat-tiliä.</value>
+  </data>
+  <data name="ConsumersWordpress" xml:space="preserve">
+    <value>WordPress</value>
+  </data>
+  <data name="ConsumersWordpressDescription" xml:space="preserve">
+    <value>Ota sovellus käyttöön julkaistaksesi asiakirjoja suoraan WordPressissä.</value>
+  </data>
+  <data name="ConsumersWordpressInstruction" xml:space="preserve">
+    <value>Ota sovellus käyttöön julkaistaksesi helposti asiakirjoja WordPress-sivustollasi. {0}Wordpress-kehittäjien sivulla, luo uusi sovellus {LogoText}-integraatioon. Syötä saamasi tiedot alle:</value>
+  </data>
+  <data name="ConsumerswpClientId" xml:space="preserve">
+    <value>WordPress-avain</value>
+  </data>
+  <data name="ConsumerswpClientSecret" xml:space="preserve">
+    <value>WordPress-salaus</value>
+  </data>
+  <data name="ConsumersYahoo" xml:space="preserve">
+    <value>Yahoo</value>
+  </data>
+  <data name="ConsumersyahooClientId" xml:space="preserve">
+    <value>Client ID</value>
+  </data>
+  <data name="ConsumersyahooClientSecret" xml:space="preserve">
+    <value>Client Secret</value>
+  </data>
+  <data name="ConsumersYahooDescription" xml:space="preserve">
+    <value>Ota sovellus käyttöön tuodaksesi käyttäjiä Yahoo-palvelusta.</value>
+  </data>
+  <data name="ConsumersYahooInstruction" xml:space="preserve">
+    <value>Ota tämä sovellus käyttöön lisätäksesi uusia portaalin käyttäjiä Yahoon kontaktilistalta. {0}Mene luo sovellus-sivulle Yahoon kehittäjäverkostossa ja luo uusi sovellus {LogoText}-integraatiolle. Syötä saamasi tiedot alle:</value>
+  </data>
+  <data name="ConsumersYandex" xml:space="preserve">
+    <value>Yandex</value>
+  </data>
+  <data name="ConsumersYandexClientId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="ConsumersYandexClientSecret" xml:space="preserve">
+    <value>Salasana</value>
+  </data>
+  <data name="ConsumersYandexDescription" xml:space="preserve">
+    <value>Ota sovellus käyttöön kirjautuaksesi portaaliin käyttäen Yandex-tiliä.</value>
+  </data>
+  <data name="ConsumersYandexInstruction" xml:space="preserve">
+    <value>Kun lisäät Yandex-sovelluksen voit kirjautua portaaliin profiilisivultasi käyttäen Yandex-tiliä.</value>
+  </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>Zoom-asiakastunnus</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Zoom-asiakassecret</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>Ota käyttöön kirjautuminen portaaliin Zoom-tilin kautta.</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>Ota käyttöön {LogoText}:en kirjautuminen Zoom-tilien kautta. {0}Mene Zoom-kehittäjien verkkosivustolle ja luo uusi sovellus ONLY OFFICE-integraatiolle. Syötä alla olevat tiedot:</value>
+  </data>
+  <data name="CouldNotRecoverPasswordForLdapUser" xml:space="preserve">
+    <value>Salasanan palautustoiminto ei ole sallittu LDAP-käyttäjälle</value>
+  </data>
+  <data name="CouldNotRecoverPasswordForSsoUser" xml:space="preserve">
+    <value>Salasanan palautustoiminto ei ole sallittu SSO-käyttäjälle</value>
+  </data>
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>Mukautettu</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Päivämäärä</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>Sähköposti</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Etunimi</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>Id</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Sukunimi</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Asiakirjapalvelun kiintiö ({0})</value>
+  </data>
+  <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
+    <value>Väärän tapauksen id.</value>
   </data>
   <data name="EmailAndPasswordIncorrectEmail" xml:space="preserve">
     <value>Virheellinen sähköpostiosoite</value>
@@ -88,6 +744,9 @@
   <data name="ErrorBadKeys" xml:space="preserve">
     <value>Virheelliset avaimet</value>
   </data>
+  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
+    <value>Viimeistä täysien oikeuksien tilaa ei voida poistaa</value>
+  </data>
   <data name="ErrorDisabledProfile" xml:space="preserve">
     <value>Käyttäjätunnuksesi on poistettu käytöstä</value>
   </data>
@@ -100,17 +759,41 @@
   <data name="ErrorEmailEmpty" xml:space="preserve">
     <value>Sähköpostiosoite on tyhjä</value>
   </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>Tämä sähköposti on liitetty käyttäjälle {0} kolmannen osapuolen palveluntarjoajana</value>
+  </data>
   <data name="ErrorEmailsAreTheSame" xml:space="preserve">
     <value>Nykyinen sähköposti ja uusi sähköposti ovat sama. Nyt ei jokin tässä täsmää</value>
   </data>
   <data name="ErrorEmptyFields" xml:space="preserve">
     <value>Täytä kaikki kentät</value>
   </data>
+  <data name="ErrorEmptyMessage" xml:space="preserve">
+    <value>Viestin teksti on tyhjä</value>
+  </data>
   <data name="ErrorEmptyUploadFileSelected" xml:space="preserve">
     <value>Lisättyä tiedostoa ei löytynyt. Ei sitten millään</value>
   </data>
+  <data name="ErrorFileNotImage" xml:space="preserve">
+    <value>Tuntematon kuvatiedoston tyyppi</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>Ryhmää ei löydy</value>
+  </data>
+  <data name="ErrorImageSize" xml:space="preserve">
+    <value>Kuvan koko ylitti sallitut parametrit</value>
+  </data>
   <data name="ErrorImageWeightLimit" xml:space="preserve">
     <value>Kuvatiedoston koko on liian suuri. Ei pysty</value>
+  </data>
+  <data name="ErrorIncorrectUserName" xml:space="preserve">
+    <value>Väärä etunimi tai sukunimi</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Kutsujen raja on ylitetty</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Lisää ainakin 1 sallittu IP-osoite.</value>
   </data>
   <data name="ErrorIpSecurity" xml:space="preserve">
     <value>Portaaliin pääsy on rajoitettu</value>
@@ -136,17 +819,77 @@
   <data name="ErrorPasswordNoDigits" xml:space="preserve">
     <value>numerot</value>
   </data>
+  <data name="ErrorPasswordNoSpaces" xml:space="preserve">
+    <value>ei välilyöntejä</value>
+  </data>
   <data name="ErrorPasswordNoSpecialSymbols" xml:space="preserve">
     <value>erikoismerkit</value>
   </data>
   <data name="ErrorPasswordNoUpperCase" xml:space="preserve">
     <value>isot kirjaimet</value>
   </data>
+  <data name="ErrorPasswordOnlyLatinLetters" xml:space="preserve">
+    <value>vain latinalaisia kirjaimia</value>
+  </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Maksu vaaditaan</value>
+  </data>
+  <data name="ErrorRequestLimitExceeded" xml:space="preserve">
+    <value>Pyyntöjen raja on ylitetty</value>
+  </data>
+  <data name="ErrorTenantTooShort" xml:space="preserve">
+    <value>Tenant domain ei voi olla tyhjä.</value>
+  </data>
+  <data name="ErrorTenantTooShortFormat" xml:space="preserve">
+    <value>Domain-nimen tulee olla {0} -{1} merkkiä pitkä.</value>
+  </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>Liian monta kirjautumisyritystä. Ole hyvä ja yritä myöhemmin uudelleen</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Lisää ainakin yksi luotettu domain.</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Käyttäjä poistettu käytöstä</value>
+  </data>
   <data name="ErrorUserNotFound" xml:space="preserve">
     <value>Käyttäjää ei löytynyt. Minne lie kadonnut</value>
   </data>
   <data name="ErrorUserNotFoundByEmail" xml:space="preserve">
     <value>Käyttäjä, jonka sähköposti on {0} ei löytynyt. Outoa</value>
+  </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>Webhook URL ei ole saatavilla. HEAD-pyyntö ei vastaa 200 http statusta.</value>
+  </data>
+  <data name="ErrorWebPluginArchive" xml:space="preserve">
+    <value>Väärä lisäosa-arkisto</value>
+  </data>
+  <data name="ErrorWebPluginExist" xml:space="preserve">
+    <value>Lisäosa on jo olemassa</value>
+  </data>
+  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
+    <value>Väärä tiedostopääte</value>
+  </data>
+  <data name="ErrorWebPluginFileSize" xml:space="preserve">
+    <value>Tiedostokoko ylittää rajan</value>
+  </data>
+  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
+    <value>Systeemin lisäosien muutokset ovat kiellettyjä</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>Laajennusten määrä ylittää rajan</value>
+  </data>
+  <data name="ErrorWebPluginName" xml:space="preserve">
+    <value>Väärä lisäosan nimi</value>
+  </data>
+  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
+    <value>Ei syöttötiedostoa</value>
+  </data>
+  <data name="ErrorWebPluginNotFound" xml:space="preserve">
+    <value>Lisäosaa ei löytynyt</value>
+  </data>
+  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
+    <value>Liian monta syöttötiedostoa</value>
   </data>
   <data name="EuServerRegion" xml:space="preserve">
     <value>EU (Frankfurt)</value>
@@ -184,11 +927,20 @@
   <data name="LdapSettingsErrorCredentialsNotValid" xml:space="preserve">
     <value>Virheellinen tunnus tai salasana.</value>
   </data>
+  <data name="LdapSettingsErrorDomainNotFound" xml:space="preserve">
+    <value>LDAP domainia ei löytynyt.</value>
+  </data>
   <data name="LdapSettingsErrorGroupsNotFound" xml:space="preserve">
     <value>Ei löydy ryhmiä.</value>
   </data>
   <data name="LdapSettingsErrorIncorrectLdapFilter" xml:space="preserve">
     <value>Virheellinen käyttäjän suodattimen arvo.</value>
+  </data>
+  <data name="LdapSettingsErrorLostRights" xml:space="preserve">
+    <value>Yritit ottaa järjestelmänvalvojanoikeudet pois itseltäsi. Tämä ei vaikuttanut järjestelmänvalvojan oikeuksiisi.</value>
+  </data>
+  <data name="LdapSettingsErrorRemovedYourself" xml:space="preserve">
+    <value>Tiliäsi ei ole yhdistetty LDAP-hakemistoon ja LDAP-salasanasi ei ole enää aktiivinen. Ole hyvä ja muuta tai aseta salasana tilillesi profiilin asetukset-sivulla.</value>
   </data>
   <data name="LdapSettingsErrorUnknownError" xml:space="preserve">
     <value>Tuntematon virhe.</value>
@@ -208,674 +960,14 @@
   <data name="LdapSettingsErrorWrongLoginAttribute" xml:space="preserve">
     <value>Ei saatu sisäänkirjautumisen attribuutin arvoa yhdelle tai usealle käyttäjälle.</value>
   </data>
+  <data name="LdapSettingsErrorWrongServerOrPort" xml:space="preserve">
+    <value>Yhteyttä LDAP-palvelimeen ei löytynyt. Ole hyvä ja varmista, että palvelimen osoite ja portin numero ovat oikein.</value>
+  </data>
   <data name="LdapSettingsErrorWrongUserAttribute" xml:space="preserve">
     <value>Ei saatu käyttäjän attribuutin arvo yhdelle tai usealle käyttäjälle.</value>
   </data>
   <data name="LdapSettingsInternalServerError" xml:space="preserve">
     <value>Palvelimen virhe.</value>
-  </data>
-  <data name="LdapSettingsStatusCertificateVerification" xml:space="preserve">
-    <value>Sertifikaatin varmennus</value>
-  </data>
-  <data name="LdapSettingsStatusCheckingLdapSettings" xml:space="preserve">
-    <value>Tarkistetaan LDAP asetuksia</value>
-  </data>
-  <data name="LdapSettingsStatusSavingGroups" xml:space="preserve">
-    <value>Tallennetaan ryhmiä</value>
-  </data>
-  <data name="LdapSettingsStatusSavingSettings" xml:space="preserve">
-    <value>Tallennetaan asetuksia</value>
-  </data>
-  <data name="LdapSettingsStatusSavingUsers" xml:space="preserve">
-    <value>Tallennetaan käyttäjiä</value>
-  </data>
-  <data name="LdapSettingsStrongAuthRequired" xml:space="preserve">
-    <value>Turvallisempi valtuutuksen tyyppi tarvitaan. Ole hyvä ja käytä suojattua yhteyttä tai aktivoi tavallinen autentikointi palvelimella.</value>
-  </data>
-  <data name="LicenseUploaded" xml:space="preserve">
-    <value>Ladattu onnistuneesti</value>
-  </data>
-  <data name="MessageEmailChangeInstuctionsSentOnEmail" xml:space="preserve">
-    <value>Sähköpostin muutosohjeet on lähetetty sähköpostiosoitteeseen</value>
-  </data>
-  <data name="MobilePhoneMustErase" xml:space="preserve">
-    <value>Numeron vaihtamiseksi, sinun tulee poistaa nykyinen puhelinnumerosi</value>
-  </data>
-  <data name="Owner" xml:space="preserve">
-    <value>Omistaja</value>
-  </data>
-  <data name="PortalSecurity" xml:space="preserve">
-    <value>Portaalin käyttöoikeus</value>
-  </data>
-  <data name="SgServerRegion" xml:space="preserve">
-    <value>Aasia (Singapore)</value>
-  </data>
-  <data name="SmsAuthenticationMessageError" xml:space="preserve">
-    <value>Virheellinen koodi</value>
-  </data>
-  <data name="SmsAuthenticationMessageToUser" xml:space="preserve">
-    <value>Koodi, jolla voit kirjautua sivustolle: {0}</value>
-  </data>
-  <data name="SmsAuthenticationTimeout" xml:space="preserve">
-    <value>Koodin käyttöaika on erääntynyt. Ole hyvä ja pyydä uusi tekstiviesti.</value>
-  </data>
-  <data name="SmsNotAvailable" xml:space="preserve">
-    <value>SMS asetukset eivät ole saatavilla</value>
-  </data>
-  <data name="SmsTooMuchError" xml:space="preserve">
-    <value>Olet lähettänyt liian monta tekstiviestiä. Yritä myöhemmin uudelleen.</value>
-  </data>
-  <data name="SsoSettingsCantSaveSettings" xml:space="preserve">
-    <value>Ei voitu tallentaa asetuksia</value>
-  </data>
-  <data name="SuccessfullySaveGreetingSettingsMessage" xml:space="preserve">
-    <value>Tervehdysasetukset on tallennettu onnistuneesti</value>
-  </data>
-  <data name="SuccessfullySaveSettingsMessage" xml:space="preserve">
-    <value>Asetukset on päivitetty onnistuneesti</value>
-  </data>
-  <data name="SuccessfullySentNotificationDeleteUserInfoMessage" xml:space="preserve">
-    <value>Profiilin poistoon liittyviä ohjeita on lähetetty sähköpostiosoitteeseesi {0}</value>
-  </data>
-  <data name="UsServerRegion" xml:space="preserve">
-    <value>US (Oregon)</value>
-  </data>
-  <data name="WhatsNewSubscriptionName" xml:space="preserve">
-    <value>Uutta</value>
-  </data>
-  <data name="TariffsFeature_audit" xml:space="preserve">
-    <value>Käyttäjien kirjautumisten &amp; toiminnan seuranta</value>
-  </data>
-  <data name="TariffsFeature_file_size" xml:space="preserve">
-    <value>Maksimi tiedostokoko</value>
-  </data>
-  <data name="TariffsFeature_file_size_exception" xml:space="preserve">
-    <value>Tiedoston koko ei saisi ylittää {0}</value>
-  </data>
-  <data name="TariffsFeature_manager_exception" xml:space="preserve">
-    <value>Ylläpitäjien määrä ei saisi ylittää {0}</value>
-  </data>
-  <data name="TariffsFeature_manager_price_count" xml:space="preserve">
-    <value>Järjestelmänvalvojien määrä</value>
-  </data>
-  <data name="TariffsFeature_restore" xml:space="preserve">
-    <value>Automaattinen varmuuskopiointi &amp; palautus</value>
-  </data>
-  <data name="TariffsFeature_room" xml:space="preserve">
-    <value>Rajoittamaton aktiivisten huoneiden määrä</value>
-  </data>
-  <data name="TariffsFeature_room_exception" xml:space="preserve">
-    <value>Huoneiden määrä ei saisi ylittää {0}</value>
-  </data>
-  <data name="TariffsFeature_sso" xml:space="preserve">
-    <value>SSO</value>
-  </data>
-  <data name="TariffsFeature_total_size_exception" xml:space="preserve">
-    <value>Käytetyn muistin koko ei saisi ylittää {0}</value>
-  </data>
-  <data name="TariffsFeature_total_size_price_count" xml:space="preserve">
-    <value>Muistin tila</value>
-  </data>
-  <data name="TariffsFeature_used_room" xml:space="preserve">
-    <value>Huoneet:</value>
-  </data>
-  <data name="TariffsFeature_used_total_size" xml:space="preserve">
-    <value>Käytetty muistin tila:</value>
-  </data>
-  <data name="TariffsFeature_used_usersInRoom" xml:space="preserve">
-    <value>Käyttäjiä huoneessa:</value>
-  </data>
-  <data name="TariffsFeature_users" xml:space="preserve">
-    <value>Rajattu käyttäjien määrä</value>
-  </data>
-  <data name="TariffsFeature_users_exception" xml:space="preserve">
-    <value>Käyttäjien määrä ei saisi ylittää {0}</value>
-  </data>
-  <data name="TariffsFeature_usersInRoom" xml:space="preserve">
-    <value>Käyttäjiä huoneessa</value>
-  </data>
-  <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
-    <value>Huoneessa olevien käyttäjien määrä ei saisi ylittää {0}</value>
-  </data>
-  <data name="TariffsFeature_customization" xml:space="preserve">
-    <value>Brändäys &amp; räätälöinti</value>
-  </data>
-  <data name="ConsumersbitlyClientSecret" xml:space="preserve">
-    <value>API avain</value>
-  </data>
-  <data name="ConsumersbitlyClientId" xml:space="preserve">
-    <value>sisäänkirjautuminen</value>
-  </data>
-  <data name="ConsumersBitlyDescription" xml:space="preserve">
-    <value>Yhdistä Bitly palveluun, jotta voit lyhentää portaalin kutsun linkkejä ja jaettuja linkkejä asiakirjojen moduulissa.</value>
-  </data>
-  <data name="ConsumersboxClientId" xml:space="preserve">
-    <value>Laatikon tunnus</value>
-  </data>
-  <data name="ConsumersboxClientSecret" xml:space="preserve">
-    <value>Laatikon avain</value>
-  </data>
-  <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Yhdistä sovellus jotta voi hallita Laatikon tiedostoja ja kansioita.</value>
-  </data>
-  <data name="ConsumersClickatell" xml:space="preserve">
-    <value>Clickatell</value>
-  </data>
-  <data name="ConsumersclickatellapiKey" xml:space="preserve">
-    <value>API avain</value>
-  </data>
-  <data name="ConsumersDocuSign" xml:space="preserve">
-    <value>DocuSign</value>
-  </data>
-  <data name="ConsumersdocuSignClientId" xml:space="preserve">
-    <value>DocuSign Avain</value>
-  </data>
-  <data name="ConsumersDocuSignDescription" xml:space="preserve">
-    <value>Yhdistä sovellus, jotta voit lisätä sähköisen DocuSign allekirjoituksen asiakirjoihin.</value>
-  </data>
-  <data name="ConsumersdocuSignHost" xml:space="preserve">
-    <value>DocuSign valtuutuksen päätepiste</value>
-  </data>
-  <data name="ConsumersDropBox" xml:space="preserve">
-    <value>DropBox</value>
-  </data>
-  <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Yhdistä sovellus jotta voit hallita Dropbox tiedostoja ja kansioita.</value>
-  </data>
-  <data name="ConsumersDropBoxKey" xml:space="preserve">
-    <value>DropBox ID</value>
-  </data>
-  <data name="ConsumersfacebookClientId" xml:space="preserve">
-    <value>Facebook ID</value>
-  </data>
-  <data name="ConsumersfacebookClientSecret" xml:space="preserve">
-    <value>Facebook avain</value>
-  </data>
-  <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Yhdistä sovellus jotta voit kirjautua portaaliin Facebook tilin kautta.</value>
-  </data>
-  <data name="ConsumersFirebase" xml:space="preserve">
-    <value>Firebase</value>
-  </data>
-  <data name="ConsumersdocuSignClientSecret" xml:space="preserve">
-    <value>DocuSign Salainen tunnus</value>
-  </data>
-  <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Yhdistä projekti, jotta voi kirjautua sisään käyttämällä Google tiliä ja hallinnoida Google Drive tiedostoja ja kansioita.</value>
-  </data>
-  <data name="ConsumersLinkedIn" xml:space="preserve">
-    <value>LinkedIn</value>
-  </data>
-  <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>Yhdistä sovellus jotta voit kirjautua sisään käyttämällä LinkedIn tiliä.</value>
-  </data>
-  <data name="ConsumersLinkedInSecret" xml:space="preserve">
-    <value>Linkedin avain</value>
-  </data>
-  <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>Yhdistä sovellus jotta voit hallita OneDrive tiedostoja ja kansioita.</value>
-  </data>
-  <data name="ConsumersTwilioDescription" xml:space="preserve">
-    <value>Yhdistä Twilio ja voit soittaa Asiakkuudenhallinnan kontakteja suoraan selaimessa.</value>
-  </data>
-  <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Yhdistä sovellus jotta voit kirjautua sisään käyttämällä Twitter tiliä.</value>
-  </data>
-  <data name="ErrorFileNotImage" xml:space="preserve">
-    <value>Tuntematon kuvatiedoston tyyppi</value>
-  </data>
-  <data name="ErrorImageSize" xml:space="preserve">
-    <value>Kuvan koko ylitti sallitut parametrit</value>
-  </data>
-  <data name="ConsumersDropBoxSecret" xml:space="preserve">
-    <value>Dropbox avain</value>
-  </data>
-  <data name="ConsumersEasyBib" xml:space="preserve">
-    <value>EasyBib</value>
-  </data>
-  <data name="ConsumersFacebook" xml:space="preserve">
-    <value>Facebook</value>
-  </data>
-  <data name="ConsumersGoogle" xml:space="preserve">
-    <value>Google</value>
-  </data>
-  <data name="ConsumersgoogleClientId" xml:space="preserve">
-    <value>Google ID</value>
-  </data>
-  <data name="ConsumersgoogleClientSecret" xml:space="preserve">
-    <value>Google avain</value>
-  </data>
-  <data name="ConsumersLinkedInKey" xml:space="preserve">
-    <value>Linkedin ID</value>
-  </data>
-  <data name="ConsumersMailru" xml:space="preserve">
-    <value>Mail.ru</value>
-  </data>
-  <data name="ConsumersMicrosoft" xml:space="preserve">
-    <value>Microsoft</value>
-  </data>
-  <data name="ConsumersSkyDrive" xml:space="preserve">
-    <value>OneDrive</value>
-  </data>
-  <data name="Consumerssmsclogin" xml:space="preserve">
-    <value>Sisäänkirjautuminen</value>
-  </data>
-  <data name="ConsumersTelegram" xml:space="preserve">
-    <value>Telegram</value>
-  </data>
-  <data name="ConsumersTwilio" xml:space="preserve">
-    <value>Twilio</value>
-  </data>
-  <data name="ConsumerstwilioAccountSid" xml:space="preserve">
-    <value>Tilin Sid arvo</value>
-  </data>
-  <data name="ConsumerstwilioAuthToken" xml:space="preserve">
-    <value>Valtuutuksen merkkijono</value>
-  </data>
-  <data name="ConsumersYahoo" xml:space="preserve">
-    <value>Yahoo</value>
-  </data>
-  <data name="ConsumersYandex" xml:space="preserve">
-    <value>Yandex</value>
-  </data>
-  <data name="ConsumersWordpress" xml:space="preserve">
-    <value>WordPress</value>
-  </data>
-  <data name="ConsumersTwitter" xml:space="preserve">
-    <value>Twitter</value>
-  </data>
-  <data name="ConsumersYandexClientSecret" xml:space="preserve">
-    <value>Salasana</value>
-  </data>
-  <data name="ConsumersBox" xml:space="preserve">
-    <value>Box</value>
-  </data>
-  <data name="Tariffs_admin" xml:space="preserve">
-    <value>Yritys</value>
-  </data>
-  <data name="Tariffs_adminyear" xml:space="preserve">
-    <value>Yritys</value>
-  </data>
-  <data name="Tariffs_startup" xml:space="preserve">
-    <value>Aloitus</value>
-  </data>
-  <data name="ConsumersBitly" xml:space="preserve">
-    <value>Bitly</value>
-  </data>
-  <data name="ConsumersMailruClientId" xml:space="preserve">
-    <value>ID</value>
-  </data>
-  <data name="LdapSettingsTenantQuotaSettled" xml:space="preserve">
-    <value>Nykyisen hinnoitteluohjelman käyttäjäraja on saavutettu</value>
-  </data>
-  <data name="LdapSettingsStatusGettingUsersFromLdap" xml:space="preserve">
-    <value>Hetaan käyttäjäluetteloa LDAP-palvelimelta</value>
-  </data>
-  <data name="LdapSettingsStatusGettingGroupsFromLdap" xml:space="preserve">
-    <value>Haetaan ryhmäluetteloa LDAP-palvelimelta</value>
-  </data>
-  <data name="LdapSettingsErrorWrongServerOrPort" xml:space="preserve">
-    <value>Yhteyttä LDAP-palvelimeen ei löytynyt. Ole hyvä ja varmista, että palvelimen osoite ja portin numero ovat oikein.</value>
-  </data>
-  <data name="ConsumersVk" xml:space="preserve">
-    <value>VK</value>
-  </data>
-  <data name="ActivateTfaAppEmptyCode" xml:space="preserve">
-    <value>Vahvistuskoodikenttä ei voi olla tyhjä</value>
-  </data>
-  <data name="ButtonSmsEnable" xml:space="preserve">
-    <value>Tekstiviestinä</value>
-  </data>
-  <data name="ButtonTfaAppEnable" xml:space="preserve">
-    <value>Todennussovelluksen kautta</value>
-  </data>
-  <data name="Consumersacesskey" xml:space="preserve">
-    <value>S3 pääsyavain</value>
-  </data>
-  <data name="ConsumersapiKey" xml:space="preserve">
-    <value>Rackspace apiKey</value>
-  </data>
-  <data name="ConsumersAppleId" xml:space="preserve">
-    <value>Apple ID</value>
-  </data>
-  <data name="ConsumersappleIdClientId" xml:space="preserve">
-    <value>Sovelluksen Client ID</value>
-  </data>
-  <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>Ota sovellus käyttöön kirjautuaksesi sisään portaaliin käyttäen Apple ID-tiliä.</value>
-  </data>
-  <data name="ConsumersAppleIdInstruction" xml:space="preserve">
-    <value>Ota tämä sovellus käyttöön antaaksesi käyttäjillesi mahdollisuuden kirjautua {LogoText}:en käyttäen Apple ID:tä. {0} Mene Apple-kehittäjät-portaaliin ja luo uusi sovellus {LogoText}-integraatioon. Syötä alle saamasi tiedot:</value>
-  </data>
-  <data name="ConsumersappleIdKeyId" xml:space="preserve">
-    <value>10-merkkinen avaimen tunniste, joka on luotu Applen yksityisellä avaimella kirjautumiseen</value>
-  </data>
-  <data name="ConsumersappleIdPrivateKey" xml:space="preserve">
-    <value>Yksityinen avain ladattu Apple-kehittäjältä</value>
-  </data>
-  <data name="ConsumersappleIdTeamId" xml:space="preserve">
-    <value>10-merkkinen kehittäjätili-tiimi ID</value>
-  </data>
-  <data name="ConsumersauthPwd" xml:space="preserve">
-    <value>Selectel authPwd</value>
-  </data>
-  <data name="ConsumersauthUser" xml:space="preserve">
-    <value>Selectel authUser</value>
-  </data>
-  <data name="ConsumersBitlyInstruction" xml:space="preserve">
-    <value>Ota tämä sovellus käyttöön lyhentääksesi kutsua ja asiakirjan linkkejä. {0} Syötä Bitly käyttäjätietosi ja API-avain alle:</value>
-  </data>
-  <data name="ConsumersBoxInstruction" xml:space="preserve">
-    <value>Ota tämä sovellus käyttöön yhdistääksesi Box-tilisi Asiakirjat-moduuliin. Pystyt hallinnoimaan, muokkaamaan ja jakamaan tiedostoja Boxista {LogoText}-käyttäjien kanssa. {0} Kirjaudu sisään tiliisi Boxin kehittäjät-sivulla ja luo uusi sovellus {LogoText}- integraatioon. Syötä saamasi tiedot alle:</value>
-  </data>
-  <data name="ConsumersClickatellDescription" xml:space="preserve">
-    <value>Ota sovellus käyttöön kaksivaiheista todennusta varten Clickatellin kautta.</value>
-  </data>
-  <data name="ConsumersClickatellInstruction" xml:space="preserve">
-    <value>Käytä tätä sovellusta ottaaksesi käyttöön kaksivaiheisen todennuksen Clickatell-palvelussa. {0} Kirjaudu sisään tekstiviesti-alustallesi ja luo uusi integraario {LogoText}:lle. Kopioi ApiKey ja syötä se alle:</value>
-  </data>
-  <data name="ConsumersDocuSignInstruction" xml:space="preserve">
-    <value>Ota tämä sovellus käyttöön allekirjoittaaksesi asiakirjoja sähköisesti DocuSignin avulla. {0}Mene DocuSign-pääkäyttäjäkonsoliin ja lisää {LogoText}-integraatio. Syötä saamasi tieto alle:</value>
-  </data>
-  <data name="ConsumersDropBoxInstruction" xml:space="preserve">
-    <value>Ota tämä sovellus käyttöön yhdistääksesi DropBox-tilisi Asiakirjat-mobuulissa. Pystyt hallitsemaan, muokkaamaan ja jakamaan tiedostoja DropBoxista {LogoText}-käyttäjien kanssa. {0}Kirjaudu sisään tilillesi Dropboxin Kehittäjät-verkkosivustolla ja luo uusi sovellus {LogoText}-integraatioon. Syötä saamasi tiedot alle:</value>
-  </data>
-  <data name="ConsumerseasyBibappkey" xml:space="preserve">
-    <value>Sovellusavain</value>
-  </data>
-  <data name="ConsumersEasyBibDescription" xml:space="preserve">
-    <value>Ota tämä sovellus käyttöön luodaksesi EasyBibillä bibliografisia listoja asiakirjoissa.</value>
-  </data>
-  <data name="ConsumersEasyBibInstruction" xml:space="preserve">
-    <value>Ota tämä sovellus käyttöön luodaksesi bibliographeja {LogoText} editoreissa. {0}Mene EasyBib-kirjautumissivulle ja täytä lomake lisätäksesi {LogoText}-integraation. Syötä saamasi sovellusavain alle:</value>
-  </data>
-  <data name="ConsumersfacebookAccessToken_Default" xml:space="preserve">
-    <value>Sovellustunnus</value>
-  </data>
-  <data name="ConsumersFacebookInstruction" xml:space="preserve">
-    <value>Ota tämä sovellus käyttöön antaaksesi käyttäjiesi kirjautua sisään {LogoText}:een käyttäen Facebookia ja linkittää heidän asiakkaidensa Facebook-tilejä CRM-moduuliin. {0}Mene Facebookin Kehittäjät-portaaliit ja luo uusi sovellus {LogoText}-integraatioon. Syötä saamasi tiedot alle:</value>
-  </data>
-  <data name="Consumersfirebase_apiKey" xml:space="preserve">
-    <value>Web API-avain</value>
-  </data>
-  <data name="Consumersfirebase_authorization" xml:space="preserve">
-    <value>Palvelinavain</value>
-  </data>
-  <data name="Consumersfirebase_messagingSenderId" xml:space="preserve">
-    <value>Lähettäjän ID</value>
-  </data>
-  <data name="Consumersfirebase_projectId" xml:space="preserve">
-    <value>Projekti-ID</value>
-  </data>
-  <data name="ConsumersFirebaseDescription" xml:space="preserve">
-    <value>Ota tämä sovellus käyttöön saadaksesi ilmoituksia sinulle lähetetyistä viesteistä Firebase Cloudissa.</value>
-  </data>
-  <data name="ConsumersFirebaseInstruction" xml:space="preserve">
-    <value>Ota tämä sovellus käyttöön, jotta käyttäjäsi saavat ilmoituksia viesteistä jopa offlinessa. {0}Mene Firebase-konsoliin ja lisää uusi projekti {LogoText}-integraatiota varten. Syötä saamasi tiedot alle:</value>
-  </data>
-  <data name="ConsumersGoogleCloud" xml:space="preserve">
-    <value>Google Cloud Storage</value>
-  </data>
-  <data name="ConsumersGoogleCloudbucket" xml:space="preserve">
-    <value>Bucket</value>
-  </data>
-  <data name="ConsumersGoogleCloudbucketDescription" xml:space="preserve">
-    <value>Syötä Google Cloud bucketin nimi varmuuskopioiden tallentamiseen.</value>
-  </data>
-  <data name="ConsumersGoogleCloudDescription" xml:space="preserve">
-    <value>Yhdistä Google Cloud Storage-palvelu varmuuskopioidaksesi ja tallentaaksesi tietoja portaalistasi.</value>
-  </data>
-  <data name="ConsumersGoogleCloudInstruction" xml:space="preserve">
-    <value>Yhdistä Google Cloud Storage-palvelu varmuuskopioidaksesi ja tallentaaksesi dataa portaalistasi. {0}Mene Google Cloud Platform-konsoliin ja luo uusi palvelutili {LogoText}:lle. Syötä saamasi tiedot alle:</value>
-  </data>
-  <data name="ConsumersGoogleCloudjson" xml:space="preserve">
-    <value>GoogleCloud json</value>
-  </data>
-  <data name="ConsumersGoogleInstruction" xml:space="preserve">
-    <value>Ota käyttöön tämä sovellus yhdistääksesi Google Drive-tilisi Asiakirjat-moduulissa. Pystyt hallinnoimaan, muokkaamaan ja jakamaan kansioita Google Drivesta {LogoText}-käyttäjille. {0}Mene Google APIs-konsoliin ja luo uusi projekti {LogoText}-integraatiolle. Syötä saamasi tiedot alle:</value>
-  </data>
-  <data name="ConsumersLinkedInInstruction" xml:space="preserve">
-    <value>Ota käyttöön tämä sovellus saadaksesi ystäväsi kirjautumaan {LogoText}:en käyttäen LinkedIn-tiliä. {0}Mene LinkedIn-kehittäjät verkkosivustolle ja luo uusi sovellus {LogoText}-integraatiolle. Syötä saamasi tiedot alle:</value>
-  </data>
-  <data name="ConsumersMailruClientSecret" xml:space="preserve">
-    <value>Salainen avain</value>
-  </data>
-  <data name="ConsumersMailruDescription" xml:space="preserve">
-    <value>Ota sovellus käyttöön kirjautuaksesi sisään portaaliin käyttäen Mail.ru-tiliä.</value>
-  </data>
-  <data name="ConsumersMailruInstruction" xml:space="preserve">
-    <value>Kun lisäät Mail.ru-sovelluksen voit ottaa käyttöön portaaliin sisäänkirjautumisen käyttäen Mail.ru-tiliä profiilisivullasi.</value>
-  </data>
-  <data name="ConsumersmicrosoftClientId" xml:space="preserve">
-    <value>Sovelluksen Client ID</value>
-  </data>
-  <data name="ConsumersmicrosoftClientSecret" xml:space="preserve">
-    <value>Client Secret</value>
-  </data>
-  <data name="ConsumersMicrosoftDescription" xml:space="preserve">
-    <value>Ota käyttöön sovellus kirjautuaksesi sisään portaaliin käyttäen Microsoft-tiliä.</value>
-  </data>
-  <data name="ConsumersMicrosoftInstruction" xml:space="preserve">
-    <value>Ota tämä sovellus käyttöön antaaksesi käyttäjille mahdollisuuden kirjautua sisään {LogoText}:en Microsoftin kautta. {0} Mene Microsoft Azureen ja luo uusi sovellus {LogoText}-integraatiolle. Syötä saamasi data alle:</value>
-  </data>
-  <data name="ConsumersRackspace" xml:space="preserve">
-    <value>Rackspace-pilvipalvelu</value>
-  </data>
-  <data name="ConsumersRackspaceDescription" xml:space="preserve">
-    <value>Yhdistä Rackspace-pilvipalvelu varmuuskopioimaan ja tallentamaan tietoa portaalistasi.</value>
-  </data>
-  <data name="ConsumersRackspaceInstruction" xml:space="preserve">
-    <value>Yhdistä Rackspace-pilvipalvelu varmuuskopioimaan ja tallentamaan tietoa portaalistasi. {0}Rackspace-pilvipalvelun ohjauspaneelin turvallisuusasetuksissa klikkaa näytä linkki Racksppace API-avaimen vieressä. Liitä saamasi tiedot alle:</value>
-  </data>
-  <data name="ConsumersRackspaceprivate_container" xml:space="preserve">
-    <value>Yksityinen sisältö</value>
-  </data>
-  <data name="ConsumersSelectelprivate_container" xml:space="preserve">
-    <value>Yksityinen sisältö</value>
-  </data>
-  <data name="ConsumersRackspaceprivate_containerDescription" xml:space="preserve">
-    <value>Syötä Rackspacen yksityisen sisällön URL-osoite varmuuskopioiden tallentamista varten.</value>
-  </data>
-  <data name="ConsumersRackspacepublic_container" xml:space="preserve">
-    <value>Yleinen sisältö</value>
-  </data>
-  <data name="ConsumersSelectelpublic_container" xml:space="preserve">
-    <value>Yleinen sisältö</value>
-  </data>
-  <data name="ConsumersRackspacepublic_containerDescription" xml:space="preserve">
-    <value>Syötä Rackspacen julkisen sisällön URL-osoite varmuuskopioiden tallentamista varten.</value>
-  </data>
-  <data name="ConsumersRackspaceregion" xml:space="preserve">
-    <value>Alue</value>
-  </data>
-  <data name="ConsumersS3region" xml:space="preserve">
-    <value>Alue</value>
-  </data>
-  <data name="ConsumersS3bucket" xml:space="preserve">
-    <value>Bucket</value>
-  </data>
-  <data name="ConsumersRackspaceregionDescription" xml:space="preserve">
-    <value>Syötä alue, jossa Rackspace-sisällöt sijaitsevat.</value>
-  </data>
-  <data name="ConsumersS3" xml:space="preserve">
-    <value>Amazon AWS S3</value>
-  </data>
-  <data name="ConsumersS3bucketDescription" xml:space="preserve">
-    <value>Syötä Amazon bucketin ainutlaatuinen nimi varmuuskopioiden tallentamista varten.</value>
-  </data>
-  <data name="ConsumersS3Description" xml:space="preserve">
-    <value>Yhdistä Amazon AWS S3 portaalisi varmuuskopiointia ja tiedon tallentamista varten.</value>
-  </data>
-  <data name="ConsumersS3Instruction" xml:space="preserve">
-    <value>Yhdistä Amazon AWS S3 varmuuskopioidaksesi ja tallentaaksesi tietoa portaalistasi. {0}Mene AWS hallintakonsoliin ja luo pääsyavaimet {LogoText}:lle. Syötä saamasi tiedot alle:</value>
-  </data>
-  <data name="ConsumersS3regionDescription" xml:space="preserve">
-    <value>Syötä AWS-alue, jossa Amazon-bucket sijaitsee.</value>
-  </data>
-  <data name="Consumerssecretaccesskey" xml:space="preserve">
-    <value>S3 salainen pääsyavain</value>
-  </data>
-  <data name="ConsumersSelectel" xml:space="preserve">
-    <value>Selectel-pilvipalvelu</value>
-  </data>
-  <data name="ConsumersSelectelauthPwd" xml:space="preserve">
-    <value>Salasana muistiin pääsyä varten</value>
-  </data>
-  <data name="ConsumersSelectelauthUser" xml:space="preserve">
-    <value>Valtuutettu käyttäjä</value>
-  </data>
-  <data name="ConsumersSelectelDescription" xml:space="preserve">
-    <value>Yhdistä Selectel-pilvipalvelu varmuuskopioidaksesi ja tallentaaksesi tietoa portaalistasi.</value>
-  </data>
-  <data name="ConsumersSelectelInstruction" xml:space="preserve">
-    <value>Yhdistä Selectel-pilvipalvelu varmuuskopioidaksesi ja tallentaaksesi tietoa portaalistasi. {0}Hanki pääsytiedot sisältöjen luku/kirjoitusoikeuksiin käyttäjälle ja syötä se alle:</value>
-  </data>
-  <data name="ConsumersSelectelprivate_containerDescription" xml:space="preserve">
-    <value>Syötä Selectel-yksityisen sisällön nimi varmuuskopioiden jakamiseen.</value>
-  </data>
-  <data name="ConsumersSelectelpublic_containerDescription" xml:space="preserve">
-    <value>Syötä Selectel- julkisen sisällön nimi varmuuskopioiden tallentamiseen.</value>
-  </data>
-  <data name="Consumersskydriveappkey" xml:space="preserve">
-    <value>SovellusID</value>
-  </data>
-  <data name="Consumersskydriveappsecret" xml:space="preserve">
-    <value>Client secret</value>
-  </data>
-  <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
-    <value>Ota tämä sovellus käyttöön OneDrive-tilisi Asiakirjat-moduulissa. Pystyt hallitsemaan, ja jakamaan tiedostoja OneDrivestä {LogoText}-käyttäjien kanssa. {0}Kirjaudu sisään Microsoft Azure-tiliisi ja luo uusi sovellus {LogoText}-integraatiolle. Syötä alle saamasi tiedot:</value>
-  </data>
-  <data name="ConsumersSmsc" xml:space="preserve">
-    <value>Tekstiviestikeskus</value>
-  </data>
-  <data name="ConsumersSmscDescription" xml:space="preserve">
-    <value>Ota käyttöön sovellus kaksivaiheista todennusta varten tekstiviestikeskuksen kautta.</value>
-  </data>
-  <data name="ConsumersSmscInstruction" xml:space="preserve">
-    <value>Käytä tätä sovellusta ottaaksesi käyttöön kaksivaiheinen todennus tekstiviestikeskuspalvelun kanssa.  {0}Syötä tekstiviestikeskustilisi sisäänkirjautumistiedot (tai salasana MD5 hash) pienillä kirjaimilla:</value>
-  </data>
-  <data name="Consumerssmscpsw" xml:space="preserve">
-    <value>Salasana tai salasana MD5 has pienillä kirjaimilla</value>
-  </data>
-  <data name="ConsumersTelegramBotName" xml:space="preserve">
-    <value>Bot-käyttäjänimi</value>
-  </data>
-  <data name="ConsumersTelegramBotToken" xml:space="preserve">
-    <value>Bot-merkki</value>
-  </data>
-  <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Yhdistä Telegram-tili saadaksesi ilmoituksia Telegramin kautta.</value>
-  </data>
-  <data name="ConsumersTelegramInstruction" xml:space="preserve">
-    <value>Ota käyttöön Telegram-botti saadaksesi ilmoituksia Telegramin kautta. Voit luoda uuden botin käyttäen BotFatheria Telegramin työpöydällä. Käyttäjien tulee ottaa käyttöön Telegram-ilmoitukset profiilisivullaan käyttääkseen tätä bottia. {0} Syötä botin käyttäjänimi ja saamasi merkki alla oleviin kenttiin.</value>
-  </data>
-  <data name="ConsumersTwilioInstruction" xml:space="preserve">
-    <value>Ota tämä sovellus käyttöön, jotta käyttäjät voivat soittaa kontakteilleen CRM-moduulin kautta käyttäen Twilio. {0}Mene Twilion konsoliin ja syötä alla olevat tiedot:</value>
-  </data>
-  <data name="Consumerstwiliosender" xml:space="preserve">
-    <value>Puhelinnumero Twiliosta (vaaditaan tekstiviestivaltuutusta varten)</value>
-  </data>
-  <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
-    <value>Client ID</value>
-  </data>
-  <data name="ConsumerstwitterAccessTokenSecret_Default" xml:space="preserve">
-    <value>Client Secret</value>
-  </data>
-  <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Ota tämä sovellus käyttöön, jotta käyttäjäsi voivat kirjautua sisään {LogoText}:en käyttämällä Twitteriä ja linkittää heidän asiakkaidensa Twitter-tilit CRM-moduuliin. {0} Mene Twitter-kehittäjien portaaliin ja luo uusi sovellus {LogoText}-integraatiolle. Syötä alle saamasi tiedot:</value>
-  </data>
-  <data name="ConsumersTwitterKey" xml:space="preserve">
-    <value>API-avain</value>
-  </data>
-  <data name="ConsumersTwitterSecret" xml:space="preserve">
-    <value>API-avainsalaus</value>
-  </data>
-  <data name="Consumersusername" xml:space="preserve">
-    <value>Rackspace käyttäjänimi</value>
-  </data>
-  <data name="ConsumersVkClientId" xml:space="preserve">
-    <value>Sovellus ID</value>
-  </data>
-  <data name="ConsumersVkClientSecret" xml:space="preserve">
-    <value>Suojattu avain</value>
-  </data>
-  <data name="ConsumersVkDescription" xml:space="preserve">
-    <value>Ota sovellus käyttöön kirjautuaksesi portaaliin käyttäen VK-tiliä.</value>
-  </data>
-  <data name="ConsumersVkInstruction" xml:space="preserve">
-    <value>Kun lisäät VK-sovelluksen, voit kirjautua portaaliin käyttäen VK-tiliä profiilisivullasi.</value>
-  </data>
-  <data name="ConsumersWordpressDescription" xml:space="preserve">
-    <value>Ota sovellus käyttöön julkaistaksesi asiakirjoja suoraan WordPressissä.</value>
-  </data>
-  <data name="ConsumersWordpressInstruction" xml:space="preserve">
-    <value>Ota sovellus käyttöön julkaistaksesi helposti asiakirjoja WordPress-sivustollasi. {0}Wordpress-kehittäjien sivulla, luo uusi sovellus {LogoText}-integraatioon. Syötä saamasi tiedot alle:</value>
-  </data>
-  <data name="ConsumerswpClientId" xml:space="preserve">
-    <value>WordPress-avain</value>
-  </data>
-  <data name="ConsumerswpClientSecret" xml:space="preserve">
-    <value>WordPress-salaus</value>
-  </data>
-  <data name="ConsumersyahooClientId" xml:space="preserve">
-    <value>Client ID</value>
-  </data>
-  <data name="ConsumersyahooClientSecret" xml:space="preserve">
-    <value>Client Secret</value>
-  </data>
-  <data name="ConsumersYahooDescription" xml:space="preserve">
-    <value>Ota sovellus käyttöön tuodaksesi käyttäjiä Yahoo-palvelusta.</value>
-  </data>
-  <data name="ConsumersYahooInstruction" xml:space="preserve">
-    <value>Ota tämä sovellus käyttöön lisätäksesi uusia portaalin käyttäjiä Yahoon kontaktilistalta. {0}Mene luo sovellus-sivulle Yahoon kehittäjäverkostossa ja luo uusi sovellus {LogoText}-integraatiolle. Syötä saamasi tiedot alle:</value>
-  </data>
-  <data name="ConsumersYandexClientId" xml:space="preserve">
-    <value>ID</value>
-  </data>
-  <data name="ConsumersYandexDescription" xml:space="preserve">
-    <value>Ota sovellus käyttöön kirjautuaksesi portaaliin käyttäen Yandex-tiliä.</value>
-  </data>
-  <data name="ConsumersYandexInstruction" xml:space="preserve">
-    <value>Kun lisäät Yandex-sovelluksen voit kirjautua portaaliin profiilisivultasi käyttäen Yandex-tiliä.</value>
-  </data>
-  <data name="CouldNotRecoverPasswordForLdapUser" xml:space="preserve">
-    <value>Salasanan palautustoiminto ei ole sallittu LDAP-käyttäjälle</value>
-  </data>
-  <data name="CouldNotRecoverPasswordForSsoUser" xml:space="preserve">
-    <value>Salasanan palautustoiminto ei ole sallittu SSO-käyttäjälle</value>
-  </data>
-  <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
-    <value>Väärän tapauksen id.</value>
-  </data>
-  <data name="ErrorEmptyMessage" xml:space="preserve">
-    <value>Viestin teksti on tyhjä</value>
-  </data>
-  <data name="ErrorIncorrectUserName" xml:space="preserve">
-    <value>Väärä etunimi tai sukunimi</value>
-  </data>
-  <data name="ErrorPasswordNoSpaces" xml:space="preserve">
-    <value>ei välilyöntejä</value>
-  </data>
-  <data name="ErrorPasswordOnlyLatinLetters" xml:space="preserve">
-    <value>vain latinalaisia kirjaimia</value>
-  </data>
-  <data name="ErrorRequestLimitExceeded" xml:space="preserve">
-    <value>Pyyntöjen raja on ylitetty</value>
-  </data>
-  <data name="ErrorTenantTooShort" xml:space="preserve">
-    <value>Tenant domain ei voi olla tyhjä.</value>
-  </data>
-  <data name="ErrorTenantTooShortFormat" xml:space="preserve">
-    <value>Domain-nimen tulee olla {0} -{1} merkkiä pitkä.</value>
-  </data>
-  <data name="LdapSettingsErrorDomainNotFound" xml:space="preserve">
-    <value>LDAP domainia ei löytynyt.</value>
-  </data>
-  <data name="LdapSettingsErrorLostRights" xml:space="preserve">
-    <value>Yritit ottaa järjestelmänvalvojanoikeudet pois itseltäsi. Tämä ei vaikuttanut järjestelmänvalvojan oikeuksiisi.</value>
-  </data>
-  <data name="LdapSettingsErrorRemovedYourself" xml:space="preserve">
-    <value>Tiliäsi ei ole yhdistetty LDAP-hakemistoon ja LDAP-salasanasi ei ole enää aktiivinen. Ole hyvä ja muuta tai aseta salasana tilillesi profiilin asetukset-sivulla.</value>
   </data>
   <data name="LdapSettingsModifyLdapUsers" xml:space="preserve">
     <value>LDAP-käyttäjien muokkaus tavallisilla portaalin käyttäjillä</value>
@@ -883,8 +975,23 @@
   <data name="LdapSettingsStatusAddingGroupUser" xml:space="preserve">
     <value>käyttäjän lisäys</value>
   </data>
+  <data name="LdapSettingsStatusCertificateVerification" xml:space="preserve">
+    <value>Sertifikaatin varmennus</value>
+  </data>
+  <data name="LdapSettingsStatusCheckingLdapSettings" xml:space="preserve">
+    <value>Tarkistetaan LDAP asetuksia</value>
+  </data>
   <data name="LdapSettingsStatusDisconnecting" xml:space="preserve">
     <value>LDAP yhteyttä katkaistaan</value>
+  </data>
+  <data name="LdapSettingsStatusGettingGroupsFromLdap" xml:space="preserve">
+    <value>Haetaan ryhmäluetteloa LDAP-palvelimelta</value>
+  </data>
+  <data name="LdapSettingsStatusGettingUsersFromLdap" xml:space="preserve">
+    <value>Hetaan käyttäjäluetteloa LDAP-palvelimelta</value>
+  </data>
+  <data name="LdapSettingsStatusGivingRights" xml:space="preserve">
+    <value>Asetetaan käyttäjä {0} järjestelmänvalvojaksi {1}</value>
   </data>
   <data name="LdapSettingsStatusLoadingBaseInfo" xml:space="preserve">
     <value>Ladataan LDAP pohjatietoja</value>
@@ -895,11 +1002,23 @@
   <data name="LdapSettingsStatusRemovingOldGroups" xml:space="preserve">
     <value>Poistetaan vanhentuneita ryhmiä, jotka on ladattu LDAP:n kautta aiemmin</value>
   </data>
+  <data name="LdapSettingsStatusRemovingOldRights" xml:space="preserve">
+    <value>Poistetaan vanhentuneet pääsyoikeudet, jotka on ladattu aiemmin LDAP:in kautta</value>
+  </data>
   <data name="LdapSettingsStatusRemovingOldUsers" xml:space="preserve">
     <value>Poistetaan käytöstä vanhentuneita käyttäjäprofiileja, jotka on ladattu aiemmin LDAP:n kautta</value>
   </data>
+  <data name="LdapSettingsStatusSavingGroups" xml:space="preserve">
+    <value>Tallennetaan ryhmiä</value>
+  </data>
+  <data name="LdapSettingsStatusSavingSettings" xml:space="preserve">
+    <value>Tallennetaan asetuksia</value>
+  </data>
   <data name="LdapSettingsStatusSavingUserPhoto" xml:space="preserve">
     <value>Tallennetaan kuvaa</value>
+  </data>
+  <data name="LdapSettingsStatusSavingUsers" xml:space="preserve">
+    <value>Tallennetaan käyttäjiä</value>
   </data>
   <data name="LdapSettingsStatusSyncingUsers" xml:space="preserve">
     <value>Synkronoidaan käyttäjiä</value>
@@ -909,6 +1028,12 @@
   </data>
   <data name="LdapSettingsStatusUpdatingUserPhotos" xml:space="preserve">
     <value>Päivitetään käyttjäjien kuvia</value>
+  </data>
+  <data name="LdapSettingsStrongAuthRequired" xml:space="preserve">
+    <value>Turvallisempi valtuutuksen tyyppi tarvitaan. Ole hyvä ja käytä suojattua yhteyttä tai aktivoi tavallinen autentikointi palvelimella.</value>
+  </data>
+  <data name="LdapSettingsTenantQuotaSettled" xml:space="preserve">
+    <value>Nykyisen hinnoitteluohjelman käyttäjäraja on saavutettu</value>
   </data>
   <data name="LdapSettingsTlsNotSupported" xml:space="preserve">
     <value>StartTLS:ä ei tueta nykyisessä LDAP-palvelimessa.</value>
@@ -931,26 +1056,74 @@
   <data name="LicenseErrorQuota" xml:space="preserve">
     <value>Käyttäjien määrä ylittää lisenssissä sallitun määrän</value>
   </data>
+  <data name="LicenseUploaded" xml:space="preserve">
+    <value>Ladattu onnistuneesti</value>
+  </data>
   <data name="LicenseUploadedOverdue" xml:space="preserve">
     <value>Onnistuneesti ladattu. {0} Tuki ja päivitykset eivät ole saatavilla tälle lisenssille {2}.{1} alkaen</value>
   </data>
   <data name="LicenseUploadedOverdueSupport" xml:space="preserve">
     <value>Onnistuneesti ladattu. {0} Tuki ei olle saatavilla tälle lisenssille {2}.{1} alkaen</value>
   </data>
+  <data name="MessageEmailChangeInstuctionsSentOnEmail" xml:space="preserve">
+    <value>Sähköpostin muutosohjeet on lähetetty sähköpostiosoitteeseen</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Salasanan muuttamisen ohje on lähetetty {0} sähköpostiosoitteeseen.</value>
+  </data>
   <data name="MessageYourPasswordSendedToEmail" xml:space="preserve">
     <value>Jos käyttäjä sähköpostilla {0}  on olemassa, salasanan vaihto-ohjeet on lähetetty tähän sähköpostiosoitteeseen.</value>
+  </data>
+  <data name="MobilePhoneMustErase" xml:space="preserve">
+    <value>Numeron vaihtamiseksi, sinun tulee poistaa nykyinen puhelinnumerosi</value>
   </data>
   <data name="OrgServerRegion" xml:space="preserve">
     <value>ORG-alue</value>
   </data>
+  <data name="Owner" xml:space="preserve">
+    <value>Omistaja</value>
+  </data>
   <data name="PortalName" xml:space="preserve">
     <value>Pilvitila asiakirjoillesi</value>
+  </data>
+  <data name="PortalSecurity" xml:space="preserve">
+    <value>Portaalin käyttöoikeus</value>
+  </data>
+  <data name="QuotaGreaterPortalError" xml:space="preserve">
+    <value>Muistikiintiön asetus epäonnistui – asettamasi muistikiintiö on suurempi kuin portaalin kiintiö.</value>
   </data>
   <data name="ReassignDataRemoveUserError" xml:space="preserve">
     <value>Tietojen uudelleen määräämisprosessi {0} ei ole valmis.</value>
   </data>
   <data name="RecaptchaInvalid" xml:space="preserve">
     <value>Virheellinen Recaptcha</value>
+  </data>
+  <data name="RoomFreeSpaceException" xml:space="preserve">
+    <value>Huonetilakiintiö ylitetty</value>
+  </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>Huonekohtaisen kiintiön asettaminen epäonnistui. Syötetty arvo on suurempi kuin koko DocSpacen muisti.</value>
+  </data>
+  <data name="SgServerRegion" xml:space="preserve">
+    <value>Aasia (Singapore)</value>
+  </data>
+  <data name="SmsAuthenticationMessageError" xml:space="preserve">
+    <value>Virheellinen koodi</value>
+  </data>
+  <data name="SmsAuthenticationMessageToUser" xml:space="preserve">
+    <value>Koodi, jolla voit kirjautua sivustolle: {0}</value>
+  </data>
+  <data name="SmsAuthenticationTimeout" xml:space="preserve">
+    <value>Koodin käyttöaika on erääntynyt. Ole hyvä ja pyydä uusi tekstiviesti.</value>
+  </data>
+  <data name="SmsNotAvailable" xml:space="preserve">
+    <value>SMS asetukset eivät ole saatavilla</value>
+  </data>
+  <data name="SmsTooMuchError" xml:space="preserve">
+    <value>Olet lähettänyt liian monta tekstiviestiä. Yritä myöhemmin uudelleen.</value>
+  </data>
+  <data name="SsoSettingsCantSaveSettings" xml:space="preserve">
+    <value>Ei voitu tallentaa asetuksia</value>
   </data>
   <data name="SsoSettingsCouldNotBeNull" xml:space="preserve">
     <value>Asetukset eivät voi olla tyhjät</value>
@@ -964,8 +1137,140 @@
   <data name="SsoSettingsInvalidMapping" xml:space="preserve">
     <value>Virheellinen kenttien kartoitus</value>
   </data>
+  <data name="SuccessfullySaveGreetingSettingsMessage" xml:space="preserve">
+    <value>Tervehdysasetukset on tallennettu onnistuneesti</value>
+  </data>
+  <data name="SuccessfullySaveSettingsMessage" xml:space="preserve">
+    <value>Asetukset on päivitetty onnistuneesti</value>
+  </data>
+  <data name="SuccessfullySentNotificationDeleteUserInfoMessage" xml:space="preserve">
+    <value>Profiilin poistoon liittyviä ohjeita on lähetetty sähköpostiosoitteeseesi {0}</value>
+  </data>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>Tekoälyagenttien määrän ei tulisi ylittää {0}</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>Tekoälytyökalut</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Ota käyttöön DocSpacessasi tekoälyominaisuudet tehostaaksesi tuottavuutta.</value>
+  </data>
+  <data name="TariffsFeature_audit" xml:space="preserve">
+    <value>Kirjautumisten ja toimien seuranta</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Varmuuskopio</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Ota varmuuskopiot käyttöön DocSpacessasi. Kustannukset laskutetaan automaattisesti.</value>
+  </data>
+  <data name="TariffsFeature_customization" xml:space="preserve">
+    <value>Brändäys &amp; räätälöinti</value>
+  </data>
+  <data name="TariffsFeature_file_size" xml:space="preserve">
+    <value>Maksimi tiedostokoko</value>
+  </data>
+  <data name="TariffsFeature_file_size_exception" xml:space="preserve">
+    <value>Tiedoston koko ei saisi ylittää {0}</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} ilmaista varmuuskopiota kuukaudessa</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Ilmaisten varmuuskopioiden määrä ei saisi ylittää {0} kuukaudessa</value>
+  </data>
+  <data name="TariffsFeature_manager_exception" xml:space="preserve">
+    <value>Ylläpitäjien määrä ei saisi ylittää {0}</value>
+  </data>
+  <data name="TariffsFeature_manager_price_count" xml:space="preserve">
+    <value>Järjestelmänvalvojien määrä</value>
+  </data>
+  <data name="TariffsFeature_restore" xml:space="preserve">
+    <value>Tietojen palautus</value>
+  </data>
+  <data name="TariffsFeature_room" xml:space="preserve">
+    <value>Rajoittamaton aktiivisten huoneiden määrä</value>
+  </data>
+  <data name="TariffsFeature_room_exception" xml:space="preserve">
+    <value>Huoneiden määrä ei saisi ylittää {0}</value>
+  </data>
+  <data name="TariffsFeature_sso" xml:space="preserve">
+    <value>SSO</value>
+  </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Varastokiintiöt &amp; tilastot</value>
+  </data>
   <data name="TariffsFeature_thirdparty" xml:space="preserve">
     <value>Kolmansien osapuolien integraatiot</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} per järjestelmänvalvoja ja mahdollisuus lisätä tilaa pyynnöstä</value>
+  </data>
+  <data name="TariffsFeature_total_size_exception" xml:space="preserve">
+    <value>Käytetyn muistin koko ei saisi ylittää {0}</value>
+  </data>
+  <data name="TariffsFeature_total_size_price_count" xml:space="preserve">
+    <value>Muistin tila</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Lisälevytila</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Säädä säilytystilaa juuri tarvitsemasi määrän mukaan.</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Pääkäyttäjät lisätty:</value>
+  </data>
+  <data name="TariffsFeature_used_room" xml:space="preserve">
+    <value>Huoneet:</value>
+  </data>
+  <data name="TariffsFeature_used_total_size" xml:space="preserve">
+    <value>Käytetty muistin tila:</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
+    <value>Käytetty muistin tila:</value>
+  </data>
+  <data name="TariffsFeature_used_usersInRoom" xml:space="preserve">
+    <value>Käyttäjiä huoneessa:</value>
+  </data>
+  <data name="TariffsFeature_users" xml:space="preserve">
+    <value>Rajoittamaton määrä käyttäjiä ja vieraita</value>
+  </data>
+  <data name="TariffsFeature_usersInRoom" xml:space="preserve">
+    <value>Käyttäjiä huoneessa</value>
+  </data>
+  <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
+    <value>Huoneessa olevien käyttäjien määrä ei saisi ylittää {0}</value>
+  </data>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Pääkäyttäjien määrä ylittää rajan: {0}/{1}.</value>
+  </data>
+  <data name="TariffsFeature_users_exception" xml:space="preserve">
+    <value>Käyttäjien määrä ei saisi ylittää {0}</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>Tekoälyverkkohaku</value>
+  </data>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Lisää rahaa lompakkoosi saadaksesi tekoälyverkkohaku käyttöön.</value>
+  </data>
+  <data name="Tariffs_admin" xml:space="preserve">
+    <value>Yritys</value>
+  </data>
+  <data name="Tariffs_adminyear" xml:space="preserve">
+    <value>Yritys</value>
+  </data>
+  <data name="Tariffs_nonprofit" xml:space="preserve">
+    <value>Voittoa tavoittelematon</value>
+  </data>
+  <data name="Tariffs_startup" xml:space="preserve">
+    <value>Aloitus</value>
+  </data>
+  <data name="TelegramOnGenericError" xml:space="preserve">
+    <value>Odottamaton virhe. Ole hyvä ja yritä uudelleen.</value>
+  </data>
+  <data name="TelegramOnSuccessfulLink" xml:space="preserve">
+    <value>Sinut on onnistuneesti yhdistetty Telegramiin saadaksesi ilmoituksia DocSpacestasi.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Väärä koodi</value>
@@ -976,109 +1281,16 @@
   <data name="TfaTooMuchError" xml:space="preserve">
     <value>Olet lähettänyt liian monta tekstiviestiä. Ole hyvä ja yritä uudelleen.</value>
   </data>
-  <data name="LdapSettingsStatusRemovingOldRights" xml:space="preserve">
-    <value>Poistetaan vanhentuneet pääsyoikeudet, jotka on ladattu aiemmin LDAP:in kautta</value>
-  </data>
-  <data name="LdapSettingsStatusGivingRights" xml:space="preserve">
-    <value>Asetetaan käyttäjä {0} järjestelmänvalvojaksi {1}</value>
-  </data>
-  <data name="ConsumersZoom" xml:space="preserve">
-    <value>Zoom</value>
-  </data>
-  <data name="ConsumersZoomClientId" xml:space="preserve">
-    <value>Zoom-asiakastunnus</value>
-  </data>
-  <data name="ConsumersZoomClientSecret" xml:space="preserve">
-    <value>Zoom-asiakassecret</value>
-  </data>
-  <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Ota käyttöön kirjautuminen portaaliin Zoom-tilin kautta.</value>
-  </data>
-  <data name="ConsumersZoomInstruction" xml:space="preserve">
-    <value>Ota käyttöön {LogoText}:en kirjautuminen Zoom-tilien kautta. {0}Mene Zoom-kehittäjien verkkosivustolle ja luo uusi sovellus ONLY OFFICE-integraatiolle. Syötä alla olevat tiedot:</value>
-  </data>
-  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
-    <value>Liian monta kirjautumisyritystä. Ole hyvä ja yritä myöhemmin uudelleen</value>
-  </data>
-  <data name="ErrorWebPluginExist" xml:space="preserve">
-    <value>Lisäosa on jo olemassa</value>
-  </data>
-  <data name="ErrorWebPluginArchive" xml:space="preserve">
-    <value>Väärä lisäosa-arkisto</value>
-  </data>
-  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
-    <value>Väärä tiedostopääte</value>
-  </data>
-  <data name="ErrorWebPluginFileSize" xml:space="preserve">
-    <value>Tiedostokoko ylittää rajan</value>
-  </data>
-  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
-    <value>Systeemin lisäosien muutokset ovat kiellettyjä</value>
-  </data>
-  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
-    <value>Viimeistä täysien oikeuksien tilaa ei voida poistaa</value>
-  </data>
-  <data name="ErrorWebPluginName" xml:space="preserve">
-    <value>Väärä lisäosan nimi</value>
-  </data>
-  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
-    <value>Ei syöttötiedostoa</value>
-  </data>
-  <data name="ErrorWebPluginNotFound" xml:space="preserve">
-    <value>Lisäosaa ei löytynyt</value>
-  </data>
-  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
-    <value>Liian monta syöttötiedostoa</value>
-  </data>
-  <data name="QuotaGreaterPortalError" xml:space="preserve">
-    <value>Muistikiintiön asetus epäonnistui – asettamasi muistikiintiö on suurempi kuin portaalin kiintiö.</value>
-  </data>
-  <data name="RoomFreeSpaceException" xml:space="preserve">
-    <value>Huonetilakiintiö ylitetty</value>
-  </data>
   <data name="UserFreeSpaceException" xml:space="preserve">
     <value>Käyttäjätilakiintiö ylitetty</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Pääkäyttäjät lisätty:</value>
-  </data>
-  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
-    <value>Kutsujen raja on ylitetty</value>
-  </data>
-  <data name="ErrorUserDisabled" xml:space="preserve">
-    <value>Käyttäjä poistettu käytöstä</value>
-  </data>
-  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
-    <value>Salasanan muuttamisen ohje on lähetetty {0} sähköpostiosoitteeseen.</value>
-  </data>
-  <data name="ErrorEmailLinked" xml:space="preserve">
-    <value>Tämä sähköposti on liitetty käyttäjälle {0} kolmannen osapuolen palveluntarjoajana</value>
-  </data>
-  <data name="TariffsFeature_statistic" xml:space="preserve">
-    <value>Varastokiintiöt &amp; tilastot</value>
-  </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} per järjestelmänvalvoja ja mahdollisuus lisätä tilaa pyynnöstä</value>
-  </data>
-  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Huonekohtaisen kiintiön asettaminen epäonnistui. Syötetty arvo on suurempi kuin koko DocSpacen muisti.</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
     <value>Käyttäjäkohtaisen kiintiön asettaminen epäonnistui. Syötetty arvo on suurempi kuin koko DocSpacen muisti.</value>
   </data>
-  <data name="ErrorTrustedMailDomain" xml:space="preserve">
-    <value>Lisää ainakin yksi luotettu domain.</value>
+  <data name="UsServerRegion" xml:space="preserve">
+    <value>US (Oregon)</value>
   </data>
-  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
-    <value>Pääkäyttäjien määrä ylittää rajan: {0}/{1}.</value>
-  </data>
-  <data name="Tariffs_nonprofit" xml:space="preserve">
-    <value>Voittoa tavoittelematon</value>
-  </data>
-  <data name="ErrorIpRestriction" xml:space="preserve">
-    <value>Lisää ainakin 1 sallittu IP-osoite.</value>
-  </data>
-  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
-    <value>Webhook URL ei ole saatavilla. HEAD-pyyntö ei vastaa 200 http statusta.</value>
+  <data name="WhatsNewSubscriptionName" xml:space="preserve">
+    <value>Uutta</value>
   </data>
 </root>

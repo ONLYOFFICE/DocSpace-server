@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,11 +30,7 @@ public class WebItemSettings() : ISettings<WebItemSettings>
 {
     private readonly WebItemManager _webItemManager;
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{C888CF56-585B-4c78-9E64-FE1093649A62}"); }
-    }
+    public static Guid ID => new("{C888CF56-585B-4c78-9E64-FE1093649A62}");
 
     [JsonPropertyName("Settings")]
     public List<WebItemOption> SettingsCollection { get; set; } = [];
@@ -59,7 +55,7 @@ public class WebItemSettings() : ISettings<WebItemSettings>
         });
         return settings;
     }
-    
+
     public DateTime LastModified { get; set; }
 
     public class WebItemOption

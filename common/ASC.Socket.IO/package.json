@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "node server.js",
-    "start:dev": "nodemon server.js"
+    "start:dev": "nodemon server.js",
+    "start:build": "yarn install && node server.js"
   },
   "dependencies": {
     "@aws-sdk/client-cloudwatch-logs": "^3.199.0",

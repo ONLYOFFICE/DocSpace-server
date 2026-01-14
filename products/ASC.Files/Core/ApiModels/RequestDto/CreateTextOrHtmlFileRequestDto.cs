@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -63,5 +63,5 @@ public class CreateTextOrHtmlFileRequestDto<T>
     /// The parameters for creating an HTML or text file.
     /// </summary>
     [FromBody]
-    public CreateTextOrHtmlFile File { get; set; }
+    public required CreateTextOrHtmlFile File { get; set; }
 }

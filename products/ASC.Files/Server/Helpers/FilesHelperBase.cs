@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -39,7 +39,7 @@ public abstract class FilesHelperBase(
     IEventBus eventBus,
     TenantManager tenantManager,
     AuthContext authContext)
-    {
+{
     protected readonly FilesSettingsHelper _filesSettingsHelper = filesSettingsHelper;
     protected readonly FileUploader _fileUploader = fileUploader;
     protected readonly FileDtoHelper _fileDtoHelper = fileDtoHelper;
@@ -61,7 +61,7 @@ public abstract class FilesHelperBase(
             await webhookManager.PublishAsync(WebhookTrigger.FileUploaded, resultFile);
 
             var folderDao = _daoFactory.GetCacheFolderDao<T>();
-            var room = await folderDao.GetParentFoldersAsync(folderId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+            var room = await folderDao.GetParentFoldersAsync(folderId).FirstOrDefaultAsync(f => f.IsRoom);
             if (room != null)
             {
                 var data = room.Id is int rId && resultFile.Id is int fId

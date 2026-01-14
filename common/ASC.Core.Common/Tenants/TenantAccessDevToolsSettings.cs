@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -39,13 +39,9 @@ public class TenantDevToolsAccessSettings : ISettings<TenantDevToolsAccessSettin
     public bool LimitedAccessForUsers { get; set; }
 
     /// <summary>
-    /// The tenant ID.
+    /// The settings ID.
     /// </summary>
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{739F1C35-1688-4EEB-B46B-6E413FBCE834}"); }
-    }
+    public static Guid ID => new("{739F1C35-1688-4EEB-B46B-6E413FBCE834}");
 
     public TenantDevToolsAccessSettings GetDefault()
     {

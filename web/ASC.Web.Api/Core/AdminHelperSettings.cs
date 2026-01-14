@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,11 +30,7 @@ public class AdminHelperSettings : ISettings<AdminHelperSettings>
 {
     public bool Viewed { get; set; }
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{342CBBF7-FE08-4261-AB38-9C6BA8FA22B9}"); }
-    }
+    public static Guid ID => new("{342CBBF7-FE08-4261-AB38-9C6BA8FA22B9}");
 
     public AdminHelperSettings GetDefault()
     {
@@ -43,6 +39,6 @@ public class AdminHelperSettings : ISettings<AdminHelperSettings>
             Viewed = false
         };
     }
-    
+
     public DateTime LastModified { get; set; }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -63,7 +63,7 @@ public class NotifyRequest(ILoggerProvider options, INotifySource notifySource, 
                 }
                 catch (Exception err)
                 {
-                    _log.ErrorIntercept(interceptor.Name, NotifyAction, Recipient, err);
+                    _log.ErrorIntercept(interceptor.Name, NotifyAction.ToString(), Recipient.ToString(), err);
                 }
             }
         }
@@ -98,7 +98,7 @@ public class NotifyRequest(ILoggerProvider options, INotifySource notifySource, 
             _tenantId = _tenantId,
             _senderNames = _senderNames,
             _patterns = _patterns,
-            Arguments = [..Arguments],
+            Arguments = [.. Arguments],
             _requaredTags = _requaredTags,
             CurrentSender = CurrentSender,
             CurrentMessage = CurrentMessage
@@ -112,12 +112,7 @@ public class NotifyRequest(ILoggerProvider options, INotifySource notifySource, 
     {
         return new NoticeMessage(recipient, NotifyAction, ObjectID);
     }
-
-    public async Task<IPatternProvider> GetPatternProvider(IServiceScope scope)
-    {
-        return await ((INotifySource)scope.ServiceProvider.GetService(_notifySource.GetType())).GetPatternProvider(this);
-    }
-
+    
     public IRecipientProvider GetRecipientsProvider(IServiceScope scope)
     {
         return ((INotifySource)scope.ServiceProvider.GetService(_notifySource.GetType())).GetRecipientsProvider();

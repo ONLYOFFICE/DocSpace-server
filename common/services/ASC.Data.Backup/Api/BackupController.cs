@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,6 +25,15 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Api.Core.Convention;
+using ASC.Common.Threading.DistributedLock.Abstractions;
+using ASC.Core.Billing;
+using ASC.Core.Common;
+using ASC.Core.Tenants;
+using ASC.Data.Backup.Core.Quota;
+using ASC.Data.Backup.Services;
+using ASC.Data.Storage;
+using ASC.MessagingSystem;
+using ASC.Web.Core.PublicResources;
 
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -39,14 +48,17 @@ namespace ASC.Data.Backup.Controllers;
 [ApiController]
 [ControllerName("backup")]
 public class BackupController(
-    BackupAjaxHandler backupAjaxHandler,
     TenantManager tenantManager,
     AuthContext authContext,
     CoreBaseSettings coreBaseSettings,
     TenantExtra tenantExtra,
     IEventBus eventBus,
     CommonLinkUtility commonLinkUtility,
-    CoreSettings coreSettings)
+    CoreSettings coreSettings,
+    BackupService backupService,
+    IDistributedLockProvider distributedLockProvider,
+    IHttpContextAccessor httpContextAccessor,
+    CountFreeBackupChecker freeBackupsChecker)
     : ControllerBase
 {
     private Guid CurrentUserId => authContext.CurrentAccount.ID;
@@ -57,16 +69,16 @@ public class BackupController(
     /// <short>Get the backup schedule</short>
     /// <path>api/2.0/backup/getbackupschedule</path>
     [Tags("Backup")]
-    [SwaggerResponse(200, "Backup schedule", typeof(BackupAjaxHandler.Schedule))]
+    [SwaggerResponse(200, "Backup schedule", typeof(ScheduleDto))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("getbackupschedule")]
-    public async Task<BackupAjaxHandler.Schedule> GetBackupSchedule(DumpDto dto)
+    public async Task<ScheduleDto> GetBackupSchedule(DumpDto dto)
     {
         if (dto.Dump)
         {
             await tenantExtra.DemandAccessSpacePermissionAsync();
         }
-        return await backupAjaxHandler.GetScheduleAsync(dto.Dump);
+        return await backupService.GetScheduleAsync(dto.Dump);
     }
 
     /// <summary>
@@ -81,9 +93,9 @@ public class BackupController(
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [SwaggerResponse(404, "The required folder was not found")]
     [HttpPost("createbackupschedule")]
-    public async Task<bool> CreateBackupScheduleAsync(BackupScheduleDto inDto)
+    public async Task<bool> CreateBackupSchedule(BackupScheduleDto inDto)
     {
-        if (inDto.Dump) 
+        if (inDto.Dump)
         {
             await tenantExtra.DemandAccessSpacePermissionAsync();
         }
@@ -97,7 +109,7 @@ public class BackupController(
             Hour = inDto.CronParams.Hour,
             Day = inDto.CronParams.Day ?? 0
         };
-        if(backupStored is > 30 or < 1)
+        if (backupStored is > 30 or < 1)
         {
             throw new ArgumentException("backupStored must be 1 - 30");
         }
@@ -107,14 +119,14 @@ public class BackupController(
 
             if (int.TryParse(storageParams["folderId"], out var fId))
             {
-                await backupAjaxHandler.CheckAccessToFolderAsync(fId);
+                await backupService.CheckAccessToFolderAsync(fId);
             }
             else
             {
-                await backupAjaxHandler.CheckAccessToFolderAsync(storageParams["folderId"]);
+                await backupService.CheckAccessToFolderAsync(storageParams["folderId"]);
             }
         }
-        await backupAjaxHandler.CreateScheduleAsync(storageType, storageParams, backupStored, cron, inDto.Dump);
+        await backupService.CreateScheduleAsync(storageType, storageParams, backupStored, cron, inDto.Dump);
         return true;
     }
 
@@ -133,7 +145,7 @@ public class BackupController(
         {
             await tenantExtra.DemandAccessSpacePermissionAsync();
         }
-        await backupAjaxHandler.DeleteScheduleAsync(dto.Dump);
+        await backupService.DeleteScheduleAsync(dto.Dump);
 
         return true;
     }
@@ -151,14 +163,14 @@ public class BackupController(
     [SwaggerResponse(404, "The required folder was not found")]
     [AllowNotPayment]
     [HttpPost("startbackup")]
-    public async Task<BackupProgress> StartBackupAsync(BackupDto inDto)
+    public async Task<BackupProgress> StartBackup(BackupDto inDto, [FromServices] TenantQuotaController quotaController)
     {
         if (inDto.Dump)
         {
             await tenantExtra.DemandAccessSpacePermissionAsync();
         }
 
-        var storageType =  inDto.StorageType ?? BackupStorageType.Documents;
+        var storageType = inDto.StorageType ?? BackupStorageType.Documents;
         var storageParams = inDto.StorageParams == null ? new Dictionary<string, string>() : inDto.StorageParams.ToDictionary(r => r.Key.ToString(), r => r.Value.ToString());
 
         var canParse = false;
@@ -179,40 +191,99 @@ public class BackupController(
 
         if (storageType is BackupStorageType.Documents or BackupStorageType.ThridpartyDocuments)
         {
+            if (storageType is BackupStorageType.Documents)
+            {
+                quotaController.Init(tenantManager.GetCurrentTenantId());
+                await quotaController.QuotaUsedCheckAsync(0, authContext.CurrentAccount.ID);
+            }
 
             if (int.TryParse(storageParams["folderId"], out var fId))
             {
-                await backupAjaxHandler.CheckAccessToFolderAsync(fId);
+                await backupService.CheckAccessToFolderAsync(fId);
             }
             else
             {
-                await backupAjaxHandler.CheckAccessToFolderAsync(storageParams["folderId"]);
+                await backupService.CheckAccessToFolderAsync(storageParams["folderId"]);
             }
         }
         if (storageType is BackupStorageType.ThirdPartyConsumer)
         {
             storageParams.TryAdd("subdir", "backup");
         }
-        
 
-        var serverBaseUri = coreBaseSettings.Standalone && await coreSettings.GetSettingAsync("BaseDomain") == null
-            ? commonLinkUtility.GetFullAbsolutePath("")
-            : null;
-        
-        var taskId = await backupAjaxHandler.StartBackupAsync(storageType, storageParams, serverBaseUri, inDto.Dump, false);
         var tenantId = tenantManager.GetCurrentTenantId();
-        
-        await eventBus.PublishAsync(new BackupRequestIntegrationEvent(
-             tenantId: tenantId,
-             storageParams: storageParams,
-             storageType: storageType,
-             createBy: CurrentUserId,
-             dump: inDto.Dump,
-             taskId: taskId,
-             serverBaseUri: serverBaseUri
-        ));
 
-        return await backupAjaxHandler.GetBackupProgressAsync(inDto.Dump);
+        IDistributedLockHandle lockHandle = null;
+        Session billingSession = null;
+
+        try
+        {
+            lockHandle = await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetFreeBackupsCountCheckKey(tenantId));
+
+            try
+            {
+                await freeBackupsChecker.CheckAppend();
+            }
+            catch (TenantQuotaException)
+            {
+                var backupServiceEnabled = await backupService.IsBackupServiceEnabledAsync(tenantId);
+                if (!backupServiceEnabled)
+                {
+                    throw;
+                }
+
+                billingSession = await backupService.OpenCustomerSessionForBackupAsync(tenantId);
+                if (billingSession == null)
+                {
+                    throw new BillingException(Resource.ErrorNotAllowedOption);
+                }
+            }
+
+            var serverBaseUri = coreBaseSettings.Standalone && await coreSettings.GetSettingAsync("BaseDomain") == null
+                ? commonLinkUtility.GetFullAbsolutePath("")
+                : null;
+
+            var taskId = await backupService.StartBackupAsync(storageType, storageParams, serverBaseUri, inDto.Dump, false);
+
+            var headers = MessageSettings.GetHttpHeaders(httpContextAccessor?.HttpContext?.Request)
+                .ToDictionary(x => x.Key, x => x.Value.ToString());
+
+            await eventBus.PublishAsync(new BackupRequestIntegrationEvent(
+                 tenantId: tenantId,
+                 storageParams: storageParams,
+                 storageType: storageType,
+                 createBy: CurrentUserId,
+                 dump: inDto.Dump,
+                 taskId: taskId,
+                 serverBaseUri: serverBaseUri,
+                 billingSessionId: billingSession?.SessionId ?? 0,
+                 billingSessionExpire: billingSession?.Expire ?? default,
+                 headers: headers
+            ));
+
+            return await backupService.GetBackupProgressAsync(inDto.Dump);
+
+        }
+        catch (Exception ex) when (ex is AccountingPaymentRequiredException or AccountingCustomerNotFoundException)
+        {
+            throw new BillingException(Resource.ErrorPaymentRequired);
+        }
+        catch (Exception)
+        {
+            if (billingSession != null)
+            {
+                await backupService.CloseCustomerSessionForBackupAsync(tenantId, billingSession.SessionId);
+            }
+
+            throw;
+        }
+        finally
+        {
+            if (lockHandle != null)
+            {
+                await lockHandle.ReleaseAsync();
+            }
+        }
     }
 
     /// <summary>
@@ -225,13 +296,13 @@ public class BackupController(
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [AllowNotPayment]
     [HttpGet("getbackupprogress")]
-    public async Task<BackupProgress> GetBackupProgressAsync(DumpDto dto)
+    public async Task<BackupProgress> GetBackupProgress(DumpDto dto)
     {
         if (dto.Dump)
         {
             await tenantExtra.DemandAccessSpacePermissionAsync();
         }
-        return await backupAjaxHandler.GetBackupProgressAsync(dto.Dump);
+        return await backupService.GetBackupProgressAsync(dto.Dump);
     }
 
     /// <summary>
@@ -250,7 +321,7 @@ public class BackupController(
         {
             await tenantExtra.DemandAccessSpacePermissionAsync();
         }
-        return await backupAjaxHandler.GetBackupHistoryAsync(dto.Dump);
+        return await backupService.GetBackupHistoryAsync(dto.Dump);
     }
 
     /// <summary>
@@ -264,7 +335,7 @@ public class BackupController(
     [HttpDelete("deletebackup/{id:guid}")]
     public async Task<bool> DeleteBackup([FromRoute] DeleteBackupDto inDto)
     {
-        await backupAjaxHandler.DeleteBackupAsync(inDto.BackupId);
+        await backupService.DeleteBackupAsync(inDto.BackupId);
         return true;
     }
 
@@ -274,7 +345,7 @@ public class BackupController(
     /// <short>Delete the backup history</short>
     /// <path>api/2.0/backup/deletebackuphistory</path>
     [Tags("Backup")]
-    [SwaggerResponse(200, "Boolean value: true if the operation is successful")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpDelete("deletebackuphistory")]
     public async Task<bool> DeleteBackupHistory(DumpDto dto)
@@ -283,7 +354,7 @@ public class BackupController(
         {
             await tenantExtra.DemandAccessSpacePermissionAsync();
         }
-        await backupAjaxHandler.DeleteAllBackupsAsync(dto.Dump);
+        await backupService.DeleteAllBackupsAsync(dto.Dump);
         return true;
     }
 
@@ -299,21 +370,21 @@ public class BackupController(
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [SwaggerResponse(404, "The required file or folder was not found")]
     [HttpPost("startrestore")]
-    public async Task<BackupProgress> StartBackupRestoreAsync(BackupRestoreDto inDto)
+    public async Task<BackupProgress> StartBackupRestore(BackupRestoreDto inDto)
     {
         if (inDto.Dump)
         {
             await tenantExtra.DemandAccessSpacePermissionAsync();
         }
 
-        await backupAjaxHandler.DemandPermissionsRestoreAsync();
+        await backupService.DemandPermissionsRestoreAsync();
 
         var storageParams = inDto.StorageParams == null ? new Dictionary<string, string>() : inDto.StorageParams.ToDictionary(r => r.Key.ToString(), r => r.Value.ToString());
 
         var serverBaseUri = coreBaseSettings.Standalone && await coreSettings.GetSettingAsync("BaseDomain") == null
             ? commonLinkUtility.GetFullAbsolutePath("")
             : null;
-        
+
         var tenantId = tenantManager.GetCurrentTenantId();
 
         var storageType = inDto.StorageType ?? BackupStorageType.Documents;
@@ -321,11 +392,11 @@ public class BackupController(
         {
             if (int.TryParse(storageParams["filePath"], out var fId))
             {
-                await backupAjaxHandler.CheckAccessToFileAsync(fId);
+                await backupService.CheckAccessToFileAsync(fId);
             }
             else
             {
-                await backupAjaxHandler.CheckAccessToFileAsync(storageParams["filePath"]);
+                await backupService.CheckAccessToFileAsync(storageParams["filePath"]);
             }
         }
         if (storageType is BackupStorageType.ThirdPartyConsumer)
@@ -333,7 +404,7 @@ public class BackupController(
             storageParams.TryAdd("subdir", "backup");
         }
 
-        var taskId = await backupAjaxHandler.StartRestoreAsync(inDto.BackupId, storageType, storageParams, inDto.Notify, serverBaseUri, inDto.Dump, false);
+        var taskId = await backupService.StartRestoreAsync(inDto.BackupId, storageType, storageParams, inDto.Notify, serverBaseUri, inDto.Dump, false);
         await eventBus.PublishAsync(new BackupRestoreRequestIntegrationEvent(
                              tenantId: tenantId,
                              createBy: CurrentUserId,
@@ -347,7 +418,7 @@ public class BackupController(
                         ));
 
 
-        return await backupAjaxHandler.GetRestoreProgressAsync(inDto.Dump);
+        return await backupService.GetRestoreProgressAsync(inDto.Dump);
     }
 
     /// <summary>
@@ -361,9 +432,9 @@ public class BackupController(
     [HttpGet("getrestoreprogress")]  //NOTE: this method doesn't check payment!!!
     [AllowAnonymous]
     [AllowNotPayment]
-    public async Task<BackupProgress> GetRestoreProgressAsync(RestoreDto dto)
+    public async Task<BackupProgress> GetRestoreProgress(RestoreDto dto)
     {
-        return await backupAjaxHandler.GetRestoreProgressAsync(dto.Dump);
+        return await backupService.GetRestoreProgressAsync(dto.Dump);
     }
 
     /// <summary>
@@ -377,6 +448,49 @@ public class BackupController(
     [SwaggerResponse(200, "Path to the temporary folder with the stored backup", typeof(object))]
     public object GetTempPath()
     {
-        return backupAjaxHandler.GetTmpFolder();
+        return backupService.GetTmpFolder();
+    }
+
+    /// <summary>
+    /// Returns the number of backups for a period of time. The default is one month.
+    /// </summary>
+    /// <short>Get the number of backups</short>
+    /// <path>api/2.0/backup/getbackupscount</path>
+    [Tags("Backup")]
+    [SwaggerResponse(200, "Number of backups", typeof(int))]
+    [AllowNotPayment]
+    [HttpGet("getbackupscount")]
+    public async Task<int> GetBackupsCountAsync(BackupsCountDto dto)
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        var to = dto.To ?? DateTime.UtcNow.AddSeconds(1);
+        var from = dto.From ?? to.AddMonths(-1);
+
+        if (from > to)
+        {
+            throw new ArgumentException("From date must be less than to date");
+        }
+
+        var result = await backupService.GetBackupsCountAsync(tenantId, dto.Paid, from, to);
+        return result;
+    }
+
+    /// <summary>
+    /// Returns the backup service state.
+    /// </summary>
+    /// <short>Get the backup service state</short>
+    /// <path>api/2.0/backup/getservicestate</path>
+    [Tags("Backup")]
+    [SwaggerResponse(200, "Backup service state", typeof(BackupServiceStateDto))]
+    [AllowNotPayment]
+    [HttpGet("getservicestate")]
+    public async Task<BackupServiceStateDto> GetBackupsServiceStateAsync()
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        var backupServiceEnabled = await backupService.IsBackupServiceEnabledAsync(tenantId);
+
+        return new BackupServiceStateDto { Enabled = backupServiceEnabled };
     }
 }

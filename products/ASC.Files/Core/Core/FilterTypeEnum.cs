@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,7 +27,7 @@
 namespace ASC.Files.Core;
 
 /// <summary>
-/// The file filter type.
+/// The filter type.
 /// </summary>
 public enum FilterType
 {
@@ -81,10 +81,16 @@ public enum FilterType
 
     [SwaggerEnum("Pdf")]
     [EnumMember] Pdf = 22,
+
     [SwaggerEnum("Pdf form")]
     [EnumMember] PdfForm = 23,
+
+    [SwaggerEnum("Virtual data rooms")]
     [EnumMember] VirtualDataRooms = 24,
+
+    [SwaggerEnum("Diagrams only")]
+    [EnumMember] DiagramsOnly = 25,
     
-    [SwaggerEnum("AI rooms")]
-    [EnumMember] AiRooms = 25
+    [SwaggerEnum("Ai rooms")]
+    [EnumMember] AiRooms = 26
 }

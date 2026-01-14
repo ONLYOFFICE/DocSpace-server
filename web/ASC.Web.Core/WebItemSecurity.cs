@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -73,10 +73,10 @@ public class WebItemSecurity(
     AuthorizationManager authorizationManager,
     WebItemSecurityCache webItemSecurityCache,
     SettingsManager settingsManager,
-    CountPaidUserChecker countPaidUserChecker, 
+    CountPaidUserChecker countPaidUserChecker,
     IDistributedLockProvider distributedLockProvider)
 {
-    
+
     private static readonly SecurityAction _read = new(new Guid("77777777-32ae-425f-99b5-83176061d1ae"), "ReadWebItem", false);
 
     //
@@ -183,7 +183,7 @@ public class WebItemSecurity(
     {
         var info = (await GetSecurityAsync(id)).ToList();
         var module = webItemManager.GetParentItemId(new Guid(id)) != Guid.Empty;
-        
+
         return new WebItemSecurityInfo
         {
             WebItemId = id,
@@ -192,12 +192,13 @@ public class WebItemSecurity(
 
             Users = await info
                            .ToAsyncEnumerable()
-                           .SelectAwait(async i => await userManager.GetUsersAsync(i.Item1))
-                           .Where(u => u.Id != Constants.LostUser.Id).ToListAsync(),
+                           .Select(async (Tuple<Guid, bool> i, CancellationToken _) => await userManager.GetUsersAsync(i.Item1))
+                           .Where(u => u.Id != Constants.LostUser.Id)
+                           .ToListAsync(),
 
             Groups = await info
                            .ToAsyncEnumerable()
-                           .SelectAwait(async i => await userManager.GetGroupInfoAsync(i.Item1))
+                           .Select(async (Tuple<Guid, bool> i, CancellationToken _) => await userManager.GetGroupInfoAsync(i.Item1))
                            .Where(g => g.ID != Constants.LostGroupInfo.ID && g.CategoryID != Constants.SysGroupCategoryId).ToListAsync()
         };
     }
@@ -227,7 +228,13 @@ public class WebItemSecurity(
 
         if (administrator)
         {
-            var tenantId = tenantManager.GetCurrentTenantId();
+            var tenant = tenantManager.GetCurrentTenant();
+            var tenantId = tenant.Id;
+
+            if (productId == Constants.GroupAdmin.ID && tenant.OwnerId != authContext.CurrentAccount.ID)
+            {
+                throw new SecurityException(Resource.ErrorAccessDenied);
+            }
 
             await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenantId)))
             {
@@ -324,27 +331,15 @@ public class WebItemSecurity(
         public Guid WebItemId { get; }
         private readonly WebItemManager _webItemManager;
 
-        public Type ObjectType
-        {
-            get { return GetType(); }
-        }
+        public Type ObjectType => GetType();
 
-        public object SecurityId
-        {
-            get { return WebItemId.ToString("N"); }
-        }
+        public object SecurityId => WebItemId.ToString("N");
 
         public string FullId => AzObjectIdHelper.GetFullObjectId(this);
 
-        public bool InheritSupported
-        {
-            get { return true; }
-        }
+        public bool InheritSupported => true;
 
-        public bool ObjectRolesSupported
-        {
-            get { return false; }
-        }
+        public bool ObjectRolesSupported => false;
 
         public static WebItemSecurityObject Create(string id, WebItemManager webItemManager)
         {

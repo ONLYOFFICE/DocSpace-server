@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,11 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Polly;
-using Polly.Contrib.WaitAndRetry;
-using Polly.Extensions.Http;
-using Polly.Timeout;
-
 namespace ASC.Files.Core.Helpers;
 
 /// <summary>
@@ -44,6 +39,16 @@ public static class DocumentService
     public const string CustomSslVerificationClient = "CustomSSLVerificationClient";
 
     /// <summary>
+    /// The document service resilience pipeline name.
+    /// </summary>
+    public const string ResiliencePipelineName = "DocumentServiceResiliencePipeline";
+
+    /// <summary>
+    /// The document service license resilience pipeline name.
+    /// </summary>
+    public const string LicenseResiliencePipelineName = "DocumentServiceLicenseResiliencePipeline";
+
+    /// <summary>
     /// Gets the HTTP client name.
     /// </summary>
     public static string GetHttpClientName(bool sslVerification) => nameof(DocumentService) + (sslVerification ? string.Empty : CustomSslVerificationClient);
@@ -56,9 +61,10 @@ public static class DocumentService
 
     private static readonly JsonSerializerOptions _commonSettings = new()
     {
-        AllowTrailingCommas = true, PropertyNameCaseInsensitive = true
+        AllowTrailingCommas = true,
+        PropertyNameCaseInsensitive = true
     };
-    
+
     /// <summary>
     /// Translation key to a supported form.
     /// </summary>
@@ -404,7 +410,7 @@ public static class DocumentService
 
         using (var response = await httpClient.SendAsync(request))
         {
-            dataResponse = await  response.Content.ReadAsStringAsync();
+            dataResponse = await response.Content.ReadAsStringAsync();
         }
 
         if (string.IsNullOrEmpty(dataResponse))
@@ -640,10 +646,7 @@ public static class DocumentService
         /// <summary>
         /// The command type.
         /// </summary>
-        public string C
-        {
-            get { return Command.ToString().ToLower(CultureInfo.InvariantCulture); }
-        }
+        public string C => Command.ToString().ToLower(CultureInfo.InvariantCulture);
 
         /// <summary>
         /// The command callback.
@@ -751,6 +754,11 @@ public static class DocumentService
         /// The height of the converted area, measured in the number of pages.
         /// </summary>
         public int FitToHeight { get; set; }
+
+        /// <summary>
+        /// Allows to set the scale of the output PDF file.
+        /// </summary>
+        public int? Scale { get; set; }
 
         /// <summary>
         /// The width of the converted area, measured in the number of pages.
@@ -933,7 +941,7 @@ public static class DocumentService
         /// The type of the file for the source viewed or edited document.
         /// </summary>
         [JsonPropertyName("filetype")]
-        public string FileType { get; set; }
+        public required string FileType { get; set; }
 
         /// <summary>
         /// The encrypted signature added to the config in the form of a token.
@@ -944,7 +952,7 @@ public static class DocumentService
         /// The absolute URL where the source viewed or edited document is stored.
         /// </summary>
         [Url]
-        public string Url { get; set; }
+        public required string Url { get; set; }
     }
 
     public class DocumentServiceException(DocumentServiceException.ErrorCode errorCode, string message)
@@ -1042,38 +1050,60 @@ public static class DocumentServiceHttpClientExtension
     public static void AddDocumentServiceHttpClient(this IServiceCollection services, IConfiguration configuration)
     {
         var httpClientTimeout = Convert.ToInt32(configuration["files:docservice:timeout"] ?? "100000");
-        var policyTimeout = httpClientTimeout / 1000;
+        var policyTimeout = TimeSpan.FromSeconds(httpClientTimeout / 1000);
         var retryCount = Convert.ToInt32(configuration["files:docservice:try"] ?? "6");
-        var delay = Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromSeconds(1), retryCount: retryCount);
+        var delay = Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromSeconds(1), retryCount: retryCount).ToArray();
+
+        var retryOptions = new RetryStrategyOptions<HttpResponseMessage>
+        {
+            MaxRetryAttempts = retryCount,
+
+            ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
+                            .Handle<HttpRequestException>()
+                            .Handle<TaskCanceledException>()
+                            .Handle<TimeoutRejectedException>()
+                            .HandleResult(response => !response.IsSuccessStatusCode),
+
+            DelayGenerator = args =>
+            {
+                return ValueTask.FromResult<TimeSpan?>(delay[args.AttemptNumber]);
+            }
+        };
+
+        var customHttpMessageHandler = new HttpClientHandler
+        {
+            ServerCertificateCustomValidationCallback = (_, _, _, _) => true
+        };
 
         services.AddHttpClient(GetHttpClientName(sslVerification: true))
                 .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-                .AddPolicyHandler(Policy.TimeoutAsync<HttpResponseMessage>(policyTimeout))
-                .AddPolicyHandler((_, _) => HttpPolicyExtensions.HandleTransientHttpError()
-                                                                .Or<TimeoutRejectedException>()
-                                                                .WaitAndRetryAsync(delay));
+                .AddResilienceHandler(ResiliencePipelineName, builder =>
+                {
+                    builder.AddTimeout(policyTimeout);
+                    builder.AddRetry(retryOptions);
+                });
 
         services.AddHttpClient(GetHttpClientName(sslVerification: false))
                 .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-                .ConfigurePrimaryHttpMessageHandler(_ =>
+                .ConfigurePrimaryHttpMessageHandler(_ => customHttpMessageHandler)
+                .AddResilienceHandler(ResiliencePipelineName, builder =>
                 {
-                    return new HttpClientHandler
-                    {
-                        ServerCertificateCustomValidationCallback = (_, _, _, _) => true
-                    };
-                })
-                .AddPolicyHandler(Policy.TimeoutAsync<HttpResponseMessage>(policyTimeout))
-                .AddPolicyHandler((_, _) => HttpPolicyExtensions.HandleTransientHttpError()
-                                                                .Or<TimeoutRejectedException>()
-                                                                .WaitAndRetryAsync(delay));
+                    builder.AddTimeout(policyTimeout);
+                    builder.AddRetry(retryOptions);
+                });
 
         services.AddHttpClient(CustomSslVerificationClient)
-                .ConfigurePrimaryHttpMessageHandler(_ =>
-                {
-                    return new HttpClientHandler
-                    {
-                        ServerCertificateCustomValidationCallback = (_, _, _, _) => true
-                    };
-                });
+                .ConfigurePrimaryHttpMessageHandler(_ => customHttpMessageHandler);
+
+        services.AddResiliencePipeline<string, LicenseValidationResult>(LicenseResiliencePipelineName, pipelineBuilder =>
+        {
+            pipelineBuilder.AddRetry(new RetryStrategyOptions<LicenseValidationResult>
+            {
+                MaxRetryAttempts = 3,
+                Delay = TimeSpan.FromSeconds(1),
+                BackoffType = DelayBackoffType.Exponential,
+                ShouldHandle = new PredicateBuilder<LicenseValidationResult>().HandleResult(result => result == null)
+            });
+        });
     }
 }

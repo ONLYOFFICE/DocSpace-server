@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -50,30 +50,42 @@ public record FormOpenSetup<T>
     /// Specifies if the completed form can be submitted only or not.
     /// </summary>
     public bool IsSubmitOnly { get; set; }
-    
+
     /// <summary>
     /// The form filling session ID.
     /// </summary>
     public string FillingSessionId { get; set; }
-    
+
     /// <summary>
     /// The editor type.
     /// </summary>
     public EditorType EditorType { get; set; }
-    
+
     /// <summary>
     /// The form draft parameters.
     /// </summary>
     public File<T> Draft { get; set; }
-    
+
     /// <summary>
     /// The role name of the user who fills out the form.
     /// </summary>
     public string RoleName { get; set; }
-    
+
     /// <summary>
     /// The root folder where the current form is located.
     /// </summary>
     public Folder<T> RootFolder { get; set; }
+
+    /// <summary>
+    /// Disable embedded config
+    /// </summary>
+    public bool DisableEmbeddedConfig { get; set; }
+
+    /// <summary>
+    /// Specifies if the room can be edited out or not.
+    /// </summary>
+    public bool CanEditRoom { get; set; }
+
+    public bool HasRole { get; set; }
 
 }

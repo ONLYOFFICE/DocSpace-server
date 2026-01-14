@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -47,7 +47,7 @@ public enum RoomType
     [SwaggerEnum(Description = "Virtual data room")]
     VirtualDataRoom = 8,
     
-    [SwaggerEnum(Description = "AI room")]
+    [SwaggerEnum(Description = "AI Room")]
     AiRoom = 9
 }
 
@@ -59,7 +59,7 @@ public static class RoomTypeExtensions
         {
             return null;
         }
-        
+
         return types.Select(x => x switch
         {
             RoomType.FillingFormsRoom => FilterType.FillingFormsRooms,
@@ -146,4 +146,6 @@ public class CreateRoomRequestDto
     /// The collection of sharing parameters.
     /// </summary>
     public IEnumerable<FileShareParams> Share { get; set; }
+    
+    public ChatSettings ChatSettings { get; set; }
 }

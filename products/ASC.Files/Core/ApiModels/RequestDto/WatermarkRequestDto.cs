@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -88,5 +88,5 @@ public class WatermarkRequestDto<T>
     /// The watermark settings.
     /// </summary>
     [FromBody]
-    public WatermarkRequestDto Watermark { get; set; }
+    public required WatermarkRequestDto Watermark { get; set; }
 }

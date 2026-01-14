@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -71,7 +71,7 @@ public class SignupAccountRequestDto
     /// <summary>
     /// The user link key.
     /// </summary>
-    public string Key { get; set; }
+    public required string Key { get; set; }
 
     /// <summary>
     /// The user culture code.
@@ -79,7 +79,7 @@ public class SignupAccountRequestDto
     public string Culture { get; set; }
 
     /// <summary>
-    /// Third-party profile in the serialized format
+    /// The third-party profile in the serialized format
     /// </summary>
-    public string SerializedProfile { get; set; }
+    public required string SerializedProfile { get; set; }
 }

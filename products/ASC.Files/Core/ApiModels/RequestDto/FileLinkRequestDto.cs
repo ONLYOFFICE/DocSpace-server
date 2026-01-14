@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -47,6 +47,12 @@ public class FileLinkRequest
     public ApiDateTime ExpirationDate { get; set; }
 
     /// <summary>
+    /// The link name.
+    /// </summary>
+    [StringLength(255)]
+    public string Title { get; set; }
+
+    /// <summary>
     /// The link scope, whether it is internal or not.
     /// </summary>
     public bool Internal { get; set; }
@@ -55,6 +61,17 @@ public class FileLinkRequest
     /// Specifies whether the file link is primary or not.
     /// </summary>
     public bool Primary { get; set; }
+
+    /// <summary>
+    /// Specifies whether to deny downloading the file or not.
+    /// </summary>
+    public bool DenyDownload { get; set; }
+
+    /// <summary>
+    /// Password for access via link.
+    /// </summary>
+    [StringLength(255)]
+    public string Password { get; set; }
 }
 
 
@@ -73,5 +90,5 @@ public class FileLinkRequestDto<T>
     /// The file external link parameters.
     /// </summary>
     [FromBody]
-    public FileLinkRequest File { get; set; }
+    public required FileLinkRequest File { get; set; }
 }

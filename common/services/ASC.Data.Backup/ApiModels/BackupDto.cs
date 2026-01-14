@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -46,4 +46,40 @@ public class BackupDto
     /// Specifies if a dump will be created or not.
     /// </summary>
     public bool Dump { get; set; }
+}
+
+
+/// <summary>
+/// Parameters for calculating the number of backups.
+/// </summary>
+public class BackupsCountDto
+{
+    /// <summary>
+    /// The from date.
+    /// </summary>
+    [FromQuery(Name = "from")]
+    public DateTime? From { get; set; }
+
+    /// <summary>
+    /// The to date.
+    /// </summary>
+    [FromQuery(Name = "to")]
+    public DateTime? To { get; set; }
+
+    /// <summary>
+    /// Specifies if the backups are paid or not.
+    /// </summary>
+    [FromQuery(Name = "paid")]
+    public bool Paid { get; set; }
+}
+
+/// <summary>
+/// Backup service state.
+/// </summary>
+public class BackupServiceStateDto
+{
+    /// <summary>
+    /// Specifies if the backup service is enabled or not.
+    /// </summary>
+    public bool Enabled { get; set; }
 }

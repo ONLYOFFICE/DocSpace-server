@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -59,5 +59,8 @@ public enum FileType
     Document = 7,
 
     [SwaggerEnum("Pdf")]
-    Pdf = 10
+    Pdf = 10,
+
+    [SwaggerEnum("Diagram")]
+    Diagram = 11
 }

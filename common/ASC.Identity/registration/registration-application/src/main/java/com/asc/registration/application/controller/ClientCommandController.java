@@ -129,7 +129,9 @@ public class ClientCommandController {
    * @return a {@link ResponseEntity} containing the created client details.
    */
   @RateLimiter(name = "globalRateLimiter")
-  @PostMapping
+  @PostMapping(
+      produces = {MediaType.APPLICATION_JSON_VALUE},
+      consumes = {MediaType.APPLICATION_JSON_VALUE})
   @Operation(
       summary = "Create a new OAuth2 client",
       description =
@@ -183,6 +185,10 @@ public class ClientCommandController {
         @ApiResponse(
             responseCode = "403",
             description = "Insufficient permissions to create client",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "415",
+            description = "Unsupported media type",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(
             responseCode = "429",
@@ -266,7 +272,9 @@ public class ClientCommandController {
    * @return a {@link ResponseEntity} indicating the status of the update.
    */
   @RateLimiter(name = "globalRateLimiter")
-  @PutMapping("/{clientId}")
+  @PutMapping(
+      value = "/{clientId}",
+      consumes = {MediaType.APPLICATION_JSON_VALUE})
   @Operation(
       summary = "Update an existing OAuth2 client",
       description =
@@ -288,6 +296,10 @@ public class ClientCommandController {
         @ApiResponse(
             responseCode = "404",
             description = "Client not found",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "415",
+            description = "Unsupported media type",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(
             responseCode = "429",
@@ -693,7 +705,9 @@ public class ClientCommandController {
    * @return a {@link ResponseEntity} indicating the status of the activation change.
    */
   @RateLimiter(name = "globalRateLimiter")
-  @PatchMapping("/{clientId}/activation")
+  @PatchMapping(
+      value = "/{clientId}/activation",
+      consumes = {MediaType.APPLICATION_JSON_VALUE})
   @Operation(
       summary = "Change client activation status",
       description =
@@ -717,6 +731,10 @@ public class ClientCommandController {
         @ApiResponse(
             responseCode = "404",
             description = "Client not found",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+            responseCode = "415",
+            description = "Unsupported media type",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(
             responseCode = "429",

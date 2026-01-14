@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -61,10 +61,10 @@ public class WebhookPayload<T1, T2>
         var target = string.IsNullOrEmpty(config.TargetId)
             ? null
             : new WebhookPayloadTargetInfo<T2>
-                {
-                    Id = dataId,
-                    Type = trigger.GetTargetType()
-                };
+            {
+                Id = dataId,
+                Type = trigger.GetTargetType()
+            };
 
         Webhook = new WebhookPayloadConfigInfo<T2>
         {

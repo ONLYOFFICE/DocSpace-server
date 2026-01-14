@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -74,10 +74,10 @@ public class CreateWebhooksConfigRequestsDto
 /// <summary>
 /// The request parameters for updating the webhook configuration.
 /// </summary>
-public class UpdateWebhooksConfigRequestsDto: CreateWebhooksConfigRequestsDto
+public class UpdateWebhooksConfigRequestsDto : CreateWebhooksConfigRequestsDto
 {
     /// <summary>
     /// The webhook configuration ID.
     /// </summary>
-    public int Id { get; set; }
+    public required int Id { get; set; }
 }

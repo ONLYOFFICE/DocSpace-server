@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -209,6 +209,11 @@ public class EmployeeFullDto : EmployeeDto
     public int? LoginEventId { get; set; }
 
     /// <summary>
+    /// The auth cookie lifetime in seconds.
+    /// </summary>
+    public double? AuthCookieLifetime { get; set; }
+
+    /// <summary>
     /// The user who created the current user.
     /// </summary>
     public EmployeeDto CreatedBy { get; set; }
@@ -230,7 +235,6 @@ public class EmployeeFullDto : EmployeeDto
 }
 [Scope]
 public class EmployeeFullDtoHelper(
-        ApiContext httpContext,
         UserManager userManager,
         AuthContext authContext,
         UserPhotoManager userPhotoManager,
@@ -246,43 +250,43 @@ public class EmployeeFullDtoHelper(
         GroupSummaryDtoHelper groupSummaryDtoHelper,
         TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
         ILogger<EmployeeDtoHelper> logger)
-    : EmployeeDtoHelper(httpContext, displayUserSettingsHelper, userPhotoManager, commonLinkUtility, userManager, authContext, logger)
+    : EmployeeDtoHelper(displayUserSettingsHelper, userPhotoManager, commonLinkUtility, userManager, authContext, logger)
 {
-    public static Expression<Func<User, UserInfo>> GetExpression(ApiContext apiContext)
-    {
-        if (apiContext?.Fields == null)
-        {
-            return null;
-        }
+    // public static Expression<Func<User, UserInfo>> GetExpression(ApiContext apiContext)
+    // {
+    //     if (apiContext?.Fields == null)
+    //     {
+    //         return null;
+    //     }
+    //
+    //     var newExpr = Expression.New(typeof(UserInfo));
+    //
+    //     //i => new UserInfo { ID = i.id } 
+    //     var parameter = Expression.Parameter(typeof(User), "i");
+    //     var bindExprs = new List<MemberAssignment>();
+    //
+    //     //foreach (var field in apiContext.Fields)
+    //     //{
+    //     //    var userInfoProp = typeof(UserInfo).GetProperty(field);
+    //     //    var userProp = typeof(User).GetProperty(field);
+    //     //    if (userInfoProp != null && userProp != null)
+    //     //    {
+    //     //        bindExprs.Add(Expression.Bind(userInfoProp, Expression.Property(parameter, userProp)));
+    //     //    }
+    //     //}
+    //
+    //     if (apiContext.Check("Id"))
+    //     {
+    //         bindExprs.Add(Expression.Bind(typeof(UserInfo).GetProperty("Id"),
+    //             Expression.Property(parameter, typeof(User).GetProperty("Id"))));
+    //     }
+    //
+    //     var body = Expression.MemberInit(newExpr, bindExprs);
+    //     var lambda = Expression.Lambda<Func<User, UserInfo>>(body, parameter);
+    //
+    //     return lambda;
+    // }
 
-        var newExpr = Expression.New(typeof(UserInfo));
-
-        //i => new UserInfo { ID = i.id } 
-        var parameter = Expression.Parameter(typeof(User), "i");
-        var bindExprs = new List<MemberAssignment>();
-
-        //foreach (var field in apiContext.Fields)
-        //{
-        //    var userInfoProp = typeof(UserInfo).GetProperty(field);
-        //    var userProp = typeof(User).GetProperty(field);
-        //    if (userInfoProp != null && userProp != null)
-        //    {
-        //        bindExprs.Add(Expression.Bind(userInfoProp, Expression.Property(parameter, userProp)));
-        //    }
-        //}
-
-        if (apiContext.Check("Id"))
-        {
-            bindExprs.Add(Expression.Bind(typeof(UserInfo).GetProperty("Id"),
-                Expression.Property(parameter, typeof(User).GetProperty("Id"))));
-        }
-
-        var body = Expression.MemberInit(newExpr, bindExprs);
-        var lambda = Expression.Lambda<Func<User, UserInfo>>(body, parameter);
-
-        return lambda;
-    }
-    
     public async Task<EmployeeFullDto> GetSimple(UserInfo userInfo, bool withGroups = true)
     {
         var result = new EmployeeFullDto
@@ -394,34 +398,17 @@ public class EmployeeFullDtoHelper(
 
         var cacheKey = Math.Abs(userInfo.LastModified.GetHashCode());
 
-        if (_httpContext.Check("avatarOriginal"))
+        result.AvatarOriginal = await _userPhotoManager.GetPhotoAbsoluteWebPath(userInfo.Id) + $"?hash={cacheKey}";
+        result.AvatarMax = await _userPhotoManager.GetMaxPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
+        result.AvatarMedium = await _userPhotoManager.GetMediumPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
+        result.Avatar = await _userPhotoManager.GetBigPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
+        var listAdminModules = await userInfo.GetListAdminModulesAsync(webItemSecurity, webItemManager);
+        if (listAdminModules.Count > 0)
         {
-            result.AvatarOriginal = await _userPhotoManager.GetPhotoAbsoluteWebPath(userInfo.Id) + $"?hash={cacheKey}";
+            result.ListAdminModules = listAdminModules;
         }
 
-        if (_httpContext.Check("avatarMax"))
-        {
-            result.AvatarMax = await _userPhotoManager.GetMaxPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
-        }
-
-        if (_httpContext.Check("avatarMedium"))
-        {
-            result.AvatarMedium = await _userPhotoManager.GetMediumPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
-        }
-
-        if (_httpContext.Check("avatar"))
-        {
-            result.Avatar = await _userPhotoManager.GetBigPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
-        }
-
-        if (_httpContext.Check("listAdminModules"))
-        {
-            var listAdminModules = await userInfo.GetListAdminModulesAsync(webItemSecurity, webItemManager);
-            if (listAdminModules.Count > 0)
-            {
-                result.ListAdminModules = listAdminModules;
-            }
-        }
+        result.RegistrationDate = apiDateTimeHelper.Get(userInfo.CreateDate);
 
         if (!isDocSpaceAdmin)
         {
@@ -432,8 +419,6 @@ public class EmployeeFullDtoHelper(
         {
             result.CreatedBy = await GetAsync(await _userManager.GetUsersAsync(userInfo.CreatedBy.Value));
         }
-            
-        result.RegistrationDate = apiDateTimeHelper.Get(userInfo.CreateDate);
 
         if (await tfaAppAuthSettingsHelper.GetEnable())
         {
@@ -445,19 +430,19 @@ public class EmployeeFullDtoHelper(
 
     private async Task FillGroupsAsync(EmployeeFullDto result, UserInfo userInfo)
     {
-        if (!_httpContext.Check("groups") && !_httpContext.Check("department"))
+        if (await _userManager.IsUserAsync(_authContext.CurrentAccount.ID) && _authContext.CurrentAccount.ID != userInfo.Id)
         {
             return;
         }
-
-        var groupsFromDb = (await _userManager.GetUserGroupsAsync(userInfo.Id));
+        
+        var groupsFromDb = await _userManager.GetUserGroupsAsync(userInfo.Id);
         List<GroupSummaryDto> groups = [];
 
         foreach (var g in groupsFromDb)
         {
             groups.Add(await groupSummaryDtoHelper.GetAsync(g));
         }
-        
+
 
         if (groups.Count > 0)
         {

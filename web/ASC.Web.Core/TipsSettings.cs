@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -37,16 +37,12 @@ public class TipsSettings : ISettings<TipsSettings>
     [DataMember(Name = "Show")]
     public bool Show { get; set; }
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{27909339-B4D4-466F-8F40-A64C9D2FC041}"); }
-    }
+    public static Guid ID => new("{27909339-B4D4-466F-8F40-A64C9D2FC041}");
 
     public TipsSettings GetDefault()
     {
         return new TipsSettings { Show = true };
     }
-    
+
     public DateTime LastModified { get; set; }
 }

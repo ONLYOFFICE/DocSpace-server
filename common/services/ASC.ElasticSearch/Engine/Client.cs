@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -55,6 +55,7 @@ public class Client(ILogger<Client> logger, Settings settings)
 
                 var uri = new Uri($"{settings.Scheme}://{settings.Host}:{settings.Port}");
                 var connectionSettings = new ConnectionSettings(new SingleNodeConnectionPool(uri))
+                    .TransferEncodingChunked()
                     .RequestTimeout(TimeSpan.FromMinutes(5))
                     .MaximumRetries(10)
                     .ThrowExceptions();
@@ -74,7 +75,7 @@ public class Client(ILogger<Client> logger, Settings settings)
                     connectionSettings.DisableDirectStreaming().PrettyJson().EnableDebugMode(r =>
                     {
                         logger.Debug(r.DebugInformation);
-                        
+
                         if (r.RequestBodyInBytes != null)
                         {
                             logger.Debug($"Request: {Encoding.UTF8.GetString(r.RequestBodyInBytes)}");
@@ -92,8 +93,15 @@ public class Client(ILogger<Client> logger, Settings settings)
                     var client = new OpenSearchClient(connectionSettings);
                     if (Ping(client))
                     {
-                        client.Ingest.PutPipeline("attachments", p => p.Processors(pp => pp.Attachment<Attachment>(a => a.Field("document.data").TargetField("document.attachment"))));
-                        
+                        client.Ingest.PutPipeline("attachments", p =>
+                            p.Processors(pp =>
+                                pp.Attachment<Attachment>(a =>
+                                    a.Field("document.data")
+                                        .TargetField("document.attachment")
+                                        .IndexedCharacters(-1))
+                                    .Remove<Document>(x =>
+                                        x.Field("document.data"))));
+
                         _client = client;
                     }
 

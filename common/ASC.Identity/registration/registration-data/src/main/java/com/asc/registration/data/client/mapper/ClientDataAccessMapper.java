@@ -92,7 +92,6 @@ public class ClientDataAccessMapper {
             modified == null
                 ? client.getClientCreationInfo().getCreatedBy().getValue()
                 : modified.getModifiedBy().getValue())
-        .version(client.getVersion())
         .build();
   }
 
@@ -191,8 +190,6 @@ public class ClientDataAccessMapper {
         origin.getModifiedOn() != null ? origin.getModifiedOn() : destination.getModifiedOn());
     destination.setModifiedBy(
         origin.getModifiedBy() != null ? origin.getModifiedBy() : destination.getModifiedBy());
-    destination.setVersion(
-        origin.getVersion() != null ? origin.getVersion() : destination.getVersion());
     return destination;
   }
 

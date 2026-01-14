@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -216,7 +216,7 @@ public class NotifyTransferRequest(TenantManager tenantManager,
         var productid = CallContext.GetData("asc.web.product_id");
         var product = productid != null ? webItemManager[(Guid)productid] as IProduct : null;
 
-        var logoText =  await tenantLogoManager.GetLogoTextAsync();
+        var logoText = await tenantLogoManager.GetLogoTextAsync();
 
         var rootPath = commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
 

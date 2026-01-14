@@ -27,14 +27,18 @@
 
 package com.asc.authorization.application.security.filter;
 
+import com.asc.common.utilities.HttpUtils;
 import io.github.bucket4j.BucketConfiguration;
 import io.github.bucket4j.ConsumptionProbe;
 import io.github.bucket4j.distributed.proxy.ProxyManager;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -56,6 +60,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Component
 @RequiredArgsConstructor
 public class RateLimiterFilter extends OncePerRequestFilter {
+  private static final String SIGNATURE_COOKIE = "x-signature";
+
   /** HTTP response header for remaining rate limit tokens. */
   private static final String X_RATE_REMAINING = "X-Ratelimit-Remaining";
 
@@ -64,6 +70,7 @@ public class RateLimiterFilter extends OncePerRequestFilter {
 
   private final Function<HttpMethod, Supplier<BucketConfiguration>> bucketFactory;
   private final ProxyManager<String> proxyManager;
+  private final HttpUtils httpUtils;
 
   /**
    * Filters incoming requests and enforces rate limiting based on client IP.
@@ -80,14 +87,30 @@ public class RateLimiterFilter extends OncePerRequestFilter {
   protected void doFilterInternal(
       HttpServletRequest request, HttpServletResponse response, FilterChain chain)
       throws ServletException, IOException {
-    var method = request.getMethod();
+    var method = httpUtils.getHttpMethod(request);
     var bucketConfiguration = bucketFactory.apply(HttpMethod.valueOf(method));
     var clientIp = getClientIp(request);
+    if (clientIp == null)
+      clientIp =
+          Optional.ofNullable(
+                  Arrays.stream(Optional.ofNullable(request.getCookies()).orElse(new Cookie[0]))
+                      .filter(c -> c.getName().equalsIgnoreCase(SIGNATURE_COOKIE))
+                      .findFirst()
+                      .map(Cookie::getValue)
+                      .orElseGet(() -> request.getHeader(SIGNATURE_COOKIE)))
+              .map(
+                  jwt -> {
+                    String[] parts = jwt.split("\\.");
+                    return parts.length == 3 ? parts[2] : null;
+                  })
+              .orElse(null);
     if (clientIp != null) {
       var bucket =
           proxyManager
               .builder()
-              .build(String.format("authorization:%s:%s", method, clientIp), bucketConfiguration);
+              .build(
+                  String.format("identity:authorization:%s:%s", method, clientIp),
+                  bucketConfiguration);
       var probe = bucket.tryConsumeAndReturnRemaining(1);
       if (probe.isConsumed()) {
         addRateLimitHeaders(response, probe);
@@ -130,7 +153,7 @@ public class RateLimiterFilter extends OncePerRequestFilter {
       throws IOException {
     response.setContentType("application/json");
     response.setHeader(X_RATE_REMAINING, String.valueOf(probe.getRemainingTokens()));
-    response.setHeader(X_RATE_RESET, String.valueOf(probe.getNanosToWaitForReset()));
+    response.setHeader(X_RATE_RESET, String.valueOf(probe.getNanosToWaitForRefill()));
     response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
   }
 
@@ -144,12 +167,24 @@ public class RateLimiterFilter extends OncePerRequestFilter {
    * @return the client IP address.
    */
   private String getClientIp(HttpServletRequest request) {
-    var ipAddress = request.getHeader("X-Forwarded-For");
-    if (ipAddress == null || ipAddress.isBlank()) {
-      ipAddress = request.getRemoteAddr();
-    } else {
-      ipAddress = ipAddress.split(",")[0];
+    var xRealAddress = request.getHeader("X-Real-IP");
+    if (xRealAddress != null && !xRealAddress.isBlank()) {
+      var realAddress = xRealAddress.split(",")[0];
+      if (httpUtils.isValidPublicIp(realAddress)) return realAddress;
     }
-    return ipAddress;
+
+    var xForwardedAddress = request.getHeader("X-Forwarded-For");
+    if (xForwardedAddress != null && !xForwardedAddress.isBlank()) {
+      var forwardedAddress = xForwardedAddress.split(",")[0];
+      if (httpUtils.isValidPublicIp(forwardedAddress)) return forwardedAddress;
+    }
+
+    var remoteAddress = request.getRemoteAddr();
+    if (remoteAddress != null && !remoteAddress.isBlank()) {
+      var trimmedAddress = remoteAddress.trim();
+      if (httpUtils.isValidPublicIp(trimmedAddress)) return trimmedAddress;
+    }
+
+    return null;
   }
 }

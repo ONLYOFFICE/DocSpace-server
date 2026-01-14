@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,7 +29,7 @@ namespace ASC.Files.Core.EF;
 /// <summary>
 /// The room data lifetime database.
 /// </summary>
-public class DbRoomDataLifetime : IMapFrom<RoomDataLifetime>
+public class DbRoomDataLifetime
 {
     /// <summary>
     /// Specifies whether to permanently delete the room data or not.

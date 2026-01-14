@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -41,10 +41,10 @@ public class IPRestrictionsService(IPRestrictionsRepository iPRestrictionsReposi
                 {
                     return ctx.NotModified();
                 }
-            
+
                 var result = await iPRestrictionsRepository.GetAsync(tenant, token);
                 var etag = await CalculateEtagAsync(result, token);
-                
+
                 return ctx.Modified(result, etag: etag);
             },
             opt => opt.SetDuration(_timeout).SetFailSafe(true));
@@ -61,7 +61,7 @@ public class IPRestrictionsService(IPRestrictionsRepository iPRestrictionsReposi
     {
         using var md5 = MD5.Create();
         using var memoryStream = new MemoryStream();
-                
+
         foreach (var restriction in ips)
         {
             var ip = IPAddress.Parse(restriction.Ip);

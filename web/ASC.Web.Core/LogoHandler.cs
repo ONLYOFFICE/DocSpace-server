@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,9 +35,16 @@ public class LogoHandler
     public async Task Invoke
         (HttpContext context,
         CommonLinkUtility commonLinkUtility,
+        TenantManager tenantManager,
         SettingsManager settingsManager,
         TenantWhiteLabelSettingsHelper tenantWhiteLabelSettingsHelper)
     {
+        var currentTenant = tenantManager.GetCurrentTenant(false);
+        if (currentTenant == null)
+        {
+            throw new ItemNotFoundException("tenant");
+        }
+
         string logoTypeStr = context.Request.Query["logotype"];
         if (!Enum.TryParse(logoTypeStr, out WhiteLabelLogoType logoType))
         {

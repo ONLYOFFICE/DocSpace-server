@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,16 +38,10 @@ public class AuditEventRequestDto
     public Guid UserId { get; set; }
 
     /// <summary>
-    /// The type of product related to the audit event.
-    /// </summary>
-    [FromQuery(Name = "productType")]
-    public ProductType ProductType { get; set; }
-
-    /// <summary>
-    /// The module within the product where the audit event occurred.
+    /// The location where the audit event occurred.
     /// </summary>
     [FromQuery(Name = "moduleType")]
-    public ModuleType ModuleType { get; set; }
+    public LocationType LocationType { get; set; }
 
     /// <summary>
     /// The type of action performed in the audit event (e.g., Create, Update, Delete).
@@ -71,7 +65,7 @@ public class AuditEventRequestDto
     /// The target object affected by the audit event (e.g., document ID, user account).
     /// </summary>
     [FromQuery(Name = "target")]
-    public string Target {  get; set; }
+    public string Target { get; set; }
 
     /// <summary>
     /// The starting date and time for filtering audit events.
@@ -84,4 +78,17 @@ public class AuditEventRequestDto
     /// </summary>
     [FromQuery(Name = "to")]
     public ApiDateTime To { get; set; }
+
+    /// <summary>
+    /// The maximum number of audit event records to retrieve.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
+
+    /// <summary>
+    /// The index of the first audit event record to retrieve in a paged query.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
 }

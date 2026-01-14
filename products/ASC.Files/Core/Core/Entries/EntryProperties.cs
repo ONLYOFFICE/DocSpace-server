@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -109,7 +109,7 @@ public class FormFillingProperties<T>
     /// The ID of the folder where the form filling results are saved.
     /// </summary>
     public T ResultsFolderId { get; set; }
-    
+
     /// <summary>
     /// The ID of the file with form filling results.
     /// </summary>

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -47,7 +47,7 @@ public class RoomRenamedInterpreter : ActionInterpreter
     protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         var additionalDescription = GetAdditionalDescription(description);
-        
+
         return ValueTask.FromResult<HistoryData>(new RenameEntryData(target, additionalDescription.RoomOldTitle, description[0]));
     }
 }
@@ -60,12 +60,12 @@ public class RoomLogoChangedInterpreter : ActionInterpreter
     }
 }
 
-public abstract class RoomUserAccessBaseInterpreter: ActionInterpreter
+public abstract class RoomUserAccessBaseInterpreter : ActionInterpreter
 {
     protected override async ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         var additionalDescription = GetAdditionalDescription(description);
-        
+
         var userId = additionalDescription.UserIds.FirstOrDefault();
         var userManager = serviceProvider.GetRequiredService<UserManager>();
 
@@ -81,7 +81,7 @@ public abstract class RoomUserAccessBaseInterpreter: ActionInterpreter
         }
 
         var employeeDtoHelper = serviceProvider.GetRequiredService<EmployeeDtoHelper>();
-        
+
         return new UserHistoryData
         {
             User = await employeeDtoHelper.GetAsync(user),
@@ -110,16 +110,21 @@ public class RoomUserRemovedInterpreter : RoomUserAccessBaseInterpreter
     protected override string GetAccess(List<string> description) => null;
 }
 
-public class RoomGroupAddedInterpreter: ActionInterpreter
+public class RoomGroupAddedInterpreter : ActionInterpreter
 {
     protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         var groupId = Guid.Parse(description[2]);
+        var isSystem = false;
+        if (description.Count == 5)
+        {
+            _ = bool.TryParse(description[3], out isSystem);
+        }
 
         return ValueTask.FromResult<HistoryData>(
             new GroupHistoryData
             {
-                Group = new GroupSummaryDto { Id = groupId, Name = description[0] }, 
+                Group = new GroupSummaryDto { Id = groupId, Name = description[0], IsSystem = isSystem },
                 Access = description[1]
             });
     }
@@ -131,10 +136,16 @@ public class RoomGroupAccessUpdatedInterpreter : ActionInterpreter
     {
         var groupId = Guid.Parse(description[2]);
 
+        var isSystem = false;
+        if (description.Count == 6)
+        {
+            _ = bool.TryParse(description[4], out isSystem);
+        }
+
         return ValueTask.FromResult<HistoryData>(
             new GroupHistoryData
             {
-                Group = new GroupSummaryDto { Id = groupId, Name = description[0] }, 
+                Group = new GroupSummaryDto { Id = groupId, Name = description[0], IsSystem = isSystem },
                 Access = description[1],
                 OldAccess = description[3]
             });
@@ -146,11 +157,16 @@ public class RoomRemovedGroupInterpreter : ActionInterpreter
     protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         var groupId = Guid.Parse(description[1]);
+        var isSystem = false;
+        if (description.Count == 4)
+        {
+            _ = bool.TryParse(description[2], out isSystem);
+        }
 
         return ValueTask.FromResult<HistoryData>(
             new GroupHistoryData
             {
-                Group = new GroupSummaryDto { Id = groupId, Name = description[0] }
+                Group = new GroupSummaryDto { Id = groupId, Name = description[0], IsSystem = isSystem }
             });
     }
 }
@@ -209,14 +225,14 @@ public class RoomLifeTimeSetInterpreter : ActionInterpreter
     protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         var desc = GetAdditionalDescription(description);
-        
+
         var lifetime = new RoomDataLifetime
         {
             Value = int.Parse(description[0]),
             Period = RoomDataLifetimePeriodExtensions.TryParse(description[1], out var period) ? period : default,
             DeletePermanently = bool.Parse(description[2])
         };
-        
+
         return ValueTask.FromResult<HistoryData>(new LifeTimeHistoryData(lifetime, target, desc.RoomTitle));
     }
 }
@@ -261,7 +277,7 @@ public class RoomWatermarkDisabledInterpreter : RoomWatermarkSetInterpreter
     protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         var desc = GetAdditionalDescription(description);
-        
+
         return ValueTask.FromResult<HistoryData>(new EntryData(target, desc.RoomTitle));
     }
 }
@@ -292,11 +308,50 @@ public class RoomInviteResendInterpreter : ActionInterpreter
         }
 
         var employeeDtoHelper = serviceProvider.GetRequiredService<EmployeeDtoHelper>();
-        
+
         return new UserHistoryData
         {
             User = await employeeDtoHelper.GetAsync(user)
         };
+    }
+}
+public class ChangeRoomOwnerInterpreter : ActionInterpreter
+{
+    protected override async ValueTask<HistoryData> GetDataAsync(
+        IServiceProvider serviceProvider,
+        string target,
+        List<string> description)
+    {
+        var userManager = serviceProvider.GetRequiredService<UserManager>();
+        var employeeDtoHelper = serviceProvider.GetRequiredService<EmployeeDtoHelper>();
+
+        var ownerDto = await GetUserDtoAsync(description[0], description[1], userManager, employeeDtoHelper);
+        var oldOwnerDto = await GetUserDtoAsync(description[2], description[3], userManager, employeeDtoHelper);
+
+        return new ChangeRoomOwnerHistoryData
+        {
+            Owner = ownerDto,
+            OldOwner = oldOwnerDto
+        };
+    }
+
+    private async Task<EmployeeDto> GetUserDtoAsync(
+        string idStr,
+        string name,
+        UserManager userManager,
+        EmployeeDtoHelper employeeDtoHelper)
+    {
+        var id = Guid.Parse(idStr);
+        var user = await userManager.GetUsersAsync(id);
+
+        var isInvalid =
+            user == null ||
+            user.Id == Constants.LostUser.Id ||
+            user.Id == ASC.Core.Configuration.Constants.Guest.ID;
+
+        return isInvalid
+            ? new EmployeeDto { DisplayName = name }
+            : await employeeDtoHelper.GetAsync(user);
     }
 }
 
@@ -305,6 +360,12 @@ public record UserHistoryData : HistoryData
     public EmployeeDto User { get; set; }
     public string Access { get; set; }
     public string OldAccess { get; set; }
+}
+
+public record ChangeRoomOwnerHistoryData : HistoryData
+{
+    public EmployeeDto Owner { get; set; }
+    public EmployeeDto OldOwner { get; set; }
 }
 
 public record GroupHistoryData : HistoryData
@@ -318,7 +379,7 @@ public record TagData(string[] Tags) : HistoryData;
 
 public record LifeTimeHistoryData : EntryData
 {
-    public LifeTimeHistoryData(RoomDataLifetime lifeTime, string id, string title, int? parentId = null, string parentTitle = null, int? parentType = null) 
+    public LifeTimeHistoryData(RoomDataLifetime lifeTime, string id, string title, int? parentId = null, string parentTitle = null, int? parentType = null)
         : base(id, title, parentId, parentTitle, parentType)
     {
         LifeTime = lifeTime;

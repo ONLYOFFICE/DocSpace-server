@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -55,7 +55,7 @@ internal class FileConverterService<T>(
             {
                 return;
             }
-            
+
             logger.DebugRunCheckConvertFilesStatus(conversionQueue.Count);
             var filesIsConverting = conversionQueue
                                     .Where(x => string.IsNullOrEmpty(x.Processed))
@@ -89,7 +89,7 @@ internal class FileConverterService<T>(
                 {
                     continue;
                 }
-                
+
                 var fileUri = file.Id.ToString();
 
                 string convertedFileUrl;
@@ -99,7 +99,7 @@ internal class FileConverterService<T>(
                 {
                     var user = await userManager.GetUsersAsync(converter.Account);
 
-                    var culture = string.IsNullOrEmpty(user.CultureName) ? (tenantManager.GetCurrentTenant()).GetCulture() : CultureInfo.GetCultureInfo(user.CultureName);
+                    var culture = string.IsNullOrEmpty(user.CultureName) ? tenantManager.GetCurrentTenant().GetCulture() : CultureInfo.GetCultureInfo(user.CultureName);
 
                     CultureInfo.CurrentCulture = culture;
                     CultureInfo.CurrentUICulture = culture;
@@ -113,12 +113,12 @@ internal class FileConverterService<T>(
                     fileUri = pathProvider.GetFileStreamUrl(file);
 
                     var toExtension = fileUtility.GetInternalConvertExtension(file.Title);
-                    
+
                     if (!string.IsNullOrEmpty(outputType) && await fileConverter.EnableConvertAsync(file, outputType, false))
                     {
                         toExtension = outputType;
                     }
-                    
+
                     var fileExtension = file.ConvertedExtension;
                     var docKey = await documentServiceHelper.GetDocKeyAsync(file);
 

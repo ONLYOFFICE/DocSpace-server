@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,16 +30,12 @@ namespace ASC.Core.Tenants;
 /// The deep link settings.
 /// </summary>
 [Serializable]
-public class TenantDeepLinkSettings: ISettings<TenantDeepLinkSettings>
+public class TenantDeepLinkSettings : ISettings<TenantDeepLinkSettings>
 {
     /// <summary>
     /// The tenant ID.
     /// </summary>
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{926A6850-7C19-4744-B4AD-813DE3CD55B1}"); }
-    }
+    public static Guid ID => new("{926A6850-7C19-4744-B4AD-813DE3CD55B1}");
 
     /// <summary>
     /// The deep link handling mode.
@@ -50,7 +46,7 @@ public class TenantDeepLinkSettings: ISettings<TenantDeepLinkSettings>
     {
         return new TenantDeepLinkSettings();
     }
-    
+
     public DateTime LastModified { get; set; }
 }
 
@@ -59,7 +55,12 @@ public class TenantDeepLinkSettings: ISettings<TenantDeepLinkSettings>
 /// </summary>
 public enum DeepLinkHandlingMode
 {
+    [SwaggerEnum("Provide choice")]
     ProvideChoice,
+
+    [SwaggerEnum("Web")]
     Web,
+
+    [SwaggerEnum("App")]
     App
 }

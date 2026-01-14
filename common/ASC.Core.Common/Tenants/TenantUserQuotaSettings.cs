@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,15 +35,12 @@ public class TenantUserQuotaSettings : TenantEntityQuotaSettings, ISettings<Tena
     /// <summary>
     /// The tenant ID.
     /// </summary>
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{5FE28053-BCD4-466B-8A4B-71B612F0D6FC}"); }
-    }
+    public static Guid ID => new("{5FE28053-BCD4-466B-8A4B-71B612F0D6FC}");
+
     public TenantUserQuotaSettings GetDefault()
     {
         return new TenantUserQuotaSettings();
     }
-    
+
     public DateTime LastModified { get; set; }
 }

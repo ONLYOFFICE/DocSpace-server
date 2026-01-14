@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -40,7 +40,8 @@ namespace ASC.Web.Api.Controllers;
 [DefaultRoute]
 [ApiController]
 [ControllerName("security")]
-public class SecurityController(PermissionContext permissionContext,
+public class SecurityController(
+    PermissionContext permissionContext,
         TenantManager tenantManager,
         MessageService messageService,
         LoginEventsRepository loginEventsRepository,
@@ -50,8 +51,7 @@ public class SecurityController(PermissionContext permissionContext,
         SettingsManager settingsManager,
         AuditActionMapper auditActionMapper,
         CoreBaseSettings coreBaseSettings,
-        ApiContext apiContext,
-        CspSettingsHelper cspSettingsHelper, 
+        CspSettingsHelper cspSettingsHelper,
         ApiDateTimeHelper apiDateTimeHelper,
         IdentityClient identityClient)
     : ControllerBase
@@ -68,13 +68,14 @@ public class SecurityController(PermissionContext permissionContext,
     [SwaggerResponse(200, "List of login events", typeof(IEnumerable<LoginEventDto>))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("audit/login/last")]
-    public async Task<IEnumerable<LoginEventDto>> GetLastLoginEventsAsync()
+    public async Task<IEnumerable<LoginEventDto>> GetLastLoginEvents()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         DemandBaseAuditPermission();
 
-        return (await loginEventsRepository.GetByFilterAsync(startIndex: 0, limit: 20)).Select(x => new LoginEventDto(x, apiDateTimeHelper));
+        return (await loginEventsRepository.GetByFilterAsync(startIndex: 0, limit: 20, limitedActionText: true))
+            .Select(x => new LoginEventDto(x, apiDateTimeHelper));
     }
 
     /// <summary>
@@ -89,7 +90,7 @@ public class SecurityController(PermissionContext permissionContext,
     [SwaggerResponse(200, "List of audit trail data", typeof(IEnumerable<AuditEventDto>))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("audit/events/last")]
-    public async Task<IEnumerable<AuditEventDto>> GetLastAuditEventsAsync()
+    public async Task<IEnumerable<AuditEventDto>> GetLastAuditEvents()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -100,7 +101,7 @@ public class SecurityController(PermissionContext permissionContext,
         var to = DateTime.UtcNow;
         var from = to.Subtract(TimeSpan.FromDays(settings.AuditTrailLifeTime));
 
-        return (await auditEventsRepository.GetByFilterAsync(startIndex: 0, limit: 20, from: from, to: to))
+        return (await auditEventsRepository.GetByFilterAsync(startIndex: 0, limit: 20, from: from, to: to, limitedActionText: true))
             .Select(x => new AuditEventDto(x, auditActionMapper, apiDateTimeHelper));
     }
 
@@ -116,24 +117,20 @@ public class SecurityController(PermissionContext permissionContext,
     [SwaggerResponse(200, "List of filtered login events", typeof(IEnumerable<LoginEventDto>))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("audit/login/filter")]
-    public async Task<IEnumerable<LoginEventDto>> GetLoginEventsByFilterAsync(LoginEventRequestDto inDto)
+    public async Task<IEnumerable<LoginEventDto>> GetLoginEventsByFilter(LoginEventRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
-        var startIndex = (int)apiContext.StartIndex;
-        var limit = (int)apiContext.Count;
-        apiContext.SetDataPaginated();
 
         inDto.Action = inDto.Action == 0 ? MessageAction.None : inDto.Action;
 
         if (!(await tenantManager.GetCurrentTenantQuotaAsync()).Audit || !SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToStringFast()))
         {
-            return await GetLastLoginEventsAsync();
+            return await GetLastLoginEvents();
         }
 
         await DemandAuditPermissionAsync();
 
-        return (await loginEventsRepository.GetByFilterAsync(inDto.UserId, inDto.Action, inDto.From, inDto.To, startIndex, limit)).Select(x => new LoginEventDto(x, apiDateTimeHelper));
+        return (await loginEventsRepository.GetByFilterAsync(inDto.UserId, inDto.Action, inDto.From, inDto.To, inDto.StartIndex, inDto.Count)).Select(x => new LoginEventDto(x, apiDateTimeHelper));
     }
 
     /// <summary>
@@ -148,24 +145,20 @@ public class SecurityController(PermissionContext permissionContext,
     [SwaggerResponse(200, "List of filtered audit trail data", typeof(IEnumerable<AuditEventDto>))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("audit/events/filter")]
-    public async Task<IEnumerable<AuditEventDto>> GetAuditEventsByFilterAsync(AuditEventRequestDto inDto)
+    public async Task<IEnumerable<AuditEventDto>> GetAuditEventsByFilter(AuditEventRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
-        var startIndex = (int)apiContext.StartIndex;
-        var limit = (int)apiContext.Count;
-        apiContext.SetDataPaginated();
 
         inDto.Action = inDto.Action == 0 ? MessageAction.None : inDto.Action;
 
         if (!(await tenantManager.GetCurrentTenantQuotaAsync()).Audit || !SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToStringFast()))
         {
-            return await GetLastAuditEventsAsync();
+            return await GetLastAuditEvents();
         }
 
         await DemandAuditPermissionAsync();
 
-        return (await auditEventsRepository.GetByFilterAsync(inDto.UserId, inDto.ProductType, inDto.ModuleType, inDto.ActionType, inDto.Action, inDto.EntryType, inDto.Target, inDto.From, inDto.To, startIndex, limit)).Select(x => new AuditEventDto(x, auditActionMapper, apiDateTimeHelper));
+        return (await auditEventsRepository.GetByFilterAsync(inDto.UserId, inDto.LocationType, inDto.ActionType, inDto.Action, inDto.EntryType, inDto.Target, inDto.From, inDto.To, inDto.StartIndex, inDto.Count)).Select(x => new AuditEventDto(x, auditActionMapper, apiDateTimeHelper));
     }
 
     /// <summary>
@@ -180,14 +173,14 @@ public class SecurityController(PermissionContext permissionContext,
     [SwaggerResponse(200, "Audit trail types", typeof(object))]
     [AllowAnonymous]
     [HttpGet("audit/types")]
-    public object GetTypes()
+    public object GetAuditTrailTypes()
     {
         return new
         {
             Actions = MessageActionExtensions.GetNames(),
             ActionTypes = ActionTypeExtensions.GetNames(),
             ProductTypes = ProductTypeExtensions.GetNames(),
-            ModuleTypes = ModuleTypeExtensions.GetNames(),
+            ModuleTypes = LocationTypeExtensions.GetNames(),
             EntryTypes = EntryTypeExtensions.GetNames()
         };
     }
@@ -204,7 +197,7 @@ public class SecurityController(PermissionContext permissionContext,
     [SwaggerResponse(200, "Audit trail mappers", typeof(object))]
     [AllowAnonymous]
     [HttpGet("audit/mappers")]
-    public object GetMappers(AuditTrailTypesRequestDto inDto)
+    public object GetAuditTrailMappers(AuditTrailTypesRequestDto inDto)
     {
         return auditActionMapper.Mappers
             .Where(r => !inDto.ProductType.HasValue || r.Product == inDto.ProductType.Value)
@@ -212,10 +205,10 @@ public class SecurityController(PermissionContext permissionContext,
             {
                 ProductType = r.Product.ToStringFast(),
                 Modules = r.Mappers
-                .Where(m => !inDto.ModuleType.HasValue || m.Module == inDto.ModuleType.Value)
+                .Where(m => !inDto.LocationType.HasValue || m.Location == inDto.LocationType.Value)
                 .Select(x => new
                 {
-                    ModuleType = x.Module.ToStringFast(),
+                    ModuleType = x.Location.ToStringFast(),
                     Actions = x.Actions.Select(a => new
                     {
                         MessageAction = a.Key.ToString(),
@@ -283,7 +276,7 @@ public class SecurityController(PermissionContext permissionContext,
         var to = DateTime.UtcNow;
         var from = to.Subtract(TimeSpan.FromDays(settings.AuditTrailLifeTime));
 
-        var reportName = string.Format(AuditReportResource.AuditTrailReportName + ".csv", from.ToString("MM.dd.yyyy", CultureInfo.InvariantCulture), to.ToString("MM.dd.yyyy"));
+        var reportName = string.Format(AuditReportResource.AuditTrailReportName + ".csv", from.ToShortDateString(), to.ToShortDateString());
 
         var events = await auditEventsRepository.GetByFilterAsync(from: from, to: to);
 
@@ -305,7 +298,7 @@ public class SecurityController(PermissionContext permissionContext,
     [SwaggerResponse(200, "Audit settings", typeof(TenantAuditSettings))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpGet("audit/settings/lifetime")]
-    public async Task<TenantAuditSettings> GetAuditSettingsAsync()
+    public async Task<TenantAuditSettings> GetAuditSettings()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -358,9 +351,9 @@ public class SecurityController(PermissionContext permissionContext,
     [Tags("Security / CSP")]
     [SwaggerResponse(200, "Ok", typeof(CspDto))]
     [SwaggerResponse(400, "Exception in Domains")]
-    [EnableCors(PolicyName = CorsPoliciesEnums.AllowAllCorsPolicyName )]
+    [EnableCors(PolicyName = CorsPoliciesEnums.AllowAllCorsPolicyName)]
     [HttpPost("csp")]
-    public async Task<CspDto> Csp(CspRequestsDto request)
+    public async Task<CspDto> ConfigureCsp(CspRequestsDto request)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -376,13 +369,13 @@ public class SecurityController(PermissionContext permissionContext,
                 {
                     uriString = uriString.Replace("*.", "");
                 }
-                
+
                 if (!uriString.Contains(Uri.SchemeDelimiter))
                 {
                     uriString = string.Concat(Uri.UriSchemeHttp, Uri.SchemeDelimiter, uriString);
                 }
 
-                if (!Uri.TryCreate(uriString, UriKind.Absolute, out _) || (Encoding.UTF8.GetByteCount(domain) != domain.Length))
+                if (!Uri.TryCreate(uriString, UriKind.Absolute, out _) || Encoding.UTF8.GetByteCount(domain) != domain.Length)
                 {
                     throw new ArgumentException(domain, nameof(request.Domains));
                 }
@@ -407,17 +400,17 @@ public class SecurityController(PermissionContext permissionContext,
     [AllowAnonymous]
     [EnableCors(PolicyName = CorsPoliciesEnums.AllowAllCorsPolicyName)]
     [HttpGet("csp")]
-    public async Task<CspDto> GetCsp()
+    public async Task<CspDto> GetCspSettings()
     {
         //await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-        
+
         var settings = await cspSettingsHelper.LoadAsync(HttpContext.GetIfModifiedSince());
 
         if (HttpContext.TryGetFromCache(settings.LastModified))
         {
             return null;
         }
-        
+
         return new CspDto
         {
             Domains = settings.Domains ?? [],
@@ -439,7 +432,7 @@ public class SecurityController(PermissionContext permissionContext,
     {
         return await identityClient.GenerateJwtTokenAsync();
     }
-    
+
 
     private async Task DemandAuditPermissionAsync()
     {

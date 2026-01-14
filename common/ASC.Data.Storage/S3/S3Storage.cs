@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -114,30 +114,30 @@ public class S3Storage(TempStream tempStream,
                 {
                     continue;
                 }
-                
+
                 if (h.StartsWith("Content-Disposition"))
                 {
-                    headersOverrides.ContentDisposition = (h[("Content-Disposition".Length + 1)..]);
+                    headersOverrides.ContentDisposition = h[("Content-Disposition".Length + 1)..];
                 }
                 else if (h.StartsWith("Cache-Control"))
                 {
-                    headersOverrides.CacheControl = (h[("Cache-Control".Length + 1)..]);
+                    headersOverrides.CacheControl = h[("Cache-Control".Length + 1)..];
                 }
                 else if (h.StartsWith("Content-Encoding"))
                 {
-                    headersOverrides.ContentEncoding = (h[("Content-Encoding".Length + 1)..]);
+                    headersOverrides.ContentEncoding = h[("Content-Encoding".Length + 1)..];
                 }
                 else if (h.StartsWith("Content-Language"))
                 {
-                    headersOverrides.ContentLanguage = (h[("Content-Language".Length + 1)..]);
+                    headersOverrides.ContentLanguage = h[("Content-Language".Length + 1)..];
                 }
                 else if (h.StartsWith("Content-Type"))
                 {
-                    headersOverrides.ContentType = (h[("Content-Type".Length + 1)..]);
+                    headersOverrides.ContentType = h[("Content-Type".Length + 1)..];
                 }
                 else if (h.StartsWith("Expires"))
                 {
-                    headersOverrides.Expires = (h[("Expires".Length + 1)..]);
+                    headersOverrides.Expires = h[("Expires".Length + 1)..];
                 }
                 else
                 {
@@ -247,7 +247,7 @@ public class S3Storage(TempStream tempStream,
             Key = MakePath(domain, path)
         };
 
-        if (length> 0 && (offset > 0 || offset == 0 && length != long.MaxValue))
+        if (length > 0 && (offset > 0 || offset == 0 && length != long.MaxValue))
         {
             request.ByteRange = new ByteRange(offset, length == int.MaxValue ? length : offset + length - 1);
         }
@@ -279,7 +279,7 @@ public class S3Storage(TempStream tempStream,
 
     private bool EnableQuotaCheck(string domain)
     {
-        return (QuotaController != null) && !domain.EndsWith("_temp");
+        return QuotaController != null && !domain.EndsWith("_temp");
     }
 
     public async Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType,
@@ -403,7 +403,7 @@ public class S3Storage(TempStream tempStream,
     public override async Task<string> UploadChunkAsync(string domain, string path, string uploadId, Stream stream, long defaultChunkSize, int chunkNumber, long chunkLength)
     {
         Stream bufferStream = null;
-        
+
         var request = new UploadPartRequest
         {
             BucketName = _bucket,
@@ -417,11 +417,11 @@ public class S3Storage(TempStream tempStream,
             request.InputStream = stream;
         }
         else
-        { 
+        {
             bufferStream = _tempStream.Create();
             await stream.CopyToAsync(bufferStream);
             bufferStream.Position = 0;
-            
+
             request.InputStream = bufferStream;
         }
 
@@ -631,7 +631,7 @@ public class S3Storage(TempStream tempStream,
                 if (string.IsNullOrEmpty(QuotaController.ExcludePattern) ||
                     !Path.GetFileName(s3Object.Key).StartsWith(QuotaController.ExcludePattern))
                 {
-                    await QuotaUsedDeleteAsync(domain, s3Object.Size, ownerId);
+                    await QuotaUsedDeleteAsync(domain, s3Object.Size.GetValueOrDefault(), ownerId);
                 }
             }
         }
@@ -655,7 +655,7 @@ public class S3Storage(TempStream tempStream,
 
             await client.DeleteObjectAsync(deleteRequest);
 
-            await QuotaUsedDeleteAsync(domain, s3Object.Size);
+            await QuotaUsedDeleteAsync(domain, s3Object.Size.GetValueOrDefault());
         }
     }
 
@@ -672,6 +672,12 @@ public class S3Storage(TempStream tempStream,
         };
 
         var response = await client.ListObjectsAsync(request);
+
+        if (response.S3Objects == null)
+        {
+            return;
+        }
+
         foreach (var s3Object in response.S3Objects)
         {
             await CopyFileAsync(client, s3Object.Key, s3Object.Key.Replace(srckey, dstkey), newDomain);
@@ -740,7 +746,7 @@ public class S3Storage(TempStream tempStream,
                 Headers =
                     {
                         CacheControl = $"public, maxage={(int)TimeSpan.FromDays(5).TotalSeconds}",
-                        ExpiresUtc = DateTime.UtcNow.Add(TimeSpan.FromDays(5)),
+                        Expires = DateTime.UtcNow.Add(TimeSpan.FromDays(5)),
                         ContentDisposition = "attachment"
                     }
             };
@@ -894,7 +900,7 @@ public class S3Storage(TempStream tempStream,
     public override async IAsyncEnumerable<string> ListFilesRelativeAsync(string domain, string path, string pattern, bool recursive)
     {
         var tmp = await GetS3ObjectsAsync(domain, path);
-        var obj = tmp.Where(x=> !x.Key.EndsWith('/'))
+        var obj = tmp.Where(x => !x.Key.EndsWith('/'))
             .Where(x => Wildcard.IsMatch(pattern, Path.GetFileName(x.Key)))
             .Select(x => x.Key[(MakePath(domain, path) + "/").Length..].TrimStart('/'));
 
@@ -941,7 +947,7 @@ public class S3Storage(TempStream tempStream,
         var request = new ListObjectsRequest { BucketName = _bucket, Prefix = MakePath(domain, path) };
         var response = await client.ListObjectsAsync(request);
 
-        return response.S3Objects.Count > 0;
+        return response.S3Objects != null && response.S3Objects.Count > 0;
     }
 
     public override async Task DeleteDirectoryAsync(string domain, string path)
@@ -958,9 +964,9 @@ public class S3Storage(TempStream tempStream,
         using var client = GetClient();
         var request = new ListObjectsRequest { BucketName = _bucket, Prefix = MakePath(domain, path) };
         var response = await client.ListObjectsAsync(request);
-        if (response.S3Objects.Count > 0)
+        if (response.S3Objects != null && response.S3Objects.Count > 0)
         {
-            return response.S3Objects[0].Size;
+            return response.S3Objects[0].Size.GetValueOrDefault();
         }
 
         throw new FileNotFoundException("file not found", path);
@@ -975,7 +981,7 @@ public class S3Storage(TempStream tempStream,
 
         var tmp = await GetS3ObjectsAsync(domain, path);
         return tmp.Where(x => Wildcard.IsMatch("*.*", Path.GetFileName(x.Key)))
-        .Sum(x => x.Size);
+        .Sum(x => x.Size.GetValueOrDefault());
     }
 
     public override async Task<long> ResetQuotaAsync(string domain)
@@ -984,9 +990,9 @@ public class S3Storage(TempStream tempStream,
         {
             var objects = await GetS3ObjectsAsync(domain);
             var size = objects.Sum(s3Object => s3Object.Size);
-            await QuotaController.QuotaUsedSetAsync(Modulename, domain, DataList.GetData(domain), size);
+            await QuotaController.QuotaUsedSetAsync(Modulename, domain, DataList.GetData(domain), size.GetValueOrDefault());
 
-            return size;
+            return size.GetValueOrDefault();
         }
 
         return 0;
@@ -996,7 +1002,7 @@ public class S3Storage(TempStream tempStream,
     {
         var objects = await GetS3ObjectsAsync(domain);
 
-        return objects.Sum(s3Object => s3Object.Size);
+        return objects.Sum(s3Object => s3Object.Size.GetValueOrDefault());
     }
 
     public override async Task<Uri> CopyAsync(string srcDomain, string srcpath, string newDomain, string newPath)
@@ -1021,11 +1027,17 @@ public class S3Storage(TempStream tempStream,
         var request = new ListObjectsRequest { BucketName = _bucket, Prefix = srckey };
 
         var response = await client.ListObjectsAsync(request);
+
+        if (response.S3Objects == null)
+        {
+            return;
+        }
+
         foreach (var s3Object in response.S3Objects)
         {
             await CopyFileAsync(client, s3Object.Key, s3Object.Key.Replace(srckey, dstkey), newDomain);
 
-            await QuotaUsedAddAsync(newDomain, s3Object.Size);
+            await QuotaUsedAddAsync(newDomain, s3Object.Size.GetValueOrDefault());
         }
     }
 
@@ -1137,7 +1149,7 @@ public class S3Storage(TempStream tempStream,
         props.TryGetValue("subdir", out _subDir);
 
         DataStoreValidator = dataStoreValidator;
-        
+
         return Task.FromResult<IDataStore>(this);
     }
 
@@ -1279,9 +1291,12 @@ public class S3Storage(TempStream tempStream,
         do
         {
             response = await client.ListObjectsAsync(request);
-            objects.AddRange(response.S3Objects.Where(entry => CheckKey(domain, entry.Key)));
+            if (response.S3Objects != null)
+            {
+                objects.AddRange(response.S3Objects.Where(entry => CheckKey(domain, entry.Key)));
+            }
             request.Marker = response.NextMarker;
-        } while (response.IsTruncated);
+        } while (response.IsTruncated.GetValueOrDefault());
         return objects;
     }
 
@@ -1476,7 +1491,7 @@ public class S3Storage(TempStream tempStream,
         }
         await ms.WriteAsync(header, token);
 
-        stream.Position = 0; 
+        stream.Position = 0;
         await stream.CopyToAsync(ms, token);
         await stream.DisposeAsync();
 
@@ -1544,7 +1559,7 @@ public class S3Storage(TempStream tempStream,
             UploadId = uploadId,
             PartETags = eTags
         };
-         await s3.CompleteMultipartUploadAsync(completeRequest);
+        await s3.CompleteMultipartUploadAsync(completeRequest);
     }
 
     public async Task ConcatFileAsync(string pathFile, string tarKey, string destinationDomain, string destinationKey, ConcurrentQueue<int> queue, CancellationToken token)
@@ -1563,7 +1578,7 @@ public class S3Storage(TempStream tempStream,
             var objResult = await s3.GetObjectMetadataAsync(_bucket, destinationPath, token).ConfigureAwait(false);
             prevFileSize = objResult.ContentLength;
         }
-        catch{}
+        catch { }
 
         var objFile = await s3.GetObjectMetadataAsync(_bucket, pathFile, token).ConfigureAwait(false);
         var header = BuilderHeaders.CreateHeader(tarKey, objFile.ContentLength);
@@ -1574,9 +1589,9 @@ public class S3Storage(TempStream tempStream,
             var endBlock = new byte[blockSize - prevFileSize % blockSize];
             await stream.WriteAsync(endBlock, token);
         }
-        
+
         await stream.WriteAsync(header, token);
-        
+
         stream.Position = 0;
 
         var uploadRequest = new UploadPartRequest
@@ -1847,12 +1862,12 @@ public class S3Storage(TempStream tempStream,
         {
             return _response.ResponseStream.WriteAsync(buffer, cancellationToken);
         }
-        
+
         public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
         {
             return _response.ResponseStream.CopyToAsync(destination, bufferSize, cancellationToken);
         }
-        
+
         public override void Flush()
         {
             _response.ResponseStream.Flush();
@@ -1910,7 +1925,7 @@ public class S3Storage(TempStream tempStream,
             return null;
         }
 
-        var cfg = new AmazonS3CryptoConfigurationV2(SecurityProfile.V2AndLegacy)
+        var cfg = new AmazonS3CryptoConfigurationV2(SecurityProfile.V2AndLegacy, CommitmentPolicy.ForbidEncryptAllowDecrypt, ContentEncryptionAlgorithm.AesGcm)
         {
             StorageMode = CryptoStorageMode.ObjectMetadata,
             MaxErrorRetry = 3

@@ -1,0 +1,29 @@
+﻿{
+  "profiles": {
+    "Kestrel WebServer": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:5157",
+      "launchUrl": "http://localhost:5157",
+      "environmentVariables": {
+        "$STORAGE_ROOT": "../../../../Data",
+        "log__dir": "../../../../Logs",
+        "log__name": "ai.api",
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "WSL 2 : Ubuntu 20.04": {
+      "commandName": "WSL2",
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:5157",
+      "launchUrl": "http://localhost:5157",
+      "environmentVariables": {
+        "$STORAGE_ROOT": "../../../../Data",
+        "log__dir": "../../../../Logs",
+        "log__name": "ai.api",
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "distributionName": "Ubuntu-20.04"
+    }
+  }
+}

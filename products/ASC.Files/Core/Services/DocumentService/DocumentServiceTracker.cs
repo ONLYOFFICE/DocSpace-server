@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -99,15 +99,10 @@ public class DocumentServiceTracker
 
     public class TrackResponse
     {
-        public int Error
-        {
-            get
-            {
-                return string.IsNullOrEmpty(Message)
-                           ? 0 //error:0 - sended
-                           : 1; //error:1 - some error
-            }
-        }
+        public int Error =>
+            string.IsNullOrEmpty(Message)
+                ? 0 //error:0 - sended
+                : 1; //error:1 - some error
 
         public string Message { get; init; }
 
@@ -144,7 +139,8 @@ public class DocumentServiceTracker
 }
 
 [Scope]
-public class DocumentServiceTrackerHelper(SecurityContext securityContext,
+public class DocumentServiceTrackerHelper(
+    SecurityContext securityContext,
     UserManager userManager,
     TenantManager tenantManager,
     FilesLinkUtility filesLinkUtility,
@@ -183,21 +179,26 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                 queryParams["request-user-agent"] = header.First();
             }
         }
-        
-        var callbackUrl = baseCommonLinkUtility.GetFullAbsolutePath($"{filesLinkUtility.FileHandlerPath}?{queryParams}"); 
+
+        var callbackUrl = baseCommonLinkUtility.GetFullAbsolutePath($"{filesLinkUtility.FileHandlerPath}?{queryParams}");
 
         callbackUrl = documentServiceConnector.ReplaceCommunityAddress(callbackUrl);
 
         return callbackUrl;
     }
 
-    public async Task<bool> StartTrackAsync<T>(T fileId, string docKeyForTrack, string token = null, int? tenantId = null)
+    public async Task<bool> StartTrackAsync<T>(T fileId, string docKeyForTrack, string token = null, int? tenantId = null, string fillingSessionId = null)
     {
         var callbackUrl = GetCallbackUrl(fileId, tenantId);
 
         if (!string.IsNullOrEmpty(token))
         {
             callbackUrl = QueryHelpers.AddQueryString(callbackUrl, FilesLinkUtility.ShareKey, token);
+        }
+
+        if (!string.IsNullOrEmpty(fillingSessionId))
+        {
+            callbackUrl = QueryHelpers.AddQueryString(callbackUrl, FilesLinkUtility.FillingSessionId, fillingSessionId);
         }
 
         return await documentServiceConnector.CommandAsync(CommandMethod.Info, docKeyForTrack, fileId, callbackUrl);
@@ -219,7 +220,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
 
             case TrackerStatus.MustSave:
             case TrackerStatus.Closed:
-                if(fileData.Status == TrackerStatus.Closed)
+                if (fileData.Status == TrackerStatus.Closed)
                 {
                     await fileTracker.RemoveAsync(fileId);
                     await socketManager.StopEditAsync(fileId);
@@ -227,22 +228,24 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                 var fileDao = daoFactory.GetFileDao<T>();
                 var folderDao = daoFactory.GetFolderDao<T>();
                 var properties = await fileDao.GetProperties(fileId);
-                if(properties?.FormFilling != null)
+                if (properties?.FormFilling != null)
                 {
                     var fileForDeletion = await documentServiceHelper.CheckNeedDeletion(fileDao, fileId, properties.FormFilling);
                     if (fileForDeletion != null)
                     {
+                        await fileTracker.RemoveAsync(fileForDeletion.Id);
+                        await socketManager.StopEditAsync(fileForDeletion.Id);
                         await fileDao.SaveProperties(fileForDeletion.Id, null);
                         await socketManager.DeleteFileAsync(fileForDeletion);
-                        await folderDao.ChangeTreeFolderSizeAsync(fileForDeletion.ParentId, (-1) * fileForDeletion.ContentLength);
+                        await folderDao.ChangeTreeFolderSizeAsync(fileForDeletion.ParentId, -1 * fileForDeletion.ContentLength);
                         await fileDao.DeleteFileAsync(fileForDeletion.Id, ASC.Core.Configuration.Constants.CoreSystem.ID);
                     }
-                    else if(fileData.Status == TrackerStatus.MustSave)
+                    else if (fileData.Status == TrackerStatus.MustSave)
                     {
                         return await ProcessSaveAsync(fileId, fileData);
                     }
                 }
-                else if(fileData.Status == TrackerStatus.MustSave)
+                else if (fileData.Status == TrackerStatus.MustSave)
                 {
                     return await ProcessSaveAsync(fileId, fileData);
                 }
@@ -273,34 +276,40 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
             if (!documentServiceHelper.IsDocSubmitKey(docKey, fileData.Key))
             {
                 logger.InformationDocServiceEditingFile(fileId.ToString(), docKey, fileData.Key, fileData.Users);
+                usersDrop = fileData.Users;
             }
-            return;
+            else
+            {
+                return;
+            }
         }
-
-        foreach (var user in fileData.Users)
+        else
         {
-            if (!Guid.TryParse(user, out var userId))
+            foreach (var user in fileData.Users)
             {
-                if (!string.IsNullOrEmpty(user) && user.StartsWith("uid-"))
+                if (!Guid.TryParse(user, out var userId))
                 {
-                    userId = Guid.Empty;
+                    if (!string.IsNullOrEmpty(user) && user.StartsWith("uid-"))
+                    {
+                        userId = Guid.Empty;
+                    }
+                    else
+                    {
+                        logger.InformationDocServiceUserIdIsNotGuid(user);
+                        continue;
+                    }
                 }
-                else
-                {
-                    logger.InformationDocServiceUserIdIsNotGuid(user);
-                    continue;
-                }
-            }
-            users.Remove(userId);
+                users.Remove(userId);
 
-            try
-            {
-                file = await entryManager.TrackEditingAsync(fileId, userId, userId, tenantManager.GetCurrentTenant());
-            }
-            catch (Exception e)
-            {
-                logger.DebugDropCommand(fileId.ToString(), fileData.Key, user, e);
-                usersDrop.Add(userId.ToString());
+                try
+                {
+                    file = await entryManager.TrackEditingAsync(fileId, userId, userId, tenantManager.GetCurrentTenant(), fillingSessionId: httpContextAccessor.HttpContext.Request.Query[FilesLinkUtility.FillingSessionId].FirstOrDefault());
+                }
+                catch (Exception e)
+                {
+                    logger.DebugDropCommand(fileId.ToString(), fileData.Key, user, e);
+                    usersDrop.Add(userId.ToString());
+                }
             }
         }
 
@@ -325,7 +334,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                     await securityContext.AuthenticateMeWithoutCookieAsync(userId); //hack
                 }
                 catch
-                { 
+                {
                     // ignored
                 }
             }
@@ -387,7 +396,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
             await securityContext.AuthenticateMeWithoutCookieAsync(userId);
 
             user = await userManager.GetUsersAsync(userId);
-            var culture = string.IsNullOrEmpty(user.CultureName) ? (tenantManager.GetCurrentTenant()).GetCulture() : CultureInfo.GetCultureInfo(user.CultureName);
+            var culture = string.IsNullOrEmpty(user.CultureName) ? tenantManager.GetCurrentTenant().GetCulture() : CultureInfo.GetCultureInfo(user.CultureName);
             CultureInfo.CurrentCulture = culture;
             CultureInfo.CurrentUICulture = culture;
         }
@@ -501,9 +510,9 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                     .FirstOrDefault();
 
                 nameInEditor = RemoveGuestPart(nameInEditor);
-                
-                userName = string.IsNullOrEmpty(nameInEditor) 
-                    ? AuditReportResource.GuestAccount 
+
+                userName = string.IsNullOrEmpty(nameInEditor)
+                    ? AuditReportResource.GuestAccount
                     : nameInEditor;
             }
             catch
@@ -511,7 +520,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
                 userName = AuditReportResource.GuestAccount;
             }
         }
-        
+
         await filesMessageService.SendAsync(forceSave && fileData.ForceSaveType == TrackerData.ForceSaveInitiator.UserSubmit ? MessageAction.FormSubmit : MessageAction.UserFileUpdated, file, MessageInitiator.DocsService, userName, file.Title);
 
         await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
@@ -522,14 +531,14 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
         }
 
         return new TrackResponse { Message = saveMessage };
-        
+
         string RemoveGuestPart(string name)
         {
             if (string.IsNullOrEmpty(name))
             {
                 return name;
             }
-            
+
             var index = name.LastIndexOf('(');
             if (index != -1)
             {
@@ -554,7 +563,7 @@ public class DocumentServiceTrackerHelper(SecurityContext securityContext,
             await securityContext.AuthenticateMeWithoutCookieAsync(userId);
 
             var user = await userManager.GetUsersAsync(userId);
-            var culture = string.IsNullOrEmpty(user.CultureName) ? (tenantManager.GetCurrentTenant()).GetCulture() : CultureInfo.GetCultureInfo(user.CultureName);
+            var culture = string.IsNullOrEmpty(user.CultureName) ? tenantManager.GetCurrentTenant().GetCulture() : CultureInfo.GetCultureInfo(user.CultureName);
             CultureInfo.CurrentCulture = culture;
             CultureInfo.CurrentUICulture = culture;
 

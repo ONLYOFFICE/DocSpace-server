@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -124,7 +124,8 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
                     "whitelabel",
                     "customnavigation",
                     "room_logos",
-                    "webplugins"
+                    "webplugins",
+                    "mcp_icons"
                 };
 
         if (!allowedStorageModules.Contains(storageModuleName))
@@ -147,7 +148,7 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
     protected void SetStepsCount(int value)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(value);
-        
+
         _stepsCount = value;
         Logger.DebugCountSteps(+_stepsCount);
     }
@@ -174,6 +175,7 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
                 throw new ArgumentOutOfRangeException(nameof(value));
             case 100:
                 await SetStepCompleted();
+                await SetProgress(100);
                 break;
             default:
                 await SetProgress((100 * _stepsCompleted + value) / _stepsCount);
@@ -311,7 +313,7 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
                     }
                     catch (Exception ex)
                     {
-                        if (attempt == 5) 
+                        if (attempt == 5)
                         {
                             Logger.ErrorRestore(ex);
                         }

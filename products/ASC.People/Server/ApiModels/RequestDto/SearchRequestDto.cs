@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -79,4 +79,16 @@ public class AdvancedSearchDto
     /// </summary>
     [FromQuery(Name = "query")]
     public string Query { get; set; }
+
+    /// <summary>
+    /// Specifies the criteria used to filter search results in advanced queries.
+    /// </summary>
+    [FromQuery(Name = "filterBy")]
+    public string FilterBy { get; set; }
+
+    /// <summary>
+    /// The value used to filter the search query.
+    /// </summary>
+    [FromQuery(Name = "filterValue")]
+    public string Text { get; set; }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -76,16 +76,12 @@ public class AdditionalWhiteLabelSettings : ISettings<AdditionalWhiteLabelSettin
     /// Specifies if the License Agreements link is available or not.
     /// </summary>
     public bool LicenseAgreementsEnabled { get; init; }
-
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{0108422F-C05D-488E-B271-30C4032494DA}"); }
-    }
+    
+    public static Guid ID => new("{0108422F-C05D-488E-B271-30C4032494DA}");
 
     public AdditionalWhiteLabelSettings(ExternalResourceSettingsHelper externalResourceSettingsHelper)
     {
-        this.ExternalResourceSettingsHelper = externalResourceSettingsHelper;
+        ExternalResourceSettingsHelper = externalResourceSettingsHelper;
     }
 
     public AdditionalWhiteLabelSettings() { }
@@ -102,24 +98,6 @@ public class AdditionalWhiteLabelSettings : ISettings<AdditionalWhiteLabelSettin
             LicenseAgreementsEnabled = !string.IsNullOrWhiteSpace(ExternalResourceSettingsHelper?.Common.GetDefaultRegionalFullEntry("license"))
         };
     }
-    
+
     public DateTime LastModified { get; set; }
-}
-
-[Scope]
-public class AdditionalWhiteLabelSettingsHelper(ExternalResourceSettingsHelper externalResourceSettingsHelper)
-{
-    public bool IsDefault(AdditionalWhiteLabelSettings settings)
-    {
-        settings.ExternalResourceSettingsHelper ??= externalResourceSettingsHelper;
-
-        var defaultSettings = settings.GetDefault();
-
-        return settings.StartDocsEnabled == defaultSettings.StartDocsEnabled &&
-                settings.HelpCenterEnabled == defaultSettings.HelpCenterEnabled &&
-                settings.FeedbackAndSupportEnabled == defaultSettings.FeedbackAndSupportEnabled &&
-                settings.UserForumEnabled == defaultSettings.UserForumEnabled &&
-                settings.VideoGuidesEnabled == defaultSettings.VideoGuidesEnabled &&
-                settings.LicenseAgreementsEnabled == defaultSettings.LicenseAgreementsEnabled;
-    }
 }

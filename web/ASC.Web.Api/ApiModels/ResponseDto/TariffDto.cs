@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -59,17 +59,17 @@ public class TariffDto
     /// <summary>
     /// The tariff due date.
     /// </summary>
-    public DateTime DueDate { get; set; }
+    public ApiDateTime DueDate { get; set; }
 
     /// <summary>
     /// The tariff delay due date.
     /// </summary>
-    public DateTime DelayDueDate { get; set; }
+    public ApiDateTime DelayDueDate { get; set; }
 
     /// <summary>
     /// The tariff license date.
     /// </summary>
-    public DateTime LicenseDate { get; set; }
+    public ApiDateTime LicenseDate { get; set; }
 
     /// <summary>
     /// The customer ID.

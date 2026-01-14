@@ -1,0 +1,120 @@
+{{>licenseInfo}}
+
+import type { Configuration } from './configuration';
+// Some imports not used depending on template conditions
+// @ts-ignore
+import http, {
+RefinedParams,
+RequestBody,
+ResponseType
+} from "k6/http";
+import { check } from "k6";
+
+export const BASE_PATH = "{{{basePath}}}".replace(/\/+$/, "");
+
+/**
+ *
+ * @export
+ */
+export const COLLECTION_FORMATS = {
+    csv: ",",
+    ssv: " ",
+    tsv: "\t",
+    pipes: "|",
+};
+
+/**
+ *
+ * @export
+ * @interface RequestArgs
+ */
+export interface RequestArgs {
+    method: string;
+    url: string;
+    body?: RequestBody | null;
+    params?: RefinedParams<ResponseType> | null; 
+}
+
+/**
+ *
+ * @export
+ * @class BaseAPI
+ */
+export class BaseAPI {
+    protected configuration: Configuration | undefined;
+
+    constructor(configuration?: Configuration, protected basePath: string = BASE_PATH) {
+        if (configuration) {
+            this.configuration = configuration;
+            this.basePath = configuration.basePath ?? basePath;
+        }
+    }
+};
+
+/**
+ *
+ * @export
+ * @class RequiredError
+ * @extends {Error}
+ */
+export class RequiredError extends Error {
+    constructor(public field: string, msg?: string) {
+        super(msg);
+        this.name = "RequiredError"
+    }
+}
+
+interface ServerMap {
+    [key: string]: {
+        url: string,
+        description: string,
+    }[];
+}
+
+/**
+ *
+ * @export
+ */
+export const operationServerMap: ServerMap = {
+    {{#apiInfo}}
+    {{#apis}}
+    {{#operations}}
+    {{#operation}}
+    {{#servers}}
+    {{#-first}}
+    "{{{classname}}}.{{{nickname}}}": [
+    {{/-first}}
+        {
+            url: "{{{url}}}",
+            description: "{{{description}}}{{^description}}No description provided{{/description}}",
+            {{#variables}}
+            {{#-first}}
+            variables: {
+                {{/-first}}
+                {{{name}}}: {
+                    description: "{{{description}}}{{^description}}No description provided{{/description}}",
+                    default_value: "{{{defaultValue}}}",
+                    {{#enumValues}}
+                    {{#-first}}
+                    enum_values: [
+                    {{/-first}}
+                        "{{{.}}}"{{^-last}},{{/-last}}
+                    {{#-last}}
+                    ]
+                    {{/-last}}
+                    {{/enumValues}}
+                    }{{^-last}},{{/-last}}
+                {{#-last}}
+            }
+            {{/-last}}
+            {{/variables}}
+        }{{^-last}},{{/-last}}
+    {{#-last}}
+    ],
+    {{/-last}}
+    {{/servers}}
+    {{/operation}}
+    {{/operations}}
+    {{/apis}}
+    {{/apiInfo}}
+}

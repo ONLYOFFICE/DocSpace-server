@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -40,7 +40,7 @@ public class WebPluginRequests
     /// The JSON-formatted configuration settings for the web plugin.
     /// </summary>
     [StringLength(255)]
-    public string Settings { get; set; }
+    public required string Settings { get; set; }
 }
 
 /// <summary>
@@ -58,7 +58,7 @@ public class WebPluginRequestsDto
     /// The configuration settings for the web plugin instance.
     /// </summary>
     [FromBody]
-    public WebPluginRequests WebPlugin { get; set; }
+    public required WebPluginRequests WebPlugin { get; set; }
 }
 
 /// <summary>

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,118 +24,130 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.People.Api;
-
-public class ContactsController(UserManager userManager,
-        PermissionContext permissionContext,
-        ApiContext apiContext,
-        UserPhotoManager userPhotoManager,
-        IHttpClientFactory httpClientFactory,
-        EmployeeFullDtoHelper employeeFullDtoHelper,
-        IHttpContextAccessor httpContextAccessor)
-    : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
-    {
-    /// <summary>
-    /// Deletes the contacts of the user with the ID specified in the request from the portal.
-    /// </summary>
-    /// <short>
-    /// Delete user contacts
-    /// </short>
-    /// <path>api/2.0/people/{userid}/contacts</path>
-    [Tags("People / Contacts")]
-    [SwaggerResponse(200, "Deleted user profile with the detailed information", typeof(EmployeeFullDto))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
-    [SwaggerResponse(404, "User not found")]
-    [HttpDelete("{userid}/contacts")]
-    public async Task<EmployeeFullDto> DeleteMemberContacts(ContactsRequestDto inDto)
-    {
-        var user = await  GetUserInfoAsync(inDto.UserId);
-
-        if (_userManager.IsSystemUser(user.Id))
-        {
-            throw new SecurityException();
-        }
-
-        await DeleteContactsAsync(inDto.Contacts.Contacts, user);
-        await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
-
-        return await employeeFullDtoHelper.GetFullAsync(user);
-    }
-
-    /// <summary>
-    /// Sets the contacts of the user with the ID specified in the request replacing the current portal data with the new data.
-    /// </summary>
-    /// <short>
-    /// Set user contacts
-    /// </short>
-    /// <path>api/2.0/people/{userid}/contacts</path>
-    [Tags("People / Contacts")]
-    [SwaggerResponse(200, "Updated user profile with the detailed information", typeof(EmployeeFullDto))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
-    [SwaggerResponse(404, "User not found")]
-    [HttpPost("{userid}/contacts")]
-    public async Task<EmployeeFullDto> SetMemberContacts(ContactsRequestDto inDto)
-    {
-        var user = await GetUserInfoAsync(inDto.UserId);
-
-        if (_userManager.IsSystemUser(user.Id))
-        {
-            throw new SecurityException();
-        }
-
-        user.ContactsList.Clear();
-        await UpdateContactsAsync(inDto.Contacts.Contacts, user);
-        await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
-
-        return await employeeFullDtoHelper.GetFullAsync(user);
-    }
-
-    /// <summary>
-    /// Updates the contact information of the user with the ID specified in the request merging the new data into the current portal data.
-    /// </summary>
-    /// <short>
-    /// Update user contacts
-    /// </short>
-    /// <path>api/2.0/people/{userid}/contacts</path>
-    [Tags("People / Contacts")]
-    [SwaggerResponse(200, "Updated user profile with the detailed information", typeof(EmployeeFullDto))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
-    [SwaggerResponse(404, "User not found")]
-    [HttpPut("{userid}/contacts")]
-    public async Task<EmployeeFullDto> UpdateMemberContacts(ContactsRequestDto inDto)
-    {
-        var user = await GetUserInfoAsync(inDto.UserId);
-
-        if (_userManager.IsSystemUser(user.Id))
-        {
-            throw new SecurityException();
-        }
-
-        await UpdateContactsAsync(inDto.Contacts.Contacts, user);
-        await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
-
-        return await employeeFullDtoHelper.GetFullAsync(user);
-    }
-
-    private async Task DeleteContactsAsync(IEnumerable<Contact> contacts, UserInfo user)
-    {
-        await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
-
-        if (contacts == null)
-        {
-            return;
-        }
-
-        user.ContactsList ??= [];
-
-        foreach (var contact in contacts)
-        {
-            var index = user.ContactsList.IndexOf(contact.Type);
-            if (index != -1)
-            {
-                //Remove existing
-                user.ContactsList.RemoveRange(index, 2);
-            }
-        }
-    }
-}
+// namespace ASC.People.Api;
+//
+// public class ContactsController(
+//     UserManager userManager,
+//     PermissionContext permissionContext,
+//     ApiContext apiContext,
+//     UserPhotoManager userPhotoManager,
+//     IHttpClientFactory httpClientFactory,
+//     EmployeeFullDtoHelper employeeFullDtoHelper,
+//     TenantManager tenantManager,
+//     AuthContext authContext,
+//     IHttpContextAccessor httpContextAccessor)
+//     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
+// {
+//     /// <summary>
+//     /// Deletes the contacts of the user with the ID specified in the request from the portal.
+//     /// </summary>
+//     /// <short>
+//     /// Delete user contacts
+//     /// </short>
+//     /// <path>api/2.0/people/{userid}/contacts</path>
+//     [Tags("People / Contacts")]
+//     [SwaggerResponse(200, "Deleted user profile with the detailed information", typeof(EmployeeFullDto))]
+//     [SwaggerResponse(403, "No permissions to perform this action")]
+//     [SwaggerResponse(404, "User not found")]
+//     [HttpDelete("{userid}/contacts")]
+//     public async Task<EmployeeFullDto> DeleteMemberContacts(ContactsRequestDto inDto)
+//     {
+//         var user = await  GetUserInfoAsync(inDto.UserId);
+//
+//         if (_userManager.IsSystemUser(user.Id))
+//         {
+//             throw new SecurityException();
+//         }
+//
+//         await DeleteContactsAsync(inDto.Contacts.Contacts, user);
+//         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
+//
+//         return await employeeFullDtoHelper.GetFullAsync(user);
+//     }
+//
+//     /// <summary>
+//     /// Sets the contacts of the user with the ID specified in the request replacing the current portal data with the new data.
+//     /// </summary>
+//     /// <short>
+//     /// Set user contacts
+//     /// </short>
+//     /// <path>api/2.0/people/{userid}/contacts</path>
+//     [Tags("People / Contacts")]
+//     [SwaggerResponse(200, "Updated user profile with the detailed information", typeof(EmployeeFullDto))]
+//     [SwaggerResponse(403, "No permissions to perform this action")]
+//     [SwaggerResponse(404, "User not found")]
+//     [HttpPost("{userid}/contacts")]
+//     public async Task<EmployeeFullDto> SetMemberContacts(ContactsRequestDto inDto)
+//     {
+//         var user = await GetUserInfoAsync(inDto.UserId);
+//         
+//         if (user.Id == tenantManager.GetCurrentTenant().OwnerId && user.Id != authContext.CurrentAccount.ID)
+//         {
+//             throw new SecurityException();
+//         }
+//         if (_userManager.IsSystemUser(user.Id))
+//         {
+//             throw new SecurityException();
+//         }
+//
+//         user.ContactsList.Clear();
+//         await UpdateContactsAsync(inDto.Contacts.Contacts, user);
+//         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
+//
+//         return await employeeFullDtoHelper.GetFullAsync(user);
+//     }
+//
+//     /// <summary>
+//     /// Updates the contact information of the user with the ID specified in the request merging the new data into the current portal data.
+//     /// </summary>
+//     /// <short>
+//     /// Update user contacts
+//     /// </short>
+//     /// <path>api/2.0/people/{userid}/contacts</path>
+//     [Tags("People / Contacts")]
+//     [SwaggerResponse(200, "Updated user profile with the detailed information", typeof(EmployeeFullDto))]
+//     [SwaggerResponse(403, "No permissions to perform this action")]
+//     [SwaggerResponse(404, "User not found")]
+//     [HttpPut("{userid}/contacts")]
+//     public async Task<EmployeeFullDto> UpdateMemberContacts(ContactsRequestDto inDto)
+//     {
+//         var user = await GetUserInfoAsync(inDto.UserId);
+//         
+//         if (user.Id == tenantManager.GetCurrentTenant().OwnerId && user.Id != authContext.CurrentAccount.ID)
+//         {
+//             throw new SecurityException();
+//         }
+//         
+//         if (_userManager.IsSystemUser(user.Id))
+//         {
+//             throw new SecurityException();
+//         }
+//
+//         await UpdateContactsAsync(inDto.Contacts.Contacts, user);
+//         await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
+//
+//         return await employeeFullDtoHelper.GetFullAsync(user);
+//     }
+//
+//     private async Task DeleteContactsAsync(IEnumerable<Contact> contacts, UserInfo user)
+//     {
+//         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
+//
+//         if (contacts == null)
+//         {
+//             return;
+//         }
+//
+//         user.ContactsList ??= [];
+//
+//         foreach (var contact in contacts)
+//         {
+//             var index = user.ContactsList.IndexOf(contact.Type);
+//             if (index != -1)
+//             {
+//                 //Remove existing
+//                 user.ContactsList.RemoveRange(index, 2);
+//             }
+//         }
+//     }
+// }

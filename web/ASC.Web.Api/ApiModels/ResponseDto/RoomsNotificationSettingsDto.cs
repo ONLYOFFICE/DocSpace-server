@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,10 +29,17 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// The rooms notification settings.
 /// </summary>
-public class RoomsNotificationSettingsDto : IMapFrom<RoomsNotificationSettings>
+public class RoomsNotificationSettingsDto
 {
     /// <summary>
     /// The list of rooms with the disabled notifications.
     /// </summary>
     public List<object> DisabledRooms { get; set; }
+}
+
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class RoomsNotificationSettingsDtoMapper
+{
+    public static partial RoomsNotificationSettingsDto Map(this RoomsNotificationSettings source);
 }

@@ -130,18 +130,23 @@ module.exports = (io) => {
       const tenant = sess?.portal?.tenantId || "unknown";
       const user = sess?.user?.id || "unknown";
       const sessId = sess?.id;
+      const room = data.dump ? `restore` : getRoom("restore");
 
       logger.info(`WS: restore backup in room ${room} session=[sessionId='sess:${sessId}' tenantId=${tenant}|${tenantId()} userId='${user}'|'${userId()}']`);
 
-      if(data.dump)
-      {
-        var room = `restore`;
-      }
-      else
-      {
-        var room = getRoom("restore");
-      }
       socket.to(room).emit("restore-backup");
+    });
+
+    socket.on("storage-encryption", (data) => {
+      const sess = socket.handshake.session;
+      const tenant = sess?.portal?.tenantId || "unknown";
+      const user = sess?.user?.id || "unknown";
+      const sessId = sess?.id;
+      const room = `storage-encryption`;
+
+      logger.info(`WS: storage encryption in room ${room} session=[sessionId='sess:${sessId}' tenantId=${tenant}|${tenantId()} userId='${user}'|'${userId()}']`);
+
+      socket.to(room).emit("storage-encryption");
     });
 
     function changeSubscription(roomParts, individual, changeFunc) {
@@ -327,29 +332,29 @@ module.exports = (io) => {
     }
   }
 
-  function deleteFile({ id, room, userIds } = {}) {
+  function deleteFile({ id, room, data, userIds } = {}) {
     logger.info(`delete file ${id} in room ${room}`);
 
     if(userIds)
     {
-      userIds.forEach(userId => modifyFolder(`${room}-${userId}`, "delete", id, "file"));
+      userIds.forEach(userId => modifyFolder(`${room}-${userId}`, "delete", id, "file", data));
     }
     else
     {
-      modifyFolder(room, "delete", id, "file");
+      modifyFolder(room, "delete", id, "file", data);
     }
   }
 
-  function deleteFolder({ id, room, userIds } = {}) {
+  function deleteFolder({ id, room, data, userIds } = {}) {
     logger.info(`delete folder ${id} in room ${room}`);
     
     if(userIds)
     {
-      userIds.forEach(userId => modifyFolder(`${room}-${userId}`, "delete", id, "folder"));
+      userIds.forEach(userId => modifyFolder(`${room}-${userId}`, "delete", id, "folder", data));
     }
     else
     {
-      modifyFolder(room, "delete", id, "folder");
+      modifyFolder(room, "delete", id, "folder", data);
     }
   }
 
@@ -414,21 +419,24 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:update-history", { id, type });
   }
 
-  function logoutSession({ room, loginEventId } = {}) {
-    logger.info(`logout user ${room} session ${loginEventId}`);
-    filesIO.to(room).emit("s:logout-session", loginEventId);
+  function logoutSession({ room, loginEventId, redirectUrl } = {}) {
+    logger.info(`logout user ${room} session ${loginEventId}, redirectUrl ${redirectUrl}`);
+    filesIO.to(room).emit("s:logout-session", { loginEventId, redirectUrl });
   }
 
   function backupProgress({ tenantId, dump, percentage } = {}) 
   {
+    var room;
+    
     if(dump)
     {
-      var room = `backup`;
+      room = `backup`;
     }
     else
     {
-      var room = `${tenantId}-backup`;
+      room = `${tenantId}-backup`;
     }
+    
     filesIO.to(room).emit("s:backup-progress", {progress: percentage});
   }
   
@@ -482,6 +490,16 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:delete-guest", guestId);
   }
 
+ function connectTelegram({ tenantId, userId } = {}) {
+    var room = `${tenantId}-telegram`;
+    filesIO.to(room).emit("s:telegram", userId);
+  }
+  
+  function updateTelegram({ tenantId, userId, username } = {}) {
+    var room = `${tenantId}-telegram-${userId}`;
+    filesIO.to(room).emit("s:update-telegram", username);
+  }
+
   function restoreProgress({ tenantId, dump, percentage } = {})
   {
     if(dump)
@@ -497,6 +515,7 @@ module.exports = (io) => {
 
   function endBackup({ tenantId, dump, result } = {})
   {
+
     if(dump)
       {
         var room = `backup`;
@@ -505,6 +524,7 @@ module.exports = (io) => {
       {
         var room = `${tenantId}-backup`;
       }
+    
     filesIO.to(room).emit("s:backup-progress", result);
   }
 
@@ -523,6 +543,41 @@ module.exports = (io) => {
   function encryptionProgress({ room, percentage, error } = {}) {
     logger.info(`${room} progress ${percentage}, error ${error}`);
     filesIO.to(room).emit("s:encryption-progress", { percentage, error });
+  }
+
+  function selfRestrictionForFile({ id, room, data } = {}) {
+    logger.info(`self restriction for file ${id} in room ${room}`);
+    filesIO.to(room).emit("s:self-restriction-file", { id, data });
+  }
+
+  function selfRestrictionForFolder({ id, room, data } = {}) {
+    logger.info(`self restriction for folder ${id} in room ${room}`);
+    filesIO.to(room).emit("s:self-restriction-folder", { id, data });
+  }
+
+  function commitChatMessage({ room, messageId }) {
+    logger.info(`commit chat message ${messageId} in room ${room}`);
+    filesIO.to(room).emit("s:commit-chat-message", { messageId });
+  }
+
+  function updateChat({ room, chatId, chatTitle, userId }) {
+    const userRoom = `${room}-${userId}`;
+    logger.info(`update chat ${chatId} in room ${room}`);
+    filesIO.to(userRoom).emit("s:update-chat", { chatId, chatTitle });
+  }
+
+  function exportChat({ room, resultFile, error }) {
+    filesIO.to(room).emit("s:export-chat", { resultFile, error });
+  }
+
+  function changeAccessRightsForFile({ id, room, data, userId } = {}) {
+    logger.info(`change access rights for file ${id} in room ${room} to user ${userId}`);
+    filesIO.to(`${room}-${userId}`).emit("s:change-access-rights-file", { id, data });
+  }
+
+  function changeAccessRightsForFolder({ id, room, data, userId } = {}) {
+    logger.info(`change access rights for folder ${id} in room ${room} to user ${userId}`);
+    filesIO.to(`${room}-${userId}`).emit("s:change-access-rights-folder", { id, data });
   }
 
   function userQuotaExceeded(data) {
@@ -568,11 +623,20 @@ module.exports = (io) => {
     addGuest,
     updateGuest,
     deleteGuest,
+    connectTelegram,
+    updateTelegram,
     backupProgress,
     restoreProgress,
     endBackup,
     endRestore,
     encryptionProgress,
+    selfRestrictionForFile,
+    selfRestrictionForFolder,
+    commitChatMessage,
+    updateChat,
+    exportChat,
+    changeAccessRightsForFile,
+    changeAccessRightsForFolder,
     userQuotaExceeded,
     roomQuotaExceeded,
     tenantQuotaExceeded

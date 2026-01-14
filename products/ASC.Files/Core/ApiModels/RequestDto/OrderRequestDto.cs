@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -47,19 +47,19 @@ public class OrdersItemRequestDto<T>
     /// <summary>
     /// The entry unique identifier (file or folder).
     /// </summary>
-    public T EntryId { get; set; }
+    public required T EntryId { get; set; }
 
     /// <summary>
     /// The entry type (file or folder).
     /// </summary>
-    public FileEntryType EntryType { get; set; }
+    public required FileEntryType EntryType { get; set; }
 
     /// <summary>
     /// The order value.
     /// </summary>
     [Range(1, int.MaxValue)]
     [JsonConverter(typeof(OrderRequestDtoConverter))]
-    public int Order { get; set; }
+    public required int Order { get; set; }
 }
 
 /// <summary>
@@ -70,28 +70,31 @@ public class OrdersRequestDto<T>
     /// <summary>
     /// The list of items with their ordering information.
     /// </summary>
-    public List<OrdersItemRequestDto<T>> Items { get; set; }
+    public required List<OrdersItemRequestDto<T>> Items { get; set; }
 }
 
 /// <summary>
 /// The JSON converter for handling order values in different formats.
 /// </summary>
-public class OrderRequestDtoConverter : System.Text.Json.Serialization.JsonConverter<int>
+public class OrderRequestDtoConverter : JsonConverter<int>
 {
     public override int Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        if (reader.TryGetInt32(out var order))
+        if (reader.TokenType == JsonTokenType.Number && reader.TryGetInt32(out var order))
         {
             return order;
         }
-        
-        var orderString = reader.GetString();
-        if (!string.IsNullOrEmpty(orderString))
+
+        if (reader.TokenType == JsonTokenType.String)
         {
-            var path = orderString.Split('.');
-            if (int.TryParse(path.Last(), out var pathOrder))
+            var orderString = reader.GetString();
+            if (!string.IsNullOrEmpty(orderString))
             {
-                return pathOrder;
+                var path = orderString.Split('.');
+                if (int.TryParse(path.Last(), out var pathOrder))
+                {
+                    return pathOrder;
+                }
             }
         }
 

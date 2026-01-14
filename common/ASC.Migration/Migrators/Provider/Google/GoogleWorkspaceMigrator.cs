@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -37,7 +37,7 @@ public class GoogleWorkspaceMigrator : Migrator
     private readonly Regex _emailRegex = new(@"(\S*@\S*\.\S*)");
     private readonly Regex _phoneRegex = new(@"(\+?\d+)");
 
-    private  readonly Regex _workspacesRegex = new(@"Workspaces(\(\d+\))?.json");
+    private readonly Regex _workspacesRegex = new(@"Workspaces(\(\d+\))?.json");
     private readonly Regex _pinnedRegex = new(@".*-at-.*-pinned\..*");
     private const string CommentsFile = "-comments.html";
     private const string InfoFile = "-info.json";
@@ -53,12 +53,11 @@ public class GoogleWorkspaceMigrator : Migrator
         GlobalFolderHelper globalFolderHelper,
         IServiceProvider serviceProvider,
         IDaoFactory daoFactory,
-        EntryManager entryManager,
         MigrationLogger migrationLogger,
         AuthContext authContext,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         UserManagerWrapper userManagerWrapper,
-        UserSocketManager socketManager) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, entryManager, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper, socketManager)
+        UserSocketManager socketManager) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper, socketManager)
     {
         MigrationInfo = new MigrationInfo { Name = "GoogleWorkspace" };
     }
@@ -156,7 +155,7 @@ public class GoogleWorkspaceMigrator : Migrator
                         {
                             continue;
                         }
-                        if (!ascUser.Equals(ASC.Core.Users.Constants.LostUser))
+                        if (!ascUser.Equals(Constants.LostUser))
                         {
                             if (!MigrationInfo.ExistUsers.TryAdd(user.Info.Email, user))
                             {
@@ -312,7 +311,7 @@ public class GoogleWorkspaceMigrator : Migrator
         }
         user.Storage.Folders.AddRange(foldersdictionary.Select(f => f.Value));
 
-        foreach(var file in user.Storage.Files)
+        foreach (var file in user.Storage.Files)
         {
             ParseShare(user.Storage.Securities, file.Path, file.Id, 2);
         }

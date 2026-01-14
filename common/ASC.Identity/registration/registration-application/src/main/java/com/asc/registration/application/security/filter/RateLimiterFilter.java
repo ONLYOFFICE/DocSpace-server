@@ -27,6 +27,8 @@
 
 package com.asc.registration.application.security.filter;
 
+import com.asc.common.utilities.HttpUtils;
+import com.asc.registration.application.security.authentication.BasicSignatureTokenPrincipal;
 import io.github.bucket4j.BucketConfiguration;
 import io.github.bucket4j.ConsumptionProbe;
 import io.github.bucket4j.distributed.proxy.ProxyManager;
@@ -42,6 +44,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -64,6 +67,7 @@ public class RateLimiterFilter extends OncePerRequestFilter {
 
   private final Function<HttpMethod, Supplier<BucketConfiguration>> bucketFactory;
   private final ProxyManager<String> proxyManager;
+  private final HttpUtils httpUtils;
 
   /**
    * Filters incoming requests and enforces rate limiting based on client IP.
@@ -80,14 +84,20 @@ public class RateLimiterFilter extends OncePerRequestFilter {
   protected void doFilterInternal(
       HttpServletRequest request, HttpServletResponse response, FilterChain chain)
       throws ServletException, IOException {
-    var method = request.getMethod();
+    var authentication = SecurityContextHolder.getContext().getAuthentication();
+    var method = httpUtils.getHttpMethod(request);
+    var clientIdentifier = getClientIp(request);
     var bucketConfiguration = bucketFactory.apply(HttpMethod.valueOf(method));
-    var clientIp = getClientIp(request);
-    if (clientIp != null) {
+    if (authentication != null
+        && authentication.getPrincipal() instanceof BasicSignatureTokenPrincipal principal)
+      clientIdentifier = principal.getUserId();
+    if (clientIdentifier != null) {
       var bucket =
           proxyManager
               .builder()
-              .build(String.format("authorization:%s:%s", method, clientIp), bucketConfiguration);
+              .build(
+                  String.format("identity:registration:%s:%s", method, clientIdentifier),
+                  bucketConfiguration);
       var probe = bucket.tryConsumeAndReturnRemaining(1);
       if (probe.isConsumed()) {
         addRateLimitHeaders(response, probe);
@@ -130,7 +140,7 @@ public class RateLimiterFilter extends OncePerRequestFilter {
       throws IOException {
     response.setContentType("application/json");
     response.setHeader(X_RATE_REMAINING, String.valueOf(probe.getRemainingTokens()));
-    response.setHeader(X_RATE_RESET, String.valueOf(probe.getNanosToWaitForReset()));
+    response.setHeader(X_RATE_RESET, String.valueOf(probe.getNanosToWaitForRefill()));
     response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
   }
 
@@ -144,12 +154,19 @@ public class RateLimiterFilter extends OncePerRequestFilter {
    * @return the client IP address.
    */
   private String getClientIp(HttpServletRequest request) {
-    var ipAddress = request.getHeader("X-Forwarded-For");
-    if (ipAddress == null || ipAddress.isBlank()) {
-      ipAddress = request.getRemoteAddr();
-    } else {
-      ipAddress = ipAddress.split(",")[0];
+    var xRealAddress = request.getHeader("X-Real-IP");
+    if (xRealAddress != null && !xRealAddress.isBlank()) return xRealAddress.split(",")[0];
+
+    var xForwardedAddress = request.getHeader("X-Forwarded-For");
+    if (xForwardedAddress != null && !xForwardedAddress.isBlank())
+      return xForwardedAddress.split(",")[0];
+
+    var remoteAddress = request.getRemoteAddr();
+    if (remoteAddress != null && !remoteAddress.isBlank()) {
+      var trimmedAddress = remoteAddress.trim();
+      if (httpUtils.isValidPublicIp(trimmedAddress)) return trimmedAddress;
     }
-    return ipAddress;
+
+    return null;
   }
 }

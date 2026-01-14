@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -37,7 +37,7 @@ internal class DynamicCorsPolicyMiddleware
 
     private readonly Func<object, Task> _onResponseStartingDelegate = OnResponseStarting;
     private readonly RequestDelegate _next;
-  //  private readonly CorsPolicy _policy;
+    //  private readonly CorsPolicy _policy;
     private readonly string _corsPolicyName;
     private IDynamicCorsPolicyService _corsService;
     private readonly ILogger<DynamicCorsPolicyMiddleware> _logger;
@@ -50,10 +50,10 @@ internal class DynamicCorsPolicyMiddleware
 
     }
 
-   public DynamicCorsPolicyMiddleware(
-        RequestDelegate next,
-        ILoggerFactory loggerFactory,
-        string policyName)
+    public DynamicCorsPolicyMiddleware(
+         RequestDelegate next,
+         ILoggerFactory loggerFactory,
+         string policyName)
     {
         ArgumentNullException.ThrowIfNull(next);
         ArgumentNullException.ThrowIfNull(loggerFactory);

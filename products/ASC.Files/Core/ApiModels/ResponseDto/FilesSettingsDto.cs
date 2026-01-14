@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -82,11 +82,6 @@ public class FilesSettingsDto
     public List<string> ExtsWebTemplate { get; set; }
 
     /// <summary>
-    /// The list of extensions of the co-authoring files.
-    /// </summary>
-    public List<string> ExtsCoAuthoring { get; set; }
-
-    /// <summary>
     /// The list of extensions of the files that must be converted.
     /// </summary>
     public List<string> ExtsMustConvert { get; set; }
@@ -135,6 +130,11 @@ public class FilesSettingsDto
     /// The list of the text document extensions. 
     /// </summary>
     public ImmutableList<string> ExtsDocument { get; set; }
+
+    /// <summary>
+    /// The list of the diagram extensions.
+    /// </summary>
+    public ImmutableList<string> ExtsDiagram { get; set; }
 
     /// <summary>
     /// The internal file formats.
@@ -322,6 +322,16 @@ public class FilesSettingsDto
     /// Specifies whether to open the editor in the same tab or not.
     /// </summary>
     public bool OpenEditorInSameTab { get; set; }
+    
+    /// <summary>
+    /// List of extensions available for vectorization
+    /// </summary>
+    public List<string> ExtsFilesVectorized { get; set; }
+    
+    /// <summary>
+    /// The maximum file size for vectorization
+    /// </summary>
+    public long MaxVectorizationFileSize { get; set; }
 }
 
 
@@ -331,6 +341,7 @@ public class FilesSettingsDtoConverter(
     FilesLinkUtility filesLinkUtility,
     FilesSettingsHelper filesSettingsHelper,
     SetupInfo setupInfo,
+    VectorizationGlobalSettings vectorizationGlobalSettings,
     SearchSettingsHelper searchSettingsHelper)
 {
     public async Task<FilesSettingsDto> Get()
@@ -338,16 +349,15 @@ public class FilesSettingsDtoConverter(
         return new FilesSettingsDto
         {
             ExtsImagePreviewed = fileUtility.ExtsImagePreviewed,
-            ExtsMediaPreviewed =  fileUtility.ExtsMediaPreviewed,
+            ExtsMediaPreviewed = fileUtility.ExtsMediaPreviewed,
             ExtsWebPreviewed = fileUtility.ExtsWebPreviewed,
             ExtsWebEdited = fileUtility.ExtsWebEdited,
             ExtsWebEncrypt = fileUtility.ExtsWebEncrypt,
-            ExtsWebReviewed =  fileUtility.ExtsWebReviewed,
+            ExtsWebReviewed = fileUtility.ExtsWebReviewed,
             ExtsWebCustomFilterEditing = fileUtility.ExtsWebCustomFilterEditing,
             ExtsWebRestrictedEditing = fileUtility.ExtsWebRestrictedEditing,
             ExtsWebCommented = fileUtility.ExtsWebCommented,
             ExtsWebTemplate = fileUtility.ExtsWebTemplate,
-            ExtsCoAuthoring = fileUtility.ExtsCoAuthoring,
             ExtsMustConvert = fileUtility.ExtsMustConvert,
             ExtsConvertible = await fileUtility.GetExtsConvertibleAsync(),
             ExtsUploadable = fileUtility.ExtsUploadable,
@@ -358,6 +368,7 @@ public class FilesSettingsDtoConverter(
             ExtsSpreadsheet = FileUtility.ExtsSpreadsheet,
             ExtsPresentation = FileUtility.ExtsPresentation,
             ExtsDocument = FileUtility.ExtsDocument,
+            ExtsDiagram = FileUtility.ExtsDiagram,
             InternalFormats = fileUtility.InternalExtension,
             MasterFormExtension = fileUtility.MasterFormExtension,
             ParamVersion = FilesLinkUtility.Version,
@@ -392,7 +403,9 @@ public class FilesSettingsDtoConverter(
             DefaultSharingAccessRights = await filesSettingsHelper.GetDefaultSharingAccessRights(),
             MaxUploadThreadCount = setupInfo.MaxUploadThreadCount,
             ChunkUploadSize = setupInfo.ChunkUploadSize,
-            OpenEditorInSameTab = await filesSettingsHelper.GetOpenEditorInSameTabAsync()
+            OpenEditorInSameTab = await filesSettingsHelper.GetOpenEditorInSameTabAsync(),
+            ExtsFilesVectorized = vectorizationGlobalSettings.SupportedFormats.ToList(),
+            MaxVectorizationFileSize = vectorizationGlobalSettings.MaxContentLength
         };
     }
 }

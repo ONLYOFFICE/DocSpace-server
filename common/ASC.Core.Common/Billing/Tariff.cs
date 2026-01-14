@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -49,7 +49,7 @@ public class Tariff
     /// The tariff due date.
     /// </summary>
     [ProtoMember(3)]
-    public DateTime DueDate { get; set; }
+    public required DateTime DueDate { get; set; }
 
     /// <summary>
     /// The tariff delay due date.
@@ -73,7 +73,13 @@ public class Tariff
     /// The list of tariff quotas.
     /// </summary>
     [ProtoMember(7)]
-    public List<Quota> Quotas { get; set; }
+    public required List<Quota> Quotas { get; set; }
+
+    /// <summary>
+    /// The list of overdue tariff quotas.
+    /// </summary>
+    [ProtoMember(8)]
+    public List<Quota> OverdueQuotas { get; set; }
 
     public override int GetHashCode()
     {
@@ -131,6 +137,11 @@ public class Quota : IEquatable<Quota>
     [ProtoMember(5)]
     public int? NextQuantity { get; set; }
 
+    /// <summary>
+    /// The quota state.
+    /// </summary>
+    public QuotaState? State => DueDate.HasValue ? DueDate.Value < DateTime.UtcNow ? QuotaState.Overdue : QuotaState.Active : null;
+
     public Quota()
     {
     }
@@ -154,4 +165,16 @@ public class Quota : IEquatable<Quota>
     {
         return other != null && other.Id == Id && other.Quantity == Quantity && other.Wallet == Wallet && other.DueDate == DueDate && other.NextQuantity == NextQuantity;
     }
+}
+
+/// <summary>
+/// The quota state.
+/// </summary>
+public enum QuotaState
+{
+    [SwaggerEnum("Active")]
+    Active,
+
+    [SwaggerEnum("Overdue")]
+    Overdue
 }

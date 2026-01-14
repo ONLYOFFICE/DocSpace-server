@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -86,7 +86,7 @@ public class DeletePersonalFolderProgressItem : DistributedTaskProgress
                 userTo = tenantManager.GetCurrentTenant().OwnerId;
             }
 
-            await fileStorageService.MoveSharedFilesAsync(_userId, userTo);
+            await fileStorageService.MoveSharedEntriesAsync(_userId, userTo);
 
             Percentage = 50;
             await PublishChanges();
@@ -95,7 +95,7 @@ public class DeletePersonalFolderProgressItem : DistributedTaskProgress
 
             Percentage = 100;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             logger.ErrorDeletePersonalFolderProgressItem(ex);
             Status = DistributedTaskStatus.Failted;

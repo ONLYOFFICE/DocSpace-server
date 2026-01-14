@@ -107,11 +107,19 @@ public class CreateTenantClientCommand implements Serializable {
   /** The redirect URIs for the client. Each must be a valid URL. */
   @JsonProperty("redirect_uris")
   @URLCollection
+  @Size(
+      min = 1,
+      max = 12,
+      message = "redirect uris must contain at least 1 and at most 12 addresses")
   private Set<String> redirectUris;
 
   /** The allowed origins for the client. Each must be a valid URL. */
   @JsonProperty("allowed_origins")
   @URLCollection
+  @Size(
+      min = 1,
+      max = 12,
+      message = "allowed origins must contain at least 1 and at most 12 addresses")
   private Set<String> allowedOrigins;
 
   /** The logout redirect URI for the client. Must be a valid URL. */

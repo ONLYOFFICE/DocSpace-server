@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -37,16 +37,15 @@ namespace ASC.Api.Core.Auth;
 [Scope]
 public class JwtBearerAuthHandler(
     IOptionsMonitor<AuthenticationSchemeOptions> options,
-    ILoggerFactory logger,
+    ILoggerFactory loggerFactory,
+    ILogger<JwtBearerAuthHandler> logger,
     UrlEncoder encoder,
     SecurityContext securityContext,
     BaseCommonLinkUtility baseCommonLinkUtility,
     IConfiguration configuration,
     IHttpClientFactory httpClientFactory)
-    : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
+    : AuthenticationHandler<AuthenticationSchemeOptions>(options, loggerFactory, encoder)
 {
-    private readonly ILogger<JwtBearerAuthHandler> _logger = logger.CreateLogger<JwtBearerAuthHandler>();
-
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         var serverRootPath = baseCommonLinkUtility.ServerRootPath;
@@ -98,7 +97,7 @@ public class JwtBearerAuthHandler(
         }
         else
         {
-            _logger.WarningDisableTokenValidation();
+            logger.WarningDisableTokenValidation();
 
             validatedToken = new JwtSecurityToken(accessToken);
         }
@@ -136,7 +135,7 @@ public class JwtBearerAuthHandler(
         ArgumentNullException.ThrowIfNull(issuer);
         ArgumentNullException.ThrowIfNull(audience);
 
-        _logger.TraceValidateTokenInfo(token, issuer, audience);
+        logger.TraceValidateTokenInfo(token, issuer, audience);
 
         var discoveryDocument = await configurationManager.GetConfigurationAsync();
         var signingKeys = discoveryDocument.SigningKeys;
@@ -183,9 +182,9 @@ public class JwtBearerAuthHandler(
         }
         catch (SecurityTokenValidationException ex)
         {
-            _logger.InformationTokenValidationException(ex);
+            logger.InformationTokenValidationException(ex);
 
             return null;
         }
-    }  
+    }
 }

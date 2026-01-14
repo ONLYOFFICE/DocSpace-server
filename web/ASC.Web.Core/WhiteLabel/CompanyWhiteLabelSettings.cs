@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -86,6 +86,11 @@ public class CompanyWhiteLabelSettings : ISettings<CompanyWhiteLabelSettings>
     [JsonPropertyName("IsLicensor")]
     public bool IsLicensor { get; set; }
 
+    /// <summary>
+    /// Specifies if the About page is visible or not
+    /// </summary>
+    public bool HideAbout { get; set; }
+
     public CompanyWhiteLabelSettings(CoreSettings coreSettings)
     {
         CoreSettings = coreSettings;
@@ -98,11 +103,7 @@ public class CompanyWhiteLabelSettings : ISettings<CompanyWhiteLabelSettings>
 
     #region ISettings Members
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{C3C5A846-01A3-476D-A962-1CFD78C04ADB}"); }
-    }
+    public static Guid ID => new("{C3C5A846-01A3-476D-A962-1CFD78C04ADB}");
 
 
     public CompanyWhiteLabelSettings GetDefault()
@@ -115,7 +116,7 @@ public class CompanyWhiteLabelSettings : ISettings<CompanyWhiteLabelSettings>
 
         return result;
     }
-    
+
     public DateTime LastModified { get; set; }
 
     #endregion
@@ -139,6 +140,7 @@ public class CompanyWhiteLabelSettingsHelper(CoreSettings coreSettings, Settings
                 settings.Email == defaultSettings.Email &&
                 settings.Address == defaultSettings.Address &&
                 settings.Phone == defaultSettings.Phone &&
-                settings.IsLicensor == defaultSettings.IsLicensor;
+                settings.IsLicensor == defaultSettings.IsLicensor &&
+                settings.HideAbout == defaultSettings.HideAbout;
     }
 }

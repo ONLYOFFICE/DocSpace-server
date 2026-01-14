@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using static ASC.Core.Billing.BillingClient;
-
 namespace ASC.Web.Api.Models;
 
 /// <summary>
@@ -39,62 +37,93 @@ public class PaymentUrlRequestsDto
     public string BackUrl { get; set; }
 
     /// <summary>
-    /// The quantity of payment
+    /// The payment quantity.
     /// </summary>
     public Dictionary<string, int> Quantity { get; set; }
 }
 
 /// <summary>
-/// The request parameters for the payment quantity specifications.
+/// The request parameters for specifying payment quantity.
 /// </summary>
 public class QuantityRequestDto
 {
     /// <summary>
-    /// The mapping of item identifiers with their respective quantities in the payment.
+    /// The mapping of item identifiers to their respective quantities in the payment.
     /// </summary>
     public Dictionary<string, int> Quantity { get; set; }
 }
 
 /// <summary>
-/// The request parameters for the wallet payment quantity specifications.
+/// The request parameters for specifying wallet payment quantity.
 /// </summary>
 public class WalletQuantityRequestDto
 {
     /// <summary>
-    /// The mapping of item identifiers with their respective quantities in the payment.
+    /// The mapping of item identifiers to their respective quantities in the payment.
     /// </summary>
     public Dictionary<string, int?> Quantity { get; set; }
 
     /// <summary>
-    /// The type of action performed on a quantity of product.
+    /// The type of action performed on a product's quantity.
     /// </summary>
     public ProductQuantityType ProductQuantityType { get; set; }
 }
 
 /// <summary>
-/// Chechout setup URL request parameters
+/// The request parameters for getting the checkout setup page URL.
 /// </summary>
-public class ChechoutSetupUrlRequestsDto
+public class CheckoutSetupUrlRequestsDto
 {
     /// <summary>
-    /// Back URL
+    /// The URL where the user will be redirected after completing the setup.
     /// </summary>
     [FromQuery]
     public string BackUrl { get; set; }
 }
 
 /// <summary>
-/// Put money on deposit request parameters
+/// The request parameters for putting money on deposit.
 /// </summary>
 public class TopUpDepositRequestDto
 {
     /// <summary>
-    /// Amount
+    /// The amount of money for the operation.
     /// </summary>
-    public decimal Amount { get; set; }
+    [Range(1, 999999)]
+    public int Amount { get; set; }
 
     /// <summary>
-    /// Currency
+    /// The three-character ISO 4217 currency symbol.
     /// </summary>
     public string Currency { get; set; }
+}
+
+/// <summary>
+/// The request parameters for getting the specified wallet service.
+/// </summary>
+public class GetWalletServiceRequestDto
+{
+    /// <summary>
+    /// The wallet service type.
+    /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    [FromQuery(Name = "service")]
+    public required TenantWalletService Service { get; set; }
+}
+
+/// <summary>
+/// The request parameters for changing the tenant wallet service state.
+/// </summary>
+public class ChangeWalletServiceStateRequestDto
+{
+    /// <summary>
+    /// The wallet service type.
+    /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public TenantWalletService Service { get; set; }
+
+    /// <summary>
+    /// Specifies whether the wallet service is enabled.
+    /// </summary>
+    public bool Enabled { get; set; }
 }

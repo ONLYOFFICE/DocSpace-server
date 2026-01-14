@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,10 +34,10 @@ public class SaveFormRoleMappingDto<T>
     /// <summary>
     /// The form ID.
     /// </summary>
-    public T FormId { get; set; }
+    public required T FormId { get; set; }
 
     /// <summary>
     /// The collection of roles.
     /// </summary>
-    public IEnumerable<FormRole> Roles { get; set; }
+    public required IEnumerable<FormRole> Roles { get; set; }
 }

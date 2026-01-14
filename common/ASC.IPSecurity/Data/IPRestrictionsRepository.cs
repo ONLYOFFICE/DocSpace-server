@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,14 +27,14 @@
 namespace ASC.IPSecurity;
 
 [Scope]
-public class IPRestrictionsRepository(IDbContextFactory<TenantDbContext> dbContextManager, IMapper mapper)
+public class IPRestrictionsRepository(IDbContextFactory<TenantDbContext> dbContextManager)
 {
     public async Task<List<IPRestriction>> GetAsync(int tenant, CancellationToken cancellationToken)
     {
         await using var tenantDbContext = await dbContextManager.CreateDbContextAsync(cancellationToken);
         return await tenantDbContext.TenantIpRestrictions
             .Where(r => r.TenantId == tenant)
-            .ProjectTo<IPRestriction>(mapper.ConfigurationProvider)
+            .Project()
             .ToListAsync(cancellationToken: cancellationToken);
     }
 

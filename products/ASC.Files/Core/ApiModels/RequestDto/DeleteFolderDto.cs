@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -57,5 +57,5 @@ public class DeleteFolder<T>
     /// The parameters for deleting a folder.
     /// </summary>
     [FromBody]
-    public DeleteFolder Delete { get; set; }
+    public required DeleteFolder Delete { get; set; }
 }

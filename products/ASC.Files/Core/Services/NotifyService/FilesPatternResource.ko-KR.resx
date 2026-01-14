@@ -1,5 +1,64 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -53,11 +112,103 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>준비된 양식 확인</value>
+  </data>
+  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
+    <value>"$RoomTitle" 룸에 새 문서("$DocumentTitle")가 생성되었습니다</value>
+  </data>
+  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
+    <value>"$RoomTitle" 룸에 새 파일이 업로드되었습니다 ($Count)</value>
+  </data>
+  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
+    <value>"$RoomTitle" 룸에 새 파일("$DocumentTitle")이 업로드되었습니다</value>
+  </data>
+  <data name="pattern_DocuSignComplete" xml:space="preserve">
+    <value>h1. 모든 서명자가 $DocumentTitle을 완료했습니다
+
+모든 서명자가 "$DocumentTitle":"$DocumentURL" 을 완료했음을 알려드립니다.</value>
+  </data>
+  <data name="pattern_DocuSignStatus" xml:space="preserve">
+    <value>h1. $Message: $DocumentTitle
+
+자세한 내용을 확인하려면 DocuSign 계정에 로그인하세요.</value>
+  </data>
+  <data name="pattern_EditorMentions" xml:space="preserve">
+    <value>h1. $__AuthorName님이 문서 주석에서 귀하를 언급했습니다
+
+$__AuthorName님이 "$RoomTitle":"$RoomURL" 방의"$DocumentTitle":"$DocumentURL" 문서의 주석에서 귀하를 언급했습니다:
+
+$Message</value>
+  </data>
+  <data name="pattern_EditorMentions_push" xml:space="preserve">
+    <value>$ToUserName님이 $DocumentTitle 문서에서 고객님을 언급하였습니다</value>
+  </data>
+  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
+    <value>"$RoomTitle" 룸에 새 폴더("$FolderTitle")가 생성되었습니다</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. $Message 양식이 작성되었습니다
+
+"$RoomTitle":"$RoomURL" 룸에서 새로운 "$DocumentTitle":"$DocumentURL" 양식이 작성되었습니다
+
+양식 제출자: "$FromUserName":"$FromUserLink"
+
+$OrangeButton
+
+&amp;nbsp;</value>
+  </data>
+  <data name="pattern_FormStartedFilling" xml:space="preserve">
+    <value>
+      활동 알림. "$FromUserName":"$FromUserLink" 님이 "$RoomTitle":"$RoomURL" 룸에서 "$DocumentTitle":"$DocumentURL" 양식 작성을 시작하였습니다 — $__DateTime.
+    </value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. $Message 양식을 작성하셨습니다
+
+"$RoomTitle":"$RoomURL" 룸에서 "$DocumentTitle":"$DocumentURL" 양식을 작성하셨습니다
+
+관리자: "$ToUserName":"$ToUserLink"
+
+$OrangeButton
+
+&amp;nbsp;</value>
+  </data>
+  <data name="pattern_FormSubmitted_push" xml:space="preserve">
+    <value>"$RoomTitle" 룸에서 "$DocumentTitle" 양식이 작성되었습니다</value>
+  </data>
+  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+    <value>
+      활동 알림. "$RoomTitle":"$RoomURL" 룸에서 "$DocumentTitle":"$DocumentURL" 양식 작성이 완료되었습니다 — $__DateTime.
+    
+</value>
+  </data>
+  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
+    <value>"$RoomTitle" 방에 초대되었습니다</value>
+  </data>
+  <data name="pattern_MailMergeEnd" xml:space="preserve">
+    <value>h1. 메일링이 완료되었습니다
+
+고객님께서 요청하신 $MailsCount 메시지의 메일링 프로세스가 완료되었음을 알려드립니다. $Message
+
+성공적으로 전송된 메일 메시지는 메일 모듈의 "전송":"$__VirtualRootPath/addons/mail/#sent" 폴더에서 확인하실 수 있습니다.</value>
+  </data>
+  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
+    <value>$FromUserName님이 "$RoomTitle" 룸을 아카이브로 이동했습니다</value>
+  </data>
+  <data name="pattern_RoomRemoved" xml:space="preserve">
+    <value>h1. $__AuthorName님이 방을 삭제했습니다
+
+$__AuthorName님이 방을 삭제했습니다: $RoomTitle</value>
+  </data>
+  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
+    <value>"$RoomTitle" 룸에서 고객님의 역할이 "$RoomRole"(으)로 변경되었습니다</value>
+  </data>
   <data name="pattern_ShareDocument" xml:space="preserve">
     <value>h1. 문서에 액세스 허가: "$DocumentTitle":"$DocumentURL"
 
@@ -72,154 +223,6 @@ $__DateTime "$__AuthorName":"$__AuthorUrl" 다음 액세스 권한을 당신에�
 
 $Message</value>
   </data>
-  <data name="subject_ShareDocument" xml:space="preserve">
-    <value>문서. 문서에 액세스 허가 : $DocumentTitle</value>
-  </data>
-  <data name="subject_ShareFolder" xml:space="preserve">
-    <value>문서. 폴더에 액세스 허가 : $DocumentTitle</value>
-  </data>
-  <data name="pattern_EditorMentions" xml:space="preserve">
-    <value>h1. $__AuthorName님이 문서 주석에서 귀하를 언급했습니다
-
-$__AuthorName님이 "$RoomTitle":"$RoomURL" 방의"$DocumentTitle":"$DocumentURL" 문서의 주석에서 귀하를 언급했습니다:
-
-$Message</value>
-  </data>
-  <data name="pattern_RoomRemoved" xml:space="preserve">
-    <value>h1. $__AuthorName님이 방을 삭제했습니다
-
-$__AuthorName님이 방을 삭제했습니다: $RoomTitle</value>
-  </data>
-  <data name="subject_DocuSignComplete_push" xml:space="preserve">
-    <value>모든 서명자가 $DocumentTitle을 완료했습니다</value>
-  </data>
-  <data name="subject_DocuSignStatus_push" xml:space="preserve">
-    <value>서명 상태가 변경되었습니다</value>
-  </data>
-  <data name="subject_EditorMentions" xml:space="preserve">
-    <value>DocSpace 알림. 문서에서 언급되었습니다</value>
-  </data>
-  <data name="subject_MailMergeEnd_push" xml:space="preserve">
-    <value>메일링이 완료되었습니다.</value>
-  </data>
-  <data name="subject_RoomRemoved" xml:space="preserve">
-    <value>DocSpace 알림. 방이 삭제되었습니다</value>
-  </data>
-  <data name="subject_ShareDocument_push" xml:space="preserve">
-    <value>다음 문서에 대한 액세스 권한이 부여되었습니다: $DocumentTitle</value>
-  </data>
-  <data name="subject_ShareEncryptedDocument_push" xml:space="preserve">
-    <value>다음 암호화 문서에 대한 액세스 권한이 부여되었습니다: $DocumentTitle</value>
-  </data>
-  <data name="subject_ShareFolder_push" xml:space="preserve">
-    <value>다음 폴더에 대한 액세스 권한이 부여되었습니다: $DocumentTitle</value>
-  </data>
-  <data name="subject_ShareDocument_tg" xml:space="preserve">
-    <value>문서. 다음 문서에 대한 액세스 권한이 부여되었습니다: [$DocumentTitle]($DocumentURL)</value>
-  </data>
-  <data name="subject_DocuSignStatus" xml:space="preserve">
-    <value>문서. 서명 상태가 변경되었습니다</value>
-  </data>
-  <data name="subject_MailMergeEnd" xml:space="preserve">
-    <value>문서. 메일링이 완료되었습니다.</value>
-  </data>
-  <data name="subject_DocuSignComplete_tg" xml:space="preserve">
-    <value>문서. 모든 서명자가 [$DocumentTitle]($DocumentURL)을 완료했습니다</value>
-  </data>
-  <data name="subject_DocuSignComplete" xml:space="preserve">
-    <value>문서. 모든 서명자가 $DocumentTitle을 완료했습니다</value>
-  </data>
-  <data name="subject_ShareFolder_tg" xml:space="preserve">
-    <value>문서. 다음 폴더에 대한 액세스 권한이 부여되었습니다: [$DocumentTitle]($DocumentURL)</value>
-  </data>
-  <data name="pattern_MailMergeEnd" xml:space="preserve">
-    <value>h1. 메일링이 완료되었습니다
-
-고객님께서 요청하신 $MailsCount 메시지의 메일링 프로세스가 완료되었음을 알려드립니다. $Message
-
-성공적으로 전송된 메일 메시지는 메일 모듈의 "전송":"$__VirtualRootPath/addons/mail/#sent" 폴더에서 확인하실 수 있습니다.</value>
-  </data>
-  <data name="pattern_DocuSignComplete" xml:space="preserve">
-    <value>h1. 모든 서명자가 $DocumentTitle을 완료했습니다
-
-모든 서명자가 "$DocumentTitle":"$DocumentURL" 을 완료했음을 알려드립니다.</value>
-  </data>
-  <data name="pattern_DocuSignStatus" xml:space="preserve">
-    <value>h1. $Message: $DocumentTitle
-
-자세한 내용을 확인하려면 DocuSign 계정에 로그인하세요.</value>
-  </data>
-  <data name="button_CheckReadyForms" xml:space="preserve">
-    <value>준비된 양식 확인</value>
-  </data>
-  <data name="pattern_FormReceived" xml:space="preserve">
-    <value>h1. $Message 양식이 작성되었습니다
-
-"$RoomTitle":"$RoomURL" 룸에서 새로운 "$DocumentTitle":"$DocumentURL" 양식이 작성되었습니다
-
-양식 제출자: "$FromUserName":"$FromUserLink"
-
-$OrangeButton</value>
-  </data>
-  <data name="pattern_FormSubmitted" xml:space="preserve">
-    <value>h1. $Message 양식을 작성하셨습니다
-
-"$RoomTitle":"$RoomURL" 룸에서 "$DocumentTitle":"$DocumentURL" 양식을 작성하셨습니다
-
-관리자: "$ToUserName":"$ToUserLink"
-
-$OrangeButton</value>
-  </data>
-  <data name="subject_FormReceived" xml:space="preserve">
-    <value>DocSpace 알림. 양식이 작성되었습니다</value>
-  </data>
-  <data name="subject_FormSubmitted" xml:space="preserve">
-    <value>DocSpace 알림. 양식이 작성되었습니다</value>
-  </data>
-  <data name="pattern_FormSubmitted_push" xml:space="preserve">
-    <value>"$RoomTitle" 룸에서 "$DocumentTitle" 양식이 작성되었습니다</value>
-  </data>
-  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
-    <value>"$RoomTitle" 방에 초대되었습니다</value>
-  </data>
-  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
-    <value>"$RoomTitle" 룸에서 고객님의 역할이 "$RoomRole"(으)로 변경되었습니다</value>
-  </data>
-  <data name="subject_YourTurnFormFilling" xml:space="preserve">
-    <value>DocSpace 알림.</value>
-  </data>
-  <data name="subject_StoppedFormFilling" xml:space="preserve">
-    <value>DocSpace 알림.</value>
-  </data>
-  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
-    <value>DocSpace 알림.</value>
-  </data>
-  <data name="subject_FormStartedFilling" xml:space="preserve">
-    <value>DocSpace 알림.</value>
-  </data>
-  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
-    <value>$FromUserName님이 "$RoomTitle" 룸을 아카이브로 이동했습니다</value>
-  </data>
-  <data name="pattern_EditorMentions_push" xml:space="preserve">
-    <value>$ToUserName님이 $DocumentTitle 문서에서 고객님을 언급하였습니다</value>
-  </data>
-  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
-    <value>"$RoomTitle" 룸에 새 문서("$DocumentTitle")가 생성되었습니다</value>
-  </data>
-  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
-    <value>"$RoomTitle" 룸에 새 파일("$DocumentTitle")이 업로드되었습니다</value>
-  </data>
-  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
-    <value>"$RoomTitle" 룸에 새 파일이 업로드되었습니다 ($Count)</value>
-  </data>
-  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
-    <value>"$RoomTitle" 룸에 새 폴더("$FolderTitle")가 생성되었습니다</value>
-  </data>
-  <data name="pattern_FormStartedFilling" xml:space="preserve">
-    <value>
-      활동 알림. "$FromUserName":"$FromUserLink" 님이 "$RoomTitle":"$RoomURL" 룸에서 "$DocumentTitle":"$DocumentURL" 양식 작성을 시작하였습니다 — $__DateTime.
-    </value>
-  </data>
   <data name="pattern_StoppedFormFilling" xml:space="preserve">
     <value>
       활동 알림. "$FromUserName":"$FromUserLink" 님이 "$RoomTitle":"$RoomURL" 룸에서 "$DocumentTitle":"$DocumentURL" 양식 작성을 중지하였습니다 — $__DateTime.
@@ -230,10 +233,70 @@ $OrangeButton</value>
       활동 알림. 고객님의 차례입니다! "$RoomTitle":"$RoomURL" 룸에서 "$DocumentTitle":"$DocumentURL" 양식을 작성하세요 — $__DateTime.
     </value>
   </data>
-  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
-    <value>
-      활동 알림. "$RoomTitle":"$RoomURL" 룸에서 "$DocumentTitle":"$DocumentURL" 양식 작성이 완료되었습니다 — $__DateTime.
-    
-</value>
+  <data name="subject_DocuSignComplete" xml:space="preserve">
+    <value>문서. 모든 서명자가 $DocumentTitle을 완료했습니다</value>
+  </data>
+  <data name="subject_DocuSignComplete_push" xml:space="preserve">
+    <value>모든 서명자가 $DocumentTitle을 완료했습니다</value>
+  </data>
+  <data name="subject_DocuSignComplete_tg" xml:space="preserve">
+    <value>문서. 모든 서명자가 [$DocumentTitle]($DocumentURL)을 완료했습니다</value>
+  </data>
+  <data name="subject_DocuSignStatus" xml:space="preserve">
+    <value>문서. 서명 상태가 변경되었습니다</value>
+  </data>
+  <data name="subject_DocuSignStatus_push" xml:space="preserve">
+    <value>서명 상태가 변경되었습니다</value>
+  </data>
+  <data name="subject_EditorMentions" xml:space="preserve">
+    <value>DocSpace 알림. 문서에서 언급되었습니다</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>DocSpace 알림. 양식이 작성되었습니다</value>
+  </data>
+  <data name="subject_FormStartedFilling" xml:space="preserve">
+    <value>DocSpace 알림.</value>
+  </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>DocSpace 알림. 양식이 작성되었습니다</value>
+  </data>
+  <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
+    <value>DocSpace 알림.</value>
+  </data>
+  <data name="subject_MailMergeEnd" xml:space="preserve">
+    <value>문서. 메일링이 완료되었습니다.</value>
+  </data>
+  <data name="subject_MailMergeEnd_push" xml:space="preserve">
+    <value>메일링이 완료되었습니다.</value>
+  </data>
+  <data name="subject_RoomRemoved" xml:space="preserve">
+    <value>DocSpace 알림. 방이 삭제되었습니다</value>
+  </data>
+  <data name="subject_ShareDocument" xml:space="preserve">
+    <value>문서. 문서에 액세스 허가 : $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareDocument_push" xml:space="preserve">
+    <value>다음 문서에 대한 액세스 권한이 부여되었습니다: $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareDocument_tg" xml:space="preserve">
+    <value>문서. 다음 문서에 대한 액세스 권한이 부여되었습니다: [$DocumentTitle]($DocumentURL)</value>
+  </data>
+  <data name="subject_ShareEncryptedDocument_push" xml:space="preserve">
+    <value>다음 암호화 문서에 대한 액세스 권한이 부여되었습니다: $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareFolder" xml:space="preserve">
+    <value>문서. 폴더에 액세스 허가 : $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareFolder_push" xml:space="preserve">
+    <value>다음 폴더에 대한 액세스 권한이 부여되었습니다: $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareFolder_tg" xml:space="preserve">
+    <value>문서. 다음 폴더에 대한 액세스 권한이 부여되었습니다: [$DocumentTitle]($DocumentURL)</value>
+  </data>
+  <data name="subject_StoppedFormFilling" xml:space="preserve">
+    <value>DocSpace 알림.</value>
+  </data>
+  <data name="subject_YourTurnFormFilling" xml:space="preserve">
+    <value>DocSpace 알림.</value>
   </data>
 </root>

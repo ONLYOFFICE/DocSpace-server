@@ -52,7 +52,7 @@ function getAndSaveAppsettings(){
 
     nconf.file("redisWithEnv", path.join(appsettings, 'redis.' + env + '.json'));
     nconf.file("redis", path.join(appsettings, 'redis.json'));
-
+    
     var redis = nconf.get("Redis");
     if(redis != null)
     {
@@ -64,6 +64,7 @@ function getAndSaveAppsettings(){
             host: redis.Hosts[0].Host,
             port: redis.Hosts[0].Port
         };
+        
         nconf.set("Redis", redis);
     }
 }

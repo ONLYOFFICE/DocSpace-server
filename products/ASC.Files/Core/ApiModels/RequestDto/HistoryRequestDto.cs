@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -41,13 +41,26 @@ public class HistoryRequestDto
     /// The start date of the history.
     /// </summary>
     [FromQuery(Name = "fromDate")]
-    public ApiDateTime FromDate {  get; set; }
+    public ApiDateTime FromDate { get; set; }
 
     /// <summary>
     /// The end date of the history.
     /// </summary>
     [FromQuery(Name = "toDate")]
     public ApiDateTime ToDate { get; set; }
+
+    /// <summary>
+    /// The number of history entries to retrieve for the file log.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
+
+    /// <summary>
+    /// The starting index for retrieving a subset of file history entries.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
 }
 
 /// <summary>
@@ -72,4 +85,17 @@ public class HistoryFolderRequestDto
     /// </summary>
     [FromQuery(Name = "toDate")]
     public ApiDateTime ToDate { get; set; }
+
+    /// <summary>
+    /// The number of records to retrieve for the folder history.
+    /// </summary>
+    [FromQuery(Name = "count")]
+    [Range(1, ApiContext.MaxCount)]
+    public int Count { get; set; } = ApiContext.DefaultCount;
+
+    /// <summary>
+    /// The starting index from which the history records are retrieved in the request.
+    /// </summary>
+    [FromQuery(Name = "startIndex")]
+    public int StartIndex { get; set; }
 }

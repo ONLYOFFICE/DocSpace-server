@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -44,14 +44,10 @@ public class TenantInfoSettings : ISettings<TenantInfoSettings>
             IsDefault = true
         };
     }
-    
+
     public DateTime LastModified { get; set; }
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{5116B892-CCDD-4406-98CD-4F18297C0C0A}"); }
-    }
+    public static Guid ID => new("{5116B892-CCDD-4406-98CD-4F18297C0C0A}");
 }
 
 public class Size
@@ -63,7 +59,7 @@ public class Size
     {
         return new Size
         {
-            Height = cache.Height, 
+            Height = cache.Height,
             Width = cache.Width
         };
     }

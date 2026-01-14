@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,7 +33,7 @@ public class DbFilesAuditReference : BaseEntity
     public int AuditEventId { get; set; }
     public bool Corrupted { get; set; }
     public DbAuditEvent AuditEvent { get; set; }
-    
+
     public override object[] GetKeys()
     {
         return [EntryId, EntryType, AuditEventId];
@@ -53,49 +53,52 @@ public static class FilesAuditReferenceExtension
         return modelBuilder;
     }
 
-    public static void MySqlAddFilesAuditReference(this ModelBuilder modelBuilder)
+    extension(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DbFilesAuditReference>(entity =>
+        public void MySqlAddFilesAuditReference()
         {
-            entity.ToTable("files_audit_reference");
+            modelBuilder.Entity<DbFilesAuditReference>(entity =>
+            {
+                entity.ToTable("files_audit_reference");
 
-            entity.HasKey(e => new {e.EntryId, e.EntryType, e.AuditEventId})
-                .HasName("PRIMARY");
+                entity.HasKey(e => new { e.EntryId, e.EntryType, e.AuditEventId })
+                    .HasName("PRIMARY");
 
-            entity.Property(e => e.EntryId)
-                .HasColumnName("entry_id");
+                entity.Property(e => e.EntryId)
+                    .HasColumnName("entry_id");
 
-            entity.Property(e => e.EntryType)
-                .HasColumnName("entry_type");
+                entity.Property(e => e.EntryType)
+                    .HasColumnName("entry_type");
 
-            entity.Property(e => e.AuditEventId)
-                .HasColumnName("audit_event_id");
-            
-            entity.Property(e => e.Corrupted)
-                .HasColumnName("corrupted");
-        });
-    }
+                entity.Property(e => e.AuditEventId)
+                    .HasColumnName("audit_event_id");
 
-    public static void PgSqlAddFilesAuditReference(this ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<DbFilesAuditReference>(entity =>
+                entity.Property(e => e.Corrupted)
+                    .HasColumnName("corrupted");
+            });
+        }
+
+        public void PgSqlAddFilesAuditReference()
         {
-            entity.ToTable("files_audit_reference");
+            modelBuilder.Entity<DbFilesAuditReference>(entity =>
+            {
+                entity.ToTable("files_audit_reference");
 
-            entity.HasKey(e => new { e.EntryId, e.EntryType, e.AuditEventId })
-                .HasName("pk_files_audit_reference");
+                entity.HasKey(e => new { e.EntryId, e.EntryType, e.AuditEventId })
+                    .HasName("pk_files_audit_reference");
 
-            entity.Property(e => e.EntryId)
-                .HasColumnName("entry_id");
+                entity.Property(e => e.EntryId)
+                    .HasColumnName("entry_id");
 
-            entity.Property(e => e.EntryType)
-                .HasColumnName("entry_type");
+                entity.Property(e => e.EntryType)
+                    .HasColumnName("entry_type");
 
-            entity.Property(e => e.AuditEventId)
-                .HasColumnName("audit_event_id");
-            
-            entity.Property(e => e.Corrupted)
-                .HasColumnName("corrupted");
-        });
+                entity.Property(e => e.AuditEventId)
+                    .HasColumnName("audit_event_id");
+
+                entity.Property(e => e.Corrupted)
+                    .HasColumnName("corrupted");
+            });
+        }
     }
 }

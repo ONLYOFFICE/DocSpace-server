@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2022
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,6 +23,8 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+using ASC.AI.Core.Database.Models;
 
 namespace ASC.Migrations.Core;
 
@@ -80,7 +82,7 @@ public class MigrationContext : DbContext
     public DbSet<DbWebhooksLog> WebhooksLogs { get; set; }
     public DbSet<DbWebhook> Webhooks { get; set; }
     public DbSet<ApiKey> ApiKeys { get; set; }
-    
+
     public DbSet<DbFile> Files { get; set; }
     public DbSet<DbFolder> Folders { get; set; }
     public DbSet<DbFolderTree> Tree { get; set; }
@@ -94,7 +96,6 @@ public class MigrationContext : DbContext
     public DbSet<DbFilesThirdpartyApp> ThirdpartyApp { get; set; }
     public DbSet<DbFilesLink> FilesLink { get; set; }
     public DbSet<DbFilesProperties> FilesProperties { get; set; }
-    public DbSet<FilesConverts> FilesConverts { get; set; }
     public DbSet<DbFileOrder> FileOrder { get; set; }
     public DbSet<DbRoomSettings> RoomSettings { get; set; }
     public DbSet<ShortLink> ShortLink { get; set; }
@@ -123,6 +124,18 @@ public class MigrationContext : DbContext
 
     public DbSet<IdentityShedlock> IdentityShedlocks { get; set; }
     public DbSet<DbUserRelation> UserRelations { get; set; }
+    
+    public DbSet<DbChat> Chats { get; set; }
+    public DbSet<DbChatMessage> ChatMessages { get; set; }
+    public DbSet<DbAiProvider> AiProviders { get; set; }
+    
+    public DbSet<DbMcpServer> McpServers { get; set; }
+    public DbSet<DbMcpServerState> McpServerStates { get; set; }
+    public DbSet<DbMcpServerSettings> McpServerSettings { get; set; }
+    public DbSet<DbRoomMcpServer> McpRoomServers { get; set; }
+    
+    public DbSet<DbFileVectorization> FileVectorization { get; set; }
+    public DbSet<DbUserChatSettings> UserChatSettings { get; set; }
 
     public MigrationContext(DbContextOptions<MigrationContext> options) : base(options) { }
 
@@ -171,7 +184,6 @@ public class MigrationContext : DbContext
             .AddDbDbFilesThirdpartyApp()
             .AddDbFilesLink()
             .AddDbFilesProperties()
-            .AddFilesConverts()
             .AddInstanceRegistration()
             .AddAuditEvent()
             .AddLoginEvents()
@@ -198,6 +210,15 @@ public class MigrationContext : DbContext
             .AddIdentityScope()
             .AddIdentityShedlock()
             .AddUserRelation()
-            .AddDbFunctions();
+            .AddUserRelation()
+            .AddDbChats()
+            .AddDbChatsMessages()
+            .AddDbAiProviders()
+            .AddDbMcpServers()
+            .AddDbMcpServerStates()
+            .AddDbMcpServerSettings()
+            .AddDbRoomMcpServers()
+            .AddDbFileVectorization()
+            .AddDbUserChatSettings();
     }
 }

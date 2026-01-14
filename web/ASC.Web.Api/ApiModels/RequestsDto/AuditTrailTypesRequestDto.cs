@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,8 +38,8 @@ public class AuditTrailTypesRequestDto
     public ProductType? ProductType { get; set; }
 
     /// <summary>
-    /// The module within the product associated with the audit trail.
+    /// The location associated with the audit trail.
     /// </summary>
     [FromQuery(Name = "moduleType")]
-    public ModuleType? ModuleType { get; set; }
+    public LocationType? LocationType { get; set; }
 }

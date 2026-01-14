@@ -28,12 +28,20 @@
 package com.asc.authorization.application.security.oauth.handler;
 
 import com.asc.authorization.application.configuration.properties.SecurityConfigurationProperties;
+import com.asc.authorization.application.security.authentication.BasicSignature;
+import com.asc.authorization.application.security.oauth.service.AuthorizationLoginEventRegistrationService;
+import com.asc.common.core.domain.value.enums.AuditCode;
+import com.asc.common.service.transfer.message.AuditMessage;
+import com.asc.common.service.transfer.message.LoginRegisteredEvent;
+import com.asc.common.utilities.HttpUtils;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.ZonedDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationCodeRequestAuthenticationToken;
@@ -51,7 +59,17 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class AuthorizationSuccessResponseHandler implements AuthenticationSuccessHandler {
+  private static final int LOGIN_REGISTERED_ACTION = 1028;
+
+  /** The name of the current service, used for audit logging. */
+  @Value("${spring.application.name}")
+  private String serviceName;
+
   private final SecurityConfigurationProperties filterSecurityConfigurationProperties;
+
+  private final HttpUtils httpUtils;
+  private final AuthorizationLoginEventRegistrationService
+      authorizationLoginEventRegistrationService;
 
   /**
    * Handles successful authentication events.
@@ -74,6 +92,9 @@ public class AuthorizationSuccessResponseHandler implements AuthenticationSucces
     log.debug("Authorization success");
 
     if (authentication instanceof OAuth2AuthorizationCodeRequestAuthenticationToken token) {
+      // TODO: Handle clientId propagation better. Now it is in details as a string
+      if (request.getAttribute("x-signature") instanceof BasicSignature signature)
+        publishAudit(request, signature, authentication.getDetails().toString());
       handleOAuth2Success(request, response, token);
     } else {
       log.warn(
@@ -81,6 +102,49 @@ public class AuthorizationSuccessResponseHandler implements AuthenticationSucces
       response.sendError(
           HttpStatus.INTERNAL_SERVER_ERROR.value(), "Authentication type is not supported");
     }
+  }
+
+  /**
+   * Publishes an audit log for the authentication attempt.
+   *
+   * @param request the {@link HttpServletRequest}.
+   * @param signature the {@link BasicSignature}.
+   * @param clientId oauth2 clientId.
+   */
+  private void publishAudit(HttpServletRequest request, BasicSignature signature, String clientId) {
+    var eventDate = ZonedDateTime.now();
+    var clientIP = httpUtils.extractHostFromUrl(httpUtils.getFirstRequestIP(request));
+    var browser = httpUtils.getClientBrowser(request);
+    var platform = httpUtils.getClientOS(request);
+    var fullUrl = httpUtils.getFullURL(request);
+
+    authorizationLoginEventRegistrationService.registerLogin(
+        LoginRegisteredEvent.builder()
+            .login(signature.getUserEmail())
+            .active(false)
+            .ip(clientIP)
+            .browser(browser)
+            .platform(platform)
+            .date(eventDate)
+            .tenantId(signature.getTenantId())
+            .userId(signature.getUserId())
+            .page(fullUrl)
+            .action(LOGIN_REGISTERED_ACTION)
+            .build(),
+        AuditMessage.builder()
+            .ip(clientIP)
+            .initiator(serviceName)
+            .target(clientId)
+            .browser(browser)
+            .platform(platform)
+            .date(eventDate)
+            .tenantId(signature.getTenantId())
+            .userId(signature.getUserId())
+            .userEmail(signature.getUserEmail())
+            .userName(signature.getUserName())
+            .page(fullUrl)
+            .action(AuditCode.GENERATE_AUTHORIZATION_CODE_TOKEN.getCode())
+            .build());
   }
 
   /**

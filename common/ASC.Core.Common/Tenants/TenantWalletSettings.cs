@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,53 +27,55 @@
 namespace ASC.Core.Tenants;
 
 /// <summary>
-/// Tenant wallet settings
+/// The wrapper for the tenant wallet settings.
 /// </summary>
 public class TenantWalletSettingsWrapper
 {
     /// <summary>
-    /// Tenant wallet settings
+    /// The tenant wallet settings.
     /// </summary>
     public TenantWalletSettings Settings { get; set; }
 }
 
+/// <summary>
+/// The tenant wallet settings.
+/// </summary>
 [Scope]
 [Serializable]
 public class TenantWalletSettings : ISettings<TenantWalletSettings>
 {
     /// <summary>
-    /// Enabled
+    /// Specifies whether automatic top-up for the tenant wallet is enabled.
     /// </summary>
     public bool Enabled { get; set; }
 
     /// <summary>
-    /// Minimun balance
+    /// The minimum wallet balance at which automatic top-up will be triggered. Must be between 5 and 1000.
     /// </summary>
     [Range(5, 1000)]
     public int MinBalance { get; set; }
 
     /// <summary>
-    /// Up to balance
+    /// The maximum wallet balance at which automatic top-up will be triggered. Must be between 6 and 5000.
     /// </summary>
     [Range(6, 5000)]
     public int UpToBalance { get; set; }
 
     /// <summary>
-    /// Currency
+    /// The three-character ISO 4217 currency symbol.
     /// </summary>
     public string Currency { get; set; }
 
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{40069709-492A-4F41-988C-F1A053A8A560}"); }
-    }
+    public static Guid ID => new("{40069709-492A-4F41-988C-F1A053A8A560}");
 
     public TenantWalletSettings GetDefault()
     {
         return new TenantWalletSettings();
     }
 
+    /// <summary>
+    /// The date and time when the tenant wallet settings were last modified.
+    /// </summary>
     public DateTime LastModified { get; set; }
 }

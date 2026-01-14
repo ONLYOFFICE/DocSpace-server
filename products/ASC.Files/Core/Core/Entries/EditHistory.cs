@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -198,16 +198,13 @@ class ChangesUserData
 /// <summary>
 /// The information about the file editing history author.
 /// </summary>
-[Transient]
 [DebuggerDisplay("{Id} {Name}")]
 public class EditHistoryAuthor(UserManager userManager, DisplayUserSettingsHelper displayUserSettingsHelper)
 {
     /// <summary>
     /// The author ID.
     /// </summary>
-    public string Id { get; init; }
-
-    private readonly string _name;
+    public required string Id { get; init; }
 
     /// <summary>
     /// The author name.
@@ -218,20 +215,20 @@ public class EditHistoryAuthor(UserManager userManager, DisplayUserSettingsHelpe
         {
             if (!Guid.TryParse(Id, out var idInternal))
             {
-                return _name;
+                return field;
             }
 
             UserInfo user;
             return
                 idInternal.Equals(Guid.Empty)
-                      || idInternal.Equals(ASC.Core.Configuration.Constants.Guest.ID)
-                      || (user = userManager.GetUsers(idInternal)).Equals(Constants.LostUser)
-                          ? string.IsNullOrEmpty(_name)
-                                ? FilesCommonResource.Guest
-                                : _name
-                          : user.DisplayUserName(false, displayUserSettingsHelper);
+                || idInternal.Equals(ASC.Core.Configuration.Constants.Guest.ID)
+                || (user = userManager.GetUsers(idInternal)).Equals(Constants.LostUser)
+                    ? string.IsNullOrEmpty(field)
+                        ? FilesCommonResource.Guest
+                        : field
+                    : user.DisplayUserName(false, displayUserSettingsHelper);
         }
-        init => _name = value;
+        init;
     }
 }
 
@@ -272,7 +269,7 @@ public class EditHistoryDataDto
     /// <summary>
     /// The document identifier used to unambiguously identify the document file.
     /// </summary>
-    public string Key { get; set; }
+    public required string Key { get; set; }
 
     /// <summary>
     /// The object of the previous version of the document.
@@ -288,17 +285,17 @@ public class EditHistoryDataDto
     /// The URL address of the current document version.
     /// </summary>
     [Url]
-    public string Url { get; set; }
+    public required string Url { get; set; }
 
     /// <summary>
     /// The document version number.
     /// </summary>
-    public int Version { get; init; }
+    public required int Version { get; init; }
 
     /// <summary>
     /// The document extension.
     /// </summary>
-    public string FileType { get; set; }
+    public required string FileType { get; set; }
 }
 
 /// <summary>

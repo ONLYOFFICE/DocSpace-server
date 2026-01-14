@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,10 +33,11 @@ public class MentionWrapperCreator(DisplayUserSettingsHelper displayUserSettings
 {
     public async Task<MentionWrapper> CreateMentionWrapperAsync(UserInfo user)
     {
-        var wrapper = new MentionWrapper { 
-            User = user, 
-            Email = user.Email, 
-            Id = user.Id.ToString(), 
+        var wrapper = new MentionWrapper
+        {
+            User = user,
+            Email = user.Email,
+            Id = user.Id.ToString(),
             Name = user.DisplayUserName(false, displayUserSettingsHelper),
             Image = commonLinkUtility.GetFullAbsolutePath(await user.GetMediumPhotoURLAsync(userPhotoManager))
         };

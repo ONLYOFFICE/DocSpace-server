@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -58,5 +58,5 @@ public class UpdateFileRequestDto<T>
     /// The parameters for updating a file.
     /// </summary>
     [FromBody]
-    public UpdateFile File { get; set; }
+    public required UpdateFile File { get; set; }
 }

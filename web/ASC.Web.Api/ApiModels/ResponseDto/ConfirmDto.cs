@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,12 +29,12 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// The confirmation parameters.
 /// </summary>
-public class ConfirmDto : IMapFrom<Validation>
+public class ConfirmDto
 {
     /// <summary>
     /// The confirmation result.
     /// </summary>
-    public ValidationResult Result { get; set; }
+    public required ValidationResult Result { get; set; }
 
     /// <summary>
     /// The confirmation room ID.
@@ -45,4 +45,20 @@ public class ConfirmDto : IMapFrom<Validation>
     /// The confirmation title.
     /// </summary>
     public string Title { get; set; }
+
+    /// <summary>
+    /// The confirmation email.
+    /// </summary>
+    public string Email { get; set; }
+    
+    /// <summary>
+    /// The confirmation is agent.
+    /// </summary>
+    public bool IsAgent { get; set; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class ConfirmDtoMapper
+{
+    public static partial ConfirmDto Map(this Validation source);
 }

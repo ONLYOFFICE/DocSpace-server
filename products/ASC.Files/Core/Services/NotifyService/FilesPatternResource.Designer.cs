@@ -19,7 +19,7 @@ namespace ASC.Files.Core.Services.NotifyService {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class FilesPatternResource {
@@ -66,6 +66,26 @@ namespace ASC.Files.Core.Services.NotifyService {
         public static string button_CheckReadyForms {
             get {
                 return ResourceManager.GetString("button_CheckReadyForms", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to h1. $__AuthorName deleted an AI agent
+        ///
+        ///$__AuthorName deleted the AI agent: $RoomTitle.
+        /// </summary>
+        public static string pattern_AgentRemoved {
+            get {
+                return ResourceManager.GetString("pattern_AgentRemoved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your role in the AI agent &quot;$RoomTitle&quot; has been changed to &quot;$RoomRole&quot;.
+        /// </summary>
+        public static string pattern_AgentUpdateAccessForUser_push {
+            get {
+                return ResourceManager.GetString("pattern_AgentUpdateAccessForUser_push", resourceCulture);
             }
         }
         
@@ -156,7 +176,9 @@ namespace ASC.Files.Core.Services.NotifyService {
         ///
         ///Form submitter: &quot;$FromUserName&quot;:&quot;$FromUserLink&quot;
         ///
-        ///$OrangeButton.
+        ///$OrangeButton
+        ///
+        ///&amp;nbsp;.
         /// </summary>
         public static string pattern_FormReceived {
             get {
@@ -182,7 +204,9 @@ namespace ASC.Files.Core.Services.NotifyService {
         ///
         ///Manager: &quot;$ToUserName&quot;:&quot;$ToUserLink&quot;
         ///
-        ///$OrangeButton.
+        ///$OrangeButton
+        ///
+        ///&amp;nbsp;.
         /// </summary>
         public static string pattern_FormSubmitted {
             get {
@@ -207,6 +231,15 @@ namespace ASC.Files.Core.Services.NotifyService {
         public static string pattern_FormWasCompletelyFilled {
             get {
                 return ResourceManager.GetString("pattern_FormWasCompletelyFilled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You have been invited to the AI agent &quot;$RoomTitle&quot;.
+        /// </summary>
+        public static string pattern_InvitedToAgent_push {
+            get {
+                return ResourceManager.GetString("pattern_InvitedToAgent_push", resourceCulture);
             }
         }
         
@@ -310,18 +343,11 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;patterns&gt;
-        ///  &lt;formatter type=&quot;ASC.Notify.Patterns.NVelocityPatternFormatter, ASC.Core.Common&quot; /&gt;
-        ///
-        ///  &lt;pattern id=&quot;DocuSignComplete&quot; sender=&quot;email.sender&quot;&gt;
-        ///    &lt;subject resource=&quot;|subject_DocuSignComplete|ASC.Files.Core.Services.NotifyService.FilesPatternResource,ASC.Files.Core&quot; /&gt;
-        ///    &lt;body styler=&quot;ASC.Notify.Textile.TextileStyler,ASC.Core.Common&quot; resource=&quot;|pattern_DocuSignComplete|ASC.Files.Core.Services.NotifyService.FilesPatternResource,ASC.Files.Core&quot; /&gt;
-        ///  &lt;/pattern&gt;
-        ///  &lt;pattern id=&quot;DocuSignComple [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to DocSpace notification. AI agent deleted.
         /// </summary>
-        public static string patterns {
+        public static string subject_AgentRemoved {
             get {
-                return ResourceManager.GetString("patterns", resourceCulture);
+                return ResourceManager.GetString("subject_AgentRemoved", resourceCulture);
             }
         }
         

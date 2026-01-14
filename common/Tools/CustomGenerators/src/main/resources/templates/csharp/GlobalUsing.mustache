@@ -1,0 +1,58 @@
+{{>partial_header}}
+
+global using System;
+global using System.Collections.Generic;
+global using System.Collections.ObjectModel;
+global using System.Linq;
+global using System.Net;
+global using System.Net.Mime;
+global using System.Collections;
+global using System.Globalization;
+global using System.IO;
+global using System.Reflection;
+global using System.Runtime.Serialization;
+global using System.Runtime.Serialization.Formatters;
+global using System.Text;
+global using System.Threading;
+global using System.Text.RegularExpressions;
+global using System.Threading.Tasks;
+{{^netStandard}}
+global using System.Web;
+{{/netStandard}}
+global using System.Text.Json;
+global using System.Text.Json.Serialization;
+global using System.Net.Http.Headers;
+{{#models}}
+{{#model}}
+{{#-first}}
+{{#vendorExtensions.x-com-visible}}
+global using System.Runtime.InteropServices;
+{{/vendorExtensions.x-com-visible}}
+{{#discriminator}}
+global using JsonSubTypes;
+{{/discriminator}}
+{{/-first}}
+{{/model}}
+{{/models}}
+{{#validatable}}
+global using System.ComponentModel.DataAnnotations;
+{{/validatable}}
+global using Polly;
+{{#useRestSharp}}
+global using RestSharp;
+{{/useRestSharp}}
+{{#useHttpClient}}
+global using System.Net.Http;
+{{/useHttpClient}}
+global using System.Net.Security;
+global using System.Security.Cryptography.X509Certificates;
+{{#useRestSharp}}
+{{#hasOAuthMethods}}global using {{packageName}}.Client.Auth;
+{{/hasOAuthMethods}}
+{{/useRestSharp}}
+{{^net35}}
+global using System.Collections.Concurrent;
+{{/net35}}
+{{#useCompareNetObjects}}
+global using KellermanSoftware.CompareNetObjects;
+{{/useCompareNetObjects}}

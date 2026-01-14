@@ -273,7 +273,7 @@ public class ClientQueryController {
   public ResponseEntity<PageableResponse<ClientResponse>> getClients(
       @AuthenticationPrincipal BasicSignatureTokenPrincipal principal,
       @Parameter(description = "Pagination limit", required = true, example = "1")
-          @RequestParam(value = "limit")
+          @RequestParam(value = "limit", defaultValue = "30")
           @Min(value = 1)
           @Max(value = 50)
           int limit,

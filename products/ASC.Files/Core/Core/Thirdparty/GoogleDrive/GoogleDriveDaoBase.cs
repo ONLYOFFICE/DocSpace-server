@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -94,7 +94,7 @@ internal class GoogleDriveDaoBase(
 
     public override string MakeId(string path = null)
     {
-        var p = string.IsNullOrEmpty(path) || path == "root" || path == ProviderInfo.RootFolderId ? "" : ("-|" + path.TrimStart('/'));
+        var p = string.IsNullOrEmpty(path) || path == "root" || path == ProviderInfo.RootFolderId ? "" : "-|" + path.TrimStart('/');
 
         return $"{PathPrefix}{p}";
     }
@@ -155,11 +155,12 @@ internal class GoogleDriveDaoBase(
         folder.Id = MakeId(driveEntry);
         folder.ParentId = isRoot ? null : MakeId(GetParentFolderId(driveEntry));
         folder.Title = MakeFolderTitle(driveEntry);
-        folder.CreateOn = isRoot ? ProviderInfo.CreateOn : (driveEntry.CreatedTimeDateTimeOffset?.DateTime ?? default);
-        folder.ModifiedOn = isRoot ? ProviderInfo.ModifiedOn : (driveEntry.ModifiedTimeDateTimeOffset?.DateTime ?? default);
+        folder.CreateOn = isRoot ? ProviderInfo.CreateOn : driveEntry.CreatedTimeDateTimeOffset?.DateTime ?? default;
+        folder.ModifiedOn = isRoot ? ProviderInfo.ModifiedOn : driveEntry.ModifiedTimeDateTimeOffset?.DateTime ?? default;
         folder.SettingsPrivate = ProviderInfo.Private;
         folder.SettingsHasLogo = ProviderInfo.HasLogo;
         folder.SettingsColor = ProviderInfo.Color;
+        folder.SettingsCover = ProviderInfo.Cover;
         ProcessFolderAsRoom(folder);
 
         if (folder.CreateOn != DateTime.MinValue && folder.CreateOn.Kind == DateTimeKind.Utc)
@@ -171,8 +172,6 @@ internal class GoogleDriveDaoBase(
         {
             folder.ModifiedOn = _tenantUtil.DateTimeFromUtc(folder.ModifiedOn);
         }
-        
-        folder.Shared = ProviderInfo.FolderType is FolderType.PublicRoom;
 
         return folder;
     }
@@ -235,7 +234,6 @@ internal class GoogleDriveDaoBase(
         file.Title = MakeFileTitle(driveFile);
         file.ThumbnailStatus = driveFile.HasThumbnail.HasValue && driveFile.HasThumbnail.Value ? Thumbnail.Created : Thumbnail.Creating;
         file.Encrypted = ProviderInfo.Private;
-        file.Shared = ProviderInfo.FolderType is FolderType.PublicRoom;
 
         return file;
     }
@@ -259,7 +257,7 @@ internal class GoogleDriveDaoBase(
             return new ErrorDriveEntry(ex, driveId);
         }
     }
-    
+
     public async Task<DriveFile> CreateFolderAsync(string title, string folderId)
     {
         return await _providerInfo.CreateFolderAsync(title, MakeThirdId(folderId), GetId);

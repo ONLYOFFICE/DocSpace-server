@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -44,7 +44,7 @@ public class UpdateRoomsQuotaRequestDto<T>
 }
 
 /// <summary>
-/// The request parameters for updating the room.
+/// The request parameters for updating the rooms.
 /// </summary>
 public class UpdateRoomsRoomIdsRequestDto<T>
 {

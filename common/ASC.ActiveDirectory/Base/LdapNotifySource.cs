@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,10 +31,7 @@ public class LdapNotifySource(LdapNotifyService ldapNotifyHelper) : INotifySourc
 {
     private Tenant _tenant;
 
-    public string Id
-    {
-        get { return "asc.activedirectory." + _tenant.Id; }
-    }
+    public string Id => "asc.activedirectory." + _tenant.Id;
 
     public void Init(Tenant tenant)
     {
@@ -45,16 +42,7 @@ public class LdapNotifySource(LdapNotifyService ldapNotifyHelper) : INotifySourc
     {
         await ldapNotifyHelper.AutoSyncAsync(_tenant);
     }
-
-    public Task<IActionProvider> GetActionProvider(NotifyRequest r)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<IPatternProvider> GetPatternProvider(NotifyRequest r)
-    {
-        throw new NotImplementedException();
-    }
+    
 
     public IRecipientProvider GetRecipientsProvider()
     {

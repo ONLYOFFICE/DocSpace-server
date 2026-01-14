@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -41,8 +41,8 @@ public class PaymentAccountHandler
         TenantManager tenantManager)
     {
         var tenant = tenantManager.GetCurrentTenant();
-        var payerId = (await tariffService.GetTariffAsync(tenant.Id)).CustomerId;
-        var payer = await userManager.GetUserByEmailAsync(payerId);
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        var payer = await userManager.GetUserByEmailAsync(customerInfo?.Email);
 
         if (securityContext.CurrentAccount.ID != payer.Id &&
             securityContext.CurrentAccount.ID != tenant.OwnerId)

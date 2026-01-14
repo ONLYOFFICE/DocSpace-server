@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -45,7 +45,7 @@ public enum EmployeeType
 
     [SwaggerEnum("DocSpace admin")]
     DocSpaceAdmin = 3,
-	
+
     [SwaggerEnum("User")]
     User = 4
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,7 +35,7 @@ public class AuthProvidersRequestDto
     /// Specifies whether to return providers that are available for invitation links, i.e. the user can login or register through these providers.
     /// </summary>
     [FromQuery(Name = "inviteView")]
-    public bool InviteView {  get; set; }
+    public bool InviteView { get; set; }
 
     /// <summary>
     /// Specifies whether to display the provider settings in a pop-up window (true) or redirect them to the desktop application (false).

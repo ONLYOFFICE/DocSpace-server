@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The parameters for adding tags.
+/// The parameters for managing room tags.
 /// </summary>
 public class BatchTagsRequestDto
 {
@@ -39,7 +39,7 @@ public class BatchTagsRequestDto
 
 
 /// <summary>
-/// The request parameters for adding tags.
+/// The request parameters for managing tags.
 /// </summary>
 public class BatchTagsRequestDto<T>
 {
@@ -50,7 +50,7 @@ public class BatchTagsRequestDto<T>
     public required T Id { get; set; }
 
     /// <summary>
-    /// The parameters for adding tags.
+    /// The parameters for managing tags.
     /// </summary>
     [FromBody]
     public BatchTagsRequestDto BatchTags { get; set; }

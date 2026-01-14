@@ -123,6 +123,10 @@ public class UpdateClientRequest implements Serializable {
   /** The allowed origins for the client. */
   @JsonProperty("allowed_origins")
   @URLCollection
+  @Size(
+      min = 1,
+      max = 12,
+      message = "allowed origins must contain at least 1 and at most 12 addresses")
   @Schema(
       description = "The allowed origins for the client",
       example = "[\"http://allowed.origin\"]")

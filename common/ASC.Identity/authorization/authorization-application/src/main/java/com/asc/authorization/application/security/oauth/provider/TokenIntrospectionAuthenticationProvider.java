@@ -27,13 +27,19 @@
 
 package com.asc.authorization.application.security.oauth.provider;
 
+import static com.asc.authorization.application.security.RegionUtils.JWT_REGION_EXTRACTOR;
+
+import com.asc.authorization.application.security.RegionUtils;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -65,6 +71,11 @@ public class TokenIntrospectionAuthenticationProvider implements AuthenticationP
   private static final TypeDescriptor LIST_STRING_TYPE_DESCRIPTOR =
       TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(String.class));
 
+  @Value("${spring.application.region}")
+  private String region;
+
+  private final Environment environment;
+
   private final OAuth2AuthorizationService authorizationService;
   private final RegisteredClientRepository registeredClientRepository;
 
@@ -85,8 +96,25 @@ public class TokenIntrospectionAuthenticationProvider implements AuthenticationP
     var tokenIntrospectionAuthentication =
         (OAuth2TokenIntrospectionAuthenticationToken) authentication;
 
-    var authorization =
-        authorizationService.findByToken(tokenIntrospectionAuthentication.getToken(), null);
+    var token = tokenIntrospectionAuthentication.getToken();
+    // TODO: Refactor for SaaS config
+    var isSaaS =
+        Arrays.stream(environment.getActiveProfiles())
+            .anyMatch(profile -> profile.equalsIgnoreCase("saas"));
+
+    if (isSaaS) {
+      var tokenRegion = RegionUtils.extract(token, JWT_REGION_EXTRACTOR);
+      if (tokenRegion.isPresent() && !tokenRegion.get().equalsIgnoreCase(region)) {
+        log.debug(
+            "Token region '{}' does not match current region '{}'. Token is not valid.",
+            tokenRegion.get(),
+            region);
+        return new OAuth2TokenIntrospectionAuthenticationToken(
+            token, authentication, OAuth2TokenIntrospection.builder().build());
+      }
+    }
+
+    var authorization = authorizationService.findByToken(token, null);
     if (authorization == null) {
       log.debug("Did not authenticate token introspection request since token was not found");
       // Return the authentication request when token not found
@@ -95,13 +123,11 @@ public class TokenIntrospectionAuthenticationProvider implements AuthenticationP
 
     log.trace("Retrieved authorization with token");
 
-    var authorizedToken = authorization.getToken(tokenIntrospectionAuthentication.getToken());
+    var authorizedToken = authorization.getToken(token);
     if (authorizedToken == null || !authorizedToken.isActive()) {
       log.trace("Did not introspect token since not active");
       return new OAuth2TokenIntrospectionAuthenticationToken(
-          tokenIntrospectionAuthentication.getToken(),
-          authentication,
-          OAuth2TokenIntrospection.builder().build());
+          token, authentication, OAuth2TokenIntrospection.builder().build());
     }
 
     var authorizedClient =

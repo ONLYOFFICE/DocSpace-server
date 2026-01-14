@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,11 +34,7 @@ public class TfaAppUserSettings : ISettings<TfaAppUserSettings>
     [JsonPropertyName("Salt")]
     public long SaltSetting { get; set; }
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{EAF10611-BE1E-4634-B7A1-57F913042F78}"); }
-    }
+    public static Guid ID => new("{EAF10611-BE1E-4634-B7A1-57F913042F78}");
 
     public TfaAppUserSettings GetDefault()
     {
@@ -48,7 +44,7 @@ public class TfaAppUserSettings : ISettings<TfaAppUserSettings>
             SaltSetting = 0
         };
     }
-    
+
     public DateTime LastModified { get; set; }
 
     public static async Task<long> GetSaltAsync(SettingsManager settingsManager, Guid userId)
@@ -93,15 +89,18 @@ public class TfaAppUserSettings : ISettings<TfaAppUserSettings>
         var defaultSettings = settingsManager.GetDefault<TfaAppUserSettings>();
         await settingsManager.SaveAsync(defaultSettings, guid);
     }
-    
+
     public static async Task<bool> TfaExpiredAndResetAsync(SettingsManager settingsManager, AuditEventsRepository auditEventsRepository, Guid userId)
     {
         var tfaExpired = false;
         var tfaLastEnabled = await settingsManager.LoadAsync<TfaAppUserSettings>(userId);
         if (tfaLastEnabled != null)
-        {            
-            var tfaLastDisabled = (await auditEventsRepository.GetByFilterAsync(action: MessageAction.TwoFactorAuthenticationDisabled, limit: 1)).FirstOrDefault();
-            if (tfaLastDisabled != null)
+        {
+            var tfaLastChange = (await auditEventsRepository
+                .GetByFilterWithActionsAsync(actions: [MessageAction.TwoFactorAuthenticationEnabledByTfaApp, MessageAction.TwoFactorAuthenticationDisabled], limit: 1))
+                .FirstOrDefault();
+
+            if (tfaLastChange is { Action: (int)MessageAction.TwoFactorAuthenticationDisabled })
             {
                 tfaExpired = tfaLastEnabled.LastModified.AddDays(1) < DateTime.UtcNow;
                 if (tfaExpired)
@@ -110,7 +109,7 @@ public class TfaAppUserSettings : ISettings<TfaAppUserSettings>
                 }
             }
         }
-        
+
         return tfaExpired;
     }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -57,12 +57,12 @@ public class CultureSpecificExternalResources
     /// The link to the product API.
     /// </summary>
     public CultureSpecificExternalResource Api { get; set; }
-    
+
     /// <summary>
     /// The link to the common product information.
     /// </summary>
     public CultureSpecificExternalResource Common { get; set; }
-    
+
     /// <summary>
     /// The link to the forum.
     /// </summary>

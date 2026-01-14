@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,7 +36,7 @@ public interface IBackupRepository
     Task<List<BackupRecord>> GetScheduledBackupRecordsAsync();
     Task<List<BackupSchedule>> GetBackupSchedulesAsync();
     Task DeleteBackupRecordAsync(Guid id);
-    Task DeleteBackupScheduleAsync(int tenantId);
+    Task DeleteBackupScheduleAsync(int tenantId, string storageBasePath);
     Task SaveBackupRecordAsync(BackupRecord backupRecord);
     Task SaveBackupScheduleAsync(BackupSchedule schedule);
 }

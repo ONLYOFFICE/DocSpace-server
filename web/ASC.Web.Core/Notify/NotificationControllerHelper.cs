@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,9 +29,16 @@ namespace ASC.Web.Core.Notify;
 public class NotificationControllerHelper(
     StudioNotifyHelper studioNotifyHelper,
     AuthContext authContext,
-    BadgesSettingsHelper badgesSettingsHelper)
+    BadgesSettingsHelper badgesSettingsHelper,
+    NotificationChannelsHelper notificationChannelsHelper,
+    Actions actions)
 {
     private readonly Guid _userId = authContext.CurrentAccount.ID;
+
+    public IEnumerable<NotificationChannelStatus> GetNotificationChannels()
+    {
+        return notificationChannelsHelper.GetNotificationChannels().Select(c => new NotificationChannelStatus { Name = c.Name, IsEnabled = c.IsEnabled });
+    }
 
     public async Task<bool> GetNotificationStatusAsync(NotificationType notificationType)
     {
@@ -42,13 +49,13 @@ public class NotificationControllerHelper(
             case NotificationType.Badges:
                 return await badgesSettingsHelper.GetEnabledForCurrentUserAsync();
             case NotificationType.RoomsActivity:
-                isEnabled = await studioNotifyHelper.IsSubscribedToNotifyAsync(_userId, Actions.RoomsActivity);
+                isEnabled = await studioNotifyHelper.IsSubscribedToNotifyAsync(_userId, actions.RoomsActivity);
                 return isEnabled;
             case NotificationType.DailyFeed:
-                isEnabled = await studioNotifyHelper.IsSubscribedToNotifyAsync(_userId, Actions.SendWhatsNew);
+                isEnabled = await studioNotifyHelper.IsSubscribedToNotifyAsync(_userId, actions.SendWhatsNew);
                 return isEnabled;
             case NotificationType.UsefullTips:
-                isEnabled = await studioNotifyHelper.IsSubscribedToNotifyAsync(_userId, Actions.PeriodicNotify);
+                isEnabled = await studioNotifyHelper.IsSubscribedToNotifyAsync(_userId, actions.PeriodicNotify);
                 return isEnabled;
             default:
                 throw new Exception("Incorrect parameters");
@@ -63,13 +70,13 @@ public class NotificationControllerHelper(
                 await badgesSettingsHelper.SetEnabledForCurrentUserAsync(isEnabled);
                 break;
             case NotificationType.RoomsActivity:
-                await studioNotifyHelper.SubscribeToNotifyAsync(_userId, Actions.RoomsActivity, isEnabled);
+                await studioNotifyHelper.SubscribeToNotifyAsync(_userId, actions.RoomsActivity, isEnabled);
                 break;
             case NotificationType.DailyFeed:
-                await studioNotifyHelper.SubscribeToNotifyAsync(_userId, Actions.SendWhatsNew, isEnabled);
+                await studioNotifyHelper.SubscribeToNotifyAsync(_userId, actions.SendWhatsNew, isEnabled);
                 break;
             case NotificationType.UsefullTips:
-                await studioNotifyHelper.SubscribeToNotifyAsync(_userId, Actions.PeriodicNotify, isEnabled);
+                await studioNotifyHelper.SubscribeToNotifyAsync(_userId, actions.PeriodicNotify, isEnabled);
                 break;
         }
     }

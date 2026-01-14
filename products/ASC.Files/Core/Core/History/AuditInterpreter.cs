@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -45,6 +45,8 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
     private static readonly RoomDenyDownloadInterpreter _roomDenyDownloadInterpreter = new();
     private static readonly UserFileUpdatedInterpreter _userFileUpdatedInterpreter = new();
     private static readonly FileCustomFilterInterpreter _fileCustomFilterInterpreter = new();
+    private static readonly RoomCreateInterpreter _roomCreateInterpreter = new();
+    private static readonly RoomRenamedInterpreter _roomRenamedInterpreter = new();
 
     private static readonly FrozenDictionary<int, ActionInterpreter> _interpreters = new Dictionary<int, ActionInterpreter>
     {
@@ -73,12 +75,13 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
         { (int)MessageAction.RoomCreateUser, new RoomUserAddedInterpreter() },
         { (int)MessageAction.RoomUpdateAccessForUser, new RoomUserUpdatedAccessInterpreter() },
         { (int)MessageAction.RoomRemoveUser, new RoomUserRemovedInterpreter() },
+        { (int)MessageAction.RoomChangeOwner, new ChangeRoomOwnerInterpreter() },
         { (int)MessageAction.RoomGroupAdded, new RoomGroupAddedInterpreter() },
         { (int)MessageAction.RoomUpdateAccessForGroup, new RoomGroupAccessUpdatedInterpreter() },
         { (int)MessageAction.RoomGroupRemove, new RoomRemovedGroupInterpreter() },
-        { (int)MessageAction.RoomCreated, new RoomCreateInterpreter() },
+        { (int)MessageAction.RoomCreated, _roomCreateInterpreter },
         { (int)MessageAction.RoomCopied, new RoomCopiedInterpreter() },
-        { (int)MessageAction.RoomRenamed, new RoomRenamedInterpreter() },
+        { (int)MessageAction.RoomRenamed, _roomRenamedInterpreter },
         { (int)MessageAction.AddedRoomTags, _roomTagsInterpreter },
         { (int)MessageAction.DeletedRoomTags, _roomTagsInterpreter },
         { (int)MessageAction.RoomLogoCreated, _roomLogoChangedInterpreter },
@@ -114,17 +117,18 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
         { (int)MessageAction.RoomCoverChanged, _roomLogoChangedInterpreter },
         { (int)MessageAction.RoomIndexExportSaved, new RoomIndexExportSavedInterpreter() },
         { (int)MessageAction.RoomInviteResend, new RoomInviteResendInterpreter() },
+        { (int)MessageAction.AgentCreated, _roomCreateInterpreter },
+        { (int)MessageAction.AgentRenamed, _roomRenamedInterpreter },
         { (int)MessageAction.FileSavedButUserQuotaExceeded, _userFileUpdatedInterpreter },
         { (int)MessageAction.FileNotSavedDueToUserQuota, _userFileUpdatedInterpreter },
         { (int)MessageAction.FileSavedButRoomQuotaExceeded, _userFileUpdatedInterpreter },
         { (int)MessageAction.FileNotSavedDueToRoomQuota, _userFileUpdatedInterpreter }
-
     }.ToFrozenDictionary();
-    
+
     public ValueTask<HistoryEntry> ToHistoryAsync(DbAuditEvent @event, DbFilesAuditReference reference)
     {
-        return !_interpreters.TryGetValue(@event.Action ?? -1, out var interpreter) 
-            ? ValueTask.FromResult<HistoryEntry>(null) 
+        return !_interpreters.TryGetValue(@event.Action ?? -1, out var interpreter)
+            ? ValueTask.FromResult<HistoryEntry>(null)
             : interpreter.InterpretAsync(@event, reference, serviceProvider);
     }
 }

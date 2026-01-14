@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -93,7 +93,7 @@ public class AutoDeletePersonalFolderService(
                 return;
             }
 
-            if (!(await userManager.IsGuestAsync(tenantUser.UserId)))
+            if (!await userManager.IsGuestAsync(tenantUser.UserId))
             {
                 return;
             }
@@ -124,7 +124,7 @@ public class AutoDeletePersonalFolderService(
                 userTo = tenantManager.GetCurrentTenant().OwnerId;
             }
 
-            await fileStorageService.MoveSharedFilesAsync(tenantUser.UserId, userTo);
+            await fileStorageService.MoveSharedEntriesAsync(tenantUser.UserId, userTo);
             await fileStorageService.DeletePersonalFolderAsync(tenantUser.UserId);
 
             logger.InfoCleanUpFinish(myId);
@@ -143,7 +143,7 @@ static file class Queries
             (UserDbContext ctx) =>
                 ctx.Users
                    .Join(ctx.Tenants, x => x.TenantId, y => y.Id, (users, tenants) => new { users, tenants })
-                   .Join(ctx.UserGroups, x => x.users.Id, y => y.Userid, (x, y) => new { users = x.users, tenants = x.tenants, userGroups = y})
+                   .Join(ctx.UserGroups, x => x.users.Id, y => y.Userid, (x, y) => new { x.users, x.tenants, userGroups = y })
                    .Where(x => x.tenants.Status == TenantStatus.Active)
                    .Where(x => x.userGroups.UserGroupId == AuthConstants.Guest.ID && !x.userGroups.Removed)
                    .Select(r => new TenantUserSettings
@@ -154,4 +154,3 @@ static file class Queries
                    }));
 
 }
-

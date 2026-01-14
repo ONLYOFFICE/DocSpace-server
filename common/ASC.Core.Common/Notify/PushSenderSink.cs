@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -58,19 +58,8 @@ public class PushSenderSink(INotifySender sender) : Sink
             return new SendResponse(message, Constants.NotifyPushSenderSysName, error);
         }
     }
-
-    private T GetTagValue<T>(INoticeMessage message, string tagName)
-    {
-        var tag = message.Arguments.FirstOrDefault(arg => arg.Tag == tagName);
-
-        return tag != null ? (T)tag.Value : default;
-    }
 }
-public class LowerCaseNamingPolicy : JsonNamingPolicy
-{
-    public override string ConvertName(string name) =>
-        name.ToLower();
-}
+
 [Scope]
 public class PushSenderSinkMessageCreator(UserManager userManager, TenantManager tenantManager, CoreSettings coreSettings) : SinkMessageCreator
 {
@@ -81,7 +70,7 @@ public class PushSenderSinkMessageCreator(UserManager userManager, TenantManager
         {
             await tenantManager.SetCurrentTenantAsync(Tenant.DefaultTenant);
             tenant = tenantManager.GetCurrentTenant(false);
-        }      
+        }
 
         var user = await userManager.GetUsersAsync(new Guid(message.Recipient.ID));
         var username = user.UserName;
@@ -98,7 +87,7 @@ public class PushSenderSinkMessageCreator(UserManager userManager, TenantManager
         var notifyData = new NotifyData
         {
             Email = user.Email,
-            Portal = tenant.GetTenantDomain(coreSettings, true),
+            Portal = tenant.GetTenantDomain(coreSettings),
             OriginalUrl = originalUrl is { Value: not null } ? originalUrl.Value.ToString() : "",
             Folder = new NotifyFolderData
             {

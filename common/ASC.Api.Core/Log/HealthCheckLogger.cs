@@ -1,5 +1,4 @@
-// common/ASC.Api.Core/Log/HealthCheckLogger.cs
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -9,8 +8,10 @@
 // any third-party rights.
 // 
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU AGPL
-// version 3 for more details.
+// of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
+// the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
+// 
+// You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
 // 
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
@@ -28,7 +29,7 @@ using ILogger = Microsoft.Extensions.Logging.ILogger;
 namespace ASC.Api.Core.Log;
 
 internal static partial class HealthCheckLogger
-{ 
+{
     [LoggerMessage(LogLevel.Error, "Health check failed. Status: {Status}. Duration: {Duration}ms")]
     public static partial void ErrorHealthCheckFailed(this ILogger logger, string Status, double Duration);
 

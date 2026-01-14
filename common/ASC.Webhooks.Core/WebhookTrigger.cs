@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -167,13 +167,16 @@ public static partial class WebhookTriggerExtensions
         }
     }
 
-    public static string ToCustomString(this WebhookTrigger value)
+    extension(WebhookTrigger value)
     {
-        return _customStrings[value];
-    }
+        public string ToCustomString()
+        {
+            return _customStrings[value];
+        }
 
-    public static string GetTargetType(this WebhookTrigger value)
-    {
-        return _customStrings[value].Split('.')[0];
+        public string GetTargetType()
+        {
+            return _customStrings[value].Split('.')[0];
+        }
     }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,27 +31,29 @@ using Constants = ASC.Core.Users.Constants;
 namespace ASC.Web.Studio.Core.Notify;
 
 [Scope]
-public class StudioPeriodicNotify(ILoggerProvider log,
-        WorkContext workContext,
-        TenantManager tenantManager,
-        TenantLogoManager tenantLogoManager,
-        UserManager userManager,
-        StudioNotifyHelper studioNotifyHelper,
-        ITariffService tariffService,
-        TenantExtra tenantExtra,
-        CommonLinkUtility commonLinkUtility,
-        ApiSystemHelper apiSystemHelper,
-        ExternalResourceSettingsHelper externalResourceSettingsHelper,
-        CoreBaseSettings coreBaseSettings,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        CoreSettings coreSettings,
-        IServiceProvider serviceProvider,
-        AuditEventsRepository auditEventsRepository,
-        LoginEventsRepository loginEventsRepository,
-        IFusionCache hybridCache,
-        IEventBus eventBus,
-        IdentityClient identityClient,
-        SecurityContext securityContext)
+public class StudioPeriodicNotify(
+    ILoggerProvider log,
+    WorkContext workContext,
+    TenantManager tenantManager,
+    TenantLogoManager tenantLogoManager,
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    TenantExtra tenantExtra,
+    CommonLinkUtility commonLinkUtility,
+    ApiSystemHelper apiSystemHelper,
+    ExternalResourceSettingsHelper externalResourceSettingsHelper,
+    CoreBaseSettings coreBaseSettings,
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    CoreSettings coreSettings,
+    IServiceProvider serviceProvider,
+    AuditEventsRepository auditEventsRepository,
+    LoginEventsRepository loginEventsRepository,
+    IFusionCache hybridCache,
+    IEventBus eventBus,
+    IdentityClient identityClient,
+    SecurityContext securityContext,
+    Actions actions)
 {
     private readonly ILogger _log = log.CreateLogger("ASC.Notify");
 
@@ -157,7 +159,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     if (createdDate.AddDays(1) == nowDate)
                     {
-                        action = Actions.SaasAdminModulesV1;
+                        action = actions.SaasAdminModulesV1;
                         paymentMessage = false;
                         toadmins = true;
 
@@ -176,7 +178,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     if (createdDate.AddDays(4) == nowDate)
                     {
-                        action = Actions.SaasAdminVideoGuides;
+                        action = actions.SaasAdminVideoGuides;
                         paymentMessage = false;
                         toadmins = true;
 
@@ -215,7 +217,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     else if (createdDate.AddDays(7) == nowDate)
                     {
-                        action = Actions.DocsTips;
+                        action = actions.DocsTips;
                         paymentMessage = false;
                         toadmins = true;
                         tousers = true;
@@ -245,7 +247,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     else if (createdDate.AddDays(10) == nowDate)
                     {
-                        action = Actions.SaasAdminIntegrations;
+                        action = actions.SaasAdminIntegrations;
                         paymentMessage = false;
                         toadmins = true;
 
@@ -284,7 +286,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     else if (createdDate.AddDays(14) == nowDate)
                     {
-                        action = Actions.SaasAdminUserAppsTipsV1;
+                        action = actions.SaasAdminUserAppsTipsV1;
                         paymentMessage = false;
                         toadmins = true;
                         tousers = true;
@@ -328,7 +330,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                         if (nowDate >= startDateToNotifyUnusedPortals && nowDate.Day == tenant.CreationDateTime.Day)
                         {
-                            action = Actions.SaasAdminStartupWarningAfterYearV1;
+                            action = actions.SaasAdminStartupWarningAfterYearV1;
                             toowner = true;
 
                             orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonLeaveFeedback", c);
@@ -343,6 +345,11 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                         if (nowDate >= startDateToRemoveUnusedPortals && nowDate.AddDays(-7).Day == tenant.CreationDateTime.Day)
                         {
+                            if (await tenantManager.IsForbiddenDomainAsync(tenant.Alias))
+                            {
+                                continue;
+                            }
+
                             var tenantDomain = tenant.GetTenantDomain(coreSettings);
 
                             _log.InformationStartRemovingUnusedFreeTenant(tenant.Id, tenantDomain);
@@ -371,7 +378,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     if (dueDateIsNotMax && dueDate.AddDays(-3) == nowDate)
                     {
-                        action = Actions.SaasOwnerPaymentWarningGracePeriodBeforeActivation;
+                        action = actions.SaasOwnerPaymentWarningGracePeriodBeforeActivation;
                         toowner = true;
                         topayer = true;
                         orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonVisitPaymentsSection", c);
@@ -382,9 +389,9 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     #region grace period activation
 
-                    else if (dueDateIsNotMax && dueDate == nowDate)
+                    else if (dueDateIsNotMax && dueDate.AddDays(1) == nowDate && delayDueDateIsNotMax)
                     {
-                        action = Actions.SaasOwnerPaymentWarningGracePeriodActivation;
+                        action = actions.SaasOwnerPaymentWarningGracePeriodActivation;
                         toowner = true;
                         topayer = true;
                         orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonVisitPaymentsSection", c);
@@ -397,7 +404,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     else if (tariff.State == TariffState.Delay && delayDueDateIsNotMax && delayDueDate.AddDays(-1) == nowDate)
                     {
-                        action = Actions.SaasOwnerPaymentWarningGracePeriodLastDay;
+                        action = actions.SaasOwnerPaymentWarningGracePeriodLastDay;
                         toowner = true;
                         topayer = true;
                         orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonVisitPaymentsSection", c);
@@ -410,7 +417,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     else if (tariff.State == TariffState.Delay && delayDueDateIsNotMax && delayDueDate == nowDate)
                     {
-                        action = Actions.SaasOwnerPaymentWarningGracePeriodExpired;
+                        action = actions.SaasOwnerPaymentWarningGracePeriodExpired;
                         toowner = true;
                         topayer = true;
                         orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonVisitPaymentsSection", c);
@@ -423,7 +430,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     else if (tariff.State == TariffState.NotPaid && dueDateIsNotMax && dueDate.AddMonths(6) == nowDate)
                     {
-                        action = Actions.SaasAdminTrialWarningAfterHalfYearV1;
+                        action = actions.SaasAdminTrialWarningAfterHalfYearV1;
                         toowner = true;
 
                         orangeButtonText = c => WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonLeaveFeedback", c);
@@ -437,6 +444,11 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                     }
                     else if (tariff.State == TariffState.NotPaid && dueDateIsNotMax && dueDate.AddMonths(6).AddDays(7) <= nowDate)
                     {
+                        if (await tenantManager.IsForbiddenDomainAsync(tenant.Alias))
+                        {
+                            continue;
+                        }
+
                         var tenantDomain = tenant.GetTenantDomain(coreSettings);
 
                         _log.InformationStartRemovingUnusedPaidTenant(tenant.Id, tenantDomain);
@@ -469,7 +481,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                 if (topayer)
                 {
-                    var payer = await userManager.GetUserByEmailAsync(tariff.CustomerId);
+                    var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+                    var payer = await userManager.GetUserByEmailAsync(customerInfo?.Email);
 
                     if (payer.Id != Constants.LostUser.Id && !users.Any(u => u.Id == payer.Id))
                     {
@@ -477,7 +490,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                     }
                 }
                 var asyncUsers = users.ToAsyncEnumerable();
-                await foreach (var u in asyncUsers.WhereAwait(async u => paymentMessage || await studioNotifyHelper.IsSubscribedToNotifyAsync(u, Actions.PeriodicNotify)))
+                await foreach (var u in asyncUsers.Where(async (u, _) => paymentMessage || await studioNotifyHelper.IsSubscribedToNotifyAsync(u, actions.PeriodicNotify)))
                 {
                     var culture = string.IsNullOrEmpty(u.CultureName) ? tenant.GetCulture() : u.GetCulture();
                     CultureInfo.CurrentCulture = culture;
@@ -530,7 +543,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
             }
             catch (Exception err)
             {
-                _log.ErrorSendSaasLettersAsync(err);
+                _log.ErrorSendSaasLettersAsync(tenant.Id, err);
             }
         }
 
@@ -601,7 +614,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     if (createdDate.AddDays(7) == nowDate)
                     {
-                        action = Actions.DocsTips;
+                        action = actions.DocsTips;
                         paymentMessage = false;
                         toadmins = true;
                         tousers = true;
@@ -633,7 +646,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     else if (createdDate.AddDays(14) == nowDate)
                     {
-                        action = Actions.EnterpriseAdminUserAppsTipsV1;
+                        action = actions.EnterpriseAdminUserAppsTipsV1;
                         paymentMessage = false;
                         toadmins = true;
                         tousers = true;
@@ -665,10 +678,10 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                     if (dueDate.AddDays(-7) == nowDate)
                     {
                         action = quota.Lifetime
-                            ? Actions.EnterpriseAdminPaymentWarningLifetimeBeforeExpiration
+                            ? actions.EnterpriseAdminPaymentWarningLifetimeBeforeExpiration
                             : quota.Customization
-                                ? Actions.DeveloperAdminPaymentWarningGracePeriodBeforeActivation
-                                : Actions.EnterpriseAdminPaymentWarningGracePeriodBeforeActivation;
+                                ? actions.DeveloperAdminPaymentWarningGracePeriodBeforeActivation
+                                : actions.EnterpriseAdminPaymentWarningGracePeriodBeforeActivation;
 
                         toadmins = true;
 
@@ -683,10 +696,10 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                     else if (dueDate == nowDate)
                     {
                         action = quota.Lifetime
-                            ? Actions.EnterpriseAdminPaymentWarningLifetimeExpiration
+                            ? actions.EnterpriseAdminPaymentWarningLifetimeExpiration
                             : quota.Customization
-                                ? Actions.DeveloperAdminPaymentWarningGracePeriodActivation
-                                : Actions.EnterpriseAdminPaymentWarningGracePeriodActivation;
+                                ? actions.DeveloperAdminPaymentWarningGracePeriodActivation
+                                : actions.EnterpriseAdminPaymentWarningGracePeriodActivation;
 
                         toadmins = true;
 
@@ -707,8 +720,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                     if (delayDueDate.AddDays(-7) == nowDate)
                     {
                         action = quota.Customization
-                                ? Actions.DeveloperAdminPaymentWarningGracePeriodBeforeExpiration
-                                : Actions.EnterpriseAdminPaymentWarningGracePeriodBeforeExpiration;
+                                ? actions.DeveloperAdminPaymentWarningGracePeriodBeforeExpiration
+                                : actions.EnterpriseAdminPaymentWarningGracePeriodBeforeExpiration;
 
                         toadmins = true;
 
@@ -723,8 +736,8 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                     else if (delayDueDate == nowDate)
                     {
                         action = quota.Customization
-                                ? Actions.DeveloperAdminPaymentWarningGracePeriodExpiration
-                                : Actions.EnterpriseAdminPaymentWarningGracePeriodExpiration;
+                                ? actions.DeveloperAdminPaymentWarningGracePeriodExpiration
+                                : actions.EnterpriseAdminPaymentWarningGracePeriodExpiration;
 
                         toadmins = true;
 
@@ -745,7 +758,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                 var users = await studioNotifyHelper.GetRecipientsAsync(toadmins, tousers, false);
 
-                await foreach (var u in users.ToAsyncEnumerable().WhereAwait(async u => paymentMessage || await studioNotifyHelper.IsSubscribedToNotifyAsync(u, Actions.PeriodicNotify)))
+                await foreach (var u in users.ToAsyncEnumerable().Where(async (u, _) => paymentMessage || await studioNotifyHelper.IsSubscribedToNotifyAsync(u, actions.PeriodicNotify)))
                 {
                     var culture = string.IsNullOrEmpty(u.CultureName) ? tenant.GetCulture() : u.GetCulture();
                     CultureInfo.CurrentCulture = culture;
@@ -758,7 +771,7 @@ public class StudioPeriodicNotify(ILoggerProvider log,
                         u,
                         senderName,
                         new TagValue(CommonTags.Culture, culture.Name),
-                        new TagValue(Tags.UserName, u.FirstName.HtmlEncode()), 
+                        new TagValue(Tags.UserName, u.FirstName.HtmlEncode()),
                         new TagValue(Tags.ActiveUsers, (await userManager.GetUsersAsync()).Length),
                         new TagValue(Tags.Price, rquota.Price),
                         new TagValue(Tags.PricePeriod, rquota.Year ? UserControlsCommonResource.TariffPerYear : UserControlsCommonResource.TariffPerMonth),
@@ -842,14 +855,14 @@ public class StudioPeriodicNotify(ILoggerProvider log,
 
                     var topGif = studioNotifyHelper.GetNotificationImageUrl("five_tips.gif");
 
-                    await foreach (var u in users.ToAsyncEnumerable().WhereAwait(async u => await studioNotifyHelper.IsSubscribedToNotifyAsync(u, Actions.PeriodicNotify)))
+                    await foreach (var u in users.ToAsyncEnumerable().Where(async (u, _) => await studioNotifyHelper.IsSubscribedToNotifyAsync(u, actions.PeriodicNotify)))
                     {
                         var culture = string.IsNullOrEmpty(u.CultureName) ? tenant.GetCulture() : u.GetCulture();
                         Thread.CurrentThread.CurrentCulture = culture;
                         Thread.CurrentThread.CurrentUICulture = culture;
 
                         await client.SendNoticeToAsync(
-                            Actions.DocsTips,
+                            actions.DocsTips,
                             u,
                             senderName,
                             new TagValue(CommonTags.Culture, culture.Name),
@@ -882,16 +895,5 @@ public class StudioPeriodicNotify(ILoggerProvider log,
         }
 
         _log.InformationEndSendOpensourceTariffLetters();
-    }
-
-    public static async Task<bool> ChangeSubscriptionAsync(Guid userId, StudioNotifyHelper studioNotifyHelper)
-    {
-        var recipient = await studioNotifyHelper.ToRecipientAsync(userId);
-
-        var isSubscribe = await studioNotifyHelper.IsSubscribedToNotifyAsync(recipient, Actions.PeriodicNotify);
-
-        await studioNotifyHelper.SubscribeToNotifyAsync(recipient, Actions.PeriodicNotify, !isSubscribe);
-
-        return !isSubscribe;
     }
 }

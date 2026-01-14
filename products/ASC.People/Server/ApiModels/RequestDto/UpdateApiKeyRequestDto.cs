@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -57,10 +57,12 @@ public class UpdateApiKeyRequestDto
     /// <summary>
     /// The unique identifier of the API key to update.
     /// </summary>
-    [FromRoute(Name = "keyId")] public Guid KeyId { get; set; }
+    [FromRoute(Name = "keyId")]
+    public required Guid KeyId { get; set; }
 
     /// <summary>
     /// The request parameters for updating an existing API key.
     /// </summary>
-    [FromBody] public UpdateApiKeyRequest Changed { get; set; }
+    [FromBody]
+    public required UpdateApiKeyRequest Changed { get; set; }
 }

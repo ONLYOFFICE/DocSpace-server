@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -47,7 +47,7 @@ public class ProtobufDeserializer<T> : IDeserializer<T> where T : new()
 }
 
 
-public class RedisProtobufSerializer: ISerializer
+public class RedisProtobufSerializer : ISerializer
 {
     public byte[] Serialize<T>(T item)
     {
@@ -98,24 +98,34 @@ public class WarmupProtobufStartupTask(ILogger<WarmupProtobufStartupTask> logger
         {
             return Task.CompletedTask;
         }
-        
+
         foreach (var t in types)
         {
             try
             {
-                if (t == redisGeneric || t == integrationEvent)
+                if (t == redisGeneric || t == integrationEvent || t.IsAbstract)
                 {
                     continue;
                 }
 
-                var genericMethod = methodInfo.MakeGenericMethod(t);
-                genericMethod.Invoke(null, null);
-                    
+                MethodInfo genericMethod;
+
+                if (t.IsGenericType)
+                {
+                    genericMethod = methodInfo.MakeGenericMethod(t.MakeGenericType(typeof(int)));
+                    genericMethod.Invoke(t.MakeGenericType(typeof(int)), null);
+                }
+                else
+                {                    
+                    genericMethod = methodInfo.MakeGenericMethod(t);
+                    genericMethod.Invoke(null, null);
+                }
+
                 if (!t.IsSubclassOf(integrationEvent))
                 {
-                    var redis = redisGeneric.MakeGenericType(t, t);
+                    var redis = redisGeneric.MakeGenericType(t.IsGenericType ? t.MakeGenericType(typeof(int)) : t, t.IsGenericType ? t.MakeGenericType(typeof(int)) : t);
                     genericMethod = methodInfo.MakeGenericMethod(redis);
-                    genericMethod.Invoke(null, null);
+                    genericMethod.Invoke(t.IsGenericType ? t.MakeGenericType(typeof(int)) : null, null);
                 }
                 logger.LogTrace("PrepareSerializer:{ProtoBufFullName}", t.FullName);
             }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -105,17 +105,18 @@ static file class Queries
     public static readonly Func<FirebaseDbContext, int, Guid, string, string, Task<FireBaseUser>> FireBaseUserAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FirebaseDbContext ctx, int tenantId, Guid userId, string application, string fbDeviceToken) =>
-                ctx.Users.FirstOrDefault(r =>  r.UserId == userId && r.TenantId == tenantId && r.Application == application && r.FirebaseDeviceToken == fbDeviceToken));
+                ctx.Users.FirstOrDefault(r => r.UserId == userId && r.TenantId == tenantId && r.Application == application && r.FirebaseDeviceToken == fbDeviceToken));
 
     public static readonly Func<FirebaseDbContext, int, Guid, string, IAsyncEnumerable<FireBaseUser>>
         FireBaseSubscribedUsersAsync = Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FirebaseDbContext ctx, int tenantId, Guid userId, string application) =>
                 ctx.Users
-                    
                     .Where(r => r.UserId == userId)
                     .Where(r => r.TenantId == tenantId)
                     .Where(r => r.IsSubscribed == true)
-                    .Where(r => r.Application == application));
+                    .Where(r => r.Application == application)
+                    .GroupBy(r => r.FirebaseDeviceToken)
+                    .Select(g => g.First()));
 
     public static readonly Func<FirebaseDbContext, int, Guid, string, Task<int>> DeleteFireBaseUserTokenAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

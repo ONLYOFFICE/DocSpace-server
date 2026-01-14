@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,10 +23,9 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-using System.Reflection.Metadata;
 
-using Microsoft.OpenApi.Extensions;
 using Microsoft.OpenApi.Models;
+
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace ASC.Api.Core.Extensions;
@@ -74,12 +73,43 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
             };
             responseSchema = CreateSuccessApiResponseSchema(primitiveResponseProperty);
         }
+        else if (schema.OneOf != null && schema.OneOf.Any(s => s.Reference?.Id != null))
+        {
+            var firstRefId = schema.OneOf.FirstOrDefault(s => s.Reference?.Id != null)?.Reference?.Id;
+            responseSchemaKey = firstRefId.Contains("Dto") ? firstRefId.Replace("Dto", "") + "Wrapper"
+                : firstRefId + "Wrapper";
+            var responseProperty = new OpenApiSchema
+            {
+                OneOf = schema.OneOf
+            };
+
+            responseSchema = CreateSuccessApiResponseSchema(responseProperty);
+            schema.OneOf = null;
+        }
         else if (schema.Type == "array")
         {
-            originalSchemaRef = schema.Items.Reference?.Id;
+            originalSchemaRef = schema.Items?.Reference?.Id;
             var schemaArray = schema.Items;
             OpenApiSchema arrayResponseProperty;
-            if (schemaArray.Type == null && schemaArray.Reference == null && schemaArray.Items == null)
+
+            if (schema.OneOf != null && schema.OneOf.Any(s => s.Items != null))
+            {
+                var firstRefId = schema.OneOf.FirstOrDefault(s => s.Items.Reference.Id != null)?.Items?.Reference?.Id;
+                responseSchemaKey = firstRefId.Contains("Dto") ? firstRefId.Replace("Dto", "") + "ArrayWrapper" : firstRefId + "ArrayWrapper";
+
+                arrayResponseProperty = new OpenApiSchema
+                {
+                    Items = new OpenApiSchema
+                    {
+                        OneOf = schema.OneOf
+                    }
+                };
+
+                responseSchema = CreateSuccessApiResponseSchema(arrayResponseProperty);
+
+                schema.OneOf = null;
+            }
+            else if (schemaArray.Type == null && schemaArray.Reference == null && schemaArray.Items == null)
             {
                 responseSchemaKey = "ObjectArrayWrapper";
                 arrayResponseProperty = new OpenApiSchema
@@ -99,7 +129,7 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
             }
             else
             {
-                responseSchemaKey = originalSchemaRef == null ? $"{schema.Items.Type.ToUpper()}ArrayWrapper" 
+                responseSchemaKey = originalSchemaRef == null ? $"{schema.Items.Type.ToUpper()}ArrayWrapper"
                     : originalSchemaRef.Contains("Dto") ? originalSchemaRef.Replace("Dto", "") + "ArrayWrapper" : originalSchemaRef + "ArrayWrapper";
                 arrayResponseProperty = new OpenApiSchema
                 {

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -192,7 +192,7 @@ public class SsoHandlerService
                     }
                     else
                     {
-                        _log.DebugUserAlreadyAuthenticated(context.User.Identity);
+                        _log.DebugUserAlreadyAuthenticated(authenticatedUserInfo.Id, authenticatedUserInfo.ToString());
                     }
                 }
                 try
@@ -203,9 +203,8 @@ public class SsoHandlerService
                 {
                     _log.WarningWithException("Failed to save user", ex);
                 }
-               
-                var authKey = await _cookiesManager.AuthenticateMeAndSetCookiesAsync(userInfo.Id, MessageAction.LoginSuccessViaSSO);
 
+                var authKey = await _cookiesManager.AuthenticateMeAndSetCookiesAsync(userInfo.Id, MessageAction.LoginSuccessViaSSO);
                 context.Response.Redirect(_commonLinkUtility.GetDefault() + "?token=" + HttpUtility.UrlEncode(authKey), false);
 
             }
@@ -485,7 +484,7 @@ public enum MessageKey
 public class SSOException(string message, MessageKey messageKey) : Exception(message)
 {
     public MessageKey MessageKey { get; } = messageKey;
-    }
+}
 
 public static class SsoHandlerExtensions
 {

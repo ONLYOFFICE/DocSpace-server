@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,8 +28,8 @@ namespace ASC.Files.Api;
 
 [DefaultRoute("roomtemplate")]
 public class RoomTemplatesController(IEventBus eventBus,
-    AuthContext authContext, 
-    TenantManager tenantManager, 
+    AuthContext authContext,
+    TenantManager tenantManager,
     FolderDtoHelper folderDtoHelper,
     FileStorageService fileStorageService,
     FileDtoHelper fileDtoHelper,
@@ -44,7 +44,7 @@ public class RoomTemplatesController(IEventBus eventBus,
     [Tags("Rooms")]
     [SwaggerResponse(200, "Status", typeof(RoomTemplateStatusDto))]
     [HttpPost("")]
-    public async Task<RoomTemplateStatusDto> CreateTemplateAsync(RoomTemplateDto dto)
+    public async Task<RoomTemplateStatusDto> CreateRoomTemplate(RoomTemplateDto dto)
     {
         LogoSettings logo = null;
         if (dto.Logo != null)
@@ -91,7 +91,7 @@ public class RoomTemplatesController(IEventBus eventBus,
             Color = dto.Color,
             Quota = dto.Quota
         });
-        return await GetTemplateCreatingStatus();
+        return await GetRoomTemplateCreatingStatus();
     }
 
     /// <summary>
@@ -102,7 +102,7 @@ public class RoomTemplatesController(IEventBus eventBus,
     [Tags("Rooms")]
     [SwaggerResponse(200, "Status", typeof(RoomTemplateStatusDto))]
     [HttpGet("status")]
-    public async Task<RoomTemplateStatusDto> GetTemplateCreatingStatus()
+    public async Task<RoomTemplateStatusDto> GetRoomTemplateCreatingStatus()
     {
         try
         {
@@ -133,8 +133,9 @@ public class RoomTemplatesController(IEventBus eventBus,
     /// <short>Get public settings</short>
     /// <path>api/2.0/files/roomtemplate/{id}/public</path>
     [Tags("Rooms")]
+    [SwaggerResponse(200, "Ok", typeof(bool))]
     [HttpGet("{id}/public")]
-    public async Task<bool> IsPublic(PublicDto inDto)
+    public async Task<bool> GetPublicSettings(PublicDto inDto)
     {
         return await fileStorageService.IsPublicAsync(inDto.Id);
     }
@@ -146,8 +147,9 @@ public class RoomTemplatesController(IEventBus eventBus,
     /// <short>Set public settings</short>
     /// <path>api/2.0/files/roomtemplate/public</path>
     [Tags("Rooms")]
+    [SwaggerResponse(200, "Ok")]
     [HttpPut("public")]
-    public async Task SetPublic(SetPublicDto inDto)
+    public async Task SetPublicSettings(SetPublicDto inDto)
     {
         var shared = fileStorageService.GetPureSharesAsync(inDto.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "", 0, -1);
 
@@ -155,7 +157,7 @@ public class RoomTemplatesController(IEventBus eventBus,
 
         await foreach (var share in shared)
         {
-            if (share.Id != authContext.CurrentAccount.ID) 
+            if (share.Id != authContext.CurrentAccount.ID)
             {
                 wrappers.Add(new AceWrapper { Id = share.Id, Access = FileShare.None, SubjectType = share.SubjectType });
             }

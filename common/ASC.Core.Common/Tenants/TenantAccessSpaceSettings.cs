@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,11 +32,7 @@ public class TenantAccessSpaceSettings : ISettings<TenantAccessSpaceSettings>
 {
     public bool LimitedAccessSpace { get; set; }
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{880585C4-52CD-4AE2-8DA4-3B8E2772753B}"); }
-    }
+    public static Guid ID => new("{880585C4-52CD-4AE2-8DA4-3B8E2772753B}");
 
     public TenantAccessSpaceSettings GetDefault()
     {
@@ -45,6 +41,6 @@ public class TenantAccessSpaceSettings : ISettings<TenantAccessSpaceSettings>
             LimitedAccessSpace = false
         };
     }
-    
+
     public DateTime LastModified { get; set; }
 }

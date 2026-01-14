@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,40 +34,40 @@ public class FirebaseDto
     /// <summary>
     /// The Firebase API key.
     /// </summary>
-    public string ApiKey { get; set; }
+    public required string ApiKey { get; set; }
 
     /// <summary>
     /// The Firebase authentication domain.
     /// </summary>
-    public string AuthDomain { get; set; }
+    public required string AuthDomain { get; set; }
 
     /// <summary>
     /// The Firebase project ID.
     /// </summary>
-    public string ProjectId { get; set; }
+    public required string ProjectId { get; set; }
 
     /// <summary>
     /// The Firebase storage bucket.
     /// </summary>
-    public string StorageBucket { get; set; }
+    public required string StorageBucket { get; set; }
 
     /// <summary>
     /// The Firebase messaging sender ID.
     /// </summary>
-    public string MessagingSenderId { get; set; }
+    public required string MessagingSenderId { get; set; }
 
     /// <summary>
     /// The Firebase application ID.
     /// </summary>
-    public string AppId { get; set; }
+    public required string AppId { get; set; }
 
     /// <summary>
     /// The Firebase measurement ID.
     /// </summary>
-    public string MeasurementId { get; set; }
+    public required string MeasurementId { get; set; }
 
     /// <summary>
     /// The Firebase database URL.
     /// </summary>
-    public string DatabaseURL { get; set; }
+    public required string DatabaseURL { get; set; }
 }

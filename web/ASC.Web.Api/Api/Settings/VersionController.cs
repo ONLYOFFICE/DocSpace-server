@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,14 +28,13 @@ namespace ASC.Web.Api.Controllers.Settings;
 
 [ApiExplorerSettings(IgnoreApi = true)]
 [DefaultRoute("version")]
-public class VersionController(PermissionContext permissionContext,
-        ApiContext apiContext,
-        TenantManager tenantManager,
-        WebItemManager webItemManager,
-        BuildVersion buildVersion,
-        IFusionCache fusionCache,
-        IHttpContextAccessor httpContextAccessor)
-    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+public class VersionController(
+    PermissionContext permissionContext,
+    TenantManager tenantManager,
+    WebItemManager webItemManager,
+    BuildVersion buildVersion,
+    IFusionCache fusionCache)
+    : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <summary>
     /// Returns the current portal build version.
@@ -48,13 +47,13 @@ public class VersionController(PermissionContext permissionContext,
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("build")]
-    public async Task<BuildVersion> GetBuildVersionsAsync()
+    public async Task<BuildVersion> GetBuildVersions()
     {
         return await buildVersion.GetCurrentBuildVersionAsync();
     }
 
     /// <summary>
-    /// Returns a list of the available portal versions including the current version.
+    /// Returns a list of the available portal versions, including the current version.
     /// </summary>
     /// <short>
     /// Get the portal versions
@@ -64,7 +63,7 @@ public class VersionController(PermissionContext permissionContext,
     [Tags("Settings / Versions")]
     [SwaggerResponse(200, "List of availibe portal versions including the current version", typeof(TenantVersionDto))]
     [HttpGet("")]
-    public async Task<TenantVersionDto> GetVersionsAsync()
+    public async Task<TenantVersionDto> GetVersions()
     {
         var tenant = tenantManager.GetCurrentTenant();
         return new TenantVersionDto(tenant.Version, await tenantManager.GetTenantVersionsAsync());
@@ -81,15 +80,15 @@ public class VersionController(PermissionContext permissionContext,
     [Tags("Settings / Versions")]
     [SwaggerResponse(200, "List of availibe portal versions including the current version", typeof(TenantVersionDto))]
     [HttpPut("")]
-    public async Task<TenantVersionDto> SetVersionAsync(SettingsRequestsDto inDto)
+    public async Task<TenantVersionDto> SetVersion(SettingsRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         (await tenantManager.GetTenantVersionsAsync()).FirstOrDefault(r => r.Id == inDto.VersionId).NotFoundIfNull();
-        
+
         var tenant = tenantManager.GetCurrentTenant();
         await tenantManager.SetTenantVersionAsync(tenant, inDto.VersionId);
 
-        return await GetVersionsAsync();
+        return await GetVersions();
     }
 }

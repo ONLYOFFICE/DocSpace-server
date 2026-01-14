@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,22 +34,22 @@ public class TfaSettingsDto
     /// <summary>
     /// The ID of the TFA configuration.
     /// </summary>
-    public string Id { get; set; }
+    public required string Id { get; set; }
 
     /// <summary>
     /// The display name or description of the TFA configuration.
     /// </summary>
-    public string Title { get; set; }
+    public required string Title { get; set; }
 
     /// <summary>
     /// Indicates whether the TFA configuration is currently active.
     /// </summary>
-    public bool Enabled { get; set; }
+    public required bool Enabled { get; set; }
 
     /// <summary>
     /// Indicates whether the TFA configuration can be used.
     /// </summary>
-    public bool Avaliable { get; set; }
+    public required bool Avaliable { get; set; }
 
     /// <summary>
     /// The list of IP addresses that are exempt from TFA requirements.

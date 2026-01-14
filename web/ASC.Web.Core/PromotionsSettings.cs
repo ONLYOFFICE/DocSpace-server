@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,16 +30,12 @@ public class PromotionsSettings : ISettings<PromotionsSettings>
 {
     public bool Show { get; set; }
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{D291A4C1-179D-4ced-895A-E094E809C859}"); }
-    }
+    public static Guid ID => new("{D291A4C1-179D-4ced-895A-E094E809C859}");
 
     public PromotionsSettings GetDefault()
     {
         return new PromotionsSettings { Show = true };
     }
-    
+
     public DateTime LastModified { get; set; }
 }

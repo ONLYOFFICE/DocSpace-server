@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -40,7 +40,6 @@ public class FirstTimeTenantSettings(
     MessageService messageService,
     LicenseReader licenseReader,
     StudioNotifyService studioNotifyService,
-    TimeZoneConverter timeZoneConverter,
     CoreBaseSettings coreBaseSettings,
     IHttpClientFactory clientFactory,
     CookiesManager cookiesManager,
@@ -77,7 +76,7 @@ public class FirstTimeTenantSettings(
                 }
             }
 
-            var currentUser = await userManager.GetUsersAsync((tenantManager.GetCurrentTenant()).OwnerId);
+            var currentUser = await userManager.GetUsersAsync(tenantManager.GetCurrentTenant().OwnerId);
 
             if (!UserManagerWrapper.ValidateEmail(email))
             {
@@ -113,11 +112,11 @@ public class FirstTimeTenantSettings(
 
             TrySetLanguage(tenant, lng);
 
-            tenant.TimeZone = timeZoneConverter.GetTimeZone(timeZone).Id;
+            tenant.TimeZone = TimeZoneConverter.GetIanaTimeZoneId(timeZone);
 
             await tenantManager.SaveTenantAsync(tenant);
             await cspSettingsHelper.SaveAsync(null);
-            
+
             await studioNotifyService.SendCongratulationsAsync(currentUser);
             await studioNotifyService.SendRegDataAsync(currentUser);
 
@@ -157,7 +156,7 @@ public class FirstTimeTenantSettings(
 
     public async Task<bool> GetRequestLicense()
     {
-        return await tenantExtra.GetEnableTariffSettings() && 
+        return await tenantExtra.GetEnableTariffSettings() &&
                tenantExtra.Enterprise &&
                !File.Exists(licenseReader.LicensePath);
     }
@@ -206,11 +205,9 @@ public class FirstTimeTenantSettings(
 
     private async Task<string> GetResponseString(HttpClient httpClient, HttpMethod method, string requestUrl, Dictionary<string, string> headers)
     {
-        string responseString = null;
-
         if (string.IsNullOrEmpty(requestUrl))
         {
-            return responseString;
+            return null;
         }
 
         var request = new HttpRequestMessage
@@ -223,7 +220,9 @@ public class FirstTimeTenantSettings(
         {
             request.Headers.Add(header.Key, header.Value);
         }
-
+        
+        string responseString = null;
+        
         try
         {
             using (var response = await httpClient.SendAsync(request))

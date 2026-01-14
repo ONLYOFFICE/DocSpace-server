@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -128,7 +128,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
                              : new Uri(cdnHeaders.CDNSslUri);
 
         DataStoreValidator = dataStoreValidator;
-        
+
         return Task.FromResult<IDataStore>(this);
     }
 
@@ -188,7 +188,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
     }
     public override Task<Uri> SaveAsync(string domain, string path, Stream stream)
     {
-        return SaveAsync(domain, path, Guid.Empty,stream, string.Empty, string.Empty);
+        return SaveAsync(domain, path, Guid.Empty, stream, string.Empty, string.Empty);
     }
 
     public override Task<Uri> SaveAsync(string domain, string path, Stream stream, ACL acl)
@@ -212,7 +212,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
 
     private bool EnableQuotaCheck(string domain)
     {
-        return (QuotaController != null) && !domain.EndsWith("_temp");
+        return QuotaController != null && !domain.EndsWith("_temp");
     }
 
     public async Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType,
@@ -474,7 +474,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
 
     public override async Task<(Uri, string)> SaveTempAsync(string domain, Stream stream)
     {
-       var assignedPath = Guid.NewGuid().ToString();
+        var assignedPath = Guid.NewGuid().ToString();
 
         return (await SaveAsync(domain, assignedPath, stream), assignedPath);
     }

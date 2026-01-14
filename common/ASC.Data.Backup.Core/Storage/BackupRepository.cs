@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,8 +27,7 @@
 namespace ASC.Data.Backup.Storage;
 
 [Scope]
-public class BackupRepository(IDbContextFactory<BackupsContext> dbContextFactory, CreatorDbContext creatorDbContext)
-    : IBackupRepository
+public class BackupRepository(IDbContextFactory<BackupsContext> dbContextFactory, CreatorDbContext creatorDbContext) : IBackupRepository
 {
     public async Task SaveBackupRecordAsync(BackupRecord backupRecord)
     {
@@ -104,10 +103,10 @@ public class BackupRepository(IDbContextFactory<BackupsContext> dbContextFactory
         await backupContext.SaveChangesAsync();
     }
 
-    public async Task DeleteBackupScheduleAsync(int tenantId)
+    public async Task DeleteBackupScheduleAsync(int tenantId, string storageBasePath = null)
     {
         await using var backupContext = await dbContextFactory.CreateDbContextAsync();
-        await Queries.DeleteSchedulesAsync(backupContext, tenantId);
+        await Queries.DeleteSchedulesAsync(backupContext, tenantId, storageBasePath);
     }
 
     public async Task<List<BackupSchedule>> GetBackupSchedulesAsync()
@@ -128,6 +127,12 @@ public class BackupRepository(IDbContextFactory<BackupsContext> dbContextFactory
             return await Queries.BackupScheduleAsync(backupContext, tenantId);
         }
     }
+
+    public async Task<int> GetBackupsCountAsync(int tenantId, bool paid, DateTime from, DateTime to)
+    {
+        await using var backupContext = await dbContextFactory.CreateDbContextAsync();
+        return await Queries.GetBackupsCount(backupContext, tenantId, paid, from, to);
+    }
 }
 
 static file class Queries
@@ -137,14 +142,14 @@ static file class Queries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (BackupsContext ctx, int tenantId, string hash) =>
                 ctx.Backups
-                    
+
                     .SingleOrDefault(b => b.Hash == hash && b.TenantId == tenantId));
 
     public static readonly Func<BackupsContext, IAsyncEnumerable<BackupRecord>> ExpiredBackupsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (BackupsContext ctx) =>
                 ctx.Backups
-                    
+
                     .Where(b => b.ExpiresOn != DateTime.MinValue
                                 && b.ExpiresOn <= DateTime.UtcNow
                                 && b.Removed == false));
@@ -153,28 +158,29 @@ static file class Queries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (BackupsContext ctx) =>
                 ctx.Backups
-                    
+
                     .Where(b => b.IsScheduled == true && b.Removed == false));
 
     public static readonly Func<BackupsContext, int, IAsyncEnumerable<BackupRecord>> BackupsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (BackupsContext ctx, int tenantId) =>
                 ctx.Backups
-                    
+
                     .Where(b => b.TenantId == tenantId && b.Removed == false));
 
     public static readonly Func<BackupsContext, int, IAsyncEnumerable<BackupRecord>> BackupsForMigrationAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (BackupsContext ctx, int tenantId) =>
                 ctx.Backups
-                    
+
                     .Where(b => b.TenantId == tenantId));
 
-    public static readonly Func<BackupsContext, int, Task<int>> DeleteSchedulesAsync =
+    public static readonly Func<BackupsContext, int, string, Task<int>> DeleteSchedulesAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (BackupsContext ctx, int tenantId) =>
+            (BackupsContext ctx, int tenantId, string storageBasePath) =>
                 ctx.Schedules
                     .Where(s => s.TenantId == tenantId)
+                    .Where(r => string.IsNullOrEmpty(storageBasePath) || r.StorageBasePath.StartsWith(storageBasePath))
                     .ExecuteDelete());
 
     public static readonly Func<BackupsContext, IAsyncEnumerable<BackupSchedule>> BackupSchedulesAsync =
@@ -198,4 +204,9 @@ static file class Queries
             (BackupsContext ctx, int tenantId) =>
                 ctx.Schedules
                     .SingleOrDefault(s => s.TenantId == tenantId));
+
+    public static readonly Func<BackupsContext, int, bool, DateTime, DateTime, Task<int>> GetBackupsCount =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (BackupsContext ctx, int tenantId, bool paid, DateTime from, DateTime to) =>
+                ctx.Backups.Count(b => b.TenantId == tenantId && b.Paid == paid && b.CreatedOn >= from && b.CreatedOn <= to));
 }

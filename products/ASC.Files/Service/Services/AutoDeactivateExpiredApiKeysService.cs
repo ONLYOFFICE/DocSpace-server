@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,10 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Service.Services;
+using ASC.Web.Studio.Core.Notify;
 
 using ApiKey = ASC.Core.Common.EF.Model.ApiKey;
 
+namespace ASC.Files.Service.Services;
 [Singleton]
 public class AutoDeactivateExpiredApiKeysService(
     IServiceScopeFactory scopeFactory,
@@ -36,7 +37,7 @@ public class AutoDeactivateExpiredApiKeysService(
 
 {
     private readonly IServiceScopeFactory _serviceScopeFactory = scopeFactory;
-    protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.FromDays(1);
+    protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.FromMinutes(10);
 
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
@@ -45,9 +46,41 @@ public class AutoDeactivateExpiredApiKeysService(
             await using var scope = _serviceScopeFactory.CreateAsyncScope();
             await using var dbContext = await scope.ServiceProvider.GetService<IDbContextFactory<ApiKeysDbContext>>().CreateDbContextAsync(stoppingToken);
 
-         //   var expiredApiKeys = Queries.GetExpiredApiKeys(dbContext); // TODO: Send notification about expired api keys
+            var expiredApiKeys = await Queries.GetExpiredApiKeys(dbContext).ToListAsync(stoppingToken);
 
-            await Queries.DeactiveExpiredApiKeys(dbContext);
+            if (expiredApiKeys.Count == 0)
+            {
+                return;
+            }
+
+            await Queries.DeactiveExpiredApiKeys(dbContext, expiredApiKeys.Select(x => x.Id));
+
+            var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
+            var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
+            var studioNotifyService = scope.ServiceProvider.GetRequiredService<StudioNotifyService>();
+
+            foreach (var apiKey in expiredApiKeys)
+            {
+                try
+                {
+                    var tenant = await tenantManager.SetCurrentTenantAsync(apiKey.TenantId);
+                    var user = await userManager.GetUsersAsync(apiKey.CreateBy);
+
+                    if (user.Status != ASC.Core.Users.EmployeeStatus.Active ||
+                        user.ActivationStatus != ASC.Core.Users.EmployeeActivationStatus.Activated)
+                    {
+                        continue;
+                    }
+
+                    await securityContext.AuthenticateMeWithoutCookieAsync(tenant.Id, user.Id);
+                    await studioNotifyService.SendApiKeyExpiredAsync(user, apiKey.Name);
+                }
+                catch (Exception ex)
+                {
+                    logger.ErrorWithException(ex);
+                }
+            }
         }
         catch (Exception e)
         {
@@ -59,16 +92,16 @@ public class AutoDeactivateExpiredApiKeysService(
 static file class Queries
 {
     public static readonly Func<ApiKeysDbContext, IAsyncEnumerable<ApiKey>> GetExpiredApiKeys =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+        EF.CompileAsyncQuery(
             (ApiKeysDbContext ctx) =>
-                ctx.DbApiKey.Where(r => r.ExpiresAt != null && r.ExpiresAt.Value.Date == DateTime.UtcNow.Date)
+                ctx.DbApiKey.Where(r => r.IsActive && r.ExpiresAt != null && r.ExpiresAt.Value < DateTime.UtcNow)
                     .AsQueryable()
         );
-    
-    public static readonly Func<ApiKeysDbContext, Task<int>> DeactiveExpiredApiKeys =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (ApiKeysDbContext ctx) =>
-                ctx.DbApiKey.Where(r => r.ExpiresAt < DateTime.UtcNow && r.IsActive)
+
+    public static readonly Func<ApiKeysDbContext, IEnumerable<Guid>, Task<int>> DeactiveExpiredApiKeys =
+        EF.CompileAsyncQuery(
+            (ApiKeysDbContext ctx, IEnumerable<Guid> ids) =>
+                ctx.DbApiKey.Where(r => ids.Contains(r.Id))
                     .ExecuteUpdate(x => x.SetProperty(r => r.IsActive, false))
                 );
 

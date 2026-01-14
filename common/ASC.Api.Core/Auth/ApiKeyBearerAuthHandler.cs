@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -52,26 +52,26 @@ public class ApiKeyBearerAuthHandler(
         {
             token = token["Bearer ".Length..];
         }
-        
+
         var apiKey = await apiKeyManager.ValidateApiKeyAsync(token);
-        
+
         try
         {
             if (apiKey == null)
             {
                 throw new AuthenticationException("Api key is invalid");
             }
-            
+
             var claims = new List<Claim>
             {
-                AuthConstants.Claim_ScopeRootWrite
+                AuthConstants.Claim_ScopeGlobalWrite
             };
 
-            if (apiKey.Permissions is { Count: > 0 } && !apiKey.Permissions.Exists(x=> x == "*"))
+            if (apiKey.Permissions is { Count: > 0 } && !apiKey.Permissions.Exists(x => x == "*"))
             {
                 claims = apiKey.Permissions.ConvertAll(x => new Claim("scope", x));
             }
-            
+
             await securityContext.AuthenticateMeWithoutCookieAsync(apiKey.CreateBy, claims);
         }
         catch (Exception ex)

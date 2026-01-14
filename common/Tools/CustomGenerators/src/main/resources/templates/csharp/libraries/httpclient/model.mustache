@@ -1,0 +1,13 @@
+{{>partial_header}}
+ 
+ using {{packageName}}.Client;
+ 
+{{#models}}
+{{#model}}
+
+namespace {{packageName}}.{{modelPackage}}
+{
+{{#isEnum}}{{>modelEnum}}{{/isEnum}}{{^isEnum}}{{#oneOf}}{{#-first}}{{>modelOneOf}}{{/-first}}{{/oneOf}}{{#vendorExtensions.x-uses-allOf}}{{>modelAllOf}}{{/vendorExtensions.x-uses-allOf}}{{#anyOf}}{{#-first}}{{>modelAnyOf}}{{/-first}}{{/anyOf}}{{^vendorExtensions.x-uses-allOf}}{{^oneOf}}{{^anyOf}}{{>modelGeneric}}{{/anyOf}}{{/oneOf}}{{/vendorExtensions.x-uses-allOf}}{{/isEnum}}
+{{/model}}
+{{/models}}
+}

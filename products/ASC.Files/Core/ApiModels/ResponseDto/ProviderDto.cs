@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -60,7 +60,7 @@ public record ProviderDto(string Name, string Key, bool Connected, bool Oauth = 
     /// The required connection URL flag.
     /// </summary>
     public bool RequiredConnectionUrl { get; init; } = RequiredConnectionUrl;
-    
+
     /// <summary>
     /// The provider OAuth client ID.
     /// </summary>

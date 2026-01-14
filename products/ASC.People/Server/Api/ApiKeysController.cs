@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,12 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Api.Core.Auth;
-using ASC.Core.Common.EF.Model;
-
-using AutoMapper;
-
-
 namespace ASC.People.Api;
 
 [Scope]
@@ -42,8 +36,8 @@ public class ApiKeysController(
     UserManager userManager,
     MessageService messageService,
     SettingsManager settingsManager,
-    IHttpContextAccessor httpContextAccessor,
-    IMapper mapper) : ControllerBase
+    ApiKeyMapper mapper,
+    IHttpContextAccessor httpContextAccessor) : ControllerBase
 {
     /// <summary>
     ///  Creates a user API key with the parameters specified in the request.
@@ -61,8 +55,8 @@ public class ApiKeysController(
         var currentType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
         var isAdmin = currentType is EmployeeType.DocSpaceAdmin;
 
-        var tenantDevToolsAccessSettings  = await settingsManager.LoadAsync<TenantDevToolsAccessSettings>();
-           
+        var tenantDevToolsAccessSettings = await settingsManager.LoadAsync<TenantDevToolsAccessSettings>();
+
         if (!isAdmin && tenantDevToolsAccessSettings is { LimitedAccessForUsers: true })
         {
             throw new UnauthorizedAccessException("This operation available only for portal owner/admins");
@@ -72,9 +66,9 @@ public class ApiKeysController(
         {
             throw new UnauthorizedAccessException("This operation unavailable for user with guest role");
         }
-        
+
         var expiresAt = apiKey.ExpiresInDays.HasValue ? TimeSpan.FromDays(apiKey.ExpiresInDays.Value) : (TimeSpan?)null;
-            
+
         if (!IsValidPermission(apiKey.Permissions))
         {
             throw new ArgumentException("Permissions are not valid.");
@@ -83,8 +77,8 @@ public class ApiKeysController(
         var result = await apiKeyManager.CreateApiKeyAsync(apiKey.Name,
             apiKey.Permissions,
             expiresAt);
-        
-        var apiKeyResponseDto = mapper.Map<ApiKeyResponseDto>(result.keyData);
+
+        var apiKeyResponseDto = await mapper.MapManual(result.keyData);
 
         messageService.Send(MessageAction.ApiKeyCreated, MessageTarget.Create(apiKeyResponseDto.Id), apiKeyResponseDto.Key);
 
@@ -108,7 +102,13 @@ public class ApiKeysController(
     {
         var scopes = AuthorizationExtension.ScopesMap;
 
-        return scopes.AllKeys.SelectMany(key => scopes[key]?.Split(',')).Distinct().Order();
+        var globalScopes = new List<string>
+        {
+            AuthConstants.Claim_ScopeGlobalRead.Value,
+            AuthConstants.Claim_ScopeGlobalWrite.Value
+        };
+
+        return scopes.Keys.SelectMany(key => scopes[key]).Union(globalScopes).Distinct().Order();
     }
 
 
@@ -116,7 +116,7 @@ public class ApiKeysController(
     ///  Returns a list of all API keys for the current user.
     /// </summary>  
     /// <short>
-    ///  Get user API keys
+    ///  Get current user's API keys
     /// </short>
     /// <path>api/2.0/keys</path>
     /// <collection>list</collection>
@@ -136,40 +136,38 @@ public class ApiKeysController(
         }
         else
         {
-           
+
             result = apiKeyManager.GetApiKeysAsync(authContext.CurrentAccount.ID);
         }
 
         await foreach (var apiKey in result)
         {
-            yield return mapper.Map<ApiKeyResponseDto>(apiKey);
+            yield return await mapper.MapManual(apiKey);
         }
     }
 
-    
+
     /// <summary>
-    ///  Returns current user API key info.
+    /// Returns information about the current user's API key.
     /// </summary>  
     /// <short>
-    ///  Get user API key info
+    ///  Get current user's API key
     /// </short>
     /// <path>api/2.0/keys/@self</path>
     [Tags("Api keys")]
     [SwaggerResponse(200, "List of api keys for user", typeof(ApiKeyResponseDto))]
     [HttpGet("@self")]
-    [Authorize(AuthenticationSchemes = ApiKeyBearerDefaults.AuthenticationScheme)]
     public async Task<ApiKeyResponseDto> GetApiKey()
     {
         var token = httpContextAccessor?.HttpContext?.Request.Headers.Authorization.ToString()["Bearer ".Length..];
 
         var apiKey = await apiKeyManager.GetApiKeyAsync(token);
-        
-        return mapper.Map<ApiKeyResponseDto>(apiKey);
+        return await mapper.MapManual(apiKey);
     }
-    
-    
+
+
     /// <summary>
-    ///  Updates an existing API key changing its name, permissions and status.
+    ///  Updates an existing API key changing its name, permissions, and status.
     /// </summary>  
     /// <short>
     ///  Update an API key
@@ -183,6 +181,11 @@ public class ApiKeysController(
         var currentType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
         var isAdmin = currentType is EmployeeType.DocSpaceAdmin;
         var apiKey = await apiKeyManager.GetApiKeyAsync(requestDto.KeyId);
+
+        if (apiKey.ExpiresAt.HasValue && apiKey.ExpiresAt.Value < DateTime.UtcNow)
+        {
+            return false;
+        }
 
         if (!isAdmin)
         {
@@ -213,7 +216,7 @@ public class ApiKeysController(
     }
 
     /// <summary>
-    ///  Delete a user API key by its ID.
+    ///  Deletes a user API key by its ID.
     /// </summary>  
     /// <short>
     ///  Delete a user API key
@@ -222,7 +225,7 @@ public class ApiKeysController(
     /// <path>api/2.0/keys/{keyId}</path>
     [Tags("Api keys")]
     [SwaggerResponse(200, "Delete a user api key", typeof(bool))]
-    [HttpDelete("{keyId}")]
+    [HttpDelete("{keyId:guid}")]
     public async Task<bool> DeleteApiKey(Guid keyId)
     {
         var currentType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
@@ -245,18 +248,14 @@ public class ApiKeysController(
         return result;
     }
 
-    private static bool IsValidPermission(List<string> permission)
+    private bool IsValidPermission(List<string> permission)
     {
         if (permission == null || permission.Count == 0)
         {
             return true;
         }
 
-        var scopes = AuthorizationExtension.ScopesMap;
-        var orderedScopes = scopes.AllKeys.SelectMany(key => scopes[key]?.Split(','))
-                                                                 .Concat(["*"])
-                                                                 .Distinct()
-                                                                 .Order();
+        var orderedScopes = GetAllPermissions().Union(new List<string> { "*" });
 
         return permission.All(x => orderedScopes.Contains(x));
     }

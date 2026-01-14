@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -86,8 +86,8 @@ public class EncryptionSettingsHelper(CoreConfiguration coreConfiguration, Insta
     private async Task<string> SerializeAsync(EncryptionSettings encryptionSettings)
     {
         return string.Join("#",
-            string.IsNullOrEmpty(encryptionSettings.Pass) ? 
-                string.Empty : 
+            string.IsNullOrEmpty(encryptionSettings.Pass) ?
+                string.Empty :
                 await instanceCrypto.EncryptAsync(encryptionSettings.Pass),
             (int)encryptionSettings.Status,
             encryptionSettings.NotifyUsers

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -86,9 +86,12 @@ public class CsvFileHelper(ILogger<CsvFileHelper> logger)
 
             await csv.NextRecordAsync();
 
-            await foreach (var records in partialRecords.WithCancellation(cancellationToken))
+            if (partialRecords != null)
             {
-                await csv.WriteRecordsAsync(records, cancellationToken);
+                await foreach (var records in partialRecords.WithCancellation(cancellationToken))
+                {
+                    await csv.WriteRecordsAsync(records, cancellationToken);
+                }
             }
 
             writer.Flush();

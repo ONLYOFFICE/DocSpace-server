@@ -1211,7 +1211,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@xmldom/xmldom@npm:^0.8.6, @xmldom/xmldom@npm:^0.8.8":
+"@xmldom/is-dom-node@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "@xmldom/is-dom-node@npm:1.0.1"
+  checksum: 10/45683a6a192e4eff0f5189d4e3ef5272fcf8e3458f598f99614810490a8163c9a7ebe4ecaf241286fb74fcd762610b46c062ad3c7fddaa6eafa9a9f1537e338a
+  languageName: node
+  linkType: hard
+
+"@xmldom/xmldom@npm:^0.8.10, @xmldom/xmldom@npm:^0.8.6":
   version: 0.8.10
   resolution: "@xmldom/xmldom@npm:0.8.10"
   checksum: 10/62400bc5e0e75b90650e33a5ceeb8d94829dd11f9b260962b71a784cd014ddccec3e603fe788af9c1e839fa4648d8c521ebd80d8b752878d3a40edabc9ce7ccf
@@ -1375,7 +1382,7 @@ __metadata:
     node-forge: "npm:^0.10.0"
     nodemon: "npm:2.0.4"
     request: "npm:^2.88.2"
-    samlify: "npm:^2.7.6"
+    samlify: "npm:^2.8.0"
     serve-favicon: "npm:^2.5.0"
     url: "npm:^0.11.0"
     winston: "npm:^3.8.2"
@@ -4289,9 +4296,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"samlify@npm:^2.7.6":
-  version: 2.8.10
-  resolution: "samlify@npm:2.8.10"
+"samlify@npm:^2.8.0":
+  version: 2.10.1
+  resolution: "samlify@npm:2.10.1"
   dependencies:
     "@authenio/xml-encryption": "npm:^2.0.2"
     "@xmldom/xmldom": "npm:^0.8.6"
@@ -4301,9 +4308,10 @@ __metadata:
     pako: "npm:^1.0.10"
     uuid: "npm:^8.3.2"
     xml: "npm:^1.0.1"
-    xml-crypto: "npm:^3.0.1"
+    xml-crypto: "npm:^6.1.2"
+    xml-escape: "npm:^1.1.0"
     xpath: "npm:^0.0.32"
-  checksum: 10/8886af80a6f556df8163fd7212895473a686dbf60eeb1f4689bd5a5430f47838c243a64a9b293d11a546abfcc8ed334de68cd7c9895b65f231ec7eda2dc23cf4
+  checksum: 10/f44259ec1f03faacedbd9b3098b07893dd69204492d1f4c63dca0bd8b979ed9ea76e3911f7e953baa4e11787acdb9f33e5449e21b0199f7ff627f449a9ce3897
   languageName: node
   linkType: hard
 
@@ -5238,13 +5246,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"xml-crypto@npm:^3.0.1":
-  version: 3.2.0
-  resolution: "xml-crypto@npm:3.2.0"
+"xml-crypto@npm:^6.1.2":
+  version: 6.1.2
+  resolution: "xml-crypto@npm:6.1.2"
   dependencies:
-    "@xmldom/xmldom": "npm:^0.8.8"
-    xpath: "npm:0.0.32"
-  checksum: 10/ea9c3ecf60fbe54b947aff86f56f5b50ecc6713f5e514b268262610c97d1f602aacfff07bc4e972d1c1dd5ca4f591aeadb723abe081eae5033c701bcecfaa765
+    "@xmldom/is-dom-node": "npm:^1.0.1"
+    "@xmldom/xmldom": "npm:^0.8.10"
+    xpath: "npm:^0.0.33"
+  checksum: 10/fdaa52229404274a1aa992dbf74f4919c302a0a2091e1ba7b85673b37969b7795960d52994bf8479e1e5f37ab3cac36b8f09461efa68b59d93824ef1c2da0102
+  languageName: node
+  linkType: hard
+
+"xml-escape@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "xml-escape@npm:1.1.0"
+  checksum: 10/52086186c4bc47ffd4496341df6c8f37e69941b713af0d15d45cbf9266f8853a158904a5b866f9f57e32b6c562dff57e330f7b1c8469eee8e6d7ef2e047993c3
   languageName: node
   linkType: hard
 
@@ -5259,6 +5275,13 @@ __metadata:
   version: 0.0.32
   resolution: "xpath@npm:0.0.32"
   checksum: 10/9d8be7adde4500e9ee96db963838269021f89ef1ad222fdfd41b7266336e851a38416b4a710c194dcf9eb35cf58ad11e023e5951e919151b76ffcd6eb3b2cbf4
+  languageName: node
+  linkType: hard
+
+"xpath@npm:^0.0.33":
+  version: 0.0.33
+  resolution: "xpath@npm:0.0.33"
+  checksum: 10/09c539661cafc0d75bb48d13fee7ce6e7593d88f4387c401a3b15d46d543e81f46680be5c6ecf868c11f6090ee67ea78e0c327c4e0ffceb2969308a2d1e238bb
   languageName: node
   linkType: hard
 

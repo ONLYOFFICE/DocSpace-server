@@ -28,8 +28,11 @@
 package com.asc.common.utilities;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Optional;
 import java.util.regex.Pattern;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
 /** Utility class for handling HTTP-related operations. */
@@ -60,6 +63,122 @@ public class HttpUtils {
 
   private HttpUtils() {
     // Private constructor to prevent instantiation
+  }
+
+  /**
+   * Validates whether the given string is a correctly formatted IPv4 address.
+   *
+   * <p>This method checks if the provided string adheres to the standard IPv4 format. It uses a
+   * regular expression to validate the format, ensuring each octet is within the valid range of
+   * 0-255.
+   *
+   * @param ip The string to be validated as an IPv4 address.
+   * @return true if the input string is a valid IPv4 address, false otherwise.
+   */
+  private boolean isValidIPv4Format(String ip) {
+    if (ip == null || ip.isBlank()) return false;
+    var ipv4Pattern =
+        "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
+    return ip.matches(ipv4Pattern);
+  }
+
+  /**
+   * Determines if the given IP address is within a private or special-use range.
+   *
+   * <p>This method checks if the provided IP address falls within any of the private IP ranges as
+   * defined by RFC 1918, loopback, link-local, multicast, or other special-use addresses. It
+   * manually checks each octet of the IP address to determine if it is private.
+   *
+   * @param ip The IP address to check.
+   * @return true if the IP address is within a private or special-use range, false otherwise.
+   */
+  private boolean isPrivateIP(String ip) {
+    var parts = ip.split("\\.");
+    if (parts.length != 4) return true;
+
+    try {
+      var first = Integer.parseInt(parts[0]);
+      var second = Integer.parseInt(parts[1]);
+      var third = Integer.parseInt(parts[2]);
+      var fourth = Integer.parseInt(parts[3]);
+
+      // RFC 1918 Private ranges
+      if (first == 10) return true; // 10.0.0.0/8
+      if (first == 172 && second >= 16 && second <= 31) return true; // 172.16.0.0/12
+      if (first == 192 && second == 168) return true; // 192.168.0.0/16
+
+      // Loopback (127.0.0.0/8)
+      if (first == 127) return true;
+
+      // Link-local (169.254.0.0/16)
+      if (first == 169 && second == 254) return true;
+
+      // Multicast (224.0.0.0/4)
+      if (first >= 224 && first <= 239) return true;
+
+      // Reserved ranges
+      if (first == 0) return true; // 0.0.0.0/8 - "This network"
+      if (first == 240) return true; // 240.0.0.0/4 - Reserved for future use
+      if (first == 255 && second == 255 && third == 255 && fourth == 255) return true; // Broadcast
+
+      return false;
+    } catch (NumberFormatException e) {
+      return true;
+    }
+  }
+
+  /**
+   * Validates if the given IP address is a valid public IPv4 address.
+   *
+   * <p>This method performs a comprehensive check to ensure the IP address is valid and public. It
+   * checks the format of the IP address, and ensures it is not a loopback, link-local, site-local,
+   * multicast, or private IP address.
+   *
+   * @param ip The IP address to validate.
+   * @return true if the IP address is valid and public, false otherwise.
+   */
+  public boolean isValidPublicIp(String ip) {
+    if (ip == null || ip.isBlank()) return false;
+
+    try {
+      var inetAddress = InetAddress.getByName(ip);
+      if (!isValidIPv4Format(ip)) return false;
+
+      if (inetAddress.isLoopbackAddress()) return false;
+
+      if (inetAddress.isLinkLocalAddress()) return false;
+
+      if (inetAddress.isSiteLocalAddress()) return false;
+
+      if (inetAddress.isMulticastAddress()) return false;
+
+      if (isPrivateIP(ip)) return false;
+
+      return true;
+    } catch (UnknownHostException e) {
+      return false;
+    }
+  }
+
+  /**
+   * Retrieves the HTTP method from the request with a fallback to "GET" for invalid methods.
+   *
+   * <p>This method attempts to determine the HTTP method used in the request. If the method is not
+   * specified or is invalid, it defaults to "GET".
+   *
+   * @param request The HttpServletRequest object from which to extract the HTTP method.
+   * @return The HTTP method as a string, defaults to "GET" if the method is invalid or not
+   *     specified.
+   */
+  public String getHttpMethod(HttpServletRequest request) {
+    var method = request.getMethod();
+    if (method == null || method.isBlank()) return "GET";
+
+    try {
+      return HttpMethod.valueOf(method).name();
+    } catch (IllegalArgumentException e) {
+      return "GET";
+    }
   }
 
   /**

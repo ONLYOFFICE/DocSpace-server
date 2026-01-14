@@ -1,0 +1,240 @@
+# {{packageName}}
+
+The ONLYOFFICE DocSpace SDK for JavaScript is a library that provides tools for integrating and managing DocSpace features within your applications. It simplifies interaction with the DocSpace TypeScript API by offering ready-to-use methods and models.
+
+{{#infoUrl}}
+For more information, please visit [{{{infoUrl}}}]({{{infoUrl}}})
+{{/infoUrl}}
+
+## Installation
+
+### Using [Node.js](https://nodejs.org/)
+
+#### npm
+
+To publish the library as an [npm](https://www.npmjs.com/) package, please follow the instructions [here](https://docs.npmjs.com/getting-started/publishing-npm-packages).
+
+To install the package, run:
+
+```shell
+npm install {{{packageName}}} --save
+```
+
+Finally, build the module:
+
+```shell
+npm run build
+```
+
+##### Local development
+
+To use the library locally without publishing it to a remote npm registry:
+
+1. Navigate to the directory containing `package.json` (and this `README.md` file). Let's refer to this path as `JAVASCRIPT_CLIENT_DIR`.
+
+2. Install dependencies:
+
+```shell
+npm install
+```
+
+3. Link the package globally:
+
+```shell
+npm link
+```
+
+4. Switch to the directory you want to use your {{{packageName}}} from.
+
+5. To use the link defined in your project, run:
+
+```shell
+npm link /path/to/<JAVASCRIPT_CLIENT_DIR>
+```
+
+6. Build the module:
+
+```shell
+npm run build
+```
+
+#### Git
+
+If the library is hosted in a Git repository (e.g., {{repositoryUrl}}), you can install it directly:
+
+```shell
+    npm install git+{{repositoryUrl}}.git
+```
+
+### Using browser
+
+The library also works in the browser environment via npm and [Browserify](http://browserify.org/):
+
+1. Follow the instructions from the [Using Node.js](https://nodejs.org/en) section. 
+
+2. Install Browserify:
+
+```shell
+npm install -g browserify
+```
+
+3. Assuming `main.js` is your entry file, bundle the code:
+
+```shell
+browserify main.js > bundle.js
+```
+
+4. Include `bundle.js` in the HTML pages.
+
+### Webpack Configuration
+
+When using Webpack you may encounter the following error: "Module not found: Error: Cannot resolve module". You should probably disable the AMD loader. Add/merge
+the following section to your Webpack configuration:
+
+```javascript
+module: {
+  rules: [
+    {
+      parser: {
+        amd: false
+      }
+    }
+  ]
+}
+```
+
+## Documentation for Authorization
+
+{{^authMethods}}Endpoints do not require authorization.{{/authMethods}}
+{{#hasAuthMethods}}Authentication schemes defined for the API:{{/hasAuthMethods}}
+{{#authMethods}}
+### {{name}}
+
+{{#isApiKey}}
+
+- **Type**: API key
+- **API key parameter name**: {{keyParamName}}
+- **Location**: {{#isKeyInQuery}}URL query string{{/isKeyInQuery}}{{#isKeyInHeader}}HTTP header{{/isKeyInHeader}}{{#isKeyInCookie}}Cookie{{/isKeyInCookie}}
+{{/isApiKey}}
+{{#isBasic}}
+{{#isBasicBasic}}
+- **Type**: HTTP basic authentication
+{{/isBasicBasic}}
+{{#isBasicBearer}}
+- **Type**: Bearer authentication{{#bearerFormat}} ({{{.}}}){{/bearerFormat}}
+{{/isBasicBearer}}
+{{#isHttpSignature}}
+- **Type**: HTTP signature authentication
+{{/isHttpSignature}}
+{{/isBasic}}
+{{#isOAuth}}
+- **Type**: OAuth
+- **Flow**: {{flow}}
+- **Authorization URL**: {{x-authorizationUrl}}
+- **Token Url**: {{x-tokenUrl}}
+- **Scopes**: {{^scopes}}N/A{{/scopes}}
+{{#scopes}}  - {{scope}}: {{description}}
+{{/scopes}}
+{{/isOAuth}}
+{{#isOpenId}}
+- **Type**: OpenId Connect
+- **OpenId Connect URL**: {{x-openIdConnectUrl}}
+{{#scopes}}  - {{scope}}: {{description}}
+{{/scopes}}
+{{/isOpenId}}
+
+{{/authMethods}}
+
+## Getting Started
+
+Please follow the [installation](#installation) instruction and execute the following JS code:
+
+```javascript
+var {{{moduleName}}} = require('{{{packageName}}}');
+{{#apiInfo}}{{#apis}}{{#-first}}{{#operations}}{{#operation}}{{#-first}}
+{{#hasAuthMethods}}
+var defaultClient = {{{moduleName}}}.ApiClient.instance;
+{{#authMethods}}
+{{#isBasic}}
+{{#isBasicBasic}}
+// Configure HTTP basic authorization: {{{name}}}
+var {{{name}}} = defaultClient.authentications['{{{name}}}'];
+{{{name}}}.username = 'YOUR USERNAME'
+{{{name}}}.password = 'YOUR PASSWORD'
+{{/isBasicBasic}}
+{{#isBasicBearer}}
+// Configure Bearer{{#bearerFormat}} ({{{.}}}){{/bearerFormat}} access token for authorization: {{{name}}}
+var {{{name}}} = defaultClient.authentications['{{{name}}}'];
+{{{name}}}.accessToken = "YOUR ACCESS TOKEN"
+{{/isBasicBearer}}
+{{/isBasic}}
+{{#isApiKey}}
+// Configure API key authorization: {{{name}}}
+var {{{name}}} = defaultClient.authentications['{{{name}}}'];
+{{{name}}}.apiKey = "YOUR API KEY"
+// Uncomment the following line to set a prefix for the API key, e.g. "Token" (defaults to null)
+//{{{name}}}.apiKeyPrefix['{{{keyParamName}}}'] = "Token"
+{{/isApiKey}}
+{{#isOAuth}}
+// Configure OAuth2 access token for authorization: {{{name}}}
+var {{{name}}} = defaultClient.authentications['{{{name}}}'];
+{{{name}}}.accessToken = "YOUR ACCESS TOKEN"
+{{/isOAuth}}
+{{/authMethods}}
+{{/hasAuthMethods}}
+
+var api = new {{{moduleName}}}.{{{classname}}}()
+{{#hasParams}}
+{{#requiredParams}}
+var {{{paramName}}} = {{{example}}}; // {{=< >=}}{<&dataType>}<={{ }}=> {{{description}}}
+{{/requiredParams}}
+{{#optionalParams}}
+{{#-first}}
+var opts = {
+{{/-first}}
+  '{{{paramName}}}': {{{example}}}{{^-last}},{{/-last}} // {{=< >=}}{<&dataType>}<={{ }}=> {{{description}}}
+{{#-last}}
+};
+{{/-last}}
+{{/optionalParams}}
+{{/hasParams}}
+{{#usePromises}}
+api.{{{operationId}}}({{#requiredParams}}{{{paramName}}}{{^-last}}, {{/-last}}{{/requiredParams}}{{#optionalParams}}{{#-last}}{{#hasRequiredParams}}, {{/hasRequiredParams}}opts{{/-last}}{{/optionalParams}}).then(function({{#returnType}}data{{/returnType}}) {
+  {{#returnType}}console.log('API called successfully. Returned data: ' + data);{{/returnType}}{{^returnType}}console.log('API called successfully.');{{/returnType}}
+}, function(error) {
+  console.error(error);
+});
+
+{{/usePromises}}
+{{^usePromises}}
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    {{#returnType}}console.log('API called successfully. Returned data: ' + data);{{/returnType}}{{^returnType}}console.log('API called successfully.');{{/returnType}}
+  }
+};
+api.{{{operationId}}}({{#requiredParams}}{{{paramName}}}{{^-last}}, {{/-last}}{{/requiredParams}}{{#optionalParams}}{{#-last}}{{#hasRequiredParams}}, {{/hasRequiredParams}}opts{{/-last}}{{/optionalParams}}{{#hasParams}}, {{/hasParams}}callback);
+{{/usePromises}}
+{{/-first}}{{/operation}}{{/operations}}{{/-first}}{{/apis}}{{/apiInfo}}
+```
+
+## Documentation for API Endpoints
+
+All URIs are relative to *https://your-docspace.onlyoffice.com*
+
+<details><summary>API Endoints table</summary>
+
+Class | Method | HTTP request | Description
+------------ | ------------- | ------------- | -------------
+{{#apiInfo}}{{#apis}}{{#operations}}{{#operation}}*{{moduleName}}.{{classname}}* | [**{{operationId}}**]({{apiDocPath}}{{classname}}.md#{{operationId}}) | **{{httpMethod}}** {{path}} | {{summary}}
+{{/operation}}{{/operations}}{{/apis}}{{/apiInfo}}
+</details>
+
+## Documentation for Models
+
+<details><summary>Models list</summary>
+
+{{#models}}{{#model}} - [{{moduleName}}.{{classname}}]({{modelDocPath}}{{classname}}.md)
+{{/model}}{{/models}}
+</details>

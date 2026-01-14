@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -50,6 +50,11 @@ public class FilesStatisticsResultDto
     /// The used space of files in the \"Rooms\" section.
     /// </summary>
     public FilesStatisticsFolder RoomsUsedSpace { get; set; }
+
+    /// <summary>
+    /// The used space of files in the \"AI agents\" section.
+    /// </summary>
+    public FilesStatisticsFolder AiAgentsUsedSpace { get; set; }
 }
 
 /// <summary>

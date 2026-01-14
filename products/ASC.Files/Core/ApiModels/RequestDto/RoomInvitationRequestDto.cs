@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,7 +35,7 @@ public class RoomInvitationRequest
     /// The collection of invitation parameters.
     /// </summary>
     [MaxEmailInvitations]
-    public IEnumerable<RoomInvitation> Invitations { get; set; }
+    public List<RoomInvitation> Invitations { get; set; }
 
     /// <summary>
     /// Specifies whether to notify users about the shared room or not.
@@ -73,5 +73,5 @@ public class RoomInvitationRequestDto<T>
     /// The room invitation request.
     /// </summary>
     [FromBody]
-    public RoomInvitationRequest RoomInvitation { get; set; }
+    public required RoomInvitationRequest RoomInvitation { get; set; }
 }

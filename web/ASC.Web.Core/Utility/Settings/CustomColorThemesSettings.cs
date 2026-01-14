@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -50,11 +50,7 @@ public class CustomColorThemesSettings : ISettings<CustomColorThemesSettings>
 
     public DateTime LastModified { get; set; }
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{FE096AE9-3044-4B92-A94C-46E323F82681}"); }
-    }
+    public static Guid ID => new("{FE096AE9-3044-4B92-A94C-46E323F82681}");
 }
 
 /// <summary>
@@ -146,7 +142,7 @@ public class CustomColorThemesSettingsColorItem
     /// </summary>
     [SwaggerSchemaCustom(Example = "#4781D1")]
     public string Accent { get; init; }
-    
+
     /// <summary>
     /// The button color.
     /// </summary>

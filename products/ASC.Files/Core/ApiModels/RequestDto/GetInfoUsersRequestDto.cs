@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,12 +27,12 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The base batch request parameters.
+/// The request parameters for getting the user access rights.
 /// </summary>
 public class GetInfoUsersRequestDto
 {
     /// <summary>
-    /// The list of user IDs from the request.
+    /// The list of user IDs.
     /// </summary>
     public List<Guid> UserIds { get; set; }
 }

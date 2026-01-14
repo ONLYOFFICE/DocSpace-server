@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -95,7 +95,6 @@ public class EmployeeDto
 
 [Scope]
 public class EmployeeDtoHelper(
-    ApiContext httpContext,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     UserPhotoManager userPhotoManager,
     CommonLinkUtility commonLinkUtility,
@@ -104,7 +103,6 @@ public class EmployeeDtoHelper(
     ILogger<EmployeeDtoHelper> logger)
 {
     private readonly ConcurrentDictionary<Guid, EmployeeDto> _dictionary = new();
-    protected readonly ApiContext _httpContext = httpContext;
     protected readonly UserPhotoManager _userPhotoManager = userPhotoManager;
     protected readonly UserManager _userManager = userManager;
     protected readonly AuthContext _authContext = authContext;
@@ -119,7 +117,7 @@ public class EmployeeDtoHelper(
             _dictionary.AddOrUpdate(userInfo.Id, _ => employee, (_, _) => employee);
 
         }
-        
+
         return employee;
     }
 
@@ -131,7 +129,7 @@ public class EmployeeDtoHelper(
             {
                 return employee;
             }
-            
+
             return await GetAsync(await _userManager.GetUsersAsync(userId));
         }
         catch (Exception e)
@@ -155,30 +153,11 @@ public class EmployeeDtoHelper(
 
         var cacheKey = Math.Abs(userInfo.LastModified.GetHashCode());
 
-        if (_httpContext.Check("avatarSmall"))
-        {
-            result.AvatarSmall = await _userPhotoManager.GetSmallPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
-        }
-        
-        if (_httpContext.Check("avatarOriginal"))
-        {
-            result.AvatarOriginal = await _userPhotoManager.GetPhotoAbsoluteWebPath(userInfo.Id) + $"?hash={cacheKey}";
-        }
-
-        if (_httpContext.Check("avatarMax"))
-        {
-            result.AvatarMax = await _userPhotoManager.GetMaxPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
-        }
-
-        if (_httpContext.Check("avatarMedium"))
-        {
-            result.AvatarMedium = await _userPhotoManager.GetMediumPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
-        }
-
-        if (_httpContext.Check("avatar"))
-        {
-            result.Avatar = await _userPhotoManager.GetBigPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
-        }
+        result.AvatarSmall = await _userPhotoManager.GetSmallPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
+        result.AvatarOriginal = await _userPhotoManager.GetPhotoAbsoluteWebPath(userInfo.Id) + $"?hash={cacheKey}";
+        result.AvatarMax = await _userPhotoManager.GetMaxPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
+        result.AvatarMedium = await _userPhotoManager.GetMediumPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
+        result.Avatar = await _userPhotoManager.GetBigPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
 
         if (result.Id != Guid.Empty)
         {

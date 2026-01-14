@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,12 +38,12 @@ public class Startup : BaseStartup
 
     public override async Task ConfigureServices(WebApplicationBuilder builder)
     {
-        var services = builder.Services;
         await base.ConfigureServices(builder);
 
+        var services = builder.Services;
         services.AddBaseDbContextPool<FilesDbContext>();
         services.RegisterQuotaFeature();
-        
+
         services.RegisterQueue<UsersQuotaSyncJob>();
         services.RegisterQueue<RemoveProgressItem>();
         services.RegisterQueue<DeletePersonalFolderProgressItem>();

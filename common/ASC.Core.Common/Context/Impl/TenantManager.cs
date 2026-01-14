@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -44,7 +44,7 @@ public class TenantManager(
     private const string CurrentTenant = "CURRENT_TENANT";
 
     private static readonly List<string> _thisCompAddresses = [];
-    
+
 
     static TenantManager()
     {
@@ -66,7 +66,7 @@ public class TenantManager(
     {
         return (await tenantService.GetTenantsAsync(default, active)).ToList();
     }
-    
+
     public Task<IEnumerable<Tenant>> GetTenantsAsync(List<int> ids)
     {
         return tenantService.GetTenantsAsync(ids);
@@ -99,9 +99,9 @@ public class TenantManager(
                 t = await tenantService.GetTenantAsync(domain[..(domain.Length - baseUrl.Length - 1)]);
             }
         }
-         
+
         t ??= await tenantService.GetTenantAsync(domain);
-         
+
         if (t == null && coreBaseSettings.Standalone && !isAlias && firstIfNotFoundForStandalone)
         {
             t = await tenantService.GetTenantForStandaloneWithoutAliasAsync(domain);
@@ -109,7 +109,7 @@ public class TenantManager(
 
         return t;
     }
-    
+
 
     public async Task SetTenantVersionAsync(Tenant tenant, int version)
     {
@@ -136,7 +136,7 @@ public class TenantManager(
 
         return newTenant;
     }
-    
+
     public async Task<Tenant> RestoreTenantAsync(Tenant oldTenant, Tenant newTenant)
     {
         newTenant = await tenantService.RestoreTenantAsync(oldTenant, newTenant, coreSettings);
@@ -152,8 +152,8 @@ public class TenantManager(
 
     public Task<Tenant> GetCurrentTenantAsync(bool throwIfNotFound, HttpContext context)
     {
-        return _currentTenant != null ? 
-            Task.FromResult(_currentTenant) : 
+        return _currentTenant != null ?
+            Task.FromResult(_currentTenant) :
             GetCurrentTenantFromDbAsync(throwIfNotFound, context);
     }
 
@@ -203,8 +203,8 @@ public class TenantManager(
     {
         return GetCurrentTenant().Id;
     }
-    
-    
+
+
     public Tenant GetCurrentTenant(bool throwIfNotFound = true)
     {
         if (_currentTenant != null)
@@ -240,16 +240,13 @@ public class TenantManager(
         if (tenant != null)
         {
             _currentTenant = tenant;
-            if (httpContextAccessor?.HttpContext != null)
-            {
-                httpContextAccessor.HttpContext.Items[CurrentTenant] = tenant;
-            }
+            httpContextAccessor?.HttpContext?.Items[CurrentTenant] = tenant;
 
             CultureInfo.CurrentCulture = tenant.GetCulture();
             CultureInfo.CurrentUICulture = tenant.GetCulture();
         }
     }
-    
+
     public async Task SetCurrentTenantAsync()
     {
         var context = httpContextAccessor?.HttpContext;
@@ -337,22 +334,18 @@ public class TenantManager(
         return defaultQuota;
     }
 
-    public async Task<IDictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync()
+    public async Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(bool all = false, bool wallet = false)
     {
-        var quotas = (await GetTenantQuotasAsync(false, false))
-            .Where(q => !string.IsNullOrEmpty(q.ProductId))
-            .DistinctBy(q => q.ProductId)
-            .ToList();
+        var quotas = (await GetTenantQuotasAsync(all, wallet))
+            .Where(q => !string.IsNullOrEmpty(q.ProductId + q.ServiceName))
+            .ToDictionary(q => q.GetPaymentId(), q => q.Name);
 
         var tenant = GetCurrentTenant(false);
 
-        var prices = await tariffService.GetProductPriceInfoAsync(tenant?.PartnerId, false, quotas.Where(p => !p.Wallet).Select(p => p.ProductId).ToArray());
-        var result = prices.ToDictionary(price => quotas.First(quota => quota.ProductId == price.Key).Name, price => price.Value);
+        var prices = await tariffService.GetProductPriceInfoAsync(tenant?.PartnerId, wallet, [.. quotas.Keys]);
+        var result = prices.ToDictionary(price => quotas.GetValueOrDefault(price.Key), price => price.Value);
 
-        var walletPrices = await tariffService.GetProductPriceInfoAsync(tenant?.PartnerId, true, quotas.Where(p => p.Wallet).Select(p => p.ProductId).ToArray());
-        var walletResult = walletPrices.ToDictionary(price => quotas.First(quota => quota.ProductId == price.Key).Name, price => price.Value);
-
-        return result.Concat(walletResult).ToDictionary(k => k.Key, v => v.Value);
+        return result;
     }
 
     public Dictionary<string, decimal> GetProductPriceInfo(string productId, bool wallet)
@@ -390,6 +383,11 @@ public class TenantManager(
     public void ValidateTenantName(string name)
     {
         tenantService.ValidateTenantName(name);
+    }
+
+    public async Task<bool> IsForbiddenDomainAsync(string domain)
+    {
+        return await tenantService.IsForbiddenDomainAsync(domain);
     }
 }
 

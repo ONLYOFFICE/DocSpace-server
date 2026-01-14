@@ -842,7 +842,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             TenantId = -11,
                             Features = "total_size:1073741824",
                             Name = "storage",
-                            Price = 0.0322m,
+                            Price = 0.14m,
                             ProductId = "1011",
                             Visible = true,
                             Wallet = true

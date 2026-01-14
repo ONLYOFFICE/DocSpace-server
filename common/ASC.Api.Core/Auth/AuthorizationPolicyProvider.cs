@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,7 +34,7 @@ public class AuthorizationPolicyProvider(IOptions<AuthorizationOptions> options)
         var basePolicy = new AuthorizationPolicyBuilder()
                                 .RequireAuthenticatedUser();
 
-        basePolicy.AddRequirements(new ScopesRequirement(AuthConstants.Claim_ScopeRootWrite.Value));
+        basePolicy.AddRequirements(new ScopesRequirement(AuthConstants.Claim_ScopeGlobalWrite.Value));
 
         return Task.FromResult(basePolicy.Build());
     }

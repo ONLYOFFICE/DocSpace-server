@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -111,9 +111,9 @@ public abstract class BaseIndexer<T>(Client client,
         {
             await webStudioDbContext.AddOrUpdateAsync(q => q.WebstudioIndex, new DbWebstudioIndex
             {
-            IndexName = Wrapper.IndexName,
+                IndexName = Wrapper.IndexName,
                 LastModified = lastModified
-        });
+            });
 
             await webStudioDbContext.SaveChangesAsync();
         }
@@ -193,7 +193,7 @@ public abstract class BaseIndexer<T>(Client client,
 
     internal async Task IndexAsync(T data, bool immediately = true)
     {
-        if (!(await BeforeIndexAsync(data)))
+        if (!await BeforeIndexAsync(data))
         {
             return;
         }
@@ -241,11 +241,11 @@ public abstract class BaseIndexer<T>(Client client,
                         }
                         catch (OpenSearchClientException e)
                         {
-                            if (e.Response.HttpStatusCode == 429)
+                            if (e.Response.HttpStatusCode is 429 or 502)
                             {
                                 throw;
                             }
-                            
+
                             _logger.ErrorIndex(e);
                         }
                         catch (Exception e)
@@ -285,11 +285,15 @@ public abstract class BaseIndexer<T>(Client client,
                             doc.Document.Data = null;
                             doc.Document = null;
                         }
+
+                        data[j] = null;
                     }
 
                     portionStart = i;
                     portion = [];
                     currentLength = 0L;
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
                     GC.Collect();
                 }
             }
@@ -595,7 +599,7 @@ public abstract class BaseIndexer<T>(Client client,
         member = expr as MemberExpression;
         if (member == null && expr is UnaryExpression unary)
         {
-                member = unary.Operand as MemberExpression;
+            member = unary.Operand as MemberExpression;
         }
 
         return member == null ? "" : member.Member.Name.ToLowerCamelCase();

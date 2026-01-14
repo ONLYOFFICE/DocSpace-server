@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -47,6 +47,11 @@ public class RoomLinkRequest
     public ApiDateTime ExpirationDate { get; set; }
 
     /// <summary>
+    /// The link scope, whether it is internal or not.
+    /// </summary>
+    public bool Internal { get; set; }
+
+    /// <summary>
     /// The link name.
     /// </summary>
     [StringLength(255)]
@@ -84,5 +89,5 @@ public class RoomLinkRequestDto<T>
     /// The room link parameters.
     /// </summary>
     [FromBody]
-    public RoomLinkRequest RoomLink { get; set; }
+    public required RoomLinkRequest RoomLink { get; set; }
 }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,13 +35,14 @@ public class FormFillingReportCreator(
     FactoryIndexerForm factoryIndexerForm)
 {
 
-    private static readonly JsonSerializerOptions _options = new() {
+    private static readonly JsonSerializerOptions _options = new()
+    {
         Converters = { new BoolToStringConverter() },
         AllowTrailingCommas = true,
         PropertyNameCaseInsensitive = true
     };
 
-    public async Task UpdateFormFillingReport<T>(int originalFormId, int roomId, int resultFormNumber,string formsDataUrl, File<T> formsDataFile)
+    public async Task UpdateFormFillingReport<T>(int originalFormId, int roomId, int resultFormNumber, string formsDataUrl, File<T> formsDataFile)
     {
         await GetSubmitFormsData(formsDataFile, originalFormId, roomId, resultFormNumber, formsDataUrl);
         await exportToXLSX.UpdateXlsxReport(roomId, originalFormId);
@@ -55,7 +56,7 @@ public class FormFillingReportCreator(
         {
             return [];
         }
-        
+
         var fileDao = daoFactory.GetFileDao<int>();
         var file = await fileDao.GetFilesAsync([folderId], FilterType.Pdf, false, Guid.Empty, null, null, false).FirstOrDefaultAsync();
         var (success, result) = await factoryIndexerForm.TrySelectAsync(r => r.Where(s => s.Id, file.Id));
@@ -73,7 +74,22 @@ public class FormFillingReportCreator(
         factoryIndexerForm.Refresh();
         var (success, result) = await factoryIndexerForm.TrySelectAsync(r => r.Where(s => s.RoomId, roomId).Where(s => s.OriginalFormId, originalFormId));
 
-        return success ? result : [];
+        if (success)
+        {
+            var sortedResult = result
+                .Select(item =>
+                {
+                    var formValue = item.FormsData?.FirstOrDefault(f => f.Key == "FormNumber").Value;
+                    int.TryParse(formValue, out var number);
+                    return (item, number);
+                })
+            .OrderBy(x => x.number)
+            .Select(x => x.item)
+            .ToList();
+
+            return sortedResult;
+        }
+        return [];
     }
 
     private async Task GetSubmitFormsData<T>(File<T> formsDataFile, int originalFormId, int roomId, int resultFormNumber, string url)
@@ -83,7 +99,7 @@ public class FormFillingReportCreator(
             RequestUri = new Uri(url),
             Method = HttpMethod.Get
         };
-        
+
         var httpClient = clientFactory.CreateClient();
         using var response = await httpClient.SendAsync(request);
         var data = await response.Content.ReadAsStringAsync();
@@ -96,9 +112,9 @@ public class FormFillingReportCreator(
                 Value = resultFormNumber.ToString()
             }
         };
-        
+
         var fromData = JsonSerializer.Deserialize<SubmitFormsData>(data, _options);
-        fromData.FormsData = fromData.FormsData.Where(f => f.Type != "picture").ToList();
+        fromData.FormsData = fromData.FormsData.Where(f => f.Type != "picture" && f.Type != "signature").ToList();
 
         var now = DateTime.UtcNow;
         var tenantId = tenantManager.GetCurrentTenantId();
@@ -120,7 +136,7 @@ public class FormFillingReportCreator(
         }
     }
 
-    public class BoolToStringConverter : System.Text.Json.Serialization.JsonConverter<string>
+    public class BoolToStringConverter : JsonConverter<string>
     {
         public override string Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
@@ -129,7 +145,7 @@ public class FormFillingReportCreator(
                 JsonTokenType.True => "true",
                 JsonTokenType.False => "false",
                 JsonTokenType.String => reader.GetString(),
-                _ => throw new System.Text.Json.JsonException("Unexpected token type")
+                _ => throw new JsonException("Unexpected token type")
             };
         }
 

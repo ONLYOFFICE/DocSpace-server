@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -49,6 +49,10 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
                 status = HttpStatusCode.NotFound;
                 message = e.Message;
                 break;
+            case FileNotFoundException e:
+                status = HttpStatusCode.NotFound;
+                message = e.Message;
+                break;
             case ArgumentException e:
                 status = HttpStatusCode.BadRequest;
                 message = e.Message;
@@ -71,7 +75,7 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
                 status = HttpStatusCode.Forbidden;
                 break;
             case TenantQuotaException:
-            case BillingNotFoundException:
+            case BillingException:
                 status = HttpStatusCode.PaymentRequired;
                 break;
             case CustomHttpException httpException:
@@ -101,7 +105,7 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
         context.Response.StatusCode = (int)status;
 
         await context.Response.WriteAsJsonAsync(result, cancellationToken);
-        
+
         return true;
     }
 }

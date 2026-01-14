@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -40,7 +40,7 @@ public class CookieAuthHandler(
     {
         try
         {
-            var authorization =Request.Cookies[cookiesManager.GetAscCookiesName()] ?? Request.Headers.Authorization.ToString();
+            var authorization = Request.Cookies[cookiesManager.GetAscCookiesName()] ?? Request.Headers.Authorization.ToString();
 
             if (string.IsNullOrEmpty(authorization))
             {
@@ -54,7 +54,7 @@ public class CookieAuthHandler(
                 authorization = authorization["Bearer ".Length..];
             }
 
-            if (!(await securityContext.AuthenticateMeAsync(authorization)))
+            if (!await securityContext.AuthenticateMeAsync(authorization))
             {
                 throw new AuthenticationException(nameof(HttpStatusCode.Unauthorized));
             }

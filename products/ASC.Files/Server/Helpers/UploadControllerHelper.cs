@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -44,8 +44,7 @@ public class UploadControllerHelper(
     FileChecker fileChecker,
     WebhookManager webhookManager,
     IEventBus eventBus,
-    AuthContext authContext,
-    Global global)
+    AuthContext authContext)
     : FilesHelperBase(
         filesSettingsHelper,
         fileUploader,
@@ -59,7 +58,7 @@ public class UploadControllerHelper(
         eventBus,
         tenantManager,
         authContext)
-    {
+{
     public async Task<object> CreateEditSessionAsync<T>(T fileId, long fileSize)
     {
         var file = await _fileUploader.VerifyChunkedUploadForEditing(fileId, fileSize);
@@ -80,6 +79,10 @@ public class UploadControllerHelper(
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
+        if (toFolder.FolderType == FolderType.FillingFormsRoom && toFolder.RootFolderType == FolderType.RoomTemplates && filesTitle.Any(r => FileUtility.GetFileExtension(r) != ".pdf"))
+        {
+            throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
+        }
 
         var result = new List<string>();
 
@@ -97,7 +100,6 @@ public class UploadControllerHelper(
 
     public async Task<object> CreateUploadSessionAsync<T>(T folderId, string fileName, long fileSize, string relativePath, bool encrypted, ApiDateTime createOn, bool createNewIfExist, bool keepVersion = false)
     {
-        fileName = await global.GetAvailableTitleAsync(fileName, folderId, _daoFactory.GetFileDao<T>().IsExistAsync, FileEntryType.File);
         var file = await _fileUploader.VerifyChunkedUploadAsync(folderId, fileName, fileSize, !createNewIfExist, relativePath);
         return await CreateUploadSessionAsync(file, encrypted, createOn, keepVersion);
     }

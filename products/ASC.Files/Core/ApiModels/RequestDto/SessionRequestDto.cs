@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -68,7 +68,7 @@ public class SessionRequest
 public class SessionRequestDto<T>
 {
     /// <summary>
-    /// The folder ID of the session.
+    /// The session folder ID.
     /// </summary>
     [FromRoute(Name = "folderId")]
     public required T FolderId { get; set; }
@@ -77,5 +77,5 @@ public class SessionRequestDto<T>
     /// The session parameters.
     /// </summary>
     [FromBody]
-    public SessionRequest Session {  get; set; }
+    public required SessionRequest Session { get; set; }
 }

@@ -33,7 +33,6 @@ const config = require("../../config");
 module.exports = (socket, next) => {
   const req = socket.client.request;
   const session = socket.handshake.session;
-
   const cookie = req?.cookies?.authorization || req?.cookies?.asc_auth_key;
   const token = req?.headers?.authorization;
   const share = socket.handshake.query?.share;
@@ -60,7 +59,7 @@ module.exports = (socket, next) => {
     }
     return;
   }
-  
+
   let headers = {};
   var basePath = portalManager(req)?.replace(/\/$/g, "");
   const basePathFromConfig = config.get("API_HOST");
@@ -84,7 +83,7 @@ module.exports = (socket, next) => {
     const getUser = () => {
       return request({
         method: "get",
-        url: "/people/@self?fields=id,userName,displayName",
+        url: "/people/@self?fields=id,userName,displayName,isAdmin,isOwner",
         headers,
         basePath,
       });

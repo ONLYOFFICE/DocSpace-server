@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -189,11 +189,11 @@ public class ConnectionsController(
     [SwaggerResponse(200, "Ok")]
     [SwaggerResponse(403, "Method not available")]
     [HttpPut("logoutall/{userId:guid}")]
-    public async Task LogOutAllActiveConnectionsForUserAsync(UserIdRequestDto inDto)
+    public async Task LogOutAllActiveConnectionsForUser(UserIdRequestDto inDto)
     {
         var currentUserId = securityContext.CurrentAccount.ID;
-        if (!await userManager.IsDocSpaceAdminAsync(currentUserId) && 
-            !await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, currentUserId) || 
+        if (!await userManager.IsDocSpaceAdminAsync(currentUserId) &&
+            !await webItemSecurity.IsProductAdministratorAsync(WebItemManager.PeopleProductID, currentUserId) ||
             (currentUserId != inDto.Id && await userManager.IsDocSpaceAdminAsync(inDto.Id)))
         {
             throw new SecurityException("Method not available");
@@ -302,7 +302,7 @@ public class ConnectionsController(
     private int GetLoginEventIdFromCookie()
     {
         var cookie = cookiesManager.GetCookies(CookiesType.AuthKey);
-        var loginEventId = cookieStorage.GetLoginEventIdFromCookie(cookie);
+        var (loginEventId, _) = cookieStorage.GetLoginEventIdFromCookie(cookie);
         return loginEventId;
     }
 }

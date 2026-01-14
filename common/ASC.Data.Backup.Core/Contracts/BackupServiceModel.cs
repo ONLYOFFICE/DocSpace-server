@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -59,6 +59,7 @@ public class StartBackupRequest
     public Dictionary<string, string> StorageParams { get; init; }
     public string ServerBaseUri { get; init; }
     public bool Dump { get; init; }
+    public IDictionary<string, string> Headers { get; init; }
 }
 
 /// <summary>
@@ -69,27 +70,27 @@ public class BackupHistoryRecord
     /// <summary>
     /// The backup ID.
     /// </summary>
-    public Guid Id { get; set; }
+    public required Guid Id { get; set; }
 
     /// <summary>
     /// The backup file name.
     /// </summary>
-    public string FileName { get; set; }
+    public required string FileName { get; set; }
 
     /// <summary>
     /// The backup storage type.
     /// </summary>
-    public BackupStorageType StorageType { get; set; }
+    public required BackupStorageType StorageType { get; set; }
 
     /// <summary>
     /// The backup creation date.
     /// </summary>
-    public DateTime CreatedOn { get; set; }
+    public required DateTime CreatedOn { get; set; }
 
     /// <summary>
     /// The backup expiration date.
     /// </summary>
-    public DateTime ExpiresOn { get; set; }
+    public required DateTime ExpiresOn { get; set; }
 }
 
 public class StartTransferRequest

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -43,11 +43,11 @@ public static class HttpClientTokenIntrospectionExtensions
         {
             { "token", request.Token }
         };
-     
+
         using var req = new HttpRequestMessage(HttpMethod.Post, request.Address);
         req.Content = new FormUrlEncodedContent(dict);
         using var response = await client.SendAsync(req, cancellationToken);
-        
+
         response.EnsureSuccessStatusCode();
 
         return await response.Content.ReadFromJsonAsync<TokenIntrospectionResponse>(cancellationToken);

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,6 +23,8 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+using ASC.Files.Core;
 
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
@@ -52,7 +54,7 @@ public class SettingsDto
     /// The language.
     /// </summary>
     [SwaggerSchemaCustom(Example = "en-US")]
-    public string Culture { get; set; }
+    public required string Culture { get; set; }
 
     /// <summary>
     /// The UTC offset in the TimeSpan format.
@@ -114,7 +116,7 @@ public class SettingsDto
     /// <summary>
     /// The base domain.
     /// </summary>
-    public string BaseDomain { get; set; }
+    public required string BaseDomain { get; set; }
 
     /// <summary>
     /// The wizard token.
@@ -189,7 +191,7 @@ public class SettingsDto
     /// <summary>
     /// Specifies whether the cookie settings are enabled.
     /// </summary>
-    public bool CookieSettingsEnabled { get; set; }
+    public required bool CookieSettingsEnabled { get; set; }
 
     /// <summary>
     /// Specifies whether the access to the space management is limited or not.
@@ -200,6 +202,11 @@ public class SettingsDto
     /// Specifies whether the access to the Developer Tools is limited for users or not.
     /// </summary>
     public bool LimitedAccessDevToolsForUsers { get; set; }
+
+    /// <summary>
+    /// Specifies whether to display the promotional banners.
+    /// </summary>
+    public bool DisplayBanners { get; set; }
 
     /// <summary>
     /// The user name validation regex.
@@ -219,7 +226,7 @@ public class SettingsDto
     /// <summary>
     /// The deep link settings.
     /// </summary>
-    public DeepLinkDto DeepLink { get; set; }
+    public required DeepLinkDto DeepLink { get; set; }
 
     /// <summary>
     /// The form gallery settings.
@@ -240,4 +247,9 @@ public class SettingsDto
     /// The external resources settings.
     /// </summary>
     public CultureSpecificExternalResources ExternalResources { get; set; }
+
+    /// <summary>
+    /// Specifies the default folder type for the current settings.
+    /// </summary>
+    public FolderType DefaultFolderType { get; set; }
 }

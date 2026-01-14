@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,16 +28,15 @@ namespace ASC.Web.Api.Controllers.Settings;
 
 [DefaultRoute("webplugins")]
 public class WebPluginsController(
-    ApiContext apiContext,
     IFusionCache fusionCache,
     WebItemManager webItemManager,
-    IHttpContextAccessor httpContextAccessor,
     PermissionContext permissionContext,
     WebPluginManager webPluginManager,
     TenantManager tenantManager,
+    MessageService messageService,
     CspSettingsHelper cspSettingsHelper,
-    IMapper mapper)
-    : BaseSettingsController(apiContext, fusionCache, webItemManager, httpContextAccessor)
+    WebPluginMapper mapper)
+    : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <summary>
     /// Adds a web plugin from a file to the current portal.
@@ -58,23 +57,25 @@ public class WebPluginsController(
 
         if (HttpContext.Request.Form.Files == null || HttpContext.Request.Form.Files.Count == 0)
         {
-            throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginNoInputFile);
+            throw new ArgumentException(Resource.ErrorWebPluginNoInputFile);
         }
 
         if (HttpContext.Request.Form.Files.Count > 1)
         {
-            throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginToManyInputFiles);
+            throw new ArgumentException(Resource.ErrorWebPluginToManyInputFiles);
         }
 
-        var file = HttpContext.Request.Form.Files[0] ?? throw new CustomHttpException(HttpStatusCode.BadRequest, Resource.ErrorWebPluginNoInputFile);
+        var file = HttpContext.Request.Form.Files[0] ?? throw new ArgumentException(Resource.ErrorWebPluginNoInputFile);
 
         var tenant = tenantManager.GetCurrentTenant();
 
         var webPlugin = await webPluginManager.AddWebPluginFromFileAsync(tenant.Id, file, inDto.System);
 
+        messageService.Send(MessageAction.WebpluginUploaded, MessageTarget.Create($"{webPlugin.PluginName}{webPlugin.Version}"), webPlugin.Name);
+
         await ChangeCspSettings(webPlugin, webPlugin.Enabled);
 
-        var outDto = mapper.Map<WebPlugin, WebPluginDto>(webPlugin);
+        var outDto = await mapper.ToDtoManual(webPlugin);
 
         return outDto;
     }
@@ -91,13 +92,17 @@ public class WebPluginsController(
     [SwaggerResponse(200, "Web plugin", typeof(IEnumerable<WebPluginDto>))]
     [SwaggerResponse(403, "Plugins disabled")]
     [HttpGet("")]
-    public async Task<IEnumerable<WebPluginDto>> GetWebPluginsAsync(GetWebPluginsRequestDto inDto)
+    public async Task<IEnumerable<WebPluginDto>> GetWebPlugins(GetWebPluginsRequestDto inDto)
     {
         var tenant = tenantManager.GetCurrentTenant();
 
         var webPlugins = await webPluginManager.GetWebPluginsAsync(tenant.Id);
 
-        var outDto = mapper.Map<List<WebPlugin>, List<WebPluginDto>>(webPlugins);
+        List<WebPluginDto> outDto = [];
+        foreach (var webPlugin in webPlugins)
+        {
+            outDto.Add(await mapper.ToDtoManual(webPlugin));
+        }
 
         if (inDto.Enabled.HasValue)
         {
@@ -118,13 +123,13 @@ public class WebPluginsController(
     [SwaggerResponse(200, "Web plugin", typeof(WebPluginDto))]
     [SwaggerResponse(403, "Plugins disabled")]
     [HttpGet("{name}")]
-    public async Task<WebPluginDto> GetWebPluginAsync(WebPluginNameRequestDto inDto)
+    public async Task<WebPluginDto> GetWebPlugin(WebPluginNameRequestDto inDto)
     {
         var tenant = tenantManager.GetCurrentTenant();
 
         var webPlugin = await webPluginManager.GetWebPluginByNameAsync(tenant.Id, inDto.Name);
 
-        var outDto = mapper.Map<WebPlugin, WebPluginDto>(webPlugin);
+        var outDto = await mapper.ToDtoManual(webPlugin);
 
         return outDto;
     }
@@ -140,13 +145,15 @@ public class WebPluginsController(
     [SwaggerResponse(200, "Ok")]
     [SwaggerResponse(403, "Plugins disabled")]
     [HttpPut("{name}")]
-    public async Task UpdateWebPluginAsync(WebPluginRequestsDto inDto)
+    public async Task UpdateWebPlugin(WebPluginRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var tenant = tenantManager.GetCurrentTenant();
 
         var webPlugin = await webPluginManager.UpdateWebPluginAsync(tenant.Id, inDto.Name, inDto.WebPlugin.Enabled, inDto.WebPlugin.Settings);
+
+        messageService.Send(MessageAction.WebpluginUpdated, MessageTarget.Create($"{webPlugin.PluginName}{webPlugin.Version}"), webPlugin.Name);
 
         await ChangeCspSettings(webPlugin, inDto.WebPlugin.Enabled);
     }
@@ -162,13 +169,15 @@ public class WebPluginsController(
     [SwaggerResponse(200, "Ok")]
     [SwaggerResponse(403, "Plugins disabled")]
     [HttpDelete("{name}")]
-    public async Task DeleteWebPluginAsync(WebPluginNameRequestDto inDto)
+    public async Task DeleteWebPlugin(WebPluginNameRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var tenant = tenantManager.GetCurrentTenant();
 
         var webPlugin = await webPluginManager.DeleteWebPluginAsync(tenant.Id, inDto.Name);
+
+        messageService.Send(MessageAction.WebpluginDeleted, MessageTarget.Create($"{webPlugin.PluginName}{webPlugin.Version}"), webPlugin.Name);
 
         await ChangeCspSettings(webPlugin, false);
     }

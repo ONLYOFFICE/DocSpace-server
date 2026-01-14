@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -62,6 +62,6 @@ public class DomainModel
     /// <summary>
     /// The host name.
     /// </summary>
-    [StringLength (255)]
+    [StringLength(255)]
     public string HostName { get; set; }
 }

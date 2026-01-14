@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,12 +36,12 @@ public abstract class DocumentBuilderTask<TId, TData> : DistributedTaskProgress
     public TId ResultFileId { get; set; }
     public string ResultFileName { get; set; }
     public string ResultFileUrl { get; set; }
-    
+
     public DocumentBuilderTask()
     {
-        
+
     }
-    
+
     protected DocumentBuilderTask(IServiceScopeFactory serviceProvider)
     {
         _serviceProvider = serviceProvider;
@@ -53,7 +53,7 @@ public abstract class DocumentBuilderTask<TId, TData> : DistributedTaskProgress
         _tenantId = tenantId;
         _userId = userId;
         _data = data;
-        
+
         Id = DocumentBuilderTaskManager.GetTaskId(tenantId, userId);
         Status = DistributedTaskStatus.Created;
 
@@ -81,10 +81,14 @@ public abstract class DocumentBuilderTask<TId, TData> : DistributedTaskProgress
             var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
             await tenantManager.SetCurrentTenantAsync(_tenantId);
 
+            var securityContext = scope.ServiceProvider.GetService<SecurityContext>();
             if (_userId != ASC.Core.Configuration.Constants.Guest.ID)
             {
-                var securityContext = scope.ServiceProvider.GetService<SecurityContext>();
                 await securityContext.AuthenticateMeWithoutCookieAsync(_userId);
+            }
+            else
+            {
+                securityContext.Logout();
             }
             var filesLinkUtility = scope.ServiceProvider.GetService<FilesLinkUtility>();
             logger = scope.ServiceProvider.GetService<ILogger<DocumentBuilderTask<TId, TData>>>();
@@ -136,7 +140,7 @@ public abstract class DocumentBuilderTask<TId, TData> : DistributedTaskProgress
             await PublishChanges();
         }
     }
-    
+
     protected abstract Task<DocumentBuilderInputData> GetDocumentBuilderInputDataAsync(IServiceProvider serviceProvider);
     protected abstract Task<File<TId>> ProcessSourceFileAsync(IServiceProvider serviceProvider, Uri fileUri, DocumentBuilderInputData inputData);
 }

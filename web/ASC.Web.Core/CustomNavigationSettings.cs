@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,17 +30,13 @@ public class CustomNavigationSettings : ISettings<CustomNavigationSettings>
 {
     public List<CustomNavigationItem> Items { get; init; }
 
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{32E02E4C-925D-4391-BAA4-3B5D223A2104}"); }
-    }
+    public static Guid ID => new("{32E02E4C-925D-4391-BAA4-3B5D223A2104}");
 
     public CustomNavigationSettings GetDefault()
     {
         return new CustomNavigationSettings { Items = [] };
     }
-    
+
     public DateTime LastModified { get; set; }
 }
 

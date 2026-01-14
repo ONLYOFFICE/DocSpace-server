@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -194,11 +194,10 @@ public class FilesSettings : ISettings<FilesSettings>
             OpenEditorInSameTab = false
         };
     }
-    
+
     public DateTime LastModified { get; set; }
 
-    [JsonIgnore]
-    public Guid ID => new("{03B382BD-3C20-4f03-8AB9-5A33F016316E}");
+    public static Guid ID => new("{03B382BD-3C20-4f03-8AB9-5A33F016316E}");
 }
 
 [Scope]
@@ -222,12 +221,12 @@ public class FilesSettingsHelper(
     public async Task<bool> GetEnableThirdParty() => (await settingsManager.LoadAsync<FilesSettings>()).EnableThirdpartySetting;
 
     public async Task SetEnableThirdParty(bool value)
-    {        
+    {
         if (!await global.IsDocSpaceAdministratorAsync)
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
-        
+
         var setting = await settingsManager.LoadAsync<FilesSettings>();
         setting.EnableThirdpartySetting = value;
         await settingsManager.SaveAsync(setting);
@@ -258,7 +257,7 @@ public class FilesSettingsHelper(
         settings.DisableShareSocialMediaSetting = !value;
         await Save(settings);
     }
-    
+
     public async Task<bool> ChangeExternalShareSettingsAsync(bool enable)
     {
         if (!await global.IsDocSpaceAdministratorAsync)
@@ -277,7 +276,7 @@ public class FilesSettingsHelper(
 
         return await GetExternalShare();
     }
-    
+
     public async Task<bool> ChangeExternalShareSocialMediaSettingsAsync(bool enable)
     {
         if (!await global.IsDocSpaceAdministratorAsync)
@@ -291,7 +290,7 @@ public class FilesSettingsHelper(
 
         return await GetExternalShareSocialMedia();
     }
-    
+
     public async Task<bool> GetStoreOriginalFiles() => (await LoadForCurrentUser()).StoreOriginalFilesSetting;
 
     public async Task SetStoreOriginalFiles(bool value)
@@ -299,14 +298,14 @@ public class FilesSettingsHelper(
         var setting = await LoadForCurrentUser();
         setting.StoreOriginalFilesSetting = value;
         await SaveForCurrentUser(setting);
-        
+
         messageService.SendHeadersMessage(MessageAction.DocumentsUploadingFormatsSettingsUpdated);
     }
 
     public async Task<bool> GetKeepNewFileName() => (await LoadForCurrentUser()).KeepNewFileName;
 
     public async Task<bool> SetKeepNewFileName(bool value)
-    {        
+    {
         var current = await LoadForCurrentUser();
         if (current.KeepNewFileName != value)
         {
@@ -321,7 +320,7 @@ public class FilesSettingsHelper(
     public async Task<bool> GetDisplayFileExtension() => (await LoadForCurrentUser()).DisplayFileExtension;
 
     public async Task<bool> SetDisplayFileExtension(bool value)
-    {        
+    {
         var current = await LoadForCurrentUser();
         if (current.DisplayFileExtension != value)
         {
@@ -356,7 +355,7 @@ public class FilesSettingsHelper(
 
         return setting.HideConfirmCancelOperationSetting;
     }
-    
+
     public async Task<bool> GetHideConfirmConvertSave() => (await LoadForCurrentUser()).HideConfirmConvertSaveSetting;
 
     private async Task SetHideConfirmConvertSave(bool value)
@@ -421,14 +420,14 @@ public class FilesSettingsHelper(
             await SaveForCurrentUser(setting);
         }
     }
-    
+
     public async Task SetOpenEditorInSameTabAsync(bool value)
     {
         var setting = await LoadForCurrentUser();
         setting.OpenEditorInSameTab = value;
         await SaveForCurrentUser(setting);
     }
-    
+
     public async Task<bool> GetOpenEditorInSameTabAsync()
     {
         return (await LoadForCurrentUser()).OpenEditorInSameTab;
@@ -461,7 +460,7 @@ public class FilesSettingsHelper(
     public async Task<bool> GetRecentSection() => !(await LoadForCurrentUser()).HideRecentSetting;
 
     public async Task SetRecentSection(bool value)
-    {        
+    {
         if (!authContext.IsAuthenticated)
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
@@ -475,12 +474,12 @@ public class FilesSettingsHelper(
     public async Task<bool> GetFavoritesSection() => !(await LoadForCurrentUser()).HideFavoritesSetting;
 
     public async Task SetFavoritesSection(bool value)
-    {        
+    {
         if (!authContext.IsAuthenticated)
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
-        
+
         var setting = await LoadForCurrentUser();
         setting.HideFavoritesSetting = !value;
         await SaveForCurrentUser(setting);
@@ -489,7 +488,7 @@ public class FilesSettingsHelper(
     public async Task<bool> GetTemplatesSection() => !(await LoadForCurrentUser()).HideTemplatesSetting;
 
     public async Task SetTemplatesSection(bool value)
-    {        
+    {
         if (!authContext.IsAuthenticated)
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);

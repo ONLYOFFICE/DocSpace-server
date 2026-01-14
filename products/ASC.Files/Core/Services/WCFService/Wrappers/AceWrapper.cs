@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -60,7 +60,7 @@ public class AceCollection<T>
 /// <summary>
 /// The parameters of the access rights.
 /// </summary>
-public class AceWrapper : IMapFrom<RoomInvitation>
+public class AceWrapper
 {
     /// <summary>
     /// The user ID.
@@ -86,6 +86,26 @@ public class AceWrapper : IMapFrom<RoomInvitation>
     /// Specifies whether a user with the access rights to a file can edit it or not.
     /// </summary>
     public bool CanEditAccess { get; set; }
+
+    /// <summary>
+    /// Determines whether internal access can be edited.
+    /// </summary>
+    public bool CanEditInternal { get; set; }
+
+    /// <summary>
+    /// Indicates whether the expiration date of access permissions can be edited.
+    /// </summary>
+    public bool CanEditExpirationDate { get; set; }
+
+    /// <summary>
+    /// Indicates whether the access rights can be revoked.
+    /// </summary>
+    public bool CanRevoke { get; set; }
+
+    /// <summary>
+    /// Determines whether the user has permission to modify the deny download setting for the file share.
+    /// </summary>
+    public bool CanEditDenyDownload { get; set; } = true;
 
     /// <summary>
     /// The subject name.
@@ -135,8 +155,16 @@ public class AceWrapper : IMapFrom<RoomInvitation>
     /// <summary>
     /// Specifies whether the subject type is a link or not.
     /// </summary>
-    [JsonIgnore] 
-    public bool IsLink => (SubjectType is SubjectType.InvitationLink or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink) || !string.IsNullOrEmpty(Link);
+    [JsonIgnore]
+    public bool IsLink => SubjectType is SubjectType.InvitationLink or SubjectType.ExternalLink or SubjectType.PrimaryExternalLink || !string.IsNullOrEmpty(Link);
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class RoomInvitationMapper
+{
+    public static partial AceWrapper Map(this RoomInvitation source);
+    public static partial List<AceWrapper> Map(this List<RoomInvitation> source);
+
 }
 
 /// <summary>

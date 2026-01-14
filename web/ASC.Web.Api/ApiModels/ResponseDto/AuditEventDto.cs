@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -102,9 +102,9 @@ public class AuditEventDto
     public ProductType Product { get; set; }
 
     /// <summary>
-    /// The module within the product where the audit event occurred.
+    /// The location where the audit event occurred.
     /// </summary>
-    public ModuleType Module { get; set; }
+    public LocationType Location { get; set; }
 
     /// <summary>
     /// The list of target objects affected by the audit event (e.g., document ID, user account).
@@ -120,7 +120,7 @@ public class AuditEventDto
     /// The audit event context.
     /// </summary>
     public string Context { get; set; }
-    
+
     public AuditEventDto(AuditEvent auditEvent, AuditActionMapper auditActionMapper, ApiDateTimeHelper apiDateTimeHelper)
     {
         Id = auditEvent.Id;
@@ -140,7 +140,7 @@ public class AuditEventDto
 
         ActionType = maps.ActionType;
         Product = maps.ProductType;
-        Module = maps.ModuleType;
+        Location = maps.LocationType;
 
         var list = new List<EntryType>(2);
 
