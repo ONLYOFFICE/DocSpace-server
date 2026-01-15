@@ -53,9 +53,7 @@ public class NotifyHelper(
 
         var client = workContext.RegisterClient(serviceProvider, studioNotifySource);
 
-        var users = (notifyUsers
-            ? await userManager.GetUsersAsync(EmployeeStatus.Active)
-            : [await userManager.GetUsersAsync(tenant.OwnerId)])
+        var users = (await GetUserInfos(tenant, notifyUsers))
             .Where(u => u.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated))
             .ToArray();
 
@@ -80,9 +78,7 @@ public class NotifyHelper(
 
         var client = workContext.RegisterClient(serviceProvider, studioNotifySource);
 
-        var users = (!notifyOnlyOwner
-            ? await userManager.GetUsersAsync(EmployeeStatus.Active)
-            : [await userManager.GetUsersAsync(tenant.OwnerId)])
+        var users =  (await GetUserInfos(tenant, !notifyOnlyOwner))
             .Where(u => u.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated))
             .ToArray();
 
@@ -110,9 +106,7 @@ public class NotifyHelper(
 
         var client = workContext.RegisterClient(serviceProvider, studioNotifySource);
 
-        var users = (!notifyOnlyOwner
-            ? await userManager.GetUsersAsync(EmployeeStatus.Active)
-            : [await userManager.GetUsersAsync(tenant.OwnerId)])
+        var users = (await GetUserInfos(tenant, !notifyOnlyOwner))
             .Where(u => u.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated))
             .ToArray();
 
@@ -187,9 +181,7 @@ public class NotifyHelper(
 
         var client = workContext.RegisterClient(serviceProvider, studioNotifySource);
 
-        var users = notifyAllUsers
-                ? await userManager.GetUsersAsync(EmployeeStatus.Active)
-                : [await userManager.GetUsersAsync(tenant.OwnerId)];
+        var users = await GetUserInfos(tenant, notifyAllUsers);
 
         foreach (var user in users.Where(r => r.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated)))
         {
@@ -199,6 +191,7 @@ public class NotifyHelper(
             await client.SendNoticeToAsync(restoreStartedNotifyAction, user, StudioNotifyService.EMailSenderName);
         }
     }
+    
 
     public async Task SendAboutRestoreCompletedAsync(Tenant tenant, bool notifyAllUsers)
     {
@@ -206,9 +199,7 @@ public class NotifyHelper(
 
         var client = workContext.RegisterClient(serviceProvider, studioNotifySource);
 
-        var users = notifyAllUsers
-            ? await userManager.GetUsersAsync(EmployeeStatus.Active)
-            : [await userManager.GetUsersAsync(tenant.OwnerId)];
+        var users = await GetUserInfos(tenant, notifyAllUsers);
 
         foreach (var user in users.Where(r => r.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated)))
         {
@@ -217,6 +208,14 @@ public class NotifyHelper(
 
             await client.SendNoticeToAsync(restoreCompletedV115NotifyAction, user, StudioNotifyService.EMailSenderName);
         }
+    }
+    
+    private async Task<UserInfo[]> GetUserInfos(Tenant tenant, bool notifyAllUsers)
+    {
+        var users = notifyAllUsers
+            ? await userManager.GetUsersAsync(EmployeeStatus.Active)
+            : [await userManager.GetUsersAsync(tenant.OwnerId)];
+        return users;
     }
 }
 
