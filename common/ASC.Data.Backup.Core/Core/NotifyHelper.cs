@@ -165,12 +165,12 @@ public class NotifyHelper(
         var admins = await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupAdmin.ID, EmployeeStatus.Active);
 
         var client = workContext.RegisterClient(serviceProvider, studioNotifySource);
-
+        
+        var scheduledBackupFailedNotifyAction = serviceProvider.GetService<ScheduledBackupFailedNotifyAction>();
+        
         foreach (var user in admins.Where(r => r.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated)))
         {
-            var scheduledBackupFailedNotifyAction = serviceProvider.GetService<ScheduledBackupFailedNotifyAction>();
             scheduledBackupFailedNotifyAction.Init(user, errorMessage);
-            
             await client.SendNoticeToAsync(scheduledBackupFailedNotifyAction, user, StudioNotifyService.EMailSenderName);
         }
     }
@@ -182,12 +182,12 @@ public class NotifyHelper(
         var client = workContext.RegisterClient(serviceProvider, studioNotifySource);
 
         var users = await GetUserInfos(tenant, notifyAllUsers);
-
+        
+        var restoreStartedNotifyAction = serviceProvider.GetService<RestoreStartedNotifyAction>();
+        
         foreach (var user in users.Where(r => r.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated)))
         {
-            var restoreStartedNotifyAction = serviceProvider.GetService<RestoreStartedNotifyAction>();
             restoreStartedNotifyAction.Init(user);
-            
             await client.SendNoticeToAsync(restoreStartedNotifyAction, user, StudioNotifyService.EMailSenderName);
         }
     }
@@ -200,12 +200,12 @@ public class NotifyHelper(
         var client = workContext.RegisterClient(serviceProvider, studioNotifySource);
 
         var users = await GetUserInfos(tenant, notifyAllUsers);
-
+        
+        var restoreCompletedV115NotifyAction = serviceProvider.GetService<RestoreCompletedV115NotifyAction>();
+        
         foreach (var user in users.Where(r => r.ActivationStatus.HasFlag(EmployeeActivationStatus.Activated)))
         {
-            var restoreCompletedV115NotifyAction = serviceProvider.GetService<RestoreCompletedV115NotifyAction>();
             await restoreCompletedV115NotifyAction.InitAsync(user);
-
             await client.SendNoticeToAsync(restoreCompletedV115NotifyAction, user, StudioNotifyService.EMailSenderName);
         }
     }
