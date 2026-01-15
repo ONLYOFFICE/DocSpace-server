@@ -100,13 +100,13 @@ public class FileSharingAceHelper(
 
             var emailInvite = !string.IsNullOrEmpty(w.Email);
             var currentUser = await userManager.GetUsersAsync(w.Id, false);
-            if ((currentUser.Status == EmployeeStatus.Terminated || currentUser.Removed) && w.Access != FileShare.None)
+            var existedShare = shares.Get(w.Id);
+            if ((currentUser.Status == EmployeeStatus.Terminated || currentUser.Removed) && (w.Access != FileShare.None || existedShare == null))
             {
                 continue;
             }
 
             var currentUserType = await userManager.GetUserTypeAsync(currentUser);
-            var existedShare = shares.Get(w.Id);
             var eventType = existedShare != null ? w.Access == FileShare.None ? EventType.Remove : EventType.Update : EventType.Create;
 
             if (existedShare != null)
