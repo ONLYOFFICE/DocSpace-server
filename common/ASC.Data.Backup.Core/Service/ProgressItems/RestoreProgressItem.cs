@@ -106,26 +106,6 @@ public class RestoreProgressItem : BaseBackupProgressItem
             _tenantManager.SetCurrentTenant(tenant);
             await _socketManager.RestoreProgressAsync(socketTenant, Dump, 0);
 
-            _notifyHelper.SetServerBaseUri(_serverBaseUri);
-
-            if (Dump)
-            {
-                var tenants = await _tenantManager.GetTenantsAsync();
-
-                foreach (var t in tenants)
-                {
-                    await _notifyHelper.SendAboutRestoreStartedAsync(t, Notify);
-                    t.SetStatus(TenantStatus.Restoring);
-                    await _tenantManager.SaveTenantAsync(t);
-                }
-            }
-            else
-            {
-                await _notifyHelper.SendAboutRestoreStartedAsync(tenant, Notify);
-                tenant.SetStatus(TenantStatus.Restoring);
-                await _tenantManager.SaveTenantAsync(tenant);
-            }
-
             var restoreTask = scope.ServiceProvider.GetService<RestorePortalTask>();
 
             var storage = await _backupStorageFactory.GetBackupStorageAsync(StorageType, TenantId, StorageParams);
@@ -146,6 +126,26 @@ public class RestoreProgressItem : BaseBackupProgressItem
                         throw new Exception(BackupResource.BackupNotFound);
                     }
                 }
+            }
+
+            _notifyHelper.SetServerBaseUri(_serverBaseUri);
+
+            if (Dump)
+            {
+                var tenants = await _tenantManager.GetTenantsAsync();
+
+                foreach (var t in tenants)
+                {
+                    await _notifyHelper.SendAboutRestoreStartedAsync(t, Notify);
+                    t.SetStatus(TenantStatus.Restoring);
+                    await _tenantManager.SaveTenantAsync(t);
+                }
+            }
+            else
+            {
+                await _notifyHelper.SendAboutRestoreStartedAsync(tenant, Notify);
+                tenant.SetStatus(TenantStatus.Restoring);
+                await _tenantManager.SaveTenantAsync(tenant);
             }
 
             Percentage = 10;
