@@ -92,7 +92,7 @@ public class StudioNotifyServiceHelper(StudioNotifyHelper studioNotifyHelper,
 
         if (action.Tags != null)
         {
-            item.Tags = action.Tags != null ? action.Tags.Select(Tag (r) => new Tag{ Key = r.Tag, Value = r.Value?.ToString() }).ToList() : [];
+            item.Tags = action.Tags.Select(Tag (r) => new Tag{ Key = r.Tag, Value = r.Value?.ToString() }).ToList();
         }
 
         await eventBus.PublishAsync(item);
