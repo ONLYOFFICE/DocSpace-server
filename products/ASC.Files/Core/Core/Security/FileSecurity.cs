@@ -26,8 +26,6 @@
 
 using System.ComponentModel;
 
-using Actions = ASC.Web.Studio.Core.Notify.Actions;
-
 namespace ASC.Files.Core.Security;
 
 [Scope]
@@ -57,7 +55,7 @@ public class FileSecurity(
     VectorizationGlobalSettings vectorizationGlobalSettings,
     VectorizationHelper vectorizationHelper,
     AiAccessibility aiAccessibility,
-    Actions actions)
+    IServiceProvider serviceProvider)
     : IFileSecurity
 {
     public readonly FileShare DefaultMyShare = FileShare.Restrict;
@@ -3395,8 +3393,8 @@ public class FileSecurity(
         var userId = authContext.CurrentAccount.ID;
 
         if (!await badgesSettingsHelper.GetEnabledForCurrentUserAsync()
-            && !await studioNotifyHelper.IsSubscribedToNotifyAsync(userId, actions.RoomsActivity)
-            && !await studioNotifyHelper.IsSubscribedToNotifyAsync(userId, actions.SendWhatsNew))
+            && !await studioNotifyHelper.IsSubscribedToNotifyAsync(userId, serviceProvider.GetService<RoomsActivityNotifyAction>())
+            && !await studioNotifyHelper.IsSubscribedToNotifyAsync(userId, serviceProvider.GetService<SendWhatsNewNotifyAction>()))
         {
             return true;
         }

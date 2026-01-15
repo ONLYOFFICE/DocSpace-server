@@ -29,5 +29,6 @@ namespace ASC.Notify.Model;
 public interface INotifyAction
 {
     string ID { get; }
-    List<Pattern> Patterns { get; set; }
+    List<Pattern> Patterns { get; }
+    List<ITagValue> Tags { get; set; }
 }
