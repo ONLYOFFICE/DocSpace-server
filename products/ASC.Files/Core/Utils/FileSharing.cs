@@ -423,7 +423,11 @@ public class FileSharingAceHelper(
                 listUsersId.Add(w.Id);
             }
 
-            listUsersId.Remove(authContext.CurrentAccount.ID);
+            //if not leaving the room
+            if (!(entryType == FileEntryType.Folder && share == FileShare.None && w.SubjectType is SubjectType.User && folder is { IsRoom: true }))
+            {
+                listUsersId.Remove(authContext.CurrentAccount.ID);
+            }
 
             if (entryType == FileEntryType.File)
             {
