@@ -44,6 +44,7 @@ public class SecurityInfoRequestDto
     /// <summary>
     /// The collection of sharing parameters.
     /// </summary>
+    [MaxEmailInvitations]
     public List<FileShareParams> Share { get; set; }
 
     /// <summary>
@@ -66,6 +67,7 @@ public class SecurityInfoSimpleRequestDto
     /// <summary>
     /// The collection of sharing parameters.
     /// </summary>
+    [MaxEmailInvitations]
     public List<FileShareParams> Share { get; set; }
 
     /// <summary>

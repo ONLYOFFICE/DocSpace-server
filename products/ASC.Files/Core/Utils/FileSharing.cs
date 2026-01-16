@@ -246,7 +246,7 @@ public class FileSharingAceHelper(
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
                 }
 
-                if (emailInvite)
+                if (emailInvite && w.Access != FileShare.None)
                 {
                     var user = await userManager.GetUserByEmailAsync(w.Email);
                     if (!user.Equals(Constants.LostUser))
@@ -387,7 +387,7 @@ public class FileSharingAceHelper(
             changed = true;
             handledAces.Add(new ProcessedItem<T>(eventType, existedShare, w, file != null ? file : folder));
 
-            if (emailInvite)
+            if (emailInvite && share != FileShare.None)
             {
                 var link = invitationService.GetInvitationLink(w.Email, share, authContext.CurrentAccount.ID, entry.Id.ToString(), culture);
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
