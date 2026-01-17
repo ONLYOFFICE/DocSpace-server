@@ -32,7 +32,7 @@ var connectionManager = new ConnectionStringManager(builder)
     .AddRedis()
     .AddEditors()
     .AddOpensearch()
-    .AddMailDev();
+    .AddMailPit();
 
 
 var basePath = Path.GetFullPath(Path.Combine("..", "..", ".."));

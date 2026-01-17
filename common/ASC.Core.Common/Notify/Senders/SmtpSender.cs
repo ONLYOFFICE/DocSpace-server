@@ -150,7 +150,7 @@ public class SmtpSender(
 
     private async Task BuildSmtpSettingsAsync(CoreConfiguration coreConfiguration)
     {
-        var connectionString = configuration.GetConnectionString("maildev");
+        var connectionString = configuration.GetConnectionString("mailpit")?.Split("=")?[1];
         if (connectionString != null && connectionString.StartsWith("smtp://"))
         {
             var uri = new Uri(connectionString);
