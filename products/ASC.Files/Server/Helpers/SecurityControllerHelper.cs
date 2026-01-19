@@ -56,6 +56,7 @@ public class SecurityControllerHelper(
         tenantManager,
         authContext)
 {
+    private readonly AuthContext _authContext = authContext;
 
     public async IAsyncEnumerable<FileShareDto> GetSecurityInfoAsync<T>(IEnumerable<T> fileIds, IEnumerable<T> folderIds)
     {
@@ -76,7 +77,7 @@ public class SecurityControllerHelper(
 
         var fileShares = await share
             .ToAsyncEnumerable()
-            .Where(async (s, _) => await userManager.CanUserViewAnotherUserAsync(authContext.CurrentAccount.ID, s.ShareTo))
+            .Where(async (s, _) => await userManager.CanUserViewAnotherUserAsync(_authContext.CurrentAccount.ID, s.ShareTo))
             .Select(async (FileShareParams s, CancellationToken _) => await fileShareParamsHelper.ToAceObjectAsync(s))
             .ToListAsync();
 
