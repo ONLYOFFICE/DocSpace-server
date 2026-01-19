@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Configuration;
+
 namespace ASC.Web.Files.Classes;
 
 [Singleton]
@@ -427,6 +429,25 @@ public class GlobalFolder(
         }
 
         result = await daoFactory.GetFolderDao<int>().GetFolderIDRoomTemplatesAsync(createIfNotExist);
+
+        if (result != default)
+        {
+            DocSpaceFolderCache[key] = result;
+        }
+
+        return result;
+    }
+
+    public async ValueTask<int> GetFolderDefaultTemplatesAsync(IDaoFactory daoFactory, bool createIfNotExist = true)
+    {
+        var key = $"defaultTemplates/{tenantManager.GetCurrentTenantId()}";
+
+        if (DocSpaceFolderCache.TryGetValue(key, out var result))
+        {
+            return result;
+        }
+
+        result = await daoFactory.GetFolderDao<int>().GetFolderIDDefaultTemplatesAsync(createIfNotExist);
 
         if (result != default)
         {
@@ -858,6 +879,7 @@ public class GlobalFolderHelper(IDaoFactory daoFactory, GlobalFolder globalFolde
     public ValueTask<int> FolderTemplatesAsync => globalFolder.GetFolderTemplatesAsync(daoFactory);
     public ValueTask<int> FolderVirtualRoomsAsync => globalFolder.GetFolderVirtualRoomsAsync(daoFactory);
     public ValueTask<int> FolderRoomTemplatesAsync => globalFolder.GetFolderRoomTemplatesAsync(daoFactory);
+    public ValueTask<int> FolderDefaultTemplatesAsync => globalFolder.GetFolderDefaultTemplatesAsync(daoFactory);
     public ValueTask<int> FolderArchiveAsync => globalFolder.GetFolderArchiveAsync(daoFactory);
     public ValueTask<int> FolderAiAgentsAsync => globalFolder.GetFolderAiAgentsAsync(daoFactory);
 
@@ -894,6 +916,11 @@ public class GlobalFolderHelper(IDaoFactory daoFactory, GlobalFolder globalFolde
     public async ValueTask<int> GetFolderRoomTemplatesAsync()
     {
         return await FolderRoomTemplatesAsync;
+    }
+
+    public async ValueTask<int> GetFolderDefaultTemplatesAsync()
+    {
+        return await FolderDefaultTemplatesAsync;
     }
 
     public async ValueTask<T> GetFolderShareAsync<T>()

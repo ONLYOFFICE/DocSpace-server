@@ -217,6 +217,7 @@ public class FolderDtoHelper(
                     FolderType.VirtualRooms => IdConverter.Convert<T>(await _globalFolderHelper.FolderVirtualRoomsAsync),
                     FolderType.Archive => IdConverter.Convert<T>(await _globalFolderHelper.FolderArchiveAsync),
                     FolderType.RoomTemplates => IdConverter.Convert<T>(await _globalFolderHelper.FolderRoomTemplatesAsync),
+                    FolderType.DefaultTempaltes => IdConverter.Convert<T>(await _globalFolderHelper.FolderDefaultTemplatesAsync),
                     _ => result.ParentId
                 };
             }
@@ -442,7 +443,7 @@ public class FolderDtoHelper(
     {
         var newBadges = folder.NewForMe;
 
-        if (folder.RootFolderType is FolderType.VirtualRooms or FolderType.RoomTemplates)
+        if (folder.RootFolderType is FolderType.VirtualRooms or FolderType.RoomTemplates or FolderType.DefaultTempaltes)
         {
             var isEnabledBadges = await badgesSettingsHelper.GetEnabledForCurrentUserAsync();
 
@@ -453,7 +454,7 @@ public class FolderDtoHelper(
         }
 
         var result = await GetAsync<FolderDto<T>, T>(folder);
-        if (folder.FolderType != FolderType.VirtualRooms && folder.FolderType != FolderType.RoomTemplates)
+        if (folder.FolderType != FolderType.VirtualRooms && folder.FolderType != FolderType.RoomTemplates && folder.FolderType != FolderType.DefaultTempaltes)
         {
             result.FilesCount = folder.FilesCount;
             result.FoldersCount = folder.FoldersCount;
