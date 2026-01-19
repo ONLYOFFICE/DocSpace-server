@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -381,12 +381,23 @@ public class NotifyEngine(Context context,
                 return;
             }
             
-            for (var i = 0; i < request._senderNames.Length; i++)
+            var senders = new List<string>(request._senderNames.Length);
+            var patterns = new List<IPattern>(request._patterns.Length);
+            foreach (var senderName in request._senderNames)
             {
-                var senderName = request._senderNames[i];
-                var pattern = request.NotifyAction.Patterns.Find(r => r.SenderName == senderName);
-                request._patterns[i] = pattern ?? throw new NotifyException($"For action \"{request.NotifyAction.ID}\" by sender \"{senderName}\" no one patterns getted.");
+                try
+                {
+                    var pattern = request.NotifyAction.Patterns.Find(r => r.SenderName == senderName);
+                    patterns.Add(pattern ?? throw new NotifyException($"For action \"{request.NotifyAction.ID}\" by sender \"{senderName}\" no one patterns getted."));
+                    senders.Add(senderName);
+                }
+                catch (Exception e)
+                {
+                    _logger.ErrorWithException(e);
+                }
             }
+            request._senderNames = senders.ToArray();
+            request._patterns = patterns.ToArray();
         }
     }
 

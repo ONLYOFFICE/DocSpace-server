@@ -22979,7 +22979,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChunkedUploadSessionResponseWrapperTWrapper"
+                  "$ref": "#/components/schemas/ObjectWrapper"
                 }
               }
             }
@@ -25258,7 +25258,7 @@
                   "InsertFile.Title": {
                     "type": "string",
                     "description": "The file title to be inserted.",
-                    "example": "1080p_small_wooden_mouse_personal_loan_account"
+                    "example": "legacy_1080p_small_wooden_mouse"
                   },
                   "InsertFile.CreateNewIfExist": {
                     "type": "boolean",
@@ -26844,7 +26844,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChunkedUploadSessionResponseWrapperTWrapper"
+                  "$ref": "#/components/schemas/ObjectWrapper"
                 }
               }
             }
@@ -26854,459 +26854,6 @@
           },
           "403": {
             "description": "You don't have enough permission to create"
-          }
-        },
-        "deprecated": true,
-        "security": [
-          {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Bearer": []
-          },
-          {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Basic": []
-          },
-          {
-            "OAuth2": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "OpenId": []
-          }
-        ]
-      }
-    },
-    "/api/2.0/files/{folderId}/session": {
-      "post": {
-        "tags": [
-          "Files / Operations"
-        ],
-        "operationId": "createUploadSessionInFolder",
-        "parameters": [
-          {
-            "name": "folderId",
-            "in": "path",
-            "description": "The session folder ID.",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "example": 9846
-            }
-          },
-          {
-            "name": "FileName",
-            "in": "query",
-            "description": "The file name.",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "example": "some text"
-            }
-          },
-          {
-            "name": "FileSize",
-            "in": "query",
-            "description": "The file size.",
-            "schema": {
-              "type": "integer",
-              "format": "int64",
-              "example": 1234
-            }
-          },
-          {
-            "name": "RelativePath",
-            "in": "query",
-            "description": "The relative path to the file.",
-            "schema": {
-              "type": "string",
-              "example": "some text"
-            }
-          },
-          {
-            "name": "CreateOn",
-            "in": "query",
-            "description": "The date and time when the file was created.",
-            "schema": {
-              "$ref": "#/components/schemas/ApiDateTime"
-            }
-          },
-          {
-            "name": "Encrypted",
-            "in": "query",
-            "description": "Specifies whether the file is encrypted or not.",
-            "schema": {
-              "type": "boolean",
-              "example": true
-            }
-          },
-          {
-            "name": "CreateNewIfExist",
-            "in": "query",
-            "description": "Specifies whether to create a new file if it already exists.",
-            "schema": {
-              "type": "boolean",
-              "example": true
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ChunkedUploadSessionResponseIntegerWrapper"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          }
-        },
-        "security": [
-          {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Bearer": []
-          },
-          {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Basic": []
-          },
-          {
-            "OAuth2": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "OpenId": []
-          }
-        ]
-      }
-    },
-    "/api/2.0/files/{folderId}/session/{sessionId}": {
-      "delete": {
-        "tags": [
-          "Files / Operations"
-        ],
-        "operationId": "abortUploadSession",
-        "parameters": [
-          {
-            "name": "sessionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "example": "some text"
-            }
-          },
-          {
-            "name": "folderId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "example": 9846
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized"
-          }
-        },
-        "security": [
-          {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Bearer": []
-          },
-          {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Basic": []
-          },
-          {
-            "OAuth2": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "OpenId": []
-          }
-        ]
-      },
-      "post": {
-        "tags": [
-          "Files / Operations"
-        ],
-        "operationId": "uploadSession",
-        "parameters": [
-          {
-            "name": "folderId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "example": 9846
-            }
-          },
-          {
-            "name": "sessionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "example": "some text"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "File": {
-                    "type": "string",
-                    "format": "binary"
-                  }
-                }
-              },
-              "encoding": {
-                "File": {
-                  "style": "form"
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UploadSessionResponseIntegerWrapper"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          }
-        },
-        "security": [
-          {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Bearer": []
-          },
-          {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Basic": []
-          },
-          {
-            "OAuth2": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "OpenId": []
-          }
-        ]
-      }
-    },
-    "/api/2.0/files/{folderId}/session/{sessionId}/upload": {
-      "post": {
-        "tags": [
-          "Files / Operations"
-        ],
-        "operationId": "uploadAsyncSession",
-        "parameters": [
-          {
-            "name": "folderId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "example": 9846
-            }
-          },
-          {
-            "name": "sessionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "example": "some text"
-            }
-          },
-          {
-            "name": "ChunkNumber",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "example": 1234
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "File": {
-                    "type": "string",
-                    "format": "binary"
-                  }
-                }
-              },
-              "encoding": {
-                "File": {
-                  "style": "form"
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ChunkedUploadSessionResponseIntegerWrapper"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          }
-        },
-        "security": [
-          {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Bearer": []
-          },
-          {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Basic": []
-          },
-          {
-            "OAuth2": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "OpenId": []
-          }
-        ]
-      }
-    },
-    "/api/2.0/files/{folderId}/session/{sessionId}/finalize": {
-      "put": {
-        "tags": [
-          "Files / Operations"
-        ],
-        "operationId": "finalizeSession",
-        "parameters": [
-          {
-            "name": "folderId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "example": 9846
-            }
-          },
-          {
-            "name": "sessionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "example": "some text"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UploadSessionResponseIntegerWrapper"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
           }
         },
         "security": [
@@ -47517,7 +47064,7 @@
             "type": "string",
             "description": "The user password.",
             "nullable": true,
-            "example": "vfmf2vO1Kp"
+            "example": "8yjgauQXph"
           },
           "passwordHash": {
             "type": "string",
@@ -49166,167 +48713,6 @@
         },
         "additionalProperties": false,
         "description": "The request parameters for checking file uploads."
-      },
-      "ChunkedUploadSessionResponseInteger": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "nullable": true,
-            "example": "9846"
-          },
-          "path": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "nullable": true,
-            "example": [
-              1234
-            ]
-          },
-          "created": {
-            "type": "string",
-            "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
-          },
-          "expired": {
-            "type": "string",
-            "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
-          },
-          "location": {
-            "type": "string",
-            "nullable": true,
-            "example": "011 Ritchie Canyon, Tabithaport, Colombia"
-          },
-          "bytes_total": {
-            "type": "integer",
-            "format": "int64",
-            "example": 1234
-          }
-        },
-        "additionalProperties": false
-      },
-      "ChunkedUploadSessionResponseIntegerWrapper": {
-        "type": "object",
-        "properties": {
-          "response": {
-            "$ref": "#/components/schemas/ChunkedUploadSessionResponseInteger"
-          },
-          "count": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "href": {
-                  "type": "string"
-                },
-                "action": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "status": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "statusCode": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "ChunkedUploadSessionResponseT": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "nullable": true,
-            "example": "9846"
-          },
-          "path": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/T"
-            },
-            "nullable": true
-          },
-          "created": {
-            "type": "string",
-            "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
-          },
-          "expired": {
-            "type": "string",
-            "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
-          },
-          "location": {
-            "type": "string",
-            "nullable": true,
-            "example": "001 Schroeder Run, New Tabithaport, Colombia"
-          },
-          "bytes_total": {
-            "type": "integer",
-            "format": "int64",
-            "example": 1234
-          }
-        },
-        "additionalProperties": false
-      },
-      "ChunkedUploadSessionResponseWrapperT": {
-        "type": "object",
-        "properties": {
-          "success": {
-            "type": "boolean",
-            "example": true
-          },
-          "data": {
-            "$ref": "#/components/schemas/ChunkedUploadSessionResponseT"
-          }
-        },
-        "additionalProperties": false
-      },
-      "ChunkedUploadSessionResponseWrapperTWrapper": {
-        "type": "object",
-        "properties": {
-          "response": {
-            "$ref": "#/components/schemas/ChunkedUploadSessionResponseWrapperT"
-          },
-          "count": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "href": {
-                  "type": "string"
-                },
-                "action": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "status": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "statusCode": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
       },
       "CoEditingConfig": {
         "type": "object",
@@ -53103,25 +52489,25 @@
         "description": "A shareable link for a file with its configuration and status."
       },
       "FileShareParams": {
-        "type": "object",
-        "properties": {
-          "shareTo": {
-            "type": "string",
-            "description": "The ID of the user to whom the file will be shared.",
-            "format": "uuid",
-            "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EmailInvitationDto"
           },
-          "email": {
-            "type": "string",
-            "description": "The user email address.",
-            "format": "email",
-            "nullable": true,
-            "example": "Sydney_Roberts4@hotmail.com"
-          },
-          "access": {
-            "$ref": "#/components/schemas/FileShare"
+          {
+            "type": "object",
+            "properties": {
+              "shareTo": {
+                "type": "string",
+                "description": "The ID of the user to whom the file will be shared.",
+                "format": "uuid",
+                "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              },
+              "access": {
+                "$ref": "#/components/schemas/FileShare"
+              }
+            }
           }
-        },
+        ],
         "additionalProperties": false,
         "description": "The collection of file sharing parameters."
       },
@@ -56433,7 +55819,7 @@
                 "type": "string",
                 "description": "The ID of the user to share a room with.",
                 "format": "uuid",
-                "example": "a5aae1e1-a1bc-ba9f-8c42-058b4abf2896"
+                "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
               },
               "access": {
                 "$ref": "#/components/schemas/FileShare"
@@ -56980,6 +56366,8 @@
             "example": true
           },
           "sharingMessage": {
+            "maxLength": 255,
+            "minLength": 0,
             "type": "string",
             "description": "The message to send when notifying about the shared file.",
             "nullable": true,
@@ -57346,10 +56734,6 @@
         },
         "additionalProperties": false,
         "description": "The Complete & Submit button settings."
-      },
-      "T": {
-        "type": "object",
-        "additionalProperties": false
       },
       "TemplatesConfig": {
         "type": "object",
@@ -57848,78 +57232,6 @@
         "properties": {
           "response": {
             "$ref": "#/components/schemas/UploadResultDto"
-          },
-          "count": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "href": {
-                  "type": "string"
-                },
-                "action": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "status": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "statusCode": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "UploadSessionResponseDtoInteger": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32",
-            "example": 1234
-          },
-          "folderId": {
-            "type": "integer",
-            "format": "int32",
-            "example": 9846
-          },
-          "version": {
-            "type": "integer",
-            "format": "int32",
-            "example": 1234
-          },
-          "title": {
-            "type": "string",
-            "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
-          },
-          "providerKey": {
-            "type": "string",
-            "nullable": true,
-            "example": "some text"
-          },
-          "uploaded": {
-            "type": "boolean",
-            "example": true
-          },
-          "file": {
-            "$ref": "#/components/schemas/FileDtoInteger"
-          }
-        },
-        "additionalProperties": false
-      },
-      "UploadSessionResponseIntegerWrapper": {
-        "type": "object",
-        "properties": {
-          "response": {
-            "$ref": "#/components/schemas/UploadSessionResponseDtoInteger"
           },
           "count": {
             "type": "integer",

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -51,7 +51,8 @@ public static class Initializer
         new("$STORAGE_ROOT", Path.Combine(_basePath, "Data", "Test")),
         new("web:hub:internal", ""),
         new("core:base-domain", "localhost"),
-        new("license:file:path", Path.Combine(_basePath, "Data", "license", "license.lic"))
+        new("license:file:path", Path.Combine(_basePath, "Data", "license", "license.lic")),
+        new("web:invitation-limit", "3")
     ];
 
     internal static readonly Faker<MemberRequestDto> FakerMember = new Faker<MemberRequestDto>()

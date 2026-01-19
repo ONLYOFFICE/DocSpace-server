@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,19 +29,13 @@ namespace ASC.Files.Core.ApiModels;
 /// <summary>
 /// The collection of file sharing parameters.
 /// </summary>
-public class FileShareParams
+public class FileShareParams : EmailInvitationDto
 {
     /// <summary>
     /// The ID of the user to whom the file will be shared.
     /// </summary>
     public Guid ShareTo { get; set; }
-
-    /// <summary>
-    /// The user email address.
-    /// </summary>
-    [EmailAddress]
-    public string Email { get; set; }
-
+    
     /// <summary>
     /// The sharing access rights.
     /// </summary>

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,21 +28,20 @@
 package com.asc.registration.service;
 
 import com.asc.registration.service.ports.input.service.ScopeApplicationService;
+import com.asc.registration.service.ports.output.resilience.ScopeCacheService;
 import com.asc.registration.service.transfer.response.ScopeResponse;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * CoreScopeApplicationService implements the {@link ScopeApplicationService} interface, providing
  * core business logic for managing scopes.
  */
-@Service
-@Validated
+@Slf4j
 @RequiredArgsConstructor
 public class CoreScopeApplicationService implements ScopeApplicationService {
+  private final ScopeCacheService scopeCacheService;
   private final ScopeQueryHandler queryHandler;
 
   /**
@@ -50,9 +49,18 @@ public class CoreScopeApplicationService implements ScopeApplicationService {
    *
    * @return a set of {@link ScopeResponse} representing all scopes.
    */
-  @Cacheable(value = "scopes", unless = "#result == null")
   public Set<ScopeResponse> getScopes() {
-    return queryHandler.getScopes();
+    log.debug("Retrieving all scopes");
+
+    var cached = scopeCacheService.getAll().orElse(null);
+    if (cached != null) {
+      log.debug("Returning {} scopes from cache", cached.size());
+      return cached;
+    }
+
+    var scopes = queryHandler.getScopes();
+    scopeCacheService.putAll(scopes);
+    return scopes;
   }
 
   /**
@@ -61,8 +69,17 @@ public class CoreScopeApplicationService implements ScopeApplicationService {
    * @param name the name of the scope to retrieve.
    * @return a {@link ScopeResponse} representing the requested scope.
    */
-  @Cacheable(value = "scope", key = "#name", unless = "#result == null")
   public ScopeResponse getScope(String name) {
-    return queryHandler.getScope(name);
+    log.debug("Retrieving scope by name: {}", name);
+
+    var cached = scopeCacheService.get(name).orElse(null);
+    if (cached != null) {
+      log.debug("Returning scope {} from cache", name);
+      return cached;
+    }
+
+    getScopes();
+
+    return scopeCacheService.get(name).orElseGet(() -> queryHandler.getScope(name));
   }
 }

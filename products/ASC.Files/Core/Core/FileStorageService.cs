@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -101,8 +101,7 @@ public class FileStorageService //: IFileStorageService
     WebhookManager webhookManager,
     FileSharingHelper fileSharingHelper,
     AiGateway gateway,
-    FormFillingReportCreator formFillingReportCreator,
-    NotifyConstants notifyConstants)
+    FormFillingReportCreator formFillingReportCreator)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
 
@@ -2525,7 +2524,7 @@ public class FileStorageService //: IFileStorageService
         try
         {
             var newFiles = await fileMarker.MarkedItemsAsync(folder)
-                .Where(x => x.FileEntryType == FileEntryType.File)
+                .Where(x => folder.FolderType == FolderType.SHARE || x.FileEntryType == FileEntryType.File)
                 .ToListAsync();
             if (newFiles.Count == 0)
             {
@@ -5102,7 +5101,7 @@ public class FileStorageService //: IFileStorageService
 
             if (recipients.Count > 0)
             {
-                await notifyClient.SendFormFillingEvent(currentRoom, form, recipients, notifyConstants.EventFormStartedFilling, currentUserId);
+                await notifyClient.SendFormFillingEvent(currentRoom, form, recipients, typeof(FormStartedFillingNotifyAction), currentUserId);
             }
 
             var roleUserIds = roles.Where(r => r.UserId != currentUserId).Select(r => r.UserId);
@@ -5198,7 +5197,7 @@ public class FileStorageService //: IFileStorageService
 
                 var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
                 await filesMessageService.SendAsync(MessageAction.FormStopped, form, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
-                await notifyClient.SendFormFillingEvent(room, form, allRoleUserIds, notifyConstants.EventStoppedFormFilling, authContext.CurrentAccount.ID);
+                await notifyClient.SendFormFillingEvent(room, form, allRoleUserIds, typeof(StoppedFormFillingNotifyAction), authContext.CurrentAccount.ID);
                 break;
 
             case FormFillingManageAction.Resume:
