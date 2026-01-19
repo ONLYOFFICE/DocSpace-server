@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Configuration;
+
 using Module = ASC.Api.Core.Module;
 
 namespace ASC.Files.Api;
@@ -34,7 +36,8 @@ public class SettingsController(
     FilesSettingsDtoConverter settingsDtoConverter,
     CompressToArchive compressToArchive,
     FolderDtoHelper folderDtoHelper,
-    FileDtoHelper fileDtoHelper)
+    FileDtoHelper fileDtoHelper,
+    DefaultTemplateSettingsHelper defaultTemplateSettingsHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -384,5 +387,20 @@ public class SettingsController(
     {
         await filesSettingsHelper.SetOpenEditorInSameTabAsync(inDto.Set);
         return await filesSettingsHelper.GetOpenEditorInSameTabAsync();
+    }
+
+
+    [HttpGet("defaulttemplate")]
+    public async Task<DefaultTemplateSettingsDto> GetDefaultTemplates()
+    {
+        var settings = await defaultTemplateSettingsHelper.GetSettings();
+        return new DefaultTemplateSettingsDto(settings);
+    }
+
+    [HttpPut("defaulttemplate")]
+    public async Task<DefaultTemplateSettingsDto> SetDefaultTemplate(DefaultTemplateSettingsRequestDto inDto)
+    {
+        var settings = await defaultTemplateSettingsHelper.SetTemplate(inDto.FileExtension, inDto.SelectedFile);
+        return new DefaultTemplateSettingsDto(settings);
     }
 }
