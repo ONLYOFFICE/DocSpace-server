@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -40,7 +40,7 @@ internal static partial class AWSSenderLogger
     public static partial void DebugRefreshingQuota(this ILogger logger, TimeSpan timeout, DateTime refreshDate);
 
     [LoggerMessage(LogLevel.Debug, "quota: {lastCount}/{maxCount} at {rate} mps. send window:{interval}")]
-    public static partial void DebugQuota(this ILogger logger, double lastCount, double maxCount, double rate, TimeSpan interval);
+    public static partial void DebugQuota(this ILogger logger, double? lastCount, double? maxCount, double rate, TimeSpan interval);
 
     [LoggerMessage(LogLevel.Warning, "Quota limit reached. setting next check to: {lastRefresh}")]
     public static partial void WarningQuotaLimit(this ILogger logger, DateTime lastRefresh);

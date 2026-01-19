@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -40,7 +40,6 @@ public class FirstTimeTenantSettings(
     MessageService messageService,
     LicenseReader licenseReader,
     StudioNotifyService studioNotifyService,
-    TimeZoneConverter timeZoneConverter,
     CoreBaseSettings coreBaseSettings,
     IHttpClientFactory clientFactory,
     CookiesManager cookiesManager,
@@ -113,7 +112,7 @@ public class FirstTimeTenantSettings(
 
             TrySetLanguage(tenant, lng);
 
-            tenant.TimeZone = timeZoneConverter.GetTimeZone(timeZone).Id;
+            tenant.TimeZone = TimeZoneConverter.GetIanaTimeZoneId(timeZone);
 
             await tenantManager.SaveTenantAsync(tenant);
             await cspSettingsHelper.SaveAsync(null);

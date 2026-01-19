@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -257,8 +257,6 @@ public class SecurityController(
             itemList.TryAdd(item.Key, item.Value);
         }
 
-        var defaultPageSettings = await settingsManager.LoadAsync<StudioDefaultPageSettings>();
-
         foreach (var item in itemList)
         {
             Guid[] subjects = null;
@@ -277,10 +275,6 @@ public class SecurityController(
                         subjects = selectedUsers.ToArray();
                     }
                 }
-            }
-            else if (productId == defaultPageSettings.DefaultProductID)
-            {
-                await settingsManager.SaveAsync(settingsManager.GetDefault<StudioDefaultPageSettings>());
             }
 
             await webItemSecurity.SetSecurityAsync(item.Key, item.Value, subjects);

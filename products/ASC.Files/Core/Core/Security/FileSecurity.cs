@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,8 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using System.ComponentModel;
-
-using Actions = ASC.Web.Studio.Core.Notify.Actions;
 
 namespace ASC.Files.Core.Security;
 
@@ -56,7 +54,8 @@ public class FileSecurity(
     AuthManager authManager,
     VectorizationGlobalSettings vectorizationGlobalSettings,
     VectorizationHelper vectorizationHelper,
-    AiAccessibility aiAccessibility)
+    AiAccessibility aiAccessibility,
+    IServiceProvider serviceProvider)
     : IFileSecurity
 {
     public readonly FileShare DefaultMyShare = FileShare.Restrict;
@@ -1187,7 +1186,7 @@ public class FileSecurity(
             return false;
         }
 
-        if (file != null && action == FilesSecurityActions.SubmitToFormGallery && !file.IsForm)
+        if (file != null && action == FilesSecurityActions.SubmitToFormGallery && ((FilterType)file.Category is not (FilterType.DocumentsOnly or FilterType.PresentationsOnly or FilterType.SpreadsheetsOnly or FilterType.PdfForm)))
         {
             return false;
         }
@@ -3394,8 +3393,8 @@ public class FileSecurity(
         var userId = authContext.CurrentAccount.ID;
 
         if (!await badgesSettingsHelper.GetEnabledForCurrentUserAsync()
-            && !await studioNotifyHelper.IsSubscribedToNotifyAsync(userId, Actions.RoomsActivity)
-            && !await studioNotifyHelper.IsSubscribedToNotifyAsync(userId, Actions.SendWhatsNew))
+            && !await studioNotifyHelper.IsSubscribedToNotifyAsync(userId, serviceProvider.GetService<RoomsActivityNotifyAction>())
+            && !await studioNotifyHelper.IsSubscribedToNotifyAsync(userId, serviceProvider.GetService<SendWhatsNewNotifyAction>()))
         {
             return true;
         }

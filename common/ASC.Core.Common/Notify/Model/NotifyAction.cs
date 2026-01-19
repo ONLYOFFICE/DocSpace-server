@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,31 +28,33 @@ using ASC.Common.IntegrationEvents.Events;
 
 namespace ASC.Notify.Model;
 
-public class NotifyAction(string id, string name = null) : INotifyAction
+public abstract class NotifyAction(TenantManager tenantManager) : INotifyAction
 {
-    public string ID { get; } = id ?? throw new ArgumentNullException(nameof(id));
-    public string Name { get; } = name;
-
+    public abstract string ID { get; }
+    public abstract List<Pattern> Patterns { get; }
+    
+    public List<ITagValue> Tags { get; set; }
+    
     public static implicit operator NotifyActionItem(NotifyAction cache)
     {
-        return new NotifyActionItem { Id = cache.ID };
+        return new NotifyActionItem
+        {
+            NotifyActionType = cache.GetType().FullName
+        };
     }
-
-    public static explicit operator NotifyAction(NotifyActionItem cache)
+    
+    protected CultureInfo GetCulture(UserInfo user)
     {
-        return new NotifyAction(cache.Id);
-    }
+        CultureInfo culture = null;
 
-    public override bool Equals(object obj)
-    {
-        return obj is INotifyAction a && a.ID == ID;
-    }
+        if (user != null && !string.IsNullOrEmpty(user.CultureName))
+        {
+            culture = user.GetCulture();
+        }
 
-    public override int GetHashCode()
-    {
-        return ID.GetHashCode();
+        return culture ?? tenantManager.GetCurrentTenant(false)?.GetCulture() ?? CultureInfo.CurrentUICulture;
     }
-
+    
     public override string ToString()
     {
         return $"action: {ID}";

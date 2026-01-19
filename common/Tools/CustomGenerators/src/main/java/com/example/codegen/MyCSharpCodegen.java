@@ -50,7 +50,7 @@ public class MyCSharpCodegen extends CSharpClientCodegen {
     public void processOpts() {
         super.processOpts();
 
-        this.outputFolder = "generated-code/my-csharp";
+        this.outputFolder = "../../../sdk/docspace-api-sdk-csharp";
 
         String baseURL = openAPI.getServers().get(0).getUrl();
         if (openAPI.getServers() != null && !openAPI.getServers().isEmpty()) {

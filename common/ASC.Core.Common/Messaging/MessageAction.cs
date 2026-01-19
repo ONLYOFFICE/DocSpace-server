@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -608,19 +608,19 @@ public enum MessageAction
     [SwaggerEnum("Form stopped")]
     FormStopped = 5153,
     
-    [SwaggerEnum("Agent created")]
+    [SwaggerEnum("AI agent created")]
     AgentCreated = 5154,
 
-    [SwaggerEnum("Agent renamed")]
+    [SwaggerEnum("AI agent renamed")]
     AgentRenamed = 5155,
     
-    [SwaggerEnum("Agent deleted")]
+    [SwaggerEnum("AI agent deleted")]
     AgentDeleted = 5156,
     
-    [SwaggerEnum("MCP server added to agent")]
+    [SwaggerEnum("MCP server added to AI agent")]
     AddedServerToAgent = 5157,
     
-    [SwaggerEnum("MCP server deleted from agent")]
+    [SwaggerEnum("MCP server deleted from AI agent")]
     DeletedServerFromAgent = 5158,
 
     [SwaggerEnum("Room change owner")]
