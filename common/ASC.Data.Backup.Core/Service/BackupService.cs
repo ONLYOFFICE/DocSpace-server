@@ -318,18 +318,18 @@ public class BackupService(
         return await backupWorker.GetBackupProgressAsync(tenantId);
     }
     
-    public async Task CancelBackupAsync(int tenantId)
+    public async Task<bool> CancelBackupAsync(int tenantId)
     {
         await DemandPermissionsBackupAsync();
 
-        await backupWorker.CancelBackupAsync(tenantId);
+        return await backupWorker.CancelBackupAsync(tenantId);
     }
 
-    public async Task CancelRestoreAsync(int tenantId)
+    public async Task<bool> CancelRestoreAsync(int tenantId)
     {
         await DemandPermissionsBackupAsync();
 
-        await backupWorker.CancelRestoreAsync(tenantId);
+        return await backupWorker.CancelRestoreAsync(tenantId);
     }
 
     public async Task<BackupProgress> GetDumpBackupProgress()

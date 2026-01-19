@@ -292,14 +292,14 @@ public class BackupController(
     /// <short>Cancel current backup</short>
     /// <path>api/2.0/backup/cancelbackup</path>
     [Tags("Backup")]
-    [SwaggerResponse(200)]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [AllowNotPayment]
     [HttpPost("cancelbackup")]
-    public async Task CancelBackupAsync()
+    public async Task<bool> CancelBackupAsync()
     {
         var tenantId = tenantManager.GetCurrentTenantId();
 
-        await backupService.CancelBackupAsync(tenantId);
+        return await backupService.CancelBackupAsync(tenantId);
     }
 
     /// <summary>
@@ -308,15 +308,15 @@ public class BackupController(
     /// <short>Cancel current restore</short>
     /// <path>api/2.0/backup/cancelrestore</path>
     [Tags("Backup")]
-    [SwaggerResponse(200)]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [AllowNotPayment]
     [HttpPost("cancelrestore")]
-    public async Task CancelRestoreAsync()
+    public async Task<bool> CancelRestoreAsync()
     {
         var tenantId = tenantManager.GetCurrentTenantId();
 
-        await backupService.CancelRestoreAsync(tenantId);
+        return await backupService.CancelRestoreAsync(tenantId);
     }
 
     /// <summary>
