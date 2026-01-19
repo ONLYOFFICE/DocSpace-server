@@ -24,6 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.EventBus.Abstractions;
+using ASC.Web.Core.RemovePortal;
+
 namespace ASC.Data.Backup.Services;
 
 [Transient]
@@ -32,6 +35,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
     private readonly IConfiguration _configuration;
     private readonly ILogger<RestoreProgressItem> _logger;
     private readonly ICache _cache;
+    private readonly IEventBus _eventBus;
     private TenantManager _tenantManager;
     private BackupStorageFactory _backupStorageFactory;
     private readonly NotifyHelper _notifyHelper;
@@ -52,6 +56,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
         IConfiguration configuration,
         ILogger<RestoreProgressItem> logger,
         ICache cache,
+        IEventBus eventBus,
         IServiceScopeFactory serviceScopeFactory,
         NotifyHelper notifyHelper,
         CoreBaseSettings coreBaseSettings)
@@ -60,6 +65,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
         _configuration = configuration;
         _logger = logger;
         _cache = cache;
+        _eventBus = eventBus;
         _notifyHelper = notifyHelper;
         _coreBaseSettings = coreBaseSettings;
     }
@@ -95,12 +101,13 @@ public class RestoreProgressItem : BaseBackupProgressItem
         await using var scope = _serviceScopeProvider.CreateAsyncScope();
         _socketManager = scope.ServiceProvider.GetService<SocketManager>();
 
+        var columnMapper = new ColumnMapper();
+
         try
         {
             _tenantManager = scope.ServiceProvider.GetService<TenantManager>();
             _backupStorageFactory = scope.ServiceProvider.GetService<BackupStorageFactory>();
             _backupRepository = scope.ServiceProvider.GetService<BackupRepository>();
-
 
             tenant = await _tenantManager.GetTenantAsync(TenantId);
             _tenantManager.SetCurrentTenant(tenant);
@@ -121,9 +128,9 @@ public class RestoreProgressItem : BaseBackupProgressItem
             }
             else
             {
-            await _notifyHelper.SendAboutRestoreStartedAsync(tenant, Notify);
-            tenant.SetStatus(TenantStatus.Restoring);
-            await _tenantManager.SaveTenantAsync(tenant);
+                await _notifyHelper.SendAboutRestoreStartedAsync(tenant, Notify);
+                tenant.SetStatus(TenantStatus.Restoring);
+                await _tenantManager.SaveTenantAsync(tenant);
             }
 
             var restoreTask = scope.ServiceProvider.GetService<RestorePortalTask>();
@@ -150,7 +157,6 @@ public class RestoreProgressItem : BaseBackupProgressItem
 
             Percentage = 10;
 
-            var columnMapper = new ColumnMapper();
             columnMapper.SetMapping("tenants_tenants", "alias", tenant.Alias, Guid.Parse(Id).ToString("N"));
             columnMapper.Commit();
 
@@ -161,16 +167,12 @@ public class RestoreProgressItem : BaseBackupProgressItem
                 {
                     return;
                 }
-                Percentage = Percentage = 10d + 0.65 * args.Progress;
+                Percentage = 10d + 0.65 * args.Progress;
                 await _socketManager.RestoreProgressAsync(socketTenant, Dump, (int)Percentage);
                 await PublishChanges();
             };
 
             await restoreTask.RunJob();
-            if (CancellationToken.IsCancellationRequested)
-            {
-                throw new OperationCanceledException();
-            }
 
             NewTenantId = columnMapper.GetTenantMapping();
 
@@ -181,12 +183,12 @@ public class RestoreProgressItem : BaseBackupProgressItem
             {
                 _cache.Reset();
 
-                    var tenants = await _tenantManager.GetTenantsAsync();
-                    foreach (var t in tenants)
-                    {
-                        await _notifyHelper.SendAboutRestoreCompletedAsync(t, Notify);
-                    }
+                var tenants = await _tenantManager.GetTenantsAsync();
+                foreach (var t in tenants)
+                {
+                    await _notifyHelper.SendAboutRestoreCompletedAsync(t, Notify);
                 }
+            }
             else
             {
                 var restoredTenant = await _tenantManager.GetTenantAsync(columnMapper.GetTenantMapping());
@@ -210,10 +212,6 @@ public class RestoreProgressItem : BaseBackupProgressItem
                 {
                     _logger.ErrorNotifyComplete(error);
                 }
-            }
-            if (CancellationToken.IsCancellationRequested)
-            {
-                throw new OperationCanceledException();
             }
 
             Percentage = 75;
@@ -266,11 +264,22 @@ public class RestoreProgressItem : BaseBackupProgressItem
         }
         catch (Exception error)
         {
-            if(!CancellationToken.IsCancellationRequested)
+            if (CancellationToken.IsCancellationRequested)
+            {
+                if (!Dump)
+                {
+                    var restoredTenantId = columnMapper.GetTenantMapping();
+                    var restoredTenant = await _tenantManager.GetTenantAsync(restoredTenantId);
+                    await _tenantManager.RemoveTenantAsync(restoredTenant);
+                    await _eventBus.PublishAsync(new RemovePortalIntegrationEvent(restoredTenant.OwnerId, restoredTenant.Id));
+                }
+            }
+            else
             {
                 _logger.ErrorRestoreProgressItem(error);
             }
-            Exception = error; 
+
+            Exception = error;
             IsCompleted = true;
 
             if (tenant != null)
@@ -286,10 +295,10 @@ public class RestoreProgressItem : BaseBackupProgressItem
                 }
                 else
                 {
-                tenant.SetStatus(TenantStatus.Active);
-                await _tenantManager.SaveTenantAsync(tenant);
+                    tenant.SetStatus(TenantStatus.Active);
+                    await _tenantManager.SaveTenantAsync(tenant);
+                }
             }
-        }
         }
         finally
         {
