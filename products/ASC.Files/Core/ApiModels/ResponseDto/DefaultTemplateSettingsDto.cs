@@ -55,8 +55,14 @@ using ASC.Files.Core.Configuration;
 
 namespace ASC.Files.Core.ApiModels.ResponseDto
 {
-    public class DefaultTemplateSettingsDto(DefaultTemplateSettings customColorThemesSettings)
+    /// <summary>
+    /// Default templates settings parameters.
+    /// </summary>
+    public class DefaultTemplateSettingsDto(DefaultTemplateSettings defaultTemplateSettings)
     {
-        public IEnumerable<DefaultTempalteItem> Items { get; set; } = customColorThemesSettings.Items;
+        /// <summary>
+        /// Default templates list.
+        /// </summary>
+        public IEnumerable<DefaultTempalteItem> Items { get; set; } = defaultTemplateSettings.Items;
     }
 }

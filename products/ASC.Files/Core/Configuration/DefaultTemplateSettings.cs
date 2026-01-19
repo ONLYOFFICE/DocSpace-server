@@ -40,9 +40,18 @@ namespace ASC.Files.Core.Configuration
         public DateTime LastModified { get; set; }
     }
 
+    /// <summary>
+    /// Default template setting
+    /// </summary>
     public class DefaultTempalteItem
     {
+        /// <summary>
+        /// File id to use as a default template
+        /// </summary>
         public int? SelectedFile { get; set; }
+        /// <summary>
+        /// Extension of a default template
+        /// </summary>
         public string FileExtension { get; set; }
     }
 

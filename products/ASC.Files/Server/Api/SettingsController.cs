@@ -389,7 +389,13 @@ public class SettingsController(
         return await filesSettingsHelper.GetOpenEditorInSameTabAsync();
     }
 
-
+    /// <summary>
+    /// Returns the default template setting.
+    /// </summary>
+    /// <short>Get the default template setting</short>
+    /// <path>api/2.0/files/settings/defaulttemplate</path>
+    [Tags("Files / Settings")]
+    [SwaggerResponse(200, "Default template settings", typeof(DefaultTemplateSettingsDto))]
     [HttpGet("defaulttemplate")]
     public async Task<DefaultTemplateSettingsDto> GetDefaultTemplates()
     {
@@ -397,6 +403,13 @@ public class SettingsController(
         return new DefaultTemplateSettingsDto(settings);
     }
 
+    /// <summary>
+    /// Changes the default template setting.
+    /// </summary>
+    /// <short>Change the default template setting</short>
+    /// <path>api/2.0/files/settings/defaulttemplate</path>
+    [Tags("Files / Settings")]
+    [SwaggerResponse(200, "New default template settings", typeof(DefaultTemplateSettingsDto))]
     [HttpPut("defaulttemplate")]
     public async Task<DefaultTemplateSettingsDto> SetDefaultTemplate(DefaultTemplateSettingsRequestDto inDto)
     {

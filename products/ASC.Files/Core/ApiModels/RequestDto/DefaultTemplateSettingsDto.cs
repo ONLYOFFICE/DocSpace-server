@@ -53,9 +53,18 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto
 {
+    /// <summary>
+    /// Default templates settings request parameters.
+    /// </summary>
     public class DefaultTemplateSettingsRequestDto()
     {
+        /// <summary>
+        /// File id to replace template with (or null to use default template)
+        /// </summary>
         public int? SelectedFile { get; set; }
+        /// <summary>
+        /// File extension of a template to replace
+        /// </summary>
         public string FileExtension { get; set; }
     }
 }
