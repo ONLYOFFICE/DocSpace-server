@@ -51,7 +51,8 @@ public static class Initializer
         new("$STORAGE_ROOT", Path.Combine(_basePath, "Data", "Test")),
         new("web:hub:internal", ""),
         new("core:base-domain", "localhost"),
-        new("license:file:path", Path.Combine(_basePath, "Data", "license", "license.lic"))
+        new("license:file:path", Path.Combine(_basePath, "Data", "license", "license.lic")),
+        new("web:invitation-limit", "3")
     ];
 
     internal static readonly Faker<MemberRequestDto> FakerMember = new Faker<MemberRequestDto>()

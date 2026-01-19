@@ -43,6 +43,8 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
     private IResourceBuilder<RedisResource>? RedisResource { get; set; }
     private IResourceBuilder<ExecutableResource>? MigrateResource { get; set; }
     private IResourceBuilder<ContainerResource>? EditorResource { get; set; }
+    private IResourceBuilder<MailPitContainerResource>? MailResource { get; set; }
+    private IResourceBuilder<ContainerResource>? OpensearchResource { get; set; }
 
     public ConnectionStringManager AddMySql()
     {
@@ -96,8 +98,8 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
             .AddRedis("cache")
             .WithPassword(null)
             .WithoutHttpsCertificate()
-            .WithLifetime(ContainerLifetime.Persistent);
-//.WithRedisInsight();
+            .WithLifetime(ContainerLifetime.Persistent)
+            .WithRedisInsight();
 #pragma warning restore ASPIRECERTIFICATES001
         
         builder.Eventing.Subscribe(RedisResource.Resource, async (ConnectionStringAvailableEvent _, CancellationToken ct) =>
@@ -138,13 +140,41 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
 
         return this;
     }
-    
+
+    public ConnectionStringManager AddOpensearch()
+    {
+        OpensearchResource = builder
+            .AddContainer(Constants.OpensearchContainer, "opensearchproject/opensearch", "2")
+            .WithHttpEndpoint(port: Constants.OpensearchPort, targetPort: Constants.OpensearchPort)
+            .WithEnvironment("DISABLE_INSTALL_DEMO_CONFIG", "true")
+            .WithEnvironment("plugins.security.disabled", "true")
+            .WithEnvironment("discovery.type", "single-node")
+            .WithEntrypoint("/bin/bash")
+            .WithArgs("-c", "opensearch-plugin install ingest-attachment --batch && /usr/share/opensearch/opensearch-docker-entrypoint.sh");
+        
+        builder.AddContainer("opensearch-dashboard", "opensearchproject/opensearch-dashboards", "2")
+            .WithHttpEndpoint(targetPort: 5601)
+            .WithEnvironment("OPENSEARCH_HOSTS", $"http://{Constants.OpensearchContainer}:{Constants.OpensearchPort.ToString()}")
+            .WithEnvironment("DISABLE_SECURITY_DASHBOARDS_PLUGIN", "true");
+
+        return this;
+    }
+
+    public ConnectionStringManager AddMailPit()
+    {
+        MailResource = builder.AddMailPit("mailpit");
+        return this;
+    }
+
     public void AddWaitFor<T>(
         IResourceBuilder<T> resourceBuilder,
         bool includeMigrate = true,
         bool includeRabbitMq = true,
         bool includeRedis = true,
-        bool includeEditors = true)  where T : IResourceWithWaitSupport
+        bool includeEditors = true,
+        bool includeOpensearch = true,
+        bool includeMailPit = true
+        )  where T : IResourceWithWaitSupport
     {
         if (includeMigrate && MigrateResource != null)
         {
@@ -165,6 +195,15 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
         {
             resourceBuilder.WaitFor(EditorResource);
         }
+
+        if (includeOpensearch && OpensearchResource != null)
+        {
+            resourceBuilder.WaitFor(OpensearchResource);
+        }
+        if (includeMailPit && MailResource != null)
+        {
+            resourceBuilder.WaitFor(MailResource);
+        }
     }
 
     public void AddBaseConfig<T>(IResourceBuilder<T> resourceBuilder, bool isDocker, bool includeHealthCheck = true) where T : IResourceWithEnvironment, IResourceWithWaitSupport, IResourceWithEndpoints
@@ -176,7 +215,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
 
         resourceBuilder
             .WithEnvironment("openTelemetry:enable", "true")
-            .WithEnvironment("files:docservice:url:portal", ConnectionStringManager.SubstituteLocalhost("http://localhost"))
+            .WithEnvironment("files:docservice:url:portal", SubstituteLocalhost("http://localhost"))
             .WithEnvironment("files:docservice:url:public", "http://localhost/ds-vpath");
 
         if (MySqlResource != null)
@@ -184,26 +223,47 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
             resourceBuilder
                 .WithReference(MySqlResource, "default:connectionString");
         }
+        
+        if (MailResource != null)
+        {
+            resourceBuilder
+                .WithReference(MailResource);
+        }
 
         if (isDocker)
         {
             resourceBuilder.WithEnvironment("files:docservice:url:internal", $"http://{Constants.EditorsContainer}");
         }
 
-        resourceBuilder
-            .WithEnvironment("RabbitMQ:Hostname", () => RabbitMqUri != null ? isDocker ? $"{SubstituteLocalhost(RabbitMqUri.Host)}" : RabbitMqUri.Host : "")
-            .WithEnvironment("RabbitMQ:Port", () => RabbitMqUri != null ? $"{RabbitMqUri.Port}" : "")
-            .WithEnvironment("RabbitMQ:UserName", () => RabbitMqUri != null ? $"{RabbitMqUri.UserInfo.Split(':')[0]}" : "")
-            .WithEnvironment("RabbitMQ:Password", () => RabbitMqUri != null ? $"{RabbitMqUri.UserInfo.Split(':')[1]}" : "")
-            .WithEnvironment("RabbitMQ:VirtualHost", () => RabbitMqUri != null ? $"{RabbitMqUri.PathAndQuery}" : "");
-
-        resourceBuilder
-            .WithEnvironment("Redis:Hosts:0:Host", () => (isDocker ? SubstituteLocalhost(RedisHost) : RedisHost) ?? string.Empty)
-            .WithEnvironment("Redis:Hosts:0:Port", () => RedisPort ?? string.Empty);
-
-        if (!string.IsNullOrEmpty(RedisPassword))
+        if (RabbitMqResource != null)
         {
-            resourceBuilder.WithEnvironment("Redis:Password", () => RedisPassword ?? string.Empty);
+            resourceBuilder
+                .WithEnvironment("RabbitMQ:Hostname", () => RabbitMqUri != null ? isDocker ? $"{SubstituteLocalhost(RabbitMqUri.Host)}" : RabbitMqUri.Host : "")
+                .WithEnvironment("RabbitMQ:Port", () => RabbitMqUri != null ? $"{RabbitMqUri.Port}" : "")
+                .WithEnvironment("RabbitMQ:UserName", () => RabbitMqUri != null ? $"{RabbitMqUri.UserInfo.Split(':')[0]}" : "")
+                .WithEnvironment("RabbitMQ:Password", () => RabbitMqUri != null ? $"{RabbitMqUri.UserInfo.Split(':')[1]}" : "")
+                .WithEnvironment("RabbitMQ:VirtualHost", () => RabbitMqUri != null ? $"{RabbitMqUri.PathAndQuery}" : "");
+        }
+
+        if (RedisResource != null)
+        {
+            resourceBuilder
+                .WithEnvironment("Redis:Hosts:0:Host", () => (isDocker ? SubstituteLocalhost(RedisHost) : RedisHost) ?? string.Empty)
+                .WithEnvironment("Redis:Hosts:0:Port", () => RedisPort ?? string.Empty);
+
+            if (!string.IsNullOrEmpty(RedisPassword))
+            {
+                resourceBuilder.WithEnvironment("Redis:Password", () => RedisPassword ?? string.Empty);
+            }
+        }
+
+        if (OpensearchResource != null)
+        {
+            resourceBuilder
+                .WithEnvironment("elastic:Scheme", () => "http")
+                .WithEnvironment("elastic:Host", () => (isDocker ? Constants.OpensearchContainer : "localhost"))
+                .WithEnvironment("elastic:Port", () => Constants.OpensearchPort.ToString())
+                .WithEnvironment("elastic:Threads", () => "1");
         }
     }
     

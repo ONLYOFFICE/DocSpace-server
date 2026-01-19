@@ -30,7 +30,9 @@ var connectionManager = new ConnectionStringManager(builder)
     .AddMySql()
     .AddRabbitMq()
     .AddRedis()
-    .AddEditors();
+    .AddEditors()
+    .AddOpensearch()
+    .AddMailPit();
 
 
 var basePath = Path.GetFullPath(Path.Combine("..", "..", ".."));

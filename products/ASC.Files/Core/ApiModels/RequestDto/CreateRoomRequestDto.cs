@@ -145,6 +145,7 @@ public class CreateRoomRequestDto
     /// <summary>
     /// The collection of sharing parameters.
     /// </summary>
+    [MaxEmailInvitations]
     public IEnumerable<FileShareParams> Share { get; set; }
     
     public ChatSettings ChatSettings { get; set; }

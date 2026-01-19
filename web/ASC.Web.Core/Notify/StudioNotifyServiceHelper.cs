@@ -35,22 +35,26 @@ public class StudioNotifyServiceHelper(StudioNotifyHelper studioNotifyHelper,
     CommonLinkUtility commonLinkUtility,
     IEventBus eventBus)
 {
-    public async Task SendNoticeToAsync(INotifyAction action, IRecipient[] recipients, string[] senderNames, params ITagValue[] args)
+    public async Task SendNoticeAsync(INotifyAction action)
     {
-        await SendNoticeToAsync(action, null, recipients, senderNames, false, null, args);
+        var subscriptionSource = studioNotifyHelper.NotifySource.GetSubscriptionProvider();
+        var recipients = await subscriptionSource.GetRecipientsAsync(action, null);
+
+        await SendNoticeToAsync(action, recipients, null, false, null);
+    }
+    
+    public async Task SendNoticeToAsync(INotifyAction action, IRecipient[] recipients, string[] senderNames)
+    {
+        await SendNoticeToAsync(action, recipients, senderNames, false, null);
     }
 
-    public async Task SendNoticeToAsync(INotifyAction action, IRecipient[] recipients, string[] senderNames, string baseUri, params ITagValue[] args)
+    public async Task SendNoticeToAsync(INotifyAction action, IRecipient[] recipients, string[] senderNames, string baseUri)
     {
-        await SendNoticeToAsync(action, null, recipients, senderNames, false, baseUri, args);
+        await SendNoticeToAsync(action, recipients, senderNames, false, baseUri);
     }
+    
 
-    public async Task SendNoticeToAsync(INotifyAction action, string objectID, IRecipient[] recipients, string[] senderNames, params ITagValue[] args)
-    {
-        await SendNoticeToAsync(action, objectID, recipients, senderNames, false, null, args);
-    }
-
-    public async Task SendNoticeToAsync(INotifyAction action, string objectID, IRecipient[] recipients, string[] senderNames, bool checkSubsciption, string baseUri, params ITagValue[] args)
+    public async Task SendNoticeToAsync(INotifyAction action, IRecipient[] recipients, string[] senderNames, bool checkSubsciption, string baseUri)
     {
         var item = new NotifyItemIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())
         {
@@ -58,11 +62,6 @@ public class StudioNotifyServiceHelper(StudioNotifyHelper studioNotifyHelper,
             CheckSubsciption = checkSubsciption,
             BaseUrl = baseUri ?? commonLinkUtility.GetFullAbsolutePath("")
         };
-
-        if (objectID != null)
-        {
-            item.ObjectId = objectID;
-        }
 
         if (recipients != null && recipients.Length != 0)
         {
@@ -91,19 +90,13 @@ public class StudioNotifyServiceHelper(StudioNotifyHelper studioNotifyHelper,
             item.SenderNames = senderNames.ToList();
         }
 
-        if (args != null && args.Length != 0)
+        if (action.Tags != null)
         {
-            item.Tags = args.Where(r => r.Value != null).Select(r => new Tag { Key = r.Tag, Value = r.Value.ToString() }).ToList();
+            item.Tags = action.Tags.Select(Tag (r) => new Tag{ Key = r.Tag, Value = r.Value?.ToString() }).ToList();
         }
 
         await eventBus.PublishAsync(item);
     }
 
-    public async Task SendNoticeAsync(INotifyAction action, params ITagValue[] args)
-    {
-        var subscriptionSource = studioNotifyHelper.NotifySource.GetSubscriptionProvider();
-        var recipients = await subscriptionSource.GetRecipientsAsync(action, null);
 
-        await SendNoticeToAsync(action, null, recipients, null, false, null, args);
-    }
 }
