@@ -574,11 +574,8 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         if (!edit && properties?.FormFilling?.OriginalFormVersion != file.Version)
         {
             await linkDao.DeleteAllLinkAsync(file.Id);
-            properties.FormFilling.ToFolderId = default(T);
-            properties.FormFilling.ResultsFolderId = default(T);
-            properties.FormFilling.ResultsFileID = default(T);
-            properties.FormFilling.ResultFormNumber = 0;
             properties.FormFilling.OriginalFormVersion = file.Version;
+            properties.FormFilling.IsVersionChanged = true;
             await fileDao.SaveProperties(file.Id, properties);
         }
 

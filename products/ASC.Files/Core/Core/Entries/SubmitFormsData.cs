@@ -91,6 +91,11 @@ public class DbFormsItemDataSearch : SubmitFormsData, ISearchItem
     public int OriginalFormId { get; set; }
 
     /// <summary>
+    /// The original form version.
+    /// </summary>
+    public int OriginalFormVersion { get; set; }
+
+    /// <summary>
     /// The ID of the room where the form is located.
     /// </summary>
     public int RoomId { get; set; }

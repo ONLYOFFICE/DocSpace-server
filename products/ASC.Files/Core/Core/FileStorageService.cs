@@ -5260,7 +5260,7 @@ public class FileStorageService //: IFileStorageService
         }
 
         var results = await formFillingReportCreator
-            .GetFormFillingResults(room.Id, form.Id);
+            .GetFormFillingResults(room.Id, form.Id, form.Version);
 
         foreach (var result in results)
         {

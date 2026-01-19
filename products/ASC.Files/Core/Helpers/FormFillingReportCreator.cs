@@ -42,10 +42,10 @@ public class FormFillingReportCreator(
         PropertyNameCaseInsensitive = true
     };
 
-    public async Task UpdateFormFillingReport<T>(int originalFormId, int roomId, int resultFormNumber, string formsDataUrl, File<T> formsDataFile)
+    public async Task UpdateFormFillingReport<T>(int originalFormId, int originalFormVersion, int roomId, int resultFormNumber, string formsDataUrl, File<T> formsDataFile)
     {
-        await GetSubmitFormsData(formsDataFile, originalFormId, roomId, resultFormNumber, formsDataUrl);
-        await exportToXLSX.UpdateXlsxReport(roomId, originalFormId);
+        await GetSubmitFormsData(formsDataFile, originalFormId, originalFormVersion, roomId, resultFormNumber, formsDataUrl);
+        await exportToXLSX.UpdateXlsxReport(roomId, originalFormId, originalFormVersion);
     }
 
     public async Task<IEnumerable<FormsItemData>> GetFormsFields(int folderId)
@@ -69,10 +69,10 @@ public class FormFillingReportCreator(
         return [];
     }
 
-    public async Task<IEnumerable<DbFormsItemDataSearch>> GetFormFillingResults(int roomId, int originalFormId)
+    public async Task<IEnumerable<DbFormsItemDataSearch>> GetFormFillingResults(int roomId, int originalFormId, int originalFormVersion)
     {
         factoryIndexerForm.Refresh();
-        var (success, result) = await factoryIndexerForm.TrySelectAsync(r => r.Where(s => s.RoomId, roomId).Where(s => s.OriginalFormId, originalFormId));
+        var (success, result) = await factoryIndexerForm.TrySelectAsync(r => r.Where(s => s.RoomId, roomId).Where(s => s.OriginalFormId, originalFormId).Where(s => s.OriginalFormVersion, originalFormVersion));
 
         if (success)
         {
@@ -92,7 +92,7 @@ public class FormFillingReportCreator(
         return [];
     }
 
-    private async Task GetSubmitFormsData<T>(File<T> formsDataFile, int originalFormId, int roomId, int resultFormNumber, string url)
+    private async Task GetSubmitFormsData<T>(File<T> formsDataFile, int originalFormId, int originalFormVersion, int roomId, int resultFormNumber, string url)
     {
         var request = new HttpRequestMessage
         {
@@ -127,6 +127,7 @@ public class FormFillingReportCreator(
                 TenantId = tenantId,
                 ParentId = parentId,
                 OriginalFormId = originalFormId,
+                OriginalFormVersion = originalFormVersion,
                 RoomId = roomId,
                 CreateOn = now,
                 FormsData = formNumber.Concat(fromData.FormsData)

@@ -2109,6 +2109,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 {
                     await formFillingReportCreator.UpdateFormFillingReport(
                        origFormId,
+                       origProperties.FormFilling.OriginalFormVersion,
                        rId,
                        resProp.FormFilling.ResultFormNumber,
                        formsDataUrl,

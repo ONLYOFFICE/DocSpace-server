@@ -121,6 +121,11 @@ public class FormFillingProperties<T>
     public T ResultsFileID { get; set; }
 
     /// <summary>
+    /// Indicates whether the original form version has changed.
+    /// </summary>
+    public bool IsVersionChanged { get; set; }
+
+    /// <summary>
     /// The result form number.
     /// </summary>
     public int ResultFormNumber { get; set; }

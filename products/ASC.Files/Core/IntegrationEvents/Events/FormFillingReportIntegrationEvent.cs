@@ -34,11 +34,12 @@ public record FormFillingReportIntegrationEvent : IntegrationEvent
 
     }
 
-    public FormFillingReportIntegrationEvent(Guid createBy, int tenantId, int roomId, int originalFormId, string baseUri, bool terminate = false, IDictionary<string, string> headers = null)
+    public FormFillingReportIntegrationEvent(Guid createBy, int tenantId, int roomId, int originalFormId, int originalFormVersion, string baseUri, bool terminate = false, IDictionary<string, string> headers = null)
     : base(createBy, tenantId)
     {
         RoomId = roomId;
         OriginalFormId = originalFormId;
+        OriginalFormVersion = originalFormVersion;
         Terminate = terminate;
         BaseUri = baseUri;
         Headers = headers;
@@ -51,11 +52,14 @@ public record FormFillingReportIntegrationEvent : IntegrationEvent
     public int OriginalFormId { get; set; }
 
     [ProtoMember(3)]
-    public string BaseUri { get; set; }
+    public int OriginalFormVersion { get; set; }
 
     [ProtoMember(4)]
-    public bool Terminate { get; set; }
+    public string BaseUri { get; set; }
 
     [ProtoMember(5)]
+    public bool Terminate { get; set; }
+
+    [ProtoMember(6)]
     public IDictionary<string, string> Headers { get; set; }
 }
