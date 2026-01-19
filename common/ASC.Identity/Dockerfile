@@ -1,5 +1,5 @@
 # Stage 1: Build the application
-FROM maven:3.8.8-eclipse-temurin-21 AS builder
+FROM maven:3.9.12-eclipse-temurin-21 AS builder
 WORKDIR /app
 
 # Copy the root pom.xml and all necessary module pom.xml files
