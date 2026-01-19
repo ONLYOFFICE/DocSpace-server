@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,31 +26,28 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-/// <summary>
-/// The request parameters for checking file uploads.
-/// </summary>
-public class CheckUploadRequest
-{
-    /// <summary>
-    /// The list of file titles.
-    /// </summary>
-    public IReadOnlyList<string> FilesTitle { get; set; }
+public class UploadSessionRequestDto<T>
+{    
+    [FromRoute(Name = "folderId")]
+    public T FolderId { get; set; }
+    
+    [FromRoute(Name = "sessionId")]
+    public string SessionId { get; set; }
+    
+    public IFormFile File { get; set; }
 }
 
-/// <summary>
-/// The generic request parameters for checking file uploads.
-/// </summary>
-public class CheckUploadRequestDto<T>
+public class UploadSessionAsyncRequestDto<T>
 {
-    /// <summary>
-    /// The folder ID.
-    /// </summary>
     [FromRoute(Name = "folderId")]
-    public required T FolderId { get; set; }
-
-    /// <summary>
-    /// The request parameters for checking file uploads.
-    /// </summary>
-    [FromBody]
-    public required CheckUploadRequest Check { get; set; }
+    public T FolderId { get; set; }
+    
+    [FromRoute(Name = "sessionId")]
+    public string SessionId { get; set; }
+    
+    [FromQuery]
+    public int? ChunkNumber { get; set; }
+    
+    [FromForm]
+    public IFormFile File { get; set; }
 }

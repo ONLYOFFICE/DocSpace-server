@@ -33,7 +33,6 @@ public abstract class FilesHelperBase(
     FileDtoHelper fileDtoHelper,
     FileStorageService fileStorageService,
     FileChecker fileChecker,
-    IHttpContextAccessor httpContextAccessor,
     WebhookManager webhookManager,
     IDaoFactory daoFactory,
     IEventBus eventBus,
@@ -45,10 +44,8 @@ public abstract class FilesHelperBase(
     protected readonly FileDtoHelper _fileDtoHelper = fileDtoHelper;
     protected readonly FileStorageService _fileStorageService = fileStorageService;
     protected readonly IDaoFactory _daoFactory = daoFactory;
-    protected readonly TenantManager _tenantManager = tenantManager;
 
     protected readonly FileChecker _fileChecker = fileChecker;
-    protected readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
     public async Task<FileDto<T>> InsertFileAsync<T>(T folderId, Stream file, string title, bool createNewIfExist, bool keepConvertStatus = false)
     {
@@ -72,7 +69,7 @@ public abstract class FilesHelperBase(
                     ? new RoomNotifyIntegrationData<string> { RoomId = srId, FileId = sfId }
                 : null;
 
-                var evt = new RoomNotifyIntegrationEvent(authContext.CurrentAccount.ID, _tenantManager.GetCurrentTenant().Id)
+                var evt = new RoomNotifyIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenant().Id)
                 {
                     Data = data,
                     ThirdPartyData = thirdPartyData

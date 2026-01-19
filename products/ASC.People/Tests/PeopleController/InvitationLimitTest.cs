@@ -56,7 +56,7 @@ public class InvitationLimitTest(
 
         var inDto = new InviteUsersRequestDto(
             invitations: [
-                new UserInvitationRequestDto(EmployeeType.User, Initializer.FakerMember.Generate().Email)
+                new UserInvitationRequestDto(EmployeeType.User) {Email = Initializer.FakerMember.Generate().Email}
             ]
         );
 
@@ -78,7 +78,7 @@ public class InvitationLimitTest(
         var invitations = new List<UserInvitationRequestDto>();
         while(invitations.Count < limit)
         {
-            invitations.Add(new UserInvitationRequestDto(EmployeeType.User, Initializer.FakerMember.Generate().Email));
+            invitations.Add(new UserInvitationRequestDto(EmployeeType.User) {Email = Initializer.FakerMember.Generate().Email});
         }
 
         inDto = new InviteUsersRequestDto(invitations);
