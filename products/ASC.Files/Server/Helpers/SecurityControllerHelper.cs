@@ -41,7 +41,8 @@ public class SecurityControllerHelper(
     IEventBus eventBus,
     TenantManager tenantManager,
     AuthContext authContext,
-    FileSharing fileSharing)
+    FileSharing fileSharing,
+    UserManager userManager)
     : FilesHelperBase(
         filesSettingsHelper,
         fileUploader,
@@ -75,7 +76,9 @@ public class SecurityControllerHelper(
 
         var fileShares = await share
             .ToAsyncEnumerable()
-            .Select(async (FileShareParams s, CancellationToken _) => await fileShareParamsHelper.ToAceObjectAsync(s)).ToListAsync();
+            .Where(async (s, _) => await userManager.CanUserViewAnotherUserAsync(authContext.CurrentAccount.ID, s.ShareTo))
+            .Select(async (FileShareParams s, CancellationToken _) => await fileShareParamsHelper.ToAceObjectAsync(s))
+            .ToListAsync();
 
         var aceCollection = new AceCollection<T>
         {
