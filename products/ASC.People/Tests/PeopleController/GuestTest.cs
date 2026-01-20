@@ -24,9 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.People.Tests.Data;
-using ASC.People.Tests.Factory;
-
 namespace ASC.People.Tests.PeopleController;
 
 [Collection("Test Collection")]
@@ -52,7 +49,7 @@ public class GuestTest(PeopleFactory peopleFactory, WepApiFactory apiFactory) : 
             parsedEmployeeType = EmployeeType.Guest;
         }
         
-        var response = await _peopleProfilesApi.AddMemberWithHttpInfoAsync(new MemberRequestDto
+        var response = await _profilesApi.AddMemberWithHttpInfoAsync(new MemberRequestDto
         {
             FromInviteLink = true,
             CultureName = "en-US",

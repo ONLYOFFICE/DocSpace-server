@@ -24,12 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.People.Tests.Data;
-using ASC.People.Tests.Factory;
-
-using DocSpace.API.SDK.Api.People;
-using DocSpace.API.SDK.Api.Portal;
-
 namespace ASC.People.Tests.PeopleController;
 
 [Collection("Test Collection")]
@@ -40,7 +34,7 @@ public class BaseTest(
 {
     protected readonly HttpClient _peopleClient = peopleFactory.HttpClient;
     protected readonly HttpClient _apiClient = apiFactory.HttpClient;
-    protected readonly ProfilesApi _peopleProfilesApi = peopleFactory.PeopleProfilesApi;
+    protected readonly ProfilesApi _profilesApi = peopleFactory.ProfilesApi;
     protected readonly UsersApi _portalUsersApi = apiFactory.PortalUsersApi;
     private readonly Func<Task> _resetDatabase = peopleFactory.ResetDatabaseAsync;
 

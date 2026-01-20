@@ -72,12 +72,12 @@ public abstract class PeopleControllerBase(
         {
             await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
         }
-
+        
         if (contacts == null)
         {
             return;
         }
-
+        
         var values = contacts.Where(r => !string.IsNullOrEmpty(r.Value)).Select(r => $"{r.Type}|{r.Value}");
         user.Contacts = string.Join('|', values);
     }

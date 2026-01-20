@@ -24,9 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.People.Tests.Data;
-using ASC.People.Tests.Factory;
-
 namespace ASC.People.Tests.PeopleController;
 
 [Collection("Test Collection")]
@@ -60,7 +57,7 @@ public class InvitationLimitTest(
             ]
         );
 
-        var wrapper = (await _peopleProfilesApi.InviteUsersAsync(inDto, TestContext.Current.CancellationToken)).Response;
+        var wrapper = (await _profilesApi.InviteUsersAsync(inDto, TestContext.Current.CancellationToken)).Response;
 
         wrapper.Should().NotBeNull();
         wrapper.Count.Should().Be(1);
@@ -84,7 +81,7 @@ public class InvitationLimitTest(
         inDto = new InviteUsersRequestDto(invitations);
 
         var exception = await Assert.ThrowsAsync<ApiException>(async () => 
-            await _peopleProfilesApi.InviteUsersAsync(inDto, TestContext.Current.CancellationToken));
+            await _profilesApi.InviteUsersAsync(inDto, TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(400);
         exception.Message.Should().Contain(Web.Core.PublicResources.Resource.ErrorInvitationLimitExceeded);
