@@ -33,6 +33,7 @@ namespace ASC.AI.Api
     [Scope]
     [DefaultRoute("openai/{providerId}/v1/{*path}")]
     [ApiController]
+    [ApiExplorerSettings(IgnoreApi = true)]
     [ControllerName("ai")]
     public class OpenAiController(
         IHttpClientFactory httpClientFactory,
