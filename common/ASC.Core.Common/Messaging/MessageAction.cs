@@ -933,6 +933,21 @@ public enum MessageAction
     [SwaggerEnum("Webplugin deleted")]
     WebpluginDeleted = 6087,
 
+    [SwaggerEnum("Whitelabel settings logo text updated")]
+    WhiteLabelSettingsLogoTextUpdated = 6088,
+
+    [SwaggerEnum("Whitelabel settings logos updated")]
+    WhiteLabelSettingsLogosUpdated = 6089,
+
+    [SwaggerEnum("Whitelabel company settings updated")]
+    WhiteLabelCompanySettingsUpdated = 6090,
+
+    [SwaggerEnum("Whitelabel additional settings updated")]
+    WhiteLabelAdditionalSettingsUpdated = 6091,
+
+    [SwaggerEnum("Whitelabel mail settings updated")]
+    WhiteLabelMailSettingsUpdated = 6092,
+
     #endregion
 
     #region others
