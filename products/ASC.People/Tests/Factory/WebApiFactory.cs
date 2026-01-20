@@ -39,6 +39,7 @@ public class WepApiFactory : WebApplicationFactory<WebApiProgram>, IAsyncLifetim
     public AuthenticationApi AuthenticationApi { get; private set; } = null!;
     public CommonSettingsApi CommonSettingsApi { get; private set; } = null!;
     public UsersApi PortalUsersApi { get; private set; } = null!;
+    public UserTypeApi UserTypeApi { get; private set; } = null!;
 
     protected override IHost CreateHost(IHostBuilder builder)
     {
@@ -59,6 +60,7 @@ public class WepApiFactory : WebApplicationFactory<WebApiProgram>, IAsyncLifetim
         AuthenticationApi = new AuthenticationApi(HttpClient, configuration);
         CommonSettingsApi = new CommonSettingsApi(HttpClient, configuration);
         PortalUsersApi = new UsersApi(HttpClient, configuration);
+        UserTypeApi = new UserTypeApi(HttpClient, configuration);
 
         return ValueTask.CompletedTask;
     }
