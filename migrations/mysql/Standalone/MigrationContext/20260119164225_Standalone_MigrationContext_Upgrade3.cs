@@ -9,7 +9,13 @@ public partial class MigrationContext_Upgrade3 : Migration
     /// <inheritdoc />
     protected override void Up(MigrationBuilder migrationBuilder)
     {
-        // remove backup feature from existing quotas
+        // remove storage quota
+        migrationBuilder.DeleteData(
+                table: "tenants_quota",
+                keyColumn: "tenant",
+                keyValue: -11);
+
+        // remove backup quota
         migrationBuilder.DeleteData(
                 table: "tenants_quota",
                 keyColumn: "tenant",
