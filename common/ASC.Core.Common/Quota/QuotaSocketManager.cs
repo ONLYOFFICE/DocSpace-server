@@ -79,33 +79,70 @@ public class QuotaSocketManager(
 
     public async Task UserQuotaExceededAsync(Guid userId)
     {
-        var room = GetQuotaRoom();
-        var eventKey = $"user_quota_exceeded/{userId.ToString()}";
-
-        await MakeRequest(eventKey, new { room });
+        await QuotaExceededAsync(QuotaScope.User, userId);
     }
 
     public async Task RoomQuotaExceededAsync(int roomId)
     {
-        var room = GetQuotaRoom();
-        var eventKey = $"room_quota_exceeded/{roomId.ToString()}";
-
-        await MakeRequest(eventKey, new { room });
+        await QuotaExceededAsync(QuotaScope.Room, roomId);
     }
 
     public async Task TenantQuotaExceededAsync()
     {
-        var tenantId = _tenantManager.GetCurrentTenantId();
-        var room = $"{tenantId}-quota";
-        var eventKey = $"tenant_quota_exceeded/{tenantId.ToString()}";
-
-        await MakeRequest(eventKey, new { room });
+        await QuotaExceededAsync(QuotaScope.Tenant, _tenantManager.GetCurrentTenantId());
     }
 
+    private async Task QuotaExceededAsync(QuotaScope scope, Guid entityId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        var room = scope switch
+        {
+            QuotaScope.User => $"{tenantId}:user:{entityId}-quota",
+            _ => throw new ArgumentException("Invalid scope for Guid entityId", nameof(scope))
+        };
+
+        await MakeRequest(
+            "quota_exceeded",
+            new
+            {
+                room,
+                scope = scope.ToString().ToLower(),
+                id = entityId
+            });
+    }
+
+    private async Task QuotaExceededAsync(QuotaScope scope, int entityId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        var room = scope switch
+        {
+            QuotaScope.Room => $"{tenantId}:room:{entityId}-quota",
+            QuotaScope.Tenant => $"{tenantId}:tenant-quota",
+            _ => throw new ArgumentException("Invalid scope for int entityId", nameof(scope))
+        };
+
+        await MakeRequest(
+            "quota_exceeded",
+            new
+            {
+                room,
+                scope = scope.ToString().ToLower(),
+                id = entityId
+            });
+    }
     private string GetQuotaRoom()
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
 
         return $"{tenantId}-quota";
+    }
+
+    private enum QuotaScope
+    {
+        User,
+        Room,
+        Tenant
     }
 }

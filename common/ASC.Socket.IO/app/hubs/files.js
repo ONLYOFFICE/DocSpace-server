@@ -580,19 +580,9 @@ module.exports = (io) => {
     filesIO.to(`${room}-${userId}`).emit("s:change-access-rights-folder", { id, data });
   }
 
-  function userQuotaExceeded(data) {
-    logger.info(`user quota exceeded. tenant: ${tenantId()}, user: ${data.userId}`);
-    filesIO.to(room).emit(`s:user_quota_exceeded_${data.userId}`, { });
-  }
-
-  function roomQuotaExceeded(data) {
-    logger.info(`room quota exceeded. tenant: ${tenantId()}, room: ${data.roomId}`);
-    filesIO.to(room).emit(`s:room_quota_exceeded_${data.roomId}`, { });
-  }
-
-  function tenantQuotaExceeded(data) {
-    logger.info(`tenant quota exceeded. tenant: ${tenantId()}`);
-    filesIO.to(room).emit(`s:tenant_quota_exceeded_${data.tenantId}`, { });
+  function quotaExceeded(data) {
+    logger.info(`quota exceeded. tenant: ${tenantId()} scope: ${data.scope} id: ${data.id}`);
+    filesIO.to(data.room).emit(`s:quota_exceeded`, {});
   }
 
   return {
@@ -637,8 +627,6 @@ module.exports = (io) => {
     exportChat,
     changeAccessRightsForFile,
     changeAccessRightsForFolder,
-    userQuotaExceeded,
-    roomQuotaExceeded,
-    tenantQuotaExceeded
+    quotaExceeded
   };
 };
