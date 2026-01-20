@@ -798,6 +798,12 @@
   <data name="ResetWebSearchSettings" xml:space="preserve">
     <value>Web search settings have been reset</value>
   </data>
+  <data name="RestoreCancelled" xml:space="preserve">
+    <value>Restore cancelled</value>
+  </data>
+  <data name="RestoreStarted" xml:space="preserve">
+    <value>Restore started</value>
+  </data>
   <data name="RevokeUserClient" xml:space="preserve">
     <value>Revoked client {0} access</value>
   </data>
@@ -897,11 +903,11 @@
   <data name="RoomWatermarkSet" xml:space="preserve">
     <value>Room: {0}. Watermark enabled</value>
   </data>
-  <data name="ScheduledBackupCancelled" xml:space="preserve">
-    <value>Scheduled backup cancelled</value>
-  </data>
   <data name="ScheduledBackupCompleted" xml:space="preserve">
     <value>Scheduled backup completed</value>
+  </data>
+  <data name="ScheduledBackupDeleted" xml:space="preserve">
+    <value>Schedule backup deleted</value>
   </data>
   <data name="ScheduledBackupFailed" xml:space="preserve">
     <value>Scheduled backup failed</value>

@@ -837,11 +837,17 @@ public enum MessageAction
     [SwaggerEnum("Scheduled backup failed")]
     ScheduledBackupFailed = 5129,
 
-    [SwaggerEnum("Backup cancelled")]
-    BackupCancelled = 5130,
+    [SwaggerEnum("Scheduled backup deleted")]
+    ScheduledBackupDeleted = 5130,
 
-    [SwaggerEnum("Scheduled backup cancelled")]
-    ScheduledBackupCancelled = 5131,
+    [SwaggerEnum("Backup cancelled")]
+    BackupCancelled = 5131,
+
+    [SwaggerEnum("Restore started")]
+    RestoreStarted = 5132,
+
+    [SwaggerEnum("Restore cancelled")]
+    RestoreCancelled = 5133,
 
     [SwaggerEnum("License key uploaded")]
     LicenseKeyUploaded = 5042,

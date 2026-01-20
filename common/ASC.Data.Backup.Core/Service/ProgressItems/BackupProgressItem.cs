@@ -274,12 +274,12 @@ public class BackupProgressItem : BaseBackupProgressItem, IDisposable
 
             if (!CancellationToken.IsCancellationRequested)
             {
-                _logger.ErrorRunJob(Id, TenantId, tempFile, _storageBasePath, error);
-                SaveAuditEvent(messageService, _isScheduled ? MessageAction.ScheduledBackupFailed : MessageAction.BackupFailed);
+                _logger.InfoBackupCancelled();
             }
             else
             {
-                SaveAuditEvent(messageService, _isScheduled ? MessageAction.ScheduledBackupCancelled : MessageAction.BackupCancelled);
+                _logger.ErrorRunJob(Id, TenantId, tempFile, _storageBasePath, error);
+                SaveAuditEvent(messageService, _isScheduled ? MessageAction.ScheduledBackupFailed : MessageAction.BackupFailed);
             }
 
             try

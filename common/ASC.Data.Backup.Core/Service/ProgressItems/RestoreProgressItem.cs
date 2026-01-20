@@ -266,6 +266,8 @@ public class RestoreProgressItem : BaseBackupProgressItem
         {
             if (CancellationToken.IsCancellationRequested)
             {
+                _logger.InfoRestoreCancelled();
+
                 if (!Dump)
                 {
                     var restoredTenantId = columnMapper.GetTenantMapping();

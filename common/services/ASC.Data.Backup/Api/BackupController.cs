@@ -33,6 +33,8 @@ using ASC.Data.Backup.Core.Quota;
 using ASC.Data.Backup.Services;
 using ASC.Data.Storage;
 using ASC.MessagingSystem;
+using ASC.MessagingSystem.Core;
+using ASC.MessagingSystem.EF.Model;
 using ASC.Web.Core.PublicResources;
 
 using Swashbuckle.AspNetCore.Annotations;
@@ -56,6 +58,7 @@ public class BackupController(
     CommonLinkUtility commonLinkUtility,
     CoreSettings coreSettings,
     BackupService backupService,
+    MessageService messageService,
     IDistributedLockProvider distributedLockProvider,
     IHttpContextAccessor httpContextAccessor,
     CountFreeBackupChecker freeBackupsChecker)
@@ -145,7 +148,12 @@ public class BackupController(
         {
             await tenantExtra.DemandAccessSpacePermissionAsync();
         }
-        await backupService.DeleteScheduleAsync(dto.Dump);
+
+        var tenantId = dto.Dump ? Tenant.DefaultTenant : tenantManager.GetCurrentTenantId();
+
+        await backupService.DeleteScheduleAsync(tenantId);
+
+        messageService.Send(MessageAction.ScheduledBackupDeleted, MessageTarget.Create(tenantId));
 
         return true;
     }
@@ -299,7 +307,14 @@ public class BackupController(
     {
         var tenantId = tenantManager.GetCurrentTenantId();
 
-        return await backupService.CancelBackupAsync(tenantId);
+        var result = await backupService.CancelBackupAsync(tenantId);
+
+        if (result)
+        {
+            messageService.Send(MessageAction.BackupCancelled, MessageTarget.Create(tenantId));
+        }
+
+        return result;
     }
 
     /// <summary>
@@ -316,7 +331,14 @@ public class BackupController(
     {
         var tenantId = tenantManager.GetCurrentTenantId();
 
-        return await backupService.CancelRestoreAsync(tenantId);
+        var result = await backupService.CancelRestoreAsync(tenantId);
+
+        if (result)
+        {
+            messageService.Send(MessageAction.RestoreCancelled, MessageTarget.Create(tenantId));
+        }
+
+        return result;
     }
 
     /// <summary>
@@ -450,6 +472,7 @@ public class BackupController(
                              taskId: taskId
                         ));
 
+        messageService.Send(MessageAction.RestoreStarted, MessageTarget.Create(tenantId), inDto.Dump ? "dump" : string.Empty);
 
         return await backupService.GetRestoreProgressAsync(inDto.Dump);
     }

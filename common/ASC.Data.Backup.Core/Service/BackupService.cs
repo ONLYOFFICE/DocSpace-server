@@ -429,14 +429,6 @@ public class BackupService(
             });
     }
 
-    public async Task DeleteScheduleAsync(bool dump)
-    {
-        await DemandPermissionsBackupAsync();
-
-        var tenantId = dump ? -1 : tenantManager.GetCurrentTenantId();
-        await backupRepository.DeleteBackupScheduleAsync(tenantId);
-    }
-
     public async Task DeleteScheduleAsync(int tenantId)
     {
         await DemandPermissionsBackupAsync();
