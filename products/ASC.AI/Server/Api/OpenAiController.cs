@@ -28,22 +28,19 @@ using System.Net.Http.Headers;
 
 using ASC.Api.Core.Middleware;
 
-using Microsoft.AspNetCore.Authorization;
-
 namespace ASC.AI.Api
 {
     [Scope]
     [DefaultRoute("openai/{providerId}/v1/{*path}")]
     [ApiController]
     [ControllerName("ai")]
-    [SuppressCustomResponseFilter]
     public class OpenAiController(
         IHttpClientFactory httpClientFactory,
         AiProviderService aiProviderService
         ) : ControllerBase
     {
         [HttpGet, HttpPost, HttpPut, HttpDelete]
-        public async Task<Stream> ProxyRequest([FromRoute] int providerId, [FromRoute] string path)
+        public async Task<IActionResult> ProxyRequest([FromRoute] int providerId, [FromRoute] string path)
         {
             var provider = await aiProviderService.GetProviderAsync(providerId);
 
@@ -70,7 +67,9 @@ namespace ASC.AI.Api
             Response.StatusCode = (int)response.StatusCode;
             Response.Headers.ContentType = response.Content.Headers.ContentType?.ToString() ?? "application/octet-stream";
             Response.Headers.ContentLength = response.Content.Headers.ContentLength;
-            return await response.Content.ReadAsStreamAsync();
+            var stream = await response.Content.ReadAsStreamAsync();
+            await stream.CopyToAsync(Response.Body);
+            return new EmptyResult();
         }
     }
 }
