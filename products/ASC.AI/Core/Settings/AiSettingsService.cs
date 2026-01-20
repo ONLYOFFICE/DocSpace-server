@@ -34,7 +34,6 @@ public class AiSettingsService(
     AuthContext authContext,
     AiSettingsStore aiSettingsStore,
     AiAccessibility accessibility,
-    AiGateway aiGateway,
     AiProviderService providerService,
     VectorizationGlobalSettings vectorizationGlobalSettings,
     SystemMcpConfig systemMcpConfig,
@@ -180,7 +179,14 @@ public class AiSettingsService(
         var docSpaceMcpServer = systemMcpConfig.Servers.Values.FirstOrDefault(
             x => x.Type == ServerType.DocSpace);
 
-        await Task.WhenAll(webSearchSettingsTask, webSearchEnabledTask, vectorizationSettingsTask, vectorizationEnabledTask, needResetProvidersTask, aiReadyTask);
+        await Task.WhenAll(
+            webSearchSettingsTask, 
+            webSearchEnabledTask, 
+            vectorizationSettingsTask, 
+            vectorizationEnabledTask, 
+            needResetProvidersTask, 
+            aiReadyTask
+            );
 
         var webSearchNeedReset = (await webSearchSettingsTask).NeedReset;
         var webSearchEnabled = !webSearchNeedReset && (await webSearchEnabledTask);
@@ -206,7 +212,7 @@ public class AiSettingsService(
     
     private async Task ThrowIfNotAccess()
     {
-        if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID) || aiGateway.Configured)
+        if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
         {
             throw new SecurityException(ErrorMessages.AiSettingsAccessDenied);
         }
