@@ -26,8 +26,6 @@
 
 using System.Net.Http.Headers;
 
-using ASC.Api.Core.Middleware;
-
 namespace ASC.AI.Api
 {
     [Scope]
