@@ -63,12 +63,12 @@ namespace ASC.AI.Api
                 request.Content.Headers.ContentType = new MediaTypeHeaderValue(Request.Headers.ContentType.FirstOrDefault() ?? "application/json");
             }
 
-            var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
 
             Response.StatusCode = (int)response.StatusCode;
             Response.Headers.ContentType = response.Content.Headers.ContentType?.ToString() ?? "application/octet-stream";
             Response.Headers.ContentLength = response.Content.Headers.ContentLength;
-            var stream = await response.Content.ReadAsStreamAsync();
+            using var stream = await response.Content.ReadAsStreamAsync();
             await stream.CopyToAsync(Response.Body);
             return new EmptyResult();
         }
