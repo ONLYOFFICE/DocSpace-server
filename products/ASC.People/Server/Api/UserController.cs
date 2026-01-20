@@ -2057,6 +2057,7 @@ public class UserController(
         var users = await inDto.UpdateMembers.UserIds
             .ToAsyncEnumerable()
             .Where(userId => !_userManager.IsSystemUser(userId))
+            .Where((async (userId, _)  => await userManager.CanUserViewAnotherUserAsync(authContext.CurrentAccount.ID, userId)))
             .Select(async (Guid userId, CancellationToken _) => await _userManager.GetUsersAsync(userId))
             .Where(r => r.Status != EmployeeStatus.Terminated)
             .ToListAsync();

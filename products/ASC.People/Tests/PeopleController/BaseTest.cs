@@ -36,6 +36,7 @@ public class BaseTest(
     protected readonly HttpClient _apiClient = apiFactory.HttpClient;
     protected readonly ProfilesApi _profilesApi = peopleFactory.ProfilesApi;
     protected readonly UsersApi _portalUsersApi = apiFactory.PortalUsersApi;
+    protected readonly UserTypeApi _userTypeApi = apiFactory.UserTypeApi;
     private readonly Func<Task> _resetDatabase = peopleFactory.ResetDatabaseAsync;
 
     public async ValueTask InitializeAsync()

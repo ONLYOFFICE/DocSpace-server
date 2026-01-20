@@ -81,4 +81,23 @@ public class GuestTest(PeopleFactory peopleFactory, WepApiFactory apiFactory) : 
         createdGuest.LastName.Should().Be(fakeMember.LastName);
         createdGuest.IsVisitor.Should().BeTrue();
     }
+    
+    // [Fact]
+    // [Trait("Category", "Bug")]
+    // [Trait("Bug", "79419")]
+    // public async Task CreateUser_AsRoomAdmin_ShouldCreateUserSuccessfully()
+    // {
+    //     await _apiClient.Authenticate(Initializer.Owner);
+    //     var roomAdmin = await Initializer.InviteContact(EmployeeType.RoomAdmin);
+    //     var guestFromOwner = await Initializer.InviteContact(EmployeeType.Guest, roomAdmin);
+    //     
+    //     await _peopleClient.Authenticate(roomAdmin);
+    //     var guestFromRoomAdmin = await Initializer.InviteContact(EmployeeType.Guest, roomAdmin);
+    //     
+    //     var updateUserTypeResponse = (await _userTypeApi.UpdateUserTypeAsync(EmployeeType.User, new UpdateMembersRequestDto([guestFromOwner.Id]), TestContext.Current.CancellationToken)).Response;
+    //     updateUserTypeResponse.Should().BeEmpty();
+    //     
+    //     updateUserTypeResponse = (await _userTypeApi.UpdateUserTypeAsync(EmployeeType.User, new UpdateMembersRequestDto([guestFromRoomAdmin.Id]), TestContext.Current.CancellationToken)).Response;
+    //     updateUserTypeResponse.Should().Contain(r=> r.Id == guestFromRoomAdmin.Id);
+    // }
 }
