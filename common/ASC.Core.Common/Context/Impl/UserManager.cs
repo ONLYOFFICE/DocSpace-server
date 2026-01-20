@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -202,11 +202,6 @@ public class UserManager(
     public async Task<bool> UserExistsAsync(Guid id)
     {
         return UserExists(await GetUsersAsync(id));
-    }
-
-    public bool UserExists(Guid id)
-    {
-        return UserExists(GetUsers(id));
     }
 
     public bool UserExists(UserInfo user)

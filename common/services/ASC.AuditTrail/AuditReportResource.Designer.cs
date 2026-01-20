@@ -3101,5 +3101,50 @@ namespace ASC.AuditTrail {
                 return ResourceManager.GetString("WebpluginUploaded", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Additional branding settings updated.
+        /// </summary>
+        public static string WhiteLabelAdditionalSettingsUpdated {
+            get {
+                return ResourceManager.GetString("WhiteLabelAdditionalSettingsUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Company info settings updated.
+        /// </summary>
+        public static string WhiteLabelCompanySettingsUpdated {
+            get {
+                return ResourceManager.GetString("WhiteLabelCompanySettingsUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Mail settings updated.
+        /// </summary>
+        public static string WhiteLabelMailSettingsUpdated {
+            get {
+                return ResourceManager.GetString("WhiteLabelMailSettingsUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Logo settings updated.
+        /// </summary>
+        public static string WhiteLabelSettingsLogosUpdated {
+            get {
+                return ResourceManager.GetString("WhiteLabelSettingsLogosUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Brand name updated.
+        /// </summary>
+        public static string WhiteLabelSettingsLogoTextUpdated {
+            get {
+                return ResourceManager.GetString("WhiteLabelSettingsLogoTextUpdated", resourceCulture);
+            }
+        }
     }
 }

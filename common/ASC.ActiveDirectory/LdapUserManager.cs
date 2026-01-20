@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,9 +38,7 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
     TenantManager tenantManager,
     TenantUtil tenantUtil,
     SecurityContext securityContext,
-    CommonLinkUtility commonLinkUtility,
     SettingsManager settingsManager,
-    DisplayUserSettingsHelper displayUserSettingsHelper,
     UserFormatter userFormatter,
     NovellLdapUserImporter novellLdapUserImporter,
     IServiceScopeFactory serviceScopeFactory,
@@ -275,21 +273,11 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
                     source.Init(tenantManager.GetCurrentTenant());
                     var workContext = scope.ServiceProvider.GetRequiredService<WorkContext>();
                     var client = workContext.RegisterClient(scope.ServiceProvider, source);
-                    var urlShortener = scope.ServiceProvider.GetRequiredService<IUrlShortener>();
-                    var notifyConstants = scope.ServiceProvider.GetRequiredService<NotifyConstants>();
-
-                    var confirmLink = commonLinkUtility.GetConfirmationEmailUrl(ldapUserInfo.Email, ConfirmType.EmailActivation);
-
-                    await client.SendNoticeToAsync(
-                        notifyConstants.ActionLdapActivation,
-                        [new DirectRecipient(ldapUserInfo.Email, null, [ldapUserInfo.Email], false)],
-                        [Core.Configuration.Constants.NotifyEMailSenderSysName],
-                        null,
-                        new TagValue(NotifyConstants.TagUserName, ldapUserInfo.DisplayUserName(displayUserSettingsHelper)),
-                        new TagValue(NotifyConstants.TagUserEmail, ldapUserInfo.Email),
-                        new TagValue(NotifyConstants.TagMyStaffLink, commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetMyStaff())),
-                        NotifyConstants.TagOrangeButton(_resource.NotifyButtonJoin, await urlShortener.GetShortenLinkAsync(confirmLink)),
-                        new TagValue(NotifyCommonTags.WithoutUnsubscribe, true));
+                    
+                    var action = serviceProvider.GetService<LdapActivationNotifyAction>();
+                    await action.Init(ldapUserInfo, _resource);
+                    
+                    await client.SendNoticeToAsync(action, [new DirectRecipient(ldapUserInfo.Email, null, [ldapUserInfo.Email], false)], [Core.Configuration.Constants.NotifyEMailSenderSysName]);
                 }
 
                 return wrapper;

@@ -1131,4 +1131,19 @@
   <data name="WebpluginUploaded" xml:space="preserve">
     <value>Plugin uploaded: {0}</value>
   </data>
+  <data name="WhiteLabelAdditionalSettingsUpdated" xml:space="preserve">
+    <value>Additional branding settings updated</value>
+  </data>
+  <data name="WhiteLabelCompanySettingsUpdated" xml:space="preserve">
+    <value>Company info settings updated</value>
+  </data>
+  <data name="WhiteLabelMailSettingsUpdated" xml:space="preserve">
+    <value>Mail settings updated</value>
+  </data>
+  <data name="WhiteLabelSettingsLogosUpdated" xml:space="preserve">
+    <value>Logo settings updated</value>
+  </data>
+  <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
+    <value>Brand name updated</value>
+  </data>
 </root>

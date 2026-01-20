@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -80,6 +80,7 @@ public class SetupInfo
     public string AmiMetaUrl { get; private set; }
     public string AmiTokenUrl { get; private set; }
     public int InvitationLimit { get; private set; }
+    public int InvitationLimitDuration { get; private set; }
 
     private readonly IConfiguration _configuration;
 
@@ -126,6 +127,7 @@ public class SetupInfo
         AmiTokenUrl = GetAppSettings("web:ami:token", "");
 
         InvitationLimit = GetAppSettings("web:invitation-limit", int.MaxValue);
+        InvitationLimitDuration = GetAppSettings("web:invitation-limit-duration", 24);
     }
 
 
