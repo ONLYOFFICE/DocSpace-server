@@ -241,7 +241,7 @@ public class ApiSystemHelper
 
         var getItemResponse = await awsDynamoDbClient.GetItemAsync(getItemRequest);
 
-        if (getItemResponse.Item.Count == 0)
+        if (getItemResponse?.Item == null || getItemResponse.Item.Count == 0)
         {
             return null;
         }
