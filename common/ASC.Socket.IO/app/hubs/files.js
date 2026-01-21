@@ -581,7 +581,7 @@ module.exports = (io) => {
   }
 
   function quotaExceeded(data) {
-    logger.info(`quota exceeded. tenant: ${tenantId()} scope: ${data.scope} id: ${data.id}`);
+    logger.info(`quota exceeded. scope: ${data.scope} id: ${data.id}`);
     filesIO.to(data.room).emit(`s:quota_exceeded`, {});
   }
 
