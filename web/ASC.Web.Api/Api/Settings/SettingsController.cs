@@ -291,10 +291,9 @@ public partial class SettingsController(
         {
             throw new Exception(Resource.UserQuotaGreaterPortalError);
         }
-
+        var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
         if (coreBaseSettings.Standalone)
         {
-            var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
             if (tenantQuotaSetting.EnableQuota)
             {
                 if (tenantQuotaSetting.Quota < quota)
@@ -308,6 +307,13 @@ public partial class SettingsController(
         quotaSettings.DefaultQuota = quota > 0 ? quota : 0;
 
         await settingsManager.SaveAsync(quotaSettings);
+
+        var usedSize = (await tenantManager.FindTenantQuotaRowsAsync(tenant.Id))
+          .Where(r => !string.IsNullOrEmpty(r.Tag) && new Guid(r.Tag) != Guid.Empty)
+          .Sum(r => r.Counter);
+        var admins = (await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupAdmin.ID)).Select(u => u.Id).ToList();
+
+        _ = quotaSocketManager.ChangeCustomQuotaUsedValueAsync(tenant.Id, customQuota.GetFeature<TenantCustomQuotaFeature>().Name, tenantQuotaSetting.EnableQuota, usedSize, tenantQuotaSetting.Quota, admins);
 
         if (inDto.EnableQuota)
         {
