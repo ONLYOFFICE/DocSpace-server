@@ -34,13 +34,15 @@ public class ChatTools(
     KnowledgeSearchTool knowledgeSearchTool,
     AiSettingsStore aiSettingsStore,
     AiGateway aiGateway,
-    AiAccessibility aiAccessibility)
+    AiAccessibility aiAccessibility,
+    SettingsManager settingsManager,
+    TenantManager tenantManager)
 {
     public async Task<(ToolHolder, string? error)> GetAsync(Folder<int> agent, UserChatSettings chatSettings, bool knowledgeHasFiles)
     {
         var (holder, error) = await mcpService.GetToolsAsync(agent.Id);
 
-        if (knowledgeHasFiles && await aiAccessibility.IsVectorizationEnabledAsync())
+        if (knowledgeHasFiles && await aiAccessibility.IsVectorizationEnabledAsync(agent))
         {
             var knowledgeFunc = knowledgeSearchTool.Init(agent);
             var knowledgeWrapper = ToWrapper(agent.Id, knowledgeFunc);
@@ -76,18 +78,26 @@ public class ChatTools(
 
     private async Task<EngineConfig?> GetWebConfigAsync(Folder<int> agent)
     {
-        if (!await aiSettingsStore.IsWebSearchEnabledAsync())
-        {
-            return null;
-        }
-        
         if (aiGateway.Configured && agent.SettingsChatProviderId == AiGateway.ProviderId)
         {
+            var tenantId = tenantManager.GetCurrentTenantId();
+            
+            var walletSettings = await settingsManager.LoadAsync<TenantWalletServiceSettings>(tenantId);
+            if (walletSettings.EnabledServices == null || !walletSettings.EnabledServices.Contains(TenantWalletService.AITools))
+            {
+                return null;
+            }
+            
             return new DocSpaceWebSearchConfig 
             { 
                 BaseUrl = aiGateway.Url, 
                 ApiKey = await aiGateway.GetKeyAsync() 
             };
+        }
+        
+        if (!await aiSettingsStore.IsWebSearchEnabledAsync())
+        {
+            return null;
         }
         
         var settings = await aiSettingsStore.GetWebSearchSettingsAsync();

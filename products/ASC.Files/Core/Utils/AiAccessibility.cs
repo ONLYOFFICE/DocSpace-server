@@ -37,23 +37,35 @@ public class AiAccessibility(
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         
-        if (aiGateway.Configured)
+        if (aiGateway.Configured && await IsAiToolsEnabled(tenantId))
         {
-            var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>(tenantId);
-            if (settings.EnabledServices != null && settings.EnabledServices.Contains(TenantWalletService.AITools))
-            {
-                return true;
-            }
+            return true;
         }
 
         await using var db = await dbContextFactory.CreateDbContextAsync();
         return await db.AiProviderExistsAsync(tenantId);
     }
-    
-    public async Task<bool> IsVectorizationEnabledAsync()
+
+    public async Task<bool> IsVectorizationEnabledAsync<T>(Folder<T> agent)
     {
+        if (agent == null)
+        {
+            return false;
+        }
+
+        if (aiGateway.Configured && agent.SettingsChatProviderId == AiGateway.ProviderId)
+        {
+            return await IsAiEnabledAsync();
+        }
+        
         var tenantId = tenantManager.GetCurrentTenantId();
         var settings = await settingsManager.LoadAsync<EncryptedVectorizationSettings>(tenantId);
         return settings.ProviderType != EmbeddingProviderType.None;
+    }
+    
+    private async Task<bool> IsAiToolsEnabled(int tenantId)
+    {
+        var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>(tenantId);
+        return settings.EnabledServices != null && settings.EnabledServices.Contains(TenantWalletService.AITools);
     }
 }
