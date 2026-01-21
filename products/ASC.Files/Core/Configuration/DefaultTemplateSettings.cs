@@ -52,16 +52,16 @@ namespace ASC.Files.Core.Configuration
         public async Task<DefaultTemplateSettingsDto> ToDto(DefaultTemplateSettings settings)
         {
             var fileIds = settings.Items.Where(i => i.SelectedFile != null).Select(i => i.SelectedFile.Value);
-            var fileTitles = (await fileDao.GetFilesAsync(fileIds).ToListAsync()).ToDictionary(f => f.Id, f => f.Title);
+            var fileTitles = (await fileDao.GetFilesAsync(fileIds).ToListAsync()).ToDictionary(f => f.Id, f => f);
 
             return new DefaultTemplateSettingsDto()
             {
-                LastModified = settings.LastModified,
                 Items = settings.Items.Select(i => new DefaultTempalteItemDto()
                 {
                     FileExtension = i.FileExtension,
                     SelectedFile = i.SelectedFile,
-                    FileTitle = i.SelectedFile.HasValue ? fileTitles[i.SelectedFile.Value] : null,
+                    FileTitle = i.SelectedFile.HasValue ? fileTitles[i.SelectedFile.Value].Title : null,
+                    LastModified = i.SelectedFile.HasValue ? fileTitles[i.SelectedFile.Value].ModifiedOn : null,
                 })
             };
         }

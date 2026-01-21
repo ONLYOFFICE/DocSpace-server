@@ -62,12 +62,6 @@ namespace ASC.Files.Core.ApiModels.ResponseDto
         /// Default templates list.
         /// </summary>
         public IEnumerable<DefaultTempalteItemDto> Items { get; set; }
-
-
-        /// <summary>
-        /// Last modified date
-        /// </summary>
-        public DateTime LastModified { get; set; }
     }
 
     /// <summary>
@@ -88,5 +82,10 @@ namespace ASC.Files.Core.ApiModels.ResponseDto
         /// Title of a default template
         /// </summary>
         public string FileTitle { get; set; }
+
+        /// <summary>
+        /// Last modified date of a default template
+        /// </summary>
+        public DateTime? LastModified { get; set; }
     }
 }
