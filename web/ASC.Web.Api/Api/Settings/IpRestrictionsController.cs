@@ -33,6 +33,7 @@ public class IpRestrictionsController(
     WebItemManager webItemManager,
     IPRestrictionsService iPRestrictionsService,
     IFusionCache fusionCache,
+    MessageService messageService,
     TenantManager tenantManager)
     : BaseSettingsController(fusionCache, webItemManager)
 {
@@ -97,6 +98,8 @@ public class IpRestrictionsController(
         var settings = new IPRestrictionsSettings { Enable = enable };
         await settingsManager.SaveAsync(settings);
 
+        messageService.Send(MessageAction.IPRestrictionsSettingsUpdated);
+
         return inDto;
     }
 
@@ -157,6 +160,8 @@ public class IpRestrictionsController(
 
         var settings = new IPRestrictionsSettings { Enable = enable };
         await settingsManager.SaveAsync(settings);
+
+        messageService.Send(MessageAction.IPRestrictionsSettingsUpdated);
 
         return inDto;
     }

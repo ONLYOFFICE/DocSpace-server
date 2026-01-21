@@ -948,6 +948,15 @@ public enum MessageAction
     [SwaggerEnum("Whitelabel mail settings updated")]
     WhiteLabelMailSettingsUpdated = 6092,
 
+    [SwaggerEnum("Invitation settings updated")]
+    InvitationSettingsUpdated = 6093,
+
+    [SwaggerEnum("IP restrictions settings updated")]
+    IPRestrictionsSettingsUpdated = 6094,
+
+    [SwaggerEnum("Login settings updated")]
+    LoginSettingsUpdated = 6095,
+
     #endregion
 
     #region others

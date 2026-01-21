@@ -1429,11 +1429,29 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invitation settings updated.
+        /// </summary>
+        public static string InvitationSettingsUpdated {
+            get {
+                return ResourceManager.GetString("InvitationSettingsUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to IP.
         /// </summary>
         public static string IpCol {
             get {
                 return ResourceManager.GetString("IpCol", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to IP Security settings updated.
+        /// </summary>
+        public static string IPRestrictionsSettingsUpdated {
+            get {
+                return ResourceManager.GetString("IPRestrictionsSettingsUpdated", resourceCulture);
             }
         }
         
@@ -1641,6 +1659,15 @@ namespace ASC.AuditTrail {
         public static string LoginHistoryReportName {
             get {
                 return ResourceManager.GetString("LoginHistoryReportName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Brute force protection settings updated.
+        /// </summary>
+        public static string LoginSettingsUpdated {
+            get {
+                return ResourceManager.GetString("LoginSettingsUpdated", resourceCulture);
             }
         }
         
