@@ -1,28 +1,15 @@
 package com.example.codegen;
 
 import org.openapitools.codegen.languages.Swift6ClientCodegen;
-import io.swagger.v3.oas.models.servers.Server;
-import io.swagger.v3.oas.models.servers.ServerVariable;
-import io.swagger.v3.oas.models.servers.ServerVariables;
-import org.openapitools.codegen.model.OperationsMap;
-import org.openapitools.codegen.model.OperationMap;
+import io.swagger.v3.oas.models.servers.*;
 import static org.openapitools.codegen.utils.StringUtils.camelize;
-import org.openapitools.codegen.CodegenOperation;
-import org.openapitools.codegen.model.ModelMap;
-import org.openapitools.codegen.SupportingFile;
-import org.openapitools.codegen.model.ApiInfoMap;
+import org.openapitools.codegen.*;
+import org.openapitools.codegen.model.*;
 
 import java.io.File;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Locale;
 import java.util.stream.Collectors;
-import java.util.HashMap;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.ArrayList;
 
 public class MySwift6ClientCodegen extends Swift6ClientCodegen {
     protected String apiNamePrefix = "", apiNameSuffix = "Api";
@@ -82,6 +69,7 @@ public class MySwift6ClientCodegen extends Swift6ClientCodegen {
             operationMap.put("x-folder", tagParts.folderPart);
             operationMap.put("x-classname", tagParts.classPart + apiNameSuffix);
             boolean shouldSupportFields = false;
+            boolean supportUseAt = false;
             if (operationList != null) {
                 for (CodegenOperation op : operationList) { 
                     if (op.operationId != null) {
@@ -102,10 +90,17 @@ public class MySwift6ClientCodegen extends Swift6ClientCodegen {
                             shouldSupportFields = true;
                         }
                     }
+                    if ("GET".equalsIgnoreCase(op.httpMethod)
+                        && "/api/2.0/files/recent".equals(op.path)) {
+
+                        op.vendorExtensions.put("x-supportsUseAtMethod", true);
+                        supportUseAt = true;
+                    }
                     
                 }
             }
             operationMap.put("x-supportsFields", shouldSupportFields);
+            operationMap.put("x-supportsUseAt", supportUseAt);
         }
 
         return objs;
