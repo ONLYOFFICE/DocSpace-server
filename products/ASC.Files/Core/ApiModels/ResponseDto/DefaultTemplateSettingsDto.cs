@@ -51,18 +51,42 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Files.Core.Configuration;
-
 namespace ASC.Files.Core.ApiModels.ResponseDto
 {
     /// <summary>
     /// Default templates settings parameters.
     /// </summary>
-    public class DefaultTemplateSettingsDto(DefaultTemplateSettings defaultTemplateSettings)
+    public class DefaultTemplateSettingsDto
     {
         /// <summary>
         /// Default templates list.
         /// </summary>
-        public IEnumerable<DefaultTempalteItem> Items { get; set; } = defaultTemplateSettings.Items;
+        public IEnumerable<DefaultTempalteItemDto> Items { get; set; }
+
+
+        /// <summary>
+        /// Last modified date
+        /// </summary>
+        public DateTime LastModified { get; set; }
+    }
+
+    /// <summary>
+    /// Default template setting
+    /// </summary>
+    public class DefaultTempalteItemDto
+    {
+        /// <summary>
+        /// File id to use as a default template
+        /// </summary>
+        public int? SelectedFile { get; set; }
+        /// <summary>
+        /// Extension of a default template
+        /// </summary>
+        public string FileExtension { get; set; }
+
+        /// <summary>
+        /// Title of a default template
+        /// </summary>
+        public string FileTitle { get; set; }
     }
 }

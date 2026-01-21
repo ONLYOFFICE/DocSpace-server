@@ -40,24 +40,32 @@ namespace ASC.Files.Core.Configuration
         public DateTime LastModified { get; set; }
     }
 
-    /// <summary>
-    /// Default template setting
-    /// </summary>
     public class DefaultTempalteItem
     {
-        /// <summary>
-        /// File id to use as a default template
-        /// </summary>
         public int? SelectedFile { get; set; }
-        /// <summary>
-        /// Extension of a default template
-        /// </summary>
         public string FileExtension { get; set; }
     }
 
     [Scope]
     public class DefaultTemplateSettingsHelper(SettingsManager settingsManager, Global global, GlobalStore globalStore, IFileDao<int> fileDao, IFolderDao<int> folderDao)
     {
+        public async Task<DefaultTemplateSettingsDto> ToDto(DefaultTemplateSettings settings)
+        {
+            var fileIds = settings.Items.Where(i => i.SelectedFile != null).Select(i => i.SelectedFile.Value);
+            var fileTitles = (await fileDao.GetFilesAsync(fileIds).ToListAsync()).ToDictionary(f => f.Id, f => f.Title);
+
+            return new DefaultTemplateSettingsDto()
+            {
+                LastModified = settings.LastModified,
+                Items = settings.Items.Select(i => new DefaultTempalteItemDto()
+                {
+                    FileExtension = i.FileExtension,
+                    SelectedFile = i.SelectedFile,
+                    FileTitle = i.SelectedFile.HasValue ? fileTitles[i.SelectedFile.Value] : null,
+                })
+            };
+        }
+
         public async Task<DefaultTemplateSettings> GetSettings()
         {
             if (!await global.IsDocSpaceAdministratorAsync)
