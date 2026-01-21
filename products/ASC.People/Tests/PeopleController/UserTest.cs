@@ -24,55 +24,34 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-extern alias ASCWebApi;
-extern alias ASCPeople;
-global using System.Data.Common;
-global using System.Net;
-global using System.Net.Http.Headers;
-global using System.Text;
-global using System.Web;
+namespace ASC.People.Tests.PeopleController;
 
-global using ASC.Core.Common.EF;
-global using ASC.Migrations;
-global using ASC.Migrations.Core;
-global using ASC.People.Tests.Data;
-global using ASC.People.Tests.Factory;
-
-global using Bogus;
-global using Bogus.DataSets;
-
-global using DocSpace.API.SDK.Api;
-global using DocSpace.API.SDK.Api.People;
-global using DocSpace.API.SDK.Api.Portal;
-global using DocSpace.API.SDK.Client;
-global using DocSpace.API.SDK.Model;
-
-global using DotNet.Testcontainers.Builders;
-global using DotNet.Testcontainers.Containers;
-
-global using FluentAssertions;
-
-global using Microsoft.AspNetCore.Hosting;
-global using Microsoft.AspNetCore.Mvc.Testing;
-global using Microsoft.AspNetCore.TestHost;
-global using Microsoft.EntityFrameworkCore;
-global using Microsoft.Extensions.Configuration;
-global using Microsoft.Extensions.DependencyInjection;
-global using Microsoft.Extensions.Hosting;
-
-global using MySql.Data.MySqlClient;
-
-global using Npgsql;
-
-global using Respawn;
-global using Respawn.Graph;
-
-global using Testcontainers.MySql;
-global using Testcontainers.PostgreSql;
-global using Testcontainers.RabbitMq;
-global using Testcontainers.Redis;
-
-global using Xunit;
-
-global using WebApiProgram = ASCWebApi::Program;
-global using PeopleProgram = ASCPeople::Program;
+[Collection("Test Collection")]
+public class UserTest(PeopleFactory peopleFactory, WepApiFactory apiFactory) : BaseTest(peopleFactory, apiFactory)
+{
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "79334")]
+    public async Task CreateUser_AsRoomAdmin_ShouldCreateUserSuccessfully()
+    {
+        await _apiClient.Authenticate(Initializer.Owner);
+        var roomAdmin = await Initializer.InviteContact(EmployeeType.RoomAdmin);
+        await _peopleClient.Authenticate(roomAdmin);
+       
+        var fakeMember = Initializer.FakerMember.Generate();
+        
+        var user = await _profilesApi.AddMemberAsync(new MemberRequestDto
+        { 
+            CultureName = "en-US",
+            Spam = false,
+            Type = EmployeeType.User,
+            Email = fakeMember.Email,
+            Password = fakeMember.Password,
+            FirstName = fakeMember.FirstName,
+            LastName = fakeMember.LastName
+        }, TestContext.Current.CancellationToken);
+        
+        user.Should().NotBeNull();
+        user.Response.FirstName.Should().NotBeNullOrWhiteSpace();
+    }
+}

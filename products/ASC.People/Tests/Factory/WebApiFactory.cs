@@ -25,10 +25,7 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 extern alias ASCWebApi;
-using ASC.People.Tests.Data;
-
 using DocSpace.API.SDK.Api.Authentication;
-using DocSpace.API.SDK.Api.Portal;
 using DocSpace.API.SDK.Api.Settings;
 
 using QuotaApi = DocSpace.API.SDK.Api.People.QuotaApi;
@@ -42,6 +39,7 @@ public class WepApiFactory : WebApplicationFactory<WebApiProgram>, IAsyncLifetim
     public AuthenticationApi AuthenticationApi { get; private set; } = null!;
     public CommonSettingsApi CommonSettingsApi { get; private set; } = null!;
     public UsersApi PortalUsersApi { get; private set; } = null!;
+    public UserTypeApi UserTypeApi { get; private set; } = null!;
 
     protected override IHost CreateHost(IHostBuilder builder)
     {
@@ -62,6 +60,7 @@ public class WepApiFactory : WebApplicationFactory<WebApiProgram>, IAsyncLifetim
         AuthenticationApi = new AuthenticationApi(HttpClient, configuration);
         CommonSettingsApi = new CommonSettingsApi(HttpClient, configuration);
         PortalUsersApi = new UsersApi(HttpClient, configuration);
+        UserTypeApi = new UserTypeApi(HttpClient, configuration);
 
         return ValueTask.CompletedTask;
     }

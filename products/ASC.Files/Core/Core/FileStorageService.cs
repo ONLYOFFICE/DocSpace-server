@@ -4918,18 +4918,13 @@ public class FileStorageService //: IFileStorageService
         {
             throw new ItemNotFoundException();
         }
-
-        Dictionary<Guid, UserRelation> userRelations = null;
-        var currentUserId = authContext.CurrentAccount.ID;
-
-        var isDocSpaceAdmin = await userManager.IsDocSpaceAdminAsync(currentUserId);
-
+        
         if (!resendAll)
         {
             await foreach (var ace in fileSharing.GetPureSharesAsync(room, usersIds))
             {
                 var user = await userManager.GetUsersAsync(ace.Id);
-                if (!await HasAccessInviteAsync(user))
+                if (!await userManager.CanUserViewAnotherUserAsync(authContext.CurrentAccount.ID, user.Id))
                 {
                     continue;
                 }
@@ -4962,7 +4957,7 @@ public class FileStorageService //: IFileStorageService
                 }
 
                 var user = await userManager.GetUsersAsync(ace.Id);
-                if (!await HasAccessInviteAsync(user))
+                if (!await userManager.CanUserViewAnotherUserAsync(authContext.CurrentAccount.ID, user.Id))
                 {
                     continue;
                 }
@@ -4978,30 +4973,6 @@ public class FileStorageService //: IFileStorageService
             {
                 finish = true;
             }
-        }
-
-        return;
-
-        async Task<bool> HasAccessInviteAsync(UserInfo user)
-        {
-            if (user.Status == EmployeeStatus.Terminated)
-            {
-                return false;
-            }
-
-            if (isDocSpaceAdmin)
-            {
-                return true;
-            }
-
-            var type = await userManager.GetUserTypeAsync(user);
-            if (type != EmployeeType.Guest || (user.CreatedBy.HasValue && user.CreatedBy.Value == currentUserId))
-            {
-                return true;
-            }
-
-            userRelations ??= await userManager.GetUserRelationsAsync(currentUserId);
-            return userRelations.ContainsKey(user.Id);
         }
     }
 

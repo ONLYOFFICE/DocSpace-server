@@ -78,6 +78,7 @@ public class SecurityInfoSimpleRequestDto
     /// <summary>
     /// The message to send when notifying about the shared file.
     /// </summary>
+    [StringLength(255)]
     public string SharingMessage { get; set; }
 }
 

@@ -303,7 +303,11 @@ public abstract class BaseStartup
                     var json = new StreamReader(httpContext.Request.Body).ReadToEndAsync().Result;
 
                     var userInvitationsDto = JsonSerializer.Deserialize<EmailInvitationsDto>(json, _serializerOptions);
-                    invitationsCount = userInvitationsDto.Invitations.Count(x => !string.IsNullOrEmpty(x.Email));
+
+                    if (userInvitationsDto?.Invitations != null)
+                    {
+                        invitationsCount = userInvitationsDto.Invitations.Count(x => !string.IsNullOrEmpty(x.Email));
+                    }
 
                     httpContext.Request.Body.Position = 0;
                 }

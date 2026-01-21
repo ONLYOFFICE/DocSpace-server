@@ -65,8 +65,11 @@ public class VirtualRoomsInternalController(
         settingsManager,
         apiDateTimeHelper,
         userManager,
+        authContext,
         daoFactory)
 {
+    private readonly AuthContext _authContext = authContext;
+
     /// <summary>
     /// Creates a room in the "Rooms" section.
     /// </summary>
@@ -132,7 +135,7 @@ public class VirtualRoomsInternalController(
             };
         }
 
-        var taskId = await roomTemplatesWorker.StartCreateRoomAsync(tenantManager.GetCurrentTenantId(), authContext.CurrentAccount.ID,
+        var taskId = await roomTemplatesWorker.StartCreateRoomAsync(tenantManager.GetCurrentTenantId(), _authContext.CurrentAccount.ID,
             dto.TemplateId,
             dto.Title,
             logo,
@@ -148,7 +151,7 @@ public class VirtualRoomsInternalController(
             dto.Private,
             false);
 
-        await eventBus.PublishAsync(new CreateRoomFromTemplateIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())
+        await eventBus.PublishAsync(new CreateRoomFromTemplateIntegrationEvent(_authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())
         {
             TemplateId = dto.TemplateId,
             Logo = logo,
@@ -212,6 +215,7 @@ public class VirtualRoomsThirdPartyController(
     SettingsManager settingsManager,
     ApiDateTimeHelper apiDateTimeHelper,
     UserManager userManager,
+    AuthContext authContext,
     IDaoFactory daoFactory)
     : VirtualRoomsController<string>(globalFolderHelper,
         fileOperationDtoHelper,
@@ -229,6 +233,7 @@ public class VirtualRoomsThirdPartyController(
         settingsManager,
         apiDateTimeHelper,
         userManager,
+        authContext,
         daoFactory)
 {
     /// <summary>
@@ -265,6 +270,7 @@ public abstract class VirtualRoomsController<T>(
     SettingsManager settingsManager,
     ApiDateTimeHelper apiDateTimeHelper,
     UserManager userManager,
+    AuthContext authContext,
     IDaoFactory daoFactory)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
@@ -496,7 +502,11 @@ public abstract class VirtualRoomsController<T>(
             }
         }
 
-        var wrappers = inDto.RoomInvitation.Invitations.Map();
+        var wrappers = (await inDto.RoomInvitation.Invitations
+            .ToAsyncEnumerable()
+            .Where(async (s, _) => await userManager.CanUserViewAnotherUserAsync(authContext.CurrentAccount.ID, s.Id))
+            .ToListAsync())
+            .Map();
 
         var aceCollection = new AceCollection<T> { Files = [], Folders = [inDto.Id], Aces = wrappers, Message = inDto.RoomInvitation.Message };
 

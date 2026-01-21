@@ -103,7 +103,9 @@ internal class ProductsActionMapper : ILocationActionMapper
                     MessageAction.ServerUpdated,
                     MessageAction.ServerEnabled,
                     MessageAction.ServerDisabled,
-                    MessageAction.WebpluginUpdated
+                    MessageAction.WebpluginUpdated,
+                    MessageAction.WhiteLabelSettingsLogoTextUpdated,MessageAction.WhiteLabelSettingsLogosUpdated,MessageAction.WhiteLabelCompanySettingsUpdated,MessageAction.WhiteLabelAdditionalSettingsUpdated,MessageAction.WhiteLabelMailSettingsUpdated,
+                    MessageAction.InvitationSettingsUpdated,MessageAction.IPRestrictionsSettingsUpdated,MessageAction.LoginSettingsUpdated
                 ]
             },
             {
