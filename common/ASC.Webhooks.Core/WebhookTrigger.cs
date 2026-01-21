@@ -139,11 +139,18 @@ public enum WebhookTrigger
     RoomRestored = 67108864,
 
     [SwaggerEnum("room.copied")]
-    RoomCopied = 134217728
+    RoomCopied = 134217728,
 
     #endregion
 
-    //remaining possible values: 268435456, 536870912, 1073741824
+    #region Forms
+
+    [SwaggerEnum("form.submit")]
+    FormSubmit = 268435456,
+
+    #endregion
+
+    //remaining possible values: 536870912, 1073741824, 2147483648, 4294967296
 }
 
 
