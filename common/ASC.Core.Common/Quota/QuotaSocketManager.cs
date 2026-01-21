@@ -98,7 +98,7 @@ public class QuotaSocketManager(
 
         var room = scope switch
         {
-            QuotaScope.User => $"{tenantId}:user:{entityId}-quota",
+            QuotaScope.User => $"{tenantId}-user-{entityId}-quota",
             _ => throw new ArgumentException("Invalid scope for Guid entityId", nameof(scope))
         };
 
@@ -118,8 +118,8 @@ public class QuotaSocketManager(
 
         var room = scope switch
         {
-            QuotaScope.Room => $"{tenantId}:room:{entityId}-quota",
-            QuotaScope.Tenant => $"{tenantId}:tenant-quota",
+            QuotaScope.Room => $"{tenantId}-room-{entityId}-quota",
+            QuotaScope.Tenant => $"{tenantId}-tenant-quota",
             _ => throw new ArgumentException("Invalid scope for int entityId", nameof(scope))
         };
 
