@@ -148,9 +148,15 @@ public enum WebhookTrigger
     [SwaggerEnum("form.submit")]
     FormSubmit = 268435456,
 
+    [SwaggerEnum("form.filled.out")]
+    FormFilledOut = 536870912,
+
+    [SwaggerEnum("form.stopped")]
+    FormStopped = 1073741824
+
     #endregion
 
-    //remaining possible values: 536870912, 1073741824, 2147483648, 4294967296
+    //remaining possible values: 2147483648, 4294967296, 8589934592
 }
 
 

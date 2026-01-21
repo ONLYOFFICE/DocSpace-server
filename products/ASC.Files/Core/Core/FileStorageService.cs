@@ -5197,6 +5197,7 @@ public class FileStorageService //: IFileStorageService
                 var allRoleUserIds = await fileDao.GetFormRoles(form.Id).Where(role => role.UserId != authContext.CurrentAccount.ID).Select(r => r.UserId).ToListAsync();
 
                 var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+                await webhookManager.PublishAsync(WebhookTrigger.FormStopped, form);
                 await filesMessageService.SendAsync(MessageAction.FormStopped, form, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
                 await notifyClient.SendFormFillingEvent(room, form, allRoleUserIds, notifyConstants.EventStoppedFormFilling, authContext.CurrentAccount.ID);
                 break;
