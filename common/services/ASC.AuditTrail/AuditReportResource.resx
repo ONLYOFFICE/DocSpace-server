@@ -573,8 +573,14 @@
   <data name="ImportActionType" xml:space="preserve">
     <value>Import</value>
   </data>
+  <data name="InvitationSettingsUpdated" xml:space="preserve">
+    <value>Invitation settings updated</value>
+  </data>
   <data name="IpCol" xml:space="preserve">
     <value>IP</value>
+  </data>
+  <data name="IPRestrictionsSettingsUpdated" xml:space="preserve">
+    <value>IP Security settings updated</value>
   </data>
   <data name="LanguageSettingsUpdated" xml:space="preserve">
     <value>Language Settings Updated</value>
@@ -644,6 +650,9 @@
   </data>
   <data name="LoginHistoryReportName" xml:space="preserve">
     <value>Login History Report ({0}-{1})</value>
+  </data>
+  <data name="LoginSettingsUpdated" xml:space="preserve">
+    <value>Brute force protection settings updated</value>
   </data>
   <data name="LoginSuccess" xml:space="preserve">
     <value>Login Success</value>
