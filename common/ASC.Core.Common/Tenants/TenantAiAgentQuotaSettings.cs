@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,7 +27,7 @@
 namespace ASC.Core.Tenants;
 
 /// <summary>
-/// The ai agent quota settings.
+/// The AI agent quota settings.
 /// </summary>
 [Serializable]
 public class TenantAiAgentQuotaSettings : TenantEntityQuotaSettings, ISettings<TenantAiAgentQuotaSettings>

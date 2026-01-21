@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -303,7 +303,11 @@ public abstract class BaseStartup
                     var json = new StreamReader(httpContext.Request.Body).ReadToEndAsync().Result;
 
                     var userInvitationsDto = JsonSerializer.Deserialize<EmailInvitationsDto>(json, _serializerOptions);
-                    invitationsCount = userInvitationsDto.Invitations.Count(x => !string.IsNullOrEmpty(x.Email));
+
+                    if (userInvitationsDto?.Invitations != null)
+                    {
+                        invitationsCount = userInvitationsDto.Invitations.Count(x => !string.IsNullOrEmpty(x.Email));
+                    }
 
                     httpContext.Request.Body.Position = 0;
                 }

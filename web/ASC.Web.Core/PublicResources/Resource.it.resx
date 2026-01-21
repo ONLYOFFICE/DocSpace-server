@@ -1,5 +1,64 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -53,11 +112,68 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=7.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=7.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+    <value>Vettorizzazione</value>
+  </data>
+  <data name="AccountingCustomerOperationContact" xml:space="preserve">
+    <value>Contatto</value>
+  </data>
+  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
+    <value>Credito</value>
+  </data>
+  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
+    <value>Valuta</value>
+  </data>
+  <data name="AccountingCustomerOperationDate" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
+    <value>Addebito</value>
+  </data>
+  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
+    <value>Dettagli</value>
+  </data>
+  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
+    <value>Quantità</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+    <value>Strumenti AI</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
+    <value>Backup</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Spazio su disco</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
+    <value>Ricarica del saldo</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
+    <value>Unità di misura</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+    <value>Token</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
+    <value>Backup</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
+    <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
+    <value>Report delle operazioni cliente ({0}-{1})</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
+    <value>Cronologia delle transazioni</value>
+  </data>
+  <data name="AccountingCustomerOperationType" xml:space="preserve">
+    <value>Tipo</value>
+  </data>
   <data name="ActivateMobilePhoneEmptyCode" xml:space="preserve">
     <value>Il campo Valida codice non può essere vuoto</value>
   </data>
@@ -73,6 +189,18 @@
   <data name="AdminMessageSent" xml:space="preserve">
     <value>Il tuo messaggio è stato inviato con successo. Sarai contattato dall'amministratore del portale.</value>
   </data>
+  <data name="AiAgentFreeSpaceException" xml:space="preserve">
+    <value>Spazio disponibile per gli agenti AI superato</value>
+  </data>
+  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
+    <value>Impossibile impostare la quota per agente AI. Il valore inserito è superiore allo spazio totale di DocSpace.</value>
+  </data>
+  <data name="AutoRenewal" xml:space="preserve">
+    <value>Rinnovo automatico</value>
+  </data>
+  <data name="AutoTopUp" xml:space="preserve">
+    <value>Ricarica automatica</value>
+  </data>
   <data name="ButtonSmsEnable" xml:space="preserve">
     <value>Tramite SMS</value>
   </data>
@@ -87,6 +215,27 @@
   </data>
   <data name="ConsumersapiKey" xml:space="preserve">
     <value>Chiave api Rackspace</value>
+  </data>
+  <data name="ConsumersAppleId" xml:space="preserve">
+    <value>ID Apple</value>
+  </data>
+  <data name="ConsumersappleIdClientId" xml:space="preserve">
+    <value>ID applicazione client</value>
+  </data>
+  <data name="ConsumersAppleIdDescription" xml:space="preserve">
+    <value>Consenti all'applicazione di accedere al portale utilizzando un account Apple ID.</value>
+  </data>
+  <data name="ConsumersAppleIdInstruction" xml:space="preserve">
+    <value>Attiva questa app per consentire ai tuoi utenti di accedere a {LogoText} utilizzando Apple ID. {0}Vai al Portale per gli sviluppatori Apple e crea una nuova integrazione per l'app {LogoText}. Inserisci di seguito i dati che hai ricevuto:</value>
+  </data>
+  <data name="ConsumersappleIdKeyId" xml:space="preserve">
+    <value>Chiave identificativa di 10 caratteri generata per la chiave privata per l'accesso con Apple</value>
+  </data>
+  <data name="ConsumersappleIdPrivateKey" xml:space="preserve">
+    <value>Chiave privata scaricata da Apple Developer</value>
+  </data>
+  <data name="ConsumersappleIdTeamId" xml:space="preserve">
+    <value>Account sviluppatore di 10 caratteri ID Team</value>
   </data>
   <data name="ConsumersauthPwd" xml:space="preserve">
     <value>authPwd Selectel</value>
@@ -106,6 +255,9 @@
   <data name="ConsumersBitlyDescription" xml:space="preserve">
     <value>Collega il servizio Bitly per abbreviare i collegamenti dell'invito al portale e i collegamenti condivisi nel modulo Documenti.</value>
   </data>
+  <data name="ConsumersBitlyInstruction" xml:space="preserve">
+    <value>Attiva questa app per abbreviare i link d'invito e di documenti. {0}Inserisci il tuo login Bitly e la chiave API di seguito:</value>
+  </data>
   <data name="ConsumersBox" xml:space="preserve">
     <value>Box</value>
   </data>
@@ -118,6 +270,9 @@
   <data name="ConsumersBoxDescription" xml:space="preserve">
     <value>Collega l'applicazione per gestire Box Files e cartelle.</value>
   </data>
+  <data name="ConsumersBoxInstruction" xml:space="preserve">
+    <value>Abilita questa app per connettere il tuo account Box al modulo Documenti. Potrai gestire, modificare e condividere file da Box con gli utenti {LogoText}. {0}Accedi al tuo account nella pagina degli sviluppatori di Box e crea una nuova app per l'integrazione di {LogoText}. Inserisci di seguito i dati che hai ricevuto:</value>
+  </data>
   <data name="ConsumersClickatell" xml:space="preserve">
     <value>Clickatell</value>
   </data>
@@ -126,6 +281,9 @@
   </data>
   <data name="ConsumersClickatellDescription" xml:space="preserve">
     <value>Collegare l'applicazione per abilitare l'autenticazione a due fattori tramite Clickatell.</value>
+  </data>
+  <data name="ConsumersClickatellInstruction" xml:space="preserve">
+    <value>Usa questa app per abilitare l'autenticazione a due fattori con il servizio Clickatell. {0}Accedi al tuo account della piattaforma SMS e crea una nuova integrazione per {LogoText}. Copia un'APIKey e inseriscila di seguito:</value>
   </data>
   <data name="ConsumersDocuSign" xml:space="preserve">
     <value>DocuSign</value>
@@ -142,11 +300,17 @@
   <data name="ConsumersdocuSignHost" xml:space="preserve">
     <value>autenticazione endpoint DocuSign</value>
   </data>
+  <data name="ConsumersDocuSignInstruction" xml:space="preserve">
+    <value>Attiva questa app per firmare digitalmente i documenti utilizzando DocuSign. {0}Vai alla tua Console di amministrazione DocuSign e aggiungi l'integrazione {LogoText}. Inserisci di seguito i dati che hai ricevuto:</value>
+  </data>
   <data name="ConsumersDropBox" xml:space="preserve">
     <value>Dropbox</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
     <value>Connetti l'applicazione per gestire file e cartelle di Dropbox.</value>
+  </data>
+  <data name="ConsumersDropBoxInstruction" xml:space="preserve">
+    <value>Attiva questa app per connettere il tuo account Dropbox al modulo Documenti. Potrai gestire, modificare e condividere file da Dropbox con gli utenti {LogoText}. {0}Accedi al tuo account sul sito web degli sviluppatori di Dropbox e crea una nuova app per l'integrazione di {LogoText}. Inserisci di seguito i dati che hai ricevuto:</value>
   </data>
   <data name="ConsumersDropBoxKey" xml:space="preserve">
     <value>ID di Dropbox</value>
@@ -163,6 +327,9 @@
   <data name="ConsumersEasyBibDescription" xml:space="preserve">
     <value>Collega l'applicazione EasyBib per creare elenchi bibliografici.</value>
   </data>
+  <data name="ConsumersEasyBibInstruction" xml:space="preserve">
+    <value>Attiva questa app per creare bibliografie negli editor di {LogoText}. {0}Vai alla pagina di registrazione su EasyBib e compila il modulo per aggiungere l'integrazione {LogoText}. Dopo aver ottenuto una chiave dell'app, incollala di seguito:</value>
+  </data>
   <data name="ConsumersFacebook" xml:space="preserve">
     <value>Facebook</value>
   </data>
@@ -178,8 +345,17 @@
   <data name="ConsumersFacebookDescription" xml:space="preserve">
     <value>Collega l'applicazione per registrarsi al portale usando l'account Facebook.</value>
   </data>
+  <data name="ConsumersFacebookInstruction" xml:space="preserve">
+    <value>Abilita questa app per consentire ai tuoi utenti di accedere a {LogoText} utilizzando Facebook e collegare gli account Facebook dei loro clienti al modulo CRM. {0}Vai al portale Facebook Developers e crea una nuova app per l'integrazione di {LogoText}. Inserisci di seguito i dati che hai ricevuto:</value>
+  </data>
   <data name="ConsumersFirebase" xml:space="preserve">
     <value>Firebase</value>
+  </data>
+  <data name="ConsumersFirebaseDescription" xml:space="preserve">
+    <value>Connetti il servizio Firebase Cloud Messagging per ricevere notifiche in merito ai messaggi che ti sono stati inviati.</value>
+  </data>
+  <data name="ConsumersFirebaseInstruction" xml:space="preserve">
+    <value>Attiva questa app per consentire ai tuoi utenti di ricevere notifiche sui messaggi anche offline. {0}Vai alla console Firebase e aggiungi un nuovo progetto per l'integrazione di {LogoText}. Inserisci di seguito i dati che hai ricevuto:</value>
   </data>
   <data name="Consumersfirebase_apiKey" xml:space="preserve">
     <value>chiave web API</value>
@@ -192,9 +368,6 @@
   </data>
   <data name="Consumersfirebase_projectId" xml:space="preserve">
     <value>ID progetto</value>
-  </data>
-  <data name="ConsumersFirebaseDescription" xml:space="preserve">
-    <value>Connetti il servizio Firebase Cloud Messagging per ricevere notifiche in merito ai messaggi che ti sono stati inviati.</value>
   </data>
   <data name="ConsumersGoogle" xml:space="preserve">
     <value>Google</value>
@@ -217,17 +390,26 @@
   <data name="ConsumersGoogleCloudDescription" xml:space="preserve">
     <value>Connetti Google Cloud Storage al backup e archivia i dati del tuo portale.</value>
   </data>
+  <data name="ConsumersGoogleCloudInstruction" xml:space="preserve">
+    <value>Collega il servizio Cloud Storage Google per eseguire il backup e archiviare i dati dal portale. {0} Vai su Google Cloud Platform Console e crea un nuovo account di servizio per {LogoText}. Incollare i dati ricevuti di seguito:</value>
+  </data>
   <data name="ConsumersGoogleCloudjson" xml:space="preserve">
     <value>GoogleCloud json</value>
   </data>
   <data name="ConsumersGoogleDescription" xml:space="preserve">
     <value>Collega il progetto per registrarsi al portale usando l'account Google e gestire così file e cartelle in Google Drive.</value>
   </data>
+  <data name="ConsumersGoogleInstruction" xml:space="preserve">
+    <value>Abilita questa app per connettere il tuo account Google Drive al modulo Documenti. Potrai gestire, modificare e condividere file da Google Drive con gli utenti di {LogoText}. {0}Vai alla console delle API di Google e crea un nuovo progetto per l'integrazione di {LogoText}. Inserisci di seguito i dati che hai ricevuto:</value>
+  </data>
   <data name="ConsumersLinkedIn" xml:space="preserve">
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
     <value>Collega l'applicazione per registrarsi al portale usando l'account Linkedin.</value>
+  </data>
+  <data name="ConsumersLinkedInInstruction" xml:space="preserve">
+    <value>Abilita questa app per consentire ai tuoi utenti di accedere a {LogoText} utilizzando i loro account LinkedIn. {0}Vai al sito web di LinkedIn Developers e crea una nuova app per l'integrazione di {LogoText}. Inserisci di seguito i dati che hai ricevuto:</value>
   </data>
   <data name="ConsumersLinkedInKey" xml:space="preserve">
     <value>ID di LinkedIn</value>
@@ -250,11 +432,29 @@
   <data name="ConsumersMailruInstruction" xml:space="preserve">
     <value>Quando aggiungi l'applicazione Mail.ru puoi abilitare l'accesso al portale usando l'account Mail.ru nella pagina del tuo profilo.</value>
   </data>
+  <data name="ConsumersMicrosoft" xml:space="preserve">
+    <value>Microsoft</value>
+  </data>
+  <data name="ConsumersmicrosoftClientId" xml:space="preserve">
+    <value>ID applicazione client</value>
+  </data>
+  <data name="ConsumersmicrosoftClientSecret" xml:space="preserve">
+    <value>Segreto Cliente</value>
+  </data>
+  <data name="ConsumersMicrosoftDescription" xml:space="preserve">
+    <value>Abilita l'applicazione per accedere al portale utilizzando un account Microsoft.</value>
+  </data>
+  <data name="ConsumersMicrosoftInstruction" xml:space="preserve">
+    <value>Attiva questa app per consentire ai tuoi utenti di accedere a {LogoText} utilizzando Microsoft. {0}Vai a Microsoft Azure e crea una nuova integrazione {LogoText} dell'app. Inserisci di seguito i dati che hai ricevuto:</value>
+  </data>
   <data name="ConsumersRackspace" xml:space="preserve">
     <value>Rackspace Cloud Storage</value>
   </data>
   <data name="ConsumersRackspaceDescription" xml:space="preserve">
     <value>Connetti Rackspace Cloud Storage al backup e archivia i dati del tuo portale.</value>
+  </data>
+  <data name="ConsumersRackspaceInstruction" xml:space="preserve">
+    <value>Connettere il servizio Rackspace Cloud Storage per eseguire il backup e archiviare i dati dal portale. {0}Nelle impostazioni di sicurezza del Pannello di controllo cloud rackspace fare clic sul collegamento Mostra accanto a Chiave API Rackspace. Incollare i dati ricevuti di seguito:</value>
   </data>
   <data name="ConsumersRackspaceprivate_container" xml:space="preserve">
     <value>Contenitore privato</value>
@@ -286,6 +486,9 @@
   <data name="ConsumersS3Description" xml:space="preserve">
     <value>Connetti Amazon AWS S3 al backup e archivia i dati del tuo portale.</value>
   </data>
+  <data name="ConsumersS3Instruction" xml:space="preserve">
+    <value>Collega Amazon AWS S3 per eseguire il backup e archiviare i dati dal tuo portale. {0}Vai alla Console di gestione AWS e crea le chiavi di accesso per {LogoText}. Incolla i dati che hai ricevuto di seguito:</value>
+  </data>
   <data name="ConsumersS3region" xml:space="preserve">
     <value>Regione</value>
   </data>
@@ -306,6 +509,9 @@
   </data>
   <data name="ConsumersSelectelDescription" xml:space="preserve">
     <value>Connetti Selectel Cloud Storage al backup e archivia i dati del tuo portale.</value>
+  </data>
+  <data name="ConsumersSelectelInstruction" xml:space="preserve">
+    <value>Collega il servizio Selectel Cloud Storage per eseguire il backup e archiviare i dati dal tuo portale. {0}Ottieni i dati di accesso per un utente con diritti di lettura/scrittura per i container dove prevedi di archiviare i tuoi backup e incollali di seguito:</value>
   </data>
   <data name="ConsumersSelectelprivate_container" xml:space="preserve">
     <value>Contenitore privato</value>
@@ -331,17 +537,38 @@
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
     <value>Collega l'applicazione per gestire file e cartelle in OneDrive.</value>
   </data>
+  <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
+    <value>Abilita questa app per connettere il tuo account OneDrive al modulo Documenti. Potrai gestire, modificare e condividere file da OneDrive con gli utenti di {LogoText}. {0}Accedi al tuo account Microsoft Azure e crea una nuova app per l'integrazione di {LogoText}. Inserisci di seguito i dati che hai ricevuto:</value>
+  </data>
   <data name="ConsumersSmsc" xml:space="preserve">
     <value>SMS-Center</value>
   </data>
   <data name="ConsumersSmscDescription" xml:space="preserve">
     <value>Collegare l'applicazione per abilitare l'autenticazione a due fattori tramite l'SMS-Center.</value>
   </data>
+  <data name="ConsumersSmscInstruction" xml:space="preserve">
+    <value>Usa questa app per abilitare l'autenticazione a due fattori con il servizio SMS Center. {0}Inserisci il login del tuo account smsc e la tua password (o l'hash MD5 della password) in minuscolo:</value>
+  </data>
   <data name="Consumerssmsclogin" xml:space="preserve">
     <value>Login</value>
   </data>
   <data name="Consumerssmscpsw" xml:space="preserve">
     <value>Password o MD5 hash della password in lettere minuscole</value>
+  </data>
+  <data name="ConsumersTelegram" xml:space="preserve">
+    <value>Telegram</value>
+  </data>
+  <data name="ConsumersTelegramBotName" xml:space="preserve">
+    <value>Nome utente del bot</value>
+  </data>
+  <data name="ConsumersTelegramBotToken" xml:space="preserve">
+    <value>Token del bot</value>
+  </data>
+  <data name="ConsumersTelegramDescription" xml:space="preserve">
+    <value>Collega l'account Telegram per ricevere le notifiche del portale tramite Telegram.</value>
+  </data>
+  <data name="ConsumersTelegramInstruction" xml:space="preserve">
+    <value>Per ricevere le notifiche del portale tramite Telegram, abilita il bot di Telegram. Puoi creare un nuovo bot usando BotFather in Telegram Desktop. Per utilizzare questo bot, gli utenti del portale devono abilitare le notifiche di Telegram sulla loro pagina del profilo. {0}Incolla il nome utente del bot e il token che hai ricevuto nei campi sottostanti.</value>
   </data>
   <data name="ConsumersTwilio" xml:space="preserve">
     <value>Twilio</value>
@@ -355,20 +582,26 @@
   <data name="ConsumersTwilioDescription" xml:space="preserve">
     <value>Aggiungi Twilio per poter chiamare i contatti CRM direttamente dal browser.</value>
   </data>
+  <data name="ConsumersTwilioInstruction" xml:space="preserve">
+    <value>Abilita questa app per consentire ai tuoi utenti di chiamare i propri contatti dal modulo CRM utilizzando Twilio. {0}Vai a Twilio Console e incolla i seguenti dati qui sotto:</value>
+  </data>
   <data name="Consumerstwiliosender" xml:space="preserve">
     <value>Numero di telefono da Twilio (richiesto per l'autorizzazione SMS)</value>
   </data>
   <data name="ConsumersTwitter" xml:space="preserve">
     <value>X</value>
   </data>
-  <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
-    <value>Client ID</value>
-  </data>
   <data name="ConsumerstwitterAccessTokenSecret_Default" xml:space="preserve">
     <value>Client Secret</value>
   </data>
+  <data name="ConsumerstwitterAccessToken_Default" xml:space="preserve">
+    <value>Client ID</value>
+  </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
     <value>Collega l'applicazione per registrarsi al portale utilizzando l'account X.</value>
+  </data>
+  <data name="ConsumersTwitterInstruction" xml:space="preserve">
+    <value>Abilita questa app per consentire ai tuoi utenti di accedere a {LogoText} usando il loro X e collegare gli account X dei loro clienti al modulo CRM. {0}Vai su X Developers Portal e crea una nuova app per l'integrazione di {LogoText}. Inserisci di seguito i dati che hai ricevuto:</value>
   </data>
   <data name="ConsumersTwitterKey" xml:space="preserve">
     <value>API Key</value>
@@ -394,11 +627,29 @@
   <data name="ConsumersVkInstruction" xml:space="preserve">
     <value>Quando aggiungi l'applicazione VK puoi abilitare l'accesso al portale usando l'account VK nella pagina del tuo profilo.</value>
   </data>
+  <data name="ConsumersWeixin" xml:space="preserve">
+    <value>WeChat</value>
+  </data>
+  <data name="ConsumersWeixinClientId" xml:space="preserve">
+    <value>ID client</value>
+  </data>
+  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
+    <value>Segreto client</value>
+  </data>
+  <data name="ConsumersWeixinDescription" xml:space="preserve">
+    <value>Abilita l’applicazione per accedere al portale usando un account WeChat.</value>
+  </data>
+  <data name="ConsumersWeixinInstruction" xml:space="preserve">
+    <value>Abilita l’applicazione per accedere al portale usando un account WeChat.</value>
+  </data>
   <data name="ConsumersWordpress" xml:space="preserve">
     <value>WordPress</value>
   </data>
   <data name="ConsumersWordpressDescription" xml:space="preserve">
     <value>Collega l'applicazione per consentire la pubblicazione di documenti su WordPress.</value>
+  </data>
+  <data name="ConsumersWordpressInstruction" xml:space="preserve">
+    <value>Attiva l'applicazione per pubblicare facilmente documenti sul tuo sito web su WordPress. {0}Nella pagina degli sviluppatori di WordPress, crea una nuova app per l'integrazione di {LogoText}. Incolla di seguito i dati che hai ricevuto:</value>
   </data>
   <data name="ConsumerswpClientId" xml:space="preserve">
     <value>Chiave WordPress</value>
@@ -418,6 +669,9 @@
   <data name="ConsumersYahooDescription" xml:space="preserve">
     <value>Collegare l'applicazione per importare i contatti di Yahoo.</value>
   </data>
+  <data name="ConsumersYahooInstruction" xml:space="preserve">
+    <value>Abilita questa app per aggiungere nuovi utenti del portale dal tuo elenco di contatti Yahoo. {0}Vai alla pagina Crea applicazione in Yahoo Developer Network e crea una nuova app per l'integrazione di {LogoText}. Inserisci di seguito i dati che hai ricevuto:</value>
+  </data>
   <data name="ConsumersYandex" xml:space="preserve">
     <value>Yandex</value>
   </data>
@@ -433,6 +687,21 @@
   <data name="ConsumersYandexInstruction" xml:space="preserve">
     <value>Quando aggiungi l'applicazione Yandex puoi abilitare l'accesso al portale usando l'account Yandex nella pagina del tuo profilo.</value>
   </data>
+  <data name="ConsumersZoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientId" xml:space="preserve">
+    <value>ID del client Zoom</value>
+  </data>
+  <data name="ConsumersZoomClientSecret" xml:space="preserve">
+    <value>Segreto del client Zoom</value>
+  </data>
+  <data name="ConsumersZoomDescription" xml:space="preserve">
+    <value>Abilita l'applicazione ad accedere al portale utilizzando un account Zoom.</value>
+  </data>
+  <data name="ConsumersZoomInstruction" xml:space="preserve">
+    <value>Abilita questa app per consentire ai tuoi utenti di accedere a {LogoText} utilizzando i loro account Zoom. {0}Vai al sito web Zoom Developers e crea una nuova integrazione dell'app {LogoText}. Inserisci i dati che hai ricevuto qui sotto:</value>
+  </data>
   <data name="CouldNotRecoverPasswordForLdapUser" xml:space="preserve">
     <value>Il recupero della password è vietato per un utente LDAP</value>
   </data>
@@ -441,6 +710,24 @@
   </data>
   <data name="CustomNamingPeopleSchema" xml:space="preserve">
     <value>Personalizzato</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
+    <value>Nome</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
+    <value>Cognome</value>
+  </data>
+  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
+    <value>Quota servizio documenti ({0})</value>
   </data>
   <data name="EmailAndPasswordIncorrectAmiId" xml:space="preserve">
     <value>ID istanza errato.</value>
@@ -457,6 +744,9 @@
   <data name="ErrorBadKeys" xml:space="preserve">
     <value>Chiavi danneggiate</value>
   </data>
+  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
+    <value>Non è possibile eliminare l'ultimo spazio ad accesso completo</value>
+  </data>
   <data name="ErrorDisabledProfile" xml:space="preserve">
     <value>Il tuo profilo è stato sospeso</value>
   </data>
@@ -468,6 +758,9 @@
   </data>
   <data name="ErrorEmailEmpty" xml:space="preserve">
     <value>Il campo Email è vuoto</value>
+  </data>
+  <data name="ErrorEmailLinked" xml:space="preserve">
+    <value>Questa email è allegata all'utente {0} come fornitore di terze parti</value>
   </data>
   <data name="ErrorEmailsAreTheSame" xml:space="preserve">
     <value>L'indirizzo email corrente coincide con quello nuovo</value>
@@ -481,11 +774,26 @@
   <data name="ErrorEmptyUploadFileSelected" xml:space="preserve">
     <value>E' impossibile trovare il file caricato</value>
   </data>
+  <data name="ErrorFileNotImage" xml:space="preserve">
+    <value>Tipo file immagine sconosciuto</value>
+  </data>
+  <data name="ErrorGroupNotFound" xml:space="preserve">
+    <value>Il gruppo non è stato trovato</value>
+  </data>
+  <data name="ErrorImageSize" xml:space="preserve">
+    <value>Dimensione dell'immagine supera i parametri consentiti</value>
+  </data>
   <data name="ErrorImageWeightLimit" xml:space="preserve">
     <value>E' stata superata la dimensione file massima</value>
   </data>
   <data name="ErrorIncorrectUserName" xml:space="preserve">
     <value>Nome o Cognome errati</value>
+  </data>
+  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
+    <value>Il limite degli inviti è stato superato</value>
+  </data>
+  <data name="ErrorIpRestriction" xml:space="preserve">
+    <value>Aggiungi almeno 1 indirizzo IP permesso.</value>
   </data>
   <data name="ErrorIpSecurity" xml:space="preserve">
     <value>L'accesso al portale è limitato</value>
@@ -523,6 +831,9 @@
   <data name="ErrorPasswordOnlyLatinLetters" xml:space="preserve">
     <value>solo alfabeto latino</value>
   </data>
+  <data name="ErrorPaymentRequired" xml:space="preserve">
+    <value>Pagamento richiesto</value>
+  </data>
   <data name="ErrorRequestLimitExceeded" xml:space="preserve">
     <value>Il limite di richieste è stato superato</value>
   </data>
@@ -532,11 +843,53 @@
   <data name="ErrorTenantTooShortFormat" xml:space="preserve">
     <value>Il nome del dominio deve essere composto da {0} a {1} caratteri.</value>
   </data>
+  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
+    <value>Troppi tentativi di accesso. Ti preghiamo di riprovare più tardi</value>
+  </data>
+  <data name="ErrorTrustedMailDomain" xml:space="preserve">
+    <value>Aggiungi almeno 1 indirizzo IP permesso.</value>
+  </data>
+  <data name="ErrorUserDisabled" xml:space="preserve">
+    <value>Utente disabilitato</value>
+  </data>
   <data name="ErrorUserNotFound" xml:space="preserve">
     <value>L'utente non è stato trovato</value>
   </data>
   <data name="ErrorUserNotFoundByEmail" xml:space="preserve">
     <value>E' impossibile trovare l'utente con l'indirizzo email "{0}"</value>
+  </data>
+  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
+    <value>L'URL del webhook non è disponibile. La richiesta HEAD non ha restituito lo stato HTTP 200.</value>
+  </data>
+  <data name="ErrorWebPluginArchive" xml:space="preserve">
+    <value>Archivio plugin errato</value>
+  </data>
+  <data name="ErrorWebPluginExist" xml:space="preserve">
+    <value>Il plugin esiste già</value>
+  </data>
+  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
+    <value>Estensione file errata</value>
+  </data>
+  <data name="ErrorWebPluginFileSize" xml:space="preserve">
+    <value>La dimensione del file supera il limite</value>
+  </data>
+  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
+    <value>Sono vietate modifiche ai plugin di sistema</value>
+  </data>
+  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
+    <value>Il numero di plugin supera il limite</value>
+  </data>
+  <data name="ErrorWebPluginName" xml:space="preserve">
+    <value>Nome del plugin sbagliato</value>
+  </data>
+  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
+    <value>Nessun file di input</value>
+  </data>
+  <data name="ErrorWebPluginNotFound" xml:space="preserve">
+    <value>Plugin non trovato</value>
+  </data>
+  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
+    <value>Troppi file di input</value>
   </data>
   <data name="EuServerRegion" xml:space="preserve">
     <value>Regione UE (Francoforte)</value>
@@ -709,8 +1062,14 @@
   <data name="LicenseUploadedOverdue" xml:space="preserve">
     <value>Caricato con successo. {0}Il supporto e gli aggiornamenti non sono disponibili per questa licenza dal {2}.{1}</value>
   </data>
+  <data name="LicenseUploadedOverdueSupport" xml:space="preserve">
+    <value>Caricato con successo. {0}L'assistenza non è disponibile per questa licenza dal {2}.{1}</value>
+  </data>
   <data name="MessageEmailChangeInstuctionsSentOnEmail" xml:space="preserve">
     <value>Le istruzioni di modifica dell'email sono state inviate</value>
+  </data>
+  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
+    <value>Le istruzioni per la modifica della password sono state inviate all'indirizzo email {0}.</value>
   </data>
   <data name="MessageYourPasswordSendedToEmail" xml:space="preserve">
     <value>Se esiste un utente con l'e-mail {0}, l'istruzione di modifica della password è stata inviata a questo indirizzo e-mail.</value>
@@ -724,14 +1083,26 @@
   <data name="Owner" xml:space="preserve">
     <value>Proprietario</value>
   </data>
+  <data name="PortalName" xml:space="preserve">
+    <value>Spazio cloud per i documenti del tuo ufficio</value>
+  </data>
   <data name="PortalSecurity" xml:space="preserve">
     <value>Accesso al portale</value>
+  </data>
+  <data name="QuotaGreaterPortalError" xml:space="preserve">
+    <value>Impossibile impostare la quota di memoria: la quota di memoria impostata è maggiore della quota dei portali.</value>
   </data>
   <data name="ReassignDataRemoveUserError" xml:space="preserve">
     <value>La riassegnazione dei dati in corso per {0} non è completa.</value>
   </data>
   <data name="RecaptchaInvalid" xml:space="preserve">
     <value>Recaptcha non valido</value>
+  </data>
+  <data name="RoomFreeSpaceException" xml:space="preserve">
+    <value>È stata superata la quota di spazio delle stanza</value>
+  </data>
+  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
+    <value>Impossibile impostare la quota per stanza. Il valore inserito è superiore allo spazio di archiviazione totale di DocSpace.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Asia Pacifico (Singapore)</value>
@@ -775,32 +1146,38 @@
   <data name="SuccessfullySentNotificationDeleteUserInfoMessage" xml:space="preserve">
     <value>Le istruzioni per disattivare il tuo profilo sono state inviate all'indirizzo email {0}</value>
   </data>
-  <data name="TfaAppAuthMessageError" xml:space="preserve">
-    <value>Codice non corretto</value>
+  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
+    <value>Il numero di agenti AI non deve superare {0}</value>
   </data>
-  <data name="TfaAppNotAvailable" xml:space="preserve">
-    <value>Le impostazioni dell'applicazione TFA non sono disponibili</value>
+  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
+    <value>Strumenti AI</value>
   </data>
-  <data name="TfaTooMuchError" xml:space="preserve">
-    <value>Hai inviato troppi SMS. Prova più tardi.</value>
-  </data>
-  <data name="UsServerRegion" xml:space="preserve">
-    <value>Regione Ovest degli Stati Uniti (Oregon)</value>
-  </data>
-  <data name="WhatsNewSubscriptionName" xml:space="preserve">
-    <value>Cosa c'è di nuovo</value>
-  </data>
-  <data name="TariffsFeature_customization" xml:space="preserve">
-    <value>Branding e personalizzazione</value>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Attiva le funzioni AI nel tuo DocSpace per aumentare la produttività.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Tracciamento accessi e azioni</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
+    <value>Backup</value>
+  </data>
+  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
+    <value>Abilita i backup per il tuo DocSpace. I costi verranno addebitati automaticamente.</value>
+  </data>
+  <data name="TariffsFeature_customization" xml:space="preserve">
+    <value>Branding e personalizzazione</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>Dimensione massima del file</value>
   </data>
   <data name="TariffsFeature_file_size_exception" xml:space="preserve">
     <value>La dimensione del file non deve superare {0}</value>
+  </data>
+  <data name="TariffsFeature_free_backup" xml:space="preserve">
+    <value>{0} backup gratuiti al mese</value>
+  </data>
+  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
+    <value>Il numero di backup gratuiti non deve superare {0} in un mese</value>
   </data>
   <data name="TariffsFeature_manager_exception" xml:space="preserve">
     <value>Il numero di amministratori non deve superare {0}</value>
@@ -820,16 +1197,37 @@
   <data name="TariffsFeature_sso" xml:space="preserve">
     <value>SSO</value>
   </data>
+  <data name="TariffsFeature_statistic" xml:space="preserve">
+    <value>Quote e statistiche di archivio</value>
+  </data>
+  <data name="TariffsFeature_thirdparty" xml:space="preserve">
+    <value>Integrazioni Pro</value>
+  </data>
+  <data name="TariffsFeature_total_size" xml:space="preserve">
+    <value>{0} per amministratore e possibilità di aggiungere spazio su richiesta</value>
+  </data>
   <data name="TariffsFeature_total_size_exception" xml:space="preserve">
     <value>La dimensione dello spazio di archiviazione utilizzato non deve superare {0}</value>
   </data>
   <data name="TariffsFeature_total_size_price_count" xml:space="preserve">
     <value>Spazio di archiviazione</value>
   </data>
+  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
+    <value>Archiviazione disco aggiuntiva</value>
+  </data>
+  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
+    <value>Regola lo spazio di archiviazione in base alla quantità esatta di cui hai bisogno.</value>
+  </data>
+  <data name="TariffsFeature_used_manager" xml:space="preserve">
+    <value>Amministratori aggiunti:</value>
+  </data>
   <data name="TariffsFeature_used_room" xml:space="preserve">
     <value>Stanze:</value>
   </data>
   <data name="TariffsFeature_used_total_size" xml:space="preserve">
+    <value>Spazio di archiviazione utilizzato:</value>
+  </data>
+  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
     <value>Spazio di archiviazione utilizzato:</value>
   </data>
   <data name="TariffsFeature_used_usersInRoom" xml:space="preserve">
@@ -838,53 +1236,23 @@
   <data name="TariffsFeature_users" xml:space="preserve">
     <value>Numero illimitato di utenti e ospiti</value>
   </data>
-  <data name="TariffsFeature_users_exception" xml:space="preserve">
-    <value>Il numero di utenti non deve superare {0}</value>
-  </data>
   <data name="TariffsFeature_usersInRoom" xml:space="preserve">
     <value>Utenti presenti nella stanza</value>
   </data>
   <data name="TariffsFeature_usersInRoom_exception" xml:space="preserve">
     <value>Il numero di utenti in stanza non deve superare {0}</value>
   </data>
-  <data name="ConsumersappleIdKeyId" xml:space="preserve">
-    <value>Chiave identificativa di 10 caratteri generata per la chiave privata per l'accesso con Apple</value>
+  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
+    <value>Il numero di amministratori supera il limite: {0}/{1}.</value>
   </data>
-  <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>Consenti all'applicazione di accedere al portale utilizzando un account Apple ID.</value>
+  <data name="TariffsFeature_users_exception" xml:space="preserve">
+    <value>Il numero di utenti non deve superare {0}</value>
   </data>
-  <data name="ConsumersAppleIdInstruction" xml:space="preserve">
-    <value>Attiva questa app per consentire ai tuoi utenti di accedere a {LogoText} utilizzando Apple ID. {0}Vai al Portale per gli sviluppatori Apple e crea una nuova integrazione per l'app {LogoText}. Inserisci di seguito i dati che hai ricevuto:</value>
+  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
+    <value>Ricerca web AI</value>
   </data>
-  <data name="ConsumersappleIdPrivateKey" xml:space="preserve">
-    <value>Chiave privata scaricata da Apple Developer</value>
-  </data>
-  <data name="ConsumersBitlyInstruction" xml:space="preserve">
-    <value>Attiva questa app per abbreviare i link d'invito e di documenti. {0}Inserisci il tuo login Bitly e la chiave API di seguito:</value>
-  </data>
-  <data name="ConsumersBoxInstruction" xml:space="preserve">
-    <value>Abilita questa app per connettere il tuo account Box al modulo Documenti. Potrai gestire, modificare e condividere file da Box con gli utenti {LogoText}. {0}Accedi al tuo account nella pagina degli sviluppatori di Box e crea una nuova app per l'integrazione di {LogoText}. Inserisci di seguito i dati che hai ricevuto:</value>
-  </data>
-  <data name="ConsumersDocuSignInstruction" xml:space="preserve">
-    <value>Attiva questa app per firmare digitalmente i documenti utilizzando DocuSign. {0}Vai alla tua Console di amministrazione DocuSign e aggiungi l'integrazione {LogoText}. Inserisci di seguito i dati che hai ricevuto:</value>
-  </data>
-  <data name="ConsumersDropBoxInstruction" xml:space="preserve">
-    <value>Attiva questa app per connettere il tuo account Dropbox al modulo Documenti. Potrai gestire, modificare e condividere file da Dropbox con gli utenti {LogoText}. {0}Accedi al tuo account sul sito web degli sviluppatori di Dropbox e crea una nuova app per l'integrazione di {LogoText}. Inserisci di seguito i dati che hai ricevuto:</value>
-  </data>
-  <data name="ErrorFileNotImage" xml:space="preserve">
-    <value>Tipo file immagine sconosciuto</value>
-  </data>
-  <data name="ErrorImageSize" xml:space="preserve">
-    <value>Dimensione dell'immagine supera i parametri consentiti</value>
-  </data>
-  <data name="ConsumersMicrosoft" xml:space="preserve">
-    <value>Microsoft</value>
-  </data>
-  <data name="ConsumersTelegram" xml:space="preserve">
-    <value>Telegram</value>
-  </data>
-  <data name="PortalName" xml:space="preserve">
-    <value>Spazio cloud per i documenti del tuo ufficio</value>
+  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
+    <value>Aggiungi fondi al tuo wallet per sbloccare la ricerca web AI.</value>
   </data>
   <data name="Tariffs_admin" xml:space="preserve">
     <value>Business</value>
@@ -892,311 +1260,11 @@
   <data name="Tariffs_adminyear" xml:space="preserve">
     <value>Business</value>
   </data>
-  <data name="Tariffs_startup" xml:space="preserve">
-    <value>Startup</value>
-  </data>
-  <data name="LicenseUploadedOverdueSupport" xml:space="preserve">
-    <value>Caricato con successo. {0}L'assistenza non è disponibile per questa licenza dal {2}.{1}</value>
-  </data>
-  <data name="ConsumersAppleId" xml:space="preserve">
-    <value>ID Apple</value>
-  </data>
-  <data name="ConsumersappleIdClientId" xml:space="preserve">
-    <value>ID applicazione client</value>
-  </data>
-  <data name="ConsumersappleIdTeamId" xml:space="preserve">
-    <value>Account sviluppatore di 10 caratteri ID Team</value>
-  </data>
-  <data name="ConsumersClickatellInstruction" xml:space="preserve">
-    <value>Usa questa app per abilitare l'autenticazione a due fattori con il servizio Clickatell. {0}Accedi al tuo account della piattaforma SMS e crea una nuova integrazione per {LogoText}. Copia un'APIKey e inseriscila di seguito:</value>
-  </data>
-  <data name="ConsumersFacebookInstruction" xml:space="preserve">
-    <value>Abilita questa app per consentire ai tuoi utenti di accedere a {LogoText} utilizzando Facebook e collegare gli account Facebook dei loro clienti al modulo CRM. {0}Vai al portale Facebook Developers e crea una nuova app per l'integrazione di {LogoText}. Inserisci di seguito i dati che hai ricevuto:</value>
-  </data>
-  <data name="ConsumersGoogleInstruction" xml:space="preserve">
-    <value>Abilita questa app per connettere il tuo account Google Drive al modulo Documenti. Potrai gestire, modificare e condividere file da Google Drive con gli utenti di {LogoText}. {0}Vai alla console delle API di Google e crea un nuovo progetto per l'integrazione di {LogoText}. Inserisci di seguito i dati che hai ricevuto:</value>
-  </data>
-  <data name="ConsumersLinkedInInstruction" xml:space="preserve">
-    <value>Abilita questa app per consentire ai tuoi utenti di accedere a {LogoText} utilizzando i loro account LinkedIn. {0}Vai al sito web di LinkedIn Developers e crea una nuova app per l'integrazione di {LogoText}. Inserisci di seguito i dati che hai ricevuto:</value>
-  </data>
-  <data name="ConsumersmicrosoftClientId" xml:space="preserve">
-    <value>ID applicazione client</value>
-  </data>
-  <data name="ConsumersmicrosoftClientSecret" xml:space="preserve">
-    <value>Segreto Cliente</value>
-  </data>
-  <data name="ConsumersMicrosoftDescription" xml:space="preserve">
-    <value>Abilita l'applicazione per accedere al portale utilizzando un account Microsoft.</value>
-  </data>
-  <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
-    <value>Abilita questa app per connettere il tuo account OneDrive al modulo Documenti. Potrai gestire, modificare e condividere file da OneDrive con gli utenti di {LogoText}. {0}Accedi al tuo account Microsoft Azure e crea una nuova app per l'integrazione di {LogoText}. Inserisci di seguito i dati che hai ricevuto:</value>
-  </data>
-  <data name="ConsumersSmscInstruction" xml:space="preserve">
-    <value>Usa questa app per abilitare l'autenticazione a due fattori con il servizio SMS Center. {0}Inserisci il login del tuo account smsc e la tua password (o l'hash MD5 della password) in minuscolo:</value>
-  </data>
-  <data name="ConsumersTelegramBotName" xml:space="preserve">
-    <value>Nome utente del bot</value>
-  </data>
-  <data name="ConsumersTelegramBotToken" xml:space="preserve">
-    <value>Token del bot</value>
-  </data>
-  <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Collega l'account Telegram per ricevere le notifiche del portale tramite Telegram.</value>
-  </data>
-  <data name="ConsumersTelegramInstruction" xml:space="preserve">
-    <value>Per ricevere le notifiche del portale tramite Telegram, abilita il bot di Telegram. Puoi creare un nuovo bot usando BotFather in Telegram Desktop. Per utilizzare questo bot, gli utenti del portale devono abilitare le notifiche di Telegram sulla loro pagina del profilo. {0}Incolla il nome utente del bot e il token che hai ricevuto nei campi sottostanti.</value>
-  </data>
-  <data name="ConsumersTwilioInstruction" xml:space="preserve">
-    <value>Abilita questa app per consentire ai tuoi utenti di chiamare i propri contatti dal modulo CRM utilizzando Twilio. {0}Vai a Twilio Console e incolla i seguenti dati qui sotto:</value>
-  </data>
-  <data name="ConsumersTwitterInstruction" xml:space="preserve">
-    <value>Abilita questa app per consentire ai tuoi utenti di accedere a {LogoText} usando il loro X e collegare gli account X dei loro clienti al modulo CRM. {0}Vai su X Developers Portal e crea una nuova app per l'integrazione di {LogoText}. Inserisci di seguito i dati che hai ricevuto:</value>
-  </data>
-  <data name="ConsumersYahooInstruction" xml:space="preserve">
-    <value>Abilita questa app per aggiungere nuovi utenti del portale dal tuo elenco di contatti Yahoo. {0}Vai alla pagina Crea applicazione in Yahoo Developer Network e crea una nuova app per l'integrazione di {LogoText}. Inserisci di seguito i dati che hai ricevuto:</value>
-  </data>
-  <data name="ConsumersWordpressInstruction" xml:space="preserve">
-    <value>Attiva l'applicazione per pubblicare facilmente documenti sul tuo sito web su WordPress. {0}Nella pagina degli sviluppatori di WordPress, crea una nuova app per l'integrazione di {LogoText}. Incolla di seguito i dati che hai ricevuto:</value>
-  </data>
-  <data name="ConsumersEasyBibInstruction" xml:space="preserve">
-    <value>Attiva questa app per creare bibliografie negli editor di {LogoText}. {0}Vai alla pagina di registrazione su EasyBib e compila il modulo per aggiungere l'integrazione {LogoText}. Dopo aver ottenuto una chiave dell'app, incollala di seguito:</value>
-  </data>
-  <data name="ConsumersFirebaseInstruction" xml:space="preserve">
-    <value>Attiva questa app per consentire ai tuoi utenti di ricevere notifiche sui messaggi anche offline. {0}Vai alla console Firebase e aggiungi un nuovo progetto per l'integrazione di {LogoText}. Inserisci di seguito i dati che hai ricevuto:</value>
-  </data>
-  <data name="ConsumersGoogleCloudInstruction" xml:space="preserve">
-    <value>Collega il servizio Cloud Storage Google per eseguire il backup e archiviare i dati dal portale. {0} Vai su Google Cloud Platform Console e crea un nuovo account di servizio per {LogoText}. Incollare i dati ricevuti di seguito:</value>
-  </data>
-  <data name="ConsumersRackspaceInstruction" xml:space="preserve">
-    <value>Connettere il servizio Rackspace Cloud Storage per eseguire il backup e archiviare i dati dal portale. {0}Nelle impostazioni di sicurezza del Pannello di controllo cloud rackspace fare clic sul collegamento Mostra accanto a Chiave API Rackspace. Incollare i dati ricevuti di seguito:</value>
-  </data>
-  <data name="ConsumersMicrosoftInstruction" xml:space="preserve">
-    <value>Attiva questa app per consentire ai tuoi utenti di accedere a {LogoText} utilizzando Microsoft. {0}Vai a Microsoft Azure e crea una nuova integrazione {LogoText} dell'app. Inserisci di seguito i dati che hai ricevuto:</value>
-  </data>
-  <data name="ConsumersS3Instruction" xml:space="preserve">
-    <value>Collega Amazon AWS S3 per eseguire il backup e archiviare i dati dal tuo portale. {0}Vai alla Console di gestione AWS e crea le chiavi di accesso per {LogoText}. Incolla i dati che hai ricevuto di seguito:</value>
-  </data>
-  <data name="ConsumersSelectelInstruction" xml:space="preserve">
-    <value>Collega il servizio Selectel Cloud Storage per eseguire il backup e archiviare i dati dal tuo portale. {0}Ottieni i dati di accesso per un utente con diritti di lettura/scrittura per i container dove prevedi di archiviare i tuoi backup e incollali di seguito:</value>
-  </data>
-  <data name="TariffsFeature_thirdparty" xml:space="preserve">
-    <value>Integrazioni Pro</value>
-  </data>
-  <data name="ConsumersZoom" xml:space="preserve">
-    <value>Zoom</value>
-  </data>
-  <data name="ConsumersZoomClientId" xml:space="preserve">
-    <value>ID del client Zoom</value>
-  </data>
-  <data name="ConsumersZoomClientSecret" xml:space="preserve">
-    <value>Segreto del client Zoom</value>
-  </data>
-  <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Abilita l'applicazione ad accedere al portale utilizzando un account Zoom.</value>
-  </data>
-  <data name="ConsumersZoomInstruction" xml:space="preserve">
-    <value>Abilita questa app per consentire ai tuoi utenti di accedere a {LogoText} utilizzando i loro account Zoom. {0}Vai al sito web Zoom Developers e crea una nuova integrazione dell'app {LogoText}. Inserisci i dati che hai ricevuto qui sotto:</value>
-  </data>
-  <data name="ErrorTooManyLoginAttempts" xml:space="preserve">
-    <value>Troppi tentativi di accesso. Ti preghiamo di riprovare più tardi</value>
-  </data>
-  <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
-    <value>Non è possibile eliminare l'ultimo spazio ad accesso completo</value>
-  </data>
-  <data name="ErrorWebPluginArchive" xml:space="preserve">
-    <value>Archivio plugin errato</value>
-  </data>
-  <data name="ErrorWebPluginExist" xml:space="preserve">
-    <value>Il plugin esiste già</value>
-  </data>
-  <data name="ErrorWebPluginFileExtension" xml:space="preserve">
-    <value>Estensione file errata</value>
-  </data>
-  <data name="ErrorWebPluginFileSize" xml:space="preserve">
-    <value>La dimensione del file supera il limite</value>
-  </data>
-  <data name="ErrorWebPluginForbiddenSystem" xml:space="preserve">
-    <value>Sono vietate modifiche ai plugin di sistema</value>
-  </data>
-  <data name="ErrorWebPluginName" xml:space="preserve">
-    <value>Nome del plugin sbagliato</value>
-  </data>
-  <data name="ErrorWebPluginNoInputFile" xml:space="preserve">
-    <value>Nessun file di input</value>
-  </data>
-  <data name="ErrorWebPluginNotFound" xml:space="preserve">
-    <value>Plugin non trovato</value>
-  </data>
-  <data name="ErrorWebPluginToManyInputFiles" xml:space="preserve">
-    <value>Troppi file di input</value>
-  </data>
-  <data name="QuotaGreaterPortalError" xml:space="preserve">
-    <value>Impossibile impostare la quota di memoria: la quota di memoria impostata è maggiore della quota dei portali.</value>
-  </data>
-  <data name="RoomFreeSpaceException" xml:space="preserve">
-    <value>È stata superata la quota di spazio delle stanza</value>
-  </data>
-  <data name="UserFreeSpaceException" xml:space="preserve">
-    <value>È stata superata la quota di spazio utente</value>
-  </data>
-  <data name="TariffsFeature_statistic" xml:space="preserve">
-    <value>Quote e statistiche di archivio</value>
-  </data>
-  <data name="TariffsFeature_total_size" xml:space="preserve">
-    <value>{0} per amministratore e possibilità di aggiungere spazio su richiesta</value>
-  </data>
-  <data name="TariffsFeature_used_manager" xml:space="preserve">
-    <value>Amministratori aggiunti:</value>
-  </data>
-  <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
-    <value>Il limite degli inviti è stato superato</value>
-  </data>
-  <data name="ErrorUserDisabled" xml:space="preserve">
-    <value>Utente disabilitato</value>
-  </data>
-  <data name="MessagePasswordSendedToEmail" xml:space="preserve">
-    <value>Le istruzioni per la modifica della password sono state inviate all'indirizzo email {0}.</value>
-  </data>
-  <data name="ErrorEmailLinked" xml:space="preserve">
-    <value>Questa email è allegata all'utente {0} come fornitore di terze parti</value>
-  </data>
-  <data name="ErrorIpRestriction" xml:space="preserve">
-    <value>Aggiungi almeno 1 indirizzo IP permesso.</value>
-  </data>
-  <data name="ErrorTrustedMailDomain" xml:space="preserve">
-    <value>Aggiungi almeno 1 indirizzo IP permesso.</value>
-  </data>
   <data name="Tariffs_nonprofit" xml:space="preserve">
     <value>Non-profit</value>
   </data>
-  <data name="TariffsFeature_usersQuotaExceeds_exception" xml:space="preserve">
-    <value>Il numero di amministratori supera il limite: {0}/{1}.</value>
-  </data>
-  <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Impossibile impostare la quota per stanza. Il valore inserito è superiore allo spazio di archiviazione totale di DocSpace.</value>
-  </data>
-  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Impossibile impostare la quota per utente. Il valore inserito è superiore allo spazio di archiviazione totale di DocSpace.</value>
-  </data>
-  <data name="ErrorWebhookUrlNotAvaliable" xml:space="preserve">
-    <value>L'URL del webhook non è disponibile. La richiesta HEAD non ha restituito lo stato HTTP 200.</value>
-  </data>
-  <data name="AccountingCustomerOperationCredit" xml:space="preserve">
-    <value>Credito</value>
-  </data>
-  <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
-    <value>Valuta</value>
-  </data>
-  <data name="AccountingCustomerOperationDate" xml:space="preserve">
-    <value>Data</value>
-  </data>
-  <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
-    <value>Quantità</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
-    <value>Unità di misura</value>
-  </data>
-  <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
-    <value>Report delle operazioni cliente ({0}-{1})</value>
-  </data>
-  <data name="ErrorGroupNotFound" xml:space="preserve">
-    <value>Il gruppo non è stato trovato</value>
-  </data>
-  <data name="TariffsFeature_total_size_wallet" xml:space="preserve">
-    <value>Archiviazione disco aggiuntiva</value>
-  </data>
-  <data name="TariffsFeature_total_size_wallet_price_count" xml:space="preserve">
-    <value>Regola lo spazio di archiviazione in base alla quantità esatta di cui hai bisogno.</value>
-  </data>
-  <data name="TariffsFeature_used_total_size_wallet" xml:space="preserve">
-    <value>Spazio di archiviazione utilizzato:</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
-    <value>Spazio su disco</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
-    <value>Ricarica del saldo</value>
-  </data>
-  <data name="AutoTopUp" xml:space="preserve">
-    <value>Ricarica automatica</value>
-  </data>
-  <data name="ErrorPaymentRequired" xml:space="preserve">
-    <value>Pagamento richiesto</value>
-  </data>
-  <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
-    <value>Il numero di backup gratuiti non deve superare {0} in un mese</value>
-  </data>
-  <data name="TariffsFeature_free_backup" xml:space="preserve">
-    <value>{0} backup gratuiti al mese</value>
-  </data>
-  <data name="TariffsFeature_backup_wallet" xml:space="preserve">
-    <value>Backup</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>Backup</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
-    <value>Backup</value>
-  </data>
-  <data name="AccountingCustomerOperationContact" xml:space="preserve">
-    <value>Contatto</value>
-  </data>
-  <data name="AccountingCustomerOperationDebit" xml:space="preserve">
-    <value>Addebito</value>
-  </data>
-  <data name="AccountingCustomerOperationDetails" xml:space="preserve">
-    <value>Dettagli</value>
-  </data>
-  <data name="AccountingCustomerOperationType" xml:space="preserve">
-    <value>Tipo</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
-    <value>GB</value>
-  </data>
-  <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
-    <value>Cronologia delle transazioni</value>
-  </data>
-  <data name="AutoRenewal" xml:space="preserve">
-    <value>Rinnovo automatico</value>
-  </data>
-  <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
-    <value>Abilita i backup per il tuo DocSpace. I costi verranno addebitati automaticamente.</value>
-  </data>
-  <data name="ConsumersWeixinClientId" xml:space="preserve">
-    <value>ID client</value>
-  </data>
-  <data name="ConsumersWeixin" xml:space="preserve">
-    <value>WeChat</value>
-  </data>
-  <data name="ConsumersWeixinClientSecret" xml:space="preserve">
-    <value>Segreto client</value>
-  </data>
-  <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Abilita l’applicazione per accedere al portale usando un account WeChat.</value>
-  </data>
-  <data name="ConsumersWeixinInstruction" xml:space="preserve">
-    <value>Abilita l’applicazione per accedere al portale usando un account WeChat.</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaDate" xml:space="preserve">
-    <value>Data</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaEmail" xml:space="preserve">
-    <value>Email</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaFirstName" xml:space="preserve">
-    <value>Nome</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaId" xml:space="preserve">
-    <value>ID</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaLastName" xml:space="preserve">
-    <value>Cognome</value>
-  </data>
-  <data name="DocumentServerLicenseQuotaReportName" xml:space="preserve">
-    <value>Quota servizio documenti ({0})</value>
-  </data>
-  <data name="ErrorWebPluginMaxCount" xml:space="preserve">
-    <value>Il numero di plugin supera il limite</value>
+  <data name="Tariffs_startup" xml:space="preserve">
+    <value>Startup</value>
   </data>
   <data name="TelegramOnGenericError" xml:space="preserve">
     <value>Si è verificato un errore imprevisto. Riprova.</value>
@@ -1204,34 +1272,25 @@
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
     <value>Hai collegato con successo Telegram per ricevere notifiche dal tuo DocSpace.</value>
   </data>
-  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
-    <value>Vettorizzazione</value>
+  <data name="TfaAppAuthMessageError" xml:space="preserve">
+    <value>Codice non corretto</value>
   </data>
-  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
-    <value>Strumenti AI</value>
+  <data name="TfaAppNotAvailable" xml:space="preserve">
+    <value>Le impostazioni dell'applicazione TFA non sono disponibili</value>
   </data>
-  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
-    <value>Token</value>
+  <data name="TfaTooMuchError" xml:space="preserve">
+    <value>Hai inviato troppi SMS. Prova più tardi.</value>
   </data>
-  <data name="AiAgentFreeSpaceException" xml:space="preserve">
-    <value>Spazio disponibile per gli agenti AI superato</value>
+  <data name="UserFreeSpaceException" xml:space="preserve">
+    <value>È stata superata la quota di spazio utente</value>
   </data>
-  <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Impossibile impostare la quota per agente AI. Il valore inserito è superiore allo spazio totale di DocSpace.</value>
+  <data name="UserQuotaGreaterPortalError" xml:space="preserve">
+    <value>Impossibile impostare la quota per utente. Il valore inserito è superiore allo spazio di archiviazione totale di DocSpace.</value>
   </data>
-  <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
-    <value>Il numero di agenti AI non deve superare {0}</value>
+  <data name="UsServerRegion" xml:space="preserve">
+    <value>Regione Ovest degli Stati Uniti (Oregon)</value>
   </data>
-  <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>Strumenti AI</value>
-  </data>
-  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Attiva le funzioni AI nel tuo DocSpace per aumentare la produttività.</value>
-  </data>
-  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
-    <value>Ricerca web AI</value>
-  </data>
-  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
-    <value>Aggiungi fondi al tuo wallet per sbloccare la ricerca web AI.</value>
+  <data name="WhatsNewSubscriptionName" xml:space="preserve">
+    <value>Cosa c'è di nuovo</value>
   </data>
 </root>

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -2256,12 +2256,12 @@ public class EntryManager(IDaoFactory daoFactory,
                     await fileTracker.RemoveAsync(form.Id);
                     await socketManager.StopEditAsync(form.Id);
                     await filesMessageService.SendAsync(MessageAction.FormCompletelyFilled, form, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
-                    await notifyClient.SendFormFillingEvent(room, form, allRoles.Select(role => role.UserId).ToList(), NotifyConstants.EventFormWasCompletelyFilled);
+                    await notifyClient.SendFormFillingEvent(room, form, allRoles.Select(role => role.UserId).ToList(), typeof(FormWasCompletelyFilledNotifyAction));
                 }
                 else if (nextRoleUserIds.Count != 0)
                 {
                     await filesMessageService.SendAsync(MessageAction.FormPartiallyFilled, form, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
-                    await notifyClient.SendFormFillingEvent(room, form, nextRoleUserIds, NotifyConstants.EventYourTurnFormFilling);
+                    await notifyClient.SendFormFillingEvent(room, form, nextRoleUserIds,  typeof(YourTurnFormFillingNotifyAction));
                 }
             }
         }

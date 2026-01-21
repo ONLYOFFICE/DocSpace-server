@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -205,7 +205,7 @@ public class MessageSettingsController(
 
             if (!email.TestEmailRegex() || email.TestEmailPunyCode())
             {
-                throw new Exception(Resource.ErrorNotCorrectEmail);
+                throw new ArgumentException(Resource.ErrorNotCorrectEmail);
             }
 
             await CheckCache("sendjoininvite");
@@ -213,7 +213,7 @@ public class MessageSettingsController(
             var user = await userManager.GetUserByEmailAsync(email);
             if (!user.Id.Equals(Constants.LostUser.Id))
             {
-                throw new Exception(await customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
+                throw new ArgumentException(await customNamingPeople.Substitute<Resource>("ErrorEmailAlreadyExists"));
             }
 
             var trustedDomainSettings = await settingsManager.LoadAsync<StudioTrustedDomainSettings>();
@@ -245,7 +245,7 @@ public class MessageSettingsController(
                             return Resource.FinishInviteJoinEmailMessage;
                         }
 
-                        throw new Exception(Resource.ErrorEmailDomainNotAllowed);
+                        throw new ArgumentException(Resource.ErrorEmailDomainNotAllowed);
                     }
                 case TenantTrustedDomainsType.All:
                     {
@@ -254,12 +254,12 @@ public class MessageSettingsController(
                         return Resource.FinishInviteJoinEmailMessage;
                     }
                 default:
-                    throw new Exception(Resource.ErrorNotCorrectEmail);
+                    throw new ArgumentException(Resource.ErrorNotCorrectEmail);
             }
         }
         catch (FormatException)
         {
-            throw new Exception(Resource.ErrorNotCorrectEmail);
+            throw new ArgumentException(Resource.ErrorNotCorrectEmail);
         }
     }
 }

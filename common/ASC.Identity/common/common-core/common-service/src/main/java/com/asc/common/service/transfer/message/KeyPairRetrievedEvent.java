@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -58,6 +58,9 @@ public class KeyPairRetrievedEvent implements Serializable {
 
   @JsonProperty(value = "pair_type")
   private String pairType;
+
+  @JsonProperty(value = "created_at")
+  private String createdAt;
 
   @JsonProperty(value = "success")
   private boolean success;

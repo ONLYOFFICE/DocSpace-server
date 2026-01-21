@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -102,13 +102,13 @@ public class FileSharingAceHelper(
 
             var emailInvite = !string.IsNullOrEmpty(w.Email);
             var currentUser = await userManager.GetUsersAsync(w.Id, false);
-            if ((currentUser.Status == EmployeeStatus.Terminated || currentUser.Removed) && w.Access != FileShare.None)
+            var existedShare = shares.Get(w.Id);
+            if ((currentUser.Status == EmployeeStatus.Terminated || currentUser.Removed) && (w.Access != FileShare.None || existedShare == null))
             {
                 continue;
             }
 
             var currentUserType = await userManager.GetUserTypeAsync(currentUser);
-            var existedShare = shares.Get(w.Id);
             var eventType = existedShare != null ? w.Access == FileShare.None ? EventType.Remove : EventType.Update : EventType.Create;
 
             if (existedShare != null)
@@ -255,7 +255,7 @@ public class FileSharingAceHelper(
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
                 }
 
-                if (emailInvite)
+                if (emailInvite && w.Access != FileShare.None)
                 {
                     var user = await userManager.GetUserByEmailAsync(w.Email);
                     if (!user.Equals(Constants.LostUser))
@@ -396,7 +396,7 @@ public class FileSharingAceHelper(
             changed = true;
             handledAces.Add(new ProcessedItem<T>(eventType, existedShare, w, file != null ? file : folder));
 
-            if (emailInvite)
+            if (emailInvite && share != FileShare.None)
             {
                 var link = invitationService.GetInvitationLink(w.Email, share, authContext.CurrentAccount.ID, entry.Id.ToString(), culture);
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
@@ -432,7 +432,11 @@ public class FileSharingAceHelper(
                 listUsersId.Add(w.Id);
             }
 
-            listUsersId.Remove(authContext.CurrentAccount.ID);
+            //if not leaving the room
+            if (!(entryType == FileEntryType.Folder && share == FileShare.None && w.SubjectType is SubjectType.User && folder is { IsRoom: true }))
+            {
+                listUsersId.Remove(authContext.CurrentAccount.ID);
+            }
 
             if (entryType == FileEntryType.File)
             {

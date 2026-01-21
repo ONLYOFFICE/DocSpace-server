@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -68,7 +68,7 @@ public static class OpenApiExtension
             c.DocumentFilter<LowercaseDocumentFilter>();
             c.SchemaFilter<DerivedSchemaFilter>();
             c.DocumentFilter<HideRouteDocumentFilter>("/api/2.0/capabilities.json");
-            c.OperationFilter<SwaggerOperationIdFilter>("api/2.0/files/recent", "getFolderRecent");
+            c.OperationFilter<SwaggerOperationIdFilter>("api/2.0/files/recent", "getFolderRecent", "Get recent files");
             c.DocumentFilter<TagDescriptionsDocumentFilter>();
             c.OperationFilter<SwaggerCustomOperationFilter>();
             c.OperationFilter<ContentTypeOperationFilter>();

@@ -1,5 +1,64 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -53,19 +112,28 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AceShareLink" xml:space="preserve">
     <value>Външен портал</value>
   </data>
+  <data name="AceStatusEnum_Collaborator" xml:space="preserve">
+    <value>Сътрудник</value>
+  </data>
   <data name="AceStatusEnum_Comment" xml:space="preserve">
     <value>Коментар</value>
   </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Създател на съдържание</value>
+  </data>
   <data name="AceStatusEnum_CustomFilter" xml:space="preserve">
     <value>Персонализиран филтър</value>
+  </data>
+  <data name="AceStatusEnum_Editing" xml:space="preserve">
+    <value>Редактор</value>
   </data>
   <data name="AceStatusEnum_FillForms" xml:space="preserve">
     <value>Попълване на формуляр</value>
@@ -82,8 +150,14 @@
   <data name="AceStatusEnum_Review" xml:space="preserve">
     <value>Преглед</value>
   </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Управител на стая</value>
+  </data>
   <data name="Admin" xml:space="preserve">
     <value>Администратор</value>
+  </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>Мениджър на агенти</value>
   </data>
   <data name="AppAccessDenied" xml:space="preserve">
     <value>За да работите с файла, трябва да предоставите достъп до него</value>
@@ -139,6 +213,15 @@
   <data name="CommentUpload" xml:space="preserve">
     <value>Качено</value>
   </data>
+  <data name="Date" xml:space="preserve">
+    <value>Дата</value>
+  </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>Споделен линк</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Линк за покана</value>
+  </data>
   <data name="DocuSignStatusDeclined" xml:space="preserve">
     <value>Отхвърлена</value>
   </data>
@@ -181,17 +264,32 @@
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Файл, по-голям от {0}, няма да бъде преместен</value>
   </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Преместването на няколко файла в стаята за попълване на формуляри не се поддържа. Премествайте по един ONLYOFFICE PDF формуляр.</value>
+  </data>
   <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
     <value>Новата версия не може да бъде същата като текущата</value>
   </data>
   <data name="ErrorMessage_FolderCopyError" xml:space="preserve">
     <value>Не можете да копирате папката в нейната подпапка</value>
   </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Преместването на папки в стаята за попълване на формуляри не се поддържа. Премествайте по един ONLYOFFICE PDF формуляр.</value>
+  </data>
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Исканата папка не бе намерена</value>
   </data>
+  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
+    <value>Невалиден доставчик</value>
+  </data>
+  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
+    <value>Не е възможно да ползвате тази папка да съхранява стаята</value>
+  </data>
   <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Неправилно заглавие</value>
+  </data>
+  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
+    <value>Линкът на поканата е невалиден или валидността му е изтекла</value>
   </data>
   <data name="ErrorMessage_LockedFile" xml:space="preserve">
     <value>Понастоящем файлът е заключен от друг потребител</value>
@@ -202,8 +300,20 @@
   <data name="ErrorMessage_ManyDownloads" xml:space="preserve">
     <value>Твърде много изтегляния.</value>
   </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>Максималният брой линкове не трябва да надвишава {0}</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Файлът не може да бъде преместен в тази стая. Моля, опитайте да преместите ONLYOFFICE PDF формуляра.</value>
+  </data>
   <data name="ErrorMessage_NotSupportedFormat" xml:space="preserve">
     <value>За съжаление този файлов формат не се поддържа</value>
+  </data>
+  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
+    <value>Този доставчик вече е свързан със стаята</value>
+  </data>
+  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
+    <value>Ролята не е налична за този тип потребител</value>
   </data>
   <data name="ErrorMessage_SaveAnonymous" xml:space="preserve">
     <value>Авторът на записа е неизвестен</value>
@@ -217,6 +327,9 @@
   <data name="ErrorMessage_SecurityException" xml:space="preserve">
     <value>Нямате достатъчно разрешение за извършване на операцията</value>
   </data>
+  <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
+    <value>Нямате достатъчно разрешение да архивирате стаята</value>
+  </data>
   <data name="ErrorMessage_SecurityException_Auth" xml:space="preserve">
     <value>Не може да се упълномощи в {0} доставчика с дадени идентификационни данни.</value>
   </data>
@@ -225,6 +338,9 @@
   </data>
   <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
     <value>Нямате нужното разрешение, за да копиране на папката</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
+    <value>Нямате разрешение да копирате в тази папка</value>
   </data>
   <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
     <value>Нямате достатъчно разрешение за създаване</value>
@@ -247,11 +363,20 @@
   <data name="ErrorMessage_SecurityException_EditFileTwice" xml:space="preserve">
     <value>Този документ се редактира от вас в друг раздел</value>
   </data>
+  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
+    <value>Нямате разрешение да редактирате стаята</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Настоящата версия на файла не може да се изтрие</value>
+  </data>
   <data name="ErrorMessage_SecurityException_MoveFile" xml:space="preserve">
     <value>Нямате достатъчно разрешение за преместване на файла</value>
   </data>
   <data name="ErrorMessage_SecurityException_MoveFolder" xml:space="preserve">
     <value>Нямате достатъчно разрешение, за да преместите папката</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
+    <value>Нямате разрешение да местите тази папка</value>
   </data>
   <data name="ErrorMessage_SecurityException_ReadFile" xml:space="preserve">
     <value>Нямате достатъчно разрешение, за да видите файла</value>
@@ -265,11 +390,17 @@
   <data name="ErrorMessage_SecurityException_RenameFolder" xml:space="preserve">
     <value>Нямате достатъчно разрешение, за да преименувате папката</value>
   </data>
+  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
+    <value>Нямате достатъчно разрешение да разархивирате стаята</value>
+  </data>
   <data name="ErrorMessage_SecurityException_UpdateEditingFile" xml:space="preserve">
     <value>Файлът не може да се актуализира, защото е отворен за редактиране</value>
   </data>
   <data name="ErrorMessage_SecurityException_ViewFolder" xml:space="preserve">
     <value>Нямате достатъчно разрешение, за да видите съдържанието на папката</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>Опитахте твърде много пъти да въведете паролата си. Молим да опитате отново по-късно</value>
   </data>
   <data name="ErrorMessage_SharpBoxException" xml:space="preserve">
     <value>Съдържанието на папката на трети страни не е налично. Опитайте да свържете отново сметката.</value>
@@ -277,8 +408,14 @@
   <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>Грешка при стартирането на файла</value>
   </data>
+  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
+    <value>Не можете да редактирате архивирани стаи</value>
+  </data>
   <data name="ErrorMessage_UpdateEditingFile" xml:space="preserve">
     <value>Не можете да актуализирате файл, който е отворен за редактиране</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Файлът не може да бъде качен в тази стая. Моля, опитайте да качите ONLYOFFICE PDF формуляра.</value>
   </data>
   <data name="ErrorMessage_UserNotFound" xml:space="preserve">
     <value>Потребителят не можа да бъде намерен</value>
@@ -286,44 +423,35 @@
   <data name="ErrorMessage_ViewTrashItem" xml:space="preserve">
     <value>Не ви е позволено да визуализирате елементите в кошчето</value>
   </data>
-  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
-    <value>Невалиден доставчик</value>
-  </data>
-  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
-    <value>Не е възможно да ползвате тази папка да съхранява стаята</value>
-  </data>
-  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
-    <value>Линкът на поканата е невалиден или валидността му е изтекла</value>
-  </data>
-  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
-    <value>Ролята не е налична за този тип потребител</value>
-  </data>
-  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
-    <value>Този доставчик вече е свързан със стаята</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
-    <value>Нямате разрешение да копирате в тази папка</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
-    <value>Нямате разрешение да местите тази папка</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
-    <value>Нямате достатъчно разрешение да разархивирате стаята</value>
-  </data>
-  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
-    <value>Не можете да редактирате архивирани стаи</value>
-  </data>
   <data name="ErrorrMessage_PinRoom" xml:space="preserve">
     <value>Не можете да фиксирате стая</value>
   </data>
   <data name="Everyone" xml:space="preserve">
     <value>Всички</value>
   </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Външен потребител</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Линк за попълване</value>
+  </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>Документи на потребител {0} {1}</value>
+  </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Номер на формуляра</value>
+  </data>
   <data name="Guest" xml:space="preserve">
     <value>Анонимен</value>
   </data>
   <data name="IndexTitle" xml:space="preserve">
     <value>Търсене по съдържание на документи</value>
+  </data>
+  <data name="KnowledgeFolder" xml:space="preserve">
+    <value>Знание</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Линк към формуляра</value>
   </data>
   <data name="MessageFileCreated" xml:space="preserve">
     <value>Файлът е създаден в папка "{0}"</value>
@@ -336,6 +464,9 @@
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Файлът вече не е чернова за попълване на формуляра.</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Отвори файл</value>
   </data>
   <data name="ProductAdminOpportunities" xml:space="preserve">
     <value>Направете същото като потребител | Link Dropbox, Box и други профили в секцията "Общи документи" | Настройване на права за достъп до документите и папките в раздела "Общи документи"</value>
@@ -356,20 +487,17 @@
   <data name="ProductUserOpportunities" xml:space="preserve">
     <value>Създаване и редактиране на собствени документи, както и споделени документи с подходящи права за достъп | Даване на четене/редактиране на достъп до други потребители към документите и папките | Link Dropbox, Box и други профили в секцията "Документи"</value>
   </data>
-  <data name="UnknownFirstName" xml:space="preserve">
-    <value>Име</value>
+  <data name="ResultStorageFolder" xml:space="preserve">
+    <value>Съхранение на резултати</value>
   </data>
-  <data name="UnknownLastName" xml:space="preserve">
-    <value>Фамилия</value>
+  <data name="RoleEnum_Collaborator" xml:space="preserve">
+    <value>Сътрудник</value>
   </data>
-  <data name="UnlockComment" xml:space="preserve">
-    <value>Файлът е отключен</value>
+  <data name="RoleEnum_Comment" xml:space="preserve">
+    <value>Коментатор</value>
   </data>
-  <data name="AceStatusEnum_Editing" xml:space="preserve">
-    <value>Редактор</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
-    <value>Нямате разрешение да редактирате стаята</value>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Създател на съдържание</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
     <value>DocSpace администратор</value>
@@ -377,41 +505,26 @@
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Редактор</value>
   </data>
-  <data name="RoleEnum_User" xml:space="preserve">
-    <value>Потребител</value>
+  <data name="RoleEnum_FillForms" xml:space="preserve">
+    <value>Попълващ формулярa</value>
+  </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>Гост</value>
   </data>
   <data name="RoleEnum_Read" xml:space="preserve">
     <value>Зрител</value>
   </data>
-  <data name="RoleEnum_Comment" xml:space="preserve">
-    <value>Коментатор</value>
-  </data>
-  <data name="RoleEnum_FillForms" xml:space="preserve">
-    <value>Попълващ формулярa</value>
-  </data>
   <data name="RoleEnum_Review" xml:space="preserve">
     <value>Рецензент</value>
   </data>
-  <data name="RoleEnum_Collaborator" xml:space="preserve">
-    <value>Сътрудник</value>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Администратор на стая</value>
   </data>
-  <data name="AceStatusEnum_Collaborator" xml:space="preserve">
-    <value>Сътрудник</value>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Управител на стая</value>
   </data>
-  <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
-    <value>Нямате достатъчно разрешение да архивирате стаята</value>
-  </data>
-  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
-    <value>Максималният брой линкове не трябва да надвишава {0}</value>
-  </data>
-  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
-    <value>Опитахте твърде много пъти да въведете паролата си. Молим да опитате отново по-късно</value>
-  </data>
-  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
-    <value>Линк за покана</value>
-  </data>
-  <data name="DefaultExternalLinkTitle" xml:space="preserve">
-    <value>Споделен линк</value>
+  <data name="RoleEnum_User" xml:space="preserve">
+    <value>Потребител</value>
   </data>
   <data name="RoomIndex_Author" xml:space="preserve">
     <value>Автор</value>
@@ -427,6 +540,9 @@
   </data>
   <data name="RoomIndex_ExportAuthor" xml:space="preserve">
     <value>Изходящ автор</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Папка</value>
   </data>
   <data name="RoomIndex_Index" xml:space="preserve">
     <value>Индекс</value>
@@ -452,79 +568,22 @@
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Вид</value>
   </data>
-  <data name="RoomIndex_Folder" xml:space="preserve">
-    <value>Папка</value>
-  </data>
-  <data name="Date" xml:space="preserve">
-    <value>Дата</value>
-  </data>
-  <data name="User" xml:space="preserve">
-    <value>Потребител</value>
-  </data>
-  <data name="LinkToForm" xml:space="preserve">
-    <value>Линк към формуляра</value>
-  </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Отвори файл</value>
-  </data>
-  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Файлът не може да бъде качен в тази стая. Моля, опитайте да качите ONLYOFFICE PDF формуляра.</value>
-  </data>
-  <data name="FillOutExternalLinkTitle" xml:space="preserve">
-    <value>Линк за попълване</value>
-  </data>
-  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Преместването на няколко файла в стаята за попълване на формуляри не се поддържа. Премествайте по един ONLYOFFICE PDF формуляр.</value>
-  </data>
-  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Преместването на папки в стаята за попълване на формуляри не се поддържа. Премествайте по един ONLYOFFICE PDF формуляр.</value>
-  </data>
-  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Файлът не може да бъде преместен в тази стая. Моля, опитайте да преместите ONLYOFFICE PDF формуляра.</value>
-  </data>
-  <data name="FormNumber" xml:space="preserve">
-    <value>Номер на формуляра</value>
-  </data>
-  <data name="ExternalUser" xml:space="preserve">
-    <value>Външен потребител</value>
-  </data>
-  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
-    <value>Управител на стая</value>
-  </data>
-  <data name="RoleEnum_RoomManager" xml:space="preserve">
-    <value>Управител на стая</value>
-  </data>
-  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
-    <value>Създател на съдържание</value>
-  </data>
-  <data name="RoleEnum_ContentCreator" xml:space="preserve">
-    <value>Създател на съдържание</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
-    <value>Настоящата версия на файла не може да се изтрие</value>
-  </data>
   <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
     <value>Сподели за попълване</value>
   </data>
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>Започни попълване</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Администратор на стая</value>
+  <data name="UnknownFirstName" xml:space="preserve">
+    <value>Име</value>
   </data>
-  <data name="RoleEnum_Guest" xml:space="preserve">
-    <value>Гост</value>
+  <data name="UnknownLastName" xml:space="preserve">
+    <value>Фамилия</value>
   </data>
-  <data name="AgentManager" xml:space="preserve">
-    <value>Мениджър на агенти</value>
+  <data name="UnlockComment" xml:space="preserve">
+    <value>Файлът е отключен</value>
   </data>
-  <data name="FolderNameForReassignedData" xml:space="preserve">
-    <value>Документи на потребител {0} {1}</value>
-  </data>
-  <data name="KnowledgeFolder" xml:space="preserve">
-    <value>Знание</value>
-  </data>
-  <data name="ResultStorageFolder" xml:space="preserve">
-    <value>Съхранение на резултати</value>
+  <data name="User" xml:space="preserve">
+    <value>Потребител</value>
   </data>
 </root>

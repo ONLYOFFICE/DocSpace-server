@@ -1,5 +1,64 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -53,19 +112,28 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AceShareLink" xml:space="preserve">
     <value>Xarici Portal</value>
   </data>
+  <data name="AceStatusEnum_Collaborator" xml:space="preserve">
+    <value>Əməkdaş</value>
+  </data>
   <data name="AceStatusEnum_Comment" xml:space="preserve">
     <value>Şərh</value>
   </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Məzmun yaradıcısı</value>
+  </data>
   <data name="AceStatusEnum_CustomFilter" xml:space="preserve">
     <value>Fərdi Filter</value>
+  </data>
+  <data name="AceStatusEnum_Editing" xml:space="preserve">
+    <value>Redaktor</value>
   </data>
   <data name="AceStatusEnum_FillForms" xml:space="preserve">
     <value>Formanın Doldurulması</value>
@@ -82,8 +150,14 @@
   <data name="AceStatusEnum_Review" xml:space="preserve">
     <value>Nəzərdən keçirmə</value>
   </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Otaq meneceri</value>
+  </data>
   <data name="Admin" xml:space="preserve">
     <value>Admin</value>
+  </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>Agent Meneceri</value>
   </data>
   <data name="AppAccessDenied" xml:space="preserve">
     <value>Faylla işləmək üçün ona giriş icazəsi verməlisiniz</value>
@@ -139,6 +213,15 @@
   <data name="CommentUpload" xml:space="preserve">
     <value>Yükləndi</value>
   </data>
+  <data name="Date" xml:space="preserve">
+    <value>Tarix</value>
+  </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>Paylaşılan keçid</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Dəvət keçidi</value>
+  </data>
   <data name="DocuSignStatusDeclined" xml:space="preserve">
     <value>Rədd edildi</value>
   </data>
@@ -181,17 +264,32 @@
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>{0} ölçüsündən böyük fayl köçürülməyəcək</value>
   </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Birdən çox faylın Forma Doldurma otağına köçürülməsi dəstəklənmir. Hər dəfə bir ONLYOFFICE PDF formasını köçürün.</value>
+  </data>
   <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
     <value>Yeni versiya cari versiya ilə eyni ola bilməz</value>
   </data>
   <data name="ErrorMessage_FolderCopyError" xml:space="preserve">
     <value>Qovluğu öz alt qovluğuna köçürə bilməzsiniz</value>
   </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Qovluqların Forma Doldurma otağına köçürülməsi dəstəklənmir. Hər dəfə bir ONLYOFFICE PDF formasını köçürün.</value>
+  </data>
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Tələb olunan qovluq tapılmadı</value>
   </data>
+  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
+    <value>Etibarsız provayder</value>
+  </data>
+  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
+    <value>Otağı saxlamaq üçün bu qovluqdan istifadə etmək mümkün deyil</value>
+  </data>
   <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Yanlış başlıq</value>
+  </data>
+  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
+    <value>Dəvət linki etibarsızdır və ya vaxtı keçmişdir</value>
   </data>
   <data name="ErrorMessage_LockedFile" xml:space="preserve">
     <value>Hazırda fayl başqa istifadəçi tərəfindən kilidlənib</value>
@@ -202,8 +300,20 @@
   <data name="ErrorMessage_ManyDownloads" xml:space="preserve">
     <value>Həddən çox endirmə var.</value>
   </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>Bağlantıların maksimum sayı {0}-dan çox ola bilməz</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Fayl bu otağa köçürülə bilməz. Lütfən, ONLYOFFICE PDF formasını köçürməyə cəhd edin.</value>
+  </data>
   <data name="ErrorMessage_NotSupportedFormat" xml:space="preserve">
     <value>Üzr istəyirik, amma bu format dəstəklənmir</value>
+  </data>
+  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
+    <value>Bu provayder artıq otağa qoşulub</value>
+  </data>
+  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
+    <value>Rol bu istifadəçi növü üçün əlçatan deyil</value>
   </data>
   <data name="ErrorMessage_SaveAnonymous" xml:space="preserve">
     <value>Yadda saxlamanı icra edən şəxs bilinmir</value>
@@ -217,6 +327,9 @@
   <data name="ErrorMessage_SecurityException" xml:space="preserve">
     <value>Əməliyyatı gerçəkləşdirməyə yetərincə icazəniz yoxdur</value>
   </data>
+  <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
+    <value>Otağı arxivləşdirmək üçün lazımi icazəniz yoxdur</value>
+  </data>
   <data name="ErrorMessage_SecurityException_Auth" xml:space="preserve">
     <value>Verilən kredensiallar ilə {0} provayerinə qoşulmaq mümkün deyil.</value>
   </data>
@@ -225,6 +338,9 @@
   </data>
   <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
     <value>Qovluğu kopyalamaq üçün lazımi icazəniz yoxdur</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
+    <value>Bu qovluğa kopyalamaq icazəniz yoxdur</value>
   </data>
   <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
     <value>Yaratmağa yetərincə icazəniz yoxdur</value>
@@ -247,11 +363,20 @@
   <data name="ErrorMessage_SecurityException_EditFileTwice" xml:space="preserve">
     <value>Bu sənəd Sizin tərəfinizdən başqa bir nişanda redaktə olunur</value>
   </data>
+  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
+    <value>Otağı redaktə etmək icazəniz yoxdur</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Faylın cari versiyasını silmək mümkün deyil</value>
+  </data>
   <data name="ErrorMessage_SecurityException_MoveFile" xml:space="preserve">
     <value>Bu faylı köçürmək üçün kifayət qədər icazəniz yoxdur</value>
   </data>
   <data name="ErrorMessage_SecurityException_MoveFolder" xml:space="preserve">
     <value>Bu qovluğu köçürmək üçün kifayət qədər icazəniz yoxdur</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
+    <value>Bu qovluğa köçürmək icazəniz yoxdur</value>
   </data>
   <data name="ErrorMessage_SecurityException_ReadFile" xml:space="preserve">
     <value>Fayla baxmağa yetərincə icazəniz yoxdur</value>
@@ -265,11 +390,17 @@
   <data name="ErrorMessage_SecurityException_RenameFolder" xml:space="preserve">
     <value>Qovluğu yenidən adlandırmağa yetərincə icazəniz yoxdur</value>
   </data>
+  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
+    <value>Otağı arxivdən çıxarmaq üçün lazımi icazəniz yoxdur</value>
+  </data>
   <data name="ErrorMessage_SecurityException_UpdateEditingFile" xml:space="preserve">
     <value>Fayl yenilənə bilməz, çünki redaktə olunmaq üçün açıqdır</value>
   </data>
   <data name="ErrorMessage_SecurityException_ViewFolder" xml:space="preserve">
     <value>Qovluğun içinə baxmağa yetərincə icazəniz yoxdur</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>Siz şifrənizi bir neçə dəfə daxil etməyə çalışmısınız. Zəhmət olmasa, bir az sonra yenə cəhd edin</value>
   </data>
   <data name="ErrorMessage_SharpBoxException" xml:space="preserve">
     <value>Üçüncü tərəf resurs qovluğunun məzmunu mövcud deyil. Hesabınızı yenidən əlaqələndirməyə çalışın.</value>
@@ -277,8 +408,14 @@
   <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>Faylın redaktəsinə başlarkən xəta baş verdi</value>
   </data>
+  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
+    <value>Arxivlənmiş otaqları redaktə edə bilməzsiniz</value>
+  </data>
   <data name="ErrorMessage_UpdateEditingFile" xml:space="preserve">
     <value>Redaktə üçün açıq olan faylı güncəlləyə bilməzsiniz</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Fayl bu otağa yüklənə bilməz. Lütfən, ONLYOFFICE PDF formasını yükləməyə cəhd edin.</value>
   </data>
   <data name="ErrorMessage_UserNotFound" xml:space="preserve">
     <value>İStifadəçi tapılmadı</value>
@@ -286,44 +423,35 @@
   <data name="ErrorMessage_ViewTrashItem" xml:space="preserve">
     <value>Səbətdə elementlərə baxmağa icazəniz yoxdur</value>
   </data>
-  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
-    <value>Etibarsız provayder</value>
-  </data>
-  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
-    <value>Otağı saxlamaq üçün bu qovluqdan istifadə etmək mümkün deyil</value>
-  </data>
-  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
-    <value>Dəvət linki etibarsızdır və ya vaxtı keçmişdir</value>
-  </data>
-  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
-    <value>Rol bu istifadəçi növü üçün əlçatan deyil</value>
-  </data>
-  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
-    <value>Bu provayder artıq otağa qoşulub</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
-    <value>Bu qovluğa kopyalamaq icazəniz yoxdur</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
-    <value>Bu qovluğa köçürmək icazəniz yoxdur</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
-    <value>Otağı arxivdən çıxarmaq üçün lazımi icazəniz yoxdur</value>
-  </data>
-  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
-    <value>Arxivlənmiş otaqları redaktə edə bilməzsiniz</value>
-  </data>
   <data name="ErrorrMessage_PinRoom" xml:space="preserve">
     <value>Otağı sabitləyə bilməzsiniz</value>
   </data>
   <data name="Everyone" xml:space="preserve">
     <value>Hər kəs</value>
   </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Xarici istifadəçi</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Doldurmaq üçün link</value>
+  </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>{0} {1} istifadəçisinin sənədləri</value>
+  </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Forma nömrəsi</value>
+  </data>
   <data name="Guest" xml:space="preserve">
     <value>Qonaq</value>
   </data>
   <data name="IndexTitle" xml:space="preserve">
     <value>Sənədlərin məzmununa görə axtarış</value>
+  </data>
+  <data name="KnowledgeFolder" xml:space="preserve">
+    <value>Məlumat</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Forma üçün link</value>
   </data>
   <data name="MessageFileCreated" xml:space="preserve">
     <value>"{0}" qovluğunda fayl yaradıldı</value>
@@ -336,6 +464,9 @@
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Fayl artıq formanı doldurmaq üçün qaralama deyil.</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Faylı açın</value>
   </data>
   <data name="ProductAdminOpportunities" xml:space="preserve">
     <value>İstifadəçinin etdiyini etmək|Hesabları Dropbox'a, Box'a və 'Ümumi sənədlər' bölməsində digər hesablara birləşdirmək|Sənədlərə və qovluqlara 'Ümumi sənədlər' bölməsində giriş hüquqları tənzimlə</value>
@@ -356,20 +487,17 @@ docx, xlsx, pptx ilə ən yüksək uyğunluq.</value>
   <data name="ProductUserOpportunities" xml:space="preserve">
     <value>Öz sənədlərini və giriş icazəsi verilmiş sənədləri yaratmat və redaktə etmək|Sənədlərə digər istifadəçilərə oxumaq və redaktə etmək hüquqları vermək|Hesabları Dropbox'a, Box'a və 'Sənədlərim' bölməsində digər hesablara birləşdirmək</value>
   </data>
-  <data name="UnknownFirstName" xml:space="preserve">
-    <value>Ad</value>
+  <data name="ResultStorageFolder" xml:space="preserve">
+    <value>Nəticə Saxlama</value>
   </data>
-  <data name="UnknownLastName" xml:space="preserve">
-    <value>Soyad</value>
+  <data name="RoleEnum_Collaborator" xml:space="preserve">
+    <value>Əməkdaş</value>
   </data>
-  <data name="UnlockComment" xml:space="preserve">
-    <value>Fayl kiliddən çıxarılıb</value>
+  <data name="RoleEnum_Comment" xml:space="preserve">
+    <value>Şərhçi</value>
   </data>
-  <data name="AceStatusEnum_Editing" xml:space="preserve">
-    <value>Redaktor</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
-    <value>Otağı redaktə etmək icazəniz yoxdur</value>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Məzmun yaradıcısı</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
     <value>DocSpace Administratoru</value>
@@ -377,41 +505,26 @@ docx, xlsx, pptx ilə ən yüksək uyğunluq.</value>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Redaktor</value>
   </data>
-  <data name="RoleEnum_User" xml:space="preserve">
-    <value>İstifadəçi</value>
+  <data name="RoleEnum_FillForms" xml:space="preserve">
+    <value>Anket dolduran</value>
+  </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>Qonaq</value>
   </data>
   <data name="RoleEnum_Read" xml:space="preserve">
     <value>İzləyici</value>
   </data>
-  <data name="RoleEnum_Comment" xml:space="preserve">
-    <value>Şərhçi</value>
-  </data>
-  <data name="RoleEnum_FillForms" xml:space="preserve">
-    <value>Anket dolduran</value>
-  </data>
   <data name="RoleEnum_Review" xml:space="preserve">
     <value>Rəyçi</value>
   </data>
-  <data name="RoleEnum_Collaborator" xml:space="preserve">
-    <value>Əməkdaş</value>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Otaq administratoru</value>
   </data>
-  <data name="AceStatusEnum_Collaborator" xml:space="preserve">
-    <value>Əməkdaş</value>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Otaq meneceri</value>
   </data>
-  <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
-    <value>Otağı arxivləşdirmək üçün lazımi icazəniz yoxdur</value>
-  </data>
-  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
-    <value>Bağlantıların maksimum sayı {0}-dan çox ola bilməz</value>
-  </data>
-  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
-    <value>Siz şifrənizi bir neçə dəfə daxil etməyə çalışmısınız. Zəhmət olmasa, bir az sonra yenə cəhd edin</value>
-  </data>
-  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
-    <value>Dəvət keçidi</value>
-  </data>
-  <data name="DefaultExternalLinkTitle" xml:space="preserve">
-    <value>Paylaşılan keçid</value>
+  <data name="RoleEnum_User" xml:space="preserve">
+    <value>İstifadəçi</value>
   </data>
   <data name="RoomIndex_Author" xml:space="preserve">
     <value>Müəllif</value>
@@ -427,6 +540,9 @@ docx, xlsx, pptx ilə ən yüksək uyğunluq.</value>
   </data>
   <data name="RoomIndex_ExportAuthor" xml:space="preserve">
     <value>İxrac Müəllifi</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Qovluq</value>
   </data>
   <data name="RoomIndex_Index" xml:space="preserve">
     <value>İndeks</value>
@@ -452,79 +568,22 @@ docx, xlsx, pptx ilə ən yüksək uyğunluq.</value>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Növ</value>
   </data>
-  <data name="RoomIndex_Folder" xml:space="preserve">
-    <value>Qovluq</value>
-  </data>
-  <data name="Date" xml:space="preserve">
-    <value>Tarix</value>
-  </data>
-  <data name="User" xml:space="preserve">
-    <value>İstifadəçi</value>
-  </data>
-  <data name="LinkToForm" xml:space="preserve">
-    <value>Forma üçün link</value>
-  </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Faylı açın</value>
-  </data>
-  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Fayl bu otağa yüklənə bilməz. Lütfən, ONLYOFFICE PDF formasını yükləməyə cəhd edin.</value>
-  </data>
-  <data name="FillOutExternalLinkTitle" xml:space="preserve">
-    <value>Doldurmaq üçün link</value>
-  </data>
-  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Birdən çox faylın Forma Doldurma otağına köçürülməsi dəstəklənmir. Hər dəfə bir ONLYOFFICE PDF formasını köçürün.</value>
-  </data>
-  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Qovluqların Forma Doldurma otağına köçürülməsi dəstəklənmir. Hər dəfə bir ONLYOFFICE PDF formasını köçürün.</value>
-  </data>
-  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Fayl bu otağa köçürülə bilməz. Lütfən, ONLYOFFICE PDF formasını köçürməyə cəhd edin.</value>
-  </data>
-  <data name="FormNumber" xml:space="preserve">
-    <value>Forma nömrəsi</value>
-  </data>
-  <data name="ExternalUser" xml:space="preserve">
-    <value>Xarici istifadəçi</value>
-  </data>
-  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
-    <value>Otaq meneceri</value>
-  </data>
-  <data name="RoleEnum_RoomManager" xml:space="preserve">
-    <value>Otaq meneceri</value>
-  </data>
-  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
-    <value>Məzmun yaradıcısı</value>
-  </data>
-  <data name="RoleEnum_ContentCreator" xml:space="preserve">
-    <value>Məzmun yaradıcısı</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
-    <value>Faylın cari versiyasını silmək mümkün deyil</value>
-  </data>
   <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
     <value>Doldurmaq üçün paylaşın</value>
   </data>
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>Doldurmağa başlayın</value>
   </data>
-  <data name="RoleEnum_Guest" xml:space="preserve">
-    <value>Qonaq</value>
+  <data name="UnknownFirstName" xml:space="preserve">
+    <value>Ad</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Otaq administratoru</value>
+  <data name="UnknownLastName" xml:space="preserve">
+    <value>Soyad</value>
   </data>
-  <data name="AgentManager" xml:space="preserve">
-    <value>Agent Meneceri</value>
+  <data name="UnlockComment" xml:space="preserve">
+    <value>Fayl kiliddən çıxarılıb</value>
   </data>
-  <data name="FolderNameForReassignedData" xml:space="preserve">
-    <value>{0} {1} istifadəçisinin sənədləri</value>
-  </data>
-  <data name="KnowledgeFolder" xml:space="preserve">
-    <value>Məlumat</value>
-  </data>
-  <data name="ResultStorageFolder" xml:space="preserve">
-    <value>Nəticə Saxlama</value>
+  <data name="User" xml:space="preserve">
+    <value>İstifadəçi</value>
   </data>
 </root>

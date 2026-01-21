@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,160 +27,15 @@
 namespace ASC.Web.Studio.Core.Notify;
 
 [Scope]
-public class StudioNotifySource(UserManager userManager, IRecipientProvider recipientsProvider,
-        SubscriptionManager subscriptionManager, TenantManager tenantManager)
-    : NotifySource("asc.web.studio", userManager, recipientsProvider, subscriptionManager, tenantManager)
+public class StudioNotifySource(UserManager userManager, IRecipientProvider recipientsProvider, SubscriptionManager subscriptionManager, IServiceProvider serviceProvider)
+    : NotifySource("asc.web.studio", userManager, recipientsProvider, subscriptionManager)
 {
-    protected override IActionProvider CreateActionProvider()
-    {
-        return new ConstActionProvider(
-                Actions.SelfProfileUpdated,
-                Actions.UserHasJoin,
-                Actions.UserMessageToAdmin,
-                Actions.UserMessageToSales,
-                Actions.RequestTariff,
-                Actions.RequestLicense,
-
-                Actions.YourProfileUpdated,
-                Actions.JoinUsers,
-                Actions.SendWhatsNew,
-                Actions.BackupCreated,
-                Actions.BackupFailed,
-                Actions.ScheduledBackupFailed,
-                Actions.RestoreStarted,
-                Actions.RestoreCompletedV115,
-                Actions.PortalDeactivate,
-                Actions.PortalDelete,
-
-                Actions.ProfileDelete,
-                Actions.ProfileHasDeletedItself,
-                Actions.ReassignsCompleted,
-                Actions.ReassignsFailed,
-                Actions.RemoveUserDataCompleted,
-                Actions.RemoveUserDataCompletedCustomMode,
-                Actions.RemoveUserDataFailed,
-
-                Actions.ConfirmOwnerChange,
-                Actions.ActivateEmail,
-                Actions.EmailChangeV115,
-                Actions.PasswordChangeV115,
-                Actions.PasswordSet,
-                Actions.PasswordChanged,
-                Actions.PhoneChange,
-                Actions.TfaChange,
-                Actions.MigrationPortalStart,
-                Actions.MigrationPortalSuccessV115,
-                Actions.MigrationPortalError,
-                Actions.MigrationPortalServerFailure,
-                Actions.PortalRename,
-
-                Actions.MailboxCreated,
-                Actions.MailboxWithoutSettingsCreated,
-                Actions.MailboxPasswordChanged,
-
-                Actions.SaasGuestActivationV115,
-                Actions.EnterpriseGuestActivationV10,
-                Actions.EnterpriseWhitelabelGuestActivationV10,
-                Actions.OpensourceGuestActivationV11,
-
-                Actions.SaasGuestWelcomeV1,
-                Actions.EnterpriseGuestWelcomeV1,
-                Actions.EnterpriseWhitelabelGuestWelcomeV1,
-                Actions.OpensourceGuestWelcomeV1,
-
-                Actions.SaasCustomModeRegData,
-
-                Actions.StorageEncryptionStart,
-                Actions.StorageEncryptionSuccess,
-                Actions.StorageEncryptionError,
-                Actions.StorageDecryptionStart,
-                Actions.StorageDecryptionSuccess,
-                Actions.StorageDecryptionError,
-
-                Actions.SaasRoomInvite,
-                Actions.SaasRoomInviteExistingUser,
-                Actions.SaasDocSpaceInvite,
-                Actions.SaasDocSpaceRegistration,
-
-                Actions.SaasAdminActivationV1,
-                Actions.EnterpriseAdminActivationV1,
-                Actions.EnterpriseWhitelabelAdminActivationV1,
-                Actions.OpensourceAdminActivationV1,
-
-                Actions.SaasAdminWelcomeV1,
-                Actions.EnterpriseAdminWelcomeV1,
-                Actions.EnterpriseWhitelabelAdminWelcomeV1,
-                Actions.OpensourceAdminWelcomeV1,
-
-                Actions.DocsTips,
-
-                Actions.SaasAdminTrialWarningAfterHalfYearV1,
-                Actions.SaasAdminStartupWarningAfterYearV1,
-
-                Actions.PortalDeleteSuccessV1,
-                Actions.PortalDeletedToSupport,
-
-                Actions.SaasUserWelcomeV1,
-                Actions.EnterpriseUserWelcomeV1,
-                Actions.EnterpriseWhitelabelUserWelcomeV1,
-                Actions.EnterpriseWhitelabelUserWelcomeCustomModeV1,
-                Actions.OpensourceUserWelcomeV1,
-
-                Actions.SaasUserActivationV1,
-                Actions.EnterpriseUserActivationV1,
-                Actions.EnterpriseWhitelabelUserActivationV1,
-                Actions.OpensourceUserActivationV1,
-
-                Actions.SaasAdminModulesV1,
-
-                Actions.SaasAdminUserAppsTipsV1,
-                Actions.EnterpriseAdminUserAppsTipsV1,
-
-                Actions.RoomsActivity,
-
-                Actions.SaasOwnerPaymentWarningGracePeriodBeforeActivation,
-                Actions.SaasOwnerPaymentWarningGracePeriodActivation,
-                Actions.SaasOwnerPaymentWarningGracePeriodLastDay,
-                Actions.SaasOwnerPaymentWarningGracePeriodExpired,
-
-                Actions.SaasAdminVideoGuides,
-                Actions.SaasAdminIntegrations,
-
-                Actions.ZoomWelcome,
-
-                Actions.MigrationPersonalToDocspace,
-
-                Actions.EnterpriseAdminPaymentWarningGracePeriodBeforeActivation,
-                Actions.EnterpriseAdminPaymentWarningGracePeriodActivation,
-                Actions.EnterpriseAdminPaymentWarningGracePeriodBeforeExpiration,
-                Actions.EnterpriseAdminPaymentWarningGracePeriodExpiration,
-                Actions.EnterpriseAdminPaymentWarningLifetimeBeforeExpiration,
-                Actions.EnterpriseAdminPaymentWarningLifetimeExpiration,
-                Actions.DeveloperAdminPaymentWarningGracePeriodBeforeActivation,
-                Actions.DeveloperAdminPaymentWarningGracePeriodActivation,
-                Actions.DeveloperAdminPaymentWarningGracePeriodBeforeExpiration,
-                Actions.DeveloperAdminPaymentWarningGracePeriodExpiration,
-
-                Actions.UserTypeChanged,
-                Actions.UserRoleChanged,
-
-                Actions.TopUpWalletError,
-                Actions.RenewSubscriptionError
-            );
-    }
-
-    protected override IPatternProvider CreatePatternsProvider()
-    {
-        return new XmlPatternProvider2(WebPatternResource.webstudio_patterns);
-    }
-
     protected override ISubscriptionProvider CreateSubscriptionProvider()
     {
-        return new AdminNotifySubscriptionProvider(base.CreateSubscriptionProvider());
+        return new AdminNotifySubscriptionProvider(base.CreateSubscriptionProvider(), serviceProvider);
     }
 
-
-    private sealed class AdminNotifySubscriptionProvider(ISubscriptionProvider provider) : ISubscriptionProvider
+    private sealed class AdminNotifySubscriptionProvider(ISubscriptionProvider provider, IServiceProvider serviceProvider) : ISubscriptionProvider
     {
         public async Task<object> GetSubscriptionRecordAsync(INotifyAction action, IRecipient recipient, string objectID)
         {
@@ -239,13 +94,12 @@ public class StudioNotifySource(UserManager userManager, IRecipientProvider reci
 
         private INotifyAction GetAdminAction(INotifyAction action)
         {
-            if (Actions.SelfProfileUpdated.ID == action.ID ||
-                Actions.UserHasJoin.ID == action.ID ||
-                Actions.UserMessageToAdmin.ID == action.ID ||
-                Actions.ProfileHasDeletedItself.ID == action.ID
-               )
+            if (serviceProvider.GetService<SelfProfileUpdatedNotifyAction>().ID == action.ID ||
+                serviceProvider.GetService<UserHasJoinNotifyAction>().ID == action.ID ||
+                serviceProvider.GetService<UserMessageToAdminNotifyAction>().ID == action.ID ||
+                serviceProvider.GetService<ProfileHasDeletedItselfNotifyAction>().ID == action.ID)
             {
-                return Actions.AdminNotify;
+                return serviceProvider.GetService<AdminNotifyAction>();
             }
 
             return action;

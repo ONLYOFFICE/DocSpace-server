@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -238,7 +238,7 @@ public class UserController(
         }
         else
         {
-            await _permissionContext.DemandPermissionsAsync(Constants.Action_AddRemoveUser);
+            await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(Guid.Empty, inDto.Type),Constants.Action_AddRemoveUser);
             var tenant = tenantManager.GetCurrentTenant();
             var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
             var currentUserType = await _userManager.GetUserTypeAsync(currentUser.Id);
@@ -331,7 +331,7 @@ public class UserController(
         user.WorkFromDate = inDto.Worksfrom != null && inDto.Worksfrom != DateTime.MinValue ? tenantUtil.DateTimeFromUtc(inDto.Worksfrom) : DateTime.UtcNow.Date;
         user.Status = EmployeeStatus.Active;
 
-        await UpdateContactsAsync(inDto.Contacts, user, !inDto.FromInviteLink);
+        await UpdateContactsAsync(inDto.Contacts, user, false);
 
         cache.Insert("REWRITE_URL" + tenantManager.GetCurrentTenantId(), HttpContext.Request.GetDisplayUrl(), TimeSpan.FromMinutes(5));
 
@@ -741,10 +741,12 @@ public class UserController(
     [HttpDelete("guests")]
     public async Task DeleteGuests(UpdateMembersRequestDto inDto)
     {
+        ArgumentNullException.ThrowIfNull(inDto?.UserIds);
+
         var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
 
         var type = await _userManager.GetUserTypeAsync(currentUser.Id);
-        if (type != EmployeeType.RoomAdmin)
+        if (type is not (EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin))
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
@@ -2049,6 +2051,7 @@ public class UserController(
         var users = await inDto.UpdateMembers.UserIds
             .ToAsyncEnumerable()
             .Where(userId => !_userManager.IsSystemUser(userId))
+            .Where((async (userId, _)  => await userManager.CanUserViewAnotherUserAsync(authContext.CurrentAccount.ID, userId)))
             .Select(async (Guid userId, CancellationToken _) => await _userManager.GetUsersAsync(userId))
             .Where(r => r.Status != EmployeeStatus.Terminated)
             .ToListAsync();

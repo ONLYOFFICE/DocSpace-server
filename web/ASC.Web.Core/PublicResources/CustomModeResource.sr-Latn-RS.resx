@@ -117,25 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="pattern_remove_user_data_completed_custom_mode" xml:space="preserve">
-    <value>Dragi $UserName,
-
-Proces uklanjanja podata od korisnika "$FromUserName":"$FromUserLink" je uspešno završen.
-
-Brisanje ličnih podataka je oslobodilo $DocsSpace</value>
-  </data>
-  <data name="ProductAdminOpportunitiesCustomMode" xml:space="preserve">
-    <value>Uradite isto kao korisnik|Povežite Dropbox, Box i druge naloge u 'Zajedničkom' odeljku|Podesite prava pristupa dokumentima i folderima u 'Zajedničkom' odeljku</value>
-  </data>
-  <data name="ProductUserOpportunitiesCustomMode" xml:space="preserve">
-    <value>Kreirajte i uređujte svoje dokumente, kao i deljene dokumente sa odgovarajućim pravima pristupa|Dajte pristup za čitanje/uređivanje drugim korisnicima za dokumente i foldere|Povežite Dropbox, Box i druge naloge u 'Dokumenti' odeljku</value>
-  </data>
-  <data name="subject_remove_user_data_completed_custom_mode" xml:space="preserve">
-    <value>${LetterLogoText}. Uklanjanje korisničkih podataka je završeno</value>
-  </data>
-  <data name="subject_saas_custom_mode_reg_data" xml:space="preserve">
-    <value>Novi portal je registrovan</value>
-  </data>
   <data name="pattern_enterprise_whitelabel_user_welcome_custom_mode_v1" xml:space="preserve">
     <value>Zdravo, $UserName!
 
@@ -155,6 +136,13 @@ Ako vam treba pomoć, pregledajte naš "Centar za Pomoć":"${__HelpLink}" ili pi
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_remove_user_data_completed_custom_mode" xml:space="preserve">
+    <value>Dragi $UserName,
+
+Proces uklanjanja podata od korisnika "$FromUserName":"$FromUserLink" je uspešno završen.
+
+Brisanje ličnih podataka je oslobodilo $DocsSpace</value>
+  </data>
   <data name="pattern_saas_custom_mode_reg_data" xml:space="preserve">
     <value>h3.Novi portal je registrovan
 
@@ -164,5 +152,17 @@ $TrulyYours</value>
 # Email: $UserEmail
 # Telefon: $Phone
 # Datum kreiranja: $Date</value>
+  </data>
+  <data name="ProductAdminOpportunitiesCustomMode" xml:space="preserve">
+    <value>Uradite isto kao korisnik|Povežite Dropbox, Box i druge naloge u 'Zajedničkom' odeljku|Podesite prava pristupa dokumentima i folderima u 'Zajedničkom' odeljku</value>
+  </data>
+  <data name="ProductUserOpportunitiesCustomMode" xml:space="preserve">
+    <value>Kreirajte i uređujte svoje dokumente, kao i deljene dokumente sa odgovarajućim pravima pristupa|Dajte pristup za čitanje/uređivanje drugim korisnicima za dokumente i foldere|Povežite Dropbox, Box i druge naloge u 'Dokumenti' odeljku</value>
+  </data>
+  <data name="subject_remove_user_data_completed_custom_mode" xml:space="preserve">
+    <value>${LetterLogoText}. Uklanjanje korisničkih podataka je završeno</value>
+  </data>
+  <data name="subject_saas_custom_mode_reg_data" xml:space="preserve">
+    <value>Novi portal je registrovan</value>
   </data>
 </root>

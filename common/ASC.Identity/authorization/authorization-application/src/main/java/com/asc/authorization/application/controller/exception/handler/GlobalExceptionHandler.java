@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,95 +29,103 @@ package com.asc.authorization.application.controller.exception.handler;
 
 import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import jakarta.servlet.http.HttpServletRequest;
+import java.net.URI;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.ErrorResponse;
+import org.springframework.http.ProblemDetail;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /**
  * GlobalExceptionHandler is a centralized exception handler that intercepts and processes various
- * exceptions thrown during application execution. Each handler method returns a {@link
- * ResponseEntity} with an appropriate HTTP status code.
+ * exceptions thrown during application execution. Each handler method returns a standardized RFC
+ * 7807 {@link ProblemDetail} response.
  */
 @Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
+  private static final URI ERROR_TYPE_URI =
+      URI.create("https://api.onlyoffice.com/docspace/api-backend/get-started/basic-concepts");
+
+  /**
+   * Creates a ProblemDetail with the standard type URI and instance path.
+   *
+   * @param status the HTTP status
+   * @param detail the detail message
+   * @param instance the request URI
+   * @return a ProblemDetail instance
+   */
+  private ProblemDetail createProblemDetail(HttpStatus status, String detail, String instance) {
+    var problemDetail = ProblemDetail.forStatusAndDetail(status, detail);
+    problemDetail.setType(ERROR_TYPE_URI);
+    problemDetail.setInstance(URI.create(instance));
+    return problemDetail;
+  }
+
   /**
    * Handles the {@link NoResourceFoundException} and returns an error response with HTTP 404
    * status.
    *
-   * <p>This method ensures that clients receive a structured error message when requesting a
-   * non-existent endpoint.
-   *
    * @param ex the {@code NoResourceFoundException} that was raised when the requested resource was
    *     not found.
-   * @return an {@code ErrorResponse} containing the error details and HTTP status code {@code
+   * @param request the {@link HttpServletRequest} associated with the current request.
+   * @return a {@link ProblemDetail} containing the error details and HTTP status code {@code
    *     NOT_FOUND}.
    */
   @ExceptionHandler(value = {NoResourceFoundException.class})
-  @ResponseStatus(HttpStatus.NOT_FOUND)
-  public ErrorResponse handleNoResourceFoundException(NoResourceFoundException ex) {
-    return ErrorResponse.create(ex, HttpStatus.NOT_FOUND, ex.getMessage());
+  public ProblemDetail handleNoResourceFoundException(
+      NoResourceFoundException ex, HttpServletRequest request) {
+    return createProblemDetail(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI());
   }
 
   /**
    * Handles {@link HttpRequestMethodNotSupportedException} and returns a response with HTTP status
    * 405.
    *
-   * <p>This method logs a warning and returns a {@link ResponseEntity} with HTTP status {@link
-   * HttpStatus#METHOD_NOT_ALLOWED}.
-   *
    * @param ex the {@link HttpRequestMethodNotSupportedException} thrown when an unsupported HTTP
    *     method is used
    * @param request the {@link HttpServletRequest} in which the exception was raised
-   * @return a {@link ResponseEntity} with HTTP status 405 (Method Not Allowed)
+   * @return a {@link ProblemDetail} with HTTP status 405 (Method Not Allowed)
    */
   @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-  public ResponseEntity<?> handleMethodNotSupportedException(
+  public ProblemDetail handleMethodNotSupportedException(
       HttpRequestMethodNotSupportedException ex, HttpServletRequest request) {
-    return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build();
+    return createProblemDetail(
+        HttpStatus.METHOD_NOT_ALLOWED, ex.getMessage(), request.getRequestURI());
   }
 
   /**
    * Handles {@link MissingServletRequestParameterException} and returns a response with HTTP status
    * 400.
    *
-   * <p>This method logs a warning and returns a {@link ResponseEntity} with HTTP status {@link
-   * HttpStatus#BAD_REQUEST}.
-   *
    * @param ex the {@link MissingServletRequestParameterException} thrown when a required request
    *     parameter is missing
    * @param request the {@link HttpServletRequest} in which the exception was raised
-   * @return a {@link ResponseEntity} with HTTP status 400 (Bad Request)
+   * @return a {@link ProblemDetail} with HTTP status 400 (Bad Request)
    */
   @ExceptionHandler(MissingServletRequestParameterException.class)
-  public ResponseEntity<?> handleMissingParameterException(
+  public ProblemDetail handleMissingParameterException(
       MissingServletRequestParameterException ex, HttpServletRequest request) {
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    return createProblemDetail(HttpStatus.BAD_REQUEST, ex.getMessage(), request.getRequestURI());
   }
 
   /**
    * Handles {@link DataAccessException} and returns a response with HTTP status 500.
    *
-   * <p>This method logs the exception and returns a {@link ResponseEntity} with HTTP status {@link
-   * HttpStatus#INTERNAL_SERVER_ERROR}.
-   *
    * @param ex the {@link DataAccessException} thrown during a database operation
    * @param request the {@link HttpServletRequest} in which the exception was raised
-   * @return a {@link ResponseEntity} with HTTP status 500 (Internal Server Error)
+   * @return a {@link ProblemDetail} with HTTP status 500 (Internal Server Error)
    */
   @ExceptionHandler(DataAccessException.class)
-  public ResponseEntity<?> handleDataAccessException(
+  public ProblemDetail handleDataAccessException(
       DataAccessException ex, HttpServletRequest request) {
     log.error("Could not perform a database operation", ex);
-    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    return createProblemDetail(
+        HttpStatus.INTERNAL_SERVER_ERROR, "A database error occurred", request.getRequestURI());
   }
 
   /**
@@ -126,26 +134,27 @@ public class GlobalExceptionHandler {
    *
    * @param ex the exception that was thrown.
    * @param request the {@link HttpServletRequest} that resulted in the exception.
-   * @return a {@link ResponseEntity} with status code 429 (Too Many Requests).
+   * @return a {@link ProblemDetail} with status code 429 (Too Many Requests).
    */
   @ExceptionHandler(value = {RequestNotPermitted.class})
-  public ResponseEntity<?> handleRequestNotPermitted(Throwable ex, HttpServletRequest request) {
-    return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
+  public ProblemDetail handleRequestNotPermitted(Throwable ex, HttpServletRequest request) {
+    return createProblemDetail(
+        HttpStatus.TOO_MANY_REQUESTS,
+        "Too many requests. Please try again later.",
+        request.getRequestURI());
   }
 
   /**
    * Handles any {@link Exception} and returns a response with HTTP status 500.
    *
-   * <p>This method logs the exception and returns a {@link ResponseEntity} with HTTP status {@link
-   * HttpStatus#INTERNAL_SERVER_ERROR}.
-   *
    * @param ex the {@link Exception} thrown during an operation
    * @param request the {@link HttpServletRequest} in which the exception was raised
-   * @return a {@link ResponseEntity} with HTTP status 500 (Internal Server Error)
+   * @return a {@link ProblemDetail} with HTTP status 500 (Internal Server Error)
    */
   @ExceptionHandler(Exception.class)
-  public final ResponseEntity<?> handleAllExceptions(Exception ex, HttpServletRequest request) {
+  public ProblemDetail handleAllExceptions(Exception ex, HttpServletRequest request) {
     log.error("Could not perform an action. Unknown exception", ex);
-    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    return createProblemDetail(
+        HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong", request.getRequestURI());
   }
 }

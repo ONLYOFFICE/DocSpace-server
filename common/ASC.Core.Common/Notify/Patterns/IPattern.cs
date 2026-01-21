@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,9 +28,9 @@ namespace ASC.Notify.Patterns;
 
 public interface IPattern
 {
-    string ID { get; }
-    string Subject { get; }
-    string Body { get; }
-    string ContentType { get; }
-    string Styler { get; }
+    Func<string> Subject { get; }
+    Func<string> Body { get; }
+    Type Styler { get; }
+    
+    string ContentType => "html";
 }

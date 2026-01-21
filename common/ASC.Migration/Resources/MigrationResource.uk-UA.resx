@@ -117,56 +117,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="DataProcessingCompleted" xml:space="preserve">
-    <value>Обробку даних виконано</value>
-  </data>
-  <data name="DataProcessing" xml:space="preserve">
-    <value>Обробка даних...</value>
-  </data>
-  <data name="DumpParse" xml:space="preserve">
-    <value>Аналізування бази даних</value>
-  </data>
-  <data name="GroupMigration" xml:space="preserve">
-    <value>Перенесення групи {0} ({1}/{2})</value>
-  </data>
-  <data name="MigratingUserFiles" xml:space="preserve">
-    <value>Перенесення файлів користувача {0} ({1}/{2})</value>
-  </data>
-  <data name="MigrationCompleted" xml:space="preserve">
-    <value>Перенесення виконано</value>
-  </data>
-  <data name="PreparingForMigration" xml:space="preserve">
-    <value>Підготовка до перенесення</value>
-  </data>
-  <data name="StartOfDataProcessing" xml:space="preserve">
-    <value>Початок обробки даних...</value>
-  </data>
-  <data name="UnzippingFinished" xml:space="preserve">
-    <value>Розпакування виконано...</value>
-  </data>
-  <data name="Unzipping" xml:space="preserve">
-    <value>Розпакування...</value>
-  </data>
-  <data name="UserMigration" xml:space="preserve">
-    <value>Перенесення користувача {0} ({1}/{2})</value>
-  </data>
-  <data name="MigrationCommonFiles" xml:space="preserve">
-    <value>Загальні файли перенесення</value>
-  </data>
-  <data name="MigrationNotFoundException" xml:space="preserve">
-    <value>Немає такого постачальника перенесення</value>
-  </data>
-  <data name="MigrationProgressException" xml:space="preserve">
-    <value>Жодне перенесення не виконується</value>
-  </data>
-  <data name="MigrationProjectFiles" xml:space="preserve">
-    <value>Файли проєкту перенесення</value>
-  </data>
   <data name="CanNotAddUserInGroup" xml:space="preserve">
     <value>Не вдалося додати користувача {0} до групи {1}</value>
   </data>
   <data name="CanNotCreateFile" xml:space="preserve">
     <value>Не вдалося створити файл {0}</value>
+  </data>
+  <data name="CanNotImportCommonFiles" xml:space="preserve">
+    <value>Не вдалося імпортувати загальні файли</value>
+  </data>
+  <data name="CanNotImportProjectFiles" xml:space="preserve">
+    <value>Не вдалося імпортувати файли проєкту</value>
   </data>
   <data name="CanNotImportUser" xml:space="preserve">
     <value>Не вдалося імпортувати користувача</value>
@@ -198,19 +159,58 @@
   <data name="CreateFolder" xml:space="preserve">
     <value>Створити папку {0}</value>
   </data>
+  <data name="CreateRootFolder" xml:space="preserve">
+    <value>Створити кореневу папку</value>
+  </data>
   <data name="CreateShareRoom" xml:space="preserve">
     <value>створити спільну кімнату {0}</value>
   </data>
-  <data name="СanNotImportCommonFiles" xml:space="preserve">
-    <value>Не вдалося імпортувати загальні файли</value>
+  <data name="DataProcessing" xml:space="preserve">
+    <value>Обробка даних...</value>
   </data>
-  <data name="СanNotImportProjectFiles" xml:space="preserve">
-    <value>Не вдалося імпортувати файли проєкту</value>
+  <data name="DataProcessingCompleted" xml:space="preserve">
+    <value>Обробку даних виконано</value>
   </data>
-  <data name="СreateRootFolder" xml:space="preserve">
-    <value>Створити кореневу папку</value>
+  <data name="DumpParse" xml:space="preserve">
+    <value>Аналізування бази даних</value>
+  </data>
+  <data name="GroupMigration" xml:space="preserve">
+    <value>Перенесення групи {0} ({1}/{2})</value>
   </data>
   <data name="LargeBackup" xml:space="preserve">
     <value>Резервна копія перевищує загальний розмір порталу</value>
+  </data>
+  <data name="MigratingUserFiles" xml:space="preserve">
+    <value>Перенесення файлів користувача {0} ({1}/{2})</value>
+  </data>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>Загальні файли перенесення</value>
+  </data>
+  <data name="MigrationCompleted" xml:space="preserve">
+    <value>Перенесення виконано</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>Немає такого постачальника перенесення</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>Жодне перенесення не виконується</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>Файли проєкту перенесення</value>
+  </data>
+  <data name="PreparingForMigration" xml:space="preserve">
+    <value>Підготовка до перенесення</value>
+  </data>
+  <data name="StartOfDataProcessing" xml:space="preserve">
+    <value>Початок обробки даних...</value>
+  </data>
+  <data name="Unzipping" xml:space="preserve">
+    <value>Розпакування...</value>
+  </data>
+  <data name="UnzippingFinished" xml:space="preserve">
+    <value>Розпакування виконано...</value>
+  </data>
+  <data name="UserMigration" xml:space="preserve">
+    <value>Перенесення користувача {0} ({1}/{2})</value>
   </data>
 </root>

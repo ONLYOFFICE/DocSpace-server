@@ -120,11 +120,20 @@
   <data name="AceShareLink" xml:space="preserve">
     <value>Արտաքին պորտալ</value>
   </data>
+  <data name="AceStatusEnum_Collaborator" xml:space="preserve">
+    <value>Համագործակցող</value>
+  </data>
   <data name="AceStatusEnum_Comment" xml:space="preserve">
     <value>Մեկնաբանություն</value>
   </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Բովանդակության ստեղծող</value>
+  </data>
   <data name="AceStatusEnum_CustomFilter" xml:space="preserve">
     <value>Պատվերով զտիչ</value>
+  </data>
+  <data name="AceStatusEnum_Editing" xml:space="preserve">
+    <value>Խմբագրիչ</value>
   </data>
   <data name="AceStatusEnum_FillForms" xml:space="preserve">
     <value>Ձևաթղթերի լրացում</value>
@@ -141,8 +150,14 @@
   <data name="AceStatusEnum_Review" xml:space="preserve">
     <value>Վերանայել</value>
   </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Սենյակի մենեջեր</value>
+  </data>
   <data name="Admin" xml:space="preserve">
     <value>Վարիչ</value>
+  </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>Գործակալի մենեջեր</value>
   </data>
   <data name="AppAccessDenied" xml:space="preserve">
     <value>Ֆայլի հետ աշխատելու համար դուք պետք է թույլ տաք դրա մուտք</value>
@@ -198,6 +213,15 @@
   <data name="CommentUpload" xml:space="preserve">
     <value>Վերբեռնվել է</value>
   </data>
+  <data name="Date" xml:space="preserve">
+    <value>Ամսաթիվ</value>
+  </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>Համօգտագործվող հղում</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Հրավերի հղում</value>
+  </data>
   <data name="DocuSignStatusDeclined" xml:space="preserve">
     <value>Մերժված</value>
   </data>
@@ -240,17 +264,32 @@
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>{0}-ից մեծ ֆայլը չի տեղափոխվի</value>
   </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Մի քանի ֆայլ տեղափոխելը Ձևաթղթերի լրացման սենյակ չի աջակցվում: Միանգամից տեղափոխեք մեկ ONLYOFFICE PDF ձև:</value>
+  </data>
   <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
     <value>Նոր տարբերակը չի կարող նույնը լինել, ինչ ներկայիս</value>
   </data>
   <data name="ErrorMessage_FolderCopyError" xml:space="preserve">
     <value>Դուք չեք կարող պատճենել թղթապանակն իր ենթաթղթապանակում</value>
   </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Թղթապանակների տեղափոխումը Ձևաթղթերի լրացման սենյակ չի աջակցվում: Միանգամից տեղափոխեք մեկ ONLYOFFICE PDF ձև:</value>
+  </data>
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Պահանջվող թղթապանակը չի գտնվել</value>
   </data>
+  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
+    <value>Անվավեր մատակարար</value>
+  </data>
+  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
+    <value>Հնարավոր չէ օգտագործել այս թղթապանակը սենյակը պահեստավորել համար</value>
+  </data>
   <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Սխալ վերնագիր</value>
+  </data>
+  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
+    <value>Հրավերի հղումն անվավեր է կամ դրա վավերականության ժամկետը սպառվել է</value>
   </data>
   <data name="ErrorMessage_LockedFile" xml:space="preserve">
     <value>Ֆայլը ներկայումս կողպված է մեկ այլ օգտվողի կողմից</value>
@@ -261,8 +300,20 @@
   <data name="ErrorMessage_ManyDownloads" xml:space="preserve">
     <value>Չափից շատ ներբեռնումներ.</value>
   </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>Հղումների առավելագույն քանակը չի կարող գերազանցել {0}-ը</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Ֆայլը չի կարող տեղափոխվել այս սենյակ: Խնդրում ենք փորձել տեղափոխել ONLYOFFICE PDF ձևը:</value>
+  </data>
   <data name="ErrorMessage_NotSupportedFormat" xml:space="preserve">
     <value>Ներողություն, այս ֆայլի ձևաչափը չի աջակցվում</value>
+  </data>
+  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
+    <value>Այս մատակարարն արդեն միացված է սենյակին</value>
+  </data>
+  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
+    <value>Դերը հասանելի չէ այս օգտատիրոջ տեսակի համար</value>
   </data>
   <data name="ErrorMessage_SaveAnonymous" xml:space="preserve">
     <value>Պահպանման հեղինակն անհայտ է</value>
@@ -276,6 +327,9 @@
   <data name="ErrorMessage_SecurityException" xml:space="preserve">
     <value>Դուք չունեք բավարար թույլտվություն՝ գործողությունը կատարելու համար</value>
   </data>
+  <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
+    <value>Դուք բավարար թույլտվություն չունեք արխիվացնելու սենյակը</value>
+  </data>
   <data name="ErrorMessage_SecurityException_Auth" xml:space="preserve">
     <value>Հնարավոր չէ հավաստագրել{0} մատակարարի մոտ՝ տրված հավատարմագրերով.</value>
   </data>
@@ -284,6 +338,9 @@
   </data>
   <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
     <value>Դուք բավարար թույլտվություն չունեք թղթապանակը պատճենելու համար</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
+    <value>Դուք այս պանակում պատճենելու թույլտվություն չունեք</value>
   </data>
   <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
     <value>Ստեղծելու համար բավարար թույլտվություն չունեք</value>
@@ -306,11 +363,20 @@
   <data name="ErrorMessage_SecurityException_EditFileTwice" xml:space="preserve">
     <value>Այս փաստաթուղթը խմբագրվում է ձեր կողմից մեկ այլ ներդիրում</value>
   </data>
+  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
+    <value>Դուք սենյակը խմբագրելու թույլտվություն չունեք</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Այլի ընթացիկ տարբերակը հնարավոր չէ ջնջել</value>
+  </data>
   <data name="ErrorMessage_SecurityException_MoveFile" xml:space="preserve">
     <value>Դուք բավարար թույլտվություն չունեք ֆայլը տեղափոխելու համար</value>
   </data>
   <data name="ErrorMessage_SecurityException_MoveFolder" xml:space="preserve">
     <value>Դուք չունեք բավարար թույլտվություն՝ թղթապանակը տեղափոխելու համար</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
+    <value>Դուք այս պանակ տեղափոխվելու թույլտվություն չունեք</value>
   </data>
   <data name="ErrorMessage_SecurityException_ReadFile" xml:space="preserve">
     <value>Դուք բավարար թույլտվություն չունեք ֆայլը դիտելու համար</value>
@@ -324,11 +390,17 @@
   <data name="ErrorMessage_SecurityException_RenameFolder" xml:space="preserve">
     <value>Դուք բավարար թույլտվություն չունեք պանակը վերանվանելու համար</value>
   </data>
+  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
+    <value>Սենյակը արխիվացնելու համար բավարար թույլտվություն չունեք</value>
+  </data>
   <data name="ErrorMessage_SecurityException_UpdateEditingFile" xml:space="preserve">
     <value>Հնարավոր չէ թարմացնել ֆայլը, քանի որ այն բացված է խմբագրման համար</value>
   </data>
   <data name="ErrorMessage_SecurityException_ViewFolder" xml:space="preserve">
     <value>Դուք բավարար թույլտվություն չունեք թղթապանակի բովանդակությունը դիտելու համար</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>Դուք չափազանց շատ անգամներ եք փորձել մուտքագրել ձեր գաղտնաբառը: Խնդրում ենք փորձեք մի փոքր ուշ</value>
   </data>
   <data name="ErrorMessage_SharpBoxException" xml:space="preserve">
     <value>Երրորդ կողմի թղթապանակի բովանդակությունը հասանելի չէ: Փորձեք նորից միացնել հաշիվը.</value>
@@ -336,8 +408,14 @@
   <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>Ֆայլի խմբագրման մեկնարկի սխալ</value>
   </data>
+  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
+    <value>Դուք չեք կարող խմբագրել արխիվացված սենյակները</value>
+  </data>
   <data name="ErrorMessage_UpdateEditingFile" xml:space="preserve">
     <value>Դուք չեք կարող թարմացնել ֆայլը, որը բացված է խմբագրման համար</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Ֆայլը չի կարող վերբեռնվել այս սենյակ: Խնդրում ենք փորձել վերբեռնել ONLYOFFICE PDF ձևը:</value>
   </data>
   <data name="ErrorMessage_UserNotFound" xml:space="preserve">
     <value>Օգտատերը չհաջողվեց գտնել</value>
@@ -345,44 +423,35 @@
   <data name="ErrorMessage_ViewTrashItem" xml:space="preserve">
     <value>Ձեզ թույլ չի տրվում նախադիտել աղբարկղի տարրերը</value>
   </data>
-  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
-    <value>Անվավեր մատակարար</value>
-  </data>
-  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
-    <value>Հնարավոր չէ օգտագործել այս թղթապանակը սենյակը պահեստավորել համար</value>
-  </data>
-  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
-    <value>Հրավերի հղումն անվավեր է կամ դրա վավերականության ժամկետը սպառվել է</value>
-  </data>
-  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
-    <value>Դերը հասանելի չէ այս օգտատիրոջ տեսակի համար</value>
-  </data>
-  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
-    <value>Այս մատակարարն արդեն միացված է սենյակին</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
-    <value>Դուք այս պանակում պատճենելու թույլտվություն չունեք</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
-    <value>Դուք այս պանակ տեղափոխվելու թույլտվություն չունեք</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
-    <value>Սենյակը արխիվացնելու համար բավարար թույլտվություն չունեք</value>
-  </data>
-  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
-    <value>Դուք չեք կարող խմբագրել արխիվացված սենյակները</value>
-  </data>
   <data name="ErrorrMessage_PinRoom" xml:space="preserve">
     <value>Դուք չեք կարող ամրացնել սենյակը</value>
   </data>
   <data name="Everyone" xml:space="preserve">
     <value>Բոլորը</value>
   </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Արտաքին օգտատեր</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Հղում լրացնելու համար</value>
+  </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>Օգտատիրոջ փաստաթղթեր {0} {1}</value>
+  </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Ձևի համարը</value>
+  </data>
   <data name="Guest" xml:space="preserve">
     <value>Անանուն</value>
   </data>
   <data name="IndexTitle" xml:space="preserve">
     <value>Որոնել փաստաթղթերի բովանդակության մեջ</value>
+  </data>
+  <data name="KnowledgeFolder" xml:space="preserve">
+    <value>Գիտելիքների</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Հղում դեպի ձև</value>
   </data>
   <data name="MessageFileCreated" xml:space="preserve">
     <value>Թղթապանակում ստեղծված ֆայլ"{0}"</value>
@@ -395,6 +464,9 @@
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Ֆայլն այլևս ձևանմուշ չէ ձևը լրացնելու համար.</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Բացել ֆայլը</value>
   </data>
   <data name="ProductAdminOpportunities" xml:space="preserve">
     <value>Արեք նույնը, ինչ օգտատերը|Կապեք Dropbox-ը, Box-ը և այլ հաշիվները «Ընդհանուր» բաժնում|Սահմանեք մուտքի իրավունքներ դեպի փաստաթղթեր և թղթապանակներ «Ընդհանուր» բաժնում</value>
@@ -415,20 +487,17 @@
   <data name="ProductUserOpportunities" xml:space="preserve">
     <value>Ստեղծեք և խմբագրեք ձեր սեփական փաստաթղթերը, ինչպես նաև համօգտագործվող փաստաթղթերը՝ համապատասխան մուտքի իրավունքով|Տրամադրեք այլ օգտատերերին կարդալու/խմբագրելու հնարավորություն փաստաթղթեր և թղթապանակներ|Կցել Dropbox-ը, Box-ը և այլ հաշիվները «Փաստաթղթեր» բաժնում</value>
   </data>
-  <data name="UnknownFirstName" xml:space="preserve">
-    <value>Անուն</value>
+  <data name="ResultStorageFolder" xml:space="preserve">
+    <value>Արդյունքների պահպանություն</value>
   </data>
-  <data name="UnknownLastName" xml:space="preserve">
-    <value>Ազգանուն</value>
+  <data name="RoleEnum_Collaborator" xml:space="preserve">
+    <value>Համագործակցող</value>
   </data>
-  <data name="UnlockComment" xml:space="preserve">
-    <value>Ֆայլն ապակողպված է</value>
+  <data name="RoleEnum_Comment" xml:space="preserve">
+    <value>Մեկնաբան</value>
   </data>
-  <data name="AceStatusEnum_Editing" xml:space="preserve">
-    <value>Խմբագրիչ</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
-    <value>Դուք սենյակը խմբագրելու թույլտվություն չունեք</value>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Բովանդակության ստեղծող</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
     <value>DocSpace ադմինիստրատոր</value>
@@ -436,41 +505,26 @@
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Խմբագիր</value>
   </data>
-  <data name="RoleEnum_User" xml:space="preserve">
-    <value>Օգտատեր</value>
+  <data name="RoleEnum_FillForms" xml:space="preserve">
+    <value>Ձևի լցոնիչ</value>
+  </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>Հյուր</value>
   </data>
   <data name="RoleEnum_Read" xml:space="preserve">
     <value>Դիտող</value>
   </data>
-  <data name="RoleEnum_Comment" xml:space="preserve">
-    <value>Մեկնաբան</value>
-  </data>
-  <data name="RoleEnum_FillForms" xml:space="preserve">
-    <value>Ձևի լցոնիչ</value>
-  </data>
   <data name="RoleEnum_Review" xml:space="preserve">
     <value>Վերանայող</value>
   </data>
-  <data name="RoleEnum_Collaborator" xml:space="preserve">
-    <value>Համագործակցող</value>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Սենյակի Ադմինիստրատոր</value>
   </data>
-  <data name="AceStatusEnum_Collaborator" xml:space="preserve">
-    <value>Համագործակցող</value>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Սենյակի մենեջեր</value>
   </data>
-  <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
-    <value>Դուք բավարար թույլտվություն չունեք արխիվացնելու սենյակը</value>
-  </data>
-  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
-    <value>Հղումների առավելագույն քանակը չի կարող գերազանցել {0}-ը</value>
-  </data>
-  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
-    <value>Դուք չափազանց շատ անգամներ եք փորձել մուտքագրել ձեր գաղտնաբառը: Խնդրում ենք փորձեք մի փոքր ուշ</value>
-  </data>
-  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
-    <value>Հրավերի հղում</value>
-  </data>
-  <data name="DefaultExternalLinkTitle" xml:space="preserve">
-    <value>Համօգտագործվող հղում</value>
+  <data name="RoleEnum_User" xml:space="preserve">
+    <value>Օգտատեր</value>
   </data>
   <data name="RoomIndex_Author" xml:space="preserve">
     <value>Հեղինակ</value>
@@ -486,6 +540,9 @@
   </data>
   <data name="RoomIndex_ExportAuthor" xml:space="preserve">
     <value>Արտահանման հեղինակ</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Թղթապանակ</value>
   </data>
   <data name="RoomIndex_Index" xml:space="preserve">
     <value>Ինդեքս</value>
@@ -511,79 +568,22 @@
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Տեսակ</value>
   </data>
-  <data name="RoomIndex_Folder" xml:space="preserve">
-    <value>Թղթապանակ</value>
-  </data>
-  <data name="Date" xml:space="preserve">
-    <value>Ամսաթիվ</value>
-  </data>
-  <data name="User" xml:space="preserve">
-    <value>Օգտատեր</value>
-  </data>
-  <data name="LinkToForm" xml:space="preserve">
-    <value>Հղում դեպի ձև</value>
-  </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Բացել ֆայլը</value>
-  </data>
-  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Ֆայլը չի կարող վերբեռնվել այս սենյակ: Խնդրում ենք փորձել վերբեռնել ONLYOFFICE PDF ձևը:</value>
-  </data>
-  <data name="FillOutExternalLinkTitle" xml:space="preserve">
-    <value>Հղում լրացնելու համար</value>
-  </data>
-  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Մի քանի ֆայլ տեղափոխելը Ձևաթղթերի լրացման սենյակ չի աջակցվում: Միանգամից տեղափոխեք մեկ ONLYOFFICE PDF ձև:</value>
-  </data>
-  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Թղթապանակների տեղափոխումը Ձևաթղթերի լրացման սենյակ չի աջակցվում: Միանգամից տեղափոխեք մեկ ONLYOFFICE PDF ձև:</value>
-  </data>
-  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Ֆայլը չի կարող տեղափոխվել այս սենյակ: Խնդրում ենք փորձել տեղափոխել ONLYOFFICE PDF ձևը:</value>
-  </data>
-  <data name="FormNumber" xml:space="preserve">
-    <value>Ձևի համարը</value>
-  </data>
-  <data name="ExternalUser" xml:space="preserve">
-    <value>Արտաքին օգտատեր</value>
-  </data>
-  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
-    <value>Սենյակի մենեջեր</value>
-  </data>
-  <data name="RoleEnum_RoomManager" xml:space="preserve">
-    <value>Սենյակի մենեջեր</value>
-  </data>
-  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
-    <value>Բովանդակության ստեղծող</value>
-  </data>
-  <data name="RoleEnum_ContentCreator" xml:space="preserve">
-    <value>Բովանդակության ստեղծող</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
-    <value>Այլի ընթացիկ տարբերակը հնարավոր չէ ջնջել</value>
-  </data>
   <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
     <value>Կիսվել՝ լրացման համար</value>
   </data>
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>Սկսել լրացնելը</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Սենյակի Ադմինիստրատոր</value>
+  <data name="UnknownFirstName" xml:space="preserve">
+    <value>Անուն</value>
   </data>
-  <data name="RoleEnum_Guest" xml:space="preserve">
-    <value>Հյուր</value>
+  <data name="UnknownLastName" xml:space="preserve">
+    <value>Ազգանուն</value>
   </data>
-  <data name="FolderNameForReassignedData" xml:space="preserve">
-    <value>Օգտատիրոջ փաստաթղթեր {0} {1}</value>
+  <data name="UnlockComment" xml:space="preserve">
+    <value>Ֆայլն ապակողպված է</value>
   </data>
-  <data name="AgentManager" xml:space="preserve">
-    <value>Գործակալի մենեջեր</value>
-  </data>
-  <data name="KnowledgeFolder" xml:space="preserve">
-    <value>Գիտելիքների</value>
-  </data>
-  <data name="ResultStorageFolder" xml:space="preserve">
-    <value>Արդյունքների պահպանություն</value>
+  <data name="User" xml:space="preserve">
+    <value>Օգտատեր</value>
   </data>
 </root>

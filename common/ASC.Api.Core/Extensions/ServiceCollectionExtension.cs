@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,6 +26,7 @@
 
 using ASC.Common.Threading.HeartBeat.Abstractions;
 using ASC.Common.Threading.HeartBeat.RedisHeartBeat;
+using ASC.EventBus.RedisMQ;
 
 using Microsoft.Extensions.Caching.Memory;
 
@@ -250,6 +251,7 @@ public static class ServiceCollectionExtension
 
             var rabbitMqConfiguration = configuration.GetSection("RabbitMQ").Get<RabbitMQSettings>();
             var activeMqConfiguration = configuration.GetSection("ActiveMQ").Get<ActiveMQSettings>();
+            var redisConfiguration = configuration.GetSection("Redis").Get<RedisConfiguration>();
 
             if (rabbitMqConfiguration != null)
             {
@@ -276,7 +278,6 @@ public static class ServiceCollectionExtension
                     var cfg = sp.GetRequiredService<IConfiguration>();
 
                     var rabbitMqPersistentConnection = sp.GetRequiredService<IRabbitMQPersistentConnection>();
-                    var iLifetimeScope = sp.GetRequiredService<ILifetimeScope>();
                     var logger = sp.GetRequiredService<ILogger<EventBusRabbitMQ>>();
                     var eventBusSubscriptionsManager = sp.GetRequiredService<IEventBusSubscriptionsManager>();
 
@@ -296,7 +297,7 @@ public static class ServiceCollectionExtension
                         retryCount = int.Parse(cfg["core:eventBus:connectRetryCount"]);
                     }
 
-                    return new EventBusRabbitMQ(rabbitMqPersistentConnection, logger, iLifetimeScope, eventBusSubscriptionsManager, serializer, subscriptionClientName, retryCount);
+                    return new EventBusRabbitMQ(rabbitMqPersistentConnection, logger, sp, eventBusSubscriptionsManager, serializer, subscriptionClientName, retryCount);
                 });
             }
             else if (activeMqConfiguration != null)
@@ -324,7 +325,6 @@ public static class ServiceCollectionExtension
                     var cfg = sp.GetRequiredService<IConfiguration>();
 
                     var activeMqPersistentConnection = sp.GetRequiredService<IActiveMQPersistentConnection>();
-                    var iLifetimeScope = sp.GetRequiredService<ILifetimeScope>();
                     var logger = sp.GetRequiredService<ILogger<EventBusActiveMQ>>();
                     var eventBusSubscriptionsManager = sp.GetRequiredService<IEventBusSubscriptionsManager>();
 
@@ -344,7 +344,29 @@ public static class ServiceCollectionExtension
                         retryCount = int.Parse(cfg["core:eventBus:connectRetryCount"]);
                     }
 
-                    return new EventBusActiveMQ(activeMqPersistentConnection, logger, iLifetimeScope, eventBusSubscriptionsManager, serializer, subscriptionClientName, retryCount);
+                    return new EventBusActiveMQ(activeMqPersistentConnection, logger, sp, eventBusSubscriptionsManager, serializer, subscriptionClientName, retryCount);
+                });
+            }
+            else if (redisConfiguration != null)
+            {
+                services.AddSingleton<IEventBus, EventBusRedisMQ>(sp =>
+                {
+                    var cfg = sp.GetRequiredService<IConfiguration>();
+
+                    var redisPersistentConnection = sp.GetRequiredService<RedisPersistentConnection>();
+                    var logger = sp.GetRequiredService<ILogger<EventBusRedisMQ>>();
+                    var eventBusSubscriptionsManager = sp.GetRequiredService<IEventBusSubscriptionsManager>();
+
+                    var serializer = new ProtobufSerializer();
+
+                    var retryCount = 5;
+
+                    if (!string.IsNullOrEmpty(cfg["core:eventBus:connectRetryCount"]))
+                    {
+                        retryCount = int.Parse(cfg["core:eventBus:connectRetryCount"]);
+                    }
+
+                    return new EventBusRedisMQ(redisPersistentConnection, logger, eventBusSubscriptionsManager, serializer, sp, retryCount);
                 });
             }
             else

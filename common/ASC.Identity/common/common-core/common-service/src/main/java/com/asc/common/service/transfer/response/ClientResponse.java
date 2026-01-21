@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,6 +27,7 @@
 
 package com.asc.common.service.transfer.response;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
@@ -116,7 +117,7 @@ public class ClientResponse implements Serializable {
   private String modifiedBy;
 
   /** Indicates if the client is public. */
-  @JsonProperty("is_public")
+  @Getter(onMethod_ = @JsonGetter("is_public"))
   private boolean isPublic;
 
   /** Indicates if the client is enabled. */

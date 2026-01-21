@@ -19,7 +19,7 @@ namespace ASC.AuditTrail {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class AuditReportResource {
@@ -97,7 +97,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Added MCP server {0} to agent.
+        ///   Looks up a localized string similar to Added MCP server {0} to AI agent.
         /// </summary>
         public static string AddedServerToAgent {
             get {
@@ -142,7 +142,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Agent created.
+        ///   Looks up a localized string similar to AI agent created.
         /// </summary>
         public static string AgentCreated {
             get {
@@ -151,7 +151,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Agent deleted.
+        ///   Looks up a localized string similar to AI agent deleted.
         /// </summary>
         public static string AgentDeleted {
             get {
@@ -160,7 +160,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Agent renamed: {0}.
+        ///   Looks up a localized string similar to AI agent renamed: {0}.
         /// </summary>
         public static string AgentRenamed {
             get {
@@ -169,7 +169,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Agents.
+        ///   Looks up a localized string similar to AI agents.
         /// </summary>
         public static string AgentsModule {
             get {
@@ -610,7 +610,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Deleted MCP server {0} from agent.
+        ///   Looks up a localized string similar to Deleted MCP server {0} from AI agent.
         /// </summary>
         public static string DeletedServerFromAgent {
             get {
@@ -3099,6 +3099,51 @@ namespace ASC.AuditTrail {
         public static string WebpluginUploaded {
             get {
                 return ResourceManager.GetString("WebpluginUploaded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Additional branding settings updated.
+        /// </summary>
+        public static string WhiteLabelAdditionalSettingsUpdated {
+            get {
+                return ResourceManager.GetString("WhiteLabelAdditionalSettingsUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Company info settings updated.
+        /// </summary>
+        public static string WhiteLabelCompanySettingsUpdated {
+            get {
+                return ResourceManager.GetString("WhiteLabelCompanySettingsUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Mail settings updated.
+        /// </summary>
+        public static string WhiteLabelMailSettingsUpdated {
+            get {
+                return ResourceManager.GetString("WhiteLabelMailSettingsUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Logo settings updated.
+        /// </summary>
+        public static string WhiteLabelSettingsLogosUpdated {
+            get {
+                return ResourceManager.GetString("WhiteLabelSettingsLogosUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Brand name updated.
+        /// </summary>
+        public static string WhiteLabelSettingsLogoTextUpdated {
+            get {
+                return ResourceManager.GetString("WhiteLabelSettingsLogoTextUpdated", resourceCulture);
             }
         }
     }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -882,5 +882,40 @@ public class RoomShareTests(
         var response = (await _roomsApi.GetRoomsFolderAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
         response.Should().NotBeNull();
         response.Folders.Should().BeEmpty();
+    }
+    
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "79361")]
+    public async Task RoomInvite_GuestWhoDoesNotBelongToMe_ReturnEmpty()
+    {
+        await _filesClient.Authenticate(Initializer.Owner);
+        var roomAdmin = await Initializer.InviteContact(EmployeeType.RoomAdmin);
+        var guest = await Initializer.InviteContact(EmployeeType.Guest);
+        
+        await _filesClient.Authenticate(roomAdmin);
+        var room = await CreateCustomRoom("room_guest_does_not_belong_to_me");
+        var securityRequest = new RoomInvitationRequest
+        {
+            Invitations = [new() { Id = guest.Id, Access = FileShare.Read }]
+        };
+        
+        await _roomsApi.SetRoomSecurityAsync(room.Id, securityRequest, TestContext.Current.CancellationToken);
+
+        var response = await _roomsApi.GetRoomSecurityInfoAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken);
+        response.Response.Should().NotContain(r=> r.SharedToUser.Id == guest.Id);
+        
+        var myguest = await Initializer.InviteContact(EmployeeType.Guest, roomAdmin);
+        
+        await _filesClient.Authenticate(roomAdmin);
+        securityRequest = new RoomInvitationRequest
+        {
+            Invitations = [new() { Id = myguest.Id, Access = FileShare.Read }]
+        };
+        
+        await _roomsApi.SetRoomSecurityAsync(room.Id, securityRequest, TestContext.Current.CancellationToken);
+
+        response = await _roomsApi.GetRoomSecurityInfoAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken);
+        response.Response.Should().Contain(r=> r.SharedToUser.Id == myguest.Id && r.Access == FileShare.Read);
     }
 }

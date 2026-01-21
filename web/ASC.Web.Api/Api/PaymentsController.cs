@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -529,11 +529,6 @@ public class PaymentController(
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        if (!tariffService.IsConfigured())
-        {
-            return null;
-        }
-
         var quotaList = await quotaService.GetTenantQuotasAsync();
         var quota = quotaList.FirstOrDefault(q => q.Wallet && q.TenantId == (int)inDto.Service);
         if (quota == null)
@@ -602,11 +597,11 @@ public class PaymentController(
     /// <short>
     /// Get the checkout setup page URL
     /// </short>
-    /// <path>api/2.0/portal/payment/chechoutsetupurl</path>
+    /// <path>api/2.0/portal/payment/checkoutsetupurl</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The URL to the checkout setup page", typeof(Uri))]
     [SwaggerResponse(403, "No permissions to perform this action")]
-    [HttpGet("chechoutsetupurl")]
+    [HttpGet("checkoutsetupurl")]
     public async Task<Uri> GetCheckoutSetupUrl(CheckoutSetupUrlRequestsDto inDto)
     {
         await DemandAdminAsync();

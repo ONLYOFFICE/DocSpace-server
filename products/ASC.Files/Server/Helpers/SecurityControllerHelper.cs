@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,7 +33,6 @@ public class SecurityControllerHelper(
     SocketManager socketManager,
     FileDtoHelper fileDtoHelper,
     FileStorageService fileStorageService,
-    IHttpContextAccessor httpContextAccessor,
     FileShareDtoHelper fileShareDtoHelper,
     FileShareParamsHelper fileShareParamsHelper,
     FileChecker fileChecker,
@@ -42,7 +41,8 @@ public class SecurityControllerHelper(
     IEventBus eventBus,
     TenantManager tenantManager,
     AuthContext authContext,
-    FileSharing fileSharing)
+    FileSharing fileSharing,
+    UserManager userManager)
     : FilesHelperBase(
         filesSettingsHelper,
         fileUploader,
@@ -50,13 +50,13 @@ public class SecurityControllerHelper(
         fileDtoHelper,
         fileStorageService,
         fileChecker,
-        httpContextAccessor,
         webhookManager,
         daoFactory,
         eventBus,
         tenantManager,
         authContext)
 {
+    private readonly AuthContext _authContext = authContext;
 
     public async IAsyncEnumerable<FileShareDto> GetSecurityInfoAsync<T>(IEnumerable<T> fileIds, IEnumerable<T> folderIds)
     {
@@ -77,7 +77,9 @@ public class SecurityControllerHelper(
 
         var fileShares = await share
             .ToAsyncEnumerable()
-            .Select(async (FileShareParams s, CancellationToken _) => await fileShareParamsHelper.ToAceObjectAsync(s)).ToListAsync();
+            .Where(async (s, _) => await userManager.CanUserViewAnotherUserAsync(_authContext.CurrentAccount.ID, s.ShareTo))
+            .Select(async (FileShareParams s, CancellationToken _) => await fileShareParamsHelper.ToAceObjectAsync(s))
+            .ToListAsync();
 
         var aceCollection = new AceCollection<T>
         {

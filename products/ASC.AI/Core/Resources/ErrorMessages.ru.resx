@@ -120,6 +120,9 @@
   <data name="AiSettingsAccessDenied" xml:space="preserve">
     <value>У вас нет разрешения на управление настройками ИИ</value>
   </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>Невозможно обработать файлы: {0}. Файлы могут быть повреждены или зашифрованы</value>
+  </data>
   <data name="ChatAccessDenied" xml:space="preserve">
     <value>У вас нет разрешения на использование чата</value>
   </data>
@@ -170,8 +173,5 @@
   </data>
   <data name="UnavailableServers" xml:space="preserve">
     <value>Серверы MCP недоступны: {0}. Проверьте настройки подключения</value>
-  </data>
-  <data name="AttachmentProcessFailed" xml:space="preserve">
-    <value>Невозможно обработать файлы: {0}. Файлы могут быть повреждены или зашифрованы</value>
   </data>
 </root>

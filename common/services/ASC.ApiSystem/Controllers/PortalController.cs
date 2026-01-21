@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -53,7 +53,6 @@ public class PortalController(
         CommonConstants commonConstants,
         ILogger<PortalController> option,
         TimeZonesProvider timeZonesProvider,
-        TimeZoneConverter timeZoneConverter,
         PasswordHasher passwordHasher,
         CspSettingsHelper cspSettingsHelper,
         CoreBaseSettings coreBaseSettings,
@@ -196,7 +195,7 @@ public class PortalController(
 
         if (!string.IsNullOrEmpty(model.TimeZoneName))
         {
-            tz = timeZoneConverter.GetTimeZone(model.TimeZoneName.Trim(), false) ?? tz;
+            tz = TimeZoneConverter.GetTimeZone(model.TimeZoneName.Trim(), false) ?? tz;
 
             option.LogDebug("PortalName = {0}; Elapsed ms. TimeZonesProvider.OlsonTimeZoneToTimeZoneInfo: {1}", model.PortalName, sw.ElapsedMilliseconds);
         }
@@ -251,6 +250,8 @@ public class PortalController(
 
             if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
             {
+                t.PaymentId = await coreSettings.GetKeyAsync(t.Id);
+
                 await apiSystemHelper.AddTenantToCacheAsync(t.GetTenantDomain(coreSettings), model.AWSRegion);
 
                 option.LogDebug("PortalName = {0}; Elapsed ms. CacheController.AddTenantToCache: {1}", model.PortalName, sw.ElapsedMilliseconds);
@@ -304,7 +305,7 @@ public class PortalController(
             sendCongratulationsAddress = await commonMethods.SendCongratulations(scheme, t, model.SkipWelcome);
             isFirst = sendCongratulationsAddress != null;
         }
-        else if (configuration["core:base-domain"] == "localhost")
+        else if (coreBaseSettings.Standalone)
         {
             try
             {
@@ -508,7 +509,7 @@ public class PortalController(
 
         if (!string.IsNullOrEmpty(model.TimeZoneName))
         {
-            tz = timeZoneConverter.GetTimeZone(model.TimeZoneName.Trim(), false) ?? tz;
+            tz = TimeZoneConverter.GetTimeZone(model.TimeZoneName.Trim(), false) ?? tz;
 
             option.LogDebug("PortalName = {0}; Elapsed ms. TimeZonesProvider.OlsonTimeZoneToTimeZoneInfo: {1}", model.PortalName, sw.ElapsedMilliseconds);
         }
@@ -564,6 +565,8 @@ public class PortalController(
 
             if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
             {
+                t.PaymentId = await coreSettings.GetKeyAsync(t.Id);
+
                 await apiSystemHelper.AddTenantToCacheAsync(t.GetTenantDomain(coreSettings), model.AWSRegion);
 
                 option.LogDebug("PortalName = {0}; Elapsed ms. CacheController.AddTenantToCache: {1}", model.PortalName, sw.ElapsedMilliseconds);
@@ -622,7 +625,7 @@ public class PortalController(
             sendCongratulationsAddress = await commonMethods.SendCongratulations(scheme, t, model.SkipWelcome);
             isFirst = sendCongratulationsAddress != null;
         }
-        else if (configuration["core:base-domain"] == "localhost")
+        else if (coreBaseSettings.Standalone)
         {
             try
             {

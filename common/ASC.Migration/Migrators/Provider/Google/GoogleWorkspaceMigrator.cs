@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -53,12 +53,11 @@ public class GoogleWorkspaceMigrator : Migrator
         GlobalFolderHelper globalFolderHelper,
         IServiceProvider serviceProvider,
         IDaoFactory daoFactory,
-        EntryManager entryManager,
         MigrationLogger migrationLogger,
         AuthContext authContext,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         UserManagerWrapper userManagerWrapper,
-        UserSocketManager socketManager) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, entryManager, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper, socketManager)
+        UserSocketManager socketManager) : base(securityContext, userManager, tenantQuotaFeatureStatHelper, quotaSocketManager, fileStorageService, globalFolderHelper, serviceProvider, daoFactory, migrationLogger, authContext, displayUserSettingsHelper, userManagerWrapper, socketManager)
     {
         MigrationInfo = new MigrationInfo { Name = "GoogleWorkspace" };
     }
