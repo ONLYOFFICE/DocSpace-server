@@ -53,10 +53,10 @@ public class FolderMoveTests(
         // Act
         var copyParams = new BatchRequestDto
         {
-            DestFolderId = targetFolderId,
+            DestFolderId = new(targetFolderId),
             ConflictResolveType = FileConflictResolveType.Skip,
             FileIds = [],
-            FolderIds = [sourceFolder.Id],
+            FolderIds = [new(sourceFolder.Id)],
             ReturnSingleOperation =  true
         };
         
@@ -100,10 +100,10 @@ public class FolderMoveTests(
         // Act
         var moveParams = new BatchRequestDto
         {
-            DestFolderId = targetFolder.Id,
+            DestFolderId = new(targetFolder.Id),
             ConflictResolveType = FileConflictResolveType.Skip,
             FileIds = [],
-            FolderIds = [sourceFolder.Id],
+            FolderIds = [new(sourceFolder.Id)],
             ReturnSingleOperation =  true
         };
         
@@ -137,7 +137,7 @@ public class FolderMoveTests(
         // Act
         var results = (await _filesOperationsApi.DuplicateBatchItemsAsync(new DuplicateRequestDto
         {
-            FolderIds = [sourceFolder.Id],
+            FolderIds = [new(sourceFolder.Id)],
             ReturnSingleOperation = true
         }, TestContext.Current.CancellationToken)).Response;
         

@@ -53,7 +53,7 @@ public class FileCopyTests(
         // Act
         var copyParams = new CopyAsJsonElement(
             destTitle: sourceFile.Title,
-            destFolderId: targetFolder.Id
+            destFolderId: new(targetFolder.Id)
         );
         
         var copiedFile = (await _filesApi.CopyFileAsAsync(sourceFile.Id, copyParams, TestContext.Current.CancellationToken)).Response;
@@ -81,7 +81,7 @@ public class FileCopyTests(
         // Act
         var results = (await _filesOperationsApi.DuplicateBatchItemsAsync(new DuplicateRequestDto
         {
-            FileIds = [sourceFile.Id],
+            FileIds = [new(sourceFile.Id)],
             ReturnSingleOperation =  true
         }, TestContext.Current.CancellationToken)).Response;
 
@@ -116,7 +116,7 @@ public class FileCopyTests(
         // Act
         var copyParams = new CopyAsJsonElement(
             destTitle: newFileName,
-            destFolderId: targetFolderId
+            destFolderId: new(targetFolderId)
         );
         
         var copiedFile = (await _filesApi.CopyFileAsAsync(sourceFile.Id, copyParams, TestContext.Current.CancellationToken)).Response;
@@ -143,9 +143,9 @@ public class FileCopyTests(
         // Act
         var moveParams = new BatchRequestDto
         {
-            DestFolderId = targetFolder.Id,
+            DestFolderId = new(targetFolder.Id),
             ConflictResolveType = FileConflictResolveType.Skip,
-            FileIds = [sourceFile.Id],
+            FileIds = [new(sourceFile.Id)],
             FolderIds = [],
             ReturnSingleOperation = true
         };

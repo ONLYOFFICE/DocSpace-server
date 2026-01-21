@@ -97,8 +97,7 @@ public class PrivacyRoomTest(
         await using var encryptTempStream = new MemoryStream();
         await FileEncryptionStream.EncryptFileAsync(stream, encryptTempStream, aesKeyForEncrypt, TestContext.Current.CancellationToken);
 
-        var uploadSession = (await _filesOperationsApi.CreateUploadSessionAsync(createdRoom.Id, new SessionRequest("new.docx", encryptTempStream.Length), TestContext.Current.CancellationToken)).Response;
-        var uploadSessionData = JsonSerializer.Deserialize<SessionData>(((JsonElement)uploadSession).ToString(), JsonSerializerOptions.Web)!;
+        var uploadSessionData = (await _filesOperationsApi.CreateUploadSessionAsync(createdRoom.Id, new SessionRequest("new.docx", encryptTempStream.Length), TestContext.Current.CancellationToken)).Response;
         
         encryptTempStream.Position = 0;
         using var formContent = new MultipartFormDataContent();
