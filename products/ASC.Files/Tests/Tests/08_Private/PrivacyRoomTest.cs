@@ -72,7 +72,8 @@ public class PrivacyRoomTest(
     public async Task SetFileAccess()
     {
         await _filesClient.Authenticate(Initializer.Owner);
-
+        
+        var settings = (await _filesSettingsApi.GetFilesSettingsAsync(TestContext.Current.CancellationToken)).Response;
         var (userPublicKey, userPrivateKeyEnc, userPassword) = ExportPublicAndPrivateKeys();
         
         var userKeys = (await _privacyroomApi.SetKeysAsync(new EncryptionKeyRequestDto(userPublicKey, userPrivateKeyEnc), cancellationToken: TestContext.Current.CancellationToken)).Response;
@@ -97,14 +98,25 @@ public class PrivacyRoomTest(
         await using var encryptTempStream = new MemoryStream();
         await FileEncryptionStream.EncryptFileAsync(stream, encryptTempStream, aesKeyForEncrypt, TestContext.Current.CancellationToken);
 
-        var uploadSessionData = (await _filesOperationsApi.CreateUploadSessionAsync(createdRoom.Id, new SessionRequest("new.docx", encryptTempStream.Length), TestContext.Current.CancellationToken)).Response;
-        
+        var createdSession = (await _filesOperationsApi.CreateUploadSessionInFolderAsync(createdRoom.Id, new SessionRequest("new.docx", encryptTempStream.Length), TestContext.Current.CancellationToken)).Response;
+        var chunkSize = (int)settings.ChunkUploadSize;
+        var buffer = new byte[chunkSize];
+        var chunkNumber = 1;
+        int bytesRead;
         encryptTempStream.Position = 0;
-        using var formContent = new MultipartFormDataContent();
-        formContent.Add(new StreamContent(encryptTempStream), "file", "new.docx");
-        await _filesClient.PostAsync(uploadSessionData.Data.Location + "&chunkNumber=1&upload=true", formContent, TestContext.Current.CancellationToken);
-        var uploadResponse = await _filesClient.PostAsync(uploadSessionData.Data.Location + "&finalize=true", null, TestContext.Current.CancellationToken);
-        var fileId = (await uploadResponse.Content.ReadFromJsonAsync<FileData>(TestContext.Current.CancellationToken))!.Data.Id;
+        
+        while ((bytesRead = await encryptTempStream.ReadAsync(buffer.AsMemory(0, chunkSize), TestContext.Current.CancellationToken)) > 0)
+        {
+            var chunkStream = new MemoryStream(buffer, 0, bytesRead);
+            var fileParameter = new FileParameter(chunkStream);
+            
+            await _filesOperationsApi.UploadAsyncSessionAsync(createdRoom.Id, createdSession.Id, chunkNumber, fileParameter, TestContext.Current.CancellationToken);
+            chunkNumber++;
+        }
+        
+        var resultFile = (await _filesOperationsApi.FinalizeSessionAsync(createdRoom.Id, createdSession.Id, TestContext.Current.CancellationToken)).Response;
+
+        var fileId = resultFile.Id;
         
         List<AccessRequestKeyDto> keys = [new(roomKeys[0].UserId, roomKeys[0].Id, filePrivateKeyEnc)];
         await _filesApi.SetEncryptionInfoAsync(fileId, keys, cancellationToken: TestContext.Current.CancellationToken);
