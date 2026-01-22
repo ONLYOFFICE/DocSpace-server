@@ -238,7 +238,7 @@ public class UserController(
         }
         else
         {
-            await _permissionContext.DemandPermissionsAsync(Constants.Action_AddRemoveUser);
+            await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(Guid.Empty, inDto.Type),Constants.Action_AddRemoveUser);
             var tenant = tenantManager.GetCurrentTenant();
             var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
             var currentUserType = await _userManager.GetUserTypeAsync(currentUser.Id);
@@ -331,7 +331,7 @@ public class UserController(
         user.WorkFromDate = inDto.Worksfrom != null && inDto.Worksfrom != DateTime.MinValue ? tenantUtil.DateTimeFromUtc(inDto.Worksfrom) : DateTime.UtcNow.Date;
         user.Status = EmployeeStatus.Active;
 
-        await UpdateContactsAsync(inDto.Contacts, user, !inDto.FromInviteLink);
+        await UpdateContactsAsync(inDto.Contacts, user, false);
 
         cache.Insert("REWRITE_URL" + tenantManager.GetCurrentTenantId(), HttpContext.Request.GetDisplayUrl(), TimeSpan.FromMinutes(5));
 
@@ -2051,6 +2051,7 @@ public class UserController(
         var users = await inDto.UpdateMembers.UserIds
             .ToAsyncEnumerable()
             .Where(userId => !_userManager.IsSystemUser(userId))
+            .Where((async (userId, _)  => await userManager.CanUserViewAnotherUserAsync(authContext.CurrentAccount.ID, userId)))
             .Select(async (Guid userId, CancellationToken _) => await _userManager.GetUsersAsync(userId))
             .Where(r => r.Status != EmployeeStatus.Terminated)
             .ToListAsync();

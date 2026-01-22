@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,28 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.People.Tests.PeopleController;
+namespace ASC.Files.Core.ApiModels.RequestDto;
 
-[Collection("Test Collection")]
-public class BaseTest(    
-    PeopleFactory peopleFactory,
-    WepApiFactory apiFactory
-    ) : IAsyncLifetime
-{
-    protected readonly HttpClient _peopleClient = peopleFactory.HttpClient;
-    protected readonly HttpClient _apiClient = apiFactory.HttpClient;
-    protected readonly ProfilesApi _profilesApi = peopleFactory.ProfilesApi;
-    protected readonly UsersApi _portalUsersApi = apiFactory.PortalUsersApi;
-    protected readonly UserTypeApi _userTypeApi = apiFactory.UserTypeApi;
-    private readonly Func<Task> _resetDatabase = peopleFactory.ResetDatabaseAsync;
-
-    public async ValueTask InitializeAsync()
-    {
-        await Initializer.InitializeAsync(peopleFactory, apiFactory);
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        await _resetDatabase();
-    }
+public class FinalizeSessionDto<T>
+{    
+    [FromRoute(Name = "folderId")]
+    public T FolderId { get; set; }
+    
+    [FromRoute(Name = "sessionId")]
+    public string SessionId { get; set; }
 }

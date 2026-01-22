@@ -289,6 +289,15 @@ public class GroupController(
     [HttpPost("{id:guid}/members")]
     public async Task<GroupDto> SetMembersTo(MembersRequestDto inDto)
     {
+        var anyValidMembers = await inDto.Members.Members
+            .ToAsyncEnumerable()
+            .AnyAsync(async (userId, _) => await ValidateUserAsync(userId));
+        
+        if (!anyValidMembers)
+        {
+            throw new ArgumentException(nameof(inDto.Members.Members));
+        }
+        
         await RemoveMembersFrom(new MembersRequestDto { Id = inDto.Id, Members = new MembersRequest { Members = (await userManager.GetUsersByGroupAsync(inDto.Id)).Select(x => x.Id) } });
         await AddMembersTo(inDto);
 
@@ -385,8 +394,7 @@ public class GroupController(
 
     private async Task TransferUserToDepartmentAsync(Guid userId, GroupInfo group, bool setAsManager)
     {
-        var user = await userManager.GetUsersAsync(userId);
-        if (userId == Guid.Empty || !userManager.UserExists(user) || user.Status == EmployeeStatus.Terminated || await userManager.IsGuestAsync(userId))
+        if (await ValidateUserAsync(userId))
         {
             return;
         }
@@ -397,6 +405,15 @@ public class GroupController(
         }
 
         await userManager.AddUserIntoGroupAsync(userId, group.ID, notifyWebSocket: false);
+    }
+
+    private async Task<bool> ValidateUserAsync(Guid userId)
+    {
+        var user = await userManager.GetUsersAsync(userId);
+        return userId == Guid.Empty || 
+               !userManager.UserExists(user) || 
+               user.Status == EmployeeStatus.Terminated || 
+               await userManager.IsGuestAsync(userId);
     }
 
     private async Task RemoveUserFromDepartmentAsync(Guid userId, GroupInfo group)

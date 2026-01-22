@@ -204,11 +204,6 @@ public class UserManager(
         return UserExists(await GetUsersAsync(id));
     }
 
-    public bool UserExists(Guid id)
-    {
-        return UserExists(GetUsers(id));
-    }
-
     public bool UserExists(UserInfo user)
     {
         return !user.Equals(Constants.LostUser);

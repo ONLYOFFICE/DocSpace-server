@@ -394,6 +394,8 @@ public class SecurityController(
 
         await settingsManager.SaveAsync(settings);
 
+        messageService.Send(MessageAction.LoginSettingsUpdated);
+
         return settings.Map();
     }
 
@@ -433,6 +435,8 @@ public class SecurityController(
         var defaultSettings = new LoginSettings().GetDefault();
 
         await settingsManager.SaveAsync(defaultSettings);
+
+        messageService.Send(MessageAction.LoginSettingsUpdated);
 
         return defaultSettings.Map();
     }

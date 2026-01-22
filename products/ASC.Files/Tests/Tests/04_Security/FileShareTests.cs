@@ -1202,4 +1202,39 @@ public class FileShareTests(
         fileAccessViaFileLink.Security.Edit.Should().BeFalse();
         fileAccessViaFileLink.Access.Should().Be(FileShare.Read);
     }
+    
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "79420")]
+    public async Task FileShare_GuestWhoDoesNotBelongToMe_ReturnEmpty()
+    {
+        await _filesClient.Authenticate(Initializer.Owner);
+        var roomAdmin = await Initializer.InviteContact(EmployeeType.RoomAdmin);
+        var guest = await Initializer.InviteContact(EmployeeType.Guest);
+        
+        await _filesClient.Authenticate(roomAdmin);
+        var file = await CreateFileInMy("file.docx", roomAdmin);
+        var securityRequest = new SecurityInfoSimpleRequestDto
+        {
+            Share = [new() { ShareTo = guest.Id, Access = FileShare.Read }]
+        };
+        
+        await _sharingApi.SetFileSecurityInfoAsync(file.Id, securityRequest, TestContext.Current.CancellationToken);
+
+        var response = await _sharingApi.GetFileSecurityInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken);
+        response.Response.Should().NotContain(r=> r.SharedToUser.Id == guest.Id);
+        
+        var myguest = await Initializer.InviteContact(EmployeeType.Guest, roomAdmin);
+        
+        await _filesClient.Authenticate(roomAdmin);
+        securityRequest = new SecurityInfoSimpleRequestDto
+        {
+            Share = [new() { ShareTo = myguest.Id, Access = FileShare.Read }]
+        };
+        
+        await _sharingApi.SetFileSecurityInfoAsync(file.Id, securityRequest, TestContext.Current.CancellationToken);
+
+        response = await _sharingApi.GetFileSecurityInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken);
+        response.Response.Should().Contain(r=> r.SharedToUser.Id == myguest.Id && r.Access == FileShare.Read);
+    }
 }
