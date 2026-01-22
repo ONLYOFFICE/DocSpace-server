@@ -29,9 +29,9 @@ namespace ASC.Core.Common.EF.Model;
 public class InvitationLink : BaseEntity
 {
     public Guid Id { get; set; }
+
     public int TenantId { get; set; }
 
-    [EnumDataType(typeof(EmployeeType))]
     public EmployeeType EmployeeType { get; set; }
 
     public DateTime Expiration { get; set; }

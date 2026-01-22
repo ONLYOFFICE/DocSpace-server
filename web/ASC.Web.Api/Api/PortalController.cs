@@ -183,7 +183,7 @@ public class PortalController(
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
-        if (inDto.EmployeeType is EmployeeType.All or EmployeeType.Guest)
+        if (inDto.EmployeeType is not (EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin or EmployeeType.User))
         {
             throw new ArgumentException(nameof(inDto.EmployeeType));
         }
@@ -232,6 +232,11 @@ public class PortalController(
     [HttpGet("users/invitationlink/{employeeType}")]
     public async Task<InvitationLinkDto> GetInvitationLinkByEmployeeType(InvitationLinkRequestDto inDto)
     {
+        if (inDto.EmployeeType is not (EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin or EmployeeType.User))
+        {
+            throw new ArgumentException(nameof(inDto.EmployeeType));
+        }
+
         var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
         if (!invitationSettings.AllowInvitingMembers)
         {

@@ -560,7 +560,7 @@ static file class Queries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (UserDbContext ctx, int tenantId, EmployeeType employeeType) =>
                 ctx.InvitationLinks
-                    .FirstOrDefault(r => r.TenantId == tenantId && (employeeType == EmployeeType.All || r.EmployeeType == employeeType)));
+                    .FirstOrDefault(r => r.TenantId == tenantId && r.EmployeeType == employeeType));
 
     public static readonly Func<UserDbContext, int, IAsyncEnumerable<InvitationLink>> GetInvitationLinksAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

@@ -32,7 +32,7 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 public class InvitationLinkRequestDto
 {
     /// <summary>
-    /// The type of employee role for the invitation link.
+    /// The type of employee role for the invitation link (DocSpaceAdmin, RoomAdmin or User).
     /// </summary>
     [FromRoute(Name = "employeeType")]
     public required EmployeeType EmployeeType { get; set; }
@@ -44,7 +44,7 @@ public class InvitationLinkRequestDto
 public class InvitationLinkCreateRequestDto
 {
     /// <summary>
-    /// The type of employee role for the invitation link.
+    /// The type of employee role for the invitation link (DocSpaceAdmin, RoomAdmin or User).
     /// </summary>
     public required EmployeeType EmployeeType { get; set; }
 
