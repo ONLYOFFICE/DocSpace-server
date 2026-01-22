@@ -252,7 +252,7 @@ public partial class UserDbContext
         return Queries.GetInvitationLinkByIdAsync(this, tenantId, id);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, EmployeeType.User])]
+    [PreCompileQuery([PreCompileQuery.DefaultInt, EmployeeType.User])]
     public Task<InvitationLink> GetInvitationLinkAsync(int tenantId, EmployeeType employeeType)
     {
         return Queries.GetInvitationLinkByTypeAsync(this, tenantId, employeeType);
@@ -270,7 +270,7 @@ public partial class UserDbContext
         return Queries.UpdateInvitationLinkAsync(this, tenantId, id, expiration, maxUseCount);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
     public Task<int> IncreaseInvitationLinkUsageAsync(int tenantId, Guid id)
     {
         return Queries.IncreaseInvitationLinkUsageAsync(this, tenantId, id);
