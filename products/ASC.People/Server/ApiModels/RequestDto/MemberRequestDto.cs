@@ -213,6 +213,122 @@ public class MemberRequestDto
 }
 
 /// <summary>
+/// The user request parameters.
+/// </summary>
+public class MemberRequestDtoV3
+{
+    /// <summary>
+    /// The user password.
+    /// </summary>
+    public string Password { get; set; }
+
+    /// <summary>
+    /// The user password hash.
+    /// </summary>
+    public string PasswordHash { get; set; }
+
+    /// <summary>
+    /// The user email address.
+    /// </summary>
+    [EmailAddress]
+    [StringLength(255)]
+    public string Email { get; set; }
+
+    /// <summary>
+    /// The user type.
+    /// </summary>
+    public EmployeeType Type { get; set; }
+
+    /// <summary>
+    /// Specifies if this is a guest or a user.
+    /// </summary>
+    public bool? IsUser { get; set; }
+
+    /// <summary>
+    /// The user first name.
+    /// </summary>
+    [StringLength(255)]
+    public string FirstName { get; set; }
+
+    /// <summary>
+    /// The user last name.
+    /// </summary>
+    [StringLength(255)]
+    public string LastName { get; set; }
+
+    /// <summary>
+    /// The list of the user departments IDs.
+    /// </summary>
+    public Guid[] Department { get; set; }
+
+    /// <summary>
+    /// The user title.
+    /// </summary>
+    [StringLength(255)]
+    public string Title { get; set; }
+
+    /// <summary>
+    /// The user location.
+    /// </summary>
+    public string Location { get; set; }
+
+    /// <summary>
+    /// The user sex (male or female).
+    /// </summary>
+    public SexEnum? Sex { get; set; }
+
+    /// <summary>
+    /// The user birthday.
+    /// </summary>
+    public ApiDateTime Birthday { get; set; }
+
+    /// <summary>
+    /// The user registration date (if it is not specified, then the current date will be set).
+    /// </summary>
+    public ApiDateTime Worksfrom { get; set; }
+
+    /// <summary>
+    /// The user comment.
+    /// </summary>
+    public string Comment { get; set; }
+
+    /// <summary>
+    /// The list of the user contacts.
+    /// </summary>
+    public IEnumerable<Contact> Contacts { get; set; }
+
+    /// <summary>
+    /// The avatar photo URL.
+    /// </summary>
+    public string Files { get; set; }
+
+    /// <summary>
+    /// Specifies if the user is added via the invitation link or not.
+    /// </summary>
+    public bool FromInviteLink { get; set; }
+
+    /// <summary>
+    /// The user key.
+    /// </summary>
+    public string Key { get; set; }
+
+    /// <summary>
+    /// The user culture code.
+    /// </summary>
+    public string CultureName { get; set; }
+
+    /// <summary>
+    /// The user target ID.
+    /// </summary>
+    public Guid Target { get; set; }
+
+    /// <summary>
+    /// Specifies if tips, updates and offers are allowed to be sent to the user or not.
+    /// </summary>
+    public bool? Spam { get; set; }
+}
+
+/// <summary>
 /// The request parameters for updating the user information.
 /// </summary>
 public class UpdateMemberRequestDto
