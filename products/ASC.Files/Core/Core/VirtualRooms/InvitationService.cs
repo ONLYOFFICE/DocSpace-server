@@ -152,7 +152,7 @@ public class InvitationService(
                     }
 
                     var type = await userManager.GetUserTypeAsync(currentUserId);
-                    
+
                     ProcessForAgent(folder, type, data);
 
                     if (FileSecurity.PaidShares.Contains(data.Share) && type is EmployeeType.Guest or EmployeeType.User)
@@ -166,16 +166,14 @@ public class InvitationService(
                         }
                     }
 
-                    var user = await userManager.GetUsersAsync(currentUserId);
-
-                    await fileSecurity.ShareAsync(folder.Id, FileEntryType.Folder, currentUserId, data.Share);
-
-                    var link = data.LinkId == Guid.Empty ? null : (await fileSecurity.GetSharesAsync(folder, [data.LinkId])).FirstOrDefault();
-                    if (link != null)
+                    var (success, validationResult) = await ProcessShare(folder, currentUserId, data);
+                    if (!success)
                     {
-                        link.Options.CurrentUseCount += 1;
-                        await fileSecurity.ShareAsync(link.EntryId, link.EntryType, link.Subject, link.Share, link.SubjectType, link.Options, link.Owner);
+                        validation.Result = validationResult;
+                        return false;
                     }
+
+                    var user = await userManager.GetUsersAsync(currentUserId);
 
                     switch (entry)
                     {
@@ -332,13 +330,10 @@ public class InvitationService(
                 }
             }
 
-            await fileSecurity.ShareAsync(roomId, FileEntryType.Folder, user.Id, data.Share);
-
-            var link = data.LinkId == Guid.Empty ? null : (await fileSecurity.GetSharesAsync(room, [data.LinkId])).FirstOrDefault();
-            if (link != null)
+            var (success, _) = await ProcessShare(room, user.Id, data);
+            if (!success)
             {
-                link.Options.CurrentUseCount += 1;
-                await fileSecurity.ShareAsync(link.EntryId, link.EntryType, link.Subject, link.Share, link.SubjectType, link.Options, link.Owner);
+                return;
             }
 
             await filesMessageService.SendAsync(MessageAction.RoomCreateUser, room, user.Id, data.Share, null, true,
@@ -388,7 +383,7 @@ public class InvitationService(
             return true;
         }
     }
-    
+
     private static void ProcessForAgent<T>(Folder<T> folder, EmployeeType type, InvitationLinkData data)
     {
         if (folder.FolderType == FolderType.AiRoom && 
@@ -397,6 +392,38 @@ public class InvitationService(
         {
             data.Share = FileShare.Read;
         }
+    }
+
+    private async Task<(bool, EmailValidationKeyProvider.ValidationResult)> ProcessShare<T>(Folder<T> folder, Guid userId, InvitationLinkData data)
+    {
+        if (data.LinkId == Guid.Empty)
+        {
+            await fileSecurity.ShareAsync(folder.Id, FileEntryType.Folder, userId, data.Share);
+        }
+        else
+        {
+            await using (await distributedLockProvider.TryAcquireFairLockAsync($"link_use_count_check_{data.LinkId}"))
+            {
+                var link = (await fileSecurity.GetSharesAsync(folder, [data.LinkId])).FirstOrDefault();
+
+                if (link != null &&
+                    link.Options.MaxUseCount.HasValue &&
+                    link.Options.MaxUseCount.Value <= link.Options.CurrentUseCount)
+                {
+                    return (false, EmailValidationKeyProvider.ValidationResult.QuotaFailed);
+                }
+
+                await fileSecurity.ShareAsync(folder.Id, FileEntryType.Folder, userId, data.Share);
+
+                if (link != null)
+                {
+                    link.Options.CurrentUseCount += 1;
+                    await fileSecurity.ShareAsync(link.EntryId, link.EntryType, link.Subject, link.Share, link.SubjectType, link.Options, link.Owner);
+                }
+            }
+        }
+
+        return (true, EmailValidationKeyProvider.ValidationResult.Ok);
     }
 }
 
