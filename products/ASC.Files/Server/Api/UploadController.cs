@@ -24,24 +24,58 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Microsoft.Extensions.Primitives;
+using Microsoft.Net.Http.Headers;
+
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
-public class UploadControllerInternal(UploadControllerHelper filesControllerHelper,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
-    : UploadController<int>(filesControllerHelper,
-        folderDtoHelper,
-    fileDtoHelper);
+public class UploadControllerInternal(
+    UploadControllerHelper filesControllerHelper,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    FileUploader fileUploader,
+    ChunkedUploadSessionHelper chunkedUploadSessionHelper,
+    ChunkedUploadSessionHolder chunkedUploadSessionHolder,
+    FilesMessageService filesMessageService,
+    WebhookManager webhookManager,
+    SocketManager socketManager,
+    AuthContext authContext,
+    TenantManager tenantManager,
+    IDaoFactory daoFactory,
+    IEventBus eventBus)
+    : UploadController<int>(filesControllerHelper, folderDtoHelper, fileDtoHelper, fileUploader, chunkedUploadSessionHelper, chunkedUploadSessionHolder, filesMessageService, webhookManager, socketManager, authContext, tenantManager, daoFactory, eventBus);
 
-public class UploadControllerThirdparty(UploadControllerHelper filesControllerHelper,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
-    : UploadController<string>(filesControllerHelper, folderDtoHelper, fileDtoHelper);
+public class UploadControllerThirdparty(
+    UploadControllerHelper filesControllerHelper,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    FileUploader fileUploader,
+    ChunkedUploadSessionHelper chunkedUploadSessionHelper,
+    ChunkedUploadSessionHolder chunkedUploadSessionHolder,
+    FilesMessageService filesMessageService,
+    WebhookManager webhookManager,
+    SocketManager socketManager,
+    AuthContext authContext,
+    TenantManager tenantManager,
+    IDaoFactory daoFactory,
+    IEventBus eventBus)
+    : UploadController<string>(filesControllerHelper, folderDtoHelper, fileDtoHelper, fileUploader, chunkedUploadSessionHelper, chunkedUploadSessionHolder, filesMessageService, webhookManager, socketManager, authContext, tenantManager, daoFactory, eventBus);
 
-public abstract class UploadController<T>(UploadControllerHelper filesControllerHelper,
-        FolderDtoHelper folderDtoHelper,
-        FileDtoHelper fileDtoHelper)
+public abstract class UploadController<T>(
+    UploadControllerHelper filesControllerHelper,
+    FolderDtoHelper folderDtoHelper,
+    FileDtoHelper fileDtoHelper,
+    FileUploader fileUploader,
+    ChunkedUploadSessionHelper chunkedUploadSessionHelper,
+    ChunkedUploadSessionHolder chunkedUploadSessionHolder,
+    FilesMessageService filesMessageService,
+    WebhookManager webhookManager,
+    SocketManager socketManager,
+    AuthContext authContext,
+    TenantManager tenantManager,
+    IDaoFactory daoFactory,
+    IEventBus eventBus)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -67,13 +101,182 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// ]]>
     /// </remarks>
     /// <path>api/2.0/files/{folderId}/upload/create_session</path>
+    [Obsolete]
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "Information about created session", typeof(object))]
+    [SwaggerResponse(200, "Information about created session", typeof(ChunkedUploadSessionResponseWrapper<>))]
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [HttpPost("{folderId}/upload/create_session")]
-    public async Task<object> CreateUploadSession(SessionRequestDto<T> inDto)
+    public async Task<ChunkedUploadSessionResponseWrapper<T>> CreateUploadSession(SessionRequestDto<T> inDto)
+    {
+        var data =  await filesControllerHelper.CreateUploadSessionAsync(inDto.FolderId, inDto.Session.FileName, inDto.Session.FileSize, inDto.Session.RelativePath, inDto.Session.Encrypted, inDto.Session.CreateOn, inDto.Session.CreateNewIfExist);
+        
+        return new ChunkedUploadSessionResponseWrapper<T>
+        {
+            Success = true,
+            Data = data
+        };
+    }
+    
+    [Tags("Files / Operations")]
+    [SwaggerResponse(200)]
+    [HttpPost("{folderId}/session")]
+    public async Task<ChunkedUploadSessionResponse<T>> CreateUploadSessionInFolder(SessionRequestDto<T> inDto)
     {
         return await filesControllerHelper.CreateUploadSessionAsync(inDto.FolderId, inDto.Session.FileName, inDto.Session.FileSize, inDto.Session.RelativePath, inDto.Session.Encrypted, inDto.Session.CreateOn, inDto.Session.CreateNewIfExist);
+    }
+    
+    [Tags("Files / Operations")]
+    [SwaggerResponse(200)]
+    [HttpDelete("{folderId}/session/{sessionId}")]
+    public async Task AbortUploadSession(AbortSessionRequestDto<T> inDto)
+    {
+        await fileUploader.AbortUploadAsync<T>(inDto.SessionId);
+    }
+    
+    //
+    // [Tags("Files / Operations")]
+    // [SwaggerResponse(200, "Information about created session")]
+    // [SwaggerResponse(403, "You don't have enough permission to create")]
+    // [HttpPut("{folderId}/session/initiate")]
+    // public async Task<ChunkedUploadSessionResponse<T>> InitiateUploadSession(InitiateSessionRequestDto<T> inDto)
+    // {
+    //     var createdSession =  await fileUploader.InitiateUploadAsync(inDto.FolderId, inDto.FileId, inDto.FileName, inDto.FileSize, inDto.Encrypted);
+    //     return await chunkedUploadSessionHelper.ToResponseObjectAsync(createdSession, true);
+    // }
+    //
+    
+    [Tags("Files / Operations")]
+    [SwaggerResponse(200)]
+    [HttpPost("{folderId}/session/{sessionId}")]
+    public async Task<UploadSessionResponseDto<T>> UploadSession(UploadSessionRequestDto<T> inDto)
+    {
+        var resumedSession = await fileUploader.UploadChunkAsync<T>(inDto.SessionId, inDto.File.OpenReadStream(),  inDto.File.Length);
+        await chunkedUploadSessionHolder.StoreSessionAsync(resumedSession);
+
+        var transferredBytes = await fileUploader.GetTransferredBytesCountAsync(resumedSession);
+        if (transferredBytes == resumedSession.BytesTotal || !resumedSession.UseChunks)
+        {
+            if (resumedSession.UseChunks)
+            {
+                resumedSession = await fileUploader.FinalizeUploadSessionAsync<T>(inDto.SessionId);
+            }
+
+            await fileUploader.DeleteLinkAndMarkAsync(resumedSession.File);
+
+            await filesMessageService.SendAsync(resumedSession.File.Version > 1
+                ? MessageAction.FileUploadedWithOverwriting
+                : MessageAction.FileUploaded, resumedSession.File, resumedSession.File.Title);
+
+            this.HttpContext.Response.StatusCode = 201;
+            await webhookManager.PublishAsync(WebhookTrigger.FileUploaded, resumedSession.File);
+
+            await socketManager.CreateFileAsync(resumedSession.File);
+            if (resumedSession.File.Version <= 1)
+            {
+                var folderDao = daoFactory.GetFolderDao<T>();
+                var room = await folderDao.GetParentFoldersAsync(resumedSession.FolderId).FirstOrDefaultAsync(f => f.IsRoom);
+                if (room != null)
+                {
+                    var data = room.Id is int rId && resumedSession.File.Id is int fId
+                        ? new RoomNotifyIntegrationData<int> { RoomId = rId, FileId = fId }
+                        : null;
+
+                    var thirdPartyData = room.Id is string srId && resumedSession.File.Id is string sfId
+                        ? new RoomNotifyIntegrationData<string> { RoomId = srId, FileId = sfId }
+                        : null;
+
+                    var evt = new RoomNotifyIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenant().Id) { Data = data, ThirdPartyData = thirdPartyData };
+
+                    await eventBus.PublishAsync(evt);
+                }
+            }
+
+            return new UploadSessionResponseDto<T>
+            {
+                ID = resumedSession.File.Id,
+                FolderId = resumedSession.File.ParentId,
+                Version = resumedSession.File.Version,
+                Title = resumedSession.File.Title,
+                ProviderKey = resumedSession.File.ProviderKey,
+                Uploaded = true,
+                File = await _fileDtoHelper.GetAsync(resumedSession.File)
+            };
+        }
+
+        return new UploadSessionResponseDto<T>
+        {
+            ID = resumedSession.File.Id,
+            FolderId = resumedSession.File.ParentId,
+            Version = resumedSession.File.Version,
+            Title = resumedSession.File.Title,
+            ProviderKey = resumedSession.File.ProviderKey,
+            File = await _fileDtoHelper.GetAsync(resumedSession.File)
+        };
+    }
+    
+    [Tags("Files / Operations")]
+    [SwaggerResponse(200)]
+    [HttpPost("{folderId}/session/{sessionId}/upload")]
+    public async Task<ChunkedUploadSessionResponse<T>> UploadAsyncSession(UploadSessionAsyncRequestDto<T> inDto)
+    {
+        var resumedSession = await fileUploader.UploadChunkAsync<T>(inDto.SessionId, inDto.File.OpenReadStream(), inDto.File.Length, inDto.ChunkNumber);
+        await chunkedUploadSessionHolder.StoreSessionAsync(resumedSession);
+        return await chunkedUploadSessionHelper.ToResponseObjectAsync(resumedSession);
+    }
+
+    [Tags("Files / Operations")]
+    [SwaggerResponse(200)]
+    [HttpPut("{folderId}/session/{sessionId}/finalize")]
+    public async Task<UploadSessionResponseDto<T>> FinalizeSession(FinalizeSessionDto<T> inDto)
+    {
+        var session = await chunkedUploadSessionHolder.GetSessionAsync<T>(inDto.SessionId);
+        if (session.UseChunks)
+        {
+            session = await fileUploader.FinalizeUploadSessionAsync<T>(inDto.SessionId);
+        }
+
+        await fileUploader.DeleteLinkAndMarkAsync(session.File);
+
+        await filesMessageService.SendAsync(session.File.Version > 1
+            ? MessageAction.FileUploadedWithOverwriting
+            : MessageAction.FileUploaded, session.File, session.File.Title);
+
+        await webhookManager.PublishAsync(WebhookTrigger.FileUploaded, session.File);
+
+        if (session.File.Version <= 1)
+        {
+            var folderDao = daoFactory.GetFolderDao<T>();
+            var parents = await folderDao.GetParentFoldersAsync(session.FolderId).ToListAsync();
+            var room = parents.FirstOrDefault(f => f.IsRoom);
+            if (room != null)
+            {
+                var data = room.Id is int rId && session.File.Id is int fId
+                    ? new RoomNotifyIntegrationData<int> { RoomId = rId, FileId = fId }
+                    : null;
+
+                var thirdPartyData = room.Id is string srId && session.File.Id is string sfId
+                    ? new RoomNotifyIntegrationData<string> { RoomId = srId, FileId = sfId }
+                    : null;
+
+                var evt = new RoomNotifyIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenant().Id) { Data = data, ThirdPartyData = thirdPartyData };
+
+                await eventBus.PublishAsync(evt);
+            }
+        }
+
+        await socketManager.CreateFileAsync(session.File);
+        this.HttpContext.Response.StatusCode = 201;
+        
+        return new UploadSessionResponseDto<T>
+        {
+            ID = session.File.Id,
+            FolderId = session.File.ParentId,
+            Version = session.File.Version,
+            Title = session.File.Title,
+            ProviderKey = session.File.ProviderKey,
+            Uploaded = true,
+            File = await _fileDtoHelper.GetAsync(session.File)
+        };
     }
 
     /// <summary>
@@ -95,12 +298,17 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     /// </remarks>
     /// <path>api/2.0/files/file/{fileId}/edit_session</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Information about created session", typeof(object))]
+    [SwaggerResponse(200, "Information about created session", typeof(ChunkedUploadSessionResponseWrapper<>))]
     [SwaggerResponse(403, "You don't have enough permission to edit the file")]
     [HttpPost("file/{fileId}/edit_session")]
-    public async Task<object> CreateEditSession(CreateEditSessionRequestDto<T> inDto)
+    public async Task<ChunkedUploadSessionResponseWrapper<T>> CreateEditSession(CreateEditSessionRequestDto<T> inDto)
     {
-        return await filesControllerHelper.CreateEditSessionAsync(inDto.FileId, inDto.FileSize);
+        var data = await filesControllerHelper.CreateEditSessionAsync(inDto.FileId, inDto.FileSize);
+        return new ChunkedUploadSessionResponseWrapper<T>
+        {
+            Success = true,
+            Data = data
+        };
     }
 
     /// <summary>
@@ -151,7 +359,7 @@ public abstract class UploadController<T>(UploadControllerHelper filesController
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [SwaggerResponse(404, "Folder not found")]
     [HttpPost("{folderId}/upload", Order = 1)]
-    public async Task<object> UploadFile(UploadWithFolderRequestDto<T> inDto)
+    public async Task<List<FileDto<T>>> UploadFile(UploadWithFolderRequestDto<T> inDto)
     {
         return await filesControllerHelper.UploadFileAsync(inDto.FolderId, inDto.UploadData);
     }
@@ -213,7 +421,7 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [SwaggerResponse(404, "File not found")]
     [HttpPost("@common/upload")]
-    public async Task<object> UploadFileToCommon([ModelBinder(BinderType = typeof(UploadModelBinder))] UploadRequestDto inDto)
+    public async Task<List<FileDto<int>>> UploadFileToCommon([ModelBinder(BinderType = typeof(UploadModelBinder))] UploadRequestDto inDto)
     {
         return await filesControllerHelper.UploadFileAsync(await globalFolderHelper.FolderCommonAsync, inDto);
     }
@@ -236,7 +444,7 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [SwaggerResponse(404, "File not found")]
     [HttpPost("@my/upload")]
-    public async Task<object> UploadFileToMy([ModelBinder(BinderType = typeof(UploadModelBinder))] UploadRequestDto inDto)
+    public async Task<List<FileDto<int>>> UploadFileToMy([ModelBinder(BinderType = typeof(UploadModelBinder))] UploadRequestDto inDto)
     {
         return await filesControllerHelper.UploadFileAsync(await globalFolderHelper.FolderMyAsync, inDto);
     }

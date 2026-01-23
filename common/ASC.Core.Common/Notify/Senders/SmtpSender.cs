@@ -29,14 +29,14 @@ using MailKit.Net.Smtp;
 namespace ASC.Core.Notify.Senders;
 
 [Singleton]
-public class SmtpSender(IConfiguration configuration,
-        IServiceProvider serviceProvider,
-        ILoggerProvider options)
+public class SmtpSender(
+    IConfiguration configuration,
+    IServiceProvider serviceProvider,
+    ILoggerProvider options)
     : INotifySender
 {
     protected ILogger _logger = options.CreateLogger("ASC.Notify");
     private IDictionary<string, string> _initProperties = new Dictionary<string, string>();
-    protected readonly IConfiguration _configuration = configuration;
     protected readonly IServiceProvider _serviceProvider = serviceProvider;
 
     private string _host;
@@ -44,7 +44,6 @@ public class SmtpSender(IConfiguration configuration,
     private bool _ssl;
     private ICredentials _credentials;
     private SaslMechanism _saslMechanism;
-    protected bool _useCoreSettings;
     const int NetworkTimeout = 30000;
 
     public virtual void Init(IDictionary<string, string> properties)
@@ -58,22 +57,20 @@ public class SmtpSender(IConfiguration configuration,
         var tenantManager = scope.ServiceProvider.GetService<TenantManager>();
         await tenantManager.SetCurrentTenantAsync(m.TenantId);
 
-        var configuration = scope.ServiceProvider.GetService<CoreConfiguration>();
-
+        var coreConfiguration = scope.ServiceProvider.GetService<CoreConfiguration>();
         var smtpClient = GetSmtpClient();
         var result = NoticeSendResult.TryOnceAgain;
         try
         {
             try
             {
-                await BuildSmtpSettingsAsync(configuration);
+                await BuildSmtpSettingsAsync(coreConfiguration);
 
                 var mail = BuildMailMessage(m);
 
                 _logger.DebugSmtpSender(_host, _port, _ssl, _credentials != null);
 
-                await smtpClient.ConnectAsync(_host, _port,
-                    _ssl ? SecureSocketOptions.Auto : SecureSocketOptions.None);
+                await smtpClient.ConnectAsync(_host, _port, _ssl ? SecureSocketOptions.Auto : SecureSocketOptions.None);
 
                 if (_credentials != null)
                 {
@@ -151,9 +148,16 @@ public class SmtpSender(IConfiguration configuration,
         return result;
     }
 
-    private async Task BuildSmtpSettingsAsync(CoreConfiguration configuration)
+    private async Task BuildSmtpSettingsAsync(CoreConfiguration coreConfiguration)
     {
-        if ((await configuration.GetDefaultSmtpSettingsAsync()).IsDefaultSettings && _initProperties.ContainsKey("host") && !string.IsNullOrEmpty(_initProperties["host"]))
+        var connectionString = configuration.GetConnectionString("mailpit")?.Split("=")?[1];
+        if (connectionString != null && connectionString.StartsWith("smtp://"))
+        {
+            var uri = new Uri(connectionString);
+            _host = uri.Host;
+            _port = uri.Port;
+        }
+        else if ((await coreConfiguration.GetDefaultSmtpSettingsAsync()).IsDefaultSettings && _initProperties.ContainsKey("host") && !string.IsNullOrEmpty(_initProperties["host"]))
         {
             _host = _initProperties["host"];
 
@@ -184,7 +188,7 @@ public class SmtpSender(IConfiguration configuration,
         }
         else
         {
-            var s = await configuration.GetDefaultSmtpSettingsAsync();
+            var s = await coreConfiguration.GetDefaultSmtpSettingsAsync();
 
             _host = s.Host;
             _port = s.Port;

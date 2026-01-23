@@ -44,6 +44,7 @@ public class SecurityInfoRequestDto
     /// <summary>
     /// The collection of sharing parameters.
     /// </summary>
+    [MaxEmailInvitations]
     public List<FileShareParams> Share { get; set; }
 
     /// <summary>
@@ -54,6 +55,7 @@ public class SecurityInfoRequestDto
     /// <summary>
     /// The message to send when notifying about the shared file.
     /// </summary>
+    [StringLength(255)]
     public string SharingMessage { get; set; }
 }
 
@@ -65,6 +67,7 @@ public class SecurityInfoSimpleRequestDto
     /// <summary>
     /// The collection of sharing parameters.
     /// </summary>
+    [MaxEmailInvitations]
     public List<FileShareParams> Share { get; set; }
 
     /// <summary>
@@ -75,6 +78,7 @@ public class SecurityInfoSimpleRequestDto
     /// <summary>
     /// The message to send when notifying about the shared file.
     /// </summary>
+    [StringLength(255)]
     public string SharingMessage { get; set; }
 }
 

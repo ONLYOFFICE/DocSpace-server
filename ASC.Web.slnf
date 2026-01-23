@@ -14,6 +14,7 @@
       "common\\ASC.EventBus.ActiveMQ\\ASC.EventBus.ActiveMQ.csproj",
       "common\\ASC.EventBus.Extensions.Logger\\ASC.EventBus.Extensions.Logger.csproj",
       "common\\ASC.EventBus.RabbitMQ\\ASC.EventBus.RabbitMQ.csproj",
+      "common\\ASC.EventBus.RedisMQ\\ASC.EventBus.RedisMQ.csproj",
       "common\\ASC.EventBus\\ASC.EventBus.csproj",
       "common\\ASC.FederatedLogin\\ASC.FederatedLogin.csproj",
       "common\\ASC.IPSecurity\\ASC.IPSecurity.csproj",

@@ -1300,6 +1300,8 @@ public partial class SettingsController(
 
         _ = await settingsManager.SaveAsync(settings);
 
+        messageService.Send(MessageAction.InvitationSettingsUpdated);
+
         return settings.Map();
     }
 }

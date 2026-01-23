@@ -26,8 +26,6 @@
 
 extern alias ASCWebApi;
 extern alias ASCPeople;
-using ASC.People.Tests.Factory;
-
 using MemberRequestDto = ASCPeople::ASC.People.ApiModels.RequestDto.MemberRequestDto;
 using PasswordHasher = ASC.Security.Cryptography.PasswordHasher;
 using WizardRequestsDto = DocSpace.API.SDK.Model.WizardRequestsDto;
@@ -51,7 +49,8 @@ public static class Initializer
         new("$STORAGE_ROOT", Path.Combine(_basePath, "Data", "Test")),
         new("web:hub:internal", ""),
         new("core:base-domain", "localhost"),
-        new("license:file:path", Path.Combine(_basePath, "Data", "license", "license.lic"))
+        new("license:file:path", Path.Combine(_basePath, "Data", "license", "license.lic")),
+        new("web:invitation-limit", "3")
     ];
 
     internal static readonly Faker<MemberRequestDto> FakerMember = new Faker<MemberRequestDto>()
@@ -132,9 +131,10 @@ public static class Initializer
         _initialized = true;
     }
     
-    internal static async Task<User> InviteContact(EmployeeType employeeType)
+    internal static async Task<User> InviteContact(EmployeeType employeeType, User? user = null)
     {
-        await _apiFactory.HttpClient.Authenticate(Owner);
+        user ??= Owner;
+        await _apiFactory.HttpClient.Authenticate(user);
 
         var shortLink = (await _apiFactory.PortalUsersApi.GetInvitationLinkAsync(employeeType, TestContext.Current.CancellationToken)).Response;
         var fullLink = await _apiFactory.HttpClient.GetAsync(shortLink);
@@ -145,7 +145,7 @@ public static class Initializer
 
         }
         
-        await _peopleFactory.HttpClient.Authenticate(Owner);
+        await _peopleFactory.HttpClient.Authenticate(user);
         _peopleFactory.HttpClient.DefaultRequestHeaders.TryAddWithoutValidation("confirm", confirmHeader);
         
         var parsedQuery = HttpUtility.ParseQueryString(confirmHeader);
@@ -156,7 +156,7 @@ public static class Initializer
         
         var fakeMember = FakerMember.Generate();
         
-        var createMemberResponse = await _peopleFactory.PeopleProfilesApi.AddMemberWithHttpInfoAsync(new DocSpace.API.SDK.Model.MemberRequestDto
+        var createMemberResponse = await _peopleFactory.ProfilesApi.AddMemberWithHttpInfoAsync(new DocSpace.API.SDK.Model.MemberRequestDto
         {
             FromInviteLink = true,
             CultureName = "en-US",
@@ -168,7 +168,7 @@ public static class Initializer
             LastName = fakeMember.LastName,
             
             Type = parsedEmployeeType,
-            Key = parsedQuery["key"],
+            Key = parsedQuery["key"] ?? "",
         }, TestContext.Current.CancellationToken);
         
         _peopleFactory.HttpClient.DefaultRequestHeaders.Remove("confirm");
@@ -178,21 +178,32 @@ public static class Initializer
             throw new HttpRequestException($"Unable to invite user {employeeType}");
         }
 
-        return new User(fakeMember.Email, fakeMember.Password);
+        return new User(fakeMember.Email, fakeMember.Password)
+        {
+            Id = createMemberResponse.Data.Response.Id
+        };
     }
 
-    public static async Task Authenticate(this HttpClient client, User user)
-    {        
+    public static async ValueTask Authenticate(this HttpClient client, User? user)
+    {
+        if (user == null)
+        {
+            client.DefaultRequestHeaders.Authorization = null;
+            return;
+        }
+
+        user.PasswordHash ??= _passwordHasher.GetClientPassword(user.Password);
+        
         var authMe = await _apiFactory.AuthenticationApi.AuthenticateMeAsync(new AuthRequestsDto
         {
             UserName = user.Email,
-            PasswordHash = _passwordHasher.GetClientPassword(user.Password)
+            PasswordHash =  user.PasswordHash
         }, TestContext.Current.CancellationToken);
         
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authMe.Response.Token);
     }
-    
-    internal static string Password(
+
+    private static string Password(
         this Internet internet,
         int minLength,
         int maxLength,

@@ -35,11 +35,15 @@ global using System.Web;
 global using ASC.Core.Common.EF;
 global using ASC.Migrations;
 global using ASC.Migrations.Core;
+global using ASC.People.Tests.Data;
+global using ASC.People.Tests.Factory;
 
 global using Bogus;
 global using Bogus.DataSets;
 
 global using DocSpace.API.SDK.Api;
+global using DocSpace.API.SDK.Api.People;
+global using DocSpace.API.SDK.Api.Portal;
 global using DocSpace.API.SDK.Client;
 global using DocSpace.API.SDK.Model;
 

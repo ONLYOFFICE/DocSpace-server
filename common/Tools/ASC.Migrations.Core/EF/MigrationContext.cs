@@ -137,6 +137,8 @@ public class MigrationContext : DbContext
     public DbSet<DbFileVectorization> FileVectorization { get; set; }
     public DbSet<DbUserChatSettings> UserChatSettings { get; set; }
 
+    public DbSet<InvitationLink> InvitationLinks { get; set; }
+
     public MigrationContext(DbContextOptions<MigrationContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -219,6 +221,7 @@ public class MigrationContext : DbContext
             .AddDbMcpServerSettings()
             .AddDbRoomMcpServers()
             .AddDbFileVectorization()
-            .AddDbUserChatSettings();
+            .AddDbUserChatSettings()
+            .AddInvitationLink();
     }
 }

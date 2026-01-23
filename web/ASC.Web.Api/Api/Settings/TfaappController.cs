@@ -178,7 +178,13 @@ public class TfaappController(
     public async Task<bool> UpdateTfaSettings(TfaRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
+        
+        var ownerId = tenantManager.GetCurrentTenant().OwnerId;
+        if ((inDto.Id == ownerId || inDto.MandatoryUsers.Contains(ownerId)) && inDto.Id != authContext.CurrentAccount.ID)
+        {
+            throw new InvalidOperationException(Resource.ErrorAccessDenied);
+        }
+        
         var result = false;
 
         MessageAction action;
@@ -278,11 +284,6 @@ public class TfaappController(
     [HttpPut("tfaappwithlink")]
     public async Task<string> UpdateTfaSettingsLink(TfaRequestsDto inDto)
     {
-        if (inDto.Id == tenantManager.GetCurrentTenant().OwnerId && inDto.Id != authContext.CurrentAccount.ID)
-        {
-            throw new InvalidOperationException(Resource.ErrorAccessDenied);
-        }
-
         if (await UpdateTfaSettings(inDto))
         {
             return await GetTfaConfirmUrl();

@@ -43,6 +43,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
     private IResourceBuilder<RedisResource>? RedisResource { get; set; }
     private IResourceBuilder<ExecutableResource>? MigrateResource { get; set; }
     private IResourceBuilder<ContainerResource>? EditorResource { get; set; }
+    private IResourceBuilder<MailPitContainerResource>? MailResource { get; set; }
     private IResourceBuilder<ContainerResource>? OpensearchResource { get; set; }
 
     public ConnectionStringManager AddMySql()
@@ -158,14 +159,21 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
 
         return this;
     }
-    
+
+    public ConnectionStringManager AddMailPit()
+    {
+        MailResource = builder.AddMailPit("mailpit");
+        return this;
+    }
+
     public void AddWaitFor<T>(
         IResourceBuilder<T> resourceBuilder,
         bool includeMigrate = true,
         bool includeRabbitMq = true,
         bool includeRedis = true,
         bool includeEditors = true,
-        bool includeOpensearch = true
+        bool includeOpensearch = true,
+        bool includeMailPit = true
         )  where T : IResourceWithWaitSupport
     {
         if (includeMigrate && MigrateResource != null)
@@ -192,6 +200,10 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
         {
             resourceBuilder.WaitFor(OpensearchResource);
         }
+        if (includeMailPit && MailResource != null)
+        {
+            resourceBuilder.WaitFor(MailResource);
+        }
     }
 
     public void AddBaseConfig<T>(IResourceBuilder<T> resourceBuilder, bool isDocker, bool includeHealthCheck = true) where T : IResourceWithEnvironment, IResourceWithWaitSupport, IResourceWithEndpoints
@@ -210,6 +222,12 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
         {
             resourceBuilder
                 .WithReference(MySqlResource, "default:connectionString");
+        }
+        
+        if (MailResource != null)
+        {
+            resourceBuilder
+                .WithReference(MailResource);
         }
 
         if (isDocker)

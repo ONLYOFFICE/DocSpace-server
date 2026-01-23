@@ -34,7 +34,7 @@ public class CheckUploadRequest
     /// <summary>
     /// The list of file titles.
     /// </summary>
-    public IEnumerable<string> FilesTitle { get; set; }
+    public IReadOnlyList<string> FilesTitle { get; set; }
 }
 
 /// <summary>
