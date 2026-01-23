@@ -63,8 +63,12 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
         size = Math.Abs(size);
         if (UsedInQuota(dataTag))
         {
-            await QuotaUsedCheckAsync(size, quotaCheckFileSize, ownerId);
+            var result = await QuotaUsedCheckAsync(size, quotaCheckFileSize, ownerId);
             CurrentSize += size;
+            if (result == QuotaCheckResult.QuotaExceeded)
+            {
+                await quotaSocketManager.TenantQuotaExceededAsync();
+            }
         }
         await SetTenantQuotaRowAsync(module, domain, size, dataTag, true, ownerId != Guid.Empty ? ownerId : authContext.CurrentAccount.ID);
 
@@ -78,8 +82,12 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
         size = Math.Abs(size);
         if (UsedInQuota(dataTag))
         {
-            await QuotaUsedCheckAsync(size, quotaCheckFileSize, ownerId);
+            var result = await QuotaUsedCheckAsync(size, quotaCheckFileSize, ownerId);
             CurrentSize += size;
+            if (result == QuotaCheckResult.QuotaExceeded)
+            {
+                await quotaSocketManager.TenantQuotaExceededAsync();
+            }
         }
 
         await SetTenantQuotaRowAsync(module, domain, size, dataTag, true, Guid.Empty);
@@ -135,7 +143,7 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
         await QuotaUsedCheckAsync(size, true, ownedId);
     }
 
-    public async Task QuotaUsedCheckAsync(long size, bool quotaCheckFileSize, Guid ownerId)
+    public async Task<QuotaCheckResult> QuotaUsedCheckAsync(long size, bool quotaCheckFileSize, Guid ownerId)
     {
         var quota = await tenantManager.GetTenantQuotaAsync(_tenant);
         if (quota != null)
@@ -151,20 +159,30 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
             }
         }
         var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
-        if (tenantQuotaSetting.EnableQuota)
+        if (!tenantQuotaSetting.EnableQuota)
         {
-            if (tenantQuotaSetting.Quota < CurrentSize + size)
-            {
-                if ((tenantQuotaSetting.Quota * 2 < CurrentSize + size) || tenantQuotaSetting.Quota < CurrentSize)
-                {
-                    throw new TenantQuotaException(maxTotalSizeChecker.GetExceptionMessage(tenantQuotaSetting.Quota));
-                }
-                await quotaSocketManager.TenantQuotaExceededAsync();
-            }
+            return QuotaCheckResult.Ok;
         }
+
+        if (tenantQuotaSetting.Quota < CurrentSize + size)
+        {
+            if ((tenantQuotaSetting.Quota * 2 < CurrentSize + size)
+                || tenantQuotaSetting.Quota < CurrentSize)
+            {
+                throw new TenantQuotaException(
+                    maxTotalSizeChecker.GetExceptionMessage(tenantQuotaSetting.Quota));
+            }
+            return QuotaCheckResult.QuotaExceeded;
+        }
+
+        return QuotaCheckResult.Ok;
     }
 
-
+    public enum QuotaCheckResult
+    {
+        Ok,
+        QuotaExceeded,
+    }
     private async Task SetTenantQuotaRowAsync(string module, string domain, long size, string dataTag, bool exchange, Guid userId)
     {
         await tenantManager.SetTenantQuotaRowAsync(
