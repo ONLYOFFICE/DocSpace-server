@@ -117,56 +117,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="DumpParse" xml:space="preserve">
-    <value>Veritabanı ayrıştırma</value>
-  </data>
-  <data name="GroupMigration" xml:space="preserve">
-    <value>Grup taşıma {0} ({1}/{2})</value>
-  </data>
-  <data name="MigratingUserFiles" xml:space="preserve">
-    <value>Kullanıcı dosyaları taşınıyor {0} ({1}/{2})</value>
-  </data>
-  <data name="MigrationCompleted" xml:space="preserve">
-    <value>Taşıma tamamlandı</value>
-  </data>
-  <data name="DataProcessingCompleted" xml:space="preserve">
-    <value>Veri işleme tamamlandı</value>
-  </data>
-  <data name="DataProcessing" xml:space="preserve">
-    <value>Veri işleniyor...</value>
-  </data>
-  <data name="PreparingForMigration" xml:space="preserve">
-    <value>Geçiş için hazırlanıyor</value>
-  </data>
-  <data name="StartOfDataProcessing" xml:space="preserve">
-    <value>Veri işleme başlatılıyor...</value>
-  </data>
-  <data name="UnzippingFinished" xml:space="preserve">
-    <value>Sıkıştırılmış dosya açma tamamlandı...</value>
-  </data>
-  <data name="Unzipping" xml:space="preserve">
-    <value>Sıkıştırılmış dosyalar açılıyor...</value>
-  </data>
-  <data name="UserMigration" xml:space="preserve">
-    <value>Kullanıcı taşıma {0} ({1}/{2})</value>
-  </data>
-  <data name="MigrationCommonFiles" xml:space="preserve">
-    <value>Migrasyon ortak dosyaları</value>
-  </data>
-  <data name="MigrationNotFoundException" xml:space="preserve">
-    <value>Böyle bir migrasyon sağlayıcısı yok</value>
-  </data>
-  <data name="MigrationProgressException" xml:space="preserve">
-    <value>Devam eden bir migrasyon işlemi yok</value>
-  </data>
-  <data name="MigrationProjectFiles" xml:space="preserve">
-    <value>Migrasyon projesi dosyaları</value>
-  </data>
   <data name="CanNotAddUserInGroup" xml:space="preserve">
     <value>{0} kullanıcısı {1} grubuna eklenemedi</value>
   </data>
   <data name="CanNotCreateFile" xml:space="preserve">
     <value>{0} dosyası oluşturulamadı</value>
+  </data>
+  <data name="CanNotImportCommonFiles" xml:space="preserve">
+    <value>Ortak dosyalar içe aktarılamadı</value>
+  </data>
+  <data name="CanNotImportProjectFiles" xml:space="preserve">
+    <value>Proje dosyaları içe aktarılamadı</value>
   </data>
   <data name="CanNotImportUser" xml:space="preserve">
     <value>Kullanıcı içe aktarılamadı</value>
@@ -198,19 +159,58 @@
   <data name="CreateFolder" xml:space="preserve">
     <value>{0} klasörünü oluştur</value>
   </data>
+  <data name="CreateRootFolder" xml:space="preserve">
+    <value>Kök klasör oluştur</value>
+  </data>
   <data name="CreateShareRoom" xml:space="preserve">
     <value>{0} ortak odasını oluştur</value>
   </data>
-  <data name="СanNotImportCommonFiles" xml:space="preserve">
-    <value>Ortak dosyalar içe aktarılamadı</value>
+  <data name="DataProcessing" xml:space="preserve">
+    <value>Veri işleniyor...</value>
   </data>
-  <data name="СanNotImportProjectFiles" xml:space="preserve">
-    <value>Proje dosyaları içe aktarılamadı</value>
+  <data name="DataProcessingCompleted" xml:space="preserve">
+    <value>Veri işleme tamamlandı</value>
   </data>
-  <data name="СreateRootFolder" xml:space="preserve">
-    <value>Kök klasör oluştur</value>
+  <data name="DumpParse" xml:space="preserve">
+    <value>Veritabanı ayrıştırma</value>
+  </data>
+  <data name="GroupMigration" xml:space="preserve">
+    <value>Grup taşıma {0} ({1}/{2})</value>
   </data>
   <data name="LargeBackup" xml:space="preserve">
     <value>Yedekleme, portalın toplam boyutundan daha büyük</value>
+  </data>
+  <data name="MigratingUserFiles" xml:space="preserve">
+    <value>Kullanıcı dosyaları taşınıyor {0} ({1}/{2})</value>
+  </data>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>Migrasyon ortak dosyaları</value>
+  </data>
+  <data name="MigrationCompleted" xml:space="preserve">
+    <value>Taşıma tamamlandı</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>Böyle bir migrasyon sağlayıcısı yok</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>Devam eden bir migrasyon işlemi yok</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>Migrasyon projesi dosyaları</value>
+  </data>
+  <data name="PreparingForMigration" xml:space="preserve">
+    <value>Geçiş için hazırlanıyor</value>
+  </data>
+  <data name="StartOfDataProcessing" xml:space="preserve">
+    <value>Veri işleme başlatılıyor...</value>
+  </data>
+  <data name="Unzipping" xml:space="preserve">
+    <value>Sıkıştırılmış dosyalar açılıyor...</value>
+  </data>
+  <data name="UnzippingFinished" xml:space="preserve">
+    <value>Sıkıştırılmış dosya açma tamamlandı...</value>
+  </data>
+  <data name="UserMigration" xml:space="preserve">
+    <value>Kullanıcı taşıma {0} ({1}/{2})</value>
   </data>
 </root>

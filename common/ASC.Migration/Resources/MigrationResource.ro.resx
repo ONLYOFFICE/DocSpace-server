@@ -117,56 +117,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="DataProcessing" xml:space="preserve">
-    <value>Procesare date...</value>
-  </data>
-  <data name="DataProcessingCompleted" xml:space="preserve">
-    <value>Procesarea datelor s-a terminat</value>
-  </data>
-  <data name="DumpParse" xml:space="preserve">
-    <value>Analiză baza de date</value>
-  </data>
-  <data name="GroupMigration" xml:space="preserve">
-    <value>Migrare de group {0} ({1}/{2})</value>
-  </data>
-  <data name="MigratingUserFiles" xml:space="preserve">
-    <value>Migrare fișiere utilizator {0} ({1}/{2})</value>
-  </data>
-  <data name="MigrationCommonFiles" xml:space="preserve">
-    <value>Migrare fișiere comune</value>
-  </data>
-  <data name="MigrationCompleted" xml:space="preserve">
-    <value>Migrarea a fost finalizată</value>
-  </data>
-  <data name="MigrationProgressException" xml:space="preserve">
-    <value>Nicio migrare în desfășurare</value>
-  </data>
-  <data name="MigrationProjectFiles" xml:space="preserve">
-    <value>Migrare fișiere de proiect</value>
-  </data>
-  <data name="MigrationNotFoundException" xml:space="preserve">
-    <value>Nu există un astfel de furnizor de migrare</value>
-  </data>
-  <data name="PreparingForMigration" xml:space="preserve">
-    <value>Pregătire pentru migrare</value>
-  </data>
-  <data name="StartOfDataProcessing" xml:space="preserve">
-    <value>Pornire procesare de date...</value>
-  </data>
-  <data name="Unzipping" xml:space="preserve">
-    <value>Decomprimare...</value>
-  </data>
-  <data name="UnzippingFinished" xml:space="preserve">
-    <value>Decomprimarea finalizată...</value>
-  </data>
-  <data name="UserMigration" xml:space="preserve">
-    <value>Migrarea calendarului de utilizator {0} ({1}/{2})</value>
-  </data>
   <data name="CanNotAddUserInGroup" xml:space="preserve">
     <value>Nu se poate adăuga utilizatorul {0} în acest grup {1}</value>
   </data>
   <data name="CanNotCreateFile" xml:space="preserve">
     <value>Nu se poate crea fișierul {0}</value>
+  </data>
+  <data name="CanNotImportCommonFiles" xml:space="preserve">
+    <value>Nu se poate importa fișiere comune</value>
+  </data>
+  <data name="CanNotImportProjectFiles" xml:space="preserve">
+    <value>Nu se poate importa fișiere de proiect</value>
   </data>
   <data name="CanNotImportUser" xml:space="preserve">
     <value>Nu se poate importa utilizatorul</value>
@@ -198,19 +159,58 @@
   <data name="CreateFolder" xml:space="preserve">
     <value>Creează folderul {0}</value>
   </data>
+  <data name="CreateRootFolder" xml:space="preserve">
+    <value>Creează folder rădăcină</value>
+  </data>
   <data name="CreateShareRoom" xml:space="preserve">
     <value>creează sala partajată {0}</value>
   </data>
-  <data name="СanNotImportCommonFiles" xml:space="preserve">
-    <value>Nu se poate importa fișiere comune</value>
+  <data name="DataProcessing" xml:space="preserve">
+    <value>Procesare date...</value>
   </data>
-  <data name="СanNotImportProjectFiles" xml:space="preserve">
-    <value>Nu se poate importa fișiere de proiect</value>
+  <data name="DataProcessingCompleted" xml:space="preserve">
+    <value>Procesarea datelor s-a terminat</value>
   </data>
-  <data name="СreateRootFolder" xml:space="preserve">
-    <value>Creează folder rădăcină</value>
+  <data name="DumpParse" xml:space="preserve">
+    <value>Analiză baza de date</value>
+  </data>
+  <data name="GroupMigration" xml:space="preserve">
+    <value>Migrare de group {0} ({1}/{2})</value>
   </data>
   <data name="LargeBackup" xml:space="preserve">
     <value>Copia de rezervă este mai mare decât spațiul de stocare total disponibil pe portal</value>
+  </data>
+  <data name="MigratingUserFiles" xml:space="preserve">
+    <value>Migrare fișiere utilizator {0} ({1}/{2})</value>
+  </data>
+  <data name="MigrationCommonFiles" xml:space="preserve">
+    <value>Migrare fișiere comune</value>
+  </data>
+  <data name="MigrationCompleted" xml:space="preserve">
+    <value>Migrarea a fost finalizată</value>
+  </data>
+  <data name="MigrationNotFoundException" xml:space="preserve">
+    <value>Nu există un astfel de furnizor de migrare</value>
+  </data>
+  <data name="MigrationProgressException" xml:space="preserve">
+    <value>Nicio migrare în desfășurare</value>
+  </data>
+  <data name="MigrationProjectFiles" xml:space="preserve">
+    <value>Migrare fișiere de proiect</value>
+  </data>
+  <data name="PreparingForMigration" xml:space="preserve">
+    <value>Pregătire pentru migrare</value>
+  </data>
+  <data name="StartOfDataProcessing" xml:space="preserve">
+    <value>Pornire procesare de date...</value>
+  </data>
+  <data name="Unzipping" xml:space="preserve">
+    <value>Decomprimare...</value>
+  </data>
+  <data name="UnzippingFinished" xml:space="preserve">
+    <value>Decomprimarea finalizată...</value>
+  </data>
+  <data name="UserMigration" xml:space="preserve">
+    <value>Migrarea calendarului de utilizator {0} ({1}/{2})</value>
   </data>
 </root>

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,22 +30,29 @@ package com.asc.authorization.application.security.oauth.provider;
 import static com.asc.authorization.application.security.RegionUtils.JWT_REGION_EXTRACTOR;
 
 import com.asc.authorization.application.security.RegionUtils;
+import com.asc.common.messaging.configuration.ClientRegistrationMessagingConfiguration;
+import com.asc.common.service.transfer.message.ClientRetrievedEvent;
+import com.asc.common.service.transfer.message.RetrieveClientMessage;
+import com.asc.common.utilities.crypto.EncryptionService;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
+import org.springframework.amqp.core.MessageProperties;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.oauth2.core.OAuth2AccessToken;
-import org.springframework.security.oauth2.core.OAuth2Token;
-import org.springframework.security.oauth2.core.OAuth2TokenIntrospectionClaimNames;
+import org.springframework.security.oauth2.core.*;
 import org.springframework.security.oauth2.core.converter.ClaimConversionService;
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
@@ -75,9 +82,95 @@ public class TokenIntrospectionAuthenticationProvider implements AuthenticationP
   private String region;
 
   private final Environment environment;
+  private final RabbitTemplate rpcRabbitTemplate;
+  private final MessageConverter messageConverter;
 
+  private final EncryptionService encryptionService;
   private final OAuth2AuthorizationService authorizationService;
   private final RegisteredClientRepository registeredClientRepository;
+
+  /**
+   * Maps a {@link ClientRetrievedEvent} to a {@link RegisteredClient}.
+   *
+   * <p>Decrypts the client secret which is transmitted in encrypted form over RabbitMQ.
+   *
+   * @param clientEvent the client event containing client information from the remote region
+   * @return the mapped {@link RegisteredClient}
+   */
+  private RegisteredClient toRegisteredClient(ClientRetrievedEvent clientEvent) {
+    return RegisteredClient.withId(clientEvent.getClientId())
+        .clientId(clientEvent.getClientId())
+        .clientSecret(encryptionService.decrypt(clientEvent.getClientSecret()))
+        .clientName(clientEvent.getName())
+        .clientAuthenticationMethods(
+            authMethods ->
+                clientEvent.getAuthenticationMethods().stream()
+                    .map(
+                        method ->
+                            switch (method) {
+                              case "client_secret_post" ->
+                                  ClientAuthenticationMethod.CLIENT_SECRET_POST;
+                              case "none" -> ClientAuthenticationMethod.NONE;
+                              default -> ClientAuthenticationMethod.CLIENT_SECRET_BASIC;
+                            })
+                    .forEach(authMethods::add))
+        .authorizationGrantTypes(
+            grantTypes -> {
+              grantTypes.add(AuthorizationGrantType.AUTHORIZATION_CODE);
+              grantTypes.add(AuthorizationGrantType.REFRESH_TOKEN);
+            })
+        .redirectUris(uris -> uris.addAll(clientEvent.getRedirectUris()))
+        .scopes(scopes -> scopes.addAll(clientEvent.getScopes()))
+        .build();
+  }
+
+  /**
+   * Fetches a registered client from a remote region via RPC messaging.
+   *
+   * <p>This method sends an RPC request to the specified remote region to retrieve the client
+   * information. It's used during token introspection when a token from a different region needs to
+   * be validated.
+   *
+   * @param clientId the ID of the client to retrieve
+   * @param targetRegion the region to fetch the client from
+   * @return an {@link Optional} containing the {@link RegisteredClient} if found, or empty if the
+   *     remote region returns no result or the request fails
+   */
+  private Optional<RegisteredClient> fetchRemoteClient(String clientId, String targetRegion) {
+    try {
+      MDC.put("client_id", clientId);
+      MDC.put("region", targetRegion);
+      log.info("Retrieving client from remote region");
+
+      var routingKey =
+          ClientRegistrationMessagingConfiguration.CLIENT_RPC_ROUTING_KEY_PREFIX + targetRegion;
+      var message =
+          messageConverter.toMessage(
+              RetrieveClientMessage.builder().clientId(clientId).build(), new MessageProperties());
+
+      var response =
+          rpcRabbitTemplate.sendAndReceive(
+              ClientRegistrationMessagingConfiguration.CLIENT_RPC_EXCHANGE, routingKey, message);
+
+      if (response == null) {
+        log.warn("Received an empty response from remote region");
+        return Optional.empty();
+      }
+
+      var data = messageConverter.fromMessage(response);
+      if (data instanceof ClientRetrievedEvent clientEvent) {
+        var registeredClient = toRegisteredClient(clientEvent);
+        return Optional.of(registeredClient);
+      }
+
+      return Optional.empty();
+    } catch (Exception e) {
+      log.error("Error fetching client from remote region: {}", targetRegion, e);
+      return Optional.empty();
+    } finally {
+      MDC.clear();
+    }
+  }
 
   /**
    * Authenticates the provided token introspection request.
@@ -102,15 +195,15 @@ public class TokenIntrospectionAuthenticationProvider implements AuthenticationP
         Arrays.stream(environment.getActiveProfiles())
             .anyMatch(profile -> profile.equalsIgnoreCase("saas"));
 
+    String tokenRgn = null;
     if (isSaaS) {
       var tokenRegion = RegionUtils.extract(token, JWT_REGION_EXTRACTOR);
       if (tokenRegion.isPresent() && !tokenRegion.get().equalsIgnoreCase(region)) {
+        tokenRgn = tokenRegion.get();
         log.debug(
-            "Token region '{}' does not match current region '{}'. Token is not valid.",
-            tokenRegion.get(),
+            "Token region '{}' does not match current region '{}'. Will attempt cross-region client lookup.",
+            tokenRgn,
             region);
-        return new OAuth2TokenIntrospectionAuthenticationToken(
-            token, authentication, OAuth2TokenIntrospection.builder().build());
       }
     }
 
@@ -130,8 +223,28 @@ public class TokenIntrospectionAuthenticationProvider implements AuthenticationP
           token, authentication, OAuth2TokenIntrospection.builder().build());
     }
 
-    var authorizedClient =
-        registeredClientRepository.findById(authorization.getRegisteredClientId());
+    RegisteredClient authorizedClient;
+    if (isSaaS && tokenRgn != null && !tokenRgn.equalsIgnoreCase(region)) {
+      log.debug(
+          "Fetching client {} from remote region: {}",
+          authorization.getRegisteredClientId(),
+          tokenRgn);
+      var remoteClient = fetchRemoteClient(authorization.getRegisteredClientId(), tokenRgn);
+      if (remoteClient.isPresent()) {
+        authorizedClient = remoteClient.get();
+        log.debug("Successfully retrieved client from remote region: {}", tokenRgn);
+      } else {
+        log.warn(
+            "Failed to retrieve client {} from remote region {}. Token introspection failed.",
+            authorization.getRegisteredClientId(),
+            tokenRgn);
+        return new OAuth2TokenIntrospectionAuthenticationToken(
+            token, authentication, OAuth2TokenIntrospection.builder().build());
+      }
+    } else {
+      authorizedClient = registeredClientRepository.findById(authorization.getRegisteredClientId());
+    }
+
     var tokenClaims = withActiveTokenClaims(authorizedToken, authorizedClient);
 
     log.trace("Authenticated token introspection request");

@@ -1,0 +1,12 @@
+resilience4j:
+  retry:
+    instances:
+      grpcClientRetry:
+        maxAttempts: ${RETRY_GRPC_CLIENT_MAX_ATTEMPTS:5}
+        waitDuration: ${RETRY_GRPC_CLIENT_WAIT_DURATION:100ms}
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: ${RETRY_GRPC_CLIENT_MULTIPLIER:1.625}
+        retryExceptions:
+          - java.lang.Exception
+        ignoreExceptions:
+          - com.asc.authorization.application.exception.client.RegisteredClientPermissionException

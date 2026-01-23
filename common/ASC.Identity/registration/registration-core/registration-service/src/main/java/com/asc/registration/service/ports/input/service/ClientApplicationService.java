@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -77,7 +77,7 @@ public interface ClientApplicationService {
    * @param clientId the unique identifier of the client.
    * @return a {@link ClientResponse} containing the detailed information of the specified client.
    */
-  ClientResponse getClient(@Valid String clientId);
+  ClientResponse getClient(@NotBlank String clientId);
 
   /**
    * Retrieves basic client information based on the provided query.

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -103,7 +103,9 @@ internal class ProductsActionMapper : ILocationActionMapper
                     MessageAction.ServerUpdated,
                     MessageAction.ServerEnabled,
                     MessageAction.ServerDisabled,
-                    MessageAction.WebpluginUpdated
+                    MessageAction.WebpluginUpdated,
+                    MessageAction.WhiteLabelSettingsLogoTextUpdated,MessageAction.WhiteLabelSettingsLogosUpdated,MessageAction.WhiteLabelCompanySettingsUpdated,MessageAction.WhiteLabelAdditionalSettingsUpdated,MessageAction.WhiteLabelMailSettingsUpdated,
+                    MessageAction.InvitationSettingsUpdated,MessageAction.IPRestrictionsSettingsUpdated,MessageAction.LoginSettingsUpdated
                 ]
             },
             {

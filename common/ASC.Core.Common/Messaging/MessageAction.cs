@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -932,6 +932,30 @@ public enum MessageAction
 
     [SwaggerEnum("Webplugin deleted")]
     WebpluginDeleted = 6087,
+
+    [SwaggerEnum("Whitelabel settings logo text updated")]
+    WhiteLabelSettingsLogoTextUpdated = 6088,
+
+    [SwaggerEnum("Whitelabel settings logos updated")]
+    WhiteLabelSettingsLogosUpdated = 6089,
+
+    [SwaggerEnum("Whitelabel company settings updated")]
+    WhiteLabelCompanySettingsUpdated = 6090,
+
+    [SwaggerEnum("Whitelabel additional settings updated")]
+    WhiteLabelAdditionalSettingsUpdated = 6091,
+
+    [SwaggerEnum("Whitelabel mail settings updated")]
+    WhiteLabelMailSettingsUpdated = 6092,
+
+    [SwaggerEnum("Invitation settings updated")]
+    InvitationSettingsUpdated = 6093,
+
+    [SwaggerEnum("IP restrictions settings updated")]
+    IPRestrictionsSettingsUpdated = 6094,
+
+    [SwaggerEnum("Login settings updated")]
+    LoginSettingsUpdated = 6095,
 
     #endregion
 

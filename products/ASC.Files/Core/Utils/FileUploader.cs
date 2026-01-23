@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -383,7 +383,11 @@ public class FileUploader(
 
     public async Task AbortUploadAsync<T>(string uploadId)
     {
-        await AbortUploadAsync(await chunkedUploadSessionHolder.GetSessionAsync<T>(uploadId));
+        var uploadSession = await chunkedUploadSessionHolder.GetSessionAsync<T>(uploadId);
+        
+        await daoFactory.GetFileDao<T>().AbortUploadSessionAsync(uploadSession);
+
+        await chunkedUploadSessionHolder.RemoveSessionAsync(uploadSession);
     }
 
     public Task<long> GetTransferredBytesCountAsync<T>(ChunkedUploadSession<T> uploadSession)
@@ -392,13 +396,7 @@ public class FileUploader(
 
         return dao.GetTransferredBytesCountAsync(uploadSession);
     }
-
-    private async Task AbortUploadAsync<T>(ChunkedUploadSession<T> uploadSession)
-    {
-        await daoFactory.GetFileDao<T>().AbortUploadSessionAsync(uploadSession);
-
-        await chunkedUploadSessionHolder.RemoveSessionAsync(uploadSession);
-    }
+    
 
     private async Task<long> GetMaxFileSizeAsync<T>(T folderId, bool chunkedUpload = false)
     {

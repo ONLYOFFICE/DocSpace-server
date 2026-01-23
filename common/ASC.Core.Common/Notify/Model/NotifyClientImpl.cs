@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -44,34 +44,34 @@ class NotifyClientImpl(
         _notifySource = notifySource;
     }
 
-    public async Task SendNoticeToAsync(INotifyAction action, IRecipient recipient, string senderNames, params ITagValue[] args)
+    public async Task SendNoticeToAsync(INotifyAction action, IRecipient recipient, string senderNames)
     {
-        await SendNoticeToAsync(action, null, recipient, [senderNames], false, args);
+        await SendNoticeToAsync(action, null, recipient, [senderNames], false);
     }
 
-    public async Task SendNoticeToAsync(INotifyAction action, IRecipient[] recipients, string[] senderNames, params ITagValue[] args)
+    public async Task SendNoticeToAsync(INotifyAction action, IRecipient[] recipients, string[] senderNames)
     {
-        await SendNoticeToAsync(action, null, recipients, senderNames, false, args);
+        await SendNoticeToAsync(action, null, recipients, senderNames, false);
     }
 
-    public async Task SendNoticeAsync(INotifyAction action, string objectID, IRecipient recipient, params ITagValue[] args)
+    public async Task SendNoticeAsync(INotifyAction action, string objectID, IRecipient recipient)
     {
-        await SendNoticeToAsync(action, objectID, [recipient], null, false, args);
+        await SendNoticeToAsync(action, objectID, [recipient], null, false);
     }
 
-    public async Task SendNoticeAsync(INotifyAction action, string objectID, IRecipient recipient, string sendername, params ITagValue[] args)
+    public async Task SendNoticeAsync(INotifyAction action, string objectID, IRecipient recipient, string sendername)
     {
-        await SendNoticeToAsync(action, objectID, [recipient], [sendername], false, args);
+        await SendNoticeToAsync(action, objectID, [recipient], [sendername], false);
     }
 
-    public async Task SendNoticeAsync(INotifyAction action, string objectID, IRecipient[] recipients, string sendername, params ITagValue[] args)
+    public async Task SendNoticeAsync(INotifyAction action, string objectID, IRecipient[] recipients, string sendername)
     {
-        await SendNoticeToAsync(action, objectID, recipients, [sendername], false, args);
+        await SendNoticeToAsync(action, objectID, recipients, [sendername], false);
     }
 
-    public async Task SendNoticeAsync(INotifyAction action, string objectID, IRecipient recipient, bool checkSubscription, params ITagValue[] args)
+    public async Task SendNoticeAsync(INotifyAction action, string objectID, IRecipient recipient, bool checkSubscription)
     {
-        await SendNoticeToAsync(action, objectID, [recipient], null, checkSubscription, args);
+        await SendNoticeToAsync(action, objectID, [recipient], null, checkSubscription);
     }
 
     public void BeginSingleRecipientEvent(string name)
@@ -84,7 +84,7 @@ class NotifyClientImpl(
         _interceptors.Add(interceptor);
     }
 
-    public async Task SendNoticeToAsync(INotifyAction action, string objectID, IRecipient[] recipients, string[] senderNames, bool checkSubsciption, params ITagValue[] args)
+    public async Task SendNoticeToAsync(INotifyAction action, string objectID, IRecipient[] recipients, string[] senderNames, bool checkSubsciption)
     {
         ArgumentNullException.ThrowIfNull(recipients);
 
@@ -92,22 +92,22 @@ class NotifyClientImpl(
 
         foreach (var recipient in recipients)
         {
-            await SendNoticeToAsync(action, objectID, recipient, senderNames, checkSubsciption, args);
+            await SendNoticeToAsync(action, objectID, recipient, senderNames, checkSubsciption);
         }
     }
 
-    public async Task SendNoticeToAsync(INotifyAction action, string objectID, IRecipient recipient, string[] senderNames, bool checkSubsciption, params ITagValue[] args)
+    public async Task SendNoticeToAsync(INotifyAction action, string objectID, IRecipient recipient, string[] senderNames, bool checkSubsciption)
     {
         ArgumentNullException.ThrowIfNull(recipient);
 
         BeginSingleRecipientEvent("__syspreventduplicateinterceptor");
 
-        await SendRequest(action, objectID, recipient, senderNames, checkSubsciption, args);
+        await SendRequest(action, objectID, recipient, senderNames, checkSubsciption);
     }
 
-    private async Task SendRequest(INotifyAction action, string objectID, IRecipient recipient, string[] senderNames, bool checkSubsciption, params ITagValue[] args)
+    private async Task SendRequest(INotifyAction action, string objectID, IRecipient recipient, string[] senderNames, bool checkSubsciption)
     {
-        var r = CreateRequest(action, objectID, recipient, args, senderNames, checkSubsciption);
+        var r = CreateRequest(action, objectID, recipient, senderNames, checkSubsciption);
         r._interceptors = _interceptors.GetAll();
         foreach (var a in notifyEngine.Actions)
         {
@@ -117,7 +117,7 @@ class NotifyClientImpl(
         await channelWriter.WriteAsync(r);
     }
 
-    private NotifyRequest CreateRequest(INotifyAction action, string objectID, IRecipient recipient, ITagValue[] args, string[] senders, bool checkSubsciption)
+    private NotifyRequest CreateRequest(INotifyAction action, string objectID, IRecipient recipient, string[] senders, bool checkSubsciption)
     {
         ArgumentNullException.ThrowIfNull(action);
         ArgumentNullException.ThrowIfNull(recipient);
@@ -129,12 +129,12 @@ class NotifyClientImpl(
             _senderNames = senders,
             _isNeedCheckSubscriptions = checkSubsciption
         };
-
-        if (args != null)
+        
+        if (action.Tags != null)
         {
-            request.Arguments.AddRange(args);
+            request.Arguments.AddRange(action.Tags);
         }
-
+        
         return request;
     }
 }

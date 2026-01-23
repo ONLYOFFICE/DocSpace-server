@@ -19,7 +19,7 @@ namespace ASC.AuditTrail {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class AuditReportResource {
@@ -1429,11 +1429,29 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invitation settings updated.
+        /// </summary>
+        public static string InvitationSettingsUpdated {
+            get {
+                return ResourceManager.GetString("InvitationSettingsUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to IP.
         /// </summary>
         public static string IpCol {
             get {
                 return ResourceManager.GetString("IpCol", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to IP Security settings updated.
+        /// </summary>
+        public static string IPRestrictionsSettingsUpdated {
+            get {
+                return ResourceManager.GetString("IPRestrictionsSettingsUpdated", resourceCulture);
             }
         }
         
@@ -1641,6 +1659,15 @@ namespace ASC.AuditTrail {
         public static string LoginHistoryReportName {
             get {
                 return ResourceManager.GetString("LoginHistoryReportName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Brute force protection settings updated.
+        /// </summary>
+        public static string LoginSettingsUpdated {
+            get {
+                return ResourceManager.GetString("LoginSettingsUpdated", resourceCulture);
             }
         }
         
@@ -3099,6 +3126,51 @@ namespace ASC.AuditTrail {
         public static string WebpluginUploaded {
             get {
                 return ResourceManager.GetString("WebpluginUploaded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Additional branding settings updated.
+        /// </summary>
+        public static string WhiteLabelAdditionalSettingsUpdated {
+            get {
+                return ResourceManager.GetString("WhiteLabelAdditionalSettingsUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Company info settings updated.
+        /// </summary>
+        public static string WhiteLabelCompanySettingsUpdated {
+            get {
+                return ResourceManager.GetString("WhiteLabelCompanySettingsUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Mail settings updated.
+        /// </summary>
+        public static string WhiteLabelMailSettingsUpdated {
+            get {
+                return ResourceManager.GetString("WhiteLabelMailSettingsUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Logo settings updated.
+        /// </summary>
+        public static string WhiteLabelSettingsLogosUpdated {
+            get {
+                return ResourceManager.GetString("WhiteLabelSettingsLogosUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Brand name updated.
+        /// </summary>
+        public static string WhiteLabelSettingsLogoTextUpdated {
+            get {
+                return ResourceManager.GetString("WhiteLabelSettingsLogoTextUpdated", resourceCulture);
             }
         }
     }

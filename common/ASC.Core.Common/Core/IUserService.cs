@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -59,4 +59,12 @@ public interface IUserService
     Task<Dictionary<Guid, UserRelation>> GetUserRelationsAsync(int tenantId, Guid sourceUserId);
     Task<Dictionary<Guid, UserRelation>> GetUserRelationsByTargetAsync(int tenantId, Guid targetUserId);
     Task DeleteUserRelationAsync(int tenantId, Guid sourceUserId, Guid targetUserId);
+
+    Task<InvitationLink> CreateInvitationLinkAsync(int tenantId, EmployeeType employeeType, DateTime expiration, int? maxUseCount);
+    Task<InvitationLink> GetInvitationLinkAsync(int tenantId, Guid id);
+    Task<InvitationLink> GetInvitationLinkAsync(int tenantId, EmployeeType employeeType);
+    Task<List<InvitationLink>> GetInvitationLinksAsync(int tenantId);
+    Task UpdateInvitationLinkAsync(int tenantId, Guid id, DateTime expiration, int? maxUseCount);
+    Task IncreaseInvitationLinkUsageAsync(int tenantId, Guid id);
+    Task DeleteInvitationLinkAsync(int tenantId, Guid id);
 }

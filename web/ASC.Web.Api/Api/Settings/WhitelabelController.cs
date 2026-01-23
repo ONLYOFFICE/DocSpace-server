@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,6 +38,7 @@ public class WhitelabelController(
     IFusionCache fusionCache,
     CompanyWhiteLabelSettingsHelper companyWhiteLabelSettingsHelper,
     TenantManager tenantManager,
+    MessageService messageService,
     TenantExtra tenantExtra,
     StorageFactory storageFactory,
     AdditionalWhiteLabelSettingsMapper additionalWhiteLabelSettingsMapper,
@@ -114,6 +115,8 @@ public class WhitelabelController(
         await settingsManager.SaveAsync(settings, tenantId);
 
         await tenantLogoManager.RemoveMailLogoDataFromCacheAsync();
+
+        messageService.Send(MessageAction.WhiteLabelSettingsLogosUpdated);
     }
 
     /// <summary>
@@ -192,6 +195,8 @@ public class WhitelabelController(
         await settingsManager.SaveAsync(settings, tenantId);
 
         await tenantLogoManager.RemoveMailLogoDataFromCacheAsync();
+
+        messageService.Send(MessageAction.WhiteLabelSettingsLogosUpdated);
     }
 
     private void GetParts(string fileName, out WhiteLabelLogoType logoType, out string fileExt)
@@ -364,6 +369,8 @@ public class WhitelabelController(
     private async Task RestoreWhiteLabelLogosForTenantAsync(TenantWhiteLabelSettings settings, IDataStore storage, int tenantId)
     {
         await tenantWhiteLabelSettingsHelper.RestoreDefaultLogos(settings, tenantLogoManager, tenantId, storage);
+
+        messageService.Send(MessageAction.WhiteLabelSettingsLogosUpdated);
     }
 
     #endregion
@@ -405,6 +412,8 @@ public class WhitelabelController(
         settings.SetLogoText(inDto.LogoText);
 
         await settingsManager.SaveAsync(settings, tenantId);
+
+        messageService.Send(MessageAction.WhiteLabelSettingsLogoTextUpdated);
 
         return true;
     }
@@ -488,6 +497,8 @@ public class WhitelabelController(
 
         await tenantWhiteLabelSettingsHelper.RestoreDefaultLogoText(settings, tenantId);
 
+        messageService.Send(MessageAction.WhiteLabelSettingsLogoTextUpdated);
+
         return true;
     }
 
@@ -560,6 +571,8 @@ public class WhitelabelController(
 
         await settingsManager.SaveForDefaultTenantAsync(wrapper.Settings);
 
+        messageService.Send(MessageAction.WhiteLabelCompanySettingsUpdated);
+
         return true;
     }
 
@@ -598,6 +611,8 @@ public class WhitelabelController(
 
         await settingsManager.SaveForDefaultTenantAsync(defaultSettings);
 
+        messageService.Send(MessageAction.WhiteLabelCompanySettingsUpdated);
+
         return defaultSettings;
     }
 
@@ -624,6 +639,8 @@ public class WhitelabelController(
         ArgumentNullException.ThrowIfNull(wrapper?.Settings, "settings");
 
         await settingsManager.SaveForDefaultTenantAsync(wrapper.Settings);
+
+        messageService.Send(MessageAction.WhiteLabelAdditionalSettingsUpdated);
 
         return true;
     }
@@ -663,6 +680,8 @@ public class WhitelabelController(
 
         await settingsManager.SaveForDefaultTenantAsync(defaultSettings);
 
+        messageService.Send(MessageAction.WhiteLabelAdditionalSettingsUpdated);
+
         return defaultSettings;
     }
 
@@ -690,6 +709,8 @@ public class WhitelabelController(
         ArgumentNullException.ThrowIfNull(wrapper?.Settings, "settings");
 
         await settingsManager.SaveForDefaultTenantAsync(wrapper.Settings);
+
+        messageService.Send(MessageAction.WhiteLabelMailSettingsUpdated);
 
         return true;
     }
@@ -729,6 +750,8 @@ public class WhitelabelController(
         var defaultSettings = settingsManager.GetDefault<MailWhiteLabelSettings>();
 
         await settingsManager.SaveForDefaultTenantAsync(defaultSettings);
+
+        messageService.Send(MessageAction.WhiteLabelMailSettingsUpdated);
 
         return defaultSettings;
     }

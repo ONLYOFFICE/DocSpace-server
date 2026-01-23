@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -47,16 +47,10 @@ public class InviteUsersRequestDto
 /// <summary>
 /// The user invitation parameters.
 /// </summary>
-public class UserInvitationRequestDto
+public class UserInvitationRequestDto : EmailInvitationDto
 {
     /// <summary>
     /// The user type.
     /// </summary>
     public EmployeeType Type { get; set; }
-
-    /// <summary>
-    /// The user email address.
-    /// </summary>
-    [EmailAddress]
-    public string Email { get; set; }
 }

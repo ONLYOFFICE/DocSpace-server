@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -142,9 +142,10 @@ public static class Initializer
         _initialized = true;
     }
     
-    internal static async Task<User> InviteContact(EmployeeType employeeType)
+    internal static async Task<User> InviteContact(EmployeeType employeeType, User? user = null)
     {
-        await _apiFactory.HttpClient.Authenticate(Owner);
+        user ??= Owner;
+        await _apiFactory.HttpClient.Authenticate(user);
 
         var shortLink = (await _apiFactory.PortalUsersApi.GetInvitationLinkAsync(employeeType, TestContext.Current.CancellationToken)).Response;
         var fullLink = await _apiFactory.HttpClient.GetAsync(shortLink);
@@ -155,7 +156,7 @@ public static class Initializer
 
         }
         
-        await _peopleFactory.HttpClient.Authenticate(Owner);
+        await _peopleFactory.HttpClient.Authenticate(user);
         _peopleFactory.HttpClient.DefaultRequestHeaders.TryAddWithoutValidation("confirm", confirmHeader);
         
         var parsedQuery = HttpUtility.ParseQueryString(confirmHeader);

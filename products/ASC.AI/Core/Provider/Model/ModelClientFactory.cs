@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,7 +33,7 @@ public class ModelClientFactory(IHttpClientFactory httpClientFactory)
     {
         return type switch
         {
-            ProviderType.OpenAi or ProviderType.OpenAiCompatible => 
+            ProviderType.OpenAi or ProviderType.OpenAiCompatible or ProviderType.DeepSeek or ProviderType.XAi => 
                 new OpenAiModelClient(httpClientFactory.CreateClient(), url, apiKey),
             ProviderType.TogetherAi => 
                 new TogetherAiModelClient(httpClientFactory.CreateClient(), url, apiKey),
@@ -43,6 +43,8 @@ public class ModelClientFactory(IHttpClientFactory httpClientFactory)
                 new DocSpaceModelClient(httpClientFactory.CreateClient(), url, apiKey),
             ProviderType.OpenRouter =>
                 new OpenRouterModelClient(httpClientFactory.CreateClient(), url, apiKey),
+            ProviderType.GoogleAi =>
+                new GoogleModelClient(httpClientFactory, apiKey),
             _ => throw new ArgumentOutOfRangeException(nameof(type))
         };
     }

@@ -120,11 +120,20 @@
   <data name="AceShareLink" xml:space="preserve">
     <value>Portal exterior</value>
   </data>
+  <data name="AceStatusEnum_Collaborator" xml:space="preserve">
+    <value>Colaborator</value>
+  </data>
   <data name="AceStatusEnum_Comment" xml:space="preserve">
     <value>Comentariu</value>
   </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Creator de conținut</value>
+  </data>
   <data name="AceStatusEnum_CustomFilter" xml:space="preserve">
     <value>Filtru particularizat</value>
+  </data>
+  <data name="AceStatusEnum_Editing" xml:space="preserve">
+    <value>Editor</value>
   </data>
   <data name="AceStatusEnum_FillForms" xml:space="preserve">
     <value>Completare formular</value>
@@ -141,8 +150,14 @@
   <data name="AceStatusEnum_Review" xml:space="preserve">
     <value>Revizuire</value>
   </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Manager de sală</value>
+  </data>
   <data name="Admin" xml:space="preserve">
     <value>Admin</value>
+  </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>Administrator de agent</value>
   </data>
   <data name="AppAccessDenied" xml:space="preserve">
     <value>Pentru a lucra cu fișierul trebuie să acordați accesul</value>
@@ -198,6 +213,15 @@
   <data name="CommentUpload" xml:space="preserve">
     <value>Încarcat</value>
   </data>
+  <data name="Date" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>Link-ul partajat</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Link-ul de invitație</value>
+  </data>
   <data name="DocuSignStatusDeclined" xml:space="preserve">
     <value>Refuzat</value>
   </data>
@@ -240,17 +264,32 @@
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Fișierul mai mare de {0} nu va fi deplasat</value>
   </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Deplasarea mai multor fișiere în Sala de completare a formularelor nu este acceptată. Deplasați câte un formular PDF ONLYOFFICE.</value>
+  </data>
   <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
     <value>O nouă versiune nu poate fi aceeași cu cea actuală</value>
   </data>
   <data name="ErrorMessage_FolderCopyError" xml:space="preserve">
     <value>Nu puteți copia folderul în subfolderul care se află în același folder</value>
   </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Deplasarea folderelor în Sala de completare a formularelor nu este acceptată. Deplasați câte un formular PDF ONLYOFFICE.</value>
+  </data>
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Folderul solicitat nu a fost găsit</value>
   </data>
+  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
+    <value>Furnizor nevalabil</value>
+  </data>
+  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
+    <value>Sala nu poate fi stocată în acest folder</value>
+  </data>
   <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Titlu incorect</value>
+  </data>
+  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
+    <value>Link-ul de invitație este nevalid sau valabilitatea linkului a expirat</value>
   </data>
   <data name="ErrorMessage_LockedFile" xml:space="preserve">
     <value>Acest fișier este acum blocat de către un alt utilizator</value>
@@ -261,8 +300,20 @@
   <data name="ErrorMessage_ManyDownloads" xml:space="preserve">
     <value>Prea multe descărcări.</value>
   </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>Numărul maxim de link-uri nu poate depăși {0}</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Imposibil de deplasat fișierul în acestă sală. Încercați să deplasați formularul PDF ONLYOFFICE.</value>
+  </data>
   <data name="ErrorMessage_NotSupportedFormat" xml:space="preserve">
     <value>Ne pare rău, acest tip de fișier nu este acceptat</value>
+  </data>
+  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
+    <value>Acest furnizor este deja conectat la sala</value>
+  </data>
+  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
+    <value>Acest rol nu este disponibil pentru acest tip de utilizator</value>
   </data>
   <data name="ErrorMessage_SaveAnonymous" xml:space="preserve">
     <value>Autorul care a salvat este necunoscut</value>
@@ -276,6 +327,9 @@
   <data name="ErrorMessage_SecurityException" xml:space="preserve">
     <value>Nu aveți permisiuni suficiente pentru a efectua această operațiune</value>
   </data>
+  <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
+    <value>Nu aveți permisiuni suficiente pentru a arhiva sala</value>
+  </data>
   <data name="ErrorMessage_SecurityException_Auth" xml:space="preserve">
     <value>Nu s-a reușit autentificarea cu acreditările de autentificare date la furnizorul {0}.</value>
   </data>
@@ -284,6 +338,9 @@
   </data>
   <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
     <value>Nu aveți permisiuni suficiente pentru a copia folderul</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
+    <value>Nu aveți permisiunea de a copia în acest folder</value>
   </data>
   <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
     <value>Nu aveți permisiuni suficiente pentru a crea</value>
@@ -306,11 +363,20 @@
   <data name="ErrorMessage_SecurityException_EditFileTwice" xml:space="preserve">
     <value>Dumneavoastră editați acest document acum într-o altă filă</value>
   </data>
+  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
+    <value>Nu aveți permisiunea pentru a edita sala</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Imposibil de șters versiunea actuală a fișierului</value>
+  </data>
   <data name="ErrorMessage_SecurityException_MoveFile" xml:space="preserve">
     <value>Nu aveți permisiuni suficiente pentru a deplasa fișierul</value>
   </data>
   <data name="ErrorMessage_SecurityException_MoveFolder" xml:space="preserve">
     <value>Nu aveți permisiuni suficiente pentru a deplasa folderul</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
+    <value>Nu aveți permisiunea de a deplasa în acest folder</value>
   </data>
   <data name="ErrorMessage_SecurityException_ReadFile" xml:space="preserve">
     <value>Nu aveți permisiuni suficiente pentru a vizualiza fișierul</value>
@@ -324,11 +390,17 @@
   <data name="ErrorMessage_SecurityException_RenameFolder" xml:space="preserve">
     <value>Nu aveți permisiuni suficiente pentru a redenumi folderrul</value>
   </data>
+  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
+    <value>Nu aveți permisiuni suficiente pentru a dezarhiva sala</value>
+  </data>
   <data name="ErrorMessage_SecurityException_UpdateEditingFile" xml:space="preserve">
     <value>Imposibil de actualizat deoarece fișierul este în curs de editare</value>
   </data>
   <data name="ErrorMessage_SecurityException_ViewFolder" xml:space="preserve">
     <value>Nu aveți permisiuni suficiente pentru a afișa conținutul folderului</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>Prea multe încercări incorecte. Încercați din nou mai târziu</value>
   </data>
   <data name="ErrorMessage_SharpBoxException" xml:space="preserve">
     <value>Conținutul folderului terță parte nu este disponibil. Încercați să vă reconectați la contul.</value>
@@ -336,8 +408,14 @@
   <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>Eroare la pornirea editării fișierului</value>
   </data>
+  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
+    <value>Imposibil de editat săli arhi</value>
+  </data>
   <data name="ErrorMessage_UpdateEditingFile" xml:space="preserve">
     <value>Nu puteți actualiza deoarece fișierul este în curs de editare</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Imposibil de încărcat fișierul în acestă sală. Încercați să încărcați formularul PDF ONLYOFFICE.</value>
   </data>
   <data name="ErrorMessage_UserNotFound" xml:space="preserve">
     <value>Utilizatorul nu a putut fi găsit</value>
@@ -345,44 +423,35 @@
   <data name="ErrorMessage_ViewTrashItem" xml:space="preserve">
     <value>Nu aveți permisiunea de a previzualiza elemente din Coșul de gunoi</value>
   </data>
-  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
-    <value>Furnizor nevalabil</value>
-  </data>
-  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
-    <value>Sala nu poate fi stocată în acest folder</value>
-  </data>
-  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
-    <value>Link-ul de invitație este nevalid sau valabilitatea linkului a expirat</value>
-  </data>
-  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
-    <value>Acest rol nu este disponibil pentru acest tip de utilizator</value>
-  </data>
-  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
-    <value>Acest furnizor este deja conectat la sala</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
-    <value>Nu aveți permisiunea de a copia în acest folder</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
-    <value>Nu aveți permisiunea de a deplasa în acest folder</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
-    <value>Nu aveți permisiuni suficiente pentru a dezarhiva sala</value>
-  </data>
-  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
-    <value>Imposibil de editat săli arhi</value>
-  </data>
   <data name="ErrorrMessage_PinRoom" xml:space="preserve">
     <value>Imposibil de fixat sala</value>
   </data>
   <data name="Everyone" xml:space="preserve">
     <value>Oricine</value>
   </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Utilizator extern</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Linkul pentru completare</value>
+  </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>Documentele utilizatorului {0} {1}</value>
+  </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Formular nr.</value>
+  </data>
   <data name="Guest" xml:space="preserve">
     <value>Anonim</value>
   </data>
   <data name="IndexTitle" xml:space="preserve">
     <value>Căutare după conținutul documentelor</value>
+  </data>
+  <data name="KnowledgeFolder" xml:space="preserve">
+    <value>Cunoştinţe</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Linkul către formular</value>
   </data>
   <data name="MessageFileCreated" xml:space="preserve">
     <value>Fișierul a fost creat în dosarul "{0}"</value>
@@ -395,6 +464,9 @@
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Nu mai este un fișier schiță pentru completarea formularului.</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Deschidere fișier</value>
   </data>
   <data name="ProductAdminOpportunities" xml:space="preserve">
     <value>Faceţi aceleaşi lucruri în calitate de utilizator|Conectați Dropbox, Box și alte conturi în secțiunea Comun |Configurați drepturi de acces la documente și dosare în secțiunea Comun</value>
@@ -415,20 +487,17 @@ Compatibilitate garantată 100% cu formatele MS Office.</value>
   <data name="ProductUserOpportunities" xml:space="preserve">
     <value>Creați și editați documentele dumneavoastră sau cele partajate cu drepturi de acces corespunzătoare|Acordați altor utilizatori permisiuni de citire/editare a documentelor și dosarelor|Conectați Dropbox, Box și alte conturi în secțiunea "Documentele"</value>
   </data>
-  <data name="UnknownFirstName" xml:space="preserve">
-    <value>Prenume</value>
+  <data name="ResultStorageFolder" xml:space="preserve">
+    <value>Stocarea rezultatelor</value>
   </data>
-  <data name="UnknownLastName" xml:space="preserve">
-    <value>Nume</value>
+  <data name="RoleEnum_Collaborator" xml:space="preserve">
+    <value>Colaborator</value>
   </data>
-  <data name="UnlockComment" xml:space="preserve">
-    <value>Fișierul este deblocat</value>
+  <data name="RoleEnum_Comment" xml:space="preserve">
+    <value>Comentator</value>
   </data>
-  <data name="AceStatusEnum_Editing" xml:space="preserve">
-    <value>Editor</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
-    <value>Nu aveți permisiunea pentru a edita sala</value>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Creator de conținut</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
     <value>Administrator DocSpace</value>
@@ -436,41 +505,26 @@ Compatibilitate garantată 100% cu formatele MS Office.</value>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Editor</value>
   </data>
-  <data name="RoleEnum_User" xml:space="preserve">
-    <value>Utilizator</value>
+  <data name="RoleEnum_FillForms" xml:space="preserve">
+    <value>Completator de formulare</value>
+  </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>Invitat</value>
   </data>
   <data name="RoleEnum_Read" xml:space="preserve">
     <value>Vizualizator</value>
   </data>
-  <data name="RoleEnum_Comment" xml:space="preserve">
-    <value>Comentator</value>
-  </data>
-  <data name="RoleEnum_FillForms" xml:space="preserve">
-    <value>Completator de formulare</value>
-  </data>
   <data name="RoleEnum_Review" xml:space="preserve">
     <value>Recenzent</value>
   </data>
-  <data name="RoleEnum_Collaborator" xml:space="preserve">
-    <value>Colaborator</value>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Administrator de sală</value>
   </data>
-  <data name="AceStatusEnum_Collaborator" xml:space="preserve">
-    <value>Colaborator</value>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Manager de sală</value>
   </data>
-  <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
-    <value>Nu aveți permisiuni suficiente pentru a arhiva sala</value>
-  </data>
-  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
-    <value>Numărul maxim de link-uri nu poate depăși {0}</value>
-  </data>
-  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
-    <value>Prea multe încercări incorecte. Încercați din nou mai târziu</value>
-  </data>
-  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
-    <value>Link-ul de invitație</value>
-  </data>
-  <data name="DefaultExternalLinkTitle" xml:space="preserve">
-    <value>Link-ul partajat</value>
+  <data name="RoleEnum_User" xml:space="preserve">
+    <value>Utilizator</value>
   </data>
   <data name="RoomIndex_Author" xml:space="preserve">
     <value>Autor</value>
@@ -486,6 +540,9 @@ Compatibilitate garantată 100% cu formatele MS Office.</value>
   </data>
   <data name="RoomIndex_ExportAuthor" xml:space="preserve">
     <value>Autor de export</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Folder</value>
   </data>
   <data name="RoomIndex_Index" xml:space="preserve">
     <value>Index</value>
@@ -511,79 +568,22 @@ Compatibilitate garantată 100% cu formatele MS Office.</value>
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Tip</value>
   </data>
-  <data name="RoomIndex_Folder" xml:space="preserve">
-    <value>Folder</value>
-  </data>
-  <data name="Date" xml:space="preserve">
-    <value>Data</value>
-  </data>
-  <data name="User" xml:space="preserve">
-    <value>Utilizator</value>
-  </data>
-  <data name="LinkToForm" xml:space="preserve">
-    <value>Linkul către formular</value>
-  </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Deschidere fișier</value>
-  </data>
-  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Imposibil de încărcat fișierul în acestă sală. Încercați să încărcați formularul PDF ONLYOFFICE.</value>
-  </data>
-  <data name="FillOutExternalLinkTitle" xml:space="preserve">
-    <value>Linkul pentru completare</value>
-  </data>
-  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Deplasarea mai multor fișiere în Sala de completare a formularelor nu este acceptată. Deplasați câte un formular PDF ONLYOFFICE.</value>
-  </data>
-  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Deplasarea folderelor în Sala de completare a formularelor nu este acceptată. Deplasați câte un formular PDF ONLYOFFICE.</value>
-  </data>
-  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Imposibil de deplasat fișierul în acestă sală. Încercați să deplasați formularul PDF ONLYOFFICE.</value>
-  </data>
-  <data name="FormNumber" xml:space="preserve">
-    <value>Formular nr.</value>
-  </data>
-  <data name="ExternalUser" xml:space="preserve">
-    <value>Utilizator extern</value>
-  </data>
-  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
-    <value>Manager de sală</value>
-  </data>
-  <data name="RoleEnum_RoomManager" xml:space="preserve">
-    <value>Manager de sală</value>
-  </data>
-  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
-    <value>Creator de conținut</value>
-  </data>
-  <data name="RoleEnum_ContentCreator" xml:space="preserve">
-    <value>Creator de conținut</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
-    <value>Imposibil de șters versiunea actuală a fișierului</value>
-  </data>
   <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
     <value>Partajare pentru completare</value>
   </data>
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>Începe completarea</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Administrator de sală</value>
+  <data name="UnknownFirstName" xml:space="preserve">
+    <value>Prenume</value>
   </data>
-  <data name="RoleEnum_Guest" xml:space="preserve">
-    <value>Invitat</value>
+  <data name="UnknownLastName" xml:space="preserve">
+    <value>Nume</value>
   </data>
-  <data name="FolderNameForReassignedData" xml:space="preserve">
-    <value>Documentele utilizatorului {0} {1}</value>
+  <data name="UnlockComment" xml:space="preserve">
+    <value>Fișierul este deblocat</value>
   </data>
-  <data name="AgentManager" xml:space="preserve">
-    <value>Administrator de agent</value>
-  </data>
-  <data name="KnowledgeFolder" xml:space="preserve">
-    <value>Cunoştinţe</value>
-  </data>
-  <data name="ResultStorageFolder" xml:space="preserve">
-    <value>Stocarea rezultatelor</value>
+  <data name="User" xml:space="preserve">
+    <value>Utilizator</value>
   </data>
 </root>

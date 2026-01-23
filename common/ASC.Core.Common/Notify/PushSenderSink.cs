@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -58,19 +58,8 @@ public class PushSenderSink(INotifySender sender) : Sink
             return new SendResponse(message, Constants.NotifyPushSenderSysName, error);
         }
     }
-
-    private T GetTagValue<T>(INoticeMessage message, string tagName)
-    {
-        var tag = message.Arguments.FirstOrDefault(arg => arg.Tag == tagName);
-
-        return tag != null ? (T)tag.Value : default;
-    }
 }
-public class LowerCaseNamingPolicy : JsonNamingPolicy
-{
-    public override string ConvertName(string name) =>
-        name.ToLower();
-}
+
 [Scope]
 public class PushSenderSinkMessageCreator(UserManager userManager, TenantManager tenantManager, CoreSettings coreSettings) : SinkMessageCreator
 {

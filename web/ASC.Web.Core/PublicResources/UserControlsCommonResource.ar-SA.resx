@@ -126,6 +126,9 @@
   <data name="LicenseKeyNotFound" xml:space="preserve">
     <value>يجب عليك إدخال مفتاح الترخيص</value>
   </data>
+  <data name="LicenseTypeNotCorrect" xml:space="preserve">
+    <value>تعارض الترخيص. يرجى التأكد من أنك قمت بتثبيت الإصدار الصحيح من {0} DocSpace (Enterprise أو Developer). إذا كان لديك أي أسئلة، فلا تتردد في الاتصال بمدير المبيعات الخاص بك.</value>
+  </data>
   <data name="NewDocument" xml:space="preserve">
     <value>مستند جديد</value>
   </data>
@@ -140,8 +143,5 @@
   </data>
   <data name="UnknownLastName" xml:space="preserve">
     <value>الاسم الأخير</value>
-  </data>
-  <data name="LicenseTypeNotCorrect" xml:space="preserve">
-    <value>تعارض الترخيص. يرجى التأكد من أنك قمت بتثبيت الإصدار الصحيح من {0} DocSpace (Enterprise أو Developer). إذا كان لديك أي أسئلة، فلا تتردد في الاتصال بمدير المبيعات الخاص بك.</value>
   </data>
 </root>

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -44,6 +44,7 @@ public class PortalController(
     ILogger<PortalController> logger,
     UserManager userManager,
     TenantManager tenantManager,
+    TenantUtil tenantUtil,
     ITariffService tariffService,
     CommonLinkUtility commonLinkUtility,
     IUrlShortener urlShortener,
@@ -74,7 +75,8 @@ public class PortalController(
     ApiDateTimeHelper apiDateTimeHelper,
     IEventBus eventBus,
     CspSettingsHelper cspSettingsHelper,
-    IdentityClient client)
+    IdentityClient client,
+    InvitationLinkDtoHelper invitationLinkDtoHelper)
     : ControllerBase
 {
     /// <summary>
@@ -136,6 +138,7 @@ public class PortalController(
     [Tags("Portal / Users")]
     [SwaggerResponse(200, "Invitation link", typeof(string))]
     [HttpGet("users/invite/{employeeType}")]
+    [Obsolete("Use CRUD /api/2.0/portal/users/invitationlink instead")]
     public async Task<string> GetInvitationLink(InvitationLinkRequestDto inDto)
     {
         var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
@@ -160,6 +163,195 @@ public class PortalController(
                 authContext.CurrentAccount.ID) + $"&emplType={inDto.EmployeeType:d}";
 
         return await urlShortener.GetShortenLinkAsync(link);
+    }
+
+    /// <summary>
+    /// Returns an invitation link for joining the portal.
+    /// </summary>
+    /// <short>
+    /// Create an invitation link
+    /// </short>
+    /// <path>api/2.0/portal/users/invitationlink</path>
+    [Tags("Portal / Users")]
+    [SwaggerResponse(200, "Invitation link", typeof(InvitationLinkDto))]
+    [HttpPost("users/invitationlink")]
+    public async Task<InvitationLinkDto> CreateInvitationLink(InvitationLinkCreateRequestDto inDto)
+    {
+        var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
+        if (!invitationSettings.AllowInvitingMembers)
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
+        if (inDto.EmployeeType is not (EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin or EmployeeType.User))
+        {
+            throw new ArgumentException(nameof(inDto.EmployeeType));
+        }
+
+        var expiration = DateTime.MinValue;
+        if (inDto.Expiration.HasValue)
+        {
+            expiration = tenantUtil.DateTimeToUtc(inDto.Expiration.Value);
+            if (expiration != DateTime.MinValue && expiration < DateTime.UtcNow)
+            {
+                throw new ArgumentException(nameof(inDto.Expiration));
+            }
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+        var currentUserId = authContext.CurrentAccount.ID;
+
+        if ((inDto.EmployeeType == EmployeeType.DocSpaceAdmin && !currentUserId.IsOwner(tenant)) ||
+            !await permissionContext.CheckPermissionsAsync(new UserSecurityProvider(Guid.Empty, inDto.EmployeeType), Constants.Action_AddRemoveUser))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
+        var existedInvitationLink = await userManager.GetInvitationLinkAsync(inDto.EmployeeType);
+        if (existedInvitationLink != null)
+        {
+            throw new ArgumentException("link with the same EmployeeType already exists");
+        }
+
+        var invitationLink = await userManager.CreateInvitationLinkAsync(inDto.EmployeeType, expiration, inDto.MaxUseCount);
+
+        var result = await invitationLinkDtoHelper.GetAsync(invitationLink, tenant.Alias, currentUserId);
+
+        return result;
+    }
+
+    /// <summary>
+    /// Returns an invitation link for joining the portal.
+    /// </summary>
+    /// <short>
+    /// Get an invitation link
+    /// </short>
+    /// <path>api/2.0/portal/users/invitationlink/{employeeType}</path>
+    [Tags("Portal / Users")]
+    [SwaggerResponse(200, "Invitation link", typeof(InvitationLinkDto))]
+    [HttpGet("users/invitationlink/{employeeType}")]
+    public async Task<InvitationLinkDto> GetInvitationLinkByEmployeeType(InvitationLinkRequestDto inDto)
+    {
+        if (inDto.EmployeeType is not (EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin or EmployeeType.User))
+        {
+            throw new ArgumentException(nameof(inDto.EmployeeType));
+        }
+
+        var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
+        if (!invitationSettings.AllowInvitingMembers)
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+        var currentUserId = authContext.CurrentAccount.ID;
+
+        if ((inDto.EmployeeType == EmployeeType.DocSpaceAdmin && !currentUserId.IsOwner(tenant)) ||
+            !await permissionContext.CheckPermissionsAsync(new UserSecurityProvider(Guid.Empty, inDto.EmployeeType), Constants.Action_AddRemoveUser))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
+        var invitationLink = await userManager.GetInvitationLinkAsync(inDto.EmployeeType);
+        if (invitationLink == null)
+        {
+            return null;
+        }
+
+        var result = await invitationLinkDtoHelper.GetAsync(invitationLink, tenant.Alias, currentUserId);
+
+        return result;
+    }
+
+    /// <summary>
+    /// Returns an invitation link for joining the portal.
+    /// </summary>
+    /// <short>
+    /// Update an invitation link
+    /// </short>
+    /// <path>api/2.0/portal/users/invitationlink</path>
+    [Tags("Portal / Users")]
+    [SwaggerResponse(200, "Invitation link", typeof(InvitationLinkDto))]
+    [HttpPut("users/invitationlink")]
+    public async Task<InvitationLinkDto> UpdateInvitationLink(InvitationLinkUpdateRequestDto inDto)
+    {
+        var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
+        if (!invitationSettings.AllowInvitingMembers)
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
+        var invitationLink = await userManager.GetInvitationLinkAsync(inDto.Id);
+        if (invitationLink == null)
+        {
+            throw new ItemNotFoundException();
+        }
+
+        if (inDto.MaxUseCount.HasValue && inDto.MaxUseCount.Value < invitationLink.CurrentUseCount)
+        {
+            throw new ArgumentException(nameof(inDto.MaxUseCount));
+        }
+
+        var expiration = DateTime.MinValue;
+        if (inDto.Expiration.HasValue)
+        {
+            expiration = tenantUtil.DateTimeToUtc(inDto.Expiration.Value);
+            if (expiration != DateTime.MinValue && expiration < DateTime.UtcNow)
+            {
+                throw new ArgumentException(nameof(inDto.Expiration));
+            }
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+        var currentUserId = authContext.CurrentAccount.ID;
+
+        if ((invitationLink.EmployeeType == EmployeeType.DocSpaceAdmin && !currentUserId.IsOwner(tenant)) ||
+            !await permissionContext.CheckPermissionsAsync(new UserSecurityProvider(Guid.Empty, invitationLink.EmployeeType), Constants.Action_AddRemoveUser))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
+        invitationLink.Expiration = expiration;
+        invitationLink.MaxUseCount = inDto.MaxUseCount;
+
+        await userManager.UpdateInvitationLinkAsync(invitationLink.Id, invitationLink.Expiration, invitationLink.MaxUseCount);
+
+        var result = await invitationLinkDtoHelper.GetAsync(invitationLink, tenant.Alias, currentUserId);
+
+        return result;
+    }
+
+    /// <short>
+    /// Delete an invitation link
+    /// </short>
+    /// <path>api/2.0/portal/users/invitationlink</path>
+    [Tags("Portal / Users")]
+    [SwaggerResponse(200, "Invitation link", typeof(string))]
+    [HttpDelete("users/invitationlink")]
+    public async Task DeleteInvitationLink(InvitationLinkDeleteRequestDto inDto)
+    {
+        var invitationSettings = await settingsManager.LoadAsync<TenantUserInvitationSettings>();
+        if (!invitationSettings.AllowInvitingMembers)
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
+        var invitationLink = await userManager.GetInvitationLinkAsync(inDto.Id);
+        if (invitationLink == null)
+        {
+            throw new ItemNotFoundException();
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+        var currentUserId = authContext.CurrentAccount.ID;
+
+        if ((invitationLink.EmployeeType == EmployeeType.DocSpaceAdmin && !currentUserId.IsOwner(tenant)) ||
+            !await permissionContext.CheckPermissionsAsync(new UserSecurityProvider(Guid.Empty, invitationLink.EmployeeType), Constants.Action_AddRemoveUser))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
+        await userManager.DeleteInvitationLinkAsync(invitationLink.Id);
     }
 
     /// <summary>

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,13 +25,15 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Common.IntegrationEvents.Events;
+using ASC.Core.Common.Notify.Model;
 
 using Constants = ASC.Core.Configuration.Constants;
 
 namespace ASC.Web.Studio.Core.Notify;
 
 [Singleton]
-public class StudioNotifyServiceSender(IServiceScopeFactory serviceProvider,
+public class StudioNotifyServiceSender(
+    IServiceScopeFactory serviceProvider,
     IConfiguration configuration,
     WorkContext workContext,
     TenantExtraConfig tenantExtraConfig)
@@ -94,11 +96,13 @@ public class StudioNotifyServiceSender(IServiceScopeFactory serviceProvider,
 }
 
 [Scope]
-public class StudioNotifyWorker(TenantManager tenantManager,
+public partial class StudioNotifyWorker(
+    TenantManager tenantManager,
     SecurityContext securityContext,
     StudioNotifyHelper studioNotifyHelper,
     CommonLinkUtility baseCommonLinkUtility,
     WorkContext workContext,
+    ILogger<StudioNotifyWorker> logger,
     IServiceProvider serviceProvider)
 {
     public async Task OnMessageAsync(NotifyItemIntegrationEvent item)
@@ -112,15 +116,28 @@ public class StudioNotifyWorker(TenantManager tenantManager,
         }
 
         var client = workContext.RegisterClient(serviceProvider, studioNotifyHelper.NotifySource);
+        var actionType = Type.GetType(item.Action.NotifyActionType);
+        if(actionType == null)
+        {
+            logger.LogNotifyNotFound(item.Action.NotifyActionType);
+            return;
+        }
+        
+
+        var action = (INotifyAction)serviceProvider.GetService(actionType);
+        if (action == null)
+        {
+            logger.LogNotifyNotFound(item.Action.NotifyActionType, item.Action.Id);
+            return;
+        }
+
+        action.Tags = item.Tags != null ? item.Tags.Select(ITagValue (r) => new TagValue(r.Key, r.Value)).ToList() : [];
 
         await client.SendNoticeToAsync(
-            (NotifyAction)item.Action,
+            action,
             item.ObjectId,
             item.Recipients?.Select(r => r.IsGroup ? new RecipientsGroup(r.Id, r.Name) : (IRecipient)new DirectRecipient(r.Id, r.Name, r.Addresses?.ToArray(), r.CheckActivation)).ToArray(),
             item.SenderNames is { Count: > 0 } ? item.SenderNames.ToArray() : null,
-            item.CheckSubsciption,
-            item.Tags?
-                .Select(ITagValue (r) => new TagValue(r.Key, r.Value))
-                .ToArray());
+            item.CheckSubsciption);
     }
 }

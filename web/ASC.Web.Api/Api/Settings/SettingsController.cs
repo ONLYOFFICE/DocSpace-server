@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -1293,6 +1293,8 @@ public partial class SettingsController(
         };
 
         _ = await settingsManager.SaveAsync(settings);
+
+        messageService.Send(MessageAction.InvitationSettingsUpdated);
 
         return settings.Map();
     }

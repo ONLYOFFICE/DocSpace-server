@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,9 +23,6 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-
-using ASC.People.Tests.Data;
-using ASC.People.Tests.Factory;
 
 namespace ASC.People.Tests.PeopleController;
 
@@ -52,7 +49,7 @@ public class GuestTest(PeopleFactory peopleFactory, WepApiFactory apiFactory) : 
             parsedEmployeeType = EmployeeType.Guest;
         }
         
-        var response = await _peopleProfilesApi.AddMemberWithHttpInfoAsync(new MemberRequestDto
+        var response = await _profilesApi.AddMemberWithHttpInfoAsync(new MemberRequestDto
         {
             FromInviteLink = true,
             CultureName = "en-US",
@@ -84,4 +81,23 @@ public class GuestTest(PeopleFactory peopleFactory, WepApiFactory apiFactory) : 
         createdGuest.LastName.Should().Be(fakeMember.LastName);
         createdGuest.IsVisitor.Should().BeTrue();
     }
+    
+    // [Fact]
+    // [Trait("Category", "Bug")]
+    // [Trait("Bug", "79419")]
+    // public async Task CreateUser_AsRoomAdmin_ShouldCreateUserSuccessfully()
+    // {
+    //     await _apiClient.Authenticate(Initializer.Owner);
+    //     var roomAdmin = await Initializer.InviteContact(EmployeeType.RoomAdmin);
+    //     var guestFromOwner = await Initializer.InviteContact(EmployeeType.Guest, roomAdmin);
+    //     
+    //     await _peopleClient.Authenticate(roomAdmin);
+    //     var guestFromRoomAdmin = await Initializer.InviteContact(EmployeeType.Guest, roomAdmin);
+    //     
+    //     var updateUserTypeResponse = (await _userTypeApi.UpdateUserTypeAsync(EmployeeType.User, new UpdateMembersRequestDto([guestFromOwner.Id]), TestContext.Current.CancellationToken)).Response;
+    //     updateUserTypeResponse.Should().BeEmpty();
+    //     
+    //     updateUserTypeResponse = (await _userTypeApi.UpdateUserTypeAsync(EmployeeType.User, new UpdateMembersRequestDto([guestFromRoomAdmin.Id]), TestContext.Current.CancellationToken)).Response;
+    //     updateUserTypeResponse.Should().Contain(r=> r.Id == guestFromRoomAdmin.Id);
+    // }
 }

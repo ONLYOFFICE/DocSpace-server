@@ -1,5 +1,64 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -53,11 +112,23 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="button_CheckReadyForms" xml:space="preserve">
+    <value>检查已准备完毕的表单</value>
+  </data>
+  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
+    <value>已在房间"$RoomTitle"中创建了新文档"$DocumentTitle"</value>
+  </data>
+  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
+    <value>新文件已上传至房间"$RoomTitle" ($Count)</value>
+  </data>
+  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
+    <value>新文件"$DocumentTitle"已上传至房间"$RoomTitle"</value>
+  </data>
   <data name="pattern_DocuSignComplete" xml:space="preserve">
     <value>h1. 所有签署者已完成 $DocumentTitle
 
@@ -68,12 +139,74 @@
 
 登录您的DocuSign账户，获取更多信息。</value>
   </data>
+  <data name="pattern_EditorMentions" xml:space="preserve">
+    <value>h1. $__AuthorName 在文档评论中提到了你
+
+$__AuthorName 在房间 "$RoomTitle":"$RoomURL" 中的文档"$DocumentTitle":"$DocumentURL"的评论中提到了你：
+
+$Message</value>
+  </data>
+  <data name="pattern_EditorMentions_push" xml:space="preserve">
+    <value>$ToUserName在文档$DocumentTitle中提及了您</value>
+  </data>
+  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
+    <value>已在房间"$RoomTitle"中创建了新文件夹"$FolderTitle"</value>
+  </data>
+  <data name="pattern_FormReceived" xml:space="preserve">
+    <value>h1. 表单 $Message 已填写完成
+
+在"$RoomTitle":"$RoomURL"房间中填写了一份新表单："$DocumentTitle":"$DocumentURL"
+
+表单提交者："$FromUserName":"$FromUserLink"
+
+$OrangeButton
+
+&amp;nbsp;</value>
+  </data>
+  <data name="pattern_FormStartedFilling" xml:space="preserve">
+    <value>
+      活动通知。"$FromUserName":"$FromUserLink" 已启动表单填写进程："$DocumentTitle":"$DocumentURL"，位于房间："$RoomTitle":"$RoomURL" — $__DateTime。
+</value>
+  </data>
+  <data name="pattern_FormSubmitted" xml:space="preserve">
+    <value>h1. 您已填写表单 $Message
+
+您在"$RoomTitle":"$RoomURL"房间中填写了表单："$DocumentTitle":"$DocumentURL"
+
+经理："$ToUserName":"$ToUserLink"
+
+$OrangeButton
+
+&amp;nbsp;</value>
+  </data>
+  <data name="pattern_FormSubmitted_push" xml:space="preserve">
+    <value>已在房间"$RoomTitle"中填写表单"$DocumentTitle"</value>
+  </data>
+  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
+    <value>
+      活动通知。表单 "$DocumentTitle":"$DocumentURL" 已在房间  "$RoomTitle":"$RoomURL" — $__DateTime中完成填写。
+</value>
+  </data>
+  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
+    <value>您已被邀请加入房间"$RoomTitle"</value>
+  </data>
   <data name="pattern_MailMergeEnd" xml:space="preserve">
     <value>h1. 邮件发送已完成
 
 此电邮通知旨在告知您：您已请求发送$MailsCount信息，且该流程现已完成。 $Message
 
 成功发送的邮件信息可在您的"邮件"模块的"Sent":"$__VirtualRootPath/addons/mail/#sent"文件夹中查找。</value>
+  </data>
+  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
+    <value>$FromUserName已将房间"$RoomTitle"移至归档</value>
+  </data>
+  <data name="pattern_RoomRemoved" xml:space="preserve">
+    <value>h1. $__AuthorName 删除了一个房间
+
+$__AuthorName 删除了房间： $RoomTitle</value>
+  </data>
+  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
+    <value>您在房间"$RoomTitle"中的权限已更改为"$RoomRole"</value>
   </data>
   <data name="pattern_ShareDocument" xml:space="preserve">
     <value>h1.获得文档访问权限: "$DocumentTitle":"$DocumentURL"
@@ -89,131 +222,6 @@ $__DateTime "$__AuthorName":"$__AuthorUrl" 向您开放了访问文件夹 "$Docu
 
 $Message</value>
   </data>
-  <data name="subject_DocuSignComplete" xml:space="preserve">
-    <value>文档。 所有签署者已完成$ DocumentTitle</value>
-  </data>
-  <data name="subject_DocuSignComplete_tg" xml:space="preserve">
-    <value>文件。所有签署方已完成 [$DocumentTitle]($DocumentURL)</value>
-  </data>
-  <data name="subject_DocuSignStatus" xml:space="preserve">
-    <value>文档。 签名状态已更改</value>
-  </data>
-  <data name="subject_MailMergeEnd" xml:space="preserve">
-    <value>文档。 邮件发送已完成。</value>
-  </data>
-  <data name="subject_ShareDocument" xml:space="preserve">
-    <value>文档：允许访问 $DocumentTitle</value>
-  </data>
-  <data name="subject_ShareDocument_tg" xml:space="preserve">
-    <value>文件。已授予文件的访问权限: [$DocumentTitle]($DocumentURL)</value>
-  </data>
-  <data name="subject_ShareFolder" xml:space="preserve">
-    <value>文档：允许访问 $DocumentTitle</value>
-  </data>
-  <data name="subject_ShareFolder_tg" xml:space="preserve">
-    <value>文件。已授予文件夹访问权限: [$DocumentTitle]($DocumentURL)</value>
-  </data>
-  <data name="pattern_EditorMentions" xml:space="preserve">
-    <value>h1. $__AuthorName 在文档评论中提到了你
-
-$__AuthorName 在房间 "$RoomTitle":"$RoomURL" 中的文档"$DocumentTitle":"$DocumentURL"的评论中提到了你：
-
-$Message</value>
-  </data>
-  <data name="pattern_RoomRemoved" xml:space="preserve">
-    <value>h1. $__AuthorName 删除了一个房间
-
-$__AuthorName 删除了房间： $RoomTitle</value>
-  </data>
-  <data name="subject_DocuSignComplete_push" xml:space="preserve">
-    <value>所有签署者均已签署 $DocumentTitle</value>
-  </data>
-  <data name="subject_DocuSignStatus_push" xml:space="preserve">
-    <value>签名状态已变更</value>
-  </data>
-  <data name="subject_EditorMentions" xml:space="preserve">
-    <value>协作空间消息通知。已在文档中提及</value>
-  </data>
-  <data name="subject_MailMergeEnd_push" xml:space="preserve">
-    <value>邮件发送完成。</value>
-  </data>
-  <data name="subject_RoomRemoved" xml:space="preserve">
-    <value>协作空间消息通知。房间已删除</value>
-  </data>
-  <data name="subject_ShareDocument_push" xml:space="preserve">
-    <value>已提供文档访问权限：$DocumentTitle</value>
-  </data>
-  <data name="subject_ShareEncryptedDocument_push" xml:space="preserve">
-    <value>已提供加密文档访问权限：$DocumentTitle</value>
-  </data>
-  <data name="subject_ShareFolder_push" xml:space="preserve">
-    <value>已提供文件夹访问权限：$DocumentTitle</value>
-  </data>
-  <data name="button_CheckReadyForms" xml:space="preserve">
-    <value>检查已准备完毕的表单</value>
-  </data>
-  <data name="pattern_FormReceived" xml:space="preserve">
-    <value>h1. 表单 $Message 已填写完成
-
-在"$RoomTitle":"$RoomURL"房间中填写了一份新表单："$DocumentTitle":"$DocumentURL"
-
-表单提交者："$FromUserName":"$FromUserLink"
-
-$OrangeButton
-
-&amp;nbsp;</value>
-  </data>
-  <data name="pattern_FormSubmitted" xml:space="preserve">
-    <value>h1. 您已填写表单 $Message
-
-您在"$RoomTitle":"$RoomURL"房间中填写了表单："$DocumentTitle":"$DocumentURL"
-
-经理："$ToUserName":"$ToUserLink"
-
-$OrangeButton
-
-&amp;nbsp;</value>
-  </data>
-  <data name="subject_FormReceived" xml:space="preserve">
-    <value>协作空间通知。表单已填写完毕</value>
-  </data>
-  <data name="subject_FormSubmitted" xml:space="preserve">
-    <value>协作空间通知。表单已填写完毕</value>
-  </data>
-  <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
-    <value>已在房间"$RoomTitle"中创建了新文档"$DocumentTitle"</value>
-  </data>
-  <data name="pattern_DocumentsUploadedTo_push" xml:space="preserve">
-    <value>新文件已上传至房间"$RoomTitle" ($Count)</value>
-  </data>
-  <data name="pattern_DocumentUploadedTo_push" xml:space="preserve">
-    <value>新文件"$DocumentTitle"已上传至房间"$RoomTitle"</value>
-  </data>
-  <data name="pattern_EditorMentions_push" xml:space="preserve">
-    <value>$ToUserName在文档$DocumentTitle中提及了您</value>
-  </data>
-  <data name="pattern_FolderCreatedInRoom_push" xml:space="preserve">
-    <value>已在房间"$RoomTitle"中创建了新文件夹"$FolderTitle"</value>
-  </data>
-  <data name="pattern_FormStartedFilling" xml:space="preserve">
-    <value>
-      活动通知。"$FromUserName":"$FromUserLink" 已启动表单填写进程："$DocumentTitle":"$DocumentURL"，位于房间："$RoomTitle":"$RoomURL" — $__DateTime。
-</value>
-  </data>
-  <data name="pattern_FormSubmitted_push" xml:space="preserve">
-    <value>已在房间"$RoomTitle"中填写表单"$DocumentTitle"</value>
-  </data>
-  <data name="pattern_FormWasCompletelyFilled" xml:space="preserve">
-    <value>
-      活动通知。表单 "$DocumentTitle":"$DocumentURL" 已在房间  "$RoomTitle":"$RoomURL" — $__DateTime中完成填写。
-</value>
-  </data>
-  <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
-    <value>$FromUserName已将房间"$RoomTitle"移至归档</value>
-  </data>
-  <data name="pattern_RoomUpdateAccessForUser_push" xml:space="preserve">
-    <value>您在房间"$RoomTitle"中的权限已更改为"$RoomRole"</value>
-  </data>
   <data name="pattern_StoppedFormFilling" xml:space="preserve">
     <value>
       活动通知。"$FromUserName":"$FromUserLink" 已停止房间  "$RoomTitle":"$RoomURL" — $__DateTime中的表单填写："$DocumentTitle":"$DocumentURL"。
@@ -224,19 +232,70 @@ $OrangeButton
       活动通知。轮到您填写房间 "$RoomTitle":"$RoomURL" — $__DateTime 中的表单："$DocumentTitle":"$DocumentURL"。
 </value>
   </data>
+  <data name="subject_DocuSignComplete" xml:space="preserve">
+    <value>文档。 所有签署者已完成$ DocumentTitle</value>
+  </data>
+  <data name="subject_DocuSignComplete_push" xml:space="preserve">
+    <value>所有签署者均已签署 $DocumentTitle</value>
+  </data>
+  <data name="subject_DocuSignComplete_tg" xml:space="preserve">
+    <value>文件。所有签署方已完成 [$DocumentTitle]($DocumentURL)</value>
+  </data>
+  <data name="subject_DocuSignStatus" xml:space="preserve">
+    <value>文档。 签名状态已更改</value>
+  </data>
+  <data name="subject_DocuSignStatus_push" xml:space="preserve">
+    <value>签名状态已变更</value>
+  </data>
+  <data name="subject_EditorMentions" xml:space="preserve">
+    <value>协作空间消息通知。已在文档中提及</value>
+  </data>
+  <data name="subject_FormReceived" xml:space="preserve">
+    <value>协作空间通知。表单已填写完毕</value>
+  </data>
   <data name="subject_FormStartedFilling" xml:space="preserve">
     <value>协作空间通知。</value>
   </data>
+  <data name="subject_FormSubmitted" xml:space="preserve">
+    <value>协作空间通知。表单已填写完毕</value>
+  </data>
   <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
     <value>协作空间通知。</value>
+  </data>
+  <data name="subject_MailMergeEnd" xml:space="preserve">
+    <value>文档。 邮件发送已完成。</value>
+  </data>
+  <data name="subject_MailMergeEnd_push" xml:space="preserve">
+    <value>邮件发送完成。</value>
+  </data>
+  <data name="subject_RoomRemoved" xml:space="preserve">
+    <value>协作空间消息通知。房间已删除</value>
+  </data>
+  <data name="subject_ShareDocument" xml:space="preserve">
+    <value>文档：允许访问 $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareDocument_push" xml:space="preserve">
+    <value>已提供文档访问权限：$DocumentTitle</value>
+  </data>
+  <data name="subject_ShareDocument_tg" xml:space="preserve">
+    <value>文件。已授予文件的访问权限: [$DocumentTitle]($DocumentURL)</value>
+  </data>
+  <data name="subject_ShareEncryptedDocument_push" xml:space="preserve">
+    <value>已提供加密文档访问权限：$DocumentTitle</value>
+  </data>
+  <data name="subject_ShareFolder" xml:space="preserve">
+    <value>文档：允许访问 $DocumentTitle</value>
+  </data>
+  <data name="subject_ShareFolder_push" xml:space="preserve">
+    <value>已提供文件夹访问权限：$DocumentTitle</value>
+  </data>
+  <data name="subject_ShareFolder_tg" xml:space="preserve">
+    <value>文件。已授予文件夹访问权限: [$DocumentTitle]($DocumentURL)</value>
   </data>
   <data name="subject_StoppedFormFilling" xml:space="preserve">
     <value>协作空间通知。</value>
   </data>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
     <value>协作空间通知。</value>
-  </data>
-  <data name="pattern_InvitedToRoom_push" xml:space="preserve">
-    <value>您已被邀请加入房间"$RoomTitle"</value>
   </data>
 </root>

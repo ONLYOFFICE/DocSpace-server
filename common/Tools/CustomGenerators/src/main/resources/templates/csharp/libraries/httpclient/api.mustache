@@ -336,6 +336,15 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
         }
         {{/x-supportsFields}}
 
+        {{#x-supportsUseAt}}private bool _useAtRecent ;
+
+        public {{x-classname}} WithFields()
+        {
+            _useAtRecent = true;
+            return this;
+        }
+        {{/x-supportsUseAt}}
+
         {{#operation}}
         /// <summary>
         /// {{summary}}
@@ -548,8 +557,20 @@ namespace {{packageName}}.{{apiPackage}}.{{x-folder}}
             {{/isHttpSignature}}
             {{/authMethods}}
 
+            {{#vendorExtensions.x-supportsUseAtMethod}}
+            // make the HTTP request
+            var recentPrefix = _useAtRecent ? "@" : "";
+            var localVarResponse = Client.{{#lambda.titlecase}}{{#lambda.lowercase}}{{httpMethod}}{{/lambda.lowercase}}{{/lambda.titlecase}}<{{{returnType}}}{{^returnType}}Object{{/returnType}}>(
+                $"/api/2.0/files/{recentPrefix}recent",
+                localVarRequestOptions,
+                Configuration
+            );
+            _useAtRecent = false;
+            {{/vendorExtensions.x-supportsUseAtMethod}}
+            {{^vendorExtensions.x-supportsUseAtMethod}}
             // make the HTTP request
             var localVarResponse = Client.{{#lambda.titlecase}}{{#lambda.lowercase}}{{httpMethod}}{{/lambda.lowercase}}{{/lambda.titlecase}}<{{{returnType}}}{{^returnType}}Object{{/returnType}}>("{{{path}}}", localVarRequestOptions, Configuration);
+            {{/vendorExtensions.x-supportsUseAtMethod}}
 
             if (ExceptionFactory != null)
             {
