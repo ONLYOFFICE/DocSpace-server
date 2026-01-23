@@ -309,7 +309,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             case "Name":
                 return new OpenApiString(faker.Name.FullName());
             case "Email":
-                return new OpenApiString(faker.Internet.Email());
+                return new OpenApiString("user@onlyoffice.com");
             case "FirstName":
                 return new OpenApiString(faker.Name.FirstName());
             case "LastName":
