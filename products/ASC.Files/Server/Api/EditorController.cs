@@ -226,7 +226,7 @@ public abstract class EditorController<T>(
                 if (!formOpenSetup.HasRole)
                 {
                     result.EditorConfig.Customization.SubmitForm.Visible = false;
-            }
+                }
             }
             else
             {
@@ -243,7 +243,7 @@ public abstract class EditorController<T>(
         if (!string.IsNullOrEmpty(formOpenSetup?.FillingSessionId))
         {
             result.FillingSessionId = formOpenSetup.FillingSessionId;
-            }
+        }
 
         if (rootFolder.RootFolderType == FolderType.RoomTemplates)
         {
@@ -279,7 +279,7 @@ public abstract class EditorController<T>(
         if (!securityContext.IsAuthenticated)
         {
             return Task.FromResult<List<MentionWrapper>>(null);
-    }
+        }
 
         return fileStorageService.SharedUsersAsync(inDto.FileId);
     }

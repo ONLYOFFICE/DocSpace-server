@@ -60,8 +60,8 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         var file = await fileDao.GetFileAsync(fileId);
         if (file != null && 0 < version && version < file.Version)
         {
-                file = await fileDao.GetFileAsync(fileId, version);
-                lastVersion = false;
+            file = await fileDao.GetFileAsync(fileId, version);
+            lastVersion = false;
         }
 
         if (file == null)
@@ -70,7 +70,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         }
 
         return (file, lastVersion);
-            }
+    }
 
     public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(File<T> file, bool lastVersion, bool editPossible, bool tryEdit,
         bool tryCoauth, bool fillFormsPossible, EditorType editorType, bool isSubmitOnly = false)
@@ -669,9 +669,9 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             }
             else
             {
-            result.EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
+                result.EditorType = editorType == EditorType.Mobile ? editorType : EditorType.Embedded;
                 result.DisableEmbeddedConfig = editorType != EditorType.Mobile;
-        }
+            }
         }
         else
         {
