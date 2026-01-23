@@ -1,25 +1,11 @@
 package com.example.codegen;
 
 import org.openapitools.codegen.languages.PostmanCollectionCodegen;
-import org.openapitools.codegen.model.OperationsMap;
-import org.openapitools.codegen.model.ModelMap;
-import org.openapitools.codegen.CodegenOperation;
-import org.openapitools.codegen.model.OperationMap;
-import org.openapitools.codegen.CodegenParameter;
-import org.openapitools.codegen.CodegenProperty;
-import org.openapitools.codegen.SupportingFile;
-import io.swagger.v3.oas.models.servers.ServerVariable;
-import io.swagger.v3.oas.models.servers.ServerVariables;
-import io.swagger.v3.oas.models.servers.Server;
+import org.openapitools.codegen.model.*;
+import org.openapitools.codegen.*;
+import io.swagger.v3.oas.models.servers.*;
 
-import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.*;
 
 public class MyPostmanCollectionCodegen extends PostmanCollectionCodegen {
 

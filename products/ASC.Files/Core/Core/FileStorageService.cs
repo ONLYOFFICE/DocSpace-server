@@ -4149,17 +4149,43 @@ public class FileStorageService //: IFileStorageService
         return users;
     }
 
-    public async Task<AceWrapper> SetInvitationLinkAsync<T>(T roomId, Guid linkId, string title, FileShare share)
+    public async Task<AceWrapper> SetInvitationLinkAsync<T>(T roomId, Guid linkId, string title, FileShare share, DateTime expirationDate, int? maxUseCount)
     {
         var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(roomId)).NotFoundIfNull();
+
+        var currentUseCount = 0;
+        if (maxUseCount.HasValue)
+        {
+            var link = (await fileSecurity.GetSharesAsync(room, [linkId])).FirstOrDefault();
+            if (link?.Options != null)
+            {
+                currentUseCount = link.Options.CurrentUseCount;
+                if (maxUseCount.Value < currentUseCount)
+                {
+                    throw new ArgumentException(null, nameof(maxUseCount));
+                }
+            }
+        }
 
         var options = new FileShareOptions
         {
             Title = !string.IsNullOrEmpty(title)
                 ? title
                 : FilesCommonResource.DefaultInvitationLinkTitle,
-            ExpirationDate = DateTime.UtcNow.Add(invitationValidator.IndividualLinkExpirationInterval)
+            MaxUseCount = maxUseCount,
+            CurrentUseCount = currentUseCount
         };
+
+        var expirationDateUtc = tenantUtil.DateTimeToUtc(expirationDate);
+        if (expirationDateUtc != DateTime.MinValue)
+        {
+            if (expirationDateUtc < DateTime.UtcNow || expirationDateUtc > DateTime.UtcNow.AddYears(FilesLinkUtility.MaxLinkLifeTimeInYears))
+            {
+                throw new ArgumentException(null, nameof(expirationDate));
+            }
+
+            options.ExpirationDate = expirationDateUtc;
+        }
 
         var result = await SetAceLinkAsync(room, SubjectType.InvitationLink, linkId, share, options);
 

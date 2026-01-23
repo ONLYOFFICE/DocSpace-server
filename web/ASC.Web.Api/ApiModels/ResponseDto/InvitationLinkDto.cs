@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+﻿// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,81 +24,83 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Files.Core.ApiModels.RequestDto;
+using ASC.Core.Common.EF.Model;
+
+namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
-/// The room link parameters.
+/// The invitation link parameters.
 /// </summary>
-public class RoomLinkRequest
+public class InvitationLinkDto
 {
     /// <summary>
-    /// The room link ID.
+    /// The ID of the invitation link.
     /// </summary>
-    public Guid LinkId { get; set; }
+    public Guid Id { get; set; }
 
     /// <summary>
-    /// The link sharing rights.
+    /// The type of employee role for the invitation link.
     /// </summary>
-    public FileShare Access { get; set; }
+    [JsonConverter(typeof(JsonNumberEnumConverter<EmployeeType>))]
+    public required EmployeeType EmployeeType { get; set; }
 
     /// <summary>
-    /// The link expiration date.
+    /// The expiration date of the invitation link.
     /// </summary>
-    public ApiDateTime ExpirationDate { get; set; }
+    public ApiDateTime Expiration { get; set; }
 
     /// <summary>
-    /// The link scope, whether it is internal or not.
+    /// Indicates whether the invitation link has expired.
     /// </summary>
-    public bool Internal { get; set; }
-
-    /// <summary>
-    /// The link name.
-    /// </summary>
-    [StringLength(255)]
-    public string Title { get; set; }
-
-    /// <summary>
-    /// The link type.
-    /// </summary>
-    public LinkType LinkType { get; set; }
-
-    /// <summary>
-    /// The link password.
-    /// </summary>
-    [StringLength(255)]
-    public string Password { get; set; }
-
-    /// <summary>
-    /// Specifies if downloading the file from the link is disabled or not.
-    /// </summary>
-    public bool DenyDownload { get; set; }
+    public bool IsExpired { get; set; }
 
     /// <summary>
     /// The maximum number of times the invitation link can be used.
     /// </summary>
-    [Range(1, 1000)]
     public int? MaxUseCount { get; set; }
 
     /// <summary>
     /// The current number of times the invitation link has been used.
     /// </summary>
     public int CurrentUseCount { get; set; }
+
+    /// <summary>
+    /// The URL of the invitation link.
+    /// </summary>
+    public string Url { get; set; }
 }
 
-/// <summary>
-/// The generic room link request parameters.
-/// </summary>
-public class RoomLinkRequestDto<T>
+[Scope]
+public class InvitationLinkDtoHelper(
+    TenantUtil tenantUtil,
+    ApiDateTimeHelper apiDateTimeHelper,
+    Signature signature,
+    CommonLinkUtility commonLinkUtility,
+    IUrlShortener urlShortener)
 {
-    /// <summary>
-    /// The room ID.
-    /// </summary>
-    [FromRoute(Name = "id")]
-    public required T Id { get; set; }
+    public async Task<InvitationLinkDto> GetAsync(InvitationLink source, string tenantAlias, Guid currentAccountId)
+    {
+        if (source == null)
+        {
+            return default;
+        }
 
-    /// <summary>
-    /// The room link parameters.
-    /// </summary>
-    [FromBody]
-    public required RoomLinkRequest RoomLink { get; set; }
+        var result = new InvitationLinkDto()
+        {
+            Id = source.Id,
+            EmployeeType = source.EmployeeType,
+            IsExpired = source.Expiration != DateTime.MinValue && source.Expiration < DateTime.UtcNow,
+            Expiration = source.Expiration != DateTime.MinValue ? apiDateTimeHelper.Get(tenantUtil.DateTimeFromUtc(source.Expiration)) : null,
+            MaxUseCount = source.MaxUseCount,
+            CurrentUseCount = source.CurrentUseCount
+        };
+
+        var key = signature.Create((int)source.EmployeeType + "." + source.Id + "." + currentAccountId + "." + tenantAlias);
+
+        var link = commonLinkUtility.GetConfirmationUrl(key, ConfirmType.LinkInvite, currentAccountId);
+
+        result.Url = await urlShortener.GetShortenLinkAsync($"{link}&emplType={source.EmployeeType:d}");
+
+        return result;
+    }
 }
