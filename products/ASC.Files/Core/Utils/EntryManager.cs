@@ -1877,7 +1877,7 @@ public class EntryManager(IDaoFactory daoFactory,
     {
         if (file.Encrypted)
         {
-            throw new NotSupportedException();
+            return;
         }
 
         linkId ??= await externalShare.GetLinkIdAsync();
