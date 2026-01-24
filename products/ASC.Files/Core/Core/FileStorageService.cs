@@ -76,7 +76,6 @@ public class FileStorageService //: IFileStorageService
     CountRoomChecker countRoomChecker,
     CountAIAgentChecker countAIAgentChecker,
     InvitationService invitationService,
-    InvitationValidator invitationValidator,
     StudioNotifyService studioNotifyService,
     TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
     QuotaSocketManager quotaSocketManager,
