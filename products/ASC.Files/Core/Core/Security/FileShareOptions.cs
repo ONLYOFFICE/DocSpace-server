@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -55,6 +55,16 @@ public class FileShareOptions
     /// Specifies if the shared link is internal or not.
     /// </summary>
     public bool Internal { get; set; }
+
+    /// <summary>
+    /// The maximum number of times the invitation link can be used.
+    /// </summary>
+    public int? MaxUseCount { get; set; }
+
+    /// <summary>
+    /// The current number of times the invitation link has been used.
+    /// </summary>
+    public int CurrentUseCount { get; set; }
 
     /// <summary>
     /// Specifies if the shared link is expired or not.

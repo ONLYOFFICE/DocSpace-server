@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -48,7 +48,6 @@ import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.web.authentication.AuthenticationConverter;
-import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -62,7 +61,6 @@ import org.springframework.util.StringUtils;
  * further authentication processing.
  */
 @Slf4j
-@Component
 @RequiredArgsConstructor
 public final class PersonalAccessTokenAuthenticationConverter implements AuthenticationConverter {
   /** The URI for OAuth2 error details. */
@@ -129,7 +127,7 @@ public final class PersonalAccessTokenAuthenticationConverter implements Authent
 
     if (token == null || token.isBlank()) {
       log.error("Signature not found");
-      throwError(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT, OAuth2ParameterNames.PASSWORD);
+      throwError(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT, OAuth2ParameterNames.TOKEN);
       return null;
     }
 

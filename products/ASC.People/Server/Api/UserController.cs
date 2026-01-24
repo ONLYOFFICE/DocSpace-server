@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -238,7 +238,7 @@ public class UserController(
         }
         else
         {
-            await _permissionContext.DemandPermissionsAsync(Constants.Action_AddRemoveUser);
+            await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(Guid.Empty, inDto.Type),Constants.Action_AddRemoveUser);
             var tenant = tenantManager.GetCurrentTenant();
             var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
             var currentUserType = await _userManager.GetUserTypeAsync(currentUser.Id);
@@ -331,7 +331,7 @@ public class UserController(
         user.WorkFromDate = inDto.Worksfrom != null && inDto.Worksfrom != DateTime.MinValue ? tenantUtil.DateTimeFromUtc(inDto.Worksfrom) : DateTime.UtcNow.Date;
         user.Status = EmployeeStatus.Active;
 
-        await UpdateContactsAsync(inDto.Contacts, user, !inDto.FromInviteLink);
+        await UpdateContactsAsync(inDto.Contacts, user, false);
 
         cache.Insert("REWRITE_URL" + tenantManager.GetCurrentTenantId(), HttpContext.Request.GetDisplayUrl(), TimeSpan.FromMinutes(5));
 
@@ -341,6 +341,12 @@ public class UserController(
         {
             user = await userManagerWrapper.AddUserAsync(user, inDto.PasswordHash, inDto.FromInviteLink, true, inDto.Type,
                 inDto.FromInviteLink && linkData is { IsCorrect: true, ConfirmType: not ConfirmType.EmpInvite }, true, true, byEmail);
+
+            if (linkData is { IsCorrect: true, ConfirmType: ConfirmType.LinkInvite } && linkData.LinkId != Guid.Empty)
+            {
+                await _userManager.IncreaseInvitationLinkUsageAsync(linkData.LinkId);
+            }
+
             if (inDto.Type is EmployeeType.Guest)
             {
                 await socketManager.AddGuestAsync(user);
@@ -394,6 +400,8 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "List of users", typeof(List<EmployeeDto>))]
+    [SwaggerResponse(400, "Incorrect email or User disabled")]
+    [SwaggerResponse(402, "The number of admins exceeds the limit")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("invite")]
     [EnableRateLimiting(RateLimiterPolicy.EmailInvitationApi)]
@@ -436,7 +444,7 @@ public class UserController(
         {
             if (!invite.Email.TestEmailRegex() || invite.Email.TestEmailPunyCode())
             {
-                continue;
+                throw new ArgumentException(Resource.ErrorNotCorrectEmail + ": " + invite.Email);
             }
 
             switch (invite.Type)
@@ -444,7 +452,7 @@ public class UserController(
                 case EmployeeType.Guest:
                 case EmployeeType.RoomAdmin when currentUserType is not EmployeeType.DocSpaceAdmin:
                 case EmployeeType.DocSpaceAdmin when !currentUser.IsOwner(tenant):
-                    continue;
+                    throw new SecurityException(Resource.ErrorAccessDenied);
             }
 
             var user = await _userManager.GetUserByEmailAsync(invite.Email);
@@ -452,7 +460,7 @@ public class UserController(
             {
                 if (user.Status == EmployeeStatus.Terminated)
                 {
-                    continue;
+                    throw new ArgumentException(Resource.ErrorUserDisabled + ": " + invite.Email);
                 }
 
                 var type = await _userManager.GetUserTypeAsync(user.Id);
@@ -2051,6 +2059,7 @@ public class UserController(
         var users = await inDto.UpdateMembers.UserIds
             .ToAsyncEnumerable()
             .Where(userId => !_userManager.IsSystemUser(userId))
+            .Where((async (userId, _)  => await userManager.CanUserViewAnotherUserAsync(authContext.CurrentAccount.ID, userId)))
             .Select(async (Guid userId, CancellationToken _) => await _userManager.GetUsersAsync(userId))
             .Where(r => r.Status != EmployeeStatus.Terminated)
             .ToListAsync();

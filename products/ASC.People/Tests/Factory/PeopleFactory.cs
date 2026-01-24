@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,10 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 extern alias ASCPeople;
-using ASC.People.Tests.Data;
-
-using DocSpace.API.SDK.Api.People;
-
 using Testcontainers.OpenSearch;
 
 namespace ASC.People.Tests.Factory;
@@ -47,7 +43,7 @@ public class PeopleFactory: WebApplicationFactory<PeopleProgram>, IAsyncLifetime
     private readonly List<string> _tablesToIgnore = ["core_acl", "core_settings", "core_subscription", "core_subscriptionmethod", "core_usergroup", "login_events", "tenants_tenants", "tenants_quota", "webstudio_settings" ];
     
     public HttpClient HttpClient { get; private set;} = null!;
-    public ProfilesApi PeopleProfilesApi { get; private set;} = null!;
+    public ProfilesApi ProfilesApi { get; private set;} = null!;
     
     public PeopleFactory()
     {        
@@ -58,16 +54,14 @@ public class PeopleFactory: WebApplicationFactory<PeopleProgram>, IAsyncLifetime
             .Build();
         
         var containers = config.GetSection("containers").Get<List<Container>>() ?? [];
+        
         var postgresSqlContainer = containers.FirstOrDefault(r => r.Name == "postgres") ?? new Container
         {
             Name = "postgres",
             Image = "postgres",
             Tag = "17.2"
         };
-        
-        _postgresSqlContainer = new PostgreSqlBuilder()
-            .WithImage($"{postgresSqlContainer.Image}:{postgresSqlContainer.Tag}")
-            .Build();
+        _postgresSqlContainer = new PostgreSqlBuilder($"{postgresSqlContainer.Image}:{postgresSqlContainer.Tag}").Build();
         
         var redisContainer = containers.FirstOrDefault(r => r.Name == "redis") ?? new Container
         {
@@ -75,9 +69,7 @@ public class PeopleFactory: WebApplicationFactory<PeopleProgram>, IAsyncLifetime
             Image = "redis",
             Tag = "7.0"
         };
-        _redisContainer = new RedisBuilder()
-            .WithImage($"{redisContainer.Image}:{redisContainer.Tag}")
-            .Build();
+        _redisContainer = new RedisBuilder($"{redisContainer.Image}:{redisContainer.Tag}").Build();
 
         var rabbitMqContainer = containers.FirstOrDefault(r => r.Name == "rabbitmq") ?? new Container
         {
@@ -86,9 +78,7 @@ public class PeopleFactory: WebApplicationFactory<PeopleProgram>, IAsyncLifetime
             Tag = "3.13"
         };
         
-        _rabbitMqContainer = new RabbitMqBuilder()
-            .WithImage($"{rabbitMqContainer.Image}:{rabbitMqContainer.Tag}")
-            .Build();
+        _rabbitMqContainer = new RabbitMqBuilder($"{rabbitMqContainer.Image}:{rabbitMqContainer.Tag}").Build();
 
         var openSearchContainer = containers.FirstOrDefault(r => r.Name == "opensearch") ?? new Container
         {
@@ -97,8 +87,7 @@ public class PeopleFactory: WebApplicationFactory<PeopleProgram>, IAsyncLifetime
             Tag = "2.18.0"
         };
         
-        _openSearchContainer = new OpenSearchBuilder()
-            .WithImage($"{openSearchContainer.Image}:{openSearchContainer.Tag}")
+        _openSearchContainer = new OpenSearchBuilder($"{openSearchContainer.Image}:{openSearchContainer.Tag}")
             .WithSecurityEnabled(false)
             .Build();
 
@@ -109,9 +98,7 @@ public class PeopleFactory: WebApplicationFactory<PeopleProgram>, IAsyncLifetime
             Tag = "8.4.3"
         };
         
-        _mySqlContainer = new MySqlBuilder()
-            .WithImage($"{mysqlContainer.Image}:{mysqlContainer.Tag}")
-            .Build();
+        _mySqlContainer = new MySqlBuilder($"{mysqlContainer.Image}:{mysqlContainer.Tag}").Build();
         
         _providerInfo = GetProviderInfo(config.GetValue<Provider>("dbProviderType"));
     }
@@ -162,7 +149,7 @@ public class PeopleFactory: WebApplicationFactory<PeopleProgram>, IAsyncLifetime
 
         HttpClient = CreateClient();
         var configuration = new Configuration { BasePath = HttpClient.BaseAddress!.ToString().TrimEnd('/') };
-        PeopleProfilesApi = new ProfilesApi(HttpClient, configuration);
+        ProfilesApi = new ProfilesApi(HttpClient, configuration);
         
         var tablesToIgnore = _tablesToIgnore.Select(t => new Table(t)).ToList();
         tablesToIgnore.AddRange(_tablesToBackup.Select(r=> new Table(MakeCopyTableName(r))));

@@ -2,7 +2,7 @@
 
 {{>partial_header}}
 
-namespace {{apiPackage}};
+namespace {{apiPackage}}{{#operations}}\{{x-folder}}{{/operations}};
 
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;

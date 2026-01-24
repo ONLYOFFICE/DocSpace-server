@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -1026,6 +1026,61 @@ public class EFUserService(
     private static IQueryable<DbGroup> BuildBaseGroupQuery(int tenant, UserDbContext userDbContext)
     {
         return userDbContext.Groups.Where(g => g.TenantId == tenant && !g.Removed);
+    }
+
+    public async Task<InvitationLink> CreateInvitationLinkAsync(int tenantId, EmployeeType employeeType, DateTime expiration, int? maxUseCount)
+    {
+        var invitationLink = new InvitationLink
+        {
+            Id = Guid.NewGuid(),
+            TenantId = tenantId,
+            EmployeeType = employeeType,
+            Expiration = expiration,
+            MaxUseCount = maxUseCount,
+            CurrentUseCount = 0
+        };
+
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        await userDbContext.AddOrUpdateAsync(q => q.InvitationLinks, invitationLink);
+        await userDbContext.SaveChangesAsync();
+
+        return invitationLink;
+    }
+
+    public async Task<InvitationLink> GetInvitationLinkAsync(int tenantId, Guid id)
+    {
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        return await userDbContext.GetInvitationLinkAsync(tenantId, id);
+    }
+
+    public async Task<InvitationLink> GetInvitationLinkAsync(int tenantId, EmployeeType employeeType)
+    {
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        return await userDbContext.GetInvitationLinkAsync(tenantId, employeeType);
+    }
+
+    public async Task<List<InvitationLink>> GetInvitationLinksAsync(int tenantId)
+    {
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        return await userDbContext.GetInvitationLinksAsync(tenantId).ToListAsync();
+    }
+
+    public async Task UpdateInvitationLinkAsync(int tenantId, Guid id, DateTime expiration, int? maxUseCount)
+    {
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        await userDbContext.UpdateInvitationLinkAsync(tenantId, id, expiration, maxUseCount);
+    }
+
+    public async Task IncreaseInvitationLinkUsageAsync(int tenantId, Guid id)
+    {
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        await userDbContext.IncreaseInvitationLinkUsageAsync(tenantId, id);
+    }
+
+    public async Task DeleteInvitationLinkAsync(int tenantId, Guid id)
+    {
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        await userDbContext.DeleteInvitationLinkAsync(tenantId, id);
     }
 }
 

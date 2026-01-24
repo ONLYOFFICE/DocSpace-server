@@ -32,12 +32,18 @@ import type { {{classname}} } from '../../{{tsModelPackage}}';
  */
 export const {{x-classname}}AxiosParamCreator = function (configuration?: Configuration) {
     {{#x-supportsFields}}let fields: string | undefined;{{/x-supportsFields}}
+    {{#x-supportsUseAt}}let useAtRecent = false;{{/x-supportsUseAt}}
     return {
         {{#x-supportsFields}}
         withFields: (f: string) => {
             fields = f;
         },
         {{/x-supportsFields}}
+        {{#x-supportsUseAt}}
+        withAtRecent: () => {
+            useAtRecent = true;
+        },
+        {{/x-supportsUseAt}}
     {{#operation}}
         /**
          * {{&notes}}
@@ -60,8 +66,16 @@ export const {{x-classname}}AxiosParamCreator = function (configuration?: Config
             assertParamExists('{{nickname}}', '{{paramName}}', {{paramName}})
     {{/required}}
     {{/allParams}}
+            {{#vendorExtensions.x-supportsUseAtMethod}}
+            const localVarPath = (useAtRecent ? '/api/2.0/files/@recent' : '{{{path}}}'){{#pathParams}}
+                .replace(`{${"{{baseName}}"}}`, encodeURIComponent(String({{paramName}}))){{/pathParams}};
+            useAtRecent = false;
+            {{/vendorExtensions.x-supportsUseAtMethod}}
+
+            {{^vendorExtensions.x-supportsUseAtMethod}}
             const localVarPath = `{{{path}}}`{{#pathParams}}
                 .replace(`{${"{{baseName}}"}}`, encodeURIComponent(String({{paramName}}))){{/pathParams}};
+            {{/vendorExtensions.x-supportsUseAtMethod}}
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;

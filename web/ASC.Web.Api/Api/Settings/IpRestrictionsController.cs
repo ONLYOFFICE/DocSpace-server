@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,6 +33,7 @@ public class IpRestrictionsController(
     WebItemManager webItemManager,
     IPRestrictionsService iPRestrictionsService,
     IFusionCache fusionCache,
+    MessageService messageService,
     TenantManager tenantManager)
     : BaseSettingsController(fusionCache, webItemManager)
 {
@@ -97,6 +98,8 @@ public class IpRestrictionsController(
         var settings = new IPRestrictionsSettings { Enable = enable };
         await settingsManager.SaveAsync(settings);
 
+        messageService.Send(MessageAction.IPRestrictionsSettingsUpdated);
+
         return inDto;
     }
 
@@ -157,6 +160,8 @@ public class IpRestrictionsController(
 
         var settings = new IPRestrictionsSettings { Enable = enable };
         await settingsManager.SaveAsync(settings);
+
+        messageService.Send(MessageAction.IPRestrictionsSettingsUpdated);
 
         return inDto;
     }

@@ -1,28 +1,16 @@
 package com.example.codegen;
 
 import org.openapitools.codegen.languages.KotlinClientCodegen;
-import org.openapitools.codegen.model.ModelMap;
-import org.openapitools.codegen.model.OperationsMap;
-import org.openapitools.codegen.model.OperationMap;
+import org.openapitools.codegen.model.*;
 import static org.openapitools.codegen.utils.StringUtils.camelize;
-import org.openapitools.codegen.CodegenOperation;
-import org.openapitools.codegen.SupportingFile;
-import org.openapitools.codegen.model.ApiInfoMap;
+import org.openapitools.codegen.*;
 
-import io.swagger.v3.oas.models.servers.Server;
-import io.swagger.v3.oas.models.servers.ServerVariable;
-import io.swagger.v3.oas.models.servers.ServerVariables;
+import io.swagger.v3.oas.models.servers.*;
 
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
 import java.io.File;
-import java.util.Locale;
-import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
-import java.util.LinkedHashMap;
-import java.util.ArrayList;
 
 public class MyKotlinClientCodegen extends KotlinClientCodegen {
     protected String apiNamePrefix = "", apiNameSuffix = "Api";
@@ -87,6 +75,8 @@ public class MyKotlinClientCodegen extends KotlinClientCodegen {
             TagParts tagParts = tagMap.get(camelize(className));
             operationMap.put("x-folder", tagParts.folderPart);
             operationMap.put("x-classname", tagParts.classPart + apiNameSuffix);
+            boolean supportUseAt = false;
+            boolean shouldSupportFields = false;
 
             if (operationList != null) {
                 for (CodegenOperation op : operationList) { 
@@ -105,11 +95,20 @@ public class MyKotlinClientCodegen extends KotlinClientCodegen {
 
                         if (allAreQueryParams && hasCountParam) {
                             op.vendorExtensions.put("x-hasFieldsParam", true);
+                            shouldSupportFields = true;
                         }
+                    }
+                    if ("GET".equalsIgnoreCase(op.httpMethod)
+                        && "/api/2.0/files/recent".equals(op.path)) {
+
+                        op.vendorExtensions.put("x-supportsUseAtMethod", true);
+                        supportUseAt = true;
                     }
                     
                 }
             }
+            operationMap.put("x-supportsFields", shouldSupportFields);
+            operationMap.put("x-supportsUseAt", supportUseAt);
         }
 
         return objs;

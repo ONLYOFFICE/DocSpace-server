@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -39,19 +39,17 @@ import io.swagger.v3.oas.annotations.servers.Server;
 import net.devh.boot.grpc.server.autoconfigure.GrpcServerSecurityAutoConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.persistence.autoconfigure.EntityScan;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  * Entry point for the ASC Identity Registration Service application.
  *
  * <p>This application provides APIs for managing registered clients in the ASC Identity ecosystem.
- * It includes features like caching, retry, transaction management, and OpenAPI documentation.
+ * It includes features like caching, transaction management, and OpenAPI documentation.
  */
-@EnableRetry
 @EnableCaching
 @EnableTransactionManagement
 @EntityScan(basePackages = {"com.asc.registration.data", "com.asc.common.data"})

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -72,6 +72,17 @@ public class RoomLinkRequest
     /// Specifies if downloading the file from the link is disabled or not.
     /// </summary>
     public bool DenyDownload { get; set; }
+
+    /// <summary>
+    /// The maximum number of times the invitation link can be used.
+    /// </summary>
+    [Range(1, 1000)]
+    public int? MaxUseCount { get; set; }
+
+    /// <summary>
+    /// The current number of times the invitation link has been used.
+    /// </summary>
+    public int CurrentUseCount { get; set; }
 }
 
 /// <summary>

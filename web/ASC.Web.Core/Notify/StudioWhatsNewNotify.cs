@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -40,7 +40,6 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
     AuditEventsRepository auditEventsRepository,
     WebItemManager webItemManager,
     DisplayUserSettingsHelper displayUserSettingsHelper,
-    Actions actions,
     IServiceProvider serviceProvider)
 {
     private readonly ILogger _log = optionsMonitor.CreateLogger("ASC.Notify");
@@ -160,18 +159,19 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
                 }
 
                 _log.Debug($"SendMsgWhatsNew userActivities count : {userActivities.Count}");//temp
-
-                var action = whatsNewType == WhatsNewType.RoomsActivity ? actions.RoomsActivity : actions.SendWhatsNew;
+                
+                var roomsActivityNotifyAction = serviceProvider.GetService<RoomsActivityNotifyAction>();
+                roomsActivityNotifyAction.Init(scheduleDate, whatsNewType, userActivities);
+                
+                var sendWhatsNewNotifyAction = serviceProvider.GetService<SendWhatsNewNotifyAction>();
+                sendWhatsNewNotifyAction.Init(scheduleDate, whatsNewType, userActivities);
+                
+                INotifyAction action = whatsNewType == WhatsNewType.RoomsActivity ? roomsActivityNotifyAction : sendWhatsNewNotifyAction;
 
                 if (userActivities.Count != 0)
                 {
                     _log.InformationSendWhatsNewTo(user.Email);
-                    await client.SendNoticeAsync(
-                        action, null, user,
-                        new TagValue(Tags.Activities, userActivities),
-                        new TagValue(Tags.Date, DateToString(scheduleDate, whatsNewType)),
-                        new TagValue(CommonTags.Priority, 1)
-                    );
+                    await client.SendNoticeAsync(action, null, user);
                 }
             }
         }
@@ -323,13 +323,13 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
     private async Task<bool> CheckSubscriptionAsync(UserInfo user, WhatsNewType whatsNewType)
     {
         if (whatsNewType == WhatsNewType.DailyFeed &&
-            await studioNotifyHelper.IsSubscribedToNotifyAsync(user, actions.SendWhatsNew))
+            await studioNotifyHelper.IsSubscribedToNotifyAsync(user, serviceProvider.GetService<SendWhatsNewNotifyAction>()))
         {
             return true;
         }
 
         if (whatsNewType == WhatsNewType.RoomsActivity &&
-            await studioNotifyHelper.IsSubscribedToNotifyAsync(user, actions.RoomsActivity))
+            await studioNotifyHelper.IsSubscribedToNotifyAsync(user, serviceProvider.GetService<RoomsActivityNotifyAction>()))
         {
             return true;
         }
@@ -350,13 +350,6 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
             hourToSend = hour;
         }
         return currentTime.Hour == hourToSend;
-    }
-
-    private static string DateToString(DateTime d, WhatsNewType type)
-    {
-        d = type == WhatsNewType.DailyFeed ? d.AddDays(-1) : d.AddHours(-1);
-
-        return d.ConvertNumerals("M");
     }
 }
 

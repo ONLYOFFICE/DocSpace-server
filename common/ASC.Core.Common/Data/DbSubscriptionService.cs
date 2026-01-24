@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -39,10 +39,9 @@ public class DbSubscriptionService(IDbContextFactory<UserDbContext> dbContextFac
         return await Queries.RecipientsAsync(userDbContext, tenant, sourceId, actionId, objectId ?? string.Empty).ToArrayAsync();
     }
 
-    public async Task<IEnumerable<SubscriptionRecord>> GetSubscriptionsAsync(int tenant, string sourceId, string actionId)
+    public async Task<IEnumerable<SubscriptionRecord>> GetSubscriptionsAsync(int tenant, string sourceId, string actionId) 
     {
         ArgumentNullException.ThrowIfNull(sourceId);
-        ArgumentNullException.ThrowIfNull(actionId);
 
         await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
 

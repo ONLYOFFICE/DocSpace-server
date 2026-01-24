@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,7 +33,6 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
         SocketManager socketManager,
         FileDtoHelper fileDtoHelper,
         FileStorageService fileStorageService,
-        IHttpContextAccessor httpContextAccessor,
         ILogger<FilesControllerHelper> logger,
         ApiDateTimeHelper apiDateTimeHelper,
         UserManager userManager,
@@ -53,7 +52,6 @@ public class FilesControllerHelper(IServiceProvider serviceProvider,
             fileDtoHelper,
             fileStorageService,
             fileChecker,
-            httpContextAccessor,
             webhookManager,
             daoFactory,
             eventBus,
