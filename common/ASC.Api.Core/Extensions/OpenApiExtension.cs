@@ -197,7 +197,7 @@ public static class OpenApiExtension
 
             app.UseSwagger(options =>
             {
-                options.OpenApiVersion = OpenApiSpecVersion.OpenApi3_1;
+                options.OpenApiVersion = OpenApiSpecVersion.OpenApi3_0;
                 options.RouteTemplate = $"openapi/{assemblyName.ToLower()}/{{documentName}}.{{extension:regex(^(json|ya?ml)$)}}";
             });
 
