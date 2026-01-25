@@ -150,7 +150,7 @@ public class FolderDto<T> : FileEntryDto<T>
     /// </summary>
     public override FileEntryType FileEntryType => FileEntryType.Folder;
 
-    public ChatSettings ChatSettings { get; set; }
+    public ChatSettingsDto ChatSettings { get; set; }
     
     public RoomType? RootRoomType { get; set; }
 }
@@ -179,7 +179,8 @@ public class FolderDtoHelper(
     UserManager userManager,
     IUrlShortener urlShortener,
     EntryStatusManager entryStatusManager,
-    AiAccessibility accessibility)
+    AiAccessibility accessibility,
+    ProviderSettings providerSettings)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, urlShortener)
 {
     private readonly EmployeeDtoHelper _employeeWrapperHelper = employeeWrapperHelper;
@@ -319,11 +320,33 @@ public class FolderDtoHelper(
         
         if (folder.SettingsChatParameters != null)
         {
-            result.ChatSettings = new ChatSettings
+            var modelId = folder.SettingsChatProviderId == 0 ? null : folder.SettingsChatParameters.ModelId;
+            ChatMultimodalSettingsDto multimodal = null;
+            string modelAlias = null;
+
+            if (modelId != null)
+            {
+                modelAlias = providerSettings.GetModelAlias(modelId);
+                var multimodalSettings = providerSettings.GetMultimodalSettings(modelId);
+                if (multimodalSettings?.Image != null)
+                {
+                    multimodal = new ChatMultimodalSettingsDto
+                    {
+                        Image = new ChatImageMultimodalSettingsDto
+                        {
+                            Formats = multimodalSettings.Image.Formats
+                        }
+                    };
+                }
+            }
+
+            result.ChatSettings = new ChatSettingsDto
             {
                 ProviderId = folder.SettingsChatProviderId,
-                ModelId = folder.SettingsChatProviderId == 0 ? null : folder.SettingsChatParameters.ModelId,
-                Prompt = folder.SettingsChatParameters.Prompt
+                ModelId = modelId,
+                ModelAlias = modelAlias,
+                Prompt = folder.SettingsChatParameters.Prompt,
+                Multimodal = multimodal
             };
         }
 

@@ -35,6 +35,7 @@ public class ProviderSettings
     private readonly FrozenDictionary<ProviderType, ProviderSettingsData> _settings;
     private readonly FrozenDictionary<(ProviderType, string), ModelSettingsData> _modelsByProvider;
     private readonly FrozenDictionary<string, MultimodalSettings> _multimodalByModelId;
+    private readonly FrozenDictionary<string, string> _aliasByModelId;
 
     public ProviderSettings(IConfiguration configuration, CoreBaseSettings coreBaseSettings)
     {
@@ -48,6 +49,7 @@ public class ProviderSettings
 
         var modelsByProvider = new Dictionary<(ProviderType, string), ModelSettingsData>();
         var multimodalByModelId = new Dictionary<string, MultimodalSettings>();
+        var aliasByModelId = new Dictionary<string, string>();
 
         foreach (var provider in _settings.Values)
         {
@@ -64,11 +66,17 @@ public class ProviderSettings
                 {
                     multimodalByModelId.TryAdd(model.Id, model.Multimodal);
                 }
+
+                if (model.Alias != null)
+                {
+                    aliasByModelId.TryAdd(model.Id, model.Alias);
+                }
             }
         }
 
         _modelsByProvider = modelsByProvider.ToFrozenDictionary();
         _multimodalByModelId = multimodalByModelId.ToFrozenDictionary();
+        _aliasByModelId = aliasByModelId.ToFrozenDictionary();
     }
 
     public ProviderSettingsData? Get(ProviderType type)
@@ -96,5 +104,10 @@ public class ProviderSettings
     public MultimodalSettings? GetMultimodalSettings(string modelId)
     {
         return _multimodalByModelId.GetValueOrDefault(modelId);
+    }
+
+    public string? GetModelAlias(string modelId)
+    {
+        return _aliasByModelId.GetValueOrDefault(modelId);
     }
 }
