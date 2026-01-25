@@ -51,6 +51,8 @@ public class AiProviderService(
         
         url = string.IsNullOrEmpty(url) ? settings.Url : new Uri(url).ToString();
         
+        ArgumentException.ThrowIfNullOrEmpty(url);
+        
         await ThrowIfNotValidAsync(url, key, type);
 
         var provider = new AiProvider
