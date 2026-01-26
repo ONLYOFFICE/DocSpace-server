@@ -28,7 +28,7 @@ namespace ASC.Data.Storage.DataOperators;
 
 public static class DataOperatorFactory
 {
-    public static async Task<IDataWriteOperator> GetWriteOperatorAsync(TempStream tempStream, string storageBasePath, string title, string tempFolder, Guid userId, CancellationToken token, IGetterWriteOperator getter)
+    public static async Task<IDataWriteOperator> GetWriteOperatorAsync(TempStream tempStream, string storageBasePath, string title, string tempFolder, Guid userId, IGetterWriteOperator getter, CancellationToken token)
     {
         var writer = await getter.GetWriteOperatorAsync(storageBasePath, title, userId);
 
@@ -44,23 +44,13 @@ public static class DataOperatorFactory
         return new ZipWriteOperator(tempStream, backupFilePath);
     }
 
-    public static IDataReadOperator GetReadOperator(string targetFile, bool removeTarget = true)
+    public static IDataReadOperator GetReadOperator(string targetFile, bool removeTarget, CancellationToken token)
     {
         if (targetFile.EndsWith("tar.gz"))
         {
-            return new ZipReadOperator(targetFile, removeTarget);
+            return new ZipReadOperator(targetFile, removeTarget, token);
         }
 
-        return new TarReadOperator(targetFile, removeTarget);
-    }
-
-    public static IDataReadOperator GetReadOperator(string targetFile, CancellationToken token, bool removeTarget = true)
-    {
-        if (targetFile.EndsWith("tar.gz"))
-        {
-            return new ZipReadOperator(targetFile, token, removeTarget);
-        }
-
-        return new TarReadOperator(targetFile, token, removeTarget);
+        return new TarReadOperator(targetFile, removeTarget, token);
     }
 }

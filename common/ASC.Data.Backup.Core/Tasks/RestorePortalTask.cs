@@ -52,7 +52,7 @@ public class RestorePortalTask(DbFactory dbFactory,
     private bool _expectDump;
     private CancellationToken _cancellationToken;
 
-    public void Init(string region, string fromFilePath, bool expectDump, CancellationToken cancellationToken, int tenantId = -1, ColumnMapper columnMapper = null, string upgradesPath = null)
+    public void Init(string region, string fromFilePath, bool expectDump, int tenantId = -1, ColumnMapper columnMapper = null, string upgradesPath = null, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(fromFilePath);
 
@@ -76,7 +76,7 @@ public class RestorePortalTask(DbFactory dbFactory,
 
         options.DebugBeginRestoreData();
 
-        using (var dataReader = DataOperatorFactory.GetReadOperator(BackupFilePath, _cancellationToken))
+        using (var dataReader = DataOperatorFactory.GetReadOperator(BackupFilePath, true, _cancellationToken))
         {
             await using (var entry = dataReader.GetEntry(KeyHelper.GetDumpKey()))
             {

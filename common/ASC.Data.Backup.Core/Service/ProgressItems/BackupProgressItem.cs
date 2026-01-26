@@ -144,7 +144,7 @@ public class BackupProgressItem : BaseBackupProgressItem, IDisposable
             tempFile = CrossPlatform.PathCombine(_tempFolder, backupName);
             storagePath = tempFile;
 
-            var writer = await DataOperatorFactory.GetWriteOperatorAsync(tempStream, _storageBasePath, backupName, _tempFolder, _userId, CancellationToken, getter);
+            var writer = await DataOperatorFactory.GetWriteOperatorAsync(tempStream, _storageBasePath, backupName, _tempFolder, _userId, getter, CancellationToken);
 
             backupPortalTask.Init(TenantId, tempFile, _limit, writer, Dump);
 

@@ -160,7 +160,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
             columnMapper.SetMapping("tenants_tenants", "alias", tenant.Alias, Guid.Parse(Id).ToString("N"));
             columnMapper.Commit();
 
-            restoreTask.Init(_region, tempFile, Dump, CancellationToken, TenantId, columnMapper, _upgradesPath);
+            restoreTask.Init(_region, tempFile, Dump, TenantId, columnMapper, _upgradesPath, CancellationToken);
             restoreTask.ProgressChanged = async args =>
             {
                 if (CancellationToken.IsCancellationRequested)
