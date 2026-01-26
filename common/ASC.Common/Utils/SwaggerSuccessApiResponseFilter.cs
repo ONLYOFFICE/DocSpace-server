@@ -65,6 +65,10 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
         if (isPrimitive)
         {
             var typeName = GetPrimitiveTypeName(schema);
+            if ((schema.Type & JsonSchemaType.Null) == JsonSchemaType.Null)
+            {
+                typeName += "Nullable";
+            }
             responseSchemaKey = $"{typeName}Wrapper";
             var primitiveResponseProperty = new OpenApiSchema
             {
@@ -165,16 +169,37 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
     
     private static string GetPrimitiveTypeName(IOpenApiSchema primitiveSchema)
     {
-        return primitiveSchema.Type switch
+        if ((primitiveSchema.Type & JsonSchemaType.String) == JsonSchemaType.String)
         {
-            JsonSchemaType.String => "String",
-            JsonSchemaType.Boolean => "Boolean",
-            JsonSchemaType.Integer when primitiveSchema.Format == "int32" => "Int32",
-            JsonSchemaType.Integer when primitiveSchema.Format == "int64" => "Int64",
-            JsonSchemaType.Number when primitiveSchema.Format == "float" => "Float",
-            JsonSchemaType.Number when primitiveSchema.Format == "double" => "Double",
-            _ => "Unknown"
-        };
+            return "String";
+        }
+        
+        if ((primitiveSchema.Type & JsonSchemaType.Boolean) == JsonSchemaType.Boolean)
+        {
+            return "Boolean";
+        }
+        
+        if ((primitiveSchema.Type & JsonSchemaType.Integer) == JsonSchemaType.Integer && primitiveSchema.Format == "int32")
+        {
+            return "Int32";
+        }
+        
+        if ((primitiveSchema.Type & JsonSchemaType.Integer) == JsonSchemaType.Integer && primitiveSchema.Format == "int64")
+        {
+            return "Int64";
+        }
+        
+        if ((primitiveSchema.Type & JsonSchemaType.Number) == JsonSchemaType.Number && primitiveSchema.Format == "float")
+        {
+            return "Float";
+        }
+        
+        if ((primitiveSchema.Type & JsonSchemaType.Number) == JsonSchemaType.Number && primitiveSchema.Format == "double")
+        {
+            return "Double";
+        }
+
+        return "Unknown";
     }
     private static OpenApiSchema CreateSuccessApiResponseSchema(IOpenApiSchema responseProperty)
     {
