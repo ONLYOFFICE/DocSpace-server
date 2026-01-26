@@ -164,14 +164,15 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
             return QuotaCheckResult.Ok;
         }
 
-        if (tenantQuotaSetting.Quota < CurrentSize + size)
+        if ((CurrentSize + size > 2 * tenantQuotaSetting.Quota )
+                || CurrentSize > tenantQuotaSetting.Quota)
         {
-            if ((tenantQuotaSetting.Quota * 2 < CurrentSize + size)
-                || tenantQuotaSetting.Quota < CurrentSize)
-            {
-                throw new TenantQuotaException(
-                    maxTotalSizeChecker.GetExceptionMessage(tenantQuotaSetting.Quota));
-            }
+            throw new TenantQuotaException(
+                maxTotalSizeChecker.GetExceptionMessage(tenantQuotaSetting.Quota));
+        }
+
+        if (CurrentSize + size > tenantQuotaSetting.Quota)
+        {
             return QuotaCheckResult.QuotaExceeded;
         }
 
