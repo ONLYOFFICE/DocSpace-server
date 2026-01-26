@@ -183,64 +183,34 @@ public class GoogleCloudStorage(TempStream tempStream,
         return tempStream;
     }
 
-    public override Task<Uri> SaveAsync(string domain, string path, Stream stream)
-    {
-        return SaveAsync(domain, path, stream, string.Empty, string.Empty);
-    }
-
-    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, CancellationToken token)
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, CancellationToken token = default)
     {
         return SaveAsync(domain, path, stream, string.Empty, string.Empty, token);
     }
 
-    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, Guid ownerId)
-    {
-        return SaveAsync(domain, path, ownerId, stream, string.Empty, string.Empty);
-    }
-    
-    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, Guid ownerId, CancellationToken token)
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, Guid ownerId, CancellationToken token = default)
     {
         return SaveAsync(domain, path, ownerId, stream, string.Empty, string.Empty, token);
     }
 
-    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, ACL acl)
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, ACL acl, CancellationToken token = default)
     {
-        return SaveAsync(domain, path, stream, null, null, acl);
-    }
-    
-    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, ACL acl, CancellationToken token)
-    {
-        return SaveAsync(domain, path, stream, null, null, acl, token);
+        return SaveAsync(domain, path, stream, null, null, acl, token: token);
     }
 
-    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType, string contentDisposition)
-    {
-        return SaveAsync(domain, path, Guid.Empty, stream, contentType, contentDisposition);
-    }
-
-    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType, string contentDisposition, CancellationToken token)
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType, string contentDisposition, CancellationToken token = default)
     {
         return SaveAsync(domain, path, Guid.Empty, stream, contentType, contentDisposition, token);
     }
 
-    public override Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType, string contentDisposition)
+    public override Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType, string contentDisposition, CancellationToken token = default)
     {
-        return SaveAsync(domain, path, ownerId, stream, contentType, contentDisposition, ACL.Auto);
-    }
-    
-    public override Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType, string contentDisposition, CancellationToken token)
-    {
-        return SaveAsync(domain, path, ownerId, stream, contentType, contentDisposition, ACL.Auto, token);
+        return SaveAsync(domain, path, ownerId, stream, contentType, contentDisposition, ACL.Auto, token: token);
     }
 
-    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentEncoding, int cacheDays)
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentEncoding, int cacheDays, CancellationToken token = default)
     {
-        return SaveAsync(domain, path, stream, string.Empty, string.Empty, ACL.Auto, contentEncoding, cacheDays);
-    }
-    
-    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentEncoding, int cacheDays, CancellationToken token)
-    {
-        return SaveAsync(domain, path, stream, string.Empty, string.Empty, ACL.Auto, token, contentEncoding, cacheDays);
+        return SaveAsync(domain, path, stream, string.Empty, string.Empty, ACL.Auto, contentEncoding, cacheDays, token);
     }
 
     private bool EnableQuotaCheck(string domain)
@@ -249,27 +219,14 @@ public class GoogleCloudStorage(TempStream tempStream,
     }
 
     public async Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType,
-                 string contentDisposition, ACL acl, string contentEncoding = null, int cacheDays = 5)
+                 string contentDisposition, ACL acl, string contentEncoding = null, int cacheDays = 5, CancellationToken token = default)
     {
         return await SaveAsync(domain, path, Guid.Empty, stream, contentType,
-                  contentDisposition, acl, contentEncoding, cacheDays);
-    }
-    
-    public async Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType,
-                 string contentDisposition, ACL acl, CancellationToken token, string contentEncoding = null, int cacheDays = 5)
-    {
-        return await SaveAsync(domain, path, Guid.Empty, stream, contentType,
-                  contentDisposition, acl, token, contentEncoding, cacheDays);
+                  contentDisposition, acl, contentEncoding, cacheDays, token);
     }
 
     public async Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType,
-                  string contentDisposition, ACL acl, string contentEncoding = null, int cacheDays = 5)
-    {
-        return await SaveAsync(domain, path, ownerId, stream, contentType, contentDisposition, acl, CancellationToken.None, contentEncoding, cacheDays);
-    }
-
-    public async Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType,
-                  string contentDisposition, ACL acl, CancellationToken token, string contentEncoding = null, int cacheDays = 5)
+                  string contentDisposition, ACL acl, string contentEncoding = null, int cacheDays = 5, CancellationToken token = default)
     {
 
         var (buffered, isNew) = await _tempStream.TryGetBufferedAsync(stream);
@@ -477,11 +434,11 @@ public class GoogleCloudStorage(TempStream tempStream,
         return await GetUriAsync(newDomain, newPath);
     }
 
-    public override async Task<(Uri, string)> SaveTempAsync(string domain, Stream stream)
+    public override async Task<(Uri, string)> SaveTempAsync(string domain, Stream stream, CancellationToken token = default)
     {
         var assignedPath = Guid.NewGuid().ToString();
 
-        return (await SaveAsync(domain, assignedPath, stream), assignedPath);
+        return (await SaveAsync(domain, assignedPath, stream, token), assignedPath);
     }
 
     public override IAsyncEnumerable<string> ListDirectoriesRelativeAsync(string domain, string path, bool recursive)
@@ -638,7 +595,7 @@ public class GoogleCloudStorage(TempStream tempStream,
         }
     }
 
-    public override async Task<string> SavePrivateAsync(string domain, string path, Stream stream, DateTime expires)
+    public override async Task<string> SavePrivateAsync(string domain, string path, Stream stream, DateTime expires, CancellationToken token = default)
     {
         using var storage = await GetStorageAsync();
 
@@ -661,7 +618,7 @@ public class GoogleCloudStorage(TempStream tempStream,
             uploaded.Metadata["Expires"] = DateTime.UtcNow.Add(TimeSpan.FromDays(5)).ToString("R", CultureInfo.InvariantCulture);
             uploaded.Metadata.Add("private-expire", expires.ToFileTimeUtc().ToString(CultureInfo.InvariantCulture));
 
-            await storage.UpdateObjectAsync(uploaded);
+            await storage.UpdateObjectAsync(uploaded, cancellationToken: token);
         }
         finally
         {
@@ -829,18 +786,18 @@ public class GoogleCloudStorage(TempStream tempStream,
         throw new NotImplementedException();
     }
 
-    protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Stream stream, string attachmentFileName)
+    protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Stream stream, string attachmentFileName, CancellationToken token = default)
     {
-        return SaveWithAutoAttachmentAsync(domain, path, Guid.Empty, stream, attachmentFileName);
+        return SaveWithAutoAttachmentAsync(domain, path, Guid.Empty, stream, attachmentFileName, token);
     }
-    protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName)
+    protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName, CancellationToken token = default)
     {
         var contentDisposition = $"attachment; filename={HttpUtility.UrlPathEncode(attachmentFileName)};";
         if (attachmentFileName.Any(c => c >= 0 && c <= 127))
         {
             contentDisposition = $"attachment; filename*=utf-8''{HttpUtility.UrlPathEncode(attachmentFileName)};";
         }
-        return SaveAsync(domain, path, ownerId, stream, null, contentDisposition);
+        return SaveAsync(domain, path, ownerId, stream, null, contentDisposition, token);
     }
 
     private StorageClient GetStorage()

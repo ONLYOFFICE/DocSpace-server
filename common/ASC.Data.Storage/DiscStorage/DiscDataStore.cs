@@ -138,32 +138,17 @@ public class DiscDataStore(
         return GetReadStreamAsync(domain, path, offset);
     }
 
-    public override Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType, string contentDisposition)
-    {
-        return SaveAsync(domain, path, stream, ownerId);
-    }
-    
-    public override Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType, string contentDisposition, CancellationToken token)
+    public override Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType, string contentDisposition, CancellationToken token = default)
     {
         return SaveAsync(domain, path, stream, ownerId, token);
     }
 
-    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType, string contentDisposition)
-    {
-        return SaveAsync(domain, path, stream);
-    }
-    
-    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType, string contentDisposition, CancellationToken token)
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType, string contentDisposition, CancellationToken token = default)
     {
         return SaveAsync(domain, path, stream, token);
     }
 
-    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentEncoding, int cacheDays)
-    {
-        return SaveAsync(domain, path, stream);
-    }
-    
-    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentEncoding, int cacheDays, CancellationToken token)
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentEncoding, int cacheDays, CancellationToken token = default)
     {
         return SaveAsync(domain, path, stream, token);
     }
@@ -173,22 +158,12 @@ public class DiscDataStore(
         return QuotaController != null && !domain.EndsWith("_temp");
     }
 
-    public override async Task<Uri> SaveAsync(string domain, string path, Stream stream)
-    {
-        return await SaveAsync(domain, path, stream, Guid.Empty);
-    }
-    
-    public override async Task<Uri> SaveAsync(string domain, string path, Stream stream, CancellationToken token)
+    public override async Task<Uri> SaveAsync(string domain, string path, Stream stream, CancellationToken token = default)
     {
         return await SaveAsync(domain, path, stream, Guid.Empty, token);
     }
 
-    public override async Task<Uri> SaveAsync(string domain, string path, Stream stream, Guid ownerId)
-    {
-        return await SaveAsync(domain, path, stream, ownerId, CancellationToken.None);
-    }
-
-    public override async Task<Uri> SaveAsync(string domain, string path, Stream stream, Guid ownerId, CancellationToken token)
+    public override async Task<Uri> SaveAsync(string domain, string path, Stream stream, Guid ownerId, CancellationToken token = default)
     {
         Logger.DebugSavePath(path);
 
@@ -234,12 +209,7 @@ public class DiscDataStore(
         }
     }
 
-    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, ACL acl)
-    {
-        return SaveAsync(domain, path, stream);
-    }
-    
-    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, ACL acl, CancellationToken token)
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, ACL acl, CancellationToken token = default)
     {
         return SaveAsync(domain, path, stream, token);
     }
@@ -549,15 +519,15 @@ public class DiscDataStore(
         throw new FileNotFoundException("directory not found " + target);
     }
 
-    public override async Task<(Uri, string)> SaveTempAsync(string domain, Stream stream)
+    public override async Task<(Uri, string)> SaveTempAsync(string domain, Stream stream, CancellationToken token = default)
     {
         var assignedPath = Guid.NewGuid().ToString();
-        return (await SaveAsync(domain, assignedPath, stream), assignedPath);
+        return (await SaveAsync(domain, assignedPath, stream, token), assignedPath);
     }
 
-    public override async Task<string> SavePrivateAsync(string domain, string path, Stream stream, DateTime expires)
+    public override async Task<string> SavePrivateAsync(string domain, string path, Stream stream, DateTime expires, CancellationToken token = default)
     {
-        var result = await SaveAsync(domain, path, stream);
+        var result = await SaveAsync(domain, path, stream, token);
         return result.ToString();
     }
 
@@ -753,13 +723,13 @@ public class DiscDataStore(
             throw new FileNotFoundException("file not found", target);
         }
     }
-    protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName)
+    protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName, CancellationToken token = default)
     {
-        return SaveAsync(domain, path, stream, ownerId);
+        return SaveAsync(domain, path, stream, ownerId, token);
     }
-    protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Stream stream, string attachmentFileName)
+    protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Stream stream, string attachmentFileName, CancellationToken token = default)
     {
-        return SaveAsync(domain, path, stream);
+        return SaveAsync(domain, path, stream, token);
     }
 
     private async Task CopyAllAsync(DirectoryInfo source, DirectoryInfo target, string newdomain)
