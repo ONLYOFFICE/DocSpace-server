@@ -321,15 +321,67 @@ public class GlobalStore(StorageFactory storageFactory, TenantManager tenantMana
         return await storageFactory.GetStorageAsync(-1, FileConstant.StorageTemplate);
     }
 
-    public async Task<string> GetNewDocTemplatePath(IDataStore storeTemplate, string extension, CultureInfo culture = null)
+    public async Task<string> GetNewDocTemplatePath(IDataStore storeTemplate, CultureInfo culture = null)
     {
         var defaultPath = coreBaseSettings.CustomMode
                 ? FileConstant.NewDocDefaultCustomModePath
                 : FileConstant.NewDocDefaultPath;
 
-        var path = await GetPathDependingOnCulture(storeTemplate, FileConstant.NewDocPath, defaultPath, culture);
+        return await GetPathDependingOnCulture(storeTemplate, FileConstant.NewDocPath, defaultPath, culture);
+    }
 
-        return $"{path}{FileConstant.NewDocFileName}{extension}";
+    public async Task<string> GetNewDocTemplatePath(IDataStore storeTemplate, string extension, CultureInfo culture = null)
+    {
+        return $"{GetNewDocTemplatePath(storeTemplate, culture)}{FileConstant.NewDocFileName}{extension}";
+    }
+
+    public class DocTemplate
+    {
+        public string Title { get; init; }
+        public string FileExtension { get; init; }
+        public Func<Task<Stream>> GetStreamAsync { get; init; }
+        public long FileSize { get; init; }
+        public string ThumbnailPath { get; init; }
+        public string FileName => Title + FileExtension;
+    }
+
+    public async Task<DocTemplate> GetNewDocTemplate(IServiceProvider serviceProvider, IDataStore storeTemplate, string extension, CultureInfo culture = null)
+    {
+        var templateSettingsHelper = serviceProvider.GetRequiredService<DefaultTemplateSettingsHelper>();
+        var templateSettings = await templateSettingsHelper.GetSettings();
+
+        var templateSetting = templateSettings.Items.FirstOrDefault(t => t.FileExtension == extension);
+        if (templateSetting?.SelectedFile != null)
+        {
+            var fileDao = serviceProvider.GetRequiredService<IFileDao<int>>();
+            var file = await fileDao.GetFileAsync(templateSetting.SelectedFile.Value);
+
+            return new DocTemplate()
+            {
+                Title = file.Title,
+                FileExtension = extension,
+                FileSize = file.ContentLength,
+                GetStreamAsync = () => fileDao.GetFileStreamAsync(file)
+            };
+        }
+
+        var defaultPath = coreBaseSettings.CustomMode
+            ? FileConstant.NewDocDefaultCustomModePath
+            : FileConstant.NewDocDefaultPath;
+
+        var path = await GetPathDependingOnCulture(storeTemplate, FileConstant.NewDocPath, defaultPath, culture);
+        var filePath = $"{path}{FileConstant.NewDocFileName}{extension}";
+
+        return await storeTemplate.IsFileAsync("", filePath)
+            ? new DocTemplate()
+            {
+                Title = Path.GetFileNameWithoutExtension(filePath),
+                FileExtension = extension,
+                GetStreamAsync = () => storeTemplate.GetReadStreamAsync(filePath),
+                FileSize = await storeTemplate.GetFileSizeAsync(filePath),
+                ThumbnailPath = filePath.Replace(Path.GetFileName(filePath), string.Empty)
+            }
+            : null;
     }
 
     public async Task<string> GetStartDocsPath(IDataStore storeTemplate, bool my, CultureInfo culture = null)
