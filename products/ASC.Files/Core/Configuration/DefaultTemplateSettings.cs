@@ -47,7 +47,7 @@ namespace ASC.Files.Core.Configuration
     }
 
     [Scope]
-    public class DefaultTemplateSettingsHelper(SettingsManager settingsManager, Global global, GlobalStore globalStore, IFileDao<int> fileDao, IFolderDao<int> folderDao)
+    public class DefaultTemplateSettingsHelper(IServiceProvider serviceProvider, SettingsManager settingsManager, Global global, GlobalStore globalStore, IFileDao<int> fileDao, IFolderDao<int> folderDao)
     {
         public async Task<DefaultTemplateSettingsDto> ToDto(DefaultTemplateSettings settings)
         {
@@ -123,6 +123,48 @@ namespace ASC.Files.Core.Configuration
 
             _ = await settingsManager.SaveAsync(settings);
             return settings;
+        }
+
+        public async Task<DefaultTemplateSettings> SetTemplate(string extension, string title, Stream stream)
+        {
+            try
+            {
+                if (!await global.IsDocSpaceAdministratorAsync)
+                {
+                    throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+                }
+
+                var settings = await GetSettings();
+                var setting = settings.Items.FirstOrDefault(item => item.FileExtension.Equals(extension, StringComparison.OrdinalIgnoreCase));
+                if (setting == null)
+                {
+                    return settings;
+                }
+
+                var file = serviceProvider.GetService<File<int>>();
+                file.ParentId = await folderDao.GetFolderIDDefaultTemplatesAsync(true);
+                file.Title = title;
+                file = await fileDao.SaveFileAsync(file, stream);
+
+                var currentFileId = setting.SelectedFile;
+                setting.SelectedFile = file.Id;
+
+                if (currentFileId != null)
+                {
+                    await fileDao.DeleteFileAsync(currentFileId.Value);
+                }
+
+                _ = await settingsManager.SaveAsync(settings);
+                return settings;
+            }
+            catch
+            {
+                throw;
+            }
+            finally
+            {
+                stream?.Dispose();
+            }
         }
 
         private async Task<IEnumerable<string>> GetSampleDocumentsExtensionsList()

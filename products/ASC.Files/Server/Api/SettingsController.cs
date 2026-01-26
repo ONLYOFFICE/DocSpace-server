@@ -37,7 +37,10 @@ public class SettingsController(
     CompressToArchive compressToArchive,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
-    DefaultTemplateSettingsHelper defaultTemplateSettingsHelper)
+    DefaultTemplateSettingsHelper defaultTemplateSettingsHelper,
+    FilesControllerHelper filesControllerHelper,
+    FileSecurityCommon fileSecurityCommon,
+    SecurityContext securityContext)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -414,6 +417,20 @@ public class SettingsController(
     public async Task<DefaultTemplateSettingsDto> SetDefaultTemplate(DefaultTemplateSettingsRequestDto inDto)
     {
         var settings = await defaultTemplateSettingsHelper.SetTemplate(inDto.FileExtension, inDto.SelectedFile);
+        return await defaultTemplateSettingsHelper.ToDto(settings);
+    }
+
+    /// <summary>
+    /// Uploads a file to use as the default template setting.
+    /// </summary>
+    /// <short>Upload a file as the default template setting</short>
+    /// <path>api/2.0/files/settings/defaulttemplate/upload</path>
+    [Tags("Files / Settings")]
+    [SwaggerResponse(200, "New default template settings", typeof(DefaultTemplateSettingsDto))]
+    [HttpPost("settings/defaulttemplate/upload")]
+    public async Task<DefaultTemplateSettingsDto> UploadDefaultTemplate(DefaultTemplateSettingsUploadRequestDto inDto)
+    {
+        var settings = await defaultTemplateSettingsHelper.SetTemplate(inDto.FileExtension, inDto.File.FileName, inDto?.File.OpenReadStream());
         return await defaultTemplateSettingsHelper.ToDto(settings);
     }
 }

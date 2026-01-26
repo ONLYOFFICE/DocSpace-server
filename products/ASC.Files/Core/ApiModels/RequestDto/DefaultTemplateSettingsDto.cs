@@ -56,7 +56,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto
     /// <summary>
     /// Default templates settings request parameters.
     /// </summary>
-    public class DefaultTemplateSettingsRequestDto()
+    public class DefaultTemplateSettingsRequestDto
     {
         /// <summary>
         /// File id to replace template with (or null to use default template)
@@ -66,5 +66,21 @@ namespace ASC.Files.Core.ApiModels.RequestDto
         /// File extension of a template to replace
         /// </summary>
         public string FileExtension { get; set; }
+    }
+
+    /// <summary>
+    /// Default templates settings upload request parameters.
+    /// </summary>
+    public class DefaultTemplateSettingsUploadRequestDto : IModelWithFile
+    {
+        /// <summary>
+        /// File extension of a template to replace
+        /// </summary>
+        public string FileExtension { get; set; }
+
+        /// <summary>
+        /// File to replace template with
+        /// </summary>
+        public IFormFile File { get; set; }
     }
 }
