@@ -170,7 +170,7 @@ namespace ASC.Files.Core.Configuration
         private async Task<IEnumerable<string>> GetSampleDocumentsExtensionsList()
         {
             var storeTemplate = await globalStore.GetStoreTemplateAsync();
-            var path = await globalStore.GetStartDocsPath(storeTemplate, true, new CultureInfo("en-US"));
+            var path = await globalStore.GetNewDocTemplatePath(storeTemplate, new CultureInfo("en-US"));
             var extensions = await storeTemplate.ListFilesRelativeAsync("", path, "*", false)
                 .Where(f => FileUtility.GetFileTypeByFileName(f) is not (FileType.Audio or FileType.Video or FileType.Image))
                 .Select(f => FileUtility.GetFileExtension(f)).Distinct()
