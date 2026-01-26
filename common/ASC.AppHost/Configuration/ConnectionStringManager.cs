@@ -62,7 +62,8 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
             }
         });
         
-        var path = Path.GetFullPath(Path.Combine("..", "Tools", "ASC.Migration.Runner", "bin", "Debug", "ASC.Migration.Runner.exe"));
+        var executableName = OperatingSystem.IsWindows() ? "ASC.Migration.Runner.exe" : "ASC.Migration.Runner";
+        var path = Path.GetFullPath(Path.Combine("..", "Tools", "ASC.Migration.Runner", "bin", "Debug", executableName));
         
         MigrateResource = builder
             .AddExecutable("migrate", path, Path.GetDirectoryName(path) ?? "")
@@ -215,8 +216,8 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
 
         resourceBuilder
             .WithEnvironment("openTelemetry:enable", "true")
-            .WithEnvironment("files:docservice:url:portal", SubstituteLocalhost("http://localhost"))
-            .WithEnvironment("files:docservice:url:public", "http://localhost/ds-vpath");
+            .WithEnvironment("files:docservice:url:portal", SubstituteLocalhost("http://localhost") + ":" + Constants.AppHostPort)
+            .WithEnvironment("files:docservice:url:public", $"http://localhost:{Constants.AppHostPort.ToString()}/ds-vpath");
 
         if (MySqlResource != null)
         {
