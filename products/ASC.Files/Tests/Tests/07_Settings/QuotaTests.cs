@@ -53,6 +53,18 @@ public class QuotaTests(
         var roomTitle = "Room for Quota Reset Test " + Guid.NewGuid().ToString()[..8];
         var room = await CreateVirtualRoom(roomTitle);
         
+        // Define a quota limit (in bytes)
+        var quotaLimit = 2147483648; // 2 GB
+        
+        // Set up request to update quota for the room
+        var updateRequest = new UpdateRoomsQuotaRequestDtoInteger
+        {           
+            RoomIds = [new(room.Id)],
+            Quota = quotaLimit
+        };
+        
+       await _quotaApi.UpdateRoomsQuotaAsync(updateRequest, TestContext.Current.CancellationToken);
+        
         // Set up request to reset quota for the room
         var resetRequest = new UpdateRoomsRoomIdsRequestDtoInteger
         {
@@ -90,6 +102,19 @@ public class QuotaTests(
         {
             RoomIds = [new(room1.Id), new(room2.Id)]
         };
+        
+        // Define a quota limit (in bytes)
+        var quotaLimit = 2147483648; // 2 GB
+        
+        // Set up request to update quota for the room
+        var updateRequest = new UpdateRoomsQuotaRequestDtoInteger
+        {           
+            RoomIds =  [new(room1.Id), new(room2.Id)],
+            Quota = quotaLimit
+        };
+        
+        await _quotaApi.UpdateRoomsQuotaAsync(updateRequest, TestContext.Current.CancellationToken);
+        
         // Act
         var result = (await _quotaApi.ResetRoomQuotaAsync(resetRequest, TestContext.Current.CancellationToken)).Response;
         
