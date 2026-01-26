@@ -59,8 +59,8 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
     {
          var originalSchemaRef = (schema as OpenApiSchemaReference)?.Reference.Id;
 
-        var isPrimitive = schema.Type != null && schema.Type != JsonSchemaType.Array;
-        string responseSchemaKey;
+        var isPrimitive = schema.Type != null && schema.Type != JsonSchemaType.Array && schema.Type != JsonSchemaType.Object;
+        string responseSchemaKey = null;
         OpenApiSchema responseSchema = null;
         if (isPrimitive)
         {
@@ -153,18 +153,27 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
         }
         else
         {
-            responseSchemaKey = originalSchemaRef.Contains("Dto") ? originalSchemaRef.Replace("Dto", "") + "Wrapper" : originalSchemaRef + "Wrapper";
+            if (originalSchemaRef != null)
+            {
+                responseSchemaKey = originalSchemaRef.Contains("Dto") ? originalSchemaRef.Replace("Dto", "") + "Wrapper" : originalSchemaRef + "Wrapper";
+            }
+
             var responseProperty = originalSchemaRef != null
             ? new OpenApiSchemaReference(originalSchemaRef)
             : schema;
             responseSchema = CreateSuccessApiResponseSchema(responseProperty);
         }
-        
-        schemas.TryAdd(responseSchemaKey, responseSchema);
-       // schema.Reference = new OpenApiSchemaReference(responseSchemaKey);
-        //schema.Type = null;
-        //schema.Properties = null;
-        return new OpenApiSchemaReference(responseSchemaKey);
+
+        if (responseSchemaKey != null)
+        {
+            schemas.TryAdd(responseSchemaKey, responseSchema);
+            // schema.Reference = new OpenApiSchemaReference(responseSchemaKey);
+            //schema.Type = null;
+            //schema.Properties = null;
+            return new OpenApiSchemaReference(responseSchemaKey);
+        }
+
+        return responseSchema;
     }
     
     private static string GetPrimitiveTypeName(IOpenApiSchema primitiveSchema)
