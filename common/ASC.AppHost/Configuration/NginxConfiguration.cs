@@ -43,7 +43,7 @@ public static class NginxConfiguration
             .WithBindMount(Path.Combine(clientBasePath, "packages", "client"), "/var/www/client")
             .WithBindMount(Path.Combine(clientBasePath, "packages", "login"), "/var/www/login")
             .WithBindMount(Path.Combine(clientBasePath, "packages", "management"), "/var/www/management")
-            .WithHttpEndpoint(80, Constants.RestyPort)
+            .WithHttpEndpoint(Constants.AppHostPort, Constants.RestyPort)
             .WaitFor(startPackages);
 
         var serviceUrls = GetServiceUrls(isDocker);
