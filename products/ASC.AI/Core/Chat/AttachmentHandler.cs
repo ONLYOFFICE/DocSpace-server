@@ -130,29 +130,11 @@ public class AttachmentHandler(
     {
         await using var stream = await fileDao.GetFileStreamAsync(file);
 
-        await using var memoryStream = new MemoryStream();
-        await stream.CopyToAsync(memoryStream);
+        var data = new byte[file.ContentLength];
+        await stream.ReadExactlyAsync(data);
 
-        var buffer = memoryStream.GetBuffer();
-        var byteCount = (int)memoryStream.Length;
         var extension = FileUtility.GetFileExtension(file.Title);
         var mediaType = GetMediaType(extension);
-
-        var base64Length = ((byteCount + 2) / 3) * 4;
-        var prefixLength = 5 + mediaType.Length + 8; // "data:" + mediaType + ";base64,"
-        var totalLength = prefixLength + base64Length;
-
-        var dataUri = string.Create(totalLength, (buffer, byteCount, mediaType), static (span, state) =>
-        {
-            var pos = 0;
-            "data:".CopyTo(span);
-            pos += 5;
-            state.mediaType.CopyTo(span[pos..]);
-            pos += state.mediaType.Length;
-            ";base64,".CopyTo(span[pos..]);
-            pos += 8;
-            Convert.TryToBase64Chars(new ReadOnlySpan<byte>(state.buffer, 0, state.byteCount), span[pos..], out _);
-        });
 
         yield return new AttachmentResult
         {
@@ -161,7 +143,8 @@ public class AttachmentHandler(
             Content = new DataMessageContent
             {
                 Id = JsonSerializer.SerializeToElement(file.Id),
-                DataUri = dataUri
+                Data = data,
+                MediaType = mediaType
             }
         };
     }

@@ -29,12 +29,16 @@ namespace ASC.AI.Core.Chat.Data;
 public class DataMessageContent : AttachmentMessageContent
 {
     [JsonIgnore]
-    public string? DataUri { get; set; }
+    public byte[]? Data { get; set; }
+
+    [JsonIgnore]
+    public string? MediaType { get; set; }
 
     public override AIContent ToAiContent()
     {
-        ArgumentException.ThrowIfNullOrEmpty(DataUri);
-        
-        return new DataContent(DataUri);
+        ArgumentNullException.ThrowIfNull(Data);
+        ArgumentException.ThrowIfNullOrEmpty(MediaType);
+
+        return new DataContent(Data, MediaType);
     }
 }
