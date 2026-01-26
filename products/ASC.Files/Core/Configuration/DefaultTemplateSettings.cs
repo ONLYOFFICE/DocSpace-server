@@ -47,22 +47,46 @@ namespace ASC.Files.Core.Configuration
     }
 
     [Scope]
-    public class DefaultTemplateSettingsHelper(IServiceProvider serviceProvider, SettingsManager settingsManager, Global global, GlobalStore globalStore, IFileDao<int> fileDao, IFolderDao<int> folderDao)
+    public class DefaultTemplateSettingsHelper(IServiceProvider serviceProvider,
+                                               SettingsManager settingsManager,
+                                               Global global,
+                                               GlobalStore globalStore,
+                                               IFileDao<int> fileDao,
+                                               IFolderDao<int> folderDao,
+                                               ExternalShare externalShare,
+                                               CommonLinkUtility commonLinkUtility)
     {
         public async Task<DefaultTemplateSettingsDto> ToDto(DefaultTemplateSettings settings)
         {
             var fileIds = settings.Items.Where(i => i.SelectedFile != null).Select(i => i.SelectedFile.Value);
             var fileTitles = (await fileDao.GetFilesAsync(fileIds).ToListAsync()).ToDictionary(f => f.Id, f => f);
 
+            DefaultTempalteItemDto asDto(DefaultTempalteItem item)
+            {
+                if (item.SelectedFile.HasValue)
+                {
+                    var file = fileTitles[item.SelectedFile.Value];
+                    return new DefaultTempalteItemDto()
+                    {
+                        FileExtension = item.FileExtension,
+                        SelectedFile = item.SelectedFile,
+                        FileTitle = file.Title,
+                        LastModified = file.ModifiedOn,
+                        ViewUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl))
+                    };
+                }
+                else
+                {
+                    return new DefaultTempalteItemDto()
+                    {
+                        FileExtension = item.FileExtension
+                    };
+                }
+            }
+
             return new DefaultTemplateSettingsDto()
             {
-                Items = settings.Items.Select(i => new DefaultTempalteItemDto()
-                {
-                    FileExtension = i.FileExtension,
-                    SelectedFile = i.SelectedFile,
-                    FileTitle = i.SelectedFile.HasValue ? fileTitles[i.SelectedFile.Value].Title : null,
-                    LastModified = i.SelectedFile.HasValue ? fileTitles[i.SelectedFile.Value].ModifiedOn : null,
-                })
+                Items = settings.Items.Select(asDto)
             };
         }
 

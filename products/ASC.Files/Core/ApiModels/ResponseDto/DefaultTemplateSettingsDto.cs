@@ -87,5 +87,10 @@ namespace ASC.Files.Core.ApiModels.ResponseDto
         /// Last modified date of a default template
         /// </summary>
         public DateTime? LastModified { get; set; }
+
+        /// <summary>
+        /// View url of a default template
+        /// </summary>
+        public string ViewUrl { get; set; }
     }
 }
