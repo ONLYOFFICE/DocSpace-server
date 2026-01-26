@@ -24,19 +24,16 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Models.ResponseDto;
+namespace ASC.AI.Core.Chat.Data;
 
-public class AttachmentContentDto : MessageContentDto
+public class TextAttachmentMessageContent : AttachmentMessageContent
 {
-    public override ContentType Type => ContentType.Attachment;
-    public required JsonElement Id { get; init; }
     public required string Title { get; init; }
     public required string Extension { get; init; }
-}
-
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
-    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public static partial class AttachmentContentDtoMapper
-{
-    public static partial AttachmentContentDto MapToDto(this TextAttachmentMessageContent source);
+    public required string Content { get; init; }
+    
+    public override AIContent ToAiContent()
+    {
+        return new TextContent($"##Attachment: {Title}\n\n{Content}\n\n");
+    }
 }

@@ -62,8 +62,8 @@ public abstract class HistoryAdapter
         {
             switch (content)
             {
-                case AttachmentMessageContent attachmentMessageContent:
-                    contents.Add(attachmentMessageContent);
+                case TextAttachmentMessageContent attachmentMessageContent:
+                    contents.Add(attachmentMessageContent.ToAiContent());
                     continue;
                 case TextMessageContent textMessageContent:
                     contents.Add(new TextContent(textMessageContent.Text));

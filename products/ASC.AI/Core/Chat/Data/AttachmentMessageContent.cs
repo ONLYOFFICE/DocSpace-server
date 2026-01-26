@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,15 +26,8 @@
 
 namespace ASC.AI.Core.Chat.Data;
 
-public class AttachmentMessageContent : MessageContent
+public abstract class AttachmentMessageContent : MessageContent
 {
     public required JsonElement Id { get; init; }
-    public required string Title { get; init; }
-    public required string Extension { get; init; }
-    public required string Content { get; init; }
-
-    public static implicit operator AIContent(AttachmentMessageContent attachment)
-    {
-        return new TextContent($"##Attachment: {attachment.Title}\n\n{attachment.Content}\n\n");
-    }
+    public abstract AIContent ToAiContent();
 }

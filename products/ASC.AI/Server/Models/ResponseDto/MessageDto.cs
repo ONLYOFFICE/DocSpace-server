@@ -70,7 +70,7 @@ public class MessageDtoConverter(
                 
                         continue;
                     }
-                case AttachmentMessageContent attachment:
+                case TextAttachmentMessageContent attachment:
                     contents.Add(attachment.MapToDto());
                     continue;
                 case TextMessageContent text:

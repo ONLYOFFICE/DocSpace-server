@@ -162,9 +162,9 @@ public class ChatCompletionRunner(
                 failedEntries.Add(result.File);
             }
             
-            if (result.AttachmentContent != null)
+            if (result.Content != null)
             {
-                yield return result.AttachmentContent;
+                yield return result.Content;
             }
         }
 
@@ -185,7 +185,7 @@ public class ChatCompletionRunner(
         }
 
         var contents = new List<AIContent>(attachments.Count + 1);
-        contents.AddRange(attachments.Select(attachment => (AIContent)attachment));
+        contents.AddRange(attachments.Select(attachment => attachment.ToAiContent()));
         contents.Add(new TextContent($"##User query: {message}"));
 
         return new ChatMessage { Role = ChatRole.User, Contents = contents };
