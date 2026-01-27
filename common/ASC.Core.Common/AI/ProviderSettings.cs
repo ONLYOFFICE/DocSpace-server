@@ -33,7 +33,7 @@ namespace ASC.Core.Common.AI;
 public class ProviderSettings
 {
     private readonly FrozenDictionary<ProviderType, ProviderSettingsData> _settings;
-    private readonly FrozenDictionary<(ProviderType, string), ModelSettingsData> _modelsByProvider;
+    private readonly FrozenDictionary<(ProviderType, string), ModelSettings> _modelsByProvider;
     private readonly FrozenDictionary<string, MultimodalSettings> _multimodalByModelId;
     private readonly FrozenDictionary<string, string> _aliasByModelId;
 
@@ -47,7 +47,7 @@ public class ProviderSettings
             : providers.Where(p => p.Type != ProviderType.OpenAiCompatible)
                 .ToFrozenDictionary(p => p.Type);
 
-        var modelsByProvider = new Dictionary<(ProviderType, string), ModelSettingsData>();
+        var modelsByProvider = new Dictionary<(ProviderType, string), ModelSettings>();
         var multimodalByModelId = new Dictionary<string, MultimodalSettings>();
         var aliasByModelId = new Dictionary<string, string>();
 
@@ -67,10 +67,7 @@ public class ProviderSettings
                     multimodalByModelId.TryAdd(model.Id, model.Multimodal);
                 }
 
-                if (model.Alias != null)
-                {
-                    aliasByModelId.TryAdd(model.Id, model.Alias);
-                }
+                aliasByModelId.TryAdd(model.Id, model.Alias);
             }
         }
 
@@ -96,7 +93,7 @@ public class ProviderSettings
         return models?.Select(m => m.Id).ToHashSet();
     }
 
-    public ModelSettingsData? GetModel(ProviderType type, string modelId)
+    public ModelSettings? GetModel(ProviderType type, string modelId)
     {
         return _modelsByProvider.GetValueOrDefault((type, modelId));
     }

@@ -34,14 +34,14 @@ public class ProviderSettingsData
     public string? Name { get; init; }
     public ProviderType Type { get; init; }
     public string? Url { get; init; }
-    public List<ModelSettingsData>? Models { get; init; }
+    public List<ModelSettings>? Models { get; init; }
     public bool Enabled { get; init; }
 }
 
-public class ModelSettingsData
+public class ModelSettings
 {
     public required string Id { get; init; }
-    public string? Alias { get; init; }
+    public required string Alias { get; init; }
     public int MaxOutputTokens { get; init; }
     public MultimodalSettings? Multimodal { get; init; }
 }
@@ -54,5 +54,5 @@ public class MultimodalSettings
 
 public class ImageMultimodalSettings
 {
-    public HashSet<string>? Formats { get; init; }
+    public required HashSet<string> Formats { get; init; }
 }
