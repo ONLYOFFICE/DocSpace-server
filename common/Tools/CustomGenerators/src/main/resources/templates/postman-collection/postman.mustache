@@ -10,7 +10,7 @@
     "_postman_id": "5d8c9db9-3822-4cc8-864b-75521aa761c2"
   },
   "item": [
-  {{#tagGroups}}
+    {{#tagGroups}}
     {
       "name": "{{name}}",
       "item": [
@@ -33,37 +33,37 @@
         {{/children}}
       ]
     }{{^-last}},{{/-last}}
-  {{/tagGroups}}
+    {{/tagGroups}}
   ],
   {{#authMethods}}{{#-first}}{{#isApiKey}}"auth": {
-      "type": "apikey",
-      "apikey": [
-        {
-          "key": "value",
-          "value": "{{=<% %>=}}{{<%={{ }}=%>{{keyParamName}}{{=<% %>=}}}}<%={{ }}=%>",
-          "type": "string"
-        },
-        {
-          "key": "key",
-          "value": "{{keyParamName}}",
-          "type": "string"
-        }
-      ]
-    },{{/isApiKey}}{{#isBasicBasic}}"auth": {
-          "type": "basic",
-          "basic": [
-            {
-              "key": "username",
-              "value": "{{=<% %>=}}{{<%={{ }}=%>USERNAME{{=<% %>=}}}}<%={{ }}=%>",
-              "type": "string"
-            },
-            {
-              "key": "password",
-              "value": "{{=<% %>=}}{{<%={{ }}=%>PASSWORD{{=<% %>=}}}}<%={{ }}=%>",
-              "type": "string"
-            }
-          ]
-        },{{/isBasicBasic}}{{/-first}}{{/authMethods}}
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "value",
+        "value": "{{=<% %>=}}{{<%={{ }}=%>{{keyParamName}}{{=<% %>=}}}}<%={{ }}=%>",
+        "type": "string"
+      },
+      {
+        "key": "key",
+        "value": "{{keyParamName}}",
+        "type": "string"
+      }
+    ]
+  },{{/isApiKey}}{{#isBasicBasic}}"auth": {
+    "type": "basic",
+    "basic": [
+      {
+        "key": "username",
+        "value": "{{=<% %>=}}{{<%={{ }}=%>USERNAME{{=<% %>=}}}}<%={{ }}=%>",
+        "type": "string"
+      },
+      {
+        "key": "password",
+        "value": "{{=<% %>=}}{{<%={{ }}=%>PASSWORD{{=<% %>=}}}}<%={{ }}=%>",
+        "type": "string"
+      }
+    ]
+  },{{/isBasicBasic}}{{/-first}}{{/authMethods}}
   "variable": [{{#servers}}{{#-first}}
     {
       "key": "baseUrl",
@@ -83,4 +83,3 @@
     }{{^-last}},{{/-last}}{{/variables}}{{/-first}}{{/vendorExtensions}}{{/apis}}{{/apiInfo}}
   ]
 }
-
