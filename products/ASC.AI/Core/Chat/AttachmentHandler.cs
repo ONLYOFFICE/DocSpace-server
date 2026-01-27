@@ -70,7 +70,7 @@ public class AttachmentHandler(
 
             if (fileType == FileType.Image)
             {
-                await foreach (var result in HandleImageAsync(file, fileDao))
+                await foreach (var result in HandleMediaAsync(fileDao, file, fileType))
                 {
                     yield return result;
                 }
@@ -126,7 +126,7 @@ public class AttachmentHandler(
         };
     }
 
-    private async IAsyncEnumerable<AttachmentResult> HandleImageAsync<T>(File<T> file, IFileDao<T> fileDao)
+    private async IAsyncEnumerable<AttachmentResult> HandleMediaAsync<T>(IFileDao<T> fileDao, File<T> file, FileType fileType)
     {
         await using var stream = await fileDao.GetFileStreamAsync(file);
 
@@ -143,6 +143,7 @@ public class AttachmentHandler(
             Content = new DataMessageContent
             {
                 Id = JsonSerializer.SerializeToElement(file.Id),
+                FileType = fileType,
                 Data = data,
                 MediaType = mediaType
             }
