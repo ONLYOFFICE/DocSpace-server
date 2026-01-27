@@ -1191,6 +1191,18 @@
   <data name="TariffsFeature_deepseek31output_wallet_price_count" xml:space="preserve">
     <value>A unit of output text measurement for Deepseek 3.1</value>
   </data>
+  <data name="TariffsFeature_deepseek32input_wallet" xml:space="preserve">
+    <value>AI Deepseek 3.2 input token</value>
+  </data>
+  <data name="TariffsFeature_deepseek32input_wallet_price_count" xml:space="preserve">
+    <value>A unit of input text measurement for Deepseek 3.2</value>
+  </data>
+  <data name="TariffsFeature_deepseek32output_wallet" xml:space="preserve">
+    <value>AI Deepseek 3.2 output token</value>
+  </data>
+  <data name="TariffsFeature_deepseek32output_wallet_price_count" xml:space="preserve">
+    <value>A unit of output text measurement for Deepseek 3.2</value>
+  </data>
   <data name="TariffsFeature_embedding_wallet" xml:space="preserve">
     <value>AI embedding</value>
   </data>
@@ -1208,6 +1220,42 @@
   </data>
   <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
     <value>The number of free backups should not exceed {0} within a month</value>
+  </data>
+  <data name="TariffsFeature_gemini3flashinput_wallet" xml:space="preserve">
+    <value>AI Gemini 3 Flash input token</value>
+  </data>
+  <data name="TariffsFeature_gemini3flashinput_wallet_price_count" xml:space="preserve">
+    <value>A unit of input text measurement for Gemini 3 Flash</value>
+  </data>
+  <data name="TariffsFeature_gemini3flashoutput_wallet" xml:space="preserve">
+    <value>AI Gemini 3 Flash output token</value>
+  </data>
+  <data name="TariffsFeature_gemini3flashoutput_wallet_price_count" xml:space="preserve">
+    <value>A unit of output text measurement for Gemini 3 Flash</value>
+  </data>
+  <data name="TariffsFeature_gemini3proinput_wallet" xml:space="preserve">
+    <value>AI Gemini 3 Pro input token</value>
+  </data>
+  <data name="TariffsFeature_gemini3proinput_wallet_price_count" xml:space="preserve">
+    <value>A unit of input text measurement for Gemini 3 Pro</value>
+  </data>
+  <data name="TariffsFeature_gemini3prooutput_wallet" xml:space="preserve">
+    <value>AI Gemini 3 Pro output token</value>
+  </data>
+  <data name="TariffsFeature_gemini3prooutput_wallet_price_count" xml:space="preserve">
+    <value>A unit of output text measurement for Gemini 3 Pro</value>
+  </data>
+  <data name="TariffsFeature_gpt52input_wallet" xml:space="preserve">
+    <value>AI GPT 5.2 input token</value>
+  </data>
+  <data name="TariffsFeature_gpt52input_wallet_price_count" xml:space="preserve">
+    <value>A unit of input text measurement for GPT 5.2</value>
+  </data>
+  <data name="TariffsFeature_gpt52output_wallet" xml:space="preserve">
+    <value>AI GPT 5.2 output token</value>
+  </data>
+  <data name="TariffsFeature_gpt52output_wallet_price_count" xml:space="preserve">
+    <value>A unit of output text measurement for GPT 5.2</value>
   </data>
   <data name="TariffsFeature_gpt5input_wallet" xml:space="preserve">
     <value>AI GPT 5 input token</value>

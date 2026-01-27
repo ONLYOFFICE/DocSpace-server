@@ -1041,7 +1041,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             TenantId = -17,
                             Features = "deepseek31input",
                             Name = "deepseek31input",
-                            Price = 0.000000276m,
+                            Price = 0.000000252m,
                             ServiceGroup = "aitools",
                             ServiceName = "deepseek3.1input",
                             Visible = false,
@@ -1052,7 +1052,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             TenantId = -18,
                             Features = "deepseek31output",
                             Name = "deepseek31output",
-                            Price = 0.00000108m,
+                            Price = 0.000000948m,
                             ServiceGroup = "aitools",
                             ServiceName = "deepseek3.1output",
                             Visible = false,
@@ -1099,6 +1099,94 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Price = 0.000012m,
                             ServiceGroup = "aitools",
                             ServiceName = "gpt5output",
+                            Visible = false,
+                            Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -23,
+                            Features = "deepseek32input",
+                            Name = "deepseek32input",
+                            Price = 0.0000003m,
+                            ServiceGroup = "aitools",
+                            ServiceName = "deepseek3.2input",
+                            Visible = false,
+                            Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -24,
+                            Features = "deepseek32output",
+                            Name = "deepseek32output",
+                            Price = 0.000000456m,
+                            ServiceGroup = "aitools",
+                            ServiceName = "deepseek3.2output",
+                            Visible = false,
+                            Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -25,
+                            Features = "gpt52input",
+                            Name = "gpt52input",
+                            Price = 0.0000021m,
+                            ServiceGroup = "aitools",
+                            ServiceName = "gpt5.2input",
+                            Visible = false,
+                            Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -26,
+                            Features = "gpt52output",
+                            Name = "gpt52output",
+                            Price = 0.0000168m,
+                            ServiceGroup = "aitools",
+                            ServiceName = "gpt5.2output",
+                            Visible = false,
+                            Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -27,
+                            Features = "gemini3proinput",
+                            Name = "gemini3proinput",
+                            Price = 0.0000024m,
+                            ServiceGroup = "aitools",
+                            ServiceName = "gemini3proinput",
+                            Visible = false,
+                            Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -28,
+                            Features = "gemini3prooutput",
+                            Name = "gemini3prooutput",
+                            Price = 0.0000144m,
+                            ServiceGroup = "aitools",
+                            ServiceName = "gemini3prooutput",
+                            Visible = false,
+                            Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -29,
+                            Features = "gemini3flashinput",
+                            Name = "gemini3flashinput",
+                            Price = 0.0000006m,
+                            ServiceGroup = "aitools",
+                            ServiceName = "gemini3flashinput",
+                            Visible = false,
+                            Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -30,
+                            Features = "gemini3flashoutput",
+                            Name = "gemini3flashoutput",
+                            Price = 0.0000036m,
+                            ServiceGroup = "aitools",
+                            ServiceName = "gemini3flashoutput",
                             Visible = false,
                             Wallet = true
                         });

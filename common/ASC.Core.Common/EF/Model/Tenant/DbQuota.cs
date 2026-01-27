@@ -249,7 +249,7 @@ public static class DbQuotaExtension
                     Name = "deepseek31input",
                     Description = null,
                     Features = "deepseek31input",
-                    Price = 0.000000276m,
+                    Price = 0.000000252m,
                     ProductId = null,
                     ServiceName = "deepseek3.1input",
                     ServiceGroup = "aitools",
@@ -262,7 +262,7 @@ public static class DbQuotaExtension
                     Name = "deepseek31output",
                     Description = null,
                     Features = "deepseek31output",
-                    Price = 0.00000108m,
+                    Price = 0.000000948m,
                     ProductId = null,
                     ServiceName = "deepseek3.1output",
                     ServiceGroup = "aitools",
@@ -317,6 +317,110 @@ public static class DbQuotaExtension
                     Price = 0.000012m,
                     ProductId = null,
                     ServiceName = "gpt5output",
+                    ServiceGroup = "aitools",
+                    Visible = false,
+                    Wallet = true
+                },
+                new DbQuota
+                {
+                    TenantId = -23,
+                    Name = "deepseek32input",
+                    Description = null,
+                    Features = "deepseek32input",
+                    Price = 0.0000003m,
+                    ProductId = null,
+                    ServiceName = "deepseek3.2input",
+                    ServiceGroup = "aitools",
+                    Visible = false,
+                    Wallet = true
+                },
+                new DbQuota
+                {
+                    TenantId = -24,
+                    Name = "deepseek32output",
+                    Description = null,
+                    Features = "deepseek32output",
+                    Price = 0.000000456m,
+                    ProductId = null,
+                    ServiceName = "deepseek3.2output",
+                    ServiceGroup = "aitools",
+                    Visible = false,
+                    Wallet = true
+                },
+                new DbQuota
+                {
+                    TenantId = -25,
+                    Name = "gpt52input",
+                    Description = null,
+                    Features = "gpt52input",
+                    Price = 0.0000021m,
+                    ProductId = null,
+                    ServiceName = "gpt5.2input",
+                    ServiceGroup = "aitools",
+                    Visible = false,
+                    Wallet = true
+                },
+                new DbQuota
+                {
+                    TenantId = -26,
+                    Name = "gpt52output",
+                    Description = null,
+                    Features = "gpt52output",
+                    Price = 0.0000168m,
+                    ProductId = null,
+                    ServiceName = "gpt5.2output",
+                    ServiceGroup = "aitools",
+                    Visible = false,
+                    Wallet = true
+                },
+                new DbQuota
+                {
+                    TenantId = -27,
+                    Name = "gemini3proinput",
+                    Description = null,
+                    Features = "gemini3proinput",
+                    Price = 0.0000024m,
+                    ProductId = null,
+                    ServiceName = "gemini3proinput",
+                    ServiceGroup = "aitools",
+                    Visible = false,
+                    Wallet = true
+                },
+                new DbQuota
+                {
+                    TenantId = -28,
+                    Name = "gemini3prooutput",
+                    Description = null,
+                    Features = "gemini3prooutput",
+                    Price = 0.0000144m,
+                    ProductId = null,
+                    ServiceName = "gemini3prooutput",
+                    ServiceGroup = "aitools",
+                    Visible = false,
+                    Wallet = true
+                },
+                new DbQuota
+                {
+                    TenantId = -29,
+                    Name = "gemini3flashinput",
+                    Description = null,
+                    Features = "gemini3flashinput",
+                    Price = 0.0000006m,
+                    ProductId = null,
+                    ServiceName = "gemini3flashinput",
+                    ServiceGroup = "aitools",
+                    Visible = false,
+                    Wallet = true
+                },
+                new DbQuota
+                {
+                    TenantId = -30,
+                    Name = "gemini3flashoutput",
+                    Description = null,
+                    Features = "gemini3flashoutput",
+                    Price = 0.0000036m,
+                    ProductId = null,
+                    ServiceName = "gemini3flashoutput",
                     ServiceGroup = "aitools",
                     Visible = false,
                     Wallet = true
