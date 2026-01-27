@@ -109,6 +109,11 @@ public class WebPluginDto
     public required string Url { get; set; }
 
     /// <summary>
+    /// The web plugin css URL.
+    /// </summary>
+    public required string CssUrl { get; set; }
+
+    /// <summary>
     /// The web plugin settings.
     /// </summary>
     public required string Settings { get; set; }
