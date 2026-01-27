@@ -37,25 +37,43 @@ var connectionManager = new ConnectionStringManager(builder)
 
 var basePath = Path.GetFullPath(Path.Combine("..", "..", ".."));
 var isDocker = String.Compare(builder.Configuration["Docker"], "true", StringComparison.OrdinalIgnoreCase) == 0;
+var isPreview = String.Compare(builder.Configuration["APP_HOSTING_STANDALONE"], "Preview", StringComparison.OrdinalIgnoreCase) == 0;
 
-_ = new ProjectConfigurator(builder, connectionManager, basePath, isDocker)
-    .AddProject<ASC_Files>(Constants.FilesPort)
-    .AddProject<ASC_Files_Service>(Constants.FilesServicePort)
-    .AddProject<ASC_People>(Constants.PeoplePort)
-    .AddProject<ASC_Web_Api>(Constants.WebApiPort)
-    .AddProject<ASC_ApiSystem>(Constants.ApiSystemPort)
-    .AddProject<ASC_ClearEvents>(Constants.ClearEventsPort)
-    .AddProject<ASC_Data_Backup>(Constants.BackupPort)
-    .AddProject<ASC_Data_Backup_BackgroundTasks>(Constants.BackupBackgroundTasksPort)
-    .AddProject<ASC_Notify>(0, false)
-    .AddProject<ASC_Studio_Notify>(Constants.StudioNotifyPort)
-    .AddProject<ASC_Web_Studio>(Constants.WebstudioPort)
-    .AddProject<ASC_AI>(Constants.AiPort)
-    .AddProject<ASC_AI_Service>(Constants.AiServicePort)
-    .AddSocketIO()
-    .AddSsoAuth()
-    .AddWebDav()
-    .AddIdentity();
+var configurator = new ProjectConfigurator(builder, connectionManager, basePath, isDocker);
+
+if (isPreview)
+{
+    configurator
+        .AddProject<ASC_Files>(Constants.FilesPort)
+        .AddProject<ASC_Files_Service>(Constants.FilesServicePort)
+        .AddProject<ASC_People>(Constants.PeoplePort)
+        .AddProject<ASC_Web_Api>(Constants.WebApiPort)
+        .AddProject<ASC_Web_Studio>(Constants.WebstudioPort)
+        .AddProject<ASC_AI>(Constants.AiPort)
+        .AddProject<ASC_AI_Service>(Constants.AiServicePort)
+        .AddSocketIO();
+}
+else
+{
+    configurator
+        .AddProject<ASC_Files>(Constants.FilesPort)
+        .AddProject<ASC_Files_Service>(Constants.FilesServicePort)
+        .AddProject<ASC_People>(Constants.PeoplePort)
+        .AddProject<ASC_Web_Api>(Constants.WebApiPort)
+        .AddProject<ASC_ApiSystem>(Constants.ApiSystemPort)
+        .AddProject<ASC_ClearEvents>(Constants.ClearEventsPort)
+        .AddProject<ASC_Data_Backup>(Constants.BackupPort)
+        .AddProject<ASC_Data_Backup_BackgroundTasks>(Constants.BackupBackgroundTasksPort)
+        .AddProject<ASC_Notify>(0, false)
+        .AddProject<ASC_Studio_Notify>(Constants.StudioNotifyPort)
+        .AddProject<ASC_Web_Studio>(Constants.WebstudioPort)
+        .AddProject<ASC_AI>(Constants.AiPort)
+        .AddProject<ASC_AI_Service>(Constants.AiServicePort)
+        .AddSocketIO()
+        .AddSsoAuth()
+        .AddWebDav()
+        .AddIdentity();
+}
 
 
 

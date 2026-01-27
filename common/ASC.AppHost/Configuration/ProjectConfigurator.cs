@@ -96,6 +96,18 @@ public class ProjectConfigurator(
             .WithArgs($"{dllPath}{name.Replace('_', '.')}.dll")
             .WithEntrypoint("dotnet");
 
+        var isStandalone = String.Compare(builder.Configuration["APP_HOSTING_STANDALONE"], "true", StringComparison.OrdinalIgnoreCase) == 0;
+
+        if (isStandalone)
+        {
+            resourceBuilder.WithEnvironment("core:base-domain", "localhost");
+        }
+        else
+        {
+            resourceBuilder.WithEnvironment("core:base-domain", "");
+        }
+
+        
         AddBaseBind(resourceBuilder);
 
         if (projectPort != 0)

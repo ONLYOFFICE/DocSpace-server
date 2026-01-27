@@ -70,6 +70,17 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
             .WithReference(MySqlResource)
             .WaitFor(MySqlResource);
         
+        var isStandalone = String.Compare(builder.Configuration["APP_HOSTING_STANDALONE"], "true", StringComparison.OrdinalIgnoreCase) == 0;
+
+        if (isStandalone)
+        {
+            MigrateResource.WithEnvironment("standalone", "true");
+        }
+        else
+        {
+            MigrateResource.WithEnvironment("standalone", "");
+        }
+        
         return this;
     }
 
