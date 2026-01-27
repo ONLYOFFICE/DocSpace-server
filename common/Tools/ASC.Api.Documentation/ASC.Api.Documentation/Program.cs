@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,5 +26,12 @@
 
 using ASC.Api.Documentation;
 
-var app = new CommandApp<SwaggerCommand>();
+var app = new CommandApp();
+
+app.Configure(config =>
+{
+    config.AddCommand<SwaggerCommand>("swagger").WithDescription("Generate swagger files"); ;
+    config.AddCommand<SortTagGroupsCommand>("sort-tag-groups").WithDescription("Generate x-tagGroups");
+    config.AddCommand<RemoveEnumCommand>("remove-enum").WithDescription("Remove duplicate enum");
+});
 app.Run(args);
