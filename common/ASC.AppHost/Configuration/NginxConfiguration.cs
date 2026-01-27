@@ -43,7 +43,7 @@ public static class NginxConfiguration
             .WithBindMount(Path.Combine(clientBasePath, "packages", "client"), "/var/www/client")
             .WithBindMount(Path.Combine(clientBasePath, "packages", "login"), "/var/www/login")
             .WithBindMount(Path.Combine(clientBasePath, "packages", "management"), "/var/www/management")
-            .WithHttpEndpoint(80, Constants.RestyPort)
+            .WithHttpEndpoint(Constants.AppHostPort, Constants.RestyPort)
             .WaitFor(startPackages);
 
         var serviceUrls = GetServiceUrls(isDocker);
@@ -54,8 +54,7 @@ public static class NginxConfiguration
         }
 
         openResty.WithArgs("/bin/sh", "-c",
-            $"envsubst '{string.Join(',', serviceUrls.Select(r => $"${r.Key}"))}' < /etc/nginx/includes/onlyoffice-upstream-map.conf > /etc/nginx/includes/onlyoffice-upstream.conf && " +
-            $"mv /etc/nginx/includes/onlyoffice-upstream.conf /etc/nginx/includes/onlyoffice-upstream-map.conf && " +
+            $"envsubst '{string.Join(' ', serviceUrls.Select(r => $"${r.Key}"))}' < /etc/nginx/includes/onlyoffice-upstream-map.conf.template > /etc/nginx/includes/onlyoffice-upstream-map.conf && " +
             $"/usr/local/openresty/bin/openresty -g 'daemon off;'");
 
         return openResty;
