@@ -48,6 +48,7 @@ public class ModelSettingsData
 
 public class MultimodalSettings
 {
+    public bool UrlSupported { get; init; }
     public ImageMultimodalSettings? Image { get; init; }
 }
 
