@@ -46,7 +46,7 @@ public class ChatCompletionRunner(
         
         var context = await contextBuilder.BuildAsync(roomId);
         
-        var attachments = await GetAttachmentsAsync(files).ToListAsync();
+        var attachments = await GetAttachmentsAsync(context, files).ToListAsync();
         
         var userMessage = FormatUserMessage(message, attachments);
 
@@ -103,7 +103,7 @@ public class ChatCompletionRunner(
         var context = await contextBuilder.BuildAsync(chat.RoomId);
         context.Chat = chat;
         
-        var attachments = await GetAttachmentsAsync(files).ToListAsync();
+        var attachments = await GetAttachmentsAsync(context, files).ToListAsync();
         
         var systemPrompt = ChatPromptTemplate.GetPrompt(
             context.Instruction, 
@@ -144,7 +144,9 @@ public class ChatCompletionRunner(
             serviceScopeFactory);
     }
 
-    private async IAsyncEnumerable<AttachmentMessageContent> GetAttachmentsAsync(IEnumerable<JsonElement>? files)
+    private async IAsyncEnumerable<AttachmentMessageContent> GetAttachmentsAsync(
+        ChatExecutionContext context, 
+        IEnumerable<JsonElement>? files)
     {
         if (files == null)
         {
@@ -155,7 +157,7 @@ public class ChatCompletionRunner(
 
         var failedEntries = new List<FileEntry>();
 
-        await foreach (var result in attachmentHandler.HandleAsync(ids, thirdPartyIds))
+        await foreach (var result in attachmentHandler.HandleAsync(context, ids, thirdPartyIds))
         {
             if (!result.Success)
             {

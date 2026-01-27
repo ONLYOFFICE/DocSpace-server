@@ -40,22 +40,29 @@ public class AttachmentHandler(
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     ITextExtractor textExtractor,
-    VectorizationGlobalSettings vectorizationGlobalSettings)
+    VectorizationGlobalSettings vectorizationGlobalSettings,
+    ProviderSettings providerSettings)
 {
-    public async IAsyncEnumerable<AttachmentResult> HandleAsync(IEnumerable<int> filesIds, IEnumerable<string> thirdPartyFilesIds)
+    public async IAsyncEnumerable<AttachmentResult> HandleAsync(
+        ChatExecutionContext context, 
+        IEnumerable<int> filesIds, 
+        IEnumerable<string> thirdPartyFilesIds)
     {
-        await foreach (var files in HandleAsync(filesIds))
+        var modelSettings = providerSettings.GetModel(context.ClientOptions.Provider, context.ClientOptions.ModelId);
+        ArgumentNullException.ThrowIfNull(modelSettings);
+        
+        await foreach (var files in HandleAsync(modelSettings.Multimodal, filesIds))
         {
             yield return files;
         }
 
-        await foreach (var files in HandleAsync(thirdPartyFilesIds))
+        await foreach (var files in HandleAsync(modelSettings.Multimodal, thirdPartyFilesIds))
         {
             yield return files;
         }
     }
 
-    private async IAsyncEnumerable<AttachmentResult> HandleAsync<T>(IEnumerable<T> filesIds)
+    private async IAsyncEnumerable<AttachmentResult> HandleAsync<T>(MultimodalSettings? multimodal, IEnumerable<T> filesIds)
     {
         var fileDao = daoFactory.GetFileDao<T>();
 
@@ -66,33 +73,38 @@ public class AttachmentHandler(
                 continue;
             }
 
-            var fileType = FileUtility.GetFileTypeByFileName(file.Title);
-
+            var extension = FileUtility.GetFileExtension(file.Title);
+            var fileType = FileUtility.GetFileTypeByExtention(extension);
+            
             if (fileType == FileType.Image)
             {
-                await foreach (var result in HandleMediaAsync(fileDao, file, fileType))
+                if (multimodal?.Image == null)
                 {
-                    yield return result;
+                    continue;
                 }
+
+                if (!multimodal.Image.Formats.Contains(extension))
+                {
+                    continue;
+                }
+                
+                yield return await HandleMediaAsync(fileDao, file, fileType, extension);
             }
             else
             {
-                await foreach (var result in HandleTextAsync(file, fileDao))
+                if (!vectorizationGlobalSettings.IsSupportedContentExtraction(file.Title) ||
+                    file.ContentLength > vectorizationGlobalSettings.MaxContentLength)
                 {
-                    yield return result;
+                    continue;
                 }
+                
+                yield return await HandleTextAsync(fileDao, file, extension);
             }
         }
     }
 
-    private async IAsyncEnumerable<AttachmentResult> HandleTextAsync<T>(File<T> file, IFileDao<T> fileDao)
+    private async Task<AttachmentResult> HandleTextAsync<T>(IFileDao<T> fileDao, File<T> file, string extension)
     {
-        if (!vectorizationGlobalSettings.IsSupportedContentExtraction(file.Title) ||
-            file.ContentLength > vectorizationGlobalSettings.MaxContentLength)
-        {
-            yield break;
-        }
-
         await using var stream = await fileDao.GetFileStreamAsync(file);
 
         await using var memoryStream = new MemoryStream();
@@ -103,16 +115,14 @@ public class AttachmentHandler(
         var content = await textExtractor.ExtractAsync(slice);
         if (string.IsNullOrEmpty(content))
         {
-            yield return new AttachmentResult
+            return new AttachmentResult
             {
                 File = file,
                 Success = false
             };
-
-            yield break;
         }
 
-        yield return new AttachmentResult
+        return new AttachmentResult
         {
             File = file,
             Success = true,
@@ -120,23 +130,23 @@ public class AttachmentHandler(
             {
                 Id = JsonSerializer.SerializeToElement(file.Id),
                 Title = file.Title,
-                Extension = FileUtility.GetFileExtension(file.Title),
+                Extension = extension,
                 Content = content
             }
         };
     }
 
-    private async IAsyncEnumerable<AttachmentResult> HandleMediaAsync<T>(IFileDao<T> fileDao, File<T> file, FileType fileType)
+    private static async Task<AttachmentResult> HandleMediaAsync<T>(
+        IFileDao<T> fileDao,
+        File<T> file,
+        FileType fileType, string extension)
     {
         await using var stream = await fileDao.GetFileStreamAsync(file);
 
         var data = new byte[file.ContentLength];
         await stream.ReadExactlyAsync(data);
 
-        var extension = FileUtility.GetFileExtension(file.Title);
-        var mediaType = GetMediaType(extension);
-
-        yield return new AttachmentResult
+        return new AttachmentResult
         {
             File = file,
             Success = true,
@@ -145,7 +155,7 @@ public class AttachmentHandler(
                 Id = JsonSerializer.SerializeToElement(file.Id),
                 FileType = fileType,
                 Data = data,
-                MediaType = mediaType
+                MediaType = GetMediaType(extension)
             }
         };
     }
