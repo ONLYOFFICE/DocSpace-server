@@ -66,6 +66,17 @@ public class ProjectConfigurator(
             project.WithEnvironment("core:hosting:singletonMode", true.ToString());
         }
         
+        var isStandalone = String.Compare(builder.Configuration["APP_HOSTING_STANDALONE"], "true", StringComparison.OrdinalIgnoreCase) == 0;
+
+        if (isStandalone)
+        {
+            project.WithEnvironment("core:base-domain", "localhost");
+        }
+        else
+        {
+            project.WithEnvironment("core:base-domain", "");
+        }
+        
         connectionManager.AddBaseConfig(project, isDocker, includeHealthCheck);
         connectionManager.AddWaitFor(project);
     }
