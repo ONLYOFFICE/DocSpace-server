@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,21 +24,33 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Helpers;
+using ASC.Web.Core.Files;
+using ASC.Web.Studio.Utility;
+
 namespace ASC.AI.Models.ResponseDto;
 
-public enum ContentType
+public class DataContentDto : MessageContentDto
 {
-    Text,
-    Tool,
-    Attachment,
-    Data
+    public override ContentType Type => ContentType.Data;
+    public required JsonElement Id { get; init; }
+    public required FileType FileType { get; init; }
+    public string? Url { get; set; }
 }
 
-[JsonDerivedType(typeof(TextContentDto))]
-[JsonDerivedType(typeof(ToolContentDto))]
-[JsonDerivedType(typeof(AttachmentContentDto))]
-[JsonDerivedType(typeof(DataContentDto))]
-public abstract class MessageContentDto
+[Scope]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
+    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public partial class DataContentDtoMapper(CommonLinkUtility commonLinkUtility, FilesLinkUtility filesLinkUtility)
 {
-    public abstract ContentType Type { get; }
+    [UserMapping(Default = true)]
+    public DataContentDto MapToDto(DataMessageContent source)
+    {
+        var target = Map(source);
+        target.Url = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileDownloadUrl(source.Id));
+
+        return target;
+    }
+    
+    private partial DataContentDto Map(DataMessageContent source);
 }
