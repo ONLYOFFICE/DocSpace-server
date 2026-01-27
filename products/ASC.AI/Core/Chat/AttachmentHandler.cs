@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Buffers;
+
 using ASC.Web.Core.Files;
 
 namespace ASC.AI.Core.Chat;
@@ -107,33 +109,40 @@ public class AttachmentHandler(
     {
         await using var stream = await fileDao.GetFileStreamAsync(file);
 
-        await using var memoryStream = new MemoryStream();
-        await stream.CopyToAsync(memoryStream);
-
-        var slice = new Memory<byte>(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
-
-        var content = await textExtractor.ExtractAsync(slice);
-        if (string.IsNullOrEmpty(content))
+        var length = (int)file.ContentLength;
+        var buffer = ArrayPool<byte>.Shared.Rent(length);
+        try
         {
+            var memory = buffer.AsMemory(0, length);
+            await stream.ReadExactlyAsync(memory);
+
+            var content = await textExtractor.ExtractAsync(memory);
+            if (string.IsNullOrEmpty(content))
+            {
+                return new AttachmentResult
+                {
+                    File = file,
+                    Success = false
+                };
+            }
+
             return new AttachmentResult
             {
                 File = file,
-                Success = false
+                Success = true,
+                Content = new TextAttachmentMessageContent
+                {
+                    Id = JsonSerializer.SerializeToElement(file.Id),
+                    Title = file.Title,
+                    Extension = extension,
+                    Content = content
+                }
             };
         }
-
-        return new AttachmentResult
+        finally
         {
-            File = file,
-            Success = true,
-            Content = new TextAttachmentMessageContent
-            {
-                Id = JsonSerializer.SerializeToElement(file.Id),
-                Title = file.Title,
-                Extension = extension,
-                Content = content
-            }
-        };
+            ArrayPool<byte>.Shared.Return(buffer);
+        }
     }
 
     private static async Task<AttachmentResult> HandleMediaAsync<T>(
