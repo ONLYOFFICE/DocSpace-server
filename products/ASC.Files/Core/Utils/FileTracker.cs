@@ -47,7 +47,7 @@ public class FileTrackerHelper(IFusionCache cache, IServiceProvider serviceProvi
             if (tracker.EditingBy.TryGetValue(tabId, out var trackInfo))
             {
                 trackInfo.TrackTime = DateTime.UtcNow;
-                checkRight = DateTime.UtcNow - tracker.EditingBy[tabId].CheckRightTime > _checkRightTimeout;
+                checkRight = DateTime.UtcNow - trackInfo.CheckRightTime > _checkRightTimeout;
             }
             else
             {
@@ -105,6 +105,28 @@ public class FileTrackerHelper(IFusionCache cache, IServiceProvider serviceProvi
         }
 
         await RemoveTrackerAsync(fileId);
+    }
+
+    public async Task SetAnonymousSessionsAsync<T>(T fileId, List<string> anonymousSessions)
+    {
+        var tracker = await GetTrackerAsync(fileId);
+
+        if (tracker == null)
+        {
+            return;
+        }
+
+        tracker.AnonymousSessions.Clear();
+
+        if (anonymousSessions != null)
+        {
+            foreach (var session in anonymousSessions)
+            {
+                tracker.AnonymousSessions.TryAdd(session, 0);
+            }
+        }
+
+        await SetTrackerAsync(fileId, tracker);
     }
 
     public record EditingStatus(bool IsEditing, bool IsEditingAlone);
@@ -209,24 +231,47 @@ public class FileTrackerHelper(IFusionCache cache, IServiceProvider serviceProvi
             : [];
     }
 
-    public async Task<Dictionary<Guid, string>> GetEditingByWithNamesAsync<T>(T fileId, Global global)
+    public async Task<List<string>> GetAnonymousEditingSessionsAsync<T>(T fileId)
     {
+        var tracker = await GetTrackerAsync(fileId);
+
+        return tracker != null && await IsEditingAsync(fileId)
+            ? tracker.AnonymousSessions.Keys.ToList()
+            : [];
+    }
+
+    public async Task<Dictionary<string, string>> GetEditingSessionsAsync<T>(T fileId, Global global)
+    {
+        var result = new Dictionary<string, string>();
+
         var tracker = await GetTrackerAsync(fileId);
         if (tracker == null || !await IsEditingAsync(fileId))
         {
-            return null;
+            return result;
         }
 
-        var result = new Dictionary<Guid, string>();
         foreach (var trackInfo in tracker.EditingBy.Values)
         {
-            if (result.ContainsKey(trackInfo.UserId))
+            var userKey = trackInfo.UserId.ToString();
+            if (result.ContainsKey(userKey))
             {
                 continue;
             }
 
             var userName = await global.GetUserNameAsync(trackInfo.UserId, true);
-            result.Add(trackInfo.UserId, userName);
+            if (trackInfo.UserId == Guid.Empty)
+            {
+                var i = 1;
+                foreach (var session in tracker.AnonymousSessions)
+                {
+                    result.Add(session.Key, i == 1 ? userName : $"{userName} {i}");
+                    i++;
+                }
+            }
+            else
+            {
+                result.Add(userKey, userName);
+            }
         }
 
         return result;
@@ -372,9 +417,12 @@ public record FileTracker
     [ProtoMember(5)]
     public string FillingSessionId { get; set; }
 
+    [ProtoMember(6)]
+    public ConcurrentDictionary<string, byte> AnonymousSessions { get; set; }
+
     public FileTracker() { }
 
-    internal FileTracker(Guid tabId, Guid userId, bool newScheme, bool editingAlone, Tenant tenant, string baseUri, string docKey, string token = null, string fillingSessionId = null)
+    internal FileTracker(Guid tabId, Guid userId, bool newScheme, bool editingAlone, Tenant tenant, string baseUri, string docKey, string token = null, string fillingSessionId = null, string anonymousSessionId = null)
     {
         DocKey = docKey;
         Tenant = tenant;
@@ -388,6 +436,7 @@ public record FileTracker
             EditingAlone = editingAlone,
             Token = token
         });
+        AnonymousSessions = new ConcurrentDictionary<string, byte>();
     }
 
     [ProtoContract]

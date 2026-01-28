@@ -2159,8 +2159,13 @@ public class FileStorageService //: IFileStorageService
                 await tagDao.SaveTagsAsync(tagLocked);
             }
 
-            var usersDrop = (await fileTracker.GetEditingByAsync(file.Id)).Where(uid => uid != authContext.CurrentAccount.ID).Select(u => u.ToString()).ToArray();
-            if (usersDrop.Length > 0)
+            var usersDrop = await fileTracker.GetAnonymousEditingSessionsAsync(file.Id);
+
+            usersDrop.AddRange((await fileTracker.GetEditingByAsync(file.Id))
+                .Where(uid => uid != authContext.CurrentAccount.ID)
+                .Select(u => u.ToString()));
+
+            if (usersDrop.Count > 0)
             {
                 var docKey = await fileTracker.GetTrackerDocKey(file.Id);
                 await documentServiceHelper.DropUserAsync(docKey, usersDrop, file.Id);
@@ -2240,8 +2245,13 @@ public class FileStorageService //: IFileStorageService
 
                 await tagDao.SaveTagsAsync(tagCustomFilter);
 
-                var usersDrop = (await fileTracker.GetEditingByAsync(file.Id)).Where(uid => uid != authContext.CurrentAccount.ID).Select(u => u.ToString()).ToArray();
-                if (usersDrop.Length > 0)
+                var usersDrop = await fileTracker.GetAnonymousEditingSessionsAsync(file.Id);
+
+                usersDrop.AddRange((await fileTracker.GetEditingByAsync(file.Id))
+                    .Where(uid => uid != authContext.CurrentAccount.ID)
+                    .Select(u => u.ToString()));
+
+                if (usersDrop.Count > 0)
                 {
                     var docKey = await fileTracker.GetTrackerDocKey(file.Id);
                     await documentServiceHelper.DropUserAsync(docKey, usersDrop, file.Id);

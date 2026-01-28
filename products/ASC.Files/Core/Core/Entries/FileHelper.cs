@@ -41,7 +41,7 @@ public class FileHelper(
             ? fileTracker.GetEditingStatusAsync(file.Id)
             : Task.FromResult<FileTrackerHelper.EditingStatus>(null);
 
-        var editingByTask = fileTracker.GetEditingByWithNamesAsync(file.Id, global);
+        var editingByTask = fileTracker.GetEditingSessionsAsync(file.Id, global);
 
         var convertingTask = fileConverter.IsConverting(file);
 
