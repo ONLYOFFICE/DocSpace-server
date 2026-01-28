@@ -71,6 +71,7 @@ internal class FolderDao(
     private const string RoomTemplates = "roomtemplates";
     private const string Archive = "archive";
     private const string AiAgents = "aiagents";
+    private const string DefaultTemplates = "defaulttemplates";
 
     public virtual async Task<Folder<int>> GetFolderAsync(int folderId)
     {
@@ -331,7 +332,7 @@ internal class FolderDao(
 
     public async Task<FilesStatisticsResultDto> GetFilesUsedSpace()
     {
-        var fileRootFolders = new List<FolderType> { FolderType.USER, FolderType.Archive, FolderType.TRASH, FolderType.VirtualRooms, FolderType.RoomTemplates, FolderType.AiAgents };
+        var fileRootFolders = new List<FolderType> { FolderType.USER, FolderType.Archive, FolderType.TRASH, FolderType.VirtualRooms, FolderType.RoomTemplates, FolderType.DefaultTemplates, FolderType.AiAgents };
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var tenantId = _tenantManager.GetCurrentTenantId();
         var result = new FilesStatisticsResultDto();
@@ -1537,6 +1538,10 @@ internal class FolderDao(
                         folder.FolderType = FolderType.Templates;
                         folder.Title = Templates;
                         break;
+                    case DefaultTemplates:
+                        folder.FolderType = FolderType.DefaultTemplates;
+                        folder.Title = DefaultTemplates;
+                        break;
                     case Privacy:
                         folder.FolderType = FolderType.Privacy;
                         folder.Title = Privacy;
@@ -1657,6 +1662,10 @@ internal class FolderDao(
                     folder.FolderType = FolderType.Templates;
                     folder.Title = Templates;
                     break;
+                case DefaultTemplates:
+                    folder.FolderType = FolderType.DefaultTemplates;
+                    folder.Title = DefaultTemplates;
+                    break;
                 case Privacy:
                     folder.FolderType = FolderType.Privacy;
                     folder.Title = Privacy;
@@ -1759,6 +1768,11 @@ internal class FolderDao(
     public async Task<int> GetFolderIDTemplatesAsync(bool createIfNotExists)
     {
         return await (this as IFolderDao<int>).GetFolderIDAsync(FileConstant.ModuleId, Templates, null, createIfNotExists);
+    }
+
+    public async Task<int> GetFolderIDDefaultTemplatesAsync(bool createIfNotExists)
+    {
+        return await (this as IFolderDao<int>).GetFolderIDAsync(FileConstant.ModuleId, DefaultTemplates, null, createIfNotExists);
     }
 
     public async Task<int> GetFolderIDPrivacyAsync(bool createIfNotExists, Guid? userId = null)
