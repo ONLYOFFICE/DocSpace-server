@@ -61,12 +61,12 @@ namespace ASC.Files.Core.Configuration
             var fileIds = settings.Items.Where(i => i.SelectedFile != null).Select(i => i.SelectedFile.Value);
             var fileTitles = (await fileDao.GetFilesAsync(fileIds).ToListAsync()).ToDictionary(f => f.Id, f => f);
 
-            DefaultTempalteItemDto asDto(DefaultTempalteItem item)
+            DefaultTemplateItemDto asDto(DefaultTempalteItem item)
             {
                 if (item.SelectedFile.HasValue)
                 {
                     var file = fileTitles[item.SelectedFile.Value];
-                    return new DefaultTempalteItemDto()
+                    return new DefaultTemplateItemDto()
                     {
                         FileExtension = item.FileExtension,
                         SelectedFile = item.SelectedFile,
@@ -77,7 +77,7 @@ namespace ASC.Files.Core.Configuration
                 }
                 else
                 {
-                    return new DefaultTempalteItemDto()
+                    return new DefaultTemplateItemDto()
                     {
                         FileExtension = item.FileExtension
                     };

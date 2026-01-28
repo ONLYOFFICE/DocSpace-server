@@ -118,7 +118,7 @@ public enum FolderType
     AiAgents = 34,
 
     [SwaggerEnum(Description = "Default Templates")]
-    DefaultTempaltes = 35,
+    DefaultTemplates = 35,
 }
 
 /// <summary>

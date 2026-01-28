@@ -34,13 +34,13 @@ namespace ASC.Files.Core.ApiModels.ResponseDto
         /// <summary>
         /// Default templates list.
         /// </summary>
-        public required IEnumerable<DefaultTempalteItemDto> Items { get; set; }
+        public required IEnumerable<DefaultTemplateItemDto> Items { get; set; }
     }
 
     /// <summary>
     /// Default template setting
     /// </summary>
-    public class DefaultTempalteItemDto
+    public class DefaultTemplateItemDto
     {
         /// <summary>
         /// File id to use as a default template

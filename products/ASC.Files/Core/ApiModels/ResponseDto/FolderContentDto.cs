@@ -114,7 +114,7 @@ public class FolderContentDtoHelper(
         }
         
         List<FileShareRecord<string>> currentUsersRecords = null;
-        if (folderItems.FolderInfo is { FolderType: FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates or FolderType.DefaultTempaltes })
+        if (folderItems.FolderInfo is { FolderType: FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates or FolderType.DefaultTemplates })
         {
             currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
         }

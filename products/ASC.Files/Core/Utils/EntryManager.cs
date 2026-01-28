@@ -481,7 +481,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
             CalculateTotal();
         }
-        else if (parent.FolderType == FolderType.DefaultTempaltes)
+        else if (parent.FolderType == FolderType.DefaultTemplates)
         {
             var folderDao = daoFactory.GetFolderDao<T>();
             var fileDao = daoFactory.GetFileDao<T>();

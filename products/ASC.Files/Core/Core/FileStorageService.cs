@@ -1547,7 +1547,7 @@ public class FileStorageService //: IFileStorageService
             var canCreate = await fileSecurity.CanCreateAsync(folder) &&
                             folder.FolderType != FolderType.VirtualRooms &&
                             folder.FolderType != FolderType.RoomTemplates &&
-                            folder.FolderType != FolderType.DefaultTempaltes &&
+                            folder.FolderType != FolderType.DefaultTemplates &&
                             folder.FolderType != FolderType.Archive;
 
             if (!canCreate)
@@ -4763,7 +4763,7 @@ public class FileStorageService //: IFileStorageService
 
         await foreach (var folder in folders)
         {
-            if (folder.RootFolderType is not FolderType.COMMON and not FolderType.VirtualRooms and not FolderType.RoomTemplates and not FolderType.DefaultTempaltes and not FolderType.AiAgents)
+            if (folder.RootFolderType is not FolderType.COMMON and not FolderType.VirtualRooms and not FolderType.RoomTemplates and not FolderType.DefaultTemplates and not FolderType.AiAgents)
             {
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
             }
