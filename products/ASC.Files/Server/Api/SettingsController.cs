@@ -424,10 +424,10 @@ public class SettingsController(
     /// Uploads a file to use as the default template setting.
     /// </summary>
     /// <short>Upload a file as the default template setting</short>
-    /// <path>api/2.0/files/settings/defaulttemplate/upload</path>
+    /// <path>api/2.0/files/settings/defaulttemplate</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "New default template settings", typeof(DefaultTemplateSettingsDto))]
-    [HttpPost("settings/defaulttemplate/upload")]
+    [HttpPost("settings/defaulttemplate")]
     public async Task<DefaultTemplateSettingsDto> UploadDefaultTemplate(DefaultTemplateSettingsUploadRequestDto inDto)
     {
         var settings = await defaultTemplateSettingsHelper.SetTemplateAsync(inDto.FileExtension, inDto.File.FileName, inDto?.File.OpenReadStream());
