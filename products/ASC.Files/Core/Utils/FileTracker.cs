@@ -76,22 +76,22 @@ public class FileTrackerHelper(IFusionCache cache, IServiceProvider serviceProvi
         cache.Events.Memory.Eviction += MemoryOnEviction;
     }
 
-    public async Task RemoveAsync<T>(T fileId, Guid tabId = default, Guid userId = default)
+    public async Task RemoveAsync<T>(T fileId, Guid? tabId = null, Guid? userId = null)
     {
         var tracker = await GetTrackerAsync(fileId);
         if (tracker != null)
         {
-            if (tabId != Guid.Empty)
+            if (tabId.HasValue)
             {
-                tracker.EditingBy.TryRemove(tabId, out _);
+                tracker.EditingBy.TryRemove(tabId.Value, out _);
                 await SetTrackerAsync(fileId, tracker);
 
                 return;
             }
 
-            if (userId != Guid.Empty)
+            if (userId.HasValue)
             {
-                var listForRemove = tracker.EditingBy.Where(b => tracker.EditingBy[b.Key].UserId == userId);
+                var listForRemove = tracker.EditingBy.Where(b => tracker.EditingBy[b.Key].UserId == userId.Value);
 
                 foreach (var editTab in listForRemove)
                 {
