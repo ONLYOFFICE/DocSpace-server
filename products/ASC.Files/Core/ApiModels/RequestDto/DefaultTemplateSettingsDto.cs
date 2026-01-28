@@ -38,22 +38,22 @@ namespace ASC.Files.Core.ApiModels.RequestDto
         /// <summary>
         /// File extension of a template to replace
         /// </summary>
-        public string FileExtension { get; set; }
+        public required string FileExtension { get; set; }
     }
 
     /// <summary>
     /// Default templates settings upload request parameters.
     /// </summary>
-    public class DefaultTemplateSettingsUploadRequestDto : IModelWithFile
+    public class DefaultTemplateSettingsUploadRequestDto
     {
         /// <summary>
         /// File extension of a template to replace
         /// </summary>
-        public string FileExtension { get; set; }
+        public required string FileExtension { get; set; }
 
         /// <summary>
         /// File to replace template with
         /// </summary>
-        public IFormFile File { get; set; }
+        public required IFormFile File { get; set; }
     }
 }

@@ -34,7 +34,7 @@ namespace ASC.Files.Core.ApiModels.ResponseDto
         /// <summary>
         /// Default templates list.
         /// </summary>
-        public IEnumerable<DefaultTempalteItemDto> Items { get; set; }
+        public required IEnumerable<DefaultTempalteItemDto> Items { get; set; }
     }
 
     /// <summary>
@@ -49,7 +49,7 @@ namespace ASC.Files.Core.ApiModels.ResponseDto
         /// <summary>
         /// Extension of a default template
         /// </summary>
-        public string FileExtension { get; set; }
+        public required string FileExtension { get; set; }
 
         /// <summary>
         /// Title of a default template
