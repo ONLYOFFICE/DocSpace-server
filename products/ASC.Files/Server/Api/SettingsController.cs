@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Configuration;
+
 using Module = ASC.Api.Core.Module;
 
 namespace ASC.Files.Api;
@@ -34,7 +36,11 @@ public class SettingsController(
     FilesSettingsDtoConverter settingsDtoConverter,
     CompressToArchive compressToArchive,
     FolderDtoHelper folderDtoHelper,
-    FileDtoHelper fileDtoHelper)
+    FileDtoHelper fileDtoHelper,
+    DefaultTemplateSettingsHelper defaultTemplateSettingsHelper,
+    FilesControllerHelper filesControllerHelper,
+    FileSecurityCommon fileSecurityCommon,
+    SecurityContext securityContext)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>
@@ -384,5 +390,47 @@ public class SettingsController(
     {
         await filesSettingsHelper.SetOpenEditorInSameTabAsync(inDto.Set);
         return await filesSettingsHelper.GetOpenEditorInSameTabAsync();
+    }
+
+    /// <summary>
+    /// Returns the default template setting.
+    /// </summary>
+    /// <short>Get the default template setting</short>
+    /// <path>api/2.0/files/settings/defaulttemplate</path>
+    [Tags("Files / Settings")]
+    [SwaggerResponse(200, "Default template settings", typeof(DefaultTemplateSettingsDto))]
+    [HttpGet("settings/defaulttemplate")]
+    public async Task<DefaultTemplateSettingsDto> GetDefaultTemplates()
+    {
+        var settings = await defaultTemplateSettingsHelper.GetSettingsAsync();
+        return await defaultTemplateSettingsHelper.ConvertToDtoAsync(settings);
+    }
+
+    /// <summary>
+    /// Changes the default template setting.
+    /// </summary>
+    /// <short>Change the default template setting</short>
+    /// <path>api/2.0/files/settings/defaulttemplate</path>
+    [Tags("Files / Settings")]
+    [SwaggerResponse(200, "New default template settings", typeof(DefaultTemplateSettingsDto))]
+    [HttpPut("settings/defaulttemplate")]
+    public async Task<DefaultTemplateSettingsDto> SetDefaultTemplate(DefaultTemplateSettingsRequestDto inDto)
+    {
+        var settings = await defaultTemplateSettingsHelper.SetTemplateAsync(inDto.FileExtension, inDto.SelectedFile);
+        return await defaultTemplateSettingsHelper.ConvertToDtoAsync(settings);
+    }
+
+    /// <summary>
+    /// Uploads a file to use as the default template setting.
+    /// </summary>
+    /// <short>Upload a file as the default template setting</short>
+    /// <path>api/2.0/files/settings/defaulttemplate</path>
+    [Tags("Files / Settings")]
+    [SwaggerResponse(200, "New default template settings", typeof(DefaultTemplateSettingsDto))]
+    [HttpPost("settings/defaulttemplate")]
+    public async Task<DefaultTemplateSettingsDto> UploadDefaultTemplate(DefaultTemplateSettingsUploadRequestDto inDto)
+    {
+        var settings = await defaultTemplateSettingsHelper.SetTemplateAsync(inDto.FileExtension, inDto.File.FileName, inDto?.File.OpenReadStream());
+        return await defaultTemplateSettingsHelper.ConvertToDtoAsync(settings);
     }
 }
