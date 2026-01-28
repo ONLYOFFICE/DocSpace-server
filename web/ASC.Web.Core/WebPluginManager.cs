@@ -46,6 +46,7 @@ public class WebPlugin
     public bool Enabled { get; set; }
     public bool System { get; set; }
     public string Url { get; set; }
+    public string CssUrl { get; set; }
     public string Settings { get; set; }
     public Dictionary<string,string> NameLocale { get; set; }
     public Dictionary<string,string> DescriptionLocale { get; set; }
@@ -166,6 +167,11 @@ public class WebPluginManager(
             var hash = string.IsNullOrEmpty(webPlugin.Version) ? string.Empty : $"?hash={webPlugin.Version}";
 
             webPlugin.Url = string.Format(urlTemplate, webPlugin.Name) + hash;
+
+            if (await storage.IsFileAsync(Path.Combine(webPlugin.Name, PluginCssFileName)))
+            {
+                webPlugin.CssUrl = webPlugin.Url.Replace(PluginFileName, PluginCssFileName);
+            }
 
             var existingSettings = await GetWebPluginSettingsAsync(webPlugin.Name);
 
@@ -351,6 +357,11 @@ public class WebPluginManager(
                 var hash = string.IsNullOrEmpty(webPlugin.Version) ? string.Empty : $"?hash={webPlugin.Version}";
 
                 webPlugin.Url = string.Format(urlTemplate, webPlugin.Name) + hash;
+
+                if (await storage.IsFileAsync(Path.Combine(webPlugin.Name, PluginCssFileName)))
+                {
+                    webPlugin.CssUrl = webPlugin.Url.Replace(PluginFileName, PluginCssFileName);
+                }
 
                 webPlugins.Add(webPlugin);
             }

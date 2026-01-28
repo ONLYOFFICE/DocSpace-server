@@ -1439,7 +1439,42 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UnknownWrapper"
+                  "type": "object",
+                  "properties": {
+                    "response": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "number",
+                        "format": "double"
+                      }
+                    },
+                    "count": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "links": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "href": {
+                            "type": "string"
+                          },
+                          "action": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "status": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "format": "int32"
+                    }
+                  }
                 }
               }
             }
@@ -6926,7 +6961,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UnknownWrapper"
+                  "$ref": "#/components/schemas/DoubleNullableWrapper"
                 }
               }
             }
@@ -12557,7 +12592,42 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UnknownWrapper"
+                  "type": "object",
+                  "properties": {
+                    "response": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "integer",
+                        "format": "int32"
+                      }
+                    },
+                    "count": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "links": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "href": {
+                            "type": "string"
+                          },
+                          "action": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "status": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "format": "int32"
+                    }
+                  }
                 }
               }
             }
@@ -14917,7 +14987,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "9846"
+              "example": "9079"
             }
           }
         ],
@@ -14987,7 +15057,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "9846"
+              "example": "9079"
             }
           }
         ],
@@ -17099,13 +17169,6 @@
                   "DocSpaceAdmin",
                   "User"
                 ],
-                "x-enum-descriptions": [
-                  "All",
-                  "Room admin",
-                  "Guest",
-                  "DocSpace admin",
-                  "User"
-                ],
                 "description": "[0 - All, 1 - Room admin, 2 - Guest, 3 - DocSpace admin, 4 - User]"
               }
             }
@@ -17512,13 +17575,6 @@
                   "RoomAdmin",
                   "Guest",
                   "DocSpaceAdmin",
-                  "User"
-                ],
-                "x-enum-descriptions": [
-                  "All",
-                  "Room admin",
-                  "Guest",
-                  "DocSpace admin",
                   "User"
                 ],
                 "description": "[0 - All, 1 - Room admin, 2 - Guest, 3 - DocSpace admin, 4 - User]"
@@ -18093,7 +18149,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9079
+              "example": 9846
             }
           },
           {
@@ -18800,7 +18856,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "0dec3996-2dfc-7cb2-e974-8e5fb9f399ce"
             }
           },
           {
@@ -18875,7 +18931,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "0dec3996-2dfc-7cb2-e974-8e5fb9f399ce"
+              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
             }
           }
         ],
@@ -28941,20 +28997,6 @@
                     "Editing",
                     "ContentCreator"
                   ],
-                  "x-enum-descriptions": [
-                    "None",
-                    "Read and write",
-                    "Read",
-                    "Restrict",
-                    "Varies",
-                    "Review",
-                    "Comment",
-                    "Fill forms",
-                    "Custom filter",
-                    "Room manager",
-                    "Editing",
-                    "Content creator"
-                  ],
                   "description": "Sharing rights (None, ReadWrite, Read, Restrict, Varies, Review, Comment, FillForms, CustomFilter, RoomAdmin, Editing, Collaborator)."
                 },
                 "description": "Sharing rights (None, ReadWrite, Read, Restrict, Varies, Review, Comment, FillForms, CustomFilter, RoomAdmin, Editing, Collaborator)."
@@ -32624,7 +32666,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "9846"
+              "example": "9079"
             }
           }
         ],
@@ -35541,28 +35583,6 @@
           "Unfollow",
           "Logout"
         ],
-        "x-enum-descriptions": [
-          "None",
-          "Create",
-          "Update",
-          "Delete",
-          "Link",
-          "Unlink",
-          "Attach",
-          "Detach",
-          "Send",
-          "Import",
-          "Export",
-          "Update access",
-          "Download",
-          "Upload",
-          "Copy",
-          "Move",
-          "Reassigns",
-          "Follow",
-          "Unfollow",
-          "Logout"
-        ],
         "description": "[0 - None, 1 - Create, 2 - Update, 3 - Delete, 4 - Link, 5 - Unlink, 6 - Attach, 7 - Detach, 8 - Send, 9 - Import, 10 - Export, 11 - Update access, 12 - Download, 13 - Upload, 14 - Copy, 15 - Move, 16 - Reassigns, 17 - Follow, 18 - Unfollow, 19 - Logout]"
       },
       "ActiveConnectionsDto": {
@@ -37402,7 +37422,7 @@
             "description": "The customer email address.",
             "nullable": true,
             "readOnly": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "Randall63@hotmail.com"
           },
           "payer": {
             "$ref": "#/components/schemas/EmployeeDto"
@@ -37702,11 +37722,6 @@
           "ProvideChoice",
           "Web",
           "App"
-        ],
-        "x-enum-descriptions": [
-          "Provide choice",
-          "Web",
-          "App"
         ]
       },
       "DefaultProductRequestDto": {
@@ -37734,13 +37749,6 @@
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
-          "Created",
-          "Running",
-          "Completed",
-          "Canceled",
-          "Failted"
-        ],
-        "x-enum-descriptions": [
           "Created",
           "Running",
           "Completed",
@@ -37831,6 +37839,41 @@
         "properties": {
           "response": {
             "$ref": "#/components/schemas/DocumentBuilderTaskDto"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DoubleNullableWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "number",
+            "nullable": true
           },
           "count": {
             "type": "integer",
@@ -38012,12 +38055,6 @@
           "Activated",
           "Pending",
           "AutoGenerated"
-        ],
-        "x-enum-descriptions": [
-          "Not activated",
-          "Activated",
-          "Pending",
-          "Auto generated"
         ]
       },
       "EmployeeArrayWrapper": {
@@ -38146,13 +38183,6 @@
           "Pending",
           "Default",
           "All"
-        ],
-        "x-enum-descriptions": [
-          "Active",
-          "Terminated",
-          "Pending",
-          "Default",
-          "All"
         ]
       },
       "EmployeeType": {
@@ -38183,12 +38213,6 @@
           "EncryptionStarted",
           "Encrypted",
           "DecryptionStarted"
-        ],
-        "x-enum-descriptions": [
-          "Decrypted",
-          "Encryption started",
-          "Encrypted",
-          "Decryption started"
         ],
         "description": "[0 - Decrypted, 1 - Encryption started, 2 - Encrypted, 3 - Decryption started]"
       },
@@ -38262,16 +38286,6 @@
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
-          "None",
-          "File",
-          "Folder",
-          "User",
-          "Group",
-          "Room",
-          "Tag",
-          "Agent"
-        ],
-        "x-enum-descriptions": [
           "None",
           "File",
           "Folder",
@@ -38547,36 +38561,6 @@
           "Knowledge",
           "ResultStorage",
           "AiAgents"
-        ],
-        "x-enum-descriptions": [
-          "Default",
-          "Coomon",
-          "Bunch",
-          "Trash",
-          "User",
-          "Share",
-          "Projects",
-          "Favourites",
-          "Recent",
-          "Templates",
-          "Privacy",
-          "Virtual rooms",
-          "Filling forms room",
-          "Editing room",
-          "Custom room",
-          "Archive",
-          "Thirdparty backup",
-          "Public room",
-          "Ready form folder",
-          "In process form folder",
-          "Form filling folder done",
-          "Form filling folder in progress",
-          "Virtual Data Room",
-          "Room templates folder",
-          "AI Room",
-          "Knowledge",
-          "Result storage",
-          "AI Agents"
         ]
       },
       "FormGalleryDto": {
@@ -39291,16 +39275,6 @@
           "Contacts",
           "Agents"
         ],
-        "x-enum-descriptions": [
-          "None",
-          "Files",
-          "Folders",
-          "Documents settings",
-          "Rooms",
-          "Settings",
-          "Contacts",
-          "Agents"
-        ],
         "description": "[0 - None, 1 - Files, 2 - Folders, 3 - Documents settings, 27 - Rooms, 29 - Settings, 30 - Contacts, 31 - Agents]"
       },
       "LoginEventArrayWrapper": {
@@ -39440,22 +39414,6 @@
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
-          "Facebook",
-          "Google",
-          "Dropbox",
-          "Docusign",
-          "Box",
-          "OneDrive",
-          "GosUslugi",
-          "LinkedIn",
-          "MailRu",
-          "VK",
-          "Wordpress",
-          "Yahoo",
-          "Yandex",
-          "Github"
-        ],
-        "x-enum-descriptions": [
           "Facebook",
           "Google",
           "Dropbox",
@@ -40274,329 +40232,6 @@
           "GenerateAuthorizationCodeToken",
           "GeneratePersonalAccessToken",
           "None"
-        ],
-        "x-enum-descriptions": [
-          "Login success",
-          "Login success via social account",
-          "Login fail invalid combination",
-          "Login fail social account not found",
-          "Login fail disabled profile",
-          "Login fail",
-          "Logout",
-          "Login success via sms",
-          "Login fail via sms",
-          "Login fail ip security",
-          "Login success via api",
-          "Login success via social app",
-          "Login success via api sms",
-          "Login fail via api",
-          "Login fail via api sms",
-          "Login success via SSO",
-          "Session started",
-          "Session completed",
-          "Login fail via SSO",
-          "Login success via api social account",
-          "Login fail via api social account",
-          "Login succes via tfa app",
-          "Login fail via Tfa app",
-          "Login fail brute force",
-          "Login success via api tfa",
-          "Login fail via api tfa",
-          "Login fail recaptcha",
-          "Authorization link activated",
-          "Login success via OAuth 2.0",
-          "Login success via login and password",
-          "User created",
-          "Guest created",
-          "User created via invite",
-          "Guest created via invite",
-          "User activated",
-          "Guest activated",
-          "User updated",
-          "User updated language",
-          "User added avatar",
-          "User deleted avatar",
-          "User updated avatar thumbnails",
-          "User linked social account",
-          "User unlinked social account",
-          "User sent activation instructions",
-          "User sent email change instructions",
-          "User sent password change instructions",
-          "User sent delete instructions",
-          "User updated password",
-          "User deleted",
-          "Users updated type",
-          "Users updated status",
-          "Users sent activation instructions",
-          "Users deleted",
-          "Sent invite instructions",
-          "User imported",
-          "Guest imported",
-          "Group created",
-          "Group updated",
-          "Group deleted",
-          "User updated mobile number",
-          "User data reassigns",
-          "User data removing",
-          "User connected tfa app",
-          "User disconnected tfa app",
-          "User logout active connections",
-          "User logout active connection",
-          "User logout active connections for user",
-          "Send join invite",
-          "File created",
-          "File renamed",
-          "File updated",
-          "File created version",
-          "File deleted version",
-          "File updated revision comment",
-          "File locked",
-          "File unlocked",
-          "File updated access",
-          "File downloaded",
-          "File downloaded as",
-          "File uploaded",
-          "File imported",
-          "File copied",
-          "File copied with overwriting",
-          "File moved",
-          "File moved with overwriting",
-          "File moved to trash",
-          "File deleted",
-          "Folder created",
-          "Folder renamed",
-          "Folder updated access",
-          "Folder copied",
-          "Folder copied with overwriting",
-          "Folder moved",
-          "Folder moved with overwriting",
-          "Folder moved to trash",
-          "Folder deleted",
-          "ThirdParty created",
-          "ThirdParty updated",
-          "ThirdParty deleted",
-          "Documents ThirdParty settings updated",
-          "Documents overwriting settings updated",
-          "Documents uploading formats settings updated",
-          "User file updated",
-          "File converted",
-          "File send access link",
-          "Document service location setting",
-          "Authorization keys setting",
-          "Full text search setting",
-          "Start transfer setting",
-          "Backup started",
-          "License key uploaded",
-          "File change owner",
-          "File restore version",
-          "Document send to sign",
-          "Document sign complete",
-          "User updated email",
-          "Documents store forcesave",
-          "Documents forcesave",
-          "Start storage encryption",
-          "Privacy room enable",
-          "Privacy room disable",
-          "Start storage decryption",
-          "File opened for change",
-          "File marked as favorite",
-          "File removed from favorite",
-          "Folder downloaded",
-          "File removed from list",
-          "Folder removed from list",
-          "File external link access updated",
-          "Trash emptied",
-          "File revision downloaded",
-          "File marked as read",
-          "File readed",
-          "Folder marked as read",
-          "Folder updated access for",
-          "File updated access for",
-          "Documents external share settings updated",
-          "Room created",
-          "Room renamed",
-          "Room archived",
-          "Room unarchived",
-          "Room deleted",
-          "Room update access for user",
-          "Tag created",
-          "Tags deleted",
-          "Added room tags",
-          "Deleted room tags",
-          "Room logo created",
-          "Room logo deleted",
-          "Room invitation link updated",
-          "Documents keep new file name settings updated",
-          "Room remove user",
-          "Room create user",
-          "Room invitation link created",
-          "Room invitation link deleted",
-          "Room external link created",
-          "Room external link updated",
-          "Room external link deleted",
-          "File external link created",
-          "File external link updated",
-          "File external link deleted",
-          "Room group added",
-          "Room update access for group",
-          "Room group remove",
-          "Room external link revoked",
-          "Room external link renamed",
-          "File uploaded with overwriting",
-          "Room copied",
-          "Documents display file extension updated",
-          "Room color changed",
-          "Room cover changed",
-          "Room indexing changed",
-          "Room deny download changed",
-          "Room index export saved",
-          "Folder index changed",
-          "Folder index reordered",
-          "Room deny download enabled",
-          "Room deny download disabled",
-          "File index changed",
-          "Room watermark set",
-          "Room watermark disabled",
-          "Room index export saved",
-          "Room indexing disabled",
-          "Room life time set",
-          "Room life time disabled",
-          "Room invite resend",
-          "File version deleted",
-          "File custom filter enabled",
-          "File custom filter disabled",
-          "Folder external link created",
-          "Folder external link updated",
-          "Folder external link deleted",
-          "Backup completed",
-          "Backup failed",
-          "Scheduled backup started",
-          "Scheduled backup completed",
-          "Scheduled backup failed",
-          "Form started to fill",
-          "Form partially filled",
-          "Form completely filled",
-          "Form stopped",
-          "AI agent created",
-          "AI agent renamed",
-          "AI agent deleted",
-          "MCP server added to AI agent",
-          "MCP server deleted from AI agent",
-          "Room change owner",
-          "Ldap enabled",
-          "Ldap disabled",
-          "LDAP synchronization completed",
-          "Language settings updated",
-          "Time zone settings updated",
-          "Dns settings updated",
-          "Trusted mail domain settings updated",
-          "Password strength settings updated",
-          "Two factor authentication settings updated",
-          "Administrator message settings updated",
-          "Default start page settings updated",
-          "Products list updated",
-          "Administrator added",
-          "Administrator opened full access",
-          "Administrator deleted",
-          "Users opened product access",
-          "Groups opened product access",
-          "Product access opened",
-          "Product access restricted",
-          "Product added administrator",
-          "Product deleted administrator",
-          "Greeting settings updated",
-          "Team template changed",
-          "Color theme changed",
-          "Owner sent change owner instructions",
-          "Owner updated",
-          "Owner sent portal deactivation instructions",
-          "Owner sent portal delete instructions",
-          "Portal deactivated",
-          "Portal deleted",
-          "Login history report downloaded",
-          "Audit trail report downloaded",
-          "SSO enabled",
-          "SSO disabled",
-          "Portal access settings updated",
-          "Cookie settings updated",
-          "Mail service settings updated",
-          "Custom navigation settings updated",
-          "Audit settings updated",
-          "Two factor authentication disabled",
-          "Two factor authentication enabled by sms",
-          "Two factor authentication enabled by tfa app",
-          "Portal renamed",
-          "Quota per room changed",
-          "Quota per room disabled",
-          "Quota per user changed",
-          "Quota per user disabled",
-          "Quota per portal changed",
-          "Quota per portal disabled",
-          "Form submit",
-          "Form opened for filling",
-          "Custom quota per room default",
-          "Custom quota per room changed",
-          "Custom quota per room disabled",
-          "Custom quota per user default",
-          "Custom quota per user changed",
-          "Custom quota per user disabled",
-          "DevTools access settings changed",
-          "Webhook created",
-          "Webhook updated",
-          "Webhook deleted",
-          "Created api key",
-          "Update api key",
-          "Deleted User api key",
-          "Customer wallet topped up",
-          "Customer operation performed",
-          "Customer operations report downloaded",
-          "Customer wallet top up settings updated",
-          "Customer subscription updated",
-          "Promotional banners visibility settings changed",
-          "Customer wallet services settings updated",
-          "Quota per AI agent changed",
-          "Quota per AI agent disabled",
-          "Custom quota per AI agent default",
-          "Custom quota per AI agent changed",
-          "Custom quota per AI agent disabled",
-          "AI provider created",
-          "AI provider updated",
-          "AI provider deleted",
-          "MCP server created",
-          "MCP server updated",
-          "MCP server enabled",
-          "MCP server disabled",
-          "MCP server deleted",
-          "WebSearch settings configured",
-          "WebSearch settings reset",
-          "Vectorization settings configured",
-          "Vectorization settings reset",
-          "Webplugin uploaded",
-          "Webplugin updated",
-          "Webplugin deleted",
-          "Whitelabel settings logo text updated",
-          "Whitelabel settings logos updated",
-          "Whitelabel company settings updated",
-          "Whitelabel additional settings updated",
-          "Whitelabel mail settings updated",
-          "Invitation settings updated",
-          "IP restrictions settings updated",
-          "Login settings updated",
-          "Contact admin mail sent",
-          "Room invite link used",
-          "User created and added to room",
-          "Guest created and added to room",
-          "Contact sales mail sent",
-          "Create client",
-          "Update client",
-          "Regenerate secret",
-          "Delete client",
-          "Change client activation",
-          "Change client visibility",
-          "Revoke user client",
-          "Generate authorization code token",
-          "Generate personal access token",
-          "None"
         ]
       },
       "MigratingApiFiles": {
@@ -40670,7 +40305,7 @@
                 "type": "string",
                 "format": "email",
                 "nullable": true,
-                "example": "Sydney_Roberts4@hotmail.com"
+                "example": "Myrtice14@hotmail.com"
               },
               "displayName": {
                 "type": "string",
@@ -40685,7 +40320,7 @@
               "lastName": {
                 "type": "string",
                 "nullable": true,
-                "example": "Wyman"
+                "example": "Upton"
               },
               "userType": {
                 "$ref": "#/components/schemas/EmployeeType"
@@ -40879,10 +40514,6 @@
         "x-enum-varnames": [
           "NotActivated",
           "Activated"
-        ],
-        "x-enum-descriptions": [
-          "Not activated",
-          "Activated"
         ]
       },
       "MobileRequestsDto": {
@@ -41052,12 +40683,6 @@
           "RoomsActivity",
           "DailyFeed",
           "UsefullTips"
-        ],
-        "x-enum-descriptions": [
-          "Badges",
-          "Rooms activity",
-          "Daily feed",
-          "Usefull tips"
         ]
       },
       "ObjectArrayWrapper": {
@@ -41497,11 +41122,6 @@
           "None",
           "Set",
           "Expired"
-        ],
-        "x-enum-descriptions": [
-          "None",
-          "Set",
-          "Expired"
         ]
       },
       "PaymentSettingsDto": {
@@ -41739,12 +41359,6 @@
           "Add",
           "Sub",
           "Renew"
-        ],
-        "x-enum-descriptions": [
-          "Set",
-          "Add",
-          "Sub",
-          "Renew"
         ]
       },
       "ProductType": {
@@ -41758,12 +41372,6 @@
         "type": "integer",
         "example": 2,
         "x-enum-varnames": [
-          "Documents",
-          "Login",
-          "Settings",
-          "Contacts"
-        ],
-        "x-enum-descriptions": [
           "Documents",
           "Login",
           "Settings",
@@ -41984,10 +41592,6 @@
         "x-enum-varnames": [
           "Active",
           "Overdue"
-        ],
-        "x-enum-descriptions": [
-          "Active",
-          "Overdue"
         ]
       },
       "QuotaWrapper": {
@@ -42036,12 +41640,6 @@
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
-          "Default",
-          "AndroidV2",
-          "iOSV2",
-          "hCaptcha"
-        ],
-        "x-enum-descriptions": [
           "Default",
           "AndroidV2",
           "iOSV2",
@@ -43552,12 +43150,6 @@
           "Paid",
           "Delay",
           "NotPaid"
-        ],
-        "x-enum-descriptions": [
-          "Trial",
-          "Paid",
-          "Delay",
-          "Not paid"
         ]
       },
       "TariffWrapper": {
@@ -44150,25 +43742,6 @@
           "Publishing",
           "RetailSales",
           "Telecommunications"
-        ],
-        "x-enum-descriptions": [
-          "Other",
-          "Accounting",
-          "Advertising marketing PR",
-          "Banking",
-          "Consulting",
-          "Design",
-          "Education",
-          "Environment",
-          "Financial services",
-          "Health care",
-          "IT",
-          "Legal",
-          "Manufacturing",
-          "Public sector",
-          "Publishing",
-          "Retail sales",
-          "Telecommunications"
         ]
       },
       "TenantQuota": {
@@ -44625,15 +44198,6 @@
           "Restoring",
           "Migrating",
           "Encryption"
-        ],
-        "x-enum-descriptions": [
-          "Active",
-          "Suspended",
-          "Remove pending",
-          "Transfering",
-          "Restoring",
-          "Migrating",
-          "Encryption"
         ]
       },
       "TenantTrustedDomainsType": {
@@ -44647,11 +44211,6 @@
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
-          "None",
-          "Custom",
-          "All"
-        ],
-        "x-enum-descriptions": [
           "None",
           "Custom",
           "All"
@@ -44798,12 +44357,6 @@
           "AITools",
           "Backup",
           "Storage"
-        ],
-        "x-enum-descriptions": [
-          "WebSearch",
-          "AITools",
-          "Backup",
-          "Storage"
         ]
       },
       "TenantWalletServiceSettings": {
@@ -44821,12 +44374,6 @@
               "type": "integer",
               "example": -14,
               "x-enum-varnames": [
-                "WebSearch",
-                "AITools",
-                "Backup",
-                "Storage"
-              ],
-              "x-enum-descriptions": [
                 "WebSearch",
                 "AITools",
                 "Backup",
@@ -45027,11 +44574,6 @@
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
-          "None",
-          "Sms",
-          "App"
-        ],
-        "x-enum-descriptions": [
           "None",
           "Sms",
           "App"
@@ -45252,40 +44794,6 @@
         },
         "additionalProperties": false,
         "description": "The request parameters for enabling or disabling administrator messaging system."
-      },
-      "UnknownWrapper": {
-        "type": "object",
-        "properties": {
-          "response": {
-            "type": "object"
-          },
-          "count": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "href": {
-                  "type": "string"
-                },
-                "action": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "status": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "statusCode": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
       },
       "UpdateWebhooksConfigRequestsDto": {
         "allOf": [
@@ -45631,15 +45139,6 @@
           "UserExcluded",
           "QuotaFailed"
         ],
-        "x-enum-descriptions": [
-          "Ok",
-          "Invalid",
-          "Expired",
-          "Tariff limit",
-          "User existed",
-          "User excluded",
-          "Quota failed"
-        ],
         "description": "[0 - Ok, 1 - Invalid, 2 - Expired, 3 - Tariff limit, 4 - User existed, 5 - User excluded, 6 - Quota failed]"
       },
       "WalletQuantityRequestDto": {
@@ -45975,14 +45474,6 @@
           "Status3xx",
           "Status4xx",
           "Status5xx"
-        ],
-        "x-enum-descriptions": [
-          "None",
-          "Not sent",
-          "Status2xx",
-          "Status3xx",
-          "Status4xx",
-          "Status5xx"
         ]
       },
       "WebhookRetryRequestsDto": {
@@ -46070,37 +45561,6 @@
           "RoomDeleted",
           "RoomRestored",
           "RoomCopied"
-        ],
-        "x-enum-descriptions": [
-          "*",
-          "user.created",
-          "user.invited",
-          "user.updated",
-          "user.deleted",
-          "group.created",
-          "group.updated",
-          "group.deleted",
-          "file.created",
-          "file.uploaded",
-          "file.updated",
-          "file.trashed",
-          "file.deleted",
-          "file.restored",
-          "file.copied",
-          "file.moved",
-          "folder.created",
-          "folder.updated",
-          "folder.trashed",
-          "folder.deleted",
-          "folder.restored",
-          "folder.copied",
-          "folder.moved",
-          "room.created",
-          "room.updated",
-          "room.archived",
-          "room.deleted",
-          "room.restored",
-          "room.copied"
         ]
       },
       "WebhooksConfigDto": {
@@ -46546,24 +46006,6 @@
           "DiagramEditor",
           "DiagramEditorEmbed"
         ],
-        "x-enum-descriptions": [
-          "Light small",
-          "Login page",
-          "Favicon",
-          "Docs editor",
-          "Docs editor embed",
-          "Left menu",
-          "About page",
-          "Notification",
-          "Spreadsheet editor",
-          "Spreadsheet editor embed",
-          "Presentation editor",
-          "Presentation editor embed",
-          "Pdf editor",
-          "Pdf editor embed",
-          "Diagram editor",
-          "Diagram editor embed"
-        ],
         "description": "[1 - Light small, 2 - Login page, 3 - Favicon, 4 - Docs editor, 5 - Docs editor embed, 6 - Left menu, 7 - About page, 8 - Notification, 9 - Spreadsheet editor, 10 - Spreadsheet editor embed, 11 - Presentation editor, 12 - Presentation editor embed, 13 - Pdf editor, 14 - Pdf editor embed, 15 - Diagram editor, 16 - Diagram editor embed]"
       },
       "WhiteLabelRequestsDto": {
@@ -46768,11 +46210,6 @@
           "SSO",
           "LDAP",
           "Standart"
-        ],
-        "x-enum-descriptions": [
-          "SSO",
-          "LDAP",
-          "Standart"
         ]
       },
       "ApiKeyResponseArrayWrapper": {
@@ -46832,7 +46269,7 @@
             "type": "string",
             "description": "The API key name.",
             "nullable": true,
-            "example": "Sydney Schroeder"
+            "example": "Winfield Upton"
           },
           "key": {
             "type": "string",
@@ -46926,11 +46363,6 @@
           "All",
           "People",
           "Guests"
-        ],
-        "x-enum-descriptions": [
-          "All",
-          "People",
-          "Guests"
         ]
       },
       "Contact": {
@@ -46963,7 +46395,7 @@
             "minLength": 0,
             "type": "string",
             "description": "The API key name.",
-            "example": "Sydney Schroeder"
+            "example": "Winfield Upton"
           },
           "permissions": {
             "type": "array",
@@ -47870,7 +47302,7 @@
             "type": "string",
             "description": "The user location.",
             "nullable": true,
-            "example": "001 Schroeder Run, New Tabithaport, Colombia"
+            "example": "408 Tabitha Expressway, Dericktown, United Kingdom"
           },
           "sex": {
             "$ref": "#/components/schemas/SexEnum"
@@ -48010,10 +47442,6 @@
         "x-enum-varnames": [
           "Paid",
           "Free"
-        ],
-        "x-enum-descriptions": [
-          "Paid",
-          "Free"
         ]
       },
       "QuotaFilter": {
@@ -48027,11 +47455,6 @@
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
-          "All",
-          "Default",
-          "Custom"
-        ],
-        "x-enum-descriptions": [
           "All",
           "Default",
           "Custom"
@@ -48065,10 +47488,6 @@
         "x-enum-varnames": [
           "Female",
           "Male"
-        ],
-        "x-enum-descriptions": [
-          "Female",
-          "Male"
         ]
       },
       "SignupAccountRequestDto": {
@@ -48085,20 +47504,20 @@
             "type": "string",
             "description": "The user first name.",
             "nullable": true,
-            "example": "Sydney"
+            "example": "Winfield"
           },
           "lastName": {
             "type": "string",
             "description": "The user last name.",
             "nullable": true,
-            "example": "Upton"
+            "example": "Wyman"
           },
           "email": {
             "type": "string",
             "description": "The user email address.",
             "format": "email",
             "nullable": true,
-            "example": "Myrtice63@hotmail.com"
+            "example": "Sydney_Roberts4@hotmail.com"
           },
           "passwordHash": {
             "type": "string",
@@ -48138,10 +47557,6 @@
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
-          "Ascending",
-          "Descending"
-        ],
-        "x-enum-descriptions": [
           "Ascending",
           "Descending"
         ]
@@ -48508,7 +47923,7 @@
             "description": "The user email address.",
             "format": "email",
             "nullable": true,
-            "example": "Nat.Schroeder1@hotmail.com"
+            "example": "Sydney_Roberts4@hotmail.com"
           },
           "isUser": {
             "type": "boolean",
@@ -48550,7 +47965,7 @@
             "type": "string",
             "description": "The user title.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "1080p_small_wooden_tuna_central"
           },
           "location": {
             "type": "string",
@@ -48799,11 +48214,6 @@
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
-          "All",
-          "Files",
-          "Folders"
-        ],
-        "x-enum-descriptions": [
           "All",
           "Files",
           "Folders"
@@ -49281,11 +48691,6 @@
           "AllAllowed",
           "PartAllowed",
           "NoneAllowed"
-        ],
-        "x-enum-descriptions": [
-          "All allowed",
-          "Part allowed",
-          "None allowed"
         ]
       },
       "CheckDestFolderWrapper": {
@@ -49611,10 +49016,6 @@
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
-          "Fast",
-          "Strict"
-        ],
-        "x-enum-descriptions": [
           "Fast",
           "Strict"
         ]
@@ -50498,14 +49899,6 @@
           "ThirtyDays",
           "TwoMonths",
           "ThreeMonths"
-        ],
-        "x-enum-descriptions": [
-          "One week",
-          "Two weeks",
-          "One month",
-          "Thirty days",
-          "Two months",
-          "Three months"
         ]
       },
       "Delete": {
@@ -51342,11 +50735,6 @@
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
-          "Desktop",
-          "Mobile",
-          "Embedded"
-        ],
-        "x-enum-descriptions": [
           "Desktop",
           "Mobile",
           "Embedded"
@@ -52608,10 +51996,6 @@
         "x-enum-varnames": [
           "Folder",
           "File"
-        ],
-        "x-enum-descriptions": [
-          "Folder",
-          "File"
         ]
       },
       "FileIntegerArrayWrapper": {
@@ -52945,16 +52329,6 @@
           "Import",
           "Convert",
           "Duplicate"
-        ],
-        "x-enum-descriptions": [
-          "Move",
-          "Copy",
-          "Delete",
-          "Download",
-          "MarkAsRead",
-          "Import",
-          "Convert",
-          "Duplicate"
         ]
       },
       "FileOperationWrapper": {
@@ -53140,20 +52514,6 @@
           "RoomManager",
           "Editing",
           "ContentCreator"
-        ],
-        "x-enum-descriptions": [
-          "None",
-          "Read and write",
-          "Read",
-          "Restrict",
-          "Varies",
-          "Review",
-          "Comment",
-          "Fill forms",
-          "Custom filter",
-          "Room manager",
-          "Editing",
-          "Content creator"
         ]
       },
       "FileShareArrayWrapper": {
@@ -53430,18 +52790,6 @@
           "IsTemplate",
           "IsFillFormDraft",
           "IsCompletedForm"
-        ],
-        "x-enum-descriptions": [
-          "None",
-          "Is editing",
-          "Is new",
-          "Is converting",
-          "Is original",
-          "Is editing alone",
-          "Is favorite",
-          "Is template",
-          "Is fill form draft",
-          "Is completed form"
         ]
       },
       "FileType": {
@@ -53462,18 +52810,6 @@
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
-          "Unknown",
-          "Archive",
-          "Video",
-          "Audio",
-          "Image",
-          "Spreadsheet",
-          "Presentation",
-          "Document",
-          "Pdf",
-          "Diagram"
-        ],
-        "x-enum-descriptions": [
           "Unknown",
           "Archive",
           "Video",
@@ -53971,20 +53307,6 @@
                 "Editing",
                 "ContentCreator"
               ],
-              "x-enum-descriptions": [
-                "None",
-                "Read and write",
-                "Read",
-                "Restrict",
-                "Varies",
-                "Review",
-                "Comment",
-                "Fill forms",
-                "Custom filter",
-                "Room manager",
-                "Editing",
-                "Content creator"
-              ],
               "description": "The default access rights in sharing settings."
             },
             "description": "The default access rights in sharing settings.",
@@ -54163,7 +53485,7 @@
             "type": "integer",
             "description": "The room ID where filling the form.",
             "format": "int32",
-            "example": 9079
+            "example": 9846
           },
           "isRoomMember": {
             "type": "boolean",
@@ -54258,29 +53580,6 @@
           "VirtualDataRooms",
           "DiagramsOnly",
           "AiRooms"
-        ],
-        "x-enum-descriptions": [
-          "None",
-          "Files  only",
-          "Folders only",
-          "Documents only",
-          "Presentations only",
-          "Spreadsheets only",
-          "Images only",
-          "By user",
-          "By department",
-          "Archive only",
-          "By extension",
-          "Media only",
-          "Filling forms rooms",
-          "Editing rooms",
-          "Custom rooms",
-          "Public rooms",
-          "Pdf",
-          "Pdf form",
-          "Virtual data rooms",
-          "Diagrams only",
-          "Ai rooms"
         ]
       },
       "FolderContentDtoInteger": {
@@ -54897,10 +54196,6 @@
         "x-enum-varnames": [
           "Stop",
           "Resume"
-        ],
-        "x-enum-descriptions": [
-          "Stop",
-          "Resume"
         ]
       },
       "FormFillingStatus": {
@@ -54921,14 +54216,6 @@
           "Draft",
           "YouTurn",
           "InProgress",
-          "Complete",
-          "Stoped"
-        ],
-        "x-enum-descriptions": [
-          "None",
-          "Draft",
-          "You turn",
-          "In progress",
           "Complete",
           "Stoped"
         ]
@@ -55631,10 +54918,6 @@
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
-          "Invitation",
-          "External"
-        ],
-        "x-enum-descriptions": [
           "Invitation",
           "External"
         ]
@@ -56491,18 +55774,6 @@
           "Yandex",
           "Storage"
         ],
-        "x-enum-descriptions": [
-          "None",
-          "Box",
-          "DropBox",
-          "GoogleDrive",
-          "kDrive",
-          "OneDrive",
-          "SharePoint",
-          "WebDav",
-          "Yandex",
-          "Storage"
-        ],
         "description": "[0 - None, 1 - Box, 2 - DropBox, 3 - GoogleDrive, 4 - kDrive, 5 - OneDrive, 6 - SharePoint, 7 - WebDav, 8 - Yandex, 9 - Storage]"
       },
       "RecentConfig": {
@@ -56584,11 +55855,6 @@
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
-          "Day",
-          "Month",
-          "Year"
-        ],
-        "x-enum-descriptions": [
           "Day",
           "Month",
           "Year"
@@ -56841,10 +56107,6 @@
         "x-enum-varnames": [
           "None",
           "FormRoleBlockingDeletion"
-        ],
-        "x-enum-descriptions": [
-          "None",
-          "Form role blocking deletion"
         ]
       },
       "RoomSecurityWrapper": {
@@ -57062,14 +56324,6 @@
           "PublicRoom",
           "VirtualDataRoom",
           "AiRoom"
-        ],
-        "x-enum-descriptions": [
-          "Form filling room",
-          "Collaboration room",
-          "Custom room",
-          "Public room",
-          "Virtual data room",
-          "AI Room"
         ]
       },
       "Run": {
@@ -57174,16 +56428,6 @@
           "Templates",
           "Knowledge",
           "ResultStorage",
-          "AiAgents"
-        ],
-        "x-enum-descriptions": [
-          "Active",
-          "Archive",
-          "Any",
-          "Recent by links",
-          "Template",
-          "Knowledge",
-          "Result storage",
           "AiAgents"
         ]
       },
@@ -57373,15 +56617,6 @@
           "PrimaryExternalLink",
           "User",
           "Group"
-        ],
-        "x-enum-descriptions": [
-          "User or group",
-          "Invitation link",
-          "External link",
-          "Additional external link",
-          "Primary external link",
-          "User",
-          "Group"
         ]
       },
       "Size": {
@@ -57432,21 +56667,6 @@
           "CustomOrder",
           "LastOpened",
           "UsedSpace"
-        ],
-        "x-enum-descriptions": [
-          "Date and time",
-          "AZ",
-          "Size",
-          "Author",
-          "Type",
-          "New",
-          "Date and time creation",
-          "Room type",
-          "Tags",
-          "Room",
-          "Custom order",
-          "Last opened",
-          "Used space"
         ]
       },
       "StartEdit": {
@@ -57488,11 +56708,6 @@
           "None",
           "ShareToFillOut",
           "StartFilling"
-        ],
-        "x-enum-descriptions": [
-          "None",
-          "Share to fill out",
-          "Start filling"
         ]
       },
       "Status": {
@@ -57515,14 +56730,6 @@
           "RequiredPassword",
           "InvalidPassword",
           "ExternalAccessDenied"
-        ],
-        "x-enum-descriptions": [
-          "Ok",
-          "Invalid",
-          "Expired",
-          "Required password",
-          "Invalid password",
-          "External access denied"
         ]
       },
       "StorageFilter": {
@@ -57539,11 +56746,6 @@
           "Internal",
           "ThirdParty"
         ],
-        "x-enum-descriptions": [
-          "None",
-          "Internal",
-          "ThirdParty"
-        ],
         "description": "[0 - None, 1 - Internal, 2 - ThirdParty]"
       },
       "SubjectFilter": {
@@ -57555,10 +56757,6 @@
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
-          "Owner",
-          "Member"
-        ],
-        "x-enum-descriptions": [
           "Owner",
           "Member"
         ],
@@ -57582,13 +56780,6 @@
           "Group",
           "InvitationLink",
           "PrimaryExternalLink"
-        ],
-        "x-enum-descriptions": [
-          "User",
-          "External link",
-          "Group",
-          "Invitation link",
-          "Primary external link"
         ]
       },
       "SubmitForm": {
@@ -57848,13 +57039,6 @@
           "Created",
           "Error",
           "NotRequired",
-          "Creating"
-        ],
-        "x-enum-descriptions": [
-          "Waiting",
-          "Created",
-          "Error",
-          "Not required",
           "Creating"
         ]
       },
@@ -58285,11 +57469,6 @@
           "Completed",
           "Failed"
         ],
-        "x-enum-descriptions": [
-          "In Progress",
-          "Completed",
-          "Failed"
-        ],
         "description": "[0 - In Progress, 1 - Completed, 2 - Failed]"
       },
       "WatermarkAdditions": {
@@ -58310,13 +57489,6 @@
           "UserIpAdress",
           "CurrentDate",
           "RoomName"
-        ],
-        "x-enum-descriptions": [
-          "User name",
-          "User email",
-          "User ip adress",
-          "Current date",
-          "Room name"
         ]
       },
       "WatermarkDto": {
@@ -58593,11 +57765,6 @@
           "EveryWeek",
           "EveryMonth"
         ],
-        "x-enum-descriptions": [
-          "Every day",
-          "Every week",
-          "Every month"
-        ],
         "description": "[0 - Every day, 1 - Every week, 2 - Every month]"
       },
       "BackupProgress": {
@@ -58653,11 +57820,6 @@
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
-          "Backup",
-          "Restore",
-          "Transfer"
-        ],
-        "x-enum-descriptions": [
           "Backup",
           "Restore",
           "Transfer"
@@ -58833,14 +57995,6 @@
           "Local",
           "DataStore",
           "ThirdPartyConsumer"
-        ],
-        "x-enum-descriptions": [
-          "Documents",
-          "Thridparty documents",
-          "Custom cloud",
-          "Local",
-          "Data store",
-          "Thirdparty consumer"
         ],
         "description": "[0 - Documents, 1 - Thridparty documents, 2 - Custom cloud, 3 - Local, 4 - Data store, 5 - Thirdparty consumer]"
       },
