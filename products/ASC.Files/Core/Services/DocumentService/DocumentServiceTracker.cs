@@ -286,6 +286,8 @@ public class DocumentServiceTrackerHelper(
         }
         else
         {
+            var anonymousSessions = new List<string>();
+
             foreach (var user in fileData.Users)
             {
                 if (!Guid.TryParse(user, out var userId))
@@ -293,6 +295,7 @@ public class DocumentServiceTrackerHelper(
                     if (!string.IsNullOrEmpty(user) && user.StartsWith("uid-"))
                     {
                         userId = Guid.Empty;
+                        anonymousSessions.Add(user);
                     }
                     else
                     {
@@ -312,20 +315,21 @@ public class DocumentServiceTrackerHelper(
                     usersDrop.Add(userId.ToString());
                 }
             }
+
+            await fileTracker.SetAnonymousSessionsAsync(fileId, anonymousSessions);
         }
 
-        if (usersDrop.Count > 0 && !await documentServiceHelper.DropUserAsync(fileData.Key, usersDrop.ToArray(), fileId))
+        if (usersDrop.Count > 0 && !await documentServiceHelper.DropUserAsync(fileData.Key, usersDrop, fileId))
         {
             logger.ErrorDocServiceDropFailed(usersDrop);
         }
 
-        var editingBy = await fileTracker.GetEditingByWithNamesAsync(fileId, global);
-
         foreach (var removeUserId in users)
         {
-            editingBy.Remove(removeUserId);
             await fileTracker.RemoveAsync(fileId, userId: removeUserId);
         }
+
+        var editingBy = await fileTracker.GetEditingSessionsAsync(fileId, global);
 
         await socketManager.StartEditAsync(fileId, editingBy);
 

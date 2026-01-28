@@ -32,7 +32,7 @@ namespace ASC.Files.Core;
 /// <summary>
 /// The file state.
 /// </summary>
-public record FileState(FileStatus FileStatus, Dictionary<Guid, string> EditingBy);
+public record FileState(FileStatus FileStatus, Dictionary<string, string> EditingBy);
 
 /// <summary>
 /// The file status.
@@ -80,7 +80,7 @@ public enum FileStatus
 public class File<T> : FileEntry<T>
 {
     private FileStatus _status;
-    private Dictionary<Guid, string> _editingBy;
+    private Dictionary<string, string> _editingBy;
 
     [JsonConstructor]
     protected File()
@@ -103,7 +103,7 @@ public class File<T> : FileEntry<T>
         set => _status = value;
     }
 
-    public Dictionary<Guid, string> EditingBy
+    public Dictionary<string, string> EditingBy
     {
         get => _editingBy;
         set => _editingBy = value;

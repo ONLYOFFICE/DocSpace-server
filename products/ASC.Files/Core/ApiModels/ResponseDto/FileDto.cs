@@ -69,7 +69,7 @@ public class FileDto<T> : FileEntryDto<T>
     /// <summary>
     /// The list of users editing the file.
     /// </summary>
-    public Dictionary<Guid, string> EditingBy { get; set; }
+    public Dictionary<string, string> EditingBy { get; set; }
 
     /// <summary>
     /// Specifies if the file is muted or not.
