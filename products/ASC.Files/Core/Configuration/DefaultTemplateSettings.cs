@@ -56,7 +56,7 @@ namespace ASC.Files.Core.Configuration
                                                ExternalShare externalShare,
                                                CommonLinkUtility commonLinkUtility)
     {
-        public async Task<DefaultTemplateSettingsDto> ToDto(DefaultTemplateSettings settings)
+        public async Task<DefaultTemplateSettingsDto> ConvertToDtoAsync(DefaultTemplateSettings settings)
         {
             var fileIds = settings.Items.Where(i => i.SelectedFile != null).Select(i => i.SelectedFile.Value);
             var fileTitles = (await fileDao.GetFilesAsync(fileIds).ToListAsync()).ToDictionary(f => f.Id, f => f);
@@ -90,7 +90,7 @@ namespace ASC.Files.Core.Configuration
             };
         }
 
-        public async Task<DefaultTemplateSettings> GetSettings()
+        public async Task<DefaultTemplateSettings> GetSettingsAsync()
         {
             if (!await global.IsDocSpaceAdministratorAsync)
             {
@@ -98,7 +98,7 @@ namespace ASC.Files.Core.Configuration
             }
 
             var settings = await settingsManager.LoadAsync<DefaultTemplateSettings>();
-            var templatesExtensions = await GetSampleDocumentsExtensionsList();
+            var templatesExtensions = await GetSampleDocumentsExtensionsListAsync();
 
             _ = settings.Items.RemoveAll(item => !templatesExtensions.Contains(item.FileExtension));
             var existingExtensions = new HashSet<string>(settings.Items.Select(item => item.FileExtension));
@@ -114,14 +114,14 @@ namespace ASC.Files.Core.Configuration
             return settings;
         }
 
-        public async Task<DefaultTemplateSettings> SetTemplate(string extension, int? fileId)
+        public async Task<DefaultTemplateSettings> SetTemplateAsync(string extension, int? fileId)
         {
             if (!await global.IsDocSpaceAdministratorAsync)
             {
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
             }
 
-            var settings = await GetSettings();
+            var settings = await GetSettingsAsync();
             var setting = settings.Items.FirstOrDefault(item => item.FileExtension.Equals(extension, StringComparison.OrdinalIgnoreCase));
             if (setting == null)
             {
@@ -149,7 +149,7 @@ namespace ASC.Files.Core.Configuration
             return settings;
         }
 
-        public async Task<DefaultTemplateSettings> SetTemplate(string extension, string title, Stream stream)
+        public async Task<DefaultTemplateSettings> SetTemplateAsync(string extension, string title, Stream stream)
         {
             try
             {
@@ -158,7 +158,7 @@ namespace ASC.Files.Core.Configuration
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
                 }
 
-                var settings = await GetSettings();
+                var settings = await GetSettingsAsync();
                 var setting = settings.Items.FirstOrDefault(item => item.FileExtension.Equals(extension, StringComparison.OrdinalIgnoreCase));
                 if (setting == null)
                 {
@@ -191,7 +191,7 @@ namespace ASC.Files.Core.Configuration
             }
         }
 
-        private async Task<IEnumerable<string>> GetSampleDocumentsExtensionsList()
+        private async Task<IEnumerable<string>> GetSampleDocumentsExtensionsListAsync()
         {
             var storeTemplate = await globalStore.GetStoreTemplateAsync();
             var path = await globalStore.GetNewDocTemplatePath(storeTemplate, new CultureInfo("en-US"));

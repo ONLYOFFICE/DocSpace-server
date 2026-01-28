@@ -402,8 +402,8 @@ public class SettingsController(
     [HttpGet("settings/defaulttemplate")]
     public async Task<DefaultTemplateSettingsDto> GetDefaultTemplates()
     {
-        var settings = await defaultTemplateSettingsHelper.GetSettings();
-        return await defaultTemplateSettingsHelper.ToDto(settings);
+        var settings = await defaultTemplateSettingsHelper.GetSettingsAsync();
+        return await defaultTemplateSettingsHelper.ConvertToDtoAsync(settings);
     }
 
     /// <summary>
@@ -416,8 +416,8 @@ public class SettingsController(
     [HttpPut("settings/defaulttemplate")]
     public async Task<DefaultTemplateSettingsDto> SetDefaultTemplate(DefaultTemplateSettingsRequestDto inDto)
     {
-        var settings = await defaultTemplateSettingsHelper.SetTemplate(inDto.FileExtension, inDto.SelectedFile);
-        return await defaultTemplateSettingsHelper.ToDto(settings);
+        var settings = await defaultTemplateSettingsHelper.SetTemplateAsync(inDto.FileExtension, inDto.SelectedFile);
+        return await defaultTemplateSettingsHelper.ConvertToDtoAsync(settings);
     }
 
     /// <summary>
@@ -430,7 +430,7 @@ public class SettingsController(
     [HttpPost("settings/defaulttemplate/upload")]
     public async Task<DefaultTemplateSettingsDto> UploadDefaultTemplate(DefaultTemplateSettingsUploadRequestDto inDto)
     {
-        var settings = await defaultTemplateSettingsHelper.SetTemplate(inDto.FileExtension, inDto.File.FileName, inDto?.File.OpenReadStream());
-        return await defaultTemplateSettingsHelper.ToDto(settings);
+        var settings = await defaultTemplateSettingsHelper.SetTemplateAsync(inDto.FileExtension, inDto.File.FileName, inDto?.File.OpenReadStream());
+        return await defaultTemplateSettingsHelper.ConvertToDtoAsync(settings);
     }
 }

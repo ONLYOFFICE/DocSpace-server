@@ -348,7 +348,7 @@ public class GlobalStore(StorageFactory storageFactory, TenantManager tenantMana
     public async Task<DocTemplate> GetNewDocTemplate(IServiceProvider serviceProvider, IDataStore storeTemplate, string extension, CultureInfo culture = null)
     {
         var templateSettingsHelper = serviceProvider.GetRequiredService<DefaultTemplateSettingsHelper>();
-        var templateSettings = await templateSettingsHelper.GetSettings();
+        var templateSettings = await templateSettingsHelper.GetSettingsAsync();
 
         var templateSetting = templateSettings.Items.FirstOrDefault(t => t.FileExtension == extension);
         if (templateSetting?.SelectedFile != null)
