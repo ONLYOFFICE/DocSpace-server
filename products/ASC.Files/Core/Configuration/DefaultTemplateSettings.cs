@@ -61,33 +61,36 @@ namespace ASC.Files.Core.Configuration
             var fileIds = settings.Items.Where(i => i.SelectedFile != null).Select(i => i.SelectedFile.Value);
             var fileTitles = (await fileDao.GetFilesAsync(fileIds).ToListAsync()).ToDictionary(f => f.Id, f => f);
 
+            return new DefaultTemplateSettingsDto()
+            {
+                Items = settings.Items
+                    .Select(asDto)
+                    .OrderBy(template =>
+                    {
+                        var index = _extensionsSortOrder.IndexOf(template.FileExtension);
+                        return index == -1 ? int.MaxValue : index;
+                    })
+                    .ThenBy(template => template.FileExtension)
+            };
+
             DefaultTemplateItemDto asDto(DefaultTempalteItem item)
             {
+                var result = new DefaultTemplateItemDto()
+                {
+                    FileExtension = item.FileExtension
+                };
+
                 if (item.SelectedFile.HasValue)
                 {
                     var file = fileTitles[item.SelectedFile.Value];
-                    return new DefaultTemplateItemDto()
-                    {
-                        FileExtension = item.FileExtension,
-                        SelectedFile = item.SelectedFile,
-                        FileTitle = file.Title,
-                        LastModified = file.ModifiedOn,
-                        ViewUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl))
-                    };
+                    result.SelectedFile = item.SelectedFile;
+                    result.FileTitle = file.Title;
+                    result.LastModified = file.ModifiedOn;
+                    result.ViewUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl));
                 }
-                else
-                {
-                    return new DefaultTemplateItemDto()
-                    {
-                        FileExtension = item.FileExtension
-                    };
-                }
-            }
 
-            return new DefaultTemplateSettingsDto()
-            {
-                Items = settings.Items.Select(asDto)
-            };
+                return result;
+            }
         }
 
         public async Task<DefaultTemplateSettings> GetSettingsAsync()
@@ -202,5 +205,7 @@ namespace ASC.Files.Core.Configuration
 
             return extensions;
         }
+
+        private static readonly List<string> _extensionsSortOrder = [".docx", ".xlsx", ".pptx", ".pdf"];
     }
 }
