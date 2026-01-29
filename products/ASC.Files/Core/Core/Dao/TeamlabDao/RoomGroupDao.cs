@@ -115,8 +115,8 @@ internal class RoomGroupDao(
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
         var tenantId = _tenantManager.GetCurrentTenantId();
 
-        return await dbContext.RoomGroup
-            .Where(r => r.Id == groupId && r.TenantId == tenantId)
+        return await dbContext.RoomGroupRef
+            .Where(r => r.GroupId == groupId && r.TenantId == tenantId)
             .CountAsync();
     }
 

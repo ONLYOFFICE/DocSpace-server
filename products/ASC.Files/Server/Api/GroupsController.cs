@@ -150,15 +150,6 @@ public class GroupsController(
 
     private async Task RemoveRoomsFromGroupAsync(List<int> intIds, List<string> stringIds, RoomGroup group)
     {
-        var totalRooms = await fileStorageService.GetGroupRoomsCountAsync(group.Id);
-
-        var toRemoveCount = intIds.Count + stringIds.Count;
-
-        if (toRemoveCount >= totalRooms)
-        {
-            throw new InvalidOperationException("Cannot remove all rooms from the group. At least one room must remain.");
-        }
-
         var intTasks = intIds.Select(id => fileStorageService.RemoveRoomFromGroupAsync(id, group.Id));
         var stringTasks = stringIds.Select(id => fileStorageService.RemoveRoomFromGroupAsync(id, group.Id));
 
