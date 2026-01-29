@@ -167,8 +167,8 @@ public class ProjectConfigurator(
                 .WithEnvironment("log:dir", "/logs")
                 .WithEnvironment("log:name", "socketIO")
                 .WithEnvironment("API_HOST", new UriBuilder(Uri.UriSchemeHttp, Constants.OpenRestyContainer, Constants.RestyPort).ToString())
-                .WithEnvironment("Redis:Hosts:0:Host", () => ConnectionStringManager.SubstituteLocalhost(connectionManager.RedisHost) ?? string.Empty)
-                .WithEnvironment("Redis:Hosts:0:Port", () => connectionManager.RedisPort ?? string.Empty)
+                .WithEnvironment("Redis:Hosts:0:Host", () => ConnectionStringManager.SubstituteLocalhost(connectionManager.Redis?.Host) ?? string.Empty)
+                .WithEnvironment("Redis:Hosts:0:Port", () => connectionManager.Redis?.Port ?? string.Empty)
                 .WithHttpEndpoint(port, port, isProxied: false)
                 .WithHttpHealthCheck("/health")
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
@@ -179,8 +179,8 @@ public class ProjectConfigurator(
         else
         {
             var resourceBuilder = builder.AddNpmApp(name, path, "start:build")
-                .WithEnvironment("Redis:Hosts:0:Host", () => connectionManager.RedisHost ?? string.Empty)
-                .WithEnvironment("Redis:Hosts:0:Port", () => connectionManager.RedisPort ?? string.Empty)
+                .WithEnvironment("Redis:Hosts:0:Host", () => connectionManager.Redis?.Host ?? string.Empty)
+                .WithEnvironment("Redis:Hosts:0:Port", () => connectionManager.Redis?.Port ?? string.Empty)
                 .WithHttpEndpoint(targetPort: port)
                 .WithHttpHealthCheck("/health")
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
