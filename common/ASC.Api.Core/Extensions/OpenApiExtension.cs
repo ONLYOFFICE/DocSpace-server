@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,10 +27,7 @@
 using System.Xml.XPath;
 
 using Microsoft.OpenApi;
-using Microsoft.OpenApi.Extensions;
-using Microsoft.OpenApi.Interfaces;
-using Microsoft.OpenApi.Models;
-using Microsoft.OpenApi.Writers;
+
 
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -56,7 +53,7 @@ public static class OpenApiExtension
             c.SwaggerDoc("common", new OpenApiInfo
             {
                 Title = "Api",
-                Version = "3.5.0",
+                Version = "3.6.0",
                 Contact = new OpenApiContact
                 {
                     Name = "API Support",
@@ -68,6 +65,7 @@ public static class OpenApiExtension
             c.DocumentFilter<LowercaseDocumentFilter>();
             c.SchemaFilter<DerivedSchemaFilter>();
             c.DocumentFilter<HideRouteDocumentFilter>("/api/2.0/capabilities.json");
+            c.DocumentFilter<HideRouteDocumentFilter>("/api/2.0/files/@recent");
             c.DocumentFilter<TagDescriptionsDocumentFilter>();
             c.OperationFilter<SwaggerCustomOperationFilter>();
             c.OperationFilter<ContentTypeOperationFilter>();
@@ -191,37 +189,41 @@ public static class OpenApiExtension
         });
     }
 
-    public static IApplicationBuilder UseOpenApi(this IApplicationBuilder app)
+    extension(IApplicationBuilder app)
     {
-        var assemblyName = Assembly.GetEntryAssembly().FullName.Split(',').First();
-
-        app.UseSwagger(c =>
+        public IApplicationBuilder UseOpenApi()
         {
-            c.RouteTemplate = $"openapi/{assemblyName.ToLower()}/{{documentName}}.{{extension:regex(^(json|ya?ml)$)}}";
-        });
+            var assemblyName = Assembly.GetEntryAssembly().FullName.Split(',').First();
 
-        return app;
-    }
-
-    public static IApplicationBuilder UseOpenApiUI(this IApplicationBuilder app, Dictionary<string, string> endpoints)
-    {
-        app.UseSwaggerUI(o =>
-        {
-            o.RoutePrefix = "openapi";
-            o.DocumentTitle = "DocSpace API";
-
-            foreach (var (name, route) in endpoints)
+            app.UseSwagger(options =>
             {
-                o.SwaggerEndpoint(route, name);
-            }
-        });
+                options.OpenApiVersion = OpenApiSpecVersion.OpenApi3_0;
+                options.RouteTemplate = $"openapi/{assemblyName.ToLower()}/{{documentName}}.{{extension:regex(^(json|ya?ml)$)}}";
+            });
 
-        app.UseEndpoints(endpointRouteBuilder =>
+            return app;
+        }
+
+        public IApplicationBuilder UseOpenApiUI(Dictionary<string, string> endpoints)
         {
-            endpointRouteBuilder.MapSwagger();
-        });
+            app.UseSwaggerUI(o =>
+            {
+                o.RoutePrefix = "openapi";
+                o.DocumentTitle = "DocSpace API";
 
-        return app;
+                foreach (var (name, route) in endpoints)
+                {
+                    o.SwaggerEndpoint(route, name);
+                }
+            });
+
+            app.UseEndpoints(endpointRouteBuilder =>
+            {
+                endpointRouteBuilder.MapSwagger();
+            });
+
+            return app;
+        }
     }
 
     public static string CustomSchemaId(Type type)
@@ -260,53 +262,41 @@ public static class OpenApiExtension
 
             if (allowAnonymous.Any())
             {
-                operation.Security.Clear();
+                operation.Security?.Clear();
             }
             else
             {
-                operation.Security.Add(new OpenApiSecurityRequirement
-                {
+                operation.Security ??= new List<OpenApiSecurityRequirement>();
+                
+                operation.Security =
+                [
+                    new OpenApiSecurityRequirement
                     {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = CookiesManager.AuthCookiesName }
-                        },
-                        ["read", "write"]
-                    }
-                });
-                operation.Security.Add(new OpenApiSecurityRequirement
-                {
+                        [ new OpenApiSecuritySchemeReference(CookiesManager.AuthCookiesName, context.Document)] =  ["read", "write"]
+                    },
+                    new OpenApiSecurityRequirement
                     {
-                        new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" } },
-                        new List<string>()
-                    }
-                });
-                operation.Security.Add(new OpenApiSecurityRequirement
-                {
+                        [ new OpenApiSecuritySchemeReference("Bearer", context.Document)] = []
+                    },
+                    new OpenApiSecurityRequirement
                     {
-                        new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "ApiKeyBearer" } }, ["read", "write"]
-                    }
-                });
-                operation.Security.Add(new OpenApiSecurityRequirement
-                {
+                        [ new OpenApiSecuritySchemeReference("ApiKeyBearer", context.Document)] =   ["read", "write"]
+                    },
+                    new OpenApiSecurityRequirement
                     {
-                        new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Basic" } },
-                        new List<string>()
-                    }
-                });
-                operation.Security.Add(new OpenApiSecurityRequirement
-                {
+                        [ new OpenApiSecuritySchemeReference("Basic", context.Document)] = []
+                    },
+                    new OpenApiSecurityRequirement
                     {
-                        new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "OAuth2" } }, ["read", "write"]
-                    }
-                });
-                operation.Security.Add(new OpenApiSecurityRequirement
-                {
+                        [ new OpenApiSecuritySchemeReference("OAuth2", context.Document)] = ["read", "write"]
+                    },
+                    new OpenApiSecurityRequirement
                     {
-                        new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "OpenId" } }, []
+                        [ new OpenApiSecuritySchemeReference("OpenId", context.Document)] = []
                     }
-                });
+                ];
 
+                operation.Responses ??= new OpenApiResponses();
                 operation.Responses.Add("401", new OpenApiResponse { Description = "Unauthorized" });
             }
 
@@ -384,7 +374,7 @@ public static class OpenApiExtension
 
     private class CustomInheritanceSchemaFilter : ISchemaFilter
     {
-        public void Apply(OpenApiSchema schema, SchemaFilterContext context)
+        public void Apply(IOpenApiSchema schema, SchemaFilterContext context)
         {
             var type = context.Type;
 
@@ -405,29 +395,24 @@ public static class OpenApiExtension
                 return;
             }
 
+            var openApiSchema = schema as OpenApiSchema;
+            
             var baseTypeSchema = context.SchemaGenerator.GenerateSchema(baseType, context.SchemaRepository);
 
             var schemaId = CustomSchemaId(baseType);
 
-            if (!context.SchemaRepository.Schemas.ContainsKey(schemaId))
-            {
-                context.SchemaRepository.Schemas.Add(schemaId, baseTypeSchema);
-            }
-
-            var baseSchemaRef = new OpenApiReference
-            {
-                Type = ReferenceType.Schema,
-                Id = schemaId
-            };
+            context.SchemaRepository.Schemas.TryAdd(schemaId, baseTypeSchema);
+            
+            var baseSchemaRef = new OpenApiSchemaReference(schemaId);
 
             var originalProperties = schema.Properties;
             var originalRequired = schema.Required;
 
             var derivedPropertiesSchema = new OpenApiSchema
             {
-                Type = "object",
-                Properties = new Dictionary<string, OpenApiSchema>(),
-                Required = new HashSet<string>(),
+                Type = JsonSchemaType.Object,
+                Properties = new Dictionary<string, IOpenApiSchema>(),
+                Required = new HashSet<string>()
             };
 
             foreach (var prop in originalProperties)
@@ -442,15 +427,15 @@ public static class OpenApiExtension
                 }
             }
 
-            schema.AllOf = new List<OpenApiSchema>
+            openApiSchema.AllOf = new List<IOpenApiSchema>
             {
-                new OpenApiSchema { Reference = baseSchemaRef },
+                baseSchemaRef,
                 derivedPropertiesSchema
             };
 
-            schema.Properties = null;
-            schema.Required = null;
-            schema.Type = null;
+            openApiSchema.Properties = null;
+            openApiSchema.Required = null;
+            openApiSchema.Type = null;
         }
 
         private HashSet<string> GetAllBaseTypeProperties(Type type)

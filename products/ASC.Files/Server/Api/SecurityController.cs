@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,6 +23,8 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+using HtmlAgilityPack;
 
 namespace ASC.Files.Api;
 
@@ -119,8 +121,17 @@ public abstract class SecurityController<T>(
     [SwaggerResponse(200, "List of shared file information: sharing rights, a user who has the access to the specified file, the file is locked by this user or not, this user is an owner of the specified file or not, this user can edit the access to the specified file or not", typeof(IAsyncEnumerable<FileShareDto>))]
     [HttpPut("file/{fileId}/share")]
     public IAsyncEnumerable<FileShareDto> SetFileSecurityInfo(FileSecurityInfoSimpleRequestDto<T> inDto)
-    {
-        return securityControllerHelper.SetSecurityInfoAsync([inDto.FileId], [], inDto.SecurityInfoSimple.Share, inDto.SecurityInfoSimple.Notify, inDto.SecurityInfoSimple.SharingMessage);
+    {                
+        string text = null;
+
+        if (inDto.SecurityInfoSimple.SharingMessage != null)
+        {
+            var htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(inDto.SecurityInfoSimple.SharingMessage);
+            text = htmlDoc.DocumentNode.InnerText;
+        }
+
+        return securityControllerHelper.SetSecurityInfoAsync([inDto.FileId], [], inDto.SecurityInfoSimple.Share, inDto.SecurityInfoSimple.Notify, text);
     }
 
     /// <summary>
@@ -133,8 +144,17 @@ public abstract class SecurityController<T>(
     [SwaggerResponse(200, "List of shared folder information: sharing rights, a user who has the access to the specified folder, the folder is locked by this user or not, this user is an owner of the specified folder or not, this user can edit the access to the specified folder or not", typeof(IAsyncEnumerable<FileShareDto>))]
     [HttpPut("folder/{folderId}/share")]
     public IAsyncEnumerable<FileShareDto> SetFolderSecurityInfo(FolderSecurityInfoSimpleRequestDto<T> inDto)
-    {
-        return securityControllerHelper.SetSecurityInfoAsync([], [inDto.FolderId], inDto.SecurityInfoSimple.Share, inDto.SecurityInfoSimple.Notify, inDto.SecurityInfoSimple.SharingMessage);
+    {        
+        string text = null;
+
+        if (inDto.SecurityInfoSimple.SharingMessage != null)
+        {
+            var htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(inDto.SecurityInfoSimple.SharingMessage);
+            text = htmlDoc.DocumentNode.InnerText;
+        }
+        
+        return securityControllerHelper.SetSecurityInfoAsync([], [inDto.FolderId], inDto.SecurityInfoSimple.Share, inDto.SecurityInfoSimple.Notify, text);
     }
 
     /// <summary>
@@ -171,7 +191,7 @@ public abstract class SecurityController<T>(
     /// <summary>
     /// Returns the group members with their folder security information.
     /// </summary>
-    /// <short>Get group members with security information</short>
+    /// <short>Get folder group members with security information</short>
     /// <path>api/2.0/files/folder/{folderId}/group/{groupId}/share</path>
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
@@ -205,7 +225,7 @@ public abstract class SecurityController<T>(
     /// <summary>
     /// Returns the group members with their file security information.
     /// </summary>
-    /// <short>Get group members with security information</short>
+    /// <short>Get file group members with security information</short>
     /// <path>api/2.0/files/file/{fileId}/group/{groupId}/share</path>
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<GroupMemberSecurityRequestDto>))]
@@ -322,11 +342,20 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     [HttpPut("share")]
     public async IAsyncEnumerable<FileShareDto> SetSecurityInfo(SecurityInfoRequestDto inDto)
     {
+        string text = null;
+
+        if (inDto.SharingMessage != null)
+        {
+            var htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(inDto.SharingMessage);
+            text = htmlDoc.DocumentNode.InnerText;
+        }
+        
         var (folderIntIds, folderStringIds) = FileOperationsManager.GetIds(inDto.FolderIds);
         var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
 
-        var internalIds = securityControllerHelper.SetSecurityInfoAsync(fileIntIds, folderIntIds, inDto.Share, inDto.Notify, inDto.SharingMessage);
-        var thirdpartyIds = securityControllerHelper.SetSecurityInfoAsync(fileStringIds, folderStringIds, inDto.Share, inDto.Notify, inDto.SharingMessage);
+        var internalIds = securityControllerHelper.SetSecurityInfoAsync(fileIntIds, folderIntIds, inDto.Share, inDto.Notify, text);
+        var thirdpartyIds = securityControllerHelper.SetSecurityInfoAsync(fileStringIds, folderStringIds, inDto.Share, inDto.Notify, text);
 
         await foreach (var s in internalIds.Concat(thirdpartyIds))
         {

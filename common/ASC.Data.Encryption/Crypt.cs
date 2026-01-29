@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -40,7 +40,7 @@ public class Crypt(IConfiguration configuration, TempPath tempPath) : ICrypt
         TempDir = tempPath.GetTempPath();
     }
 
-    public byte Version { get { return 1; } }
+    public byte Version => 1;
 
     public async ValueTask EncryptFileAsync(string filePath)
     {

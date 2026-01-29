@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -75,7 +75,7 @@ internal class LinkDao<T>(
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var mappedLinkedId = (await mapping.MappingIdAsync(linkedId));
+        var mappedLinkedId = await mapping.MappingIdAsync(linkedId);
 
         var fromDb = await filesDbContext.SourceIdAsync(tenantId, mappedLinkedId.Item1, _authContext.CurrentAccount.ID);
 
@@ -115,7 +115,7 @@ internal class LinkDao<T>(
             .ToAsyncEnumerable()
             .Select(async (T x, CancellationToken _) => await mapping.MappingIdAsync(x))
             .ToListAsync();
-        var source = mappedIds.Select(x => x.ToString());
+        var source = mappedIds.Select(x => x.Item1);
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
@@ -132,7 +132,7 @@ internal class LinkDao<T>(
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var mappedSourceId = (await mapping.MappingIdAsync(sourceId));
+        var mappedSourceId = await mapping.MappingIdAsync(sourceId);
 
         var link = await filesDbContext.FileLinkAsync(tenantId, mappedSourceId.Item1, _authContext.CurrentAccount.ID);
 
@@ -148,7 +148,7 @@ internal class LinkDao<T>(
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var mappedFileId = (await mapping.MappingIdAsync(fileId));
+        var mappedFileId = await mapping.MappingIdAsync(fileId);
 
         await filesDbContext.DeleteFileLinks(tenantId, mappedFileId.Item1);
     }

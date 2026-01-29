@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,25 +28,13 @@ namespace ASC.Web.Core.Jabber;
 
 public class FireBase : Consumer
 {
-    public string Authorization
-    {
-        get { return this["firebase_authorization"]; }
-    }
+    public string Authorization => this["firebase_authorization"];
 
-    public string ProjectId
-    {
-        get { return this["firebase_projectId"]; }
-    }
+    public string ProjectId => this["firebase_projectId"];
 
-    public string ApiKey
-    {
-        get { return this["firebase_apiKey"]; }
-    }
+    public string ApiKey => this["firebase_apiKey"];
 
-    public string MessagingSenderId
-    {
-        get { return this["firebase_messagingSenderId"]; }
-    }
+    public string MessagingSenderId => this["firebase_messagingSenderId"];
 
     public FireBase()
     {

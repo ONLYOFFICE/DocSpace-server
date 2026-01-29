@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2010-2022
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -139,6 +139,8 @@ public class MigrationContext : DbContext
     public DbSet<DbFileVectorization> FileVectorization { get; set; }
     public DbSet<DbUserChatSettings> UserChatSettings { get; set; }
 
+    public DbSet<InvitationLink> InvitationLinks { get; set; }
+
     public MigrationContext(DbContextOptions<MigrationContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -223,6 +225,7 @@ public class MigrationContext : DbContext
             .AddDbMcpServerSettings()
             .AddDbRoomMcpServers()
             .AddDbFileVectorization()
-            .AddDbUserChatSettings();
+            .AddDbUserChatSettings()
+            .AddInvitationLink();
     }
 }

@@ -126,6 +126,9 @@
   <data name="BackupInvalid" xml:space="preserve">
     <value>Skedari rezervë është i pavlefshëm.</value>
   </data>
+  <data name="BackupMissingFilesWarning" xml:space="preserve">
+    <value>Disa skedarë nuk u përfshinë në backup. Për më shumë detaje, ju lutemi kontrolloni {0}</value>
+  </data>
   <data name="BackupNotFound" xml:space="preserve">
     <value>Skedari rezervë është i pavlefshëm. Ju lutemi përdorni skedarin e krijuar në të njëjtin portal.</value>
   </data>
@@ -155,8 +158,5 @@
   </data>
   <data name="RestoreException" xml:space="preserve">
     <value>Ndodhi një gabim gjatë restaurimit të rezervimit. Ju lutem provoni ta rivendosni përsëri ose kontaktoni suportin.</value>
-  </data>
-  <data name="BackupMissingFilesWarning" xml:space="preserve">
-    <value>Disa skedarë nuk u përfshinë në backup. Për më shumë detaje, ju lutemi kontrolloni {0}</value>
   </data>
 </root>

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -61,7 +61,7 @@ public class CookieStorage(InstanceCrypto instanceCrypto,
 
         try
         {
-            cookie = (HttpUtility.UrlDecode(cookie)).Replace(' ', '+');
+            cookie = HttpUtility.UrlDecode(cookie).Replace(' ', '+');
             var s = instanceCrypto.Decrypt(cookie).Split('$');
 
             if (1 < s.Length)
@@ -111,7 +111,7 @@ public class CookieStorage(InstanceCrypto instanceCrypto,
 
         try
         {
-            cookie = (HttpUtility.UrlDecode(cookie)).Replace(' ', '+');
+            cookie = HttpUtility.UrlDecode(cookie).Replace(' ', '+');
             var s = instanceCrypto.Decrypt(cookie).Split('$');
             if (8 < s.Length)
             {

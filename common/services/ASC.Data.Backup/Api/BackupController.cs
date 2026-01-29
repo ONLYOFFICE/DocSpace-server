@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -70,7 +70,7 @@ public class BackupController(
     /// <path>api/2.0/backup/getbackupschedule</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Backup schedule", typeof(ScheduleDto))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "Access denied")]
     [HttpGet("getbackupschedule")]
     public async Task<ScheduleDto> GetBackupSchedule(DumpDto dto)
     {
@@ -90,7 +90,7 @@ public class BackupController(
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(400, "BackupStored must be 1 - 30 or backup can not start as dump")]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
-    [SwaggerResponse(403, "You don't have enough permission to create")]
+    [SwaggerResponse(403, "Access denied")]
     [SwaggerResponse(404, "The required folder was not found")]
     [HttpPost("createbackupschedule")]
     public async Task<bool> CreateBackupSchedule(BackupScheduleDto inDto)
@@ -137,7 +137,7 @@ public class BackupController(
     /// <path>api/2.0/backup/deletebackupschedule</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "Access denied")]
     [HttpDelete("deletebackupschedule")]
     public async Task<bool> DeleteBackupSchedule(DumpDto dto)
     {
@@ -159,7 +159,7 @@ public class BackupController(
     [SwaggerResponse(200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link", typeof(BackupProgress))]
     [SwaggerResponse(400, "Wrong folder type or backup can`t start as dump")]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
-    [SwaggerResponse(403, "You don't have enough permission to create")]
+    [SwaggerResponse(403, "Access denied")]
     [SwaggerResponse(404, "The required folder was not found")]
     [AllowNotPayment]
     [HttpPost("startbackup")]
@@ -264,7 +264,7 @@ public class BackupController(
             return await backupService.GetBackupProgressAsync(inDto.Dump);
 
         }
-        catch (Exception ex) when (ex is AccountingPaymentRequiredException || ex is AccountingCustomerNotFoundException)
+        catch (Exception ex) when (ex is AccountingPaymentRequiredException or AccountingCustomerNotFoundException)
         {
             throw new BillingException(Resource.ErrorPaymentRequired);
         }
@@ -293,7 +293,7 @@ public class BackupController(
     /// <path>api/2.0/backup/getbackupprogress</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link", typeof(BackupProgress))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "Access denied")]
     [AllowNotPayment]
     [HttpGet("getbackupprogress")]
     public async Task<BackupProgress> GetBackupProgress(DumpDto dto)
@@ -313,7 +313,7 @@ public class BackupController(
     /// <collection>list</collection>
     [Tags("Backup")]
     [SwaggerResponse(200, "List of backup history records", typeof(List<BackupHistoryRecord>))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "Access denied")]
     [HttpGet("getbackuphistory")]
     public async Task<List<BackupHistoryRecord>> GetBackupHistory(DumpDto dto)
     {
@@ -331,7 +331,7 @@ public class BackupController(
     /// <path>api/2.0/backup/deletebackup/{id}</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "Access denied")]
     [HttpDelete("deletebackup/{id:guid}")]
     public async Task<bool> DeleteBackup([FromRoute] DeleteBackupDto inDto)
     {
@@ -346,7 +346,7 @@ public class BackupController(
     /// <path>api/2.0/backup/deletebackuphistory</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "Access denied")]
     [HttpDelete("deletebackuphistory")]
     public async Task<bool> DeleteBackupHistory(DumpDto dto)
     {
@@ -367,7 +367,7 @@ public class BackupController(
     [SwaggerResponse(200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link", typeof(BackupProgress))]
     [SwaggerResponse(400, "Backup can not start as dump")]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
-    [SwaggerResponse(403, "You don't have enough permission to create")]
+    [SwaggerResponse(403, "Access denied")]
     [SwaggerResponse(404, "The required file or folder was not found")]
     [HttpPost("startrestore")]
     public async Task<BackupProgress> StartBackupRestore(BackupRestoreDto inDto)
@@ -458,6 +458,8 @@ public class BackupController(
     /// <path>api/2.0/backup/getbackupscount</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Number of backups", typeof(int))]
+    [SwaggerResponse(400, "From date must be less than to date")]
+    [SwaggerResponse(403, "Access denied")]
     [AllowNotPayment]
     [HttpGet("getbackupscount")]
     public async Task<int> GetBackupsCountAsync(BackupsCountDto dto)

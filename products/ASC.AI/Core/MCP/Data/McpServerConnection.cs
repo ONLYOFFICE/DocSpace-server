@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,6 +42,8 @@ public class McpServerConnection
     public McpServerSettings? Settings { get; set; }
     public bool Connected => ConnectionType is ConnectionType.Direct || Settings?.OauthCredentials != null;
     public Icon? Icon { get; set; }
+
+    public bool NeedReset { get; set; }
 }
 
 public static class McpRoomServerExtensions
@@ -71,8 +73,20 @@ public static class McpRoomServerExtensions
 
             if (item.Server.Headers != null)
             {
-                var headersJson = await crypto.DecryptAsync(item.Server.Headers);
-                serverConnection.Headers = JsonSerializer.Deserialize<Dictionary<string, string>>(headersJson);
+                var headersJson = string.Empty;
+                try
+                {
+                    headersJson = await crypto.DecryptAsync(item.Server.Headers);
+                }
+                catch (CryptographicException)
+                {
+                    serverConnection.NeedReset = true;
+                }
+
+                if (!serverConnection.NeedReset)
+                {
+                    serverConnection.Headers = JsonSerializer.Deserialize<Dictionary<string, string>>(headersJson);
+                }
             }
 
             if (item.Server.HasIcon)
@@ -94,7 +108,7 @@ public static class McpRoomServerExtensions
                 ServerType = item.SystemServer.Type,
                 ConnectionType = item.SystemServer.ConnectionType,
                 System = true,
-                OauthProvider = item.SystemServer.LoginProviderSelector?.Invoke(consumerFactory),
+                OauthProvider = item.SystemServer.LoginProviderSelector?.Invoke(consumerFactory)
             };
         }
         

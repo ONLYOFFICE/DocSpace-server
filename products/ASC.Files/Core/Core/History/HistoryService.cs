@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -66,6 +66,7 @@ public class HistoryService(
         MessageAction.RoomCreateUser,
         MessageAction.RoomUpdateAccessForUser,
         MessageAction.RoomRemoveUser,
+        MessageAction.RoomChangeOwner,
         MessageAction.RoomGroupAdded,
         MessageAction.RoomUpdateAccessForGroup,
         MessageAction.RoomGroupRemove,

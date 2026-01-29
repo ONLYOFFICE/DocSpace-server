@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,4 +38,7 @@ internal static partial class RestoreProgressItemLogger
 
     [LoggerMessage(LogLevel.Error, "DeleteFiles")]
     public static partial void ErrorDeleteFiles(this ILogger<RestoreProgressItem> logger, Exception exception);
+
+    [LoggerMessage(LogLevel.Error, "Clear2faSettings")]
+    public static partial void ErrorClear2faSettings(this ILogger<RestoreProgressItem> logger, Exception exception);
 }

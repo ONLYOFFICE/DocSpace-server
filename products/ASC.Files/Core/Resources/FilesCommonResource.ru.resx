@@ -120,11 +120,20 @@
   <data name="AceShareLink" xml:space="preserve">
     <value>Вне портала</value>
   </data>
+  <data name="AceStatusEnum_Collaborator" xml:space="preserve">
+    <value>Соавтор</value>
+  </data>
   <data name="AceStatusEnum_Comment" xml:space="preserve">
     <value>Комментирование</value>
   </data>
+  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
+    <value>Создатель контента</value>
+  </data>
   <data name="AceStatusEnum_CustomFilter" xml:space="preserve">
     <value>Пользовательский фильтр</value>
+  </data>
+  <data name="AceStatusEnum_Editing" xml:space="preserve">
+    <value>Редактор</value>
   </data>
   <data name="AceStatusEnum_FillForms" xml:space="preserve">
     <value>Заполнение форм</value>
@@ -141,8 +150,14 @@
   <data name="AceStatusEnum_Review" xml:space="preserve">
     <value>Рецензирование</value>
   </data>
+  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
+    <value>Менеджер комнат</value>
+  </data>
   <data name="Admin" xml:space="preserve">
     <value>Администратор</value>
+  </data>
+  <data name="AgentManager" xml:space="preserve">
+    <value>Менеджер агентов</value>
   </data>
   <data name="AppAccessDenied" xml:space="preserve">
     <value>Для работы с файлом Вы должны предоставить к нему доступ</value>
@@ -198,6 +213,15 @@
   <data name="CommentUpload" xml:space="preserve">
     <value>Загружена</value>
   </data>
+  <data name="Date" xml:space="preserve">
+    <value>Дата</value>
+  </data>
+  <data name="DefaultExternalLinkTitle" xml:space="preserve">
+    <value>Ссылка для доступа</value>
+  </data>
+  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
+    <value>Пригласительная ссылка</value>
+  </data>
   <data name="DocuSignStatusDeclined" xml:space="preserve">
     <value>Отклонен</value>
   </data>
@@ -240,17 +264,32 @@
   <data name="ErrorMessage_FileSizeMove" xml:space="preserve">
     <value>Файл более {0} не будет перемещен</value>
   </data>
+  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
+    <value>Перемещение нескольких файлов в комнату «Заполнение форм» не поддерживается. Перемещайте по одной PDF-форме ONLYOFFICE.</value>
+  </data>
   <data name="ErrorMessage_FileUpdateToVersion" xml:space="preserve">
     <value>Новая версия не может совпадать с текущей</value>
   </data>
   <data name="ErrorMessage_FolderCopyError" xml:space="preserve">
     <value>Нельзя скопировать папку в свою дочернюю папку</value>
   </data>
+  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
+    <value>Перемещение папок в комнату «Заполнение форм» не поддерживается. Перемещайте по одной PDF-форме ONLYOFFICE.</value>
+  </data>
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Запрашиваемая папка не найдена</value>
   </data>
+  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
+    <value>Недопустимый провайдер</value>
+  </data>
+  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
+    <value>Невозможно использовать эту папку для хранения комнаты</value>
+  </data>
   <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Некорректное название</value>
+  </data>
+  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
+    <value>Пригласительная ссылка недействительна или срок ее действия истек</value>
   </data>
   <data name="ErrorMessage_LockedFile" xml:space="preserve">
     <value>Файл заблокирован другим пользователем</value>
@@ -261,8 +300,20 @@
   <data name="ErrorMessage_ManyDownloads" xml:space="preserve">
     <value>Слишком много загрузок.</value>
   </data>
+  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
+    <value>Максимальное количество ссылок не должно превышать {0}</value>
+  </data>
+  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
+    <value>Файл не может быть перемещен в эту комнату. Попробуйте переместить PDF-форму ONLYOFFICE.</value>
+  </data>
   <data name="ErrorMessage_NotSupportedFormat" xml:space="preserve">
     <value>К сожалению, этот формат файла не поддерживается</value>
+  </data>
+  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
+    <value>Этот провайдер уже подключен к комнате</value>
+  </data>
+  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
+    <value>Роль недоступна для этого типа пользователя</value>
   </data>
   <data name="ErrorMessage_SaveAnonymous" xml:space="preserve">
     <value>Автор сохранения неизвестен</value>
@@ -276,6 +327,9 @@
   <data name="ErrorMessage_SecurityException" xml:space="preserve">
     <value>Недостаточно прав для совершения операции</value>
   </data>
+  <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
+    <value>У вас недостаточно прав для архивирования комнаты</value>
+  </data>
   <data name="ErrorMessage_SecurityException_Auth" xml:space="preserve">
     <value>Не удается авторизоваться у провайдера {0} с указанными учетными данными.</value>
   </data>
@@ -284,6 +338,9 @@
   </data>
   <data name="ErrorMessage_SecurityException_CopyFolder" xml:space="preserve">
     <value>У Вас недостаточно прав для копирования папки</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
+    <value>У вас недостаточно прав для копирования в эту папку</value>
   </data>
   <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
     <value>У Вас недостаточно прав для создания</value>
@@ -306,11 +363,20 @@
   <data name="ErrorMessage_SecurityException_EditFileTwice" xml:space="preserve">
     <value>Этот документ редактируется Вами в другой вкладке</value>
   </data>
+  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
+    <value>У вас недостаточно прав для редактирования комнаты</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
+    <value>Невозможно удалить текущую версию файла</value>
+  </data>
   <data name="ErrorMessage_SecurityException_MoveFile" xml:space="preserve">
     <value>У вас недостаточно прав для перемещения этого файла</value>
   </data>
   <data name="ErrorMessage_SecurityException_MoveFolder" xml:space="preserve">
     <value>У вас недостаточно прав для перемещения этой папки</value>
+  </data>
+  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
+    <value>У вас недостаточно прав для перемещения в эту папку</value>
   </data>
   <data name="ErrorMessage_SecurityException_ReadFile" xml:space="preserve">
     <value>Недостаточно прав для просмотра файла</value>
@@ -324,11 +390,17 @@
   <data name="ErrorMessage_SecurityException_RenameFolder" xml:space="preserve">
     <value>Недостаточно прав для переименования папки</value>
   </data>
+  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
+    <value>У вас недостаточно прав для разархивирования комнаты</value>
+  </data>
   <data name="ErrorMessage_SecurityException_UpdateEditingFile" xml:space="preserve">
     <value>Невозможно обновить файл, т.к. файл открыт на редактирование</value>
   </data>
   <data name="ErrorMessage_SecurityException_ViewFolder" xml:space="preserve">
     <value>Недостаточно прав для просмотра папки</value>
+  </data>
+  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
+    <value>Вы сделали слишком много попыток ввода пароля. Пожалуйста, повторите попытку позже</value>
   </data>
   <data name="ErrorMessage_SharpBoxException" xml:space="preserve">
     <value>Содержимое папки стороннего ресурса недоступно. Попробуйте заново подключить аккаунт.</value>
@@ -336,8 +408,14 @@
   <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>Ошибка запуска редактирования файла</value>
   </data>
+  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
+    <value>Вы не можете редактировать заархивированные комнаты</value>
+  </data>
   <data name="ErrorMessage_UpdateEditingFile" xml:space="preserve">
     <value>Нельзя обновлять файл, открытый на редактирование</value>
+  </data>
+  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
+    <value>Файл не может быть загружен в эту комнату. Попробуйте загрузить PDF-форму ONLYOFFICE.</value>
   </data>
   <data name="ErrorMessage_UserNotFound" xml:space="preserve">
     <value>Пользователь не найден</value>
@@ -345,44 +423,35 @@
   <data name="ErrorMessage_ViewTrashItem" xml:space="preserve">
     <value>Запрещено просматривать элементы корзины</value>
   </data>
-  <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
-    <value>Недопустимый провайдер</value>
-  </data>
-  <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
-    <value>Невозможно использовать эту папку для хранения комнаты</value>
-  </data>
-  <data name="ErrorMessage_InvintationLink" xml:space="preserve">
-    <value>Пригласительная ссылка недействительна или срок ее действия истек</value>
-  </data>
-  <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
-    <value>Роль недоступна для этого типа пользователя</value>
-  </data>
-  <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
-    <value>Этот провайдер уже подключен к комнате</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
-    <value>У вас недостаточно прав для копирования в эту папку</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
-    <value>У вас недостаточно прав для перемещения в эту папку</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_UnarchiveRoom" xml:space="preserve">
-    <value>У вас недостаточно прав для разархивирования комнаты</value>
-  </data>
-  <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
-    <value>Вы не можете редактировать заархивированные комнаты</value>
-  </data>
   <data name="ErrorrMessage_PinRoom" xml:space="preserve">
     <value>Вы не можете закрепить комнату</value>
   </data>
   <data name="Everyone" xml:space="preserve">
     <value>Все</value>
   </data>
+  <data name="ExternalUser" xml:space="preserve">
+    <value>Внешний пользователь</value>
+  </data>
+  <data name="FillOutExternalLinkTitle" xml:space="preserve">
+    <value>Ссылка для заполнения</value>
+  </data>
+  <data name="FolderNameForReassignedData" xml:space="preserve">
+    <value>Документы пользователя {0} {1}</value>
+  </data>
+  <data name="FormNumber" xml:space="preserve">
+    <value>Номер формы</value>
+  </data>
   <data name="Guest" xml:space="preserve">
     <value>Анонимный пользователь</value>
   </data>
   <data name="IndexTitle" xml:space="preserve">
     <value>Поиск по содержимому документов</value>
+  </data>
+  <data name="KnowledgeFolder" xml:space="preserve">
+    <value>Знание</value>
+  </data>
+  <data name="LinkToForm" xml:space="preserve">
+    <value>Ссылка на форму</value>
   </data>
   <data name="MessageFileCreated" xml:space="preserve">
     <value>Файл создан в папке "{0}"</value>
@@ -395,6 +464,9 @@
   </data>
   <data name="MessageFillFormDraftDiscard" xml:space="preserve">
     <value>Файл больше не является черновиком для заполнения формы.</value>
+  </data>
+  <data name="OpenForm" xml:space="preserve">
+    <value>Открыть файл</value>
   </data>
   <data name="ProductAdminOpportunities" xml:space="preserve">
     <value>Делать то же самое, что и пользователь|Подключать аккаунты Dropbox, Box и другие в разделе 'Общие'|Настраивать права доступа к документам и папкам в разделе 'Общие'</value>
@@ -415,20 +487,17 @@
   <data name="ProductUserOpportunities" xml:space="preserve">
     <value>Создавать и редактировать свои документы, а также те, к которым предоставлен доступ с соответствующими правами|Предоставлять другим пользователям доступ к документам и папкам с правами на чтение/редактирование|Подключать аккаунты Dropbox, Box и другие в разделе 'Документы'</value>
   </data>
-  <data name="UnknownFirstName" xml:space="preserve">
-    <value>Имя</value>
+  <data name="ResultStorageFolder" xml:space="preserve">
+    <value>Хранилище результатов</value>
   </data>
-  <data name="UnknownLastName" xml:space="preserve">
-    <value>Фамилия</value>
+  <data name="RoleEnum_Collaborator" xml:space="preserve">
+    <value>Соавтор</value>
   </data>
-  <data name="UnlockComment" xml:space="preserve">
-    <value>Файл разблокирован</value>
+  <data name="RoleEnum_Comment" xml:space="preserve">
+    <value>Комментатор</value>
   </data>
-  <data name="AceStatusEnum_Editing" xml:space="preserve">
-    <value>Редактор</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_EditRoom" xml:space="preserve">
-    <value>У вас недостаточно прав для редактирования комнаты</value>
+  <data name="RoleEnum_ContentCreator" xml:space="preserve">
+    <value>Создатель контента</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
     <value>Администратор DocSpace</value>
@@ -436,41 +505,26 @@
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Редактор</value>
   </data>
-  <data name="RoleEnum_User" xml:space="preserve">
-    <value>Пользователь</value>
+  <data name="RoleEnum_FillForms" xml:space="preserve">
+    <value>Заполнитель формы</value>
+  </data>
+  <data name="RoleEnum_Guest" xml:space="preserve">
+    <value>Гость</value>
   </data>
   <data name="RoleEnum_Read" xml:space="preserve">
     <value>Зритель</value>
   </data>
-  <data name="RoleEnum_Comment" xml:space="preserve">
-    <value>Комментатор</value>
-  </data>
-  <data name="RoleEnum_FillForms" xml:space="preserve">
-    <value>Заполнитель формы</value>
-  </data>
   <data name="RoleEnum_Review" xml:space="preserve">
     <value>Рецензент</value>
   </data>
-  <data name="RoleEnum_Collaborator" xml:space="preserve">
-    <value>Соавтор</value>
+  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
+    <value>Администратор комнаты</value>
   </data>
-  <data name="AceStatusEnum_Collaborator" xml:space="preserve">
-    <value>Соавтор</value>
+  <data name="RoleEnum_RoomManager" xml:space="preserve">
+    <value>Менеджер комнат</value>
   </data>
-  <data name="ErrorMessage_SecurityException_ArchiveRoom" xml:space="preserve">
-    <value>У вас недостаточно прав для архивирования комнаты</value>
-  </data>
-  <data name="ErrorMessage_MaxLinksCount" xml:space="preserve">
-    <value>Максимальное количество ссылок не должно превышать {0}</value>
-  </data>
-  <data name="ErrorMessage_SharePasswordManyAttempts" xml:space="preserve">
-    <value>Вы сделали слишком много попыток ввода пароля. Пожалуйста, повторите попытку позже</value>
-  </data>
-  <data name="DefaultInvitationLinkTitle" xml:space="preserve">
-    <value>Пригласительная ссылка</value>
-  </data>
-  <data name="DefaultExternalLinkTitle" xml:space="preserve">
-    <value>Ссылка для доступа</value>
+  <data name="RoleEnum_User" xml:space="preserve">
+    <value>Пользователь</value>
   </data>
   <data name="RoomIndex_Author" xml:space="preserve">
     <value>Автор</value>
@@ -486,6 +540,9 @@
   </data>
   <data name="RoomIndex_ExportAuthor" xml:space="preserve">
     <value>Автор экспорта</value>
+  </data>
+  <data name="RoomIndex_Folder" xml:space="preserve">
+    <value>Папка</value>
   </data>
   <data name="RoomIndex_Index" xml:space="preserve">
     <value>Индекс</value>
@@ -511,79 +568,22 @@
   <data name="RoomIndex_Type" xml:space="preserve">
     <value>Тип</value>
   </data>
-  <data name="RoomIndex_Folder" xml:space="preserve">
-    <value>Папка</value>
-  </data>
-  <data name="Date" xml:space="preserve">
-    <value>Дата</value>
-  </data>
-  <data name="User" xml:space="preserve">
-    <value>Пользователь</value>
-  </data>
-  <data name="LinkToForm" xml:space="preserve">
-    <value>Ссылка на форму</value>
-  </data>
-  <data name="OpenForm" xml:space="preserve">
-    <value>Открыть файл</value>
-  </data>
-  <data name="ErrorMessage_UploadToFormRoom" xml:space="preserve">
-    <value>Файл не может быть загружен в эту комнату. Попробуйте загрузить PDF-форму ONLYOFFICE.</value>
-  </data>
-  <data name="FillOutExternalLinkTitle" xml:space="preserve">
-    <value>Ссылка для заполнения</value>
-  </data>
-  <data name="ErrorMessage_FilesMoveFormFillingError" xml:space="preserve">
-    <value>Перемещение нескольких файлов в комнату «Заполнение форм» не поддерживается. Перемещайте по одной PDF-форме ONLYOFFICE.</value>
-  </data>
-  <data name="ErrorMessage_FolderMoveFormFillingError" xml:space="preserve">
-    <value>Перемещение папок в комнату «Заполнение форм» не поддерживается. Перемещайте по одной PDF-форме ONLYOFFICE.</value>
-  </data>
-  <data name="ErrorMessage_MoveToFormRoom" xml:space="preserve">
-    <value>Файл не может быть перемещен в эту комнату. Попробуйте переместить PDF-форму ONLYOFFICE.</value>
-  </data>
-  <data name="FormNumber" xml:space="preserve">
-    <value>Номер формы</value>
-  </data>
-  <data name="ExternalUser" xml:space="preserve">
-    <value>Внешний пользователь</value>
-  </data>
-  <data name="AceStatusEnum_RoomManager" xml:space="preserve">
-    <value>Менеджер комнат</value>
-  </data>
-  <data name="RoleEnum_RoomManager" xml:space="preserve">
-    <value>Менеджер комнат</value>
-  </data>
-  <data name="AceStatusEnum_ContentCreator" xml:space="preserve">
-    <value>Создатель контента</value>
-  </data>
-  <data name="RoleEnum_ContentCreator" xml:space="preserve">
-    <value>Создатель контента</value>
-  </data>
-  <data name="ErrorMessage_SecurityException_FileVersion" xml:space="preserve">
-    <value>Невозможно удалить текущую версию файла</value>
-  </data>
   <data name="StartFillingModeEnum_ShareToFillOut" xml:space="preserve">
     <value>Предоставить доступ для заполнения</value>
   </data>
   <data name="StartFillingModeEnum_StartFilling" xml:space="preserve">
     <value>Начать заполнение</value>
   </data>
-  <data name="RoleEnum_RoomAdmin" xml:space="preserve">
-    <value>Администратор комнаты</value>
+  <data name="UnknownFirstName" xml:space="preserve">
+    <value>Имя</value>
   </data>
-  <data name="RoleEnum_Guest" xml:space="preserve">
-    <value>Гость</value>
+  <data name="UnknownLastName" xml:space="preserve">
+    <value>Фамилия</value>
   </data>
-  <data name="FolderNameForReassignedData" xml:space="preserve">
-    <value>Документы пользователя {0} {1}</value>
+  <data name="UnlockComment" xml:space="preserve">
+    <value>Файл разблокирован</value>
   </data>
-  <data name="AgentManager" xml:space="preserve">
-    <value>Менеджер агентов</value>
-  </data>
-  <data name="KnowledgeFolder" xml:space="preserve">
-    <value>Знание</value>
-  </data>
-  <data name="ResultStorageFolder" xml:space="preserve">
-    <value>Хранилище результатов</value>
+  <data name="User" xml:space="preserve">
+    <value>Пользователь</value>
   </data>
 </root>

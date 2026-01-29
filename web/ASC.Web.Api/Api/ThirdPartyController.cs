@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -130,10 +130,10 @@ public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : Contr
     {
         url += (url.Contains('#') ? "&" : "#")
                 + (string.IsNullOrEmpty(error)
-                        ? (string.IsNullOrEmpty(code)
-                                ? string.Empty
-                                : "code=" + HttpUtility.UrlEncode(code))
-                        : ("error/" + HttpUtility.UrlEncode(error)));
+                        ? string.IsNullOrEmpty(code)
+                            ? string.Empty
+                            : "code=" + HttpUtility.UrlEncode(code)
+                        : "error/" + HttpUtility.UrlEncode(error));
 
         return url;
     }

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -111,7 +111,7 @@ public class WatermarkManager(
             return new WatermarkSettings();
         }
 
-        if (room == null || !DocSpaceHelper.IsRoom(room.FolderType))
+        if (room is not { IsRoom: true })
         {
             throw new ItemNotFoundException();
         }
@@ -164,8 +164,7 @@ public class WatermarkManager(
 
     public async Task<WatermarkSettings> GetWatermarkAsync<T>(Folder<T> room)
     {
-        if (room == null ||
-            !DocSpaceHelper.IsRoom(room.FolderType) ||
+        if (room is not { IsRoom: true } ||
             room.ProviderEntry ||
             room.RootFolderType == FolderType.Archive ||
             !await fileSecurity.CanEditRoomAsync(room))

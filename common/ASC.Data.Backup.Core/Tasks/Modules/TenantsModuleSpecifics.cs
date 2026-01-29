@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -57,7 +57,8 @@ public class TenantsModuleSpecifics(CoreSettings coreSettings, Helpers helpers) 
     private readonly RelationInfo[] _tableRelations =
     [
         new("tenants_tenants", "id", "tenants_quota", "tenant"),
-            new("core_user", "id", "tenants_tenants", "owner_id", null, null, RelationImportance.Low)
+        new("core_user", "id", "tenants_tenants", "owner_id", null, null, RelationImportance.Low),
+        new("core_user", "id", "core_user", "created_by")
     ];
 
     public override void PrepareData(DataTable data, BackupCorrection backupCorrection)

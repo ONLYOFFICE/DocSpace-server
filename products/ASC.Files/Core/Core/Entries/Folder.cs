@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -116,6 +116,9 @@ public enum FolderType
 
     [SwaggerEnum(Description = "AI Agents")]
     AiAgents = 34,
+
+    [SwaggerEnum(Description = "Default Templates")]
+    DefaultTemplates = 35,
 }
 
 /// <summary>
@@ -172,6 +175,11 @@ public interface IFolder
     /// The collection of folder tags.
     /// </summary>
     public IEnumerable<Tag> Tags { get; set; }
+
+    /// <summary>
+    /// Indicates whether the folder represents a room.
+    /// </summary>
+    bool IsRoom { get; }
 }
 
 /// <summary>
@@ -304,6 +312,8 @@ public class Folder<T> : FileEntry<T>, IFolder
     /// Specifies if the folder is root or not.
     /// </summary>
     public bool IsRoot => FolderType == RootFolderType;
+
+    public bool IsRoom => this.FolderType.IsRoom();
 }
 
 [Scope]

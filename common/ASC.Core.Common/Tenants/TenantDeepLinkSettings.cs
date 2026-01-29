@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,11 +35,7 @@ public class TenantDeepLinkSettings : ISettings<TenantDeepLinkSettings>
     /// <summary>
     /// The tenant ID.
     /// </summary>
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{926A6850-7C19-4744-B4AD-813DE3CD55B1}"); }
-    }
+    public static Guid ID => new("{926A6850-7C19-4744-B4AD-813DE3CD55B1}");
 
     /// <summary>
     /// The deep link handling mode.

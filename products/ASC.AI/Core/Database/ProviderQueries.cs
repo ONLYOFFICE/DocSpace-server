@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -57,6 +57,12 @@ public partial class AiDbContext
     {
         return Queries.DeleteProvidersAsync(this, tenantId, ids);
     }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    public IAsyncEnumerable<string> GetProviderKeysAsync(int tenantId)
+    {
+        return Queries.GetProviderKeysAsync(this, tenantId);
+    }
 }
 
 static file class Queries
@@ -93,4 +99,11 @@ static file class Queries
                 ctx.Providers
                     .Where(x => x.TenantId == tenantId)
                     .Where(x => ids.Contains(x.Id)).ExecuteDelete());
+
+    public static readonly Func<AiDbContext, int, IAsyncEnumerable<string>> GetProviderKeysAsync =
+        EF.CompileAsyncQuery(
+            (AiDbContext ctx, int tenantId) =>
+                ctx.Providers
+                    .Where(x => x.TenantId == tenantId)
+                    .Select(x => x.Key));
 }

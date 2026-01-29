@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -202,11 +202,6 @@ public class UserManager(
     public async Task<bool> UserExistsAsync(Guid id)
     {
         return UserExists(await GetUsersAsync(id));
-    }
-
-    public bool UserExists(Guid id)
-    {
-        return UserExists(GetUsers(id));
     }
 
     public bool UserExists(UserInfo user)
@@ -414,8 +409,8 @@ public class UserManager(
     private async Task SyncCardDavAsync(UserInfo u, UserInfo oldUserData, UserInfo newUser)
     {
         var tenant = tenantManager.GetCurrentTenant();
-        var myUri = (httpContextAccessor?.HttpContext != null) ? httpContextAccessor.HttpContext.Request.GetDisplayUrl() :
-                    (cache.Get<string>("REWRITE_URL" + tenant.Id) != null) ?
+        var myUri = httpContextAccessor?.HttpContext != null ? httpContextAccessor.HttpContext.Request.GetDisplayUrl() :
+                    cache.Get<string>("REWRITE_URL" + tenant.Id) != null ?
                     new Uri(cache.Get<string>("REWRITE_URL" + tenant.Id)).ToString() : tenant.GetTenantDomain(coreSettings);
 
         var rootAuthorization = await cardDavAddressBook.GetSystemAuthorizationAsync();
@@ -502,8 +497,8 @@ public class UserManager(
             var currentAccountPassword = await instanceCrypto.EncryptAsync(currentMail);
             var userAuthorization = currentMail + ":" + currentAccountPassword;
             var rootAuthorization = await cardDavAddressBook.GetSystemAuthorizationAsync();
-            var myUri = (httpContextAccessor?.HttpContext != null) ? httpContextAccessor.HttpContext.Request.GetDisplayUrl() :
-                (cache.Get<string>("REWRITE_URL" + tenant.Id) != null) ?
+            var myUri = httpContextAccessor?.HttpContext != null ? httpContextAccessor.HttpContext.Request.GetDisplayUrl() :
+                cache.Get<string>("REWRITE_URL" + tenant.Id) != null ?
                 new Uri(cache.Get<string>("REWRITE_URL" + tenant.Id)).ToString() : tenant.GetTenantDomain(coreSettings);
             var davUsersEmails = await GetDavUserEmailsAsync();
             var requestUrlBook = cardDavAddressBook.GetRadicaleUrl(myUri, delUser.Email.ToLower(), true, true);
@@ -666,8 +661,8 @@ public class UserManager(
         if (groupId == Constants.GroupGuest.ID)
         {
             var tenant = tenantManager.GetCurrentTenant();
-            var myUri = (httpContextAccessor?.HttpContext != null) ? httpContextAccessor.HttpContext.Request.GetDisplayUrl() :
-                       (cache.Get<string>("REWRITE_URL" + tenant.Id) != null) ?
+            var myUri = httpContextAccessor?.HttpContext != null ? httpContextAccessor.HttpContext.Request.GetDisplayUrl() :
+                       cache.Get<string>("REWRITE_URL" + tenant.Id) != null ?
                        new Uri(cache.Get<string>("REWRITE_URL" + tenant.Id)).ToString() : tenant.GetTenantDomain(coreSettings);
 
             if (!dontClearAddressBook)
@@ -935,6 +930,45 @@ public class UserManager(
     #endregion Groups
 
 
+    #region InvitationLinks
+
+    public async Task<InvitationLink> CreateInvitationLinkAsync(EmployeeType employeeType, DateTime expiration, int? maxUseCount)
+    {
+        return await userService.CreateInvitationLinkAsync(Tenant.Id, employeeType, expiration, maxUseCount);
+    }
+
+    public async Task<InvitationLink> GetInvitationLinkAsync(Guid id)
+    {
+        return await userService.GetInvitationLinkAsync(Tenant.Id, id);
+    }
+
+    public async Task<InvitationLink> GetInvitationLinkAsync(EmployeeType employeeType)
+    {
+        return await userService.GetInvitationLinkAsync(Tenant.Id, employeeType);
+    }
+
+    public async Task<List<InvitationLink>> GetInvitationLinksAsync()
+    {
+        return await userService.GetInvitationLinksAsync(Tenant.Id);
+    }
+
+    public async Task UpdateInvitationLinkAsync(Guid id, DateTime expiration, int? maxUseCount)
+    {
+        await userService.UpdateInvitationLinkAsync(Tenant.Id, id, expiration, maxUseCount);
+    }
+
+    public async Task IncreaseInvitationLinkUsageAsync(Guid id)
+    {
+        await userService.IncreaseInvitationLinkUsageAsync(Tenant.Id, id);
+    }
+
+    public async Task DeleteInvitationLinkAsync(Guid id)
+    {
+        await userService.DeleteInvitationLinkAsync(Tenant.Id, id);
+    }
+
+    #endregion
+
     private bool IsPropertiesContainsWords(string[] properties, IEnumerable<string> words)
     {
         foreach (var w in words)
@@ -942,7 +976,7 @@ public class UserManager(
             var find = false;
             foreach (var p in properties)
             {
-                find = (2 <= w.Length) && (0 <= p.IndexOf(w, StringComparison.CurrentCultureIgnoreCase));
+                find = 2 <= w.Length && 0 <= p.IndexOf(w, StringComparison.CurrentCultureIgnoreCase);
                 if (find)
                 {
                     break;

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,5 +30,5 @@ public sealed class TextMessageContent(string? text = null) : MessageContent
 {
     public string? Text { get; init; } = text;
     
-    public override string ToString() => this.Text ?? string.Empty;
+    public override string ToString() => Text ?? string.Empty;
 }

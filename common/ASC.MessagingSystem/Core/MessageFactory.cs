@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -112,7 +112,7 @@ public class MessageFactory(
                 Action = action,
                 Active = true,
                 Initiator = initiator,
-                Description = description?.Select(s => s ?? "").ToArray(),
+                Description = description?.Select(s => s ?? "").ToArray()
             };
 
             if (request != null)

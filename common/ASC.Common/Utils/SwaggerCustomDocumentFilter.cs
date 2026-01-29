@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,8 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Microsoft.OpenApi.Any;
-using Microsoft.OpenApi.Models;
+using System.Text.Json.Nodes;
+
+using Microsoft.OpenApi;
 
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -41,24 +42,29 @@ public class HideRouteDocumentFilter(string routeToHide) : IDocumentFilter
 
 public class DerivedSchemaFilter : ISchemaFilter
 {
-    public void Apply(OpenApiSchema schema, SchemaFilterContext context)
+    public void Apply(IOpenApiSchema schema, SchemaFilterContext context)
     {
+        if(schema is not OpenApiSchema openApiSchema)
+        {
+            return;
+        }
+
         var baseType = context.Type;
-        var derivedTypes = baseType.GetCustomAttributes<JsonDerivedTypeAttribute>(true).Select(attr => attr.DerivedType).Where(t => t != null).Distinct().ToList();
+        var derivedTypes = baseType.GetCustomAttributes<JsonDerivedTypeAttribute>(true).Select(attr => attr.DerivedType).Distinct().ToList();
         if (derivedTypes.Count > 0)
         {
-
-            schema.Extensions.Add("x-derived", new OpenApiBoolean(true));
-            var derivedArray = new OpenApiArray();
+            openApiSchema.Extensions ??= new Dictionary<string, IOpenApiExtension>();
+            openApiSchema.Extensions.Add("x-derived", new JsonNodeExtension(true));
+            var derivedArray = new JsonArray();
             foreach (var type in derivedTypes)
             {
                 var schemaId = CustomSchemaId(type);
-                derivedArray.Add(new OpenApiString(schemaId));
+                derivedArray.Add(schemaId);
             }
 
             if (derivedArray.Any())
             {
-                schema.Extensions["x-derived-types"] = derivedArray;
+                openApiSchema.Extensions["x-derived-types"] = new JsonNodeExtension(derivedArray);
             }
         }
     }
@@ -96,7 +102,7 @@ public class LowercaseDocumentFilter : IDocumentFilter
 
             for (var i = 0; i < segments.Length; i++)
             {
-                if (!segments[i].StartsWith("{") && !segments[i].EndsWith("}"))
+                if (!segments[i].StartsWith('{') && !segments[i].EndsWith("}"))
                 {
                     segments[i] = segments[i].ToLowerInvariant();
                 }
@@ -214,32 +220,34 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
                     Name = tag,
                     Description = _tagDescriptions[tag]
                 };
-                openApiTag.Extensions.Add("x-displayName", new OpenApiString(displayName));
+                openApiTag.Extensions ??= new Dictionary<string, IOpenApiExtension>();
+                openApiTag.Extensions.Add("x-displayName", new JsonNodeExtension(displayName));
 
                 return openApiTag;
-            }).ToList();
+            }).ToHashSet();
 
         var groupTag = customTags
             .Where(tag => _tagDescriptions.ContainsKey(tag))
             .GroupBy(tag => tag.Split(" / ")[0])
             .ToDictionary(group => group.Key, group => group.ToList());
 
-        var tagGroups = new OpenApiArray();
+        var tagGroups = new JsonArray();
         foreach (var group in groupTag)
         {
-            var groupObject = new OpenApiObject();
-            var tagsArray = new OpenApiArray();
+            var groupObject = new JsonObject();
+            var tagsArray = new JsonArray();
 
             foreach (var tag in group.Value)
             {
-                tagsArray.Add(new OpenApiString(tag));
+                tagsArray.Add(tag);
             }
 
-            groupObject["name"] = new OpenApiString(group.Key);
+            groupObject["name"] = group.Key;
             groupObject["tags"] = tagsArray;
             tagGroups.Add(groupObject);
         }
 
-        swaggerDoc.Extensions["x-tagGroups"] = tagGroups;
+        swaggerDoc.Extensions ??= new Dictionary<string, IOpenApiExtension>();
+        swaggerDoc.Extensions["x-tagGroups"] = new JsonNodeExtension(tagGroups);
     }
 }

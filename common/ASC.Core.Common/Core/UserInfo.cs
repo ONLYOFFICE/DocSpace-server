@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -92,18 +92,16 @@ public sealed class UserInfo : IDirectRecipient, ICloneable
     [EmailAddress]
     public string Email { get; set; }
 
-    private string _contacts;
-
     /// <summary>
     /// The list of user contacts in the string format.
     /// </summary>
     public string Contacts
     {
-        get => _contacts;
+        get;
         set
         {
-            _contacts = value;
-            ContactsFromString(_contacts);
+            field = value;
+            ContactsFromString(field);
         }
     }
 

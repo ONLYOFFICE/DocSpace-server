@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -66,13 +66,13 @@ public class RedisHeartBeatFactory(IRedisDatabase database) : IHeartBeatFactory
     {
         var timer = new PeriodicTimer(pulseInterval);
 
-        _ = Task.Run((async () =>
+        _ = Task.Run(async () =>
         {
             while (await timer.WaitForNextTickAsync(cancellationToken))
             {
                 await database.Database.LockExtendAsync(key, id, timeout);
             }
-        }), cancellationToken);
+        }, cancellationToken);
 
         return timer;
     }

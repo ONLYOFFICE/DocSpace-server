@@ -1,12 +1,12 @@
 {{>partial_header}}
 
+{{#operations.x-supportsFields}}
+from __future__ import annotations
+{{/operations.x-supportsFields}}
 import warnings
 from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
-{{#operations.x-supportsFields}}
-from __future__ import annotations
-{{/operations.x-supportsFields}}
 
 {{#imports}}
 {{import}}
@@ -32,12 +32,24 @@ class {{x-classname}}:
         {{#x-supportsFields}}
         self._fields = None
         {{/x-supportsFields}}
+        {{#x-supportsUseAt}}
+        self._use_at_recent = False
+        {{/x-supportsUseAt}}
 
 {{#x-supportsFields}}
     def with_fields(self, fields: str) -> {{x-classname}}:
         self._fields = fields
         return self
 {{/x-supportsFields}}
+{{#x-supportsUseAt}}
+
+    def with_at_recent(self):
+        """
+        Use legacy /@recent path for the next request
+        """
+        self._use_at_recent = True
+        return self
+{{/x-supportsUseAt}}
 {{#operation}}
 
 
@@ -235,9 +247,19 @@ class {{x-classname}}:
             '{{name}}'{{^-last}}, {{/-last}}{{/authMethods}}
         ]
 
+        {{#vendorExtensions.x-supportsUseAtMethod}}
+        recent_prefix = '@' if self._use_at_recent else ''
+        resource_path = '/api/2.0/files/{recent_prefix}recent'
+        self._use_at_recent = False
+        {{/vendorExtensions.x-supportsUseAtMethod}}
+
+        {{^vendorExtensions.x-supportsUseAtMethod}}
+        resource_path = "{{{path}}}"
+        {{/vendorExtensions.x-supportsUseAtMethod}}
+
         return self.api_client.param_serialize(
             method='{{httpMethod}}',
-            resource_path='{{{path}}}',
+            resource_path=resource_path,
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

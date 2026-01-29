@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -48,11 +48,11 @@ public class ChatSocketClient(
         await MakeRequest("commit-chat-message", new { room, messageId });
     }
 
-    public async Task ExportCompleted<T>(Guid chatId, File<T>? resultFile)
+    public async Task ExportCompleted<T>(Guid chatId, File<T>? resultFile, string? error)
     {
         var currentUser = securityContext.CurrentAccount.ID;
         var room = $"{GetRoom(chatId)}-{currentUser}";
-        await MakeRequest("chat-export", new { room, resultFile = resultFile?.MapToDto<T>() });
+        await MakeRequest("chat-export", new { room, resultFile = resultFile?.MapToDto<T>(), error });
     }
 
     private string GetRoom(Guid chatId)

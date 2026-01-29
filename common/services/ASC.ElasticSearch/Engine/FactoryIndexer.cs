@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -65,7 +65,7 @@ public abstract class FactoryIndexer<T>(ILoggerProvider options,
     where T : class, ISearchItem
 {
     protected ILogger Logger { get; } = options.CreateLogger("ASC.Indexer");
-    public string IndexName { get => _indexer.IndexName; }
+    public string IndexName => _indexer.IndexName;
     public virtual string SettingsTitle => string.Empty;
 
     protected readonly BaseIndexer<T> _indexer = baseIndexer;

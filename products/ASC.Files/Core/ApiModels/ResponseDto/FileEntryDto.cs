@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -98,15 +98,13 @@ public abstract class FileEntryBaseDto
     /// </summary>
     public EmployeeDto CreatedBy { get; set; }
 
-    private ApiDateTime _updated;
-
     /// <summary>
     /// The last date and time when the file entry was updated.
     /// </summary>
     public ApiDateTime Updated
     {
-        get => _updated < Created ? Created : _updated;
-        set => _updated = value;
+        get => field < Created ? Created : field;
+        set;
     }
 
     /// <summary>
@@ -305,6 +303,7 @@ public class FileEntryDtoHelper(
                 FolderType.VirtualRooms => IdConverter.Convert<TId>(await _globalFolderHelper.GetFolderVirtualRooms()),
                 FolderType.Archive => IdConverter.Convert<TId>(await _globalFolderHelper.GetFolderArchive()),
                 FolderType.RoomTemplates => IdConverter.Convert<TId>(await _globalFolderHelper.GetFolderRoomTemplatesAsync()),
+                FolderType.DefaultTemplates => IdConverter.Convert<TId>(await _globalFolderHelper.GetFolderDefaultTemplatesAsync()),
                 _ => entry.RootId
             };
         }

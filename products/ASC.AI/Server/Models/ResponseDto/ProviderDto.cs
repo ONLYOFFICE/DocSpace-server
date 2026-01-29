@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -34,6 +34,8 @@ public class ProviderDto
     public string? Url { get; init; }
     public required ApiDateTime CreatedOn { get; init; }
     public required ApiDateTime ModifiedOn { get; init; }
+
+    public bool NeedReset { get; init; }
 }
 
 [Scope]

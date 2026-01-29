@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,13 +27,68 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The request paarmeters for handling invitation link requests with specific user type parameters.
+/// The request parameters for receiving an invitation link.
 /// </summary>
 public class InvitationLinkRequestDto
 {
     /// <summary>
-    /// The type of employee role for the invitation link (All, RoomAdmin, Guest, DocSpaceAdmin, User).
+    /// The type of employee role for the invitation link (DocSpaceAdmin, RoomAdmin or User).
     /// </summary>
     [FromRoute(Name = "employeeType")]
     public required EmployeeType EmployeeType { get; set; }
+}
+
+/// <summary>
+/// The request parameters for creating an invitation link.
+/// </summary>
+public class InvitationLinkCreateRequestDto
+{
+    /// <summary>
+    /// The type of employee role for the invitation link (DocSpaceAdmin, RoomAdmin or User).
+    /// </summary>
+    public required EmployeeType EmployeeType { get; set; }
+
+    /// <summary>
+    /// The expiration date of the invitation link.
+    /// </summary>
+    public DateTime? Expiration { get; set; }
+
+    /// <summary>
+    /// The maximum number of times the invitation link can be used.
+    /// </summary>
+    [Range(1, 1000)]
+    public int? MaxUseCount { get; set; }
+}
+
+/// <summary>
+/// The request parameters for updating an invitation link.
+/// </summary>
+public class InvitationLinkUpdateRequestDto
+{
+    /// <summary>
+    /// The ID of the invitation link.
+    /// </summary>
+    public required Guid Id { get; set; }
+
+    /// <summary>
+    /// The expiration date of the invitation link.
+    /// </summary>
+    public DateTime? Expiration { get; set; }
+
+    /// <summary>
+    /// The maximum number of times the invitation link can be used.
+    /// </summary>
+    [Range(1, 1000)]
+    public int? MaxUseCount { get; set; }
+}
+
+/// <summary>
+/// The request parameters for deleting an invitation link.
+/// </summary>
+public class InvitationLinkDeleteRequestDto
+{
+    /// <summary>
+    /// The ID of the invitation link.
+    /// </summary>
+    public required Guid Id { get; set; }
 }

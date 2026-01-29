@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,6 +23,8 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+using ASC.Files.Core.Configuration;
 
 namespace ASC.Web.Files.Classes;
 
@@ -170,18 +172,17 @@ public partial class Global(
         }
     }
 
-    private List<string> _imageThumbnailExtension;
     public List<string> ImageThumbnailExtension
     {
         get
         {
-            if (_imageThumbnailExtension != null)
+            if (field != null)
             {
-                return _imageThumbnailExtension;
+                return field;
             }
 
-            _imageThumbnailExtension = configuration.GetSection("files:thumbnail:img-exts").Get<List<string>>() ?? [".bmp", ".gif", ".jpeg", ".jpg", ".pbm", ".png", ".tiff", ".tif", ".tga", ".webp", ".heic"];
-            return _imageThumbnailExtension;
+            field = configuration.GetSection("files:thumbnail:img-exts").Get<List<string>>() ?? [".bmp", ".gif", ".jpeg", ".jpg", ".pbm", ".png", ".tiff", ".tif", ".tga", ".webp", ".heic"];
+            return field;
         }
     }
 
@@ -320,15 +321,67 @@ public class GlobalStore(StorageFactory storageFactory, TenantManager tenantMana
         return await storageFactory.GetStorageAsync(-1, FileConstant.StorageTemplate);
     }
 
-    public async Task<string> GetNewDocTemplatePath(IDataStore storeTemplate, string extension, CultureInfo culture = null)
+    public async Task<string> GetNewDocTemplatePath(IDataStore storeTemplate, CultureInfo culture = null)
     {
         var defaultPath = coreBaseSettings.CustomMode
                 ? FileConstant.NewDocDefaultCustomModePath
                 : FileConstant.NewDocDefaultPath;
 
-        var path = await GetPathDependingOnCulture(storeTemplate, FileConstant.NewDocPath, defaultPath, culture);
+        return await GetPathDependingOnCulture(storeTemplate, FileConstant.NewDocPath, defaultPath, culture);
+    }
 
-        return $"{path}{FileConstant.NewDocFileName}{extension}";
+    public async Task<string> GetNewDocTemplatePath(IDataStore storeTemplate, string extension, CultureInfo culture = null)
+    {
+        return $"{GetNewDocTemplatePath(storeTemplate, culture)}{FileConstant.NewDocFileName}{extension}";
+    }
+
+    public class DocTemplate
+    {
+        public string Title { get; init; }
+        public string FileExtension { get; init; }
+        public Func<Task<Stream>> GetStreamAsync { get; init; }
+        public long FileSize { get; init; }
+        public string ThumbnailPath { get; init; }
+        public string FileName => Title + FileExtension;
+    }
+
+    public async Task<DocTemplate> GetNewDocTemplate(IServiceProvider serviceProvider, IDataStore storeTemplate, string extension, CultureInfo culture = null)
+    {
+        var templateSettingsHelper = serviceProvider.GetRequiredService<DefaultTemplateSettingsHelper>();
+        var templateSettings = await templateSettingsHelper.GetSettingsAsync();
+
+        var templateSetting = templateSettings.Items.FirstOrDefault(t => t.FileExtension == extension);
+        if (templateSetting?.SelectedFile != null)
+        {
+            var fileDao = serviceProvider.GetRequiredService<IFileDao<int>>();
+            var file = await fileDao.GetFileAsync(templateSetting.SelectedFile.Value);
+
+            return new DocTemplate()
+            {
+                Title = file.Title,
+                FileExtension = extension,
+                FileSize = file.ContentLength,
+                GetStreamAsync = () => fileDao.GetFileStreamAsync(file)
+            };
+        }
+
+        var defaultPath = coreBaseSettings.CustomMode
+            ? FileConstant.NewDocDefaultCustomModePath
+            : FileConstant.NewDocDefaultPath;
+
+        var path = await GetPathDependingOnCulture(storeTemplate, FileConstant.NewDocPath, defaultPath, culture);
+        var filePath = $"{path}{FileConstant.NewDocFileName}{extension}";
+
+        return await storeTemplate.IsFileAsync("", filePath)
+            ? new DocTemplate()
+            {
+                Title = Path.GetFileNameWithoutExtension(filePath),
+                FileExtension = extension,
+                GetStreamAsync = () => storeTemplate.GetReadStreamAsync(filePath),
+                FileSize = await storeTemplate.GetFileSizeAsync(filePath),
+                ThumbnailPath = filePath.Replace(Path.GetFileName(filePath), string.Empty)
+            }
+            : null;
     }
 
     public async Task<string> GetStartDocsPath(IDataStore storeTemplate, bool my, CultureInfo culture = null)
@@ -428,6 +481,25 @@ public class GlobalFolder(
         }
 
         result = await daoFactory.GetFolderDao<int>().GetFolderIDRoomTemplatesAsync(createIfNotExist);
+
+        if (result != default)
+        {
+            DocSpaceFolderCache[key] = result;
+        }
+
+        return result;
+    }
+
+    public async ValueTask<int> GetFolderDefaultTemplatesAsync(IDaoFactory daoFactory, bool createIfNotExist = true)
+    {
+        var key = $"defaultTemplates/{tenantManager.GetCurrentTenantId()}";
+
+        if (DocSpaceFolderCache.TryGetValue(key, out var result))
+        {
+            return result;
+        }
+
+        result = await daoFactory.GetFolderDao<int>().GetFolderIDDefaultTemplatesAsync(createIfNotExist);
 
         if (result != default)
         {
@@ -681,7 +753,7 @@ public class GlobalFolder(
             return id;
         }
 
-        var cacheKey = $"trash/{(tenantManager.GetCurrentTenant()).Id}/{authContext.CurrentAccount.ID}";
+        var cacheKey = $"trash/{tenantManager.GetCurrentTenant().Id}/{authContext.CurrentAccount.ID}";
         if (!TrashFolderCache.TryGetValue(cacheKey, out var trashFolderId))
         {
             id = authContext.IsAuthenticated ? await daoFactory.GetFolderDao<int>().GetFolderIDTrashAsync(true) : 0;
@@ -745,7 +817,7 @@ public class GlobalFolder(
             await securityContext.AuthenticateMeWithoutCookieAsync(userId);
 
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
-            var culture = my ? (await userManager.GetUsersAsync(userId)).GetCulture() : (tenantManager.GetCurrentTenant()).GetCulture();
+            var culture = my ? (await userManager.GetUsersAsync(userId)).GetCulture() : tenantManager.GetCurrentTenant().GetCulture();
 
             var globalStore = scope.ServiceProvider.GetRequiredService<GlobalStore>();
             var storeTemplate = await globalStore.GetStoreTemplateAsync();
@@ -859,6 +931,7 @@ public class GlobalFolderHelper(IDaoFactory daoFactory, GlobalFolder globalFolde
     public ValueTask<int> FolderTemplatesAsync => globalFolder.GetFolderTemplatesAsync(daoFactory);
     public ValueTask<int> FolderVirtualRoomsAsync => globalFolder.GetFolderVirtualRoomsAsync(daoFactory);
     public ValueTask<int> FolderRoomTemplatesAsync => globalFolder.GetFolderRoomTemplatesAsync(daoFactory);
+    public ValueTask<int> FolderDefaultTemplatesAsync => globalFolder.GetFolderDefaultTemplatesAsync(daoFactory);
     public ValueTask<int> FolderArchiveAsync => globalFolder.GetFolderArchiveAsync(daoFactory);
     public ValueTask<int> FolderAiAgentsAsync => globalFolder.GetFolderAiAgentsAsync(daoFactory);
 
@@ -897,6 +970,11 @@ public class GlobalFolderHelper(IDaoFactory daoFactory, GlobalFolder globalFolde
         return await FolderRoomTemplatesAsync;
     }
 
+    public async ValueTask<int> GetFolderDefaultTemplatesAsync()
+    {
+        return await FolderDefaultTemplatesAsync;
+    }
+
     public async ValueTask<T> GetFolderShareAsync<T>()
     {
         return IdConverter.Convert<T>(await FolderShareAsync);
@@ -918,9 +996,5 @@ public class GlobalFolderHelper(IDaoFactory daoFactory, GlobalFolder globalFolde
     {
         globalFolder.SetFolderTrashAsync(value);
     }
-    public ValueTask<int> FolderTrashAsync
-    {
-        get => globalFolder.GetFolderTrashAsync(daoFactory);
-    }
-
+    public ValueTask<int> FolderTrashAsync => globalFolder.GetFolderTrashAsync(daoFactory);
 }

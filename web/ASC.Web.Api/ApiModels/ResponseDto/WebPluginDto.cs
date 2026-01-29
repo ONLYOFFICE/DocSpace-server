@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -109,9 +109,24 @@ public class WebPluginDto
     public required string Url { get; set; }
 
     /// <summary>
+    /// The web plugin css URL.
+    /// </summary>
+    public required string CssUrl { get; set; }
+
+    /// <summary>
     /// The web plugin settings.
     /// </summary>
     public required string Settings { get; set; }
+
+    /// <summary>
+    /// The web plugin localized name.
+    /// </summary>
+    public Dictionary<string, string> NameLocale { get; set; }
+
+    /// <summary>
+    /// The web plugin localized description.
+    /// </summary>
+    public Dictionary<string, string> DescriptionLocale { get; set; }
 }
 
 [Scope]

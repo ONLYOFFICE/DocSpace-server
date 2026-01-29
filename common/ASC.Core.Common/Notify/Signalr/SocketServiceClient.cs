@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -47,7 +47,7 @@ public class SocketServiceClient(
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
-    protected virtual string Hub { get => "default"; }
+    protected virtual string Hub => "default";
 
     public async Task MakeRequest(string method, object data, int? tenantId = null)
     {
@@ -111,7 +111,7 @@ public class SocketService(
 
         List<ChannelReader<SocketData>> readers = [channelReader];
 
-        if (((int)(maxDegreeOfParallelism * 0.3)) > 0)
+        if ((int)(maxDegreeOfParallelism * 0.3) > 0)
         {
             var splitter = channelReader.Split(2, (_, _, p) => p.TariffState == TariffState.Paid ? 0 : 1, stoppingToken);
             var premiumChannels = splitter[0].Split((int)(maxDegreeOfParallelism * 0.7), null, stoppingToken);

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -67,6 +67,11 @@ public class InvitationValidator(
         if (commonLinkResult == EmailValidationKeyProvider.ValidationResult.Invalid && userId.HasValue)
         {
             commonLinkResult = emailValidationKeyProvider.ValidateEmailKey(ConfirmType.LinkInvite.ToStringFast() + (int)employeeType + userId.Value + tenant.Alias, key, emailValidationKeyProvider.ValidEmailKeyInterval);
+
+            if (commonLinkResult == EmailValidationKeyProvider.ValidationResult.Invalid)
+            {
+                (commonLinkResult, linkId) = await ValidateCommonLinkAsync(key, employeeType, userId.Value, tenant.Alias);
+            }
         }
 
         if (commonLinkResult != EmailValidationKeyProvider.ValidationResult.Invalid)
@@ -74,6 +79,11 @@ public class InvitationValidator(
             result.Status = commonLinkResult;
             result.LinkType = InvitationLinkType.Common;
             result.ConfirmType = ConfirmType.LinkInvite;
+
+            if (linkId != default)
+            {
+                result.LinkId = linkId;
+            }
 
             if (!userId.HasValue)
             {
@@ -175,6 +185,49 @@ public class InvitationValidator(
         }
 
         return linkId == Guid.Empty ? (EmailValidationKeyProvider.ValidationResult.Invalid, default) : (EmailValidationKeyProvider.ValidationResult.Ok, linkId);
+    }
+
+    private async Task<(EmailValidationKeyProvider.ValidationResult, Guid)> ValidateCommonLinkAsync(string key, EmployeeType employeeType, Guid userId, string tenantAlias)
+    {
+        Guid linkId = default;
+
+        var combined = signature.Read<string>(key);
+        if (!string.IsNullOrEmpty(combined))
+        {
+            var split = combined.Split('.');
+            if (split.Length == 4 &&
+                split[0].Equals(((int)employeeType).ToString()) &&
+                Guid.TryParse(split[1], out var id) &&
+                Guid.TryParse(split[2], out var uId) && uId.Equals(userId) &&
+                split[3].Equals(tenantAlias))
+            {
+                linkId = id;
+            }
+        }
+
+        if (linkId == default)
+        {
+            return (EmailValidationKeyProvider.ValidationResult.Invalid, linkId);
+        }
+
+        var link = await userManager.GetInvitationLinkAsync(linkId);
+
+        if (link == null || link.EmployeeType != employeeType)
+        {
+            return (EmailValidationKeyProvider.ValidationResult.Invalid, linkId);
+        }
+
+        if (link.Expiration != DateTime.MinValue && link.Expiration < DateTime.UtcNow)
+        {
+            return (EmailValidationKeyProvider.ValidationResult.Expired, linkId);
+        }
+
+        if (link.MaxUseCount.HasValue && link.MaxUseCount.Value <= link.CurrentUseCount)
+        {
+            return (EmailValidationKeyProvider.ValidationResult.QuotaFailed, linkId);
+        }
+
+        return (EmailValidationKeyProvider.ValidationResult.Ok, linkId);
     }
 
     private async Task<DbAuditEvent> GetLinkVisitMessageAsync(int tenantId, string email, string key)

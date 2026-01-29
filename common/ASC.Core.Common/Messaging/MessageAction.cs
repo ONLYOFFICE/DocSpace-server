@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -608,20 +608,23 @@ public enum MessageAction
     [SwaggerEnum("Form stopped")]
     FormStopped = 5153,
     
-    [SwaggerEnum("Agent created")]
+    [SwaggerEnum("AI agent created")]
     AgentCreated = 5154,
 
-    [SwaggerEnum("Agent renamed")]
+    [SwaggerEnum("AI agent renamed")]
     AgentRenamed = 5155,
     
-    [SwaggerEnum("Agent deleted")]
+    [SwaggerEnum("AI agent deleted")]
     AgentDeleted = 5156,
     
-    [SwaggerEnum("MCP server added to agent")]
+    [SwaggerEnum("MCP server added to AI agent")]
     AddedServerToAgent = 5157,
     
-    [SwaggerEnum("MCP server deleted from agent")]
+    [SwaggerEnum("MCP server deleted from AI agent")]
     DeletedServerFromAgent = 5158,
+
+    [SwaggerEnum("Room change owner")]
+    RoomChangeOwner = 5159,
 
     #endregion
 
@@ -929,6 +932,30 @@ public enum MessageAction
 
     [SwaggerEnum("Webplugin deleted")]
     WebpluginDeleted = 6087,
+
+    [SwaggerEnum("Whitelabel settings logo text updated")]
+    WhiteLabelSettingsLogoTextUpdated = 6088,
+
+    [SwaggerEnum("Whitelabel settings logos updated")]
+    WhiteLabelSettingsLogosUpdated = 6089,
+
+    [SwaggerEnum("Whitelabel company settings updated")]
+    WhiteLabelCompanySettingsUpdated = 6090,
+
+    [SwaggerEnum("Whitelabel additional settings updated")]
+    WhiteLabelAdditionalSettingsUpdated = 6091,
+
+    [SwaggerEnum("Whitelabel mail settings updated")]
+    WhiteLabelMailSettingsUpdated = 6092,
+
+    [SwaggerEnum("Invitation settings updated")]
+    InvitationSettingsUpdated = 6093,
+
+    [SwaggerEnum("IP restrictions settings updated")]
+    IPRestrictionsSettingsUpdated = 6094,
+
+    [SwaggerEnum("Login settings updated")]
+    LoginSettingsUpdated = 6095,
 
     #endregion
 

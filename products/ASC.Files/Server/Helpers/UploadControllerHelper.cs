@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Web.Core.WhiteLabel;
-
 namespace ASC.Files.Helpers;
 
 [Scope]
@@ -35,12 +33,8 @@ public class UploadControllerHelper(
     SocketManager socketManager,
     FileDtoHelper fileDtoHelper,
     FileStorageService fileStorageService,
-    IHttpContextAccessor httpContextAccessor,
-    FilesLinkUtility filesLinkUtility,
     ChunkedUploadSessionHelper chunkedUploadSessionHelper,
     TenantManager tenantManager,
-    IHttpClientFactory httpClientFactory,
-    SecurityContext securityContext,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     FileChecker fileChecker,
@@ -54,21 +48,20 @@ public class UploadControllerHelper(
         fileDtoHelper,
         fileStorageService,
         fileChecker,
-        httpContextAccessor,
         webhookManager,
         daoFactory,
         eventBus,
         tenantManager,
         authContext)
 {
-    public async Task<object> CreateEditSessionAsync<T>(T fileId, long fileSize)
+    public async Task<ChunkedUploadSessionResponse<T>> CreateEditSessionAsync<T>(T fileId, long fileSize)
     {
         var file = await _fileUploader.VerifyChunkedUploadForEditing(fileId, fileSize);
 
         return await CreateUploadSessionAsync(file, false, null, true);
     }
 
-    public async Task<List<string>> CheckUploadAsync<T>(T folderId, IEnumerable<string> filesTitle)
+    public async Task<List<string>> CheckUploadAsync<T>(T folderId, IReadOnlyList<string> filesTitle)
     {
         var folderDao = _daoFactory.GetFolderDao<T>();
         var fileDao = _daoFactory.GetFileDao<T>();
@@ -100,114 +93,45 @@ public class UploadControllerHelper(
         return result;
     }
 
-    public async Task<object> CreateUploadSessionAsync<T>(T folderId, string fileName, long fileSize, string relativePath, bool encrypted, ApiDateTime createOn, bool createNewIfExist, bool keepVersion = false)
+    public async Task<ChunkedUploadSessionResponse<T>> CreateUploadSessionAsync<T>(T folderId, string fileName, long fileSize, string relativePath, bool encrypted, ApiDateTime createOn, bool createNewIfExist, bool keepVersion = false)
     {
         var file = await _fileUploader.VerifyChunkedUploadAsync(folderId, fileName, fileSize, !createNewIfExist, relativePath);
         return await CreateUploadSessionAsync(file, encrypted, createOn, keepVersion);
     }
 
-    private async Task<object> CreateUploadSessionAsync<T>(File<T> file, bool encrypted, ApiDateTime createOn, bool keepVersion = false)
+    private async Task<ChunkedUploadSessionResponse<T>> CreateUploadSessionAsync<T>(File<T> file, bool encrypted, ApiDateTime createOn, bool keepVersion = false)
     {
-        if (filesLinkUtility.IsLocalFileUploader)
-        {
-            var session = await _fileUploader.InitiateUploadAsync(file.ParentId, file.Id ?? default, file.Title, file.ContentLength, encrypted, keepVersion, createOn);
+        var session = await _fileUploader.InitiateUploadAsync(file.ParentId, file.Id ?? default, file.Title, file.ContentLength, encrypted, keepVersion, createOn);
 
-            var responseObject = await chunkedUploadSessionHelper.ToResponseObjectAsync(session, true);
-
-            return new
-            {
-                success = true,
-                data = responseObject
-            };
-        }
-
-        var createSessionUrl = await filesLinkUtility.GetInitiateUploadSessionUrlAsync(_tenantManager.GetCurrentTenantId(), file.ParentId, file.Id, file.Title, file.ContentLength, encrypted, securityContext);
-
-        var httpClient = httpClientFactory.CreateClient();
-
-        var request = new HttpRequestMessage
-        {
-            RequestUri = new Uri(createSessionUrl),
-            Method = HttpMethod.Post
-        };
-
-        // hack for uploader.onlyoffice.com in api requests
-        //var rewriterHeader = _httpContextAccessor.HttpContext.Request.Headers[HttpRequestExtensions.UrlRewriterHeader];
-        //if (!string.IsNullOrEmpty(rewriterHeader))
-        //{
-        //    request.Headers.Add(HttpRequestExtensions.UrlRewriterHeader, rewriterHeader.ToString());
-        //}
-
-        using var response = await httpClient.SendAsync(request);
-        var responseAsString = await response.Content.ReadAsStringAsync();
-        var jObject = JObject.Parse(responseAsString); //result is json string
-
-        var result = new
-        {
-            success = jObject["success"].ToString(),
-            data = new
-            {
-                id = jObject["data"]["id"].ToString(),
-                path = jObject["data"]["path"].Values().Select(x => (T)Convert.ChangeType(x, typeof(T))),
-                created = jObject["data"]["created"].Value<DateTime>(),
-                expired = jObject["data"]["expired"].Value<DateTime>(),
-                location = jObject["data"]["location"].ToString(),
-                bytes_uploaded = jObject["data"]["bytes_uploaded"].Value<long>(),
-                bytes_total = jObject["data"]["bytes_total"].Value<long>()
-            }
-        };
-
-        return result;
+        return await chunkedUploadSessionHelper.ToResponseObjectAsync(session, true);
     }
 
-    public async Task<object> UploadFileAsync<T>(T folderId, UploadRequestDto uploadModel)
+    public async Task<List<FileDto<T>>> UploadFileAsync<T>(T folderId, UploadRequestDto uploadModel)
     {
         if (uploadModel.StoreOriginalFileFlag.HasValue)
         {
             await _filesSettingsHelper.SetStoreOriginalFiles(uploadModel.StoreOriginalFileFlag.Value);
         }
-
-        IEnumerable<IFormFile> files = _httpContextAccessor.HttpContext?.Request.Form.Files;
-        if (!files.Any())
+        
+        if (uploadModel.File == null)
         {
-            files = uploadModel.Files;
+            throw new InvalidOperationException("No input files");
         }
 
-        if (files != null && files.Any())
+        var fileName = "file" + MimeMapping.GetExtention(uploadModel.ContentType.MediaType);
+        if (uploadModel.ContentDisposition != null)
         {
-            if (files.Count() == 1)
-            {
-                //Only one file. return it
-                var postedFile = files.First();
-
-                return await InsertFileAsync(folderId, postedFile.OpenReadStream(), postedFile.FileName, uploadModel.CreateNewIfExist, uploadModel.KeepConvertStatus);
-            }
-
-            //For case with multiple files
-            var result = new List<object>();
-
-            foreach (var postedFile in uploadModel.Files)
-            {
-                result.Add(await InsertFileAsync(folderId, postedFile.OpenReadStream(), postedFile.FileName, uploadModel.CreateNewIfExist, uploadModel.KeepConvertStatus));
-            }
-
-            return result;
+            fileName = uploadModel.ContentDisposition.FileName;
         }
 
-        if (uploadModel.File != null)
-        {
-            var fileName = "file" + MimeMapping.GetExtention(uploadModel.ContentType.MediaType);
-            if (uploadModel.ContentDisposition != null)
-            {
-                fileName = uploadModel.ContentDisposition.FileName;
-            }
-
-            return new List<FileDto<T>>
-            {
-                await InsertFileAsync(folderId, uploadModel.File.OpenReadStream(), fileName, uploadModel.CreateNewIfExist, uploadModel.KeepConvertStatus)
-            };
-        }
-
-        throw new InvalidOperationException("No input files");
+        return [
+            await InsertFileAsync(folderId, uploadModel.File.OpenReadStream(), fileName, uploadModel.CreateNewIfExist, uploadModel.KeepConvertStatus)
+        ];
     }
+}
+
+public class ChunkedUploadSessionResponseWrapper<T>
+{
+    public bool Success { get; set; }
+    public ChunkedUploadSessionResponse<T> Data { get; set; }
 }

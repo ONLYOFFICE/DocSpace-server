@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -158,7 +158,7 @@ public class KafkaCacheNotify<T> : IDisposable, ICacheNotify<T> where T : new()
                 {
                     var cr = c.Consume(_cancelationToken[channelName].Token);
                     
-                    if (cr is { Message: not null } && cr.Message.Value != null && !(new Guid(cr.Message.Key.Id)).Equals(_key))
+                    if (cr is { Message: not null } && cr.Message.Value != null && !new Guid(cr.Message.Key.Id).Equals(_key))
                     {
                         if (_actions.TryGetValue(channelName, out var act))
                         {

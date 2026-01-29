@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,4 +36,16 @@ public class ProviderIdRequestDto
     /// </summary>
     [FromRoute(Name = "providerId")]
     public required int ProviderId { get; set; }
+}
+
+/// <summary>
+/// The request parameters for retrieving third-party providers.
+/// </summary>
+public class GetProvidersRequestDto
+{
+    /// <summary>
+    /// Specifies whether WebDAV resources should be excluded from the result..
+    /// </summary>
+    [FromQuery(Name = "excludewebdav")]
+    public bool ExcludeWebDav { get; set; }
 }

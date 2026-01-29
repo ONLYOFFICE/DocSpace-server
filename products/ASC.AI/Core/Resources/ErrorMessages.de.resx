@@ -120,6 +120,9 @@
   <data name="AiSettingsAccessDenied" xml:space="preserve">
     <value>Sie haben keine Berechtigung, die KI-Einstellungen zu verwalten</value>
   </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>Dateien konnten nicht verarbeitet werden: {0}. Die Dateien sind möglicherweise beschädigt oder verschlüsselt</value>
+  </data>
   <data name="ChatAccessDenied" xml:space="preserve">
     <value>Sie haben keine Berechtigung, den Chat zu nutzen</value>
   </data>

@@ -33,21 +33,52 @@ namespace ASC.Web.Core.WhiteLabel;
 [EnumExtensions]
 public enum WhiteLabelLogoType
 {
+    [SwaggerEnum("Light small")]
     LightSmall = 1,
+
+    [SwaggerEnum("Login page")]
     LoginPage = 2,
+
+    [SwaggerEnum("Favicon")]
     Favicon = 3,
+
+    [SwaggerEnum("Docs editor")]
     DocsEditor = 4,
+
+    [SwaggerEnum("Docs editor embed")]
     DocsEditorEmbed = 5,
+
+    [SwaggerEnum("Left menu")]
     LeftMenu = 6,
+
+    [SwaggerEnum("About page")]
     AboutPage = 7,
+
+    [SwaggerEnum("Notification")]
     Notification = 8,
+
+    [SwaggerEnum("Spreadsheet editor")]
     SpreadsheetEditor = 9,
+
+    [SwaggerEnum("Spreadsheet editor embed")]
     SpreadsheetEditorEmbed = 10,
+
+    [SwaggerEnum("Presentation editor")]
     PresentationEditor = 11,
+
+    [SwaggerEnum("Presentation editor embed")]
     PresentationEditorEmbed = 12,
+
+    [SwaggerEnum("Pdf editor")]
     PdfEditor = 13,
+
+    [SwaggerEnum("Pdf editor embed")]
     PdfEditorEmbed = 14,
+
+    [SwaggerEnum("Diagram editor")]
     DiagramEditor = 15,
+
+    [SwaggerEnum("Diagram editor embed")]
     DiagramEditorEmbed = 16,
 }
 
@@ -61,7 +92,7 @@ public static class WhiteLabelLogoTypeHelper
             FileType.Presentation => embed ? WhiteLabelLogoType.PresentationEditorEmbed : WhiteLabelLogoType.PresentationEditor,
             FileType.Pdf => embed ? WhiteLabelLogoType.PdfEditorEmbed : WhiteLabelLogoType.PdfEditor,
             FileType.Diagram => embed ? WhiteLabelLogoType.DiagramEditorEmbed : WhiteLabelLogoType.DiagramEditor,
-            _ => embed ? WhiteLabelLogoType.DocsEditorEmbed : WhiteLabelLogoType.DocsEditor,
+            _ => embed ? WhiteLabelLogoType.DocsEditorEmbed : WhiteLabelLogoType.DocsEditor
         };
     }
 }

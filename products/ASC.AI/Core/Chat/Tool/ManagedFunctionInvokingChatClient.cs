@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -135,7 +135,7 @@ public class ManagedFunctionInvokingChatClient(
                 {
                     FunctionInvocationStatus.NotFound => $"Error: Requested function \"{result.CallContent.Name}\" not found.",
                     FunctionInvocationStatus.Exception => "Error: Function failed.",
-                    _ => "Error: Unknown error.",
+                    _ => "Error: Unknown error."
                 };
 
                 if (IncludeDetailedErrors && result.Exception is not null)

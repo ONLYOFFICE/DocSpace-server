@@ -1,5 +1,64 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -53,10 +112,10 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ActionCol" xml:space="preserve">
     <value>Akcia</value>
@@ -66,6 +125,12 @@
   </data>
   <data name="ActionTypeCol" xml:space="preserve">
     <value>Typ Akcie</value>
+  </data>
+  <data name="AddedRoomTags" xml:space="preserve">
+    <value>Pridané tagy: [{1}]</value>
+  </data>
+  <data name="AddedServerToAgent" xml:space="preserve">
+    <value>Server MCP {0} bol pridaný do agenta</value>
   </data>
   <data name="AdministratorAdded" xml:space="preserve">
     <value>Pridaný správca: {0}</value>
@@ -79,8 +144,41 @@
   <data name="AdministratorOpenedFullAccess" xml:space="preserve">
     <value>Správcovia{0}]. Úplný prístup bol otvorený</value>
   </data>
+  <data name="AgentCreated" xml:space="preserve">
+    <value>Agent bol vytvorený</value>
+  </data>
+  <data name="AgentDeleted" xml:space="preserve">
+    <value>Agent bol odstránený</value>
+  </data>
+  <data name="AgentRenamed" xml:space="preserve">
+    <value>Agent bol premenovaný: {0}</value>
+  </data>
+  <data name="AgentsModule" xml:space="preserve">
+    <value>Agenti</value>
+  </data>
+  <data name="AIProviderCreated" xml:space="preserve">
+    <value>AI provider bol vytvorený: {0}</value>
+  </data>
+  <data name="AIProviderDeleted" xml:space="preserve">
+    <value>AI provider bol odstránený: {0}</value>
+  </data>
+  <data name="AIProviderUpdated" xml:space="preserve">
+    <value>AI provider bol aktualizovaný: {0}</value>
+  </data>
+  <data name="ApiKeyCreated" xml:space="preserve">
+    <value>Vytvorený kľúč používateľa API: {0}</value>
+  </data>
+  <data name="ApiKeyDeleted" xml:space="preserve">
+    <value>Odstránený kľúč používateľa API: {0}</value>
+  </data>
+  <data name="ApiKeyUpdated" xml:space="preserve">
+    <value>Kľúč používateľa API aktualizovaný: {0}</value>
+  </data>
   <data name="AttachActionType" xml:space="preserve">
     <value>Priložiť</value>
+  </data>
+  <data name="AuditSettingsUpdated" xml:space="preserve">
+    <value>Nastavenia auditu životnosti aktualizované</value>
   </data>
   <data name="AuditTrailReportDownloaded" xml:space="preserve">
     <value>Report Auditných záznamov stiahnutý</value>
@@ -88,11 +186,29 @@
   <data name="AuditTrailReportName" xml:space="preserve">
     <value>Report Auditných záznamov ({0}-{1})</value>
   </data>
+  <data name="AuthLinkActivated" xml:space="preserve">
+    <value>Odkaz na autorizáciu bol aktivovaný</value>
+  </data>
   <data name="AuthorizationKeysSetting" xml:space="preserve">
     <value>Licenčné kľúče tretej strany boli aktualizované</value>
   </data>
+  <data name="BackupStarted" xml:space="preserve">
+    <value>Spustiť zálohovanie</value>
+  </data>
+  <data name="BannerSettingsChanged" xml:space="preserve">
+    <value>Nastavenia viditeľnosti propagačných bannerov boli zmenené</value>
+  </data>
   <data name="BrowserCol" xml:space="preserve">
     <value>Prehliadač</value>
+  </data>
+  <data name="ChangeClientActivation" xml:space="preserve">
+    <value>Aktivácia klienta {0} bola zmenená</value>
+  </data>
+  <data name="ChangeClientVisibility" xml:space="preserve">
+    <value>Zobrazenie klienta {0} bolo zmenené</value>
+  </data>
+  <data name="CityCol" xml:space="preserve">
+    <value>Mesto</value>
   </data>
   <data name="ColorThemeChanged" xml:space="preserve">
     <value>Farebná téma sa zmenila</value>
@@ -106,8 +222,62 @@
   <data name="CopyActionType" xml:space="preserve">
     <value>Kopírovať</value>
   </data>
+  <data name="CountryCol" xml:space="preserve">
+    <value>Krajina</value>
+  </data>
   <data name="CreateActionType" xml:space="preserve">
     <value>Vytvoriť</value>
+  </data>
+  <data name="CreateClient" xml:space="preserve">
+    <value>Klient vytvorený</value>
+  </data>
+  <data name="CustomerOperationPerformed" xml:space="preserve">
+    <value>Bola vykonaná operácia zákazníka</value>
+  </data>
+  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
+    <value>Bola stiahnutá správa o operáciách zákazníka</value>
+  </data>
+  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
+    <value>Predplatné zákazníka bolo aktualizované: {0}</value>
+  </data>
+  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
+    <value>Nastavenia služieb s povolenou peňaženkou zákazníka boli aktualizované</value>
+  </data>
+  <data name="CustomerWalletToppedUp" xml:space="preserve">
+    <value>Peňaženka zákazníka bola dobitá: {0}</value>
+  </data>
+  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
+    <value>Nastavenia dobíjania zákazníckej peňaženky boli aktualizované</value>
+  </data>
+  <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
+    <value>Vlastné nastavenia navigácie aktualizované</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
+    <value>AI agenti [{0}]. Nastavte vlastnú kvótu úložiska pre AI agentov: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
+    <value>AI agenti [{0}]. Nastavte predvolenú kvótu úložiska pre AI agentov: {1}</value>
+  </data>
+  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>AI agenti [{0}]. Kvóta úložiska pre AI agentov vypnutá</value>
+  </data>
+  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
+    <value>Miestnosti [{0}]. Nastaviť vlastnú kvótu úložiska pre miestnosti: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
+    <value>Miestnosti [{0}]. Nastaviť predvolenú kvótu úložiska pre miestnosti: {1}</value>
+  </data>
+  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
+    <value>Miestnosti [{0}]. Vypnúť kvótu úložiska pre miestnosti</value>
+  </data>
+  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
+    <value>Používatelia [{0}]. Nastaviť vlastnú kvótu úložiska pre používateľov: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
+    <value>Používatelia [{0}]. Nastaviť predvolenú kvótu úložiska pre používateľov: {1}</value>
+  </data>
+  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
+    <value>Používatelia [{0}]. Vypnúť kvótu úložiska pre používateľov</value>
   </data>
   <data name="DateCol" xml:space="preserve">
     <value>Dátum</value>
@@ -118,8 +288,20 @@
   <data name="DeleteActionType" xml:space="preserve">
     <value>Vymazať</value>
   </data>
+  <data name="DeleteClient" xml:space="preserve">
+    <value>Klient {0} vymazaný</value>
+  </data>
+  <data name="DeletedRoomTags" xml:space="preserve">
+    <value>Vymazane tagy: [{1}]</value>
+  </data>
+  <data name="DeletedServerFromAgent" xml:space="preserve">
+    <value>Server MCP {0} odstránený z agenta</value>
+  </data>
   <data name="DetachActionType" xml:space="preserve">
     <value>Odpojiť</value>
+  </data>
+  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
+    <value>Zmena nastavení prístupu k nástrojom pre vývojárov</value>
   </data>
   <data name="DnsSettingsUpdated" xml:space="preserve">
     <value>Nastavenia DNS boli aktualizované</value>
@@ -127,11 +309,17 @@
   <data name="DocumentServiceLocationSetting" xml:space="preserve">
     <value>Aktualizované umiestenie Dokumentovej služby</value>
   </data>
+  <data name="DocumentsForcesave" xml:space="preserve">
+    <value>Nastavenia Forcesave aktualizované</value>
+  </data>
   <data name="DocumentsOverwritingSettingsUpdated" xml:space="preserve">
     <value>Prepisovanie aktualizovaných nastavení</value>
   </data>
   <data name="DocumentsSettingsModule" xml:space="preserve">
     <value>Nastavenia</value>
+  </data>
+  <data name="DocumentsStoreForcesave" xml:space="preserve">
+    <value>Nastavenia Forcesave pre úložisko aktualizované</value>
   </data>
   <data name="DocumentsThirdPartySettingsUpdated" xml:space="preserve">
     <value>Aktualizované nastavenia tretej strany</value>
@@ -163,6 +351,12 @@
   <data name="FileCreatedVersion" xml:space="preserve">
     <value>Súbory [{0}]. Revízia: {1}. Verzia bola vytvorená</value>
   </data>
+  <data name="FileCustomFilterDisabled" xml:space="preserve">
+    <value>Súbor: {0}. Vlastný filter vypnutý</value>
+  </data>
+  <data name="FileCustomFilterEnabled" xml:space="preserve">
+    <value>Súbor: {0}. Vlastný filter povolený</value>
+  </data>
   <data name="FileDeleted" xml:space="preserve">
     <value>Súbor bol vymazaný: {0}</value>
   </data>
@@ -175,11 +369,26 @@
   <data name="FileDownloadedAs" xml:space="preserve">
     <value>Súbory [{0}]. Stiahnuté ako: {1}</value>
   </data>
+  <data name="FileExternalLinkCreated" xml:space="preserve">
+    <value>Súbory [{0}]. Bol vytvorený externý odkaz: {1}. Úloha: {2}</value>
+  </data>
+  <data name="FileExternalLinkDeleted" xml:space="preserve">
+    <value>Súbory [{0}]. Bol odstránený externý odkaz: {1}</value>
+  </data>
+  <data name="FileExternalLinkUpdated" xml:space="preserve">
+    <value>Súbory [{0}].Bol aktualizovaný externý odkaz: {1}. Úloha: {2}</value>
+  </data>
   <data name="FileImported" xml:space="preserve">
     <value>Priečinky[{0}]. Importovaný súbor: {1}. Poskytovateľ: {2}</value>
   </data>
+  <data name="FileIndexChanged" xml:space="preserve">
+    <value>Súbor: {0}. Index zmenený z {1} na {2}</value>
+  </data>
   <data name="FileLocked" xml:space="preserve">
     <value>Súbor zamknutý: {0}</value>
+  </data>
+  <data name="FileMarkedAsFavorite" xml:space="preserve">
+    <value>Súbor bol pridaný medzi obľúbené: {0}</value>
   </data>
   <data name="FileMoved" xml:space="preserve">
     <value>Súbory [{0}]. Presunuté z priečinka "{1}" do priečinka: "{2}"</value>
@@ -189,6 +398,15 @@
   </data>
   <data name="FileMovedWithOverwriting" xml:space="preserve">
     <value>Súbory [{0}]. Presunuté s prepísaním z priečinka "{1}" do priečinka: "{2}"</value>
+  </data>
+  <data name="FileOpenedForChange" xml:space="preserve">
+    <value>Súbor otvorený pre zmenu: {0}</value>
+  </data>
+  <data name="FileRemovedFromFavorite" xml:space="preserve">
+    <value>Súbor bol odstránený z obľúbených: {0}</value>
+  </data>
+  <data name="FileRemovedFromList" xml:space="preserve">
+    <value>Súbor bol odstránený z „Zdieľané so mnou“: {0}</value>
   </data>
   <data name="FileRenamed" xml:space="preserve">
     <value>Súbor premenovaný : {0}</value>
@@ -201,6 +419,9 @@
   </data>
   <data name="FileSendAccessLink" xml:space="preserve">
     <value>Odoslaný zdieľaný odkaz na súbor [{0}]. Príjemcovia: [{1}]</value>
+  </data>
+  <data name="FileSizePostfix" xml:space="preserve">
+    <value>bytes,KB,MB,GB,TB</value>
   </data>
   <data name="FilesModule" xml:space="preserve">
     <value>Súbory</value>
@@ -217,11 +438,20 @@
   <data name="FileUpdatedAccess" xml:space="preserve">
     <value>Súbory [{0}]. Prístup aktualizovaný</value>
   </data>
+  <data name="FileUpdatedAccessFor" xml:space="preserve">
+    <value>Súbory [{0}]. Prístup bol aktualizovaný pre {1}. Rola: {2}</value>
+  </data>
   <data name="FileUpdatedRevisionComment" xml:space="preserve">
     <value>Súbory [{0}]. Revízia {1}. Komentár bol aktualizovaný</value>
   </data>
   <data name="FileUploaded" xml:space="preserve">
     <value>Súbor nahraný: {0}</value>
+  </data>
+  <data name="FileUploadedWithOverwriting" xml:space="preserve">
+    <value>Súbor nahraný s prepísaním: {0}</value>
+  </data>
+  <data name="FileVersionRemoved" xml:space="preserve">
+    <value>Súbory [{0}]. Verzia odstránená: {1}</value>
   </data>
   <data name="FolderCopied" xml:space="preserve">
     <value>Priečinky[{0}]. Skopírované do priečinka: {1}</value>
@@ -235,6 +465,24 @@
   <data name="FolderDeleted" xml:space="preserve">
     <value>Priečinok odstránený: {0}</value>
   </data>
+  <data name="FolderDownloaded" xml:space="preserve">
+    <value>Priečinok bol stiahnutý: {0}</value>
+  </data>
+  <data name="FolderExternalLinkCreated" xml:space="preserve">
+    <value>Priečinky [{0}]. Bol vytvorený externý odkaz: {1}. Rola: {2}</value>
+  </data>
+  <data name="FolderExternalLinkDeleted" xml:space="preserve">
+    <value>Priečinky [{0}]. Bol odstránený externý odkaz: {1}</value>
+  </data>
+  <data name="FolderExternalLinkUpdated" xml:space="preserve">
+    <value>Priečinky [{0}]. Bol aktualizovaný externý odkaz: {1}. Úloha: {2}</value>
+  </data>
+  <data name="FolderIndexChanged" xml:space="preserve">
+    <value>Priečinok: {0}. Index zmenený z {1} na {2}</value>
+  </data>
+  <data name="FolderIndexReordered" xml:space="preserve">
+    <value>Priečinok: {0}. Poradie indexov zmenené</value>
+  </data>
   <data name="FolderMoved" xml:space="preserve">
     <value>Priečinky[{0}]. Presunuté do priečinka: {1}</value>
   </data>
@@ -243,6 +491,9 @@
   </data>
   <data name="FolderMovedWithOverwriting" xml:space="preserve">
     <value>Priečinky[{0}]. Presunuté s prepísaním do priečinka: {1}</value>
+  </data>
+  <data name="FolderRemovedFromList" xml:space="preserve">
+    <value>Priečinok bol odstránený z „Zdieľané so mnou“: {0}</value>
   </data>
   <data name="FolderRenamed" xml:space="preserve">
     <value>Priečinok premenovaný: {0}</value>
@@ -253,11 +504,38 @@
   <data name="FolderUpdatedAccess" xml:space="preserve">
     <value>Priečinky [{0}]. Prístup aktualizovaný</value>
   </data>
+  <data name="FolderUpdatedAccessFor" xml:space="preserve">
+    <value>Priečinky [{0}]. Bol aktualizovaný prístup pre {1}. Úloha: {2}</value>
+  </data>
   <data name="FollowActionType" xml:space="preserve">
     <value>Sledovať</value>
   </data>
+  <data name="FormCompletelyFilled" xml:space="preserve">
+    <value>Používatelia [{0}]. Vyplnený formulár: {1}</value>
+  </data>
+  <data name="FormOpenedForFilling" xml:space="preserve">
+    <value>Súbor otvorený na vyplnenie: {0}</value>
+  </data>
+  <data name="FormPartiallyFilled" xml:space="preserve">
+    <value>Používatelia [{0}]. Vyplnená časť formulára: {1}</value>
+  </data>
+  <data name="FormStartedToFill" xml:space="preserve">
+    <value>Používatelia [{0}]. Začal vypĺňať: {1}</value>
+  </data>
+  <data name="FormStopped" xml:space="preserve">
+    <value>Používatelia [{0}]. Formulár bol ukončený: {1}</value>
+  </data>
+  <data name="FormSubmit" xml:space="preserve">
+    <value>Používatelia [{0}]. Formulár odoslaný: {1}</value>
+  </data>
   <data name="FullTextSearchSetting" xml:space="preserve">
     <value>Nastavenia Sphinx boli aktualizované</value>
+  </data>
+  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
+    <value>Vygenerovaný autorizačný kód pre klienta {0}</value>
+  </data>
+  <data name="GeneratePersonalAccessToken" xml:space="preserve">
+    <value>Vygenerovaný osobný prístupový token pre klienta {0}</value>
   </data>
   <data name="GreetingSettingsUpdated" xml:space="preserve">
     <value>Nastavenia úvodnej stránky aktualizované</value>
@@ -295,14 +573,29 @@
   <data name="LanguageSettingsUpdated" xml:space="preserve">
     <value>Jazykové nastavenia boli aktualizované</value>
   </data>
+  <data name="LdapDisabled" xml:space="preserve">
+    <value>Overenie LDAP je zakázané</value>
+  </data>
+  <data name="LdapEnabled" xml:space="preserve">
+    <value>Autentifikácia LDAP povolená</value>
+  </data>
+  <data name="LdapSync" xml:space="preserve">
+    <value>Synchronizácia LDAP dokončená</value>
+  </data>
   <data name="LicenseKeyUploaded" xml:space="preserve">
     <value>Licenčný kľúč bol nahraný</value>
   </data>
   <data name="LinkActionType" xml:space="preserve">
     <value>Odkaz</value>
   </data>
+  <data name="LocationCol" xml:space="preserve">
+    <value>Umiestnenie</value>
+  </data>
   <data name="LoginFail" xml:space="preserve">
     <value>Prihlásenie zlyhalo</value>
+  </data>
+  <data name="LoginFailBruteForce" xml:space="preserve">
+    <value>Prihlásenie zlyhalo. Príliš veľa pokusov</value>
   </data>
   <data name="LoginFailDisabledProfile" xml:space="preserve">
     <value>Prihlásenie zlyhalo. Profil zakázaný</value>
@@ -312,6 +605,9 @@
   </data>
   <data name="LoginFailIpSecurity" xml:space="preserve">
     <value>Zabezpečenie protokolu IP: Prihlásenie zlyhalo</value>
+  </data>
+  <data name="LoginFailRecaptcha" xml:space="preserve">
+    <value>Prihlásenie zlyhalo. Recaptcha je neplatná</value>
   </data>
   <data name="LoginFailSocialAccountNotFound" xml:space="preserve">
     <value>Prihlásenie zlyhalo. Priradený účet sociálnej siete sa nenašiel</value>
@@ -325,11 +621,17 @@
   <data name="LoginFailViaApiSocialAccount" xml:space="preserve">
     <value>Prihlásenie prostredníctvom API a sociálnych médií zlyhalo</value>
   </data>
+  <data name="LoginFailViaApiTfa" xml:space="preserve">
+    <value>Prihlásenie cez API a aplikáciu autentifikátora zlyhalo</value>
+  </data>
   <data name="LoginFailViaSms" xml:space="preserve">
     <value>Prihlásenie cez SMS zlyhalo</value>
   </data>
   <data name="LoginFailViaSSO" xml:space="preserve">
     <value>Prihlásenie cez SSO zlyhalo</value>
+  </data>
+  <data name="LoginFailViaTfaApp" xml:space="preserve">
+    <value>Prihlásenie cez aplikáciu autentifikátora zlyhalo</value>
   </data>
   <data name="LoginHistoryReportDownloaded" xml:space="preserve">
     <value>Report histórie prihlásení bol stiahnutý</value>
@@ -340,14 +642,29 @@
   <data name="LoginSuccess" xml:space="preserve">
     <value>Prihlásenie úspešné</value>
   </data>
-  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
-    <value>Prihlásenie prostredníctvom účtu sociálnej siete bolo úspešné: {0}</value>
+  <data name="LoginSuccessSocialAccount" xml:space="preserve">
+    <value>Prihlásenie prostredníctvom účtu sociálnej siete bolo úspešné</value>
+  </data>
+  <data name="LoginSuccessSocialApp" xml:space="preserve">
+    <value>Úspešné prihlásenie prostredníctvom sociálnej aplikácie</value>
   </data>
   <data name="LoginSuccessViaApi" xml:space="preserve">
     <value>Úspešné prihlásenie cez API</value>
   </data>
   <data name="LoginSuccessViaApiSms" xml:space="preserve">
     <value>Úspešné prihlásenie cez API &amp; SMS kód</value>
+  </data>
+  <data name="LoginSuccessViaApiSocialAccount" xml:space="preserve">
+    <value>Prihlásenie prostredníctvom účtu sociálnej siete bolo úspešné: {0}</value>
+  </data>
+  <data name="LoginSuccessViaApiTfa" xml:space="preserve">
+    <value>Úspešné prihlásenie prostredníctvom API a aplikácie autentifikátora</value>
+  </data>
+  <data name="LoginSuccessViaOAuth" xml:space="preserve">
+    <value>Úspešné prihlásenie cez OAuth 2.0</value>
+  </data>
+  <data name="LoginSuccessViaPassword" xml:space="preserve">
+    <value>Úspešné prihlásenie pomocou prihlasovacieho mena a hesla</value>
   </data>
   <data name="LoginSuccessViaSms" xml:space="preserve">
     <value>Prihlásenie cez SMS bolo úspešné</value>
@@ -357,6 +674,9 @@
   </data>
   <data name="LoginSuccessViaSSO" xml:space="preserve">
     <value>Úspešné prihlásenie cez SSO</value>
+  </data>
+  <data name="LoginSuccesViaTfaApp" xml:space="preserve">
+    <value>Úspešné prihlásenie prostredníctvom aplikácie autentifikátora</value>
   </data>
   <data name="Logout" xml:space="preserve">
     <value>Odhlásenie</value>
@@ -400,6 +720,15 @@
   <data name="PortalDeleted" xml:space="preserve">
     <value>Portál bol odstránený</value>
   </data>
+  <data name="PortalRenamed" xml:space="preserve">
+    <value>Portál bol premenovaný</value>
+  </data>
+  <data name="PrivacyRoomDisable" xml:space="preserve">
+    <value>Súkromná miestnosť je vypnutá</value>
+  </data>
+  <data name="PrivacyRoomEnable" xml:space="preserve">
+    <value>Súkromná miestnosť je zapnutá</value>
+  </data>
   <data name="ProductAccessOpened" xml:space="preserve">
     <value>Produkty [{0}]. Prístup bol otvorený</value>
   </data>
@@ -424,14 +753,164 @@
   <data name="ProductsListUpdated" xml:space="preserve">
     <value>Zoznam produktov aktualizovaný</value>
   </data>
+  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
+    <value>Predvolená kvóta úložiska pre AI agentov bola nastavená na: {0}</value>
+  </data>
+  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
+    <value>Predvolená kvóta úložiska pre AI agentov bola deaktivovaná</value>
+  </data>
+  <data name="QuotaPerPortalChanged" xml:space="preserve">
+    <value>Nastavená predvolená kvóta úložiska: {0}</value>
+  </data>
+  <data name="QuotaPerPortalDisabled" xml:space="preserve">
+    <value>Deaktivovaná predvolená kvóta úložiska</value>
+  </data>
+  <data name="QuotaPerRoomChanged" xml:space="preserve">
+    <value>Nastavená predvolená kvóta úložiska pre miestnosti: {0}</value>
+  </data>
+  <data name="QuotaPerRoomDisabled" xml:space="preserve">
+    <value>Deaktivovaná predvolená kvóta úložiska pre miestnosti</value>
+  </data>
+  <data name="QuotaPerUserChanged" xml:space="preserve">
+    <value>Nastavená predvolená kvóta úložiska pre používateľov: {0}</value>
+  </data>
+  <data name="QuotaPerUserDisabled" xml:space="preserve">
+    <value>Deaktivovaná predvolená kvóta úložiska pre používateľov</value>
+  </data>
   <data name="ReassignsActionType" xml:space="preserve">
     <value>Prevádza späť/priraďuje</value>
+  </data>
+  <data name="RegenerateSecret" xml:space="preserve">
+    <value>Znovu vygenerované tajný kód klienta {0}</value>
+  </data>
+  <data name="ResetVectorizationSettings" xml:space="preserve">
+    <value>Nastavenia vektorizácie boli obnovené</value>
+  </data>
+  <data name="ResetWebSearchSettings" xml:space="preserve">
+    <value>Nastavenia vyhľadávania na webe boli obnovené</value>
+  </data>
+  <data name="RevokeUserClient" xml:space="preserve">
+    <value>Prístup klienta {0} zrušený</value>
+  </data>
+  <data name="RoomArchived" xml:space="preserve">
+    <value>Miestnosť archivovaná</value>
+  </data>
+  <data name="RoomCopied" xml:space="preserve">
+    <value>Skopírovaná miestnosť: {0}</value>
+  </data>
+  <data name="RoomCreated" xml:space="preserve">
+    <value>Miestnosť vytvorená</value>
+  </data>
+  <data name="RoomCreateUser" xml:space="preserve">
+    <value>Pridaný používateľ: {0}. Rola: {1}</value>
+  </data>
+  <data name="RoomDeleted" xml:space="preserve">
+    <value>Miestnosť vymazaná</value>
+  </data>
+  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
+    <value>Miestnosť: {0}. Odmietnutie sťahovania zakázané</value>
+  </data>
+  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
+    <value>Miestnosť: {0}. Odmietnutie sťahovania povolené</value>
+  </data>
+  <data name="RoomExternalLinkCreated" xml:space="preserve">
+    <value>Externý odkaz vytvorený: {0}. Rola: {1}</value>
+  </data>
+  <data name="RoomExternalLinkDeleted" xml:space="preserve">
+    <value>Externý odkaz odstránený: {0}</value>
+  </data>
+  <data name="RoomExternalLinkRevoked" xml:space="preserve">
+    <value>Externý odkaz bol zrušený: {1}</value>
+  </data>
+  <data name="RoomExternalLinkUpdated" xml:space="preserve">
+    <value>Externý odkaz aktualizovaný: {0}. Rola: {1}</value>
+  </data>
+  <data name="RoomGroupAdded" xml:space="preserve">
+    <value>Pridaná skupina: {0}. Rola: {1}</value>
+  </data>
+  <data name="RoomGroupRemove" xml:space="preserve">
+    <value>Odstránená skupina: {0}</value>
+  </data>
+  <data name="RoomIndexExportSaved" xml:space="preserve">
+    <value>Export indexu miestnosti uloženého v Dokumentoch</value>
+  </data>
+  <data name="RoomIndexingDisabled" xml:space="preserve">
+    <value>Indexovanie miestnosti vypnuté</value>
+  </data>
+  <data name="RoomIndexingEnabled" xml:space="preserve">
+    <value>Indexovanie miestnosti povolené</value>
+  </data>
+  <data name="RoomInvitationLinkCreated" xml:space="preserve">
+    <value>Odkaz vytvorený. Rola: {1}</value>
+  </data>
+  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
+    <value>Odkaz vymazaný</value>
+  </data>
+  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
+    <value>Odkaz aktualizovaný. Rola: {1}</value>
+  </data>
+  <data name="RoomInviteResend" xml:space="preserve">
+    <value>Pozvánky boli znovu odoslané: {0}</value>
+  </data>
+  <data name="RoomLifeTimeDisabled" xml:space="preserve">
+    <value>Doba používania vypnutá</value>
+  </data>
+  <data name="RoomLifeTimeSet" xml:space="preserve">
+    <value>Doba používania je nastavená. Hodnota: {0}. Čas: {1}. Navždy vymazať: {2}</value>
+  </data>
+  <data name="RoomLogoCreated" xml:space="preserve">
+    <value>Logo vytvorené</value>
+  </data>
+  <data name="RoomLogoDeleted" xml:space="preserve">
+    <value>Logo vymazané</value>
+  </data>
+  <data name="RoomRemoveUser" xml:space="preserve">
+    <value>Vymazaný používateľ: {0}</value>
+  </data>
+  <data name="RoomRenamed" xml:space="preserve">
+    <value>Miestnosť premenovaná: {0}</value>
+  </data>
+  <data name="RoomsModule" xml:space="preserve">
+    <value>Miestností</value>
+  </data>
+  <data name="RoomUnarchived" xml:space="preserve">
+    <value>Miestnosť nearchivovaná</value>
+  </data>
+  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
+    <value>{0} priradene: {1}</value>
+  </data>
+  <data name="RoomUpdateAccessForUser" xml:space="preserve">
+    <value>{0} priradene: {1}</value>
+  </data>
+  <data name="RoomWatermarkDisabled" xml:space="preserve">
+    <value>Miestnosť: {0}. Vodoznak vypnutý</value>
+  </data>
+  <data name="RoomWatermarkSet" xml:space="preserve">
+    <value>Miestnosť: {0}. Vodoznak povolený</value>
   </data>
   <data name="SendActionType" xml:space="preserve">
     <value>Poslať</value>
   </data>
+  <data name="SendJoinInvite" xml:space="preserve">
+    <value>Používateľ {0} poslal pozvánku {1}, aby sa pripojil k tomuto priestoru DocSpace</value>
+  </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Pokyny k pozvánke boli odoslané: {0}</value>
+  </data>
+  <data name="ServerCreated" xml:space="preserve">
+    <value>MCP server {0} bol vytvorený</value>
+  </data>
+  <data name="ServerDeleted" xml:space="preserve">
+    <value>MCP server {0} bol odstránený</value>
+  </data>
+  <data name="ServerDisabled" xml:space="preserve">
+    <value>Server MCP bol vypnutý: {0}</value>
+  </data>
+  <data name="ServerEnabled" xml:space="preserve">
+    <value>Server MCP bol aktivovaný: {0}</value>
+  </data>
+  <data name="ServerUpdated" xml:space="preserve">
+    <value>Server MCP bol aktualizovaný: {0}</value>
   </data>
   <data name="SessionCompleted" xml:space="preserve">
     <value>Relácia bola dokončená</value>
@@ -442,20 +921,35 @@
   <data name="SettingsModule" xml:space="preserve">
     <value>Nastavenia</value>
   </data>
+  <data name="SetVectorizationSettings" xml:space="preserve">
+    <value>Nastavenia vektorizácie boli nakonfigurované. Provider: {0}</value>
+  </data>
+  <data name="SetWebSearchSettings" xml:space="preserve">
+    <value>Nastavenia vyhľadávania na webe boli nakonfigurované. Vyhľadávač: {0}</value>
+  </data>
   <data name="SSODisabled" xml:space="preserve">
     <value>SSO deaktivované</value>
   </data>
   <data name="SSOEnabled" xml:space="preserve">
     <value>SSO povolené</value>
   </data>
-  <data name="BackupStarted" xml:space="preserve">
-    <value>Spustiť zálohovanie</value>
+  <data name="StartStorageDecryption" xml:space="preserve">
+    <value>Spustiť dešifrovanie úložiska</value>
+  </data>
+  <data name="StartStorageEncryption" xml:space="preserve">
+    <value>Spustiť šifrovanie úložiska</value>
   </data>
   <data name="StartTransferSetting" xml:space="preserve">
     <value>Začnite migráciu portálu do iného regiónu</value>
   </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>Systémový účet</value>
+  </data>
+  <data name="TagCreated" xml:space="preserve">
+    <value>Tag vytvorený: {0}</value>
+  </data>
+  <data name="TagsDeleted" xml:space="preserve">
+    <value>Tagy vymazaný: {0}</value>
   </data>
   <data name="TargetIdCol" xml:space="preserve">
     <value>Target ID</value>
@@ -478,8 +972,20 @@
   <data name="TimeZoneSettingsUpdated" xml:space="preserve">
     <value>Nastavenie Časovej zóny bolo aktualizované</value>
   </data>
+  <data name="TrashEmptied" xml:space="preserve">
+    <value>Kôš vyprázdnený</value>
+  </data>
   <data name="TrustedMailDomainSettingsUpdated" xml:space="preserve">
     <value>Aktualizované nastavenia domény dôveryhodnej pošty</value>
+  </data>
+  <data name="TwoFactorAuthenticationSettingsDisabled" xml:space="preserve">
+    <value>Nastavenia dvojfaktorového overovania aktualizované: dvojfaktorové overovanie vypnuté</value>
+  </data>
+  <data name="TwoFactorAuthenticationSettingsEnabledBySms" xml:space="preserve">
+    <value>Nastavenia dvojfaktorového overovania aktualizované: potvrdzovanie prostredníctvom SMS povolené</value>
+  </data>
+  <data name="TwoFactorAuthenticationSettingsEnabledByTfaApp" xml:space="preserve">
+    <value>Nastavenia dvojfaktorového overovania aktualizované: povolená aplikácia na overovanie</value>
   </data>
   <data name="TwoFactorAuthenticationSettingsUpdated" xml:space="preserve">
     <value>Aktualizované nastavenia dvojfaktorovej autentifikácie</value>
@@ -498,6 +1004,9 @@
   </data>
   <data name="UpdateActionType" xml:space="preserve">
     <value>Aktualizácia</value>
+  </data>
+  <data name="UpdateClient" xml:space="preserve">
+    <value>Klient {0} aktualizovaný</value>
   </data>
   <data name="UploadActionType" xml:space="preserve">
     <value>Nahrať</value>
@@ -519,6 +1028,9 @@
   </data>
   <data name="UserDataReassigns" xml:space="preserve">
     <value>Znovu priradené údaje: od používateľa {0} užívateľovi {1}</value>
+  </data>
+  <data name="UserDataRemoving" xml:space="preserve">
+    <value>Údaje používateľa pre {0} boli odstránené</value>
   </data>
   <data name="UserDeleted" xml:space="preserve">
     <value>Používateľ vymazaný: {0}</value>
@@ -559,6 +1071,12 @@
   <data name="UsersUpdatedType" xml:space="preserve">
     <value>Používatelia [{0}]. Typ aktualizovaný</value>
   </data>
+  <data name="UserTfaDisconnected" xml:space="preserve">
+    <value>Aplikácia autentifikátora odpojená: {0}</value>
+  </data>
+  <data name="UserTfaGenerateCodes" xml:space="preserve">
+    <value>Boli vytvorené nové záložné kódy</value>
+  </data>
   <data name="UserUnlinkedSocialAccount" xml:space="preserve">
     <value>Sociálny účet je odpojený. Poskytovateľ: {0}</value>
   </data>
@@ -567,6 +1085,9 @@
   </data>
   <data name="UserUpdatedAvatarThumbnails" xml:space="preserve">
     <value>Používatelia [{0}]. Miniatúra Avatara aktualizovaná</value>
+  </data>
+  <data name="UserUpdatedEmail" xml:space="preserve">
+    <value>E-mail aktualizovaný</value>
   </data>
   <data name="UserUpdatedLanguage" xml:space="preserve">
     <value>Jazyk bol aktualizovaný</value>
@@ -577,300 +1098,6 @@
   <data name="UserUpdatedPassword" xml:space="preserve">
     <value>Heslo aktualizované</value>
   </data>
-  <data name="RoomCreated" xml:space="preserve">
-    <value>Miestnosť vytvorená</value>
-  </data>
-  <data name="RoomsModule" xml:space="preserve">
-    <value>Miestností</value>
-  </data>
-  <data name="TrashEmptied" xml:space="preserve">
-    <value>Kôš vyprázdnený</value>
-  </data>
-  <data name="AddedRoomTags" xml:space="preserve">
-    <value>Pridané tagy: [{1}]</value>
-  </data>
-  <data name="DeletedRoomTags" xml:space="preserve">
-    <value>Vymazane tagy: [{1}]</value>
-  </data>
-  <data name="RoomArchived" xml:space="preserve">
-    <value>Miestnosť archivovaná</value>
-  </data>
-  <data name="RoomCreateUser" xml:space="preserve">
-    <value>Pridaný používateľ: {0}. Rola: {1}</value>
-  </data>
-  <data name="RoomDeleted" xml:space="preserve">
-    <value>Miestnosť vymazaná</value>
-  </data>
-  <data name="RoomInvitationLinkCreated" xml:space="preserve">
-    <value>Odkaz vytvorený. Rola: {1}</value>
-  </data>
-  <data name="RoomInvitationLinkDeleted" xml:space="preserve">
-    <value>Odkaz vymazaný</value>
-  </data>
-  <data name="RoomInvitationLinkUpdated" xml:space="preserve">
-    <value>Odkaz aktualizovaný. Rola: {1}</value>
-  </data>
-  <data name="RoomLogoCreated" xml:space="preserve">
-    <value>Logo vytvorené</value>
-  </data>
-  <data name="RoomLogoDeleted" xml:space="preserve">
-    <value>Logo vymazané</value>
-  </data>
-  <data name="RoomRemoveUser" xml:space="preserve">
-    <value>Vymazaný používateľ: {0}</value>
-  </data>
-  <data name="RoomRenamed" xml:space="preserve">
-    <value>Miestnosť premenovaná: {0}</value>
-  </data>
-  <data name="RoomUnarchived" xml:space="preserve">
-    <value>Miestnosť nearchivovaná</value>
-  </data>
-  <data name="RoomUpdateAccessForUser" xml:space="preserve">
-    <value>{0} priradene: {1}</value>
-  </data>
-  <data name="TagCreated" xml:space="preserve">
-    <value>Tag vytvorený: {0}</value>
-  </data>
-  <data name="TagsDeleted" xml:space="preserve">
-    <value>Tagy vymazaný: {0}</value>
-  </data>
-  <data name="UserDataRemoving" xml:space="preserve">
-    <value>Údaje používateľa pre {0} boli odstránené</value>
-  </data>
-  <data name="TwoFactorAuthenticationSettingsDisabled" xml:space="preserve">
-    <value>Nastavenia dvojfaktorového overovania aktualizované: dvojfaktorové overovanie vypnuté</value>
-  </data>
-  <data name="TwoFactorAuthenticationSettingsEnabledBySms" xml:space="preserve">
-    <value>Nastavenia dvojfaktorového overovania aktualizované: potvrdzovanie prostredníctvom SMS povolené</value>
-  </data>
-  <data name="TwoFactorAuthenticationSettingsEnabledByTfaApp" xml:space="preserve">
-    <value>Nastavenia dvojfaktorového overovania aktualizované: povolená aplikácia na overovanie</value>
-  </data>
-  <data name="LoginSuccessSocialApp" xml:space="preserve">
-    <value>Úspešné prihlásenie prostredníctvom sociálnej aplikácie</value>
-  </data>
-  <data name="LoginSuccesViaTfaApp" xml:space="preserve">
-    <value>Úspešné prihlásenie prostredníctvom aplikácie autentifikátora</value>
-  </data>
-  <data name="LoginSuccessViaApiTfa" xml:space="preserve">
-    <value>Úspešné prihlásenie prostredníctvom API a aplikácie autentifikátora</value>
-  </data>
-  <data name="DocumentsStoreForcesave" xml:space="preserve">
-    <value>Nastavenia Forcesave pre úložisko aktualizované</value>
-  </data>
-  <data name="StartStorageEncryption" xml:space="preserve">
-    <value>Spustiť šifrovanie úložiska</value>
-  </data>
-  <data name="StartStorageDecryption" xml:space="preserve">
-    <value>Spustiť dešifrovanie úložiska</value>
-  </data>
-  <data name="PrivacyRoomEnable" xml:space="preserve">
-    <value>Súkromná miestnosť je zapnutá</value>
-  </data>
-  <data name="PrivacyRoomDisable" xml:space="preserve">
-    <value>Súkromná miestnosť je vypnutá</value>
-  </data>
-  <data name="UserTfaGenerateCodes" xml:space="preserve">
-    <value>Boli vytvorené nové záložné kódy</value>
-  </data>
-  <data name="LoginFailViaTfaApp" xml:space="preserve">
-    <value>Prihlásenie cez aplikáciu autentifikátora zlyhalo</value>
-  </data>
-  <data name="LoginFailBruteForce" xml:space="preserve">
-    <value>Prihlásenie zlyhalo. Príliš veľa pokusov</value>
-  </data>
-  <data name="LoginFailRecaptcha" xml:space="preserve">
-    <value>Prihlásenie zlyhalo. Recaptcha je neplatná</value>
-  </data>
-  <data name="DocumentsForcesave" xml:space="preserve">
-    <value>Nastavenia Forcesave aktualizované</value>
-  </data>
-  <data name="LoginFailViaApiTfa" xml:space="preserve">
-    <value>Prihlásenie cez API a aplikáciu autentifikátora zlyhalo</value>
-  </data>
-  <data name="UserUpdatedEmail" xml:space="preserve">
-    <value>E-mail aktualizovaný</value>
-  </data>
-  <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
-    <value>Vlastné nastavenia navigácie aktualizované</value>
-  </data>
-  <data name="UserTfaDisconnected" xml:space="preserve">
-    <value>Aplikácia autentifikátora odpojená: {0}</value>
-  </data>
-  <data name="AuditSettingsUpdated" xml:space="preserve">
-    <value>Nastavenia auditu životnosti aktualizované</value>
-  </data>
-  <data name="CityCol" xml:space="preserve">
-    <value>Mesto</value>
-  </data>
-  <data name="CountryCol" xml:space="preserve">
-    <value>Krajina</value>
-  </data>
-  <data name="RoomExternalLinkCreated" xml:space="preserve">
-    <value>Externý odkaz vytvorený: {0}. Rola: {1}</value>
-  </data>
-  <data name="RoomExternalLinkDeleted" xml:space="preserve">
-    <value>Externý odkaz odstránený: {0}</value>
-  </data>
-  <data name="RoomExternalLinkUpdated" xml:space="preserve">
-    <value>Externý odkaz aktualizovaný: {0}. Rola: {1}</value>
-  </data>
-  <data name="FileOpenedForChange" xml:space="preserve">
-    <value>Súbor otvorený pre zmenu: {0}</value>
-  </data>
-  <data name="PortalRenamed" xml:space="preserve">
-    <value>Portál bol premenovaný</value>
-  </data>
-  <data name="FileSizePostfix" xml:space="preserve">
-    <value>bytes,KB,MB,GB,TB</value>
-  </data>
-  <data name="FileUploadedWithOverwriting" xml:space="preserve">
-    <value>Súbor nahraný s prepísaním: {0}</value>
-  </data>
-  <data name="QuotaPerPortalChanged" xml:space="preserve">
-    <value>Nastavená predvolená kvóta úložiska: {0}</value>
-  </data>
-  <data name="QuotaPerPortalDisabled" xml:space="preserve">
-    <value>Deaktivovaná predvolená kvóta úložiska</value>
-  </data>
-  <data name="QuotaPerRoomChanged" xml:space="preserve">
-    <value>Nastavená predvolená kvóta úložiska pre miestnosti: {0}</value>
-  </data>
-  <data name="QuotaPerRoomDisabled" xml:space="preserve">
-    <value>Deaktivovaná predvolená kvóta úložiska pre miestnosti</value>
-  </data>
-  <data name="QuotaPerUserChanged" xml:space="preserve">
-    <value>Nastavená predvolená kvóta úložiska pre používateľov: {0}</value>
-  </data>
-  <data name="QuotaPerUserDisabled" xml:space="preserve">
-    <value>Deaktivovaná predvolená kvóta úložiska pre používateľov</value>
-  </data>
-  <data name="RoomCopied" xml:space="preserve">
-    <value>Skopírovaná miestnosť: {0}</value>
-  </data>
-  <data name="RoomGroupAdded" xml:space="preserve">
-    <value>Pridaná skupina: {0}. Rola: {1}</value>
-  </data>
-  <data name="RoomGroupRemove" xml:space="preserve">
-    <value>Odstránená skupina: {0}</value>
-  </data>
-  <data name="RoomUpdateAccessForGroup" xml:space="preserve">
-    <value>{0} priradene: {1}</value>
-  </data>
-  <data name="SendJoinInvite" xml:space="preserve">
-    <value>Používateľ {0} poslal pozvánku {1}, aby sa pripojil k tomuto priestoru DocSpace</value>
-  </data>
-  <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
-    <value>Miestnosti [{0}]. Nastaviť vlastnú kvótu úložiska pre miestnosti: {1}</value>
-  </data>
-  <data name="CustomQuotaPerRoomDefault" xml:space="preserve">
-    <value>Miestnosti [{0}]. Nastaviť predvolenú kvótu úložiska pre miestnosti: {1}</value>
-  </data>
-  <data name="CustomQuotaPerRoomDisabled" xml:space="preserve">
-    <value>Miestnosti [{0}]. Vypnúť kvótu úložiska pre miestnosti</value>
-  </data>
-  <data name="CustomQuotaPerUserChanged" xml:space="preserve">
-    <value>Používatelia [{0}]. Nastaviť vlastnú kvótu úložiska pre používateľov: {1}</value>
-  </data>
-  <data name="CustomQuotaPerUserDefault" xml:space="preserve">
-    <value>Používatelia [{0}]. Nastaviť predvolenú kvótu úložiska pre používateľov: {1}</value>
-  </data>
-  <data name="CustomQuotaPerUserDisabled" xml:space="preserve">
-    <value>Používatelia [{0}]. Vypnúť kvótu úložiska pre používateľov</value>
-  </data>
-  <data name="FormOpenedForFilling" xml:space="preserve">
-    <value>Súbor otvorený na vyplnenie: {0}</value>
-  </data>
-  <data name="FormSubmit" xml:space="preserve">
-    <value>Používatelia [{0}]. Formulár odoslaný: {1}</value>
-  </data>
-  <data name="RoomIndexExportSaved" xml:space="preserve">
-    <value>Export indexu miestnosti uloženého v Dokumentoch</value>
-  </data>
-  <data name="RoomInviteResend" xml:space="preserve">
-    <value>Pozvánky boli znovu odoslané: {0}</value>
-  </data>
-  <data name="ChangeClientActivation" xml:space="preserve">
-    <value>Aktivácia klienta {0} bola zmenená</value>
-  </data>
-  <data name="ChangeClientVisibility" xml:space="preserve">
-    <value>Zobrazenie klienta {0} bolo zmenené</value>
-  </data>
-  <data name="CreateClient" xml:space="preserve">
-    <value>Klient vytvorený</value>
-  </data>
-  <data name="DeleteClient" xml:space="preserve">
-    <value>Klient {0} vymazaný</value>
-  </data>
-  <data name="FileIndexChanged" xml:space="preserve">
-    <value>Súbor: {0}. Index zmenený z {1} na {2}</value>
-  </data>
-  <data name="FolderIndexChanged" xml:space="preserve">
-    <value>Priečinok: {0}. Index zmenený z {1} na {2}</value>
-  </data>
-  <data name="FolderIndexReordered" xml:space="preserve">
-    <value>Priečinok: {0}. Poradie indexov zmenené</value>
-  </data>
-  <data name="GenerateAuthorizationCodeToken" xml:space="preserve">
-    <value>Vygenerovaný autorizačný kód pre klienta {0}</value>
-  </data>
-  <data name="GeneratePersonalAccessToken" xml:space="preserve">
-    <value>Vygenerovaný osobný prístupový token pre klienta {0}</value>
-  </data>
-  <data name="RegenerateSecret" xml:space="preserve">
-    <value>Znovu vygenerované tajný kód klienta {0}</value>
-  </data>
-  <data name="RevokeUserClient" xml:space="preserve">
-    <value>Prístup klienta {0} zrušený</value>
-  </data>
-  <data name="RoomDenyDownloadDisabled" xml:space="preserve">
-    <value>Miestnosť: {0}. Odmietnutie sťahovania zakázané</value>
-  </data>
-  <data name="RoomDenyDownloadEnabled" xml:space="preserve">
-    <value>Miestnosť: {0}. Odmietnutie sťahovania povolené</value>
-  </data>
-  <data name="RoomIndexingDisabled" xml:space="preserve">
-    <value>Indexovanie miestnosti vypnuté</value>
-  </data>
-  <data name="RoomIndexingEnabled" xml:space="preserve">
-    <value>Indexovanie miestnosti povolené</value>
-  </data>
-  <data name="RoomLifeTimeDisabled" xml:space="preserve">
-    <value>Doba používania vypnutá</value>
-  </data>
-  <data name="RoomLifeTimeSet" xml:space="preserve">
-    <value>Doba používania je nastavená. Hodnota: {0}. Čas: {1}. Navždy vymazať: {2}</value>
-  </data>
-  <data name="RoomWatermarkDisabled" xml:space="preserve">
-    <value>Miestnosť: {0}. Vodoznak vypnutý</value>
-  </data>
-  <data name="RoomWatermarkSet" xml:space="preserve">
-    <value>Miestnosť: {0}. Vodoznak povolený</value>
-  </data>
-  <data name="UpdateClient" xml:space="preserve">
-    <value>Klient {0} aktualizovaný</value>
-  </data>
-  <data name="ApiKeyCreated" xml:space="preserve">
-    <value>Vytvorený kľúč používateľa API: {0}</value>
-  </data>
-  <data name="ApiKeyDeleted" xml:space="preserve">
-    <value>Odstránený kľúč používateľa API: {0}</value>
-  </data>
-  <data name="ApiKeyUpdated" xml:space="preserve">
-    <value>Kľúč používateľa API aktualizovaný: {0}</value>
-  </data>
-  <data name="FormCompletelyFilled" xml:space="preserve">
-    <value>Používatelia [{0}]. Vyplnený formulár: {1}</value>
-  </data>
-  <data name="FormPartiallyFilled" xml:space="preserve">
-    <value>Používatelia [{0}]. Vyplnená časť formulára: {1}</value>
-  </data>
-  <data name="FormStopped" xml:space="preserve">
-    <value>Používatelia [{0}]. Formulár bol ukončený: {1}</value>
-  </data>
-  <data name="FormStartedToFill" xml:space="preserve">
-    <value>Používatelia [{0}]. Začal vypĺňať: {1}</value>
-  </data>
   <data name="WebhookCreated" xml:space="preserve">
     <value>Webhook vytvorený: {0}</value>
   </data>
@@ -879,173 +1106,5 @@
   </data>
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Webhook aktualizovaný: {0}</value>
-  </data>
-  <data name="FileVersionRemoved" xml:space="preserve">
-    <value>Súbory [{0}]. Verzia odstránená: {1}</value>
-  </data>
-  <data name="DevToolsAccessSettingsChanged" xml:space="preserve">
-    <value>Zmena nastavení prístupu k nástrojom pre vývojárov</value>
-  </data>
-  <data name="FileCustomFilterDisabled" xml:space="preserve">
-    <value>Súbor: {0}. Vlastný filter vypnutý</value>
-  </data>
-  <data name="FileCustomFilterEnabled" xml:space="preserve">
-    <value>Súbor: {0}. Vlastný filter povolený</value>
-  </data>
-  <data name="AuthLinkActivated" xml:space="preserve">
-    <value>Odkaz na autorizáciu bol aktivovaný</value>
-  </data>
-  <data name="CustomerOperationPerformed" xml:space="preserve">
-    <value>Bola vykonaná operácia zákazníka</value>
-  </data>
-  <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
-    <value>Bola stiahnutá správa o operáciách zákazníka</value>
-  </data>
-  <data name="CustomerSubscriptionUpdated" xml:space="preserve">
-    <value>Predplatné zákazníka bolo aktualizované: {0}</value>
-  </data>
-  <data name="CustomerWalletToppedUp" xml:space="preserve">
-    <value>Peňaženka zákazníka bola dobitá: {0}</value>
-  </data>
-  <data name="LocationCol" xml:space="preserve">
-    <value>Umiestnenie</value>
-  </data>
-  <data name="BannerSettingsChanged" xml:space="preserve">
-    <value>Nastavenia viditeľnosti propagačných bannerov boli zmenené</value>
-  </data>
-  <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Nastavenia služieb s povolenou peňaženkou zákazníka boli aktualizované</value>
-  </data>
-  <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
-    <value>Nastavenia dobíjania zákazníckej peňaženky boli aktualizované</value>
-  </data>
-  <data name="LdapDisabled" xml:space="preserve">
-    <value>Overenie LDAP je zakázané</value>
-  </data>
-  <data name="LdapEnabled" xml:space="preserve">
-    <value>Autentifikácia LDAP povolená</value>
-  </data>
-  <data name="LdapSync" xml:space="preserve">
-    <value>Synchronizácia LDAP dokončená</value>
-  </data>
-  <data name="LoginSuccessSocialAccount" xml:space="preserve">
-    <value>Prihlásenie prostredníctvom účtu sociálnej siete bolo úspešné</value>
-  </data>
-  <data name="AddedServerToAgent" xml:space="preserve">
-    <value>Server MCP {0} bol pridaný do agenta</value>
-  </data>
-  <data name="AgentCreated" xml:space="preserve">
-    <value>Agent bol vytvorený</value>
-  </data>
-  <data name="AgentDeleted" xml:space="preserve">
-    <value>Agent bol odstránený</value>
-  </data>
-  <data name="AgentRenamed" xml:space="preserve">
-    <value>Agent bol premenovaný: {0}</value>
-  </data>
-  <data name="AgentsModule" xml:space="preserve">
-    <value>Agenti</value>
-  </data>
-  <data name="AIProviderCreated" xml:space="preserve">
-    <value>AI provider bol vytvorený: {0}</value>
-  </data>
-  <data name="AIProviderDeleted" xml:space="preserve">
-    <value>AI provider bol odstránený: {0}</value>
-  </data>
-  <data name="AIProviderUpdated" xml:space="preserve">
-    <value>AI provider bol aktualizovaný: {0}</value>
-  </data>
-  <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
-    <value>AI agenti [{0}]. Nastavte vlastnú kvótu úložiska pre AI agentov: {1}</value>
-  </data>
-  <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
-    <value>AI agenti [{0}]. Nastavte predvolenú kvótu úložiska pre AI agentov: {1}</value>
-  </data>
-  <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
-    <value>AI agenti [{0}]. Kvóta úložiska pre AI agentov vypnutá</value>
-  </data>
-  <data name="DeletedServerFromAgent" xml:space="preserve">
-    <value>Server MCP {0} odstránený z agenta</value>
-  </data>
-  <data name="FileExternalLinkCreated" xml:space="preserve">
-    <value>Súbory [{0}]. Bol vytvorený externý odkaz: {1}. Úloha: {2}</value>
-  </data>
-  <data name="FileExternalLinkDeleted" xml:space="preserve">
-    <value>Súbory [{0}]. Bol odstránený externý odkaz: {1}</value>
-  </data>
-  <data name="FileExternalLinkUpdated" xml:space="preserve">
-    <value>Súbory [{0}].Bol aktualizovaný externý odkaz: {1}. Úloha: {2}</value>
-  </data>
-  <data name="FileMarkedAsFavorite" xml:space="preserve">
-    <value>Súbor bol pridaný medzi obľúbené: {0}</value>
-  </data>
-  <data name="FileRemovedFromFavorite" xml:space="preserve">
-    <value>Súbor bol odstránený z obľúbených: {0}</value>
-  </data>
-  <data name="FileRemovedFromList" xml:space="preserve">
-    <value>Súbor bol odstránený z „Zdieľané so mnou“: {0}</value>
-  </data>
-  <data name="FileUpdatedAccessFor" xml:space="preserve">
-    <value>Súbory [{0}]. Prístup bol aktualizovaný pre {1}. Rola: {2}</value>
-  </data>
-  <data name="FolderDownloaded" xml:space="preserve">
-    <value>Priečinok bol stiahnutý: {0}</value>
-  </data>
-  <data name="FolderExternalLinkCreated" xml:space="preserve">
-    <value>Priečinky [{0}]. Bol vytvorený externý odkaz: {1}. Rola: {2}</value>
-  </data>
-  <data name="FolderExternalLinkDeleted" xml:space="preserve">
-    <value>Priečinky [{0}]. Bol odstránený externý odkaz: {1}</value>
-  </data>
-  <data name="FolderExternalLinkUpdated" xml:space="preserve">
-    <value>Priečinky [{0}]. Bol aktualizovaný externý odkaz: {1}. Úloha: {2}</value>
-  </data>
-  <data name="FolderRemovedFromList" xml:space="preserve">
-    <value>Priečinok bol odstránený z „Zdieľané so mnou“: {0}</value>
-  </data>
-  <data name="FolderUpdatedAccessFor" xml:space="preserve">
-    <value>Priečinky [{0}]. Bol aktualizovaný prístup pre {1}. Úloha: {2}</value>
-  </data>
-  <data name="LoginSuccessViaOAuth" xml:space="preserve">
-    <value>Úspešné prihlásenie cez OAuth 2.0</value>
-  </data>
-  <data name="LoginSuccessViaPassword" xml:space="preserve">
-    <value>Úspešné prihlásenie pomocou prihlasovacieho mena a hesla</value>
-  </data>
-  <data name="QuotaPerAiAgentChanged" xml:space="preserve">
-    <value>Predvolená kvóta úložiska pre AI agentov bola nastavená na: {0}</value>
-  </data>
-  <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
-    <value>Predvolená kvóta úložiska pre AI agentov bola deaktivovaná</value>
-  </data>
-  <data name="ResetVectorizationSettings" xml:space="preserve">
-    <value>Nastavenia vektorizácie boli obnovené</value>
-  </data>
-  <data name="ResetWebSearchSettings" xml:space="preserve">
-    <value>Nastavenia vyhľadávania na webe boli obnovené</value>
-  </data>
-  <data name="RoomExternalLinkRevoked" xml:space="preserve">
-    <value>Externý odkaz bol zrušený: {1}</value>
-  </data>
-  <data name="ServerCreated" xml:space="preserve">
-    <value>MCP server {0} bol vytvorený</value>
-  </data>
-  <data name="ServerDeleted" xml:space="preserve">
-    <value>MCP server {0} bol odstránený</value>
-  </data>
-  <data name="ServerDisabled" xml:space="preserve">
-    <value>Server MCP bol vypnutý: {0}</value>
-  </data>
-  <data name="ServerEnabled" xml:space="preserve">
-    <value>Server MCP bol aktivovaný: {0}</value>
-  </data>
-  <data name="ServerUpdated" xml:space="preserve">
-    <value>Server MCP bol aktualizovaný: {0}</value>
-  </data>
-  <data name="SetVectorizationSettings" xml:space="preserve">
-    <value>Nastavenia vektorizácie boli nakonfigurované. Provider: {0}</value>
-  </data>
-  <data name="SetWebSearchSettings" xml:space="preserve">
-    <value>Nastavenia vyhľadávania na webe boli nakonfigurované. Vyhľadávač: {0}</value>
   </data>
 </root>

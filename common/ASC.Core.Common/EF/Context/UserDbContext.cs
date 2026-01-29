@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,6 +42,7 @@ public partial class UserDbContext(DbContextOptions<UserDbContext> dbContextOpti
     public DbSet<DbWebstudioSettings> WebstudioSettings { get; set; }
     public DbSet<DbQuotaRow> QuotaRow { get; set; }
     public DbSet<DbUserRelation> UserRelations { get; set; }
+    public DbSet<InvitationLink> InvitationLinks { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -60,6 +61,7 @@ public partial class UserDbContext(DbContextOptions<UserDbContext> dbContextOpti
         .AddAccountLinks()
         .AddWebstudioSettings()
         .AddDbQuotaRow()
-        .AddUserRelation();
+        .AddUserRelation()
+        .AddInvitationLink();
     }
 }

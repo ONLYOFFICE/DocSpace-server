@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -159,18 +159,19 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
                 }
 
                 _log.Debug($"SendMsgWhatsNew userActivities count : {userActivities.Count}");//temp
-
-                var action = whatsNewType == WhatsNewType.RoomsActivity ? Actions.RoomsActivity : Actions.SendWhatsNew;
+                
+                var roomsActivityNotifyAction = serviceProvider.GetService<RoomsActivityNotifyAction>();
+                roomsActivityNotifyAction.Init(scheduleDate, whatsNewType, userActivities);
+                
+                var sendWhatsNewNotifyAction = serviceProvider.GetService<SendWhatsNewNotifyAction>();
+                sendWhatsNewNotifyAction.Init(scheduleDate, whatsNewType, userActivities);
+                
+                INotifyAction action = whatsNewType == WhatsNewType.RoomsActivity ? roomsActivityNotifyAction : sendWhatsNewNotifyAction;
 
                 if (userActivities.Count != 0)
                 {
                     _log.InformationSendWhatsNewTo(user.Email);
-                    await client.SendNoticeAsync(
-                        action, null, user,
-                        new TagValue(Tags.Activities, userActivities),
-                        new TagValue(Tags.Date, DateToString(scheduleDate, whatsNewType)),
-                        new TagValue(CommonTags.Priority, 1)
-                    );
+                    await client.SendNoticeAsync(action, null, user);
                 }
             }
         }
@@ -187,7 +188,7 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
 
         var user = userManager.GetUsers(activityInfo.UserId);
 
-        var date = activityInfo.Data.ConvertNumerals("t");
+        var date = activityInfo.Date.ConvertNumerals("t");
         var userName = user.DisplayUserName(displayUserSettingsHelper);
         var userRole = activityInfo.UserRole;
         var fileUrl = activityInfo.FileUrl;
@@ -261,8 +262,11 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
         }
         else if (action == MessageAction.FileUploaded)
         {
-            userActivityText = string.Format(WebstudioNotifyPatternResource.ActionFileUploaded,
-                userName, fileUrl, fileTitle, roomsUrl, roomsTitle, date);
+            var pattern = activityInfo.IsAgent && activityInfo.IsKnowledge
+                ? WebstudioNotifyPatternResource.ActionFileUploadedToAgentKnowledge
+                : WebstudioNotifyPatternResource.ActionFileUploaded;
+
+            userActivityText = string.Format(pattern, userName, fileUrl, fileTitle, roomsUrl, roomsTitle, date);
         }
         else if (action == MessageAction.UserFileUpdated)
         {
@@ -319,13 +323,13 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
     private async Task<bool> CheckSubscriptionAsync(UserInfo user, WhatsNewType whatsNewType)
     {
         if (whatsNewType == WhatsNewType.DailyFeed &&
-            await studioNotifyHelper.IsSubscribedToNotifyAsync(user, Actions.SendWhatsNew))
+            await studioNotifyHelper.IsSubscribedToNotifyAsync(user, serviceProvider.GetService<SendWhatsNewNotifyAction>()))
         {
             return true;
         }
 
         if (whatsNewType == WhatsNewType.RoomsActivity &&
-            await studioNotifyHelper.IsSubscribedToNotifyAsync(user, Actions.RoomsActivity))
+            await studioNotifyHelper.IsSubscribedToNotifyAsync(user, serviceProvider.GetService<RoomsActivityNotifyAction>()))
         {
             return true;
         }
@@ -347,20 +351,13 @@ public class StudioWhatsNewNotify(TenantManager tenantManager,
         }
         return currentTime.Hour == hourToSend;
     }
-
-    private static string DateToString(DateTime d, WhatsNewType type)
-    {
-        d = type == WhatsNewType.DailyFeed ? d.AddDays(-1) : d.AddHours(-1);
-
-        return d.ConvertNumerals("M");
-    }
 }
 
 public class ActivityInfo
 {
     public Guid UserId { get; init; }
     public MessageAction Action { get; init; }
-    public DateTime Data { get; init; }
+    public DateTime Date { get; init; }
     public string FileTitle { get; set; }
     public string FileUrl { get; set; }
     public string RoomUri { get; set; }
@@ -369,6 +366,7 @@ public class ActivityInfo
     public List<Guid> TargetUsers { get; set; }
     public string UserRole { get; set; }
     public bool IsAgent { get; set; }
+    public bool IsKnowledge { get; set; }
 }
 
 public enum WhatsNewType

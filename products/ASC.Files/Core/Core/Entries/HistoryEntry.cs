@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -119,6 +119,7 @@ public record HistoryEntry
 [JsonDerivedType(typeof(RenameEntryData))]
 [JsonDerivedType(typeof(TagData))]
 [JsonDerivedType(typeof(UserHistoryData))]
+[JsonDerivedType(typeof(ChangeRoomOwnerHistoryData))]
 [JsonDerivedType(typeof(UserFileUpdateData))]
 [JsonDerivedType(typeof(FileData))]
 [JsonDerivedType(typeof(FileOperationData))]

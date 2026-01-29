@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -41,11 +41,7 @@ public class TenantBannerSettings : ISettings<TenantBannerSettings>
     /// <summary>
     /// The settings ID.
     /// </summary>
-    [JsonIgnore]
-    public Guid ID
-    {
-        get { return new Guid("{89763892-F2B1-40A2-B2E3-B397FAA7B88A}"); }
-    }
+    public static Guid ID => new("{89763892-F2B1-40A2-B2E3-B397FAA7B88A}");
 
     public TenantBannerSettings GetDefault()
     {

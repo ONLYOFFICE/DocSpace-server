@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,10 +29,7 @@ namespace ASC.Web.Studio.Core;
 [Scope]
 public class FileSizeComment(SetupInfo setupInfo)
 {
-    public string FileImageSizeExceptionString
-    {
-        get { return GetFileSizeExceptionString(setupInfo.MaxImageUploadSize); }
-    }
+    public string FileImageSizeExceptionString => GetFileSizeExceptionString(setupInfo.MaxImageUploadSize);
 
     public static string GetFileSizeExceptionString(long size)
     {

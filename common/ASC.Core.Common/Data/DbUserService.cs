@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -206,7 +206,7 @@ public class EFUserService(
                 var pwdHash = GetPasswordHash(user.Id, passwordHash);
 
                 var any = await userDbContext.UserSecurity
-                    .AnyAsync(r => r.UserId == user.Id && (r.PwdHash == pwdHash));
+                    .AnyAsync(r => r.UserId == user.Id && r.PwdHash == pwdHash);
 
                 if (any)
                 {
@@ -344,12 +344,12 @@ public class EFUserService(
                 }
             case UserSortType.Type:
                 {
-                    var q1 = (from user in q
-                              join userGroup in userDbContext.UserGroups.Where(g =>
-                                  !g.Removed && (g.UserGroupId == Constants.GroupAdmin.ID || g.UserGroupId == Constants.GroupGuest.ID ||
-                                                 g.UserGroupId == Constants.GroupUser.ID)) on user.Id equals userGroup.Userid into joinedGroup
-                              from @group in joinedGroup.DefaultIfEmpty()
-                              select new UserWithGroup { User = user, Group = @group });
+                    var q1 = from user in q
+                        join userGroup in userDbContext.UserGroups.Where(g =>
+                            !g.Removed && (g.UserGroupId == Constants.GroupAdmin.ID || g.UserGroupId == Constants.GroupGuest.ID ||
+                                           g.UserGroupId == Constants.GroupUser.ID)) on user.Id equals userGroup.Userid into joinedGroup
+                        from @group in joinedGroup.DefaultIfEmpty()
+                        select new UserWithGroup { User = user, Group = @group };
 
                     Expression<Func<UserWithGroup, int>> orderByUserType = u =>
                         u.User.Id == filter.OwnerId ? 0 :
@@ -398,7 +398,7 @@ public class EFUserService(
                     break;
                 }
             case UserSortType.Email:
-                q = (filter.SortOrderAsc ? q.OrderBy(u => u.Email) : q.OrderByDescending(u => u.Email));
+                q = filter.SortOrderAsc ? q.OrderBy(u => u.Email) : q.OrderByDescending(u => u.Email);
                 break;
             case UserSortType.LastName:
                 q = filter.SortOrderAsc
@@ -822,11 +822,11 @@ public class EFUserService(
         {
             if (filter.QuotaFilter == QuotaFilter.Custom)
             {
-                q = q.Where(r => userDbContext.WebstudioSettings.Any(a => a.TenantId == r.TenantId && a.Id == new UserQuotaSettings().ID && a.UserId == r.Id));
+                q = q.Where(r => userDbContext.WebstudioSettings.Any(a => a.TenantId == r.TenantId && a.Id == UserQuotaSettings.ID && a.UserId == r.Id));
             }
             else if (filter.QuotaFilter == QuotaFilter.Default)
             {
-                q = q.Where(r => !userDbContext.WebstudioSettings.Any(a => a.TenantId == r.TenantId && a.Id == new UserQuotaSettings().ID && a.UserId == r.Id));
+                q = q.Where(r => !userDbContext.WebstudioSettings.Any(a => a.TenantId == r.TenantId && a.Id == UserQuotaSettings.ID && a.UserId == r.Id));
             }
         }
 
@@ -1026,6 +1026,61 @@ public class EFUserService(
     private static IQueryable<DbGroup> BuildBaseGroupQuery(int tenant, UserDbContext userDbContext)
     {
         return userDbContext.Groups.Where(g => g.TenantId == tenant && !g.Removed);
+    }
+
+    public async Task<InvitationLink> CreateInvitationLinkAsync(int tenantId, EmployeeType employeeType, DateTime expiration, int? maxUseCount)
+    {
+        var invitationLink = new InvitationLink
+        {
+            Id = Guid.NewGuid(),
+            TenantId = tenantId,
+            EmployeeType = employeeType,
+            Expiration = expiration,
+            MaxUseCount = maxUseCount,
+            CurrentUseCount = 0
+        };
+
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        await userDbContext.AddOrUpdateAsync(q => q.InvitationLinks, invitationLink);
+        await userDbContext.SaveChangesAsync();
+
+        return invitationLink;
+    }
+
+    public async Task<InvitationLink> GetInvitationLinkAsync(int tenantId, Guid id)
+    {
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        return await userDbContext.GetInvitationLinkAsync(tenantId, id);
+    }
+
+    public async Task<InvitationLink> GetInvitationLinkAsync(int tenantId, EmployeeType employeeType)
+    {
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        return await userDbContext.GetInvitationLinkAsync(tenantId, employeeType);
+    }
+
+    public async Task<List<InvitationLink>> GetInvitationLinksAsync(int tenantId)
+    {
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        return await userDbContext.GetInvitationLinksAsync(tenantId).ToListAsync();
+    }
+
+    public async Task UpdateInvitationLinkAsync(int tenantId, Guid id, DateTime expiration, int? maxUseCount)
+    {
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        await userDbContext.UpdateInvitationLinkAsync(tenantId, id, expiration, maxUseCount);
+    }
+
+    public async Task IncreaseInvitationLinkUsageAsync(int tenantId, Guid id)
+    {
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        await userDbContext.IncreaseInvitationLinkUsageAsync(tenantId, id);
+    }
+
+    public async Task DeleteInvitationLinkAsync(int tenantId, Guid id)
+    {
+        await using var userDbContext = await dbContextFactory.CreateDbContextAsync();
+        await userDbContext.DeleteInvitationLinkAsync(tenantId, id);
     }
 }
 

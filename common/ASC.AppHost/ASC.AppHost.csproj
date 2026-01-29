@@ -1,6 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-    <Sdk Name="Aspire.AppHost.Sdk" Version="13.0.0"/>
+﻿<Project Sdk="Aspire.AppHost.Sdk/13.1.0">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
@@ -15,10 +13,12 @@
         <PackageReference Include="Aspire.Hosting.NodeJs" />
         <PackageReference Include="Aspire.Hosting.RabbitMQ" />
         <PackageReference Include="Aspire.Hosting.Redis" />
+        <PackageReference Include="CommunityToolkit.Aspire.Hosting.MailPit" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\..\products\ASC.AI\Server\ASC.AI.csproj" />
+      <ProjectReference Include="..\..\products\ASC.AI\Service\ASC.AI.Service.csproj" />
       <ProjectReference Include="..\services\ASC.ApiSystem\ASC.ApiSystem.csproj" />
       <ProjectReference Include="..\services\ASC.ClearEvents\ASC.ClearEvents.csproj" />
       <ProjectReference Include="..\services\ASC.Data.Backup.BackgroundTasks\ASC.Data.Backup.BackgroundTasks.csproj" />

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -148,8 +148,8 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <summary>
     /// The file entry type of the folder.
     /// </summary>
-    public override FileEntryType FileEntryType { get => FileEntryType.Folder; }
-    
+    public override FileEntryType FileEntryType => FileEntryType.Folder;
+
     public ChatSettings ChatSettings { get; set; }
     
     public RoomType? RootRoomType { get; set; }
@@ -195,7 +195,7 @@ public class FolderDtoHelper(
         var result = await GetFolderWrapperAsync(folder);
         result.ParentId = folder.ParentId;
 
-        if (DocSpaceHelper.IsRoom(folder.FolderType))
+        if (folder.IsRoom)
         {
             if (folder.Tags == null)
             {
@@ -217,6 +217,7 @@ public class FolderDtoHelper(
                     FolderType.VirtualRooms => IdConverter.Convert<T>(await _globalFolderHelper.FolderVirtualRoomsAsync),
                     FolderType.Archive => IdConverter.Convert<T>(await _globalFolderHelper.FolderArchiveAsync),
                     FolderType.RoomTemplates => IdConverter.Convert<T>(await _globalFolderHelper.FolderRoomTemplatesAsync),
+                    FolderType.DefaultTemplates => IdConverter.Convert<T>(await _globalFolderHelper.FolderDefaultTemplatesAsync),
                     _ => result.ParentId
                 };
             }
@@ -287,7 +288,7 @@ public class FolderDtoHelper(
                 result.RootFolderType = FolderType.SHARE;
             }
             
-            var room = parents.FirstOrDefault(f => DocSpaceHelper.IsRoom(f.FolderType));
+            var room = parents.FirstOrDefault(f => f.IsRoom);
             if (room != null)
             {
                 result.OwnedBy = await _employeeWrapperHelper.GetAsync(room.CreateBy);
@@ -296,7 +297,7 @@ public class FolderDtoHelper(
 
         if (folder.Order != 0)
         {
-            if (string.IsNullOrEmpty(order) && (contextFolder == null || !DocSpaceHelper.IsRoom(contextFolder.FolderType)))
+            if (string.IsNullOrEmpty(order) && contextFolder is not { IsRoom: true })
             {
                 order = await breadCrumbsManager.GetBreadCrumbsOrderAsync(folder.ParentId);
             }
@@ -366,6 +367,10 @@ public class FolderDtoHelper(
             else if (Equals(result.OriginRoomId, await _globalFolderHelper.FolderArchiveAsync))
             {
                 result.OriginRoomTitle = result.OriginTitle;
+            }            
+            else if(result.RootFolderType == FolderType.USER)
+            {
+                result.OriginRoomTitle = FilesUCResource.SharedForMe;
             }
         }
 
@@ -423,7 +428,7 @@ public class FolderDtoHelper(
         var result = await GetFolderWrapperAsync(folder);
         result.ParentId = folder.ParentId;
 
-        if (!DocSpaceHelper.IsRoom(folder.FolderType))
+        if (!folder.IsRoom)
         {
             return result;
         }
@@ -438,7 +443,7 @@ public class FolderDtoHelper(
     {
         var newBadges = folder.NewForMe;
 
-        if (folder.RootFolderType is FolderType.VirtualRooms or FolderType.RoomTemplates)
+        if (folder.RootFolderType is FolderType.VirtualRooms or FolderType.RoomTemplates or FolderType.DefaultTemplates)
         {
             var isEnabledBadges = await badgesSettingsHelper.GetEnabledForCurrentUserAsync();
 
@@ -449,7 +454,7 @@ public class FolderDtoHelper(
         }
 
         var result = await GetAsync<FolderDto<T>, T>(folder);
-        if (folder.FolderType != FolderType.VirtualRooms && folder.FolderType != FolderType.RoomTemplates)
+        if (folder.FolderType != FolderType.VirtualRooms && folder.FolderType != FolderType.RoomTemplates && folder.FolderType != FolderType.DefaultTemplates)
         {
             result.FilesCount = folder.FilesCount;
             result.FoldersCount = folder.FoldersCount;

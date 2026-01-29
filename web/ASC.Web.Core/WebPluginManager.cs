@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -46,7 +46,10 @@ public class WebPlugin
     public bool Enabled { get; set; }
     public bool System { get; set; }
     public string Url { get; set; }
+    public string CssUrl { get; set; }
     public string Settings { get; set; }
+    public Dictionary<string,string> NameLocale { get; set; }
+    public Dictionary<string,string> DescriptionLocale { get; set; }
 
     public WebPlugin Clone()
     {
@@ -164,6 +167,11 @@ public class WebPluginManager(
             var hash = string.IsNullOrEmpty(webPlugin.Version) ? string.Empty : $"?hash={webPlugin.Version}";
 
             webPlugin.Url = string.Format(urlTemplate, webPlugin.Name) + hash;
+
+            if (await storage.IsFileAsync(Path.Combine(webPlugin.Name, PluginCssFileName)))
+            {
+                webPlugin.CssUrl = webPlugin.Url.Replace(PluginFileName, PluginCssFileName);
+            }
 
             var existingSettings = await GetWebPluginSettingsAsync(webPlugin.Name);
 
@@ -349,6 +357,11 @@ public class WebPluginManager(
                 var hash = string.IsNullOrEmpty(webPlugin.Version) ? string.Empty : $"?hash={webPlugin.Version}";
 
                 webPlugin.Url = string.Format(urlTemplate, webPlugin.Name) + hash;
+
+                if (await storage.IsFileAsync(Path.Combine(webPlugin.Name, PluginCssFileName)))
+                {
+                    webPlugin.CssUrl = webPlugin.Url.Replace(PluginFileName, PluginCssFileName);
+                }
 
                 webPlugins.Add(webPlugin);
             }
@@ -647,7 +660,7 @@ public class WebPluginManager(
         long totalBytesRead = 0;
         int bytesRead;
 
-        while ((bytesRead = await inputStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+        while ((bytesRead = await inputStream.ReadAsync(buffer)) > 0)
         {
             totalBytesRead += bytesRead;
 
@@ -661,7 +674,7 @@ public class WebPluginManager(
                 throw new Exception($"The entry {entry.Name} exceeds the maximum size.");
             }
 
-            await outputStream.WriteAsync(buffer, 0, bytesRead);
+            await outputStream.WriteAsync(buffer.AsMemory(0, bytesRead));
         }
 
         if (totalBytesRead != entry.Size)

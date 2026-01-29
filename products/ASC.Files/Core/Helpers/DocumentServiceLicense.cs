@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -80,7 +80,7 @@ public class DocumentServiceLicense(ICache cache,
 
         var errorMsg = string.Empty;
 
-        var response = await pipeline.ExecuteAsync(async (_) =>
+        var response = await pipeline.ExecuteAsync(async _ =>
         {
             var commandResponse = await GetDocumentServiceLicenseAsync(false);
 
@@ -108,8 +108,7 @@ public class DocumentServiceLicense(ICache cache,
                     return new LicenseValidationResult(false, "Server is null");
                 }
 
-                return commandResponse.Server.ResultType == CommandResponse.ServerInfo.ResultTypes.Success ||
-                    commandResponse.Server.ResultType == CommandResponse.ServerInfo.ResultTypes.SuccessLimit
+                return commandResponse.Server.ResultType is CommandResponse.ServerInfo.ResultTypes.Success or CommandResponse.ServerInfo.ResultTypes.SuccessLimit
                     ? new LicenseValidationResult(true, null)
                     : new LicenseValidationResult(false, $"ResultType is {commandResponse.Server.ResultType}");
             }

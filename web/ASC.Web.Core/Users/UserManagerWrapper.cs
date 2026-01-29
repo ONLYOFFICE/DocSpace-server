@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -383,7 +383,7 @@ public sealed class UserManagerWrapper(
 
             var @event = await auditEventsRepository.GetByFilterAsync(action: MessageAction.SendJoinInvite, target: userInfo.Email);
             var createBy = @event.LastOrDefault()?.UserId;
-            var link = commonLinkUtility.GetInvitationLink(userInfo.Email, type, createBy ?? (tenantManager.GetCurrentTenant()).OwnerId, userInfo.GetCulture()?.Name);
+            var link = commonLinkUtility.GetInvitationLink(userInfo.Email, type, createBy ?? tenantManager.GetCurrentTenant().OwnerId, userInfo.GetCulture()?.Name);
             var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
             await studioNotifyService.SendDocSpaceRegistration(userInfo.Email, shortenLink);

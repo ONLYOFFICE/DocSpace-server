@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,7 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -36,9 +36,9 @@ public class SwaggerCustomOperationFilter : IOperationFilter
     {
         foreach (var parameter in operation.Parameters)
         {
-            if (parameter.In == ParameterLocation.Query && parameter.Schema.Type == "array")
+            if (parameter.In == ParameterLocation.Query && parameter.Schema.Type == JsonSchemaType.Array)
             {
-                parameter.Style = ParameterStyle.DeepObject;
+                (parameter as OpenApiParameter)?.Style = ParameterStyle.DeepObject;
             }
         }
     }
@@ -54,7 +54,7 @@ public class ContentTypeOperationFilter : IOperationFilter
                 .Where(c => c.Key != "text/json" && !c.Key.EndsWith("+json"))
                 .ToDictionary(c => c.Key, c => c.Value);
 
-            operation.RequestBody.Content = content;
+            (operation.RequestBody as OpenApiRequestBody)?.Content = content;
         }
 
         if (operation.Responses != null)
@@ -65,8 +65,32 @@ public class ContentTypeOperationFilter : IOperationFilter
                     .Where(c => c.Key.Equals("application/json"))
                     .ToDictionary(c => c.Key, c => c.Value);
 
-                response.Value.Content = content;
+                (response.Value as OpenApiResponse)?.Content = content;
             }
+        }
+    }
+}
+
+public class SwaggerOperationIdFilter : IOperationFilter
+{
+    private readonly string _route;
+    private readonly string _newOperationId;
+    private readonly string _shortName;
+
+    public SwaggerOperationIdFilter(string route, string newOperationId, string shortName)
+    {
+        _route = route;
+        _newOperationId = newOperationId;
+        _shortName = shortName;
+    }
+    public void Apply(OpenApiOperation operation, OperationFilterContext context)
+    {
+        if (context.ApiDescription.RelativePath.Equals(_route, StringComparison.OrdinalIgnoreCase) &&
+            context.ApiDescription.HttpMethod.Equals("GET", StringComparison.OrdinalIgnoreCase))
+        {
+            operation.OperationId = _newOperationId;
+            operation.Extensions ??= new Dictionary<string, IOpenApiExtension>();
+            operation.Extensions["x-shortName"] = new JsonNodeExtension(_shortName);
         }
     }
 }

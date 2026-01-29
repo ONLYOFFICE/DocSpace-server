@@ -117,14 +117,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="BackupNotFound" xml:space="preserve">
-    <value>Резервна копија датотеке је неважећа. Молимо користите датотеку креирану на истом порталу.</value>
-  </data>
-  <data name="ButtonSetPassword" xml:space="preserve">
-    <value>Постави лозинку</value>
-  </data>
-  <data name="LargeBackup" xml:space="preserve">
-    <value>Резервна копија је већа него целокупна величина портала</value>
+  <data name="AutoBackup" xml:space="preserve">
+    <value>Аутоматка резервна копија</value>
   </data>
   <data name="BackupException" xml:space="preserve">
     <value>Дошло је до грешке приликом креирања резервне копије. Покушајте поново или контактирајте подршку.</value>
@@ -132,11 +126,11 @@
   <data name="BackupInvalid" xml:space="preserve">
     <value>Фајл резервне копије није важећи.</value>
   </data>
-  <data name="RestoreException" xml:space="preserve">
-    <value>Дошло је до грешке приликом враћања резервне копије. Покушајте поново или контактирајте подршку.</value>
+  <data name="BackupMissingFilesWarning" xml:space="preserve">
+    <value>Некe датотеке нису укључене у резервну копију. За више детаља проверите {0}</value>
   </data>
-  <data name="AutoBackup" xml:space="preserve">
-    <value>Аутоматка резервна копија</value>
+  <data name="BackupNotFound" xml:space="preserve">
+    <value>Резервна копија датотеке је неважећа. Молимо користите датотеку креирану на истом порталу.</value>
   </data>
   <data name="BackupStorageTypeCustomCloud" xml:space="preserve">
     <value>Custom cloud</value>
@@ -156,7 +150,13 @@
   <data name="BackupStorageTypeThridpartyDocuments" xml:space="preserve">
     <value>Ресурс треће стране</value>
   </data>
-  <data name="BackupMissingFilesWarning" xml:space="preserve">
-    <value>Некe датотеке нису укључене у резервну копију. За више детаља проверите {0}</value>
+  <data name="ButtonSetPassword" xml:space="preserve">
+    <value>Постави лозинку</value>
+  </data>
+  <data name="LargeBackup" xml:space="preserve">
+    <value>Резервна копија је већа него целокупна величина портала</value>
+  </data>
+  <data name="RestoreException" xml:space="preserve">
+    <value>Дошло је до грешке приликом враћања резервне копије. Покушајте поново или контактирајте подршку.</value>
   </data>
 </root>

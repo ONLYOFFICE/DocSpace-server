@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,6 +26,7 @@
 
 using ASC.Api.Core.Webhook;
 using ASC.Core.Common;
+using ASC.Core.Common.Settings;
 using ASC.Files.Core.Resources;
 using ASC.People.ApiModels.ResponseDto;
 using ASC.Webhooks.Core;
@@ -49,7 +50,6 @@ public class UpdateUserTypeProgressItem : DistributedTaskProgress
 
     public UpdateUserTypeProgressItem()
     {
-
     }
 
     public UpdateUserTypeProgressItem(IServiceScopeFactory serviceScopeFactory)
@@ -77,6 +77,7 @@ public class UpdateUserTypeProgressItem : DistributedTaskProgress
         await using var scope = _serviceScopeFactory.CreateAsyncScope();
         var scopeClass = scope.ServiceProvider.GetService<ChangeUserTypeProgressItemScope>();
         var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, displayUserSettingsHelper, options, webItemSecurityCache, distributedLockProvider, socketManager, webhookManager, userFormatter, daoFactory, groupFullDtoHelper) = scopeClass;
+        var settingsManager = scope.ServiceProvider.GetService<SettingsManager>();
         var logger = options.CreateLogger("ASC.Web");
         await tenantManager.SetCurrentTenantAsync(_tenantId);
         _userInfo = await userManager.GetUsersAsync(User);
@@ -92,8 +93,23 @@ public class UpdateUserTypeProgressItem : DistributedTaskProgress
             await fileStorageService.ReassignRoomsAsync(User, ToUser);
             await SetPercentageAndCheckCancellationAsync(40, true);
 
+            var currentType = await userManager.GetUserTypeAsync(_userInfo);
+            if (currentType is EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin &&
+                _employeeType is EmployeeType.User or EmployeeType.Guest)
+            {
+                await fileStorageService.DowngradeRoomManagerRoleAsync(User);
+                await SetPercentageAndCheckCancellationAsync(45, true);
+            }
+
             if (_employeeType == EmployeeType.Guest)
             {
+                var startFolderType = await settingsManager.LoadAsync<StudioDefaultPageSettings>(User);
+
+                if (startFolderType.DefaultFolderType == FolderType.USER)
+                {
+                    await settingsManager.SaveAsync(startFolderType.GetDefault(), User);
+                }
+                
                 await securityContext.AuthenticateMeWithoutCookieAsync(ToUser);
                 await fileStorageService.UpdatePersonalFolderModified(User);
                 await securityContext.AuthenticateMeWithoutCookieAsync(_currentUserId);
@@ -155,6 +171,7 @@ public class UpdateUserTypeProgressItem : DistributedTaskProgress
                     await userManager.AddUserIntoGroupAsync(User, Constants.GroupUser.ID);
                     await socketManager.UpdateUserAsync(_userInfo);
                 }
+
                 if (currentType != _employeeType)
                 {
                     await webItemSecurityCache.ClearCacheAsync(_tenantId);
@@ -266,4 +283,4 @@ public record ChangeUserTypeProgressItemScope(
     UserWebhookManager WebhookManager,
     UserFormatter UserFormatter,
     IDaoFactory DaoFactory,
-    GroupFullDtoHelper groupFullDtoHelper);
+    GroupFullDtoHelper GroupFullDtoHelper);

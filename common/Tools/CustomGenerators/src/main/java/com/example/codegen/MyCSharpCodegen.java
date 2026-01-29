@@ -1,40 +1,22 @@
 package com.example.codegen;
 
-import io.swagger.v3.oas.models.servers.ServerVariables;
-import io.swagger.v3.oas.models.servers.Server;
-import io.swagger.v3.oas.models.servers.ServerVariable;
+import io.swagger.v3.oas.models.servers.*;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.tags.Tag;
 import io.swagger.v3.oas.models.media.Schema;
 
-import org.openapitools.codegen.model.ModelMap;
-import org.openapitools.codegen.model.ModelsMap;
+import org.openapitools.codegen.model.*;
 import org.openapitools.codegen.languages.CSharpClientCodegen;
-import org.openapitools.codegen.SupportingFile;
-import org.openapitools.codegen.CodegenModel;
-import org.openapitools.codegen.model.OperationsMap;
-import org.openapitools.codegen.model.OperationMap;
-import org.openapitools.codegen.CodegenOperation;
-import org.openapitools.codegen.CodegenParameter;
-import org.openapitools.codegen.CodegenProperty;
+import org.openapitools.codegen.*;
 import static org.openapitools.codegen.utils.CamelizeOption.LOWERCASE_FIRST_LETTER;
 import static org.openapitools.codegen.utils.StringUtils.camelize;
-import org.openapitools.codegen.model.ApiInfoMap;
 import org.openapitools.codegen.utils.ModelUtils;
 
 import java.io.File;
-import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.HashMap;
-import com.example.codegen.TagParts;
-import java.util.Locale;
 import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.LinkedHashMap;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.HashSet;
+import com.example.codegen.TagParts;
+import java.util.*;
 
 public class MyCSharpCodegen extends CSharpClientCodegen {
     
@@ -50,7 +32,7 @@ public class MyCSharpCodegen extends CSharpClientCodegen {
     public void processOpts() {
         super.processOpts();
 
-        this.outputFolder = "generated-code/my-csharp";
+        this.outputFolder = "../../../sdk/docspace-api-sdk-csharp";
 
         String baseURL = openAPI.getServers().get(0).getUrl();
         if (openAPI.getServers() != null && !openAPI.getServers().isEmpty()) {
@@ -93,6 +75,10 @@ public class MyCSharpCodegen extends CSharpClientCodegen {
 
         supportingFiles.add(new SupportingFile(
             "CHANGELOG.mustache", "", "CHANGELOG.md"
+        ));
+
+        supportingFiles.add(new SupportingFile(
+            "README_nuget.mustache", "docs", "README_nuget.md"
         ));
     }
 
@@ -170,6 +156,7 @@ public class MyCSharpCodegen extends CSharpClientCodegen {
             operationMap.put("x-folder", tagParts.folderPart);
             operationMap.put("x-classname", tagParts.classPart + apiNameSuffix);
             boolean shouldSupportFields = false;
+            boolean supportUseAt = false;
             if (operationList != null) {
                 for (CodegenOperation op : operationList) { 
                     if (op.operationId != null) {
@@ -189,6 +176,12 @@ public class MyCSharpCodegen extends CSharpClientCodegen {
                             op.vendorExtensions.put("x-hasFieldsParam", true);
                             shouldSupportFields = true;
                         }
+                    }
+                    if ("GET".equalsIgnoreCase(op.httpMethod)
+                        && "/api/2.0/files/recent".equals(op.path)) {
+
+                        op.vendorExtensions.put("x-supportsUseAtMethod", true);
+                        supportUseAt = true;
                     }
 
                     if (op.allParams != null) {
@@ -215,6 +208,7 @@ public class MyCSharpCodegen extends CSharpClientCodegen {
                 }
             }
             operationMap.put("x-supportsFields", shouldSupportFields);
+            operationMap.put("x-supportsUseAt", supportUseAt);
         }
 
         return objs;

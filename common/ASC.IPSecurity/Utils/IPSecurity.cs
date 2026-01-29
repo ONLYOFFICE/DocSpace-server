@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -39,21 +39,19 @@ public class IPSecurity(
     SettingsManager settingsManager,
     ILogger<IPSecurity> logger)
 {
-    private string _currentIpForTest;
     private string CurrentIpForTest
     {
         get
         {
-            return _currentIpForTest ??= configuration["ipsecurity:test"];
+            return field ??= configuration["ipsecurity:test"];
         }
     }
 
-    private string _myNetworks;
     private string MyNetworks
     {
         get
         {
-            return _myNetworks ??= configuration["ipsecurity:mynetworks"];
+            return field ??= configuration["ipsecurity:mynetworks"];
         }
     }
 

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -79,14 +79,14 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
 
             var request = new ChunkedRequestHelper<T>(context.Request);
 
-            if (!(await TryAuthorizeAsync(request)))
+            if (!await TryAuthorizeAsync(request))
             {
                 await WriteError(context, "Not authorized or session with specified upload id already expired");
 
                 return;
             }
 
-            if ((tenantManager.GetCurrentTenant()).Status != TenantStatus.Active)
+            if (tenantManager.GetCurrentTenant().Status != TenantStatus.Active)
             {
                 await WriteError(context, "Can't perform upload for deleted or transferring portals");
 
@@ -134,7 +134,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                             if (resumedSession.File.Version <= 1)
                             {
                                 var folderDao = daoFactory.GetFolderDao<T>();
-                                var room = await folderDao.GetParentFoldersAsync(resumedSession.FolderId).FirstOrDefaultAsync(f => DocSpaceHelper.IsRoom(f.FolderType));
+                                var room = await folderDao.GetParentFoldersAsync(resumedSession.FolderId).FirstOrDefaultAsync(f => f.IsRoom);
                                 if (room != null)
                                 {
                                     var data = room.Id is int rId && resumedSession.File.Id is int fId
@@ -199,7 +199,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                     {
                         var folderDao = daoFactory.GetFolderDao<T>();
                         var parents = await folderDao.GetParentFoldersAsync(session.FolderId).ToListAsync();
-                        var room = parents.FirstOrDefault(f => DocSpaceHelper.IsRoom(f.FolderType));
+                        var room = parents.FirstOrDefault(f => f.IsRoom);
                         if (room != null)
                         {
                             var data = room.Id is int rId && session.File.Id is int fId
@@ -285,17 +285,19 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
         return WriteResponse(context, true, data, string.Empty, statusCode);
     }
 
+    private static readonly JsonSerializerOptions _options = new()
+    {
+        WriteIndented = false, 
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull, 
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
+    
     private static Task WriteResponse(HttpContext context, bool success, object data, string message, int statusCode)
     {
         context.Response.StatusCode = statusCode;
         context.Response.ContentType = "application/json";
 
-        return context.Response.WriteAsync(JsonSerializer.Serialize(new { success, data, message }, new JsonSerializerOptions
-        {
-            WriteIndented = false,
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        }));
+        return context.Response.WriteAsync(JsonSerializer.Serialize(new { success, data, message }, _options));
     }
 
     private async Task<object> ToResponseObject<T>(File<T> file)
@@ -432,20 +434,19 @@ public class ChunkedRequestHelper<T>(HttpRequest request)
 
     public bool Encrypted => _request.Query["encrypted"] == "true";
 
-    private int? _chunkNumber;
     public int? ChunkNumber
     {
         get
         {
-            if (!_chunkNumber.HasValue)
+            if (!field.HasValue)
             {
                 var result = int.TryParse(_request.Query["chunkNumber"], out var i);
                 if (result)
                 {
-                    _chunkNumber = i;
+                    field = i;
                 }
             }
-            return _chunkNumber;
+            return field;
         }
     }
 

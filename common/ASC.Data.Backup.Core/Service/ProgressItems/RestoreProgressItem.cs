@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -106,26 +106,6 @@ public class RestoreProgressItem : BaseBackupProgressItem
             _tenantManager.SetCurrentTenant(tenant);
             await _socketManager.RestoreProgressAsync(socketTenant, Dump, 0);
 
-            _notifyHelper.SetServerBaseUri(_serverBaseUri);
-
-            if (Dump)
-            {
-                var tenants = await _tenantManager.GetTenantsAsync();
-
-                foreach (var t in tenants)
-                {
-                    await _notifyHelper.SendAboutRestoreStartedAsync(t, Notify);
-                    t.SetStatus(TenantStatus.Restoring);
-                    await _tenantManager.SaveTenantAsync(t);
-                }
-            }
-            else
-            {
-                await _notifyHelper.SendAboutRestoreStartedAsync(tenant, Notify);
-                tenant.SetStatus(TenantStatus.Restoring);
-                await _tenantManager.SaveTenantAsync(tenant);
-            }
-
             var restoreTask = scope.ServiceProvider.GetService<RestorePortalTask>();
 
             var storage = await _backupStorageFactory.GetBackupStorageAsync(StorageType, TenantId, StorageParams);
@@ -146,6 +126,26 @@ public class RestoreProgressItem : BaseBackupProgressItem
                         throw new Exception(BackupResource.BackupNotFound);
                     }
                 }
+            }
+
+            _notifyHelper.SetServerBaseUri(_serverBaseUri);
+
+            if (Dump)
+            {
+                var tenants = await _tenantManager.GetTenantsAsync();
+
+                foreach (var t in tenants)
+                {
+                    await _notifyHelper.SendAboutRestoreStartedAsync(t, Notify);
+                    t.SetStatus(TenantStatus.Restoring);
+                    await _tenantManager.SaveTenantAsync(t);
+                }
+            }
+            else
+            {
+                await _notifyHelper.SendAboutRestoreStartedAsync(tenant, Notify);
+                tenant.SetStatus(TenantStatus.Restoring);
+                await _tenantManager.SaveTenantAsync(tenant);
             }
 
             Percentage = 10;
@@ -203,6 +203,26 @@ public class RestoreProgressItem : BaseBackupProgressItem
             }
 
             Percentage = 75;
+
+            try
+            {
+                var webstudioDbContextFactory = scope.ServiceProvider.GetService<IDbContextFactory<WebstudioDbContext>>();
+
+                var tfaSettings = new[] { TfaAppAuthSettings.ID, TfaAppUserSettings.ID, StudioSmsNotificationSettings.ID };
+
+                await using var webstudioContext = await webstudioDbContextFactory.CreateDbContextAsync();
+
+                await webstudioContext.WebstudioSettings
+                    .Where(s => (restoreTask.Dump || s.TenantId == TenantId) && tfaSettings.Contains(s.Id))
+                    .ExecuteDeleteAsync();
+
+                await webstudioContext.SaveChangesAsync();
+            }
+            catch (Exception error)
+            {
+                _logger.ErrorClear2faSettings(error);
+            }
+
             try
             {
                 await _socketManager.RestoreProgressAsync(socketTenant, Dump, (int)Percentage);

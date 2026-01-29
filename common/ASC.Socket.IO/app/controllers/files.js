@@ -157,6 +157,11 @@ module.exports = (files) => {
     res.end();
   });
 
+  router.post("/telegram", (req, res) => {
+    files.connectTelegram(req.body);
+    res.end();
+  });
+
   router.post("/update-telegram", (req, res) => {
     files.updateTelegram(req.body);
     res.end();

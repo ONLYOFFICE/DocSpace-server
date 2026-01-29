@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -39,10 +39,7 @@ public class ApiSystemHelper
 {
     public string ApiSystemUrl { get; }
 
-    public bool ApiCacheEnable
-    {
-        get => _dynamoDbSettings.ApiCacheEnable;
-    }
+    public bool ApiCacheEnable => _dynamoDbSettings.ApiCacheEnable;
 
     private readonly byte[] _skey;
     private readonly ILogger<ApiSystemHelper> _logger;
@@ -244,7 +241,7 @@ public class ApiSystemHelper
 
         var getItemResponse = await awsDynamoDbClient.GetItemAsync(getItemRequest);
 
-        if (getItemResponse.Item.Count == 0)
+        if (getItemResponse?.Item == null || getItemResponse.Item.Count == 0)
         {
             return null;
         }

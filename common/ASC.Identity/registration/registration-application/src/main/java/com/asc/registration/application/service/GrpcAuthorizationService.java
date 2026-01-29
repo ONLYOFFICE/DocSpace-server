@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,19 +24,19 @@
 // writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
 package com.asc.registration.application.service;
 
 import com.asc.common.application.proto.AuthorizationServiceGrpc;
 import com.asc.common.application.proto.GetConsentsRequest;
 import com.asc.common.application.proto.GetConsentsResponse;
+import io.github.resilience4j.retry.annotation.Retry;
 import io.grpc.Deadline;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -67,10 +67,7 @@ public class GrpcAuthorizationService {
    *     associated metadata.
    * @throws Exception if the gRPC call fails after exhausting the configured retry attempts.
    */
-  @Retryable(
-      retryFor = Exception.class,
-      maxAttempts = 5,
-      backoff = @Backoff(delay = 100, multiplier = 1.625))
+  @Retry(name = "grpcAuthorizationRetry")
   public GetConsentsResponse getConsents(
       String principalId, int limit, ZonedDateTime lastModifiedOn) {
     log.info("GRPC call to get principal {} consents", principalId);

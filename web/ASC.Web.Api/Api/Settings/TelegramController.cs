@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -46,10 +46,10 @@ public class TelegramController(
     public async Task<TelegramStatusDto> CheckTelegram()
     {
         var status = await telegramHelper.GetTelegramUserStatus(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId());
-        return new TelegramStatusDto()
+        return new TelegramStatusDto
         {
             Status = status.Item1,
-            Username = status.Item2,
+            Username = status.Item2
         };
     }
 
