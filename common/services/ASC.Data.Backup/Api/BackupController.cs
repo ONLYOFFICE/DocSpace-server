@@ -317,29 +317,29 @@ public class BackupController(
         return result;
     }
 
-    /// <summary>
-    /// Cancel current restore.(Only from saas backup)
-    /// </summary>
-    /// <short>Cancel current restore</short>
-    /// <path>api/2.0/backup/cancelrestore</path>
-    [Tags("Backup")]
-    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
-    [AllowNotPayment]
-    [HttpPost("cancelrestore")]
-    public async Task<bool> CancelRestoreAsync()
-    {
-        var tenantId = tenantManager.GetCurrentTenantId();
-
-        var result = await backupService.CancelRestoreAsync(tenantId);
-
-        if (result)
-        {
-            messageService.Send(MessageAction.RestoreCancelled, MessageTarget.Create(tenantId));
-        }
-
-        return result;
-    }
+    // /// <summary>
+    // /// Cancel current restore.(Only from saas backup)
+    // /// </summary>
+    // /// <short>Cancel current restore</short>
+    // /// <path>api/2.0/backup/cancelrestore</path>
+    // [Tags("Backup")]
+    // [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    // [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    // [AllowNotPayment]
+    // [HttpPost("cancelrestore")]
+    // public async Task<bool> CancelRestoreAsync()
+    // {
+    //     var tenantId = tenantManager.GetCurrentTenantId();
+    //
+    //     var result = await backupService.CancelRestoreAsync(tenantId);
+    //
+    //     if (result)
+    //     {
+    //         messageService.Send(MessageAction.RestoreCancelled, MessageTarget.Create(tenantId));
+    //     }
+    //
+    //     return result;
+    // }
 
     /// <summary>
     /// Returns the progress of the started backup.
