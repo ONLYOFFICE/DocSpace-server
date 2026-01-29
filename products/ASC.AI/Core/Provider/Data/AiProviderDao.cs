@@ -212,9 +212,8 @@ public class AiProviderDao(
     public async Task<DefaultAiProvider?> GetDefaultProviderAsync(int tenantId)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        var dbResult = await dbContext.GetDefaultProviderAsync(tenantId);
 
-        return dbResult?.Map();
+        return await dbContext.GetDefaultProviderAsync(tenantId);
     }
 
     public async Task<bool> DeleteDefaultProviderAsync(int tenantId)

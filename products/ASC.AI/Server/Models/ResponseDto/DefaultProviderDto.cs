@@ -30,6 +30,7 @@ public class DefaultProviderDto
 {
     public int ProviderId { get; init; }
     public required string DefaultModel { get; init; }
+    public string? ProviderTitle { get; init; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,

@@ -30,6 +30,7 @@ public class DefaultAiProvider
 {
     public int ProviderId { get; set; }
     public required string DefaultModel { get; set; }
+    public string? ProviderTitle { get; set; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,

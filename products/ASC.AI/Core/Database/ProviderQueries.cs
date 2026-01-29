@@ -65,7 +65,7 @@ public partial class AiDbContext
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt])]
-    public Task<DbDefaultAiProvider?> GetDefaultProviderAsync(int tenantId)
+    public Task<DefaultAiProvider?> GetDefaultProviderAsync(int tenantId)
     {
         return Queries.GetDefaultProviderAsync(this, tenantId);
     }
@@ -125,10 +125,25 @@ static file class Queries
                     .Where(x => x.TenantId == tenantId)
                     .Select(x => x.Key));
 
-    public static readonly Func<AiDbContext, int, Task<DbDefaultAiProvider?>> GetDefaultProviderAsync =
+    public static readonly Func<AiDbContext, int, Task<DefaultAiProvider?>> GetDefaultProviderAsync =
         EF.CompileAsyncQuery(
             (AiDbContext ctx, int tenantId) =>
-                ctx.DefaultProviders.FirstOrDefault(x => x.TenantId == tenantId));
+                ctx.DefaultProviders
+                    .Where(dp => dp.TenantId == tenantId)
+                    .GroupJoin(
+                        ctx.Providers,
+                        dp => new { dp.TenantId, Id = dp.ProviderId },
+                        p => new { p.TenantId, p.Id },
+                        (dp, providers) => new { dp, providers })
+                    .SelectMany(
+                        x => x.providers.DefaultIfEmpty(),
+                        (x, provider) => new DefaultAiProvider
+                        {
+                            ProviderId = x.dp.ProviderId,
+                            DefaultModel = x.dp.DefaultModel,
+                            ProviderTitle = provider != null ? provider.Title : null
+                        })
+                    .FirstOrDefault());
 
     public static readonly Func<AiDbContext, int, Task<int>> DeleteDefaultProviderAsync =
         EF.CompileAsyncQuery(

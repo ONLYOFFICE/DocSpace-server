@@ -111,7 +111,7 @@ public class AiProviderService(
             yield return new AiProvider
             {
                 Id = AiGateway.ProviderId,
-                Title = "DocSpace AI",
+                Title = AiGateway.ProviderTitle,
                 Url = string.Empty,
                 Key = string.Empty,
                 Type = ProviderType.DocSpaceAi
@@ -181,7 +181,7 @@ public class AiProviderService(
             return new AiProvider
             {
                 Id = AiGateway.ProviderId,
-                Title = "DocSpace AI",
+                Title = AiGateway.ProviderTitle,
                 Url = gateway.Url,
                 Key = await gateway.GetKeyAsync(),
                 Type = ProviderType.DocSpaceAi
@@ -262,6 +262,7 @@ public class AiProviderService(
 
         var tenantId = tenantManager.GetCurrentTenantId();
         var result = await providerDao.SetDefaultProviderAsync(tenantId, providerId, defaultModel);
+        result.ProviderTitle = provider.Title;
 
         messageService.Send(MessageAction.AIDefaultProviderSet, MessageTarget.Create(result.ProviderId), provider.Title, defaultModel);
 
@@ -272,7 +273,28 @@ public class AiProviderService(
     {
         var tenantId = tenantManager.GetCurrentTenantId();
 
-        return await providerDao.GetDefaultProviderAsync(tenantId);
+        var result = await providerDao.GetDefaultProviderAsync(tenantId);
+
+        if (result == null)
+        {
+            return null;
+        }
+
+        if (!string.IsNullOrEmpty(result.ProviderTitle) || result.ProviderId != AiGateway.ProviderId)
+        {
+            return result;
+        }
+
+        if (gateway.Configured)
+        {
+            result.ProviderTitle = AiGateway.ProviderTitle;
+        }
+        else
+        {
+            return null;
+        }
+
+        return result;
     }
 
     public async Task DeleteDefaultProviderAsync()
