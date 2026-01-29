@@ -40,19 +40,30 @@ public class AiProviderService(
     public async Task<AiProvider> AddProviderAsync(string? title, string? url, string key, ProviderType type)
     {
         await ThrowIfNotAccessAsync();
-        
+
         var settings = providerSettings.Get(type);
         if (settings == null)
         {
             throw new ArgumentException(ErrorMessages.IncorrectProvider);
         }
-        
+
         ArgumentException.ThrowIfNullOrEmpty(title);
         ArgumentException.ThrowIfNullOrEmpty(key);
-        
+
         url = string.IsNullOrEmpty(url) ? settings.Url : new Uri(url).ToString();
         
-        await ThrowIfNotValidAsync(url, key, type);
+        var defaultModel = await ExecuteClientOperationAsync(url, key, type, async client =>
+        {
+            var models = await client.ListModelsAsync();
+
+            var supported = providerSettings.GetSupportedModels(type);
+            if (supported != null)
+            {
+                models = models.Where(m => supported.Contains(m.Id));
+            }
+
+            return models.FirstOrDefault()?.Id ?? throw new ArgumentException(ErrorMessages.NoModelsAvailable);
+        });
 
         var provider = new AiProvider
         {
@@ -61,8 +72,8 @@ public class AiProviderService(
             Key = key,
             Type = type
         };
-        
-        return await providerDao.AddProviderAsync(tenantManager.GetCurrentTenantId(), provider);
+
+        return await providerDao.AddProviderAsync(tenantManager.GetCurrentTenantId(), provider, defaultModel);
     }
     
     public async Task<AiProvider> UpdateProviderAsync(int id, string? title, string? url, string? key)
@@ -92,7 +103,11 @@ public class AiProviderService(
 
         if (needCheck)
         {
-            await ThrowIfNotValidAsync(provider.Url, provider.Key, provider.Type);
+            await ExecuteClientOperationAsync<object?>(provider.Url, provider.Key, provider.Type, async client =>
+            {
+                await client.PingAsync();
+                return null;
+            });
         }
         
         return await providerDao.UpdateProviderAsync(provider);
@@ -235,13 +250,13 @@ public class AiProviderService(
         }
     }
 
-    private async Task ThrowIfNotValidAsync(string url, string key, ProviderType type)
+    private async Task<T> ExecuteClientOperationAsync<T>(string url, string key, ProviderType type, Func<IModelClient, Task<T>> operation)
     {
         var client = modelClientFactory.Create(type, url, key);
 
         try
         {
-            await client.PingAsync();
+            return await operation(client);
         }
         catch (HttpRequestException httpException)
         {
@@ -274,7 +289,6 @@ public class AiProviderService(
         var tenantId = tenantManager.GetCurrentTenantId();
 
         var result = await providerDao.GetDefaultProviderAsync(tenantId);
-
         if (result == null)
         {
             return null;

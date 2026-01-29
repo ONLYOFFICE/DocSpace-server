@@ -45,6 +45,12 @@ public partial class AiDbContext
     {
         return Queries.GetProvidersTotalCountAsync(this, tenantId);
     }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    public Task<bool> HasProvidersAsync(int tenantId)
+    {
+        return Queries.HasProvidersAsync(this, tenantId);
+    }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, null, null, null, PreCompileQuery.DefaultDateTime])]
     public Task UpdateProviderAsync(int id, string title, string? url, string key, DateTime modifiedOn)
@@ -101,6 +107,10 @@ static file class Queries
     public static readonly Func<AiDbContext, int, Task<int>> GetProvidersTotalCountAsync =
         EF.CompileAsyncQuery((AiDbContext ctx, int tenantId) =>
             ctx.Providers.Count(x => x.TenantId == tenantId));
+
+    public static readonly Func<AiDbContext, int, Task<bool>> HasProvidersAsync =
+        EF.CompileAsyncQuery((AiDbContext ctx, int tenantId) =>
+            ctx.Providers.Any(x => x.TenantId == tenantId));
 
     public static readonly Func<AiDbContext, int, string, string?, string, DateTime, Task> UpdateProviderAsync =
         EF.CompileAsyncQuery(

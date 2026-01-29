@@ -31,17 +31,20 @@ public class AiProviderDao(
     IDbContextFactory<AiDbContext> dbContextFactory, 
     InstanceCrypto crypto)
 {
-    public async Task<AiProvider> AddProviderAsync(int tenantId, AiProvider provider)
+    public async Task<AiProvider> AddProviderAsync(int tenantId, AiProvider provider, string defaultModel)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
-        
+
         DbAiProvider dbProvider = null!;
         var now = DateTime.UtcNow;
 
         await strategy.ExecuteAsync(async () =>
         {
             await using var context = await dbContextFactory.CreateDbContextAsync();
+            await using var transaction = await context.Database.BeginTransactionAsync();
+
+            var isFirstProvider = !await context.HasProvidersAsync(tenantId);
 
             dbProvider = new DbAiProvider
             {
@@ -53,15 +56,29 @@ public class AiProviderDao(
                 CreatedOn = now,
                 ModifiedOn = now
             };
-            
+
             await context.Providers.AddAsync(dbProvider);
             await context.SaveChangesAsync();
+
+            if (isFirstProvider)
+            {
+                var defaultProviderEntity = new DbDefaultAiProvider
+                {
+                    TenantId = tenantId,
+                    ProviderId = dbProvider.Id,
+                    DefaultModel = defaultModel
+                };
+                await context.DefaultProviders.AddAsync(defaultProviderEntity);
+                await context.SaveChangesAsync();
+            }
+
+            await transaction.CommitAsync();
         });
-        
+
         provider.Id = dbProvider.Id;
         provider.CreatedOn = now;
         provider.ModifiedOn = now;
-        
+
         return provider;
     }
 
