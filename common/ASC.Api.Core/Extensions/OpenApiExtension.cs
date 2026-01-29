@@ -62,6 +62,7 @@ public static class OpenApiExtension
                     Url = new Uri("https://helpdesk.onlyoffice.com/hc/en-us")
                 }
             });
+            c.AddScalarFilters();
             c.SchemaFilter<SwaggerSchemaCustomFilter>();
             c.DocumentFilter<LowercaseDocumentFilter>();
             c.SchemaFilter<DerivedSchemaFilter>();
@@ -225,6 +226,7 @@ public static class OpenApiExtension
                 
                 endpointRouteBuilder.MapScalarApiReference(((options, _) =>
                 {
+                    options.WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
                     options.AddDocuments(endpoints.Select(r=> new ScalarDocument(r.Key)
                     {
                         RoutePattern = r.Value.ToLower(),
