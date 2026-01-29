@@ -108,8 +108,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
             .AddRedis("cache")
             .WithPassword(null)
             .WithoutHttpsCertificate()
-            .WithLifetime(ContainerLifetime.Persistent)
-            .WithRedisInsight();
+            .WithLifetime(ContainerLifetime.Persistent);
 #pragma warning restore ASPIRECERTIFICATES001
         
         builder.Eventing.Subscribe(RedisResource.Resource, async (ConnectionStringAvailableEvent _, CancellationToken ct) =>
@@ -253,6 +252,11 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
                 .WithEnvironment("RabbitMQ:Password", () => RabbitMqUri != null ? $"{RabbitMqUri.UserInfo.Split(':')[1]}" : "")
                 .WithEnvironment("RabbitMQ:VirtualHost", () => RabbitMqUri != null ? $"{RabbitMqUri.PathAndQuery}" : "");
         }
+        else
+        {
+            resourceBuilder.WithEnvironment("RabbitMQ", "{}");
+        }
+       
 
         if (RedisResource != null)
         {
