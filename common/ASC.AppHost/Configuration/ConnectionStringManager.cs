@@ -252,12 +252,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
                 .WithEnvironment("RabbitMQ:Password", () => RabbitMqUri != null ? $"{RabbitMqUri.UserInfo.Split(':')[1]}" : "")
                 .WithEnvironment("RabbitMQ:VirtualHost", () => RabbitMqUri != null ? $"{RabbitMqUri.PathAndQuery}" : "");
         }
-        else
-        {
-            resourceBuilder.WithEnvironment("RabbitMQ", "{}");
-        }
-       
-
+      
         if (RedisResource != null)
         {
             resourceBuilder

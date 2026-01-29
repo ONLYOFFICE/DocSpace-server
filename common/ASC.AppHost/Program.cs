@@ -33,13 +33,13 @@ var disableBuildClient = String.Compare(builder.Configuration["DISABLE_BUILD_CLI
 
 var connectionManager = new ConnectionStringManager(builder)
     .AddMySql()
+    .AddRabbitMq()
     .AddRedis()
     .AddEditors();
 
 if (!isPreview)
 {
     connectionManager
-        .AddRabbitMq()
         .AddOpensearch()
         .AddMailPit();
 }
