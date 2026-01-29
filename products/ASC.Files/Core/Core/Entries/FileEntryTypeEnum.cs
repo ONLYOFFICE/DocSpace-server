@@ -33,9 +33,9 @@ namespace ASC.Files.Core;
 [EnumExtensions]
 public enum FileEntryType
 {
-    [SwaggerEnum("Folder")]
+    [Description("Folder")]
     Folder = 1,
 
-    [SwaggerEnum("File")]
+    [Description("File")]
     File = 2
 }

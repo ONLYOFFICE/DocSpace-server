@@ -175,10 +175,10 @@ public class FileShareLink
 /// </summary>
 public enum LinkType
 {
-    [SwaggerEnum(Description = "Invitation")]
+    [Description("Invitation")]
     Invitation,
 
-    [SwaggerEnum(Description = "External")]
+    [Description("External")]
     External
 }
 

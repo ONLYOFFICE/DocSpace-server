@@ -230,8 +230,8 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             foreach (var enumValue in Enum.GetValues(checkType))
             {
                 var value = checkType.GetMember(enumValue.ToString())[0];
-                var enumAttribute = value.GetCustomAttributes<SwaggerEnumAttribute>().FirstOrDefault();
-                if (enumAttribute is { Ignore: false })
+                var enumAttribute = value.GetCustomAttributes<DescriptionAttribute>().FirstOrDefault();
+                if (enumAttribute != null)
                 {
                     enumDataString.Add(enumValue.ToString());
                     enumVarNames.Add(enumValue.ToString());
