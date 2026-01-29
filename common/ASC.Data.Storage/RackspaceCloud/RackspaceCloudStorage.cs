@@ -306,6 +306,8 @@ public class RackspaceCloudStorage(TempPath tempPath,
 
             stream.Position = 0;
 
+            token.ThrowIfCancellationRequested();
+
             client.CreateObject(_private_container,
                                 stream,
                                 MakePath(domain, path),

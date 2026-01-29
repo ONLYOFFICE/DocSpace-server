@@ -50,10 +50,8 @@ public class ZipWriteOperator : IDataWriteOperator
 
     public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store, Func<Task> action)
     {
-        if (CancellationToken.IsCancellationRequested)
-        {
-            throw new OperationCanceledException();
-        }
+        CancellationToken.ThrowIfCancellationRequested();
+
         var fileStream = await ActionInvoker.TryAsync(async () => await store.GetReadStreamAsync(domain, path), 5, error => throw error);
 
         if (fileStream != null)
@@ -65,10 +63,8 @@ public class ZipWriteOperator : IDataWriteOperator
 
     public async Task WriteEntryAsync(string tarKey, Stream stream, Func<Task> action)
     {
-        if (CancellationToken.IsCancellationRequested)
-        {
-            throw new OperationCanceledException();
-        }
+        CancellationToken.ThrowIfCancellationRequested();
+
         var (buffered, isNew) = await _tempStream.TryGetBufferedAsync(stream);
         try
         {
@@ -76,8 +72,8 @@ public class ZipWriteOperator : IDataWriteOperator
             entry.Size = buffered.Length;
             await _tarOutputStream.PutNextEntryAsync(entry, CancellationToken.None);
             buffered.Position = 0;
-            await buffered.CopyToAsync(_tarOutputStream);
-            await _tarOutputStream.CloseEntryAsync(CancellationToken.None).ContinueWith(async _ => await action());
+            await buffered.CopyToAsync(_tarOutputStream, CancellationToken);
+            await _tarOutputStream.CloseEntryAsync(CancellationToken).ContinueWith(async _ => await action(), CancellationToken);
         }
         finally
         {
@@ -93,6 +89,4 @@ public class ZipWriteOperator : IDataWriteOperator
         _tarOutputStream.Close();
         await _tarOutputStream.DisposeAsync();
     }
-
-
 }

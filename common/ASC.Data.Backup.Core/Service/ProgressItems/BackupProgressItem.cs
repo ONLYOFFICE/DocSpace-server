@@ -177,10 +177,8 @@ public class BackupProgressItem : BaseBackupProgressItem, IDisposable
             };
 
             await backupPortalTask.RunJob();
-            if (CancellationToken.IsCancellationRequested)
-            {
-                throw new OperationCanceledException();
-            }
+
+            CancellationToken.ThrowIfCancellationRequested();
 
             string hash;
             if (writer.NeedUpload)
@@ -193,10 +191,9 @@ public class BackupProgressItem : BaseBackupProgressItem, IDisposable
                 storagePath = writer.StoragePath;
                 hash = writer.Hash;
             }
-            if (CancellationToken.IsCancellationRequested)
-            {
-                throw new OperationCanceledException();
-            }
+
+            CancellationToken.ThrowIfCancellationRequested();
+
             Link = await backupStorage.GetPublicLinkAsync(storagePath);
 
             var backupTenant = TenantId;

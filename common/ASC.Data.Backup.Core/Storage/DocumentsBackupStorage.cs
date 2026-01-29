@@ -139,17 +139,21 @@ public class DocumentsBackupStorage(SetupInfo setupInfo,
 
         int bytesRead;
 
-        while ((bytesRead = await source.ReadAsync(buffer.AsMemory(0, (int)setupInfo.ChunkUploadSize))) > 0)
+        while ((bytesRead = await source.ReadAsync(buffer.AsMemory(0, (int)setupInfo.ChunkUploadSize), token)) > 0)
         {
+            using var theMemStream = new MemoryStream();
+            await theMemStream.WriteAsync(buffer.AsMemory(0, bytesRead), token);
+
             if (token.IsCancellationRequested)
             {
-                throw new OperationCanceledException();
+                break;
             }
-            using var theMemStream = new MemoryStream();
-            await theMemStream.WriteAsync(buffer.AsMemory(0, bytesRead));
+
             theMemStream.Position = 0;
             file = await fileDao.UploadChunkAsync(chunkedUploadSession, theMemStream, bytesRead);
         }
+
+        token.ThrowIfCancellationRequested();
 
         if (file.Id == null)
         {

@@ -349,6 +349,8 @@ public class S3Storage(TempStream tempStream,
 
             await uploader.UploadAsync(request, token);
 
+            token.ThrowIfCancellationRequested();
+
             //await InvalidateCloudFrontAsync(MakePath(domain, path));
 
             await QuotaUsedAddAsync(domain, buffered.Length, ownerId);
@@ -759,6 +761,8 @@ public class S3Storage(TempStream tempStream,
             request.Metadata.Add("private-expire", expires.ToFileTimeUtc().ToString(CultureInfo.InvariantCulture));
 
             await uploader.UploadAsync(request, token);
+
+            token.ThrowIfCancellationRequested();
         }
         finally
         {

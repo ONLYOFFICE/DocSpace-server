@@ -137,9 +137,9 @@ public class GoogleCloudStorage(TempStream tempStream,
         using var storage = await GetStorageAsync();
 
         using var stream = new MemoryStream(Encoding.UTF8.GetBytes(_json ?? ""));
-        var preSignedURL = await (await FromCredentialStreamAsync(stream)).SignAsync(_bucket, MakePath(domain, path), expire, HttpMethod.Get);
+        var preSignedUrl = await (await FromCredentialStreamAsync(stream)).SignAsync(_bucket, MakePath(domain, path), expire, HttpMethod.Get);
 
-        return MakeUri(preSignedURL);
+        return MakeUri(preSignedUrl);
     }
 
     public Uri GetUriShared(string domain, string path)
@@ -252,6 +252,8 @@ public class GoogleCloudStorage(TempStream tempStream,
 
             var uploaded = await storage.UploadObjectAsync(_bucket, MakePath(domain, path), mime, buffered, uploadObjectOptions, token);
 
+            token.ThrowIfCancellationRequested();
+
             uploaded.ContentEncoding = contentEncoding;
             uploaded.CacheControl = $"public, maxage={(int)TimeSpan.FromDays(cacheDays).TotalSeconds}";
 
@@ -268,7 +270,9 @@ public class GoogleCloudStorage(TempStream tempStream,
                 uploaded.ContentDisposition = "attachment";
             }
 
-            await storage.UpdateObjectAsync(uploaded);
+            await storage.UpdateObjectAsync(uploaded, cancellationToken: token);
+
+            token.ThrowIfCancellationRequested();
 
             //           InvalidateCloudFront(MakePath(domain, path));
 
@@ -610,7 +614,9 @@ public class GoogleCloudStorage(TempStream tempStream,
 
             buffered.Position = 0;
 
-            var uploaded = await storage.UploadObjectAsync(_bucket, MakePath(domain, path), "application/octet-stream", buffered, uploadObjectOptions);
+            var uploaded = await storage.UploadObjectAsync(_bucket, MakePath(domain, path), "application/octet-stream", buffered, uploadObjectOptions, token);
+
+            token.ThrowIfCancellationRequested();
 
             uploaded.CacheControl = $"public, maxage={(int)TimeSpan.FromDays(5).TotalSeconds}";
             uploaded.ContentDisposition = "attachment";
@@ -619,6 +625,8 @@ public class GoogleCloudStorage(TempStream tempStream,
             uploaded.Metadata.Add("private-expire", expires.ToFileTimeUtc().ToString(CultureInfo.InvariantCulture));
 
             await storage.UpdateObjectAsync(uploaded, cancellationToken: token);
+
+            token.ThrowIfCancellationRequested();
         }
         finally
         {
@@ -630,11 +638,11 @@ public class GoogleCloudStorage(TempStream tempStream,
 
         using var mStream = new MemoryStream(Encoding.UTF8.GetBytes(_json ?? ""));
         var signDuration = expires.Date == DateTime.MinValue ? expires.TimeOfDay : expires.Subtract(DateTime.UtcNow);
-        var preSignedURL = await (await FromCredentialStreamAsync(mStream))
-            .SignAsync(RequestTemplate.FromBucket(_bucket).WithObjectName(MakePath(domain, path)), Options.FromDuration(signDuration));
+        var preSignedUrl = await (await FromCredentialStreamAsync(mStream, token))
+            .SignAsync(RequestTemplate.FromBucket(_bucket).WithObjectName(MakePath(domain, path)), Options.FromDuration(signDuration), token);
 
         //TODO: CNAME!
-        return preSignedURL;
+        return preSignedUrl;
     }
 
     public override async Task DeleteExpiredAsync(string domain, string path, TimeSpan oldThreshold)

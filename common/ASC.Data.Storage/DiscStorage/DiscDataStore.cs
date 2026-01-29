@@ -192,6 +192,9 @@ public class DiscDataStore(
             
             await using var fs = File.Open(target, FileMode.Create);
             await buffered.CopyToAsync(fs, token);
+
+            token.ThrowIfCancellationRequested();
+
             var fslen = fs.Length;
 
             await QuotaUsedAddAsync(domain, fslen, ownerId);
