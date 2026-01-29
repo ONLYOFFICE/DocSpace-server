@@ -57,14 +57,7 @@ public class AiProviderService(
         
         var defaultModel = await ExecuteClientOperationAsync(url, key, type, async client =>
         {
-            var models = await client.ListModelsAsync();
-
-            var supported = providerSettings.GetSupportedModels(type);
-            if (supported != null)
-            {
-                models = models.Where(m => supported.Contains(m.Id));
-            }
-
+            var models = await GetFilteredModelsAsync(client, type);
             return models.FirstOrDefault()?.Id ?? throw new ArgumentException(ErrorMessages.NoModelsAvailable);
         });
 
@@ -294,32 +287,29 @@ public class AiProviderService(
             return [];
         }
 
-        var client = modelClientFactory.Create(p.Type, p.Url, p.Key);
-        try
+        return await ExecuteClientOperationAsync<IEnumerable<ModelData>>(p.Url, p.Key, p.Type, async client =>
         {
-            var models = await client.ListModelsAsync(scope);
-            
-            var supported = providerSettings.GetSupportedModels(p.Type);
-            if (supported != null)
-            {
-                models = models.Where(m => supported.Contains(m.Id));
-            }
-            
+            var models = await GetFilteredModelsAsync(client, p.Type, scope);
+
             return models.Select(m => new ModelData
             {
                 Provider = p,
                 ModelId = m.Id
             });
-        }
-        catch (HttpRequestException httpException)
-        {
-            if (httpException.StatusCode is HttpStatusCode.Unauthorized)
-            {
-                throw new ArgumentException(ErrorMessages.InvalidKey);
-            }
+        });
+    }
 
-            throw new ArgumentException(ErrorMessages.InvalidUrl);
+    private async Task<IEnumerable<ModelInfo>> GetFilteredModelsAsync(IModelClient client, ProviderType type, Scope? scope = null)
+    {
+        var models = await client.ListModelsAsync(scope);
+
+        var supported = providerSettings.GetSupportedModels(type);
+        if (supported != null)
+        {
+            models = models.Where(m => supported.Contains(m.Id));
         }
+
+        return models;
     }
     
     private async Task ThrowIfNotAccessAsync()
