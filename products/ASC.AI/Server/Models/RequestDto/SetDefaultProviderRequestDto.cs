@@ -26,8 +26,18 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request parameters for setting the default AI provider.
+/// </summary>
 public class SetDefaultProviderRequestDto
 {
+    /// <summary>
+    /// AI provider identifier.
+    /// </summary>
     public int ProviderId { get; set; }
+
+    /// <summary>
+    /// Default model identifier to use with this provider.
+    /// </summary>
     public required string DefaultModel { get; set; }
 }

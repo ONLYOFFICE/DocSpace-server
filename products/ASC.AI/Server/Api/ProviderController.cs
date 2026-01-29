@@ -108,6 +108,16 @@ public class ProviderController(
         return providers.Select(x => x.MapToDto()).ToList();
     }
 
+    /// <summary>
+    /// Sets the default AI provider for the current tenant.
+    /// </summary>
+    /// <short>Set default AI provider</short>
+    /// <path>api/2.0/ai/providers/default</path>
+    [Tags("AI / Providers")]
+    [SwaggerResponse(200, "Default provider information", typeof(DefaultProviderDto))]
+    [SwaggerResponse(403, "You don't have enough permission to manage providers")]
+    [SwaggerResponse(404, "Provider not found")]
+    [SwaggerResponse(429, "Too many requests")]
     [HttpPut("providers/default")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<DefaultProviderDto> SetDefaultProviderAsync(SetDefaultProviderRequestDto inDto)
@@ -117,6 +127,13 @@ public class ProviderController(
         return result.MapToDto();
     }
 
+    /// <summary>
+    /// Returns the default AI provider for the current tenant.
+    /// </summary>
+    /// <short>Get default AI provider</short>
+    /// <path>api/2.0/ai/providers/default</path>
+    [Tags("AI / Providers")]
+    [SwaggerResponse(200, "Default provider information or null if not set", typeof(DefaultProviderDto))]
     [HttpGet("providers/default")]
     public async Task<DefaultProviderDto?> GetDefaultProviderAsync()
     {
@@ -125,6 +142,14 @@ public class ProviderController(
         return result?.MapToDto();
     }
 
+    /// <summary>
+    /// Deletes the default AI provider for the current tenant.
+    /// </summary>
+    /// <short>Delete default AI provider</short>
+    /// <path>api/2.0/ai/providers/default</path>
+    [Tags("AI / Providers")]
+    [SwaggerResponse(204, "Default provider was deleted successfully")]
+    [SwaggerResponse(403, "You don't have enough permission to manage providers")]
     [HttpDelete("providers/default")]
     public async Task<NoContentResult> DeleteDefaultProviderAsync()
     {

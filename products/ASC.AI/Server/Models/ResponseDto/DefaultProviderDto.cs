@@ -26,10 +26,24 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
+/// <summary>
+/// Default AI provider information.
+/// </summary>
 public class DefaultProviderDto
 {
+    /// <summary>
+    /// AI provider identifier.
+    /// </summary>
     public int ProviderId { get; init; }
+
+    /// <summary>
+    /// Default model identifier used with this provider.
+    /// </summary>
     public required string DefaultModel { get; init; }
+
+    /// <summary>
+    /// AI provider title.
+    /// </summary>
     public string? ProviderTitle { get; init; }
 }
 
