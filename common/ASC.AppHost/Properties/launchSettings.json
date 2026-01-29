@@ -20,6 +20,7 @@
       "applicationUrl": "http://localhost:15208",
       "environmentVariables": {
         "APP_HOSTING_STANDALONE": "true",
+        "DISABLE_BUILD_CLIENT": "false",
         "ASPIRE_ALLOW_UNSECURED_TRANSPORT": "true",
         "ASPNETCORE_ENVIRONMENT": "Development",
         "DOTNET_ENVIRONMENT": "Development",

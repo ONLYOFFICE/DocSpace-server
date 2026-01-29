@@ -26,18 +26,23 @@
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var connectionManager = new ConnectionStringManager(builder)
-    .AddMySql()
-    .AddRabbitMq()
-    .AddRedis()
-    .AddEditors()
-    .AddOpensearch()
-    .AddMailPit();
-
-
 var basePath = Path.GetFullPath(Path.Combine("..", "..", ".."));
 var isDocker = String.Compare(builder.Configuration["Docker"], "true", StringComparison.OrdinalIgnoreCase) == 0;
-var isPreview = String.Compare(builder.Configuration["APP_HOSTING_STANDALONE"], "Preview", StringComparison.OrdinalIgnoreCase) == 0;
+var isPreview = String.Compare(builder.Configuration["ASPNETCORE_ENVIRONMENT"], "Preview", StringComparison.OrdinalIgnoreCase) == 0;
+var disableBuildClient = String.Compare(builder.Configuration["DISABLE_BUILD_CLIENT"], "true", StringComparison.OrdinalIgnoreCase) == 0;
+
+var connectionManager = new ConnectionStringManager(builder)
+    .AddMySql()
+    .AddRedis()
+    .AddEditors();
+
+if (!isPreview)
+{
+    connectionManager
+        .AddRabbitMq()
+        .AddOpensearch()
+        .AddMailPit();
+}
 
 var configurator = new ProjectConfigurator(builder, connectionManager, basePath, isDocker);
 
@@ -76,13 +81,19 @@ else
 }
 
 
+IResourceBuilder<ExecutableResource>? startPackages = null;
 
 var clientBasePath = Path.Combine(basePath, "client");
-var installPackages = builder.AddExecutable("asc-install-packages", "pnpm", clientBasePath, "install");
-var buildPackages = builder.AddExecutable("asc-build-packages", "pnpm", clientBasePath, "build").WaitForCompletion(installPackages);
-var startPackages = builder.AddExecutable("asc-start-packages", "pnpm", clientBasePath, "start").WaitForCompletion(buildPackages);
-installPackages.WithChildRelationship(buildPackages);
-buildPackages.WithChildRelationship(startPackages);
+
+if (!disableBuildClient)
+{
+    var installPackages = builder.AddExecutable("asc-install-packages", "pnpm", clientBasePath, "install");
+    var buildPackages = builder.AddExecutable("asc-build-packages", "pnpm", clientBasePath, "build").WaitForCompletion(installPackages);
+
+    startPackages = builder.AddExecutable("asc-start-packages", "pnpm", clientBasePath, "start").WaitForCompletion(buildPackages);
+    installPackages.WithChildRelationship(buildPackages);
+    buildPackages.WithChildRelationship(startPackages);
+}
 
 NginxConfiguration.ConfigureOpenResty(builder, basePath, clientBasePath, startPackages, isDocker);
 
