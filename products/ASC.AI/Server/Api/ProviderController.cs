@@ -107,4 +107,29 @@ public class ProviderController(
 
         return providers.Select(x => x.MapToDto()).ToList();
     }
+
+    [HttpPut("providers/default")]
+    [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
+    public async Task<DefaultProviderDto> SetDefaultProviderAsync(SetDefaultProviderRequestDto inDto)
+    {
+        var result = await providerService.SetDefaultProviderAsync(inDto.ProviderId, inDto.DefaultModel);
+
+        return result.MapToDto();
+    }
+
+    [HttpGet("providers/default")]
+    public async Task<DefaultProviderDto?> GetDefaultProviderAsync()
+    {
+        var result = await providerService.GetDefaultProviderAsync();
+
+        return result?.MapToDto();
+    }
+
+    [HttpDelete("providers/default")]
+    public async Task<NoContentResult> DeleteDefaultProviderAsync()
+    {
+        await providerService.DeleteDefaultProviderAsync();
+
+        return NoContent();
+    }
 }

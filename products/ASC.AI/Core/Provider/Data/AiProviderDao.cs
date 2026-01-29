@@ -174,12 +174,62 @@ public class AiProviderDao(
         {
             await using var context = await dbContextFactory.CreateDbContextAsync();
             var transaction = await context.Database.BeginTransactionAsync();
-            
+
+            await context.DeleteDefaultProvidersByProviderIdsAsync(tenantId, ids);
             await context.DeleteProvidersAsync(tenantId, ids);
             await context.UpdateRoomSettingsAsync(tenantId, ids);
-            
+
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
         });
+    }
+
+    public async Task<DefaultAiProvider> SetDefaultProviderAsync(int tenantId, int providerId, string defaultModel)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var strategy = dbContext.Database.CreateExecutionStrategy();
+
+        DbDefaultAiProvider result = null!;
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await dbContextFactory.CreateDbContextAsync();
+
+            var entity = new DbDefaultAiProvider
+            {
+                TenantId = tenantId,
+                ProviderId = providerId,
+                DefaultModel = defaultModel
+            };
+
+            result = await context.DefaultProviders.AddOrUpdateAsync(entity);
+            await context.SaveChangesAsync();
+        });
+
+        return result.Map();
+    }
+
+    public async Task<DefaultAiProvider?> GetDefaultProviderAsync(int tenantId)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var dbResult = await dbContext.GetDefaultProviderAsync(tenantId);
+
+        return dbResult?.Map();
+    }
+
+    public async Task<bool> DeleteDefaultProviderAsync(int tenantId)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var strategy = dbContext.Database.CreateExecutionStrategy();
+
+        var deleted = 0;
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await dbContextFactory.CreateDbContextAsync();
+            deleted = await context.DeleteDefaultProviderAsync(tenantId);
+        });
+
+        return deleted > 0;
     }
 }

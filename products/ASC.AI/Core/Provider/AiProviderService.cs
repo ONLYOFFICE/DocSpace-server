@@ -28,13 +28,14 @@ namespace ASC.AI.Core.Provider;
 
 [Scope]
 public class AiProviderService(
-    AiProviderDao providerDao, 
-    TenantManager tenantManager, 
+    AiProviderDao providerDao,
+    TenantManager tenantManager,
     AuthContext authContext,
     ProviderSettings providerSettings,
     UserManager userManager,
     ModelClientFactory modelClientFactory,
-    AiGateway gateway)
+    AiGateway gateway,
+    MessageService messageService)
 {
     public async Task<AiProvider> AddProviderAsync(string? title, string? url, string key, ProviderType type)
     {
@@ -237,7 +238,7 @@ public class AiProviderService(
     private async Task ThrowIfNotValidAsync(string url, string key, ProviderType type)
     {
         var client = modelClientFactory.Create(type, url, key);
-        
+
         try
         {
             await client.PingAsync();
@@ -250,6 +251,40 @@ public class AiProviderService(
             }
 
             throw new ArgumentException(ErrorMessages.InvalidUrl);
+        }
+    }
+
+    public async Task<DefaultAiProvider> SetDefaultProviderAsync(int providerId, string defaultModel)
+    {
+        await ThrowIfNotAccessAsync();
+
+        var provider = await GetProviderAsync(providerId);
+
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var result = await providerDao.SetDefaultProviderAsync(tenantId, providerId, defaultModel);
+
+        messageService.Send(MessageAction.AIDefaultProviderSet, MessageTarget.Create(result.ProviderId), provider.Title, defaultModel);
+
+        return result;
+    }
+
+    public async Task<DefaultAiProvider?> GetDefaultProviderAsync()
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        return await providerDao.GetDefaultProviderAsync(tenantId);
+    }
+
+    public async Task DeleteDefaultProviderAsync()
+    {
+        await ThrowIfNotAccessAsync();
+
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var deleted = await providerDao.DeleteDefaultProviderAsync(tenantId);
+
+        if (deleted)
+        {
+            messageService.Send(MessageAction.AIDefaultProviderDeleted);
         }
     }
 }

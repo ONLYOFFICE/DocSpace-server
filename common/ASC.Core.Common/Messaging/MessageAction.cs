@@ -896,7 +896,13 @@ public enum MessageAction
 
     [SwaggerEnum("AI provider deleted")]
     AIProviderDeleted = 6075,
-    
+
+    [SwaggerEnum("AI default provider set")]
+    AIDefaultProviderSet = 6096,
+
+    [SwaggerEnum("AI default provider deleted")]
+    AIDefaultProviderDeleted = 6097,
+
     [SwaggerEnum("MCP server created")]
     ServerCreated = 6076,
     
