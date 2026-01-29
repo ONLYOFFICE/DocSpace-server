@@ -78,6 +78,16 @@
       "x-displayName": "Audit trail data"
     },
     {
+      "name": "Security / Banners visibility",
+      "description": "Operations for managing visibility of security banners.",
+      "x-displayName": "Banners visibility"
+    },
+    {
+      "name": "Settings / Banners visibility",
+      "description": "Operations for managing visibility of settings banners.",
+      "x-displayName": "Banners visibility"
+    },
+    {
       "name": "Security / CSP",
       "description": "Operations for working with CSP.",
       "x-displayName": "CSP"
@@ -188,6 +198,11 @@
       "x-displayName": "Storage"
     },
     {
+      "name": "Settings / Telegram",
+      "description": "Operations for managing Telegram integration.",
+      "x-displayName": "Telegram"
+    },
+    {
       "name": "Settings / TFA settings",
       "description": "Operations for working with TFA settings.",
       "x-displayName": "TFA settings"
@@ -208,18 +223,6 @@
       "x-displayName": "ThirdParty"
     },
     {
-      "name": "Security / Banners visibility",
-      "x-displayName": "Security / Banners visibility"
-    },
-    {
-      "name": "Settings / Banners visibility",
-      "x-displayName": "Settings / Banners visibility"
-    },
-    {
-      "name": "Settings / Telegram",
-      "x-displayName": "Settings / Telegram"
-    },
-    {
       "name": "Api keys",
       "description": "Operations for working with api keys.",
       "x-displayName": "Api keys"
@@ -230,8 +233,13 @@
       "x-displayName": "Group"
     },
     {
+      "name": "Group / Search",
+      "description": "Operations for searching groups.",
+      "x-displayName": "Search"
+    },
+    {
       "name": "People / Guests",
-      "description": "Operations for workig with gursts",
+      "description": "Operations for workig with guests",
       "x-displayName": "Guests"
     },
     {
@@ -285,12 +293,9 @@
       "x-displayName": "User type"
     },
     {
-      "name": "Group / Search",
-      "x-displayName": "Group / Search"
-    },
-    {
       "name": "Portal / Guests",
-      "x-displayName": "Portal / Guests"
+      "description": "Operations for managing guest users in the portal.",
+      "x-displayName": "Guests"
     },
     {
       "name": "Files / Files",
@@ -3286,7 +3291,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -4033,7 +4038,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -4150,7 +4155,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -4276,7 +4281,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -5054,7 +5059,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -6280,7 +6285,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -9947,7 +9952,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -10252,7 +10257,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -10319,7 +10324,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -10330,7 +10335,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -10710,7 +10715,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -12239,7 +12244,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -12362,7 +12367,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -12459,7 +12464,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -12820,7 +12825,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "Winfield Upton"
+              "example": "John Doe"
             }
           }
         ],
@@ -12887,7 +12892,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "Winfield Upton"
+              "example": "John Doe"
             }
           }
         ],
@@ -12958,7 +12963,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "Winfield Upton"
+              "example": "John Doe"
             }
           }
         ],
@@ -13451,7 +13456,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -13636,7 +13641,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -13712,7 +13717,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -13791,7 +13796,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -13861,7 +13866,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -14009,7 +14014,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -14085,7 +14090,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -14164,7 +14169,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -14245,7 +14250,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -14326,7 +14331,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -14436,7 +14441,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -14546,7 +14551,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -14784,7 +14789,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -14904,7 +14909,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "9846"
+              "example": "1"
             }
           }
         ],
@@ -14987,7 +14992,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "9079"
+              "example": "1"
             }
           }
         ],
@@ -15057,7 +15062,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "9079"
+              "example": "1"
             }
           }
         ],
@@ -15127,7 +15132,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "9846"
+              "example": "1"
             }
           }
         ],
@@ -15208,7 +15213,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "9846"
+              "example": "1"
             }
           }
         ],
@@ -15688,7 +15693,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "9846"
+              "example": "1"
             }
           }
         ],
@@ -15761,7 +15766,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "9846"
+              "example": "1"
             }
           }
         ],
@@ -15831,7 +15836,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "9846"
+              "example": "1"
             }
           }
         ],
@@ -16031,7 +16036,7 @@
               "minLength": 0,
               "type": "string",
               "format": "email",
-              "example": "Sydney_Roberts4@hotmail.com"
+              "example": "example@onlyoffice.com"
             }
           },
           {
@@ -16254,7 +16259,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "9846"
+              "example": "1"
             }
           }
         ],
@@ -16475,7 +16480,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -16658,7 +16663,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -16841,7 +16846,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -17783,7 +17788,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -17966,7 +17971,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -18149,7 +18154,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -18661,7 +18666,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -18856,7 +18861,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "0dec3996-2dfc-7cb2-e974-8e5fb9f399ce"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -18931,7 +18936,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -19717,7 +19722,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -19847,7 +19852,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -19920,7 +19925,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -20038,7 +20043,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -20087,7 +20092,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -20157,7 +20162,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -20223,7 +20228,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -20306,7 +20311,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -20436,7 +20441,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -20503,7 +20508,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -20614,7 +20619,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -20693,7 +20698,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -20728,7 +20733,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -20795,7 +20800,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -20862,7 +20867,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -20950,7 +20955,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -21027,7 +21032,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -21108,7 +21113,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -21186,7 +21191,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -21262,7 +21267,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -21305,7 +21310,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -21387,7 +21392,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -21432,7 +21437,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -21467,7 +21472,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -21545,7 +21550,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -21623,7 +21628,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -21683,7 +21688,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -21762,7 +21767,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -21822,7 +21827,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -21909,7 +21914,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -21987,7 +21992,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -22133,7 +22138,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -22283,7 +22288,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -22422,7 +22427,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -22715,7 +22720,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -22764,7 +22769,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -22831,7 +22836,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -23271,7 +23276,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -23350,7 +23355,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -23532,7 +23537,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -23567,7 +23572,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -23643,7 +23648,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -23719,7 +23724,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -23752,7 +23757,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -23833,7 +23838,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -23910,7 +23915,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -23948,7 +23953,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -24097,7 +24102,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -24167,7 +24172,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -24237,7 +24242,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -24361,7 +24366,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -24440,7 +24445,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -24500,7 +24505,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -24576,7 +24581,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -25308,7 +25313,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -25386,7 +25391,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -25404,7 +25409,7 @@
                   "InsertFile.Title": {
                     "type": "string",
                     "description": "The file title to be inserted.",
-                    "example": "legacy_1080p_small_wooden_mouse"
+                    "example": "SampleFile"
                   },
                   "InsertFile.CreateNewIfExist": {
                     "type": "boolean",
@@ -25565,7 +25570,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -25652,7 +25657,7 @@
                   "Title": {
                     "type": "string",
                     "description": "The file title to be inserted.",
-                    "example": "legacy_1080p_small_wooden_mouse"
+                    "example": "SampleFile"
                   },
                   "CreateNewIfExist": {
                     "type": "boolean",
@@ -25882,7 +25887,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -25956,7 +25961,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -26033,7 +26038,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -26403,7 +26408,7 @@
             "description": "The ID of the file operation.",
             "schema": {
               "type": "string",
-              "example": "9846"
+              "example": "1"
             }
           }
         ],
@@ -26445,7 +26450,7 @@
             "description": "The ID of the file operation.",
             "schema": {
               "type": "string",
-              "example": "9846"
+              "example": "1"
             }
           }
         ],
@@ -26806,7 +26811,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "9846"
+              "example": "1"
             }
           }
         ],
@@ -26969,7 +26974,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -27049,7 +27054,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -27133,7 +27138,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -27188,7 +27193,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -27281,7 +27286,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -27383,7 +27388,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -29114,6 +29119,209 @@
         "description": "Changes the ability to open the document in the same browser tab."
       }
     },
+    "/api/2.0/files/settings/defaulttemplate": {
+      "get": {
+        "tags": [
+          "Files / Settings"
+        ],
+        "summary": "Get the default template setting",
+        "operationId": "getDefaultTemplates",
+        "responses": {
+          "200": {
+            "description": "Default template settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultTemplateSettingsWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ],
+        "description": "Returns the default template setting."
+      },
+      "put": {
+        "tags": [
+          "Files / Settings"
+        ],
+        "summary": "Change the default template setting",
+        "operationId": "setDefaultTemplate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DefaultTemplateSettingsRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "New default template settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultTemplateSettingsWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ],
+        "description": "Changes the default template setting."
+      },
+      "post": {
+        "tags": [
+          "Files / Settings"
+        ],
+        "summary": "Upload a file as the default template setting",
+        "operationId": "uploadDefaultTemplate",
+        "parameters": [
+          {
+            "name": "FileExtension",
+            "in": "query",
+            "description": "File extension of a template to replace",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": ".txt"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": [
+                  "File"
+                ],
+                "type": "object",
+                "properties": {
+                  "File": {
+                    "type": "string",
+                    "description": "File to replace template with",
+                    "format": "binary"
+                  }
+                }
+              },
+              "encoding": {
+                "File": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "New default template settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultTemplateSettingsWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ],
+        "description": "Uploads a file to use as the default template setting."
+      }
+    },
     "/api/2.0/files/file/{fileId}/sharedusers": {
       "get": {
         "tags": [
@@ -29130,7 +29338,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -29197,7 +29405,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -29286,7 +29494,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -29375,7 +29583,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -29453,7 +29661,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -29531,7 +29739,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -29608,7 +29816,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -29717,7 +29925,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -30082,7 +30290,7 @@
             "description": "The unique document identifier.",
             "schema": {
               "type": "string",
-              "example": "9846"
+              "example": "1"
             }
           },
           {
@@ -30091,7 +30299,7 @@
             "description": "The unique folder identifier.",
             "schema": {
               "type": "string",
-              "example": "9846"
+              "example": "1"
             }
           }
         ],
@@ -30646,7 +30854,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -31142,7 +31350,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -31175,7 +31383,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -31251,7 +31459,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -31329,7 +31537,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -31406,7 +31614,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -31483,7 +31691,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -31559,7 +31767,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -31665,7 +31873,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -31741,7 +31949,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -31816,7 +32024,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -31886,7 +32094,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -31964,7 +32172,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -32044,7 +32252,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -32123,7 +32331,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -32190,7 +32398,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -32328,7 +32536,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -32395,7 +32603,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -32462,7 +32670,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -32533,7 +32741,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -32600,7 +32808,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -32666,7 +32874,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "9079"
+              "example": "1"
             }
           }
         ],
@@ -33032,7 +33240,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -35621,7 +35829,7 @@
             "type": "integer",
             "description": "The active connection ID.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "tenantId": {
             "type": "integer",
@@ -35633,7 +35841,7 @@
             "type": "string",
             "description": "The user ID.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "mobile": {
             "type": "boolean",
@@ -35833,7 +36041,7 @@
             "description": "The email address used for sending administrator messages.",
             "format": "email",
             "nullable": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "example@onlyoffice.com"
           },
           "culture": {
             "type": "string",
@@ -35867,7 +36075,7 @@
             "description": "Email",
             "format": "email",
             "nullable": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "example@onlyoffice.com"
           },
           "culture": {
             "type": "string",
@@ -35953,7 +36161,7 @@
             "type": "integer",
             "description": "The audit event ID.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "date": {
             "$ref": "#/components/schemas/ApiDateTime"
@@ -35968,7 +36176,7 @@
             "type": "string",
             "description": "The ID of the user who triggered the audit event.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "action": {
             "type": "string",
@@ -36064,7 +36272,7 @@
             "type": "string",
             "description": "The authorization key name.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           },
           "value": {
             "maxLength": 255,
@@ -36078,7 +36286,7 @@
             "type": "string",
             "description": "The authorization key title.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           }
         },
         "additionalProperties": false,
@@ -36097,7 +36305,7 @@
             "type": "string",
             "description": "The password in plain text for user authentication.",
             "nullable": true,
-            "example": "vfmf2vO1Kp"
+            "example": "P@ssw0rd123"
           },
           "passwordHash": {
             "type": "string",
@@ -36206,13 +36414,13 @@
             "type": "string",
             "description": "The name of the authorization service.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           },
           "title": {
             "type": "string",
             "description": "The user-friendly display title of the authorization service.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "description": {
             "type": "string",
@@ -36660,7 +36868,7 @@
             "description": "The company email address.",
             "format": "email",
             "nullable": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "example@onlyoffice.com"
           },
           "address": {
             "maxLength": 255,
@@ -36765,7 +36973,7 @@
             "description": "The company email address.",
             "format": "email",
             "nullable": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "example@onlyoffice.com"
           },
           "address": {
             "type": "string",
@@ -36816,7 +37024,7 @@
             "description": "The email address to confirm the user's identity.",
             "format": "email",
             "nullable": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "example@onlyoffice.com"
           },
           "first": {
             "type": "boolean",
@@ -36847,19 +37055,19 @@
             "type": "string",
             "description": "The confirmation room ID.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "title": {
             "type": "string",
             "description": "The confirmation title.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "email": {
             "type": "string",
             "description": "The confirmation email.",
             "nullable": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "example@onlyoffice.com"
           },
           "isAgent": {
             "type": "boolean",
@@ -37017,7 +37225,7 @@
             "minLength": 0,
             "type": "string",
             "description": "The human-readable name of the webhook configuration.",
-            "example": "Winfield Upton"
+            "example": "John Doe"
           },
           "uri": {
             "minLength": 1,
@@ -37422,7 +37630,7 @@
             "description": "The customer email address.",
             "nullable": true,
             "readOnly": true,
-            "example": "Randall63@hotmail.com"
+            "example": "example@onlyoffice.com"
           },
           "payer": {
             "$ref": "#/components/schemas/EmployeeDto"
@@ -37511,14 +37719,14 @@
             "type": "integer",
             "description": "The tenant ID.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "name": {
             "maxLength": 255,
             "type": "string",
             "description": "The tenant name.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           },
           "alias": {
             "maxLength": 100,
@@ -37792,7 +38000,7 @@
             "type": "string",
             "description": "The Document Builder task ID.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "error": {
             "type": "string",
@@ -38005,7 +38213,7 @@
             "description": "The email address.",
             "format": "email",
             "nullable": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "example@onlyoffice.com"
           },
           "encEmail": {
             "type": "string",
@@ -38033,7 +38241,7 @@
             "type": "string",
             "description": "The room ID.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           }
         },
         "additionalProperties": false,
@@ -38223,7 +38431,7 @@
             "type": "string",
             "description": "The encryption password.",
             "nullable": true,
-            "example": "vfmf2vO1Kp"
+            "example": "P@ssw0rd123"
           },
           "status": {
             "$ref": "#/components/schemas/EncryprtionStatus"
@@ -38311,7 +38519,7 @@
             "type": "string",
             "description": "The used space title.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           }
         },
         "additionalProperties": false,
@@ -38339,13 +38547,13 @@
             "type": "integer",
             "description": "The Firebase user ID.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "userId": {
             "type": "string",
             "description": "The user ID.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "tenantId": {
             "type": "integer",
@@ -38498,7 +38706,7 @@
         "description": "The Firebase-related request parameters."
       },
       "FolderType": {
-        "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Result storage, 34 - AI Agents]",
+        "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Result storage, 34 - AI Agents, 35 - Default Templates]",
         "x-enum-type": "integer",
         "enum": [
           0,
@@ -38528,7 +38736,8 @@
           31,
           32,
           33,
-          34
+          34,
+          35
         ],
         "type": "integer",
         "example": 0,
@@ -38560,7 +38769,8 @@
           "AiRoom",
           "Knowledge",
           "ResultStorage",
-          "AiAgents"
+          "AiAgents",
+          "DefaultTemplates"
         ]
       },
       "FormGalleryDto": {
@@ -38633,7 +38843,7 @@
             "type": "string",
             "description": "The title of the tenant greeting settings.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           }
         },
         "additionalProperties": false,
@@ -38738,7 +38948,7 @@
               "id": {
                 "type": "integer",
                 "format": "int32",
-                "example": 9846
+                "example": 1
               },
               "tenantId": {
                 "type": "integer",
@@ -38919,7 +39129,7 @@
             "type": "string",
             "description": "The ID of the invitation link.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           }
         },
         "additionalProperties": false,
@@ -38935,7 +39145,7 @@
             "type": "string",
             "description": "The ID of the invitation link.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "employeeType": {
             "$ref": "#/components/schemas/EmployeeType"
@@ -38981,7 +39191,7 @@
             "type": "string",
             "description": "The ID of the invitation link.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "expiration": {
             "type": "string",
@@ -39161,7 +39371,7 @@
             "type": "string",
             "description": "The white label logo name.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           },
           "default": {
             "type": "boolean",
@@ -39321,7 +39531,7 @@
             "type": "integer",
             "description": "The login event ID.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "date": {
             "$ref": "#/components/schemas/ApiDateTime"
@@ -39336,7 +39546,7 @@
             "type": "string",
             "description": "The user ID of the login event.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "login": {
             "type": "string",
@@ -40305,7 +40515,7 @@
                 "type": "string",
                 "format": "email",
                 "nullable": true,
-                "example": "Myrtice14@hotmail.com"
+                "example": "example@onlyoffice.com"
               },
               "displayName": {
                 "type": "string",
@@ -40315,12 +40525,12 @@
               "firstName": {
                 "type": "string",
                 "nullable": true,
-                "example": "Winfield"
+                "example": "John"
               },
               "lastName": {
                 "type": "string",
                 "nullable": true,
-                "example": "Upton"
+                "example": "Doe"
               },
               "userType": {
                 "$ref": "#/components/schemas/EmployeeType"
@@ -40540,7 +40750,7 @@
             "type": "string",
             "description": "The notification channel name.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           },
           "isEnabled": {
             "type": "boolean",
@@ -41292,13 +41502,13 @@
             "type": "string",
             "description": "The product ID.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "userId": {
             "type": "string",
             "description": "The user unique identifier.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "administrator": {
             "type": "boolean",
@@ -41408,7 +41618,7 @@
             "type": "integer",
             "description": "The quota ID.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "quantity": {
             "type": "integer",
@@ -41495,13 +41705,13 @@
             "type": "integer",
             "description": "The quota ID.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "title": {
             "type": "string",
             "description": "The quota title.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "price": {
             "$ref": "#/components/schemas/PriceDto"
@@ -41856,7 +42066,7 @@
             "type": "string",
             "description": "The contact email address for the sales inquiry.",
             "nullable": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "example@onlyoffice.com"
           },
           "message": {
             "maxLength": 255,
@@ -41956,13 +42166,13 @@
             "type": "string",
             "description": "The product ID for which permissions are being set.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "userId": {
             "type": "string",
             "description": "The ID of the user whose permissions are being configured.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "administrator": {
             "type": "boolean",
@@ -42531,26 +42741,26 @@
             "type": "string",
             "description": "The first name.",
             "nullable": true,
-            "example": "Winfield"
+            "example": "John"
           },
           "lastName": {
             "type": "string",
             "description": "The last name.",
             "nullable": true,
-            "example": "Wyman"
+            "example": "Doe"
           },
           "email": {
             "type": "string",
             "description": "The email address.",
             "format": "email",
             "nullable": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "example@onlyoffice.com"
           },
           "title": {
             "type": "string",
             "description": "The title.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "location": {
             "type": "string",
@@ -42863,13 +43073,13 @@
             "type": "string",
             "description": "The storage ID.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "title": {
             "type": "string",
             "description": "The storage title.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "properties": {
             "type": "array",
@@ -43085,7 +43295,7 @@
             "type": "integer",
             "description": "The tariff ID.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "state": {
             "$ref": "#/components/schemas/TariffState"
@@ -43598,7 +43808,7 @@
             "type": "string",
             "description": "The tenant name.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           },
           "ownerId": {
             "type": "string",
@@ -43781,7 +43991,7 @@
             "type": "string",
             "description": "The tenant product ID.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "serviceName": {
             "type": "string",
@@ -43966,13 +44176,13 @@
             "type": "string",
             "description": "The ID of the tenant quota feature.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "title": {
             "type": "string",
             "description": "The title of the tenant quota feature.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "image": {
             "type": "string",
@@ -44522,7 +44732,7 @@
             "type": "string",
             "description": "The ID of the user for whom the TFA settings are being configured.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "trustedIps": {
             "type": "array",
@@ -44629,13 +44839,13 @@
             "type": "string",
             "description": "The ID of the TFA configuration.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "title": {
             "type": "string",
             "description": "The display name or description of the TFA configuration.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "enabled": {
             "type": "boolean",
@@ -44750,7 +44960,7 @@
             "type": "string",
             "description": "The IANA time zone identifier.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "displayName": {
             "type": "string",
@@ -44810,7 +45020,7 @@
                 "type": "integer",
                 "description": "The webhook configuration ID.",
                 "format": "int32",
-                "example": 9846
+                "example": 1
               }
             }
           }
@@ -44898,19 +45108,19 @@
             "type": "string",
             "description": "The user ID.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "firstName": {
             "type": "string",
             "description": "The user first name.",
             "nullable": true,
-            "example": "Winfield"
+            "example": "John"
           },
           "lastName": {
             "type": "string",
             "description": "The user last name.",
             "nullable": true,
-            "example": "Wyman"
+            "example": "Doe"
           },
           "userName": {
             "type": "string",
@@ -44948,7 +45158,7 @@
             "type": "string",
             "description": "The user title.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "workFromDate": {
             "type": "string",
@@ -44962,7 +45172,7 @@
             "description": "The user email address.",
             "format": "email",
             "nullable": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "example@onlyoffice.com"
           },
           "contacts": {
             "type": "string",
@@ -45177,7 +45387,7 @@
             "type": "string",
             "description": "The module ID.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "enabled": {
             "type": "boolean",
@@ -45257,6 +45467,7 @@
           "author",
           "createBy",
           "createOn",
+          "cssUrl",
           "description",
           "enabled",
           "homePage",
@@ -45276,7 +45487,7 @@
             "type": "string",
             "description": "The web plugin name.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           },
           "version": {
             "type": "string",
@@ -45354,6 +45565,12 @@
           "url": {
             "type": "string",
             "description": "The web plugin URL.",
+            "nullable": true,
+            "example": "some text"
+          },
+          "cssUrl": {
+            "type": "string",
+            "description": "The web plugin css URL.",
             "nullable": true,
             "example": "some text"
           },
@@ -45573,13 +45790,13 @@
             "type": "integer",
             "description": "The webhook ID.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "name": {
             "type": "string",
             "description": "The webhook name.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           },
           "uri": {
             "type": "string",
@@ -45784,7 +46001,7 @@
             "type": "integer",
             "description": "The webhook log ID.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "configName": {
             "type": "string",
@@ -45935,7 +46152,7 @@
             "type": "string",
             "description": "The white label file name.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           },
           "size": {
             "$ref": "#/components/schemas/IMagickGeometry"
@@ -46043,7 +46260,7 @@
             "description": "The user's email address for authentication and communication.",
             "format": "email",
             "nullable": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "example@onlyoffice.com"
           },
           "passwordHash": {
             "type": "string",
@@ -46263,13 +46480,13 @@
             "type": "string",
             "description": "The API key unique identifier.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "name": {
             "type": "string",
             "description": "The API key name.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           },
           "key": {
             "type": "string",
@@ -46395,7 +46612,7 @@
             "minLength": 0,
             "type": "string",
             "description": "The API key name.",
-            "example": "Winfield Upton"
+            "example": "John Doe"
           },
           "permissions": {
             "type": "array",
@@ -46516,7 +46733,7 @@
             "description": "The email address.",
             "format": "email",
             "nullable": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "example@onlyoffice.com"
           }
         },
         "additionalProperties": false,
@@ -46534,7 +46751,7 @@
             "type": "string",
             "description": "The user email address.",
             "format": "email",
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "example@onlyoffice.com"
           },
           "recaptchaType": {
             "$ref": "#/components/schemas/RecaptchaType"
@@ -46973,7 +47190,7 @@
             "type": "string",
             "description": "The group name.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           },
           "parent": {
             "type": "string",
@@ -46992,7 +47209,7 @@
             "type": "string",
             "description": "The group ID.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "isLDAP": {
             "type": "boolean",
@@ -47202,7 +47419,7 @@
             "type": "string",
             "description": "The user password.",
             "nullable": true,
-            "example": "vfmf2vO1Kp"
+            "example": "P@ssw0rd123"
           },
           "passwordHash": {
             "type": "string",
@@ -47217,7 +47434,7 @@
             "description": "The user email address.",
             "format": "email",
             "nullable": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "example@onlyoffice.com"
           },
           "encEmail": {
             "type": "string",
@@ -47236,7 +47453,7 @@
             "type": "string",
             "description": "The user password.",
             "nullable": true,
-            "example": "vfmf2vO1Kp"
+            "example": "P@ssw0rd123"
           },
           "passwordHash": {
             "type": "string",
@@ -47251,7 +47468,7 @@
             "description": "The user email address.",
             "format": "email",
             "nullable": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "example@onlyoffice.com"
           },
           "type": {
             "$ref": "#/components/schemas/EmployeeType"
@@ -47268,7 +47485,7 @@
             "type": "string",
             "description": "The user first name.",
             "nullable": true,
-            "example": "Winfield"
+            "example": "John"
           },
           "lastName": {
             "maxLength": 255,
@@ -47276,7 +47493,7 @@
             "type": "string",
             "description": "The user last name.",
             "nullable": true,
-            "example": "Wyman"
+            "example": "Doe"
           },
           "department": {
             "type": "array",
@@ -47296,13 +47513,13 @@
             "type": "string",
             "description": "The user title.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "location": {
             "type": "string",
             "description": "The user location.",
             "nullable": true,
-            "example": "408 Tabitha Expressway, Dericktown, United Kingdom"
+            "example": "001 Schroeder Run, New Tabithaport, Colombia"
           },
           "sex": {
             "$ref": "#/components/schemas/SexEnum"
@@ -47470,7 +47687,7 @@
             "type": "string",
             "description": "The user ID.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           }
         },
         "additionalProperties": false,
@@ -47504,20 +47721,20 @@
             "type": "string",
             "description": "The user first name.",
             "nullable": true,
-            "example": "Winfield"
+            "example": "John"
           },
           "lastName": {
             "type": "string",
             "description": "The user last name.",
             "nullable": true,
-            "example": "Wyman"
+            "example": "Doe"
           },
           "email": {
             "type": "string",
             "description": "The user email address.",
             "format": "email",
             "nullable": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "example@onlyoffice.com"
           },
           "passwordHash": {
             "type": "string",
@@ -47599,7 +47816,7 @@
             "type": "string",
             "description": "The user ID.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "reassignUserId": {
             "type": "string",
@@ -47636,7 +47853,7 @@
             "type": "string",
             "description": "The task progress ID.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "error": {
             "type": "string",
@@ -47706,7 +47923,7 @@
             "type": "string",
             "description": "The user ID whose data is reassigned/removed.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           }
         },
         "additionalProperties": false,
@@ -47833,7 +48050,7 @@
             "type": "string",
             "description": "The new name for the API key.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           },
           "permissions": {
             "type": "array",
@@ -47908,7 +48125,7 @@
             "type": "string",
             "description": "The user ID.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "disable": {
             "type": "boolean",
@@ -47923,7 +48140,7 @@
             "description": "The user email address.",
             "format": "email",
             "nullable": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "example@onlyoffice.com"
           },
           "isUser": {
             "type": "boolean",
@@ -47937,7 +48154,7 @@
             "type": "string",
             "description": "The user first name.",
             "nullable": true,
-            "example": "Winfield"
+            "example": "John"
           },
           "lastName": {
             "maxLength": 255,
@@ -47945,7 +48162,7 @@
             "type": "string",
             "description": "The user last name.",
             "nullable": true,
-            "example": "Wyman"
+            "example": "Doe"
           },
           "department": {
             "type": "array",
@@ -47965,7 +48182,7 @@
             "type": "string",
             "description": "The user title.",
             "nullable": true,
-            "example": "1080p_small_wooden_tuna_central"
+            "example": "SampleFile"
           },
           "location": {
             "type": "string",
@@ -48284,7 +48501,7 @@
             "type": "string",
             "description": "The authentication password.",
             "nullable": true,
-            "example": "vfmf2vO1Kp"
+            "example": "P@ssw0rd123"
           },
           "rawToken": {
             "type": "string",
@@ -48586,7 +48803,7 @@
             "type": "string",
             "description": "The new file owner ID.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           }
         },
         "additionalProperties": false,
@@ -48620,7 +48837,7 @@
             "type": "integer",
             "description": "The file ID to check conversion proccess.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "sync": {
             "type": "boolean",
@@ -48642,7 +48859,7 @@
             "type": "string",
             "description": "The password of the converted file.",
             "nullable": true,
-            "example": "vfmf2vO1Kp"
+            "example": "P@ssw0rd123"
           },
           "outputType": {
             "type": "string",
@@ -48831,7 +49048,7 @@
           "id": {
             "type": "string",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "path": {
             "type": "array",
@@ -48907,7 +49124,7 @@
           "id": {
             "type": "string",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "path": {
             "type": "array",
@@ -49200,7 +49417,7 @@
           "name": {
             "type": "string",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           },
           "parameters": {
             "type": "array",
@@ -49260,7 +49477,7 @@
             "type": "string",
             "description": "The conversion operation ID.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "Operation": {
             "$ref": "#/components/schemas/FileOperationType"
@@ -49332,7 +49549,7 @@
             "type": "string",
             "description": "The copied file password.",
             "nullable": true,
-            "example": "vfmf2vO1Kp"
+            "example": "P@ssw0rd123"
           },
           "toForm": {
             "type": "boolean",
@@ -49410,7 +49627,7 @@
             "type": "string",
             "description": "The cover unique identifier.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "data": {
             "type": "string",
@@ -49434,7 +49651,7 @@
             "type": "string",
             "description": "The file title for creation.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "templateId": {
             "oneOf": [
@@ -49476,7 +49693,7 @@
             "type": "string",
             "description": "The folder title to create.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           }
         },
         "additionalProperties": false,
@@ -49499,7 +49716,7 @@
             "type": "string",
             "description": "The room title.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "logo": {
             "$ref": "#/components/schemas/LogoRequest"
@@ -49584,7 +49801,7 @@
             "type": "string",
             "description": "The room name.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "quota": {
             "type": "integer",
@@ -49676,7 +49893,7 @@
             "type": "string",
             "description": "The tag name.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           }
         },
         "additionalProperties": false,
@@ -49694,7 +49911,7 @@
             "type": "string",
             "description": "The file title for text or HTML file.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "content": {
             "type": "string",
@@ -49727,7 +49944,7 @@
             "type": "string",
             "description": "The third-party room name to be created.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "roomType": {
             "$ref": "#/components/schemas/RoomType"
@@ -49820,7 +50037,7 @@
             "type": "string",
             "description": "The name of the customer configuration.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           },
           "www": {
             "type": "string",
@@ -49900,6 +50117,123 @@
           "TwoMonths",
           "ThreeMonths"
         ]
+      },
+      "DefaultTemplateItemDto": {
+        "required": [
+          "fileExtension"
+        ],
+        "type": "object",
+        "properties": {
+          "selectedFile": {
+            "type": "integer",
+            "description": "File id to use as a default template",
+            "format": "int32",
+            "nullable": true,
+            "example": 1234
+          },
+          "fileExtension": {
+            "type": "string",
+            "description": "Extension of a default template",
+            "nullable": true,
+            "example": ".txt"
+          },
+          "fileTitle": {
+            "type": "string",
+            "description": "Title of a default template",
+            "nullable": true,
+            "example": "some text"
+          },
+          "lastModified": {
+            "type": "string",
+            "description": "Last modified date of a default template",
+            "format": "date-time",
+            "nullable": true,
+            "example": "2008-04-10T06:30:00.0000000+04:00"
+          },
+          "viewUrl": {
+            "type": "string",
+            "description": "View url of a default template",
+            "nullable": true,
+            "example": "some text"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Default template setting"
+      },
+      "DefaultTemplateSettingsDto": {
+        "required": [
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DefaultTemplateItemDto"
+            },
+            "description": "Default templates list.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Default templates settings parameters."
+      },
+      "DefaultTemplateSettingsRequestDto": {
+        "required": [
+          "fileExtension"
+        ],
+        "type": "object",
+        "properties": {
+          "selectedFile": {
+            "type": "integer",
+            "description": "File id to replace template with (or null to use default template)",
+            "format": "int32",
+            "nullable": true,
+            "example": 1234
+          },
+          "fileExtension": {
+            "type": "string",
+            "description": "File extension of a template to replace",
+            "nullable": true,
+            "example": ".txt"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Default templates settings request parameters."
+      },
+      "DefaultTemplateSettingsWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/DefaultTemplateSettingsDto"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
       },
       "Delete": {
         "type": "object",
@@ -50026,7 +50360,7 @@
                 "type": "integer",
                 "description": "The file ID to delete.",
                 "format": "int32",
-                "example": 9846
+                "example": 1
               },
               "versions": {
                 "type": "array",
@@ -50207,7 +50541,7 @@
             "type": "string",
             "description": "The document title.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "url": {
             "type": "string",
@@ -50314,7 +50648,7 @@
             "type": "string",
             "description": "The optional password for accessing protected files.",
             "nullable": true,
-            "example": "vfmf2vO1Kp"
+            "example": "P@ssw0rd123"
           }
         },
         "additionalProperties": false,
@@ -50327,7 +50661,7 @@
             "type": "integer",
             "description": "The InProcess folder ID of the draft.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "folderTitle": {
             "type": "string",
@@ -50339,7 +50673,7 @@
             "type": "integer",
             "description": "The draft ID.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "fileTitle": {
             "type": "string",
@@ -50446,13 +50780,13 @@
             "type": "string",
             "description": "The author ID.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "name": {
             "type": "string",
             "description": "The author name.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           }
         },
         "additionalProperties": false,
@@ -50824,13 +51158,13 @@
             "type": "string",
             "description": "The external data ID.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "title": {
             "type": "string",
             "description": "The external data title.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "type": {
             "$ref": "#/components/schemas/FileEntryType"
@@ -50894,7 +51228,7 @@
             "type": "string",
             "description": "The password to share external data.",
             "nullable": true,
-            "example": "vfmf2vO1Kp"
+            "example": "P@ssw0rd123"
           }
         },
         "additionalProperties": false,
@@ -50976,7 +51310,7 @@
                 "type": "integer",
                 "description": "The folder ID where the file is located.",
                 "format": "int32",
-                "example": 9846
+                "example": 1
               },
               "version": {
                 "type": "integer",
@@ -52120,7 +52454,7 @@
             "type": "string",
             "description": "The link name.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "internal": {
             "type": "boolean",
@@ -52143,7 +52477,7 @@
             "type": "string",
             "description": "Password for access via link.",
             "nullable": true,
-            "example": "vfmf2vO1Kp"
+            "example": "P@ssw0rd123"
           }
         },
         "additionalProperties": false,
@@ -52235,7 +52569,7 @@
             "type": "string",
             "description": "The file operation ID.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "Operation": {
             "$ref": "#/components/schemas/FileOperationType"
@@ -52431,13 +52765,13 @@
             "type": "string",
             "description": "The unique system identifier.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "roomId": {
             "type": "string",
             "description": "Room ID",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "canEditRoom": {
             "type": "boolean",
@@ -52632,13 +52966,13 @@
             "type": "string",
             "description": "The unique identifier of the shared link.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "title": {
             "type": "string",
             "description": "The title of the shared content.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "shareLink": {
             "type": "string",
@@ -52656,7 +52990,7 @@
             "type": "string",
             "description": "The password protection for accessing the shared content.",
             "nullable": true,
-            "example": "vfmf2vO1Kp"
+            "example": "P@ssw0rd123"
           },
           "denyDownload": {
             "type": "boolean",
@@ -53391,7 +53725,7 @@
             "type": "string",
             "description": "The folder title.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "usedSpace": {
             "type": "integer",
@@ -53485,7 +53819,7 @@
             "type": "integer",
             "description": "The room ID where filling the form.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "isRoomMember": {
             "type": "boolean",
@@ -54084,7 +54418,7 @@
             "type": "string",
             "description": "The link name.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "password": {
             "maxLength": 255,
@@ -54092,7 +54426,7 @@
             "type": "string",
             "description": "The link password.",
             "nullable": true,
-            "example": "vfmf2vO1Kp"
+            "example": "P@ssw0rd123"
           },
           "denyDownload": {
             "type": "boolean",
@@ -54284,7 +54618,7 @@
             "type": "integer",
             "description": "The room ID.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "roleName": {
             "type": "string",
@@ -54302,7 +54636,7 @@
             "type": "string",
             "description": "The user ID.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "sequence": {
             "type": "integer",
@@ -54529,7 +54863,7 @@
             "type": "string",
             "description": "The unique system identifier.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "sourceFileId": {
             "type": "integer",
@@ -54752,7 +55086,7 @@
             "type": "integer",
             "description": "The unique identifier for the file history entry.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "action": {
             "$ref": "#/components/schemas/HistoryAction"
@@ -55043,7 +55377,7 @@
             "type": "string",
             "description": "The logo cover ID.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "data": {
             "type": "string",
@@ -55150,14 +55484,14 @@
             "format": "email",
             "nullable": true,
             "readOnly": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "example@onlyoffice.com"
           },
           "id": {
             "type": "string",
             "description": "The user unique identification.",
             "nullable": true,
             "readOnly": true,
-            "example": "9846"
+            "example": "1"
           },
           "image": {
             "type": "string",
@@ -55177,7 +55511,7 @@
             "description": "The user full name.",
             "nullable": true,
             "readOnly": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           }
         },
         "additionalProperties": false,
@@ -55227,7 +55561,7 @@
             "type": "string",
             "description": "The module ID.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "appName": {
             "type": "string",
@@ -55239,7 +55573,7 @@
             "type": "string",
             "description": "The module product class name.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "link": {
             "type": "string",
@@ -55707,7 +56041,7 @@
             "type": "string",
             "description": "The provider name.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           },
           "key": {
             "type": "string",
@@ -55789,7 +56123,7 @@
             "type": "string",
             "description": "The document title that will be displayed in the Open Recent... menu option.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "url": {
             "type": "string",
@@ -55873,7 +56207,7 @@
             "type": "integer",
             "description": "The room ID.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "progress": {
             "type": "number",
@@ -55942,7 +56276,7 @@
                 "type": "string",
                 "description": "The ID of the user to share a room with.",
                 "format": "uuid",
-                "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+                "example": "00000000-0000-0000-0000-000000000000"
               },
               "access": {
                 "$ref": "#/components/schemas/FileShare"
@@ -56016,7 +56350,7 @@
             "type": "string",
             "description": "The link name.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "linkType": {
             "$ref": "#/components/schemas/LinkType"
@@ -56027,7 +56361,7 @@
             "type": "string",
             "description": "The link password.",
             "nullable": true,
-            "example": "vfmf2vO1Kp"
+            "example": "P@ssw0rd123"
           },
           "denyDownload": {
             "type": "boolean",
@@ -56153,13 +56487,13 @@
             "type": "integer",
             "description": "The room template ID.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "title": {
             "type": "string",
             "description": "The room template title.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "logo": {
             "$ref": "#/components/schemas/LogoRequest"
@@ -56368,13 +56702,13 @@
             "type": "integer",
             "description": "The folder ID to save the file as PDF.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "title": {
             "type": "string",
             "description": "The file title to save as PDF.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           }
         },
         "additionalProperties": false,
@@ -56572,7 +56906,7 @@
             "type": "integer",
             "description": "The room template ID.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "public": {
             "type": "boolean",
@@ -56817,7 +57151,7 @@
             "type": "string",
             "description": "The template title that will be displayed in the Create New... menu option.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "url": {
             "type": "string",
@@ -56868,7 +57202,7 @@
             "type": "string",
             "description": "The password.",
             "nullable": true,
-            "example": "vfmf2vO1Kp"
+            "example": "P@ssw0rd123"
           },
           "token": {
             "type": "string",
@@ -56991,7 +57325,7 @@
             "type": "string",
             "description": "The third-party request password.",
             "nullable": true,
-            "example": "vfmf2vO1Kp"
+            "example": "P@ssw0rd123"
           },
           "token": {
             "type": "string",
@@ -57073,7 +57407,7 @@
             "type": "string",
             "description": "The file title to update.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "lastVersion": {
             "type": "integer",
@@ -57094,7 +57428,7 @@
             "type": "string",
             "description": "The room title.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "quota": {
             "type": "integer",
@@ -57329,7 +57663,7 @@
           "folderId": {
             "type": "integer",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "version": {
             "type": "integer",
@@ -57339,7 +57673,7 @@
           "title": {
             "type": "string",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "providerKey": {
             "type": "string",
@@ -57397,13 +57731,13 @@
             "type": "string",
             "description": "The user ID.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "name": {
             "type": "string",
             "description": "The full name of the user.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           },
           "image": {
             "type": "string",
@@ -57691,7 +58025,7 @@
           "id": {
             "type": "string",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "fileName": {
             "type": "string",
