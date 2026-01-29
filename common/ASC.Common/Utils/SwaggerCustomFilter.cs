@@ -26,8 +26,6 @@
 
 using System.Text.Json.Nodes;
 
-using Bogus;
-
 using Microsoft.OpenApi;
 
 using Swashbuckle.AspNetCore.Annotations;
@@ -308,30 +306,26 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
     }
     private JsonNode GenerateFakeData(PropertyInfo propertyInfo)
     {
-        var faker = new Faker();
-        Randomizer.Seed = new Random(123);
-        var fileExtension = ".txt";
         switch (propertyInfo.Name)
         {
             case "Name":
-                return faker.Name.FullName();
+                return "John Doe";
             case "Email":
-                return faker.Internet.Email();
+                return "example@onlyoffice.com";
             case "FirstName":
-                return faker.Name.FirstName();
+                return "John";
             case "LastName":
-                return faker.Name.LastName();
+                return "Doe";
             case "Location":
-                return faker.Address.FullAddress();
+                return "001 Schroeder Run, New Tabithaport, Colombia";
             case "Password":
-                return faker.Internet.Password();
+                return "P@ssw0rd123";
             case "Extension":
             case "Ext":
             case "FileExtension":
-                return fileExtension;
+                return ".txt";
             case "Title":
-                var fileName = faker.System.FileName();
-                return fileName.Substring(0, fileName.LastIndexOf('.'));
+                return "SampleFile";
             case "Id":
             case "FileId":
             case "FolderId":
@@ -341,15 +335,15 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             case "ProductId":
                 if (propertyInfo.PropertyType == typeof(string))
                 {
-                    return faker.Random.Int(1, 10000).ToString();
+                    return "1";
                 }
 
                 if (propertyInfo.PropertyType == typeof(int))
                 {
-                    return faker.Random.Int(1, 10000);
+                    return 1;
                 }
 
-                return faker.Random.Guid().ToString();
+                return "00000000-0000-0000-0000-000000000000";
             default:
                 return null;
         }
