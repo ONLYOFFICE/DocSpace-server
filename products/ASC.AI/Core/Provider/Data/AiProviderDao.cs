@@ -182,7 +182,7 @@ public class AiProviderDao(
         return provider;
     }
     
-    public async Task DeleteProviders(int tenantId, List<int> ids)
+    public async Task DeleteProviders(int tenantId, HashSet<int> ids)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
