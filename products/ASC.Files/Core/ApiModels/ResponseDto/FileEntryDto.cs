@@ -303,6 +303,7 @@ public class FileEntryDtoHelper(
                 FolderType.VirtualRooms => IdConverter.Convert<TId>(await _globalFolderHelper.GetFolderVirtualRooms()),
                 FolderType.Archive => IdConverter.Convert<TId>(await _globalFolderHelper.GetFolderArchive()),
                 FolderType.RoomTemplates => IdConverter.Convert<TId>(await _globalFolderHelper.GetFolderRoomTemplatesAsync()),
+                FolderType.DefaultTemplates => IdConverter.Convert<TId>(await _globalFolderHelper.GetFolderDefaultTemplatesAsync()),
                 _ => entry.RootId
             };
         }

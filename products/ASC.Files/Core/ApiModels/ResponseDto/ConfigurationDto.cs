@@ -103,13 +103,13 @@ public class ConfigurationDto<T>
 /// </summary>
 public enum StartFillingMode
 {
-    [SwaggerEnum("None")]
+    [Description("None")]
     None,
 
-    [SwaggerEnum("Share to fill out")]
+    [Description("Share to fill out")]
     ShareToFillOut,
 
-    [SwaggerEnum("Start filling")]
+    [Description("Start filling")]
     StartFilling
 }
 

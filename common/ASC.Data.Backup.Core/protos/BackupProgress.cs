@@ -31,13 +31,13 @@ namespace ASC.Data.Backup.Contracts;
 /// </summary>
 public enum BackupProgressEnum
 {
-    [SwaggerEnum(Description = "Backup")]
+    [Description("Backup")]
     Backup,
 
-    [SwaggerEnum(Description = "Restore")]
+    [Description("Restore")]
     Restore,
 
-    [SwaggerEnum(Description = "Transfer")]
+    [Description("Transfer")]
     Transfer
 }
 

@@ -47,9 +47,9 @@ public class ManageFormFillingDto<T>
 /// </summary>
 public enum FormFillingManageAction
 {
-    [SwaggerEnum("Stop")]
+    [Description("Stop")]
     Stop,
 
-    [SwaggerEnum("Resume")]
+    [Description("Resume")]
     Resume
 }

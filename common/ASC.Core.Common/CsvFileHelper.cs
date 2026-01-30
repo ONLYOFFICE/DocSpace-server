@@ -28,6 +28,8 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using CsvHelper.TypeConversion;
 
+using DateTimeConverter = CsvHelper.TypeConversion.DateTimeConverter;
+
 namespace ASC.Core.Common;
 
 [Scope]

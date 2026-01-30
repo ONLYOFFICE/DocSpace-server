@@ -32,63 +32,63 @@ namespace ASC.AuditTrail.Types;
 [EnumExtensions]
 public enum ActionType
 {
-    [SwaggerEnum("None")]
+    [Description("None")]
     None,
 
-    [SwaggerEnum("Create")]
+    [Description("Create")]
     Create,
 
-    [SwaggerEnum("Update")]
+    [Description("Update")]
     Update,
 
-    [SwaggerEnum("Delete")]
+    [Description("Delete")]
     Delete,
 
-    [SwaggerEnum("Link")]
+    [Description("Link")]
     Link,
 
-    [SwaggerEnum("Unlink")]
+    [Description("Unlink")]
     Unlink,
 
-    [SwaggerEnum("Attach")]
+    [Description("Attach")]
     Attach,
 
-    [SwaggerEnum("Detach")]
+    [Description("Detach")]
     Detach,
 
-    [SwaggerEnum("Send")]
+    [Description("Send")]
     Send,
 
-    [SwaggerEnum("Import")]
+    [Description("Import")]
     Import,
 
-    [SwaggerEnum("Export")]
+    [Description("Export")]
     Export,
 
-    [SwaggerEnum("Update access")]
+    [Description("Update access")]
     UpdateAccess,
 
-    [SwaggerEnum("Download")]
+    [Description("Download")]
     Download,
 
-    [SwaggerEnum("Upload")]
+    [Description("Upload")]
     Upload,
 
-    [SwaggerEnum("Copy")]
+    [Description("Copy")]
     Copy,
 
-    [SwaggerEnum("Move")]
+    [Description("Move")]
     Move,
 
-    [SwaggerEnum("Reassigns")]
+    [Description("Reassigns")]
     Reassigns,
 
-    [SwaggerEnum("Follow")]
+    [Description("Follow")]
     Follow,
 
-    [SwaggerEnum("Unfollow")]
+    [Description("Unfollow")]
     Unfollow,
 
-    [SwaggerEnum("Logout")]
+    [Description("Logout")]
     Logout
 }

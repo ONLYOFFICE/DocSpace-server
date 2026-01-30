@@ -31,9 +31,9 @@ namespace ASC.Core;
 /// </summary>
 public enum Payments
 {
-    [SwaggerEnum("Paid")]
+    [Description("Paid")]
     Paid = 0,
 
-    [SwaggerEnum("Free")]
+    [Description("Free")]
     Free = 1
 }

@@ -77,7 +77,6 @@ public class FileStorageService //: IFileStorageService
     CountRoomChecker countRoomChecker,
     CountAIAgentChecker countAIAgentChecker,
     InvitationService invitationService,
-    InvitationValidator invitationValidator,
     StudioNotifyService studioNotifyService,
     TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
     QuotaSocketManager quotaSocketManager,
@@ -1549,6 +1548,7 @@ public class FileStorageService //: IFileStorageService
             var canCreate = await fileSecurity.CanCreateAsync(folder) &&
                             folder.FolderType != FolderType.VirtualRooms &&
                             folder.FolderType != FolderType.RoomTemplates &&
+                            folder.FolderType != FolderType.DefaultTemplates &&
                             folder.FolderType != FolderType.Archive;
 
             if (!canCreate)
@@ -1616,7 +1616,7 @@ public class FileStorageService //: IFileStorageService
         {
             var culture = (await userManager.GetUsersAsync(authContext.CurrentAccount.ID)).GetCulture();
             var storeTemplate = await globalStore.GetStoreTemplateAsync();
-            var pathNew = await globalStore.GetNewDocTemplatePath(storeTemplate, fileExt, culture);
+            var docTemplate = await globalStore.GetNewDocTemplate(serviceProvider, storeTemplate, fileExt, culture);
 
             try
             {
@@ -1624,8 +1624,8 @@ public class FileStorageService //: IFileStorageService
 
                 if (!enableExternalExt)
                 {
-                    await using var stream = await storeTemplate.GetReadStreamAsync("", pathNew, 0);
-                    file.ContentLength = stream.CanSeek ? stream.Length : await storeTemplate.GetFileSizeAsync(pathNew);
+                    await using var stream = await docTemplate.GetStreamAsync();
+                    file.ContentLength = docTemplate.FileSize;
 
                     if (FileUtility.GetFileTypeByExtention(fileExt) == FileType.Pdf)
                     {
@@ -1653,23 +1653,24 @@ public class FileStorageService //: IFileStorageService
 
                 var counter = 0;
 
-                var path = pathNew.Replace(Path.GetFileName(pathNew), string.Empty);
-
-                foreach (var size in thumbnailSettings.Sizes)
+                if (!string.IsNullOrWhiteSpace( docTemplate.ThumbnailPath))
                 {
-                    var pathThumb = $"{path}{fileExt.Trim('.')}.{size.Width}x{size.Height}.{global.ThumbnailExtension}";
-
-                    if (!await storeTemplate.IsFileAsync("", pathThumb))
+                    foreach (var size in thumbnailSettings.Sizes)
                     {
-                        break;
-                    }
+                        var pathThumb = $"{docTemplate.ThumbnailPath}{fileExt.Trim('.')}.{size.Width}x{size.Height}.{global.ThumbnailExtension}";
 
-                    await using (var streamThumb = await storeTemplate.GetReadStreamAsync("", pathThumb, 0))
-                    {
-                        await (await globalStore.GetStoreAsync()).SaveAsync(fileDao.GetUniqThumbnailPath(file, size.Width, size.Height), streamThumb);
-                    }
+                        if (!await storeTemplate.IsFileAsync("", pathThumb))
+                        {
+                            break;
+                        }
 
-                    counter++;
+                        await using (var streamThumb = await storeTemplate.GetReadStreamAsync("", pathThumb, 0))
+                        {
+                            await (await globalStore.GetStoreAsync()).SaveAsync(fileDao.GetUniqThumbnailPath(file, size.Width, size.Height), streamThumb);
+                        }
+
+                        counter++;
+                    }
                 }
 
                 if (thumbnailSettings.Sizes.Count() == counter)
@@ -4773,7 +4774,7 @@ public class FileStorageService //: IFileStorageService
 
         await foreach (var folder in folders)
         {
-            if (folder.RootFolderType is not FolderType.COMMON and not FolderType.VirtualRooms and not FolderType.RoomTemplates and not FolderType.AiAgents)
+            if (folder.RootFolderType is not FolderType.COMMON and not FolderType.VirtualRooms and not FolderType.RoomTemplates and not FolderType.DefaultTemplates and not FolderType.AiAgents)
             {
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
             }
