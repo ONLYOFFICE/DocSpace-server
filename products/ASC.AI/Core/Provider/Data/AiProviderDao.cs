@@ -124,11 +124,16 @@ public class AiProviderDao(
     {
         var defaultProviderId = (await GetDefaultProviderAsync(tenantId))?.ProviderId;
 
-        if (gateway.Configured)
+        if (gateway.Configured && offset == 0)
         {
             var gatewayProvider = await CreateGatewayProviderAsync();
             gatewayProvider.IsDefault = defaultProviderId == gatewayProvider.Id;
             yield return gatewayProvider;
+            limit--;
+        }
+
+        if (limit <= 0)
+        {
             yield break;
         }
 
@@ -148,11 +153,6 @@ public class AiProviderDao(
 
     public async Task<bool> CanDecryptSomeKeyAsync(int tenantId)
     {
-        if (gateway.Configured)
-        {
-            return true;
-        }
-
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
         var count = 0;
@@ -173,13 +173,15 @@ public class AiProviderDao(
 
     public async Task<int> GetProvidersTotalCountAsync(int tenantId)
     {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var count = await dbContext.GetProvidersTotalCountAsync(tenantId);
+
         if (gateway.Configured)
         {
-            return 1;
+            count++;
         }
 
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        return await dbContext.GetProvidersTotalCountAsync(tenantId);
+        return count;
     }
 
     public async Task<AiProvider> UpdateProviderAsync(int tenantId, AiProvider provider)
