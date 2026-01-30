@@ -91,6 +91,7 @@ public class CreateAgentRequestDto
     /// <summary>
     /// The collection of sharing parameters.
     /// </summary>
+    [MaxEmailInvitations]
     public IEnumerable<FileShareParams>? Share { get; set; }
         
     /// <summary>

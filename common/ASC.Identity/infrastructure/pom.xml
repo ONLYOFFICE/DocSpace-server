@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.asc</groupId>
         <artifactId>identity</artifactId>
-        <version>1.0.3</version>
+        <version>1.1.0</version>
     </parent>
 
     <artifactId>infrastructure</artifactId>
@@ -17,6 +17,5 @@
         <module>infrastructure-benchmark</module>
         <module>infrastructure-migration-runner</module>
         <module>infrastructure-configuration</module>
-        <module>infrastructure-data-transfer</module>
     </modules>
 </project>

@@ -1,0 +1,19 @@
+resilience4j:
+  retry:
+    instances:
+      optimisticLockingRetry:
+        maxAttempts: ${RETRY_OPTIMISTIC_LOCKING_MAX_ATTEMPTS:3}
+        waitDuration: ${RETRY_OPTIMISTIC_LOCKING_WAIT_DURATION:500ms}
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: ${RETRY_OPTIMISTIC_LOCKING_MULTIPLIER:1.65}
+        retryExceptions:
+          - org.springframework.dao.OptimisticLockingFailureException
+        ignoreExceptions:
+          - com.asc.registration.core.domain.exception.ClientNotFoundException
+      grpcAuthorizationRetry:
+        maxAttempts: ${RETRY_GRPC_AUTHORIZATION_MAX_ATTEMPTS:5}
+        waitDuration: ${RETRY_GRPC_AUTHORIZATION_WAIT_DURATION:100ms}
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: ${RETRY_GRPC_AUTHORIZATION_MULTIPLIER:1.625}
+        retryExceptions:
+          - java.lang.Exception

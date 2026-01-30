@@ -1,5 +1,5 @@
 {{>licenseInfo}}
-package {{package}};
+package {{package}}{{#operations}}.{{x-folder}}{{/operations}};
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -135,7 +135,12 @@ public class {{x-classname}} extends BaseApi {
     localVarQueryParameterBaseName = "{{{baseName}}}";
           {{#isArray}}
     for (int i=0; i < {{paramName}}.size(); i++) {
-      localVarQueryStringJoiner.add({{paramName}}.get(i).toUrlQueryString(String.format("{{baseName}}[%d]", i)));
+      {{#items.isModel}}
+      localVarQueryStringJoiner.add({{paramName}}.get(i).toUrlQueryString(String.format(java.util.Locale.ROOT, "{{baseName}}[%d]", i)));
+      {{/items.isModel}}
+      {{^items.isModel}}
+      localVarQueryStringJoiner.add(String.format(java.util.Locale.ROOT, "{{baseName}}[%d]=%s", i, apiClient.parameterToString({{paramName}}.get(i))));
+      {{/items.isModel}}
     }
           {{/isArray}}
           {{^isArray}}
@@ -173,7 +178,7 @@ public class {{x-classname}} extends BaseApi {
     {{/headerParams}}
   
     {{#vendorExtensions.x-hasFieldsParam}}if (this.fields != null)
-      localVarHeaderParams.put.Add("fields", this.fields);
+      localVarHeaderParams.put("fields", this.fields);
     {{/vendorExtensions.x-hasFieldsParam}}
 
     localVarHeaderParams.putAll(additionalHeaders);

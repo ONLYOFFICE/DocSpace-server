@@ -37,7 +37,7 @@ module.exports = function () {
         const proto = req.headers['x-forwarded-proto']?.split(',').shift();
         const host = req.headers['x-forwarded-host']?.split(',').shift();
         const originUrl = `${proto}://${host}`;
-        const baseUrl = config.get("API_HOST") || originUrl;
+        const baseUrl = config.get("API_HOST")?.replace(/\/$/g, "") || originUrl;
 
         return { baseUrl, originUrl };
     }

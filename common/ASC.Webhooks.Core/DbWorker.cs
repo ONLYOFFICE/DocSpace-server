@@ -371,22 +371,22 @@ public class DbWebhooks
 [Flags]
 public enum WebhookGroupStatus
 {
-    [SwaggerEnum("None")]
+    [Description("None")]
     None = 0,
 
-    [SwaggerEnum("Not sent")]
+    [Description("Not sent")]
     NotSent = 1,
 
-    [SwaggerEnum("Status2xx")]
+    [Description("Status2xx")]
     Status2xx = 2,
 
-    [SwaggerEnum("Status3xx")]
+    [Description("Status3xx")]
     Status3xx = 4,
 
-    [SwaggerEnum("Status4xx")]
+    [Description("Status4xx")]
     Status4xx = 8,
 
-    [SwaggerEnum("Status5xx")]
+    [Description("Status5xx")]
     Status5xx = 16
 }
 

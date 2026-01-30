@@ -76,7 +76,6 @@ public class FileStorageService //: IFileStorageService
     CountRoomChecker countRoomChecker,
     CountAIAgentChecker countAIAgentChecker,
     InvitationService invitationService,
-    InvitationValidator invitationValidator,
     StudioNotifyService studioNotifyService,
     TenantQuotaFeatureStatHelper tenantQuotaFeatureStatHelper,
     QuotaSocketManager quotaSocketManager,
@@ -101,8 +100,7 @@ public class FileStorageService //: IFileStorageService
     WebhookManager webhookManager,
     FileSharingHelper fileSharingHelper,
     AiGateway gateway,
-    FormFillingReportCreator formFillingReportCreator,
-    NotifyConstants notifyConstants)
+    FormFillingReportCreator formFillingReportCreator)
 {
     private readonly ILogger _logger = optionMonitor.CreateLogger("ASC.Files");
 
@@ -1537,6 +1535,7 @@ public class FileStorageService //: IFileStorageService
             var canCreate = await fileSecurity.CanCreateAsync(folder) &&
                             folder.FolderType != FolderType.VirtualRooms &&
                             folder.FolderType != FolderType.RoomTemplates &&
+                            folder.FolderType != FolderType.DefaultTemplates &&
                             folder.FolderType != FolderType.Archive;
 
             if (!canCreate)
@@ -1604,7 +1603,7 @@ public class FileStorageService //: IFileStorageService
         {
             var culture = (await userManager.GetUsersAsync(authContext.CurrentAccount.ID)).GetCulture();
             var storeTemplate = await globalStore.GetStoreTemplateAsync();
-            var pathNew = await globalStore.GetNewDocTemplatePath(storeTemplate, fileExt, culture);
+            var docTemplate = await globalStore.GetNewDocTemplate(serviceProvider, storeTemplate, fileExt, culture);
 
             try
             {
@@ -1612,8 +1611,8 @@ public class FileStorageService //: IFileStorageService
 
                 if (!enableExternalExt)
                 {
-                    await using var stream = await storeTemplate.GetReadStreamAsync("", pathNew, 0);
-                    file.ContentLength = stream.CanSeek ? stream.Length : await storeTemplate.GetFileSizeAsync(pathNew);
+                    await using var stream = await docTemplate.GetStreamAsync();
+                    file.ContentLength = docTemplate.FileSize;
 
                     if (FileUtility.GetFileTypeByExtention(fileExt) == FileType.Pdf)
                     {
@@ -1641,23 +1640,24 @@ public class FileStorageService //: IFileStorageService
 
                 var counter = 0;
 
-                var path = pathNew.Replace(Path.GetFileName(pathNew), string.Empty);
-
-                foreach (var size in thumbnailSettings.Sizes)
+                if (!string.IsNullOrWhiteSpace( docTemplate.ThumbnailPath))
                 {
-                    var pathThumb = $"{path}{fileExt.Trim('.')}.{size.Width}x{size.Height}.{global.ThumbnailExtension}";
-
-                    if (!await storeTemplate.IsFileAsync("", pathThumb))
+                    foreach (var size in thumbnailSettings.Sizes)
                     {
-                        break;
-                    }
+                        var pathThumb = $"{docTemplate.ThumbnailPath}{fileExt.Trim('.')}.{size.Width}x{size.Height}.{global.ThumbnailExtension}";
 
-                    await using (var streamThumb = await storeTemplate.GetReadStreamAsync("", pathThumb, 0))
-                    {
-                        await (await globalStore.GetStoreAsync()).SaveAsync(fileDao.GetUniqThumbnailPath(file, size.Width, size.Height), streamThumb);
-                    }
+                        if (!await storeTemplate.IsFileAsync("", pathThumb))
+                        {
+                            break;
+                        }
 
-                    counter++;
+                        await using (var streamThumb = await storeTemplate.GetReadStreamAsync("", pathThumb, 0))
+                        {
+                            await (await globalStore.GetStoreAsync()).SaveAsync(fileDao.GetUniqThumbnailPath(file, size.Width, size.Height), streamThumb);
+                        }
+
+                        counter++;
+                    }
                 }
 
                 if (thumbnailSettings.Sizes.Count() == counter)
@@ -2513,7 +2513,7 @@ public class FileStorageService //: IFileStorageService
         try
         {
             var newFiles = await fileMarker.MarkedItemsAsync(folder)
-                .Where(x => x.FileEntryType == FileEntryType.File)
+                .Where(x => folder.FolderType == FolderType.SHARE || x.FileEntryType == FileEntryType.File)
                 .ToListAsync();
             if (newFiles.Count == 0)
             {
@@ -4138,17 +4138,43 @@ public class FileStorageService //: IFileStorageService
         return users;
     }
 
-    public async Task<AceWrapper> SetInvitationLinkAsync<T>(T roomId, Guid linkId, string title, FileShare share)
+    public async Task<AceWrapper> SetInvitationLinkAsync<T>(T roomId, Guid linkId, string title, FileShare share, DateTime expirationDate, int? maxUseCount)
     {
         var room = (await daoFactory.GetFolderDao<T>().GetFolderAsync(roomId)).NotFoundIfNull();
+
+        var currentUseCount = 0;
+        if (maxUseCount.HasValue)
+        {
+            var link = (await fileSecurity.GetSharesAsync(room, [linkId])).FirstOrDefault();
+            if (link?.Options != null)
+            {
+                currentUseCount = link.Options.CurrentUseCount;
+                if (maxUseCount.Value < currentUseCount)
+                {
+                    throw new ArgumentException(null, nameof(maxUseCount));
+                }
+            }
+        }
 
         var options = new FileShareOptions
         {
             Title = !string.IsNullOrEmpty(title)
                 ? title
                 : FilesCommonResource.DefaultInvitationLinkTitle,
-            ExpirationDate = DateTime.UtcNow.Add(invitationValidator.IndividualLinkExpirationInterval)
+            MaxUseCount = maxUseCount,
+            CurrentUseCount = currentUseCount
         };
+
+        var expirationDateUtc = tenantUtil.DateTimeToUtc(expirationDate);
+        if (expirationDateUtc != DateTime.MinValue)
+        {
+            if (expirationDateUtc < DateTime.UtcNow || expirationDateUtc > DateTime.UtcNow.AddYears(FilesLinkUtility.MaxLinkLifeTimeInYears))
+            {
+                throw new ArgumentException(null, nameof(expirationDate));
+            }
+
+            options.ExpirationDate = expirationDateUtc;
+        }
 
         var result = await SetAceLinkAsync(room, SubjectType.InvitationLink, linkId, share, options);
 
@@ -4725,7 +4751,7 @@ public class FileStorageService //: IFileStorageService
 
         await foreach (var folder in folders)
         {
-            if (folder.RootFolderType is not FolderType.COMMON and not FolderType.VirtualRooms and not FolderType.RoomTemplates and not FolderType.AiAgents)
+            if (folder.RootFolderType is not FolderType.COMMON and not FolderType.VirtualRooms and not FolderType.RoomTemplates and not FolderType.DefaultTemplates and not FolderType.AiAgents)
             {
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
             }
@@ -4907,18 +4933,13 @@ public class FileStorageService //: IFileStorageService
         {
             throw new ItemNotFoundException();
         }
-
-        Dictionary<Guid, UserRelation> userRelations = null;
-        var currentUserId = authContext.CurrentAccount.ID;
-
-        var isDocSpaceAdmin = await userManager.IsDocSpaceAdminAsync(currentUserId);
-
+        
         if (!resendAll)
         {
             await foreach (var ace in fileSharing.GetPureSharesAsync(room, usersIds))
             {
                 var user = await userManager.GetUsersAsync(ace.Id);
-                if (!await HasAccessInviteAsync(user))
+                if (!await userManager.CanUserViewAnotherUserAsync(authContext.CurrentAccount.ID, user.Id))
                 {
                     continue;
                 }
@@ -4951,7 +4972,7 @@ public class FileStorageService //: IFileStorageService
                 }
 
                 var user = await userManager.GetUsersAsync(ace.Id);
-                if (!await HasAccessInviteAsync(user))
+                if (!await userManager.CanUserViewAnotherUserAsync(authContext.CurrentAccount.ID, user.Id))
                 {
                     continue;
                 }
@@ -4967,30 +4988,6 @@ public class FileStorageService //: IFileStorageService
             {
                 finish = true;
             }
-        }
-
-        return;
-
-        async Task<bool> HasAccessInviteAsync(UserInfo user)
-        {
-            if (user.Status == EmployeeStatus.Terminated)
-            {
-                return false;
-            }
-
-            if (isDocSpaceAdmin)
-            {
-                return true;
-            }
-
-            var type = await userManager.GetUserTypeAsync(user);
-            if (type != EmployeeType.Guest || (user.CreatedBy.HasValue && user.CreatedBy.Value == currentUserId))
-            {
-                return true;
-            }
-
-            userRelations ??= await userManager.GetUserRelationsAsync(currentUserId);
-            return userRelations.ContainsKey(user.Id);
         }
     }
 
@@ -5090,7 +5087,7 @@ public class FileStorageService //: IFileStorageService
 
             if (recipients.Count > 0)
             {
-                await notifyClient.SendFormFillingEvent(currentRoom, form, recipients, notifyConstants.EventFormStartedFilling, currentUserId);
+                await notifyClient.SendFormFillingEvent(currentRoom, form, recipients, typeof(FormStartedFillingNotifyAction), currentUserId);
             }
 
             var roleUserIds = roles.Where(r => r.UserId != currentUserId).Select(r => r.UserId);
@@ -5186,7 +5183,7 @@ public class FileStorageService //: IFileStorageService
 
                 var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
                 await filesMessageService.SendAsync(MessageAction.FormStopped, form, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
-                await notifyClient.SendFormFillingEvent(room, form, allRoleUserIds, notifyConstants.EventStoppedFormFilling, authContext.CurrentAccount.ID);
+                await notifyClient.SendFormFillingEvent(room, form, allRoleUserIds, typeof(StoppedFormFillingNotifyAction), authContext.CurrentAccount.ID);
                 break;
 
             case FormFillingManageAction.Resume:

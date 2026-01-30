@@ -54,6 +54,13 @@ public class ReassignController(
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
         var tenant = tenantManager.GetCurrentTenant();
+        var userType = await userManager.GetUserTypeAsync(inDto.UserId);
+
+        if (userType is EmployeeType.DocSpaceAdmin && !securityContext.CurrentAccount.ID.Equals(tenant.OwnerId))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
         var progressItem = await queueWorkerReassign.GetProgressItemStatus(tenant.Id, inDto.UserId);
 
         return TaskProgressResponseDto.Get(progressItem);
@@ -115,6 +122,13 @@ public class ReassignController(
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
         var tenant = tenantManager.GetCurrentTenant();
+        var userType = await userManager.GetUserTypeAsync(inDto.UserId);
+
+        if (userType is EmployeeType.DocSpaceAdmin && !securityContext.CurrentAccount.ID.Equals(tenant.OwnerId))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
         var progressItem = await queueWorkerReassign.GetProgressItemStatus(tenant.Id, inDto.UserId);
 
         if (progressItem != null)

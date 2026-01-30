@@ -1,27 +1,15 @@
 package com.example.codegen;
 
 import org.openapitools.codegen.languages.JavaClientCodegen;
-import io.swagger.v3.oas.models.servers.Server;
-import io.swagger.v3.oas.models.servers.ServerVariable;
-import io.swagger.v3.oas.models.servers.ServerVariables;
-import org.openapitools.codegen.model.OperationsMap;
-import org.openapitools.codegen.model.OperationMap;
+import io.swagger.v3.oas.models.servers.*;
 import static org.openapitools.codegen.utils.StringUtils.camelize;
-import org.openapitools.codegen.CodegenOperation;
-import org.openapitools.codegen.model.ModelMap;
-import org.openapitools.codegen.SupportingFile;
-import org.openapitools.codegen.model.ApiInfoMap;
+import org.openapitools.codegen.*;
+import org.openapitools.codegen.model.*;
 
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
 import java.io.File;
-import java.util.Locale;
-import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
-import java.util.LinkedHashMap;
-import java.util.ArrayList;
+import java.util.*;
 
 public class MyJavaClientCodegen extends JavaClientCodegen {
     
@@ -68,7 +56,10 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
         supportingFiles.add(new SupportingFile(
             "CHANGELOG.mustache", "", "CHANGELOG.md"
         ));
+        supportingFiles.add(new SupportingFile("sample.mustache", "samples", "sample.java"));
+        supportingFiles.add(new SupportingFile("auth/OpenIdAuth.mustache", this.authFolder, "OpenIdAuth.java"));
     }
+
 
     @Override
     public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List<ModelMap> allModels) {
@@ -82,9 +73,19 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
                 className = className.substring(0, className.length() - 3);
             }
             TagParts tagParts = tagMap.get(camelize(className));
+            String baseClassName = tagParts.classPart + apiNameSuffix;
+            String finalClassName = baseClassName;
+
+            // if (usedClassNames.contains(finalClassName)) {
+            //     finalClassName = camelize(tagParts.folderPart) + baseClassName;
+            // }
+
+            // usedClassNames.add(finalClassName);
+
             operationMap.put("x-folder", tagParts.folderPart);
-            operationMap.put("x-classname", tagParts.classPart + apiNameSuffix);
+            operationMap.put("x-classname", finalClassName);
             boolean shouldSupportFields = false;
+            boolean supportUseAt = false;
             if (operationList != null) {
                 for (CodegenOperation op : operationList) { 
                     if (op.operationId != null) {
@@ -104,15 +105,23 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
                             shouldSupportFields = true;
                         }
                     }
+                    if ("GET".equalsIgnoreCase(op.httpMethod)
+                        && "/api/2.0/files/recent".equals(op.path)) {
+
+                        op.vendorExtensions.put("x-supportsUseAtMethod", true);
+                        supportUseAt = true;
+                    }
                     
                 }
             }
             operationMap.put("x-supportsFields", shouldSupportFields);
+            operationMap.put("x-supportsUseAt", supportUseAt);
         }
 
         return objs;
     }
-
+    
+    @Override
     public Map<String, Object> postProcessSupportingFileData(Map<String, Object> objs) {
         super.postProcessSupportingFileData(objs);
 
@@ -157,6 +166,37 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
         return objs;
     }
 
+    @Override
+    public ModelsMap postProcessModels(ModelsMap objs) {
+        super.postProcessModels(objs);
+
+        for (ModelMap mo : objs.getModels()) {
+            CodegenModel model = mo.getModel();
+
+            if ("ApiDateTime".equals(model.classname)) {
+                model.vendorExtensions.put("isApiDateTime", true);
+
+                for (CodegenProperty prop : model.vars) {
+                    prop.isReadOnly = false;
+                }
+            }
+
+            for (CodegenProperty prop : model.vars) {
+                if ("version_Changed".equalsIgnoreCase(prop.baseName)) {
+                    prop.name = "VersionChangedField";
+                    prop.baseName = "versionChangedField";
+                    prop.getter = "getVersionChangedField";
+                    prop.setter = "setVersionChangedField";
+                    prop.nameInCamelCase = "versionChangedField";
+                    prop.nameInPascalCase = "VersionChangedField";
+                    prop.nameInSnakeCase = "VERSION_CHANGED_FIELD";
+                }
+            }
+            model.readWriteVars = model.vars.stream().filter(v -> !v.isReadOnly).collect(Collectors.toList());
+        }
+        return objs;
+    }
+
     private final Map<String, TagParts> tagMap = new HashMap<>();
 
     @Override
@@ -179,6 +219,7 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
     }
 
     private final Map<String, String> seenApiFilenames = new HashMap<String, String>();
+    private final Set<String> usedApiClassNames = new HashSet<>();
 
     @Override
     public String apiFilename(String templateName, String tag) {
@@ -190,9 +231,15 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
         }
 
         String folderPath = apiFileFolder() + File.separator + tagParts.folderPart;
-        String filename = toApiFilename(tagParts.classPart) + suffix;
 
-        return folderPath + File.separator + filename;
+        String baseFileName = toApiFilename(tagParts.classPart) + suffix;
+        String fileName = baseFileName;
+        // if (usedApiClassNames.contains(fileName)) {
+        //     fileName = tagParts.folderPart + toApiFilename(tagParts.classPart) + suffix;
+        // }
+        // usedApiClassNames.add(fileName);
+
+        return folderPath + File.separator + fileName;
     }
 
     private String uniqueCaseInsensitiveString(String value, Map<String, String> seenValues) {

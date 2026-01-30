@@ -1,27 +1,15 @@
 package com.example.codegen;
 
 import org.openapitools.codegen.languages.PhpClientCodegen;
-import io.swagger.v3.oas.models.servers.Server;
-import io.swagger.v3.oas.models.servers.ServerVariable;
-import io.swagger.v3.oas.models.servers.ServerVariables;
-import org.openapitools.codegen.model.OperationsMap;
-import org.openapitools.codegen.model.OperationMap;
+import io.swagger.v3.oas.models.servers.*;
 import static org.openapitools.codegen.utils.StringUtils.camelize;
-import org.openapitools.codegen.CodegenOperation;
-import org.openapitools.codegen.model.ModelMap;
-import org.openapitools.codegen.SupportingFile;
-import org.openapitools.codegen.model.ApiInfoMap;
+import org.openapitools.codegen.*;
+import org.openapitools.codegen.model.*;
 
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
 import java.io.File;
-import java.util.Locale;
-import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 
 public class MyPHPClientCodegen extends PhpClientCodegen {
     
@@ -85,6 +73,7 @@ public class MyPHPClientCodegen extends PhpClientCodegen {
             operationMap.put("x-folder", tagParts.folderPart);
             operationMap.put("x-classname", tagParts.classPart + apiNameSuffix);
             boolean shouldSupportFields = false;
+            boolean supportUseAt = false;
             if (operationList != null) {
                 for (CodegenOperation op : operationList) { 
                     if (op.operationId != null) {
@@ -104,10 +93,17 @@ public class MyPHPClientCodegen extends PhpClientCodegen {
                             shouldSupportFields = true;
                         }
                     }
+                    if ("GET".equalsIgnoreCase(op.httpMethod)
+                        && "/api/2.0/files/recent".equals(op.path)) {
+
+                        op.vendorExtensions.put("x-supportsUseAtMethod", true);
+                        supportUseAt = true;
+                    }
                     
                 }
             }
             operationMap.put("x-supportsFields", shouldSupportFields);
+            operationMap.put("x-supportsUseAt", supportUseAt);
         }
 
         return objs;

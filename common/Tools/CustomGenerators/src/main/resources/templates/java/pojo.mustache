@@ -118,6 +118,24 @@ public class {{classname}} {{#parent}}extends {{{.}}} {{/parent}}{{#vendorExtens
   }
   {{/withXml}}
   {{/vendorExtensions.x-has-readonly-properties}}
+
+{{#vendorExtensions.isApiDateTime}}
+
+  @JsonCreator
+  public static {{classname}} fromString(String value) {
+      if (value == null || value.isEmpty()) {
+          return null;
+      }
+
+      OffsetDateTime odt = OffsetDateTime.parse(value);
+
+      {{classname}} dt = new {{classname}}();
+      dt.utcTime = odt.withOffsetSameInstant(ZoneOffset.UTC);
+      dt.timeZoneOffset = odt.getOffset().toString();
+
+      return dt;
+  }
+{{/vendorExtensions.isApiDateTime}}
 {{#vendorExtensions.x-java-all-args-constructor}}
 
   /**

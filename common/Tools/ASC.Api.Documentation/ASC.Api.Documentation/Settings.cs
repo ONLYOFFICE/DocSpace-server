@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -75,5 +75,35 @@ public class Settings : CommandSettings
         Endpoints = configuration.GetSection("openApi:endpoints").Get<Dictionary<string, string>>()!;
         
         return ValidationResult.Success();
+    }
+}
+
+public class FilePathSettings : CommandSettings
+{
+    [CommandOption("--file <FILE>")]
+    public string File { get; set; } = null!;
+
+    public override ValidationResult Validate()
+    {
+        if (!string.IsNullOrWhiteSpace(File))
+        {
+            File = Path.GetFullPath(File);
+            return ValidationResult.Success();
+        }
+
+        var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+
+        var pathParts = configuration.GetSection("pathToFile").Get<string[]>();
+
+        if (pathParts == null || pathParts.Length == 0)
+        {
+            return ValidationResult.Error(
+                "File path not specified. Use --file <FILE> or configure file in appsettings.json"
+            );
+        }
+
+        File = Path.GetFullPath(Path.Combine(pathParts));
+
+        return !System.IO.File.Exists(File) ? ValidationResult.Error($"File not found: {File}") : ValidationResult.Success();
     }
 }

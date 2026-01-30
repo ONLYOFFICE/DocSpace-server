@@ -401,6 +401,7 @@ public interface IFolderDao<T>
     Task<T> GetFolderIDVirtualRooms(bool createIfNotExists);
 
     Task<T> GetFolderIDRoomTemplatesAsync(bool createIfNotExists);
+    Task<T> GetFolderIDDefaultTemplatesAsync(bool createIfNotExists);
 
     /// <summary>
     /// Returns id folder "Archive"

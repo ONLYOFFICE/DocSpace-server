@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Microsoft.Extensions.DependencyInjection;
+
 namespace ASC.EventBus.ActiveMQ;
 
 public class EventBusActiveMQ : IEventBus, IDisposable
@@ -32,7 +34,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
 
     private readonly ILogger<EventBusActiveMQ> _logger;
     private readonly IEventBusSubscriptionsManager _subsManager;
-    private readonly ILifetimeScope _autofac;
+    private readonly IServiceProvider _serviceProvider;
 
     private static readonly ConcurrentQueue<Guid> _rejectedEvents = new();
     private readonly IActiveMQPersistentConnection _persistentConnection;
@@ -47,7 +49,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
 
     public EventBusActiveMQ(IActiveMQPersistentConnection persistentConnection,
                             ILogger<EventBusActiveMQ> logger,
-                            ILifetimeScope autofac,
+                            IServiceProvider serviceProvider,
                             IEventBusSubscriptionsManager subsManager,
                             IIntegrationEventSerializer serializer,
                             string queueName = null,
@@ -58,7 +60,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
         _subsManager = subsManager ?? new InMemoryEventBusSubscriptionsManager();
         _serializer = serializer;
         _queueName = queueName;
-        _autofac = autofac;
+        _serviceProvider = serviceProvider;
         _retryCount = retryCount;
         _subsManager.OnEventRemoved += SubsManager_OnEventRemoved;
         _consumers = [];
@@ -314,14 +316,14 @@ public class EventBusActiveMQ : IEventBus, IDisposable
 
         if (_subsManager.HasSubscriptionsForEvent(eventName))
         {
-            await using var scope = _autofac.BeginLifetimeScope(AUTOFAC_SCOPE_NAME);
+            await using var scope = _serviceProvider.CreateAsyncScope();
             var subscriptions = _subsManager.GetHandlersForEvent(eventName);
 
             foreach (var subscription in subscriptions)
             {
                 if (subscription.IsDynamic)
                 {
-                    if (scope.ResolveOptional(subscription.HandlerType) is not IDynamicIntegrationEventHandler handler)
+                    if (scope.ServiceProvider.GetService(subscription.HandlerType) is not IDynamicIntegrationEventHandler handler)
                     {
                         continue;
                     }
@@ -332,7 +334,7 @@ public class EventBusActiveMQ : IEventBus, IDisposable
                 }
                 else
                 {
-                    var handler = scope.ResolveOptional(subscription.HandlerType);
+                    var handler = scope.ServiceProvider.GetService(subscription.HandlerType);
                     if (handler == null)
                     {
                         continue;

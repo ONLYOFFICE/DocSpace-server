@@ -38,60 +38,60 @@ namespace ASC.Web.Studio.Utility;
 [EnumExtensions]
 public enum ConfirmType
 {
-    [SwaggerEnum("Emp invite")]
+    [Description("Emp invite")]
     EmpInvite,
 
-    [SwaggerEnum("Link invite")]
+    [Description("Link invite")]
     LinkInvite,
 
-    [SwaggerEnum("Portal suspend")]
+    [Description("Portal suspend")]
     PortalSuspend,
 
-    [SwaggerEnum("Portal continue")]
+    [Description("Portal continue")]
     PortalContinue,
 
-    [SwaggerEnum("Portal remove")]
+    [Description("Portal remove")]
     PortalRemove,
 
-    [SwaggerEnum("Dns change")]
+    [Description("Dns change")]
     DnsChange,
 
-    [SwaggerEnum("Portal owner change")]
+    [Description("Portal owner change")]
     PortalOwnerChange,
 
-    [SwaggerEnum("Activation")]
+    [Description("Activation")]
     Activation,
 
-    [SwaggerEnum("Email change")]
+    [Description("Email change")]
     EmailChange,
 
-    [SwaggerEnum("Email activation")]
+    [Description("Email activation")]
     EmailActivation,
 
-    [SwaggerEnum("Password change")]
+    [Description("Password change")]
     PasswordChange,
 
-    [SwaggerEnum("Profile remove")]
+    [Description("Profile remove")]
     ProfileRemove,
 
-    [SwaggerEnum("Phone activation")]
+    [Description("Phone activation")]
     PhoneActivation,
 
-    [SwaggerEnum("Phone auth")]
+    [Description("Phone auth")]
     PhoneAuth,
 
-    [SwaggerEnum("Auth")]
+    [Description("Auth")]
     Auth,
 
-    [SwaggerEnum("Tfa activation")]
+    [Description("Tfa activation")]
     TfaActivation,
 
-    [SwaggerEnum("Tfa auth")]
+    [Description("Tfa auth")]
     TfaAuth,
 
-    [SwaggerEnum("Wizard")]
+    [Description("Wizard")]
     Wizard,
 
-    [SwaggerEnum("Guest share link")]
+    [Description("Guest share link")]
     GuestShareLink
 }

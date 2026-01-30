@@ -32,22 +32,22 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// </summary>
 public enum RoomType
 {
-    [SwaggerEnum(Description = "Form filling room")]
+    [Description("Form filling room")]
     FillingFormsRoom = 1,
 
-    [SwaggerEnum(Description = "Collaboration room")]
+    [Description("Collaboration room")]
     EditingRoom = 2,
 
-    [SwaggerEnum(Description = "Custom room")]
+    [Description("Custom room")]
     CustomRoom = 5,
 
-    [SwaggerEnum(Description = "Public room")]
+    [Description("Public room")]
     PublicRoom = 6,
 
-    [SwaggerEnum(Description = "Virtual data room")]
+    [Description("Virtual data room")]
     VirtualDataRoom = 8,
     
-    [SwaggerEnum(Description = "AI Room")]
+    [Description("AI Room")]
     AiRoom = 9
 }
 
@@ -145,6 +145,7 @@ public class CreateRoomRequestDto
     /// <summary>
     /// The collection of sharing parameters.
     /// </summary>
+    [MaxEmailInvitations]
     public IEnumerable<FileShareParams> Share { get; set; }
     
     public ChatSettings ChatSettings { get; set; }

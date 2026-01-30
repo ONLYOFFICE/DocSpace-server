@@ -28,6 +28,8 @@ namespace ASC.AppHost.Configuration;
 
 public static class Constants
 {
+    public const int AppHostPort = 8092;
+
     public const int RestyPort = 8092;
     public const int SocketIoPort = 9899;
     public const int SsoAuthPort = 9834;
@@ -46,10 +48,12 @@ public static class Constants
     public const int BackupBackgroundTasksPort = 5032;
     public const int FilesServicePort = 5009;
     public const int StudioNotifyPort = 5006;
+    public const int OpensearchPort = 9200;
     
     public const string HostDockerInternal = "host.docker.internal";
     public const string OpenRestyContainer = "asc-openresty";
     public const string EditorsContainer = "asc-editors";
+    public const string OpensearchContainer = "opensearch";
     public const string SocketIoContainer = "asc-socketIO";
     public const string IdentityRegistrationContainer = "asc-identity-registration";
     public const string IdentityAuthorizationContainer = "asc-identity-authorization";

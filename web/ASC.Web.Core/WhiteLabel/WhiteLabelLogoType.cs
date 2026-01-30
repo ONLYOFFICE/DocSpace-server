@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2026
+// (c) Copyright Ascensio System SIA 2009-2025
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,22 +33,53 @@ namespace ASC.Web.Core.WhiteLabel;
 [EnumExtensions]
 public enum WhiteLabelLogoType
 {
+    [Description("Light small")]
     LightSmall = 1,
+
+    [Description("Login page")]
     LoginPage = 2,
+
+    [Description("Favicon")]
     Favicon = 3,
+
+    [Description("Docs editor")]
     DocsEditor = 4,
+
+    [Description("Docs editor embed")]
     DocsEditorEmbed = 5,
+
+    [Description("Left menu")]
     LeftMenu = 6,
+
+    [Description("About page")]
     AboutPage = 7,
+
+    [Description("Notification")]
     Notification = 8,
+
+    [Description("Spreadsheet editor")]
     SpreadsheetEditor = 9,
+
+    [Description("Spreadsheet editor embed")]
     SpreadsheetEditorEmbed = 10,
+
+    [Description("Presentation editor")]
     PresentationEditor = 11,
+
+    [Description("Presentation editor embed")]
     PresentationEditorEmbed = 12,
+
+    [Description("Pdf editor")]
     PdfEditor = 13,
+
+    [Description("Pdf editor embed")]
     PdfEditorEmbed = 14,
+
+    [Description("Diagram editor")]
     DiagramEditor = 15,
-    DiagramEditorEmbed = 16
+
+    [Description("Diagram editor embed")]
+    DiagramEditorEmbed = 16,
 }
 
 public static class WhiteLabelLogoTypeHelper
