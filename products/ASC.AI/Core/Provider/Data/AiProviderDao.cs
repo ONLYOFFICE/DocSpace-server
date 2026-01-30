@@ -28,31 +28,42 @@ namespace ASC.AI.Core.Provider.Data;
 
 [Scope]
 public class AiProviderDao(
-    IDbContextFactory<AiDbContext> dbContextFactory, 
-    InstanceCrypto crypto)
+    IDbContextFactory<AiDbContext> dbContextFactory,
+    InstanceCrypto crypto,
+    AiGateway gateway,
+    IFusionCache cache)
 {
-    public async Task<AiProvider> AddProviderAsync(int tenantId, AiProvider provider, string defaultModel)
+    private static readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(10);
+
+    public async Task<AiProvider> AddProviderAsync(
+        int tenantId,
+        string title,
+        string url,
+        string key,
+        ProviderType type,
+        string defaultModel)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
 
         DbAiProvider dbProvider = null!;
         var now = DateTime.UtcNow;
+        var isFirstProvider = false;
 
         await strategy.ExecuteAsync(async () =>
         {
             await using var context = await dbContextFactory.CreateDbContextAsync();
             await using var transaction = await context.Database.BeginTransactionAsync();
 
-            var isFirstProvider = !await context.HasProvidersAsync(tenantId);
+            isFirstProvider = !await context.HasProvidersAsync(tenantId);
 
             dbProvider = new DbAiProvider
             {
                 TenantId = tenantId,
-                Type = provider.Type,
-                Url = provider.Url,
-                Key = await crypto.EncryptAsync(provider.Key),
-                Title = provider.Title,
+                Type = type,
+                Url = url,
+                Key = await crypto.EncryptAsync(key),
+                Title = title,
                 CreatedOn = now,
                 ModifiedOn = now
             };
@@ -75,17 +86,33 @@ public class AiProviderDao(
             await transaction.CommitAsync();
         });
 
-        provider.Id = dbProvider.Id;
-        provider.CreatedOn = now;
-        provider.ModifiedOn = now;
+        if (isFirstProvider)
+        {
+            await InvalidateDefaultProviderCacheAsync(tenantId);
+        }
 
-        return provider;
+        return new AiProvider
+        {
+            Id = dbProvider.Id,
+            Title = title,
+            Url = url,
+            Key = key,
+            Type = type,
+            CreatedOn = now,
+            ModifiedOn = now,
+            IsDefault = isFirstProvider
+        };
     }
 
     public async Task<AiProvider?> GetProviderAsync(int tenantId, int id)
     {
+        if (gateway.Configured && id == AiGateway.ProviderId)
+        {
+            return await CreateGatewayProviderAsync(includeCredentials: true);
+        }
+
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        
+
         var provider = await dbContext.GetProviderAsync(tenantId, id);
         if (provider == null)
         {
@@ -111,6 +138,16 @@ public class AiProviderDao(
     
     public async IAsyncEnumerable<AiProvider> GetProvidersAsync(int tenantId, int offset, int limit)
     {
+        var defaultProviderId = (await GetDefaultProviderAsync(tenantId))?.ProviderId;
+
+        if (gateway.Configured)
+        {
+            var gatewayProvider = await CreateGatewayProviderAsync();
+            gatewayProvider.IsDefault = defaultProviderId == gatewayProvider.Id;
+            yield return gatewayProvider;
+            yield break;
+        }
+
         var dbContext = await dbContextFactory.CreateDbContextAsync();
         await foreach (var provider in dbContext.GetProvidersAsync(tenantId, offset, limit))
         {
@@ -127,6 +164,7 @@ public class AiProviderDao(
 
             var res = provider.Map();
             res.NeedReset = reset;
+            res.IsDefault = defaultProviderId == res.Id;
 
             yield return res;
         }
@@ -134,6 +172,11 @@ public class AiProviderDao(
 
     public async Task<bool> CanDecryptSomeKeyAsync(int tenantId)
     {
+        if (gateway.Configured)
+        {
+            return true;
+        }
+
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
         var count = 0;
@@ -146,9 +189,7 @@ public class AiProviderDao(
                 _ = await crypto.DecryptAsync(key);
                 return true;
             }
-            catch (CryptographicException)
-            {
-            }
+            catch (CryptographicException) { }
         }
 
         return count == 0;
@@ -156,6 +197,11 @@ public class AiProviderDao(
 
     public async Task<int> GetProvidersTotalCountAsync(int tenantId)
     {
+        if (gateway.Configured)
+        {
+            return 1;
+        }
+
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         return await dbContext.GetProvidersTotalCountAsync(tenantId);
     }
@@ -184,6 +230,8 @@ public class AiProviderDao(
     
     public async Task DeleteProviders(int tenantId, HashSet<int> ids)
     {
+        var defaultProviderId = (await GetDefaultProviderAsync(tenantId))?.ProviderId;
+
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
 
@@ -199,6 +247,11 @@ public class AiProviderDao(
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
         });
+
+        if (defaultProviderId.HasValue && ids.Contains(defaultProviderId.Value))
+        {
+            await InvalidateDefaultProviderCacheAsync(tenantId);
+        }
     }
 
     public async Task<DefaultAiProvider> SetDefaultProviderAsync(int tenantId, int providerId, string defaultModel)
@@ -223,14 +276,17 @@ public class AiProviderDao(
             await context.SaveChangesAsync();
         });
 
+        await InvalidateDefaultProviderCacheAsync(tenantId);
+
         return result.Map();
     }
 
     public async Task<DefaultAiProvider?> GetDefaultProviderAsync(int tenantId)
     {
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var cacheKey = GetDefaultProviderCacheKey(tenantId);
 
-        return await dbContext.GetDefaultProviderAsync(tenantId);
+        return await cache.GetOrSetAsync(cacheKey, 
+            async _ => await FetchDefaultProviderAsync(tenantId), _cacheExpiration);
     }
 
     public async Task<bool> DeleteDefaultProviderAsync(int tenantId)
@@ -246,6 +302,58 @@ public class AiProviderDao(
             deleted = await context.DeleteDefaultProviderAsync(tenantId);
         });
 
+        if (deleted > 0)
+        {
+            await InvalidateDefaultProviderCacheAsync(tenantId);
+        }
+
         return deleted > 0;
+    }
+
+    private static string GetDefaultProviderCacheKey(int tenantId)
+    {
+        return $"ai:default_provider:{tenantId}";
+    }
+    
+    private async Task InvalidateDefaultProviderCacheAsync(int tenantId)
+    {
+        await cache.RemoveAsync(GetDefaultProviderCacheKey(tenantId));
+    }
+
+    private async Task<DefaultAiProvider?> FetchDefaultProviderAsync(int tenantId)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+        var result = await dbContext.GetDefaultProviderAsync(tenantId);
+        if (result == null)
+        {
+            return null;
+        }
+
+        if (result.ProviderId != AiGateway.ProviderId)
+        {
+            return result;
+        }
+
+        if (!gateway.Configured)
+        {
+            return null;
+        }
+
+        result.ProviderTitle = AiGateway.ProviderTitle;
+
+        return result;
+    }
+    
+    private async Task<AiProvider> CreateGatewayProviderAsync(bool includeCredentials = false)
+    {
+        return new AiProvider
+        {
+            Id = AiGateway.ProviderId,
+            Title = AiGateway.ProviderTitle,
+            Url = includeCredentials ? gateway.Url : string.Empty,
+            Key = includeCredentials ? await gateway.GetKeyAsync() : string.Empty,
+            Type = ProviderType.DocSpaceAi
+        };
     }
 }

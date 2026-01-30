@@ -101,6 +101,7 @@ static file class Queries
             (AiDbContext ctx, int tenantId, int offset, int limit) => 
             ctx.Providers
                 .Where(x => x.TenantId == tenantId)
+                .OrderBy(x => x.Id)
                 .Skip(offset)
                 .Take(limit));
 

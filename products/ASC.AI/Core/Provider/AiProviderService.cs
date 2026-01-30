@@ -35,11 +35,8 @@ public class AiProviderService(
     UserManager userManager,
     ModelClientFactory modelClientFactory,
     AiGateway gateway,
-    MessageService messageService,
-    IFusionCache cache)
+    MessageService messageService)
 {
-    private static readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(10);
-
     public async Task<AiProvider> AddProviderAsync(string? title, string? url, string key, ProviderType type)
     {
         await ThrowIfNotAccessAsync();
@@ -54,28 +51,17 @@ public class AiProviderService(
         ArgumentException.ThrowIfNullOrEmpty(key);
 
         url = string.IsNullOrEmpty(url) ? settings.Url : new Uri(url).ToString();
-        
-        var defaultModel = await ExecuteClientOperationAsync(url, key, type, async client =>
+
+        var defaultModel = await ExecuteProviderRequestAsync(async () =>
         {
+            var client = modelClientFactory.Create(type, url, key);
             var models = await GetFilteredModelsAsync(client, type);
             return models.FirstOrDefault()?.Id ?? throw new ArgumentException(ErrorMessages.NoModelsAvailable);
         });
 
-        var provider = new AiProvider
-        {
-            Title = title,
-            Url = url,
-            Key = key,
-            Type = type
-        };
-
         var tenantId = tenantManager.GetCurrentTenantId();
-
-        provider = await providerDao.AddProviderAsync(tenantId, provider, defaultModel);
         
-        await cache.RemoveAsync(GetDefaultProviderCacheKey(tenantId));
-        
-        return provider;
+        return await providerDao.AddProviderAsync(tenantId, title, url, key, type, defaultModel);
     }
     
     public async Task<AiProvider> UpdateProviderAsync(int id, string? title, string? url, string? key)
@@ -105,10 +91,11 @@ public class AiProviderService(
 
         if (needCheck)
         {
-            await ExecuteClientOperationAsync<object?>(provider.Url, provider.Key, provider.Type, async client =>
+            await ExecuteProviderRequestAsync(async () =>
             {
+                var client = modelClientFactory.Create(provider.Type, provider.Url, provider.Key);
                 await client.PingAsync();
-                return null;
+                return true;
             });
         }
         
@@ -124,37 +111,15 @@ public class AiProviderService(
         }
 
         var tenantId = tenantManager.GetCurrentTenantId();
-        var defaultProviderId = (await GetDefaultProviderCachedAsync(tenantId))?.ProviderId;
 
-        if (gateway.Configured)
+        await foreach (var provider in providerDao.GetProvidersAsync(tenantId, offset, limit))
         {
-            yield return new AiProvider
-            {
-                Id = AiGateway.ProviderId,
-                Title = AiGateway.ProviderTitle,
-                Url = string.Empty,
-                Key = string.Empty,
-                Type = ProviderType.DocSpaceAi,
-                IsDefault = defaultProviderId == AiGateway.ProviderId
-            };
-        }
-        else
-        {
-            await foreach (var provider in providerDao.GetProvidersAsync(tenantId, offset, limit))
-            {
-                provider.IsDefault = defaultProviderId == provider.Id;
-                yield return provider;
-            }
+            yield return provider;
         }
     }
 
     public async Task<bool> NeedResetProvidersAsync()
     {
-        if (gateway.Configured)
-        {
-            return false;
-        }
-
         var canDecryptSomeKey = await providerDao.CanDecryptSomeKeyAsync(tenantManager.GetCurrentTenantId());
 
         return !canDecryptSomeKey;
@@ -162,11 +127,6 @@ public class AiProviderService(
 
     public async Task<int> GetProvidersTotalCountAsync()
     {
-        if (gateway.Configured)
-        {
-            return 1;
-        }
-        
         return await providerDao.GetProvidersTotalCountAsync(tenantManager.GetCurrentTenantId());
     }
 
@@ -181,44 +141,34 @@ public class AiProviderService(
     {
         await ThrowIfNotAccessAsync();
 
-        var tenantId = tenantManager.GetCurrentTenantId();
-        var defaultProviderId = (await GetDefaultProviderCachedAsync(tenantId))?.ProviderId;
-
-        await providerDao.DeleteProviders(tenantId, ids);
-
-        if (defaultProviderId.HasValue && ids.Contains(defaultProviderId.Value))
-        {
-            await cache.RemoveAsync(GetDefaultProviderCacheKey(tenantId));
-        }
+        await providerDao.DeleteProviders(tenantManager.GetCurrentTenantId(), ids);
     }
 
     public async Task<IEnumerable<ModelData>> GetModelsAsync(int providerId, Scope? scope)
     {
-        if (gateway.Configured)
-        {
-            var internalProvider = await GetProviderAsync(AiGateway.ProviderId);
-            return await GetProviderModelsAsync(internalProvider, scope);
-        }
-        
         var provider = await GetProviderAsync(providerId);
-        return await GetProviderModelsAsync(provider, scope);
-    }
-    
-    public async Task<AiProvider> GetProviderAsync(int providerId)
-    {
-        if (gateway.Configured)
+        if (provider.NeedReset)
         {
-            return new AiProvider
-            {
-                Id = AiGateway.ProviderId,
-                Title = AiGateway.ProviderTitle,
-                Url = gateway.Url,
-                Key = await gateway.GetKeyAsync(),
-                Type = ProviderType.DocSpaceAi
-            };
+            return [];
         }
 
+        return await ExecuteProviderRequestAsync(async () => 
+        { 
+            var client = modelClientFactory.Create(provider.Type, provider.Url, provider.Key);
+            var models = await GetFilteredModelsAsync(client, provider.Type, scope);
+
+            return models.Select(m => new ModelData
+            {
+                Provider = provider,
+                ModelId = m.Id
+            });
+        });
+    }
+
+    public async Task<AiProvider> GetProviderAsync(int providerId)
+    {
         var provider = await providerDao.GetProviderAsync(tenantManager.GetCurrentTenantId(), providerId);
+
         return provider ?? throw new ItemNotFoundException(ErrorMessages.ProviderNotFound);
     }
 
@@ -232,8 +182,6 @@ public class AiProviderService(
         var result = await providerDao.SetDefaultProviderAsync(tenantId, providerId, defaultModel);
         result.ProviderTitle = provider.Title;
 
-        await cache.RemoveAsync(GetDefaultProviderCacheKey(tenantId));
-
         messageService.Send(MessageAction.AIDefaultProviderSet, MessageTarget.Create(result.ProviderId), provider.Title, defaultModel);
 
         return result;
@@ -241,62 +189,19 @@ public class AiProviderService(
 
     public async Task<DefaultAiProvider?> GetDefaultProviderAsync()
     {
-        var tenantId = tenantManager.GetCurrentTenantId();
-
-        var result = await GetDefaultProviderCachedAsync(tenantId);
-        if (result == null)
-        {
-            return null;
-        }
-
-        if (!string.IsNullOrEmpty(result.ProviderTitle) || result.ProviderId != AiGateway.ProviderId)
-        {
-            return result;
-        }
-
-        if (gateway.Configured)
-        {
-            result.ProviderTitle = AiGateway.ProviderTitle;
-        }
-        else
-        {
-            return null;
-        }
-
-        return result;
+        return await providerDao.GetDefaultProviderAsync(tenantManager.GetCurrentTenantId());
     }
 
     public async Task DeleteDefaultProviderAsync()
     {
         await ThrowIfNotAccessAsync();
 
-        var tenantId = tenantManager.GetCurrentTenantId();
-        var deleted = await providerDao.DeleteDefaultProviderAsync(tenantId);
+        var deleted = await providerDao.DeleteDefaultProviderAsync(tenantManager.GetCurrentTenantId());
 
         if (deleted)
         {
-            await cache.RemoveAsync(GetDefaultProviderCacheKey(tenantId));
             messageService.Send(MessageAction.AIDefaultProviderDeleted);
         }
-    }
-    
-    private async Task<IEnumerable<ModelData>> GetProviderModelsAsync(AiProvider p, Scope? scope)
-    {
-        if (p.NeedReset)
-        {
-            return [];
-        }
-
-        return await ExecuteClientOperationAsync<IEnumerable<ModelData>>(p.Url, p.Key, p.Type, async client =>
-        {
-            var models = await GetFilteredModelsAsync(client, p.Type, scope);
-
-            return models.Select(m => new ModelData
-            {
-                Provider = p,
-                ModelId = m.Id
-            });
-        });
     }
 
     private async Task<IEnumerable<ModelInfo>> GetFilteredModelsAsync(IModelClient client, ProviderType type, Scope? scope = null)
@@ -320,13 +225,11 @@ public class AiProviderService(
         }
     }
 
-    private async Task<T> ExecuteClientOperationAsync<T>(string url, string key, ProviderType type, Func<IModelClient, Task<T>> operation)
+    private async Task<T> ExecuteProviderRequestAsync<T>(Func<Task<T>> request)
     {
-        var client = modelClientFactory.Create(type, url, key);
-
         try
         {
-            return await operation(client);
+            return await request();
         }
         catch (HttpRequestException httpException)
         {
@@ -337,15 +240,5 @@ public class AiProviderService(
 
             throw new ArgumentException(ErrorMessages.InvalidUrl);
         }
-    }
-
-    private static string GetDefaultProviderCacheKey(int tenantId) => $"ai:default_provider:{tenantId}";
-
-    private async Task<DefaultAiProvider?> GetDefaultProviderCachedAsync(int tenantId)
-    {
-        var cacheKey = GetDefaultProviderCacheKey(tenantId);
-
-        return await cache.GetOrSetAsync(cacheKey, async _ =>
-            await providerDao.GetDefaultProviderAsync(tenantId), _cacheExpiration);
     }
 }
