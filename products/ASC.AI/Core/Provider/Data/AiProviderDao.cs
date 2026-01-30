@@ -111,19 +111,11 @@ public class AiProviderDao(
             return null;
         }
 
-        var reset = false;
-        try
-        {
-            provider.Key = await crypto.DecryptAsync(provider.Key);
-        }
-        catch (CryptographicException)
-        {
-            provider.Key = string.Empty;
-            reset = true;
-        }
+        var (success, decryptedKey) = await TryDecryptKeyAsync(provider.Key);
+        provider.Key = decryptedKey;
 
         var res = provider.Map();
-        res.NeedReset = reset;
+        res.NeedReset = !success;
 
         return res;
     }
@@ -143,19 +135,11 @@ public class AiProviderDao(
         var dbContext = await dbContextFactory.CreateDbContextAsync();
         await foreach (var provider in dbContext.GetProvidersAsync(tenantId, offset, limit))
         {
-            var reset = false;
-            try
-            {
-                provider.Key = await crypto.DecryptAsync(provider.Key);
-            }
-            catch (CryptographicException)
-            {
-                provider.Key = string.Empty;
-                reset = true;
-            }
+            var (success, decryptedKey) = await TryDecryptKeyAsync(provider.Key);
+            provider.Key = decryptedKey;
 
             var res = provider.Map();
-            res.NeedReset = reset;
+            res.NeedReset = !success;
             res.IsDefault = defaultProviderId == res.Id;
 
             yield return res;
@@ -329,5 +313,18 @@ public class AiProviderDao(
             Key = includeCredentials ? await gateway.GetKeyAsync() : string.Empty,
             Type = ProviderType.DocSpaceAi
         };
+    }
+
+    private async Task<(bool Success, string Key)> TryDecryptKeyAsync(string encryptedKey)
+    {
+        try
+        {
+            var decryptedKey = await crypto.DecryptAsync(encryptedKey);
+            return (true, decryptedKey);
+        }
+        catch (CryptographicException)
+        {
+            return (false, string.Empty);
+        }
     }
 }
