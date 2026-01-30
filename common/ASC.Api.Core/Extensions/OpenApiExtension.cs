@@ -40,7 +40,12 @@ public static class OpenApiExtension
     {
         return services.AddSwaggerGen(c =>
         {
-            var assemblyName = Assembly.GetEntryAssembly().FullName.Split(',').First();
+            var entryAssembly = Assembly.GetEntryAssembly();
+            if (entryAssembly == null)
+            {
+                return;
+            }
+            var assemblyName = entryAssembly.FullName?.Split(',').First();
             c.ResolveConflictingActions(a => a.First());
             c.CustomOperationIds(r =>
             {
@@ -71,6 +76,7 @@ public static class OpenApiExtension
             c.DocumentFilter<TagDescriptionsDocumentFilter>();
             c.OperationFilter<SwaggerCustomOperationFilter>();
             c.OperationFilter<ContentTypeOperationFilter>();
+            c.OperationFilter<AllowAnonymousFilter>();
             c.DocumentFilter<SwaggerSuccessApiResponseFilter>();
             c.EnableAnnotations();
             c.SchemaFilter<CustomInheritanceSchemaFilter>();
@@ -165,16 +171,23 @@ public static class OpenApiExtension
                 OpenIdConnectUrl = string.IsNullOrEmpty(openIdConnectUrl) ? new Uri(string.Empty, UriKind.RelativeOrAbsolute) : new Uri(openIdConnectUrl),
                 Description = "OpenID Connect authentication"
             });
-
-            var xmlPath = Path.Combine(AppContext.BaseDirectory, $"{assemblyName}.xml");
-            if (File.Exists(xmlPath))
+            
+            string xmlPath = null;
+            var assemblyLocation = entryAssembly.Location;
+            if (!string.IsNullOrEmpty(assemblyLocation))
             {
-                var doc = new XPathDocument(xmlPath);
+                var assemblyDirectoryLocation = Path.GetDirectoryName(assemblyLocation);
+                if (!string.IsNullOrEmpty(assemblyDirectoryLocation))
+                {
+                    xmlPath = Path.Combine(assemblyDirectoryLocation, $"{assemblyName}.xml");
+                    if (File.Exists(xmlPath))
+                    {
+                        var doc = new XPathDocument(xmlPath);
 
-                c.IncludeXmlComments(() => doc);
-                c.OperationFilter<XmlCustomTagFilter>(doc);
-
-                c.OperationFilter<AllowAnonymousFilter>();
+                        c.IncludeXmlComments(() => doc);
+                        //c.OperationFilter<XmlCustomTagFilter>(doc);
+                    }
+                }
             }
 
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
@@ -372,16 +385,9 @@ public static class OpenApiExtension
             var shortNode = methodNode?.SelectSingleNode("short");
             if (shortNode != null)
             {
-                operation.AddExtension("x-shortName", new XmlShortNameExtension(XmlCommentsTextHelper.Humanize(shortNode.InnerXml)));
+                operation.Description = operation.Summary;
+                operation.Summary = XmlCommentsTextHelper.Humanize(shortNode.InnerXml);
             }
-        }
-    }
-
-    private class XmlShortNameExtension(string shortName) : IOpenApiExtension
-    {
-        public void Write(IOpenApiWriter writer, OpenApiSpecVersion specVersion)
-        {
-            writer.WriteValue(shortName);
         }
     }
 
