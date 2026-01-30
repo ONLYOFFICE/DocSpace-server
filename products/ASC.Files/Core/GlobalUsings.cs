@@ -29,6 +29,7 @@ global using System.Collections.Frozen;
 global using System.Collections.Immutable;
 global using System.ClientModel;
 global using System.ClientModel.Primitives;
+global using System.ComponentModel;
 global using System.ComponentModel.DataAnnotations;
 global using System.Diagnostics;
 global using System.Extensions;

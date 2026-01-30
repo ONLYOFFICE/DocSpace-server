@@ -78,6 +78,16 @@
       "x-displayName": "Audit trail data"
     },
     {
+      "name": "Security / Banners visibility",
+      "description": "Operations for managing visibility of security banners.",
+      "x-displayName": "Banners visibility"
+    },
+    {
+      "name": "Settings / Banners visibility",
+      "description": "Operations for managing visibility of settings banners.",
+      "x-displayName": "Banners visibility"
+    },
+    {
       "name": "Security / CSP",
       "description": "Operations for working with CSP.",
       "x-displayName": "CSP"
@@ -188,6 +198,11 @@
       "x-displayName": "Storage"
     },
     {
+      "name": "Settings / Telegram",
+      "description": "Operations for managing Telegram integration.",
+      "x-displayName": "Telegram"
+    },
+    {
       "name": "Settings / TFA settings",
       "description": "Operations for working with TFA settings.",
       "x-displayName": "TFA settings"
@@ -208,18 +223,6 @@
       "x-displayName": "ThirdParty"
     },
     {
-      "name": "Security / Banners visibility",
-      "x-displayName": "Security / Banners visibility"
-    },
-    {
-      "name": "Settings / Banners visibility",
-      "x-displayName": "Settings / Banners visibility"
-    },
-    {
-      "name": "Settings / Telegram",
-      "x-displayName": "Settings / Telegram"
-    },
-    {
       "name": "Api keys",
       "description": "Operations for working with api keys.",
       "x-displayName": "Api keys"
@@ -230,8 +233,13 @@
       "x-displayName": "Group"
     },
     {
+      "name": "Group / Search",
+      "description": "Operations for searching groups.",
+      "x-displayName": "Search"
+    },
+    {
       "name": "People / Guests",
-      "description": "Operations for workig with gursts",
+      "description": "Operations for workig with guests",
       "x-displayName": "Guests"
     },
     {
@@ -285,12 +293,9 @@
       "x-displayName": "User type"
     },
     {
-      "name": "Group / Search",
-      "x-displayName": "Group / Search"
-    },
-    {
       "name": "Portal / Guests",
-      "x-displayName": "Portal / Guests"
+      "description": "Operations for managing guest users in the portal.",
+      "x-displayName": "Guests"
     },
     {
       "name": "Files / Files",
@@ -1439,7 +1444,42 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UnknownWrapper"
+                  "type": "object",
+                  "properties": {
+                    "response": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "number",
+                        "format": "double"
+                      }
+                    },
+                    "count": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "links": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "href": {
+                            "type": "string"
+                          },
+                          "action": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "status": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "format": "int32"
+                    }
+                  }
                 }
               }
             }
@@ -3251,7 +3291,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -3313,7 +3353,7 @@
           {
             "name": "employeeType",
             "in": "path",
-            "description": "The type of employee role for the invitation link (All, RoomAdmin, Guest, DocSpaceAdmin, User).",
+            "description": "The type of employee role for the invitation link (DocSpaceAdmin, RoomAdmin or User).",
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/EmployeeType"
@@ -3327,6 +3367,256 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/StringWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "deprecated": true,
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ],
+        "description": "Returns an invitation link for joining the portal."
+      }
+    },
+    "/api/2.0/portal/users/invitationlink": {
+      "post": {
+        "tags": [
+          "Portal / Users"
+        ],
+        "summary": "Create an invitation link",
+        "operationId": "createInvitationLink",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InvitationLinkCreateRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Invitation link",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvitationLinkWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ],
+        "description": "Returns an invitation link for joining the portal."
+      },
+      "put": {
+        "tags": [
+          "Portal / Users"
+        ],
+        "summary": "Update an invitation link",
+        "operationId": "updateInvitationLink",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InvitationLinkUpdateRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Invitation link",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvitationLinkWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ],
+        "description": "Returns an invitation link for joining the portal."
+      },
+      "delete": {
+        "tags": [
+          "Portal / Users"
+        ],
+        "operationId": "deleteInvitationLink",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InvitationLinkDeleteRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Invitation link",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ],
+        "summary": "Delete an invitation link"
+      }
+    },
+    "/api/2.0/portal/users/invitationlink/{employeeType}": {
+      "get": {
+        "tags": [
+          "Portal / Users"
+        ],
+        "summary": "Get an invitation link",
+        "operationId": "getInvitationLinkByEmployeeType",
+        "parameters": [
+          {
+            "name": "employeeType",
+            "in": "path",
+            "description": "The type of employee role for the invitation link (DocSpaceAdmin, RoomAdmin or User).",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EmployeeType"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invitation link",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvitationLinkWrapper"
                 }
               }
             }
@@ -3748,7 +4038,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -3865,7 +4155,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -3991,7 +4281,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -4769,7 +5059,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -5995,7 +6285,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -6676,7 +6966,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DoubleWrapper"
+                  "$ref": "#/components/schemas/DoubleNullableWrapper"
                 }
               }
             }
@@ -9662,7 +9952,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -9967,7 +10257,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -10034,7 +10324,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -10045,7 +10335,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -10425,7 +10715,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -10905,8 +11195,8 @@
           "401": {
             "description": "Unauthorized"
           },
-          "402": {
-            "description": "Your pricing plan does not support this option"
+          "403": {
+            "description": "Access denied"
           }
         },
         "security": [
@@ -11954,7 +12244,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -12077,7 +12367,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -12174,7 +12464,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -12307,7 +12597,42 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UnknownWrapper"
+                  "type": "object",
+                  "properties": {
+                    "response": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "integer",
+                        "format": "int32"
+                      }
+                    },
+                    "count": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "links": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "href": {
+                            "type": "string"
+                          },
+                          "action": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "status": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "format": "int32"
+                    }
+                  }
                 }
               }
             }
@@ -12500,7 +12825,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "Winfield Upton"
+              "example": "John Doe"
             }
           }
         ],
@@ -12567,7 +12892,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "Winfield Upton"
+              "example": "John Doe"
             }
           }
         ],
@@ -12638,7 +12963,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "Winfield Upton"
+              "example": "John Doe"
             }
           }
         ],
@@ -13131,7 +13456,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -13316,7 +13641,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -13392,7 +13717,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -13471,7 +13796,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -13541,7 +13866,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -13689,7 +14014,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -13765,7 +14090,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -13844,7 +14169,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -13925,7 +14250,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -14006,7 +14331,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -14116,7 +14441,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -14226,7 +14551,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -14464,7 +14789,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -14584,7 +14909,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "9846"
+              "example": "1"
             }
           }
         ],
@@ -14667,7 +14992,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "9846"
+              "example": "1"
             }
           }
         ],
@@ -14737,7 +15062,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "9846"
+              "example": "1"
             }
           }
         ],
@@ -14807,7 +15132,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "9846"
+              "example": "1"
             }
           }
         ],
@@ -14888,7 +15213,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "9846"
+              "example": "1"
             }
           }
         ],
@@ -15244,8 +15569,14 @@
               }
             }
           },
+          "400": {
+            "description": "Incorrect email or User disabled"
+          },
           "401": {
             "description": "Unauthorized"
+          },
+          "402": {
+            "description": "The number of admins exceeds the limit"
           },
           "403": {
             "description": "No permissions to perform this action"
@@ -15362,7 +15693,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "9846"
+              "example": "1"
             }
           }
         ],
@@ -15435,7 +15766,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "9846"
+              "example": "1"
             }
           }
         ],
@@ -15505,7 +15836,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "9846"
+              "example": "1"
             }
           }
         ],
@@ -15705,7 +16036,7 @@
               "minLength": 0,
               "type": "string",
               "format": "email",
-              "example": "Sydney_Roberts4@hotmail.com"
+              "example": "example@onlyoffice.com"
             }
           },
           {
@@ -15928,7 +16259,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "9846"
+              "example": "1"
             }
           }
         ],
@@ -16149,7 +16480,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -16332,7 +16663,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -16515,7 +16846,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -16841,13 +17172,6 @@
                   "RoomAdmin",
                   "Guest",
                   "DocSpaceAdmin",
-                  "User"
-                ],
-                "x-enum-descriptions": [
-                  "All",
-                  "Room admin",
-                  "Guest",
-                  "DocSpace admin",
                   "User"
                 ],
                 "description": "[0 - All, 1 - Room admin, 2 - Guest, 3 - DocSpace admin, 4 - User]"
@@ -17258,13 +17582,6 @@
                   "DocSpaceAdmin",
                   "User"
                 ],
-                "x-enum-descriptions": [
-                  "All",
-                  "Room admin",
-                  "Guest",
-                  "DocSpace admin",
-                  "User"
-                ],
                 "description": "[0 - All, 1 - Room admin, 2 - Guest, 3 - DocSpace admin, 4 - User]"
               }
             }
@@ -17471,7 +17788,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -17654,7 +17971,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -17837,7 +18154,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -18349,7 +18666,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -18544,7 +18861,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -18619,7 +18936,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -19405,7 +19722,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -19535,7 +19852,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -19608,7 +19925,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -19726,7 +20043,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -19775,7 +20092,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -19845,7 +20162,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -19911,7 +20228,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -19994,7 +20311,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -20124,7 +20441,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -20191,7 +20508,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -20302,7 +20619,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -20381,7 +20698,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9079
+              "example": 1
             }
           }
         ],
@@ -20416,7 +20733,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -20483,7 +20800,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -20550,7 +20867,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -20638,7 +20955,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -20715,7 +21032,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -20796,7 +21113,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -20874,7 +21191,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -20950,7 +21267,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -20993,7 +21310,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -21075,7 +21392,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -21120,7 +21437,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -21155,7 +21472,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -21233,7 +21550,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -21311,7 +21628,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -21371,7 +21688,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -21450,7 +21767,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -21510,7 +21827,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -21597,7 +21914,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -21675,7 +21992,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -21821,7 +22138,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -21971,7 +22288,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -22110,7 +22427,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -22403,7 +22720,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -22452,7 +22769,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -22519,7 +22836,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -22782,7 +23099,7 @@
           "Files / Folders"
         ],
         "summary": "Get the Recent section",
-        "operationId": "getFolderRecent",
+        "operationId": "getRecentFolder",
         "parameters": [
           {
             "name": "userIdOrGroupId",
@@ -22959,7 +23276,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -23038,7 +23355,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -23220,7 +23537,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -23255,7 +23572,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -23331,7 +23648,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -23407,7 +23724,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -23440,7 +23757,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -23521,7 +23838,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -23598,7 +23915,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -23636,7 +23953,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -23785,7 +24102,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -23855,7 +24172,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -23925,7 +24242,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -24049,7 +24366,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -24128,7 +24445,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -24188,7 +24505,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -24264,7 +24581,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -24707,172 +25024,6 @@
         "description": "Returns the detailed list of files and folders located in the Private Room section."
       }
     },
-    "/api/2.0/files/@recent": {
-      "get": {
-        "tags": [
-          "Files / Folders"
-        ],
-        "summary": "Get the Recent section",
-        "operationId": "getRecentFolder",
-        "parameters": [
-          {
-            "name": "userIdOrGroupId",
-            "in": "query",
-            "description": "The user or group ID.",
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
-            }
-          },
-          {
-            "name": "filterType",
-            "in": "query",
-            "description": "The filter type.",
-            "schema": {
-              "$ref": "#/components/schemas/FilterType"
-            }
-          },
-          {
-            "name": "excludeSubject",
-            "in": "query",
-            "description": "Specifies whether to exclude search by user or group ID.",
-            "schema": {
-              "type": "boolean",
-              "example": true
-            }
-          },
-          {
-            "name": "applyFilterOption",
-            "in": "query",
-            "description": "Specifies whether to return only files, only folders or all elements.",
-            "schema": {
-              "$ref": "#/components/schemas/ApplyFilterOption"
-            }
-          },
-          {
-            "name": "searchArea",
-            "in": "query",
-            "description": "The search area.",
-            "schema": {
-              "$ref": "#/components/schemas/SearchArea"
-            }
-          },
-          {
-            "name": "extension",
-            "in": "query",
-            "description": "Specifies whether to search for a specific file extension in the Recent folder.",
-            "style": "deepObject",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "example": ".txt"
-            }
-          },
-          {
-            "name": "count",
-            "in": "query",
-            "description": "The maximum number of items to return.",
-            "schema": {
-              "maximum": 100,
-              "minimum": 1,
-              "type": "integer",
-              "format": "int32",
-              "example": 1234
-            }
-          },
-          {
-            "name": "startIndex",
-            "in": "query",
-            "description": "The starting position of the results to be returned in the query response.",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "example": 1234
-            }
-          },
-          {
-            "name": "sortBy",
-            "in": "query",
-            "description": "Specifies the sorting criteria for the folder request.",
-            "schema": {
-              "type": "string",
-              "example": "some text"
-            }
-          },
-          {
-            "name": "sortOrder",
-            "in": "query",
-            "description": "The order in which the results are sorted.",
-            "schema": {
-              "$ref": "#/components/schemas/SortOrder"
-            }
-          },
-          {
-            "name": "filterValue",
-            "in": "query",
-            "description": "The text used for filtering or searching folder contents.",
-            "schema": {
-              "type": "string",
-              "example": "some text"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The Recent section contents",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FolderContentIntegerWrapper"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "You don't have enough permission to view the folder content"
-          },
-          "404": {
-            "description": "The required folder was not found"
-          }
-        },
-        "security": [
-          {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Bearer": []
-          },
-          {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Basic": []
-          },
-          {
-            "OAuth2": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "OpenId": []
-          }
-        ],
-        "description": "Returns the detailed list of files located in the Recent section."
-      }
-    },
     "/api/2.0/files/@root": {
       "get": {
         "tags": [
@@ -25162,7 +25313,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -25240,7 +25391,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -25258,7 +25409,7 @@
                   "InsertFile.Title": {
                     "type": "string",
                     "description": "The file title to be inserted.",
-                    "example": "legacy_1080p_small_wooden_mouse"
+                    "example": "SampleFile"
                   },
                   "InsertFile.CreateNewIfExist": {
                     "type": "boolean",
@@ -25419,7 +25570,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -25506,7 +25657,7 @@
                   "Title": {
                     "type": "string",
                     "description": "The file title to be inserted.",
-                    "example": "legacy_1080p_small_wooden_mouse"
+                    "example": "SampleFile"
                   },
                   "CreateNewIfExist": {
                     "type": "boolean",
@@ -25736,7 +25887,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -25810,7 +25961,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -25887,7 +26038,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -26257,7 +26408,7 @@
             "description": "The ID of the file operation.",
             "schema": {
               "type": "string",
-              "example": "9846"
+              "example": "1"
             }
           }
         ],
@@ -26299,7 +26450,7 @@
             "description": "The ID of the file operation.",
             "schema": {
               "type": "string",
-              "example": "9846"
+              "example": "1"
             }
           }
         ],
@@ -26660,7 +26811,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "9846"
+              "example": "1"
             }
           }
         ],
@@ -26823,7 +26974,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -26903,7 +27054,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -26987,7 +27138,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -27042,7 +27193,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -27135,7 +27286,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -27237,7 +27388,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -28851,20 +29002,6 @@
                     "Editing",
                     "ContentCreator"
                   ],
-                  "x-enum-descriptions": [
-                    "None",
-                    "Read and write",
-                    "Read",
-                    "Restrict",
-                    "Varies",
-                    "Review",
-                    "Comment",
-                    "Fill forms",
-                    "Custom filter",
-                    "Room manager",
-                    "Editing",
-                    "Content creator"
-                  ],
                   "description": "Sharing rights (None, ReadWrite, Read, Restrict, Varies, Review, Comment, FillForms, CustomFilter, RoomAdmin, Editing, Collaborator)."
                 },
                 "description": "Sharing rights (None, ReadWrite, Read, Restrict, Varies, Review, Comment, FillForms, CustomFilter, RoomAdmin, Editing, Collaborator)."
@@ -28982,6 +29119,209 @@
         "description": "Changes the ability to open the document in the same browser tab."
       }
     },
+    "/api/2.0/files/settings/defaulttemplate": {
+      "get": {
+        "tags": [
+          "Files / Settings"
+        ],
+        "summary": "Get the default template setting",
+        "operationId": "getDefaultTemplates",
+        "responses": {
+          "200": {
+            "description": "Default template settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultTemplateSettingsWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ],
+        "description": "Returns the default template setting."
+      },
+      "put": {
+        "tags": [
+          "Files / Settings"
+        ],
+        "summary": "Change the default template setting",
+        "operationId": "setDefaultTemplate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DefaultTemplateSettingsRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "New default template settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultTemplateSettingsWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ],
+        "description": "Changes the default template setting."
+      },
+      "post": {
+        "tags": [
+          "Files / Settings"
+        ],
+        "summary": "Upload a file as the default template setting",
+        "operationId": "uploadDefaultTemplate",
+        "parameters": [
+          {
+            "name": "FileExtension",
+            "in": "query",
+            "description": "File extension of a template to replace",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": ".txt"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": [
+                  "File"
+                ],
+                "type": "object",
+                "properties": {
+                  "File": {
+                    "type": "string",
+                    "description": "File to replace template with",
+                    "format": "binary"
+                  }
+                }
+              },
+              "encoding": {
+                "File": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "New default template settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultTemplateSettingsWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": []
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": []
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": []
+          }
+        ],
+        "description": "Uploads a file to use as the default template setting."
+      }
+    },
     "/api/2.0/files/file/{fileId}/sharedusers": {
       "get": {
         "tags": [
@@ -28998,7 +29338,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -29065,7 +29405,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -29154,7 +29494,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -29243,7 +29583,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -29321,7 +29661,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -29399,7 +29739,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -29476,7 +29816,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -29585,7 +29925,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -29950,7 +30290,7 @@
             "description": "The unique document identifier.",
             "schema": {
               "type": "string",
-              "example": "9846"
+              "example": "1"
             }
           },
           {
@@ -29959,7 +30299,7 @@
             "description": "The unique folder identifier.",
             "schema": {
               "type": "string",
-              "example": "9846"
+              "example": "1"
             }
           }
         ],
@@ -30514,7 +30854,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -31010,7 +31350,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -31043,7 +31383,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -31119,7 +31459,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -31197,7 +31537,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -31274,7 +31614,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -31351,7 +31691,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -31427,7 +31767,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -31533,7 +31873,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -31609,7 +31949,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           },
           {
@@ -31684,7 +32024,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -31754,7 +32094,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -31832,7 +32172,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -31912,7 +32252,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -31991,7 +32331,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -32058,7 +32398,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -32196,7 +32536,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -32263,7 +32603,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -32330,7 +32670,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -32401,7 +32741,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -32468,7 +32808,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -32534,7 +32874,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "9846"
+              "example": "1"
             }
           }
         ],
@@ -32900,7 +33240,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 9846
+              "example": 1
             }
           }
         ],
@@ -33139,8 +33479,8 @@
           "401": {
             "description": "Unauthorized"
           },
-          "402": {
-            "description": "Your pricing plan does not support this option"
+          "403": {
+            "description": "Access denied"
           }
         },
         "security": [
@@ -33212,7 +33552,7 @@
             "description": "Your pricing plan does not support this option"
           },
           "403": {
-            "description": "You don't have enough permission to create"
+            "description": "Access denied"
           },
           "404": {
             "description": "The required folder was not found"
@@ -33282,8 +33622,8 @@
           "401": {
             "description": "Unauthorized"
           },
-          "402": {
-            "description": "Your pricing plan does not support this option"
+          "403": {
+            "description": "Access denied"
           }
         },
         "security": [
@@ -33355,7 +33695,7 @@
             "description": "Your pricing plan does not support this option"
           },
           "403": {
-            "description": "You don't have enough permission to create"
+            "description": "Access denied"
           },
           "404": {
             "description": "The required folder was not found"
@@ -33425,8 +33765,8 @@
           "401": {
             "description": "Unauthorized"
           },
-          "402": {
-            "description": "Your pricing plan does not support this option"
+          "403": {
+            "description": "Access denied"
           }
         },
         "security": [
@@ -33493,8 +33833,8 @@
           "401": {
             "description": "Unauthorized"
           },
-          "402": {
-            "description": "Your pricing plan does not support this option"
+          "403": {
+            "description": "Access denied"
           }
         },
         "security": [
@@ -33563,8 +33903,8 @@
           "401": {
             "description": "Unauthorized"
           },
-          "402": {
-            "description": "Your pricing plan does not support this option"
+          "403": {
+            "description": "Access denied"
           }
         },
         "security": [
@@ -33631,8 +33971,8 @@
           "401": {
             "description": "Unauthorized"
           },
-          "402": {
-            "description": "Your pricing plan does not support this option"
+          "403": {
+            "description": "Access denied"
           }
         },
         "security": [
@@ -33704,7 +34044,7 @@
             "description": "Your pricing plan does not support this option"
           },
           "403": {
-            "description": "You don't have enough permission to create"
+            "description": "Access denied"
           },
           "404": {
             "description": "The required file or folder was not found"
@@ -33824,8 +34164,14 @@
               }
             }
           },
+          "400": {
+            "description": "From date must be less than to date"
+          },
           "401": {
             "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Access denied"
           }
         },
         "security": [
@@ -35445,28 +35791,6 @@
           "Unfollow",
           "Logout"
         ],
-        "x-enum-descriptions": [
-          "None",
-          "Create",
-          "Update",
-          "Delete",
-          "Link",
-          "Unlink",
-          "Attach",
-          "Detach",
-          "Send",
-          "Import",
-          "Export",
-          "Update access",
-          "Download",
-          "Upload",
-          "Copy",
-          "Move",
-          "Reassigns",
-          "Follow",
-          "Unfollow",
-          "Logout"
-        ],
         "description": "[0 - None, 1 - Create, 2 - Update, 3 - Delete, 4 - Link, 5 - Unlink, 6 - Attach, 7 - Detach, 8 - Send, 9 - Import, 10 - Export, 11 - Update access, 12 - Download, 13 - Upload, 14 - Copy, 15 - Move, 16 - Reassigns, 17 - Follow, 18 - Unfollow, 19 - Logout]"
       },
       "ActiveConnectionsDto": {
@@ -35505,7 +35829,7 @@
             "type": "integer",
             "description": "The active connection ID.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "tenantId": {
             "type": "integer",
@@ -35517,7 +35841,7 @@
             "type": "string",
             "description": "The user ID.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "mobile": {
             "type": "boolean",
@@ -35717,7 +36041,7 @@
             "description": "The email address used for sending administrator messages.",
             "format": "email",
             "nullable": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "example@onlyoffice.com"
           },
           "culture": {
             "type": "string",
@@ -35751,7 +36075,7 @@
             "description": "Email",
             "format": "email",
             "nullable": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "example@onlyoffice.com"
           },
           "culture": {
             "type": "string",
@@ -35837,7 +36161,7 @@
             "type": "integer",
             "description": "The audit event ID.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "date": {
             "$ref": "#/components/schemas/ApiDateTime"
@@ -35852,7 +36176,7 @@
             "type": "string",
             "description": "The ID of the user who triggered the audit event.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "action": {
             "type": "string",
@@ -35948,7 +36272,7 @@
             "type": "string",
             "description": "The authorization key name.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           },
           "value": {
             "maxLength": 255,
@@ -35962,7 +36286,7 @@
             "type": "string",
             "description": "The authorization key title.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           }
         },
         "additionalProperties": false,
@@ -35981,7 +36305,7 @@
             "type": "string",
             "description": "The password in plain text for user authentication.",
             "nullable": true,
-            "example": "vfmf2vO1Kp"
+            "example": "P@ssw0rd123"
           },
           "passwordHash": {
             "type": "string",
@@ -36090,13 +36414,13 @@
             "type": "string",
             "description": "The name of the authorization service.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           },
           "title": {
             "type": "string",
             "description": "The user-friendly display title of the authorization service.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "description": {
             "type": "string",
@@ -36544,7 +36868,7 @@
             "description": "The company email address.",
             "format": "email",
             "nullable": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "example@onlyoffice.com"
           },
           "address": {
             "maxLength": 255,
@@ -36649,7 +36973,7 @@
             "description": "The company email address.",
             "format": "email",
             "nullable": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "example@onlyoffice.com"
           },
           "address": {
             "type": "string",
@@ -36700,7 +37024,7 @@
             "description": "The email address to confirm the user's identity.",
             "format": "email",
             "nullable": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "example@onlyoffice.com"
           },
           "first": {
             "type": "boolean",
@@ -36731,19 +37055,19 @@
             "type": "string",
             "description": "The confirmation room ID.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "title": {
             "type": "string",
             "description": "The confirmation title.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "email": {
             "type": "string",
             "description": "The confirmation email.",
             "nullable": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "example@onlyoffice.com"
           },
           "isAgent": {
             "type": "boolean",
@@ -36901,7 +37225,7 @@
             "minLength": 0,
             "type": "string",
             "description": "The human-readable name of the webhook configuration.",
-            "example": "Winfield Upton"
+            "example": "John Doe"
           },
           "uri": {
             "minLength": 1,
@@ -37306,7 +37630,7 @@
             "description": "The customer email address.",
             "nullable": true,
             "readOnly": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "example@onlyoffice.com"
           },
           "payer": {
             "$ref": "#/components/schemas/EmployeeDto"
@@ -37395,14 +37719,14 @@
             "type": "integer",
             "description": "The tenant ID.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "name": {
             "maxLength": 255,
             "type": "string",
             "description": "The tenant name.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           },
           "alias": {
             "maxLength": 100,
@@ -37606,11 +37930,6 @@
           "ProvideChoice",
           "Web",
           "App"
-        ],
-        "x-enum-descriptions": [
-          "Provide choice",
-          "Web",
-          "App"
         ]
       },
       "DefaultProductRequestDto": {
@@ -37638,13 +37957,6 @@
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
-          "Created",
-          "Running",
-          "Completed",
-          "Canceled",
-          "Failted"
-        ],
-        "x-enum-descriptions": [
           "Created",
           "Running",
           "Completed",
@@ -37688,7 +38000,7 @@
             "type": "string",
             "description": "The Document Builder task ID.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "error": {
             "type": "string",
@@ -37712,12 +38024,7 @@
           },
           "resultFileId": {
             "description": "The result file ID.",
-            "nullable": true,
-            "example": {
-              "int": 1234,
-              "string": "some text",
-              "boolean": true
-            }
+            "nullable": true
           },
           "resultFileName": {
             "type": "string",
@@ -37740,6 +38047,41 @@
         "properties": {
           "response": {
             "$ref": "#/components/schemas/DocumentBuilderTaskDto"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DoubleNullableWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "number",
+            "nullable": true
           },
           "count": {
             "type": "integer",
@@ -37871,7 +38213,7 @@
             "description": "The email address.",
             "format": "email",
             "nullable": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "example@onlyoffice.com"
           },
           "encEmail": {
             "type": "string",
@@ -37899,7 +38241,7 @@
             "type": "string",
             "description": "The room ID.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           }
         },
         "additionalProperties": false,
@@ -37921,12 +38263,6 @@
           "Activated",
           "Pending",
           "AutoGenerated"
-        ],
-        "x-enum-descriptions": [
-          "Not activated",
-          "Activated",
-          "Pending",
-          "Auto generated"
         ]
       },
       "EmployeeArrayWrapper": {
@@ -38055,13 +38391,6 @@
           "Pending",
           "Default",
           "All"
-        ],
-        "x-enum-descriptions": [
-          "Active",
-          "Terminated",
-          "Pending",
-          "Default",
-          "All"
         ]
       },
       "EmployeeType": {
@@ -38093,12 +38422,6 @@
           "Encrypted",
           "DecryptionStarted"
         ],
-        "x-enum-descriptions": [
-          "Decrypted",
-          "Encryption started",
-          "Encrypted",
-          "Decryption started"
-        ],
         "description": "[0 - Decrypted, 1 - Encryption started, 2 - Encrypted, 3 - Decryption started]"
       },
       "EncryptionSettings": {
@@ -38108,7 +38431,7 @@
             "type": "string",
             "description": "The encryption password.",
             "nullable": true,
-            "example": "vfmf2vO1Kp"
+            "example": "P@ssw0rd123"
           },
           "status": {
             "$ref": "#/components/schemas/EncryprtionStatus"
@@ -38180,16 +38503,6 @@
           "Tag",
           "Agent"
         ],
-        "x-enum-descriptions": [
-          "None",
-          "File",
-          "Folder",
-          "User",
-          "Group",
-          "Room",
-          "Tag",
-          "Agent"
-        ],
         "description": "[0 - None, 1 - File, 2 - Folder, 23 - User, 24 - Group, 25 - Room, 26 - Tag, 27 - Agent]"
       },
       "FeatureUsedDto": {
@@ -38200,18 +38513,13 @@
         "properties": {
           "value": {
             "description": "The used space value.",
-            "nullable": true,
-            "example": {
-              "int": 1234,
-              "string": "some text",
-              "boolean": true
-            }
+            "nullable": true
           },
           "title": {
             "type": "string",
             "description": "The used space title.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           }
         },
         "additionalProperties": false,
@@ -38239,13 +38547,13 @@
             "type": "integer",
             "description": "The Firebase user ID.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "userId": {
             "type": "string",
             "description": "The user ID.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "tenantId": {
             "type": "integer",
@@ -38398,7 +38706,7 @@
         "description": "The Firebase-related request parameters."
       },
       "FolderType": {
-        "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Result storage, 34 - AI Agents]",
+        "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Result storage, 34 - AI Agents, 35 - Default Templates]",
         "x-enum-type": "integer",
         "enum": [
           0,
@@ -38428,7 +38736,8 @@
           31,
           32,
           33,
-          34
+          34,
+          35
         ],
         "type": "integer",
         "example": 0,
@@ -38460,37 +38769,8 @@
           "AiRoom",
           "Knowledge",
           "ResultStorage",
-          "AiAgents"
-        ],
-        "x-enum-descriptions": [
-          "Default",
-          "Coomon",
-          "Bunch",
-          "Trash",
-          "User",
-          "Share",
-          "Projects",
-          "Favourites",
-          "Recent",
-          "Templates",
-          "Privacy",
-          "Virtual rooms",
-          "Filling forms room",
-          "Editing room",
-          "Custom room",
-          "Archive",
-          "Thirdparty backup",
-          "Public room",
-          "Ready form folder",
-          "In process form folder",
-          "Form filling folder done",
-          "Form filling folder in progress",
-          "Virtual Data Room",
-          "Room templates folder",
-          "AI Room",
-          "Knowledge",
-          "Result storage",
-          "AI Agents"
+          "AiAgents",
+          "DefaultTemplates"
         ]
       },
       "FormGalleryDto": {
@@ -38563,7 +38843,7 @@
             "type": "string",
             "description": "The title of the tenant greeting settings.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           }
         },
         "additionalProperties": false,
@@ -38668,7 +38948,7 @@
               "id": {
                 "type": "integer",
                 "format": "int32",
-                "example": 9846
+                "example": 1
               },
               "tenantId": {
                 "type": "integer",
@@ -38781,6 +39061,163 @@
         "properties": {
           "response": {
             "type": "integer"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "InvitationLinkCreateRequestDto": {
+        "required": [
+          "employeeType"
+        ],
+        "type": "object",
+        "properties": {
+          "employeeType": {
+            "$ref": "#/components/schemas/EmployeeType"
+          },
+          "expiration": {
+            "type": "string",
+            "description": "The expiration date of the invitation link.",
+            "format": "date-time",
+            "nullable": true,
+            "example": "2008-04-10T06:30:00.0000000+04:00"
+          },
+          "maxUseCount": {
+            "maximum": 1000,
+            "minimum": 1,
+            "type": "integer",
+            "description": "The maximum number of times the invitation link can be used.",
+            "format": "int32",
+            "nullable": true,
+            "example": 1234
+          }
+        },
+        "additionalProperties": false,
+        "description": "The request parameters for creating an invitation link."
+      },
+      "InvitationLinkDeleteRequestDto": {
+        "required": [
+          "id"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The ID of the invitation link.",
+            "format": "uuid",
+            "example": "00000000-0000-0000-0000-000000000000"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The request parameters for deleting an invitation link."
+      },
+      "InvitationLinkDto": {
+        "required": [
+          "employeeType"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The ID of the invitation link.",
+            "format": "uuid",
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          "employeeType": {
+            "$ref": "#/components/schemas/EmployeeType"
+          },
+          "expiration": {
+            "$ref": "#/components/schemas/ApiDateTime"
+          },
+          "isExpired": {
+            "type": "boolean",
+            "description": "Indicates whether the invitation link has expired.",
+            "example": true
+          },
+          "maxUseCount": {
+            "type": "integer",
+            "description": "The maximum number of times the invitation link can be used.",
+            "format": "int32",
+            "nullable": true,
+            "example": 1234
+          },
+          "currentUseCount": {
+            "type": "integer",
+            "description": "The current number of times the invitation link has been used.",
+            "format": "int32",
+            "example": 1234
+          },
+          "url": {
+            "type": "string",
+            "description": "The URL of the invitation link.",
+            "nullable": true,
+            "example": "some text"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The invitation link parameters."
+      },
+      "InvitationLinkUpdateRequestDto": {
+        "required": [
+          "id"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The ID of the invitation link.",
+            "format": "uuid",
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          "expiration": {
+            "type": "string",
+            "description": "The expiration date of the invitation link.",
+            "format": "date-time",
+            "nullable": true,
+            "example": "2008-04-10T06:30:00.0000000+04:00"
+          },
+          "maxUseCount": {
+            "maximum": 1000,
+            "minimum": 1,
+            "type": "integer",
+            "description": "The maximum number of times the invitation link can be used.",
+            "format": "int32",
+            "nullable": true,
+            "example": 1234
+          }
+        },
+        "additionalProperties": false,
+        "description": "The request parameters for updating an invitation link."
+      },
+      "InvitationLinkWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/InvitationLinkDto"
           },
           "count": {
             "type": "integer",
@@ -38934,7 +39371,7 @@
             "type": "string",
             "description": "The white label logo name.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           },
           "default": {
             "type": "boolean",
@@ -39048,16 +39485,6 @@
           "Contacts",
           "Agents"
         ],
-        "x-enum-descriptions": [
-          "None",
-          "Files",
-          "Folders",
-          "Documents settings",
-          "Rooms",
-          "Settings",
-          "Contacts",
-          "Agents"
-        ],
         "description": "[0 - None, 1 - Files, 2 - Folders, 3 - Documents settings, 27 - Rooms, 29 - Settings, 30 - Contacts, 31 - Agents]"
       },
       "LoginEventArrayWrapper": {
@@ -39104,7 +39531,7 @@
             "type": "integer",
             "description": "The login event ID.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "date": {
             "$ref": "#/components/schemas/ApiDateTime"
@@ -39119,7 +39546,7 @@
             "type": "string",
             "description": "The user ID of the login event.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "login": {
             "type": "string",
@@ -39197,22 +39624,6 @@
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
-          "Facebook",
-          "Google",
-          "Dropbox",
-          "Docusign",
-          "Box",
-          "OneDrive",
-          "GosUslugi",
-          "LinkedIn",
-          "MailRu",
-          "VK",
-          "Wordpress",
-          "Yahoo",
-          "Yandex",
-          "Github"
-        ],
-        "x-enum-descriptions": [
           "Facebook",
           "Google",
           "Dropbox",
@@ -39382,7 +39793,7 @@
         "description": "The request parameters for configuring trusted mail domains and visitor invitation settings."
       },
       "MessageAction": {
-        "description": "[1000 - Login success, 1001 - Login success via social account, 1002 - Login fail invalid combination, 1003 - Login fail social account not found, 1004 - Login fail disabled profile, 1005 - Login fail, 1006 - Logout, 1007 - Login success via sms, 1008 - Login fail via sms, 1009 - Login fail ip security, 1010 - Login success via api, 1011 - Login success via social app, 1012 - Login success via api sms, 1013 - Login fail via api, 1014 - Login fail via api sms, 1015 - Login success via SSO, 1016 - Session started, 1017 - Session completed, 1018 - Login fail via SSO, 1019 - Login success via api social account, 1020 - Login fail via api social account, 1021 - Login succes via tfa app, 1022 - Login fail via Tfa app, 1023 - Login fail brute force, 1024 - Login success via api tfa, 1025 - Login fail via api tfa, 1026 - Login fail recaptcha, 1027 - Authorization link activated, 1028 - Login success via OAuth 2.0, 1029 - Login success via login and password, 4000 - User created, 4001 - Guest created, 4002 - User created via invite, 4003 - Guest created via invite, 4004 - User activated, 4005 - Guest activated, 4006 - User updated, 4007 - User updated language, 4008 - User added avatar, 4009 - User deleted avatar, 4010 - User updated avatar thumbnails, 4011 - User linked social account, 4012 - User unlinked social account, 4013 - User sent activation instructions, 4014 - User sent email change instructions, 4015 - User sent password change instructions, 4016 - User sent delete instructions, 4017 - User updated password, 4018 - User deleted, 4019 - Users updated type, 4020 - Users updated status, 4021 - Users sent activation instructions, 4022 - Users deleted, 4023 - Sent invite instructions, 4024 - User imported, 4025 - Guest imported, 4026 - Group created, 4027 - Group updated, 4028 - Group deleted, 4029 - User updated mobile number, 4030 - User data reassigns, 4031 - User data removing, 4032 - User connected tfa app, 4033 - User disconnected tfa app, 4034 - User logout active connections, 4035 - User logout active connection, 4036 - User logout active connections for user, 4037 - Send join invite, 5000 - File created, 5001 - File renamed, 5002 - File updated, 5003 - File created version, 5004 - File deleted version, 5005 - File updated revision comment, 5006 - File locked, 5007 - File unlocked, 5008 - File updated access, 5009 - File downloaded, 5010 - File downloaded as, 5011 - File uploaded, 5012 - File imported, 5013 - File copied, 5014 - File copied with overwriting, 5015 - File moved, 5016 - File moved with overwriting, 5017 - File moved to trash, 5018 - File deleted, 5019 - Folder created, 5020 - Folder renamed, 5021 - Folder updated access, 5022 - Folder copied, 5023 - Folder copied with overwriting, 5024 - Folder moved, 5025 - Folder moved with overwriting, 5026 - Folder moved to trash, 5027 - Folder deleted, 5028 - ThirdParty created, 5029 - ThirdParty updated, 5030 - ThirdParty deleted, 5031 - Documents ThirdParty settings updated, 5032 - Documents overwriting settings updated, 5033 - Documents uploading formats settings updated, 5034 - User file updated, 5035 - File converted, 5036 - File send access link, 5037 - Document service location setting, 5038 - Authorization keys setting, 5039 - Full text search setting, 5040 - Start transfer setting, 5041 - Backup started, 5042 - License key uploaded, 5043 - File change owner, 5044 - File restore version, 5045 - Document send to sign, 5046 - Document sign complete, 5047 - User updated email, 5048 - Documents store forcesave, 5049 - Documents forcesave, 5050 - Start storage encryption, 5051 - Privacy room enable, 5052 - Privacy room disable, 5053 - Start storage decryption, 5054 - File opened for change, 5055 - File marked as favorite, 5056 - File removed from favorite, 5057 - Folder downloaded, 5058 - File removed from list, 5059 - Folder removed from list, 5060 - File external link access updated, 5061 - Trash emptied, 5062 - File revision downloaded, 5063 - File marked as read, 5064 - File readed, 5065 - Folder marked as read, 5066 - Folder updated access for, 5068 - File updated access for, 5069 - Documents external share settings updated, 5070 - Room created, 5071 - Room renamed, 5072 - Room archived, 5073 - Room unarchived, 5074 - Room deleted, 5075 - Room update access for user, 5076 - Tag created, 5077 - Tags deleted, 5078 - Added room tags, 5079 - Deleted room tags, 5080 - Room logo created, 5081 - Room logo deleted, 5082 - Room invitation link updated, 5083 - Documents keep new file name settings updated, 5084 - Room remove user, 5085 - Room create user, 5086 - Room invitation link created, 5087 - Room invitation link deleted, 5088 - Room external link created, 5089 - Room external link updated, 5090 - Room external link deleted, 5091 - File external link created, 5092 - File external link updated, 5093 - File external link deleted, 5094 - Room group added, 5095 - Room update access for group, 5096 - Room group remove, 5097 - Room external link revoked, 5098 - Room external link renamed, 5099 - File uploaded with overwriting, 5100 - Room copied, 5101 - Documents display file extension updated, 5102 - Room color changed, 5103 - Room cover changed, 5104 - Room indexing changed, 5105 - Room deny download changed, 5106 - Room index export saved, 5107 - Folder index changed, 5108 - Folder index reordered, 5109 - Room deny download enabled, 5110 - Room deny download disabled, 5111 - File index changed, 5112 - Room watermark set, 5113 - Room watermark disabled, 5114 - Room index export saved, 5115 - Room indexing disabled, 5116 - Room life time set, 5117 - Room life time disabled, 5118 - Room invite resend, 5119 - File version deleted, 5120 - File custom filter enabled, 5121 - File custom filter disabled, 5122 - Folder external link created, 5123 - Folder external link updated, 5124 - Folder external link deleted, 5125 - Backup completed, 5126 - Backup failed, 5127 - Scheduled backup started, 5128 - Scheduled backup completed, 5129 - Scheduled backup failed, 5150 - Form started to fill, 5151 - Form partially filled, 5152 - Form completely filled, 5153 - Form stopped, 5154 - AI agent created, 5155 - AI agent renamed, 5156 - AI agent deleted, 5157 - MCP server added to AI agent, 5158 - MCP server deleted from AI agent, 5159 - Room change owner, 5501 - Ldap enabled, 5502 - Ldap disabled, 5503 - LDAP synchronization completed, 6000 - Language settings updated, 6001 - Time zone settings updated, 6002 - Dns settings updated, 6003 - Trusted mail domain settings updated, 6004 - Password strength settings updated, 6005 - Two factor authentication settings updated, 6006 - Administrator message settings updated, 6007 - Default start page settings updated, 6008 - Products list updated, 6009 - Administrator added, 6010 - Administrator opened full access, 6011 - Administrator deleted, 6012 - Users opened product access, 6013 - Groups opened product access, 6014 - Product access opened, 6015 - Product access restricted, 6016 - Product added administrator, 6017 - Product deleted administrator, 6018 - Greeting settings updated, 6019 - Team template changed, 6020 - Color theme changed, 6021 - Owner sent change owner instructions, 6022 - Owner updated, 6023 - Owner sent portal deactivation instructions, 6024 - Owner sent portal delete instructions, 6025 - Portal deactivated, 6026 - Portal deleted, 6027 - Login history report downloaded, 6028 - Audit trail report downloaded, 6029 - SSO enabled, 6030 - SSO disabled, 6031 - Portal access settings updated, 6032 - Cookie settings updated, 6033 - Mail service settings updated, 6034 - Custom navigation settings updated, 6035 - Audit settings updated, 6036 - Two factor authentication disabled, 6037 - Two factor authentication enabled by sms, 6038 - Two factor authentication enabled by tfa app, 6039 - Portal renamed, 6040 - Quota per room changed, 6041 - Quota per room disabled, 6042 - Quota per user changed, 6043 - Quota per user disabled, 6044 - Quota per portal changed, 6045 - Quota per portal disabled, 6046 - Form submit, 6047 - Form opened for filling, 6048 - Custom quota per room default, 6049 - Custom quota per room changed, 6050 - Custom quota per room disabled, 6051 - Custom quota per user default, 6052 - Custom quota per user changed, 6053 - Custom quota per user disabled, 6054 - DevTools access settings changed, 6055 - Webhook created, 6056 - Webhook updated, 6057 - Webhook deleted, 6058 - Created api key, 6059 - Update api key, 6060 - Deleted User api key, 6061 - Customer wallet topped up, 6062 - Customer operation performed, 6063 - Customer operations report downloaded, 6064 - Customer wallet top up settings updated, 6065 - Customer subscription updated, 6066 - Promotional banners visibility settings changed, 6067 - Customer wallet services settings updated, 6068 - Quota per AI agent changed, 6069 - Quota per AI agent disabled, 6070 - Custom quota per AI agent default, 6071 - Custom quota per AI agent changed, 6072 - Custom quota per AI agent disabled, 6073 - AI provider created, 6074 - AI provider updated, 6075 - AI provider deleted, 6076 - MCP server created, 6077 - MCP server updated, 6078 - MCP server enabled, 6079 - MCP server disabled, 6080 - MCP server deleted, 6081 - WebSearch settings configured, 6082 - WebSearch settings reset, 6083 - Vectorization settings configured, 6084 - Vectorization settings reset, 6085 - Webplugin uploaded, 6086 - Webplugin updated, 6087 - Webplugin deleted, 7000 - Contact admin mail sent, 7001 - Room invite link used, 7002 - User created and added to room, 7003 - Guest created and added to room, 7004 - Contact sales mail sent, 9901 - Create client, 9902 - Update client, 9903 - Regenerate secret, 9904 - Delete client, 9905 - Change client activation, 9906 - Change client visibility, 9907 - Revoke user client, 9908 - Generate authorization code token, 9909 - Generate personal access token, -1 - None]",
+        "description": "[1000 - Login success, 1001 - Login success via social account, 1002 - Login fail invalid combination, 1003 - Login fail social account not found, 1004 - Login fail disabled profile, 1005 - Login fail, 1006 - Logout, 1007 - Login success via sms, 1008 - Login fail via sms, 1009 - Login fail ip security, 1010 - Login success via api, 1011 - Login success via social app, 1012 - Login success via api sms, 1013 - Login fail via api, 1014 - Login fail via api sms, 1015 - Login success via SSO, 1016 - Session started, 1017 - Session completed, 1018 - Login fail via SSO, 1019 - Login success via api social account, 1020 - Login fail via api social account, 1021 - Login succes via tfa app, 1022 - Login fail via Tfa app, 1023 - Login fail brute force, 1024 - Login success via api tfa, 1025 - Login fail via api tfa, 1026 - Login fail recaptcha, 1027 - Authorization link activated, 1028 - Login success via OAuth 2.0, 1029 - Login success via login and password, 4000 - User created, 4001 - Guest created, 4002 - User created via invite, 4003 - Guest created via invite, 4004 - User activated, 4005 - Guest activated, 4006 - User updated, 4007 - User updated language, 4008 - User added avatar, 4009 - User deleted avatar, 4010 - User updated avatar thumbnails, 4011 - User linked social account, 4012 - User unlinked social account, 4013 - User sent activation instructions, 4014 - User sent email change instructions, 4015 - User sent password change instructions, 4016 - User sent delete instructions, 4017 - User updated password, 4018 - User deleted, 4019 - Users updated type, 4020 - Users updated status, 4021 - Users sent activation instructions, 4022 - Users deleted, 4023 - Sent invite instructions, 4024 - User imported, 4025 - Guest imported, 4026 - Group created, 4027 - Group updated, 4028 - Group deleted, 4029 - User updated mobile number, 4030 - User data reassigns, 4031 - User data removing, 4032 - User connected tfa app, 4033 - User disconnected tfa app, 4034 - User logout active connections, 4035 - User logout active connection, 4036 - User logout active connections for user, 4037 - Send join invite, 5000 - File created, 5001 - File renamed, 5002 - File updated, 5003 - File created version, 5004 - File deleted version, 5005 - File updated revision comment, 5006 - File locked, 5007 - File unlocked, 5008 - File updated access, 5009 - File downloaded, 5010 - File downloaded as, 5011 - File uploaded, 5012 - File imported, 5013 - File copied, 5014 - File copied with overwriting, 5015 - File moved, 5016 - File moved with overwriting, 5017 - File moved to trash, 5018 - File deleted, 5019 - Folder created, 5020 - Folder renamed, 5021 - Folder updated access, 5022 - Folder copied, 5023 - Folder copied with overwriting, 5024 - Folder moved, 5025 - Folder moved with overwriting, 5026 - Folder moved to trash, 5027 - Folder deleted, 5028 - ThirdParty created, 5029 - ThirdParty updated, 5030 - ThirdParty deleted, 5031 - Documents ThirdParty settings updated, 5032 - Documents overwriting settings updated, 5033 - Documents uploading formats settings updated, 5034 - User file updated, 5035 - File converted, 5036 - File send access link, 5037 - Document service location setting, 5038 - Authorization keys setting, 5039 - Full text search setting, 5040 - Start transfer setting, 5041 - Backup started, 5042 - License key uploaded, 5043 - File change owner, 5044 - File restore version, 5045 - Document send to sign, 5046 - Document sign complete, 5047 - User updated email, 5048 - Documents store forcesave, 5049 - Documents forcesave, 5050 - Start storage encryption, 5051 - Privacy room enable, 5052 - Privacy room disable, 5053 - Start storage decryption, 5054 - File opened for change, 5055 - File marked as favorite, 5056 - File removed from favorite, 5057 - Folder downloaded, 5058 - File removed from list, 5059 - Folder removed from list, 5060 - File external link access updated, 5061 - Trash emptied, 5062 - File revision downloaded, 5063 - File marked as read, 5064 - File readed, 5065 - Folder marked as read, 5066 - Folder updated access for, 5068 - File updated access for, 5069 - Documents external share settings updated, 5070 - Room created, 5071 - Room renamed, 5072 - Room archived, 5073 - Room unarchived, 5074 - Room deleted, 5075 - Room update access for user, 5076 - Tag created, 5077 - Tags deleted, 5078 - Added room tags, 5079 - Deleted room tags, 5080 - Room logo created, 5081 - Room logo deleted, 5082 - Room invitation link updated, 5083 - Documents keep new file name settings updated, 5084 - Room remove user, 5085 - Room create user, 5086 - Room invitation link created, 5087 - Room invitation link deleted, 5088 - Room external link created, 5089 - Room external link updated, 5090 - Room external link deleted, 5091 - File external link created, 5092 - File external link updated, 5093 - File external link deleted, 5094 - Room group added, 5095 - Room update access for group, 5096 - Room group remove, 5097 - Room external link revoked, 5098 - Room external link renamed, 5099 - File uploaded with overwriting, 5100 - Room copied, 5101 - Documents display file extension updated, 5102 - Room color changed, 5103 - Room cover changed, 5104 - Room indexing changed, 5105 - Room deny download changed, 5106 - Room index export saved, 5107 - Folder index changed, 5108 - Folder index reordered, 5109 - Room deny download enabled, 5110 - Room deny download disabled, 5111 - File index changed, 5112 - Room watermark set, 5113 - Room watermark disabled, 5114 - Room index export saved, 5115 - Room indexing disabled, 5116 - Room life time set, 5117 - Room life time disabled, 5118 - Room invite resend, 5119 - File version deleted, 5120 - File custom filter enabled, 5121 - File custom filter disabled, 5122 - Folder external link created, 5123 - Folder external link updated, 5124 - Folder external link deleted, 5125 - Backup completed, 5126 - Backup failed, 5127 - Scheduled backup started, 5128 - Scheduled backup completed, 5129 - Scheduled backup failed, 5150 - Form started to fill, 5151 - Form partially filled, 5152 - Form completely filled, 5153 - Form stopped, 5154 - AI agent created, 5155 - AI agent renamed, 5156 - AI agent deleted, 5157 - MCP server added to AI agent, 5158 - MCP server deleted from AI agent, 5159 - Room change owner, 5501 - Ldap enabled, 5502 - Ldap disabled, 5503 - LDAP synchronization completed, 6000 - Language settings updated, 6001 - Time zone settings updated, 6002 - Dns settings updated, 6003 - Trusted mail domain settings updated, 6004 - Password strength settings updated, 6005 - Two factor authentication settings updated, 6006 - Administrator message settings updated, 6007 - Default start page settings updated, 6008 - Products list updated, 6009 - Administrator added, 6010 - Administrator opened full access, 6011 - Administrator deleted, 6012 - Users opened product access, 6013 - Groups opened product access, 6014 - Product access opened, 6015 - Product access restricted, 6016 - Product added administrator, 6017 - Product deleted administrator, 6018 - Greeting settings updated, 6019 - Team template changed, 6020 - Color theme changed, 6021 - Owner sent change owner instructions, 6022 - Owner updated, 6023 - Owner sent portal deactivation instructions, 6024 - Owner sent portal delete instructions, 6025 - Portal deactivated, 6026 - Portal deleted, 6027 - Login history report downloaded, 6028 - Audit trail report downloaded, 6029 - SSO enabled, 6030 - SSO disabled, 6031 - Portal access settings updated, 6032 - Cookie settings updated, 6033 - Mail service settings updated, 6034 - Custom navigation settings updated, 6035 - Audit settings updated, 6036 - Two factor authentication disabled, 6037 - Two factor authentication enabled by sms, 6038 - Two factor authentication enabled by tfa app, 6039 - Portal renamed, 6040 - Quota per room changed, 6041 - Quota per room disabled, 6042 - Quota per user changed, 6043 - Quota per user disabled, 6044 - Quota per portal changed, 6045 - Quota per portal disabled, 6046 - Form submit, 6047 - Form opened for filling, 6048 - Custom quota per room default, 6049 - Custom quota per room changed, 6050 - Custom quota per room disabled, 6051 - Custom quota per user default, 6052 - Custom quota per user changed, 6053 - Custom quota per user disabled, 6054 - DevTools access settings changed, 6055 - Webhook created, 6056 - Webhook updated, 6057 - Webhook deleted, 6058 - Created api key, 6059 - Update api key, 6060 - Deleted User api key, 6061 - Customer wallet topped up, 6062 - Customer operation performed, 6063 - Customer operations report downloaded, 6064 - Customer wallet top up settings updated, 6065 - Customer subscription updated, 6066 - Promotional banners visibility settings changed, 6067 - Customer wallet services settings updated, 6068 - Quota per AI agent changed, 6069 - Quota per AI agent disabled, 6070 - Custom quota per AI agent default, 6071 - Custom quota per AI agent changed, 6072 - Custom quota per AI agent disabled, 6073 - AI provider created, 6074 - AI provider updated, 6075 - AI provider deleted, 6076 - MCP server created, 6077 - MCP server updated, 6078 - MCP server enabled, 6079 - MCP server disabled, 6080 - MCP server deleted, 6081 - WebSearch settings configured, 6082 - WebSearch settings reset, 6083 - Vectorization settings configured, 6084 - Vectorization settings reset, 6085 - Webplugin uploaded, 6086 - Webplugin updated, 6087 - Webplugin deleted, 6088 - Whitelabel settings logo text updated, 6089 - Whitelabel settings logos updated, 6090 - Whitelabel company settings updated, 6091 - Whitelabel additional settings updated, 6092 - Whitelabel mail settings updated, 6093 - Invitation settings updated, 6094 - IP restrictions settings updated, 6095 - Login settings updated, 7000 - Contact admin mail sent, 7001 - Room invite link used, 7002 - User created and added to room, 7003 - Guest created and added to room, 7004 - Contact sales mail sent, 9901 - Create client, 9902 - Update client, 9903 - Regenerate secret, 9904 - Delete client, 9905 - Change client activation, 9906 - Change client visibility, 9907 - Revoke user client, 9908 - Generate authorization code token, 9909 - Generate personal access token, -1 - None]",
         "x-enum-type": "integer",
         "enum": [
           1000,
@@ -39683,6 +40094,14 @@
           6085,
           6086,
           6087,
+          6088,
+          6089,
+          6090,
+          6091,
+          6092,
+          6093,
+          6094,
+          6095,
           7000,
           7001,
           7002,
@@ -40000,6 +40419,14 @@
           "WebpluginUploaded",
           "WebpluginUpdated",
           "WebpluginDeleted",
+          "WhiteLabelSettingsLogoTextUpdated",
+          "WhiteLabelSettingsLogosUpdated",
+          "WhiteLabelCompanySettingsUpdated",
+          "WhiteLabelAdditionalSettingsUpdated",
+          "WhiteLabelMailSettingsUpdated",
+          "InvitationSettingsUpdated",
+          "IPRestrictionsSettingsUpdated",
+          "LoginSettingsUpdated",
           "ContactAdminMailSent",
           "RoomInviteLinkUsed",
           "UserCreatedAndAddedToRoom",
@@ -40014,321 +40441,6 @@
           "RevokeUserClient",
           "GenerateAuthorizationCodeToken",
           "GeneratePersonalAccessToken",
-          "None"
-        ],
-        "x-enum-descriptions": [
-          "Login success",
-          "Login success via social account",
-          "Login fail invalid combination",
-          "Login fail social account not found",
-          "Login fail disabled profile",
-          "Login fail",
-          "Logout",
-          "Login success via sms",
-          "Login fail via sms",
-          "Login fail ip security",
-          "Login success via api",
-          "Login success via social app",
-          "Login success via api sms",
-          "Login fail via api",
-          "Login fail via api sms",
-          "Login success via SSO",
-          "Session started",
-          "Session completed",
-          "Login fail via SSO",
-          "Login success via api social account",
-          "Login fail via api social account",
-          "Login succes via tfa app",
-          "Login fail via Tfa app",
-          "Login fail brute force",
-          "Login success via api tfa",
-          "Login fail via api tfa",
-          "Login fail recaptcha",
-          "Authorization link activated",
-          "Login success via OAuth 2.0",
-          "Login success via login and password",
-          "User created",
-          "Guest created",
-          "User created via invite",
-          "Guest created via invite",
-          "User activated",
-          "Guest activated",
-          "User updated",
-          "User updated language",
-          "User added avatar",
-          "User deleted avatar",
-          "User updated avatar thumbnails",
-          "User linked social account",
-          "User unlinked social account",
-          "User sent activation instructions",
-          "User sent email change instructions",
-          "User sent password change instructions",
-          "User sent delete instructions",
-          "User updated password",
-          "User deleted",
-          "Users updated type",
-          "Users updated status",
-          "Users sent activation instructions",
-          "Users deleted",
-          "Sent invite instructions",
-          "User imported",
-          "Guest imported",
-          "Group created",
-          "Group updated",
-          "Group deleted",
-          "User updated mobile number",
-          "User data reassigns",
-          "User data removing",
-          "User connected tfa app",
-          "User disconnected tfa app",
-          "User logout active connections",
-          "User logout active connection",
-          "User logout active connections for user",
-          "Send join invite",
-          "File created",
-          "File renamed",
-          "File updated",
-          "File created version",
-          "File deleted version",
-          "File updated revision comment",
-          "File locked",
-          "File unlocked",
-          "File updated access",
-          "File downloaded",
-          "File downloaded as",
-          "File uploaded",
-          "File imported",
-          "File copied",
-          "File copied with overwriting",
-          "File moved",
-          "File moved with overwriting",
-          "File moved to trash",
-          "File deleted",
-          "Folder created",
-          "Folder renamed",
-          "Folder updated access",
-          "Folder copied",
-          "Folder copied with overwriting",
-          "Folder moved",
-          "Folder moved with overwriting",
-          "Folder moved to trash",
-          "Folder deleted",
-          "ThirdParty created",
-          "ThirdParty updated",
-          "ThirdParty deleted",
-          "Documents ThirdParty settings updated",
-          "Documents overwriting settings updated",
-          "Documents uploading formats settings updated",
-          "User file updated",
-          "File converted",
-          "File send access link",
-          "Document service location setting",
-          "Authorization keys setting",
-          "Full text search setting",
-          "Start transfer setting",
-          "Backup started",
-          "License key uploaded",
-          "File change owner",
-          "File restore version",
-          "Document send to sign",
-          "Document sign complete",
-          "User updated email",
-          "Documents store forcesave",
-          "Documents forcesave",
-          "Start storage encryption",
-          "Privacy room enable",
-          "Privacy room disable",
-          "Start storage decryption",
-          "File opened for change",
-          "File marked as favorite",
-          "File removed from favorite",
-          "Folder downloaded",
-          "File removed from list",
-          "Folder removed from list",
-          "File external link access updated",
-          "Trash emptied",
-          "File revision downloaded",
-          "File marked as read",
-          "File readed",
-          "Folder marked as read",
-          "Folder updated access for",
-          "File updated access for",
-          "Documents external share settings updated",
-          "Room created",
-          "Room renamed",
-          "Room archived",
-          "Room unarchived",
-          "Room deleted",
-          "Room update access for user",
-          "Tag created",
-          "Tags deleted",
-          "Added room tags",
-          "Deleted room tags",
-          "Room logo created",
-          "Room logo deleted",
-          "Room invitation link updated",
-          "Documents keep new file name settings updated",
-          "Room remove user",
-          "Room create user",
-          "Room invitation link created",
-          "Room invitation link deleted",
-          "Room external link created",
-          "Room external link updated",
-          "Room external link deleted",
-          "File external link created",
-          "File external link updated",
-          "File external link deleted",
-          "Room group added",
-          "Room update access for group",
-          "Room group remove",
-          "Room external link revoked",
-          "Room external link renamed",
-          "File uploaded with overwriting",
-          "Room copied",
-          "Documents display file extension updated",
-          "Room color changed",
-          "Room cover changed",
-          "Room indexing changed",
-          "Room deny download changed",
-          "Room index export saved",
-          "Folder index changed",
-          "Folder index reordered",
-          "Room deny download enabled",
-          "Room deny download disabled",
-          "File index changed",
-          "Room watermark set",
-          "Room watermark disabled",
-          "Room index export saved",
-          "Room indexing disabled",
-          "Room life time set",
-          "Room life time disabled",
-          "Room invite resend",
-          "File version deleted",
-          "File custom filter enabled",
-          "File custom filter disabled",
-          "Folder external link created",
-          "Folder external link updated",
-          "Folder external link deleted",
-          "Backup completed",
-          "Backup failed",
-          "Scheduled backup started",
-          "Scheduled backup completed",
-          "Scheduled backup failed",
-          "Form started to fill",
-          "Form partially filled",
-          "Form completely filled",
-          "Form stopped",
-          "AI agent created",
-          "AI agent renamed",
-          "AI agent deleted",
-          "MCP server added to AI agent",
-          "MCP server deleted from AI agent",
-          "Room change owner",
-          "Ldap enabled",
-          "Ldap disabled",
-          "LDAP synchronization completed",
-          "Language settings updated",
-          "Time zone settings updated",
-          "Dns settings updated",
-          "Trusted mail domain settings updated",
-          "Password strength settings updated",
-          "Two factor authentication settings updated",
-          "Administrator message settings updated",
-          "Default start page settings updated",
-          "Products list updated",
-          "Administrator added",
-          "Administrator opened full access",
-          "Administrator deleted",
-          "Users opened product access",
-          "Groups opened product access",
-          "Product access opened",
-          "Product access restricted",
-          "Product added administrator",
-          "Product deleted administrator",
-          "Greeting settings updated",
-          "Team template changed",
-          "Color theme changed",
-          "Owner sent change owner instructions",
-          "Owner updated",
-          "Owner sent portal deactivation instructions",
-          "Owner sent portal delete instructions",
-          "Portal deactivated",
-          "Portal deleted",
-          "Login history report downloaded",
-          "Audit trail report downloaded",
-          "SSO enabled",
-          "SSO disabled",
-          "Portal access settings updated",
-          "Cookie settings updated",
-          "Mail service settings updated",
-          "Custom navigation settings updated",
-          "Audit settings updated",
-          "Two factor authentication disabled",
-          "Two factor authentication enabled by sms",
-          "Two factor authentication enabled by tfa app",
-          "Portal renamed",
-          "Quota per room changed",
-          "Quota per room disabled",
-          "Quota per user changed",
-          "Quota per user disabled",
-          "Quota per portal changed",
-          "Quota per portal disabled",
-          "Form submit",
-          "Form opened for filling",
-          "Custom quota per room default",
-          "Custom quota per room changed",
-          "Custom quota per room disabled",
-          "Custom quota per user default",
-          "Custom quota per user changed",
-          "Custom quota per user disabled",
-          "DevTools access settings changed",
-          "Webhook created",
-          "Webhook updated",
-          "Webhook deleted",
-          "Created api key",
-          "Update api key",
-          "Deleted User api key",
-          "Customer wallet topped up",
-          "Customer operation performed",
-          "Customer operations report downloaded",
-          "Customer wallet top up settings updated",
-          "Customer subscription updated",
-          "Promotional banners visibility settings changed",
-          "Customer wallet services settings updated",
-          "Quota per AI agent changed",
-          "Quota per AI agent disabled",
-          "Custom quota per AI agent default",
-          "Custom quota per AI agent changed",
-          "Custom quota per AI agent disabled",
-          "AI provider created",
-          "AI provider updated",
-          "AI provider deleted",
-          "MCP server created",
-          "MCP server updated",
-          "MCP server enabled",
-          "MCP server disabled",
-          "MCP server deleted",
-          "WebSearch settings configured",
-          "WebSearch settings reset",
-          "Vectorization settings configured",
-          "Vectorization settings reset",
-          "Webplugin uploaded",
-          "Webplugin updated",
-          "Webplugin deleted",
-          "Contact admin mail sent",
-          "Room invite link used",
-          "User created and added to room",
-          "Guest created and added to room",
-          "Contact sales mail sent",
-          "Create client",
-          "Update client",
-          "Regenerate secret",
-          "Delete client",
-          "Change client activation",
-          "Change client visibility",
-          "Revoke user client",
-          "Generate authorization code token",
-          "Generate personal access token",
           "None"
         ]
       },
@@ -40403,7 +40515,7 @@
                 "type": "string",
                 "format": "email",
                 "nullable": true,
-                "example": "Randall14@hotmail.com"
+                "example": "example@onlyoffice.com"
               },
               "displayName": {
                 "type": "string",
@@ -40413,12 +40525,12 @@
               "firstName": {
                 "type": "string",
                 "nullable": true,
-                "example": "Winfield"
+                "example": "John"
               },
               "lastName": {
                 "type": "string",
                 "nullable": true,
-                "example": "Wyman"
+                "example": "Doe"
               },
               "userType": {
                 "$ref": "#/components/schemas/EmployeeType"
@@ -40612,10 +40724,6 @@
         "x-enum-varnames": [
           "NotActivated",
           "Activated"
-        ],
-        "x-enum-descriptions": [
-          "Not activated",
-          "Activated"
         ]
       },
       "MobileRequestsDto": {
@@ -40642,7 +40750,7 @@
             "type": "string",
             "description": "The notification channel name.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           },
           "isEnabled": {
             "type": "boolean",
@@ -40785,12 +40893,6 @@
           "RoomsActivity",
           "DailyFeed",
           "UsefullTips"
-        ],
-        "x-enum-descriptions": [
-          "Badges",
-          "Rooms activity",
-          "Daily feed",
-          "Usefull tips"
         ]
       },
       "ObjectArrayWrapper": {
@@ -41230,11 +41332,6 @@
           "None",
           "Set",
           "Expired"
-        ],
-        "x-enum-descriptions": [
-          "None",
-          "Set",
-          "Expired"
         ]
       },
       "PaymentSettingsDto": {
@@ -41405,13 +41502,13 @@
             "type": "string",
             "description": "The product ID.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "userId": {
             "type": "string",
             "description": "The user unique identifier.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "administrator": {
             "type": "boolean",
@@ -41472,12 +41569,6 @@
           "Add",
           "Sub",
           "Renew"
-        ],
-        "x-enum-descriptions": [
-          "Set",
-          "Add",
-          "Sub",
-          "Renew"
         ]
       },
       "ProductType": {
@@ -41491,12 +41582,6 @@
         "type": "integer",
         "example": 2,
         "x-enum-varnames": [
-          "Documents",
-          "Login",
-          "Settings",
-          "Contacts"
-        ],
-        "x-enum-descriptions": [
           "Documents",
           "Login",
           "Settings",
@@ -41533,7 +41618,7 @@
             "type": "integer",
             "description": "The quota ID.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "quantity": {
             "type": "integer",
@@ -41620,13 +41705,13 @@
             "type": "integer",
             "description": "The quota ID.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "title": {
             "type": "string",
             "description": "The quota title.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "price": {
             "$ref": "#/components/schemas/PriceDto"
@@ -41717,10 +41802,6 @@
         "x-enum-varnames": [
           "Active",
           "Overdue"
-        ],
-        "x-enum-descriptions": [
-          "Active",
-          "Overdue"
         ]
       },
       "QuotaWrapper": {
@@ -41769,12 +41850,6 @@
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
-          "Default",
-          "AndroidV2",
-          "iOSV2",
-          "hCaptcha"
-        ],
-        "x-enum-descriptions": [
           "Default",
           "AndroidV2",
           "iOSV2",
@@ -41879,14 +41954,7 @@
               "type": "object"
             },
             "description": "The list of rooms with the disabled notifications.",
-            "nullable": true,
-            "example": [
-              {
-                "int": 1234,
-                "string": "some text",
-                "boolean": true
-              }
-            ]
+            "nullable": true
           }
         },
         "additionalProperties": false,
@@ -41931,12 +41999,7 @@
         "properties": {
           "roomsId": {
             "description": "The target room identifier.",
-            "nullable": true,
-            "example": {
-              "int": 1234,
-              "string": "some text",
-              "boolean": true
-            }
+            "nullable": true
           },
           "mute": {
             "type": "boolean",
@@ -42003,7 +42066,7 @@
             "type": "string",
             "description": "The contact email address for the sales inquiry.",
             "nullable": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "example@onlyoffice.com"
           },
           "message": {
             "maxLength": 255,
@@ -42103,13 +42166,13 @@
             "type": "string",
             "description": "The product ID for which permissions are being set.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "userId": {
             "type": "string",
             "description": "The ID of the user whose permissions are being configured.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "administrator": {
             "type": "boolean",
@@ -42678,26 +42741,26 @@
             "type": "string",
             "description": "The first name.",
             "nullable": true,
-            "example": "Winfield"
+            "example": "John"
           },
           "lastName": {
             "type": "string",
             "description": "The last name.",
             "nullable": true,
-            "example": "Wyman"
+            "example": "Doe"
           },
           "email": {
             "type": "string",
             "description": "The email address.",
             "format": "email",
             "nullable": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "example@onlyoffice.com"
           },
           "title": {
             "type": "string",
             "description": "The title.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "location": {
             "type": "string",
@@ -43010,13 +43073,13 @@
             "type": "string",
             "description": "The storage ID.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "title": {
             "type": "string",
             "description": "The storage title.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "properties": {
             "type": "array",
@@ -43232,7 +43295,7 @@
             "type": "integer",
             "description": "The tariff ID.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "state": {
             "$ref": "#/components/schemas/TariffState"
@@ -43297,12 +43360,6 @@
           "Paid",
           "Delay",
           "NotPaid"
-        ],
-        "x-enum-descriptions": [
-          "Trial",
-          "Paid",
-          "Delay",
-          "Not paid"
         ]
       },
       "TariffWrapper": {
@@ -43751,7 +43808,7 @@
             "type": "string",
             "description": "The tenant name.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           },
           "ownerId": {
             "type": "string",
@@ -43895,25 +43952,6 @@
           "Publishing",
           "RetailSales",
           "Telecommunications"
-        ],
-        "x-enum-descriptions": [
-          "Other",
-          "Accounting",
-          "Advertising marketing PR",
-          "Banking",
-          "Consulting",
-          "Design",
-          "Education",
-          "Environment",
-          "Financial services",
-          "Health care",
-          "IT",
-          "Legal",
-          "Manufacturing",
-          "Public sector",
-          "Publishing",
-          "Retail sales",
-          "Telecommunications"
         ]
       },
       "TenantQuota": {
@@ -43953,7 +43991,7 @@
             "type": "string",
             "description": "The tenant product ID.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "serviceName": {
             "type": "string",
@@ -44138,13 +44176,13 @@
             "type": "string",
             "description": "The ID of the tenant quota feature.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "title": {
             "type": "string",
             "description": "The title of the tenant quota feature.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "image": {
             "type": "string",
@@ -44154,12 +44192,7 @@
           },
           "value": {
             "description": "The value of the tenant quota feature.",
-            "nullable": true,
-            "example": {
-              "int": 1234,
-              "string": "some text",
-              "boolean": true
-            }
+            "nullable": true
           },
           "type": {
             "type": "string",
@@ -44375,15 +44408,6 @@
           "Restoring",
           "Migrating",
           "Encryption"
-        ],
-        "x-enum-descriptions": [
-          "Active",
-          "Suspended",
-          "Remove pending",
-          "Transfering",
-          "Restoring",
-          "Migrating",
-          "Encryption"
         ]
       },
       "TenantTrustedDomainsType": {
@@ -44397,11 +44421,6 @@
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
-          "None",
-          "Custom",
-          "All"
-        ],
-        "x-enum-descriptions": [
           "None",
           "Custom",
           "All"
@@ -44548,12 +44567,6 @@
           "AITools",
           "Backup",
           "Storage"
-        ],
-        "x-enum-descriptions": [
-          "WebSearch",
-          "AITools",
-          "Backup",
-          "Storage"
         ]
       },
       "TenantWalletServiceSettings": {
@@ -44571,12 +44584,6 @@
               "type": "integer",
               "example": -14,
               "x-enum-varnames": [
-                "WebSearch",
-                "AITools",
-                "Backup",
-                "Storage"
-              ],
-              "x-enum-descriptions": [
                 "WebSearch",
                 "AITools",
                 "Backup",
@@ -44725,7 +44732,7 @@
             "type": "string",
             "description": "The ID of the user for whom the TFA settings are being configured.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "trustedIps": {
             "type": "array",
@@ -44777,11 +44784,6 @@
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
-          "None",
-          "Sms",
-          "App"
-        ],
-        "x-enum-descriptions": [
           "None",
           "Sms",
           "App"
@@ -44837,13 +44839,13 @@
             "type": "string",
             "description": "The ID of the TFA configuration.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "title": {
             "type": "string",
             "description": "The display name or description of the TFA configuration.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "enabled": {
             "type": "boolean",
@@ -44958,7 +44960,7 @@
             "type": "string",
             "description": "The IANA time zone identifier.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "displayName": {
             "type": "string",
@@ -45003,40 +45005,6 @@
         "additionalProperties": false,
         "description": "The request parameters for enabling or disabling administrator messaging system."
       },
-      "UnknownWrapper": {
-        "type": "object",
-        "properties": {
-          "response": {
-            "type": "object"
-          },
-          "count": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "href": {
-                  "type": "string"
-                },
-                "action": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "status": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "statusCode": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
       "UpdateWebhooksConfigRequestsDto": {
         "allOf": [
           {
@@ -45052,7 +45020,7 @@
                 "type": "integer",
                 "description": "The webhook configuration ID.",
                 "format": "int32",
-                "example": 9846
+                "example": 1
               }
             }
           }
@@ -45140,19 +45108,19 @@
             "type": "string",
             "description": "The user ID.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "firstName": {
             "type": "string",
             "description": "The user first name.",
             "nullable": true,
-            "example": "Winfield"
+            "example": "John"
           },
           "lastName": {
             "type": "string",
             "description": "The user last name.",
             "nullable": true,
-            "example": "Wyman"
+            "example": "Doe"
           },
           "userName": {
             "type": "string",
@@ -45190,7 +45158,7 @@
             "type": "string",
             "description": "The user title.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "workFromDate": {
             "type": "string",
@@ -45204,7 +45172,7 @@
             "description": "The user email address.",
             "format": "email",
             "nullable": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "example@onlyoffice.com"
           },
           "contacts": {
             "type": "string",
@@ -45381,15 +45349,6 @@
           "UserExcluded",
           "QuotaFailed"
         ],
-        "x-enum-descriptions": [
-          "Ok",
-          "Invalid",
-          "Expired",
-          "Tariff limit",
-          "User existed",
-          "User excluded",
-          "Quota failed"
-        ],
         "description": "[0 - Ok, 1 - Invalid, 2 - Expired, 3 - Tariff limit, 4 - User existed, 5 - User excluded, 6 - Quota failed]"
       },
       "WalletQuantityRequestDto": {
@@ -45428,7 +45387,7 @@
             "type": "string",
             "description": "The module ID.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "enabled": {
             "type": "boolean",
@@ -45508,6 +45467,7 @@
           "author",
           "createBy",
           "createOn",
+          "cssUrl",
           "description",
           "enabled",
           "homePage",
@@ -45527,7 +45487,7 @@
             "type": "string",
             "description": "The web plugin name.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           },
           "version": {
             "type": "string",
@@ -45605,6 +45565,12 @@
           "url": {
             "type": "string",
             "description": "The web plugin URL.",
+            "nullable": true,
+            "example": "some text"
+          },
+          "cssUrl": {
+            "type": "string",
+            "description": "The web plugin css URL.",
             "nullable": true,
             "example": "some text"
           },
@@ -45725,14 +45691,6 @@
           "Status3xx",
           "Status4xx",
           "Status5xx"
-        ],
-        "x-enum-descriptions": [
-          "None",
-          "Not sent",
-          "Status2xx",
-          "Status3xx",
-          "Status4xx",
-          "Status5xx"
         ]
       },
       "WebhookRetryRequestsDto": {
@@ -45820,37 +45778,6 @@
           "RoomDeleted",
           "RoomRestored",
           "RoomCopied"
-        ],
-        "x-enum-descriptions": [
-          "*",
-          "user.created",
-          "user.invited",
-          "user.updated",
-          "user.deleted",
-          "group.created",
-          "group.updated",
-          "group.deleted",
-          "file.created",
-          "file.uploaded",
-          "file.updated",
-          "file.trashed",
-          "file.deleted",
-          "file.restored",
-          "file.copied",
-          "file.moved",
-          "folder.created",
-          "folder.updated",
-          "folder.trashed",
-          "folder.deleted",
-          "folder.restored",
-          "folder.copied",
-          "folder.moved",
-          "room.created",
-          "room.updated",
-          "room.archived",
-          "room.deleted",
-          "room.restored",
-          "room.copied"
         ]
       },
       "WebhooksConfigDto": {
@@ -45863,13 +45790,13 @@
             "type": "integer",
             "description": "The webhook ID.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "name": {
             "type": "string",
             "description": "The webhook name.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           },
           "uri": {
             "type": "string",
@@ -46074,7 +46001,7 @@
             "type": "integer",
             "description": "The webhook log ID.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "configName": {
             "type": "string",
@@ -46225,7 +46152,7 @@
             "type": "string",
             "description": "The white label file name.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           },
           "size": {
             "$ref": "#/components/schemas/IMagickGeometry"
@@ -46257,6 +46184,7 @@
         "description": "The white label item path parameters."
       },
       "WhiteLabelLogoType": {
+        "x-enum-type": "integer",
         "enum": [
           1,
           2,
@@ -46276,7 +46204,26 @@
           16
         ],
         "type": "integer",
-        "format": "int32"
+        "example": 1,
+        "x-enum-varnames": [
+          "LightSmall",
+          "LoginPage",
+          "Favicon",
+          "DocsEditor",
+          "DocsEditorEmbed",
+          "LeftMenu",
+          "AboutPage",
+          "Notification",
+          "SpreadsheetEditor",
+          "SpreadsheetEditorEmbed",
+          "PresentationEditor",
+          "PresentationEditorEmbed",
+          "PdfEditor",
+          "PdfEditorEmbed",
+          "DiagramEditor",
+          "DiagramEditorEmbed"
+        ],
+        "description": "[1 - Light small, 2 - Login page, 3 - Favicon, 4 - Docs editor, 5 - Docs editor embed, 6 - Left menu, 7 - About page, 8 - Notification, 9 - Spreadsheet editor, 10 - Spreadsheet editor embed, 11 - Presentation editor, 12 - Presentation editor embed, 13 - Pdf editor, 14 - Pdf editor embed, 15 - Diagram editor, 16 - Diagram editor embed]"
       },
       "WhiteLabelRequestsDto": {
         "type": "object",
@@ -46313,7 +46260,7 @@
             "description": "The user's email address for authentication and communication.",
             "format": "email",
             "nullable": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "example@onlyoffice.com"
           },
           "passwordHash": {
             "type": "string",
@@ -46480,11 +46427,6 @@
           "SSO",
           "LDAP",
           "Standart"
-        ],
-        "x-enum-descriptions": [
-          "SSO",
-          "LDAP",
-          "Standart"
         ]
       },
       "ApiKeyResponseArrayWrapper": {
@@ -46538,13 +46480,13 @@
             "type": "string",
             "description": "The API key unique identifier.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "name": {
             "type": "string",
             "description": "The API key name.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           },
           "key": {
             "type": "string",
@@ -46638,11 +46580,6 @@
           "All",
           "People",
           "Guests"
-        ],
-        "x-enum-descriptions": [
-          "All",
-          "People",
-          "Guests"
         ]
       },
       "Contact": {
@@ -46675,7 +46612,7 @@
             "minLength": 0,
             "type": "string",
             "description": "The API key name.",
-            "example": "Winfield Upton"
+            "example": "John Doe"
           },
           "permissions": {
             "type": "array",
@@ -46796,7 +46733,7 @@
             "description": "The email address.",
             "format": "email",
             "nullable": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "example@onlyoffice.com"
           }
         },
         "additionalProperties": false,
@@ -46814,7 +46751,7 @@
             "type": "string",
             "description": "The user email address.",
             "format": "email",
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "example@onlyoffice.com"
           },
           "recaptchaType": {
             "$ref": "#/components/schemas/RecaptchaType"
@@ -47157,12 +47094,7 @@
           },
           "data": {
             "description": "The file upload result data.",
-            "nullable": true,
-            "example": {
-              "int": 1234,
-              "string": "some text",
-              "boolean": true
-            }
+            "nullable": true
           },
           "message": {
             "type": "string",
@@ -47258,7 +47190,7 @@
             "type": "string",
             "description": "The group name.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           },
           "parent": {
             "type": "string",
@@ -47277,7 +47209,7 @@
             "type": "string",
             "description": "The group ID.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "isLDAP": {
             "type": "boolean",
@@ -47487,7 +47419,7 @@
             "type": "string",
             "description": "The user password.",
             "nullable": true,
-            "example": "vfmf2vO1Kp"
+            "example": "P@ssw0rd123"
           },
           "passwordHash": {
             "type": "string",
@@ -47502,7 +47434,7 @@
             "description": "The user email address.",
             "format": "email",
             "nullable": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "example@onlyoffice.com"
           },
           "encEmail": {
             "type": "string",
@@ -47521,7 +47453,7 @@
             "type": "string",
             "description": "The user password.",
             "nullable": true,
-            "example": "vfmf2vO1Kp"
+            "example": "P@ssw0rd123"
           },
           "passwordHash": {
             "type": "string",
@@ -47536,7 +47468,7 @@
             "description": "The user email address.",
             "format": "email",
             "nullable": true,
-            "example": "Nat.Schroeder1@hotmail.com"
+            "example": "example@onlyoffice.com"
           },
           "type": {
             "$ref": "#/components/schemas/EmployeeType"
@@ -47553,7 +47485,7 @@
             "type": "string",
             "description": "The user first name.",
             "nullable": true,
-            "example": "Winfield"
+            "example": "John"
           },
           "lastName": {
             "maxLength": 255,
@@ -47561,7 +47493,7 @@
             "type": "string",
             "description": "The user last name.",
             "nullable": true,
-            "example": "Wyman"
+            "example": "Doe"
           },
           "department": {
             "type": "array",
@@ -47581,7 +47513,7 @@
             "type": "string",
             "description": "The user title.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "location": {
             "type": "string",
@@ -47727,10 +47659,6 @@
         "x-enum-varnames": [
           "Paid",
           "Free"
-        ],
-        "x-enum-descriptions": [
-          "Paid",
-          "Free"
         ]
       },
       "QuotaFilter": {
@@ -47747,11 +47675,6 @@
           "All",
           "Default",
           "Custom"
-        ],
-        "x-enum-descriptions": [
-          "All",
-          "Default",
-          "Custom"
         ]
       },
       "SetManagerRequest": {
@@ -47764,7 +47687,7 @@
             "type": "string",
             "description": "The user ID.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           }
         },
         "additionalProperties": false,
@@ -47780,10 +47703,6 @@
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
-          "Female",
-          "Male"
-        ],
-        "x-enum-descriptions": [
           "Female",
           "Male"
         ]
@@ -47802,20 +47721,20 @@
             "type": "string",
             "description": "The user first name.",
             "nullable": true,
-            "example": "Winfield"
+            "example": "John"
           },
           "lastName": {
             "type": "string",
             "description": "The user last name.",
             "nullable": true,
-            "example": "Wyman"
+            "example": "Doe"
           },
           "email": {
             "type": "string",
             "description": "The user email address.",
             "format": "email",
             "nullable": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "example@onlyoffice.com"
           },
           "passwordHash": {
             "type": "string",
@@ -47855,10 +47774,6 @@
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
-          "Ascending",
-          "Descending"
-        ],
-        "x-enum-descriptions": [
           "Ascending",
           "Descending"
         ]
@@ -47901,7 +47816,7 @@
             "type": "string",
             "description": "The user ID.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "reassignUserId": {
             "type": "string",
@@ -47938,7 +47853,7 @@
             "type": "string",
             "description": "The task progress ID.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "error": {
             "type": "string",
@@ -48008,7 +47923,7 @@
             "type": "string",
             "description": "The user ID whose data is reassigned/removed.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           }
         },
         "additionalProperties": false,
@@ -48135,7 +48050,7 @@
             "type": "string",
             "description": "The new name for the API key.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           },
           "permissions": {
             "type": "array",
@@ -48210,7 +48125,7 @@
             "type": "string",
             "description": "The user ID.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "disable": {
             "type": "boolean",
@@ -48225,7 +48140,7 @@
             "description": "The user email address.",
             "format": "email",
             "nullable": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "example@onlyoffice.com"
           },
           "isUser": {
             "type": "boolean",
@@ -48239,7 +48154,7 @@
             "type": "string",
             "description": "The user first name.",
             "nullable": true,
-            "example": "Winfield"
+            "example": "John"
           },
           "lastName": {
             "maxLength": 255,
@@ -48247,7 +48162,7 @@
             "type": "string",
             "description": "The user last name.",
             "nullable": true,
-            "example": "Wyman"
+            "example": "Doe"
           },
           "department": {
             "type": "array",
@@ -48267,7 +48182,7 @@
             "type": "string",
             "description": "The user title.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "location": {
             "type": "string",
@@ -48519,11 +48434,6 @@
           "All",
           "Files",
           "Folders"
-        ],
-        "x-enum-descriptions": [
-          "All",
-          "Files",
-          "Folders"
         ]
       },
       "ArchiveRoomRequest": {
@@ -48591,7 +48501,7 @@
             "type": "string",
             "description": "The authentication password.",
             "nullable": true,
-            "example": "vfmf2vO1Kp"
+            "example": "P@ssw0rd123"
           },
           "rawToken": {
             "type": "string",
@@ -48893,7 +48803,7 @@
             "type": "string",
             "description": "The new file owner ID.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           }
         },
         "additionalProperties": false,
@@ -48927,7 +48837,7 @@
             "type": "integer",
             "description": "The file ID to check conversion proccess.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "sync": {
             "type": "boolean",
@@ -48949,7 +48859,7 @@
             "type": "string",
             "description": "The password of the converted file.",
             "nullable": true,
-            "example": "vfmf2vO1Kp"
+            "example": "P@ssw0rd123"
           },
           "outputType": {
             "type": "string",
@@ -48998,11 +48908,6 @@
           "AllAllowed",
           "PartAllowed",
           "NoneAllowed"
-        ],
-        "x-enum-descriptions": [
-          "All allowed",
-          "Part allowed",
-          "None allowed"
         ]
       },
       "CheckDestFolderWrapper": {
@@ -49143,7 +49048,7 @@
           "id": {
             "type": "string",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "path": {
             "type": "array",
@@ -49219,7 +49124,7 @@
           "id": {
             "type": "string",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "path": {
             "type": "array",
@@ -49328,10 +49233,6 @@
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
-          "Fast",
-          "Strict"
-        ],
-        "x-enum-descriptions": [
           "Fast",
           "Strict"
         ]
@@ -49516,7 +49417,7 @@
           "name": {
             "type": "string",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           },
           "parameters": {
             "type": "array",
@@ -49576,7 +49477,7 @@
             "type": "string",
             "description": "The conversion operation ID.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "Operation": {
             "$ref": "#/components/schemas/FileOperationType"
@@ -49595,12 +49496,7 @@
           },
           "result": {
             "description": "The resulting file after the conversion.",
-            "nullable": true,
-            "example": {
-              "int": 1234,
-              "string": "some text",
-              "boolean": true
-            }
+            "nullable": true
           },
           "error": {
             "type": "string",
@@ -49653,7 +49549,7 @@
             "type": "string",
             "description": "The copied file password.",
             "nullable": true,
-            "example": "vfmf2vO1Kp"
+            "example": "P@ssw0rd123"
           },
           "toForm": {
             "type": "boolean",
@@ -49731,7 +49627,7 @@
             "type": "string",
             "description": "The cover unique identifier.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "data": {
             "type": "string",
@@ -49755,7 +49651,7 @@
             "type": "string",
             "description": "The file title for creation.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "templateId": {
             "oneOf": [
@@ -49797,7 +49693,7 @@
             "type": "string",
             "description": "The folder title to create.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           }
         },
         "additionalProperties": false,
@@ -49820,7 +49716,7 @@
             "type": "string",
             "description": "The room title.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "logo": {
             "$ref": "#/components/schemas/LogoRequest"
@@ -49905,7 +49801,7 @@
             "type": "string",
             "description": "The room name.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "quota": {
             "type": "integer",
@@ -49997,7 +49893,7 @@
             "type": "string",
             "description": "The tag name.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           }
         },
         "additionalProperties": false,
@@ -50015,7 +49911,7 @@
             "type": "string",
             "description": "The file title for text or HTML file.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "content": {
             "type": "string",
@@ -50048,7 +49944,7 @@
             "type": "string",
             "description": "The third-party room name to be created.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "roomType": {
             "$ref": "#/components/schemas/RoomType"
@@ -50141,7 +50037,7 @@
             "type": "string",
             "description": "The name of the customer configuration.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           },
           "www": {
             "type": "string",
@@ -50220,15 +50116,124 @@
           "ThirtyDays",
           "TwoMonths",
           "ThreeMonths"
-        ],
-        "x-enum-descriptions": [
-          "One week",
-          "Two weeks",
-          "One month",
-          "Thirty days",
-          "Two months",
-          "Three months"
         ]
+      },
+      "DefaultTemplateItemDto": {
+        "required": [
+          "fileExtension"
+        ],
+        "type": "object",
+        "properties": {
+          "selectedFile": {
+            "type": "integer",
+            "description": "File id to use as a default template",
+            "format": "int32",
+            "nullable": true,
+            "example": 1234
+          },
+          "fileExtension": {
+            "type": "string",
+            "description": "Extension of a default template",
+            "nullable": true,
+            "example": ".txt"
+          },
+          "fileTitle": {
+            "type": "string",
+            "description": "Title of a default template",
+            "nullable": true,
+            "example": "some text"
+          },
+          "lastModified": {
+            "type": "string",
+            "description": "Last modified date of a default template",
+            "format": "date-time",
+            "nullable": true,
+            "example": "2008-04-10T06:30:00.0000000+04:00"
+          },
+          "viewUrl": {
+            "type": "string",
+            "description": "View url of a default template",
+            "nullable": true,
+            "example": "some text"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Default template setting"
+      },
+      "DefaultTemplateSettingsDto": {
+        "required": [
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DefaultTemplateItemDto"
+            },
+            "description": "Default templates list.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Default templates settings parameters."
+      },
+      "DefaultTemplateSettingsRequestDto": {
+        "required": [
+          "fileExtension"
+        ],
+        "type": "object",
+        "properties": {
+          "selectedFile": {
+            "type": "integer",
+            "description": "File id to replace template with (or null to use default template)",
+            "format": "int32",
+            "nullable": true,
+            "example": 1234
+          },
+          "fileExtension": {
+            "type": "string",
+            "description": "File extension of a template to replace",
+            "nullable": true,
+            "example": ".txt"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Default templates settings request parameters."
+      },
+      "DefaultTemplateSettingsWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/DefaultTemplateSettingsDto"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
       },
       "Delete": {
         "type": "object",
@@ -50355,7 +50360,7 @@
                 "type": "integer",
                 "description": "The file ID to delete.",
                 "format": "int32",
-                "example": 9846
+                "example": 1
               },
               "versions": {
                 "type": "array",
@@ -50536,7 +50541,7 @@
             "type": "string",
             "description": "The document title.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "url": {
             "type": "string",
@@ -50643,7 +50648,7 @@
             "type": "string",
             "description": "The optional password for accessing protected files.",
             "nullable": true,
-            "example": "vfmf2vO1Kp"
+            "example": "P@ssw0rd123"
           }
         },
         "additionalProperties": false,
@@ -50656,7 +50661,7 @@
             "type": "integer",
             "description": "The InProcess folder ID of the draft.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "folderTitle": {
             "type": "string",
@@ -50668,7 +50673,7 @@
             "type": "integer",
             "description": "The draft ID.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "fileTitle": {
             "type": "string",
@@ -50775,13 +50780,13 @@
             "type": "string",
             "description": "The author ID.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "name": {
             "type": "string",
             "description": "The author name.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           }
         },
         "additionalProperties": false,
@@ -51067,11 +51072,6 @@
           "Desktop",
           "Mobile",
           "Embedded"
-        ],
-        "x-enum-descriptions": [
-          "Desktop",
-          "Mobile",
-          "Embedded"
         ]
       },
       "EmbeddedConfig": {
@@ -51158,13 +51158,13 @@
             "type": "string",
             "description": "The external data ID.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "title": {
             "type": "string",
             "description": "The external data title.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "type": {
             "$ref": "#/components/schemas/FileEntryType"
@@ -51228,7 +51228,7 @@
             "type": "string",
             "description": "The password to share external data.",
             "nullable": true,
-            "example": "vfmf2vO1Kp"
+            "example": "P@ssw0rd123"
           }
         },
         "additionalProperties": false,
@@ -51310,7 +51310,7 @@
                 "type": "integer",
                 "description": "The folder ID where the file is located.",
                 "format": "int32",
-                "example": 9846
+                "example": 1
               },
               "version": {
                 "type": "integer",
@@ -52330,10 +52330,6 @@
         "x-enum-varnames": [
           "Folder",
           "File"
-        ],
-        "x-enum-descriptions": [
-          "Folder",
-          "File"
         ]
       },
       "FileIntegerArrayWrapper": {
@@ -52458,7 +52454,7 @@
             "type": "string",
             "description": "The link name.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "internal": {
             "type": "boolean",
@@ -52481,7 +52477,7 @@
             "type": "string",
             "description": "Password for access via link.",
             "nullable": true,
-            "example": "vfmf2vO1Kp"
+            "example": "P@ssw0rd123"
           }
         },
         "additionalProperties": false,
@@ -52573,7 +52569,7 @@
             "type": "string",
             "description": "The file operation ID.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "Operation": {
             "$ref": "#/components/schemas/FileOperationType"
@@ -52659,16 +52655,6 @@
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
-          "Move",
-          "Copy",
-          "Delete",
-          "Download",
-          "MarkAsRead",
-          "Import",
-          "Convert",
-          "Duplicate"
-        ],
-        "x-enum-descriptions": [
           "Move",
           "Copy",
           "Delete",
@@ -52779,13 +52765,13 @@
             "type": "string",
             "description": "The unique system identifier.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "roomId": {
             "type": "string",
             "description": "Room ID",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "canEditRoom": {
             "type": "boolean",
@@ -52862,20 +52848,6 @@
           "RoomManager",
           "Editing",
           "ContentCreator"
-        ],
-        "x-enum-descriptions": [
-          "None",
-          "Read and write",
-          "Read",
-          "Restrict",
-          "Varies",
-          "Review",
-          "Comment",
-          "Fill forms",
-          "Custom filter",
-          "Room manager",
-          "Editing",
-          "Content creator"
         ]
       },
       "FileShareArrayWrapper": {
@@ -52934,11 +52906,6 @@
           "sharedTo": {
             "description": "The user who has the access to the specified file.",
             "nullable": true,
-            "example": {
-              "int": 1234,
-              "string": "some text",
-              "boolean": true
-            },
             "deprecated": true
           },
           "sharedToUser": {
@@ -52999,13 +52966,13 @@
             "type": "string",
             "description": "The unique identifier of the shared link.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "title": {
             "type": "string",
             "description": "The title of the shared content.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "shareLink": {
             "type": "string",
@@ -53023,7 +52990,7 @@
             "type": "string",
             "description": "The password protection for accessing the shared content.",
             "nullable": true,
-            "example": "vfmf2vO1Kp"
+            "example": "P@ssw0rd123"
           },
           "denyDownload": {
             "type": "boolean",
@@ -53053,6 +53020,20 @@
             "description": "The token for validating access requests.",
             "nullable": true,
             "example": "some text"
+          },
+          "maxUseCount": {
+            "type": "integer",
+            "description": "The maximum number of times the invitation link can be used.",
+            "format": "int32",
+            "nullable": true,
+            "example": 1234
+          },
+          "currentUseCount": {
+            "type": "integer",
+            "description": "The current number of times the invitation link has been used.",
+            "format": "int32",
+            "nullable": true,
+            "example": 1234
           }
         },
         "additionalProperties": false,
@@ -53143,18 +53124,6 @@
           "IsTemplate",
           "IsFillFormDraft",
           "IsCompletedForm"
-        ],
-        "x-enum-descriptions": [
-          "None",
-          "Is editing",
-          "Is new",
-          "Is converting",
-          "Is original",
-          "Is editing alone",
-          "Is favorite",
-          "Is template",
-          "Is fill form draft",
-          "Is completed form"
         ]
       },
       "FileType": {
@@ -53175,18 +53144,6 @@
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
-          "Unknown",
-          "Archive",
-          "Video",
-          "Audio",
-          "Image",
-          "Spreadsheet",
-          "Presentation",
-          "Document",
-          "Pdf",
-          "Diagram"
-        ],
-        "x-enum-descriptions": [
           "Unknown",
           "Archive",
           "Video",
@@ -53684,20 +53641,6 @@
                 "Editing",
                 "ContentCreator"
               ],
-              "x-enum-descriptions": [
-                "None",
-                "Read and write",
-                "Read",
-                "Restrict",
-                "Varies",
-                "Review",
-                "Comment",
-                "Fill forms",
-                "Custom filter",
-                "Room manager",
-                "Editing",
-                "Content creator"
-              ],
               "description": "The default access rights in sharing settings."
             },
             "description": "The default access rights in sharing settings.",
@@ -53782,7 +53725,7 @@
             "type": "string",
             "description": "The folder title.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "usedSpace": {
             "type": "integer",
@@ -53876,7 +53819,7 @@
             "type": "integer",
             "description": "The room ID where filling the form.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "isRoomMember": {
             "type": "boolean",
@@ -53971,29 +53914,6 @@
           "VirtualDataRooms",
           "DiagramsOnly",
           "AiRooms"
-        ],
-        "x-enum-descriptions": [
-          "None",
-          "Files  only",
-          "Folders only",
-          "Documents only",
-          "Presentations only",
-          "Spreadsheets only",
-          "Images only",
-          "By user",
-          "By department",
-          "Archive only",
-          "By extension",
-          "Media only",
-          "Filling forms rooms",
-          "Editing rooms",
-          "Custom rooms",
-          "Public rooms",
-          "Pdf",
-          "Pdf form",
-          "Virtual data rooms",
-          "Diagrams only",
-          "Ai rooms"
         ]
       },
       "FolderContentDtoInteger": {
@@ -54498,7 +54418,7 @@
             "type": "string",
             "description": "The link name.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "password": {
             "maxLength": 255,
@@ -54506,7 +54426,7 @@
             "type": "string",
             "description": "The link password.",
             "nullable": true,
-            "example": "vfmf2vO1Kp"
+            "example": "P@ssw0rd123"
           },
           "denyDownload": {
             "type": "boolean",
@@ -54610,10 +54530,6 @@
         "x-enum-varnames": [
           "Stop",
           "Resume"
-        ],
-        "x-enum-descriptions": [
-          "Stop",
-          "Resume"
         ]
       },
       "FormFillingStatus": {
@@ -54634,14 +54550,6 @@
           "Draft",
           "YouTurn",
           "InProgress",
-          "Complete",
-          "Stoped"
-        ],
-        "x-enum-descriptions": [
-          "None",
-          "Draft",
-          "You turn",
-          "In progress",
           "Complete",
           "Stoped"
         ]
@@ -54710,7 +54618,7 @@
             "type": "integer",
             "description": "The room ID.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "roleName": {
             "type": "string",
@@ -54728,7 +54636,7 @@
             "type": "string",
             "description": "The user ID.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "sequence": {
             "type": "integer",
@@ -54955,7 +54863,7 @@
             "type": "string",
             "description": "The unique system identifier.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "sourceFileId": {
             "type": "integer",
@@ -55178,7 +55086,7 @@
             "type": "integer",
             "description": "The unique identifier for the file history entry.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "action": {
             "$ref": "#/components/schemas/HistoryAction"
@@ -55346,10 +55254,6 @@
         "x-enum-varnames": [
           "Invitation",
           "External"
-        ],
-        "x-enum-descriptions": [
-          "Invitation",
-          "External"
         ]
       },
       "Location": {
@@ -55473,7 +55377,7 @@
             "type": "string",
             "description": "The logo cover ID.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "data": {
             "type": "string",
@@ -55580,14 +55484,14 @@
             "format": "email",
             "nullable": true,
             "readOnly": true,
-            "example": "Sydney_Roberts4@hotmail.com"
+            "example": "example@onlyoffice.com"
           },
           "id": {
             "type": "string",
             "description": "The user unique identification.",
             "nullable": true,
             "readOnly": true,
-            "example": "9846"
+            "example": "1"
           },
           "image": {
             "type": "string",
@@ -55607,7 +55511,7 @@
             "description": "The user full name.",
             "nullable": true,
             "readOnly": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           }
         },
         "additionalProperties": false,
@@ -55657,7 +55561,7 @@
             "type": "string",
             "description": "The module ID.",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "appName": {
             "type": "string",
@@ -55669,7 +55573,7 @@
             "type": "string",
             "description": "The module product class name.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "link": {
             "type": "string",
@@ -56137,7 +56041,7 @@
             "type": "string",
             "description": "The provider name.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           },
           "key": {
             "type": "string",
@@ -56204,18 +56108,6 @@
           "Yandex",
           "Storage"
         ],
-        "x-enum-descriptions": [
-          "None",
-          "Box",
-          "DropBox",
-          "GoogleDrive",
-          "kDrive",
-          "OneDrive",
-          "SharePoint",
-          "WebDav",
-          "Yandex",
-          "Storage"
-        ],
         "description": "[0 - None, 1 - Box, 2 - DropBox, 3 - GoogleDrive, 4 - kDrive, 5 - OneDrive, 6 - SharePoint, 7 - WebDav, 8 - Yandex, 9 - Storage]"
       },
       "RecentConfig": {
@@ -56231,7 +56123,7 @@
             "type": "string",
             "description": "The document title that will be displayed in the Open Recent... menu option.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "url": {
             "type": "string",
@@ -56300,11 +56192,6 @@
           "Day",
           "Month",
           "Year"
-        ],
-        "x-enum-descriptions": [
-          "Day",
-          "Month",
-          "Year"
         ]
       },
       "RoomFromTemplateStatusDto": {
@@ -56320,7 +56207,7 @@
             "type": "integer",
             "description": "The room ID.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "progress": {
             "type": "number",
@@ -56389,7 +56276,7 @@
                 "type": "string",
                 "description": "The ID of the user to share a room with.",
                 "format": "uuid",
-                "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+                "example": "00000000-0000-0000-0000-000000000000"
               },
               "access": {
                 "$ref": "#/components/schemas/FileShare"
@@ -56463,7 +56350,7 @@
             "type": "string",
             "description": "The link name.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "linkType": {
             "$ref": "#/components/schemas/LinkType"
@@ -56474,12 +56361,27 @@
             "type": "string",
             "description": "The link password.",
             "nullable": true,
-            "example": "vfmf2vO1Kp"
+            "example": "P@ssw0rd123"
           },
           "denyDownload": {
             "type": "boolean",
             "description": "Specifies if downloading the file from the link is disabled or not.",
             "example": true
+          },
+          "maxUseCount": {
+            "maximum": 1000,
+            "minimum": 1,
+            "type": "integer",
+            "description": "The maximum number of times the invitation link can be used.",
+            "format": "int32",
+            "nullable": true,
+            "example": 1234
+          },
+          "currentUseCount": {
+            "type": "integer",
+            "description": "The current number of times the invitation link has been used.",
+            "format": "int32",
+            "example": 1234
           }
         },
         "additionalProperties": false,
@@ -56539,10 +56441,6 @@
         "x-enum-varnames": [
           "None",
           "FormRoleBlockingDeletion"
-        ],
-        "x-enum-descriptions": [
-          "None",
-          "Form role blocking deletion"
         ]
       },
       "RoomSecurityWrapper": {
@@ -56589,13 +56487,13 @@
             "type": "integer",
             "description": "The room template ID.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "title": {
             "type": "string",
             "description": "The room template title.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "logo": {
             "$ref": "#/components/schemas/LogoRequest"
@@ -56760,14 +56658,6 @@
           "PublicRoom",
           "VirtualDataRoom",
           "AiRoom"
-        ],
-        "x-enum-descriptions": [
-          "Form filling room",
-          "Collaboration room",
-          "Custom room",
-          "Public room",
-          "Virtual data room",
-          "AI Room"
         ]
       },
       "Run": {
@@ -56812,13 +56702,13 @@
             "type": "integer",
             "description": "The folder ID to save the file as PDF.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "title": {
             "type": "string",
             "description": "The file title to save as PDF.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           }
         },
         "additionalProperties": false,
@@ -56872,16 +56762,6 @@
           "Templates",
           "Knowledge",
           "ResultStorage",
-          "AiAgents"
-        ],
-        "x-enum-descriptions": [
-          "Active",
-          "Archive",
-          "Any",
-          "Recent by links",
-          "Template",
-          "Knowledge",
-          "Result storage",
           "AiAgents"
         ]
       },
@@ -56964,6 +56844,8 @@
             "example": true
           },
           "sharingMessage": {
+            "maxLength": 255,
+            "minLength": 0,
             "type": "string",
             "description": "The message to send when notifying about the shared file.",
             "nullable": true,
@@ -57024,7 +56906,7 @@
             "type": "integer",
             "description": "The room template ID.",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "public": {
             "type": "boolean",
@@ -57067,15 +56949,6 @@
           "ExternalLink",
           "AdditionalExternalLink",
           "PrimaryExternalLink",
-          "User",
-          "Group"
-        ],
-        "x-enum-descriptions": [
-          "User or group",
-          "Invitation link",
-          "External link",
-          "Additional external link",
-          "Primary external link",
           "User",
           "Group"
         ]
@@ -57128,21 +57001,6 @@
           "CustomOrder",
           "LastOpened",
           "UsedSpace"
-        ],
-        "x-enum-descriptions": [
-          "Date and time",
-          "AZ",
-          "Size",
-          "Author",
-          "Type",
-          "New",
-          "Date and time creation",
-          "Room type",
-          "Tags",
-          "Room",
-          "Custom order",
-          "Last opened",
-          "Used space"
         ]
       },
       "StartEdit": {
@@ -57184,11 +57042,6 @@
           "None",
           "ShareToFillOut",
           "StartFilling"
-        ],
-        "x-enum-descriptions": [
-          "None",
-          "Share to fill out",
-          "Start filling"
         ]
       },
       "Status": {
@@ -57211,14 +57064,6 @@
           "RequiredPassword",
           "InvalidPassword",
           "ExternalAccessDenied"
-        ],
-        "x-enum-descriptions": [
-          "Ok",
-          "Invalid",
-          "Expired",
-          "Required password",
-          "Invalid password",
-          "External access denied"
         ]
       },
       "StorageFilter": {
@@ -57235,11 +57080,6 @@
           "Internal",
           "ThirdParty"
         ],
-        "x-enum-descriptions": [
-          "None",
-          "Internal",
-          "ThirdParty"
-        ],
         "description": "[0 - None, 1 - Internal, 2 - ThirdParty]"
       },
       "SubjectFilter": {
@@ -57251,10 +57091,6 @@
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
-          "Owner",
-          "Member"
-        ],
-        "x-enum-descriptions": [
           "Owner",
           "Member"
         ],
@@ -57278,13 +57114,6 @@
           "Group",
           "InvitationLink",
           "PrimaryExternalLink"
-        ],
-        "x-enum-descriptions": [
-          "User",
-          "External link",
-          "Group",
-          "Invitation link",
-          "Primary external link"
         ]
       },
       "SubmitForm": {
@@ -57322,7 +57151,7 @@
             "type": "string",
             "description": "The template title that will be displayed in the Create New... menu option.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "url": {
             "type": "string",
@@ -57373,7 +57202,7 @@
             "type": "string",
             "description": "The password.",
             "nullable": true,
-            "example": "vfmf2vO1Kp"
+            "example": "P@ssw0rd123"
           },
           "token": {
             "type": "string",
@@ -57496,7 +57325,7 @@
             "type": "string",
             "description": "The third-party request password.",
             "nullable": true,
-            "example": "vfmf2vO1Kp"
+            "example": "P@ssw0rd123"
           },
           "token": {
             "type": "string",
@@ -57545,13 +57374,6 @@
           "Error",
           "NotRequired",
           "Creating"
-        ],
-        "x-enum-descriptions": [
-          "Waiting",
-          "Created",
-          "Error",
-          "Not required",
-          "Creating"
         ]
       },
       "UpdateComment": {
@@ -57585,7 +57407,7 @@
             "type": "string",
             "description": "The file title to update.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "lastVersion": {
             "type": "integer",
@@ -57606,7 +57428,7 @@
             "type": "string",
             "description": "The room title.",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "quota": {
             "type": "integer",
@@ -57784,12 +57606,7 @@
           },
           "data": {
             "description": "The uploaded data.",
-            "nullable": true,
-            "example": {
-              "int": 1234,
-              "string": "some text",
-              "boolean": true
-            }
+            "nullable": true
           },
           "message": {
             "type": "string",
@@ -57846,7 +57663,7 @@
           "folderId": {
             "type": "integer",
             "format": "int32",
-            "example": 9846
+            "example": 1
           },
           "version": {
             "type": "integer",
@@ -57856,7 +57673,7 @@
           "title": {
             "type": "string",
             "nullable": true,
-            "example": "legacy_1080p_small_wooden_mouse"
+            "example": "SampleFile"
           },
           "providerKey": {
             "type": "string",
@@ -57914,13 +57731,13 @@
             "type": "string",
             "description": "The user ID.",
             "nullable": true,
-            "example": "9846"
+            "example": "1"
           },
           "name": {
             "type": "string",
             "description": "The full name of the user.",
             "nullable": true,
-            "example": "Winfield Upton"
+            "example": "John Doe"
           },
           "image": {
             "type": "string",
@@ -57986,11 +57803,6 @@
           "Completed",
           "Failed"
         ],
-        "x-enum-descriptions": [
-          "In Progress",
-          "Completed",
-          "Failed"
-        ],
         "description": "[0 - In Progress, 1 - Completed, 2 - Failed]"
       },
       "WatermarkAdditions": {
@@ -58011,13 +57823,6 @@
           "UserIpAdress",
           "CurrentDate",
           "RoomName"
-        ],
-        "x-enum-descriptions": [
-          "User name",
-          "User email",
-          "User ip adress",
-          "Current date",
-          "Room name"
         ]
       },
       "WatermarkDto": {
@@ -58220,7 +58025,7 @@
           "id": {
             "type": "string",
             "format": "uuid",
-            "example": "aae1e103-bca5-9fa1-ba8c-42058b4abf28"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "fileName": {
             "type": "string",
@@ -58294,11 +58099,6 @@
           "EveryWeek",
           "EveryMonth"
         ],
-        "x-enum-descriptions": [
-          "Every day",
-          "Every week",
-          "Every month"
-        ],
         "description": "[0 - Every day, 1 - Every week, 2 - Every month]"
       },
       "BackupProgress": {
@@ -58354,11 +58154,6 @@
         "type": "integer",
         "example": 0,
         "x-enum-varnames": [
-          "Backup",
-          "Restore",
-          "Transfer"
-        ],
-        "x-enum-descriptions": [
           "Backup",
           "Restore",
           "Transfer"
@@ -58535,14 +58330,6 @@
           "DataStore",
           "ThirdPartyConsumer"
         ],
-        "x-enum-descriptions": [
-          "Documents",
-          "Thridparty documents",
-          "Custom cloud",
-          "Local",
-          "Data store",
-          "Thirdparty consumer"
-        ],
         "description": "[0 - Documents, 1 - Thridparty documents, 2 - Custom cloud, 3 - Local, 4 - Data store, 5 - Thirdparty consumer]"
       },
       "Cron": {
@@ -58625,20 +58412,10 @@
         "type": "object",
         "properties": {
           "key": {
-            "nullable": true,
-            "example": {
-              "int": 1234,
-              "string": "some text",
-              "boolean": true
-            }
+            "nullable": true
           },
           "value": {
-            "nullable": true,
-            "example": {
-              "int": 1234,
-              "string": "some text",
-              "boolean": true
-            }
+            "nullable": true
           }
         },
         "additionalProperties": false

@@ -34,33 +34,33 @@ namespace ASC.Web.Core.Files;
 [EnumExtensions]
 public enum FileType
 {
-    [SwaggerEnum("Unknown")]
+    [Description("Unknown")]
     Unknown = 0,
 
-    [SwaggerEnum("Archive")]
+    [Description("Archive")]
     Archive = 1,
 
-    [SwaggerEnum("Video")]
+    [Description("Video")]
     Video = 2,
 
-    [SwaggerEnum("Audio")]
+    [Description("Audio")]
     Audio = 3,
 
-    [SwaggerEnum("Image")]
+    [Description("Image")]
     Image = 4,
 
-    [SwaggerEnum("Spreadsheet")]
+    [Description("Spreadsheet")]
     Spreadsheet = 5,
 
-    [SwaggerEnum("Presentation")]
+    [Description("Presentation")]
     Presentation = 6,
 
-    [SwaggerEnum("Document")]
+    [Description("Document")]
     Document = 7,
 
-    [SwaggerEnum("Pdf")]
+    [Description("Pdf")]
     Pdf = 10,
 
-    [SwaggerEnum("Diagram")]
+    [Description("Diagram")]
     Diagram = 11
 }

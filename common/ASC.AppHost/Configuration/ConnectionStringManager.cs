@@ -28,15 +28,13 @@ using MySqlConnector;
 
 namespace ASC.AppHost.Configuration;
 
+public record RedisConfig(string Host, string Port, string? Password = null);
+
 public class ConnectionStringManager(IDistributedApplicationBuilder builder)
 {
     private MySqlConnectionStringBuilder? MySqlConnectionStringBuilder { get; set; }
     public Uri? RabbitMqUri { get; private set; }
-    
-    //TODO:create record
-    public string? RedisHost { get; private set; }
-    public string? RedisPort { get; private set; }
-    public string? RedisPassword { get; private set; }
+    public RedisConfig? Redis { get; private set; }
 
     private IResourceBuilder<MySqlDatabaseResource>? MySqlResource { get; set; }
     private IResourceBuilder<RabbitMQServerResource>? RabbitMqResource { get; set; }
@@ -62,12 +60,24 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
             }
         });
         
-        var path = Path.GetFullPath(Path.Combine("..", "Tools", "ASC.Migration.Runner", "bin", "Debug", "ASC.Migration.Runner.exe"));
+        var executableName = OperatingSystem.IsWindows() ? "ASC.Migration.Runner.exe" : "ASC.Migration.Runner";
+        var path = Path.GetFullPath(Path.Combine("..", "Tools", "ASC.Migration.Runner", "bin", "Debug", executableName));
         
         MigrateResource = builder
             .AddExecutable("migrate", path, Path.GetDirectoryName(path) ?? "")
             .WithReference(MySqlResource)
             .WaitFor(MySqlResource);
+        
+        var isStandalone = String.Compare(builder.Configuration["APP_HOSTING_STANDALONE"], "true", StringComparison.OrdinalIgnoreCase) == 0;
+
+        if (isStandalone)
+        {
+            MigrateResource.WithEnvironment("standalone", "true");
+        }
+        else
+        {
+            MigrateResource.WithEnvironment("standalone", "");
+        }
         
         return this;
     }
@@ -98,30 +108,28 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
             .AddRedis("cache")
             .WithPassword(null)
             .WithoutHttpsCertificate()
-            .WithLifetime(ContainerLifetime.Persistent)
-            .WithRedisInsight();
+            .WithLifetime(ContainerLifetime.Persistent);
 #pragma warning restore ASPIRECERTIFICATES001
         
         builder.Eventing.Subscribe(RedisResource.Resource, async (ConnectionStringAvailableEvent _, CancellationToken ct) =>
         {
             var connectionString = await RedisResource.Resource.ConnectionStringExpression.GetValueAsync(ct).ConfigureAwait(false);
-            if (connectionString != null)
+            if (connectionString != null && Redis == null)
             {
                 var hostAndPassword = connectionString.Split(',');
                 var splitted = hostAndPassword[0].Split(':');
                 if (splitted.Length == 2)
                 {
-                    RedisHost = splitted[0];
-                    RedisPort = splitted[1];
-                }
-
-                if (hostAndPassword.Length > 1)
-                {
-                    var splittedHostAndPassword = hostAndPassword[1].Split('=');
-                    if (splittedHostAndPassword.Length == 2)
+                    string? password = null;
+                    if (hostAndPassword.Length > 1)
                     {
-                        RedisPassword = splittedHostAndPassword[1];
+                        var splittedHostAndPassword = hostAndPassword[1].Split('=');
+                        if (splittedHostAndPassword.Length == 2)
+                        {
+                            password = splittedHostAndPassword[1];
+                        }
                     }
+                    Redis = new RedisConfig(splitted[0], splitted[1], password);
                 }
             }
         });
@@ -215,8 +223,8 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
 
         resourceBuilder
             .WithEnvironment("openTelemetry:enable", "true")
-            .WithEnvironment("files:docservice:url:portal", SubstituteLocalhost("http://localhost"))
-            .WithEnvironment("files:docservice:url:public", "http://localhost/ds-vpath");
+            .WithEnvironment("files:docservice:url:portal", SubstituteLocalhost("http://localhost") + ":" + Constants.AppHostPort)
+            .WithEnvironment("files:docservice:url:public", $"http://localhost:{Constants.AppHostPort.ToString()}/ds-vpath");
 
         if (MySqlResource != null)
         {
@@ -244,16 +252,16 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
                 .WithEnvironment("RabbitMQ:Password", () => RabbitMqUri != null ? $"{RabbitMqUri.UserInfo.Split(':')[1]}" : "")
                 .WithEnvironment("RabbitMQ:VirtualHost", () => RabbitMqUri != null ? $"{RabbitMqUri.PathAndQuery}" : "");
         }
-
+      
         if (RedisResource != null)
         {
             resourceBuilder
-                .WithEnvironment("Redis:Hosts:0:Host", () => (isDocker ? SubstituteLocalhost(RedisHost) : RedisHost) ?? string.Empty)
-                .WithEnvironment("Redis:Hosts:0:Port", () => RedisPort ?? string.Empty);
+                .WithEnvironment("Redis:Hosts:0:Host", () => (isDocker ? SubstituteLocalhost(Redis?.Host) : Redis?.Host) ?? string.Empty)
+                .WithEnvironment("Redis:Hosts:0:Port", () => Redis?.Port ?? string.Empty);
 
-            if (!string.IsNullOrEmpty(RedisPassword))
+            if (!string.IsNullOrEmpty(Redis?.Password))
             {
-                resourceBuilder.WithEnvironment("Redis:Password", () => RedisPassword ?? string.Empty);
+                resourceBuilder.WithEnvironment("Redis:Password", () => Redis?.Password ?? string.Empty);
             }
         }
 
@@ -280,12 +288,12 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
             .WithEnvironment("RABBIT_URI", () => RabbitMqUri != null ? $"{SubstituteLocalhost(RabbitMqUri.ToString())}" : string.Empty);
 
         resourceBuilder
-            .WithEnvironment("REDIS_HOST", () => SubstituteLocalhost(RedisHost) ?? string.Empty)
-            .WithEnvironment("REDIS_PORT", () => RedisPort ?? string.Empty);
+            .WithEnvironment("REDIS_HOST", () => SubstituteLocalhost(Redis?.Host) ?? string.Empty)
+            .WithEnvironment("REDIS_PORT", () => Redis?.Port ?? string.Empty);
 
-        if (!string.IsNullOrEmpty(RedisPassword))
+        if (!string.IsNullOrEmpty(Redis?.Password))
         {
-            resourceBuilder.WithEnvironment("REDIS_PASSWORD", () => RedisPassword ?? string.Empty);
+            resourceBuilder.WithEnvironment("REDIS_PASSWORD", () => Redis?.Password ?? string.Empty);
         }
 
         AddWaitFor(resourceBuilder, includeEditors: false);

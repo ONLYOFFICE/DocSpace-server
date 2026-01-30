@@ -28,6 +28,8 @@ namespace ASC.AppHost.Configuration;
 
 public static class Constants
 {
+    public const int AppHostPort = 8092;
+
     public const int RestyPort = 8092;
     public const int SocketIoPort = 9899;
     public const int SsoAuthPort = 9834;

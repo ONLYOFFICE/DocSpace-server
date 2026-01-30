@@ -32,15 +32,15 @@ namespace ASC.Core.Tenants;
 [EnumExtensions]
 public enum TenantWalletService
 {
-    [SwaggerEnum("Storage")]
+    [Description("Storage")]
     Storage = -11,
 
-    [SwaggerEnum("Backup")]
+    [Description("Backup")]
     Backup = -12,
 
-    [SwaggerEnum("AITools")]
+    [Description("AITools")]
     AITools = -13,
 
-    [SwaggerEnum("WebSearch")]
+    [Description("WebSearch")]
     WebSearch = -14
 }

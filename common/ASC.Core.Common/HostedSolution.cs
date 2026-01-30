@@ -45,6 +45,11 @@ public class HostedSolution(ITenantService tenantService,
         return (await tenantService.GetTenantsAsync(from)).ToList();
     }
 
+    public async Task<List<Tenant>> GetTenantsAsync(List<int> ids)
+    {
+        return (await tenantService.GetTenantsAsync(ids)).ToList();
+    }
+
     public async Task<List<Tenant>> FindTenantsAsync(string login, string passwordHash = null)
     {
         if (!string.IsNullOrEmpty(passwordHash) && await userService.GetUserByPasswordHashAsync(Tenant.DefaultTenant, login, passwordHash) == null)

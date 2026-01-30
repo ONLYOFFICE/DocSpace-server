@@ -750,12 +750,12 @@ public class CronParams
 /// </summary>
 public enum BackupPeriod
 {
-    [SwaggerEnum(Description = "Every day")]
+    [Description("Every day")]
     EveryDay = 0,
 
-    [SwaggerEnum(Description = "Every week")]
+    [Description("Every week")]
     EveryWeek = 1,
 
-    [SwaggerEnum(Description = "Every month")]
+    [Description("Every month")]
     EveryMonth = 2
 }
