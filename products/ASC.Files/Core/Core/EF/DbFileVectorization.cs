@@ -43,13 +43,13 @@ public class DbFileVectorization : BaseEntity
 
 public enum VectorizationStatus
 {
-    [SwaggerEnum("In Progress")]
+    [Description("In Progress")]
     InProgress,
 
-    [SwaggerEnum("Completed")]
+    [Description("Completed")]
     Completed,
 
-    [SwaggerEnum("Failed")]
+    [Description("Failed")]
     Failed
 }
 

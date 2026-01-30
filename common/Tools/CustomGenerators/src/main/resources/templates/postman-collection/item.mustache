@@ -1,31 +1,25 @@
+{{#vendorExtensions.postmanRequests}}
 {
-              "name": "{{{path}}}{{#isDeprecated}} (DEPRECATED){{/isDeprecated}}",
-              "description": "{{{notes}}}",
-              "item": [
-                {{#vendorExtensions.postmanRequests}}
-                {
-                  "name": "{{{name}}}",
-                  "request": {{>request}},
-                  "response": [
-                    {{#responses}}
+              "name": "{{{name}}}",
+              "request": {{>request}},
+              "response": [
+                {{#responses}}
+                  {
+                    "name": "{{name}}",
+                    "code": {{code}},
+                    "status": "{{status}}",
+                    "header": [
                       {
-                        "name": "{{name}}",
-                        "code": {{code}},
-                        "status": "{{status}}",
-                        "header": [
-                          {
-                            "key": "Content-Type",
-                            "value": "application/json"
-                          }
-                        ],
-                        "_postman_previewlanguage": "json",
-                        "cookie": [],
-                        "body" : "{{{body}}}",
-                        "originalRequest": {{#originalRequest}}{{>request}}{{/originalRequest}}
-                      }{{^-last}},{{/-last}}
-                    {{/responses}}
-                  ]
-                }{{^-last}},{{/-last}}
-                {{/vendorExtensions.postmanRequests}}
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "_postman_previewlanguage": "json",
+                    "cookie": [],
+                    "body" : "{{{body}}}",
+                    "description" : "{{{description}}}",
+                    "originalRequest": {{#originalRequest}}{{>request}}{{/originalRequest}}
+                  }{{^-last}},{{/-last}}
+                {{/responses}}
               ]
-            }
+            }{{/vendorExtensions.postmanRequests}}
