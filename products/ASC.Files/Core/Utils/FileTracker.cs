@@ -240,9 +240,9 @@ public class FileTrackerHelper(IFusionCache cache, IServiceProvider serviceProvi
             : [];
     }
 
-    public async Task<Dictionary<string, string>> GetEditingSessionsAsync<T>(T fileId, Global global)
+    public async Task<Dictionary<Guid, string>> GetEditingSessionsAsync<T>(T fileId, Global global)
     {
-        var result = new Dictionary<string, string>();
+        var result = new Dictionary<Guid, string>();
 
         var tracker = await GetTrackerAsync(fileId);
         if (tracker == null || !await IsEditingAsync(fileId))
@@ -252,8 +252,7 @@ public class FileTrackerHelper(IFusionCache cache, IServiceProvider serviceProvi
 
         foreach (var trackInfo in tracker.EditingBy.Values)
         {
-            var userKey = trackInfo.UserId.ToString();
-            if (result.ContainsKey(userKey))
+            if (result.ContainsKey(trackInfo.UserId))
             {
                 continue;
             }
@@ -261,16 +260,12 @@ public class FileTrackerHelper(IFusionCache cache, IServiceProvider serviceProvi
             var userName = await global.GetUserNameAsync(trackInfo.UserId, true);
             if (trackInfo.UserId == Guid.Empty)
             {
-                var i = 1;
-                foreach (var session in tracker.AnonymousSessions)
-                {
-                    result.Add(session.Key, i == 1 ? userName : $"{userName} {i}");
-                    i++;
-                }
+                var count = tracker.AnonymousSessions.Count;
+                result.Add(trackInfo.UserId, count > 1 ? $"{userName} ({count})" : userName);
             }
             else
             {
-                result.Add(userKey, userName);
+                result.Add(trackInfo.UserId, userName);
             }
         }
 
