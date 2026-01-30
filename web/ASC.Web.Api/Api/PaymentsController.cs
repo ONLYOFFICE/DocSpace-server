@@ -505,7 +505,7 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/walletservices</path>
     /// <collection>list</collection>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "List of available wallet services", typeof(IEnumerable<QuotaDto>))]
+    [SwaggerResponse(200, "List of available wallet services", typeof(IEnumerable<WalletServiceDto>))]
     [HttpGet("walletservices")]
     public async Task<IEnumerable<WalletServiceDto>> GetWalletServices()
     {
