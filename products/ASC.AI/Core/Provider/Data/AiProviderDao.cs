@@ -1,25 +1,25 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2026
-// 
+// (c) Copyright Ascensio System SIA 2009-2026
+//
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
 // of the GNU Affero General Public License (AGPL) version 3 as published by the Free Software
 // Foundation. In accordance with Section 7(a) of the GNU AGPL its Section 15 shall be amended
 // to the effect that Ascensio System SIA expressly excludes the warranty of non-infringement of
 // any third-party rights.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For details, see
 // the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021.
-// 
+//
 // The  interactive user interfaces in modified source and object code versions of the Program must
 // display Appropriate Legal Notices, as required under Section 5 of the GNU AGPL version 3.
-// 
+//
 // Pursuant to Section 7(b) of the License you must retain the original Product logo when
 // distributing the program. Pursuant to Section 7(e) we decline to grant you any rights under
 // trademark law for use of our trademarks.
-// 
+//
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
@@ -30,11 +30,8 @@ namespace ASC.AI.Core.Provider.Data;
 public class AiProviderDao(
     IDbContextFactory<AiDbContext> dbContextFactory,
     InstanceCrypto crypto,
-    AiGateway gateway,
-    IFusionCache cache)
+    AiGateway gateway) : IAiProviderDao
 {
-    private static readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(10);
-
     public async Task<AiProvider> AddProviderAsync(
         int tenantId,
         string title,
@@ -86,12 +83,6 @@ public class AiProviderDao(
             await transaction.CommitAsync();
         });
 
-        if (isFirstProvider)
-        {
-            await InvalidateDefaultProviderCacheAsync(tenantId);
-            await InvalidateFirstProviderCacheAsync(tenantId);
-        }
-
         return new AiProvider
         {
             Id = dbProvider.Id,
@@ -136,7 +127,7 @@ public class AiProviderDao(
 
         return res;
     }
-    
+
     public async IAsyncEnumerable<AiProvider> GetProvidersAsync(int tenantId, int offset, int limit)
     {
         var defaultProviderId = (await GetDefaultProviderAsync(tenantId))?.ProviderId;
@@ -206,21 +197,21 @@ public class AiProviderDao(
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         return await dbContext.GetProvidersTotalCountAsync(tenantId);
     }
-    
-    public async Task<AiProvider> UpdateProviderAsync(AiProvider provider)
+
+    public async Task<AiProvider> UpdateProviderAsync(int tenantId, AiProvider provider)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
-        
+
         var key = await crypto.EncryptAsync(provider.Key);
         var now = DateTime.UtcNow;
 
         await strategy.ExecuteAsync(async () =>
         {
             await using var context = await dbContextFactory.CreateDbContextAsync();
-            
-            await context.UpdateProviderAsync(provider.Id, provider.Title, provider.Url, key, now);
-            
+
+            await context.UpdateProviderAsync(tenantId, provider.Id, provider.Title, provider.Url, key, now);
+
             await context.SaveChangesAsync();
         });
 
@@ -228,11 +219,9 @@ public class AiProviderDao(
         provider.NeedReset = false;
         return provider;
     }
-    
+
     public async Task DeleteProviders(int tenantId, HashSet<int> ids)
     {
-        var defaultProviderId = (await GetDefaultProviderAsync(tenantId))?.ProviderId;
-
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
 
@@ -248,13 +237,6 @@ public class AiProviderDao(
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
         });
-
-        if (defaultProviderId.HasValue && ids.Contains(defaultProviderId.Value))
-        {
-            await InvalidateDefaultProviderCacheAsync(tenantId);
-        }
-        
-        await InvalidateFirstProviderCacheAsync(tenantId);
     }
 
     public async Task<DefaultAiProvider> SetDefaultProviderAsync(int tenantId, AiProvider provider, string defaultModel)
@@ -277,8 +259,6 @@ public class AiProviderDao(
             await context.SaveChangesAsync();
         });
 
-        await InvalidateDefaultProviderCacheAsync(tenantId);
-
         return new DefaultAiProvider
         {
             ProviderId = provider.Id,
@@ -288,68 +268,6 @@ public class AiProviderDao(
     }
 
     public async Task<DefaultAiProvider?> GetDefaultProviderAsync(int tenantId)
-    {
-        var cacheKey = GetDefaultProviderCacheKey(tenantId);
-
-        return await cache.GetOrSetAsync(cacheKey,
-            async _ => await FetchDefaultProviderAsync(tenantId), _cacheExpiration);
-    }
-
-    public async Task<int?> GetFirstProviderIdAsync(int tenantId)
-    {
-        if (gateway.Configured)
-        {
-            return AiGateway.ProviderId;
-        }
-
-        var cacheKey = GetFirstProviderCacheKey(tenantId);
-
-        return await cache.GetOrSetAsync(cacheKey,
-            async _ => await FetchFirstProviderIdAsync(tenantId), _cacheExpiration);
-    }
-
-    public async Task<bool> DeleteDefaultProviderAsync(int tenantId)
-    {
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        var strategy = dbContext.Database.CreateExecutionStrategy();
-
-        var deleted = 0;
-
-        await strategy.ExecuteAsync(async () =>
-        {
-            await using var context = await dbContextFactory.CreateDbContextAsync();
-            deleted = await context.DeleteDefaultProviderAsync(tenantId);
-        });
-
-        if (deleted > 0)
-        {
-            await InvalidateDefaultProviderCacheAsync(tenantId);
-        }
-
-        return deleted > 0;
-    }
-
-    private static string GetDefaultProviderCacheKey(int tenantId)
-    {
-        return $"ai:default_provider:{tenantId}";
-    }
-
-    private static string GetFirstProviderCacheKey(int tenantId)
-    {
-        return $"ai:first_provider:{tenantId}";
-    }
-    
-    private async Task InvalidateFirstProviderCacheAsync(int tenantId)
-    {
-        await cache.RemoveAsync(GetFirstProviderCacheKey(tenantId));
-    }
-    
-    private async Task InvalidateDefaultProviderCacheAsync(int tenantId)
-    {
-        await cache.RemoveAsync(GetDefaultProviderCacheKey(tenantId));
-    }
-
-    private async Task<DefaultAiProvider?> FetchDefaultProviderAsync(int tenantId)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
@@ -374,12 +292,33 @@ public class AiProviderDao(
         return result;
     }
 
-    private async Task<int?> FetchFirstProviderIdAsync(int tenantId)
+    public async Task<int?> GetFirstProviderIdAsync(int tenantId)
     {
+        if (gateway.Configured)
+        {
+            return AiGateway.ProviderId;
+        }
+
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         return await dbContext.GetFirstProviderIdAsync(tenantId);
     }
-    
+
+    public async Task<bool> DeleteDefaultProviderAsync(int tenantId)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var strategy = dbContext.Database.CreateExecutionStrategy();
+
+        var deleted = 0;
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await dbContextFactory.CreateDbContextAsync();
+            deleted = await context.DeleteDefaultProviderAsync(tenantId);
+        });
+
+        return deleted > 0;
+    }
+
     private async Task<AiProvider> CreateGatewayProviderAsync(bool includeCredentials = false)
     {
         return new AiProvider

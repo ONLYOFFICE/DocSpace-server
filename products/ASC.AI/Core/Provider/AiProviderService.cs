@@ -28,7 +28,7 @@ namespace ASC.AI.Core.Provider;
 
 [Scope]
 public class AiProviderService(
-    AiProviderDao providerDao,
+    IAiProviderDao providerDao,
     TenantManager tenantManager,
     AuthContext authContext,
     ProviderSettings providerSettings,
@@ -98,8 +98,10 @@ public class AiProviderService(
                 return true;
             });
         }
+
+        var tenantId = tenantManager.GetCurrentTenantId();
         
-        return await providerDao.UpdateProviderAsync(provider);
+        return await providerDao.UpdateProviderAsync(tenantId, provider);
     }
 
     public async IAsyncEnumerable<AiProvider> GetProvidersAsync(int offset, int limit)
