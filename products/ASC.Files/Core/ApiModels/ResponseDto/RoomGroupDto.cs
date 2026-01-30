@@ -44,7 +44,7 @@ public class RoomGroupDto
     /// <summary>
     /// Group icon
     /// </summary>
-    public LogoCover Icon { get; set; }
+    public MultiSizeLogoCover Icon { get; set; }
 
     /// <summary>
     /// The user ID.
@@ -102,11 +102,11 @@ public class RoomGroupDtoHelper(FolderDtoHelper folderWrapperHelper, IDaoFactory
         var totalRooms = internalRooms.Count + thirdPartyRooms.Count;
         result.TotalRooms = totalRooms;
 
-        LogoCover cover = null;
+        MultiSizeLogoCover cover = null;
         if (!string.IsNullOrEmpty(group.Icon) &&
-            (await RoomLogoManager.GetCoversAsync()).TryGetValue(group.Icon, out var fromDict))
+            (await RoomLogoManager.GetCoversBySizeAsync()).TryGetValue(group.Icon, out var fromDict))
         {
-            cover = new LogoCover
+            cover = new MultiSizeLogoCover
             {
                 Id = group.Icon,
                 Data = fromDict
