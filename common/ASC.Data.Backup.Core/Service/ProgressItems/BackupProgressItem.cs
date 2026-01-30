@@ -266,15 +266,16 @@ public class BackupProgressItem : BaseBackupProgressItem, IDisposable
         }
         catch (Exception error)
         {
-            Exception = error;
             IsCompleted = true;
 
-            if (!CancellationToken.IsCancellationRequested)
+            if (CancellationToken.IsCancellationRequested)
             {
+                Warning = ASC.AuditTrail.AuditReportResource.BackupCancelled;
                 _logger.InfoBackupCancelled();
             }
             else
             {
+                Exception = error;
                 _logger.ErrorRunJob(Id, TenantId, tempFile, _storageBasePath, error);
                 SaveAuditEvent(messageService, _isScheduled ? MessageAction.ScheduledBackupFailed : MessageAction.BackupFailed);
             }

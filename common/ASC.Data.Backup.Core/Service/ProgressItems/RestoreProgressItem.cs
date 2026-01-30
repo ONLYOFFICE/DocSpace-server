@@ -264,8 +264,11 @@ public class RestoreProgressItem : BaseBackupProgressItem
         }
         catch (Exception error)
         {
+            IsCompleted = true;
+
             if (CancellationToken.IsCancellationRequested)
             {
+                Warning = ASC.AuditTrail.AuditReportResource.RestoreCancelled;
                 _logger.InfoRestoreCancelled();
 
                 if (!Dump)
@@ -278,11 +281,9 @@ public class RestoreProgressItem : BaseBackupProgressItem
             }
             else
             {
+                Exception = error;
                 _logger.ErrorRestoreProgressItem(error);
             }
-
-            Exception = error;
-            IsCompleted = true;
 
             if (tenant != null)
             {
