@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    [Migration("20251129155940_MigrationContext_Upgrade68")]
+    [Migration("20251129155940_MigrationContext_Upgrade69")]
     partial class MigrationContext_Upgrade69
     {
         /// <inheritdoc />
