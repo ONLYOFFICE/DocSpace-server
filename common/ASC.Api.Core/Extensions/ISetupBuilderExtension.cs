@@ -36,6 +36,11 @@ public static class ISetupBuilderExtension
 
         var settings = configuration.GetSection("log").Get<NLogSettings>();
 
+        if (settings == null)
+        {
+            return loggingBuilder;
+        }
+        
         if (!string.IsNullOrEmpty(settings.Name))
         {
             conf.Variables["name"] = settings.Name;
