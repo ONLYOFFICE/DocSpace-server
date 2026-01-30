@@ -179,7 +179,7 @@ public class AiProviderService(
         var provider = await GetProviderAsync(providerId);
 
         var tenantId = tenantManager.GetCurrentTenantId();
-        var result = await providerDao.SetDefaultProviderAsync(tenantId, providerId, defaultModel);
+        var result = await providerDao.SetDefaultProviderAsync(tenantId, provider, defaultModel);
         result.ProviderTitle = provider.Title;
 
         messageService.Send(MessageAction.AIDefaultProviderSet, MessageTarget.Create(result.ProviderId), provider.Title, defaultModel);
@@ -189,7 +189,54 @@ public class AiProviderService(
 
     public async Task<DefaultAiProvider?> GetDefaultProviderAsync()
     {
-        return await providerDao.GetDefaultProviderAsync(tenantManager.GetCurrentTenantId());
+        var tenantId = tenantManager.GetCurrentTenantId();
+        
+        var defaultProvider = await providerDao.GetDefaultProviderAsync(tenantId);
+        if (defaultProvider != null)
+        {
+            return defaultProvider;
+        }
+
+        // Auto-set the first provider as default if none is set
+        var firstProviderId = await providerDao.GetFirstProviderIdAsync(tenantId);
+        if (firstProviderId == null)
+        {
+            return null;
+        }
+
+        var firstProvider = await providerDao.GetProviderAsync(tenantId, firstProviderId.Value);
+        if (firstProvider == null || firstProvider.NeedReset)
+        {
+            return null;
+        }
+
+        var defaultModel = await GetFirstAvailableModelAsync(firstProvider);
+        if (defaultModel == null)
+        {
+            return null;
+        }
+
+        return await providerDao.SetDefaultProviderAsync(tenantId, firstProvider, defaultModel);
+
+        async Task<string?> GetFirstAvailableModelAsync(AiProvider provider)
+        {
+            var supportedModels = providerSettings.GetSupportedModels(provider.Type);
+            if (supportedModels is { Count: > 0 })
+            {
+                return supportedModels.First();
+            }
+
+            try
+            {
+                var client = modelClientFactory.Create(provider.Type, provider.Url, provider.Key);
+                var models = await client.ListModelsAsync();
+                return models.FirstOrDefault()?.Id;
+            }
+            catch
+            {
+                return null;
+            }
+        }
     }
 
     public async Task DeleteDefaultProviderAsync()
@@ -225,7 +272,7 @@ public class AiProviderService(
         }
     }
 
-    private async Task<T> ExecuteProviderRequestAsync<T>(Func<Task<T>> request)
+    private static async Task<T> ExecuteProviderRequestAsync<T>(Func<Task<T>> request)
     {
         try
         {
