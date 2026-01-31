@@ -27,7 +27,8 @@
         "tags": [
           "Api keys"
         ],
-        "summary": "Creates a user API key with the parameters specified in the request.",
+        "summary": "Create a user API key",
+        "description": "Creates a user API key with the parameters specified in the request.",
         "operationId": "createApiKey",
         "requestBody": {
           "content": {
@@ -87,7 +88,8 @@
         "tags": [
           "Api keys"
         ],
-        "summary": "Returns a list of all API keys for the current user.",
+        "summary": "Get current user's API keys",
+        "description": "Returns a list of all API keys for the current user.",
         "operationId": "getApiKeys",
         "responses": {
           "200": {
@@ -140,7 +142,8 @@
         "tags": [
           "Api keys"
         ],
-        "summary": "Returns a list of all available permissions for the API key.",
+        "summary": "Get API key permissions",
+        "description": "Returns a list of all available permissions for the API key.",
         "operationId": "getAllPermissions",
         "responses": {
           "200": {
@@ -193,7 +196,8 @@
         "tags": [
           "Api keys"
         ],
-        "summary": "Returns information about the current user's API key.",
+        "summary": "Get current user's API key",
+        "description": "Returns information about the current user's API key.",
         "operationId": "getApiKey",
         "responses": {
           "200": {
@@ -246,7 +250,8 @@
         "tags": [
           "Api keys"
         ],
-        "summary": "Updates an existing API key changing its name, permissions, and status.",
+        "summary": "Update an API key",
+        "description": "Updates an existing API key changing its name, permissions, and status.",
         "operationId": "updateApiKey",
         "parameters": [
           {
@@ -321,7 +326,8 @@
         "tags": [
           "Api keys"
         ],
-        "summary": "Deletes a user API key by its ID.",
+        "summary": "Delete a user API key",
+        "description": "Deletes a user API key by its ID.",
         "operationId": "deleteApiKey",
         "parameters": [
           {
@@ -386,8 +392,8 @@
         "tags": [
           "Group"
         ],
-        "summary": "Returns the general information about all the groups, such as group ID and group manager.",
-        "description": "This method returns partial group information.",
+        "summary": "Get groups",
+        "description": "Returns the general information about all the groups, such as group ID and group manager.",
         "operationId": "getGroups",
         "parameters": [
           {
@@ -507,7 +513,8 @@
         "tags": [
           "Group"
         ],
-        "summary": "Adds a new group with the group manager, name, and members specified in the request.",
+        "summary": "Add a new group",
+        "description": "Adds a new group with the group manager, name, and members specified in the request.",
         "operationId": "addGroup",
         "requestBody": {
           "content": {
@@ -569,8 +576,8 @@
         "tags": [
           "Group"
         ],
-        "summary": "Returns the detailed information about the selected group.",
-        "description": "This method returns full group information.",
+        "summary": "Get a group",
+        "description": "Returns the detailed information about the selected group.",
         "operationId": "getGroup",
         "parameters": [
           {
@@ -646,7 +653,8 @@
         "tags": [
           "Group"
         ],
-        "summary": "Updates the existing group changing the group manager, name, and/or members.",
+        "summary": "Update a group",
+        "description": "Updates the existing group changing the group manager, name, and/or members.",
         "operationId": "updateGroup",
         "parameters": [
           {
@@ -724,7 +732,8 @@
         "tags": [
           "Group"
         ],
-        "summary": "Deletes a group with the ID specified in the request from the list of groups on the portal.",
+        "summary": "Delete a group",
+        "description": "Deletes a group with the ID specified in the request from the list of groups on the portal.",
         "operationId": "deleteGroup",
         "parameters": [
           {
@@ -793,7 +802,8 @@
         "tags": [
           "Group"
         ],
-        "summary": "Returns a list of groups for the user with the ID specified in the request.",
+        "summary": "Get user groups",
+        "description": "Returns a list of groups for the user with the ID specified in the request.",
         "operationId": "getGroupByUserId",
         "parameters": [
           {
@@ -859,7 +869,8 @@
         "tags": [
           "Group"
         ],
-        "summary": "Moves all the members from the selected group to another one specified in the request.",
+        "summary": "Move group members",
+        "description": "Moves all the members from the selected group to another one specified in the request.",
         "operationId": "moveMembersTo",
         "parameters": [
           {
@@ -939,7 +950,8 @@
         "tags": [
           "Group"
         ],
-        "summary": "Replaces the group members with those specified in the request.",
+        "summary": "Replace group members",
+        "description": "Replaces the group members with those specified in the request.",
         "operationId": "setMembersTo",
         "parameters": [
           {
@@ -1014,7 +1026,8 @@
         "tags": [
           "Group"
         ],
-        "summary": "Adds new group members to the group with the ID specified in the request.",
+        "summary": "Add group members",
+        "description": "Adds new group members to the group with the ID specified in the request.",
         "operationId": "addMembersTo",
         "parameters": [
           {
@@ -1092,7 +1105,8 @@
         "tags": [
           "Group"
         ],
-        "summary": "Removes the group members specified in the request from the selected group.",
+        "summary": "Remove group members",
+        "description": "Removes the group members specified in the request from the selected group.",
         "operationId": "removeMembersFrom",
         "parameters": [
           {
@@ -1172,7 +1186,8 @@
         "tags": [
           "Group"
         ],
-        "summary": "Sets a user with the ID specified in the request as a group manager.",
+        "summary": "Set a group manager",
+        "description": "Sets a user with the ID specified in the request as a group manager.",
         "operationId": "setGroupManager",
         "parameters": [
           {
@@ -1252,7 +1267,8 @@
         "tags": [
           "Group / Search"
         ],
-        "summary": "Returns groups with their sharing settings in a room with the ID specified in request.",
+        "summary": "Get groups with room sharing settings",
+        "description": "Returns groups with their sharing settings in a room with the ID specified in request.",
         "operationId": "getGroupsWithRoomsShared",
         "parameters": [
           {
@@ -1361,7 +1377,8 @@
         "tags": [
           "Group / Search"
         ],
-        "summary": "Returns groups with their sharing settings in a folder with the ID specified in request.",
+        "summary": "Get groups with folder sharing settings",
+        "description": "Returns groups with their sharing settings in a folder with the ID specified in request.",
         "operationId": "getGroupsWithFoldersShared",
         "parameters": [
           {
@@ -1470,7 +1487,8 @@
         "tags": [
           "Group / Search"
         ],
-        "summary": "Returns groups with their sharing settings for a file with the ID specified in request.",
+        "summary": "Get groups with file sharing settings",
+        "description": "Returns groups with their sharing settings for a file with the ID specified in request.",
         "operationId": "getGroupsWithFilesShared",
         "parameters": [
           {
@@ -1579,7 +1597,8 @@
         "tags": [
           "People / Guests"
         ],
-        "summary": "Deletes guests from the list and excludes them from rooms to which they were invited.",
+        "summary": "Delete guests",
+        "description": "Deletes guests from the list and excludes them from rooms to which they were invited.",
         "operationId": "deleteGuests",
         "requestBody": {
           "content": {
@@ -1637,7 +1656,8 @@
         "tags": [
           "People / Guests"
         ],
-        "summary": "Approves a guest sharing link and returns the detailed information about a guest.",
+        "summary": "Approve a guest sharing link",
+        "description": "Approves a guest sharing link and returns the detailed information about a guest.",
         "operationId": "approveGuestShareLink",
         "requestBody": {
           "content": {
@@ -1705,7 +1725,8 @@
         "tags": [
           "People / Password"
         ],
-        "summary": "Sets a new password to the user with the ID specified in the request.",
+        "summary": "Change a user password",
+        "description": "Sets a new password to the user with the ID specified in the request.",
         "operationId": "changeUserPassword",
         "parameters": [
           {
@@ -1791,7 +1812,8 @@
         "tags": [
           "People / Password"
         ],
-        "summary": "Reminds a password to the user using the email address specified in the request.",
+        "summary": "Remind a user password",
+        "description": "Reminds a password to the user using the email address specified in the request.",
         "operationId": "sendUserPassword",
         "requestBody": {
           "content": {
@@ -1824,7 +1846,8 @@
         "tags": [
           "People / Photos"
         ],
-        "summary": "Creates the user photo thumbnails by coordinates of the original image specified in the request.",
+        "summary": "Create photo thumbnails",
+        "description": "Creates the user photo thumbnails by coordinates of the original image specified in the request.",
         "operationId": "createMemberPhotoThumbnails",
         "parameters": [
           {
@@ -1906,7 +1929,8 @@
         "tags": [
           "People / Photos"
         ],
-        "summary": "Deletes a photo of the user with the ID specified in the request.",
+        "summary": "Delete a user photo",
+        "description": "Deletes a photo of the user with the ID specified in the request.",
         "operationId": "deleteMemberPhoto",
         "parameters": [
           {
@@ -1975,7 +1999,8 @@
         "tags": [
           "People / Photos"
         ],
-        "summary": "Returns a photo of the user with the ID specified in the request.",
+        "summary": "Get a user photo",
+        "description": "Returns a photo of the user with the ID specified in the request.",
         "operationId": "getMemberPhoto",
         "parameters": [
           {
@@ -2044,7 +2069,8 @@
         "tags": [
           "People / Photos"
         ],
-        "summary": "Updates a photo of the user with the ID specified in the request.",
+        "summary": "Update a user photo",
+        "description": "Updates a photo of the user with the ID specified in the request.",
         "operationId": "updateMemberPhoto",
         "parameters": [
           {
@@ -2124,7 +2150,8 @@
         "tags": [
           "People / Photos"
         ],
-        "summary": "Uploads a photo of the user with the ID specified in the request.",
+        "summary": "Upload a user photo",
+        "description": "Uploads a photo of the user with the ID specified in the request.",
         "operationId": "uploadMemberPhoto",
         "parameters": [
           {
@@ -2227,7 +2254,8 @@
         "tags": [
           "People / Profiles"
         ],
-        "summary": "Returns the user claims.",
+        "summary": "Get user claims",
+        "description": "Returns the user claims.",
         "operationId": "getClaims",
         "responses": {
           "200": {
@@ -2280,7 +2308,8 @@
         "tags": [
           "People / Profiles"
         ],
-        "summary": "Adds a new portal user with the first name, last name, email address, and several optional parameters specified in the request.",
+        "summary": "Add a user",
+        "description": "Adds a new portal user with the first name, last name, email address, and several optional parameters specified in the request.",
         "operationId": "addMember",
         "requestBody": {
           "content": {
@@ -2343,7 +2372,8 @@
         "tags": [
           "People / Profiles"
         ],
-        "summary": "Returns a list of profiles for all the portal users.",
+        "summary": "Get profiles",
+        "description": "Returns a list of profiles for all the portal users.",
         "operationId": "getAllProfiles",
         "parameters": [
           {
@@ -2464,7 +2494,8 @@
         "tags": [
           "People / Profiles"
         ],
-        "summary": "Invites users specified in the request to the current portal.",
+        "summary": "Invite users",
+        "description": "Invites users specified in the request to the current portal.",
         "operationId": "inviteUsers",
         "requestBody": {
           "content": {
@@ -2533,7 +2564,8 @@
         "tags": [
           "People / Profiles"
         ],
-        "summary": "Resends emails to the users who have not activated their emails.",
+        "summary": "Resend activation emails",
+        "description": "Resends emails to the users who have not activated their emails.",
         "operationId": "resendUserInvites",
         "requestBody": {
           "content": {
@@ -2598,7 +2630,8 @@
         "tags": [
           "People / Profiles"
         ],
-        "summary": "Deletes a user with the ID specified in the request from the portal.",
+        "summary": "Delete a user",
+        "description": "Deletes a user with the ID specified in the request from the portal.",
         "operationId": "deleteMember",
         "parameters": [
           {
@@ -2670,7 +2703,8 @@
         "tags": [
           "People / Profiles"
         ],
-        "summary": "Returns the detailed information about a profile of the user with the ID specified in the request.",
+        "summary": "Get a profile by user ID",
+        "description": "Returns the detailed information about a profile of the user with the ID specified in the request.",
         "operationId": "getProfileByUserId",
         "parameters": [
           {
@@ -2739,7 +2773,8 @@
         "tags": [
           "People / Profiles"
         ],
-        "summary": "Updates the data for the selected portal user with the first name, last name, email address, and/or optional parameters specified in the request.",
+        "summary": "Update a user",
+        "description": "Updates the data for the selected portal user with the first name, last name, email address, and/or optional parameters specified in the request.",
         "operationId": "updateMember",
         "parameters": [
           {
@@ -2824,7 +2859,8 @@
         "tags": [
           "People / Profiles"
         ],
-        "summary": "Deletes the current user profile.",
+        "summary": "Delete my profile",
+        "description": "Deletes the current user profile.",
         "operationId": "deleteProfile",
         "responses": {
           "200": {
@@ -2881,7 +2917,8 @@
         "tags": [
           "People / Profiles"
         ],
-        "summary": "Returns the detailed information about the current user profile.",
+        "summary": "Get my profile",
+        "description": "Returns the detailed information about the current user profile.",
         "operationId": "getSelfProfile",
         "responses": {
           "200": {
@@ -2934,7 +2971,8 @@
         "tags": [
           "People / Profiles"
         ],
-        "summary": "Returns the detailed information about a profile of the user with the email specified in the request.",
+        "summary": "Get a profile by user email",
+        "description": "Returns the detailed information about a profile of the user with the email specified in the request.",
         "operationId": "getProfileByEmail",
         "parameters": [
           {
@@ -3020,7 +3058,8 @@
         "tags": [
           "People / Profiles"
         ],
-        "summary": "Sends a message to the user email with the instructions to change the email address connected to the portal.",
+        "summary": "Send instructions to change email",
+        "description": "Sends a message to the user email with the instructions to change the email address connected to the portal.",
         "operationId": "sendEmailChangeInstructions",
         "requestBody": {
           "content": {
@@ -3091,7 +3130,8 @@
         "tags": [
           "People / Profiles"
         ],
-        "summary": "Deletes a list of the users with the IDs specified in the request.",
+        "summary": "Delete users",
+        "description": "Deletes a list of the users with the IDs specified in the request.",
         "operationId": "removeUsers",
         "requestBody": {
           "content": {
@@ -3156,7 +3196,8 @@
         "tags": [
           "People / Profiles"
         ],
-        "summary": "Updates the user culture code with the parameters specified in the request.",
+        "summary": "Update a user culture code",
+        "description": "Updates the user culture code with the parameters specified in the request.",
         "operationId": "updateMemberCulture",
         "parameters": [
           {
@@ -3237,7 +3278,8 @@
         "tags": [
           "People / Quota"
         ],
-        "summary": "Changes a quota limit for the users with the IDs specified in the request.",
+        "summary": "Change a user quota limit",
+        "description": "Changes a quota limit for the users with the IDs specified in the request.",
         "operationId": "updateUserQuota",
         "requestBody": {
           "content": {
@@ -3302,7 +3344,8 @@
         "tags": [
           "People / Quota"
         ],
-        "summary": "Resets a quota limit of users with the IDs specified in the request.",
+        "summary": "Reset a user quota limit",
+        "description": "Resets a quota limit of users with the IDs specified in the request.",
         "operationId": "resetUsersQuota",
         "requestBody": {
           "content": {
@@ -3373,7 +3416,8 @@
         "tags": [
           "People / Search"
         ],
-        "summary": "Returns the account entries with their sharing settings in a room with the ID specified in request.",
+        "summary": "Get account entries",
+        "description": "Returns the account entries with their sharing settings in a room with the ID specified in request.",
         "operationId": "getAccountsEntriesWithRoomsShared",
         "parameters": [
           {
@@ -3555,7 +3599,8 @@
         "tags": [
           "People / Search"
         ],
-        "summary": "Returns the account entries with their sharing settings in a folder with the ID specified in request.",
+        "summary": "Get account entries with folder sharing settings",
+        "description": "Returns the account entries with their sharing settings in a folder with the ID specified in request.",
         "operationId": "getAccountsEntriesWithFoldersShared",
         "parameters": [
           {
@@ -3737,7 +3782,8 @@
         "tags": [
           "People / Search"
         ],
-        "summary": "Returns the account entries with their sharing settings for a file with the ID specified in request.",
+        "summary": "Get account entries with file sharing settings",
+        "description": "Returns the account entries with their sharing settings for a file with the ID specified in request.",
         "operationId": "getAccountsEntriesWithFilesShared",
         "parameters": [
           {
@@ -3919,7 +3965,8 @@
         "tags": [
           "People / Search"
         ],
-        "summary": "Returns a list of users matching the status filter and search query.",
+        "summary": "Search users by status filter",
+        "description": "Returns a list of users matching the status filter and search query.",
         "operationId": "searchUsersByStatus",
         "parameters": [
           {
@@ -4013,7 +4060,8 @@
         "tags": [
           "People / Search"
         ],
-        "summary": "Returns a list of users with full information about them matching the parameters specified in the request.",
+        "summary": "Search users with detailed information by extended filter",
+        "description": "Returns a list of users with full information about them matching the parameters specified in the request.",
         "operationId": "searchUsersByExtendedFilter",
         "parameters": [
           {
@@ -4291,7 +4339,8 @@
         "tags": [
           "People / Search"
         ],
-        "summary": "Returns a list of users matching the search query. This method uses the query parameters.",
+        "summary": "Search users (using query parameters)",
+        "description": "Returns a list of users matching the search query. This method uses the query parameters.",
         "operationId": "searchUsersByQuery",
         "parameters": [
           {
@@ -4355,7 +4404,8 @@
         "tags": [
           "People / Search"
         ],
-        "summary": "Returns a list of users matching the search query.",
+        "summary": "Search users",
+        "description": "Returns a list of users matching the search query.",
         "operationId": "getSearch",
         "parameters": [
           {
@@ -4441,7 +4491,8 @@
         "tags": [
           "People / Search"
         ],
-        "summary": "Returns a list of users matching the parameters specified in the request.",
+        "summary": "Search users by extended filter",
+        "description": "Returns a list of users matching the parameters specified in the request.",
         "operationId": "getSimpleByFilter",
         "parameters": [
           {
@@ -4719,7 +4770,8 @@
         "tags": [
           "People / Search"
         ],
-        "summary": "Returns the users with the sharing settings in a room with the ID specified in request.",
+        "summary": "Get users with room sharing settings",
+        "description": "Returns the users with the sharing settings in a room with the ID specified in request.",
         "operationId": "getUsersWithRoomShared",
         "parameters": [
           {
@@ -4901,7 +4953,8 @@
         "tags": [
           "People / Search"
         ],
-        "summary": "Returns the users with the sharing settings in a folder with the ID specified in request.",
+        "summary": "Get users with folder sharing settings",
+        "description": "Returns the users with the sharing settings in a folder with the ID specified in request.",
         "operationId": "getUsersWithFoldersShared",
         "parameters": [
           {
@@ -5083,7 +5136,8 @@
         "tags": [
           "People / Search"
         ],
-        "summary": "Returns the users with the sharing settings in a file with the ID specified in request.",
+        "summary": "Get users with file sharing settings",
+        "description": "Returns the users with the sharing settings in a file with the ID specified in request.",
         "operationId": "getUsersWithFilesShared",
         "parameters": [
           {
@@ -5265,7 +5319,8 @@
         "tags": [
           "People / Theme"
         ],
-        "summary": "Returns a theme which is set to the current portal.",
+        "summary": "Get the portal theme",
+        "description": "Returns a theme which is set to the current portal.",
         "operationId": "getPortalTheme",
         "responses": {
           "200": {
@@ -5316,7 +5371,8 @@
         "tags": [
           "People / Theme"
         ],
-        "summary": "Changes the current portal theme.",
+        "summary": "Change the portal theme",
+        "description": "Changes the current portal theme.",
         "operationId": "changePortalTheme",
         "requestBody": {
           "content": {
@@ -5378,7 +5434,8 @@
         "tags": [
           "People / Third-party accounts"
         ],
-        "summary": "Returns a list of the available third-party accounts.",
+        "summary": "Get third-party accounts",
+        "description": "Returns a list of the available third-party accounts.",
         "operationId": "getThirdPartyAuthProviders",
         "parameters": [
           {
@@ -5437,7 +5494,8 @@
         "tags": [
           "People / Third-party accounts"
         ],
-        "summary": "Links a third-party account specified in the request to the user profile.",
+        "summary": "Link a third-pary account",
+        "description": "Links a third-party account specified in the request to the user profile.",
         "operationId": "linkThirdPartyAccount",
         "requestBody": {
           "content": {
@@ -5495,7 +5553,8 @@
         "tags": [
           "People / Third-party accounts"
         ],
-        "summary": "Creates a third-party account with the parameters specified in the request.",
+        "summary": "Create a third-pary account",
+        "description": "Creates a third-party account with the parameters specified in the request.",
         "operationId": "signupThirdPartyAccount",
         "requestBody": {
           "content": {
@@ -5531,7 +5590,8 @@
         "tags": [
           "People / Third-party accounts"
         ],
-        "summary": "Unlinks a third-party account specified in the request from the user profile.",
+        "summary": "Unlink a third-pary account",
+        "description": "Unlinks a third-party account specified in the request from the user profile.",
         "operationId": "unlinkThirdPartyAccount",
         "parameters": [
           {
@@ -5588,7 +5648,8 @@
         "tags": [
           "People / User data"
         ],
-        "summary": "Returns the progress of the started data reassignment for the user with the ID specified in the request.",
+        "summary": "Get the reassignment progress",
+        "description": "Returns the progress of the started data reassignment for the user with the ID specified in the request.",
         "operationId": "getReassignProgress",
         "parameters": [
           {
@@ -5654,7 +5715,8 @@
         "tags": [
           "People / User data"
         ],
-        "summary": "Starts the data reassignment for the user with the ID specified in the request.",
+        "summary": "Start the data reassignment",
+        "description": "Starts the data reassignment for the user with the ID specified in the request.",
         "operationId": "startReassign",
         "requestBody": {
           "content": {
@@ -5719,7 +5781,8 @@
         "tags": [
           "People / User data"
         ],
-        "summary": "Terminates the data reassignment for the user with the ID specified in the request.",
+        "summary": "Terminate the data reassignment",
+        "description": "Terminates the data reassignment for the user with the ID specified in the request.",
         "operationId": "terminateReassign",
         "requestBody": {
           "content": {
@@ -5781,7 +5844,8 @@
         "tags": [
           "People / User data"
         ],
-        "summary": "Checks whether the reassignment of rooms and shared files is required.",
+        "summary": "Check data for reassignment need",
+        "description": "Checks whether the reassignment of rooms and shared files is required.",
         "operationId": "necessaryReassign",
         "parameters": [
           {
@@ -5854,7 +5918,8 @@
         "tags": [
           "People / User data"
         ],
-        "summary": "Returns the progress of the started data deletion for the user with the ID specified in the request.",
+        "summary": "Get the deletion progress",
+        "description": "Returns the progress of the started data deletion for the user with the ID specified in the request.",
         "operationId": "getRemoveProgress",
         "parameters": [
           {
@@ -5920,7 +5985,8 @@
         "tags": [
           "People / User data"
         ],
-        "summary": "Sends the instructions for deleting a user profile.",
+        "summary": "Send the deletion instructions",
+        "description": "Sends the instructions for deleting a user profile.",
         "operationId": "sendInstructionsToDelete",
         "responses": {
           "200": {
@@ -5976,7 +6042,8 @@
         "tags": [
           "People / User data"
         ],
-        "summary": "Starts the data deletion for the user with the ID specified in the request.",
+        "summary": "Start the data deletion",
+        "description": "Starts the data deletion for the user with the ID specified in the request.",
         "operationId": "startRemove",
         "requestBody": {
           "content": {
@@ -6047,7 +6114,8 @@
         "tags": [
           "People / User data"
         ],
-        "summary": "Terminates the data deletion for the user with the ID specified in the request.",
+        "summary": "Terminate the data deletion",
+        "description": "Terminates the data deletion for the user with the ID specified in the request.",
         "operationId": "terminateRemove",
         "requestBody": {
           "content": {
@@ -6102,7 +6170,8 @@
         "tags": [
           "People / User data"
         ],
-        "summary": "Starts deleting the personal folder.",
+        "summary": "Delete the personal folder",
+        "description": "Starts deleting the personal folder.",
         "operationId": "startDeletePersonalFolder",
         "responses": {
           "200": {
@@ -6158,7 +6227,8 @@
         "tags": [
           "People / User data"
         ],
-        "summary": "Returns the progress of deleting the personal folder.",
+        "summary": "Get the progress of deleting the personal folder",
+        "description": "Returns the progress of deleting the personal folder.",
         "operationId": "getDeletePersonalFolderProgress",
         "responses": {
           "200": {
@@ -6211,7 +6281,8 @@
         "tags": [
           "People / User status"
         ],
-        "summary": "Returns a list of profiles filtered by the user status.",
+        "summary": "Get profiles by status",
+        "description": "Returns a list of profiles filtered by the user status.",
         "operationId": "getByStatus",
         "parameters": [
           {
@@ -6339,7 +6410,8 @@
         "tags": [
           "People / User status"
         ],
-        "summary": "Changes a status of the users with the IDs specified in the request.",
+        "summary": "Change a user status",
+        "description": "Changes a status of the users with the IDs specified in the request.",
         "operationId": "updateUserStatus",
         "parameters": [
           {
@@ -6414,7 +6486,8 @@
         "tags": [
           "People / User status"
         ],
-        "summary": "Sets the required activation status to the list of users with the IDs specified in the request.",
+        "summary": "Set an activation status to the users",
+        "description": "Sets the required activation status to the list of users with the IDs specified in the request.",
         "operationId": "updateUserActivationStatus",
         "parameters": [
           {
@@ -6489,7 +6562,8 @@
         "tags": [
           "People / User type"
         ],
-        "summary": "Changes a type of the users with the IDs specified in the request.",
+        "summary": "Change a user type",
+        "description": "Changes a type of the users with the IDs specified in the request.",
         "operationId": "updateUserType",
         "parameters": [
           {
@@ -6564,7 +6638,8 @@
         "tags": [
           "People / User type"
         ],
-        "summary": "Starts updating the type of the user or guest when reassigning rooms and shared files.",
+        "summary": "Start updating user type",
+        "description": "Starts updating the type of the user or guest when reassigning rooms and shared files.",
         "operationId": "starUserTypetUpdate",
         "requestBody": {
           "content": {
@@ -6629,7 +6704,8 @@
         "tags": [
           "People / User type"
         ],
-        "summary": "Returns the progress of updating the user type.",
+        "summary": "Get the progress of updating user type",
+        "description": "Returns the progress of updating the user type.",
         "operationId": "getUserTypeUpdateProgress",
         "parameters": [
           {
@@ -6695,7 +6771,8 @@
         "tags": [
           "People / User type"
         ],
-        "summary": "Terminates the process of updating the type of the user or guest.",
+        "summary": "Terminate updating user type",
+        "description": "Terminates the process of updating the type of the user or guest.",
         "operationId": "terminateUserTypeUpdate",
         "requestBody": {
           "content": {
@@ -6757,7 +6834,8 @@
         "tags": [
           "Portal / Guests"
         ],
-        "summary": "Returns a link to share a guest with another user.",
+        "summary": "Get a guest sharing link",
+        "description": "Returns a link to share a guest with another user.",
         "operationId": "getGuestSharingLink",
         "parameters": [
           {

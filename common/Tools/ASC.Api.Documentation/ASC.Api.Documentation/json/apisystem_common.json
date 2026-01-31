@@ -27,7 +27,8 @@
         "tags": [
           "Portal"
         ],
-        "summary": "Registers a new portal with the parameters specified in the request.",
+        "summary": "Register a portal",
+        "description": "Registers a new portal with the parameters specified in the request.",
         "operationId": "register",
         "requestBody": {
           "content": {
@@ -104,7 +105,8 @@
         "tags": [
           "Portal"
         ],
-        "summary": "Registers a new portal by email with the parameters specified in the request.",
+        "summary": "Register a portal by email",
+        "description": "Registers a new portal by email with the parameters specified in the request.",
         "operationId": "registerByEmail",
         "requestBody": {
           "content": {
@@ -181,7 +183,8 @@
         "tags": [
           "Portal"
         ],
-        "summary": "Deletes a portal with a name specified in the request.",
+        "summary": "Remove a portal",
+        "description": "Deletes a portal with a name specified in the request.",
         "operationId": "remove",
         "parameters": [
           {
@@ -493,7 +496,8 @@
         "tags": [
           "Portal"
         ],
-        "summary": "Changes a portal activation status with a value specified in the request.",
+        "summary": "Change a portal status",
+        "description": "Changes a portal activation status with a value specified in the request.",
         "operationId": "changeStatus",
         "requestBody": {
           "content": {
@@ -570,7 +574,8 @@
         "tags": [
           "Portal"
         ],
-        "summary": "Checks if the specified name is available to create a portal.",
+        "summary": "Validate the portal name",
+        "description": "Checks if the specified name is available to create a portal.",
         "operationId": "checkExistingNamePortal",
         "requestBody": {
           "content": {
@@ -615,7 +620,8 @@
         "tags": [
           "Portal"
         ],
-        "summary": "Returns a list of all the portals registered for the user with the email address specified in the request.",
+        "summary": "Get portals",
+        "description": "Returns a list of all the portals registered for the user with the email address specified in the request.",
         "operationId": "getPortals",
         "parameters": [
           {
@@ -934,7 +940,8 @@
         "tags": [
           "Portal"
         ],
-        "summary": "Signs in to the portal with the parameters specified in the request.",
+        "summary": "Sign in to the portal",
+        "description": "Signs in to the portal with the parameters specified in the request.",
         "operationId": "signInToPortal",
         "requestBody": {
           "content": {
@@ -979,7 +986,8 @@
         "tags": [
           "Portal"
         ],
-        "summary": "Returns an Document Server license quota.",
+        "summary": "Get an Document Server license quota",
+        "description": "Returns an Document Server license quota.",
         "operationId": "getDocumentServerLicenseQuota",
         "parameters": [
           {
@@ -1042,7 +1050,8 @@
         "tags": [
           "Portal"
         ],
-        "summary": "Generates the Document Server license quota report.",
+        "summary": "Generate the Document Server license quota report",
+        "description": "Generates the Document Server license quota report.",
         "operationId": "createDocumentServerLicenseQuotaReport",
         "parameters": [
           {
@@ -1105,7 +1114,8 @@
         "tags": [
           "Settings"
         ],
-        "summary": "Returns the portal settings by the parameters specified in the request.",
+        "summary": "Get settings",
+        "description": "Returns the portal settings by the parameters specified in the request.",
         "operationId": "getSettings",
         "parameters": [
           {
@@ -1201,7 +1211,8 @@
         "tags": [
           "Settings"
         ],
-        "summary": "Saves the settings specified in the request for the current portal.",
+        "summary": "Save settings",
+        "description": "Saves the settings specified in the request for the current portal.",
         "operationId": "saveSettings",
         "requestBody": {
           "content": {
@@ -1278,7 +1289,8 @@
         "tags": [
           "Settings"
         ],
-        "summary": "Checks the domain with the name specified in the request.",
+        "summary": "Check the domain name",
+        "description": "Checks the domain with the name specified in the request.",
         "operationId": "checkDomain",
         "requestBody": {
           "content": {

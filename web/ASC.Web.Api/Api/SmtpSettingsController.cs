@@ -26,9 +26,9 @@
 
 namespace ASC.Api.Settings;
 
-///<summary>
+///<remarks>
 /// SMTP settings API.
-///</summary>
+///</remarks>
 [Scope]
 [ApiController]
 [DefaultRoute("smtp")]
@@ -42,12 +42,12 @@ public class SmtpSettingsController(
         TenantManager tenantManager)
     : ControllerBase
 {
-    /// <summary>
+    /// <remarks>
     /// Returns the current portal SMTP settings.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the SMTP settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/smtpsettings/smtp</path>
     [Tags("Security / SMTP settings")]
     [SwaggerResponse(200, "SMTP settings", typeof(SmtpSettingsDto))]
@@ -70,12 +70,12 @@ public class SmtpSettingsController(
         return settings;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Saves the SMTP settings for the current portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Save the SMTP settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/smtpsettings/smtp</path>
     [Tags("Security / SMTP settings")]
     [SwaggerResponse(200, "SMTP settings", typeof(SmtpSettingsDto))]
@@ -121,12 +121,12 @@ public class SmtpSettingsController(
         return settingsConfig;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Resets the SMTP settings of the current portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Reset the SMTP settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/smtpsettings/smtp</path>
     [Tags("Security / SMTP settings")]
     [SwaggerResponse(200, "Default SMTP settings", typeof(SmtpSettingsDto))]
@@ -153,12 +153,12 @@ public class SmtpSettingsController(
         return settings;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Tests the SMTP settings for the current portal (sends test message to the user email).
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Test the SMTP settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/smtpsettings/smtp/test</path>
     [Tags("Security / SMTP settings")]
     [SwaggerResponse(200, "SMTP operation status", typeof(SmtpOperationStatusRequestsDto))]
@@ -177,12 +177,12 @@ public class SmtpSettingsController(
         return await smtpOperation.GetStatus(tenant);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the status of the SMTP testing process.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the SMTP testing process status
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/smtpsettings/smtp/test/status</path>
     [Tags("Security / SMTP settings")]
     [SwaggerResponse(200, "SMTP operation status", typeof(SmtpOperationStatusRequestsDto))]

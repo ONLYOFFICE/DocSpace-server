@@ -27,7 +27,8 @@
         "tags": [
           "Authentication"
         ],
-        "summary": "Checks if the current user is authenticated or not.",
+        "summary": "Check authentication",
+        "description": "Checks if the current user is authenticated or not.",
         "operationId": "getIsAuthentificated",
         "responses": {
           "200": {
@@ -46,7 +47,8 @@
         "tags": [
           "Authentication"
         ],
-        "summary": "Authenticates the current user by SMS, authenticator app, or without two-factor authentication.",
+        "summary": "Authenticate a user",
+        "description": "Authenticates the current user by SMS, authenticator app, or without two-factor authentication.",
         "operationId": "authenticateMe",
         "requestBody": {
           "content": {
@@ -88,7 +90,8 @@
         "tags": [
           "Authentication"
         ],
-        "summary": "Authenticates the current user by SMS or two-factor authentication code.",
+        "summary": "Authenticate a user by code",
+        "description": "Authenticates the current user by SMS or two-factor authentication code.",
         "operationId": "authenticateMeFromBodyWithCode",
         "parameters": [
           {
@@ -140,7 +143,8 @@
         "tags": [
           "Authentication"
         ],
-        "summary": "Logs out of the current user account.",
+        "summary": "Log out",
+        "description": "Logs out of the current user account.",
         "operationId": "logout",
         "responses": {
           "200": {
@@ -161,7 +165,8 @@
         "tags": [
           "Authentication"
         ],
-        "summary": "Opens a confirmation email URL to validate a certain action (employee invitation, portal removal, phone activation, etc.).",
+        "summary": "Open confirmation email URL",
+        "description": "Opens a confirmation email URL to validate a certain action (employee invitation, portal removal, phone activation, etc.).",
         "operationId": "checkConfirm",
         "requestBody": {
           "content": {
@@ -191,7 +196,8 @@
         "tags": [
           "Authentication"
         ],
-        "summary": "Sets a mobile phone for the current user.",
+        "summary": "Set a mobile phone",
+        "description": "Sets a mobile phone for the current user.",
         "operationId": "saveMobilePhone",
         "requestBody": {
           "content": {
@@ -253,7 +259,8 @@
         "tags": [
           "Authentication"
         ],
-        "summary": "Sends SMS with an authentication code.",
+        "summary": "Send SMS code",
+        "description": "Sends SMS with an authentication code.",
         "operationId": "sendSmsCode",
         "requestBody": {
           "content": {
@@ -289,7 +296,8 @@
         "tags": [
           "Capabilities"
         ],
-        "summary": "Returns the information about portal capabilities.",
+        "summary": "Get portal capabilities",
+        "description": "Returns the information about portal capabilities.",
         "operationId": "getPortalCapabilities",
         "responses": {
           "200": {
@@ -310,7 +318,8 @@
         "tags": [
           "Migration"
         ],
-        "summary": "Returns a list of available migrations.",
+        "summary": "Get migrations",
+        "description": "Returns a list of available migrations.",
         "operationId": "listMigrations",
         "responses": {
           "200": {
@@ -366,7 +375,8 @@
         "tags": [
           "Migration"
         ],
-        "summary": "Uploads and initializes a migration with a migrator name specified in the request.",
+        "summary": "Upload and initialize migration",
+        "description": "Uploads and initializes a migration with a migrator name specified in the request.",
         "operationId": "uploadAndInitializeMigration",
         "parameters": [
           {
@@ -427,7 +437,8 @@
         "tags": [
           "Migration"
         ],
-        "summary": "Returns the migration status.",
+        "summary": "Get migration status",
+        "description": "Returns the migration status.",
         "operationId": "getMigrationStatus",
         "responses": {
           "200": {
@@ -483,7 +494,8 @@
         "tags": [
           "Migration"
         ],
-        "summary": "Cancels the migration.",
+        "summary": "Cancel migration",
+        "description": "Cancels the migration.",
         "operationId": "cancelMigration",
         "responses": {
           "200": {
@@ -532,7 +544,8 @@
         "tags": [
           "Migration"
         ],
-        "summary": "Clears the migration.",
+        "summary": "Clear migration",
+        "description": "Clears the migration.",
         "operationId": "clearMigration",
         "responses": {
           "200": {
@@ -581,7 +594,8 @@
         "tags": [
           "Migration"
         ],
-        "summary": "Starts the migration process.",
+        "summary": "Start migration",
+        "description": "Starts the migration process.",
         "operationId": "startMigration",
         "requestBody": {
           "content": {
@@ -639,7 +653,8 @@
         "tags": [
           "Migration"
         ],
-        "summary": "Returns the migration logs.",
+        "summary": "Get migration logs",
+        "description": "Returns the migration logs.",
         "operationId": "getMigrationLogs",
         "responses": {
           "200": {
@@ -688,7 +703,8 @@
         "tags": [
           "Migration"
         ],
-        "summary": "Finishes the migration process.",
+        "summary": "Finish migration",
+        "description": "Finishes the migration process.",
         "operationId": "finishMigration",
         "requestBody": {
           "content": {
@@ -746,7 +762,8 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Returns the URL to the payment page.",
+        "summary": "Get the payment page URL",
+        "description": "Returns the URL to the payment page.",
         "operationId": "getPaymentUrl",
         "requestBody": {
           "content": {
@@ -811,7 +828,8 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Updates the payment quantity with the parameters specified in the request.",
+        "summary": "Update the payment quantity",
+        "description": "Updates the payment quantity with the parameters specified in the request.",
         "operationId": "updatePayment",
         "requestBody": {
           "content": {
@@ -876,7 +894,8 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Updates the wallet payment quantity with the parameters specified in the request.",
+        "summary": "Update the wallet payment quantity",
+        "description": "Updates the wallet payment quantity with the parameters specified in the request.",
         "operationId": "updateWalletPayment",
         "requestBody": {
           "content": {
@@ -941,7 +960,8 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Calculates an amount of the wallet payment with the parameters specified in the request.",
+        "summary": "Calculate the wallet payment amount",
+        "description": "Calculates an amount of the wallet payment with the parameters specified in the request.",
         "operationId": "calculateWalletPayment",
         "requestBody": {
           "content": {
@@ -1006,7 +1026,8 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Returns the URL to the payment account.",
+        "summary": "Get the payment account",
+        "description": "Returns the URL to the payment account.",
         "operationId": "getPaymentAccount",
         "parameters": [
           {
@@ -1073,7 +1094,8 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Returns the available portal prices.",
+        "summary": "Get prices",
+        "description": "Returns the available portal prices.",
         "operationId": "getPortalPrices",
         "responses": {
           "200": {
@@ -1161,7 +1183,8 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Returns the available portal currencies.",
+        "summary": "Get currencies",
+        "description": "Returns the available portal currencies.",
         "operationId": "getPaymentCurrencies",
         "responses": {
           "200": {
@@ -1214,7 +1237,8 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Returns the available portal quotas.",
+        "summary": "Get quotas",
+        "description": "Returns the available portal quotas.",
         "operationId": "getPaymentQuotas",
         "parameters": [
           {
@@ -1278,7 +1302,8 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Returns the available wallet services.",
+        "summary": "Get wallet services",
+        "description": "Returns the available wallet services.",
         "operationId": "getWalletServices",
         "responses": {
           "200": {
@@ -1331,7 +1356,8 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Returns the specified wallet service.",
+        "summary": "Get wallet service",
+        "description": "Returns the specified wallet service.",
         "operationId": "getWalletService",
         "parameters": [
           {
@@ -1395,7 +1421,8 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Returns the payment information about the current portal quota.",
+        "summary": "Get quota payment information",
+        "description": "Returns the payment information about the current portal quota.",
         "operationId": "getQuotaPaymentInformation",
         "parameters": [
           {
@@ -1462,7 +1489,8 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Sends a request for the portal payment.",
+        "summary": "Send a payment request",
+        "description": "Sends a request for the portal payment.",
         "operationId": "sendPaymentRequest",
         "requestBody": {
           "content": {
@@ -1523,7 +1551,8 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Returns the URL to the checkout setup page.",
+        "summary": "Get the checkout setup page URL",
+        "description": "Returns the URL to the checkout setup page.",
         "operationId": "getCheckoutSetupUrl",
         "parameters": [
           {
@@ -1590,7 +1619,8 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Returns the customer information.",
+        "summary": "Get the customer information",
+        "description": "Returns the customer information.",
         "operationId": "getCustomerInfo",
         "parameters": [
           {
@@ -1657,7 +1687,8 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Returns the result of putting money on deposit.",
+        "summary": "Put money on deposit",
+        "description": "Returns the result of putting money on deposit.",
         "operationId": "topUpDeposit",
         "requestBody": {
           "content": {
@@ -1722,7 +1753,8 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Returns the customer balance from the accounting service.",
+        "summary": "Get the customer balance",
+        "description": "Returns the customer balance from the accounting service.",
         "operationId": "getCustomerBalance",
         "parameters": [
           {
@@ -1789,7 +1821,8 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Returns the report of customer operations from the accounting service.",
+        "summary": "Get the customer operations",
+        "description": "Returns the report of customer operations from the accounting service.",
         "operationId": "getCustomerOperations",
         "parameters": [
           {
@@ -1914,7 +1947,8 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Starts generating a customer operations report as an \"xlsx\" file and saves it in Documents.",
+        "summary": "Start the customer operations report generation",
+        "description": "Starts generating a customer operations report as an \"xlsx\" file and saves it in Documents.",
         "operationId": "createCustomerOperationsReport",
         "requestBody": {
           "content": {
@@ -1974,7 +2008,8 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Returns the status of generating a customer operations report.",
+        "summary": "Get the status of the customer operations report generation",
+        "description": "Returns the status of generating a customer operations report.",
         "operationId": "getCustomerOperationsReport",
         "responses": {
           "200": {
@@ -2025,7 +2060,8 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Terminates generating a customer operations report.",
+        "summary": "Terminate the customer operations report generation",
+        "description": "Terminates generating a customer operations report.",
         "operationId": "terminateCustomerOperationsReport",
         "responses": {
           "200": {
@@ -2071,7 +2107,8 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Returns the wallet auto top-up settings.",
+        "summary": "Get wallet auto top-up settings",
+        "description": "Returns the wallet auto top-up settings.",
         "operationId": "getTenantWalletSettings",
         "responses": {
           "200": {
@@ -2125,7 +2162,8 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Sets the wallet auto top-up settings.",
+        "summary": "Set wallet auto top-up settings",
+        "description": "Sets the wallet auto top-up settings.",
         "operationId": "setTenantWalletSettings",
         "requestBody": {
           "content": {
@@ -2190,7 +2228,8 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Returns the wallet services settings.",
+        "summary": "Get wallet services settings",
+        "description": "Returns the wallet services settings.",
         "operationId": "getTenantWalletServiceSettings",
         "responses": {
           "200": {
@@ -2246,7 +2285,8 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Changes the wallet service state.",
+        "summary": "Change wallet service state",
+        "description": "Changes the wallet service state.",
         "operationId": "changeTenantWalletServiceState",
         "requestBody": {
           "content": {
@@ -2311,7 +2351,8 @@
         "tags": [
           "Portal / Quota"
         ],
-        "summary": "Returns the used space of the current portal.",
+        "summary": "Get the portal used space",
+        "description": "Returns the used space of the current portal.",
         "operationId": "getPortalUsedSpace",
         "responses": {
           "200": {
@@ -2364,7 +2405,8 @@
         "tags": [
           "Portal / Quota"
         ],
-        "summary": "Returns the current portal tariff.",
+        "summary": "Get a portal tariff",
+        "description": "Returns the current portal tariff.",
         "operationId": "getPortalTariff",
         "parameters": [
           {
@@ -2428,7 +2470,8 @@
         "tags": [
           "Portal / Quota"
         ],
-        "summary": "Returns the current portal quota.",
+        "summary": "Get a portal quota",
+        "description": "Returns the current portal quota.",
         "operationId": "getPortalQuota",
         "responses": {
           "200": {
@@ -2484,7 +2527,8 @@
         "tags": [
           "Portal / Quota"
         ],
-        "summary": "Returns the recommended quota for the current portal.",
+        "summary": "Get the recommended quota",
+        "description": "Returns the recommended quota for the current portal.",
         "operationId": "getRightQuota",
         "responses": {
           "200": {
@@ -2537,7 +2581,8 @@
         "tags": [
           "Portal / Settings"
         ],
-        "summary": "Returns the current portal information.",
+        "summary": "Get a portal",
+        "description": "Returns the current portal information.",
         "operationId": "getPortalInformation",
         "responses": {
           "200": {
@@ -2590,7 +2635,8 @@
         "tags": [
           "Portal / Settings"
         ],
-        "summary": "Returns the full absolute path to the current portal.",
+        "summary": "Get a path to the portal",
+        "description": "Returns the full absolute path to the current portal.",
         "operationId": "getPortalPath",
         "parameters": [
           {
@@ -2654,7 +2700,8 @@
         "tags": [
           "Portal / Settings"
         ],
-        "summary": "Sends the instructions to suspend the current portal.",
+        "summary": "Send suspension instructions",
+        "description": "Sends the instructions to suspend the current portal.",
         "operationId": "sendSuspendInstructions",
         "responses": {
           "200": {
@@ -2698,7 +2745,8 @@
         "tags": [
           "Portal / Settings"
         ],
-        "summary": "Deactivates the current portal.",
+        "summary": "Deactivate a portal",
+        "description": "Deactivates the current portal.",
         "operationId": "suspendPortal",
         "responses": {
           "200": {
@@ -2744,7 +2792,8 @@
         "tags": [
           "Portal / Settings"
         ],
-        "summary": "Sends the instructions to remove the current portal.",
+        "summary": "Send removal instructions",
+        "description": "Sends the instructions to remove the current portal.",
         "operationId": "sendDeleteInstructions",
         "responses": {
           "200": {
@@ -2788,7 +2837,8 @@
         "tags": [
           "Portal / Settings"
         ],
-        "summary": "Deletes the current portal.",
+        "summary": "Delete a portal",
+        "description": "Deletes the current portal.",
         "operationId": "deletePortal",
         "responses": {
           "200": {
@@ -2841,7 +2891,8 @@
         "tags": [
           "Portal / Settings"
         ],
-        "summary": "Restores the current portal.",
+        "summary": "Restore a portal",
+        "description": "Restores the current portal.",
         "operationId": "continuePortal",
         "responses": {
           "200": {
@@ -2887,7 +2938,8 @@
         "tags": [
           "Portal / Users"
         ],
-        "summary": "Returns a user with the ID specified in the request from the current portal.",
+        "summary": "Get a user by ID",
+        "description": "Returns a user with the ID specified in the request from the current portal.",
         "operationId": "getUserById",
         "parameters": [
           {
@@ -2953,7 +3005,8 @@
         "tags": [
           "Portal / Users"
         ],
-        "summary": "Returns an invitation link for joining the portal.",
+        "summary": "Get an invitation link",
+        "description": "Returns an invitation link for joining the portal.",
         "operationId": "getInvitationLink",
         "parameters": [
           {
@@ -3018,7 +3071,8 @@
         "tags": [
           "Portal / Users"
         ],
-        "summary": "Returns an invitation link for joining the portal.",
+        "summary": "Create an invitation link",
+        "description": "Returns an invitation link for joining the portal.",
         "operationId": "createInvitationLink",
         "requestBody": {
           "content": {
@@ -3078,7 +3132,8 @@
         "tags": [
           "Portal / Users"
         ],
-        "summary": "Returns an invitation link for joining the portal.",
+        "summary": "Update an invitation link",
+        "description": "Returns an invitation link for joining the portal.",
         "operationId": "updateInvitationLink",
         "requestBody": {
           "content": {
@@ -3138,6 +3193,7 @@
         "tags": [
           "Portal / Users"
         ],
+        "summary": "Delete an invitation link",
         "operationId": "deleteInvitationLink",
         "requestBody": {
           "content": {
@@ -3199,7 +3255,8 @@
         "tags": [
           "Portal / Users"
         ],
-        "summary": "Returns an invitation link for joining the portal.",
+        "summary": "Get an invitation link",
+        "description": "Returns an invitation link for joining the portal.",
         "operationId": "getInvitationLinkByEmployeeType",
         "parameters": [
           {
@@ -3263,7 +3320,8 @@
         "tags": [
           "Portal / Users"
         ],
-        "summary": "Returns a number of portal users.",
+        "summary": "Get a number of portal users",
+        "description": "Returns a number of portal users.",
         "operationId": "getPortalUsersCount",
         "responses": {
           "200": {
@@ -3316,7 +3374,8 @@
         "tags": [
           "Portal / Users"
         ],
-        "summary": "Marks a gift message as read.",
+        "summary": "Mark a gift message as read",
+        "description": "Marks a gift message as read.",
         "operationId": "markGiftMessageAsRead",
         "responses": {
           "200": {
@@ -3362,7 +3421,8 @@
         "tags": [
           "Portal / Users"
         ],
-        "summary": "Sends congratulations to the user after registering a portal.",
+        "summary": "Send congratulations",
+        "description": "Sends congratulations to the user after registering a portal.",
         "operationId": "sendCongratulations",
         "parameters": [
           {
@@ -3402,7 +3462,8 @@
         "tags": [
           "Security / Access to DevTools"
         ],
-        "summary": "Sets the Developer Tools access settings for the portal.",
+        "summary": "Set the Developer Tools access settings",
+        "description": "Sets the Developer Tools access settings for the portal.",
         "operationId": "setTenantDevToolsAccessSettings",
         "requestBody": {
           "content": {
@@ -3462,7 +3523,8 @@
         "tags": [
           "Settings / Access to DevTools"
         ],
-        "summary": "Returns the Developer Tools access settings for the portal.",
+        "summary": "Get the Developer Tools access settings",
+        "description": "Returns the Developer Tools access settings for the portal.",
         "operationId": "getTenantAccessDevToolsSettings",
         "responses": {
           "200": {
@@ -3515,7 +3577,8 @@
         "tags": [
           "Security / Active connections"
         ],
-        "summary": "Returns all the active connections to the portal.",
+        "summary": "Get active connections",
+        "description": "Returns all the active connections to the portal.",
         "operationId": "getAllActiveConnections",
         "responses": {
           "200": {
@@ -3568,7 +3631,8 @@
         "tags": [
           "Security / Active connections"
         ],
-        "summary": "Logs out from all the active connections for the current user and changes their password.",
+        "summary": "Log out and change password",
+        "description": "Logs out from all the active connections for the current user and changes their password.",
         "operationId": "logOutAllActiveConnectionsChangePassword",
         "responses": {
           "200": {
@@ -3621,7 +3685,8 @@
         "tags": [
           "Security / Active connections"
         ],
-        "summary": "Logs out from all the active connections for the user with the ID specified in the request.",
+        "summary": "Log out for the user by ID",
+        "description": "Logs out from all the active connections for the user with the ID specified in the request.",
         "operationId": "logOutAllActiveConnectionsForUser",
         "parameters": [
           {
@@ -3683,7 +3748,8 @@
         "tags": [
           "Security / Active connections"
         ],
-        "summary": "Logs out from all the active connections except the current connection.",
+        "summary": "Log out from all connections except the current one",
+        "description": "Logs out from all the active connections except the current connection.",
         "operationId": "logOutAllExceptThisConnection",
         "responses": {
           "200": {
@@ -3736,7 +3802,8 @@
         "tags": [
           "Security / Active connections"
         ],
-        "summary": "Logs out from the connection with the ID specified in the request.",
+        "summary": "Log out from the connection",
+        "description": "Logs out from the connection with the ID specified in the request.",
         "operationId": "logOutActiveConnection",
         "parameters": [
           {
@@ -3805,7 +3872,8 @@
         "tags": [
           "Security / Audit trail data"
         ],
-        "summary": "Returns a list of the latest changes (creation, modification, deletion, etc.) made by users to the entities on the portal.",
+        "summary": "Get audit trail data",
+        "description": "Returns a list of the latest changes (creation, modification, deletion, etc.) made by users to the entities on the portal.",
         "operationId": "getLastAuditEvents",
         "responses": {
           "200": {
@@ -3861,7 +3929,8 @@
         "tags": [
           "Security / Audit trail data"
         ],
-        "summary": "Returns a list of the audit events by the parameters specified in the request.",
+        "summary": "Get filtered audit trail data",
+        "description": "Returns a list of the audit events by the parameters specified in the request.",
         "operationId": "getAuditEventsByFilter",
         "parameters": [
           {
@@ -4008,7 +4077,8 @@
         "tags": [
           "Security / Audit trail data"
         ],
-        "summary": "Returns all the available audit trail types.",
+        "summary": "Get audit trail types",
+        "description": "Returns all the available audit trail types.",
         "operationId": "getAuditTrailTypes",
         "responses": {
           "200": {
@@ -4029,7 +4099,8 @@
         "tags": [
           "Security / Audit trail data"
         ],
-        "summary": "Returns the mappers for the audit trail types.",
+        "summary": "Get audit trail mappers",
+        "description": "Returns the mappers for the audit trail types.",
         "operationId": "getAuditTrailMappers",
         "parameters": [
           {
@@ -4068,7 +4139,8 @@
         "tags": [
           "Security / Audit trail data"
         ],
-        "summary": "Generates the audit trail report.",
+        "summary": "Generate the audit trail report",
+        "description": "Generates the audit trail report.",
         "operationId": "createAuditTrailReport",
         "responses": {
           "200": {
@@ -4127,7 +4199,8 @@
         "tags": [
           "Security / Audit trail data"
         ],
-        "summary": "Returns the audit trail settings.",
+        "summary": "Get the audit trail settings",
+        "description": "Returns the audit trail settings.",
         "operationId": "getAuditSettings",
         "responses": {
           "200": {
@@ -4181,7 +4254,8 @@
         "tags": [
           "Security / Audit trail data"
         ],
-        "summary": "Sets the audit trail settings for the current portal.",
+        "summary": "Set the audit trail settings",
+        "description": "Sets the audit trail settings for the current portal.",
         "operationId": "setAuditSettings",
         "requestBody": {
           "content": {
@@ -4249,7 +4323,8 @@
         "tags": [
           "Security / Banners visibility"
         ],
-        "summary": "Sets the visibility settings of the promotional banners in the portal.",
+        "summary": "Set the banners visibility",
+        "description": "Sets the visibility settings of the promotional banners in the portal.",
         "operationId": "setTenantBannerSettings",
         "requestBody": {
           "content": {
@@ -4309,7 +4384,8 @@
         "tags": [
           "Settings / Banners visibility"
         ],
-        "summary": "Returns the visibility settings of the promotional banners in the portal.",
+        "summary": "Get the banners visibility",
+        "description": "Returns the visibility settings of the promotional banners in the portal.",
         "operationId": "getTenantBannerSettings",
         "responses": {
           "200": {
@@ -4362,7 +4438,8 @@
         "tags": [
           "Security / CSP"
         ],
-        "summary": "Configures the CSP (Content Security Policy) settings for the current portal.",
+        "summary": "Configure CSP settings",
+        "description": "Configures the CSP (Content Security Policy) settings for the current portal.",
         "operationId": "configureCsp",
         "requestBody": {
           "content": {
@@ -4425,7 +4502,8 @@
         "tags": [
           "Security / CSP"
         ],
-        "summary": "Returns the CSP (Content Security Policy) settings for the current portal.",
+        "summary": "Get CSP settings",
+        "description": "Returns the CSP (Content Security Policy) settings for the current portal.",
         "operationId": "getCspSettings",
         "responses": {
           "200": {
@@ -4446,7 +4524,8 @@
         "tags": [
           "Security / Firebase"
         ],
-        "summary": "Saves the Firebase device token specified in the request for the Documents application.",
+        "summary": "Save the Documents Firebase device token",
+        "description": "Saves the Firebase device token specified in the request for the Documents application.",
         "operationId": "docRegisterPusnNotificationDevice",
         "requestBody": {
           "content": {
@@ -4508,7 +4587,8 @@
         "tags": [
           "Security / Firebase"
         ],
-        "summary": "Subscribes to the Documents push notification.",
+        "summary": "Subscribe to Documents push notification",
+        "description": "Subscribes to the Documents push notification.",
         "operationId": "subscribeDocumentsPushNotification",
         "requestBody": {
           "content": {
@@ -4570,7 +4650,8 @@
         "tags": [
           "Security / Login history"
         ],
-        "summary": "Returns all the latest user login activity, including successful logins and error logs.",
+        "summary": "Get login history",
+        "description": "Returns all the latest user login activity, including successful logins and error logs.",
         "operationId": "getLastLoginEvents",
         "responses": {
           "200": {
@@ -4626,7 +4707,8 @@
         "tags": [
           "Security / Login history"
         ],
-        "summary": "Returns a list of the login events by the parameters specified in the request.",
+        "summary": "Get filtered login events",
+        "description": "Returns a list of the login events by the parameters specified in the request.",
         "operationId": "getLoginEventsByFilter",
         "parameters": [
           {
@@ -4740,7 +4822,8 @@
         "tags": [
           "Security / Login history"
         ],
-        "summary": "Generates the login history report.",
+        "summary": "Generate the login history report",
+        "description": "Generates the login history report.",
         "operationId": "createLoginHistoryReport",
         "responses": {
           "200": {
@@ -4796,7 +4879,8 @@
         "tags": [
           "Security / OAuth2"
         ],
-        "summary": "Generates a JWT token for communication between login (client) and identity services.",
+        "summary": "Generate JWT token",
+        "description": "Generates a JWT token for communication between login (client) and identity services.",
         "operationId": "generateJwtToken",
         "responses": {
           "200": {
@@ -4849,7 +4933,8 @@
         "tags": [
           "Security / SMTP settings"
         ],
-        "summary": "Returns the current portal SMTP settings.",
+        "summary": "Get the SMTP settings",
+        "description": "Returns the current portal SMTP settings.",
         "operationId": "getSmtpSettings",
         "responses": {
           "200": {
@@ -4903,7 +4988,8 @@
         "tags": [
           "Security / SMTP settings"
         ],
-        "summary": "Saves the SMTP settings for the current portal.",
+        "summary": "Save the SMTP settings",
+        "description": "Saves the SMTP settings for the current portal.",
         "operationId": "saveSmtpSettings",
         "requestBody": {
           "content": {
@@ -4966,7 +5052,8 @@
         "tags": [
           "Security / SMTP settings"
         ],
-        "summary": "Resets the SMTP settings of the current portal.",
+        "summary": "Reset the SMTP settings",
+        "description": "Resets the SMTP settings of the current portal.",
         "operationId": "resetSmtpSettings",
         "responses": {
           "200": {
@@ -5022,7 +5109,8 @@
         "tags": [
           "Security / SMTP settings"
         ],
-        "summary": "Tests the SMTP settings for the current portal (sends test message to the user email).",
+        "summary": "Test the SMTP settings",
+        "description": "Tests the SMTP settings for the current portal (sends test message to the user email).",
         "operationId": "testSmtpSettings",
         "responses": {
           "200": {
@@ -5078,7 +5166,8 @@
         "tags": [
           "Security / SMTP settings"
         ],
-        "summary": "Returns the status of the SMTP testing process.",
+        "summary": "Get the SMTP testing process status",
+        "description": "Returns the status of the SMTP testing process.",
         "operationId": "getSmtpOperationStatus",
         "responses": {
           "200": {
@@ -5134,7 +5223,8 @@
         "tags": [
           "Settings / Authorization"
         ],
-        "summary": "Returns the authorization services.",
+        "summary": "Get the authorization services",
+        "description": "Returns the authorization services.",
         "operationId": "getAuthServices",
         "responses": {
           "200": {
@@ -5185,7 +5275,8 @@
         "tags": [
           "Settings / Authorization"
         ],
-        "summary": "Saves the authorization keys.",
+        "summary": "Save the authorization keys",
+        "description": "Saves the authorization keys.",
         "operationId": "saveAuthKeys",
         "requestBody": {
           "content": {
@@ -5253,7 +5344,8 @@
         "tags": [
           "Settings / Common settings"
         ],
-        "summary": "Returns a list of all the available portal settings with the current values for each parameter.",
+        "summary": "Get the portal settings",
+        "description": "Returns a list of all the available portal settings with the current values for each parameter.",
         "operationId": "getPortalSettings",
         "parameters": [
           {
@@ -5285,7 +5377,8 @@
         "tags": [
           "Settings / Common settings"
         ],
-        "summary": "Saves the mail domain settings specified in the request to the portal.",
+        "summary": "Save the mail domain settings",
+        "description": "Saves the mail domain settings specified in the request to the portal.",
         "operationId": "saveMailDomainSettings",
         "requestBody": {
           "content": {
@@ -5347,7 +5440,8 @@
         "tags": [
           "Settings / Common settings"
         ],
-        "summary": "Saves the deep link configuration settings for the portal.",
+        "summary": "Configure the deep link settings",
+        "description": "Saves the deep link configuration settings for the portal.",
         "operationId": "configureDeepLink",
         "requestBody": {
           "content": {
@@ -5410,7 +5504,8 @@
         "tags": [
           "Settings / Common settings"
         ],
-        "summary": "Returns the deep link settings.",
+        "summary": "Get the deep link settings",
+        "description": "Returns the deep link settings.",
         "operationId": "getDeepLinkSettings",
         "responses": {
           "200": {
@@ -5431,7 +5526,8 @@
         "tags": [
           "Settings / Common settings"
         ],
-        "summary": "Returns a list of all the available portal languages in the format of a two-letter or four-letter language code (e.g. \"de\", \"en-US\", etc.).",
+        "summary": "Get supported languages",
+        "description": "Returns a list of all the available portal languages in the format of a two-letter or four-letter language code (e.g. \"de\", \"en-US\", etc.).",
         "operationId": "getSupportedCultures",
         "responses": {
           "200": {
@@ -5452,7 +5548,8 @@
         "tags": [
           "Settings / Common settings"
         ],
-        "summary": "Returns a list of all the available portal time zones.",
+        "summary": "Get time zones",
+        "description": "Returns a list of all the available portal time zones.",
         "operationId": "getTimeZones",
         "responses": {
           "200": {
@@ -5505,7 +5602,8 @@
         "tags": [
           "Settings / Common settings"
         ],
-        "summary": "Returns the portal hostname.",
+        "summary": "Get hostname",
+        "description": "Returns the portal hostname.",
         "operationId": "getPortalHostname",
         "responses": {
           "200": {
@@ -5558,7 +5656,8 @@
         "tags": [
           "Settings / Common settings"
         ],
-        "summary": "Saves the DNS settings specified in the request to the current portal.",
+        "summary": "Save the DNS settings",
+        "description": "Saves the DNS settings specified in the request to the current portal.",
         "operationId": "saveDnsSettings",
         "requestBody": {
           "content": {
@@ -5629,7 +5728,8 @@
         "tags": [
           "Settings / Common settings"
         ],
-        "summary": "Returns the portal logo image URL.",
+        "summary": "Get a portal logo",
+        "description": "Returns the portal logo image URL.",
         "operationId": "getPortalLogo",
         "responses": {
           "200": {
@@ -5682,7 +5782,8 @@
         "tags": [
           "Settings / Common settings"
         ],
-        "summary": "Completes the Wizard settings.",
+        "summary": "Complete the Wizard settings",
+        "description": "Completes the Wizard settings.",
         "operationId": "completeWizard",
         "requestBody": {
           "content": {
@@ -5750,7 +5851,8 @@
         "tags": [
           "Settings / Common settings"
         ],
-        "summary": "Returns the portal color theme.",
+        "summary": "Get a color theme",
+        "description": "Returns the portal color theme.",
         "operationId": "getPortalColorTheme",
         "responses": {
           "200": {
@@ -5769,7 +5871,8 @@
         "tags": [
           "Settings / Common settings"
         ],
-        "summary": "Saves the portal color theme specified in the request.",
+        "summary": "Save a color theme",
+        "description": "Saves the portal color theme specified in the request.",
         "operationId": "savePortalColorTheme",
         "requestBody": {
           "content": {
@@ -5829,7 +5932,8 @@
         "tags": [
           "Settings / Common settings"
         ],
-        "summary": "Deletes the portal color theme with the ID specified in the request.",
+        "summary": "Delete a color theme",
+        "description": "Deletes the portal color theme with the ID specified in the request.",
         "operationId": "deletePortalColorTheme",
         "parameters": [
           {
@@ -5895,7 +5999,8 @@
         "tags": [
           "Settings / Common settings"
         ],
-        "summary": "Closes the administrator helper notification.",
+        "summary": "Close the admin helper",
+        "description": "Closes the administrator helper notification.",
         "operationId": "closeAdminHelper",
         "responses": {
           "200": {
@@ -5944,7 +6049,8 @@
         "tags": [
           "Settings / Common settings"
         ],
-        "summary": "Sets the default folder.",
+        "summary": "Set the default folder",
+        "description": "Sets the default folder.",
         "operationId": "saveDefaultFolder",
         "requestBody": {
           "content": {
@@ -6006,7 +6112,8 @@
         "tags": [
           "Settings / Common settings"
         ],
-        "summary": "Updates the email activation settings.",
+        "summary": "Update the email activation settings",
+        "description": "Updates the email activation settings.",
         "operationId": "updateEmailActivationSettings",
         "requestBody": {
           "content": {
@@ -6068,7 +6175,8 @@
         "tags": [
           "Settings / Common settings"
         ],
-        "summary": "Returns the socket settings.",
+        "summary": "Get the socket settings",
+        "description": "Returns the socket settings.",
         "operationId": "getSocketSettings",
         "responses": {
           "200": {
@@ -6121,7 +6229,8 @@
         "tags": [
           "Settings / Common settings"
         ],
-        "summary": "Returns the portal payment settings.",
+        "summary": "Get the payment settings",
+        "description": "Returns the portal payment settings.",
         "operationId": "getPaymentSettings",
         "responses": {
           "200": {
@@ -6174,7 +6283,8 @@
         "tags": [
           "Settings / Common settings"
         ],
-        "summary": "Returns the portal user invitation settings.",
+        "summary": "Get the user invitation settings",
+        "description": "Returns the portal user invitation settings.",
         "operationId": "getTenantUserInvitationSettings",
         "responses": {
           "200": {
@@ -6193,7 +6303,8 @@
         "tags": [
           "Settings / Common settings"
         ],
-        "summary": "Updates the portal user invitation settings.",
+        "summary": "Update user invitation settings",
+        "description": "Updates the portal user invitation settings.",
         "operationId": "updateInvitationSettings",
         "requestBody": {
           "content": {
@@ -6255,7 +6366,8 @@
         "tags": [
           "Settings / Cookies"
         ],
-        "summary": "Returns the cookies lifetime value in minutes.",
+        "summary": "Get cookies lifetime",
+        "description": "Returns the cookies lifetime value in minutes.",
         "operationId": "getCookieSettings",
         "responses": {
           "200": {
@@ -6306,7 +6418,8 @@
         "tags": [
           "Settings / Cookies"
         ],
-        "summary": "Updates the cookies lifetime value in minutes.",
+        "summary": "Update cookies lifetime",
+        "description": "Updates the cookies lifetime value in minutes.",
         "operationId": "updateCookieSettings",
         "requestBody": {
           "content": {
@@ -6371,7 +6484,8 @@
         "tags": [
           "Settings / Encryption"
         ],
-        "summary": "Starts the storage encryption process.",
+        "summary": "Start the storage encryption process",
+        "description": "Starts the storage encryption process.",
         "operationId": "startStorageEncryption",
         "requestBody": {
           "content": {
@@ -6442,7 +6556,8 @@
         "tags": [
           "Settings / Encryption"
         ],
-        "summary": "Returns the storage encryption settings.",
+        "summary": "Get the storage encryption settings",
+        "description": "Returns the storage encryption settings.",
         "operationId": "getStorageEncryptionSettings",
         "responses": {
           "200": {
@@ -6501,7 +6616,8 @@
         "tags": [
           "Settings / Encryption"
         ],
-        "summary": "Returns the storage encryption progress.",
+        "summary": "Get the storage encryption progress",
+        "description": "Returns the storage encryption progress.",
         "operationId": "getStorageEncryptionProgress",
         "responses": {
           "200": {
@@ -6557,7 +6673,8 @@
         "tags": [
           "Settings / Greeting settings"
         ],
-        "summary": "Returns the greeting settings for the current portal.",
+        "summary": "Get greeting settings",
+        "description": "Returns the greeting settings for the current portal.",
         "operationId": "getGreetingSettings",
         "responses": {
           "200": {
@@ -6608,7 +6725,8 @@
         "tags": [
           "Settings / Greeting settings"
         ],
-        "summary": "Saves the greeting settings specified in the request to the current portal.",
+        "summary": "Save the greeting settings",
+        "description": "Saves the greeting settings specified in the request to the current portal.",
         "operationId": "saveGreetingSettings",
         "requestBody": {
           "content": {
@@ -6670,7 +6788,8 @@
         "tags": [
           "Settings / Greeting settings"
         ],
-        "summary": "Checks if the greeting settings of the current portal are set to default or not.",
+        "summary": "Check the default greeting settings",
+        "description": "Checks if the greeting settings of the current portal are set to default or not.",
         "operationId": "getIsDefaultGreetingSettings",
         "responses": {
           "200": {
@@ -6723,7 +6842,8 @@
         "tags": [
           "Settings / Greeting settings"
         ],
-        "summary": "Restores the current portal greeting settings.",
+        "summary": "Restore the greeting settings",
+        "description": "Restores the current portal greeting settings.",
         "operationId": "restoreGreetingSettings",
         "responses": {
           "200": {
@@ -6776,7 +6896,8 @@
         "tags": [
           "Settings / IP restrictions"
         ],
-        "summary": "Returns the IP portal restrictions.",
+        "summary": "Get the IP portal restrictions",
+        "description": "Returns the IP portal restrictions.",
         "operationId": "getIpRestrictions",
         "responses": {
           "200": {
@@ -6827,7 +6948,8 @@
         "tags": [
           "Settings / IP restrictions"
         ],
-        "summary": "Updates the IP restrictions with the parameters specified in the request.",
+        "summary": "Update the IP restrictions",
+        "description": "Updates the IP restrictions with the parameters specified in the request.",
         "operationId": "saveIpRestrictions",
         "requestBody": {
           "content": {
@@ -6889,7 +7011,8 @@
         "tags": [
           "Settings / IP restrictions"
         ],
-        "summary": "Returns the IP restriction settings.",
+        "summary": "Get the IP restriction settings",
+        "description": "Returns the IP restriction settings.",
         "operationId": "readIpRestrictionsSettings",
         "responses": {
           "200": {
@@ -6940,7 +7063,8 @@
         "tags": [
           "Settings / IP restrictions"
         ],
-        "summary": "Updates the IP restriction settings with the parameters specified in the request.",
+        "summary": "Update the IP restriction settings",
+        "description": "Updates the IP restriction settings with the parameters specified in the request.",
         "operationId": "updateIpRestrictionsSettings",
         "requestBody": {
           "content": {
@@ -7002,7 +7126,8 @@
         "tags": [
           "Settings / License"
         ],
-        "summary": "Refreshes the portal license.",
+        "summary": "Refresh the license",
+        "description": "Refreshes the portal license.",
         "operationId": "refreshLicense",
         "responses": {
           "200": {
@@ -7055,7 +7180,8 @@
         "tags": [
           "Settings / License"
         ],
-        "summary": "Activates a license for the portal.",
+        "summary": "Activate a license",
+        "description": "Activates a license for the portal.",
         "operationId": "acceptLicense",
         "responses": {
           "200": {
@@ -7108,7 +7234,8 @@
         "tags": [
           "Settings / License"
         ],
-        "summary": "Requests a portal license if necessary.",
+        "summary": "Request a license",
+        "description": "Requests a portal license if necessary.",
         "operationId": "getIsLicenseRequired",
         "responses": {
           "200": {
@@ -7129,7 +7256,8 @@
         "tags": [
           "Settings / License"
         ],
-        "summary": "Uploads a portal license specified in the request.",
+        "summary": "Upload a license",
+        "description": "Uploads a portal license specified in the request.",
         "operationId": "uploadLicense",
         "requestBody": {
           "content": {
@@ -7218,7 +7346,8 @@
         "tags": [
           "Settings / Login settings"
         ],
-        "summary": "Updates the login settings with the parameters specified in the request.",
+        "summary": "Update the login settings",
+        "description": "Updates the login settings with the parameters specified in the request.",
         "operationId": "updateLoginSettings",
         "requestBody": {
           "content": {
@@ -7278,7 +7407,8 @@
         "tags": [
           "Settings / Login settings"
         ],
-        "summary": "Returns the portal login settings.",
+        "summary": "Get the login settings",
+        "description": "Returns the portal login settings.",
         "operationId": "getLoginSettings",
         "responses": {
           "200": {
@@ -7329,7 +7459,8 @@
         "tags": [
           "Settings / Login settings"
         ],
-        "summary": "Resets the portal login settings to default.",
+        "summary": "Reset the login settings",
+        "description": "Resets the portal login settings to default.",
         "operationId": "setDefaultLoginSettings",
         "responses": {
           "200": {
@@ -7382,7 +7513,8 @@
         "tags": [
           "Settings / Messages"
         ],
-        "summary": "Displays the contact form on the \"Sign In\" page, allowing users to send a message to the DocSpace administrator in case they encounter any issues while accessing DocSpace.",
+        "summary": "Enable the administrator message settings",
+        "description": "Displays the contact form on the \"Sign In\" page, allowing users to send a message to the DocSpace administrator in case they encounter any issues while accessing DocSpace.",
         "operationId": "enableAdminMessageSettings",
         "requestBody": {
           "content": {
@@ -7444,7 +7576,8 @@
         "tags": [
           "Settings / Messages"
         ],
-        "summary": "Sends a message to the administrator email when unauthorized users encounter issues accessing DocSpace.",
+        "summary": "Send a message to the administrator",
+        "description": "Sends a message to the administrator email when unauthorized users encounter issues accessing DocSpace.",
         "operationId": "sendAdminMail",
         "requestBody": {
           "content": {
@@ -7480,7 +7613,8 @@
         "tags": [
           "Settings / Messages"
         ],
-        "summary": "Sends an invitation email with a link to the DocSpace.",
+        "summary": "Sends an invitation email",
+        "description": "Sends an invitation email with a link to the DocSpace.",
         "operationId": "sendJoinInviteMail",
         "requestBody": {
           "content": {
@@ -7519,7 +7653,8 @@
         "tags": [
           "Settings / Notifications"
         ],
-        "summary": "Checks if the notification type specified in the request is enabled or not.",
+        "summary": "Check notification availability",
+        "description": "Checks if the notification type specified in the request is enabled or not.",
         "operationId": "getNotificationSettings",
         "parameters": [
           {
@@ -7583,7 +7718,8 @@
         "tags": [
           "Settings / Notifications"
         ],
-        "summary": "Enables the notification type specified in the request.",
+        "summary": "Enable notifications",
+        "description": "Enables the notification type specified in the request.",
         "operationId": "setNotificationSettings",
         "requestBody": {
           "content": {
@@ -7645,7 +7781,8 @@
         "tags": [
           "Settings / Notifications"
         ],
-        "summary": "Returns a list of rooms with the disabled notifications.",
+        "summary": "Get room notification settings",
+        "description": "Returns a list of rooms with the disabled notifications.",
         "operationId": "getRoomsNotificationSettings",
         "responses": {
           "200": {
@@ -7696,7 +7833,8 @@
         "tags": [
           "Settings / Notifications"
         ],
-        "summary": "Sets a notification status for a room with the ID specified in the request.",
+        "summary": "Set room notification status",
+        "description": "Sets a notification status for a room with the ID specified in the request.",
         "operationId": "setRoomsNotificationStatus",
         "requestBody": {
           "content": {
@@ -7758,7 +7896,8 @@
         "tags": [
           "Settings / Notifications"
         ],
-        "summary": "Returns a list of notification channels.",
+        "summary": "Get notification channels",
+        "description": "Returns a list of notification channels.",
         "operationId": "getNotificationChannels",
         "responses": {
           "200": {
@@ -7811,7 +7950,8 @@
         "tags": [
           "Settings / Owner"
         ],
-        "summary": "Sends the instructions to change the DocSpace owner.",
+        "summary": "Send the owner change instructions",
+        "description": "Sends the instructions to change the DocSpace owner.",
         "operationId": "sendOwnerChangeInstructions",
         "requestBody": {
           "content": {
@@ -7877,7 +8017,8 @@
         "tags": [
           "Settings / Owner"
         ],
-        "summary": "Updates the current portal owner with a new one specified in the request.",
+        "summary": "Update the portal owner",
+        "description": "Updates the current portal owner with a new one specified in the request.",
         "operationId": "updatePortalOwner",
         "requestBody": {
           "content": {
@@ -7938,7 +8079,8 @@
         "tags": [
           "Settings / Quota"
         ],
-        "summary": "Returns the user quota settings.",
+        "summary": "Get the user quota settings",
+        "description": "Returns the user quota settings.",
         "operationId": "getUserQuotaSettings",
         "responses": {
           "200": {
@@ -7991,7 +8133,8 @@
         "tags": [
           "Settings / Quota"
         ],
-        "summary": "Saves the room quota settings specified in the request to the current portal.",
+        "summary": "Save the room quota settings",
+        "description": "Saves the room quota settings specified in the request to the current portal.",
         "operationId": "saveRoomQuotaSettings",
         "requestBody": {
           "content": {
@@ -8056,7 +8199,8 @@
         "tags": [
           "Settings / Quota"
         ],
-        "summary": "Saves the AI Agent quota settings specified in the request to the current portal.",
+        "summary": "Save the AI Agent quota settings",
+        "description": "Saves the AI Agent quota settings specified in the request to the current portal.",
         "operationId": "saveAiAgentQuotaSettings",
         "requestBody": {
           "content": {
@@ -8121,7 +8265,8 @@
         "tags": [
           "Settings / Quota"
         ],
-        "summary": "Saves the tenant quota settings specified in the request to the current portal.",
+        "summary": "Save the tenant quota settings",
+        "description": "Saves the tenant quota settings specified in the request to the current portal.",
         "operationId": "setTenantQuotaSettings",
         "requestBody": {
           "content": {
@@ -8189,7 +8334,8 @@
         "tags": [
           "Settings / Rebranding"
         ],
-        "summary": "Saves the white label logos specified in the request.",
+        "summary": "Save the white label logos",
+        "description": "Saves the white label logos specified in the request.",
         "operationId": "saveWhiteLabelSettings",
         "parameters": [
           {
@@ -8274,7 +8420,8 @@
         "tags": [
           "Settings / Rebranding"
         ],
-        "summary": "Saves the white label logos from files.",
+        "summary": "Save the white label logos from files",
+        "description": "Saves the white label logos from files.",
         "operationId": "saveWhiteLabelSettingsFromFiles",
         "parameters": [
           {
@@ -8353,7 +8500,8 @@
         "tags": [
           "Settings / Rebranding"
         ],
-        "summary": "Returns the white label logos.",
+        "summary": "Get the white label logos",
+        "description": "Returns the white label logos.",
         "operationId": "getWhiteLabelLogos",
         "parameters": [
           {
@@ -8394,7 +8542,8 @@
         "tags": [
           "Settings / Rebranding"
         ],
-        "summary": "Specifies if the white label logos are default or not.",
+        "summary": "Check the default white label logos",
+        "description": "Specifies if the white label logos are default or not.",
         "operationId": "getIsDefaultWhiteLabelLogos",
         "parameters": [
           {
@@ -8467,7 +8616,8 @@
         "tags": [
           "Settings / Rebranding"
         ],
-        "summary": "Restores the white label logos.",
+        "summary": "Restore the white label logos",
+        "description": "Restores the white label logos.",
         "operationId": "restoreWhiteLabelLogos",
         "parameters": [
           {
@@ -8543,7 +8693,8 @@
         "tags": [
           "Settings / Rebranding"
         ],
-        "summary": "Saves the white label logo text specified in the request.",
+        "summary": "Save the white label logo text settings",
+        "description": "Saves the white label logo text specified in the request.",
         "operationId": "saveWhiteLabelLogoText",
         "parameters": [
           {
@@ -8628,7 +8779,8 @@
         "tags": [
           "Settings / Rebranding"
         ],
-        "summary": "Returns the white label logo text.",
+        "summary": "Get the white label logo text",
+        "description": "Returns the white label logo text.",
         "operationId": "getWhiteLabelLogoText",
         "parameters": [
           {
@@ -8701,7 +8853,8 @@
         "tags": [
           "Settings / Rebranding"
         ],
-        "summary": "Specifies if the white label logo text is default or not.",
+        "summary": "Check the default white label logo text",
+        "description": "Specifies if the white label logo text is default or not.",
         "operationId": "getIsDefaultWhiteLabelLogoText",
         "parameters": [
           {
@@ -8774,7 +8927,8 @@
         "tags": [
           "Settings / Rebranding"
         ],
-        "summary": "Restores the white label logo text.",
+        "summary": "Restore the white label logo text",
+        "description": "Restores the white label logo text.",
         "operationId": "restoreWhiteLabelLogoText",
         "parameters": [
           {
@@ -8850,7 +9004,8 @@
         "tags": [
           "Settings / Rebranding"
         ],
-        "summary": "Returns the licensor data.",
+        "summary": "Get the licensor data",
+        "description": "Returns the licensor data.",
         "operationId": "getLicensorData",
         "responses": {
           "200": {
@@ -8903,7 +9058,8 @@
         "tags": [
           "Settings / Rebranding"
         ],
-        "summary": "Saves the company white label settings specified in the request.",
+        "summary": "Save the company white label settings",
+        "description": "Saves the company white label settings specified in the request.",
         "operationId": "saveCompanyWhiteLabelSettings",
         "requestBody": {
           "content": {
@@ -8969,7 +9125,8 @@
         "tags": [
           "Settings / Rebranding"
         ],
-        "summary": "Returns the company white label settings.",
+        "summary": "Get the company white label settings",
+        "description": "Returns the company white label settings.",
         "operationId": "getCompanyWhiteLabelSettings",
         "responses": {
           "200": {
@@ -9020,7 +9177,8 @@
         "tags": [
           "Settings / Rebranding"
         ],
-        "summary": "Deletes the company white label settings.",
+        "summary": "Delete the company white label settings",
+        "description": "Deletes the company white label settings.",
         "operationId": "deleteCompanyWhiteLabelSettings",
         "responses": {
           "200": {
@@ -9076,7 +9234,8 @@
         "tags": [
           "Settings / Rebranding"
         ],
-        "summary": "Saves the additional white label settings specified in the request.",
+        "summary": "Save the additional white label settings",
+        "description": "Saves the additional white label settings specified in the request.",
         "operationId": "saveAdditionalWhiteLabelSettings",
         "requestBody": {
           "content": {
@@ -9142,7 +9301,8 @@
         "tags": [
           "Settings / Rebranding"
         ],
-        "summary": "Returns the additional white label settings.",
+        "summary": "Get the additional white label settings",
+        "description": "Returns the additional white label settings.",
         "operationId": "getAdditionalWhiteLabelSettings",
         "responses": {
           "200": {
@@ -9193,7 +9353,8 @@
         "tags": [
           "Settings / Rebranding"
         ],
-        "summary": "Deletes the additional white label settings.",
+        "summary": "Delete the additional white label settings",
+        "description": "Deletes the additional white label settings.",
         "operationId": "deleteAdditionalWhiteLabelSettings",
         "responses": {
           "200": {
@@ -9249,7 +9410,8 @@
         "tags": [
           "Settings / Rebranding"
         ],
-        "summary": "Checks if the white label is enabled or not.",
+        "summary": "Check the white label availability",
+        "description": "Checks if the white label is enabled or not.",
         "operationId": "getEnableWhitelabel",
         "responses": {
           "200": {
@@ -9302,7 +9464,8 @@
         "tags": [
           "Settings / Security"
         ],
-        "summary": "Returns the security settings for the modules specified in the request.",
+        "summary": "Get the security settings",
+        "description": "Returns the security settings for the modules specified in the request.",
         "operationId": "getWebItemSettingsSecurityInfo",
         "parameters": [
           {
@@ -9370,7 +9533,8 @@
         "tags": [
           "Settings / Security"
         ],
-        "summary": "Sets the security settings to the module with the ID specified in the request.",
+        "summary": "Set the module security settings",
+        "description": "Sets the security settings to the module with the ID specified in the request.",
         "operationId": "setWebItemSecurity",
         "requestBody": {
           "content": {
@@ -9435,7 +9599,8 @@
         "tags": [
           "Settings / Security"
         ],
-        "summary": "Returns the availability of the module with the ID specified in the request.",
+        "summary": "Get the module availability",
+        "description": "Returns the availability of the module with the ID specified in the request.",
         "operationId": "getWebItemSecurityInfo",
         "parameters": [
           {
@@ -9501,7 +9666,8 @@
         "tags": [
           "Settings / Security"
         ],
-        "summary": "Returns a list of all the enabled modules.",
+        "summary": "Get the enabled modules",
+        "description": "Returns a list of all the enabled modules.",
         "operationId": "getEnabledModules",
         "responses": {
           "200": {
@@ -9554,7 +9720,8 @@
         "tags": [
           "Settings / Security"
         ],
-        "summary": "Returns the portal password settings.",
+        "summary": "Get the password settings",
+        "description": "Returns the portal password settings.",
         "operationId": "getPasswordSettings",
         "responses": {
           "200": {
@@ -9605,7 +9772,8 @@
         "tags": [
           "Settings / Security"
         ],
-        "summary": "Sets the portal password settings.",
+        "summary": "Set the password settings",
+        "description": "Sets the portal password settings.",
         "operationId": "updatePasswordSettings",
         "requestBody": {
           "content": {
@@ -9670,7 +9838,8 @@
         "tags": [
           "Settings / Security"
         ],
-        "summary": "Sets the security settings to the modules with the IDs specified in the request.",
+        "summary": "Set the security settings to modules",
+        "description": "Sets the security settings to the modules with the IDs specified in the request.",
         "operationId": "setAccessToWebItems",
         "requestBody": {
           "content": {
@@ -9735,7 +9904,8 @@
         "tags": [
           "Settings / Security"
         ],
-        "summary": "Returns a list of all the administrators of a product with the ID specified in the request.",
+        "summary": "Get the product administrators",
+        "description": "Returns a list of all the administrators of a product with the ID specified in the request.",
         "operationId": "getProductAdministrators",
         "parameters": [
           {
@@ -9801,7 +9971,8 @@
         "tags": [
           "Settings / Security"
         ],
-        "summary": "Checks if the selected user is an administrator of a product with the ID specified in the request.",
+        "summary": "Check a product administrator",
+        "description": "Checks if the selected user is an administrator of a product with the ID specified in the request.",
         "operationId": "getIsProductAdministrator",
         "parameters": [
           {
@@ -9876,7 +10047,8 @@
         "tags": [
           "Settings / Security"
         ],
-        "summary": "Sets the selected user as an administrator of a product with the ID specified in the request.",
+        "summary": "Set a product administrator",
+        "description": "Sets the selected user as an administrator of a product with the ID specified in the request.",
         "operationId": "setProductAdministrator",
         "requestBody": {
           "content": {
@@ -9944,7 +10116,8 @@
         "tags": [
           "Settings / SSO"
         ],
-        "summary": "Returns the current portal SSO settings.",
+        "summary": "Get the SSO settings",
+        "description": "Returns the current portal SSO settings.",
         "operationId": "getSsoSettingsV2",
         "responses": {
           "200": {
@@ -9963,7 +10136,8 @@
         "tags": [
           "Settings / SSO"
         ],
-        "summary": "Saves the SSO settings for the current portal.",
+        "summary": "Save the SSO settings",
+        "description": "Saves the SSO settings for the current portal.",
         "operationId": "saveSsoSettingsV2",
         "requestBody": {
           "content": {
@@ -10026,7 +10200,8 @@
         "tags": [
           "Settings / SSO"
         ],
-        "summary": "Resets the SSO settings of the current portal.",
+        "summary": "Reset the SSO settings",
+        "description": "Resets the SSO settings of the current portal.",
         "operationId": "resetSsoSettingsV2",
         "responses": {
           "200": {
@@ -10079,7 +10254,8 @@
         "tags": [
           "Settings / SSO"
         ],
-        "summary": "Returns the default portal SSO settings.",
+        "summary": "Get the default SSO settings",
+        "description": "Returns the default portal SSO settings.",
         "operationId": "getDefaultSsoSettingsV2",
         "responses": {
           "200": {
@@ -10132,7 +10308,8 @@
         "tags": [
           "Settings / SSO"
         ],
-        "summary": "Returns the SSO settings constants.",
+        "summary": "Get the SSO settings constants",
+        "description": "Returns the SSO settings constants.",
         "operationId": "getSsoSettingsV2Constants",
         "responses": {
           "200": {
@@ -10185,7 +10362,8 @@
         "tags": [
           "Settings / Statistics"
         ],
-        "summary": "Returns the space usage statistics for the module with the ID specified in the request.",
+        "summary": "Get the space usage statistics",
+        "description": "Returns the space usage statistics for the module with the ID specified in the request.",
         "operationId": "getSpaceUsageStatistics",
         "parameters": [
           {
@@ -10251,7 +10429,8 @@
         "tags": [
           "Settings / Storage"
         ],
-        "summary": "Returns a list of all the portal storages.",
+        "summary": "Get storages",
+        "description": "Returns a list of all the portal storages.",
         "operationId": "getAllStorages",
         "responses": {
           "200": {
@@ -10305,7 +10484,8 @@
         "tags": [
           "Settings / Storage"
         ],
-        "summary": "Updates a storage with the parameters specified in the request.",
+        "summary": "Update a storage",
+        "description": "Updates a storage with the parameters specified in the request.",
         "operationId": "updateStorage",
         "requestBody": {
           "content": {
@@ -10371,7 +10551,8 @@
         "tags": [
           "Settings / Storage"
         ],
-        "summary": "Resets the storage settings to the default parameters.",
+        "summary": "Reset the storage settings",
+        "description": "Resets the storage settings to the default parameters.",
         "operationId": "resetStorageToDefault",
         "responses": {
           "200": {
@@ -10420,7 +10601,8 @@
         "tags": [
           "Settings / Storage"
         ],
-        "summary": "Returns the storage progress.",
+        "summary": "Get the storage progress",
+        "description": "Returns the storage progress.",
         "operationId": "getStorageProgress",
         "responses": {
           "200": {
@@ -10473,7 +10655,8 @@
         "tags": [
           "Settings / Storage"
         ],
-        "summary": "Returns a list of all the CDN storages.",
+        "summary": "Get the CDN storages",
+        "description": "Returns a list of all the CDN storages.",
         "operationId": "getAllCdnStorages",
         "responses": {
           "200": {
@@ -10527,7 +10710,8 @@
         "tags": [
           "Settings / Storage"
         ],
-        "summary": "Updates the CDN storage with the parameters specified in the request.",
+        "summary": "Update the CDN storage",
+        "description": "Updates the CDN storage with the parameters specified in the request.",
         "operationId": "updateCdnStorage",
         "requestBody": {
           "content": {
@@ -10593,7 +10777,8 @@
         "tags": [
           "Settings / Storage"
         ],
-        "summary": "Resets the CDN storage settings to the default parameters.",
+        "summary": "Reset the CDN storage settings",
+        "description": "Resets the CDN storage settings to the default parameters.",
         "operationId": "resetCdnToDefault",
         "responses": {
           "200": {
@@ -10642,7 +10827,8 @@
         "tags": [
           "Settings / Storage"
         ],
-        "summary": "Returns a list of all the backup storages.",
+        "summary": "Get the backup storages",
+        "description": "Returns a list of all the backup storages.",
         "operationId": "getAllBackupStorages",
         "parameters": [
           {
@@ -10708,7 +10894,8 @@
         "tags": [
           "Settings / Storage"
         ],
-        "summary": "Returns a list of all Amazon regions.",
+        "summary": "Get Amazon regions",
+        "description": "Returns a list of all Amazon regions.",
         "operationId": "getAmazonS3Regions",
         "responses": {
           "200": {
@@ -10761,7 +10948,8 @@
         "tags": [
           "Settings / Telegram"
         ],
-        "summary": "Checks if the current user is connected to the Telegram Bot or not.",
+        "summary": "Check the Telegram connection",
+        "description": "Checks if the current user is connected to the Telegram Bot or not.",
         "operationId": "checkTelegram",
         "responses": {
           "200": {
@@ -10814,7 +11002,8 @@
         "tags": [
           "Settings / Telegram"
         ],
-        "summary": "Returns a link that will connect the Telegram Bot to your account.",
+        "summary": "Get the Telegram link",
+        "description": "Returns a link that will connect the Telegram Bot to your account.",
         "operationId": "linkTelegram",
         "responses": {
           "200": {
@@ -10865,7 +11054,8 @@
         "tags": [
           "Settings / Telegram"
         ],
-        "summary": "Unlinks the Telegram Bot from your account.",
+        "summary": "Unlink Telegram",
+        "description": "Unlinks the Telegram Bot from your account.",
         "operationId": "unlinkTelegram",
         "responses": {
           "200": {
@@ -10918,7 +11108,8 @@
         "tags": [
           "Settings / TFA settings"
         ],
-        "summary": "Returns the current two-factor authentication settings.",
+        "summary": "Get the TFA settings",
+        "description": "Returns the current two-factor authentication settings.",
         "operationId": "getTfaSettings",
         "responses": {
           "200": {
@@ -10969,7 +11160,8 @@
         "tags": [
           "Settings / TFA settings"
         ],
-        "summary": "Updates the two-factor authentication settings with the parameters specified in the request.",
+        "summary": "Update the TFA settings",
+        "description": "Updates the two-factor authentication settings with the parameters specified in the request.",
         "operationId": "updateTfaSettings",
         "requestBody": {
           "content": {
@@ -11034,7 +11226,8 @@
         "tags": [
           "Settings / TFA settings"
         ],
-        "summary": "Validates the two-factor authentication code specified in the request.",
+        "summary": "Validate the TFA code",
+        "description": "Validates the two-factor authentication code specified in the request.",
         "operationId": "tfaValidateAuthCode",
         "requestBody": {
           "content": {
@@ -11096,7 +11289,8 @@
         "tags": [
           "Settings / TFA settings"
         ],
-        "summary": "Returns the confirmation email URL for authorization via SMS or TFA application.",
+        "summary": "Get confirmation email",
+        "description": "Returns the confirmation email URL for authorization via SMS or TFA application.",
         "operationId": "getTfaConfirmUrl",
         "responses": {
           "200": {
@@ -11149,7 +11343,8 @@
         "tags": [
           "Settings / TFA settings"
         ],
-        "summary": "Returns the confirmation email URL for updating TFA settings.",
+        "summary": "Get a confirmation email for updating TFA settings",
+        "description": "Returns the confirmation email URL for updating TFA settings.",
         "operationId": "updateTfaSettingsLink",
         "requestBody": {
           "content": {
@@ -11217,7 +11412,8 @@
         "tags": [
           "Settings / TFA settings"
         ],
-        "summary": "Generates the setup TFA code for the current user.",
+        "summary": "Generate setup code",
+        "description": "Generates the setup TFA code for the current user.",
         "operationId": "tfaAppGenerateSetupCode",
         "responses": {
           "200": {
@@ -11273,7 +11469,8 @@
         "tags": [
           "Settings / TFA settings"
         ],
-        "summary": "Returns the two-factor authentication application codes.",
+        "summary": "Get the TFA codes",
+        "description": "Returns the two-factor authentication application codes.",
         "operationId": "getTfaAppCodes",
         "responses": {
           "200": {
@@ -11329,7 +11526,8 @@
         "tags": [
           "Settings / TFA settings"
         ],
-        "summary": "Requests the new backup codes for the two-factor authentication application.",
+        "summary": "Update the TFA codes",
+        "description": "Requests the new backup codes for the two-factor authentication application.",
         "operationId": "updateTfaAppCodes",
         "responses": {
           "200": {
@@ -11385,7 +11583,8 @@
         "tags": [
           "Settings / TFA settings"
         ],
-        "summary": "Unlinks the current two-factor authentication application from the user account specified in the request.",
+        "summary": "Unlink the TFA application",
+        "description": "Unlinks the current two-factor authentication application from the user account specified in the request.",
         "operationId": "unlinkTfaApp",
         "requestBody": {
           "content": {
@@ -11453,7 +11652,8 @@
         "tags": [
           "Settings / Webhooks"
         ],
-        "summary": "Returns a list of the tenant webhooks.",
+        "summary": "Get webhooks",
+        "description": "Returns a list of the tenant webhooks.",
         "operationId": "getTenantWebhooks",
         "responses": {
           "200": {
@@ -11504,7 +11704,8 @@
         "tags": [
           "Settings / Webhooks"
         ],
-        "summary": "Creates a new tenant webhook with the parameters specified in the request.",
+        "summary": "Create a webhook",
+        "description": "Creates a new tenant webhook with the parameters specified in the request.",
         "operationId": "createWebhook",
         "requestBody": {
           "content": {
@@ -11564,7 +11765,8 @@
         "tags": [
           "Settings / Webhooks"
         ],
-        "summary": "Updates a tenant webhook with the parameters specified in the request.",
+        "summary": "Update a webhook",
+        "description": "Updates a tenant webhook with the parameters specified in the request.",
         "operationId": "updateWebhook",
         "requestBody": {
           "content": {
@@ -11626,7 +11828,8 @@
         "tags": [
           "Settings / Webhooks"
         ],
-        "summary": "Enables or disables a tenant webhook with the parameters specified in the request.",
+        "summary": "Enable a webhook",
+        "description": "Enables or disables a tenant webhook with the parameters specified in the request.",
         "operationId": "enableWebhook",
         "requestBody": {
           "content": {
@@ -11688,7 +11891,8 @@
         "tags": [
           "Settings / Webhooks"
         ],
-        "summary": "Removes a tenant webhook with the ID specified in the request.",
+        "summary": "Remove a webhook",
+        "description": "Removes a tenant webhook with the ID specified in the request.",
         "operationId": "removeWebhook",
         "parameters": [
           {
@@ -11754,7 +11958,8 @@
         "tags": [
           "Settings / Webhooks"
         ],
-        "summary": "Returns the logs of the webhook activities.",
+        "summary": "Get webhook logs",
+        "description": "Returns the logs of the webhook activities.",
         "operationId": "getWebhooksLogs",
         "parameters": [
           {
@@ -11906,7 +12111,8 @@
         "tags": [
           "Settings / Webhooks"
         ],
-        "summary": "Retries a webhook with the ID specified in the request.",
+        "summary": "Retry a webhook",
+        "description": "Retries a webhook with the ID specified in the request.",
         "operationId": "retryWebhook",
         "parameters": [
           {
@@ -11978,7 +12184,8 @@
         "tags": [
           "Settings / Webhooks"
         ],
-        "summary": "Retries all the webhooks with the IDs specified in the request.",
+        "summary": "Retry webhooks",
+        "description": "Retries all the webhooks with the IDs specified in the request.",
         "operationId": "retryWebhooks",
         "requestBody": {
           "content": {
@@ -12040,7 +12247,8 @@
         "tags": [
           "Settings / Webhooks"
         ],
-        "summary": "Returns a list of triggers for a webhook.",
+        "summary": "Get webhook triggers",
+        "description": "Returns a list of triggers for a webhook.",
         "operationId": "getWebhookTriggers",
         "responses": {
           "200": {
@@ -12128,7 +12336,8 @@
         "tags": [
           "Settings / Webplugins"
         ],
-        "summary": "Adds a web plugin from a file to the current portal.",
+        "summary": "Add a web plugin",
+        "description": "Adds a web plugin from a file to the current portal.",
         "operationId": "addWebPluginFromFile",
         "parameters": [
           {
@@ -12196,7 +12405,8 @@
         "tags": [
           "Settings / Webplugins"
         ],
-        "summary": "Returns the portal web plugins.",
+        "summary": "Get web plugins",
+        "description": "Returns the portal web plugins.",
         "operationId": "getWebPlugins",
         "parameters": [
           {
@@ -12263,7 +12473,8 @@
         "tags": [
           "Settings / Webplugins"
         ],
-        "summary": "Returns a web plugin by the name specified in the request.",
+        "summary": "Get a web plugin by name",
+        "description": "Returns a web plugin by the name specified in the request.",
         "operationId": "getWebPlugin",
         "parameters": [
           {
@@ -12329,7 +12540,8 @@
         "tags": [
           "Settings / Webplugins"
         ],
-        "summary": "Updates a web plugin with the parameters specified in the request.",
+        "summary": "Update a web plugin",
+        "description": "Updates a web plugin with the parameters specified in the request.",
         "operationId": "updateWebPlugin",
         "parameters": [
           {
@@ -12399,7 +12611,8 @@
         "tags": [
           "Settings / Webplugins"
         ],
-        "summary": "Deletes a web plugin by the name specified in the request.",
+        "summary": "Delete a web plugin",
+        "description": "Deletes a web plugin by the name specified in the request.",
         "operationId": "deleteWebPlugin",
         "parameters": [
           {
@@ -12460,8 +12673,8 @@
         "tags": [
           "ThirdParty"
         ],
-        "summary": "Returns a request to get the confirmation code from URL.",
-        "description": "List of providers: Google, Dropbox, Docusign, Box, OneDrive, Wordpress.",
+        "summary": "Get the code request",
+        "description": "Returns a request to get the confirmation code from URL.",
         "operationId": "getThirdPartyCode",
         "parameters": [
           {

@@ -39,12 +39,12 @@ public class SsoController(
     AuthContext authContext)
     : BaseSettingsController(fusionCache, webItemManager)
 {
-    /// <summary>
+    /// <remarks>
     /// Returns the current portal SSO settings.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the SSO settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/ssov2</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / SSO")]
@@ -84,12 +84,12 @@ public class SsoController(
         return settings;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the default portal SSO settings.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the default SSO settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/ssov2/default</path>
     [Tags("Settings / SSO")]
     [SwaggerResponse(200, "Default SSO settings", typeof(SsoSettingsV2))]
@@ -100,12 +100,12 @@ public class SsoController(
         return settingsManager.GetDefault<SsoSettingsV2>();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the SSO settings constants.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the SSO settings constants
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/ssov2/constants</path>
     [Tags("Settings / SSO")]
     [SwaggerResponse(200, "The SSO settings constants: SSO name ID format type, SSO binding type, SSO signing algorithm type, SSO SP certificate action type, SSO IDP certificate action type", typeof(object))]
@@ -123,12 +123,12 @@ public class SsoController(
         };
     }
 
-    /// <summary>
+    /// <remarks>
     /// Saves the SSO settings for the current portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Save the SSO settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/ssov2</path>
     [Tags("Settings / SSO")]
     [SwaggerResponse(200, "SSO settings", typeof(SsoSettingsV2))]
@@ -212,12 +212,12 @@ public class SsoController(
         return settings;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Resets the SSO settings of the current portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Reset the SSO settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/ssov2</path>
     [Tags("Settings / SSO")]
     [SwaggerResponse(200, "Default SSO settings", typeof(SsoSettingsV2))]

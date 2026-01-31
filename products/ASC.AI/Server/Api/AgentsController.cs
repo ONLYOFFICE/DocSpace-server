@@ -46,10 +46,10 @@ public class AgentsController(
     RootNewItemsDtoHelper rootNewItemsDtoHelper)
     : ControllerBase
 {
-    /// <summary>
+    /// <remarks>
     /// Get ai agents
-    /// </summary>
-    /// <short>Get ai agents</short>
+    /// </remarks>
+    /// <summary>Get ai agents</summary>
     /// <path>api/2.0/ai/agents</path>
     [SwaggerResponse(200, "Agent information", typeof(FolderContentDto<int>))]
     [HttpGet("agents")]
@@ -101,10 +101,10 @@ public class AgentsController(
         return dto.NotFoundIfNull();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Creates an ai agent.
-    /// </summary>
-    /// <short>Create an ai agent</short>
+    /// </remarks>
+    /// <summary>Create an ai agent</summary>
     /// <path>api/2.0/ai/agents</path>
     [SwaggerResponse(200, "Agent information", typeof(FolderDto<int>))]
     [HttpPost("agents")]
@@ -151,10 +151,10 @@ public class AgentsController(
         return await folderDtoHelper.GetAsync(room);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns an ai agent.
-    /// </summary>
-    /// <short>Return an ai agent</short>
+    /// </remarks>
+    /// <summary>Return an ai agent</summary>
     /// <path>api/2.0/ai/agents/{id}</path>
     [SwaggerResponse(200, "Agent information", typeof(FolderDto<int>))]
     [HttpGet("agents/{id}")]
@@ -165,10 +165,10 @@ public class AgentsController(
         return await folderDtoHelper.GetAsync(folder);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Updates an ai agent.
-    /// </summary>
-    /// <short>Update an ai agent</short>
+    /// </remarks>
+    /// <summary>Update an ai agent</summary>
     /// <path>api/2.0/ai/agents/{id}</path>
     [SwaggerResponse(200, "Updated agent information", typeof(FolderDto<int>))]
     [HttpPut("agents/{id}")]
@@ -179,10 +179,10 @@ public class AgentsController(
         return await folderDtoHelper.GetAsync(room);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Removes an ai agent.
-    /// </summary>
-    /// <short>Remove an ai agent</short>
+    /// </remarks>
+    /// <summary>Remove an ai agent</summary>
     /// <path>api/2.0/ai/agents/{id}</path>
     [SwaggerResponse(200, "File operation", typeof(FileOperationDto))]
     [HttpDelete("agents/{id}")]
@@ -194,12 +194,12 @@ public class AgentsController(
     }
 
 
-    /// <summary>
+    /// <remarks>
     /// Changes the quota limit for the AI agents with the IDs specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Change the AI agent quota limit
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/ai/agents/agentquota</path>
     /// <collection>list</collection>
     [SwaggerResponse(200, "List of AI agents with the detailed information", typeof(IAsyncEnumerable<FolderDto<int>>))]
@@ -227,12 +227,12 @@ public class AgentsController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Resets the quota limit for the AI agents with the IDs specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Reset the AI agents quota limit
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/ai/agents/resetquota</path>
     /// <collection>list</collection>
     [SwaggerResponse(200, "List of AI agents with the detailed information", typeof(IAsyncEnumerable<FolderDto<int>>))]
@@ -254,10 +254,10 @@ public class AgentsController(
         filesMessageService.Send(MessageAction.CustomQuotaPerAiAgentDefault, quotaAiAgentSettings.DefaultQuota.ToString(), agentTitles.ToArray());
     }
         
-    /// <summary>
+    /// <remarks>
     /// Returns the room new items.
-    /// </summary>
-    /// <short>Get the room new items</short>
+    /// </remarks>
+    /// <summary>Get the room new items</summary>
     /// <path>api/2.0/ai/agents/news</path>
     [SwaggerResponse(200, "List of new items", typeof(List<NewItemsDto<AgentNewItemsDto>>))]
     [HttpGet("agents/news")]

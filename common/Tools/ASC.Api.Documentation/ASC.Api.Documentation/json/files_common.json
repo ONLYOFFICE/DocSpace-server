@@ -27,7 +27,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Saves edits to a file with the ID specified in the request.",
+        "summary": "Save file edits",
+        "description": "Saves edits to a file with the ID specified in the request.",
         "operationId": "saveEditingFileFromForm",
         "parameters": [
           {
@@ -144,7 +145,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Informs about opening a file with the ID specified in the request for editing, locking it from being deleted or moved (this method is called by the mobile editors).",
+        "summary": "Start file editing",
+        "description": "Informs about opening a file with the ID specified in the request for editing, locking it from being deleted or moved (this method is called by the mobile editors).",
         "operationId": "startEditFile",
         "parameters": [
           {
@@ -192,7 +194,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Starts filling a file with the ID specified in the request.",
+        "summary": "Start file filling",
+        "description": "Starts filling a file with the ID specified in the request.",
         "operationId": "startFillingFile",
         "parameters": [
           {
@@ -261,7 +264,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Tracks file changes when editing.",
+        "summary": "Track file editing",
+        "description": "Tracks file changes when editing.",
         "operationId": "trackEditFile",
         "parameters": [
           {
@@ -326,7 +330,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Returns the initialization configuration of a file to open it in the editor.",
+        "summary": "Open a file configuration",
+        "description": "Returns the initialization configuration of a file to open it in the editor.",
         "operationId": "openEditFile",
         "parameters": [
           {
@@ -408,7 +413,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Returns a link to download a file with the ID specified in the request asynchronously.",
+        "summary": "Get file download link asynchronously",
+        "description": "Returns a link to download a file with the ID specified in the request asynchronously.",
         "operationId": "getPresignedFileUri",
         "parameters": [
           {
@@ -474,7 +480,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Returns the reference data to uniquely identify a file in its system and check the availability of insering data into the destination spreadsheet by the external link.",
+        "summary": "Get reference data",
+        "description": "Returns the reference data to uniquely identify a file in its system and check the availability of insering data into the destination spreadsheet by the external link.",
         "operationId": "getReferenceData",
         "requestBody": {
           "content": {
@@ -536,7 +543,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Returns a list of users with their access rights to the protected file with the ID specified in the request.",
+        "summary": "Get users access rights to the protected file",
+        "description": "Returns a list of users with their access rights to the protected file with the ID specified in the request.",
         "operationId": "getProtectedFileUsers",
         "parameters": [
           {
@@ -602,7 +610,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Returns the list of actions performed on the file with the specified identifier.",
+        "summary": "Get file history",
+        "description": "Returns the list of actions performed on the file with the specified identifier.",
         "operationId": "getFileHistory",
         "parameters": [
           {
@@ -666,14 +675,14 @@
               }
             }
           },
-          "401": {
-            "description": "Unauthorized"
-          },
           "403": {
             "description": "You don't have enough permission to perform the operation"
           },
           "404": {
             "description": "The required file was not found"
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         },
         "security": [
@@ -712,7 +721,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Changes the version history of a file with the ID specified in the request.",
+        "summary": "Change version history",
+        "description": "Changes the version history of a file with the ID specified in the request.",
         "operationId": "changeVersionHistory",
         "parameters": [
           {
@@ -749,11 +759,11 @@
               }
             }
           },
-          "401": {
-            "description": "Unauthorized"
-          },
           "403": {
             "description": "You do not have enough permissions to edit the file"
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         },
         "security": [
@@ -790,7 +800,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Returns the detailed information about all the available file versions with the ID specified in the request.",
+        "summary": "Get file versions",
+        "description": "Returns the detailed information about all the available file versions with the ID specified in the request.",
         "operationId": "getFileVersionInfo",
         "parameters": [
           {
@@ -824,7 +835,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Returns a pre-signed URL to download a file with the specified ID.\r\nThis temporary link provides secure access to the file.",
+        "summary": "Get file download link",
+        "description": "Returns a pre-signed URL to download a file with the specified ID.\r\nThis temporary link provides secure access to the file.",
         "operationId": "getPresignedUri",
         "parameters": [
           {
@@ -890,7 +902,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Checks if the PDF file is a form or not.",
+        "summary": "Check the PDF file",
+        "description": "Checks if the PDF file is a form or not.",
         "operationId": "isFormPDF",
         "parameters": [
           {
@@ -956,7 +969,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Copies (and converts if possible) an existing file to the specified folder.",
+        "summary": "Copy a file",
+        "description": "Copies (and converts if possible) an existing file to the specified folder.",
         "operationId": "copyFileAs",
         "parameters": [
           {
@@ -993,9 +1007,6 @@
               }
             }
           },
-          "401": {
-            "description": "Unauthorized"
-          },
           "400": {
             "description": "No file id or folder id toFolderId determine provider"
           },
@@ -1004,6 +1015,9 @@
           },
           "404": {
             "description": "File not found"
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         },
         "security": [
@@ -1042,8 +1056,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Creates a new file in the specified folder with the title specified in the request.",
-        "description": "If a file extension is different from DOCX/XLSX/PPTX and refers to one of the known text, spreadsheet, or presentation formats, it will be changed to DOCX/XLSX/PPTX accordingly. If the file extension is not specified or is unknown, the DOCX extension will be added to the file title.",
+        "summary": "Create a file",
+        "description": "Creates a new file in the specified folder with the title specified in the request.",
         "operationId": "createFile",
         "parameters": [
           {
@@ -1120,7 +1134,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Creates an HTML (.html) file in the selected folder with the title and contents specified in the request.",
+        "summary": "Create an HTML file",
+        "description": "Creates an HTML (.html) file in the selected folder with the title and contents specified in the request.",
         "operationId": "createHtmlFile",
         "parameters": [
           {
@@ -1157,11 +1172,11 @@
               }
             }
           },
-          "401": {
-            "description": "Unauthorized"
-          },
           "403": {
             "description": "You don't have enough permission to create"
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         },
         "security": [
@@ -1200,7 +1215,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Creates a text (.txt) file in the selected folder with the title and contents specified in the request.",
+        "summary": "Create a text file",
+        "description": "Creates a text (.txt) file in the selected folder with the title and contents specified in the request.",
         "operationId": "createTextFile",
         "parameters": [
           {
@@ -1277,7 +1293,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Deletes a file with the ID specified in the request.",
+        "summary": "Delete a file",
+        "description": "Deletes a file with the ID specified in the request.",
         "operationId": "deleteFile",
         "parameters": [
           {
@@ -1352,7 +1369,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Returns the detailed information about a file with the ID specified in the request.",
+        "summary": "Get file information",
+        "description": "Returns the detailed information about a file with the ID specified in the request.",
         "operationId": "getFileInfo",
         "parameters": [
           {
@@ -1394,7 +1412,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Updates the information of the selected file with the parameters specified in the request.",
+        "summary": "Update a file",
+        "description": "Updates the information of the selected file with the parameters specified in the request.",
         "operationId": "updateFile",
         "parameters": [
           {
@@ -1442,7 +1461,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Retrieves the result of a form-filling session.",
+        "summary": "Get form-filling result",
+        "description": "Retrieves the result of a form-filling session.",
         "operationId": "getFillResult",
         "parameters": [
           {
@@ -1474,7 +1494,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Returns a URL to the changes of a file version specified in the request.",
+        "summary": "Get changes URL",
+        "description": "Returns a URL to the changes of a file version specified in the request.",
         "operationId": "getEditDiffUrl",
         "parameters": [
           {
@@ -1518,7 +1539,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Returns the version history of a file with the ID specified in the request.",
+        "summary": "Get version history",
+        "description": "Returns the version history of a file with the ID specified in the request.",
         "operationId": "getEditHistory",
         "parameters": [
           {
@@ -1552,7 +1574,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Locks a file with the ID specified in the request.",
+        "summary": "Lock a file",
+        "description": "Locks a file with the ID specified in the request.",
         "operationId": "lockFile",
         "parameters": [
           {
@@ -1629,7 +1652,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Sets the Custom Filter editing mode to a file with the ID specified in the request.",
+        "summary": "Set the Custom Filter editing mode",
+        "description": "Sets the Custom Filter editing mode to a file with the ID specified in the request.",
         "operationId": "setCustomFilterTag",
         "parameters": [
           {
@@ -1706,7 +1730,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Restores a file version specified in the request.",
+        "summary": "Restore a file version",
+        "description": "Restores a file version specified in the request.",
         "operationId": "restoreFileVersion",
         "parameters": [
           {
@@ -1765,7 +1790,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Creates a primary external link by the identifier specified in the request.",
+        "summary": "Create primary external link",
+        "description": "Creates a primary external link by the identifier specified in the request.",
         "operationId": "createFilePrimaryExternalLink",
         "parameters": [
           {
@@ -1802,11 +1828,11 @@
               }
             }
           },
-          "401": {
-            "description": "Unauthorized"
-          },
           "404": {
             "description": "Not Found"
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         },
         "security": [
@@ -1843,7 +1869,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Returns the primary external link by the identifier specified in the request.",
+        "summary": "Get primary external link",
+        "description": "Returns the primary external link by the identifier specified in the request.",
         "operationId": "getFilePrimaryExternalLink",
         "parameters": [
           {
@@ -1902,7 +1929,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Returns the external links of a file with the ID specified in the request.",
+        "summary": "Get file external links",
+        "description": "Returns the external links of a file with the ID specified in the request.",
         "operationId": "getFileLinks",
         "parameters": [
           {
@@ -1988,7 +2016,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Sets an external link to a file with the ID specified in the request.",
+        "summary": "Set an external link",
+        "description": "Sets an external link to a file with the ID specified in the request.",
         "operationId": "setFileExternalLink",
         "parameters": [
           {
@@ -2065,7 +2094,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Sets the order of the file with the ID specified in the request.",
+        "summary": "Set file order",
+        "description": "Sets the order of the file with the ID specified in the request.",
         "operationId": "setFileOrder",
         "parameters": [
           {
@@ -2101,14 +2131,14 @@
               }
             }
           },
-          "401": {
-            "description": "Unauthorized"
-          },
           "403": {
             "description": "You don't have enough permission to perform the operation"
           },
           "404": {
             "description": "Not Found"
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         },
         "security": [
@@ -2147,7 +2177,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Sets the order of the files specified in the request.",
+        "summary": "Set order of files",
+        "description": "Sets the order of the files specified in the request.",
         "operationId": "setFilesOrder",
         "requestBody": {
           "content": {
@@ -2209,7 +2240,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Saves a file with the identifier specified in the request as a PDF document.",
+        "summary": "Save a file as PDF",
+        "description": "Saves a file with the identifier specified in the request as a PDF document.",
         "operationId": "saveFileAsPdf",
         "parameters": [
           {
@@ -2246,11 +2278,11 @@
               }
             }
           },
-          "401": {
-            "description": "Unauthorized"
-          },
           "404": {
             "description": "File not found"
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         },
         "security": [
@@ -2289,7 +2321,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Saves the form role mapping.",
+        "summary": "Save form role mapping",
+        "description": "Saves the form role mapping.",
         "operationId": "saveFormRoleMapping",
         "parameters": [
           {
@@ -2314,11 +2347,11 @@
           "200": {
             "description": "Updated information about form role mappings"
           },
-          "401": {
-            "description": "Unauthorized"
-          },
           "403": {
             "description": "You do not have enough permissions to edit the file"
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         },
         "security": [
@@ -2384,11 +2417,11 @@
               }
             }
           },
-          "401": {
-            "description": "Unauthorized"
-          },
           "403": {
             "description": "You do not have enough permissions to view the form roles"
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         },
         "security": [
@@ -2427,7 +2460,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Performs the specified form filling action.",
+        "summary": "Perform form filling action",
+        "description": "Performs the specified form filling action.",
         "operationId": "manageFormFilling",
         "parameters": [
           {
@@ -2452,11 +2486,11 @@
           "200": {
             "description": "Successfully processed the form filling action"
           },
-          "401": {
-            "description": "Unauthorized"
-          },
           "403": {
             "description": "You do not have enough permissions to perform this action"
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         },
         "security": [
@@ -2495,7 +2529,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Returns the results of form submissions.",
+        "summary": "Get form submission results",
+        "description": "Returns the results of form submissions.",
         "operationId": "getFormSubmissions",
         "parameters": [
           {
@@ -2521,11 +2556,11 @@
               }
             }
           },
-          "401": {
-            "description": "Unauthorized"
-          },
           "403": {
             "description": "You do not have enough permissions to perform this action"
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         },
         "security": [
@@ -2564,8 +2599,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Creates a new file in the \"My documents\" section with the title specified in the request.",
-        "description": "If a file extension is different from DOCX/XLSX/PPTX and refers to one of the known text, spreadsheet, or presentation formats, it will be changed to DOCX/XLSX/PPTX accordingly. If the file extension is not specified or is unknown, the DOCX extension will be added to the file title.",
+        "summary": "Create a file in the \"My documents\" section",
+        "description": "Creates a new file in the \"My documents\" section with the title specified in the request.",
         "operationId": "createFileInMyDocuments",
         "requestBody": {
           "content": {
@@ -2627,7 +2662,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Creates an HTML (.html) file in the \"My documents\" section with the title and contents specified in the request.",
+        "summary": "Create an HTML file in the \"My documents\" section",
+        "description": "Creates an HTML (.html) file in the \"My documents\" section with the title and contents specified in the request.",
         "operationId": "createHtmlFileInMyDocuments",
         "requestBody": {
           "content": {
@@ -2649,11 +2685,11 @@
               }
             }
           },
-          "401": {
-            "description": "Unauthorized"
-          },
           "403": {
             "description": "You don't have enough permission to create"
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         },
         "security": [
@@ -2692,7 +2728,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Creates a text (.txt) file in the \"My documents\" section with the title and contents specified in the request.",
+        "summary": "Create a text file in the \"My documents\" section",
+        "description": "Creates a text (.txt) file in the \"My documents\" section with the title and contents specified in the request.",
         "operationId": "createTextFileInMyDocuments",
         "requestBody": {
           "content": {
@@ -2754,7 +2791,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Creates thumbnails for the files with the IDs specified in the request.",
+        "summary": "Create file thumbnails",
+        "description": "Creates thumbnails for the files with the IDs specified in the request.",
         "operationId": "createThumbnails",
         "requestBody": {
           "content": {
@@ -2784,7 +2822,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Checks if the current file is a form draft which can be filled out.",
+        "summary": "Check the form draft filling",
+        "description": "Checks if the current file is a form draft which can be filled out.",
         "operationId": "checkFillFormDraft",
         "parameters": [
           {
@@ -2832,7 +2871,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Adds a file with the ID specified in the request to the \"Recent\" section.",
+        "summary": "Add a file to the \"Recent\" section",
+        "description": "Adds a file with the ID specified in the request to the \"Recent\" section.",
         "operationId": "addFileToRecent",
         "parameters": [
           {
@@ -2898,7 +2938,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Changes the favorite status of the file with the ID specified in the request.",
+        "summary": "Change the file favorite status",
+        "description": "Changes the favorite status of the file with the ID specified in the request.",
         "operationId": "toggleFileFavorite",
         "parameters": [
           {
@@ -2976,7 +3017,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Adds files with the IDs specified in the request to the template list.",
+        "summary": "Add template files",
+        "description": "Adds files with the IDs specified in the request to the template list.",
         "operationId": "addTemplates",
         "requestBody": {
           "content": {
@@ -3036,7 +3078,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Removes files with the IDs specified in the request from the template list.",
+        "summary": "Delete template files",
+        "description": "Removes files with the IDs specified in the request from the template list.",
         "operationId": "deleteTemplates",
         "requestBody": {
           "description": "The file IDs.",
@@ -3107,7 +3150,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Removes files with the IDs specified in the request from the \"Recent\" section.",
+        "summary": "Delete recent files",
+        "description": "Removes files with the IDs specified in the request from the \"Recent\" section.",
         "operationId": "deleteRecent",
         "requestBody": {
           "content": {
@@ -3167,7 +3211,8 @@
         "tags": [
           "Files / Folders"
         ],
-        "summary": "Returns the detailed list of files located in the \"Recent\" section.",
+        "summary": "Get the \"Recent\" section",
+        "description": "Returns the detailed list of files located in the \"Recent\" section.",
         "operationId": "getRecentFolder",
         "parameters": [
           {
@@ -3332,8 +3377,8 @@
         "tags": [
           "Files / Files"
         ],
-        "summary": "Creates a session to edit the existing file with multiple chunks (needed for WebDAV).",
-        "description": "Information about created session which includes:\r\n<ul>\r\n<li><b>id:</b> unique ID of this upload session,</li>\r\n<li><b>created:</b> UTC time when the session was created,</li>\r\n<li><b>expired:</b> UTC time when the session will expire if no chunks are sent before that time,</li>\r\n<li><b>location:</b> URL where you should send your next chunk,</li>\r\n<li><b>bytes_uploaded:</b> number of bytes uploaded for the specific upload ID,</li>\r\n<li><b>bytes_total:</b> total number of bytes which will be uploaded.</li>\r\n</ul>",
+        "summary": "Create the editing session",
+        "description": "Creates a session to edit the existing file with multiple chunks (needed for WebDAV).",
         "operationId": "createEditSession",
         "parameters": [
           {
@@ -3364,7 +3409,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChunkedUploadSessionResponseWrapperTWrapper"
+                  "$ref": "#/components/schemas/ChunkedUploadSessionResponseWrapperIntegerWrapper"
                 }
               }
             }
@@ -3412,7 +3457,8 @@
         "tags": [
           "Files / Folders"
         ],
-        "summary": "Returns the activity history of a folder with a specified identifier.",
+        "summary": "Get folder history",
+        "description": "Returns the activity history of a folder with a specified identifier.",
         "operationId": "getFolderHistory",
         "parameters": [
           {
@@ -3522,7 +3568,8 @@
         "tags": [
           "Files / Folders"
         ],
-        "summary": "Generates the activity history of a folder.",
+        "summary": "Generates folder history",
+        "description": "Generates the activity history of a folder.",
         "operationId": "createReportFolderHistory",
         "parameters": [
           {
@@ -3592,7 +3639,8 @@
         "tags": [
           "Files / Folders"
         ],
-        "summary": "Returns the form filter of a folder with the ID specified in the request.",
+        "summary": "Get folder form filter",
+        "description": "Returns the form filter of a folder with the ID specified in the request.",
         "operationId": "getFolder",
         "parameters": [
           {
@@ -3626,7 +3674,8 @@
         "tags": [
           "Files / Folders"
         ],
-        "summary": "Creates a new folder with the title specified in the request. The parent folder ID can be also specified.",
+        "summary": "Create a folder",
+        "description": "Creates a new folder with the title specified in the request. The parent folder ID can be also specified.",
         "operationId": "createFolder",
         "parameters": [
           {
@@ -3701,7 +3750,8 @@
         "tags": [
           "Files / Folders"
         ],
-        "summary": "Deletes a folder with the ID specified in the request.",
+        "summary": "Delete a folder",
+        "description": "Deletes a folder with the ID specified in the request.",
         "operationId": "deleteFolder",
         "parameters": [
           {
@@ -3776,7 +3826,8 @@
         "tags": [
           "Files / Folders"
         ],
-        "summary": "Returns the detailed information about a folder with the ID specified in the request.",
+        "summary": "Get folder information",
+        "description": "Returns the detailed information about a folder with the ID specified in the request.",
         "operationId": "getFolderInfo",
         "parameters": [
           {
@@ -3808,7 +3859,8 @@
         "tags": [
           "Files / Folders"
         ],
-        "summary": "Renames the selected folder with a new title specified in the request.",
+        "summary": "Rename a folder",
+        "description": "Renames the selected folder with a new title specified in the request.",
         "operationId": "renameFolder",
         "parameters": [
           {
@@ -3888,7 +3940,8 @@
         "tags": [
           "Files / Folders"
         ],
-        "summary": "Sets the order of a folder with ID specified in the request.",
+        "summary": "Set folder order",
+        "description": "Sets the order of a folder with ID specified in the request.",
         "operationId": "setFolderOrder",
         "parameters": [
           {
@@ -3964,7 +4017,8 @@
         "tags": [
           "Files / Folders"
         ],
-        "summary": "Returns the detailed list of files and folders located in the folder with the ID specified in the request.",
+        "summary": "Get a folder by ID",
+        "description": "Returns the detailed list of files and folders located in the folder with the ID specified in the request.",
         "operationId": "getFolderByFolderId",
         "parameters": [
           {
@@ -4150,7 +4204,8 @@
         "tags": [
           "Files / Folders"
         ],
-        "summary": "Returns a path to the folder with the ID specified in the request.",
+        "summary": "Get the folder path",
+        "description": "Returns a path to the folder with the ID specified in the request.",
         "operationId": "getFolderPath",
         "parameters": [
           {
@@ -4219,7 +4274,8 @@
         "tags": [
           "Files / Folders"
         ],
-        "summary": "Returns a list of all the subfolders from a folder with the ID specified in the request.",
+        "summary": "Get subfolders",
+        "description": "Returns a list of all the subfolders from a folder with the ID specified in the request.",
         "operationId": "getFolders",
         "parameters": [
           {
@@ -4288,7 +4344,8 @@
         "tags": [
           "Files / Folders"
         ],
-        "summary": "Returns a list of all the new items from a folder with the ID specified in the request.",
+        "summary": "Get new folder items",
+        "description": "Returns a list of all the new items from a folder with the ID specified in the request.",
         "operationId": "getNewFolderItems",
         "parameters": [
           {
@@ -4357,7 +4414,8 @@
         "tags": [
           "Files / Folders"
         ],
-        "summary": "Returns the used space of files in the root folders.",
+        "summary": "Get used space of files",
+        "description": "Returns the used space of files in the root folders.",
         "operationId": "getFilesUsedSpace",
         "responses": {
           "200": {
@@ -4410,7 +4468,8 @@
         "tags": [
           "Files / Folders"
         ],
-        "summary": "Creates a primary external link by the identifier specified in the request.",
+        "summary": "Create primary external link",
+        "description": "Creates a primary external link by the identifier specified in the request.",
         "operationId": "createFolderPrimaryExternalLink",
         "parameters": [
           {
@@ -4488,7 +4547,8 @@
         "tags": [
           "Files / Folders"
         ],
-        "summary": "Returns the primary external link by the identifier specified in the request.",
+        "summary": "Get primary external link",
+        "description": "Returns the primary external link by the identifier specified in the request.",
         "operationId": "getFolderPrimaryExternalLink",
         "parameters": [
           {
@@ -4547,7 +4607,8 @@
         "tags": [
           "Files / Folders"
         ],
-        "summary": "Sets the folder external link with the ID specified in the request.",
+        "summary": "Set the folder external link",
+        "description": "Sets the folder external link with the ID specified in the request.",
         "operationId": "setFolderPrimaryExternalLink",
         "parameters": [
           {
@@ -4622,7 +4683,8 @@
         "tags": [
           "Files / Folders"
         ],
-        "summary": "Returns the links of the folder with the ID specified in the request.",
+        "summary": "Get the folder links",
+        "description": "Returns the links of the folder with the ID specified in the request.",
         "operationId": "getFolderLinks",
         "parameters": [
           {
@@ -4688,7 +4750,8 @@
         "tags": [
           "Files / Folders"
         ],
-        "summary": "Returns the detailed list of files and folders located in the \"Favorites\" section.",
+        "summary": "Get the \"Favorites\" section",
+        "description": "Returns the detailed list of files and folders located in the \"Favorites\" section.",
         "operationId": "getFavoritesFolder",
         "parameters": [
           {
@@ -4815,7 +4878,8 @@
         "tags": [
           "Files / Folders"
         ],
-        "summary": "Returns the detailed list of files and folders located in the \"My documents\" section.",
+        "summary": "Get the \"My documents\" section",
+        "description": "Returns the detailed list of files and folders located in the \"My documents\" section.",
         "operationId": "getMyFolder",
         "parameters": [
           {
@@ -4950,7 +5014,8 @@
         "tags": [
           "Files / Folders"
         ],
-        "summary": "Returns the detailed list of files and folders located in the \"Private Room\" section.",
+        "summary": "Get the \"Private Room\" section",
+        "description": "Returns the detailed list of files and folders located in the \"Private Room\" section.",
         "operationId": "getPrivacyFolder",
         "parameters": [
           {
@@ -5077,7 +5142,8 @@
         "tags": [
           "Files / Folders"
         ],
-        "summary": "Returns all the sections matching the parameters specified in the request.",
+        "summary": "Get filtered sections",
+        "description": "Returns all the sections matching the parameters specified in the request.",
         "operationId": "getRootFolders",
         "parameters": [
           {
@@ -5213,7 +5279,8 @@
         "tags": [
           "Files / Folders"
         ],
-        "summary": "Returns the detailed list of files and folders located in the \"Trash\" section.",
+        "summary": "Get the \"Trash\" section",
+        "description": "Returns the detailed list of files and folders located in the \"Trash\" section.",
         "operationId": "getTrashFolder",
         "parameters": [
           {
@@ -5348,7 +5415,8 @@
         "tags": [
           "Files / Folders"
         ],
-        "summary": "Checks the file uploads to the folder with the ID specified in the request.",
+        "summary": "Check file uploads",
+        "description": "Checks the file uploads to the folder with the ID specified in the request.",
         "operationId": "checkUpload",
         "parameters": [
           {
@@ -5425,7 +5493,8 @@
         "tags": [
           "Files / Folders"
         ],
-        "summary": "Inserts a file specified in the request to the selected folder by single file uploading.",
+        "summary": "Insert a file",
+        "description": "Inserts a file specified in the request to the selected folder by single file uploading.",
         "operationId": "insertFile",
         "parameters": [
           {
@@ -5602,8 +5671,8 @@
         "tags": [
           "Files / Folders"
         ],
-        "summary": "Uploads a file specified in the request to the selected folder by single file uploading or standart multipart/form-data method.",
-        "description": " You can upload files in two different ways:\r\n <ol>\r\n<li>Using single file upload. You should set the Content-Type and Content-Disposition headers to specify a file name and content type, and send the file to the request body.</li>\r\n<li>Using standart multipart/form-data method.</li>\r\n</ol>",
+        "summary": "Upload a file",
+        "description": "Uploads a file specified in the request to the selected folder by single file uploading or standart multipart/form-data method.",
         "operationId": "uploadFile",
         "parameters": [
           {
@@ -5685,7 +5754,8 @@
         "tags": [
           "Files / Folders"
         ],
-        "summary": "Inserts a file specified in the request to the \"My documents\" section by single file uploading.",
+        "summary": "Insert a file to the \"My documents\" section",
+        "description": "Inserts a file specified in the request to the \"My documents\" section by single file uploading.",
         "operationId": "insertFileToMyFromBody",
         "requestBody": {
           "content": {
@@ -5849,8 +5919,8 @@
         "tags": [
           "Files / Folders"
         ],
-        "summary": "Uploads a file specified in the request to the \"My documents\" section by single file uploading or standart multipart/form-data method.",
-        "description": " You can upload files in two different ways:\r\n <ol>\r\n<li>Using single file upload. You should set the Content-Type and Content-Disposition headers to specify a file name and content type, and send the file to the request body.</li>\r\n<li>Using standart multipart/form-data method.</li>\r\n</ol>",
+        "summary": "Upload a file to the \"My documents\" section",
+        "description": "Uploads a file specified in the request to the \"My documents\" section by single file uploading or standart multipart/form-data method.",
         "operationId": "uploadFileToMy",
         "parameters": [
           {
@@ -5919,7 +5989,8 @@
         "tags": [
           "Files / Operations"
         ],
-        "summary": "Checks the conversion status of a file with the ID specified in the request.",
+        "summary": "Get conversion status",
+        "description": "Checks the conversion status of a file with the ID specified in the request.",
         "operationId": "checkConversionStatus",
         "parameters": [
           {
@@ -5992,7 +6063,8 @@
         "tags": [
           "Files / Operations"
         ],
-        "summary": "Starts a conversion operation of a file with the ID specified in the request.",
+        "summary": "Start file conversion",
+        "description": "Starts a conversion operation of a file with the ID specified in the request.",
         "operationId": "startFileConversion",
         "parameters": [
           {
@@ -6068,7 +6140,8 @@
         "tags": [
           "Files / Operations"
         ],
-        "summary": "Updates a comment in a file with the ID specified in the request.",
+        "summary": "Update a comment",
+        "description": "Updates a comment in a file with the ID specified in the request.",
         "operationId": "updateFileComment",
         "parameters": [
           {
@@ -6145,7 +6218,8 @@
         "tags": [
           "Files / Operations"
         ],
-        "summary": "Starts the download process of files and folders with the IDs specified in the request.",
+        "summary": "Bulk download",
+        "description": "Starts the download process of files and folders with the IDs specified in the request.",
         "operationId": "bulkDownload",
         "requestBody": {
           "content": {
@@ -6178,7 +6252,8 @@
         "tags": [
           "Files / Operations"
         ],
-        "summary": "Copies all the selected files and folders to the folder with the ID specified in the request.",
+        "summary": "Copy to the folder",
+        "description": "Copies all the selected files and folders to the folder with the ID specified in the request.",
         "operationId": "copyBatchItems",
         "requestBody": {
           "content": {
@@ -6243,7 +6318,8 @@
         "tags": [
           "Files / Operations"
         ],
-        "summary": "Deletes the files and folders with the IDs specified in the request.",
+        "summary": "Delete files and folders",
+        "description": "Deletes the files and folders with the IDs specified in the request.",
         "operationId": "deleteBatchItems",
         "requestBody": {
           "content": {
@@ -6308,7 +6384,8 @@
         "tags": [
           "Files / Operations"
         ],
-        "summary": "Deletes the file versions with the IDs specified in the request.",
+        "summary": "Delete file versions",
+        "description": "Deletes the file versions with the IDs specified in the request.",
         "operationId": "deleteFileVersions",
         "requestBody": {
           "content": {
@@ -6370,7 +6447,8 @@
         "tags": [
           "Files / Operations"
         ],
-        "summary": "Deletes all the files and folders from the \"Trash\" folder.",
+        "summary": "Empty the \"Trash\" folder",
+        "description": "Deletes all the files and folders from the \"Trash\" folder.",
         "operationId": "emptyTrash",
         "parameters": [
           {
@@ -6434,7 +6512,8 @@
         "tags": [
           "Files / Operations"
         ],
-        "summary": "Returns a list of all the active file operations.",
+        "summary": "Get active file operations",
+        "description": "Returns a list of all the active file operations.",
         "operationId": "getOperationStatuses",
         "parameters": [
           {
@@ -6466,7 +6545,8 @@
         "tags": [
           "Files / Operations"
         ],
-        "summary": "Retrieves the statuses of operations filtered by the specified operation type.",
+        "summary": "Get file operation statuses",
+        "description": "Retrieves the statuses of operations filtered by the specified operation type.",
         "operationId": "getOperationStatusesByType",
         "parameters": [
           {
@@ -6507,7 +6587,8 @@
         "tags": [
           "Files / Operations"
         ],
-        "summary": "Marks the files and folders with the IDs specified in the request as read.",
+        "summary": "Mark as read",
+        "description": "Marks the files and folders with the IDs specified in the request as read.",
         "operationId": "markAsRead",
         "requestBody": {
           "content": {
@@ -6569,7 +6650,8 @@
         "tags": [
           "Files / Operations"
         ],
-        "summary": "Moves or copies all the selected files and folders to the folder with the ID specified in the request.",
+        "summary": "Move or copy to a folder",
+        "description": "Moves or copies all the selected files and folders to the folder with the ID specified in the request.",
         "operationId": "moveBatchItems",
         "requestBody": {
           "content": {
@@ -6632,7 +6714,8 @@
         "tags": [
           "Files / Operations"
         ],
-        "summary": "Checks if files or folders can be moved or copied to the specified folder, moves or copies them, and returns their information.",
+        "summary": "Move or copy files to a folder",
+        "description": "Checks if files or folders can be moved or copied to the specified folder, moves or copies them, and returns their information.",
         "operationId": "checkMoveOrCopyBatchItems",
         "parameters": [
           {
@@ -6698,7 +6781,8 @@
         "tags": [
           "Files / Operations"
         ],
-        "summary": "Duplicates all the selected files and folders.",
+        "summary": "Duplicate files and folders",
+        "description": "Duplicates all the selected files and folders.",
         "operationId": "duplicateBatchItems",
         "requestBody": {
           "content": {
@@ -6763,7 +6847,8 @@
         "tags": [
           "Files / Operations"
         ],
-        "summary": "Checks if files can be moved or copied to the specified folder.",
+        "summary": "Check for moving or copying files to a folder",
+        "description": "Checks if files can be moved or copied to the specified folder.",
         "operationId": "checkMoveOrCopyDestFolder",
         "parameters": [
           {
@@ -6829,7 +6914,8 @@
         "tags": [
           "Files / Operations"
         ],
-        "summary": "Finishes an operation with the ID specified in the request or all the active operations.",
+        "summary": "Finish active operations",
+        "description": "Finishes an operation with the ID specified in the request or all the active operations.",
         "operationId": "terminateTasks",
         "parameters": [
           {
@@ -6862,7 +6948,8 @@
         "tags": [
           "Files / Operations"
         ],
-        "summary": "Adds files and folders with the IDs specified in the request to the favorite list.",
+        "summary": "Add favorite files and folders",
+        "description": "Adds files and folders with the IDs specified in the request to the favorite list.",
         "operationId": "addFavorites",
         "requestBody": {
           "content": {
@@ -6925,7 +7012,8 @@
         "tags": [
           "Files / Operations"
         ],
-        "summary": "Removes files and folders with the IDs specified in the request from the favorite list. This method uses the body parameters.",
+        "summary": "Delete favorite files and folders (using body parameters)",
+        "description": "Removes files and folders with the IDs specified in the request from the favorite list. This method uses the body parameters.",
         "operationId": "deleteFavoritesFromBody",
         "requestBody": {
           "content": {
@@ -6987,8 +7075,8 @@
         "tags": [
           "Files / Operations"
         ],
-        "summary": "Creates the session to upload large files in multiple chunks to the folder with the ID specified in the request.",
-        "description": "Each chunk can have different length but the length should be multiple of <b>512</b> and greater or equal to <b>10 mb</b>. Last chunk can have any size.\r\nAfter the initial response to the request with the <b>200 OK</b> status, you must get the <em>location</em> field value from the response. Send all your chunks to this location.\r\nEach chunk must be sent in the exact order the chunks appear in the file.\r\nAfter receiving each chunk, the server will respond with the current information about the upload session if no errors occurred.\r\nWhen the number of bytes uploaded is equal to the number of bytes you sent in the initial request, the server responds with the <b>201 Created</b> status and sends you information about the uploaded file.\r\nInformation about created session which includes:\r\n<ul>\r\n<li><b>id:</b> unique ID of this upload session,</li>\r\n<li><b>created:</b> UTC time when the session was created,</li>\r\n<li><b>expired:</b> UTC time when the session will expire if no chunks are sent before that time,</li>\r\n<li><b>location:</b> URL where you should send your next chunk,</li>\r\n<li><b>bytes_uploaded:</b> number of bytes uploaded for the specific upload ID,</li>\r\n<li><b>bytes_total:</b> total number of bytes which will be uploaded.</li>\r\n</ul>",
+        "summary": "Chunked upload",
+        "description": "Creates the session to upload large files in multiple chunks to the folder with the ID specified in the request.",
         "operationId": "createUploadSession",
         "parameters": [
           {
@@ -7020,7 +7108,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChunkedUploadSessionResponseWrapperTWrapper"
+                  "$ref": "#/components/schemas/ChunkedUploadSessionResponseWrapperIntegerWrapper"
                 }
               }
             }
@@ -7477,7 +7565,8 @@
         "tags": [
           "Files / Quota"
         ],
-        "summary": "Changes the quota limit for the rooms with the IDs specified in the request.",
+        "summary": "Change the room quota limit",
+        "description": "Changes the quota limit for the rooms with the IDs specified in the request.",
         "operationId": "updateRoomsQuota",
         "requestBody": {
           "content": {
@@ -7539,7 +7628,8 @@
         "tags": [
           "Files / Quota"
         ],
-        "summary": "Resets the quota limit for the rooms with the IDs specified in the request.",
+        "summary": "Reset the room quota limit",
+        "description": "Resets the quota limit for the rooms with the IDs specified in the request.",
         "operationId": "resetRoomQuota",
         "requestBody": {
           "content": {
@@ -7601,7 +7691,8 @@
         "tags": [
           "Files / Settings"
         ],
-        "summary": "Checks the document service location URL.",
+        "summary": "Check the document service URL",
+        "description": "Checks the document service location URL.",
         "operationId": "checkDocServiceUrl",
         "requestBody": {
           "content": {
@@ -7664,7 +7755,8 @@
         "tags": [
           "Files / Settings"
         ],
-        "summary": "Returns the URL address of the connected editors.",
+        "summary": "Get the document service URL",
+        "description": "Returns the URL address of the connected editors.",
         "operationId": "getDocServiceUrl",
         "parameters": [
           {
@@ -7696,7 +7788,8 @@
         "tags": [
           "Files / Settings"
         ],
-        "summary": "Changes the access to the third-party settings.",
+        "summary": "Change the third-party settings access",
+        "description": "Changes the access to the third-party settings.",
         "operationId": "changeAccessToThirdparty",
         "requestBody": {
           "content": {
@@ -7756,7 +7849,8 @@
         "tags": [
           "Files / Third-party integration"
         ],
-        "summary": "Returns a list of all the connected third-party accounts.",
+        "summary": "Get the third-party accounts",
+        "description": "Returns a list of all the connected third-party accounts.",
         "operationId": "getThirdPartyAccounts",
         "responses": {
           "200": {
@@ -7807,8 +7901,8 @@
         "tags": [
           "Files / Third-party integration"
         ],
-        "summary": "Saves the third-party storage service account. For WebDav, Yandex, kDrive and SharePoint, the login and password are used for authentication. For other providers, the authentication is performed using a token received via OAuth 2.0.",
-        "description": "List of provider keys: DropboxV2, Box, WebDav, Yandex, OneDrive, SharePoint, GoogleDrive, kDrive.",
+        "summary": "Save a third-party account",
+        "description": "Saves the third-party storage service account. For WebDav, Yandex, kDrive and SharePoint, the login and password are used for authentication. For other providers, the authentication is performed using a token received via OAuth 2.0.",
         "operationId": "saveThirdParty",
         "requestBody": {
           "content": {
@@ -7870,7 +7964,8 @@
         "tags": [
           "Files / Settings"
         ],
-        "summary": "Specifies whether to confirm the file deletion or not.",
+        "summary": "Confirm the file deletion",
+        "description": "Specifies whether to confirm the file deletion or not.",
         "operationId": "changeDeleteConfirm",
         "requestBody": {
           "content": {
@@ -7932,7 +8027,8 @@
         "tags": [
           "Files / Settings"
         ],
-        "summary": "Changes the format of the downloaded archive from .zip to .tar.gz. This method uses the body parameters.",
+        "summary": "Change the archive format (using body parameters)",
+        "description": "Changes the format of the downloaded archive from .zip to .tar.gz. This method uses the body parameters.",
         "operationId": "changeDownloadZipFromBody",
         "requestBody": {
           "content": {
@@ -7994,7 +8090,8 @@
         "tags": [
           "Files / Settings"
         ],
-        "summary": "Displays the \"Recent\" folder.",
+        "summary": "Display the \"Recent\" folder",
+        "description": "Displays the \"Recent\" folder.",
         "operationId": "displayRecent",
         "requestBody": {
           "content": {
@@ -8059,7 +8156,8 @@
         "tags": [
           "Files / Settings"
         ],
-        "summary": "Changes the ability to share a file externally.",
+        "summary": "Change the external sharing ability",
+        "description": "Changes the ability to share a file externally.",
         "operationId": "externalShare",
         "requestBody": {
           "content": {
@@ -8121,7 +8219,8 @@
         "tags": [
           "Files / Settings"
         ],
-        "summary": "Changes the ability to share a file externally on social networks.",
+        "summary": "Change the external sharing ability on social networks",
+        "description": "Changes the ability to share a file externally on social networks.",
         "operationId": "externalShareSocialMedia",
         "requestBody": {
           "content": {
@@ -8183,7 +8282,8 @@
         "tags": [
           "Files / Settings"
         ],
-        "summary": "Specifies if the file forcesaving is enabled or not.",
+        "summary": "Change the forcesaving ability",
+        "description": "Specifies if the file forcesaving is enabled or not.",
         "operationId": "forcesave",
         "responses": {
           "200": {
@@ -8236,7 +8336,8 @@
         "tags": [
           "Files / Settings"
         ],
-        "summary": "Returns all the file settings.",
+        "summary": "Get file settings",
+        "description": "Returns all the file settings.",
         "operationId": "getFilesSettings",
         "responses": {
           "200": {
@@ -8257,7 +8358,8 @@
         "tags": [
           "Files / Settings"
         ],
-        "summary": "Returns the information about the \"Documents\" module.",
+        "summary": "Get the \"Documents\" information",
+        "description": "Returns the information about the \"Documents\" module.",
         "operationId": "getFilesModule",
         "responses": {
           "200": {
@@ -8310,7 +8412,8 @@
         "tags": [
           "Files / Settings"
         ],
-        "summary": "Hides the confirmation dialog when canceling operations.",
+        "summary": "Hide confirmation dialog when canceling operations",
+        "description": "Hides the confirmation dialog when canceling operations.",
         "operationId": "hideConfirmCancelOperation",
         "requestBody": {
           "content": {
@@ -8372,7 +8475,8 @@
         "tags": [
           "Files / Settings"
         ],
-        "summary": "Hides the confirmation dialog for saving the file copy in the original format when converting a file.",
+        "summary": "Hide the confirmation dialog when converting",
+        "description": "Hides the confirmation dialog for saving the file copy in the original format when converting a file.",
         "operationId": "hideConfirmConvert",
         "requestBody": {
           "content": {
@@ -8434,7 +8538,8 @@
         "tags": [
           "Files / Settings"
         ],
-        "summary": "Hides the confirmation dialog when changing the room lifetime settings.",
+        "summary": "Hide confirmation dialog when changing room lifetime settings",
+        "description": "Hides the confirmation dialog when changing the room lifetime settings.",
         "operationId": "hideConfirmRoomLifetime",
         "requestBody": {
           "content": {
@@ -8496,7 +8601,8 @@
         "tags": [
           "Files / Settings"
         ],
-        "summary": "Checks if the \"Private Room\" settings are available or not.",
+        "summary": "Check the \"Private Room\" availability",
+        "description": "Checks if the \"Private Room\" settings are available or not.",
         "operationId": "isAvailablePrivacyRoomSettings",
         "responses": {
           "200": {
@@ -8549,7 +8655,8 @@
         "tags": [
           "Files / Settings"
         ],
-        "summary": "Changes the ability to store the forcesaved file versions.",
+        "summary": "Change the ability to store the forcesaved files",
+        "description": "Changes the ability to store the forcesaved file versions.",
         "operationId": "storeForcesave",
         "responses": {
           "200": {
@@ -8602,7 +8709,8 @@
         "tags": [
           "Files / Settings"
         ],
-        "summary": "Changes the ability to upload documents in the original formats as well.",
+        "summary": "Change the ability to upload original formats",
+        "description": "Changes the ability to upload documents in the original formats as well.",
         "operationId": "storeOriginal",
         "requestBody": {
           "content": {
@@ -8664,7 +8772,8 @@
         "tags": [
           "Files / Settings"
         ],
-        "summary": "Specifies whether to ask a user for a file name on creation or not.",
+        "summary": "Ask a new file name",
+        "description": "Specifies whether to ask a user for a file name on creation or not.",
         "operationId": "keepNewFileName",
         "requestBody": {
           "content": {
@@ -8726,7 +8835,8 @@
         "tags": [
           "Files / Settings"
         ],
-        "summary": "Specifies whether to display a file extension or not.",
+        "summary": "Display a file extension",
+        "description": "Specifies whether to display a file extension or not.",
         "operationId": "displayFileExtension",
         "requestBody": {
           "content": {
@@ -8788,7 +8898,8 @@
         "tags": [
           "Files / Settings"
         ],
-        "summary": "Updates a file version if a file with such a name already exists.",
+        "summary": "Update a file version if it exists",
+        "description": "Updates a file version if a file with such a name already exists.",
         "operationId": "updateFileIfExist",
         "requestBody": {
           "content": {
@@ -8850,7 +8961,8 @@
         "tags": [
           "Files / Settings"
         ],
-        "summary": "Returns the trash bin auto-clearing setting.",
+        "summary": "Get the trash bin auto-clearing setting",
+        "description": "Returns the trash bin auto-clearing setting.",
         "operationId": "getAutomaticallyCleanUp",
         "responses": {
           "200": {
@@ -8901,7 +9013,8 @@
         "tags": [
           "Files / Settings"
         ],
-        "summary": "Updates the trash bin auto-clearing setting.",
+        "summary": "Update the trash bin auto-clearing setting",
+        "description": "Updates the trash bin auto-clearing setting.",
         "operationId": "changeAutomaticallyCleanUp",
         "requestBody": {
           "content": {
@@ -8963,7 +9076,8 @@
         "tags": [
           "Files / Settings"
         ],
-        "summary": "Changes the default access rights in the sharing settings.",
+        "summary": "Change the default access rights",
+        "description": "Changes the default access rights in the sharing settings.",
         "operationId": "changeDefaultAccessRights",
         "requestBody": {
           "description": "Sharing rights (None, ReadWrite, Read, Restrict, Varies, Review, Comment, FillForms, CustomFilter, RoomAdmin, Editing, Collaborator).",
@@ -9097,7 +9211,8 @@
         "tags": [
           "Files / Settings"
         ],
-        "summary": "Changes the ability to open the document in the same browser tab.",
+        "summary": "Open document in the same browser tab",
+        "description": "Changes the ability to open the document in the same browser tab.",
         "operationId": "setOpenEditorInSameTab",
         "requestBody": {
           "content": {
@@ -9159,7 +9274,8 @@
         "tags": [
           "Files / Settings"
         ],
-        "summary": "Returns the default template setting.",
+        "summary": "Get the default template setting",
+        "description": "Returns the default template setting.",
         "operationId": "getDefaultTemplates",
         "responses": {
           "200": {
@@ -9210,7 +9326,8 @@
         "tags": [
           "Files / Settings"
         ],
-        "summary": "Changes the default template setting.",
+        "summary": "Change the default template setting",
+        "description": "Changes the default template setting.",
         "operationId": "setDefaultTemplate",
         "requestBody": {
           "content": {
@@ -9270,7 +9387,8 @@
         "tags": [
           "Files / Settings"
         ],
-        "summary": "Uploads a file to use as the default template setting.",
+        "summary": "Upload a file as the default template setting",
+        "description": "Uploads a file to use as the default template setting.",
         "operationId": "uploadDefaultTemplate",
         "parameters": [
           {
@@ -9359,7 +9477,8 @@
         "tags": [
           "Files / Sharing"
         ],
-        "summary": "Returns a list of users with their access rights to the file with the ID specified in the request.",
+        "summary": "Get user access rights by file ID",
+        "description": "Returns a list of users with their access rights to the file with the ID specified in the request.",
         "operationId": "getSharedUsers",
         "parameters": [
           {
@@ -9425,7 +9544,8 @@
         "tags": [
           "Files / Sharing"
         ],
-        "summary": "Returns the detailed information about the shared file with the ID specified in the request.",
+        "summary": "Get the shared file information",
+        "description": "Returns the detailed information about the shared file with the ID specified in the request.",
         "operationId": "getFileSecurityInfo",
         "parameters": [
           {
@@ -9513,7 +9633,8 @@
         "tags": [
           "Files / Sharing"
         ],
-        "summary": "Returns the detailed information about the shared folder with the ID specified in the request.",
+        "summary": "Get the shared folder information",
+        "description": "Returns the detailed information about the shared folder with the ID specified in the request.",
         "operationId": "getFolderSecurityInfo",
         "parameters": [
           {
@@ -9601,7 +9722,8 @@
         "tags": [
           "Files / Sharing"
         ],
-        "summary": "Sets the sharing settings to a file with the ID specified in the request.",
+        "summary": "Share a file",
+        "description": "Sets the sharing settings to a file with the ID specified in the request.",
         "operationId": "setFileSecurityInfo",
         "parameters": [
           {
@@ -9678,7 +9800,8 @@
         "tags": [
           "Files / Sharing"
         ],
-        "summary": "Sets the sharing settings to a folder with the ID specified in the request.",
+        "summary": "Share a folder",
+        "description": "Sets the sharing settings to a folder with the ID specified in the request.",
         "operationId": "setFolderSecurityInfo",
         "parameters": [
           {
@@ -9755,7 +9878,8 @@
         "tags": [
           "Files / Sharing"
         ],
-        "summary": "Sends a message to the users who are mentioned in the file with the ID specified in the request.",
+        "summary": "Send the mention message",
+        "description": "Sends a message to the users who are mentioned in the file with the ID specified in the request.",
         "operationId": "sendEditorNotify",
         "parameters": [
           {
@@ -9831,7 +9955,8 @@
         "tags": [
           "Files / Sharing"
         ],
-        "summary": "Returns the group members with their folder security information.",
+        "summary": "Get folder group members with security information",
+        "description": "Returns the group members with their folder security information.",
         "operationId": "getGroupsMembersWithFolderSecurity",
         "parameters": [
           {
@@ -9939,7 +10064,8 @@
         "tags": [
           "Files / Sharing"
         ],
-        "summary": "Returns the group members with their file security information.",
+        "summary": "Get file group members with security information",
+        "description": "Returns the group members with their file security information.",
         "operationId": "getGroupsMembersWithFileSecurity",
         "parameters": [
           {
@@ -10047,7 +10173,8 @@
         "tags": [
           "Files / Sharing"
         ],
-        "summary": "Changes the owner of the file with the ID specified in the request.",
+        "summary": "Change the file owner",
+        "description": "Changes the owner of the file with the ID specified in the request.",
         "operationId": "changeFileOwner",
         "requestBody": {
           "content": {
@@ -10109,7 +10236,8 @@
         "tags": [
           "Files / Sharing"
         ],
-        "summary": "Returns the sharing rights for all the files and folders specified in the request.",
+        "summary": "Get the sharing rights",
+        "description": "Returns the sharing rights for all the files and folders specified in the request.",
         "operationId": "getSecurityInfo",
         "requestBody": {
           "content": {
@@ -10169,7 +10297,8 @@
         "tags": [
           "Files / Sharing"
         ],
-        "summary": "Removes the sharing rights from all the files and folders specified in the request.",
+        "summary": "Remove the sharing rights",
+        "description": "Removes the sharing rights from all the files and folders specified in the request.",
         "operationId": "removeSecurityInfo",
         "requestBody": {
           "content": {
@@ -10229,7 +10358,8 @@
         "tags": [
           "Files / Sharing"
         ],
-        "summary": "Sets the sharing rights to all the files and folders specified in the request.",
+        "summary": "Set the sharing rights",
+        "description": "Sets the sharing rights to all the files and folders specified in the request.",
         "operationId": "setSecurityInfo",
         "requestBody": {
           "content": {
@@ -10291,7 +10421,8 @@
         "tags": [
           "Files / Sharing"
         ],
-        "summary": "Returns the external data by the key specified in the request.",
+        "summary": "Get the external data",
+        "description": "Returns the external data by the key specified in the request.",
         "operationId": "getExternalShareData",
         "parameters": [
           {
@@ -10342,7 +10473,8 @@
         "tags": [
           "Files / Sharing"
         ],
-        "summary": "Applies a password specified in the request to get the external data.",
+        "summary": "Apply external data password",
+        "description": "Applies a password specified in the request to get the external data.",
         "operationId": "applyExternalSharePassword",
         "parameters": [
           {
@@ -10389,8 +10521,8 @@
         "tags": [
           "Files / Third-party integration"
         ],
-        "summary": "Returns the list of the available providers.",
-        "description": "Available provider keys: DropboxV2, Box, WebDav, Yandex, OneDrive, SharePoint, GoogleDrive, kDrive.",
+        "summary": "Get providers",
+        "description": "Returns the list of the available providers.",
         "operationId": "getCapabilities",
         "responses": {
           "200": {
@@ -10443,7 +10575,8 @@
         "tags": [
           "Files / Third-party integration"
         ],
-        "summary": "Removes the third-party storage service account with the ID specified in the request.",
+        "summary": "Remove a third-party account",
+        "description": "Removes the third-party storage service account with the ID specified in the request.",
         "operationId": "deleteThirdParty",
         "parameters": [
           {
@@ -10509,7 +10642,8 @@
         "tags": [
           "Files / Third-party integration"
         ],
-        "summary": "Returns a list of the third-party services connected to the \"Common\" section.",
+        "summary": "Get the common third-party services",
+        "description": "Returns a list of the third-party services connected to the \"Common\" section.",
         "operationId": "getCommonThirdPartyFolders",
         "responses": {
           "200": {
@@ -10562,7 +10696,8 @@
         "tags": [
           "Files / Third-party integration"
         ],
-        "summary": "Returns a backup of the connected third-party account.",
+        "summary": "Get a third-party account backup",
+        "description": "Returns a backup of the connected third-party account.",
         "operationId": "getBackupThirdPartyAccount",
         "responses": {
           "200": {
@@ -10613,8 +10748,8 @@
         "tags": [
           "Files / Third-party integration"
         ],
-        "summary": "Saves a backup of the connected third-party account.",
-        "description": "List of provider keys: DropboxV2, Box, WebDav, Yandex, OneDrive, SharePoint, GoogleDrive, kDrive.",
+        "summary": "Save a third-party account backup",
+        "description": "Saves a backup of the connected third-party account.",
         "operationId": "saveThirdPartyBackup",
         "requestBody": {
           "content": {
@@ -10676,8 +10811,8 @@
         "tags": [
           "Files / Third-party integration"
         ],
-        "summary": "Returns a list of all providers.",
-        "description": "Available provider keys: Dropbox, Box, WebDav, OneDrive, GoogleDrive, kDrive, ownCloud, Nextcloud.",
+        "summary": "Get all providers",
+        "description": "Returns a list of all providers.",
         "operationId": "getAllProviders",
         "parameters": [
           {
@@ -10741,7 +10876,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Starts creating the room template.",
+        "summary": "Start creating room template",
+        "description": "Starts creating the room template.",
         "operationId": "createRoomTemplate",
         "requestBody": {
           "content": {
@@ -10803,7 +10939,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Returns the progress status of the room template creation process.",
+        "summary": "Get status of room template creation",
+        "description": "Returns the progress status of the room template creation process.",
         "operationId": "getRoomTemplateCreatingStatus",
         "responses": {
           "200": {
@@ -10856,8 +10993,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Returns the public settings of the room template with the ID specified in the request.",
-        "description": "",
+        "summary": "Get public settings",
+        "description": "Returns the public settings of the room template with the ID specified in the request.",
         "operationId": "getPublicSettings",
         "parameters": [
           {
@@ -10923,7 +11060,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Sets the public settings for the room template with the ID specified in the request.",
+        "summary": "Set public settings",
+        "description": "Sets the public settings for the room template with the ID specified in the request.",
         "operationId": "setPublicSettings",
         "requestBody": {
           "content": {
@@ -10978,7 +11116,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Creates a room in the \"Rooms\" section.",
+        "summary": "Create a room",
+        "description": "Creates a room in the \"Rooms\" section.",
         "operationId": "createRoom",
         "requestBody": {
           "content": {
@@ -11038,7 +11177,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Returns the contents of the \"Rooms\" section by the parameters specified in the request.",
+        "summary": "Get rooms",
+        "description": "Returns the contents of the \"Rooms\" section by the parameters specified in the request.",
         "operationId": "getRoomsFolder",
         "parameters": [
           {
@@ -11232,7 +11372,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Creates a room in the \"Rooms\" section based on the template.",
+        "summary": "Create a room from the template",
+        "description": "Creates a room in the \"Rooms\" section based on the template.",
         "operationId": "createRoomFromTemplate",
         "requestBody": {
           "content": {
@@ -11294,7 +11435,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Returns the progress of creating a room from the template.",
+        "summary": "Get the room creation progress",
+        "description": "Returns the progress of creating a room from the template.",
         "operationId": "getRoomCreatingStatus",
         "responses": {
           "200": {
@@ -11347,7 +11489,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Returns the room information.",
+        "summary": "Get room information",
+        "description": "Returns the room information.",
         "operationId": "getRoomInfo",
         "parameters": [
           {
@@ -11379,7 +11522,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Updates a room with the ID specified in the request.",
+        "summary": "Update a room",
+        "description": "Updates a room with the ID specified in the request.",
         "operationId": "updateRoom",
         "parameters": [
           {
@@ -11454,7 +11598,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Removes a room with the ID specified in the request.",
+        "summary": "Remove a room",
+        "description": "Removes a room with the ID specified in the request.",
         "operationId": "deleteRoom",
         "parameters": [
           {
@@ -11531,7 +11676,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Moves a room with the ID specified in the request to the \"Archive\" section.",
+        "summary": "Archive a room",
+        "description": "Moves a room with the ID specified in the request to the \"Archive\" section.",
         "operationId": "archiveRoom",
         "parameters": [
           {
@@ -11607,7 +11753,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Moves a room with the ID specified in the request from the \"Archive\" section to the \"Rooms\" section.",
+        "summary": "Unarchive a room",
+        "description": "Moves a room with the ID specified in the request from the \"Archive\" section to the \"Rooms\" section.",
         "operationId": "unarchiveRoom",
         "parameters": [
           {
@@ -11683,7 +11830,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Sets the access rights to the room with the ID specified in the request.",
+        "summary": "Set the room access rights",
+        "description": "Sets the access rights to the room with the ID specified in the request.",
         "operationId": "setRoomSecurity",
         "parameters": [
           {
@@ -11758,7 +11906,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Returns the access rights of a room with the ID specified in the request.",
+        "summary": "Get the room access rights",
+        "description": "Returns the access rights of a room with the ID specified in the request.",
         "operationId": "getRoomSecurityInfo",
         "parameters": [
           {
@@ -11863,7 +12012,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Sets the room external or invitation link with the ID specified in the request.",
+        "summary": "Set the room external or invitation link",
+        "description": "Sets the room external or invitation link with the ID specified in the request.",
         "operationId": "setRoomLink",
         "parameters": [
           {
@@ -11938,7 +12088,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Returns the links of the room with the ID specified in the request.",
+        "summary": "Get the room links",
+        "description": "Returns the links of the room with the ID specified in the request.",
         "operationId": "getRoomLinks",
         "parameters": [
           {
@@ -12012,7 +12163,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Returns the primary external link of the room with the ID specified in the request.",
+        "summary": "Get the room primary external link",
+        "description": "Returns the primary external link of the room with the ID specified in the request.",
         "operationId": "getRoomsPrimaryExternalLink",
         "parameters": [
           {
@@ -12081,7 +12233,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Adds the tags to a room with the ID specified in the request.",
+        "summary": "Add the room tags",
+        "description": "Adds the tags to a room with the ID specified in the request.",
         "operationId": "addRoomTags",
         "parameters": [
           {
@@ -12158,7 +12311,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Removes the tags from a room with the ID specified in the request.",
+        "summary": "Remove the room tags",
+        "description": "Removes the tags from a room with the ID specified in the request.",
         "operationId": "deleteRoomTags",
         "parameters": [
           {
@@ -12237,7 +12391,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Creates a logo for a room with the ID specified in the request.",
+        "summary": "Create a room logo",
+        "description": "Creates a logo for a room with the ID specified in the request.",
         "operationId": "createRoomLogo",
         "parameters": [
           {
@@ -12315,7 +12470,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Removes a logo from a room with the ID specified in the request.",
+        "summary": "Remove a room logo",
+        "description": "Removes a logo from a room with the ID specified in the request.",
         "operationId": "deleteRoomLogo",
         "parameters": [
           {
@@ -12381,7 +12537,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Changes a cover of a room with the ID specified in the request.",
+        "summary": "Change the room cover",
+        "description": "Changes a cover of a room with the ID specified in the request.",
         "operationId": "changeRoomCover",
         "parameters": [
           {
@@ -12464,7 +12621,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Returns a list of all covers.",
+        "summary": "Get covers",
+        "description": "Returns a list of all covers.",
         "operationId": "getRoomCovers",
         "responses": {
           "200": {
@@ -12517,7 +12675,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Pins a room with the ID specified in the request to the top of the list.",
+        "summary": "Pin a room",
+        "description": "Pins a room with the ID specified in the request to the top of the list.",
         "operationId": "pinRoom",
         "parameters": [
           {
@@ -12583,7 +12742,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Unpins a room with the ID specified in the request from the top of the list.",
+        "summary": "Unpin a room",
+        "description": "Unpins a room with the ID specified in the request from the top of the list.",
         "operationId": "unpinRoom",
         "parameters": [
           {
@@ -12649,7 +12809,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Resends the email invitations to a room with the ID specified in the request to the selected users.",
+        "summary": "Resend the room invitations",
+        "description": "Resends the email invitations to a room with the ID specified in the request to the selected users.",
         "operationId": "resendEmailInvitations",
         "parameters": [
           {
@@ -12719,7 +12880,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Reorders the room with ID specified in the request.",
+        "summary": "Reorder the room",
+        "description": "Reorders the room with ID specified in the request.",
         "operationId": "reorderRoom",
         "parameters": [
           {
@@ -12785,7 +12947,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Returns a list of all the new items from a room with the ID specified in the request.",
+        "summary": "Get the new room items",
+        "description": "Returns a list of all the new items from a room with the ID specified in the request.",
         "operationId": "getNewRoomItems",
         "parameters": [
           {
@@ -12851,7 +13014,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Creates a room in the \"Rooms\" section stored in a third-party storage.",
+        "summary": "Create a third-party room",
+        "description": "Creates a room in the \"Rooms\" section stored in a third-party storage.",
         "operationId": "createRoomThirdParty",
         "parameters": [
           {
@@ -12927,7 +13091,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Creates a custom room tag with the parameters specified in the request.",
+        "summary": "Create a room tag",
+        "description": "Creates a custom room tag with the parameters specified in the request.",
         "operationId": "createRoomTag",
         "requestBody": {
           "content": {
@@ -12990,7 +13155,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Returns a list of custom room tags.",
+        "summary": "Get the room tags",
+        "description": "Returns a list of custom room tags.",
         "operationId": "getRoomTagsInfo",
         "parameters": [
           {
@@ -13074,7 +13240,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Deletes a bunch of custom room tags specified in the request.",
+        "summary": "Delete the custom room tags",
+        "description": "Deletes a bunch of custom room tags specified in the request.",
         "operationId": "deleteCustomTags",
         "requestBody": {
           "content": {
@@ -13132,7 +13299,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Uploads a temporary image to create a room logo.",
+        "summary": "Upload a room logo image",
+        "description": "Uploads a temporary image to create a room logo.",
         "operationId": "uploadRoomLogo",
         "requestBody": {
           "content": {
@@ -13211,7 +13379,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Starts the index export of a room with the ID specified in the request.",
+        "summary": "Start the room index export",
+        "description": "Starts the index export of a room with the ID specified in the request.",
         "operationId": "startRoomIndexExport",
         "parameters": [
           {
@@ -13280,7 +13449,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Returns the room index export.",
+        "summary": "Get the room index export",
+        "description": "Returns the room index export.",
         "operationId": "getRoomIndexExport",
         "responses": {
           "200": {
@@ -13331,7 +13501,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Terminates the room index export.",
+        "summary": "Terminate the room index export",
+        "description": "Terminates the room index export.",
         "operationId": "terminateRoomIndexExport",
         "responses": {
           "200": {
@@ -13377,7 +13548,8 @@
         "tags": [
           "Rooms"
         ],
-        "summary": "Returns the room new items.",
+        "summary": "Get the room new items",
+        "description": "Returns the room new items.",
         "operationId": "getRoomsNewItems",
         "responses": {
           "200": {
@@ -14326,45 +14498,7 @@
           }
         }
       },
-      "ChunkedUploadSessionResponseT": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "nullable": true,
-            "example": "1"
-          },
-          "path": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/T"
-            },
-            "nullable": true
-          },
-          "created": {
-            "type": "string",
-            "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
-          },
-          "expired": {
-            "type": "string",
-            "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
-          },
-          "location": {
-            "type": "string",
-            "nullable": true,
-            "example": "001 Schroeder Run, New Tabithaport, Colombia"
-          },
-          "bytes_total": {
-            "type": "integer",
-            "format": "int64",
-            "example": 1234
-          }
-        },
-        "additionalProperties": false
-      },
-      "ChunkedUploadSessionResponseWrapperT": {
+      "ChunkedUploadSessionResponseWrapperInteger": {
         "type": "object",
         "properties": {
           "success": {
@@ -14372,16 +14506,16 @@
             "example": true
           },
           "data": {
-            "$ref": "#/components/schemas/ChunkedUploadSessionResponseT"
+            "$ref": "#/components/schemas/ChunkedUploadSessionResponseInteger"
           }
         },
         "additionalProperties": false
       },
-      "ChunkedUploadSessionResponseWrapperTWrapper": {
+      "ChunkedUploadSessionResponseWrapperIntegerWrapper": {
         "type": "object",
         "properties": {
           "response": {
-            "$ref": "#/components/schemas/ChunkedUploadSessionResponseWrapperT"
+            "$ref": "#/components/schemas/ChunkedUploadSessionResponseWrapperInteger"
           },
           "count": {
             "type": "integer",
@@ -25414,10 +25548,6 @@
         },
         "additionalProperties": false,
         "description": "The \"Complete & Submit\" button settings."
-      },
-      "T": {
-        "type": "object",
-        "additionalProperties": false
       },
       "TemplatesConfig": {
         "type": "object",

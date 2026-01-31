@@ -27,7 +27,8 @@
         "tags": [
           "Backup"
         ],
-        "summary": "Returns the backup schedule of the current portal.",
+        "summary": "Get the backup schedule",
+        "description": "Returns the backup schedule of the current portal.",
         "operationId": "getBackupSchedule",
         "parameters": [
           {
@@ -94,7 +95,8 @@
         "tags": [
           "Backup"
         ],
-        "summary": "Creates the backup schedule of the current portal with the parameters specified in the request.",
+        "summary": "Create the backup schedule",
+        "description": "Creates the backup schedule of the current portal with the parameters specified in the request.",
         "operationId": "createBackupSchedule",
         "requestBody": {
           "content": {
@@ -168,7 +170,8 @@
         "tags": [
           "Backup"
         ],
-        "summary": "Deletes the backup schedule of the current portal.",
+        "summary": "Delete the backup schedule",
+        "description": "Deletes the backup schedule of the current portal.",
         "operationId": "deleteBackupSchedule",
         "parameters": [
           {
@@ -235,7 +238,8 @@
         "tags": [
           "Backup"
         ],
-        "summary": "Starts the backup of the current portal with the parameters specified in the request.",
+        "summary": "Start the backup",
+        "description": "Starts the backup of the current portal with the parameters specified in the request.",
         "operationId": "startBackup",
         "requestBody": {
           "content": {
@@ -309,7 +313,8 @@
         "tags": [
           "Backup"
         ],
-        "summary": "Returns the progress of the started backup.",
+        "summary": "Get the backup progress",
+        "description": "Returns the progress of the started backup.",
         "operationId": "getBackupProgress",
         "parameters": [
           {
@@ -376,7 +381,8 @@
         "tags": [
           "Backup"
         ],
-        "summary": "Returns the history of the started backup.",
+        "summary": "Get the backup history",
+        "description": "Returns the history of the started backup.",
         "operationId": "getBackupHistory",
         "parameters": [
           {
@@ -443,7 +449,8 @@
         "tags": [
           "Backup"
         ],
-        "summary": "Deletes the backup with the ID specified in the request.",
+        "summary": "Delete the backup",
+        "description": "Deletes the backup with the ID specified in the request.",
         "operationId": "deleteBackup",
         "parameters": [
           {
@@ -512,7 +519,8 @@
         "tags": [
           "Backup"
         ],
-        "summary": "Deletes the backup history from the current portal.",
+        "summary": "Delete the backup history",
+        "description": "Deletes the backup history from the current portal.",
         "operationId": "deleteBackupHistory",
         "parameters": [
           {
@@ -579,7 +587,8 @@
         "tags": [
           "Backup"
         ],
-        "summary": "Starts the data restoring process of the current portal with the parameters specified in the request.",
+        "summary": "Start the restoring process",
+        "description": "Starts the data restoring process of the current portal with the parameters specified in the request.",
         "operationId": "startBackupRestore",
         "requestBody": {
           "content": {
@@ -653,7 +662,8 @@
         "tags": [
           "Backup"
         ],
-        "summary": "Returns the progress of the started restoring process.",
+        "summary": "Get the restoring progress",
+        "description": "Returns the progress of the started restoring process.",
         "operationId": "getRestoreProgress",
         "parameters": [
           {
@@ -685,7 +695,8 @@
         "tags": [
           "Backup"
         ],
-        "summary": "Returns the number of backups for a period of time. The default is one month.",
+        "summary": "Get the number of backups",
+        "description": "Returns the number of backups for a period of time. The default is one month.",
         "operationId": "getBackupsCount",
         "parameters": [
           {
@@ -775,7 +786,8 @@
         "tags": [
           "Backup"
         ],
-        "summary": "Returns the backup service state.",
+        "summary": "Get the backup service state",
+        "description": "Returns the backup service state.",
         "operationId": "getBackupsServiceState",
         "responses": {
           "200": {
