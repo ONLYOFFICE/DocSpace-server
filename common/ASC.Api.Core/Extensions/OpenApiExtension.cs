@@ -185,7 +185,7 @@ public static class OpenApiExtension
                         var doc = new XPathDocument(xmlPath);
 
                         c.IncludeXmlComments(() => doc);
-                        //c.OperationFilter<XmlCustomTagFilter>(doc);
+                        c.OperationFilter<XmlCustomTagFilter>(doc);
                     }
                 }
             }
