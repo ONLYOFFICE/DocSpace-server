@@ -33,16 +33,18 @@ public class ModelClientFactory(IHttpClientFactory httpClientFactory)
     {
         return type switch
         {
-            ProviderType.OpenAi or ProviderType.OpenAiCompatible => 
+            ProviderType.OpenAi or ProviderType.OpenAiCompatible or ProviderType.DeepSeek or ProviderType.XAi => 
                 new OpenAiModelClient(httpClientFactory.CreateClient(), url, apiKey),
             ProviderType.TogetherAi => 
                 new TogetherAiModelClient(httpClientFactory.CreateClient(), url, apiKey),
             ProviderType.Anthropic =>
                 new AnthropicModelClient(httpClientFactory.CreateClient(), url, apiKey),
-            ProviderType.DocSpaceAi =>
+            ProviderType.PortalAi =>
                 new DocSpaceModelClient(httpClientFactory.CreateClient(), url, apiKey),
             ProviderType.OpenRouter =>
                 new OpenRouterModelClient(httpClientFactory.CreateClient(), url, apiKey),
+            ProviderType.GoogleAi =>
+                new GoogleModelClient(httpClientFactory, apiKey),
             _ => throw new ArgumentOutOfRangeException(nameof(type))
         };
     }

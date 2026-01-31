@@ -101,7 +101,7 @@ public class PaymentController(
         }
 
         var monthQuotas = (await quotaService.GetTenantQuotasAsync())
-            .Where(q => !string.IsNullOrEmpty(q.ProductId) && q.Visible && !q.Year)
+            .Where(q => !string.IsNullOrEmpty(q.ProductId) && q.Visible && !q.Wallet && !q.Year)
             .ToList();
 
         // TODO: Temporary restriction.
@@ -505,13 +505,13 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/walletservices</path>
     /// <collection>list</collection>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "List of available wallet services", typeof(IEnumerable<QuotaDto>))]
+    [SwaggerResponse(200, "List of available wallet services", typeof(IEnumerable<WalletServiceDto>))]
     [HttpGet("walletservices")]
-    public async Task<IEnumerable<QuotaDto>> GetWalletServices()
+    public async Task<IEnumerable<WalletServiceDto>> GetWalletServices()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        return await tariffHelper.GetQuotasAsync(true, true).ToListAsync();
+        return await tariffHelper.GetWalletServicesAsync();
     }
 
     /// <summary>

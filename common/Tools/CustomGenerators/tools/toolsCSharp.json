@@ -15,6 +15,7 @@
     "library": "httpclient",
     "targetFramework": "net9.0",
     "useOneOfDiscriminatorLookup": false,
-    "excludeTests": true
+    "excludeTests": true,
+    "zeroBasedEnums": true
   }
 }

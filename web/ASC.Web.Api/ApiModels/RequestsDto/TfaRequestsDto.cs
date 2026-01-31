@@ -63,13 +63,13 @@ public class TfaRequestsDto
 /// </summary>
 public enum TfaRequestsDtoType
 {
-    [SwaggerEnum("None")]
+    [Description("None")]
     None = 0,
 
-    [SwaggerEnum("Sms")]
+    [Description("Sms")]
     Sms = 1,
 
-    [SwaggerEnum("App")]
+    [Description("App")]
     App = 2
 }
 

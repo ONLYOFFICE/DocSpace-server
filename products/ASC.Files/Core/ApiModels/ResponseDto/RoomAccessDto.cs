@@ -52,9 +52,9 @@ public class RoomSecurityDto
 /// </summary>
 public enum RoomSecurityError
 {
-    [SwaggerEnum("None")]
+    [Description("None")]
     None,
 
-    [SwaggerEnum("Form role blocking deletion")]
+    [Description("Form role blocking deletion")]
     FormRoleBlockingDeletion
 }

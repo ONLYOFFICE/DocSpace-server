@@ -31,18 +31,18 @@ namespace ASC.Files.Core;
 /// </summary>
 public enum ForcesaveType
 {
-    [SwaggerEnum("None")]
+    [Description("None")]
     None = 0,
 
-    [SwaggerEnum("Command")]
+    [Description("Command")]
     Command = 1,
 
-    [SwaggerEnum("User")]
+    [Description("User")]
     User = 2,
 
-    [SwaggerEnum("Timer")]
+    [Description("Timer")]
     Timer = 3,
 
-    [SwaggerEnum("User submit")]
+    [Description("User submit")]
     UserSubmit = 4
 }

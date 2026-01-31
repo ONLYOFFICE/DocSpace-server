@@ -115,7 +115,7 @@ internal class LinkDao<T>(
             .ToAsyncEnumerable()
             .Select(async (T x, CancellationToken _) => await mapping.MappingIdAsync(x))
             .ToListAsync();
-        var source = mappedIds.Select(x => x.ToString());
+        var source = mappedIds.Select(x => x.Item1);
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 

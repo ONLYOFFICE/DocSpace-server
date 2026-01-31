@@ -34,34 +34,34 @@ namespace ASC.Files.Core;
 [Flags]
 public enum FileStatus
 {
-    [SwaggerEnum(Description = "None")]
+    [Description("None")]
     None = 0x0,
 
-    [SwaggerEnum(Description = "Is editing")]
+    [Description("Is editing")]
     IsEditing = 0x1,
 
-    [SwaggerEnum(Description = "Is new")]
+    [Description("Is new")]
     IsNew = 0x2,
 
-    [SwaggerEnum(Description = "Is converting")]
+    [Description("Is converting")]
     IsConverting = 0x4,
 
-    [SwaggerEnum(Description = "Is original")]
+    [Description("Is original")]
     IsOriginal = 0x8,
 
-    [SwaggerEnum(Description = "Is editing alone")]
+    [Description("Is editing alone")]
     IsEditingAlone = 0x10,
 
-    [SwaggerEnum(Description = "Is favorite")]
+    [Description("Is favorite")]
     IsFavorite = 0x20,
 
-    [SwaggerEnum(Description = "Is template")]
+    [Description("Is template")]
     IsTemplate = 0x40,
 
-    [SwaggerEnum(Description = "Is fill form draft")]
+    [Description("Is fill form draft")]
     IsFillFormDraft = 0x80,
 
-    [SwaggerEnum(Description = "Is completed form")]
+    [Description("Is completed form")]
     IsCompletedForm = 0x100
 }
 

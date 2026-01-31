@@ -28,12 +28,15 @@ namespace ASC.Core.Common.EF.Model.Ai;
 
 public enum ProviderType
 {
-    DocSpaceAi = 0,
+    PortalAi = 0,
     OpenAi = 1,
     TogetherAi = 2,
     OpenAiCompatible = 3,
     Anthropic = 4,
-    OpenRouter = 5
+    OpenRouter = 5,
+    DeepSeek = 6,
+    XAi = 7,
+    GoogleAi = 8
 }
 
 public class DbAiProvider : BaseEntity

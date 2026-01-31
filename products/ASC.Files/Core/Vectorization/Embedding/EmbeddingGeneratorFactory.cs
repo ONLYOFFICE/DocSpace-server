@@ -36,13 +36,13 @@ public class EmbeddingGeneratorFactory(
     InstanceCrypto instanceCrypto,
     VectorizationGlobalSettings vectorizationGlobalSettings)
 {
-    public async Task<IEmbeddingGenerator<string, Embedding<float>>> CreateAsync()
+    public async Task<IEmbeddingGenerator<string, Embedding<float>>> CreateAsync(int providerId)
     {
         string url;
         string key;
         string modelId;
 
-        if (gateway.Configured)
+        if (gateway.Configured && providerId == AiGateway.ProviderId)
         {
             url = gateway.Url;
             key = await gateway.GetKeyAsync();

@@ -185,6 +185,11 @@ internal abstract class ThirdPartyProviderDao
         return Task.FromResult<string>(null);
     }
 
+    public Task<string> GetFolderIDDefaultTemplatesAsync(bool createIfNotExists)
+    {
+        return Task.FromResult<string>(null);
+    }
+
     public Task<string> GetFolderIDPrivacyAsync(bool createIfNotExists, Guid? userId)
     {
         return Task.FromResult<string>(null);

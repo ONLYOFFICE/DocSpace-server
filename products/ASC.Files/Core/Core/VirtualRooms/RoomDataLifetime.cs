@@ -116,12 +116,12 @@ public static partial class RoomDataLifetimeMapper
 [EnumExtensions]
 public enum RoomDataLifetimePeriod
 {
-    [SwaggerEnum("Day")]
+    [Description("Day")]
     Day = 0,
 
-    [SwaggerEnum("Month")]
+    [Description("Month")]
     Month = 1,
 
-    [SwaggerEnum("Year")]
+    [Description("Year")]
     Year = 2
 }

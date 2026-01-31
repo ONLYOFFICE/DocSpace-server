@@ -38,7 +38,7 @@ public class KnowledgeSearchTool(KnowledgeSearchEngine searchEngine)
         Description = Description
     };
 
-    public AIFunction Init(int roomId)
+    public AIFunction Init(Folder<int> agent)
     {
         return AIFunctionFactory.Create(Function, FactoryOptions);
         
@@ -46,7 +46,7 @@ public class KnowledgeSearchTool(KnowledgeSearchEngine searchEngine)
         {
             try
             {
-                var results = await searchEngine.SearchAsync(roomId, query);
+                var results = await searchEngine.SearchAsync(agent, query);
                 
                 return new ToolResponse<List<KnowledgeSearchResult>>
                 {

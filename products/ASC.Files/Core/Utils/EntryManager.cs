@@ -320,8 +320,7 @@ public class EntryManager(IDaoFactory daoFactory,
     NotifyClient notifyClient,
     ExternalShare externalShare,
     FileSharingAceHelper fileSharingAceHelper,
-    DisplayUserSettingsHelper displayUserSettingsHelper,
-    NotifyConstants notifyConstants)
+    DisplayUserSettingsHelper displayUserSettingsHelper)
 {
     private const string UpdateList = "filesUpdateList";
 
@@ -478,6 +477,15 @@ public class EntryManager(IDaoFactory daoFactory,
             var folderDao = daoFactory.GetFolderDao<T>();
             var fileDao = daoFactory.GetFileDao<T>();
             var files = await GetTemplatesAsync(folderDao, fileDao, filterType, subjectGroup, subjectId, searchText, extension, searchInContent).ToListAsync();
+            entries.AddRange(files);
+
+            CalculateTotal();
+        }
+        else if (parent.FolderType == FolderType.DefaultTemplates)
+        {
+            var folderDao = daoFactory.GetFolderDao<T>();
+            var fileDao = daoFactory.GetFileDao<T>();
+            var files = await fileDao.GetFilesAsync(parent.Id, orderBy, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, withSubfolders).ToListAsync();
             entries.AddRange(files);
 
             CalculateTotal();
@@ -2257,12 +2265,12 @@ public class EntryManager(IDaoFactory daoFactory,
                     await fileTracker.RemoveAsync(form.Id);
                     await socketManager.StopEditAsync(form.Id);
                     await filesMessageService.SendAsync(MessageAction.FormCompletelyFilled, form, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
-                    await notifyClient.SendFormFillingEvent(room, form, allRoles.Select(role => role.UserId).ToList(), notifyConstants.EventFormWasCompletelyFilled);
+                    await notifyClient.SendFormFillingEvent(room, form, allRoles.Select(role => role.UserId).ToList(), typeof(FormWasCompletelyFilledNotifyAction));
                 }
                 else if (nextRoleUserIds.Count != 0)
                 {
                     await filesMessageService.SendAsync(MessageAction.FormPartiallyFilled, form, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
-                    await notifyClient.SendFormFillingEvent(room, form, nextRoleUserIds, notifyConstants.EventYourTurnFormFilling);
+                    await notifyClient.SendFormFillingEvent(room, form, nextRoleUserIds,  typeof(YourTurnFormFillingNotifyAction));
                 }
             }
         }

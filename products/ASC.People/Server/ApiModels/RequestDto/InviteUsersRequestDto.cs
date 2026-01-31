@@ -47,16 +47,10 @@ public class InviteUsersRequestDto
 /// <summary>
 /// The user invitation parameters.
 /// </summary>
-public class UserInvitationRequestDto
+public class UserInvitationRequestDto : EmailInvitationDto
 {
     /// <summary>
     /// The user type.
     /// </summary>
     public EmployeeType Type { get; set; }
-
-    /// <summary>
-    /// The user email address.
-    /// </summary>
-    [EmailAddress]
-    public string Email { get; set; }
 }

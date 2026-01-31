@@ -24,7 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -47,8 +47,7 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
                     {
                         foreach (var content in response.Value.Content)
                         {
-                            var schema = content.Value.Schema;
-                            WrapSchemaInSuccessApiResponse(schema, schemas);
+                            content.Value.Schema = WrapSchemaInSuccessApiResponse(content.Value.Schema, schemas);
                         }
                     }
                 }
@@ -56,16 +55,20 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
         }
     }
 
-    private static void WrapSchemaInSuccessApiResponse(OpenApiSchema schema, IDictionary<string, OpenApiSchema> schemas)
+    private static IOpenApiSchema WrapSchemaInSuccessApiResponse(IOpenApiSchema schema, IDictionary<string, IOpenApiSchema> schemas)
     {
-        var originalSchemaRef = schema.Reference?.Id;
+         var originalSchemaRef = (schema as OpenApiSchemaReference)?.Reference.Id;
 
-        var isPrimitive = schema.Type != null && schema.Type != "array";
-        string responseSchemaKey;
+        var isPrimitive = schema.Type != null && schema.Type != JsonSchemaType.Array && schema.Type != JsonSchemaType.Object;
+        string responseSchemaKey = null;
         OpenApiSchema responseSchema = null;
         if (isPrimitive)
         {
             var typeName = GetPrimitiveTypeName(schema);
+            if ((schema.Type & JsonSchemaType.Null) == JsonSchemaType.Null)
+            {
+                typeName += "Nullable";
+            }
             responseSchemaKey = $"{typeName}Wrapper";
             var primitiveResponseProperty = new OpenApiSchema
             {
@@ -73,9 +76,9 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
             };
             responseSchema = CreateSuccessApiResponseSchema(primitiveResponseProperty);
         }
-        else if (schema.OneOf != null && schema.OneOf.Any(s => s.Reference?.Id != null))
+        else if (schema.OneOf != null && schema.OneOf.Any(s => (s as OpenApiSchemaReference)?.Reference.Id != null))
         {
-            var firstRefId = schema.OneOf.FirstOrDefault(s => s.Reference?.Id != null)?.Reference?.Id;
+            var firstRefId = (schema.OneOf.FirstOrDefault(s => (s as OpenApiSchemaReference)?.Reference.Id != null) as OpenApiSchemaReference)?.Reference.Id;
             responseSchemaKey = firstRefId.Contains("Dto") ? firstRefId.Replace("Dto", "") + "Wrapper"
                 : firstRefId + "Wrapper";
             var responseProperty = new OpenApiSchema
@@ -84,17 +87,17 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
             };
 
             responseSchema = CreateSuccessApiResponseSchema(responseProperty);
-            schema.OneOf = null;
+            //schema.OneOf = null;
         }
-        else if (schema.Type == "array")
+        else if (schema.Type == JsonSchemaType.Array)
         {
-            originalSchemaRef = schema.Items?.Reference?.Id;
+            originalSchemaRef = (schema.Items as OpenApiSchemaReference)?.Reference.Id;
             var schemaArray = schema.Items;
             OpenApiSchema arrayResponseProperty;
 
             if (schema.OneOf != null && schema.OneOf.Any(s => s.Items != null))
             {
-                var firstRefId = schema.OneOf.FirstOrDefault(s => s.Items.Reference.Id != null)?.Items?.Reference?.Id;
+                var firstRefId = (schema.OneOf.FirstOrDefault(s => (s.Items as OpenApiSchemaReference)?.Reference.Id != null)?.Items as OpenApiSchemaReference)?.Reference.Id;
                 responseSchemaKey = firstRefId.Contains("Dto") ? firstRefId.Replace("Dto", "") + "ArrayWrapper" : firstRefId + "ArrayWrapper";
 
                 arrayResponseProperty = new OpenApiSchema
@@ -107,100 +110,130 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
 
                 responseSchema = CreateSuccessApiResponseSchema(arrayResponseProperty);
 
-                schema.OneOf = null;
+                //schema.OneOf = null;
             }
-            else if (schemaArray.Type == null && schemaArray.Reference == null && schemaArray.Items == null)
+            else if (schemaArray.Type == null && (schemaArray is not OpenApiSchemaReference) && schemaArray.Items == null)
             {
                 responseSchemaKey = "ObjectArrayWrapper";
                 arrayResponseProperty = new OpenApiSchema
                 {
-                    Type = "array",
-                    Items = new OpenApiSchema { Type = "object" }
+                    Type = JsonSchemaType.Array,
+                    Items = new OpenApiSchema { Type = JsonSchemaType.Object }
                 };
             }
-            else if (schemaArray is { Type: "array" })
+            else if (schemaArray is { Type: JsonSchemaType.Array })
             {
                 responseSchemaKey = "ArrayArrayWrapper";
                 arrayResponseProperty = new OpenApiSchema
                 {
-                    Type = "array",
-                    Items = new OpenApiSchema { Type = "array", Items = new OpenApiSchema { Type = schemaArray.Items.Type } }
+                    Type = JsonSchemaType.Array,
+                    Items = new OpenApiSchema { Type = JsonSchemaType.Array, Items = new OpenApiSchema { Type = schemaArray.Items.Type } }
                 };
             }
             else
             {
-                responseSchemaKey = originalSchemaRef == null ? $"{schema.Items.Type.ToUpper()}ArrayWrapper"
+                responseSchemaKey = originalSchemaRef == null ? $"{schema.Items.Type.ToString().ToUpper()}ArrayWrapper"
                     : originalSchemaRef.Contains("Dto") ? originalSchemaRef.Replace("Dto", "") + "ArrayWrapper" : originalSchemaRef + "ArrayWrapper";
                 arrayResponseProperty = new OpenApiSchema
                 {
-                    Type = "array",
-                    Items = originalSchemaRef != null ? new OpenApiSchema { Reference = schema.Items.Reference } : new OpenApiSchema { Type = schema.Items.Type }
+                    Type = JsonSchemaType.Array,
+                    Items = originalSchemaRef != null ? new OpenApiSchemaReference((schema.Items as OpenApiSchemaReference)?.Reference.Id) : new OpenApiSchema { Type = schema.Items.Type }
                 };
             }
 
             responseSchema = CreateSuccessApiResponseSchema(arrayResponseProperty);
         }
-        else if (schema == null || (schema.Type == null && schema.Reference == null && schema.Items == null))
+        else if (schema == null || (schema.Type == null && (schema is not OpenApiSchemaReference) && schema.Items == null))
         {
             responseSchemaKey = "ObjectWrapper";
             if (!schemas.ContainsKey(responseSchemaKey))
             {
-                responseSchema = CreateSuccessApiResponseSchema(new OpenApiSchema { Type = "object" });
+                responseSchema = CreateSuccessApiResponseSchema(new OpenApiSchema { Type = JsonSchemaType.Object });
             }
         }
         else
         {
-            responseSchemaKey = originalSchemaRef.Contains("Dto") ? originalSchemaRef.Replace("Dto", "") + "Wrapper" : originalSchemaRef + "Wrapper";
+            if (originalSchemaRef != null)
+            {
+                responseSchemaKey = originalSchemaRef.Contains("Dto") ? originalSchemaRef.Replace("Dto", "") + "Wrapper" : originalSchemaRef + "Wrapper";
+            }
+
             var responseProperty = originalSchemaRef != null
-            ? new OpenApiSchema { Reference = new OpenApiReference { Id = originalSchemaRef, Type = ReferenceType.Schema } }
+            ? new OpenApiSchemaReference(originalSchemaRef)
             : schema;
             responseSchema = CreateSuccessApiResponseSchema(responseProperty);
         }
-        if (!schemas.ContainsKey(responseSchemaKey))
+
+        if (responseSchemaKey != null)
         {
-            schemas[responseSchemaKey] = responseSchema;
+            schemas.TryAdd(responseSchemaKey, responseSchema);
+            // schema.Reference = new OpenApiSchemaReference(responseSchemaKey);
+            //schema.Type = null;
+            //schema.Properties = null;
+            return new OpenApiSchemaReference(responseSchemaKey);
         }
-        schema.Reference = new OpenApiReference { Id = responseSchemaKey, Type = ReferenceType.Schema };
-        schema.Type = null;
-        schema.Properties = null;
+
+        return responseSchema;
     }
-    private static string GetPrimitiveTypeName(OpenApiSchema primitiveSchema)
+    
+    private static string GetPrimitiveTypeName(IOpenApiSchema primitiveSchema)
     {
-        return primitiveSchema.Type switch
+        if ((primitiveSchema.Type & JsonSchemaType.String) == JsonSchemaType.String)
         {
-            "string" => "String",
-            "boolean" => "Boolean",
-            "integer" when primitiveSchema.Format == "int32" => "Int32",
-            "integer" when primitiveSchema.Format == "int64" => "Int64",
-            "number" when primitiveSchema.Format == "float" => "Float",
-            "number" when primitiveSchema.Format == "double" => "Double",
-            _ => "Unknown"
-        };
+            return "String";
+        }
+        
+        if ((primitiveSchema.Type & JsonSchemaType.Boolean) == JsonSchemaType.Boolean)
+        {
+            return "Boolean";
+        }
+        
+        if ((primitiveSchema.Type & JsonSchemaType.Integer) == JsonSchemaType.Integer && primitiveSchema.Format == "int32")
+        {
+            return "Int32";
+        }
+        
+        if ((primitiveSchema.Type & JsonSchemaType.Integer) == JsonSchemaType.Integer && primitiveSchema.Format == "int64")
+        {
+            return "Int64";
+        }
+        
+        if ((primitiveSchema.Type & JsonSchemaType.Number) == JsonSchemaType.Number && primitiveSchema.Format == "float")
+        {
+            return "Float";
+        }
+        
+        if ((primitiveSchema.Type & JsonSchemaType.Number) == JsonSchemaType.Number && primitiveSchema.Format == "double")
+        {
+            return "Double";
+        }
+
+        return "Unknown";
     }
-    private static OpenApiSchema CreateSuccessApiResponseSchema(OpenApiSchema responseProperty)
+    private static OpenApiSchema CreateSuccessApiResponseSchema(IOpenApiSchema responseProperty)
     {
         return new OpenApiSchema
         {
-            Type = "object",
-            Properties = new Dictionary<string, OpenApiSchema>
+            Type = JsonSchemaType.Object,
+            Properties = new Dictionary<string, IOpenApiSchema>
             {
                 { "response", responseProperty },
-                { "count", new OpenApiSchema { Type = "integer", Format = "int32" } },
+                { "count", new OpenApiSchema { Type = JsonSchemaType.Integer, Format = "int32" } },
                 { "links", new OpenApiSchema
                     {
-                        Type = "array",
+                        Type = JsonSchemaType.Array,
                         Items = new OpenApiSchema
                         {
-                            Type = "object",
-                            Properties = new Dictionary<string, OpenApiSchema>
+                            Type = JsonSchemaType.Object,
+                            Properties = new Dictionary<string, IOpenApiSchema>
                             {
-                                { "href", new OpenApiSchema { Type = "string" } },
-                                { "action", new OpenApiSchema { Type = "string" } }
+                                { "href", new OpenApiSchema { Type = JsonSchemaType.String } },
+                                { "action", new OpenApiSchema { Type = JsonSchemaType.String } }
                             }
                         }
                     } },
-                { "status", new OpenApiSchema { Type = "integer", Format = "int32" } },
-                { "statusCode", new OpenApiSchema { Type = "integer", Format = "int32" } }
+                { "status", new OpenApiSchema { Type = JsonSchemaType.Integer, Format = "int32" } },
+                { "statusCode", new OpenApiSchema { Type = JsonSchemaType.Integer, Format = "int32" } }
             }
         };
     }

@@ -480,7 +480,7 @@ public class StorageController(
     /// <collection>list</collection>
     [Tags("Settings / Storage")]
     [SwaggerResponse(200, "List of the backup storages with the following parameters", typeof(List<StorageDto>))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "Access denied")]
     [HttpGet("storage/backup")]
     public async Task<List<StorageDto>> GetAllBackupStorages(AllBackupStoragesDto dto)
     {
