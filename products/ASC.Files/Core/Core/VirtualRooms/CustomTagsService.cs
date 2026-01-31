@@ -137,6 +137,15 @@ public class CustomTagsService(
         var tagDao = daoFactory.GetTagDao<T>();
 
         var tagsInfos = await tagDao.GetTagsInfoAsync(names, TagType.Custom).ToListAsync();
+        var notFoundTags = names?.Where(x => tagsInfos.All(r => r.Name != x));
+
+        if (notFoundTags != null)
+        {
+            foreach (var tagInfo in notFoundTags)
+            {
+                tagsInfos.Add(await CreateTagAsync(tagInfo));
+            }
+        }
 
         if (tagsInfos.Count == 0)
         {
