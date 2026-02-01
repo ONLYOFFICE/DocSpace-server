@@ -185,7 +185,6 @@ public static class OpenApiExtension
                         var doc = new XPathDocument(xmlPath);
 
                         c.IncludeXmlComments(() => doc);
-                        c.OperationFilter<XmlCustomTagFilter>(doc);
                     }
                 }
             }
@@ -353,43 +352,7 @@ public static class OpenApiExtension
             }
         }
     }
-
-    private class XmlCustomTagFilter(XPathDocument xmlDoc) : IOperationFilter
-    {
-        private readonly XPathNavigator _xmlNavigator = xmlDoc.CreateNavigator();
-
-        public void Apply(OpenApiOperation operation, OperationFilterContext context)
-        {
-            if (context.MethodInfo == null || context.MethodInfo.DeclaringType == null)
-            {
-                return;
-            }
-
-            var targetMethod = context.MethodInfo.DeclaringType.IsConstructedGenericType ?
-                context.MethodInfo.GetUnderlyingGenericTypeMethod() :
-                context.MethodInfo;
-
-            if (targetMethod == null)
-            {
-                return;
-            }
-
-            ApplyMethodTags(operation, targetMethod);
-        }
-
-        private void ApplyMethodTags(OpenApiOperation operation, MethodInfo methodInfo)
-        {
-            var methodMemberName = XmlCommentsNodeNameHelper.GetMemberNameForMethod(methodInfo);
-            var methodNode = _xmlNavigator.SelectSingleNode($"/doc/members/member[@name='{methodMemberName}']");
-
-            var shortNode = methodNode?.SelectSingleNode("short");
-            if (shortNode != null)
-            {
-                operation.Description = operation.Summary;
-                operation.Summary = XmlCommentsTextHelper.Humanize(shortNode.InnerXml);
-            }
-        }
-    }
+    
 
     private class CustomInheritanceSchemaFilter : ISchemaFilter
     {
