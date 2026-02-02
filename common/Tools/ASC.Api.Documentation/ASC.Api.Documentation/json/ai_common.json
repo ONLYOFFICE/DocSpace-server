@@ -1,0 +1,6872 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Api",
+    "contact": {
+      "name": "API Support",
+      "url": "https://helpdesk.onlyoffice.com/hc/en-us",
+      "email": "support@onlyoffice.com"
+    },
+    "version": "3.6.0"
+  },
+  "servers": [
+    {
+      "url": "{baseUrl}",
+      "description": "Server configuration",
+      "variables": {
+        "baseUrl": {
+          "default": "",
+          "description": "Default URL"
+        }
+      }
+    }
+  ],
+  "paths": {
+    "/api/2.0/ai/agents": {
+      "get": {
+        "tags": [
+          "ai"
+        ],
+        "summary": "Get ai agents",
+        "description": "Get ai agents",
+        "operationId": "getAgents",
+        "parameters": [
+          {
+            "name": "subjectId",
+            "in": "query",
+            "description": "The filter by user ID.",
+            "schema": {
+              "type": "string",
+              "example": "some text"
+            }
+          },
+          {
+            "name": "withoutTags",
+            "in": "query",
+            "description": "Specifies whether to search by tags or not.",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          },
+          {
+            "name": "tags",
+            "in": "query",
+            "description": "The tags in the serialized format.",
+            "schema": {
+              "type": "string",
+              "example": "some text"
+            }
+          },
+          {
+            "name": "excludeSubject",
+            "in": "query",
+            "description": "Specifies whether to exclude search by user or group ID.",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          },
+          {
+            "name": "subjectFilter",
+            "in": "query",
+            "description": "The filter by user (Owner - 0, Member - 1).",
+            "schema": {
+              "$ref": "#/components/schemas/SubjectFilter"
+            }
+          },
+          {
+            "name": "quotaFilter",
+            "in": "query",
+            "description": "The filter by quota (All - 0, Default - 1, Custom - 2).",
+            "schema": {
+              "$ref": "#/components/schemas/QuotaFilter"
+            }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Specifies the maximum number of items to retrieve.",
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "example": 1234
+            }
+          },
+          {
+            "name": "startIndex",
+            "in": "query",
+            "description": "The index from which to start retrieving the room content.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1234
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "Specifies the field by which the room content should be sorted.",
+            "schema": {
+              "type": "string",
+              "example": "some text"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "in": "query",
+            "description": "The order in which the results are sorted.",
+            "schema": {
+              "$ref": "#/components/schemas/SortOrder"
+            }
+          },
+          {
+            "name": "filterValue",
+            "in": "query",
+            "description": "The text filter value used to refine search or query operations.",
+            "schema": {
+              "type": "string",
+              "example": "some text"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Agent information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderContentIntegerWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "ai"
+        ],
+        "summary": "Create an ai agent",
+        "description": "Creates an ai agent.",
+        "operationId": "createAgent",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAgentRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Agent information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderIntegerWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/agents/{id}": {
+      "get": {
+        "tags": [
+          "ai"
+        ],
+        "summary": "Return an ai agent",
+        "description": "Returns an ai agent.",
+        "operationId": "getAgentInfo",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The room ID.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Agent information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderIntegerWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "ai"
+        ],
+        "summary": "Update an ai agent",
+        "description": "Updates an ai agent.",
+        "operationId": "updateAgent",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The room ID.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The request parameters for updating a room.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRoomRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Updated agent information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderIntegerWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "ai"
+        ],
+        "summary": "Remove an ai agent",
+        "description": "Removes an ai agent.",
+        "operationId": "deleteAgent",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The room ID.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The parameters for deleting a room.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteRoomRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "File operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileOperationWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/agents/agentquota": {
+      "put": {
+        "tags": [
+          "ai"
+        ],
+        "summary": "Change the AI agent quota limit",
+        "description": "Changes the quota limit for the AI agents with the IDs specified in the request.",
+        "operationId": "updateAgentsQuota",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRoomsQuotaRequestDtoInteger"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of AI agents with the detailed information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderIntegerArrayWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/agents/resetquota": {
+      "put": {
+        "tags": [
+          "ai"
+        ],
+        "summary": "Reset the AI agents quota limit",
+        "description": "Resets the quota limit for the AI agents with the IDs specified in the request.",
+        "operationId": "resetAgentsQuota",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRoomsRoomIdsRequestDtoInteger"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of AI agents with the detailed information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderIntegerArrayWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/agents/news": {
+      "get": {
+        "tags": [
+          "ai"
+        ],
+        "summary": "Get the room new items",
+        "description": "Returns the room new items.",
+        "operationId": "getAgentsNewItems",
+        "responses": {
+          "200": {
+            "description": "List of new items",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NewItemsAgentNewItemsArrayWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/rooms/{roomId}/chats": {
+      "post": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "startNewChat",
+        "parameters": [
+          {
+            "name": "roomId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartNewChatBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "getChats",
+        "parameters": [
+          {
+            "name": "roomId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          },
+          {
+            "name": "startIndex",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1234
+            }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1234
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatArrayWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/chats/{chatId}/messages": {
+      "post": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "continueChat",
+        "parameters": [
+          {
+            "name": "chatId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContinueChatBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "getMessages",
+        "parameters": [
+          {
+            "name": "chatId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+            }
+          },
+          {
+            "name": "startIndex",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1234
+            }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1234
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageArrayWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/chats/{chatId}": {
+      "put": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "renameChat",
+        "parameters": [
+          {
+            "name": "chatId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenameChatBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "getChat",
+        "parameters": [
+          {
+            "name": "chatId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "deleteChat",
+        "parameters": [
+          {
+            "name": "chatId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/chats/{chatId}/messages/export": {
+      "post": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "exportChat",
+        "parameters": [
+          {
+            "name": "chatId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportChatRequestBodyInteger"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/chats/models": {
+      "get": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "getChatModels",
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1234
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelArrayWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/chats/tool-permissions/{callId}/decision": {
+      "post": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "providePermission",
+        "parameters": [
+          {
+            "name": "callId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "some text"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ToolDecisionRequestBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/rooms/{roomId}/chats/config": {
+      "put": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "setUserChatsSettings",
+        "parameters": [
+          {
+            "name": "roomId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetUserChatSettingsRequestBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserChatSettingsWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "getUserChatsSettings",
+        "parameters": [
+          {
+            "name": "roomId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserChatSettingsWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/servers": {
+      "post": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "addServer",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddMcpServerRequestBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/McpServerWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "deleteServer",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteServersRequestBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "getServers",
+        "parameters": [
+          {
+            "name": "startIndex",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1234
+            }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1234
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/McpServerArrayWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/servers/{id}": {
+      "put": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "updateServer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "00000000-0000-0000-0000-000000000000"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateServerRequestBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/McpServerWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "getServer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "00000000-0000-0000-0000-000000000000"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/McpServerShortWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/servers/{id}/status": {
+      "put": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "setServerStatus",
+        "parameters": [
+          {
+            "name": "Id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "00000000-0000-0000-0000-000000000000"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetServerStatusRequestBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/McpServerWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/servers/available": {
+      "get": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "getAvailableServers",
+        "parameters": [
+          {
+            "name": "startIndex",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1234
+            }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1234
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/McpServerShortArrayWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/rooms/{roomId}/servers": {
+      "post": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "addRoomServers",
+        "parameters": [
+          {
+            "name": "roomId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddRoomServersRequestBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/McpServerStatusArrayWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "getRoomServers",
+        "parameters": [
+          {
+            "name": "roomId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/McpServerStatusArrayWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "deleteRoomServers",
+        "parameters": [
+          {
+            "name": "roomId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteRoomServersRequestBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/rooms/{roomId}/servers/{serverId}/tools": {
+      "put": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "setTools",
+        "parameters": [
+          {
+            "name": "roomId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          },
+          {
+            "name": "serverId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetMcpToolsRequestBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/McpToolArrayWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "getTools",
+        "parameters": [
+          {
+            "name": "roomId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          },
+          {
+            "name": "serverId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/McpToolArrayWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/rooms/{roomId}/servers/{serverId}/connect": {
+      "post": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "connectServer",
+        "parameters": [
+          {
+            "name": "roomId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          },
+          {
+            "name": "serverId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConnectServerRequestBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/McpServerStatusWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/rooms/{roomId}/servers/{serverId}/disconnect": {
+      "post": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "disconnectServer",
+        "parameters": [
+          {
+            "name": "roomId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          },
+          {
+            "name": "serverId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/McpServerStatusWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/messages/{messageId}/export": {
+      "post": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "exportMessage",
+        "parameters": [
+          {
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1234
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportMessageRequestBodyInteger"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/providers": {
+      "post": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "addProvider",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProviderRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "getProviders",
+        "parameters": [
+          {
+            "name": "startIndex",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1234
+            }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1234
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderArrayWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "deleteProviders",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoveProviderRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/providers/{id}": {
+      "put": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "updateProvider",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProviderBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/providers/available": {
+      "get": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "getAvailableProviders",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderSettingsArrayWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/config/web-search": {
+      "put": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "setWebSearchSettings",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetWebSearchSettingsRequestBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebSearchSettingsWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "getWebSearchSettings",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebSearchSettingsWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/config/vectorization": {
+      "put": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "setVectorizationSettings",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetEmbeddingConfigRequestBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VectorizationSettingsWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "getVectorizationSettings",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VectorizationSettingsWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/config": {
+      "get": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "getAiSettings",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiSettingsWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/vectorization/tasks": {
+      "post": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "startTask",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VectorizationStartRequestBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AddMcpServerRequestBody": {
+        "required": [
+          "description",
+          "endpoint",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 128,
+            "type": "string",
+            "nullable": true,
+            "example": "John Doe"
+          },
+          "description": {
+            "maxLength": 255,
+            "type": "string",
+            "nullable": true,
+            "example": "some text"
+          },
+          "endpoint": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "example": "some text"
+          },
+          "headers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "nullable": true,
+            "example": [
+              {
+                "key": "some text",
+                "value": "some text"
+              }
+            ]
+          },
+          "icon": {
+            "type": "string",
+            "nullable": true,
+            "example": "some text"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AddRoomServersRequestBody": {
+        "required": [
+          "servers"
+        ],
+        "type": "object",
+        "properties": {
+          "servers": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "nullable": true,
+            "example": [
+              "75a5f745-f697-4418-b38d-0fe0d277e258"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "AgentNewItemsDto": {
+        "required": [
+          "agent",
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "agent": {
+            "$ref": "#/components/schemas/FileEntryBaseDto"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FileEntryBaseDto"
+            },
+            "description": "The list of file entry items.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The agent new item's information."
+      },
+      "AiSettingsDto": {
+        "required": [
+          "embeddingModel",
+          "knowledgeSearchToolName",
+          "webCrawlingToolName",
+          "webSearchToolName"
+        ],
+        "type": "object",
+        "properties": {
+          "webSearchEnabled": {
+            "type": "boolean",
+            "example": true
+          },
+          "webSearchNeedReset": {
+            "type": "boolean",
+            "example": true
+          },
+          "vectorizationEnabled": {
+            "type": "boolean",
+            "example": true
+          },
+          "vectorizationNeedReset": {
+            "type": "boolean",
+            "example": true
+          },
+          "aiReady": {
+            "type": "boolean",
+            "example": true
+          },
+          "aiReadyNeedReset": {
+            "type": "boolean",
+            "example": true
+          },
+          "portalMcpServerId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+          },
+          "embeddingModel": {
+            "type": "string",
+            "nullable": true,
+            "example": "some text"
+          },
+          "knowledgeSearchToolName": {
+            "type": "string",
+            "nullable": true,
+            "example": "some text"
+          },
+          "webSearchToolName": {
+            "type": "string",
+            "nullable": true,
+            "example": "some text"
+          },
+          "webCrawlingToolName": {
+            "type": "string",
+            "nullable": true,
+            "example": "some text"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AiSettingsWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/AiSettingsDto"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ApiDateTime": {
+        "type": "object",
+        "properties": {
+          "utcTime": {
+            "type": "string",
+            "description": "The time in UTC format.",
+            "format": "date-time",
+            "readOnly": true,
+            "example": "2008-04-10T06:30:00.0000000+04:00"
+          },
+          "timeZoneOffset": {
+            "type": "string",
+            "description": "The time zone offset.",
+            "format": "date-span",
+            "readOnly": true,
+            "example": "00:00:00"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The API date and time parameters."
+      },
+      "ChatArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatDto"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ChatDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true,
+            "example": "SampleFile"
+          },
+          "createdOn": {
+            "$ref": "#/components/schemas/ApiDateTime"
+          },
+          "modifiedOn": {
+            "$ref": "#/components/schemas/ApiDateTime"
+          },
+          "createdBy": {
+            "$ref": "#/components/schemas/EmployeeDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ChatSettings": {
+        "type": "object",
+        "properties": {
+          "providerId": {
+            "type": "integer",
+            "format": "int32",
+            "example": 1234
+          },
+          "modelId": {
+            "type": "string",
+            "nullable": true,
+            "example": "some text"
+          },
+          "prompt": {
+            "type": "string",
+            "nullable": true,
+            "example": "some text"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ChatWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/ChatDto"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ConnectServerRequestBody": {
+        "required": [
+          "code"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "nullable": true,
+            "example": "some text"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ContentType": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "ContinueChatBody": {
+        "required": [
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "nullable": true,
+            "example": "some text"
+          },
+          "contextFolderId": {
+            "type": "integer",
+            "format": "int32",
+            "example": 1234
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "example": 1234
+                },
+                {
+                  "type": "string",
+                  "example": "some text"
+                }
+              ]
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateAgentRequestDto": {
+        "required": [
+          "chatSettings",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "title": {
+            "maxLength": 170,
+            "minLength": 0,
+            "type": "string",
+            "description": "The room name.",
+            "nullable": true,
+            "example": "SampleFile"
+          },
+          "quota": {
+            "type": "integer",
+            "description": "The room quota.",
+            "format": "int64",
+            "nullable": true,
+            "example": 1234
+          },
+          "indexing": {
+            "type": "boolean",
+            "description": "Specifies whether to create a room with indexing.",
+            "nullable": true,
+            "example": true
+          },
+          "denyDownload": {
+            "type": "boolean",
+            "description": "Specifies whether to deny downloads from the room.",
+            "nullable": true,
+            "example": true
+          },
+          "lifetime": {
+            "$ref": "#/components/schemas/RoomDataLifetimeDto"
+          },
+          "watermark": {
+            "$ref": "#/components/schemas/WatermarkRequestDto"
+          },
+          "logo": {
+            "$ref": "#/components/schemas/LogoRequest"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The list of tags.",
+            "nullable": true,
+            "example": [
+              "some text"
+            ]
+          },
+          "color": {
+            "maxLength": 6,
+            "minLength": 0,
+            "type": "string",
+            "description": "The room color.",
+            "nullable": true,
+            "example": "some text"
+          },
+          "cover": {
+            "maxLength": 50,
+            "minLength": 0,
+            "type": "string",
+            "description": "The room cover.",
+            "nullable": true,
+            "example": "some text"
+          },
+          "private": {
+            "type": "boolean",
+            "description": "Specifies whether the room to be created is private or not.",
+            "example": true
+          },
+          "share": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FileShareParams"
+            },
+            "description": "The collection of sharing parameters.",
+            "nullable": true
+          },
+          "chatSettings": {
+            "$ref": "#/components/schemas/ChatSettings"
+          },
+          "attachDefaultTools": {
+            "type": "boolean",
+            "description": "Specifies whether to attach default tools to the agent or not.",
+            "example": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateProviderRequestDto": {
+        "required": [
+          "key",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/ProviderType"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true,
+            "example": "SampleFile"
+          },
+          "url": {
+            "type": "string",
+            "nullable": true,
+            "example": "some text"
+          },
+          "key": {
+            "type": "string",
+            "nullable": true,
+            "example": "some text"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DeleteRoomRequest": {
+        "type": "object",
+        "properties": {
+          "deleteAfter": {
+            "type": "boolean",
+            "description": "Specifies whether to delete a room after the editing session is finished or not.",
+            "example": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The parameters for deleting a room."
+      },
+      "DeleteRoomServersRequestBody": {
+        "required": [
+          "servers"
+        ],
+        "type": "object",
+        "properties": {
+          "servers": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "nullable": true,
+            "example": [
+              "75a5f745-f697-4418-b38d-0fe0d277e258"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "DeleteServersRequestBody": {
+        "required": [
+          "servers"
+        ],
+        "type": "object",
+        "properties": {
+          "servers": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "nullable": true,
+            "example": [
+              "75a5f745-f697-4418-b38d-0fe0d277e258"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "DistributedTaskStatus": {
+        "oneOf": [
+          {
+            "enum": [
+              "Created",
+              "Running",
+              "Completed",
+              "Canceled",
+              "Failted"
+            ],
+            "type": "string",
+            "description": "[Created - Created, Running - Running, Completed - Completed, Canceled - Canceled, Failted - Failted]",
+            "example": "Created"
+          },
+          {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "description": "[0 - Created, 1 - Running, 2 - Completed, 3 - Canceled, 4 - Failted]",
+            "example": 0,
+            "x-enum-varnames": [
+              "Created",
+              "Running",
+              "Completed",
+              "Canceled",
+              "Failted"
+            ],
+            "x-enum-descriptions": [
+              "Created",
+              "Running",
+              "Completed",
+              "Canceled",
+              "Failted"
+            ]
+          }
+        ],
+        "x-enum-type": "integer"
+      },
+      "EmailInvitationDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "The email address.",
+            "format": "email",
+            "nullable": true,
+            "example": "example@onlyoffice.com"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The email invitation parameters."
+      },
+      "EmbeddingProviderType": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "EmployeeDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The user ID.",
+            "format": "uuid",
+            "example": "{00000000-0000-0000-0000-000000000000}"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "The user display name.",
+            "nullable": true,
+            "example": "Mike Zanyatski"
+          },
+          "title": {
+            "type": "string",
+            "description": "The user title.",
+            "nullable": true,
+            "example": "Manager"
+          },
+          "avatar": {
+            "type": "string",
+            "description": "The user avatar.",
+            "nullable": true,
+            "example": "some text"
+          },
+          "avatarOriginal": {
+            "type": "string",
+            "description": "The user original size avatar.",
+            "nullable": true,
+            "example": "some text"
+          },
+          "avatarMax": {
+            "type": "string",
+            "description": "The user maximum size avatar.",
+            "nullable": true,
+            "example": "some text"
+          },
+          "avatarMedium": {
+            "type": "string",
+            "description": "The user medium size avatar.",
+            "nullable": true,
+            "example": "some text"
+          },
+          "avatarSmall": {
+            "type": "string",
+            "description": "The user small size avatar.",
+            "nullable": true,
+            "example": "url to small avatar"
+          },
+          "profileUrl": {
+            "type": "string",
+            "description": "The user profile URL.",
+            "nullable": true,
+            "example": "some text"
+          },
+          "hasAvatar": {
+            "type": "boolean",
+            "description": "Specifies if the user has an avatar or not.",
+            "example": true
+          },
+          "isAnonim": {
+            "type": "boolean",
+            "description": "Specifies if the user is anonymous or not.",
+            "example": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The user parameters."
+      },
+      "EngineType": {
+        "enum": [
+          0,
+          1
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "ExportChatRequestBodyInteger": {
+        "required": [
+          "folderId",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "folderId": {
+            "type": "integer",
+            "format": "int32",
+            "example": 1
+          },
+          "title": {
+            "type": "string",
+            "nullable": true,
+            "example": "SampleFile"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ExportMessageRequestBodyInteger": {
+        "required": [
+          "folderId",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "folderId": {
+            "type": "integer",
+            "format": "int32",
+            "example": 1
+          },
+          "title": {
+            "type": "string",
+            "nullable": true,
+            "example": "SampleFile"
+          }
+        },
+        "additionalProperties": false
+      },
+      "FileEntryBaseDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "The file entry title.",
+            "nullable": true,
+            "example": "Some titile.txt/ Some title"
+          },
+          "access": {
+            "$ref": "#/components/schemas/FileShare"
+          },
+          "sharedBy": {
+            "$ref": "#/components/schemas/EmployeeDto"
+          },
+          "ownedBy": {
+            "$ref": "#/components/schemas/EmployeeDto"
+          },
+          "shared": {
+            "type": "boolean",
+            "description": "Specifies if the file entry is shared via link or not.",
+            "example": false
+          },
+          "sharedForUser": {
+            "type": "boolean",
+            "description": "Specifies if the file entry is shared for user or not.",
+            "example": false
+          },
+          "parentShared": {
+            "type": "boolean",
+            "description": "Indicates whether the parent entity is shared.",
+            "example": true
+          },
+          "shortWebUrl": {
+            "type": "string",
+            "description": "The short Web URL.",
+            "format": "uri",
+            "nullable": true,
+            "example": "some text"
+          },
+          "created": {
+            "$ref": "#/components/schemas/ApiDateTime"
+          },
+          "createdBy": {
+            "$ref": "#/components/schemas/EmployeeDto"
+          },
+          "updated": {
+            "$ref": "#/components/schemas/ApiDateTime"
+          },
+          "autoDelete": {
+            "$ref": "#/components/schemas/ApiDateTime"
+          },
+          "rootFolderType": {
+            "$ref": "#/components/schemas/FolderType"
+          },
+          "parentRoomType": {
+            "$ref": "#/components/schemas/FolderType"
+          },
+          "updatedBy": {
+            "$ref": "#/components/schemas/EmployeeDto"
+          },
+          "providerItem": {
+            "type": "boolean",
+            "description": "Specifies if the file entry provider is specified or not.",
+            "nullable": true,
+            "example": true
+          },
+          "providerKey": {
+            "type": "string",
+            "description": "The provider key of the file entry.",
+            "nullable": true,
+            "example": "some text"
+          },
+          "providerId": {
+            "type": "integer",
+            "description": "The provider ID of the file entry.",
+            "format": "int32",
+            "nullable": true,
+            "example": 1234
+          },
+          "order": {
+            "type": "string",
+            "description": "The order of the file entry.",
+            "nullable": true,
+            "example": "some text"
+          },
+          "isFavorite": {
+            "type": "boolean",
+            "description": "Specifies if the file is a favorite or not.",
+            "nullable": true,
+            "example": true
+          },
+          "fileEntryType": {
+            "$ref": "#/components/schemas/FileEntryType"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The file entry information.",
+        "x-derived": true,
+        "x-derived-types": [
+          "FileDtoInteger",
+          "FileDtoString",
+          "FolderDtoInteger",
+          "FolderDtoString"
+        ]
+      },
+      "FileEntryDtoInteger": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/FileEntryBaseDto"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "description": "The file entry ID.",
+                "format": "int32",
+                "example": 10
+              },
+              "rootFolderId": {
+                "type": "integer",
+                "description": "The root folder ID of the file entry.",
+                "format": "int32",
+                "example": 1234
+              },
+              "originId": {
+                "type": "integer",
+                "description": "The origin ID of the file entry.",
+                "format": "int32",
+                "example": 1234
+              },
+              "originRoomId": {
+                "type": "integer",
+                "description": "The origin room ID of the file entry.",
+                "format": "int32",
+                "example": 1234
+              },
+              "originTitle": {
+                "type": "string",
+                "description": "The origin title of the file entry.",
+                "nullable": true,
+                "example": "some text"
+              },
+              "originRoomTitle": {
+                "type": "string",
+                "description": "The origin room title of the file entry.",
+                "nullable": true,
+                "example": "some text"
+              },
+              "canShare": {
+                "type": "boolean",
+                "description": "Specifies if the file entry can be shared or not.",
+                "example": true
+              },
+              "shareSettings": {
+                "type": "object",
+                "properties": {
+                  "User": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "ExternalLink": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "Group": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "InvitationLink": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "PrimaryExternalLink": {
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                },
+                "additionalProperties": false,
+                "description": "A dictionary representing the sharing settings for the file entry.",
+                "nullable": true,
+                "example": [
+                  {
+                    "value": 1234
+                  }
+                ]
+              },
+              "security": {
+                "type": "object",
+                "properties": {
+                  "Read": {
+                    "type": "boolean"
+                  },
+                  "Comment": {
+                    "type": "boolean"
+                  },
+                  "FillForms": {
+                    "type": "boolean"
+                  },
+                  "Review": {
+                    "type": "boolean"
+                  },
+                  "Create": {
+                    "type": "boolean"
+                  },
+                  "CreateFrom": {
+                    "type": "boolean"
+                  },
+                  "Edit": {
+                    "type": "boolean"
+                  },
+                  "Delete": {
+                    "type": "boolean"
+                  },
+                  "CustomFilter": {
+                    "type": "boolean"
+                  },
+                  "EditRoom": {
+                    "type": "boolean"
+                  },
+                  "Rename": {
+                    "type": "boolean"
+                  },
+                  "ReadHistory": {
+                    "type": "boolean"
+                  },
+                  "Lock": {
+                    "type": "boolean"
+                  },
+                  "EditHistory": {
+                    "type": "boolean"
+                  },
+                  "CopyTo": {
+                    "type": "boolean"
+                  },
+                  "Copy": {
+                    "type": "boolean"
+                  },
+                  "MoveTo": {
+                    "type": "boolean"
+                  },
+                  "Move": {
+                    "type": "boolean"
+                  },
+                  "Pin": {
+                    "type": "boolean"
+                  },
+                  "Mute": {
+                    "type": "boolean"
+                  },
+                  "EditAccess": {
+                    "type": "boolean"
+                  },
+                  "Duplicate": {
+                    "type": "boolean"
+                  },
+                  "SubmitToFormGallery": {
+                    "type": "boolean"
+                  },
+                  "Download": {
+                    "type": "boolean"
+                  },
+                  "Convert": {
+                    "type": "boolean"
+                  },
+                  "CopySharedLink": {
+                    "type": "boolean"
+                  },
+                  "ReadLinks": {
+                    "type": "boolean"
+                  },
+                  "Reconnect": {
+                    "type": "boolean"
+                  },
+                  "CreateRoomFrom": {
+                    "type": "boolean"
+                  },
+                  "CopyLink": {
+                    "type": "boolean"
+                  },
+                  "Embed": {
+                    "type": "boolean"
+                  },
+                  "ChangeOwner": {
+                    "type": "boolean"
+                  },
+                  "IndexExport": {
+                    "type": "boolean"
+                  },
+                  "StartFilling": {
+                    "type": "boolean"
+                  },
+                  "FillingStatus": {
+                    "type": "boolean"
+                  },
+                  "ResetFilling": {
+                    "type": "boolean"
+                  },
+                  "StopFilling": {
+                    "type": "boolean"
+                  },
+                  "OpenForm": {
+                    "type": "boolean"
+                  },
+                  "EditInternal": {
+                    "type": "boolean"
+                  },
+                  "EditExpiration": {
+                    "type": "boolean"
+                  },
+                  "Vectorization": {
+                    "type": "boolean"
+                  },
+                  "AskAi": {
+                    "type": "boolean"
+                  },
+                  "UseChat": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": false,
+                "description": "The actions that can be performed with the file entry.",
+                "nullable": true,
+                "example": [
+                  {
+                    "value": true
+                  }
+                ]
+              },
+              "availableShareRights": {
+                "type": "object",
+                "properties": {
+                  "User": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "ExternalLink": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "Group": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "InvitationLink": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "PrimaryExternalLink": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "additionalProperties": false,
+                "description": "The available external rights of the file entry.",
+                "nullable": true,
+                "example": [
+                  {
+                    "value": [
+                      "some text"
+                    ]
+                  }
+                ]
+              },
+              "requestToken": {
+                "type": "string",
+                "description": "The request token of the file entry.",
+                "nullable": true,
+                "example": "some text"
+              },
+              "external": {
+                "type": "boolean",
+                "description": "Specifies if the folder can be accessed via an external link or not.",
+                "nullable": true,
+                "example": true
+              },
+              "expirationDate": {
+                "$ref": "#/components/schemas/ApiDateTime"
+              },
+              "isLinkExpired": {
+                "type": "boolean",
+                "description": "Indicates whether the shareable link associated with the file or folder has expired.",
+                "nullable": true,
+                "example": true
+              }
+            }
+          }
+        ],
+        "additionalProperties": false,
+        "description": "The generic file entry information."
+      },
+      "FileEntryType": {
+        "oneOf": [
+          {
+            "enum": [
+              "Folder",
+              "File"
+            ],
+            "type": "string",
+            "description": "[Folder - Folder, File - File]",
+            "example": "Folder"
+          },
+          {
+            "enum": [
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "[1 - Folder, 2 - File]",
+            "example": 1,
+            "x-enum-varnames": [
+              "Folder",
+              "File"
+            ],
+            "x-enum-descriptions": [
+              "Folder",
+              "File"
+            ]
+          }
+        ],
+        "description": "The file entry type.",
+        "x-enum-type": "integer"
+      },
+      "FileOperationDto": {
+        "required": [
+          "error",
+          "finished",
+          "id",
+          "Operation",
+          "processed",
+          "progress"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The file operation ID.",
+            "nullable": true,
+            "example": "1"
+          },
+          "Operation": {
+            "$ref": "#/components/schemas/FileOperationType"
+          },
+          "progress": {
+            "type": "integer",
+            "description": "The file operation progress in percentage.",
+            "format": "int32",
+            "example": 100
+          },
+          "error": {
+            "type": "string",
+            "description": "The file operation error message.",
+            "nullable": true,
+            "example": ""
+          },
+          "processed": {
+            "type": "string",
+            "description": "The file operation processing status.",
+            "nullable": true,
+            "example": "1"
+          },
+          "finished": {
+            "type": "boolean",
+            "description": "Specifies if the file operation is finished or not.",
+            "example": true
+          },
+          "url": {
+            "type": "string",
+            "description": "The file operation URL.",
+            "format": "uri",
+            "nullable": true,
+            "example": "some text"
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FileEntryBaseDto"
+            },
+            "description": "The list of files of the file operation.",
+            "nullable": true
+          },
+          "folders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FileEntryBaseDto"
+            },
+            "description": "The list of folders of the file operation.",
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/DistributedTaskStatus"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The file operation information."
+      },
+      "FileOperationType": {
+        "oneOf": [
+          {
+            "enum": [
+              "Move",
+              "Copy",
+              "Delete",
+              "Download",
+              "MarkAsRead",
+              "Import",
+              "Convert",
+              "Duplicate"
+            ],
+            "type": "string",
+            "description": "[Move - Move, Copy - Copy, Delete - Delete, Download - Download, MarkAsRead - MarkAsRead, Import - Import, Convert - Convert, Duplicate - Duplicate]",
+            "example": "Move"
+          },
+          {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "type": "integer",
+            "description": "[0 - Move, 1 - Copy, 2 - Delete, 3 - Download, 4 - MarkAsRead, 5 - Import, 6 - Convert, 7 - Duplicate]",
+            "example": 0,
+            "x-enum-varnames": [
+              "Move",
+              "Copy",
+              "Delete",
+              "Download",
+              "MarkAsRead",
+              "Import",
+              "Convert",
+              "Duplicate"
+            ],
+            "x-enum-descriptions": [
+              "Move",
+              "Copy",
+              "Delete",
+              "Download",
+              "MarkAsRead",
+              "Import",
+              "Convert",
+              "Duplicate"
+            ]
+          }
+        ],
+        "description": "The file operation type.",
+        "x-enum-type": "integer"
+      },
+      "FileOperationWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/FileOperationDto"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "FileShare": {
+        "oneOf": [
+          {
+            "enum": [
+              "None",
+              "ReadWrite",
+              "Read",
+              "Restrict",
+              "Varies",
+              "Review",
+              "Comment",
+              "FillForms",
+              "CustomFilter",
+              "RoomManager",
+              "Editing",
+              "ContentCreator"
+            ],
+            "type": "string",
+            "description": "[None - None, ReadWrite - Read and write, Read - Read, Restrict - Restrict, Varies - Varies, Review - Review, Comment - Comment, FillForms - Fill forms, CustomFilter - Custom filter, RoomManager - Room manager, Editing - Editing, ContentCreator - Content creator]",
+            "example": "None"
+          },
+          {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11
+            ],
+            "type": "integer",
+            "description": "[0 - None, 1 - Read and write, 2 - Read, 3 - Restrict, 4 - Varies, 5 - Review, 6 - Comment, 7 - Fill forms, 8 - Custom filter, 9 - Room manager, 10 - Editing, 11 - Content creator]",
+            "example": 0,
+            "x-enum-varnames": [
+              "None",
+              "ReadWrite",
+              "Read",
+              "Restrict",
+              "Varies",
+              "Review",
+              "Comment",
+              "FillForms",
+              "CustomFilter",
+              "RoomManager",
+              "Editing",
+              "ContentCreator"
+            ],
+            "x-enum-descriptions": [
+              "None",
+              "Read and write",
+              "Read",
+              "Restrict",
+              "Varies",
+              "Review",
+              "Comment",
+              "Fill forms",
+              "Custom filter",
+              "Room manager",
+              "Editing",
+              "Content creator"
+            ]
+          }
+        ],
+        "description": "The access rights type.",
+        "x-enum-type": "integer"
+      },
+      "FileShareParams": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EmailInvitationDto"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "shareTo": {
+                "type": "string",
+                "description": "The ID of the user to whom the file will be shared.",
+                "format": "uuid",
+                "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              },
+              "access": {
+                "$ref": "#/components/schemas/FileShare"
+              }
+            }
+          }
+        ],
+        "additionalProperties": false,
+        "description": "The collection of file sharing parameters."
+      },
+      "FolderContentDtoInteger": {
+        "required": [
+          "pathParts",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FileEntryBaseDto"
+            },
+            "description": "The list of files in the folder.",
+            "nullable": true
+          },
+          "folders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FileEntryBaseDto"
+            },
+            "description": "The list of folders in the folder.",
+            "nullable": true
+          },
+          "current": {
+            "$ref": "#/components/schemas/FolderDtoInteger"
+          },
+          "pathParts": {
+            "description": "The folder path.",
+            "nullable": true,
+            "example": "{key = \"Key\", path = \"//path//to//folder\"}"
+          },
+          "startIndex": {
+            "type": "integer",
+            "description": "The folder start index.",
+            "format": "int32",
+            "example": 0
+          },
+          "count": {
+            "type": "integer",
+            "description": "The number of folder elements.",
+            "format": "int32",
+            "example": 4
+          },
+          "total": {
+            "type": "integer",
+            "description": "The total number of elements in the folder.",
+            "format": "int32",
+            "example": 4
+          },
+          "new": {
+            "type": "integer",
+            "description": "The new element index in the folder.",
+            "format": "int32",
+            "example": 1234
+          }
+        },
+        "additionalProperties": false,
+        "description": "The folder content information."
+      },
+      "FolderContentIntegerWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/FolderContentDtoInteger"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "FolderDtoInteger": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/FileEntryDtoInteger"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "parentId": {
+                "type": "integer",
+                "description": "The parent folder ID of the folder.",
+                "format": "int32",
+                "example": 10
+              },
+              "filesCount": {
+                "type": "integer",
+                "description": "The number of files that the folder contains.",
+                "format": "int32",
+                "example": 5
+              },
+              "foldersCount": {
+                "type": "integer",
+                "description": "The number of folders that the folder contains.",
+                "format": "int32",
+                "example": 7
+              },
+              "isShareable": {
+                "type": "boolean",
+                "description": "Specifies if the folder can be shared or not.",
+                "nullable": true,
+                "example": true
+              },
+              "new": {
+                "type": "integer",
+                "description": "The new element index in the folder.",
+                "format": "int32",
+                "example": 1234
+              },
+              "mute": {
+                "type": "boolean",
+                "description": "Specifies if the folder notifications are enabled or not.",
+                "example": true
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "The list of tags of the folder.",
+                "nullable": true,
+                "example": [
+                  "some text"
+                ]
+              },
+              "logo": {
+                "$ref": "#/components/schemas/Logo"
+              },
+              "pinned": {
+                "type": "boolean",
+                "description": "Specifies if the folder is pinned or not.",
+                "example": true
+              },
+              "roomType": {
+                "$ref": "#/components/schemas/RoomType"
+              },
+              "private": {
+                "type": "boolean",
+                "description": "Specifies if the folder is private or not.",
+                "example": true
+              },
+              "indexing": {
+                "type": "boolean",
+                "description": "Specifies if the folder is indexed or not.",
+                "example": true
+              },
+              "denyDownload": {
+                "type": "boolean",
+                "description": "Specifies if the folder can be downloaded or not.",
+                "example": true
+              },
+              "lifetime": {
+                "$ref": "#/components/schemas/RoomDataLifetimeDto"
+              },
+              "watermark": {
+                "$ref": "#/components/schemas/WatermarkDto"
+              },
+              "type": {
+                "$ref": "#/components/schemas/FolderType"
+              },
+              "inRoom": {
+                "type": "boolean",
+                "description": "Specifies if the folder is placed in the room or not.",
+                "nullable": true,
+                "example": true
+              },
+              "quotaLimit": {
+                "type": "integer",
+                "description": "The folder quota limit.",
+                "format": "int64",
+                "nullable": true,
+                "example": 1234
+              },
+              "isCustomQuota": {
+                "type": "boolean",
+                "description": "Specifies if the folder room has a custom quota or not.",
+                "nullable": true,
+                "example": true
+              },
+              "usedSpace": {
+                "type": "integer",
+                "description": "How much folder space is used (counter).",
+                "format": "int64",
+                "nullable": true,
+                "example": 1234
+              },
+              "passwordProtected": {
+                "type": "boolean",
+                "description": "Specifies if the folder is password protected or not.",
+                "nullable": true,
+                "example": true
+              },
+              "expired": {
+                "type": "boolean",
+                "description": "Specifies if an external link to the folder is expired or not.",
+                "nullable": true,
+                "example": true,
+                "deprecated": true
+              },
+              "chatSettings": {
+                "$ref": "#/components/schemas/ChatSettings"
+              },
+              "rootRoomType": {
+                "$ref": "#/components/schemas/RoomType"
+              }
+            }
+          }
+        ],
+        "additionalProperties": false,
+        "description": "The folder parameters."
+      },
+      "FolderIntegerArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FolderDtoInteger"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "FolderIntegerWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/FolderDtoInteger"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "FolderType": {
+        "oneOf": [
+          {
+            "enum": [
+              "DEFAULT",
+              "COMMON",
+              "BUNCH",
+              "TRASH",
+              "USER",
+              "SHARE",
+              "Projects",
+              "Favorites",
+              "Recent",
+              "Templates",
+              "Privacy",
+              "VirtualRooms",
+              "FillingFormsRoom",
+              "EditingRoom",
+              "CustomRoom",
+              "Archive",
+              "ThirdpartyBackup",
+              "PublicRoom",
+              "ReadyFormFolder",
+              "InProcessFormFolder",
+              "FormFillingFolderDone",
+              "FormFillingFolderInProgress",
+              "VirtualDataRoom",
+              "RoomTemplates",
+              "AiRoom",
+              "Knowledge",
+              "ResultStorage",
+              "AiAgents",
+              "DefaultTemplates"
+            ],
+            "type": "string",
+            "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ResultStorage - Result storage, AiAgents - AI Agents, DefaultTemplates - Default Templates]",
+            "example": "DEFAULT"
+          },
+          {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              5,
+              6,
+              8,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
+              16,
+              19,
+              20,
+              21,
+              22,
+              25,
+              26,
+              27,
+              28,
+              29,
+              30,
+              31,
+              32,
+              33,
+              34,
+              35
+            ],
+            "type": "integer",
+            "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Result storage, 34 - AI Agents, 35 - Default Templates]",
+            "example": 0,
+            "x-enum-varnames": [
+              "DEFAULT",
+              "COMMON",
+              "BUNCH",
+              "TRASH",
+              "USER",
+              "SHARE",
+              "Projects",
+              "Favorites",
+              "Recent",
+              "Templates",
+              "Privacy",
+              "VirtualRooms",
+              "FillingFormsRoom",
+              "EditingRoom",
+              "CustomRoom",
+              "Archive",
+              "ThirdpartyBackup",
+              "PublicRoom",
+              "ReadyFormFolder",
+              "InProcessFormFolder",
+              "FormFillingFolderDone",
+              "FormFillingFolderInProgress",
+              "VirtualDataRoom",
+              "RoomTemplates",
+              "AiRoom",
+              "Knowledge",
+              "ResultStorage",
+              "AiAgents",
+              "DefaultTemplates"
+            ],
+            "x-enum-descriptions": [
+              "Default",
+              "Coomon",
+              "Bunch",
+              "Trash",
+              "User",
+              "Share",
+              "Projects",
+              "Favourites",
+              "Recent",
+              "Templates",
+              "Privacy",
+              "Virtual rooms",
+              "Filling forms room",
+              "Editing room",
+              "Custom room",
+              "Archive",
+              "Thirdparty backup",
+              "Public room",
+              "Ready form folder",
+              "In process form folder",
+              "Form filling folder done",
+              "Form filling folder in progress",
+              "Virtual Data Room",
+              "Room templates folder",
+              "AI Room",
+              "Knowledge",
+              "Result storage",
+              "AI Agents",
+              "Default Templates"
+            ]
+          }
+        ],
+        "description": "The folder type.",
+        "x-enum-type": "integer"
+      },
+      "Icon": {
+        "required": [
+          "icon16",
+          "icon24",
+          "icon32",
+          "icon48"
+        ],
+        "type": "object",
+        "properties": {
+          "icon48": {
+            "type": "string",
+            "nullable": true,
+            "example": "some text"
+          },
+          "icon32": {
+            "type": "string",
+            "nullable": true,
+            "example": "some text"
+          },
+          "icon24": {
+            "type": "string",
+            "nullable": true,
+            "example": "some text"
+          },
+          "icon16": {
+            "type": "string",
+            "nullable": true,
+            "example": "some text"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Logo": {
+        "required": [
+          "large",
+          "medium",
+          "original",
+          "small"
+        ],
+        "type": "object",
+        "properties": {
+          "original": {
+            "type": "string",
+            "description": "The original logo.",
+            "nullable": true,
+            "example": "some text"
+          },
+          "large": {
+            "type": "string",
+            "description": "The large logo.",
+            "nullable": true,
+            "example": "some text"
+          },
+          "medium": {
+            "type": "string",
+            "description": "The medium logo.",
+            "nullable": true,
+            "example": "some text"
+          },
+          "small": {
+            "type": "string",
+            "description": "The small logo.",
+            "nullable": true,
+            "example": "some text"
+          },
+          "color": {
+            "type": "string",
+            "description": "The logo color.",
+            "nullable": true,
+            "example": "some text"
+          },
+          "cover": {
+            "$ref": "#/components/schemas/LogoCover"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The room logo information."
+      },
+      "LogoCover": {
+        "required": [
+          "data",
+          "id"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The logo cover ID.",
+            "nullable": true,
+            "example": "1"
+          },
+          "data": {
+            "type": "string",
+            "description": "The logo cover data.",
+            "nullable": true,
+            "example": "some text"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The logo cover information."
+      },
+      "LogoRequest": {
+        "type": "object",
+        "properties": {
+          "tmpFile": {
+            "type": "string",
+            "description": "The path to the temporary image file.",
+            "nullable": true,
+            "example": "some text"
+          },
+          "x": {
+            "type": "integer",
+            "description": "The X coordinate of the rectangle starting point.",
+            "format": "int32",
+            "example": 1234
+          },
+          "y": {
+            "type": "integer",
+            "description": "The Y coordinate of the rectangle starting point.",
+            "format": "int32",
+            "example": 1234
+          },
+          "width": {
+            "type": "integer",
+            "description": "The rectangle width.",
+            "format": "int32"
+          },
+          "height": {
+            "type": "integer",
+            "description": "The rectangle height.",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The logo request parameters."
+      },
+      "McpServerArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/McpServerDto"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "McpServerDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true,
+            "example": "John Doe"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "example": "some text"
+          },
+          "endpoint": {
+            "type": "string",
+            "nullable": true,
+            "example": "some text"
+          },
+          "serverType": {
+            "$ref": "#/components/schemas/ServerType"
+          },
+          "headers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "nullable": true,
+            "example": [
+              {
+                "key": "some text",
+                "value": "some text"
+              }
+            ]
+          },
+          "enabled": {
+            "type": "boolean",
+            "example": true
+          },
+          "icon": {
+            "$ref": "#/components/schemas/Icon"
+          },
+          "needReset": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "McpServerShortArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/McpServerShortDto"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "McpServerShortDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true,
+            "example": "John Doe"
+          },
+          "serverType": {
+            "$ref": "#/components/schemas/ServerType"
+          },
+          "enabled": {
+            "type": "boolean",
+            "example": true
+          },
+          "icon": {
+            "$ref": "#/components/schemas/Icon"
+          },
+          "needReset": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "McpServerShortWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/McpServerShortDto"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "McpServerStatusArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/McpServerStatusDto"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "McpServerStatusDto": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true,
+            "example": "John Doe"
+          },
+          "serverType": {
+            "$ref": "#/components/schemas/ServerType"
+          },
+          "connected": {
+            "type": "boolean",
+            "example": true
+          },
+          "icon": {
+            "$ref": "#/components/schemas/Icon"
+          },
+          "needReset": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "McpServerStatusWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/McpServerStatusDto"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "McpServerWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/McpServerDto"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "McpToolArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/McpToolDto"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "McpToolDto": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true,
+            "example": "John Doe"
+          },
+          "enabled": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MessageArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MessageDto"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "MessageContentDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/ContentType"
+          }
+        },
+        "additionalProperties": false,
+        "x-derived": true,
+        "x-derived-types": [
+          "TextContentDto",
+          "ToolContentDto",
+          "AttachmentContentDto"
+        ]
+      },
+      "MessageDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          },
+          "contents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MessageContentDto"
+            },
+            "nullable": true
+          },
+          "createdOn": {
+            "$ref": "#/components/schemas/ApiDateTime"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ModelArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ModelDto"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ModelDto": {
+        "required": [
+          "modelId",
+          "providerTitle"
+        ],
+        "type": "object",
+        "properties": {
+          "providerId": {
+            "type": "integer",
+            "format": "int32",
+            "example": 1234
+          },
+          "providerTitle": {
+            "type": "string",
+            "nullable": true,
+            "example": "some text"
+          },
+          "modelId": {
+            "type": "string",
+            "nullable": true,
+            "example": "some text"
+          }
+        },
+        "additionalProperties": false
+      },
+      "NewItemsAgentNewItemsArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NewItemsDtoAgentNewItemsDto"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "NewItemsDtoAgentNewItemsDto": {
+        "required": [
+          "date",
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "date": {
+            "$ref": "#/components/schemas/ApiDateTime"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AgentNewItemsDto"
+            },
+            "description": "The list of items.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The new item parameters."
+      },
+      "ProviderArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProviderDto"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ProviderDto": {
+        "required": [
+          "createdOn",
+          "modifiedOn",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32",
+            "example": 1
+          },
+          "title": {
+            "type": "string",
+            "nullable": true,
+            "example": "SampleFile"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ProviderType"
+          },
+          "url": {
+            "type": "string",
+            "nullable": true,
+            "example": "some text"
+          },
+          "createdOn": {
+            "$ref": "#/components/schemas/ApiDateTime"
+          },
+          "modifiedOn": {
+            "$ref": "#/components/schemas/ApiDateTime"
+          },
+          "needReset": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProviderSettingsArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProviderSettingsDto"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ProviderSettingsDto": {
+        "required": [
+          "url"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/ProviderType"
+          },
+          "url": {
+            "type": "string",
+            "nullable": true,
+            "example": "some text"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProviderType": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "ProviderWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/ProviderDto"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "QuotaFilter": {
+        "oneOf": [
+          {
+            "enum": [
+              "All",
+              "Default",
+              "Custom"
+            ],
+            "type": "string",
+            "description": "[All - All, Default - Default, Custom - Custom]",
+            "example": "All"
+          },
+          {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "[0 - All, 1 - Default, 2 - Custom]",
+            "example": 0,
+            "x-enum-varnames": [
+              "All",
+              "Default",
+              "Custom"
+            ],
+            "x-enum-descriptions": [
+              "All",
+              "Default",
+              "Custom"
+            ]
+          }
+        ],
+        "description": "The quota filter (All - 0, Default - 1, Custom - 2).",
+        "x-enum-type": "integer"
+      },
+      "RemoveProviderRequestDto": {
+        "required": [
+          "ids"
+        ],
+        "type": "object",
+        "properties": {
+          "ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true,
+            "example": [
+              1234
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "RenameChatBody": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 255,
+            "type": "string",
+            "nullable": true,
+            "example": "John Doe"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Role": {
+        "enum": [
+          0,
+          1
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "RoomDataLifetimeDto": {
+        "type": "object",
+        "properties": {
+          "deletePermanently": {
+            "type": "boolean",
+            "description": "Specifies whether to permanently delete the room data or not.",
+            "example": true
+          },
+          "period": {
+            "$ref": "#/components/schemas/RoomDataLifetimePeriod"
+          },
+          "value": {
+            "maximum": 999,
+            "minimum": 1,
+            "type": "integer",
+            "description": "Specifies the time period value of the room data lifetime.",
+            "format": "int32",
+            "nullable": true,
+            "example": 1234
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Specifies whether the room data lifetime setting is enabled or not.",
+            "nullable": true,
+            "example": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The room data lifetime information."
+      },
+      "RoomDataLifetimePeriod": {
+        "oneOf": [
+          {
+            "enum": [
+              "Day",
+              "Month",
+              "Year"
+            ],
+            "type": "string",
+            "description": "[Day - Day, Month - Month, Year - Year]",
+            "example": "Day"
+          },
+          {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "[0 - Day, 1 - Month, 2 - Year]",
+            "example": 0,
+            "x-enum-varnames": [
+              "Day",
+              "Month",
+              "Year"
+            ],
+            "x-enum-descriptions": [
+              "Day",
+              "Month",
+              "Year"
+            ]
+          }
+        ],
+        "description": "The room data lifetime period.",
+        "x-enum-type": "integer"
+      },
+      "RoomType": {
+        "oneOf": [
+          {
+            "enum": [
+              "FillingFormsRoom",
+              "EditingRoom",
+              "CustomRoom",
+              "PublicRoom",
+              "VirtualDataRoom",
+              "AiRoom"
+            ],
+            "type": "string",
+            "description": "[FillingFormsRoom - Form filling room, EditingRoom - Collaboration room, CustomRoom - Custom room, PublicRoom - Public room, VirtualDataRoom - Virtual data room, AiRoom - AI Room]",
+            "example": "FillingFormsRoom"
+          },
+          {
+            "enum": [
+              1,
+              2,
+              5,
+              6,
+              8,
+              9
+            ],
+            "type": "integer",
+            "description": "[1 - Form filling room, 2 - Collaboration room, 5 - Custom room, 6 - Public room, 8 - Virtual data room, 9 - AI Room]",
+            "example": 1,
+            "x-enum-varnames": [
+              "FillingFormsRoom",
+              "EditingRoom",
+              "CustomRoom",
+              "PublicRoom",
+              "VirtualDataRoom",
+              "AiRoom"
+            ],
+            "x-enum-descriptions": [
+              "Form filling room",
+              "Collaboration room",
+              "Custom room",
+              "Public room",
+              "Virtual data room",
+              "AI Room"
+            ]
+          }
+        ],
+        "description": "The room type.",
+        "x-enum-type": "integer"
+      },
+      "ServerType": {
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "SetEmbeddingConfigRequestBody": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/EmbeddingProviderType"
+          },
+          "key": {
+            "type": "string",
+            "nullable": true,
+            "example": "some text"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SetMcpToolsRequestBody": {
+        "required": [
+          "disabledTools"
+        ],
+        "type": "object",
+        "properties": {
+          "disabledTools": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "example": [
+              "some text"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "SetServerStatusRequestBody": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SetUserChatSettingsRequestBody": {
+        "type": "object",
+        "properties": {
+          "webSearchEnabled": {
+            "type": "boolean",
+            "nullable": true,
+            "example": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SetWebSearchSettingsRequestBody": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "example": true
+          },
+          "type": {
+            "$ref": "#/components/schemas/EngineType"
+          },
+          "key": {
+            "type": "string",
+            "nullable": true,
+            "example": "some text"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SortOrder": {
+        "oneOf": [
+          {
+            "enum": [
+              "Ascending",
+              "Descending"
+            ],
+            "type": "string",
+            "description": "[Ascending - Ascending, Descending - Descending]",
+            "example": "Ascending"
+          },
+          {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "[0 - Ascending, 1 - Descending]",
+            "example": 0,
+            "x-enum-varnames": [
+              "Ascending",
+              "Descending"
+            ],
+            "x-enum-descriptions": [
+              "Ascending",
+              "Descending"
+            ]
+          }
+        ],
+        "description": "The order in which the results are sorted.",
+        "x-enum-type": "integer"
+      },
+      "StartNewChatBody": {
+        "required": [
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "nullable": true,
+            "example": "some text"
+          },
+          "contextFolderId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true,
+            "example": 1234
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "example": 1234
+                },
+                {
+                  "type": "string",
+                  "example": "some text"
+                }
+              ]
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SubjectFilter": {
+        "oneOf": [
+          {
+            "enum": [
+              "Owner",
+              "Member"
+            ],
+            "type": "string",
+            "description": "[Owner - Owner, Member - Member]",
+            "example": "Owner"
+          },
+          {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "[0 - Owner, 1 - Member]",
+            "example": 0,
+            "x-enum-varnames": [
+              "Owner",
+              "Member"
+            ],
+            "x-enum-descriptions": [
+              "Owner",
+              "Member"
+            ]
+          }
+        ],
+        "x-enum-type": "integer"
+      },
+      "ToolDecisionRequestBody": {
+        "type": "object",
+        "properties": {
+          "decision": {
+            "$ref": "#/components/schemas/ToolExecutionDecision"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ToolExecutionDecision": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "UpdateProviderBody": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "nullable": true,
+            "example": "SampleFile"
+          },
+          "url": {
+            "type": "string",
+            "nullable": true,
+            "example": "some text"
+          },
+          "key": {
+            "type": "string",
+            "nullable": true,
+            "example": "some text"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateRoomRequest": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "maxLength": 170,
+            "minLength": 0,
+            "type": "string",
+            "description": "The room title.",
+            "nullable": true,
+            "example": "SampleFile"
+          },
+          "quota": {
+            "type": "integer",
+            "description": "The room quota.",
+            "format": "int64",
+            "nullable": true,
+            "example": 1234
+          },
+          "indexing": {
+            "type": "boolean",
+            "description": "Specifies whether to create a third-party room with indexing.",
+            "nullable": true,
+            "example": true
+          },
+          "denyDownload": {
+            "type": "boolean",
+            "description": "Specifies whether to deny downloads from the third-party room.",
+            "nullable": true,
+            "example": true
+          },
+          "lifetime": {
+            "$ref": "#/components/schemas/RoomDataLifetimeDto"
+          },
+          "watermark": {
+            "$ref": "#/components/schemas/WatermarkRequestDto"
+          },
+          "logo": {
+            "$ref": "#/components/schemas/LogoRequest"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The list of tags.",
+            "nullable": true,
+            "example": [
+              "some text"
+            ]
+          },
+          "color": {
+            "maxLength": 6,
+            "minLength": 0,
+            "type": "string",
+            "description": "The room color.",
+            "nullable": true,
+            "example": "some text"
+          },
+          "cover": {
+            "maxLength": 50,
+            "minLength": 0,
+            "type": "string",
+            "description": "The room cover.",
+            "nullable": true,
+            "example": "some text"
+          },
+          "chatSettings": {
+            "$ref": "#/components/schemas/ChatSettings"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The request parameters for updating a room."
+      },
+      "UpdateRoomsQuotaRequestDtoInteger": {
+        "type": "object",
+        "properties": {
+          "roomIds": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "example": 1234
+                },
+                {
+                  "type": "string",
+                  "example": "some text"
+                }
+              ]
+            },
+            "description": "The list of room IDs.",
+            "nullable": true
+          },
+          "quota": {
+            "type": "integer",
+            "description": "The room quota.",
+            "format": "int64",
+            "example": 1234
+          }
+        },
+        "additionalProperties": false,
+        "description": "The request parameters for updating the room quota."
+      },
+      "UpdateRoomsRoomIdsRequestDtoInteger": {
+        "type": "object",
+        "properties": {
+          "roomIds": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "example": 1234
+                },
+                {
+                  "type": "string",
+                  "example": "some text"
+                }
+              ]
+            },
+            "description": "The list of room IDs.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The request parameters for updating the rooms."
+      },
+      "UpdateServerRequestBody": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 128,
+            "type": "string",
+            "nullable": true,
+            "example": "John Doe"
+          },
+          "description": {
+            "maxLength": 255,
+            "type": "string",
+            "nullable": true,
+            "example": "some text"
+          },
+          "endpoint": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "example": "some text"
+          },
+          "headers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "nullable": true,
+            "example": [
+              {
+                "key": "some text",
+                "value": "some text"
+              }
+            ]
+          },
+          "updateIcon": {
+            "type": "boolean",
+            "example": true
+          },
+          "icon": {
+            "type": "string",
+            "nullable": true,
+            "example": "some text"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserChatSettingsDto": {
+        "type": "object",
+        "properties": {
+          "webSearchEnabled": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserChatSettingsWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/UserChatSettingsDto"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "VectorizationSettingsDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/EmbeddingProviderType"
+          },
+          "needReset": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "VectorizationSettingsWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/VectorizationSettingsDto"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "VectorizationStartRequestBody": {
+        "required": [
+          "files"
+        ],
+        "type": "object",
+        "properties": {
+          "files": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true,
+            "example": [
+              1234
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "WatermarkAdditions": {
+        "oneOf": [
+          {
+            "enum": [
+              "UserName",
+              "UserEmail",
+              "UserIpAdress",
+              "CurrentDate",
+              "RoomName"
+            ],
+            "type": "string",
+            "description": "[UserName - User name, UserEmail - User email, UserIpAdress - User ip adress, CurrentDate - Current date, RoomName - Room name]",
+            "example": "UserName"
+          },
+          {
+            "enum": [
+              1,
+              2,
+              4,
+              8,
+              16
+            ],
+            "type": "integer",
+            "description": "[1 - User name, 2 - User email, 4 - User ip adress, 8 - Current date, 16 - Room name]",
+            "example": 1,
+            "x-enum-varnames": [
+              "UserName",
+              "UserEmail",
+              "UserIpAdress",
+              "CurrentDate",
+              "RoomName"
+            ],
+            "x-enum-descriptions": [
+              "User name",
+              "User email",
+              "User ip adress",
+              "Current date",
+              "Room name"
+            ]
+          }
+        ],
+        "description": "The watermark additions.",
+        "x-enum-type": "integer"
+      },
+      "WatermarkDto": {
+        "required": [
+          "additions",
+          "imageHeight",
+          "imageScale",
+          "imageWidth",
+          "rotate"
+        ],
+        "type": "object",
+        "properties": {
+          "additions": {
+            "$ref": "#/components/schemas/WatermarkAdditions"
+          },
+          "text": {
+            "type": "string",
+            "description": "The watermark text.",
+            "nullable": true,
+            "example": "some text"
+          },
+          "rotate": {
+            "type": "integer",
+            "description": "The watermark text and image rotate.",
+            "format": "int32",
+            "example": 1234
+          },
+          "imageScale": {
+            "type": "integer",
+            "description": "The watermark image scale.",
+            "format": "int32",
+            "example": 1234
+          },
+          "imageUrl": {
+            "type": "string",
+            "description": "The watermark image url.",
+            "nullable": true,
+            "example": "some text"
+          },
+          "imageHeight": {
+            "type": "number",
+            "description": "The watermark image height.",
+            "format": "double",
+            "example": -8.5
+          },
+          "imageWidth": {
+            "type": "number",
+            "description": "The watermark image width.",
+            "format": "double",
+            "example": -8.5
+          }
+        },
+        "additionalProperties": false,
+        "description": "The watermark settings."
+      },
+      "WatermarkRequestDto": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Specifies whether watermarks are on or off.",
+            "nullable": true,
+            "example": true
+          },
+          "additions": {
+            "$ref": "#/components/schemas/WatermarkAdditions"
+          },
+          "text": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string",
+            "description": "The watermark text.",
+            "nullable": true,
+            "example": "some text"
+          },
+          "rotate": {
+            "type": "integer",
+            "description": "The watermark text and image rotate angle.",
+            "format": "int32",
+            "example": 1234
+          },
+          "imageScale": {
+            "type": "integer",
+            "description": "The watermark image scale.",
+            "format": "int32",
+            "example": 1234
+          },
+          "imageUrl": {
+            "type": "string",
+            "description": "The path to the temporary image file.",
+            "nullable": true,
+            "example": "some text"
+          },
+          "imageHeight": {
+            "type": "number",
+            "description": "The watermark image height.",
+            "format": "double",
+            "example": -8.5
+          },
+          "imageWidth": {
+            "type": "number",
+            "description": "The watermark image width.",
+            "format": "double",
+            "example": -8.5
+          }
+        },
+        "additionalProperties": false,
+        "description": "The request parameters for adding watermarks."
+      },
+      "WebSearchSettingsDto": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "example": true
+          },
+          "type": {
+            "$ref": "#/components/schemas/EngineType"
+          },
+          "needReset": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "WebSearchSettingsWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/WebSearchSettingsDto"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "asc_auth_key": {
+        "type": "apiKey",
+        "description": "Use Cookie authentication",
+        "name": "asc_auth_key",
+        "in": "cookie"
+      },
+      "Basic": {
+        "type": "http",
+        "description": "Enter your username and password",
+        "scheme": "basic"
+      },
+      "Bearer": {
+        "type": "http",
+        "description": "Enter 'Bearer {JWT Token}'",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      },
+      "ApiKeyBearer": {
+        "type": "apiKey",
+        "description": "Authentication is determined by the 'Authorization' header",
+        "name": "ApiKeyBearer",
+        "in": "header"
+      },
+      "OAuth2": {
+        "type": "oauth2",
+        "description": "OAuth2 flow with Authorization Code",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "",
+            "tokenUrl": "",
+            "scopes": {
+              "read": "Read access to protected resources",
+              "write": "Write access to protected resources"
+            }
+          }
+        }
+      },
+      "OpenId": {
+        "type": "openIdConnect",
+        "description": "OpenID Connect authentication",
+        "openIdConnectUrl": ""
+      }
+    }
+  },
+  "x-tagGroups": [ ]
+}

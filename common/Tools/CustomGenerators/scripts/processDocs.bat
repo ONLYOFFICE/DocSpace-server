@@ -6,7 +6,7 @@ call dotnet build ASC.Api.Documentation.sln
 
 echo [2/4] Generating OpenAPI specifications
 cd ASC.Api.Documentation\json
-call redocly join api_common.json people_common.json files_common.json backup_common.json apisystem_common.json ..\..\..\CustomGenerators\json\oauth.json -o ..\..\..\CustomGenerators\json\api-docs.json
+call redocly join api_common.json people_common.json files_common.json backup_common.json ..\..\..\CustomGenerators\json\oauth.json -o ..\..\..\CustomGenerators\json\api-docs.json
 
 echo [3/4] Post-processing: sorting tag groups
 cd ..\bin\Debug\net10.0
