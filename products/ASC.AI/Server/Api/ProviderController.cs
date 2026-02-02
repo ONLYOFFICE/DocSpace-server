@@ -117,9 +117,7 @@ public class ProviderController(
     [SwaggerResponse(200, "Default provider information", typeof(DefaultProviderDto))]
     [SwaggerResponse(403, "You don't have enough permission to manage providers")]
     [SwaggerResponse(404, "Provider not found")]
-    [SwaggerResponse(429, "Too many requests")]
     [HttpPut("providers/default")]
-    [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<DefaultProviderDto> SetDefaultProviderAsync(SetDefaultProviderRequestDto inDto)
     {
         var result = await providerService.SetDefaultProviderAsync(inDto.ProviderId, inDto.DefaultModel);
