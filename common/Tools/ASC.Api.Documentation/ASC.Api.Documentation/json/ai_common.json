@@ -2525,7 +2525,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProviderWrapper"
+                  "$ref": "#/components/schemas/AiProviderWrapper"
                 }
               }
             }
@@ -2595,7 +2595,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProviderArrayWrapper"
+                  "$ref": "#/components/schemas/AiProviderArrayWrapper"
                 }
               }
             }
@@ -2721,7 +2721,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProviderWrapper"
+                  "$ref": "#/components/schemas/AiProviderWrapper"
                 }
               }
             }
@@ -3237,6 +3237,116 @@
         "additionalProperties": false,
         "description": "The agent new item's information."
       },
+      "AiProviderArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiProviderDto"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "AiProviderDto": {
+        "required": [
+          "createdOn",
+          "modifiedOn",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32",
+            "example": 1
+          },
+          "title": {
+            "type": "string",
+            "nullable": true,
+            "example": "SampleFile"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ProviderType"
+          },
+          "url": {
+            "type": "string",
+            "nullable": true,
+            "example": "some text"
+          },
+          "createdOn": {
+            "$ref": "#/components/schemas/ApiDateTime"
+          },
+          "modifiedOn": {
+            "$ref": "#/components/schemas/ApiDateTime"
+          },
+          "needReset": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AiProviderWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/AiProviderDto"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "AiSettingsDto": {
         "required": [
           "embeddingModel",
@@ -3484,15 +3594,6 @@
           }
         },
         "additionalProperties": false
-      },
-      "ContentType": {
-        "enum": [
-          0,
-          1,
-          2
-        ],
-        "type": "integer",
-        "format": "int32"
       },
       "ContinueChatBody": {
         "required": [
@@ -5587,7 +5688,7 @@
         "type": "object",
         "properties": {
           "type": {
-            "$ref": "#/components/schemas/ContentType"
+            "$ref": "#/components/schemas/MessageContentType"
           }
         },
         "additionalProperties": false,
@@ -5597,6 +5698,15 @@
           "ToolContentDto",
           "AttachmentContentDto"
         ]
+      },
+      "MessageContentType": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
       },
       "MessageDto": {
         "type": "object",
@@ -5743,82 +5853,6 @@
         "additionalProperties": false,
         "description": "The new item parameters."
       },
-      "ProviderArrayWrapper": {
-        "type": "object",
-        "properties": {
-          "response": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ProviderDto"
-            }
-          },
-          "count": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "href": {
-                  "type": "string"
-                },
-                "action": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "status": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "statusCode": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "ProviderDto": {
-        "required": [
-          "createdOn",
-          "modifiedOn",
-          "title"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32",
-            "example": 1
-          },
-          "title": {
-            "type": "string",
-            "nullable": true,
-            "example": "SampleFile"
-          },
-          "type": {
-            "$ref": "#/components/schemas/ProviderType"
-          },
-          "url": {
-            "type": "string",
-            "nullable": true,
-            "example": "some text"
-          },
-          "createdOn": {
-            "$ref": "#/components/schemas/ApiDateTime"
-          },
-          "modifiedOn": {
-            "$ref": "#/components/schemas/ApiDateTime"
-          },
-          "needReset": {
-            "type": "boolean",
-            "example": true
-          }
-        },
-        "additionalProperties": false
-      },
       "ProviderSettingsArrayWrapper": {
         "type": "object",
         "properties": {
@@ -5887,40 +5921,6 @@
         ],
         "type": "integer",
         "format": "int32"
-      },
-      "ProviderWrapper": {
-        "type": "object",
-        "properties": {
-          "response": {
-            "$ref": "#/components/schemas/ProviderDto"
-          },
-          "count": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "href": {
-                  "type": "string"
-                },
-                "action": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "status": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "statusCode": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
       },
       "QuotaFilter": {
         "oneOf": [
