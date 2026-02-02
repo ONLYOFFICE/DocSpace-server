@@ -55,12 +55,12 @@ public class TenantDeepLinkSettings : ISettings<TenantDeepLinkSettings>
 /// </summary>
 public enum DeepLinkHandlingMode
 {
-    [SwaggerEnum("Provide choice")]
+    [Description("Provide choice")]
     ProvideChoice,
 
-    [SwaggerEnum("Web")]
+    [Description("Web")]
     Web,
 
-    [SwaggerEnum("App")]
+    [Description("App")]
     App
 }

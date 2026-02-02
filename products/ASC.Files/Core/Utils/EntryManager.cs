@@ -481,6 +481,15 @@ public class EntryManager(IDaoFactory daoFactory,
 
             CalculateTotal();
         }
+        else if (parent.FolderType == FolderType.DefaultTemplates)
+        {
+            var folderDao = daoFactory.GetFolderDao<T>();
+            var fileDao = daoFactory.GetFileDao<T>();
+            var files = await fileDao.GetFilesAsync(parent.Id, orderBy, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, withSubfolders).ToListAsync();
+            entries.AddRange(files);
+
+            CalculateTotal();
+        }
         else if (parent.FolderType == FolderType.Privacy)
         {
             var folderDao = daoFactory.GetFolderDao<T>();

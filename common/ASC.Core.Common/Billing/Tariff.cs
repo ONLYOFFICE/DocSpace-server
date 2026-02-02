@@ -172,9 +172,9 @@ public class Quota : IEquatable<Quota>
 /// </summary>
 public enum QuotaState
 {
-    [SwaggerEnum("Active")]
+    [Description("Active")]
     Active,
 
-    [SwaggerEnum("Overdue")]
+    [Description("Overdue")]
     Overdue
 }

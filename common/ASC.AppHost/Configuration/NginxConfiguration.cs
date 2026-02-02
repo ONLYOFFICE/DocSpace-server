@@ -32,9 +32,10 @@ public static class NginxConfiguration
         IDistributedApplicationBuilder builder,
         string basePath,
         string clientBasePath,
-        IResourceBuilder<ExecutableResource> startPackages,
+        IResourceBuilder<ExecutableResource>? startPackages,
         bool isDocker)
     {
+        
         var openResty = builder.AddContainer(Constants.OpenRestyContainer, "openresty/openresty", "latest")
             .WithBindMount(Path.Combine(basePath, "buildtools", "config", "nginx"), "/etc/nginx/conf.d/")
             .WithBindMount(Path.Combine(basePath, "buildtools", "config", "nginx", "includes"), "/etc/nginx/includes/")
@@ -43,9 +44,13 @@ public static class NginxConfiguration
             .WithBindMount(Path.Combine(clientBasePath, "packages", "client"), "/var/www/client")
             .WithBindMount(Path.Combine(clientBasePath, "packages", "login"), "/var/www/login")
             .WithBindMount(Path.Combine(clientBasePath, "packages", "management"), "/var/www/management")
-            .WithHttpEndpoint(Constants.AppHostPort, Constants.RestyPort)
-            .WaitFor(startPackages);
+            .WithHttpEndpoint(Constants.AppHostPort, Constants.RestyPort);
 
+        if (startPackages != null)
+        {
+            openResty.WaitFor(startPackages);
+        }
+        
         var serviceUrls = GetServiceUrls(isDocker);
 
         foreach (var (key, value) in serviceUrls)

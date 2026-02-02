@@ -1155,6 +1155,12 @@
   <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
     <value>Brand name updated</value>
   </data>
+  <data name="AIDefaultProviderSet" xml:space="preserve">
+    <value>Default AI provider set: Name: {0}, Default Model: {1}</value>
+  </data>
+  <data name="AIDefaultProviderDeleted" xml:space="preserve">
+    <value>Default provider deleted</value>
+  </data>
   <data name="FileSavedButUserQuotaExceeded" xml:space="preserve">
     <value>Users [{0}]. File updated: {1}, exceeding the user storage quota.</value>
   </data>

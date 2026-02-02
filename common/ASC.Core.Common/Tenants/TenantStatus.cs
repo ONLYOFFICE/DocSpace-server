@@ -32,24 +32,24 @@ namespace ASC.Core.Tenants;
 [EnumExtensions]
 public enum TenantStatus
 {
-    [SwaggerEnum("Active")]
+    [Description("Active")]
     Active = 0,
 
-    [SwaggerEnum("Suspended")]
+    [Description("Suspended")]
     Suspended = 1,
 
-    [SwaggerEnum("Remove pending")]
+    [Description("Remove pending")]
     RemovePending = 2,
 
-    [SwaggerEnum("Transfering")]
+    [Description("Transfering")]
     Transfering = 3,
 
-    [SwaggerEnum("Restoring")]
+    [Description("Restoring")]
     Restoring = 4,
 
-    [SwaggerEnum("Migrating")]
+    [Description("Migrating")]
     Migrating = 5,
 
-    [SwaggerEnum("Encryption")]
+    [Description("Encryption")]
     Encryption = 6
 }

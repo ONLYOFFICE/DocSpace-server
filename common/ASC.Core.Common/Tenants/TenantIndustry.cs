@@ -31,54 +31,54 @@ namespace ASC.Core.Tenants;
 /// </summary>
 public enum TenantIndustry
 {
-    [SwaggerEnum("Other")]
+    [Description("Other")]
     Other,
 
-    [SwaggerEnum("Accounting")]
+    [Description("Accounting")]
     Accounting,
 
-    [SwaggerEnum("Advertising marketing PR")]
+    [Description("Advertising marketing PR")]
     AdvertisingMarketingPR,
 
-    [SwaggerEnum("Banking")]
+    [Description("Banking")]
     Banking,
 
-    [SwaggerEnum("Consulting")]
+    [Description("Consulting")]
     Consulting,
 
-    [SwaggerEnum("Design")]
+    [Description("Design")]
     Design,
 
-    [SwaggerEnum("Education")]
+    [Description("Education")]
     Education,
 
-    [SwaggerEnum("Environment")]
+    [Description("Environment")]
     Environment,
 
-    [SwaggerEnum("Financial services")]
+    [Description("Financial services")]
     FinancialServices,
 
-    [SwaggerEnum("Health care")]
+    [Description("Health care")]
     HealthCare,
 
-    [SwaggerEnum("IT")]
+    [Description("IT")]
     IT,
 
-    [SwaggerEnum("Legal")]
+    [Description("Legal")]
     Legal,
 
-    [SwaggerEnum("Manufacturing")]
+    [Description("Manufacturing")]
     Manufacturing,
 
-    [SwaggerEnum("Public sector")]
+    [Description("Public sector")]
     PublicSector,
 
-    [SwaggerEnum("Publishing")]
+    [Description("Publishing")]
     Publishing,
 
-    [SwaggerEnum("Retail sales")]
+    [Description("Retail sales")]
     RetailSales,
 
-    [SwaggerEnum("Telecommunications")]
+    [Description("Telecommunications")]
     Telecommunications
 }

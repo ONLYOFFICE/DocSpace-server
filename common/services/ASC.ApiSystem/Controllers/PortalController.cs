@@ -706,7 +706,7 @@ public class PortalController(
 
         var isLastFullAccessSpace = true;
 
-        var activeTenants = await hostedSolution.GetTenantsAsync(default);
+        var activeTenants = await hostedSolution.GetTenantsAsync(default(DateTime));
 
         foreach (var t in activeTenants.Where(t => t.Id != tenant.Id))
         {
@@ -937,9 +937,9 @@ public class PortalController(
         {
             var sw = Stopwatch.StartNew();
 
-            var clientIP = commonMethods.GetClientIp();
+            var clientIp = commonMethods.GetClientIp();
 
-            if (commonMethods.CheckMuchRegistration(model, clientIP, sw))
+            if (commonMethods.CheckMuchRegistration(model, clientIp, sw))
             {
                 if (string.IsNullOrEmpty(model.RecaptchaResponse))
                 {
@@ -950,7 +950,7 @@ public class PortalController(
                     });
                 }
 
-                var error = await GetRecaptchaError(model, clientIP, sw);
+                var error = await GetRecaptchaError(model, clientIp, sw);
 
                 if (error != null)
                 {
@@ -958,20 +958,39 @@ public class PortalController(
                 }
             }
 
+            if (!string.IsNullOrEmpty(model.ThirdPartyProfile))
+            {
+                try
+                {
+                    var profile = await loginProfileTransport.FromPureTransport(model.ThirdPartyProfile);
+                    if (profile != null && string.IsNullOrEmpty(profile.AuthorizationError))
+                    {
+                        var tenantWrappersByProfile = GetTenantsByThirdPartyProfileAsync(profile);
+                        return Ok(new
+                        {
+                            tenants = tenantWrappersByProfile
+                        });
+                    }
+                }
+                catch (Exception e)
+                {
+                    option.LogError(e, e.Message);
+                }
+            }
+
             var tenants = await commonMethods.GetTenantsAsync(model.Email, model.PasswordHash);
 
             var scheme = commonMethods.GetRequestScheme();
 
-            var tenantsWrapper = from tenant in tenants
-                                 let domain = tenant.GetTenantDomain(coreSettings)
-                                 select new
-                                 {
-                                     portalName = $"{scheme}{Uri.SchemeDelimiter}{domain}",
-                                     portalLink = commonMethods.CreateReference(tenant.Id, scheme, domain, model.Email)
-                                 };
+            var tenantWrappers = from tenant in tenants
+                let domain = tenant.GetTenantDomain(coreSettings)
+                let portalName = $"{scheme}{Uri.SchemeDelimiter}{domain}"
+                let portalLink = commonMethods.CreateReference(tenant.Id, scheme, domain, model.Email)
+                select new TenantWrapper(portalName, portalLink);
+
             return Ok(new
             {
-                tenants = tenantsWrapper
+                tenants = tenantWrappers
             });
         }
         catch (Exception ex)
@@ -987,6 +1006,49 @@ public class PortalController(
         }
     }
 
+    record TenantWrapper(string PortalName, string PortalLink);
+    
+    private async Task<List<TenantWrapper>> GetTenantsByThirdPartyProfileAsync(LoginProfile  profile)
+    {
+        var result = new List<TenantWrapper>();
+        if (profile == null)
+        {
+            return result;
+        }
+
+        var linkedProfiles = await accountLinker.GetLinkedObjectsByHashIdAsync(profile.HashId);
+        var userIds = new List<Guid>();
+        foreach (var profileId in linkedProfiles)
+        {
+            if (Guid.TryParse(profileId, out var userId))
+            {
+                userIds.Add(userId);
+            }
+        }
+
+        var users = (await hostedSolution.FindUsersAsync(userIds))
+            .Where(u => u.Status is EmployeeStatus.Active)
+            .DistinctBy(u => u.TenantId)
+            .ToDictionary(k => k.TenantId, v => v);
+
+        var tenants = await hostedSolution.GetTenantsAsync(users.Keys.ToList());
+
+        var scheme = commonMethods.GetRequestScheme();
+
+        foreach (var tenant in tenants)
+        {
+            if (!users.TryGetValue(tenant.Id, out var user))
+            {
+                continue;
+            }
+            var domain = tenant.GetTenantDomain(coreSettings);
+            var portalName = $"{scheme}{Uri.SchemeDelimiter}{domain}";
+            var portalLink = commonMethods.CreateReference(tenant.Id, scheme, domain, user.Email);
+            result.Add(new TenantWrapper(portalName, portalLink));
+        }
+
+        return result;
+    }
 
     /// <summary>
     /// Returns an Document Server license quota.

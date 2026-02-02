@@ -37,6 +37,7 @@ public class AiProvider
     public DateTime ModifiedOn { get; set; }
 
     public bool NeedReset { get; set; }
+    public bool IsDefault { get; set; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
