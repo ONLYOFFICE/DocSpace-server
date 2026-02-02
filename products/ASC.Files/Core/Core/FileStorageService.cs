@@ -45,6 +45,7 @@ public class FileStorageService //: IFileStorageService
     SocketManager socketManager,
     IDaoFactory daoFactory,
     FileMarker fileMarker,
+    FileHelper fileHelper,
     BreadCrumbsManager breadCrumbsManager,
     LockerManager lockerManager,
     EntryManager entryManager,
@@ -2147,8 +2148,13 @@ public class FileStorageService //: IFileStorageService
                 await tagDao.SaveTagsAsync(tagLocked);
             }
 
-            var usersDrop = (await fileTracker.GetEditingByAsync(file.Id)).Where(uid => uid != authContext.CurrentAccount.ID).Select(u => u.ToString()).ToArray();
-            if (usersDrop.Length > 0)
+            var usersDrop = await fileTracker.GetAnonymousEditingSessionsAsync(file.Id);
+
+            usersDrop.AddRange((await fileTracker.GetEditingByAsync(file.Id))
+                .Where(uid => uid != authContext.CurrentAccount.ID)
+                .Select(u => u.ToString()));
+
+            if (usersDrop.Count > 0)
             {
                 var docKey = await fileTracker.GetTrackerDocKey(file.Id);
                 await documentServiceHelper.DropUserAsync(docKey, usersDrop, file.Id);
@@ -2228,8 +2234,13 @@ public class FileStorageService //: IFileStorageService
 
                 await tagDao.SaveTagsAsync(tagCustomFilter);
 
-                var usersDrop = (await fileTracker.GetEditingByAsync(file.Id)).Where(uid => uid != authContext.CurrentAccount.ID).Select(u => u.ToString()).ToArray();
-                if (usersDrop.Length > 0)
+                var usersDrop = await fileTracker.GetAnonymousEditingSessionsAsync(file.Id);
+
+                usersDrop.AddRange((await fileTracker.GetEditingByAsync(file.Id))
+                    .Where(uid => uid != authContext.CurrentAccount.ID)
+                    .Select(u => u.ToString()));
+
+                if (usersDrop.Count > 0)
                 {
                     var docKey = await fileTracker.GetTrackerDocKey(file.Id);
                     await documentServiceHelper.DropUserAsync(docKey, usersDrop, file.Id);
@@ -4843,12 +4854,17 @@ public class FileStorageService //: IFileStorageService
             var newFile = file;
             if (file.CreateBy != userInfo.Id)
             {
+                var fileState = await fileHelper.GetFileState(file);
+
+                file.SetFileState(fileState);
+
                 newFile = serviceProvider.GetService<File<T>>();
                 newFile.Id = file.Id;
                 newFile.Version = file.Version + 1;
                 newFile.VersionGroup = file.VersionGroup + 1;
                 newFile.Title = file.Title;
-                newFile.SetFileStatus(await file.GetFileStatus());
+                newFile.FileStatus = file.FileStatus;
+                newFile.EditingBy = file.EditingBy;
                 newFile.ParentId = file.ParentId;
                 newFile.CreateBy = userInfo.Id;
                 newFile.CreateOn = file.CreateOn;

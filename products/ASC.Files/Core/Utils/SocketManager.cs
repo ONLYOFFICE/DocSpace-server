@@ -44,10 +44,10 @@ public class SocketManager(
 {
     protected override string Hub => "files";
 
-    public async Task StartEditAsync<T>(T fileId)
+    public async Task StartEditAsync<T>(T fileId, Dictionary<Guid, string> editingBy)
     {
         var room = FileRoom(fileId);
-        await MakeRequest("start-edit", new { room, fileId });
+        await MakeRequest("start-edit", new { room, fileId, editingBy });
     }
 
     public async Task StopEditAsync<T>(T fileId)
