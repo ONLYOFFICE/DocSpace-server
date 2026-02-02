@@ -24,22 +24,30 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Core.Chat.Tool;
-
 namespace ASC.AI.Models.ResponseDto;
 
-public class ToolContentDto : MessageContentDto
+public class AiProviderDto
 {
-    public override MessageContentType Type => MessageContentType.Tool;
-    public required string Name { get; init; }
-    public IDictionary<string, object?>? Arguments { get; init; }
-    public object? Result { get; init; }
-    public McpServerInfo? McpServerInfo { get; init; }
+    public int Id { get; init; }
+    public required string Title { get; init; }
+    public ProviderType Type { get; init; }
+    public string? Url { get; init; }
+    public required ApiDateTime CreatedOn { get; init; }
+    public required ApiDateTime ModifiedOn { get; init; }
+
+    public bool NeedReset { get; init; }
+    public bool IsDefault { get; init; }
 }
 
+[Scope]
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
     PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public static partial class ToolContentDtoMapper
+public partial class ProviderMapper(ApiDateTimeHelper helper)
 {
-    public static partial ToolContentDto MapToDto(this ToolCallMessageContent source);
+    public partial AiProviderDto MapToDto(AiProvider provider);
+
+    private ApiDateTime MapDateTime(DateTime dateTime)
+    {
+        return helper.Get(dateTime);
+    }
 }

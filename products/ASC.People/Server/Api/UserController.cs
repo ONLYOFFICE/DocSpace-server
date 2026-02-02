@@ -32,9 +32,9 @@ using ASC.Web.Files.Utils;
 
 namespace ASC.People.Api;
 
-///<summary>
+///<remarks>
 /// User API.
-///</summary>
+///</remarks>
 public class UserController(
     CommonLinkUtility commonLinkUtility,
     ICache cache,
@@ -92,12 +92,12 @@ public class UserController(
     GroupFullDtoHelper groupFullDtoHelper)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 {
-    /// <summary>
+    /// <remarks>
     /// Returns the user claims.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get user claims
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/tokendiagnostics</path>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Claims", typeof(object))]
@@ -114,12 +114,12 @@ public class UserController(
     }
 
 
-    /// <summary>
+    /// <remarks>
     /// Adds an activated portal user with the first name, last name, email address, and several optional parameters specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Add an activated user
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/active</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("People / Profiles")]
@@ -210,12 +210,12 @@ public class UserController(
         return await employeeFullDtoHelper.GetFullAsync(user);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Adds a new portal user with the first name, last name, email address, and several optional parameters specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Add a user
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people</path>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Newly added user with the detailed information", typeof(EmployeeFullDto))]
@@ -390,12 +390,12 @@ public class UserController(
         return await employeeFullDtoHelper.GetFullAsync(user);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Invites users specified in the request to the current portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Invite users
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/invite</path>
     /// <collection>list</collection>
     [Tags("People / Profiles")]
@@ -504,10 +504,10 @@ public class UserController(
         return result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sets a new password to the user with the ID specified in the request.
-    /// </summary>
-    /// <short>Change a user password</short>
+    /// </remarks>
+    /// <summary>Change a user password</summary>
     /// <path>api/2.0/people/{userid}/password</path>
     [Tags("People / Password")]
     [SwaggerResponse(200, "Detailed user information", typeof(EmployeeFullDto))]
@@ -612,12 +612,12 @@ public class UserController(
         return await employeeFullDtoHelper.GetFullAsync(await GetUserInfoAsync(inDto.UserId.ToString()));
     }
 
-    /// <summary>
+    /// <remarks>
     /// Deletes a user with the ID specified in the request from the portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Delete a user
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/{userid}</path>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Deleted user detailed information", typeof(EmployeeFullDto))]
@@ -683,12 +683,12 @@ public class UserController(
         return await employeeFullDtoHelper.GetFullAsync(user);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Deletes the current user profile.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Delete my profile
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/@self</path>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Detailed information about my profile", typeof(EmployeeFullDto))]
@@ -736,12 +736,12 @@ public class UserController(
         return await employeeFullDtoHelper.GetFullAsync(user);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Deletes guests from the list and excludes them from rooms to which they were invited.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Delete guests
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/guests</path>
     [SwaggerResponse(200, "Request parameters for deleting guests")]
     [SwaggerResponse(403, "No permissions to perform this action")]
@@ -779,12 +779,12 @@ public class UserController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a link to share a guest with another user.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get a guest sharing link
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/guests/{userid}/share</path>
     [Tags("Portal / Guests")]
     [SwaggerResponse(200, "User share link", typeof(string))]
@@ -820,12 +820,12 @@ public class UserController(
         return await urlShortener.GetShortenLinkAsync(link);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Approves a guest sharing link and returns the detailed information about a guest.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Approve a guest sharing link
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/guests/share/approve</path>
     [Tags("People / Guests")]
     [SwaggerResponse(200, "Detailed profile information", typeof(EmployeeFullDto))]
@@ -870,12 +870,12 @@ public class UserController(
         return await employeeFullDtoHelper.GetFullAsync(targetUser);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of users matching the status filter and search query.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Search users by status filter
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/status/{status}/search</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
@@ -910,12 +910,12 @@ public class UserController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of profiles for all the portal users.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get profiles
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people</path>
     /// <collection>list</collection>
     [Tags("People / Profiles")]
@@ -938,12 +938,12 @@ public class UserController(
         return GetByStatus(status);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the detailed information about a profile of the user with the email specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get a profile by user email
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/email</path>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Detailed profile information", typeof(EmployeeFullDto))]
@@ -984,12 +984,12 @@ public class UserController(
         return await employeeFullDtoHelper.GetFullAsync(user);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the detailed information about a profile of the user with the ID specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get a profile by user ID
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/{userid}</path>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Detailed profile information", typeof(EmployeeFullDto))]
@@ -1037,12 +1037,12 @@ public class UserController(
         return await employeeFullDtoHelper.GetFullAsync(user);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of profiles filtered by the user status.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get profiles by status
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/status/{status}</path>
     /// <collection>list</collection>
     [Tags("People / User status")]
@@ -1074,12 +1074,12 @@ public class UserController(
         return SearchUsersByExtendedFilter(filter);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of users with full information about them matching the parameters specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Search users with detailed information by extended filter
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/filter</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
@@ -1121,10 +1121,10 @@ public class UserController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the information about the "People" module.
-    /// </summary>
-    /// <short>Get the People information</short>
+    /// </remarks>
+    /// <summary>Get the People information</summary>
     /// <path>api/2.0/people/info</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("People / Module")]
@@ -1138,10 +1138,10 @@ public class UserController(
         return new Module(product);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of users matching the search query. This method uses the query parameters.
-    /// </summary>
-    /// <short>Search users (using query parameters)</short>
+    /// </remarks>
+    /// <summary>Search users (using query parameters)</summary>
     /// <path>api/2.0/people/search</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
@@ -1153,10 +1153,10 @@ public class UserController(
         return GetSearch(query);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of users matching the search query.
-    /// </summary>
-    /// <short>Search users</short>
+    /// </remarks>
+    /// <summary>Search users</summary>
     /// <path>api/2.0/people/@search/{query}</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
@@ -1184,12 +1184,12 @@ public class UserController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of users matching the parameters specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Search users by extended filter
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/simple/filter</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
@@ -1230,12 +1230,12 @@ public class UserController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Deletes a list of the users with the IDs specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Delete users
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/delete</path>
     /// <collection>list</collection>
     [Tags("People / Profiles")]
@@ -1293,12 +1293,12 @@ public class UserController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Resends emails to the users who have not activated their emails.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Resend activation emails
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/invite</path>
     /// <collection>list</collection>
     [Tags("People / Profiles")]
@@ -1437,12 +1437,12 @@ public class UserController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a theme which is set to the current portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the portal theme
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/theme</path>
     [Tags("People / Theme")]
     [SwaggerResponse(200, "Theme", typeof(DarkThemeSettings))]
@@ -1452,12 +1452,12 @@ public class UserController(
         return await settingsManager.LoadForCurrentUserAsync<DarkThemeSettings>();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Changes the current portal theme.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Change the portal theme
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/theme</path>
     [Tags("People / Theme")]
     [SwaggerResponse(200, "Theme", typeof(DarkThemeSettings))]
@@ -1474,12 +1474,12 @@ public class UserController(
         return darkThemeSettings;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the detailed information about the current user profile.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get my profile
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/@self</path>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Detailed information about my profile", typeof(EmployeeFullDto))]
@@ -1517,12 +1517,12 @@ public class UserController(
         return result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sends a message to the user email with the instructions to change the email address connected to the portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Send instructions to change email
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/email</path>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Message text", typeof(string))]
@@ -1616,12 +1616,12 @@ public class UserController(
         return string.Format(Resource.MessageEmailChangeInstuctionsSentOnEmail, email);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Reminds a password to the user using the email address specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Remind a user password
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/password</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("People / Password")]
@@ -1664,12 +1664,12 @@ public class UserController(
         return string.Format(pattern, inDto.Email);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sets the required activation status to the list of users with the IDs specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Set an activation status to the users
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/activationstatus/{activationstatus}</path>
     /// <collection>list</collection>
     [Tags("People / User status")]
@@ -1719,12 +1719,12 @@ public class UserController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Updates the user culture code with the parameters specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Update a user culture code
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/{userid}/culture</path>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Detailed user information", typeof(EmployeeFullDto))]
@@ -1747,12 +1747,12 @@ public class UserController(
         return await employeeFullDtoHelper.GetFullAsync(user);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Updates the data for the selected portal user with the first name, last name, email address, and/or optional parameters specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Update a user
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/{userid}</path>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Updated user with the detailed information", typeof(EmployeeFullDto))]
@@ -1917,12 +1917,12 @@ public class UserController(
         return await employeeFullDtoHelper.GetFullAsync(user);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Changes a status of the users with the IDs specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Change a user status
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/status/{status}</path>
     /// <collection>list</collection>
     [Tags("People / User status")]
@@ -2032,12 +2032,12 @@ public class UserController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Changes a type of the users with the IDs specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Change a user type
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/type/{type}</path>
     /// <collection>list</collection>
     [Tags("People / User type")]
@@ -2092,10 +2092,10 @@ public class UserController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Starts updating the type of the user or guest when reassigning rooms and shared files.
-    /// </summary>
-    /// <short>Start updating user type</short>
+    /// </remarks>
+    /// <summary>Start updating user type</summary>
     /// <path>api/2.0/people/type</path>
     [Tags("People / User type")]
     [SwaggerResponse(200, "Update type progress", typeof(TaskProgressResponseDto))]
@@ -2152,10 +2152,10 @@ public class UserController(
         return TaskProgressResponseDto.Get(progressItem);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the progress of updating the user type.
-    /// </summary>
-    /// <short>Get the progress of updating user type</short>
+    /// </remarks>
+    /// <summary>Get the progress of updating user type</summary>
     /// <path>api/2.0/people/type/progress/{userid}</path>
     [Tags("People / User type")]
     [SwaggerResponse(200, "Update type progress", typeof(TaskProgressResponseDto))]
@@ -2170,10 +2170,10 @@ public class UserController(
         return TaskProgressResponseDto.Get(progressItem);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Terminates the process of updating the type of the user or guest.
-    /// </summary>
-    /// <short>Terminate updating user type</short>
+    /// </remarks>
+    /// <summary>Terminate updating user type</summary>
     /// <path>api/2.0/people/type/terminate</path>
     [Tags("People / User type")]
     [SwaggerResponse(200, "Update type progress", typeof(TaskProgressResponseDto))]
@@ -2196,12 +2196,12 @@ public class UserController(
         return TaskProgressResponseDto.Get(progressItem);
     }
 
-    ///<summary>
+    ///<remarks>
     /// Starts the process of recalculating a quota.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Recalculate a quota 
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/recalculatequota</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("People / Quota")]
@@ -2212,12 +2212,12 @@ public class UserController(
         await usersQuotaSyncOperation.RecalculateQuota(tenantManager.GetCurrentTenant());
     }
 
-    /// <summary>
+    /// <remarks>
     /// Checks the process of recalculating a quota.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Check the quota recalculation
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/checkrecalculatequota</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("People / Quota")]
@@ -2229,12 +2229,12 @@ public class UserController(
         return await usersQuotaSyncOperation.CheckRecalculateQuota(tenantManager.GetCurrentTenant());
     }
 
-    /// <summary>
+    /// <remarks>
     /// Changes a quota limit for the users with the IDs specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Change a user quota limit
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/userquota</path>
     /// <collection>list</collection>
     [Tags("People / Quota")]
@@ -2299,12 +2299,12 @@ public class UserController(
 
     }
 
-    /// <summary>
+    /// <remarks>
     /// Resets a quota limit of users with the IDs specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Reset a user quota limit
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/resetquota</path>
     /// <collection>list</collection>
     [Tags("People / Quota")]
@@ -2536,12 +2536,12 @@ public class UserController(
         }
     }
 
-    ///// <summary>
+    ///// <remarks>
     ///// Imports the new portal users with the first name, last name, and email address.
-    ///// </summary>
-    ///// <short>
+    ///// </remarks>
+    ///// <summary>
     ///// Import users
-    ///// </short>
+    ///// </summary>
     ///// <param type="System.String, System" name="userList">List of users</param>
     ///// <param type="System.Boolean, System" name="importUsersAsCollaborators" optional="true">Specifies whether to import users as guests or not</param>
     ///// <path>api/2.0/people/import/save</path>
@@ -2570,12 +2570,12 @@ public class UserController(
     //    }
     //}
 
-    // <summary>
+    // <remarks>
     // Returns a status of the current user.
-    // </summary>
-    // <short>
+    // </remarks>
+    // <summary>
     // Get a user status
-    // </short>
+    // </summary>
     // <returns tye="System.Object, System">Current user information</returns>
     // <category>User status</category>
     // <path>api/2.0/people/import/status</path>
@@ -2632,12 +2632,12 @@ public class UserControllerAdditional<T>(
     UserManager userManager)
     : ApiControllerBase
 {
-    /// <summary>
+    /// <remarks>
     /// Returns the users with the sharing settings in a room with the ID specified in request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get users with room sharing settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/room/{id}</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
@@ -2653,12 +2653,12 @@ public class UserControllerAdditional<T>(
             yield return p;
         }
     }
-    /// <summary>
+    /// <remarks>
     /// Returns the users with the sharing settings in a folder with the ID specified in request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get users with folder sharing settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/folder/{id}</path>
     [Tags("People / Search")]
     [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<EmployeeFullDto>))]
@@ -2673,12 +2673,12 @@ public class UserControllerAdditional<T>(
             yield return p;
         }
     }
-    /// <summary>
+    /// <remarks>
     /// Returns the users with the sharing settings in a file with the ID specified in request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get users with file sharing settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/file/{id}</path>
     [Tags("People / Search")]
     [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<EmployeeFullDto>))]

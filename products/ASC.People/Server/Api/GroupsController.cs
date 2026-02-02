@@ -28,9 +28,9 @@ using ASC.Web.Files.Utils;
 
 namespace ASC.People.Api;
 
-///<summary>
+///<remarks>
 /// Groups API.
-///</summary>
+///</remarks>
 ///<name>group</name>
 [Scope]
 [DefaultRoute]
@@ -48,12 +48,12 @@ public class GroupController(
     UserWebhookManager webhookManager)
     : ControllerBase
 {
-    /// <summary>
+    /// <remarks>
     /// Returns the general information about all the groups, such as group ID and group manager.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get groups
-    /// </short>
+    /// </summary>
     /// <remarks>
     /// This method returns partial group information.
     /// </remarks>
@@ -88,12 +88,12 @@ public class GroupController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the detailed information about the selected group.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get a group
-    /// </short>
+    /// </summary>
     /// <remarks>
     /// This method returns full group information.
     /// </remarks>
@@ -109,12 +109,12 @@ public class GroupController(
         return await groupFullDtoHelper.Get(await GetGroupInfoAsync(inDto.Id), inDto.IncludeMembers);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of groups for the user with the ID specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get user groups
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/group/user/{userid}</path>
     /// <collection>list</collection>
     [Tags("Group")]
@@ -134,12 +134,12 @@ public class GroupController(
         return result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Adds a new group with the group manager, name, and members specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Add a new group
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/group</path>
     [Tags("Group")]
     [SwaggerResponse(200, "Newly created group with the detailed information", typeof(GroupDto))]
@@ -171,12 +171,12 @@ public class GroupController(
         return dto;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Updates the existing group changing the group manager, name, and/or members.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Update a group
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/group/{id}</path>
     [Tags("Group")]
     [SwaggerResponse(200, "Updated group with the detailed information", typeof(GroupDto))]
@@ -220,12 +220,12 @@ public class GroupController(
         return dto;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Deletes a group with the ID specified in the request from the list of groups on the portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Delete a group
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/group/{id}</path>
     [Tags("Group")]
     [SwaggerResponse(200, "No content", typeof(NoContentResult))]
@@ -249,12 +249,12 @@ public class GroupController(
         return NoContent();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Moves all the members from the selected group to another one specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Move group members
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/group/{fromId}/members/{toId}</path>
     [Tags("Group")]
     [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
@@ -277,12 +277,12 @@ public class GroupController(
         return await GetGroup(new DetailedInformationRequestDto { Id = inDto.ToId });
     }
 
-    /// <summary>
+    /// <remarks>
     /// Replaces the group members with those specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Replace group members
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/group/{id}/members</path>
     [Tags("Group")]
     [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
@@ -304,12 +304,12 @@ public class GroupController(
         return await GetGroup(new DetailedInformationRequestDto { Id = inDto.Id });
     }
 
-    /// <summary>
+    /// <remarks>
     /// Adds new group members to the group with the ID specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Add group members
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/group/{id}/members</path>
     [Tags("Group")]
     [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
@@ -329,12 +329,12 @@ public class GroupController(
         return await GetGroup(new DetailedInformationRequestDto { Id = group.ID });
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sets a user with the ID specified in the request as a group manager.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Set a group manager
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/group/{id}/manager</path>
     [Tags("Group")]
     [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
@@ -356,12 +356,12 @@ public class GroupController(
         return await GetGroup(new DetailedInformationRequestDto { Id = inDto.Id });
     }
 
-    /// <summary>
+    /// <remarks>
     /// Removes the group members specified in the request from the selected group.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Remove group members
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/group/{id}/members</path>
     [Tags("Group")]
     [SwaggerResponse(200, "Group with the detailed information", typeof(GroupDto))]
@@ -457,10 +457,10 @@ public class GroupControllerAdditional<T>(
     FileSecurity fileSecurity,
     GroupFullDtoHelper groupFullDtoHelper) : ControllerBase
 {
-    /// <summary>
+    /// <remarks>
     /// Returns groups with their sharing settings in a room with the ID specified in request.
-    /// </summary>
-    /// <short>Get groups with room sharing settings</short>
+    /// </remarks>
+    /// <summary>Get groups with room sharing settings</summary>
     /// <path>api/2.0/group/room/{id}</path>
     /// <collection>list</collection>
     [Tags("Group / Search")]
@@ -477,10 +477,10 @@ public class GroupControllerAdditional<T>(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns groups with their sharing settings in a folder with the ID specified in request.
-    /// </summary>
-    /// <short>Get groups with folder sharing settings</short>
+    /// </remarks>
+    /// <summary>Get groups with folder sharing settings</summary>
     /// <path>api/2.0/group/folder/{id}</path>
     /// <collection>list</collection>
     [Tags("Group / Search")]
@@ -497,10 +497,10 @@ public class GroupControllerAdditional<T>(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns groups with their sharing settings for a file with the ID specified in request.
-    /// </summary>
-    /// <short>Get groups with file sharing settings</short>
+    /// </remarks>
+    /// <summary>Get groups with file sharing settings</summary>
     /// <path>api/2.0/group/file/{id}</path>
     /// <collection>list</collection>
     [Tags("Group / Search")]

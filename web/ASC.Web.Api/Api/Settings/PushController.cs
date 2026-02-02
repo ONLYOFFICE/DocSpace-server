@@ -35,10 +35,10 @@ public class PushController(
     FirebaseHelper firebaseHelper)
     : BaseSettingsController(fusionCache, webItemManager)
 {
-    /// <summary>
+    /// <remarks>
     /// Saves the Firebase device token specified in the request for the Documents application.
-    /// </summary>
-    /// <short>Save the Documents Firebase device token</short>
+    /// </remarks>
+    /// <summary>Save the Documents Firebase device token</summary>
     /// <path>api/2.0/settings/push/docregisterdevice</path>
     [Tags("Security / Firebase")]
     [SwaggerResponse(200, "FireBase user", typeof(FireBaseUser))]
@@ -48,10 +48,10 @@ public class PushController(
         return await firebaseHelper.RegisterUserDeviceAsync(inDto.FirebaseDeviceToken, inDto.IsSubscribed, PushConstants.PushDocAppName);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Subscribes to the Documents push notification.
-    /// </summary>
-    /// <short>Subscribe to Documents push notification</short>
+    /// </remarks>
+    /// <summary>Subscribe to Documents push notification</summary>
     /// <path>api/2.0/settings/push/docsubscribe</path>
     [Tags("Security / Firebase")]
     [SwaggerResponse(200, "FireBase user", typeof(FireBaseUser))]

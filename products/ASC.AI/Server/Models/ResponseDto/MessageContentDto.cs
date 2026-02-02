@@ -26,7 +26,7 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
-public enum ContentType
+public enum MessageContentType
 {
     Text,
     Tool,
@@ -38,5 +38,5 @@ public enum ContentType
 [JsonDerivedType(typeof(AttachmentContentDto))]
 public abstract class MessageContentDto
 {
-    public abstract ContentType Type { get; }
+    public abstract MessageContentType Type { get; }
 }

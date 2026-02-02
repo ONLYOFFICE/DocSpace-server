@@ -32,9 +32,9 @@ using Microsoft.AspNetCore.Cors;
 
 namespace ASC.Web.Api.Controllers;
 
-/// <summary>
+/// <remarks>
 /// Security API.
-/// </summary>
+/// </remarks>
 /// <name>security</name>
 [Scope]
 [DefaultRoute]
@@ -56,12 +56,12 @@ public class SecurityController(
         IdentityClient identityClient)
     : ControllerBase
 {
-    /// <summary>
+    /// <remarks>
     /// Returns all the latest user login activity, including successful logins and error logs.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get login history
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/security/audit/login/last</path>
     /// <collection>list</collection>
     [Tags("Security / Login history")]
@@ -78,12 +78,12 @@ public class SecurityController(
             .Select(x => new LoginEventDto(x, apiDateTimeHelper));
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of the latest changes (creation, modification, deletion, etc.) made by users to the entities on the portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get audit trail data
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/security/audit/events/last</path>
     /// <collection>list</collection>
     [Tags("Security / Audit trail data")]
@@ -105,12 +105,12 @@ public class SecurityController(
             .Select(x => new AuditEventDto(x, auditActionMapper, apiDateTimeHelper));
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of the login events by the parameters specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get filtered login events
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/security/audit/login/filter</path>
     /// <collection>list</collection>
     [Tags("Security / Login history")]
@@ -133,12 +133,12 @@ public class SecurityController(
         return (await loginEventsRepository.GetByFilterAsync(inDto.UserId, inDto.Action, inDto.From, inDto.To, inDto.StartIndex, inDto.Count)).Select(x => new LoginEventDto(x, apiDateTimeHelper));
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of the audit events by the parameters specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get filtered audit trail data
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/security/audit/events/filter</path>
     /// <collection>list</collection>
     [Tags("Security / Audit trail data")]
@@ -161,12 +161,12 @@ public class SecurityController(
         return (await auditEventsRepository.GetByFilterAsync(inDto.UserId, inDto.LocationType, inDto.ActionType, inDto.Action, inDto.EntryType, inDto.Target, inDto.From, inDto.To, inDto.StartIndex, inDto.Count)).Select(x => new AuditEventDto(x, auditActionMapper, apiDateTimeHelper));
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns all the available audit trail types.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get audit trail types
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/security/audit/types</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Security / Audit trail data")]
@@ -185,12 +185,12 @@ public class SecurityController(
         };
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the mappers for the audit trail types.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get audit trail mappers
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/security/audit/mappers</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Security / Audit trail data")]
@@ -219,12 +219,12 @@ public class SecurityController(
             });
     }
 
-    /// <summary>
+    /// <remarks>
     /// Generates the login history report.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Generate the login history report
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/security/audit/login/report</path>
     [Tags("Security / Login history")]
     [SwaggerResponse(200, "URL to the xlsx report file", typeof(string))]
@@ -251,12 +251,12 @@ public class SecurityController(
         return result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Generates the audit trail report.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Generate the audit trail report
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/security/audit/events/report</path>
     [Tags("Security / Audit trail data")]
     [SwaggerResponse(200, "URL to the xlsx report file", typeof(string))]
@@ -287,12 +287,12 @@ public class SecurityController(
         return result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the audit trail settings.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the audit trail settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/security/audit/settings/lifetime</path>
     [Tags("Security / Audit trail data")]
     [SwaggerResponse(200, "Audit settings", typeof(TenantAuditSettings))]
@@ -307,12 +307,12 @@ public class SecurityController(
         return await settingsManager.LoadAsync<TenantAuditSettings>(tenantManager.GetCurrentTenantId());
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sets the audit trail settings for the current portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Set the audit trail settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/security/audit/settings/lifetime</path>
     [Tags("Security / Audit trail data")]
     [SwaggerResponse(200, "Audit trail settings", typeof(TenantAuditSettings))]
@@ -341,12 +341,12 @@ public class SecurityController(
         return inDto.Settings;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Configures the CSP (Content Security Policy) settings for the current portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Configure CSP settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/security/csp</path>
     [Tags("Security / CSP")]
     [SwaggerResponse(200, "Ok", typeof(CspDto))]
@@ -387,12 +387,12 @@ public class SecurityController(
         return new CspDto { Domains = request.Domains, Header = header };
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the CSP (Content Security Policy) settings for the current portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get CSP settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/security/csp</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Security / CSP")]
@@ -418,12 +418,12 @@ public class SecurityController(
         };
     }
 
-    /// <summary>
+    /// <remarks>
     /// Generates a JWT token for communication between login (client) and identity services.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Generate JWT token
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/security/oauth2/token</path>
     [Tags("Security / OAuth2")]
     [HttpGet("oauth2/token")]

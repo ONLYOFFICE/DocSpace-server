@@ -78,10 +78,10 @@ public abstract class UploadController<T>(
     IEventBus eventBus)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
-    /// <summary>
+    /// <remarks>
     /// Creates the session to upload large files in multiple chunks to the folder with the ID specified in the request.
-    /// </summary>
-    /// <short>Chunked upload</short>
+    /// </remarks>
+    /// <summary>Chunked upload</summary>
     /// <remarks>
     /// <![CDATA[
     /// Each chunk can have different length but the length should be multiple of <b>512</b> and greater or equal to <b>10 mb</b>. Last chunk can have any size.
@@ -103,7 +103,7 @@ public abstract class UploadController<T>(
     /// <path>api/2.0/files/{folderId}/upload/create_session</path>
     [Obsolete]
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "Information about created session", typeof(ChunkedUploadSessionResponseWrapper<>))]
+    [SwaggerResponse(200, "Information about created session")]
     [SwaggerResponse(403, "You don't have enough permission to create")]
     [HttpPost("{folderId}/upload/create_session")]
     public async Task<ChunkedUploadSessionResponseWrapper<T>> CreateUploadSession(SessionRequestDto<T> inDto)
@@ -279,10 +279,10 @@ public abstract class UploadController<T>(
         };
     }
 
-    /// <summary>
+    /// <remarks>
     /// Creates a session to edit the existing file with multiple chunks (needed for WebDAV).
-    /// </summary>
-    /// <short>Create the editing session</short>
+    /// </remarks>
+    /// <summary>Create the editing session</summary>
     /// <remarks>
     /// <![CDATA[
     /// Information about created session which includes:
@@ -298,7 +298,7 @@ public abstract class UploadController<T>(
     /// </remarks>
     /// <path>api/2.0/files/file/{fileId}/edit_session</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Information about created session", typeof(ChunkedUploadSessionResponseWrapper<>))]
+    [SwaggerResponse(200, "Information about created session")]
     [SwaggerResponse(403, "You don't have enough permission to edit the file")]
     [HttpPost("file/{fileId}/edit_session")]
     public async Task<ChunkedUploadSessionResponseWrapper<T>> CreateEditSession(CreateEditSessionRequestDto<T> inDto)
@@ -311,10 +311,10 @@ public abstract class UploadController<T>(
         };
     }
 
-    /// <summary>
+    /// <remarks>
     /// Checks the file uploads to the folder with the ID specified in the request.
-    /// </summary>
-    /// <short>Check file uploads</short>
+    /// </remarks>
+    /// <summary>Check file uploads</summary>
     /// <path>api/2.0/files/{folderId}/upload/check</path>
     /// <collection>list</collection>
     [Tags("Files / Folders")]
@@ -325,10 +325,10 @@ public abstract class UploadController<T>(
         return filesControllerHelper.CheckUploadAsync(model.FolderId, model.Check.FilesTitle);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Inserts a file specified in the request to the selected folder by single file uploading.
-    /// </summary>
-    /// <short>Insert a file</short>
+    /// </remarks>
+    /// <summary>Insert a file</summary>
     /// <path>api/2.0/files/{folderId}/insert</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Inserted file", typeof(FileDto<int>))]
@@ -341,10 +341,10 @@ public abstract class UploadController<T>(
     }
 
 
-    /// <summary>
+    /// <remarks>
     /// Uploads a file specified in the request to the selected folder by single file uploading or standart multipart/form-data method.
-    /// </summary>
-    /// <short>Upload a file</short>
+    /// </remarks>
+    /// <summary>Upload a file</summary>
     /// <remarks>
     /// <![CDATA[
     ///  You can upload files in two different ways:
@@ -371,10 +371,10 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
         FileDtoHelper fileDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
-    /// <summary>
+    /// <remarks>
     /// Inserts a file specified in the request to the "Common" section by single file uploading.
-    /// </summary>
-    /// <short>Insert a file to the "Common" section</short>
+    /// </remarks>
+    /// <summary>Insert a file to the "Common" section</summary>
     /// <path>api/2.0/files/@common/insert</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
@@ -387,10 +387,10 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
         return await filesControllerHelper.InsertFileAsync(await globalFolderHelper.FolderCommonAsync, inDto.Stream, inDto.Title, inDto.CreateNewIfExist, inDto.KeepConvertStatus);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Inserts a file specified in the request to the "My documents" section by single file uploading.
-    /// </summary>
-    /// <short>Insert a file to the "My documents" section</short>
+    /// </remarks>
+    /// <summary>Insert a file to the "My documents" section</summary>
     /// <path>api/2.0/files/@my/insert</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Inserted file", typeof(FileDto<int>))]
@@ -402,10 +402,10 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
         return await filesControllerHelper.InsertFileAsync(await globalFolderHelper.FolderMyAsync, inDto.Stream, inDto.Title, inDto.CreateNewIfExist, inDto.KeepConvertStatus);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Uploads a file specified in the request to the "Common" section by single file uploading or standart multipart/form-data method.
-    /// </summary>
-    /// <short>Upload a file to the "Common" section</short>
+    /// </remarks>
+    /// <summary>Upload a file to the "Common" section</summary>
     /// <remarks>
     /// <![CDATA[
     ///  You can upload files in two different ways:
@@ -426,10 +426,10 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
         return await filesControllerHelper.UploadFileAsync(await globalFolderHelper.FolderCommonAsync, inDto);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Uploads a file specified in the request to the "My documents" section by single file uploading or standart multipart/form-data method.
-    /// </summary>
-    /// <short>Upload a file to the "My documents" section</short>
+    /// </remarks>
+    /// <summary>Upload a file to the "My documents" section</summary>
     /// <remarks>
     /// <![CDATA[
     ///  You can upload files in two different ways:

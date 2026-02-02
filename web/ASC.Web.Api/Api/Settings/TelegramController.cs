@@ -35,10 +35,10 @@ public class TelegramController(
     )
     : BaseSettingsController(fusionCache, webItemManager)
 {
-    /// <summary>
+    /// <remarks>
     /// Checks if the current user is connected to the Telegram Bot or not.
-    /// </summary>
-    /// <short>Check the Telegram connection</short>
+    /// </remarks>
+    /// <summary>Check the Telegram connection</summary>
     /// <path>api/2.0/settings/telegram/check</path>
     [Tags("Settings / Telegram")]
     [SwaggerResponse(200, "Status if user is linked or not", typeof(TelegramStatusDto))]
@@ -53,10 +53,10 @@ public class TelegramController(
         };
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a link that will connect the Telegram Bot to your account.
-    /// </summary>
-    /// <short>Get the Telegram link</short>
+    /// </remarks>
+    /// <summary>Get the Telegram link</summary>
     /// <path>api/2.0/settings/telegram/link</path>
     [Tags("Settings / Telegram")]
     [SwaggerResponse(200, "A link to connect Telegram account", typeof(string))]
@@ -70,10 +70,10 @@ public class TelegramController(
             : currentLink;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Unlinks the Telegram Bot from your account.
-    /// </summary>
-    /// <short>Unlink Telegram</short>
+    /// </remarks>
+    /// <summary>Unlink Telegram</summary>
     /// <path>api/2.0/settings/telegram/link</path>
     [Tags("Settings / Telegram")]
     [SwaggerResponse(200, "True if success", typeof(bool))]
