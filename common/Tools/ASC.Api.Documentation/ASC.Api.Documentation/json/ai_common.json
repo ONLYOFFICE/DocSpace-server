@@ -2813,6 +2813,125 @@
         ]
       }
     },
+    "/api/2.0/ai/providers/default": {
+      "put": {
+        "tags": [
+          "AI / Providers"
+        ],
+        "summary": "Sets the default AI provider for the current tenant.",
+        "operationId": "setDefaultProvider",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetDefaultProviderRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default provider information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultProviderWrapper"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You don't have enough permission to manage providers"
+          },
+          "404": {
+            "description": "Provider not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "AI / Providers"
+        ],
+        "summary": "Returns the default AI provider for the current tenant.",
+        "operationId": "getDefaultProvider",
+        "responses": {
+          "200": {
+            "description": "Default provider information or null if not set",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultProviderWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
     "/api/2.0/ai/config/web-search": {
       "put": {
         "tags": [
@@ -3309,6 +3428,10 @@
           "needReset": {
             "type": "boolean",
             "example": true
+          },
+          "isDefault": {
+            "type": "boolean",
+            "example": true
           }
         },
         "additionalProperties": false
@@ -3543,6 +3666,11 @@
             "type": "string",
             "nullable": true,
             "example": "some text"
+          },
+          "internal": {
+            "type": "boolean",
+            "readOnly": true,
+            "example": true
           }
         },
         "additionalProperties": false
@@ -3751,6 +3879,68 @@
           }
         },
         "additionalProperties": false
+      },
+      "DefaultProviderDto": {
+        "required": [
+          "defaultModel"
+        ],
+        "type": "object",
+        "properties": {
+          "providerId": {
+            "type": "integer",
+            "description": "AI provider identifier.",
+            "format": "int32",
+            "example": 1234
+          },
+          "defaultModel": {
+            "type": "string",
+            "description": "Default model identifier used with this provider.",
+            "nullable": true,
+            "example": "some text"
+          },
+          "providerTitle": {
+            "type": "string",
+            "description": "AI provider title.",
+            "nullable": true,
+            "example": "some text"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Default AI provider information."
+      },
+      "DefaultProviderWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/DefaultProviderDto"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
       },
       "DeleteRoomRequest": {
         "type": "object",
@@ -5965,6 +6155,7 @@
         "type": "object",
         "properties": {
           "ids": {
+            "uniqueItems": true,
             "type": "array",
             "items": {
               "type": "integer",
@@ -6124,6 +6315,29 @@
         ],
         "type": "integer",
         "format": "int32"
+      },
+      "SetDefaultProviderRequestDto": {
+        "required": [
+          "defaultModel"
+        ],
+        "type": "object",
+        "properties": {
+          "providerId": {
+            "type": "integer",
+            "description": "AI provider identifier.",
+            "format": "int32",
+            "example": 1234
+          },
+          "defaultModel": {
+            "maxLength": 255,
+            "type": "string",
+            "description": "Default model identifier to use with this provider.",
+            "nullable": true,
+            "example": "some text"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Request parameters for setting the default AI provider."
       },
       "SetEmbeddingConfigRequestBody": {
         "type": "object",
