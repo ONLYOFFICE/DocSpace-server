@@ -25,7 +25,7 @@
     "/api/2.0/ai/agents": {
       "get": {
         "tags": [
-          "ai"
+          "AI / Agents"
         ],
         "summary": "Get ai agents",
         "description": "Get ai agents",
@@ -179,7 +179,7 @@
       },
       "post": {
         "tags": [
-          "ai"
+          "AI / Agents"
         ],
         "summary": "Create an ai agent",
         "description": "Creates an ai agent.",
@@ -242,7 +242,7 @@
     "/api/2.0/ai/agents/{id}": {
       "get": {
         "tags": [
-          "ai"
+          "AI / Agents"
         ],
         "summary": "Return an ai agent",
         "description": "Returns an ai agent.",
@@ -307,7 +307,7 @@
       },
       "put": {
         "tags": [
-          "ai"
+          "AI / Agents"
         ],
         "summary": "Update an ai agent",
         "description": "Updates an ai agent.",
@@ -383,7 +383,7 @@
       },
       "delete": {
         "tags": [
-          "ai"
+          "AI / Agents"
         ],
         "summary": "Remove an ai agent",
         "description": "Removes an ai agent.",
@@ -461,7 +461,7 @@
     "/api/2.0/ai/agents/agentquota": {
       "put": {
         "tags": [
-          "ai"
+          "AI / Agents"
         ],
         "summary": "Change the AI agent quota limit",
         "description": "Changes the quota limit for the AI agents with the IDs specified in the request.",
@@ -524,7 +524,7 @@
     "/api/2.0/ai/agents/resetquota": {
       "put": {
         "tags": [
-          "ai"
+          "AI / Agents"
         ],
         "summary": "Reset the AI agents quota limit",
         "description": "Resets the quota limit for the AI agents with the IDs specified in the request.",
@@ -587,7 +587,7 @@
     "/api/2.0/ai/agents/news": {
       "get": {
         "tags": [
-          "ai"
+          "AI / Agents"
         ],
         "summary": "Get the room new items",
         "description": "Returns the room new items.",
@@ -641,7 +641,7 @@
     "/api/2.0/ai/rooms/{roomId}/chats": {
       "post": {
         "tags": [
-          "ai"
+          "AI / Chat"
         ],
         "operationId": "startNewChat",
         "parameters": [
@@ -706,7 +706,7 @@
       },
       "get": {
         "tags": [
-          "ai"
+          "AI / Chat"
         ],
         "operationId": "getChats",
         "parameters": [
@@ -788,7 +788,7 @@
     "/api/2.0/ai/chats/{chatId}/messages": {
       "post": {
         "tags": [
-          "ai"
+          "AI / Chat"
         ],
         "operationId": "continueChat",
         "parameters": [
@@ -853,7 +853,7 @@
       },
       "get": {
         "tags": [
-          "ai"
+          "AI / Chat"
         ],
         "operationId": "getMessages",
         "parameters": [
@@ -935,7 +935,7 @@
     "/api/2.0/ai/chats/{chatId}": {
       "put": {
         "tags": [
-          "ai"
+          "AI / Chat"
         ],
         "operationId": "renameChat",
         "parameters": [
@@ -1007,7 +1007,7 @@
       },
       "get": {
         "tags": [
-          "ai"
+          "AI / Chat"
         ],
         "operationId": "getChat",
         "parameters": [
@@ -1069,7 +1069,7 @@
       },
       "delete": {
         "tags": [
-          "ai"
+          "AI / Chat"
         ],
         "operationId": "deleteChat",
         "parameters": [
@@ -1126,7 +1126,7 @@
     "/api/2.0/ai/chats/{chatId}/messages/export": {
       "post": {
         "tags": [
-          "ai"
+          "AI / Chat"
         ],
         "operationId": "exportChat",
         "parameters": [
@@ -1193,7 +1193,7 @@
     "/api/2.0/ai/chats/models": {
       "get": {
         "tags": [
-          "ai"
+          "AI / Chat"
         ],
         "operationId": "getChatModels",
         "parameters": [
@@ -1256,7 +1256,7 @@
     "/api/2.0/ai/chats/tool-permissions/{callId}/decision": {
       "post": {
         "tags": [
-          "ai"
+          "AI / Chat"
         ],
         "operationId": "providePermission",
         "parameters": [
@@ -1322,7 +1322,7 @@
     "/api/2.0/ai/rooms/{roomId}/chats/config": {
       "put": {
         "tags": [
-          "ai"
+          "AI / Chat"
         ],
         "operationId": "setUserChatsSettings",
         "parameters": [
@@ -1394,7 +1394,7 @@
       },
       "get": {
         "tags": [
-          "ai"
+          "AI / Chat"
         ],
         "operationId": "getUserChatsSettings",
         "parameters": [
@@ -1458,7 +1458,7 @@
     "/api/2.0/ai/servers": {
       "post": {
         "tags": [
-          "ai"
+          "AI / MCP"
         ],
         "operationId": "addServer",
         "requestBody": {
@@ -1518,7 +1518,7 @@
       },
       "delete": {
         "tags": [
-          "ai"
+          "AI / MCP"
         ],
         "operationId": "deleteServer",
         "requestBody": {
@@ -1571,7 +1571,7 @@
       },
       "get": {
         "tags": [
-          "ai"
+          "AI / MCP"
         ],
         "operationId": "getServers",
         "parameters": [
@@ -1643,7 +1643,7 @@
     "/api/2.0/ai/servers/{id}": {
       "put": {
         "tags": [
-          "ai"
+          "AI / MCP"
         ],
         "operationId": "updateServer",
         "parameters": [
@@ -1715,7 +1715,7 @@
       },
       "get": {
         "tags": [
-          "ai"
+          "AI / MCP"
         ],
         "operationId": "getServer",
         "parameters": [
@@ -1779,7 +1779,7 @@
     "/api/2.0/ai/servers/{id}/status": {
       "put": {
         "tags": [
-          "ai"
+          "AI / MCP"
         ],
         "operationId": "setServerStatus",
         "parameters": [
@@ -1853,7 +1853,7 @@
     "/api/2.0/ai/servers/available": {
       "get": {
         "tags": [
-          "ai"
+          "AI / MCP"
         ],
         "operationId": "getAvailableServers",
         "parameters": [
@@ -1925,7 +1925,7 @@
     "/api/2.0/ai/rooms/{roomId}/servers": {
       "post": {
         "tags": [
-          "ai"
+          "AI / MCP"
         ],
         "operationId": "addRoomServers",
         "parameters": [
@@ -1997,7 +1997,7 @@
       },
       "get": {
         "tags": [
-          "ai"
+          "AI / MCP"
         ],
         "operationId": "getRoomServers",
         "parameters": [
@@ -2059,7 +2059,7 @@
       },
       "delete": {
         "tags": [
-          "ai"
+          "AI / MCP"
         ],
         "operationId": "deleteRoomServers",
         "parameters": [
@@ -2126,7 +2126,7 @@
     "/api/2.0/ai/rooms/{roomId}/servers/{serverId}/tools": {
       "put": {
         "tags": [
-          "ai"
+          "AI / MCP"
         ],
         "operationId": "setTools",
         "parameters": [
@@ -2208,7 +2208,7 @@
       },
       "get": {
         "tags": [
-          "ai"
+          "AI / MCP"
         ],
         "operationId": "getTools",
         "parameters": [
@@ -2282,7 +2282,7 @@
     "/api/2.0/ai/rooms/{roomId}/servers/{serverId}/connect": {
       "post": {
         "tags": [
-          "ai"
+          "AI / MCP"
         ],
         "operationId": "connectServer",
         "parameters": [
@@ -2366,7 +2366,7 @@
     "/api/2.0/ai/rooms/{roomId}/servers/{serverId}/disconnect": {
       "post": {
         "tags": [
-          "ai"
+          "AI / MCP"
         ],
         "operationId": "disconnectServer",
         "parameters": [
@@ -2440,7 +2440,7 @@
     "/api/2.0/ai/messages/{messageId}/export": {
       "post": {
         "tags": [
-          "ai"
+          "AI / Messages"
         ],
         "operationId": "exportMessage",
         "parameters": [
@@ -2507,7 +2507,7 @@
     "/api/2.0/ai/providers": {
       "post": {
         "tags": [
-          "ai"
+          "AI / Providers"
         ],
         "operationId": "addProvider",
         "requestBody": {
@@ -2566,7 +2566,7 @@
       },
       "get": {
         "tags": [
-          "ai"
+          "AI / Providers"
         ],
         "operationId": "getProviders",
         "parameters": [
@@ -2636,7 +2636,7 @@
       },
       "delete": {
         "tags": [
-          "ai"
+          "AI / Providers"
         ],
         "operationId": "deleteProviders",
         "requestBody": {
@@ -2690,7 +2690,7 @@
     "/api/2.0/ai/providers/{id}": {
       "put": {
         "tags": [
-          "ai"
+          "AI / Providers"
         ],
         "operationId": "updateProvider",
         "parameters": [
@@ -2764,7 +2764,7 @@
     "/api/2.0/ai/providers/available": {
       "get": {
         "tags": [
-          "ai"
+          "AI / Providers"
         ],
         "operationId": "getAvailableProviders",
         "responses": {
@@ -2816,7 +2816,7 @@
     "/api/2.0/ai/config/web-search": {
       "put": {
         "tags": [
-          "ai"
+          "AI / Settings"
         ],
         "operationId": "setWebSearchSettings",
         "requestBody": {
@@ -2876,7 +2876,7 @@
       },
       "get": {
         "tags": [
-          "ai"
+          "AI / Settings"
         ],
         "operationId": "getWebSearchSettings",
         "responses": {
@@ -2928,7 +2928,7 @@
     "/api/2.0/ai/config/vectorization": {
       "put": {
         "tags": [
-          "ai"
+          "AI / Settings"
         ],
         "operationId": "setVectorizationSettings",
         "requestBody": {
@@ -2988,7 +2988,7 @@
       },
       "get": {
         "tags": [
-          "ai"
+          "AI / Settings"
         ],
         "operationId": "getVectorizationSettings",
         "responses": {
@@ -3040,7 +3040,7 @@
     "/api/2.0/ai/config": {
       "get": {
         "tags": [
-          "ai"
+          "AI / Settings"
         ],
         "operationId": "getAiSettings",
         "responses": {
@@ -3092,7 +3092,7 @@
     "/api/2.0/ai/vectorization/tasks": {
       "post": {
         "tags": [
-          "ai"
+          "AI / Vectorization"
         ],
         "operationId": "startTask",
         "requestBody": {
@@ -6868,5 +6868,55 @@
       }
     }
   },
-  "x-tagGroups": [ ]
+  "tags": [
+    {
+      "name": "AI / Agents",
+      "description": "Operations for working with AI agents.",
+      "x-displayName": "Agents"
+    },
+    {
+      "name": "AI / Chat",
+      "description": "Operations for working with AI chat.",
+      "x-displayName": "Chat"
+    },
+    {
+      "name": "AI / MCP",
+      "description": "Operations for working with MCP servers.",
+      "x-displayName": "MCP"
+    },
+    {
+      "name": "AI / Messages",
+      "description": "Operations for working with AI messages.",
+      "x-displayName": "Messages"
+    },
+    {
+      "name": "AI / Providers",
+      "description": "Operations for working with AI providers.",
+      "x-displayName": "Providers"
+    },
+    {
+      "name": "AI / Settings",
+      "description": "Operations for working with AI settings.",
+      "x-displayName": "Settings"
+    },
+    {
+      "name": "AI / Vectorization",
+      "description": "Operations for working with vectorization.",
+      "x-displayName": "Vectorization"
+    }
+  ],
+  "x-tagGroups": [
+    {
+      "name": "AI",
+      "tags": [
+        "AI / Agents",
+        "AI / Chat",
+        "AI / MCP",
+        "AI / Messages",
+        "AI / Providers",
+        "AI / Settings",
+        "AI / Vectorization"
+      ]
+    }
+  ]
 }

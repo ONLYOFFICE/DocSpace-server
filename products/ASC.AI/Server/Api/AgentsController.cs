@@ -51,6 +51,7 @@ public class AgentsController(
     /// </remarks>
     /// <summary>Get ai agents</summary>
     /// <path>api/2.0/ai/agents</path>
+    [Tags("AI / Agents")]
     [SwaggerResponse(200, "Agent information", typeof(FolderContentDto<int>))]
     [HttpGet("agents")]
     public async Task<FolderContentDto<int>> GetAgents(GetAgentListRequestDto inDto)
@@ -106,6 +107,7 @@ public class AgentsController(
     /// </remarks>
     /// <summary>Create an ai agent</summary>
     /// <path>api/2.0/ai/agents</path>
+    [Tags("AI / Agents")]
     [SwaggerResponse(200, "Agent information", typeof(FolderDto<int>))]
     [HttpPost("agents")]
     public async Task<FolderDto<int>> CreateAgent(CreateAgentRequestDto inDto)
@@ -156,6 +158,7 @@ public class AgentsController(
     /// </remarks>
     /// <summary>Return an ai agent</summary>
     /// <path>api/2.0/ai/agents/{id}</path>
+    [Tags("AI / Agents")]
     [SwaggerResponse(200, "Agent information", typeof(FolderDto<int>))]
     [HttpGet("agents/{id}")]
     public async Task<FolderDto<int>> GetAgentInfo(RoomIdRequestDto<int> inDto)
@@ -170,6 +173,7 @@ public class AgentsController(
     /// </remarks>
     /// <summary>Update an ai agent</summary>
     /// <path>api/2.0/ai/agents/{id}</path>
+    [Tags("AI / Agents")]
     [SwaggerResponse(200, "Updated agent information", typeof(FolderDto<int>))]
     [HttpPut("agents/{id}")]
     public async Task<FolderDto<int>> UpdateAgent(UpdateRoomRequestDto<int> inDto)
@@ -184,6 +188,7 @@ public class AgentsController(
     /// </remarks>
     /// <summary>Remove an ai agent</summary>
     /// <path>api/2.0/ai/agents/{id}</path>
+    [Tags("AI / Agents")]
     [SwaggerResponse(200, "File operation", typeof(FileOperationDto))]
     [HttpDelete("agents/{id}")]
     public async Task<FileOperationDto> DeleteAgent(DeleteRoomRequestDto<int> inDto)
@@ -202,6 +207,7 @@ public class AgentsController(
     /// </summary>
     /// <path>api/2.0/ai/agents/agentquota</path>
     /// <collection>list</collection>
+    [Tags("AI / Agents")]
     [SwaggerResponse(200, "List of AI agents with the detailed information", typeof(IAsyncEnumerable<FolderDto<int>>))]
     [HttpPut("agents/agentquota")]
     public async IAsyncEnumerable<FolderDto<int>> UpdateAgentsQuota(UpdateRoomsQuotaRequestDto<int> inDto)
@@ -235,6 +241,7 @@ public class AgentsController(
     /// </summary>
     /// <path>api/2.0/ai/agents/resetquota</path>
     /// <collection>list</collection>
+    [Tags("AI / Agents")]
     [SwaggerResponse(200, "List of AI agents with the detailed information", typeof(IAsyncEnumerable<FolderDto<int>>))]
     [HttpPut("agents/resetquota")]
     public async IAsyncEnumerable<FolderDto<int>> ResetAgentsQuota(UpdateRoomsRoomIdsRequestDto<int> inDto)
@@ -259,6 +266,7 @@ public class AgentsController(
     /// </remarks>
     /// <summary>Get the room new items</summary>
     /// <path>api/2.0/ai/agents/news</path>
+    [Tags("AI / Agents")]
     [SwaggerResponse(200, "List of new items", typeof(List<NewItemsDto<AgentNewItemsDto>>))]
     [HttpGet("agents/news")]
     public async Task<List<NewItemsDto<AgentNewItemsDto>>> GetAgentsNewItems()

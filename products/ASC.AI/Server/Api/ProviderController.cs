@@ -38,6 +38,7 @@ public class ProviderController(
     MessageService messageService,
     ProviderMapper providerMapper) : ControllerBase
 {
+    [Tags("AI / Providers")]
     [HttpPost("providers")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<ProviderDto> AddProviderAsync(CreateProviderRequestDto inDto)
@@ -49,6 +50,7 @@ public class ProviderController(
         return providerMapper.MapToDto(provider);
     }
 
+    [Tags("AI / Providers")]
     [HttpGet("providers")]
     public async Task<List<ProviderDto>> GetProvidersAsync(PaginatedRequestDto inDto)
     {
@@ -65,6 +67,7 @@ public class ProviderController(
         return providers;
     }
     
+    [Tags("AI / Providers")]
     [HttpPut("providers/{id}")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<ProviderDto> UpdateProviderAsync(UpdateProviderRequestDto inDto)
@@ -76,6 +79,7 @@ public class ProviderController(
         return providerMapper.MapToDto(provider);
     }
 
+    [Tags("AI / Providers")]
     [HttpDelete("providers")]
     public async Task<NoContentResult> DeleteProvidersAsync(RemoveProviderRequestDto inDto)
     {
@@ -100,6 +104,7 @@ public class ProviderController(
         return NoContent();
     }
 
+    [Tags("AI / Providers")]
     [HttpGet("providers/available")]
     public async Task<List<ProviderSettingsDto>> GetAvailableProvidersAsync()
     {
