@@ -34,7 +34,6 @@ public class AiProviderService(
     ProviderSettings providerSettings,
     UserManager userManager,
     ModelClientFactory modelClientFactory,
-    AiGateway gateway,
     MessageService messageService)
 {
     public async Task<AiProvider> AddProviderAsync(string? title, string? url, string key, ProviderType type)
@@ -268,7 +267,7 @@ public class AiProviderService(
     
     private async Task ThrowIfNotAccessAsync()
     {
-        if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID) || gateway.Configured)
+        if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
         {
             throw new SecurityException(ErrorMessages.ManageProviders);       
         }

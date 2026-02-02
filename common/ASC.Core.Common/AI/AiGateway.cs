@@ -47,7 +47,7 @@ public class AiGateway(
     SettingsManager settingsManager)
 {
     public const int ProviderId = -1;
-    public const string ProviderTitle = "DocSpace AI";
+    public const string ProviderTitle = "ONLYOFFICE AI";
     public string Url => Settings?.Url;
     
     public bool Configured => !string.IsNullOrEmpty(Url) && !string.IsNullOrEmpty(Settings?.Secret);

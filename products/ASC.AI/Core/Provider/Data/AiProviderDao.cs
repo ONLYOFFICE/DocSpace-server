@@ -52,7 +52,7 @@ public class AiProviderDao(
             await using var context = await dbContextFactory.CreateDbContextAsync();
             await using var transaction = await context.Database.BeginTransactionAsync();
 
-            isFirstProvider = !await context.HasProvidersAsync(tenantId);
+            isFirstProvider = !gateway.Configured && !await context.HasProvidersAsync(tenantId);
 
             dbProvider = new DbAiProvider
             {
@@ -313,7 +313,7 @@ public class AiProviderDao(
             Title = AiGateway.ProviderTitle,
             Url = includeCredentials ? gateway.Url : string.Empty,
             Key = includeCredentials ? await gateway.GetKeyAsync() : string.Empty,
-            Type = ProviderType.DocSpaceAi
+            Type = ProviderType.PortalAi
         };
     }
 
