@@ -167,7 +167,16 @@ namespace ASC.AI.Core.Resources {
                 return ResourceManager.GetString("ManageServers", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to No models available for this provider.
+        /// </summary>
+        internal static string NoModelsAvailable {
+            get {
+                return ResourceManager.GetString("NoModelsAvailable", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Provider not found.
         /// </summary>

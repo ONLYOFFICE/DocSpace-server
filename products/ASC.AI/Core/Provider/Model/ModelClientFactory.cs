@@ -39,7 +39,7 @@ public class ModelClientFactory(IHttpClientFactory httpClientFactory)
                 new TogetherAiModelClient(httpClientFactory.CreateClient(), url, apiKey),
             ProviderType.Anthropic =>
                 new AnthropicModelClient(httpClientFactory.CreateClient(), url, apiKey),
-            ProviderType.DocSpaceAi =>
+            ProviderType.PortalAi =>
                 new DocSpaceModelClient(httpClientFactory.CreateClient(), url, apiKey),
             ProviderType.OpenRouter =>
                 new OpenRouterModelClient(httpClientFactory.CreateClient(), url, apiKey),

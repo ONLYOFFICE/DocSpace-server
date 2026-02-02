@@ -896,7 +896,7 @@ public enum MessageAction
 
     [Description("AI provider deleted")]
     AIProviderDeleted = 6075,
-    
+
     [Description("MCP server created")]
     ServerCreated = 6076,
     
@@ -956,6 +956,9 @@ public enum MessageAction
 
     [Description("Login settings updated")]
     LoginSettingsUpdated = 6095,
+    
+    [Description("AI default provider set")]
+    AIDefaultProviderSet = 6096,
 
     #endregion
 

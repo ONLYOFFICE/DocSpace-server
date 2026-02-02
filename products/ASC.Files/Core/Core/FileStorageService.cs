@@ -931,16 +931,9 @@ public class FileStorageService //: IFileStorageService
 
             if (chatSettings != null)
             {
-                if (gateway.Configured)
+                if (chatSettings.ProviderId <= 0 && !(chatSettings.ProviderId == -1 && gateway.Configured))
                 {
-                    chatSettings.ProviderId = AiGateway.ProviderId;
-                }
-                else
-                {
-                    ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(
-                        chatSettings.ProviderId, 
-                        0, 
-                        nameof(chatSettings.ProviderId));
+                    throw new ArgumentException(nameof(chatSettings.ProviderId));
                 }
                 
                 ArgumentException.ThrowIfNullOrEmpty(chatSettings.ModelId);
@@ -1176,16 +1169,11 @@ public class FileStorageService //: IFileStorageService
 
             if (chatSettingsChanged)
             {
-                if (gateway.Configured)
+                var chatSettings = updateData.ChatSettings;
+                
+                if (chatSettings.ProviderId <= 0 && !(chatSettings.ProviderId == -1 && gateway.Configured))
                 {
-                    updateData.ChatSettings.ProviderId = AiGateway.ProviderId;
-                }
-                else
-                {
-                    ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(
-                        updateData.ChatSettings.ProviderId, 
-                        0, 
-                        nameof(updateData.ChatSettings.ProviderId));
+                    throw new ArgumentException(nameof(updateData.ChatSettings.ProviderId));
                 }
                 
                 ArgumentException.ThrowIfNullOrEmpty(updateData.ChatSettings.ModelId);
