@@ -49,7 +49,7 @@ namespace ASC.Migrations.MySql.Migrations.CoreDb
 
                 b.Property<decimal>("Price")
                     .ValueGeneratedOnAdd()
-                    .HasColumnType("decimal(10,4)")
+                    .HasColumnType("decimal(15,9)")
                     .HasColumnName("price")
                     .HasDefaultValueSql("'0.00'");
 
@@ -57,6 +57,13 @@ namespace ASC.Migrations.MySql.Migrations.CoreDb
                     .HasMaxLength(128)
                     .HasColumnType("varchar")
                     .HasColumnName("product_id")
+                    .UseCollation("utf8_general_ci")
+                    .HasAnnotation("MySql:CharSet", "utf8");
+
+                b.Property<string>("ServiceGroup")
+                    .HasMaxLength(128)
+                    .HasColumnType("varchar")
+                    .HasColumnName("service_group")
                     .UseCollation("utf8_general_ci")
                     .HasAnnotation("MySql:CharSet", "utf8");
 

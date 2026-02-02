@@ -110,4 +110,36 @@ public class ProviderController(
 
         return providers.Select(x => x.MapToDto()).ToList();
     }
+
+    /// <summary>
+    /// Sets the default AI provider for the current tenant.
+    /// </summary>
+    /// <short>Set default AI provider</short>
+    /// <path>api/2.0/ai/providers/default</path>
+    [Tags("AI / Providers")]
+    [SwaggerResponse(200, "Default provider information", typeof(DefaultProviderDto))]
+    [SwaggerResponse(403, "You don't have enough permission to manage providers")]
+    [SwaggerResponse(404, "Provider not found")]
+    [HttpPut("providers/default")]
+    public async Task<DefaultProviderDto> SetDefaultProviderAsync(SetDefaultProviderRequestDto inDto)
+    {
+        var result = await providerService.SetDefaultProviderAsync(inDto.ProviderId, inDto.DefaultModel);
+
+        return result.MapToDto();
+    }
+
+    /// <summary>
+    /// Returns the default AI provider for the current tenant.
+    /// </summary>
+    /// <short>Get default AI provider</short>
+    /// <path>api/2.0/ai/providers/default</path>
+    [Tags("AI / Providers")]
+    [SwaggerResponse(200, "Default provider information or null if not set", typeof(DefaultProviderDto))]
+    [HttpGet("providers/default")]
+    public async Task<DefaultProviderDto?> GetDefaultProviderAsync()
+    {
+        var result = await providerService.GetDefaultProviderAsync();
+
+        return result?.MapToDto();
+    }
 }

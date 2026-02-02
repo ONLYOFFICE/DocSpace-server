@@ -36,6 +36,7 @@ public class AiProviderDto
     public required ApiDateTime ModifiedOn { get; init; }
 
     public bool NeedReset { get; init; }
+    public bool IsDefault { get; init; }
 }
 
 [Scope]

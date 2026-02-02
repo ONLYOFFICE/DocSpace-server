@@ -58,7 +58,7 @@ public class ExternalShare(
                 }
                 else
                 {
-                    url = file.DownloadUrl;
+                    url = filesLinkUtility.GetFileDownloadUrl(file.Id);
                 }
 
                 url = QueryHelpers.AddQueryString(url, FilesLinkUtility.ShareKey, key);
