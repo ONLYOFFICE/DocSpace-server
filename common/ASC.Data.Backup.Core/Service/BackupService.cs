@@ -174,7 +174,7 @@ public class BackupService(
 
         if (file == null)
         {
-            throw new DirectoryNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+            throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
         var folderDao = daoFactory.GetFolderDao<T>();
