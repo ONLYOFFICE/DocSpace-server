@@ -122,18 +122,6 @@ public class CachedAiProviderDao(
             async _ => await providerDao.GetFirstProviderIdAsync(tenantId), _cacheExpiration);
     }
 
-    public async Task<bool> DeleteDefaultProviderAsync(int tenantId)
-    {
-        var deleted = await providerDao.DeleteDefaultProviderAsync(tenantId);
-
-        if (deleted)
-        {
-            await InvalidateDefaultProviderCacheAsync(tenantId);
-        }
-
-        return deleted;
-    }
-
     private static string GetDefaultProviderCacheKey(int tenantId)
     {
         return $"ai:default_provider:{tenantId}";

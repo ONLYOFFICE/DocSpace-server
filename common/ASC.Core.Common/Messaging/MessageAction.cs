@@ -960,9 +960,6 @@ public enum MessageAction
     [Description("AI default provider set")]
     AIDefaultProviderSet = 6096,
 
-    [Description("AI default provider deleted")]
-    AIDefaultProviderDeleted = 6097,
-
     #endregion
 
     #region others

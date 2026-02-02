@@ -289,22 +289,6 @@ public class AiProviderDao(
         return await dbContext.GetFirstProviderIdAsync(tenantId);
     }
 
-    public async Task<bool> DeleteDefaultProviderAsync(int tenantId)
-    {
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        var strategy = dbContext.Database.CreateExecutionStrategy();
-
-        var deleted = 0;
-
-        await strategy.ExecuteAsync(async () =>
-        {
-            await using var context = await dbContextFactory.CreateDbContextAsync();
-            deleted = await context.DeleteDefaultProviderAsync(tenantId);
-        });
-
-        return deleted > 0;
-    }
-
     private async Task<AiProvider> CreateGatewayProviderAsync(bool includeCredentials = false)
     {
         return new AiProvider

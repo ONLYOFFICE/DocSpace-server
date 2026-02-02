@@ -141,20 +141,4 @@ public class ProviderController(
 
         return result?.MapToDto();
     }
-
-    /// <summary>
-    /// Deletes the default AI provider for the current tenant.
-    /// </summary>
-    /// <short>Delete default AI provider</short>
-    /// <path>api/2.0/ai/providers/default</path>
-    [Tags("AI / Providers")]
-    [SwaggerResponse(204, "Default provider was deleted successfully")]
-    [SwaggerResponse(403, "You don't have enough permission to manage providers")]
-    [HttpDelete("providers/default")]
-    public async Task<NoContentResult> DeleteDefaultProviderAsync()
-    {
-        await providerService.DeleteDefaultProviderAsync();
-
-        return NoContent();
-    }
 }

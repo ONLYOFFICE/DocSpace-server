@@ -53,6 +53,4 @@ public interface IAiProviderDao
     Task<DefaultAiProvider?> GetDefaultProviderAsync(int tenantId);
 
     Task<int?> GetFirstProviderIdAsync(int tenantId);
-
-    Task<bool> DeleteDefaultProviderAsync(int tenantId);
 }

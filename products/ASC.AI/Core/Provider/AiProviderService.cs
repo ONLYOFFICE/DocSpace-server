@@ -240,18 +240,6 @@ public class AiProviderService(
         }
     }
 
-    public async Task DeleteDefaultProviderAsync()
-    {
-        await ThrowIfNotAccessAsync();
-
-        var deleted = await providerDao.DeleteDefaultProviderAsync(tenantManager.GetCurrentTenantId());
-
-        if (deleted)
-        {
-            messageService.Send(MessageAction.AIDefaultProviderDeleted);
-        }
-    }
-
     private async Task<IEnumerable<ModelInfo>> GetFilteredModelsAsync(IModelClient client, ProviderType type, Scope? scope = null)
     {
         var models = await client.ListModelsAsync(scope);

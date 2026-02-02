@@ -82,12 +82,6 @@ public partial class AiDbContext
         return Queries.GetDefaultProviderAsync(this, tenantId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt])]
-    public Task<int> DeleteDefaultProviderAsync(int tenantId)
-    {
-        return Queries.DeleteDefaultProviderAsync(this, tenantId);
-    }
-
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public Task DeleteDefaultProvidersByProviderIdsAsync(int tenantId, IEnumerable<int> providerIds)
     {
@@ -170,11 +164,6 @@ static file class Queries
                             ProviderTitle = provider != null ? provider.Title : null
                         })
                     .FirstOrDefault());
-
-    public static readonly Func<AiDbContext, int, Task<int>> DeleteDefaultProviderAsync =
-        EF.CompileAsyncQuery(
-            (AiDbContext ctx, int tenantId) =>
-                ctx.DefaultProviders.Where(x => x.TenantId == tenantId).ExecuteDelete());
 
     public static readonly Func<AiDbContext, int, IEnumerable<int>, Task> DeleteDefaultProvidersByProviderIdsAsync =
         EF.CompileAsyncQuery(
