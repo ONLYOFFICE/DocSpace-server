@@ -270,6 +270,7 @@ public class BackupProgressItem : BaseBackupProgressItem, IDisposable
 
             if (CancellationToken.IsCancellationRequested)
             {
+                Status = DistributedTaskStatus.Canceled;
                 Warning = ASC.AuditTrail.AuditReportResource.BackupCancelled;
                 _logger.InfoBackupCancelled();
             }

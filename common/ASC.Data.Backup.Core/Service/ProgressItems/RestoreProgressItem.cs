@@ -268,6 +268,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
 
             if (CancellationToken.IsCancellationRequested)
             {
+                Status = DistributedTaskStatus.Canceled;
                 Warning = ASC.AuditTrail.AuditReportResource.RestoreCancelled;
                 _logger.InfoRestoreCancelled();
 
