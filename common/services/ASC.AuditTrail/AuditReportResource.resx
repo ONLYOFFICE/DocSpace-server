@@ -1167,4 +1167,10 @@
   <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
     <value>Brand name updated</value>
   </data>
+  <data name="AIDefaultProviderSet" xml:space="preserve">
+    <value>Default AI provider set: Name: {0}, Default Model: {1}</value>
+  </data>
+  <data name="AIDefaultProviderDeleted" xml:space="preserve">
+    <value>Default provider deleted</value>
+  </data>
 </root>

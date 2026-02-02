@@ -9,17 +9,14 @@ public partial class MigrationContext_Upgrade3 : Migration
     /// <inheritdoc />
     protected override void Up(MigrationBuilder migrationBuilder)
     {
-        // remove storage quota
+        // remove storage, backup and AI tools
         migrationBuilder.DeleteData(
-                table: "tenants_quota",
-                keyColumn: "tenant",
-                keyValue: -11);
-
-        // remove backup quota
-        migrationBuilder.DeleteData(
-                table: "tenants_quota",
-                keyColumn: "tenant",
-                keyValue: -12);
+            table: "tenants_quota",
+            keyColumn: "tenant",
+            keyValues:
+            [
+                -11, -12, -13, -14, -15, -16, -17, -18, -19, -20, -21, -22, -23, -24, -25, -26, -27, -28, -29, -30
+            ]);
     }
 
     /// <inheritdoc />

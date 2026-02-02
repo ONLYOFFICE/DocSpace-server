@@ -174,7 +174,7 @@ public class BackupService(
 
         if (file == null)
         {
-            throw new DirectoryNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+            throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
         var folderDao = daoFactory.GetFolderDao<T>();
@@ -756,12 +756,12 @@ public class CronParams
 /// </summary>
 public enum BackupPeriod
 {
-    [SwaggerEnum(Description = "Every day")]
+    [Description("Every day")]
     EveryDay = 0,
 
-    [SwaggerEnum(Description = "Every week")]
+    [Description("Every week")]
     EveryWeek = 1,
 
-    [SwaggerEnum(Description = "Every month")]
+    [Description("Every month")]
     EveryMonth = 2
 }

@@ -87,15 +87,15 @@ public class NotificationControllerHelper(
 /// </summary>
 public enum NotificationType
 {
-    [SwaggerEnum("Badges")]
+    [Description("Badges")]
     Badges = 0,
 
-    [SwaggerEnum("Rooms activity")]
+    [Description("Rooms activity")]
     RoomsActivity = 1,
 
-    [SwaggerEnum("Daily feed")]
+    [Description("Daily feed")]
     DailyFeed = 2,
 
-    [SwaggerEnum("Usefull tips")]
+    [Description("Usefull tips")]
     UsefullTips = 3
 }

@@ -30,6 +30,8 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.Process" />
     <PackageReference Include="RedisRateLimiting" />
     <PackageReference Include="RedisRateLimiting.AspNetCore" />
+    <PackageReference Include="Scalar.AspNetCore" />
+    <PackageReference Include="Scalar.AspNetCore.Swashbuckle" />
     <PackageReference Include="StackExchange.Redis.Extensions.AspNetCore" />
     <PackageReference Include="StackExchange.Redis.Extensions.Newtonsoft" />
 	<PackageReference Include="Autofac.Extensions.DependencyInjection" />

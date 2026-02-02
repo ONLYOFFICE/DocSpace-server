@@ -66,6 +66,41 @@ public class QuotaHelper(
         return await ToQuotaDto(quota, userType, getUsed, enabledWalletServices);
     }
 
+    public async Task<IEnumerable<WalletServiceDto>> GetWalletServicesAsync()
+    {
+        var quotas = await tenantManager.GetTenantQuotasAsync(all: true, wallet: true);
+
+        var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
+        var enabledWalletServices = coreBaseSettings.Standalone ? null : (await settingsManager.LoadAsync<TenantWalletServiceSettings>()).EnabledServices;
+
+        var dict = new Dictionary<string, WalletServiceDto>();
+
+        foreach (var quota in quotas.OrderByDescending(q => q.Visible))
+        {
+            var quotaDto = await ToQuotaDto(quota, userType, false, enabledWalletServices);
+
+            if (quota.Visible)
+            {
+                dict.Add(quota.Name, quotaDto.MapToWalletServiceDto());
+                continue;
+            }
+
+            if (!string.IsNullOrEmpty(quota.ServiceGroup) && dict.ContainsKey(quota.ServiceGroup))
+            {
+                if (dict[quota.ServiceGroup].InnerServices == null)
+                {
+                    dict[quota.ServiceGroup].InnerServices = [quotaDto];
+                }
+                else
+                {
+                    dict[quota.ServiceGroup].InnerServices.Add(quotaDto);
+                }
+            }
+        }
+
+        return dict.Values;
+    }
+
     private async Task<QuotaDto> ToQuotaDto(TenantQuota quota, EmployeeType employeeType, bool getUsed = false, List<TenantWalletService> enabledWalletServices = null)
     {
         var features = await GetFeatures(quota, employeeType, getUsed, enabledWalletServices).ToListAsync();

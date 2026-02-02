@@ -13,6 +13,7 @@
     {{#tagGroups}}
     {
       "name": "{{name}}",
+      "description": "{{{description}}}",
       "item": [
         {{#children}}
         {{#isSelf}}
@@ -23,6 +24,7 @@
         {{^isSelf}}
         {
           "name": "{{name}}",
+          "description": "{{{description}}}",
           "item": [
             {{#operations}}
             {{>item}}{{^-last}},{{/-last}}

@@ -31,22 +31,22 @@ namespace ASC.Webhooks.Core;
 /// </summary>
 public enum WebhookTrigger
 {
-    [SwaggerEnum("*")]
+    [Description("*")]
     All = 0,
 
 
     #region User
 
-    [SwaggerEnum("user.created")]
+    [Description("user.created")]
     UserCreated = 1,
 
-    [SwaggerEnum("user.invited")]
+    [Description("user.invited")]
     UserInvited = 2,
 
-    [SwaggerEnum("user.updated")]
+    [Description("user.updated")]
     UserUpdated = 4,
 
-    [SwaggerEnum("user.deleted")]
+    [Description("user.deleted")]
     UserDeleted = 8,
 
     #endregion User
@@ -54,13 +54,13 @@ public enum WebhookTrigger
 
     #region Group
 
-    [SwaggerEnum("group.created")]
+    [Description("group.created")]
     GroupCreated = 16,
 
-    [SwaggerEnum("group.updated")]
+    [Description("group.updated")]
     GroupUpdated = 32,
 
-    [SwaggerEnum("group.deleted")]
+    [Description("group.deleted")]
     GroupDeleted = 64,
 
     #endregion
@@ -68,28 +68,28 @@ public enum WebhookTrigger
 
     #region File
 
-    [SwaggerEnum("file.created")]
+    [Description("file.created")]
     FileCreated = 128,
 
-    [SwaggerEnum("file.uploaded")]
+    [Description("file.uploaded")]
     FileUploaded = 256,
 
-    [SwaggerEnum("file.updated")]
+    [Description("file.updated")]
     FileUpdated = 512,
 
-    [SwaggerEnum("file.trashed")]
+    [Description("file.trashed")]
     FileTrashed = 1024,
 
-    [SwaggerEnum("file.deleted")]
+    [Description("file.deleted")]
     FileDeleted = 2048,
 
-    [SwaggerEnum("file.restored")]
+    [Description("file.restored")]
     FileRestored = 4096,
 
-    [SwaggerEnum("file.copied")]
+    [Description("file.copied")]
     FileCopied = 8192,
 
-    [SwaggerEnum("file.moved")]
+    [Description("file.moved")]
     FileMoved = 16384,
 
     #endregion
@@ -97,25 +97,25 @@ public enum WebhookTrigger
 
     #region Folder
 
-    [SwaggerEnum("folder.created")]
+    [Description("folder.created")]
     FolderCreated = 32768,
 
-    [SwaggerEnum("folder.updated")]
+    [Description("folder.updated")]
     FolderUpdated = 65536,
 
-    [SwaggerEnum("folder.trashed")]
+    [Description("folder.trashed")]
     FolderTrashed = 131072,
 
-    [SwaggerEnum("folder.deleted")]
+    [Description("folder.deleted")]
     FolderDeleted = 262144,
 
-    [SwaggerEnum("folder.restored")]
+    [Description("folder.restored")]
     FolderRestored = 524288,
 
-    [SwaggerEnum("folder.copied")]
+    [Description("folder.copied")]
     FolderCopied = 1048576,
 
-    [SwaggerEnum("folder.moved")]
+    [Description("folder.moved")]
     FolderMoved = 2097152,
 
     #endregion
@@ -123,22 +123,22 @@ public enum WebhookTrigger
 
     #region Room
 
-    [SwaggerEnum("room.created")]
+    [Description("room.created")]
     RoomCreated = 4194304,
 
-    [SwaggerEnum("room.updated")]
+    [Description("room.updated")]
     RoomUpdated = 8388608,
 
-    [SwaggerEnum("room.archived")]
+    [Description("room.archived")]
     RoomArchived = 16777216,
 
-    [SwaggerEnum("room.deleted")]
+    [Description("room.deleted")]
     RoomDeleted = 33554432,
 
-    [SwaggerEnum("room.restored")]
+    [Description("room.restored")]
     RoomRestored = 67108864,
 
-    [SwaggerEnum("room.copied")]
+    [Description("room.copied")]
     RoomCopied = 134217728
 
     #endregion
@@ -161,7 +161,7 @@ public static partial class WebhookTriggerExtensions
         {
             var field = type.GetField(value.ToString());
 
-            var attribute = (SwaggerEnumAttribute)Attribute.GetCustomAttribute(field, typeof(SwaggerEnumAttribute));
+            var attribute = (DescriptionAttribute)Attribute.GetCustomAttribute(field, typeof(DescriptionAttribute));
 
             _customStrings.Add(value, attribute != null ? attribute.Description : field.Name);
         }

@@ -325,11 +325,11 @@ public class AccountingClient
 /// </summary>
 public enum PaymentMethodStatus
 {
-    [SwaggerEnum("None")]
+    [Description("None")]
     None,
-    [SwaggerEnum("Set")]
+    [Description("Set")]
     Set,
-    [SwaggerEnum("Expired")]
+    [Description("Expired")]
     Expired
 }
 

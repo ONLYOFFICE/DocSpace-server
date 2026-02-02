@@ -32,19 +32,19 @@ namespace ASC.Files.Core.VirtualRooms;
 [Flags]
 public enum WatermarkAdditions
 {
-    [SwaggerEnum("User name")]
+    [Description("User name")]
     UserName = 1,
 
-    [SwaggerEnum("User email")]
+    [Description("User email")]
     UserEmail = 2,
 
-    [SwaggerEnum("User ip adress")]
+    [Description("User ip adress")]
     UserIpAdress = 4,
 
-    [SwaggerEnum("Current date")]
+    [Description("Current date")]
     CurrentDate = 8,
 
-    [SwaggerEnum("Room name")]
+    [Description("Room name")]
     RoomName = 16
 }
 

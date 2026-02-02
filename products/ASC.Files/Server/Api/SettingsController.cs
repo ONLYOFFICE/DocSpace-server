@@ -37,10 +37,7 @@ public class SettingsController(
     CompressToArchive compressToArchive,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
-    DefaultTemplateSettingsHelper defaultTemplateSettingsHelper,
-    FilesControllerHelper filesControllerHelper,
-    FileSecurityCommon fileSecurityCommon,
-    SecurityContext securityContext)
+    DefaultTemplateSettingsHelper defaultTemplateSettingsHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <summary>

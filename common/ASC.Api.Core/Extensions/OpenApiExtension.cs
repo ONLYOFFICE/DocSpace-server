@@ -28,6 +28,7 @@ using System.Xml.XPath;
 
 using Microsoft.OpenApi;
 
+using Scalar.AspNetCore;
 
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -61,6 +62,7 @@ public static class OpenApiExtension
                     Url = new Uri("https://helpdesk.onlyoffice.com/hc/en-us")
                 }
             });
+            c.AddScalarFilters();
             c.SchemaFilter<SwaggerSchemaCustomFilter>();
             c.DocumentFilter<LowercaseDocumentFilter>();
             c.SchemaFilter<DerivedSchemaFilter>();
@@ -220,6 +222,17 @@ public static class OpenApiExtension
             app.UseEndpoints(endpointRouteBuilder =>
             {
                 endpointRouteBuilder.MapSwagger();
+                
+                
+                endpointRouteBuilder.MapScalarApiReference(((options, _) =>
+                {
+                    options.WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
+                    options.AddDocuments(endpoints.Select(r=> new ScalarDocument(r.Key)
+                    {
+                        RoutePattern = r.Value.ToLower(),
+                        IsDefault = r.Key == "asc.files"
+                    }));
+                }));
             });
 
             return app;
