@@ -39,5 +39,6 @@ public class SetDefaultProviderRequestDto
     /// <summary>
     /// Default model identifier to use with this provider.
     /// </summary>
+    [MaxLength(255)]
     public required string DefaultModel { get; set; }
 }
