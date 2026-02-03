@@ -24,25 +24,37 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Buffers;
+
 using ASC.Web.Core.Files;
 
 namespace ASC.AI.Core.Chat.Data;
 
-public class DataMessageContent : AttachmentMessageContent
+public class DataMessageContent : AttachmentMessageContent, IDisposable
 {
     public FileType FileType { get; init; }
-    
+
     [JsonIgnore]
-    public byte[]? Data { get; set; }
+    public (IMemoryOwner<byte> Owner, int Length)? Data { get; set; }
 
     [JsonIgnore]
     public string? MediaType { get; set; }
 
     public override AIContent ToAiContent()
     {
-        ArgumentNullException.ThrowIfNull(Data);
+        if (!Data.HasValue)
+        {
+            throw new ArgumentNullException(nameof(Data));
+        }
+
         ArgumentException.ThrowIfNullOrEmpty(MediaType);
 
-        return new DataContent(Data, MediaType);
+        return new DataContent(Data.Value.Owner.Memory[..Data.Value.Length], MediaType);
+    }
+
+    public void Dispose()
+    {
+        Data?.Owner.Dispose();
+        Data = null;
     }
 }

@@ -152,8 +152,9 @@ public class AttachmentHandler(
     {
         await using var stream = await fileDao.GetFileStreamAsync(file);
 
-        var data = new byte[file.ContentLength];
-        await stream.ReadExactlyAsync(data);
+        var length = (int)file.ContentLength;
+        var memoryOwner = MemoryPool<byte>.Shared.Rent(length);
+        await stream.ReadExactlyAsync(memoryOwner.Memory[..length]);
 
         return new AttachmentResult
         {
@@ -163,7 +164,7 @@ public class AttachmentHandler(
             {
                 Id = JsonSerializer.SerializeToElement(file.Id),
                 FileType = fileType,
-                Data = data,
+                Data = (memoryOwner, length),
                 MediaType = GetMediaType(extension)
             }
         };

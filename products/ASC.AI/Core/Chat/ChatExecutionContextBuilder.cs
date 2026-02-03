@@ -117,6 +117,14 @@ public class ChatExecutionContext : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
+        foreach (var attachment in Attachments)
+        {
+            if (attachment is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
+        }
+
         await Tools.DisposeAsync();
     }
 }
