@@ -272,6 +272,15 @@ public class AiProviderDao(
 
         if (!await gateway.IsEnabledAsync())
         {
+            var strategy = dbContext.Database.CreateExecutionStrategy();
+
+            await strategy.ExecuteAsync(async () =>
+            {
+                await using var context = await dbContextFactory.CreateDbContextAsync();
+                await context.DeleteDefaultProvidersByProviderIdsAsync(tenantId, new HashSet<int> { AiGateway.ProviderId });
+                await context.SaveChangesAsync();
+            });
+
             return null;
         }
 
