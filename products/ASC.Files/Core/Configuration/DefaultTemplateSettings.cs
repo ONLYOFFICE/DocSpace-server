@@ -49,7 +49,6 @@ namespace ASC.Files.Core.Configuration
     [Scope]
     public class DefaultTemplateSettingsHelper(IServiceProvider serviceProvider,
                                                SettingsManager settingsManager,
-                                               PermissionContext permissionContext,
                                                GlobalStore globalStore,
                                                IFileDao<int> fileDao,
                                                IFolderDao<int> folderDao,
@@ -115,8 +114,6 @@ namespace ASC.Files.Core.Configuration
 
         public async Task<DefaultTemplateSettings> SetTemplateAsync(string extension, int? fileId)
         {
-            await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
             var settings = await GetSettingsAsync();
             var setting = settings.Items.FirstOrDefault(item => item.FileExtension.Equals(extension, StringComparison.OrdinalIgnoreCase));
             if (setting == null)
@@ -149,8 +146,6 @@ namespace ASC.Files.Core.Configuration
         {
             try
             {
-                await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
                 var settings = await GetSettingsAsync();
                 var setting = settings.Items.FirstOrDefault(item => item.FileExtension.Equals(extension, StringComparison.OrdinalIgnoreCase));
                 if (setting == null)
