@@ -49,7 +49,7 @@ namespace ASC.Files.Core.Configuration
     [Scope]
     public class DefaultTemplateSettingsHelper(IServiceProvider serviceProvider,
                                                SettingsManager settingsManager,
-                                               Global global,
+                                               PermissionContext permissionContext,
                                                GlobalStore globalStore,
                                                IFileDao<int> fileDao,
                                                IFolderDao<int> folderDao,
@@ -96,11 +96,6 @@ namespace ASC.Files.Core.Configuration
 
         public async Task<DefaultTemplateSettings> GetSettingsAsync()
         {
-            if (!await global.IsDocSpaceAdministratorAsync)
-            {
-                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
-            }
-
             var settings = await settingsManager.LoadAsync<DefaultTemplateSettings>();
             var templatesExtensions = await GetSampleDocumentsExtensionsListAsync();
 
@@ -120,10 +115,7 @@ namespace ASC.Files.Core.Configuration
 
         public async Task<DefaultTemplateSettings> SetTemplateAsync(string extension, int? fileId)
         {
-            if (!await global.IsDocSpaceAdministratorAsync)
-            {
-                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
-            }
+            await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
             var settings = await GetSettingsAsync();
             var setting = settings.Items.FirstOrDefault(item => item.FileExtension.Equals(extension, StringComparison.OrdinalIgnoreCase));
@@ -157,10 +149,7 @@ namespace ASC.Files.Core.Configuration
         {
             try
             {
-                if (!await global.IsDocSpaceAdministratorAsync)
-                {
-                    throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
-                }
+                await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
                 var settings = await GetSettingsAsync();
                 var setting = settings.Items.FirstOrDefault(item => item.FileExtension.Equals(extension, StringComparison.OrdinalIgnoreCase));
