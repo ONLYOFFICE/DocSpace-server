@@ -241,10 +241,11 @@ public static class OpenApiExtension
             {
                 endpointRouteBuilder.MapSwagger();
                 
-                
                 endpointRouteBuilder.MapScalarApiReference(((options, _) =>
                 {
-                    options.WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
+                    options.Servers = [];
+                    options.EnabledClients = [ScalarClient.HttpClient, ScalarClient.Axios, ScalarClient.Fetch, ScalarClient.Python3, ScalarClient.Requests, ScalarClient.Curl];
+                    options.WithDefaultHttpClient(ScalarTarget.JavaScript, ScalarClient.Axios);
                     options.AddDocuments(endpoints.Select(r=> new ScalarDocument(r.Key)
                     {
                         RoutePattern = r.Value.ToLower(),
