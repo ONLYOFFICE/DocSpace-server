@@ -10,7 +10,7 @@
         <AssemblyTitle>ASC.AI</AssemblyTitle>
         <Product>ASC.AI</Product>
         <GenerateDocumentationFile>True</GenerateDocumentationFile>
-        <OpenApiGenerateDocuments>true</OpenApiGenerateDocuments>
+        <OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
         <OpenApiDocumentsDirectory>$(MSBuildProjectDirectory)\..\..\..\common\Tools\ASC.Api.Documentation\ASC.Api.Documentation\json\</OpenApiDocumentsDirectory>
         <OpenApiGenerateDocumentsOptions>--file-name ai</OpenApiGenerateDocumentsOptions>
         <NoWarn>1701;1702;1591</NoWarn>
