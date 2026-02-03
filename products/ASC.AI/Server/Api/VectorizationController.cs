@@ -33,6 +33,7 @@ namespace ASC.AI.Api;
 public class VectorizationController(
     VectorizationTaskPublisher vectorizationTaskPublisher) : ControllerBase
 {
+    [Tags("AI / Vectorization")]
     [HttpPost("vectorization/tasks")]
     public async Task StartTaskAsync(VectorizationStartRequestDto inDto)
     {

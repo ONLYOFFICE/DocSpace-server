@@ -54,4 +54,68 @@ public class UserTest(PeopleFactory peopleFactory, WepApiFactory apiFactory) : B
         user.Should().NotBeNull();
         user.Response.FirstName.Should().NotBeNullOrWhiteSpace();
     }
+    
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "79724")]
+    public async Task UpdateDocspaceAdmin_ByDocspaceAdmin_ShouldThrowAccessDenied()
+    {
+        await _peopleClient.Authenticate(Initializer.Owner);
+
+        var owner = await _profilesApi.GetSelfProfileAsync(TestContext.Current.CancellationToken);
+        owner.Should().NotBeNull();
+        owner.Response.Should().NotBeNull();
+
+        var docspaceAdmin1 = await Initializer.InviteContact(EmployeeType.DocSpaceAdmin);
+        var docspaceAdmin2 = await Initializer.InviteContact(EmployeeType.DocSpaceAdmin);
+
+        await _peopleClient.Authenticate(docspaceAdmin1);
+
+        // Try to update Owner - should throw access denied
+        var exception = await Assert.ThrowsAsync<ApiException>(async () =>
+            await _profilesApi.UpdateMemberAsync(
+                owner.Response.Id.ToString(),
+                new UpdateMemberRequestDto(),
+                TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(403);
+
+        // Try to update another Docspace admin - should throw access denied
+        exception = await Assert.ThrowsAsync<ApiException>(async () =>
+            await _profilesApi.UpdateMemberAsync(
+                docspaceAdmin2.Id.ToString(),
+                new UpdateMemberRequestDto(),
+                TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(403);
+
+        // Update self - can't disable, cant change type, but can update other fields
+        var user = await _profilesApi.UpdateMemberAsync(
+                docspaceAdmin1.Id.ToString(),
+                new UpdateMemberRequestDto()
+                {
+                    FirstName = "UpdatedFirstName",
+                    LastName = "UpdatedLastName",
+                    Disable = true,
+                    IsUser = true
+                },
+                TestContext.Current.CancellationToken);
+
+        user.Should().NotBeNull();
+        user.Response.Should().NotBeNull();
+        user.Response.Id.Should().Be(docspaceAdmin1.Id);
+        user.Response.FirstName.Should().Be("UpdatedFirstName");
+        user.Response.LastName.Should().Be("UpdatedLastName");
+        user.Response.Status.Should().Be(EmployeeStatus.Active);
+        user.Response.IsAdmin.Should().Be(false);
+        user.Response.IsVisitor.Should().Be(false);
+
+        var groups = await _groupApi.GetGroupByUserIdAsync(
+                docspaceAdmin1.Id,
+                TestContext.Current.CancellationToken);
+
+        groups.Should().NotBeNull();
+        groups.Response.Should().NotBeNull();
+        groups.Response.Select(x=>x.Id).Should().NotContain(Core.Users.Constants.GroupGuest.ID);
+    }
 }

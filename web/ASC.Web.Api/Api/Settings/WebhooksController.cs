@@ -47,12 +47,12 @@ public class WebhooksController(
     WebhooksConfigDtoHelper webhooksConfigDtoHelper)
     : BaseSettingsController(fusionCache, webItemManager)
 {
-    /// <summary>
+    /// <remarks>
     /// Returns a list of the tenant webhooks.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get webhooks
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/webhook</path>
     /// <collection>list</collection>
     [Tags("Settings / Webhooks")]
@@ -68,12 +68,12 @@ public class WebhooksController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Creates a new tenant webhook with the parameters specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Create a webhook
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/webhook</path>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "Tenant webhook with its config parameters", typeof(WebhooksConfigDto))]
@@ -91,12 +91,12 @@ public class WebhooksController(
         return await webhooksConfigDtoHelper.GetAsync(webhook);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Updates a tenant webhook with the parameters specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Update a webhook
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/webhook</path>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "Updated tenant webhook with its config parameters", typeof(WebhooksConfigDto))]
@@ -139,12 +139,12 @@ public class WebhooksController(
         return await webhooksConfigDtoHelper.GetAsync(webhook);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Enables or disables a tenant webhook with the parameters specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Enable a webhook
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/webhook/enable</path>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "Enable or disable tenant webhook", typeof(WebhooksConfigDto))]
@@ -180,12 +180,12 @@ public class WebhooksController(
         return await webhooksConfigDtoHelper.GetAsync(webhook);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Removes a tenant webhook with the ID specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Remove a webhook
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/webhook</path>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "Tenant webhook with its config parameters", typeof(WebhooksConfigDto))]
@@ -214,12 +214,12 @@ public class WebhooksController(
         return await webhooksConfigDtoHelper.GetAsync(webhook);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the logs of the webhook activities.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get webhook logs
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/webhooks/log</path>
     /// <collection>list</collection>
     [Tags("Settings / Webhooks")]
@@ -241,12 +241,12 @@ public class WebhooksController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Retries a webhook with the ID specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Retry a webhook
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/webhook/{id}/retry</path>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "Logs of the webhook activities", typeof(WebhooksLogDto))]
@@ -281,12 +281,12 @@ public class WebhooksController(
         return mapper.Map(result);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Retries all the webhooks with the IDs specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Retry webhooks
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/webhook/retry</path>
     /// <collection>list</collection>
     [Tags("Settings / Webhooks")]
@@ -318,12 +318,12 @@ public class WebhooksController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of triggers for a webhook.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get webhook triggers
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/webhook/triggers</path>
     /// <collection>list</collection>
     [Tags("Settings / Webhooks")]

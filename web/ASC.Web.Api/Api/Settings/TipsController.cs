@@ -43,10 +43,10 @@ public class TipsController(
 {
     private readonly ILogger _log = option.CreateLogger("ASC.Api");
 
-    /// <summary>
+    /// <remarks>
     /// Updates the user interface tip settings with the parameters specified in the request.
-    /// </summary>
-    /// <short>Update the tip settings</short>
+    /// </remarks>
+    /// <summary>Update the tip settings</summary>
     /// <path>api/2.0/settings/tips</path>
     [Tags("Settings / Tips")]
     [SwaggerResponse(200, "Updated tip settings", typeof(TipsSettings))]
@@ -87,10 +87,10 @@ public class TipsController(
         return settings;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Updates the tip subscription.
-    /// </summary>
-    /// <short>Update the tip subscription</short>
+    /// </remarks>
+    /// <summary>Update the tip subscription</summary>
     /// <path>api/2.0/settings/tips/change/subscription</path>
     [Tags("Settings / Tips")]
     [SwaggerResponse(200, "Boolean value: true if the user is subscribed to the tips", typeof(bool))]
@@ -106,10 +106,10 @@ public class TipsController(
         return !isSubscribe;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Checks if the current user is subscribed to the tips or not.
-    /// </summary>
-    /// <short>Check the tip subscription</short>
+    /// </remarks>
+    /// <summary>Check the tip subscription</summary>
     /// <path>api/2.0/settings/tips/subscription</path>
     [Tags("Settings / Tips")]
     [SwaggerResponse(200, "Boolean value: true if the user is subscribed to the tips", typeof(bool))]

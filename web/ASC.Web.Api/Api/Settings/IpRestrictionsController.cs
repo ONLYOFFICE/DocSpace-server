@@ -37,10 +37,10 @@ public class IpRestrictionsController(
     TenantManager tenantManager)
     : BaseSettingsController(fusionCache, webItemManager)
 {
-    /// <summary>
+    /// <remarks>
     /// Returns the IP portal restrictions.
-    /// </summary>
-    /// <short>Get the IP portal restrictions</short>
+    /// </remarks>
+    /// <summary>Get the IP portal restrictions</summary>
     /// <path>api/2.0/settings/iprestrictions</path>
     /// <collection>list</collection>
     [Tags("Settings / IP restrictions")]
@@ -57,10 +57,10 @@ public class IpRestrictionsController(
         return HttpContext.TryGetFromCache(await HttpContextExtension.CalculateEtagAsync(result.Select(r => r.Ip))) ? null : result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Updates the IP restrictions with the parameters specified in the request.
-    /// </summary>
-    /// <short>Update the IP restrictions</short>
+    /// </remarks>
+    /// <summary>Update the IP restrictions</summary>
     /// <path>api/2.0/settings/iprestrictions</path>
     [Tags("Settings / IP restrictions")]
     [SwaggerResponse(200, "Updated IP restriction settings", typeof(IpRestrictionsDto))]
@@ -103,10 +103,10 @@ public class IpRestrictionsController(
         return inDto;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the IP restriction settings.
-    /// </summary>
-    /// <short>Get the IP restriction settings</short>
+    /// </remarks>
+    /// <summary>Get the IP restriction settings</summary>
     /// <path>api/2.0/settings/iprestrictions/settings</path>
     [Tags("Settings / IP restrictions")]
     [SwaggerResponse(200, "IP restriction settings", typeof(IPRestrictionsSettings))]
@@ -120,10 +120,10 @@ public class IpRestrictionsController(
         return HttpContext.TryGetFromCache(settings.LastModified) ? null : settings;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Updates the IP restriction settings with the parameters specified in the request.
-    /// </summary>
-    /// <short>Update the IP restriction settings</short>
+    /// </remarks>
+    /// <summary>Update the IP restriction settings</summary>
     /// <path>api/2.0/settings/iprestrictions/settings</path>
     [Tags("Settings / IP restrictions")]
     [SwaggerResponse(200, "Updated IP restriction settings", typeof(IpRestrictionsDto))]

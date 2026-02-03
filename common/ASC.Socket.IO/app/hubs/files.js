@@ -253,9 +253,9 @@ module.exports = (io) => {
     filesIO.to(socket.id).emit("connection-init");
   });
 
-  function startEdit({ fileId, room } = {}) {
+  function startEdit({ fileId, room, editingBy } = {}) {
     logger.info(`start edit file ${fileId} in room ${room}`);
-    filesIO.to(room).emit("s:start-edit-file", fileId);
+    filesIO.to(room).emit("s:start-edit-file", { fileId, editingBy });
   }
 
   function stopEdit({ fileId, room } = {}) {

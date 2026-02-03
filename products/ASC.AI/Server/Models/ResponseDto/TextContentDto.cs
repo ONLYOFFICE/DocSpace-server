@@ -28,7 +28,7 @@ namespace ASC.AI.Models.ResponseDto;
 
 public class TextContentDto : MessageContentDto
 {
-    public override ContentType Type => ContentType.Text;
+    public override MessageContentType Type => MessageContentType.Text;
     public string? Text { get; init; }
 }
 

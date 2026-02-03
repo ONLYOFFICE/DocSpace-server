@@ -36,10 +36,10 @@ public class VersionController(
     IFusionCache fusionCache)
     : BaseSettingsController(fusionCache, webItemManager)
 {
-    /// <summary>
+    /// <remarks>
     /// Returns the current portal build version.
-    /// </summary>
-    /// <short>Get the current build version</short>
+    /// </remarks>
+    /// <summary>Get the current build version</summary>
     /// <path>api/2.0/settings/version/build</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Versions")]
@@ -52,12 +52,12 @@ public class VersionController(
         return await buildVersion.GetCurrentBuildVersionAsync();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of the available portal versions, including the current version.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the portal versions
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/version</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Versions")]
@@ -69,12 +69,12 @@ public class VersionController(
         return new TenantVersionDto(tenant.Version, await tenantManager.GetTenantVersionsAsync());
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sets a version with the ID specified in the request to the current tenant.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Change the portal version
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/version</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Versions")]

@@ -29,9 +29,9 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Api.Controllers;
 
-/// <summary>
+/// <remarks>
 /// Authorization API.
-/// </summary>
+/// </remarks>
 /// <name>authentication</name>
 [Scope]
 [DefaultRoute]
@@ -72,10 +72,10 @@ public class AuthenticationController(
     AuditEventsRepository auditEventsRepository)
     : ControllerBase
 {
-    /// <summary>
+    /// <remarks>
     /// Checks if the current user is authenticated or not.
-    /// </summary>
-    /// <short>Check authentication</short>
+    /// </remarks>
+    /// <summary>Check authentication</summary>
     /// <path>api/2.0/authentication</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
@@ -87,12 +87,12 @@ public class AuthenticationController(
         return securityContext.IsAuthenticated;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Authenticates the current user by SMS or two-factor authentication code.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Authenticate a user by code
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/authentication/{code}</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
@@ -181,12 +181,12 @@ public class AuthenticationController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Authenticates the current user by SMS, authenticator app, or without two-factor authentication.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Authenticate a user
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/authentication</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
@@ -340,12 +340,12 @@ public class AuthenticationController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Logs out of the current user account.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Log out
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/authentication/logout</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
@@ -389,12 +389,12 @@ public class AuthenticationController(
         return null;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Opens a confirmation email URL to validate a certain action (employee invitation, portal removal, phone activation, etc.).
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Open confirmation email URL
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/authentication/confirm</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
@@ -423,12 +423,12 @@ public class AuthenticationController(
         return result.Map();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sets a mobile phone for the current user.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Set a mobile phone
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/authentication/setphone</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
@@ -451,12 +451,12 @@ public class AuthenticationController(
         };
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sends SMS with an authentication code.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Send SMS code
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/authentication/sendsms</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]

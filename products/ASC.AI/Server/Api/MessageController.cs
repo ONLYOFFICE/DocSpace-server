@@ -32,6 +32,7 @@ namespace ASC.AI.Api;
 [ControllerName("ai")]
 public class MessageController(MessageExporter exporter) : ControllerBase
 {
+    [Tags("AI / Messages")]
     [HttpPost("messages/{messageId}/export")]
     public async Task ExportMessageAsync(ExportMessageRequestDto<int> inDto)
     {
