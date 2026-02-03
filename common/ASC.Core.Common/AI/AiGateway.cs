@@ -70,7 +70,7 @@ public class AiGateway(
     {
         if (!await IsEnabledAsync())
         {
-            return null;
+            throw new InvalidOperationException("AI Gateway is not enabled");
         }
         
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenantManager.GetCurrentTenantId());
