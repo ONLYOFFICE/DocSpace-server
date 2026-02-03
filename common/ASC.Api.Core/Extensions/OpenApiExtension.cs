@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Text.Json.Nodes;
 using System.Xml.XPath;
 
 using Microsoft.OpenApi;
@@ -55,8 +56,8 @@ public static class OpenApiExtension
             });
 
             c.CustomSchemaIds(CustomSchemaId);
-
-            c.SwaggerDoc(docVersion, new OpenApiInfo
+            
+            var openApiInfo = new OpenApiInfo
             {
                 Title = "Api",
                 Version = "3.6.0",
@@ -66,7 +67,33 @@ public static class OpenApiExtension
                     Email = "support@onlyoffice.com",
                     Url = new Uri("https://helpdesk.onlyoffice.com/hc/en-us")
                 }
+            };
+            
+            openApiInfo.Extensions ??= new Dictionary<string, IOpenApiExtension>();
+            openApiInfo.Extensions["x-scalar-sdk-installation"] = new JsonNodeExtension(new JsonArray
+            {
+                new JsonObject
+                {
+                    ["lang"] = ScalarTarget.Node.ToStringFast(),
+                    ["description"] = "Install our **ONLYOFFICE SDK** for Node.js from npm:",
+                    ["source"] = "npm install @onlyoffice/docspace-api-sdk"
+                },
+                new JsonObject
+                {
+                    ["lang"] = ScalarTarget.Python.ToStringFast(),
+                    ["description"] = "Install our **ONLYOFFICE SDK** for Python app from pip:",
+                    ["source"] = "pip install docspace-api-sdk"
+                },
+                new JsonObject
+                {
+                    ["lang"] = ScalarTarget.CSharp.ToStringFast(),
+                    ["description"] = "Install our **ONLYOFFICE SDK** for .Net from nuget:",
+                    ["source"] = "dotnet add package DocSpace.API.SDK"
+                }
             });
+            
+            c.SwaggerDoc(docVersion, openApiInfo);
+            
             c.AddScalarFilters();
             c.SchemaFilter<SwaggerSchemaCustomFilter>();
             c.DocumentFilter<LowercaseDocumentFilter>();
@@ -244,8 +271,9 @@ public static class OpenApiExtension
                 endpointRouteBuilder.MapScalarApiReference(((options, context) =>
                 {
                     options.Servers = [];
-                    options.EnabledClients = [ScalarClient.HttpClient, ScalarClient.Axios, ScalarClient.Fetch, ScalarClient.Python3, ScalarClient.Requests, ScalarClient.Curl];
-                    options.WithDefaultHttpClient(ScalarTarget.JavaScript, ScalarClient.Axios);
+                    options.EnabledTargets = [ScalarTarget.Node, ScalarTarget.CSharp, ScalarTarget.Python];
+                    options.EnabledClients = [ScalarClient.Axios, ScalarClient.Fetch, ScalarClient.Python3, ScalarClient.HttpClient];
+                    options.WithDefaultHttpClient(ScalarTarget.Node, ScalarClient.Axios);
                     options.AddDocuments(endpoints.Select(r=> new ScalarDocument(r.Key)
                     {
                         RoutePattern = r.Value.ToLower(),
