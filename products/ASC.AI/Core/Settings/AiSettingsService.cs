@@ -174,7 +174,7 @@ public class AiSettingsService(
         var vectorizationEnabledTask = aiSettingsStore.IsVectorizationEnabledAsync();
 
         var needResetProvidersTask = providerService.NeedResetProvidersAsync();
-        var aiReadyTask = accessibility.IsAiEnabledAsync();
+        var aiStatus = accessibility.GetStatusAsync();
 
         var docSpaceMcpServer = systemMcpConfig.Servers.Values.FirstOrDefault(
             x => x.Type == ServerType.DocSpace);
@@ -185,7 +185,7 @@ public class AiSettingsService(
             vectorizationSettingsTask, 
             vectorizationEnabledTask, 
             needResetProvidersTask, 
-            aiReadyTask
+            aiStatus
             );
 
         var webSearchNeedReset = (await webSearchSettingsTask).NeedReset;
@@ -195,7 +195,7 @@ public class AiSettingsService(
         var vectorizationEnabled = !vectorizationNeedReset && (await vectorizationEnabledTask);
 
         var needResetProviders = await needResetProvidersTask;
-        var aiReady = !needResetProviders && (await aiReadyTask);
+        var aiReady = !needResetProviders && (await aiStatus).Enabled;
 
         return new AiSettings
         {
