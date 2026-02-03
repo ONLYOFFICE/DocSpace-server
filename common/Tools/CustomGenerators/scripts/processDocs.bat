@@ -1,7 +1,12 @@
 @echo off
 
-echo [1/4] Building OpenAPI documentation
-cd ..\..\ASC.Api.Documentation
+echo Building OpenAPI documentation
+cd ..\..\..\..\
+
+call dotnet build ASC.Web.sln -p:OpenApiGenerateDocuments=true
+
+echo [1/4] Building ASC.Api.Documentation
+cd common\Tools\ASC.Api.Documentation
 call dotnet build ASC.Api.Documentation.sln
 
 echo [2/4] Generating OpenAPI specifications
