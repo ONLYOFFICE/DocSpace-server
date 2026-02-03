@@ -232,19 +232,14 @@ public class FileDtoHelper(
 {
     private readonly EmployeeDtoHelper _employeeWrapperHelper = employeeWrapperHelper;
 
-    public async Task<FileDto<T>> GetAsync<T>(File<T> file, string order = null, TimeSpan? expiration = null, IFolder contextFolder = null, bool? aiReady = null)
+    public async Task<FileDto<T>> GetAsync<T>(File<T> file, string order = null, TimeSpan? expiration = null, IFolder contextFolder = null, AiStatus aiStatus = null)
     {
-        Task<bool> aiReadyTask = null;
-        if (aiReady == null)
-        {
-            aiReadyTask = aiAccessibility.IsAiEnabledAsync();
-        }
-        
         var result = await GetFileWrapperAsync(file, order, expiration, contextFolder);
         
         result.ViewAccessibility = await fileUtility.GetAccessibility(file);
         result.AvailableShareRights =  (await _fileSecurity.GetAccesses(file)).ToDictionary(r => r.Key, r => r.Value.Select(v => v.ToStringFast()));
         result.VectorizationStatus = file.VectorizationStatus;
+        aiStatus ??= await aiAccessibility.GetStatusAsync();
         
         if (contextFolder == null)
         {
@@ -378,16 +373,11 @@ public class FileDtoHelper(
             }
             catch (Exception)
             {
+                // ignored
             }
-
         }
         
-        if (aiReadyTask != null)
-        {
-            aiReady = await aiReadyTask;
-        }
-        
-        if (aiReady is false)
+        if (aiStatus is { Enabled: true})
         {
             if (result.Security.ContainsKey(FileSecurity.FilesSecurityActions.AskAi))
             {

@@ -26,6 +26,12 @@
 
 namespace ASC.Files.Core.Utils;
 
+public class AiStatus
+{
+    public bool Enabled { get; init; }
+    public bool GatewayEnabled { get; init; }
+}
+
 [Scope]
 public class AiAccessibility(
     TenantManager tenantManager,
@@ -33,17 +39,16 @@ public class AiAccessibility(
     SettingsManager settingsManager,
     IDbContextFactory<FilesDbContext> dbContextFactory)
 {
-    public async Task<bool> IsAiEnabledAsync()
+    public async Task<AiStatus> GetStatusAsync()
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         
-        if (aiGateway.Configured && await IsAiToolsEnabled(tenantId))
+        if (await aiGateway.IsEnabledAsync())
         {
-            return true;
+            return new AiStatus { Enabled = true, GatewayEnabled = true };
         }
 
-        await using var db = await dbContextFactory.CreateDbContextAsync();
-        return await db.AiProviderExistsAsync(tenantId);
+        return new AiStatus { Enabled = await HasProvidersAsync(tenantId), GatewayEnabled = false };
     }
 
     public async Task<bool> IsVectorizationEnabledAsync<T>(Folder<T> agent)
@@ -53,19 +58,24 @@ public class AiAccessibility(
             return false;
         }
 
-        if (aiGateway.Configured && agent.SettingsChatProviderId == AiGateway.ProviderId)
+        if (agent.SettingsChatProviderId == AiGateway.ProviderId)
         {
-            return await IsAiEnabledAsync();
+            return await aiGateway.IsEnabledAsync();
         }
         
         var tenantId = tenantManager.GetCurrentTenantId();
+        if (!await HasProvidersAsync(tenantId))
+        {
+            return false;
+        }
+        
         var settings = await settingsManager.LoadAsync<EncryptedVectorizationSettings>(tenantId);
         return settings.ProviderType != EmbeddingProviderType.None;
     }
     
-    private async Task<bool> IsAiToolsEnabled(int tenantId)
+    private async Task<bool> HasProvidersAsync(int tenantId)
     {
-        var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>(tenantId);
-        return settings.EnabledServices != null && settings.EnabledServices.Contains(TenantWalletService.AITools);
+        await using var db = await dbContextFactory.CreateDbContextAsync();
+        return await db.AiProviderExistsAsync(tenantId);
     }
 }

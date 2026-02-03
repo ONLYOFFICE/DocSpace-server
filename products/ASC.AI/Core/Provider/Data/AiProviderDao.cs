@@ -52,7 +52,7 @@ public class AiProviderDao(
             await using var context = await dbContextFactory.CreateDbContextAsync();
             await using var transaction = await context.Database.BeginTransactionAsync();
 
-            isFirstProvider = !gateway.Configured && !await context.HasProvidersAsync(tenantId);
+            isFirstProvider = !await gateway.IsEnabledAsync() && !await context.HasProvidersAsync(tenantId);
 
             dbProvider = new DbAiProvider
             {
@@ -98,7 +98,7 @@ public class AiProviderDao(
 
     public async Task<AiProvider?> GetProviderAsync(int tenantId, int id)
     {
-        if (gateway.Configured && id == AiGateway.ProviderId)
+        if (await gateway.IsEnabledAsync() && id == AiGateway.ProviderId)
         {
             return await CreateGatewayProviderAsync(includeCredentials: true);
         }
@@ -124,7 +124,7 @@ public class AiProviderDao(
     {
         var defaultProviderId = (await GetDefaultProviderAsync(tenantId))?.ProviderId;
 
-        if (gateway.Configured && offset == 0)
+        if (await gateway.IsEnabledAsync() && offset == 0)
         {
             var gatewayProvider = await CreateGatewayProviderAsync();
             gatewayProvider.IsDefault = defaultProviderId == gatewayProvider.Id;
@@ -173,10 +173,12 @@ public class AiProviderDao(
 
     public async Task<int> GetProvidersTotalCountAsync(int tenantId)
     {
+        var task = gateway.IsEnabledAsync();
+        
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var count = await dbContext.GetProvidersTotalCountAsync(tenantId);
 
-        if (gateway.Configured)
+        if (await task)
         {
             count++;
         }
@@ -268,7 +270,7 @@ public class AiProviderDao(
             return result;
         }
 
-        if (!gateway.Configured)
+        if (!await gateway.IsEnabledAsync())
         {
             return null;
         }
@@ -280,7 +282,7 @@ public class AiProviderDao(
 
     public async Task<int?> GetFirstProviderIdAsync(int tenantId)
     {
-        if (gateway.Configured)
+        if (await gateway.IsEnabledAsync())
         {
             return AiGateway.ProviderId;
         }

@@ -34,9 +34,7 @@ public class ChatTools(
     KnowledgeSearchTool knowledgeSearchTool,
     AiSettingsStore aiSettingsStore,
     AiGateway aiGateway,
-    AiAccessibility aiAccessibility,
-    SettingsManager settingsManager,
-    TenantManager tenantManager)
+    AiAccessibility aiAccessibility)
 {
     public async Task<(ToolHolder, string? error)> GetAsync(Folder<int> agent, UserChatSettings chatSettings, bool knowledgeHasFiles)
     {
@@ -78,16 +76,8 @@ public class ChatTools(
 
     private async Task<EngineConfig?> GetWebConfigAsync(Folder<int> agent)
     {
-        if (aiGateway.Configured && agent.SettingsChatProviderId == AiGateway.ProviderId)
+        if (agent.SettingsChatProviderId == AiGateway.ProviderId && await aiGateway.IsEnabledAsync())
         {
-            var tenantId = tenantManager.GetCurrentTenantId();
-            
-            var walletSettings = await settingsManager.LoadAsync<TenantWalletServiceSettings>(tenantId);
-            if (walletSettings.EnabledServices == null || !walletSettings.EnabledServices.Contains(TenantWalletService.AITools))
-            {
-                return null;
-            }
-            
             return new DocSpaceWebSearchConfig 
             { 
                 BaseUrl = aiGateway.Url, 
