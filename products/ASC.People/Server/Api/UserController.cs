@@ -444,7 +444,7 @@ public class UserController(
         {
             if (!invite.Email.TestEmailRegex() || invite.Email.TestEmailPunyCode())
             {
-                throw new ArgumentException(Resource.ErrorNotCorrectEmail + ": " + invite.Email);
+                throw new ArgumentException(Resource.ErrorNotCorrectEmail);
             }
 
             switch (invite.Type)
