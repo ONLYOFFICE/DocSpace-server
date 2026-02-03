@@ -965,7 +965,7 @@ public class PortalController(
                     var profile = await loginProfileTransport.FromPureTransport(model.ThirdPartyProfile);
                     if (profile != null && string.IsNullOrEmpty(profile.AuthorizationError))
                     {
-                        var tenantWrappersByProfile = GetTenantsByThirdPartyProfileAsync(profile);
+                        var tenantWrappersByProfile = await GetTenantsByThirdPartyProfileAsync(profile);
                         return Ok(new
                         {
                             tenants = tenantWrappersByProfile

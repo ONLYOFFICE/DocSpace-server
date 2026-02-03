@@ -444,7 +444,7 @@ public class UserController(
         {
             if (!invite.Email.TestEmailRegex() || invite.Email.TestEmailPunyCode())
             {
-                throw new ArgumentException(Resource.ErrorNotCorrectEmail + ": " + invite.Email);
+                throw new ArgumentException(Resource.ErrorNotCorrectEmail);
             }
 
             switch (invite.Type)
@@ -1771,11 +1771,24 @@ public class UserController(
 
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
 
-        var changed = false;
+        var tenant = tenantManager.GetCurrentTenant();
         var self = securityContext.CurrentAccount.ID.Equals(user.Id);
+        var currentUserIsOwner = securityContext.CurrentAccount.ID.IsOwner(tenant);
         var currentUserIsDocSpaceAdmin = await _userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID);
+        var userIsOwner = user.IsOwner(tenant);
+        var userType = await _userManager.GetUserTypeAsync(user.Id);
 
-        //Update it
+        if (!self)
+        {
+            if (userIsOwner || (!currentUserIsOwner && userType == EmployeeType.DocSpaceAdmin))
+            {
+                throw new SecurityException();
+            }
+        }
+
+        var changed = false;
+        var statusChanged = false;
+
         if (self)
         {
             var isLdap = user.IsLDAP();
@@ -1783,8 +1796,6 @@ public class UserController(
 
             if (!isLdap && !isSso)
             {
-                //Set common fields
-
                 var firstName = inDto.UpdateMember.FirstName ?? user.FirstName;
                 var lastName = inDto.UpdateMember.LastName ?? user.LastName;
 
@@ -1831,7 +1842,6 @@ public class UserController(
                 user.WorkFromDate = null;
             }
 
-            //Update contacts
             await UpdateContactsAsync(inDto.UpdateMember.Contacts, user);
             await UpdateDepartmentsAsync(inDto.UpdateMember.Department, user);
 
@@ -1843,13 +1853,7 @@ public class UserController(
             changed = true;
         }
 
-        var tenant = tenantManager.GetCurrentTenant();
-        var userIsOwner = user.IsOwner(tenant);
-        var currentUserIsOwner = securityContext.CurrentAccount.ID.IsOwner(tenant);
-        var userType = await _userManager.GetUserTypeAsync(user.Id);
-        var statusChanged = false;
-
-        if ((self || currentUserIsOwner || currentUserIsDocSpaceAdmin && !userIsOwner && userType != EmployeeType.DocSpaceAdmin) && inDto.UpdateMember.Disable.HasValue)
+        if (!self && inDto.UpdateMember.Disable.HasValue)
         {
             user.Status = inDto.UpdateMember.Disable.Value ? EmployeeStatus.Terminated : EmployeeStatus.Active;
             user.TerminatedDate = inDto.UpdateMember.Disable.Value ? DateTime.UtcNow : null;
@@ -1857,28 +1861,27 @@ public class UserController(
             statusChanged = true;
         }
 
-
-        // change user type
-        var canBeGuestFlag = !userIsOwner &&
-                             !await _userManager.IsDocSpaceAdminAsync(user) &&
-                             (await user.GetListAdminModulesAsync(webItemSecurity, webItemManager)).Count == 0 &&
-                             !self;
-
-        if (inDto.UpdateMember.IsUser.HasValue)
+        if (!self && inDto.UpdateMember.IsUser.HasValue)
         {
-            var isGuest = inDto.UpdateMember.IsUser.Value;
-
-            if (isGuest && canBeGuestFlag && !await _userManager.IsGuestAsync(user))
+            var setGuest = inDto.UpdateMember.IsUser.Value;
+            var isGuest = await _userManager.IsGuestAsync(user);
+            if (setGuest && !isGuest)
             {
-                await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersCountCheckKey(tenant.Id)))
+                var canBeGuest = !userIsOwner &&
+                                 !await _userManager.IsDocSpaceAdminAsync(user) &&
+                                 (await user.GetListAdminModulesAsync(webItemSecurity, webItemManager)).Count == 0;
+                if (canBeGuest)
                 {
-                    await activeUsersChecker.CheckAppend();
-                    await _userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupGuest.ID);
-                    await webItemSecurityCache.ClearCacheAsync(tenant.Id);
-                    changed = true;
+                    await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetUsersCountCheckKey(tenant.Id)))
+                    {
+                        await activeUsersChecker.CheckAppend();
+                        await _userManager.AddUserIntoGroupAsync(user.Id, Constants.GroupGuest.ID);
+                        await webItemSecurityCache.ClearCacheAsync(tenant.Id);
+                        changed = true;
+                    }
                 }
             }
-            else if (!self && !isGuest && await _userManager.IsGuestAsync(user))
+            else if (!setGuest && isGuest)
             {
                 await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetPaidUsersCountCheckKey(tenant.Id)))
                 {
