@@ -50,6 +50,8 @@ public class AiProviderService(
         ArgumentException.ThrowIfNullOrEmpty(key);
 
         url = string.IsNullOrEmpty(url) ? settings.Url : new Uri(url).ToString();
+        
+        ArgumentException.ThrowIfNullOrEmpty(url);
 
         var defaultModel = await ExecuteProviderRequestAsync(async () =>
         {
