@@ -36,7 +36,7 @@ namespace ASC.Api.Core.Extensions;
 
 public static class OpenApiExtension
 {
-    public static IServiceCollection AddOpenApi(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddOpenApi(this IServiceCollection services, IConfiguration configuration, string docVersion = "2.0")
     {
         return services.AddSwaggerGen(c =>
         {
@@ -56,7 +56,7 @@ public static class OpenApiExtension
 
             c.CustomSchemaIds(CustomSchemaId);
 
-            c.SwaggerDoc("common", new OpenApiInfo
+            c.SwaggerDoc(docVersion, new OpenApiInfo
             {
                 Title = "Api",
                 Version = "3.6.0",
@@ -207,7 +207,13 @@ public static class OpenApiExtension
     {
         public IApplicationBuilder UseOpenApi()
         {
-            var assemblyName = Assembly.GetEntryAssembly().FullName.Split(',').First();
+            var entryAssembly = Assembly.GetEntryAssembly();
+            if (entryAssembly == null)
+            {
+                throw new InvalidOperationException("Entry assembly is null. Cannot configure OpenAPI.");
+            }
+
+            var assemblyName = entryAssembly.FullName.Split(',').First();
 
             app.UseSwagger(options =>
             {

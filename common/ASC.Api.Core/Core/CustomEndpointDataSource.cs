@@ -39,7 +39,7 @@ public class CustomEndpointDataSource : EndpointDataSource
             {
                 var routeEndpoints = new List<RouteEndpoint>();
                 var constraintRouteAttr = r.Metadata.OfType<ConstraintRouteAttribute>().FirstOrDefault();
-                var firstParameters = r.RoutePattern.Parameters.FirstOrDefault();
+                var firstParameters = r.RoutePattern.Parameters.FirstOrDefault(p => p.Name != "version");
                 if (firstParameters != null && constraintRouteAttr != null)
                 {
                     var routeValueDictionary = new RouteValueDictionary
