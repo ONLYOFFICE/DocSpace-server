@@ -241,7 +241,7 @@ public static class OpenApiExtension
             {
                 endpointRouteBuilder.MapSwagger();
                 
-                endpointRouteBuilder.MapScalarApiReference(((options, _) =>
+                endpointRouteBuilder.MapScalarApiReference(((options, context) =>
                 {
                     options.Servers = [];
                     options.EnabledClients = [ScalarClient.HttpClient, ScalarClient.Axios, ScalarClient.Fetch, ScalarClient.Python3, ScalarClient.Requests, ScalarClient.Curl];
@@ -251,6 +251,21 @@ public static class OpenApiExtension
                         RoutePattern = r.Value.ToLower(),
                         IsDefault = r.Key == "asc.files"
                     }));
+                    
+                    var authCookie = context.Request.Cookies[CookiesManager.AuthCookiesName]?.ToString();
+                    if (!string.IsNullOrEmpty(authCookie))
+                    {
+                        options.Authentication = new ScalarAuthenticationOptions
+                        {
+                            PreferredSecuritySchemes = [CookiesManager.AuthCookiesName]
+                        };
+
+                        options.AddApiKeyAuthentication(CookiesManager.AuthCookiesName, scheme =>
+                        {
+                            scheme.Name = CookiesManager.AuthCookiesName;
+                            scheme.Value = authCookie;
+                        });
+                    }
                 }));
             });
 
