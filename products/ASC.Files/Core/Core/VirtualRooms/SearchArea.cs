@@ -31,27 +31,27 @@ namespace ASC.Files.Core.VirtualRooms;
 /// </summary>
 public enum SearchArea
 {
-    [SwaggerEnum("Active")]
+    [Description("Active")]
     Active,
 
-    [SwaggerEnum("Archive")]
+    [Description("Archive")]
     Archive,
 
-    [SwaggerEnum("Any")]
+    [Description("Any")]
     Any,
 
-    [SwaggerEnum("Recent by links")]
+    [Description("Recent by links")]
     RecentByLinks,
 
-    [SwaggerEnum("Template")]
+    [Description("Template")]
     Templates,
     
-    [SwaggerEnum("Knowledge")]
+    [Description("Knowledge")]
     Knowledge,
     
-    [SwaggerEnum("Result storage")]
+    [Description("Result storage")]
     ResultStorage,
 
-    [SwaggerEnum("AiAgents")]
+    [Description("AiAgents")]
     AiAgents
 }

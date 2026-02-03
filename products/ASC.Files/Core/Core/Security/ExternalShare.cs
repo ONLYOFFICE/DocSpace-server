@@ -58,7 +58,7 @@ public class ExternalShare(
                 }
                 else
                 {
-                    url = file.DownloadUrl;
+                    url = filesLinkUtility.GetFileDownloadUrl(file.Id);
                 }
 
                 url = QueryHelpers.AddQueryString(url, FilesLinkUtility.ShareKey, key);
@@ -462,22 +462,22 @@ public class ExternalSessionSnapshot
 /// </summary>
 public enum Status
 {
-    [SwaggerEnum(Description = "Ok")]
+    [Description("Ok")]
     Ok,
 
-    [SwaggerEnum(Description = "Invalid")]
+    [Description("Invalid")]
     Invalid,
 
-    [SwaggerEnum(Description = "Expired")]
+    [Description("Expired")]
     Expired,
 
-    [SwaggerEnum(Description = "Required password")]
+    [Description("Required password")]
     RequiredPassword,
 
-    [SwaggerEnum(Description = "Invalid password")]
+    [Description("Invalid password")]
     InvalidPassword,
 
-    [SwaggerEnum(Description = "External access denied")]
+    [Description("External access denied")]
     ExternalAccessDenied
 }
 

@@ -31,21 +31,21 @@ namespace ASC.Files.Core;
 /// </summary>
 public enum FormFillingStatus
 {
-    [SwaggerEnum("None")]
+    [Description("None")]
     None = 0,
 
-    [SwaggerEnum("Draft")]
+    [Description("Draft")]
     Draft = 1,
 
-    [SwaggerEnum("You turn")]
+    [Description("You turn")]
     YouTurn = 2,
 
-    [SwaggerEnum("In progress")]
+    [Description("In progress")]
     InProgress = 3,
 
-    [SwaggerEnum("Complete")]
+    [Description("Complete")]
     Complete = 4,
 
-    [SwaggerEnum("Stoped")]
+    [Description("Stoped")]
     Stoped = 5
 }

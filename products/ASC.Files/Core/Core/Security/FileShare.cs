@@ -33,40 +33,40 @@ namespace ASC.Files.Core.Security;
 [JsonConverter(typeof(FileShareConverter))]
 public enum FileShare
 {
-    [SwaggerEnum(Description = "None")]
+    [Description("None")]
     None,
 
-    [SwaggerEnum(Description = "Read and write")]
+    [Description("Read and write")]
     ReadWrite,
 
-    [SwaggerEnum(Description = "Read")]
+    [Description("Read")]
     Read,
 
-    [SwaggerEnum(Description = "Restrict")]
+    [Description("Restrict")]
     Restrict,
 
-    [SwaggerEnum(Description = "Varies")]
+    [Description("Varies")]
     Varies,
 
-    [SwaggerEnum(Description = "Review")]
+    [Description("Review")]
     Review,
 
-    [SwaggerEnum(Description = "Comment")]
+    [Description("Comment")]
     Comment,
 
-    [SwaggerEnum(Description = "Fill forms")]
+    [Description("Fill forms")]
     FillForms,
 
-    [SwaggerEnum(Description = "Custom filter")]
+    [Description("Custom filter")]
     CustomFilter,
 
-    [SwaggerEnum(Description = "Room manager")]
+    [Description("Room manager")]
     RoomManager,
 
-    [SwaggerEnum(Description = "Editing")]
+    [Description("Editing")]
     Editing,
 
-    [SwaggerEnum(Description = "Content creator")]
+    [Description("Content creator")]
     ContentCreator
 }
 

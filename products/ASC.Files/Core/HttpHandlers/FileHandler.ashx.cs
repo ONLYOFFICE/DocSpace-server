@@ -793,25 +793,22 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             var fileExtension = fileUtility.GetInternalExtension(toExtension);
 
             var storeTemplate = await globalStore.GetStoreTemplateAsync();
-            var path = await globalStore.GetNewDocTemplatePath(storeTemplate, fileExtension);
+            var docTemplate = await globalStore.GetNewDocTemplate(serviceProvider, storeTemplate, fileExtension);
 
-            if (!await storeTemplate.IsFileAsync("", path))
+            if (docTemplate != null)
             {
                 context.Response.StatusCode = (int)HttpStatusCode.NotFound;
                 await context.Response.WriteAsync(FilesCommonResource.ErrorMessage_FileNotFound);
                 return;
             }
 
-            fileName = Path.GetFileName(path);
+            fileName = docTemplate.FileName;
 
             context.Response.Headers.Append("Content-Disposition", ContentDispositionUtil.GetHeaderValue(fileName));
             context.Response.ContentType = MimeMapping.GetMimeMapping(fileName);
 
-            await using var stream = await storeTemplate.GetReadStreamAsync("", path);
-            context.Response.Headers.Append("Content-Length",
-                stream.CanSeek
-                ? stream.Length.ToString(CultureInfo.InvariantCulture)
-                : (await storeTemplate.GetFileSizeAsync("", path)).ToString(CultureInfo.InvariantCulture));
+            await using var stream = await docTemplate.GetStreamAsync();
+            context.Response.Headers.Append("Content-Length", docTemplate.FileSize.ToString(CultureInfo.InvariantCulture));
             await stream.CopyToAsync(context.Response.Body);
         }
         catch (Exception ex)
@@ -1349,11 +1346,11 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             }
         }
 
-        var templatePath = await globalStore.GetNewDocTemplatePath(storeTemplate, fileExt, lang);
+        var docTemplate = await globalStore.GetNewDocTemplate(serviceProvider, storeTemplate, fileExt, lang);
 
         if (string.IsNullOrEmpty(fileTitle))
         {
-            fileTitle = Path.GetFileName(templatePath);
+            fileTitle = docTemplate.FileName;
         }
         else
         {
@@ -1366,8 +1363,8 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
         file.Comment = FilesCommonResource.CommentCreate;
 
         var fileDao = daoFactory.GetFileDao<T>();
-        var stream = await storeTemplate.GetReadStreamAsync("", templatePath, 0);
-        file.ContentLength = stream.CanSeek ? stream.Length : await storeTemplate.GetFileSizeAsync(templatePath);
+        var stream = await docTemplate.GetStreamAsync();
+        file.ContentLength = docTemplate.FileSize;
         return await fileDao.SaveFileAsync(file, stream);
     }
 

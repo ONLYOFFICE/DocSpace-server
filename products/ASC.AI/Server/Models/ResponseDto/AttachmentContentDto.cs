@@ -28,7 +28,7 @@ namespace ASC.AI.Models.ResponseDto;
 
 public class AttachmentContentDto : MessageContentDto
 {
-    public override ContentType Type => ContentType.Attachment;
+    public override MessageContentType Type => MessageContentType.Attachment;
     public required JsonElement Id { get; init; }
     public required string Title { get; init; }
     public required string Extension { get; init; }

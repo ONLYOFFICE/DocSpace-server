@@ -19,8 +19,23 @@
       "launchBrowser": true,
       "applicationUrl": "http://localhost:15208",
       "environmentVariables": {
+        "APP_HOSTING_STANDALONE": "true",
+        "DISABLE_BUILD_CLIENT": "false",
         "ASPIRE_ALLOW_UNSECURED_TRANSPORT": "true",
         "ASPNETCORE_ENVIRONMENT": "Development",
+        "DOTNET_ENVIRONMENT": "Development",
+        "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "http://localhost:19085",
+        "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "http://localhost:20013"
+      }
+    },
+    "preview": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "applicationUrl": "http://localhost:15208",
+      "environmentVariables": {
+        "ASPIRE_ALLOW_UNSECURED_TRANSPORT": "true",
+        "ASPNETCORE_ENVIRONMENT": "Preview",
         "DOTNET_ENVIRONMENT": "Development",
         "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "http://localhost:19085",
         "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "http://localhost:20013"

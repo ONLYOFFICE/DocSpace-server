@@ -45,6 +45,7 @@ public class FileStorageService //: IFileStorageService
     SocketManager socketManager,
     IDaoFactory daoFactory,
     FileMarker fileMarker,
+    FileHelper fileHelper,
     BreadCrumbsManager breadCrumbsManager,
     LockerManager lockerManager,
     EntryManager entryManager,
@@ -930,16 +931,9 @@ public class FileStorageService //: IFileStorageService
 
             if (chatSettings != null)
             {
-                if (gateway.Configured)
+                if (chatSettings.ProviderId <= 0 && !(chatSettings.ProviderId == -1 && gateway.Configured))
                 {
-                    chatSettings.ProviderId = AiGateway.ProviderId;
-                }
-                else
-                {
-                    ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(
-                        chatSettings.ProviderId, 
-                        0, 
-                        nameof(chatSettings.ProviderId));
+                    throw new ArgumentException(nameof(chatSettings.ProviderId));
                 }
                 
                 ArgumentException.ThrowIfNullOrEmpty(chatSettings.ModelId);
@@ -1175,16 +1169,11 @@ public class FileStorageService //: IFileStorageService
 
             if (chatSettingsChanged)
             {
-                if (gateway.Configured)
+                var chatSettings = updateData.ChatSettings;
+                
+                if (chatSettings.ProviderId <= 0 && !(chatSettings.ProviderId == -1 && gateway.Configured))
                 {
-                    updateData.ChatSettings.ProviderId = AiGateway.ProviderId;
-                }
-                else
-                {
-                    ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(
-                        updateData.ChatSettings.ProviderId, 
-                        0, 
-                        nameof(updateData.ChatSettings.ProviderId));
+                    throw new ArgumentException(nameof(updateData.ChatSettings.ProviderId));
                 }
                 
                 ArgumentException.ThrowIfNullOrEmpty(updateData.ChatSettings.ModelId);
@@ -1547,6 +1536,7 @@ public class FileStorageService //: IFileStorageService
             var canCreate = await fileSecurity.CanCreateAsync(folder) &&
                             folder.FolderType != FolderType.VirtualRooms &&
                             folder.FolderType != FolderType.RoomTemplates &&
+                            folder.FolderType != FolderType.DefaultTemplates &&
                             folder.FolderType != FolderType.Archive;
 
             if (!canCreate)
@@ -1614,7 +1604,7 @@ public class FileStorageService //: IFileStorageService
         {
             var culture = (await userManager.GetUsersAsync(authContext.CurrentAccount.ID)).GetCulture();
             var storeTemplate = await globalStore.GetStoreTemplateAsync();
-            var pathNew = await globalStore.GetNewDocTemplatePath(storeTemplate, fileExt, culture);
+            var docTemplate = await globalStore.GetNewDocTemplate(serviceProvider, storeTemplate, fileExt, culture);
 
             try
             {
@@ -1622,8 +1612,8 @@ public class FileStorageService //: IFileStorageService
 
                 if (!enableExternalExt)
                 {
-                    await using var stream = await storeTemplate.GetReadStreamAsync("", pathNew, 0);
-                    file.ContentLength = stream.CanSeek ? stream.Length : await storeTemplate.GetFileSizeAsync(pathNew);
+                    await using var stream = await docTemplate.GetStreamAsync();
+                    file.ContentLength = docTemplate.FileSize;
 
                     if (FileUtility.GetFileTypeByExtention(fileExt) == FileType.Pdf)
                     {
@@ -1651,23 +1641,24 @@ public class FileStorageService //: IFileStorageService
 
                 var counter = 0;
 
-                var path = pathNew.Replace(Path.GetFileName(pathNew), string.Empty);
-
-                foreach (var size in thumbnailSettings.Sizes)
+                if (!string.IsNullOrWhiteSpace( docTemplate.ThumbnailPath))
                 {
-                    var pathThumb = $"{path}{fileExt.Trim('.')}.{size.Width}x{size.Height}.{global.ThumbnailExtension}";
-
-                    if (!await storeTemplate.IsFileAsync("", pathThumb))
+                    foreach (var size in thumbnailSettings.Sizes)
                     {
-                        break;
-                    }
+                        var pathThumb = $"{docTemplate.ThumbnailPath}{fileExt.Trim('.')}.{size.Width}x{size.Height}.{global.ThumbnailExtension}";
 
-                    await using (var streamThumb = await storeTemplate.GetReadStreamAsync("", pathThumb, 0))
-                    {
-                        await (await globalStore.GetStoreAsync()).SaveAsync(fileDao.GetUniqThumbnailPath(file, size.Width, size.Height), streamThumb);
-                    }
+                        if (!await storeTemplate.IsFileAsync("", pathThumb))
+                        {
+                            break;
+                        }
 
-                    counter++;
+                        await using (var streamThumb = await storeTemplate.GetReadStreamAsync("", pathThumb, 0))
+                        {
+                            await (await globalStore.GetStoreAsync()).SaveAsync(fileDao.GetUniqThumbnailPath(file, size.Width, size.Height), streamThumb);
+                        }
+
+                        counter++;
+                    }
                 }
 
                 if (thumbnailSettings.Sizes.Count() == counter)
@@ -2157,8 +2148,13 @@ public class FileStorageService //: IFileStorageService
                 await tagDao.SaveTagsAsync(tagLocked);
             }
 
-            var usersDrop = (await fileTracker.GetEditingByAsync(file.Id)).Where(uid => uid != authContext.CurrentAccount.ID).Select(u => u.ToString()).ToArray();
-            if (usersDrop.Length > 0)
+            var usersDrop = await fileTracker.GetAnonymousEditingSessionsAsync(file.Id);
+
+            usersDrop.AddRange((await fileTracker.GetEditingByAsync(file.Id))
+                .Where(uid => uid != authContext.CurrentAccount.ID)
+                .Select(u => u.ToString()));
+
+            if (usersDrop.Count > 0)
             {
                 var docKey = await fileTracker.GetTrackerDocKey(file.Id);
                 await documentServiceHelper.DropUserAsync(docKey, usersDrop, file.Id);
@@ -2238,8 +2234,13 @@ public class FileStorageService //: IFileStorageService
 
                 await tagDao.SaveTagsAsync(tagCustomFilter);
 
-                var usersDrop = (await fileTracker.GetEditingByAsync(file.Id)).Where(uid => uid != authContext.CurrentAccount.ID).Select(u => u.ToString()).ToArray();
-                if (usersDrop.Length > 0)
+                var usersDrop = await fileTracker.GetAnonymousEditingSessionsAsync(file.Id);
+
+                usersDrop.AddRange((await fileTracker.GetEditingByAsync(file.Id))
+                    .Where(uid => uid != authContext.CurrentAccount.ID)
+                    .Select(u => u.ToString()));
+
+                if (usersDrop.Count > 0)
                 {
                     var docKey = await fileTracker.GetTrackerDocKey(file.Id);
                     await documentServiceHelper.DropUserAsync(docKey, usersDrop, file.Id);
@@ -4761,7 +4762,7 @@ public class FileStorageService //: IFileStorageService
 
         await foreach (var folder in folders)
         {
-            if (folder.RootFolderType is not FolderType.COMMON and not FolderType.VirtualRooms and not FolderType.RoomTemplates and not FolderType.AiAgents)
+            if (folder.RootFolderType is not FolderType.COMMON and not FolderType.VirtualRooms and not FolderType.RoomTemplates and not FolderType.DefaultTemplates and not FolderType.AiAgents)
             {
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
             }
@@ -4853,12 +4854,17 @@ public class FileStorageService //: IFileStorageService
             var newFile = file;
             if (file.CreateBy != userInfo.Id)
             {
+                var fileState = await fileHelper.GetFileState(file);
+
+                file.SetFileState(fileState);
+
                 newFile = serviceProvider.GetService<File<T>>();
                 newFile.Id = file.Id;
                 newFile.Version = file.Version + 1;
                 newFile.VersionGroup = file.VersionGroup + 1;
                 newFile.Title = file.Title;
-                newFile.SetFileStatus(await file.GetFileStatus());
+                newFile.FileStatus = file.FileStatus;
+                newFile.EditingBy = file.EditingBy;
                 newFile.ParentId = file.ParentId;
                 newFile.CreateBy = userInfo.Id;
                 newFile.CreateOn = file.CreateOn;

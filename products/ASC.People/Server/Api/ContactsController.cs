@@ -38,12 +38,12 @@
 //     IHttpContextAccessor httpContextAccessor)
 //     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 // {
-//     /// <summary>
+//     /// <remarks>
 //     /// Deletes the contacts of the user with the ID specified in the request from the portal.
-//     /// </summary>
-//     /// <short>
+//     /// </remarks>
+//     /// <summary>
 //     /// Delete user contacts
-//     /// </short>
+//     /// </summary>
 //     /// <path>api/2.0/people/{userid}/contacts</path>
 //     [Tags("People / Contacts")]
 //     [SwaggerResponse(200, "Deleted user profile with the detailed information", typeof(EmployeeFullDto))]
@@ -65,12 +65,12 @@
 //         return await employeeFullDtoHelper.GetFullAsync(user);
 //     }
 //
-//     /// <summary>
+//     /// <remarks>
 //     /// Sets the contacts of the user with the ID specified in the request replacing the current portal data with the new data.
-//     /// </summary>
-//     /// <short>
+//     /// </remarks>
+//     /// <summary>
 //     /// Set user contacts
-//     /// </short>
+//     /// </summary>
 //     /// <path>api/2.0/people/{userid}/contacts</path>
 //     [Tags("People / Contacts")]
 //     [SwaggerResponse(200, "Updated user profile with the detailed information", typeof(EmployeeFullDto))]
@@ -97,12 +97,12 @@
 //         return await employeeFullDtoHelper.GetFullAsync(user);
 //     }
 //
-//     /// <summary>
+//     /// <remarks>
 //     /// Updates the contact information of the user with the ID specified in the request merging the new data into the current portal data.
-//     /// </summary>
-//     /// <short>
+//     /// </remarks>
+//     /// <summary>
 //     /// Update user contacts
-//     /// </short>
+//     /// </summary>
 //     /// <path>api/2.0/people/{userid}/contacts</path>
 //     [Tags("People / Contacts")]
 //     [SwaggerResponse(200, "Updated user profile with the detailed information", typeof(EmployeeFullDto))]

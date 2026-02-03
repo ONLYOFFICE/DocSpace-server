@@ -67,6 +67,11 @@ public class FileDto<T> : FileEntryDto<T>
     public FileStatus FileStatus { get; set; }
 
     /// <summary>
+    /// The list of users editing the file.
+    /// </summary>
+    public Dictionary<Guid, string> EditingBy { get; set; }
+
+    /// <summary>
     /// Specifies if the file is muted or not.
     /// </summary>
     [SwaggerSchemaCustom(Example = false)]
@@ -219,6 +224,7 @@ public class FileDtoHelper(
     FileUtility fileUtility,
     FileSharingHelper fileSharingHelper,
     BadgesSettingsHelper badgesSettingsHelper,
+    FileHelper fileHelper,
     FilesSettingsHelper filesSettingsHelper,
     FileDateTime fileDateTime,
     ExternalShare externalShare,
@@ -405,22 +411,27 @@ public class FileDtoHelper(
 
         var getFileTask = GetAsync<FileDto<T>, T>(file);
         var badgesTask = badgesSettingsHelper.GetEnabledForCurrentUserAsync();
-        var fileStatusTask = file.GetFileStatus();
+        var fileStateTask = fileHelper.GetFileState(file);
 
         var extension = FileUtility.GetFileExtension(file.Title);
         var fileType = FileUtility.GetFileTypeByExtention(extension);
 
-        await Task.WhenAll(getFileTask, badgesTask, fileStatusTask);
+        await Task.WhenAll(getFileTask, badgesTask, fileStateTask);
 
         var result = getFileTask.Result;
         var isEnabledBadges = badgesTask.Result;
+        var fileState = fileStateTask.Result;
+
+        file.SetFileState(fileState);
+
         result.FolderId = file.ParentId;
         result.FileExst = extension;
         result.FileType = fileType;
         result.Version = file.Version;
         result.VersionGroup = file.VersionGroup;
         result.ContentLength = file.ContentLengthString;
-        result.FileStatus = fileStatusTask.Result;
+        result.FileStatus = file.FileStatus;
+        result.EditingBy = file.EditingBy;
         result.Mute = !isEnabledBadges;
         result.PureContentLength = file.ContentLength.NullIfDefault();
         result.Comment = file.Comment;
@@ -457,7 +468,7 @@ public class FileDtoHelper(
             var currentFolder = currentFolderTask.Result;
 
             Folder<T> currentRoom;
-            if (!currentFolder.IsRoom && file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates)
+            if (!currentFolder.IsRoom && file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates or FolderType.DefaultTemplates)
             {
                 currentRoom = await DocSpaceHelper.GetParentRoom(file, folderDao) ?? currentFolder;
             }
@@ -616,7 +627,7 @@ public class FileDtoHelper(
                 }
             }
             
-            result.ViewUrl = _externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl), result.RequestToken);
+            result.ViewUrl = _externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileDownloadUrl(file.Id)), result.RequestToken);
             result.WebUrl = _externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version, externalMediaAccess)), result.RequestToken);
             result.ThumbnailStatus = file.ThumbnailStatus;
             

@@ -28,12 +28,12 @@ namespace ASC.Files.Core.Core;
 
 public enum AdditionalFilterOption
 {
-    [SwaggerEnum("All")]
+    [Description("All")]
     All,
 
-    [SwaggerEnum("My files and folders")]
+    [Description("My files and folders")]
     MyFilesAndFolders,
 
-    [SwaggerEnum("Forms with filling role")]
+    [Description("Forms with filling role")]
     FormsWithFillingRole
 }

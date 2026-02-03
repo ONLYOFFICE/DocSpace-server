@@ -63,10 +63,10 @@ public abstract class SecurityController<T>(
     FileShareDtoHelper fileShareDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
-    /// <summary>
+    /// <remarks>
     /// Returns the detailed information about the shared file with the ID specified in the request.
-    /// </summary>
-    /// <short>Get the shared file information</short>
+    /// </remarks>
+    /// <summary>Get the shared file information</summary>
     /// <path>api/2.0/files/file/{fileId}/share</path>
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
@@ -87,10 +87,10 @@ public abstract class SecurityController<T>(
         apiContext.SetTotalCount(await fileStorageService.GetPureSharesCountAsync(inDto.Id, FileEntryType.File, ShareFilterType.UserOrGroup, null));
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the detailed information about the shared folder with the ID specified in the request.
-    /// </summary>
-    /// <short>Get the shared folder information</short>
+    /// </remarks>
+    /// <summary>Get the shared folder information</summary>
     /// <path>api/2.0/files/folder/{folderId}/share</path>
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
@@ -111,10 +111,10 @@ public abstract class SecurityController<T>(
         apiContext.SetTotalCount(await fileStorageService.GetPureSharesCountAsync(inDto.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, null));
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sets the sharing settings to a file with the ID specified in the request.
-    /// </summary>
-    /// <short>Share a file</short>
+    /// </remarks>
+    /// <summary>Share a file</summary>
     /// <path>api/2.0/files/file/{fileId}/share</path>
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
@@ -134,10 +134,10 @@ public abstract class SecurityController<T>(
         return securityControllerHelper.SetSecurityInfoAsync([inDto.FileId], [], inDto.SecurityInfoSimple.Share, inDto.SecurityInfoSimple.Notify, text);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sets the sharing settings to a folder with the ID specified in the request.
-    /// </summary>
-    /// <short>Share a folder</short>
+    /// </remarks>
+    /// <summary>Share a folder</summary>
     /// <path>api/2.0/files/folder/{folderId}/share</path>
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
@@ -157,10 +157,10 @@ public abstract class SecurityController<T>(
         return securityControllerHelper.SetSecurityInfoAsync([], [inDto.FolderId], inDto.SecurityInfoSimple.Share, inDto.SecurityInfoSimple.Notify, text);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the encryption keys to access a file with the ID specified in the request.
-    /// </summary>
-    /// <short>Get file encryption keys</short>
+    /// </remarks>
+    /// <summary>Get file encryption keys</summary>
     /// <path>api/2.0/files/file/{fileId}/publickeys</path>
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
@@ -173,10 +173,10 @@ public abstract class SecurityController<T>(
         return await fileStorageService.GetEncryptionAccessAsync(inDto.FileId);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sends a message to the users who are mentioned in the file with the ID specified in the request.
-    /// </summary>
-    /// <short>Send the mention message</short>
+    /// </remarks>
+    /// <summary>Send the mention message</summary>
     /// <path>api/2.0/files/file/{fileId}/sendeditornotify</path>
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
@@ -188,10 +188,10 @@ public abstract class SecurityController<T>(
         return await fileStorageService.SendEditorNotifyAsync(inDto.FileId, inDto.MentionMessage);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the group members with their folder security information.
-    /// </summary>
-    /// <short>Get folder group members with security information</short>
+    /// </remarks>
+    /// <summary>Get folder group members with security information</summary>
     /// <path>api/2.0/files/folder/{folderId}/group/{groupId}/share</path>
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
@@ -222,10 +222,10 @@ public abstract class SecurityController<T>(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the group members with their file security information.
-    /// </summary>
-    /// <short>Get file group members with security information</short>
+    /// </remarks>
+    /// <summary>Get file group members with security information</summary>
     /// <path>api/2.0/files/file/{fileId}/group/{groupId}/share</path>
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<GroupMemberSecurityRequestDto>))]
@@ -264,10 +264,10 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
         ExternalLinkHelper externalLinkHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
-    /// <summary>
+    /// <remarks>
     /// Changes the owner of the file with the ID specified in the request.
-    /// </summary>
-    /// <short>Change the file owner</short>
+    /// </remarks>
+    /// <summary>Change the file owner</summary>
     /// <path>api/2.0/files/owner</path>
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
@@ -288,10 +288,10 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the sharing rights for all the files and folders specified in the request.
-    /// </summary>
-    /// <short>Get the sharing rights</short>
+    /// </remarks>
+    /// <summary>Get the sharing rights</summary>
     /// <path>api/2.0/files/share</path>
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
@@ -311,10 +311,10 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Removes the sharing rights from all the files and folders specified in the request.
-    /// </summary>
-    /// <short>Remove the sharing rights</short>
+    /// </remarks>
+    /// <summary>Remove the sharing rights</summary>
     /// <path>api/2.0/files/share</path>
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -331,10 +331,10 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     }
 
 
-    /// <summary>
+    /// <remarks>
     /// Sets the sharing rights to all the files and folders specified in the request.
-    /// </summary>
-    /// <short>Set the sharing rights</short>
+    /// </remarks>
+    /// <summary>Set the sharing rights</summary>
     /// <path>api/2.0/files/share</path>
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
@@ -363,10 +363,10 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the external data by the key specified in the request.
-    /// </summary>
-    /// <short>Get the external data</short>
+    /// </remarks>
+    /// <summary>Get the external data</summary>
     /// <path>api/2.0/files/share/{key}</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Sharing")]
@@ -380,10 +380,10 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
         return validationInfo.Map();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Applies a password specified in the request to get the external data.
-    /// </summary>
-    /// <short>Apply external data password</short>
+    /// </remarks>
+    /// <summary>Apply external data password</summary>
     /// <path>api/2.0/files/share/{key}/password</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Sharing")]

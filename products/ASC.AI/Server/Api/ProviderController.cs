@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ProviderDto = ASC.AI.Models.ResponseDto.ProviderDto;
-
 namespace ASC.AI.Api;
 
 [Scope]
@@ -38,9 +36,10 @@ public class ProviderController(
     MessageService messageService,
     ProviderMapper providerMapper) : ControllerBase
 {
+    [Tags("AI / Providers")]
     [HttpPost("providers")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
-    public async Task<ProviderDto> AddProviderAsync(CreateProviderRequestDto inDto)
+    public async Task<AiProviderDto> AddProviderAsync(CreateProviderRequestDto inDto)
     {
         var provider = await providerService.AddProviderAsync(inDto.Title, inDto.Url, inDto.Key, inDto.Type);
 
@@ -49,8 +48,9 @@ public class ProviderController(
         return providerMapper.MapToDto(provider);
     }
 
+    [Tags("AI / Providers")]
     [HttpGet("providers")]
-    public async Task<List<ProviderDto>> GetProvidersAsync(PaginatedRequestDto inDto)
+    public async Task<List<AiProviderDto>> GetProvidersAsync(PaginatedRequestDto inDto)
     {
         var totalCountTask = providerService.GetProvidersTotalCountAsync();
         
@@ -65,9 +65,10 @@ public class ProviderController(
         return providers;
     }
     
+    [Tags("AI / Providers")]
     [HttpPut("providers/{id}")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
-    public async Task<ProviderDto> UpdateProviderAsync(UpdateProviderRequestDto inDto)
+    public async Task<AiProviderDto> UpdateProviderAsync(UpdateProviderRequestDto inDto)
     {
         var provider = await providerService.UpdateProviderAsync(inDto.Id, inDto.Body.Title, inDto.Body.Url, inDto.Body.Key);
 
@@ -76,6 +77,7 @@ public class ProviderController(
         return providerMapper.MapToDto(provider);
     }
 
+    [Tags("AI / Providers")]
     [HttpDelete("providers")]
     public async Task<NoContentResult> DeleteProvidersAsync(RemoveProviderRequestDto inDto)
     {
@@ -100,11 +102,44 @@ public class ProviderController(
         return NoContent();
     }
 
+    [Tags("AI / Providers")]
     [HttpGet("providers/available")]
     public async Task<List<ProviderSettingsDto>> GetAvailableProvidersAsync()
     {
         var providers = await providerService.GetAvailableProvidersAsync();
 
         return providers.Select(x => x.MapToDto()).ToList();
+    }
+
+    /// <summary>
+    /// Sets the default AI provider for the current tenant.
+    /// </summary>
+    /// <short>Set default AI provider</short>
+    /// <path>api/2.0/ai/providers/default</path>
+    [Tags("AI / Providers")]
+    [SwaggerResponse(200, "Default provider information", typeof(DefaultProviderDto))]
+    [SwaggerResponse(403, "You don't have enough permission to manage providers")]
+    [SwaggerResponse(404, "Provider not found")]
+    [HttpPut("providers/default")]
+    public async Task<DefaultProviderDto> SetDefaultProviderAsync(SetDefaultProviderRequestDto inDto)
+    {
+        var result = await providerService.SetDefaultProviderAsync(inDto.ProviderId, inDto.DefaultModel);
+
+        return result.MapToDto();
+    }
+
+    /// <summary>
+    /// Returns the default AI provider for the current tenant.
+    /// </summary>
+    /// <short>Get default AI provider</short>
+    /// <path>api/2.0/ai/providers/default</path>
+    [Tags("AI / Providers")]
+    [SwaggerResponse(200, "Default provider information or null if not set", typeof(DefaultProviderDto))]
+    [HttpGet("providers/default")]
+    public async Task<DefaultProviderDto?> GetDefaultProviderAsync()
+    {
+        var result = await providerService.GetDefaultProviderAsync();
+
+        return result?.MapToDto();
     }
 }

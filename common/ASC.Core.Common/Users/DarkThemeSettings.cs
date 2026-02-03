@@ -62,12 +62,12 @@ public class DarkThemeSettings : ISettings<DarkThemeSettings>
 [JsonConverter(typeof(JsonStringEnumConverter<DarkThemeSettingsType>))]
 public enum DarkThemeSettingsType
 {
-    [SwaggerEnum("Base")]
+    [Description("Base")]
     Base,
 
-    [SwaggerEnum("Dark")]
+    [Description("Dark")]
     Dark,
 
-    [SwaggerEnum("System")]
+    [Description("System")]
     System
 }

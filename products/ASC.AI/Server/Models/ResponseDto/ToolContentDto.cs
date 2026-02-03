@@ -30,7 +30,7 @@ namespace ASC.AI.Models.ResponseDto;
 
 public class ToolContentDto : MessageContentDto
 {
-    public override ContentType Type => ContentType.Tool;
+    public override MessageContentType Type => MessageContentType.Tool;
     public required string Name { get; init; }
     public IDictionary<string, object?>? Arguments { get; init; }
     public object? Result { get; init; }
