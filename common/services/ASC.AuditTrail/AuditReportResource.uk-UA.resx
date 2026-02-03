@@ -1107,4 +1107,52 @@
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Вебхук оновлено: {0}</value>
   </data>
+  <data name="BackupCompleted" xml:space="preserve">
+    <value>Резервне копіювання виконано</value>
+  </data>
+  <data name="BackupFailed" xml:space="preserve">
+    <value>Збій резервного копіювання</value>
+  </data>
+  <data name="InvitationSettingsUpdated" xml:space="preserve">
+    <value>Параметри запрошення оновлено</value>
+  </data>
+  <data name="IPRestrictionsSettingsUpdated" xml:space="preserve">
+    <value>Параметри безпеки IP оновлено</value>
+  </data>
+  <data name="LoginSettingsUpdated" xml:space="preserve">
+    <value>Параметри захисту від атак грубою силою оновлено</value>
+  </data>
+  <data name="ScheduledBackupCompleted" xml:space="preserve">
+    <value>Заплановане резервне копіювання виконано</value>
+  </data>
+  <data name="ScheduledBackupFailed" xml:space="preserve">
+    <value>Збій запланованого резервного копіювання</value>
+  </data>
+  <data name="ScheduledBackupStarted" xml:space="preserve">
+    <value>Заплановане резервне копіювання розпочато</value>
+  </data>
+  <data name="WebpluginDeleted" xml:space="preserve">
+    <value>Плагін видалено: {0}</value>
+  </data>
+  <data name="WebpluginUpdated" xml:space="preserve">
+    <value>Плагін оновлено: {0}</value>
+  </data>
+  <data name="WebpluginUploaded" xml:space="preserve">
+    <value>Плагін передано: {0}</value>
+  </data>
+  <data name="WhiteLabelAdditionalSettingsUpdated" xml:space="preserve">
+    <value>Додаткові параметри брендингу оновлено</value>
+  </data>
+  <data name="WhiteLabelCompanySettingsUpdated" xml:space="preserve">
+    <value>Параметри інформації про компанію оновлено</value>
+  </data>
+  <data name="WhiteLabelMailSettingsUpdated" xml:space="preserve">
+    <value>Параметри пошти оновлено</value>
+  </data>
+  <data name="WhiteLabelSettingsLogosUpdated" xml:space="preserve">
+    <value>Параметри логотипа оновлено</value>
+  </data>
+  <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
+    <value>Назву бренду оновлено</value>
+  </data>
 </root>

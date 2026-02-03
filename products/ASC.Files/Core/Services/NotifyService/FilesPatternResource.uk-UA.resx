@@ -298,4 +298,18 @@ $Message</value>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
     <value>Сповіщення DocSpace.</value>
   </data>
+  <data name="pattern_AgentRemoved" xml:space="preserve">
+    <value>h1. $__AuthorName видалив(ла) ШІ-агента
+
+$__AuthorName видалив(ла) ШІ-агента $RoomTitle</value>
+  </data>
+  <data name="pattern_AgentUpdateAccessForUser_push" xml:space="preserve">
+    <value>Вашу роль у ШІ-агенті «$RoomTitle» змінено на «$RoomRole»</value>
+  </data>
+  <data name="pattern_InvitedToAgent_push" xml:space="preserve">
+    <value>Вас запрошено до ШІ-агента «$RoomTitle»</value>
+  </data>
+  <data name="subject_AgentRemoved" xml:space="preserve">
+    <value>Сповіщення DocSpace. ШІ-агента видалено</value>
+  </data>
 </root>

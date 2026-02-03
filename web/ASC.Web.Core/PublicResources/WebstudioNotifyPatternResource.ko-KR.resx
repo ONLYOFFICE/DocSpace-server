@@ -2152,4 +2152,34 @@ $TrulyYours</value>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>감사드립니다, ${LetterLogoText} 팀</value>
   </data>
+  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt;님이 새 문서: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;를 AI 에이전트의 지식 기반: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;에 업로드하셨습니다</value>
+  </data>
+  <data name="pattern_api_key_expired" xml:space="preserve">
+    <value>$UserName님, 안녕하세요!
+
+고객님의 API 키("*$Message*")가 만료되어 비활성화되었음을 알려드립니다.
+
+새로운 API 키는 "개발자 도구":"${__VirtualRootPath}/developer-tools/api-keys"에서 생성할 수 있습니다.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace가 삭제되었습니다.
+
+*포털:* ${PortalUrl}
+*소유자:* ${UserName} ${UserEmail} 
+*고객:* ${OwnerName}
+
+자동 결제를 해제 상태로 해주세요. 고객의 Stripe 계정에서 자동 결제 상태를 확인하세요.</value>
+  </data>
+  <data name="pattern_user_agent_role_changed" xml:space="preserve">
+    <value>안녕하세요! 
+
+DocSpace AI 에이전트 "${RoomTitle}":"${RoomUrl}": ${UserRole}에서 새로운 역할을 부여받으셨습니다.
+
+룸 역할 및 권한에 대한 자세한 사항은 "도움말 센터":"${HelpCenterUrl}"를 참고하세요.
+
+$TrulyYours</value>
+  </data>
 </root>

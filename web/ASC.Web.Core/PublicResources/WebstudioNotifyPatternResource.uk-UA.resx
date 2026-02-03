@@ -2155,4 +2155,34 @@ $TrulyYours</value>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>Щиро ваша, команда ${LetterLogoText}</value>
   </data>
+  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; передав(ла) новий документ &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; до бази знань ШІ-агента &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="pattern_api_key_expired" xml:space="preserve">
+    <value>Вітаємо, $UserName!
+
+Цим листом повідомляємо, що термін дії вашого API-ключа «*$Message*» закінчився і його було деактивовано.
+
+Ви можете згенерувати новий API-ключ у розділі "Інструменти розробника": ${__VirtualRootPath}/developer-tools/api-keys".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace видалено.
+
+*Портал:* ${PortalUrl}
+*Власник:* ${UserName} ${UserEmail} 
+*Клієнт:* ${OwnerName}
+
+Переконайтеся, що автоматичне виставлення рахунків вимкнено. Перевірте статус автоматичного виставлення рахунків в обліковому записі клієнта Stripe.</value>
+  </data>
+  <data name="pattern_user_agent_role_changed" xml:space="preserve">
+    <value>Вітаємо!
+
+Вам призначено нову роль у ШІ-агенті DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+Дізнайтеся більше про ролі та дозволи в кімнаті в "Довідковому центрі":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
 </root>
