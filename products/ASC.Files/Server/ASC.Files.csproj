@@ -21,6 +21,7 @@
 		<InternalsVisibleTo Include="ASC.Files.Tests" />
 	</ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\common\ASC.Analyzers\ASC.Analyzers.csproj"  OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\..\..\common\ASC.Api.Core\ASC.Api.Core.csproj" />
     <ProjectReference Include="..\..\..\common\ASC.Data.Backup.Core\ASC.Data.Backup.Core.csproj" />
     <ProjectReference Include="..\Core\ASC.Files.Core.csproj" />
