@@ -626,16 +626,16 @@ public enum MessageAction
     [Description("Room change owner")]
     RoomChangeOwner = 5159,
 
-    [SwaggerEnum("File saved, user quota exceeded")]
+    [Description("File saved, user quota exceeded")]
     FileSavedButUserQuotaExceeded = 5201,
 
-    [SwaggerEnum("File not saved due to user quota exceeded")]
+    [Description("File not saved due to user quota exceeded")]
     FileNotSavedDueToUserQuota = 5202,
 
-    [SwaggerEnum("File saved, room quota exceeded")]
+    [Description("File saved, room quota exceeded")]
     FileSavedButRoomQuotaExceeded = 5203,
 
-    [SwaggerEnum("File not saved due to room quota exceeded")]
+    [Description("File not saved due to room quota exceeded")]
     FileNotSavedDueToRoomQuota = 5204,
 
     #endregion
