@@ -10,29 +10,32 @@ namespace ASC.Analyzers;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
 {
-    public const string ControllerDiagnosticId = "API001";
+    public const string ModelDiagnosticId = "API001";
     public const string ActionDiagnosticId = "API002";
     public const string SummaryDiagnosticId = "API003";
     public const string RemarksDiagnosticId = "API004";
+    public const string ModelDtoDiagnosticId = "API005";
 
-    private static readonly LocalizableString _controllerTitle = "API Controller missing XML documentation";
+    private static readonly LocalizableString _modelTitle = "API DTO model missing XML documentation";
     private static readonly LocalizableString _actionTitle = "API Action method missing XML documentation";
     private static readonly LocalizableString _summaryTitle = "API Action method missing summary";
     private static readonly LocalizableString _remarksTitle = "API Action method missing remarks";
-
-    private static readonly LocalizableString _controllerMessageFormat = "API Controller '{0}' should have XML documentation";
+    private static readonly LocalizableString _modelDtoTitle = "API DTO model's property missing XML documentation";
+    
+    private static readonly LocalizableString _modelMessageFormat = "API DTO model '{0}' should have XML documentation";
     private static readonly LocalizableString _actionMessageFormat = "API Action method '{0}' should have XML documentation";
     private static readonly LocalizableString _summaryMessageFormat = "API Action method '{0}' should have summary";
     private static readonly LocalizableString _remarksMessageFormat = "API Action method '{0}' should have remarks";
+    private static readonly LocalizableString _modelDtoMessageFormat = "API DTO model's '{0}' property '{1}' should have XML documentation";
 
     private static readonly LocalizableString _description = "API controllers and their methods should have XML documentation for Swagger/OpenAPI generation.";
 
     private const string Category = "Documentation";
 
-    private static readonly DiagnosticDescriptor _controllerRule = new(
-        ControllerDiagnosticId, 
-        _controllerTitle, 
-        _controllerMessageFormat, 
+    private static readonly DiagnosticDescriptor _modelRule = new(
+        ModelDiagnosticId, 
+        _modelTitle, 
+        _modelMessageFormat, 
         Category, 
         DiagnosticSeverity.Warning, 
         isEnabledByDefault: true, 
@@ -65,37 +68,24 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
         isEnabledByDefault: true, 
         description: _description);
     
+    private static readonly DiagnosticDescriptor _modelDtoRule = new(
+        ModelDtoDiagnosticId, 
+        _modelDtoTitle, 
+        _modelDtoMessageFormat, 
+        Category, 
+        DiagnosticSeverity.Warning, 
+        isEnabledByDefault: true, 
+        description: _description);
 
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [_controllerRule, _actionRule, _remarksRule, _summaryRule];
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [_modelRule, _actionRule, _remarksRule, _summaryRule, _modelDtoRule];
 
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-            
-        //context.RegisterSyntaxNodeAction(AnalyzeClass, SyntaxKind.ClassDeclaration);
         context.RegisterSyntaxNodeAction(AnalyzeMethod, SyntaxKind.MethodDeclaration);
     }
-
-    private static void AnalyzeClass(SyntaxNodeAnalysisContext context)
-    {
-        var classDeclaration = (ClassDeclarationSyntax)context.Node;
-            
-        if (!IsApiController(context, classDeclaration))
-        {
-            return;
-        }
-
-        if (!HasXmlDocumentation(classDeclaration))
-        {
-            var diagnostic = Diagnostic.Create(
-                _controllerRule, 
-                classDeclaration.Identifier.GetLocation(), 
-                classDeclaration.Identifier.Text);
-                
-            context.ReportDiagnostic(diagnostic);
-        }
-    }
+    
 
     private static void AnalyzeMethod(SyntaxNodeAnalysisContext context)
     {    
@@ -228,30 +218,41 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
                 methodDeclaration.Identifier.Text));
         }
         
-        // var documentedParams = xmlStructure.Content
-        //     .OfType<XmlElementSyntax>()
-        //     .Where(e => e.StartTag.Name.ToString() == "param")
-        //     .Select(e => e.StartTag.Attributes
-        //         .OfType<XmlNameAttributeSyntax>()
-        //         .FirstOrDefault()?.Identifier.ToString())
-        //     .Where(name => !string.IsNullOrEmpty(name))
-        //     .ToHashSet();
+        foreach (var parameter in methodDeclaration.ParameterList.Parameters)
+        {
+            var parameterType = parameter.Type;
+
+            if (parameterType != null && context.SemanticModel.GetSymbolInfo(parameterType).Symbol is ITypeSymbol typeSymbol)
+            {
+                var syntaxReferences = typeSymbol.DeclaringSyntaxReferences;
         
-        // foreach (var parameter in methodDeclaration.ParameterList.Parameters)
-        // {
-        //     var paramName = parameter.Identifier.Text;
-        //     if (documentedParams.Contains(paramName))
-        //     {
-        //         continue;
-        //     }
-        //
-        //     var diagnostic = Diagnostic.Create(
-        //         _parameterRule,
-        //         parameter.Identifier.GetLocation(),
-        //         paramName,
-        //         methodDeclaration.Identifier.Text);
-        //
-        //     context.ReportDiagnostic(diagnostic);
-        // }
+                foreach (var syntaxReference in syntaxReferences)
+                {
+                    var syntaxNode = syntaxReference.GetSyntax();
+                    if (syntaxNode is ClassDeclarationSyntax modelDeclaration)
+                    {
+                        if (!HasXmlDocumentation(modelDeclaration))
+                        {
+                            context.ReportDiagnostic(Diagnostic.Create(
+                                _modelRule,
+                                modelDeclaration.Identifier.GetLocation(),
+                                modelDeclaration.Identifier.Text));
+                        }
+
+                        foreach (var prop in modelDeclaration.ChildNodes().OfType<PropertyDeclarationSyntax>())
+                        {
+                            if (!HasXmlDocumentation(prop))
+                            {
+                                context.ReportDiagnostic(Diagnostic.Create(
+                                    _modelDtoRule,
+                                    prop.Identifier.GetLocation(),
+                                    modelDeclaration.Identifier.Text,
+                                    prop.Identifier.Text));
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
