@@ -2,7 +2,7 @@
   "$schema": "./node_modules/@openapitools/openapi-generator-cli/config.schema.json",
   "spaces": 2,
   "generator-cli": {
-    "version": "7.17.0"
+    "version": "7.18.0"
   },
   "generatorName": "my-java",
   "inputSpec": "./json/api-docs.json",
@@ -10,6 +10,8 @@
   "additionalProperties": {
     "packageName": "docspace-api-sdk",
     "packageVersion": "3.6.0",
+    "artifactId": "docspace-api-sdk",
+    "artifactVersion": "3.6.0",
     "licenseName": "Apache-2.0",
     "repositoryUrl": "https://github.com/ONLYOFFICE/docspace-api-sdk-java",
     "repositoryName": "ONLYOFFICE/docs-integration-sdk-java",

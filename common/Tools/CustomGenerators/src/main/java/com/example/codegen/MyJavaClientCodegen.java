@@ -16,7 +16,7 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
     public MyJavaClientCodegen() {
         super();
         this.templateDir = "templates/java";
-        this.embeddedTemplateDir = "java";
+        this.embeddedTemplateDir = "Java";
     }
 
     @Override
