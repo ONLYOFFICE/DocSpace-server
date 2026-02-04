@@ -42,6 +42,7 @@ global using Bogus;
 global using Bogus.DataSets;
 
 global using DocSpace.API.SDK.Api;
+global using DocSpace.API.SDK.Api.Group;
 global using DocSpace.API.SDK.Api.People;
 global using DocSpace.API.SDK.Api.Portal;
 global using DocSpace.API.SDK.Client;

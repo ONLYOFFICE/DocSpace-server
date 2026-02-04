@@ -502,10 +502,10 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         var docKey = await GetDocKeyAsync(fileStable);
 
-        await DropUserAsync(docKey, usersDrop.ToArray(), file.Id);
+        await DropUserAsync(docKey, usersDrop, file.Id);
     }
 
-    public async Task<bool> DropUserAsync(string docKeyForTrack, string[] users, object fileId = null)
+    public async Task<bool> DropUserAsync(string docKeyForTrack, List<string> users, object fileId = null)
     {
         return await documentServiceConnector.CommandAsync(CommandMethod.Drop, docKeyForTrack, fileId, null, users);
     }

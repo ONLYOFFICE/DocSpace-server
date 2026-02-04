@@ -193,7 +193,14 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
         { "Settings / LDAP", "Operations for working with LDAP settings." },
         { "Settings / Banners visibility", "Operations for managing visibility of settings banners." },
         { "Settings / Telegram", "Operations for managing Telegram integration." },
-        { "Api keys", "Operations for working with api keys." }
+        { "Api keys", "Operations for working with api keys." },
+        { "AI / Agents", "Operations for working with AI agents." },
+        { "AI / Chat", "Operations for working with AI chat." },
+        { "AI / Messages", "Operations for working with AI messages." },
+        { "AI / Providers", "Operations for working with AI providers." },
+        { "AI / Settings", "Operations for working with AI settings." },
+        { "AI / MCP", "Operations for working with MCP servers." },
+        { "AI / Vectorization", "Operations for working with vectorization." }
     };
 
     public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)

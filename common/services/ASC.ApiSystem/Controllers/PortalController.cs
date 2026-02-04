@@ -72,9 +72,9 @@ public class PortalController(
 
     #region For TEST api
 
-    /// <summary>
+    /// <remarks>
     /// Test API.
-    /// </summary>
+    /// </remarks>
     /// <path>apisystem/portal/test</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [SwaggerResponse(200, "Portal api works")]
@@ -92,12 +92,12 @@ public class PortalController(
 
     #region API methods
 
-    /// <summary>
+    /// <remarks>
     /// Registers a new portal with the parameters specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Register a portal
-    /// </short>
+    /// </summary>
     /// <path>apisystem/portal/register</path>
     [Tags("Portal")]
     [SwaggerResponse(200, "Ok", typeof(IActionResult))]
@@ -338,12 +338,12 @@ public class PortalController(
     }
 
 
-    /// <summary>
+    /// <remarks>
     /// Registers a new portal by email with the parameters specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Register a portal by email
-    /// </short>
+    /// </summary>
     /// <path>apisystem/portal/registerbyemail</path>
     [Tags("Portal")]
     [SwaggerResponse(200, "Ok", typeof(IActionResult))]
@@ -658,12 +658,12 @@ public class PortalController(
     }
 
 
-    /// <summary>
+    /// <remarks>
     /// Deletes a portal with a name specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Remove a portal
-    /// </short>
+    /// </summary>
     /// <path>apisystem/portal/remove</path>
     [Tags("Portal")]
     [SwaggerResponse(200, "Ok", typeof(IActionResult))]
@@ -745,12 +745,12 @@ public class PortalController(
         });
     }
 
-    /// <summary>
+    /// <remarks>
     /// Changes a portal activation status with a value specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Change a portal status
-    /// </short>
+    /// </summary>
     /// <path>apisystem/portal/status</path>
     [Tags("Portal")]
     [SwaggerResponse(200, "Ok", typeof(IActionResult))]
@@ -808,12 +808,12 @@ public class PortalController(
         });
     }
 
-    /// <summary>
+    /// <remarks>
     /// Checks if the specified name is available to create a portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Validate the portal name
-    /// </short>
+    /// </summary>
     /// <path>apisystem/portal/validateportalname</path>
     [Tags("Portal")]
     [SwaggerResponse(200, "Ok", typeof(IActionResult))]
@@ -844,12 +844,12 @@ public class PortalController(
         });
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of all the portals registered for the user with the email address specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get portals
-    /// </short>
+    /// </summary>
     /// <path>apisystem/portal/get</path>
     [Tags("Portal")]
     [SwaggerResponse(200, "Ok", typeof(IActionResult))]
@@ -919,12 +919,12 @@ public class PortalController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Signs in to the portal with the parameters specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Sign in to the portal
-    /// </short>
+    /// </summary>
     /// <path>apisystem/portal/signin</path>
     [Tags("Portal")]
     [SwaggerResponse(200, "Ok", typeof(IActionResult))]
@@ -965,7 +965,7 @@ public class PortalController(
                     var profile = await loginProfileTransport.FromPureTransport(model.ThirdPartyProfile);
                     if (profile != null && string.IsNullOrEmpty(profile.AuthorizationError))
                     {
-                        var tenantWrappersByProfile = GetTenantsByThirdPartyProfileAsync(profile);
+                        var tenantWrappersByProfile = await GetTenantsByThirdPartyProfileAsync(profile);
                         return Ok(new
                         {
                             tenants = tenantWrappersByProfile
@@ -1050,12 +1050,12 @@ public class PortalController(
         return result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns an Document Server license quota.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get an Document Server license quota
-    /// </short>
+    /// </summary>
     /// <path>apisystem/portal/licensequota</path>
     [Tags("Portal")]
     [SwaggerResponse(200, "Ok", typeof(IActionResult))]
@@ -1093,12 +1093,12 @@ public class PortalController(
         });
     }
 
-    /// <summary>
+    /// <remarks>
     /// Generates the Document Server license quota report.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Generate the Document Server license quota report
-    /// </short>
+    /// </summary>
     /// <path>apisystem/portal/quota/licensequota/report</path>
     [Tags("Portal")]
     [SwaggerResponse(200, "URL to the xlsx report file", typeof(IActionResult))]

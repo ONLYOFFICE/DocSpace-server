@@ -31,6 +31,8 @@ using ASC.Api.Core.Cors.Enums;
 using ASC.Api.Core.Cors.Middlewares;
 using ASC.MessagingSystem;
 
+using Asp.Versioning;
+
 using Flurl.Util;
 
 using IPNetwork = System.Net.IPNetwork;
@@ -90,6 +92,22 @@ public abstract class BaseStartup
         services.AddExceptionHandler<CustomExceptionHandler>();
         services.AddProblemDetails();
 
+        services.AddApiVersioning(options =>
+        {
+            options.DefaultApiVersion = new ApiVersion(2, 0);
+            options.ApiVersionReader = new UrlSegmentApiVersionReader();
+            options.AssumeDefaultVersionWhenUnspecified = true;
+            options.ReportApiVersions = true;
+        }).AddMvc()
+        .AddApiExplorer(options =>
+        {
+            options.GroupNameFormat = "VV";
+            options.SubstitutionFormat = "VV";
+            options.AssumeDefaultVersionWhenUnspecified = true;
+            options.SubstituteApiVersionInUrl = true;
+            options.DefaultApiVersion = new ApiVersion(2, 0);
+        });
+        
         services.Configure<ForwardedHeadersOptions>(options =>
         {
             options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
@@ -432,6 +450,7 @@ public abstract class BaseStartup
         if (OpenApiEnabled)
         {
             mvcBuilder.AddApiExplorer();
+            
             services.AddOpenApi(_configuration);
         }
         if (OpenTelemetryEnabled)

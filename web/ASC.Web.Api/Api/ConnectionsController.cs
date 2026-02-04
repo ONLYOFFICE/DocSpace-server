@@ -26,9 +26,9 @@
 
 namespace ASC.Web.Api;
 
-/// <summary>
+/// <remarks>
 /// Security API.
-/// </summary>
+/// </remarks>
 /// <name>security</name>
 [Scope]
 [DefaultRoute("activeconnections")]
@@ -51,12 +51,12 @@ public class ConnectionsController(
     ApiDateTimeHelper apiDateTimeHelper)
     : ControllerBase
 {
-    /// <summary>
+    /// <remarks>
     /// Returns all the active connections to the portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get active connections
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/security/activeconnections</path>
     [Tags("Security / Active connections")]
     [SwaggerResponse(200, "Active portal connections", typeof(ActiveConnectionsDto))]
@@ -140,12 +140,12 @@ public class ConnectionsController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Logs out from all the active connections for the current user and changes their password.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Log out and change password
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/security/activeconnections/logoutallchangepassword</path>
     [Tags("Security / Active connections")]
     [SwaggerResponse(200, "URL to the confirmation message for changing a password", typeof(string))]
@@ -178,12 +178,12 @@ public class ConnectionsController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Logs out from all the active connections for the user with the ID specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Log out for the user by ID
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/security/activeconnections/logoutall/{userId}</path>
     [Tags("Security / Active connections")]
     [SwaggerResponse(200, "Ok")]
@@ -202,12 +202,12 @@ public class ConnectionsController(
         await LogOutAllActiveConnections(inDto.Id);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Logs out from all the active connections except the current connection.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Log out from all connections except the current one
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/security/activeconnections/logoutallexceptthis</path>
     [Tags("Security / Active connections")]
     [SwaggerResponse(200, "Current user name", typeof(string))]
@@ -237,12 +237,12 @@ public class ConnectionsController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Logs out from the connection with the ID specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Log out from the connection
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/security/activeconnections/logout/{loginEventId}</path>
     [Tags("Security / Active connections")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]

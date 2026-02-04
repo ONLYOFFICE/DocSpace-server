@@ -64,6 +64,7 @@ internal class FileDao(
         SecurityContext securityContext,
         TempStream tempStream,
         FileChecker fileChecker,
+        FileHelper fileHelper,
         EntryManager entryManager,
         FileSharing fileSharing,
         FilesMessageService filesMessageService,
@@ -1364,11 +1365,15 @@ internal class FileDao(
 
     private async Task<File<int>> CopyFileAsync(File<int> file, int toFolderId)
     {
-        var status = await file.GetFileStatus();
+        var fileState = await fileHelper.GetFileState(file);
+
+        file.SetFileState(fileState);
+
         const FileStatus flagsToRemove = FileStatus.IsEditing | FileStatus.IsEditingAlone | FileStatus.IsConverting;
 
         var copy = _serviceProvider.GetService<File<int>>();
-        copy.SetFileStatus(status & ~flagsToRemove);
+        copy.FileStatus = file.FileStatus & ~flagsToRemove;
+        copy.EditingBy = file.EditingBy;
         copy.ParentId = toFolderId;
         copy.Title = await global.GetAvailableTitleAsync(file.Title, toFolderId, IsExistAsync, FileEntryType.File);
         copy.ConvertedType = file.ConvertedType;
@@ -2990,6 +2995,7 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         SecurityContext securityContext,
         TempStream tempStream,
         FileChecker fileChecker,
+        FileHelper fileHelper,
         EntryManager entryManager,
         FileSharing fileSharing,
         FilesMessageService filesMessageService,
@@ -3007,7 +3013,6 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         fileUtility,
         dbContextManager,
         tenantManager,
-        
         tenantUtil,
         setupInfo,
         maxTotalSizeStatistic,
@@ -3034,6 +3039,7 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         securityContext,
         tempStream,
         fileChecker,
+        fileHelper,
         entryManager,
         fileSharing,
         filesMessageService,
