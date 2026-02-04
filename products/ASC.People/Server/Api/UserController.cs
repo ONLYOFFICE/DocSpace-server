@@ -621,8 +621,7 @@ public class UserController(
     /// <path>api/2.0/people/{userid}</path>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Deleted user detailed information", typeof(EmployeeFullDto))]
-    [SwaggerResponse(400, "The user is not suspended")]
-    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation or user is not suspended")]
     [SwaggerResponse(404, "User not found")]
     [HttpDelete("{userid}")]
     public async Task<EmployeeFullDto> DeleteMember(GetMemberByIdRequestDto inDto)
@@ -638,7 +637,7 @@ public class UserController(
 
         if (user.Status != EmployeeStatus.Terminated)
         {
-            throw new Exception("The user is not suspended");
+            throw new InvalidOperationException("The user is not suspended");
         }
 
         var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
