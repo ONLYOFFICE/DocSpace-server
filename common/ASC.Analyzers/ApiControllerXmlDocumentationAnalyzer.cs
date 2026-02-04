@@ -12,15 +12,18 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
 {
     public const string ControllerDiagnosticId = "API001";
     public const string ActionDiagnosticId = "API002";
-    public const string ParameterDiagnosticId = "API003";
+    public const string SummaryDiagnosticId = "API003";
+    public const string RemarksDiagnosticId = "API004";
 
     private static readonly LocalizableString _controllerTitle = "API Controller missing XML documentation";
     private static readonly LocalizableString _actionTitle = "API Action method missing XML documentation";
-    private static readonly LocalizableString _parameterTitle = "API Action parameter missing XML documentation";
+    private static readonly LocalizableString _summaryTitle = "API Action method missing summary";
+    private static readonly LocalizableString _remarksTitle = "API Action method missing remarks";
 
     private static readonly LocalizableString _controllerMessageFormat = "API Controller '{0}' should have XML documentation";
     private static readonly LocalizableString _actionMessageFormat = "API Action method '{0}' should have XML documentation";
-    private static readonly LocalizableString _parameterMessageFormat = "Parameter '{0}' in action '{1}' should be documented";
+    private static readonly LocalizableString _summaryMessageFormat = "API Action method '{0}' should have summary";
+    private static readonly LocalizableString _remarksMessageFormat = "API Action method '{0}' should have remarks";
 
     private static readonly LocalizableString _description = "API controllers and their methods should have XML documentation for Swagger/OpenAPI generation.";
 
@@ -43,24 +46,34 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
         DiagnosticSeverity.Warning, 
         isEnabledByDefault: true, 
         description: _description);
-
-    private static readonly DiagnosticDescriptor _parameterRule = new(
-        ParameterDiagnosticId, 
-        _parameterTitle, 
-        _parameterMessageFormat, 
+    
+    private static readonly DiagnosticDescriptor _summaryRule = new(
+        SummaryDiagnosticId, 
+        _summaryTitle, 
+        _summaryMessageFormat, 
         Category, 
-        DiagnosticSeverity.Info, 
+        DiagnosticSeverity.Warning, 
         isEnabledByDefault: true, 
         description: _description);
+    
+    private static readonly DiagnosticDescriptor _remarksRule = new(
+        RemarksDiagnosticId, 
+        _remarksTitle, 
+        _remarksMessageFormat, 
+        Category, 
+        DiagnosticSeverity.Warning, 
+        isEnabledByDefault: true, 
+        description: _description);
+    
 
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [_controllerRule, _actionRule, _parameterRule];
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [_controllerRule, _actionRule, _remarksRule, _summaryRule];
 
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
             
-        context.RegisterSyntaxNodeAction(AnalyzeClass, SyntaxKind.ClassDeclaration);
+        //context.RegisterSyntaxNodeAction(AnalyzeClass, SyntaxKind.ClassDeclaration);
         context.RegisterSyntaxNodeAction(AnalyzeMethod, SyntaxKind.MethodDeclaration);
     }
 
@@ -86,10 +99,6 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
 
     private static void AnalyzeMethod(SyntaxNodeAnalysisContext context)
     {    
-        // if (!System.Diagnostics.Debugger.IsAttached)
-        // {
-        //     System.Diagnostics.Debugger.Launch();
-        // }
         var methodDeclaration = (MethodDeclarationSyntax)context.Node;
             
         if (!IsApiActionMethod(context, methodDeclaration))
@@ -108,7 +117,7 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
             return;
         }
             
-        CheckParameterDocumentation(context, methodDeclaration);
+        CheckDocumentation(context, methodDeclaration);
     }
 
     private static bool IsApiController(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
@@ -174,7 +183,7 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
                                t.IsKind(SyntaxKind.MultiLineDocumentationCommentTrivia));
     }
 
-    private static void CheckParameterDocumentation(SyntaxNodeAnalysisContext context, MethodDeclarationSyntax methodDeclaration)
+    private static void CheckDocumentation(SyntaxNodeAnalysisContext context, MethodDeclarationSyntax methodDeclaration)
     {
         if (methodDeclaration.ParameterList.Parameters.Count == 0)
         {
@@ -190,34 +199,59 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        var xmlStructure = xmlTrivia.GetStructure() as DocumentationCommentTriviaSyntax;
-        if (xmlStructure == null)
+        if (xmlTrivia.GetStructure() is not DocumentationCommentTriviaSyntax xmlStructure)
         {
             return;
         }
 
-        var documentedParams = xmlStructure.Content
-            .OfType<XmlElementSyntax>()
-            .Where(e => e.StartTag?.Name?.ToString() == "param")
-            .Select(e => e.StartTag?.Attributes
-                .OfType<XmlNameAttributeSyntax>()
-                .FirstOrDefault()?.Identifier.ToString())
-            .Where(name => !string.IsNullOrEmpty(name))
-            .ToHashSet();
-            
-        foreach (var parameter in methodDeclaration.ParameterList.Parameters)
-        {
-            var paramName = parameter.Identifier.Text;
-            if (!documentedParams.Contains(paramName))
-            {
-                var diagnostic = Diagnostic.Create(
-                    _parameterRule,
-                    parameter.Identifier.GetLocation(),
-                    paramName,
-                    methodDeclaration.Identifier.Text);
+        var xmlElementSyntaxes = xmlStructure.Content.OfType<XmlElementSyntax>().ToList();
+        
+        var remarkExists = xmlElementSyntaxes
+            .Any(e => e.StartTag.Name.ToString() == "remarks");
 
-                context.ReportDiagnostic(diagnostic);
-            }
+        if (!remarkExists)
+        {
+            context.ReportDiagnostic(Diagnostic.Create(
+                _remarksRule,
+                methodDeclaration.Identifier.GetLocation(), 
+                methodDeclaration.Identifier.Text));
         }
+
+        var summaryExists = xmlElementSyntaxes
+            .Any(e => e.StartTag.Name.ToString() == "summary");
+        
+        if (!summaryExists)
+        {
+            context.ReportDiagnostic(Diagnostic.Create(
+                _remarksRule,
+                methodDeclaration.Identifier.GetLocation(), 
+                methodDeclaration.Identifier.Text));
+        }
+        
+        // var documentedParams = xmlStructure.Content
+        //     .OfType<XmlElementSyntax>()
+        //     .Where(e => e.StartTag.Name.ToString() == "param")
+        //     .Select(e => e.StartTag.Attributes
+        //         .OfType<XmlNameAttributeSyntax>()
+        //         .FirstOrDefault()?.Identifier.ToString())
+        //     .Where(name => !string.IsNullOrEmpty(name))
+        //     .ToHashSet();
+        
+        // foreach (var parameter in methodDeclaration.ParameterList.Parameters)
+        // {
+        //     var paramName = parameter.Identifier.Text;
+        //     if (documentedParams.Contains(paramName))
+        //     {
+        //         continue;
+        //     }
+        //
+        //     var diagnostic = Diagnostic.Create(
+        //         _parameterRule,
+        //         parameter.Identifier.GetLocation(),
+        //         paramName,
+        //         methodDeclaration.Identifier.Text);
+        //
+        //     context.ReportDiagnostic(diagnostic);
+        // }
     }
 }
