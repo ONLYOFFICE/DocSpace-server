@@ -171,4 +171,7 @@
   <data name="UnavailableServers" xml:space="preserve">
     <value>Servery MCP sú nedostupné: {0}. Skontrolujte nastavenia pripojenia</value>
   </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>Súbory {0} nemožno spracovať. Môžu byť poškodené alebo zašifrované</value>
+  </data>
 </root>

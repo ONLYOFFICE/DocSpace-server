@@ -1107,4 +1107,10 @@
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Webhook aktualizovaný: {0}</value>
   </data>
+  <data name="BackupCompleted" xml:space="preserve">
+    <value>Zálohovanie dokončené</value>
+  </data>
+  <data name="BackupFailed" xml:space="preserve">
+    <value>Zálohovanie zlyhalo</value>
+  </data>
 </root>

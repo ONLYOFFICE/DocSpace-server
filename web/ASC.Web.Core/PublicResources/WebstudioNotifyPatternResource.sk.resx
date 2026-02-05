@@ -2154,4 +2154,43 @@ $TrulyYours</value>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>S úctou, tím ${LetterLogoText}</value>
   </data>
+  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; nahral nový dokument: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; do bázy znalostí AI agenta: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="pattern_api_key_expired" xml:space="preserve">
+    <value>Dobrý deň, $UserName,
+
+oznamujeme vám, že platnosť vášho kľúča API "*$Message*" vypršala a kľúč bol deaktivovaný.
+
+Nový kľúč API si môžete vygenerovať v časti "Developer Tools":"${__VirtualRootPath}/developer-tools/api-keys".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace bol vymazaný.
+
+*Portál:* ${PortalUrl}
+*Vlastník:* ${UserName} ${UserEmail} 
+*Zákazník:* ${OwnerName}
+
+Odporúčame skontrolovať stav automatickej fakturácie v zákazníckom účte Stripe a uistiť sa, že je vypnutá.</value>
+  </data>
+  <data name="pattern_user_agent_role_changed" xml:space="preserve">
+    <value>Dobrý deň!
+
+Máte priradenú novú rolu v DocSpace AI agente "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+Viac o rolách v miestnostiach a povoleniach nájdete v "Help Center":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_api_key_expired" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace: Platnosť vášho kľúča API vypršala</value>
+  </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>Dokumentačný priestor ${LetterLogoText} bol odstránený</value>
+  </data>
+  <data name="subject_user_agent_role_changed" xml:space="preserve">
+    <value>Vaša rola v AI agente DocSpace bola zmenená</value>
+  </data>
 </root>
