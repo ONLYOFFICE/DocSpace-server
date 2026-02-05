@@ -109,38 +109,7 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
             
         CheckDocumentation(context, methodDeclaration);
     }
-
-    private static bool IsApiController(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
-    {
-        var semanticModel = context.SemanticModel;
-        var classSymbol = semanticModel.GetDeclaredSymbol(classDeclaration);
-            
-        if (classSymbol == null)
-        {
-            return false;
-        }
-
-        var hasApiControllerAttribute = classSymbol.GetAttributes()
-            .Any(attr => attr.AttributeClass?.Name == "ApiControllerAttribute");
-
-        if (hasApiControllerAttribute)
-        {
-            return true;
-        }
-
-        var baseType = classSymbol.BaseType;
-        while (baseType != null)
-        {
-            if (baseType.Name is "ControllerBase" or "Controller")
-            {
-                return true;
-            }
-
-            baseType = baseType.BaseType;
-        }
-
-        return false;
-    }
+    
 
     private static bool IsApiActionMethod(SyntaxNodeAnalysisContext context, MethodDeclarationSyntax methodDeclaration)
     {
@@ -166,6 +135,51 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
             .Any(attr => httpAttributes.Contains(attr.AttributeClass?.Name));
     }
 
+    private static bool IsApiController(SyntaxNodeAnalysisContext context, ClassDeclarationSyntax classDeclaration)
+    {
+        var semanticModel = context.SemanticModel;
+        var classSymbol = semanticModel.GetDeclaredSymbol(classDeclaration);
+            
+        if (classSymbol == null)
+        {
+            return false;
+        }
+
+        var attributes = classSymbol.GetAttributes();
+        
+        var apiExplorerSettings = attributes
+            .FirstOrDefault(attr => attr.AttributeClass?.Name == "ApiExplorerSettingsAttribute");
+
+        var ignoreApiArg = apiExplorerSettings?.NamedArguments
+            .FirstOrDefault(arg => arg.Key == "IgnoreApi");
+
+        if (ignoreApiArg?.Value.Value is true)
+        {
+            return false;
+        }
+
+        var hasApiControllerAttribute = attributes
+            .Any(attr => attr.AttributeClass?.Name == "ApiControllerAttribute");
+
+        if (hasApiControllerAttribute)
+        {
+            return true;
+        }
+
+        var baseType = classSymbol.BaseType;
+        while (baseType != null)
+        {
+            if (baseType.Name is "ControllerBase" or "Controller")
+            {
+                return true;
+            }
+
+            baseType = baseType.BaseType;
+        }
+
+        return false;
+    }
+    
     private static bool HasXmlDocumentation(SyntaxNode node)
     {
         var trivia = node.GetLeadingTrivia();
