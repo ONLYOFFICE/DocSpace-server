@@ -33,7 +33,7 @@ namespace ASC.AI.Models.ResponseDto;
 public class DataContentDto : MessageContentDto
 {
     public override MessageContentType Type => MessageContentType.Data;
-    public required JsonElement Id { get; init; }
+    public int Id { get; init; }
     public required FileType FileType { get; init; }
     public string? Url { get; set; }
 }

@@ -28,6 +28,5 @@ namespace ASC.AI.Core.Chat.Data;
 
 public abstract class AttachmentMessageContent : MessageContent
 {
-    public required JsonElement Id { get; init; }
     public abstract AIContent ToAiContent();
 }

@@ -77,14 +77,15 @@ public class ChatCompletionRunner(
         var client = chatClientFactory.Create(context.ClientOptions, context.Tools);
         
         return new ChatCompletionGenerator(
-            client, 
-            logger, 
-            socketManager, 
-            messages, 
-            chatHistory, 
-            chatNameGenerator, 
+            client,
+            logger,
+            socketManager,
+            messages,
+            chatHistory,
+            chatNameGenerator,
             context,
-            serviceScopeFactory);
+            serviceScopeFactory,
+            attachmentHandler);
     }
 
     public async Task<ChatCompletionGenerator> StartChatAsync(
@@ -134,14 +135,15 @@ public class ChatCompletionRunner(
         var client = chatClientFactory.Create(context.ClientOptions, context.Tools);
 
         return new ChatCompletionGenerator(
-            client, 
-            logger, 
-            socketManager, 
-            messages, 
-            chatHistory, 
-            chatNameGenerator, 
+            client,
+            logger,
+            socketManager,
+            messages,
+            chatHistory,
+            chatNameGenerator,
             context,
-            serviceScopeFactory);
+            serviceScopeFactory,
+            attachmentHandler);
     }
 
     private async IAsyncEnumerable<AttachmentMessageContent> GetAttachmentsAsync(

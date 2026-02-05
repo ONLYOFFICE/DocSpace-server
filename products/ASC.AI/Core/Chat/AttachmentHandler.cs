@@ -43,7 +43,8 @@ public class AttachmentHandler(
     FileSecurity fileSecurity,
     ITextExtractor textExtractor,
     VectorizationGlobalSettings vectorizationGlobalSettings,
-    ProviderSettings providerSettings)
+    ProviderSettings providerSettings,
+    ILogger<AttachmentHandler> logger)
 {
     public async IAsyncEnumerable<AttachmentResult> HandleAsync(
         ChatExecutionContext context, 
@@ -53,20 +54,55 @@ public class AttachmentHandler(
         var modelSettings = providerSettings.GetModel(context.ClientOptions.Provider, context.ClientOptions.ModelId);
         ArgumentNullException.ThrowIfNull(modelSettings);
         
-        await foreach (var files in HandleAsync(modelSettings.Multimodal, filesIds))
+        await foreach (var files in HandleAsync(modelSettings.Multimodal, filesIds, context.Agent.Id))
         {
             yield return files;
         }
 
-        await foreach (var files in HandleAsync(modelSettings.Multimodal, thirdPartyFilesIds))
+        await foreach (var files in HandleAsync(modelSettings.Multimodal, thirdPartyFilesIds, context.Agent.Id))
         {
             yield return files;
         }
     }
+    
+    public async Task CleanupAsync(IEnumerable<AttachmentMessageContent>? attachments)
+    {
+        if (attachments == null)
+        {
+            return;
+        }
 
-    private async IAsyncEnumerable<AttachmentResult> HandleAsync<T>(MultimodalSettings? multimodal, IEnumerable<T> filesIds)
+        var internalDao = daoFactory.GetFileDao<int>();
+
+        foreach (var attachment in attachments)
+        {
+            if (attachment is not DataMessageContent dataContent)
+            {
+                continue;
+            }
+
+            try
+            {
+                dataContent.Dispose();
+                await internalDao.DeleteFileAsync(dataContent.Id);
+            }
+            catch (Exception e)
+            {
+                logger.ErrorWithException(e);
+            }
+        }
+    }
+
+    private async IAsyncEnumerable<AttachmentResult> HandleAsync<T>(
+        MultimodalSettings? multimodal,
+        IEnumerable<T> filesIds,
+        int agentId)
     {
         var fileDao = daoFactory.GetFileDao<T>();
+        var internalDao = daoFactory.GetFileDao<int>();
+
+        var textFiles = new List<(File<T> File, string Extension)>();
+        var mediaFiles = new List<(File<T> File, FileType FileType, string Extension)>();
 
         await foreach (var fileEntry in fileSecurity.FilterReadAsync(fileDao.GetFilesAsync(filesIds)))
         {
@@ -77,7 +113,7 @@ public class AttachmentHandler(
 
             var extension = FileUtility.GetFileExtension(file.Title);
             var fileType = FileUtility.GetFileTypeByExtention(extension);
-            
+
             if (fileType == FileType.Image)
             {
                 if (multimodal?.Image == null)
@@ -89,8 +125,8 @@ public class AttachmentHandler(
                 {
                     continue;
                 }
-                
-                yield return await HandleMediaAsync(fileDao, file, fileType, extension);
+
+                mediaFiles.Add((file, fileType, extension));
             }
             else
             {
@@ -99,9 +135,52 @@ public class AttachmentHandler(
                 {
                     continue;
                 }
-                
-                yield return await HandleTextAsync(fileDao, file, extension);
+
+                textFiles.Add((file, extension));
             }
+        }
+
+        var copiedFiles = await CopyMediaFilesAsync(fileDao, internalDao, mediaFiles, agentId);
+
+        foreach (var (copiedFile, fileType, extension) in copiedFiles)
+        {
+            yield return await HandleMediaAsync(internalDao, copiedFile, fileType, extension);
+        }
+
+        foreach (var (file, extension) in textFiles)
+        {
+            yield return await HandleTextAsync(fileDao, file, extension);
+        }
+    }
+
+    private async Task<List<(File<int> CopiedFile, FileType FileType, string Extension)>> CopyMediaFilesAsync<T>(
+        IFileDao<T> fileDao,
+        IFileDao<int> internalDao,
+        List<(File<T> File, FileType FileType, string Extension)> mediaFiles,
+        int agentId)
+    {
+        var copiedFiles = new List<(File<int> CopiedFile, FileType FileType, string Extension)>();
+
+        try
+        {
+            foreach (var (file, fileType, extension) in mediaFiles)
+            {
+                var copiedFile = await fileDao.CopyFileAsync(file.Id, agentId);
+                copiedFiles.Add((copiedFile, fileType, extension));
+            }
+
+            return copiedFiles;
+        }
+        catch (Exception e)
+        {
+            logger.ErrorWithException(e);
+            
+            foreach (var (copiedFile, _, _) in copiedFiles)
+            {
+                await internalDao.DeleteFileAsync(copiedFile.Id);
+            }
+
+            throw;
         }
     }
 
@@ -144,13 +223,14 @@ public class AttachmentHandler(
             ArrayPool<byte>.Shared.Return(buffer);
         }
     }
-
-    private static async Task<AttachmentResult> HandleMediaAsync<T>(
-        IFileDao<T> fileDao,
-        File<T> file,
-        FileType fileType, string extension)
+    
+    private static async Task<AttachmentResult> HandleMediaAsync(
+        IFileDao<int> internalDao,
+        File<int> file,
+        FileType fileType,
+        string extension)
     {
-        await using var stream = await fileDao.GetFileStreamAsync(file);
+        await using var stream = await internalDao.GetFileStreamAsync(file);
 
         var length = (int)file.ContentLength;
         var memoryOwner = MemoryPool<byte>.Shared.Rent(length);
@@ -162,7 +242,7 @@ public class AttachmentHandler(
             Success = true,
             Content = new DataMessageContent
             {
-                Id = JsonSerializer.SerializeToElement(file.Id),
+                Id = file.Id,
                 FileType = fileType,
                 Data = (memoryOwner, length),
                 MediaType = GetMediaType(extension)
