@@ -169,11 +169,16 @@ public abstract class EditorController<T>(
 
             formOpenSetup.RootFolder = rootFolder;
         }
+        var quotaExceededScope = await documentServiceHelper.CheckCustomQuotaAsync(rootFolder);
+
+        var canEdit =
+            quotaExceededScope == null &&
+            (formOpenSetup?.CanEdit ?? !file.IsCompletedForm);
 
         var docParams = await documentServiceHelper.GetParamsAsync(
             formOpenSetup is { Draft: not null } ? formOpenSetup.Draft : file,
             lastVersion,
-            await documentServiceHelper.CheckCustomQuota(rootFolder) && (formOpenSetup?.CanEdit ?? !file.IsCompletedForm),
+            canEdit,
             !inDto.View,
             true, formOpenSetup == null || formOpenSetup.CanFill,
             formOpenSetup?.EditorType ?? inDto.EditorType,
@@ -200,7 +205,10 @@ public abstract class EditorController<T>(
         }
 
         var result = await configurationConverter.Convert(configuration, file);
-
+        if (quotaExceededScope != null)
+        {
+            result.QuotaExceededScope = quotaExceededScope;
+        }
         if (formOpenSetup != null && formOpenSetup.DisableEmbeddedConfig && result.EditorConfig.Embedded != null)
         {
             result.EditorConfig.Embedded.EmbedUrl = "";
