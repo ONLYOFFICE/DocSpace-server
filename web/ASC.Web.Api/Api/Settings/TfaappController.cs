@@ -180,7 +180,8 @@ public class TfaappController(
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         
         var ownerId = tenantManager.GetCurrentTenant().OwnerId;
-        if ((inDto.Id == ownerId || inDto.MandatoryUsers.Contains(ownerId)) && inDto.Id != authContext.CurrentAccount.ID)
+        if ((inDto.Id == ownerId || (inDto.MandatoryUsers != null && inDto.MandatoryUsers.Contains(ownerId)))
+            && inDto.Id != authContext.CurrentAccount.ID)
         {
             throw new InvalidOperationException(Resource.ErrorAccessDenied);
         }
