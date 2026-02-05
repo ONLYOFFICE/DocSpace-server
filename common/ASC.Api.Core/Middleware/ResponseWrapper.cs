@@ -53,6 +53,10 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
                 status = HttpStatusCode.NotFound;
                 message = e.Message;
                 break;
+            case DirectoryNotFoundException e:
+                status = HttpStatusCode.NotFound;
+                message = e.Message;
+                break;
             case ArgumentException e:
                 status = HttpStatusCode.BadRequest;
                 message = e.Message;

@@ -7,6 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Asp.Versioning.Http" />
+    <PackageReference Include="Asp.Versioning.Mvc" />
+    <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" />
     <PackageReference Include="AspNetCore.HealthChecks.Kafka" />
     <PackageReference Include="AspNetCore.HealthChecks.MySql" />
     <PackageReference Include="AspNetCore.HealthChecks.NpgSql" />

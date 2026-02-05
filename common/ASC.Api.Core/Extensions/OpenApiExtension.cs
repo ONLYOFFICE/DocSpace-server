@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.Text.Json.Nodes;
 using System.Xml.XPath;
 
 using Microsoft.OpenApi;
@@ -36,11 +37,16 @@ namespace ASC.Api.Core.Extensions;
 
 public static class OpenApiExtension
 {
-    public static IServiceCollection AddOpenApi(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddOpenApi(this IServiceCollection services, IConfiguration configuration, string docVersion = "2.0")
     {
         return services.AddSwaggerGen(c =>
         {
-            var assemblyName = Assembly.GetEntryAssembly().FullName.Split(',').First();
+            var entryAssembly = Assembly.GetEntryAssembly();
+            if (entryAssembly == null)
+            {
+                return;
+            }
+            var assemblyName = entryAssembly.FullName?.Split(',').First();
             c.ResolveConflictingActions(a => a.First());
             c.CustomOperationIds(r =>
             {
@@ -50,8 +56,8 @@ public static class OpenApiExtension
             });
 
             c.CustomSchemaIds(CustomSchemaId);
-
-            c.SwaggerDoc("common", new OpenApiInfo
+            
+            var openApiInfo = new OpenApiInfo
             {
                 Title = "Api",
                 Version = "3.6.0",
@@ -61,7 +67,33 @@ public static class OpenApiExtension
                     Email = "support@onlyoffice.com",
                     Url = new Uri("https://helpdesk.onlyoffice.com/hc/en-us")
                 }
+            };
+            
+            openApiInfo.Extensions ??= new Dictionary<string, IOpenApiExtension>();
+            openApiInfo.Extensions["x-scalar-sdk-installation"] = new JsonNodeExtension(new JsonArray
+            {
+                new JsonObject
+                {
+                    ["lang"] = ScalarTarget.Node.ToStringFast(),
+                    ["description"] = "Install our **ONLYOFFICE SDK** for Node.js from npm:",
+                    ["source"] = "npm install @onlyoffice/docspace-api-sdk"
+                },
+                new JsonObject
+                {
+                    ["lang"] = ScalarTarget.Python.ToStringFast(),
+                    ["description"] = "Install our **ONLYOFFICE SDK** for Python app from pip:",
+                    ["source"] = "pip install docspace-api-sdk"
+                },
+                new JsonObject
+                {
+                    ["lang"] = ScalarTarget.CSharp.ToStringFast(),
+                    ["description"] = "Install our **ONLYOFFICE SDK** for .Net from nuget:",
+                    ["source"] = "dotnet add package DocSpace.API.SDK"
+                }
             });
+            
+            c.SwaggerDoc(docVersion, openApiInfo);
+            
             c.AddScalarFilters();
             c.SchemaFilter<SwaggerSchemaCustomFilter>();
             c.DocumentFilter<LowercaseDocumentFilter>();
@@ -71,6 +103,7 @@ public static class OpenApiExtension
             c.DocumentFilter<TagDescriptionsDocumentFilter>();
             c.OperationFilter<SwaggerCustomOperationFilter>();
             c.OperationFilter<ContentTypeOperationFilter>();
+            c.OperationFilter<AllowAnonymousFilter>();
             c.DocumentFilter<SwaggerSuccessApiResponseFilter>();
             c.EnableAnnotations();
             c.SchemaFilter<CustomInheritanceSchemaFilter>();
@@ -165,16 +198,22 @@ public static class OpenApiExtension
                 OpenIdConnectUrl = string.IsNullOrEmpty(openIdConnectUrl) ? new Uri(string.Empty, UriKind.RelativeOrAbsolute) : new Uri(openIdConnectUrl),
                 Description = "OpenID Connect authentication"
             });
-
-            var xmlPath = Path.Combine(AppContext.BaseDirectory, $"{assemblyName}.xml");
-            if (File.Exists(xmlPath))
+            
+            string xmlPath = null;
+            var assemblyLocation = entryAssembly.Location;
+            if (!string.IsNullOrEmpty(assemblyLocation))
             {
-                var doc = new XPathDocument(xmlPath);
+                var assemblyDirectoryLocation = Path.GetDirectoryName(assemblyLocation);
+                if (!string.IsNullOrEmpty(assemblyDirectoryLocation))
+                {
+                    xmlPath = Path.Combine(assemblyDirectoryLocation, $"{assemblyName}.xml");
+                    if (File.Exists(xmlPath))
+                    {
+                        var doc = new XPathDocument(xmlPath);
 
-                c.IncludeXmlComments(() => doc);
-                c.OperationFilter<XmlCustomTagFilter>(doc);
-
-                c.OperationFilter<AllowAnonymousFilter>();
+                        c.IncludeXmlComments(() => doc);
+                    }
+                }
             }
 
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
@@ -195,7 +234,13 @@ public static class OpenApiExtension
     {
         public IApplicationBuilder UseOpenApi()
         {
-            var assemblyName = Assembly.GetEntryAssembly().FullName.Split(',').First();
+            var entryAssembly = Assembly.GetEntryAssembly();
+            if (entryAssembly == null)
+            {
+                throw new InvalidOperationException("Entry assembly is null. Cannot configure OpenAPI.");
+            }
+
+            var assemblyName = entryAssembly.FullName.Split(',').First();
 
             app.UseSwagger(options =>
             {
@@ -223,15 +268,32 @@ public static class OpenApiExtension
             {
                 endpointRouteBuilder.MapSwagger();
                 
-                
-                endpointRouteBuilder.MapScalarApiReference(((options, _) =>
+                endpointRouteBuilder.MapScalarApiReference(((options, context) =>
                 {
-                    options.WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
+                    options.Servers = [];
+                    options.EnabledTargets = [ScalarTarget.Node, ScalarTarget.CSharp, ScalarTarget.Python];
+                    options.EnabledClients = [ScalarClient.Axios, ScalarClient.Fetch, ScalarClient.Python3, ScalarClient.HttpClient];
+                    options.WithDefaultHttpClient(ScalarTarget.Node, ScalarClient.Axios);
                     options.AddDocuments(endpoints.Select(r=> new ScalarDocument(r.Key)
                     {
                         RoutePattern = r.Value.ToLower(),
                         IsDefault = r.Key == "asc.files"
                     }));
+                    
+                    var authCookie = context.Request.Cookies[CookiesManager.AuthCookiesName]?.ToString();
+                    if (!string.IsNullOrEmpty(authCookie))
+                    {
+                        options.Authentication = new ScalarAuthenticationOptions
+                        {
+                            PreferredSecuritySchemes = [CookiesManager.AuthCookiesName]
+                        };
+
+                        options.AddApiKeyAuthentication(CookiesManager.AuthCookiesName, scheme =>
+                        {
+                            scheme.Name = CookiesManager.AuthCookiesName;
+                            scheme.Value = authCookie;
+                        });
+                    }
                 }));
             });
 
@@ -340,50 +402,7 @@ public static class OpenApiExtension
             }
         }
     }
-
-    private class XmlCustomTagFilter(XPathDocument xmlDoc) : IOperationFilter
-    {
-        private readonly XPathNavigator _xmlNavigator = xmlDoc.CreateNavigator();
-
-        public void Apply(OpenApiOperation operation, OperationFilterContext context)
-        {
-            if (context.MethodInfo == null || context.MethodInfo.DeclaringType == null)
-            {
-                return;
-            }
-
-            var targetMethod = context.MethodInfo.DeclaringType.IsConstructedGenericType ?
-                context.MethodInfo.GetUnderlyingGenericTypeMethod() :
-                context.MethodInfo;
-
-            if (targetMethod == null)
-            {
-                return;
-            }
-
-            ApplyMethodTags(operation, targetMethod);
-        }
-
-        private void ApplyMethodTags(OpenApiOperation operation, MethodInfo methodInfo)
-        {
-            var methodMemberName = XmlCommentsNodeNameHelper.GetMemberNameForMethod(methodInfo);
-            var methodNode = _xmlNavigator.SelectSingleNode($"/doc/members/member[@name='{methodMemberName}']");
-
-            var shortNode = methodNode?.SelectSingleNode("short");
-            if (shortNode != null)
-            {
-                operation.AddExtension("x-shortName", new XmlShortNameExtension(XmlCommentsTextHelper.Humanize(shortNode.InnerXml)));
-            }
-        }
-    }
-
-    private class XmlShortNameExtension(string shortName) : IOpenApiExtension
-    {
-        public void Write(IOpenApiWriter writer, OpenApiSpecVersion specVersion)
-        {
-            writer.WriteValue(shortName);
-        }
-    }
+    
 
     private class CustomInheritanceSchemaFilter : ISchemaFilter
     {

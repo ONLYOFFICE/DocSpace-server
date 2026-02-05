@@ -1883,6 +1883,32 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
 
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.Ai.DbDefaultAiProvider", b =>
+                {
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("DefaultModel")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("default_model")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<int>("ProviderId")
+                        .HasColumnType("int")
+                        .HasColumnName("provider_id");
+
+                    b.HasKey("TenantId")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("ai_providers_default", (string)null);
+
+                    b.HasAnnotation("MySql:CharSet", "utf8");
+                });
+
             modelBuilder.Entity("ASC.Core.Common.EF.Model.ApiKey", b =>
                 {
                     b.Property<Guid>("Id")
@@ -5741,6 +5767,17 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .IsRequired();
 
                     b.Navigation("Chat");
+                });
+
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.Ai.DbDefaultAiProvider", b =>
+                {
+                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
                 });
 
             modelBuilder.Entity("ASC.Core.Common.EF.Model.ApiKey", b =>

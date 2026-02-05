@@ -26,9 +26,9 @@
 
 namespace ASC.People.Api;
 
-///<summary>
+///<remarks>
 /// Remove user data API.
-///</summary>
+///</remarks>
 public class RemoveUserDataController(PermissionContext permissionContext,
         UserManager userManager,
         QueueWorkerRemove queueWorkerRemove,
@@ -40,10 +40,10 @@ public class RemoveUserDataController(PermissionContext permissionContext,
         TenantManager tenantManager)
     : ApiControllerBase
 {
-    /// <summary>
+    /// <remarks>
     /// Returns the progress of the started data deletion for the user with the ID specified in the request.
-    /// </summary>
-    /// <short>Get the deletion progress</short>
+    /// </remarks>
+    /// <summary>Get the deletion progress</summary>
     /// <path>api/2.0/people/remove/progress/{userid}</path>
     [Tags("People / User data")]
     [SwaggerResponse(200, "Deletion progress", typeof(TaskProgressResponseDto))]
@@ -58,12 +58,12 @@ public class RemoveUserDataController(PermissionContext permissionContext,
         return TaskProgressResponseDto.Get(progressItem);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sends the instructions for deleting a user profile.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Send the deletion instructions
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/self/delete</path>
     [Tags("People / User data")]
     [SwaggerResponse(200, "Information message", typeof(string))]
@@ -86,10 +86,10 @@ public class RemoveUserDataController(PermissionContext permissionContext,
         return string.Format(Resource.SuccessfullySentNotificationDeleteUserInfoMessage, "<b>" + user.Email + "</b>");
     }
 
-    /// <summary>
+    /// <remarks>
     /// Starts the data deletion for the user with the ID specified in the request.
-    /// </summary>
-    /// <short>Start the data deletion</short>
+    /// </remarks>
+    /// <summary>Start the data deletion</summary>
     /// <path>api/2.0/people/remove/start</path>
     [Tags("People / User data")]
     [SwaggerResponse(200, "Deletion progress", typeof(TaskProgressResponseDto))]
@@ -133,10 +133,10 @@ public class RemoveUserDataController(PermissionContext permissionContext,
         return TaskProgressResponseDto.Get(progressItem);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Terminates the data deletion for the user with the ID specified in the request.
-    /// </summary>
-    /// <short>Terminate the data deletion</short>
+    /// </remarks>
+    /// <summary>Terminate the data deletion</summary>
     /// <path>api/2.0/people/remove/terminate</path>
     [Tags("People / User data")]
     [HttpPut("remove/terminate")]
@@ -148,10 +148,10 @@ public class RemoveUserDataController(PermissionContext permissionContext,
         await queueWorkerRemove.Terminate(tenant.Id, inDto.UserId);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Starts deleting the personal folder.
-    /// </summary>
-    /// <short>Delete the personal folder</short>
+    /// </remarks>
+    /// <summary>Delete the personal folder</summary>
     /// <path>api/2.0/people/delete/personal/start</path>
     [Tags("People / User data")]
     [SwaggerResponse(200, "delete personal progress", typeof(TaskProgressResponseDto))]
@@ -174,10 +174,10 @@ public class RemoveUserDataController(PermissionContext permissionContext,
         return TaskProgressResponseDto.Get(progressItem);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the progress of deleting the personal folder.
-    /// </summary>
-    /// <short>Get the progress of deleting the personal folder</short>
+    /// </remarks>
+    /// <summary>Get the progress of deleting the personal folder</summary>
     /// <path>api/2.0/people/delete/personal/progress</path>
     [Tags("People / User data")]
     [SwaggerResponse(200, "Deletion progress", typeof(TaskProgressResponseDto))]
