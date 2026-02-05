@@ -75,14 +75,19 @@ internal class ProviderDaoBase(IServiceProvider serviceProvider,
             deleteSourceFile);
     }
 
-    protected async Task<File<int>> PerformCrossDaoFileCopyAsync(string fromFileId, int toFolderId, bool deleteSourceFile)
+    protected async Task<File<int>> PerformCrossDaoFileCopyAsync(string fromFileId, int toFolderId, bool deleteSourceFile, Guid chatId = default)
     {
         var fromSelector = _selectorFactory.GetSelector(fromFileId);
 
         return await _crossDao.PerformCrossDaoFileCopyAsync(
-            fromFileId, fromSelector.GetFileDao(fromFileId), fromSelector.ConvertId,
-            toFolderId, _serviceProvider.GetService<IFileDao<int>>(), r => r,
-            deleteSourceFile);
+            fromFileId, 
+            fromSelector.GetFileDao(fromFileId), 
+            fromSelector.ConvertId,
+            toFolderId, 
+            _serviceProvider.GetService<IFileDao<int>>(), 
+            r => r,
+            deleteSourceFile, 
+            chatId);
     }
 
     protected Task<Folder<string>> PerformCrossDaoFolderCopyAsync(string fromFolderId, string toRootFolderId, bool deleteSourceFolder, CancellationToken? cancellationToken)

@@ -37,7 +37,8 @@ internal class CrossDao //Additional SharpBox
     public async Task<File<TTo>> PerformCrossDaoFileCopyAsync<TFrom, TTo>(
         TFrom fromFileId, IFileDao<TFrom> fromFileDao, Func<TFrom, TFrom> fromConverter,
         TTo toFolderId, IFileDao<TTo> toFileDao, Func<TTo, TTo> toConverter,
-        bool deleteSourceFile)
+        bool deleteSourceFile,
+        Guid chatId = default)
     {
         //Get File from first dao
         var fromFile = await fromFileDao.GetFileAsync(fromConverter(fromFileId));
@@ -45,9 +46,9 @@ internal class CrossDao //Additional SharpBox
         if (fromFile.ContentLength > setupInfo.AvailableFileSize)
         {
             throw new Exception(string.Format(
-                deleteSourceFile 
-                    ? FilesCommonResource.ErrorMessage_FileSizeMove 
-                    : FilesCommonResource.ErrorMessage_FileSizeCopy, 
+                deleteSourceFile
+                    ? FilesCommonResource.ErrorMessage_FileSizeMove
+                    : FilesCommonResource.ErrorMessage_FileSizeCopy,
                 FileSizeComment.FilesSizeToString(setupInfo.AvailableFileSize)));
         }
 
@@ -56,7 +57,7 @@ internal class CrossDao //Additional SharpBox
         var tagDao = serviceProvider.GetService<ITagDao<TFrom>>();
 
         var fromFileCopy = (File<TFrom>)fromFile.Clone();
-        
+
         var fromFileShareRecords = securityDao.GetPureShareRecordsAsync(fromFileCopy);
         var fromFileNewTags = tagDao.GetNewTagsAsync(Guid.Empty, fromFileCopy);
         var fromFileLockTag = await tagDao.GetTagsAsync(fromFile.Id, FileEntryType.File, TagType.Locked).FirstOrDefaultAsync();
@@ -79,7 +80,7 @@ internal class CrossDao //Additional SharpBox
                          : await fromFileDao.GetFileStreamAsync(fromFile))
         {
             toFile.ContentLength = fromFileStream.CanSeek ? fromFileStream.Length : fromFile.ContentLength;
-            toFile = await toFileDao.SaveFileAsync(toFile, fromFileStream);
+            toFile = await toFileDao.SaveFileAsync(toFile, fromFileStream, chatId);
         }
 
         if (!deleteSourceFile)
