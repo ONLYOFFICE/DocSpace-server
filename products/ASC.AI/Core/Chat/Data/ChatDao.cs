@@ -175,17 +175,21 @@ public class ChatDao(IDbContextFactory<AiDbContext> dbContextFactory)
         return await dbContext.GetChatsTotalCountAsync(tenantId, roomId, userId);
     }
 
-    public async Task DeleteChatsAsync(int tenantId, IEnumerable<Guid> chatIds)
+    public async Task DeleteChatAsync(int tenantId, Guid chatId)
     {
-        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
-        var strategy = filesDbContext.Database.CreateExecutionStrategy();
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var strategy = dbContext.Database.CreateExecutionStrategy();
 
-        await strategy.ExecuteAsync(async () =>
+        var deleted = await strategy.ExecuteAsync(async () =>
         {
             await using var context = await dbContextFactory.CreateDbContextAsync();
-            await context.DeleteChatsAsync(tenantId, chatIds);
-            await context.SaveChangesAsync();
+            return await context.MarkChatAsDeletedAsync(tenantId, chatId);
         });
+
+        if (deleted)
+        {
+            // TODO: Publish chat deletion task to worker queue for cleanup of attachments
+        }
     }
 
     public async Task<long> AddMessageAsync(Guid chatId, Message message)

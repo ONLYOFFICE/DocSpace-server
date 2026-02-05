@@ -81,7 +81,7 @@ public class ChatService(
     public async Task DeleteChatAsync(Guid chatId)
     {
         var chat = await GetChatAsync(chatId);
-        await chatDao.DeleteChatsAsync(tenantManager.GetCurrentTenantId(), [chat.Id]);
+        await chatDao.DeleteChatAsync(tenantManager.GetCurrentTenantId(), chat.Id);
     }
 
     public Task<IEnumerable<ModelData>> GetModelsAsync(int providerId)
