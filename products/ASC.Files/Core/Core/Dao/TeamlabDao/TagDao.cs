@@ -37,7 +37,9 @@ internal abstract class BaseTagDao<T>(
     SettingsManager settingsManager,
     AuthContext authContext,
     IServiceProvider serviceProvider,
-    IDistributedLockProvider distributedLockProvider)
+    IDistributedLockProvider distributedLockProvider,
+    GlobalFolder globalFolder,
+    SocketManager socketManager)
     : AbstractDao(dbContextManager,
         userManager,
         tenantManager,
@@ -196,6 +198,14 @@ internal abstract class BaseTagDao<T>(
 
         filesDbContext.Tag.Update(existingTag);
         await filesDbContext.SaveChangesAsync();
+
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var folderThirdPartyDao = daoFactory.GetFolderDao<string>();
+        var rooms = await folderDao.GetRoomsAsync([await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)], null, new List<string> { tagInfo.Name }, Guid.Empty, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, null, QuotaFilter.All).ToListAsync();
+        var thirdPartyRooms = await folderThirdPartyDao.GetProviderBasedRoomsAsync(SearchArea.Active, null, new List<string> { tagInfo.Name }, Guid.Empty, null, false, false, ProviderFilter.None, SubjectFilter.Owner, null).ToListAsync();
+        var tasks = rooms.Select(room => socketManager.UpdateFolderAsync(room))
+             .Concat(thirdPartyRooms.Select(room => socketManager.UpdateFolderAsync(room)));
+        await Task.WhenAll(tasks);
 
         return existingTag.MapToTagInfo();
     }
@@ -582,6 +592,14 @@ internal abstract class BaseTagDao<T>(
         {
             await filesDbContext.DeleteTagLinksByTagIdAsync(tenantId, id);
             await filesDbContext.DeleteTagByIdAsync(tenantId, id);
+
+            var folderDao = daoFactory.GetFolderDao<int>();
+            var folderThirdPartyDao = daoFactory.GetFolderDao<string>();
+            var rooms = await folderDao.GetRoomsAsync([await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)], null, new List<string> { tag.Name }, Guid.Empty, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, null, QuotaFilter.All).ToListAsync();
+            var thirdPartyRooms = await folderThirdPartyDao.GetProviderBasedRoomsAsync(SearchArea.Active, null, new List<string> { tag.Name }, Guid.Empty, null, false, false, ProviderFilter.None, SubjectFilter.Owner, null).ToListAsync();
+            var tasks = rooms.Select(room => socketManager.UpdateFolderAsync(room))
+                 .Concat(thirdPartyRooms.Select(room => socketManager.UpdateFolderAsync(room)));
+            await Task.WhenAll(tasks);
         }
     }
 
@@ -718,7 +736,9 @@ internal class TagDao(
     SettingsManager settingsManager,
     AuthContext authContext,
     IServiceProvider serviceProvider,
-    IDistributedLockProvider distributedLockProvider)
+    IDistributedLockProvider distributedLockProvider,
+    GlobalFolder globalFolder,
+    SocketManager socketManager)
     : BaseTagDao<int>(
         daoFactory,
         userManager,
@@ -730,7 +750,9 @@ internal class TagDao(
           settingsManager,
           authContext,
           serviceProvider,
-          distributedLockProvider)
+          distributedLockProvider,
+          globalFolder,
+          socketManager)
 {
     public override IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, Folder<int> parentFolder, bool deepSearch)
     {
@@ -850,7 +872,9 @@ internal class ThirdPartyTagDao(
         AuthContext authContext,
         IServiceProvider serviceProvider,
         IThirdPartyTagDao thirdPartyTagDao,
-        IDistributedLockProvider distributedLockProvider)
+        IDistributedLockProvider distributedLockProvider,
+        GlobalFolder globalFolder,
+        SocketManager socketManager)
     : BaseTagDao<string>(
         daoFactory,
         userManager,
@@ -862,7 +886,9 @@ internal class ThirdPartyTagDao(
           settingsManager,
           authContext,
           serviceProvider,
-          distributedLockProvider)
+          distributedLockProvider,
+          globalFolder,
+          socketManager)
 {
     public override IAsyncEnumerable<Tag> GetNewTagsAsync(Guid subject, Folder<string> parentFolder, bool deepSearch)
     {

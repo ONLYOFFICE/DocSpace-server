@@ -642,7 +642,7 @@ public abstract class VirtualRoomsController<T>(
     public async Task<FolderDto<T>> AddRoomTags(BatchTagsRequestDto<T> inDto)
     {
         var room = await customTagsService.AddRoomTagsAsync(inDto.Id, inDto.BatchTags.Names);
-
+        await socketManager.UpdateFolderAsync(room);
         return await _folderDtoHelper.GetAsync(room);
     }
 
@@ -658,7 +658,7 @@ public abstract class VirtualRoomsController<T>(
     public async Task<FolderDto<T>> DeleteRoomTags(BatchTagsRequestDto<T> inDto)
     {
         var room = await customTagsService.DeleteRoomTagsAsync(inDto.Id, inDto.BatchTags.Names);
-
+        await socketManager.UpdateFolderAsync(room);
         return await _folderDtoHelper.GetAsync(room);
     }
 
@@ -925,8 +925,8 @@ public class VirtualRoomsCommonController(
 
     /// <remarks>
     /// Updates the name of a custom tag.
-    /// </summary>
-    /// <short>Update tag</short>
+    /// </remarks>
+    /// <summary>Update tag</summary>
     /// <path>api/2.0/files/tags</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Updated tag name", typeof(object))]
@@ -938,10 +938,8 @@ public class VirtualRoomsCommonController(
         return updatedTag.Name;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of custom tags.
-    /// </summary>
-    /// <short>Get the room tags</short>
     /// </remarks>
     /// <summary>Get the room tags</summary>
     /// <path>api/2.0/files/tags</path>
@@ -956,8 +954,8 @@ public class VirtualRoomsCommonController(
 
     /// <remarks>
     /// Checks if a specific custom tag has linked items.
-    /// </summary>
-    /// <short>Has tag links</short>
+    /// </remarks>
+    /// <summary>Has tag links</summary>
     /// <path>api/2.0/files/tags/{tagName}/has-links</path>
     /// <collection>item</collection>
     [Tags("Rooms")]
@@ -970,10 +968,8 @@ public class VirtualRoomsCommonController(
         return hasTagLiks;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Deletes a bunch of custom tags specified in the request.
-    /// </summary>
-    /// <short>Delete the custom room tags</short>
     /// </remarks>
     /// <summary>Delete the custom room tags</summary>
     /// <path>api/2.0/files/tags</path>
