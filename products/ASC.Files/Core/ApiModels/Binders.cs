@@ -326,7 +326,7 @@ public class UploadModelBinder : IModelBinder
 
         if (bindingContext.HttpContext.Request.HasFormContentType)
         {
-            result.Files = bindingContext.HttpContext.Request.Form.Files;
+            result.File = bindingContext.HttpContext.Request.Form.Files.FirstOrDefault();
         }
 
         bindingContext.HttpContext.Request.EnableBuffering();
