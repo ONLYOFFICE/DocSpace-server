@@ -1107,4 +1107,52 @@
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Webhook atualizado: {0}</value>
   </data>
+  <data name="BackupCompleted" xml:space="preserve">
+    <value>Backup concluído</value>
+  </data>
+  <data name="BackupFailed" xml:space="preserve">
+    <value>Falha no backup</value>
+  </data>
+  <data name="InvitationSettingsUpdated" xml:space="preserve">
+    <value>Definições de convite atualizadas</value>
+  </data>
+  <data name="IPRestrictionsSettingsUpdated" xml:space="preserve">
+    <value>Definições de segurança IP atualizadas</value>
+  </data>
+  <data name="LoginSettingsUpdated" xml:space="preserve">
+    <value>Definições de proteção contra força bruta atualizadas</value>
+  </data>
+  <data name="ScheduledBackupCompleted" xml:space="preserve">
+    <value>Backup programado concluído</value>
+  </data>
+  <data name="ScheduledBackupFailed" xml:space="preserve">
+    <value>Falha no backup agendado</value>
+  </data>
+  <data name="ScheduledBackupStarted" xml:space="preserve">
+    <value>Backup programado iniciado</value>
+  </data>
+  <data name="WebpluginDeleted" xml:space="preserve">
+    <value>Plugin eliminado: {0}</value>
+  </data>
+  <data name="WebpluginUpdated" xml:space="preserve">
+    <value>Plugin atualizado: {0}</value>
+  </data>
+  <data name="WebpluginUploaded" xml:space="preserve">
+    <value>Plugin carregado: {0}</value>
+  </data>
+  <data name="WhiteLabelAdditionalSettingsUpdated" xml:space="preserve">
+    <value>Definições adicionais de marca atualizadas</value>
+  </data>
+  <data name="WhiteLabelCompanySettingsUpdated" xml:space="preserve">
+    <value>Definições de informações da empresa atualizadas</value>
+  </data>
+  <data name="WhiteLabelMailSettingsUpdated" xml:space="preserve">
+    <value>Definições de e-mail atualizadas</value>
+  </data>
+  <data name="WhiteLabelSettingsLogosUpdated" xml:space="preserve">
+    <value>Definições do logótipo atualizadas</value>
+  </data>
+  <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
+    <value>Nome da marca atualizado</value>
+  </data>
 </root>

@@ -174,4 +174,7 @@
   <data name="UnavailableServers" xml:space="preserve">
     <value>Серверы MCP недоступны: {0}. Проверьте настройки подключения</value>
   </data>
+  <data name="NoModelsAvailable" xml:space="preserve">
+    <value>Нет доступных моделей для этого провайдера</value>
+  </data>
 </root>

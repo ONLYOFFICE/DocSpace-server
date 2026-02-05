@@ -2094,4 +2094,92 @@ $TrulyYours</value>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>Atenciosamente, equipe ${LetterLogoText}</value>
   </data>
+  <data name="subject_user_agent_role_changed" xml:space="preserve">
+    <value>A sua função no agente de IA do DocSpace foi alterada</value>
+  </data>
+  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; carregou um novo documento: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; para a base de conhecimento do agente de IA: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="pattern_api_key_expired" xml:space="preserve">
+    <value>Olá, $UserName!
+
+Este e-mail é para informar que a sua chave API "*$Message*" expirou e foi desativada.
+
+Pode gerar uma nova chave API em “Ferramentas do desenvolvedor”: «${__VirtualRootPath}/developer-tools/api-keys”.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} O DocSpace foi eliminado.
+
+*Portal:* ${PortalUrl}
+*Proprietário:* ${UserName} ${UserEmail} 
+*Cliente:* ${OwnerName}
+
+Certifique-se de que o faturamento automático está desativado. Verifique o estado do faturamento automático na conta Stripe do cliente.</value>
+  </data>
+  <data name="pattern_user_agent_role_changed" xml:space="preserve">
+    <value>Olá!
+
+Foi atribuída uma nova função no agente DocSpace AI "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+Saiba mais sobre as funções e permissões da sala em "Centro de Ajuda":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_backup_failed" xml:space="preserve">
+    <value>Olá, $UserName,
+
+O processo de backup do seu DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" falhou.
+
+Se tiver alguma dúvida ou precisar de ajuda, não hesite em contactar-nos através de "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_backup_failed_tg" xml:space="preserve">
+    <value>Olá, $UserName,
+
+O processo de backup do seu DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) falhou.
+
+Se tiver alguma dúvida ou precisar de ajuda, não hesite em contactar-nos através de [${__SupportLink}](${__SupportLink})
+
+Cumprimentos,
+${LetterLogoText} Equipa de Suporte
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Olá!
+
+Você está convidado a participar de um agente DocSpace AI em "${__VirtualRootPath}":"${__VirtualRootPath}". Aceite o convite clicando no link:
+
+$OrangeButton
+
+Após clicar no link do convite, defina uma nova palavra-passe para a sua conta.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed" xml:space="preserve">
+    <value>Olá, $UserName,
+
+O processo de backup agendado para o seu DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" falhou.
+
+Recomendamos verificar as configurações "Backup":"${__VirtualRootPath}/portal-settings/backup/data-backup" e "Services":"${__VirtualRootPath}/portal-settings/services".
+
+Se tiver alguma dúvida ou precisar de ajuda, não hesite em contactar-nos através de "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_scheduled_backup_failed_tg" xml:space="preserve">
+    <value>Olá, $UserName,
+
+O processo de backup agendado para o seu DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) falhou.
+
+Recomendamos verificar as configurações [Backup](${__VirtualRootPath}/portal-settings/backup/data-backup) e [Serviços](${__VirtualRootPath}/portal-settings/services).
+
+Se tiver alguma dúvida ou precisar de ajuda, não hesite em contactar-nos através de [${__SupportLink}](${__SupportLink})
+
+Cumprimentos,
+${LetterLogoText} Equipa de Suporte
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
 </root>
