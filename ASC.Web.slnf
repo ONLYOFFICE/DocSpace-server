@@ -1,8 +1,9 @@
-{
+﻿{
   "solution": {
     "path": "ASC.Web.sln",
     "projects": [
       "common\\ASC.ActiveDirectory\\ASC.ActiveDirectory.csproj",
+      "common\\ASC.Analyzers\\ASC.Analyzers.csproj",
       "common\\ASC.Api.Core\\ASC.Api.Core.csproj",
       "common\\ASC.AppHost\\ASC.AppHost.csproj",
       "common\\ASC.Common\\ASC.Common.csproj",
