@@ -80,11 +80,12 @@ public class ChatCompletionGenerator(
                     if (context.Chat == null)
                     {
                         var tempTitle = chatNameGenerator.Generate(context.RawMessage);
-                    
+
                         context.Chat = await chatHistory.AddChatAsync(
                             context.TenantId,
                             context.Agent.Id,
                             context.User.Id,
+                            context.ChatId,
                             tempTitle,
                             context.RawMessage,
                             context.Attachments);

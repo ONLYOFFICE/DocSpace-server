@@ -127,6 +127,7 @@ public class MigrationContext : DbContext
     
     public DbSet<DbChat> Chats { get; set; }
     public DbSet<DbChatMessage> ChatMessages { get; set; }
+    public DbSet<DbChatMessageAttachment> ChatMessageAttachments { get; set; }
     public DbSet<DbAiProvider> AiProviders { get; set; }
     public DbSet<DbDefaultAiProvider> DefaultAiProviders { get; set; }
     
@@ -224,6 +225,7 @@ public class MigrationContext : DbContext
             .AddDbFileVectorization()
             .AddDbUserChatSettings()
             .AddInvitationLink()
-            .AddDbDefaultAiProviders();
+            .AddDbDefaultAiProviders()
+            .AddDbChatMessageAttachment();
     }
 }

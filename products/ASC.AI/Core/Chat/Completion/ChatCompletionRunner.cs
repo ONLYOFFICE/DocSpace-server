@@ -43,9 +43,10 @@ public class ChatCompletionRunner(
         int roomId, string message, IEnumerable<JsonElement>? files = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(message);
-        
+
         var context = await contextBuilder.BuildAsync(roomId);
-        
+        context.ChatId = Guid.NewGuid();
+
         var attachments = await GetAttachmentsAsync(context, files).ToListAsync();
         
         var userMessage = FormatUserMessage(message, attachments);
@@ -103,7 +104,8 @@ public class ChatCompletionRunner(
         
         var context = await contextBuilder.BuildAsync(chat.RoomId);
         context.Chat = chat;
-        
+        context.ChatId = chat.Id;
+
         var attachments = await GetAttachmentsAsync(context, files).ToListAsync();
         
         var systemPrompt = ChatPromptTemplate.GetPrompt(

@@ -112,6 +112,7 @@ public class ChatExecutionContext : IAsyncDisposable
     public ChatMessage? UserMessage { get; set; }
     public string RawMessage { get; set; } = string.Empty;
     public List<AttachmentMessageContent> Attachments { get; set; } = [];
+    public Guid ChatId { get; set; }
     public ChatSession? Chat { get; set; }
     public string? Error { get; init; }
 

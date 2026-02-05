@@ -44,22 +44,23 @@ public class AttachmentHandler(
     ITextExtractor textExtractor,
     VectorizationGlobalSettings vectorizationGlobalSettings,
     ProviderSettings providerSettings,
+    IDbContextFactory<AiDbContext> dbContextFactory,
     ILogger<AttachmentHandler> logger)
 {
     public async IAsyncEnumerable<AttachmentResult> HandleAsync(
-        ChatExecutionContext context, 
-        IEnumerable<int> filesIds, 
+        ChatExecutionContext context,
+        IEnumerable<int> filesIds,
         IEnumerable<string> thirdPartyFilesIds)
     {
         var modelSettings = providerSettings.GetModel(context.ClientOptions.Provider, context.ClientOptions.ModelId);
         ArgumentNullException.ThrowIfNull(modelSettings);
-        
-        await foreach (var files in HandleAsync(modelSettings.Multimodal, filesIds, context.Agent.Id))
+
+        await foreach (var files in HandleAsync(modelSettings.Multimodal, filesIds, context.TenantId, context.ChatId, context.Agent.Id))
         {
             yield return files;
         }
 
-        await foreach (var files in HandleAsync(modelSettings.Multimodal, thirdPartyFilesIds, context.Agent.Id))
+        await foreach (var files in HandleAsync(modelSettings.Multimodal, thirdPartyFilesIds, context.TenantId, context.ChatId, context.Agent.Id))
         {
             yield return files;
         }
@@ -96,6 +97,8 @@ public class AttachmentHandler(
     private async IAsyncEnumerable<AttachmentResult> HandleAsync<T>(
         MultimodalSettings? multimodal,
         IEnumerable<T> filesIds,
+        int tenantId,
+        Guid chatId,
         int agentId)
     {
         var fileDao = daoFactory.GetFileDao<T>();
@@ -140,7 +143,7 @@ public class AttachmentHandler(
             }
         }
 
-        var copiedFiles = await CopyMediaFilesAsync(fileDao, internalDao, mediaFiles, agentId);
+        var copiedFiles = await CopyMediaFilesAsync(fileDao, internalDao, mediaFiles, tenantId, chatId, agentId);
 
         foreach (var (copiedFile, fileType, extension) in copiedFiles)
         {
@@ -157,6 +160,8 @@ public class AttachmentHandler(
         IFileDao<T> fileDao,
         IFileDao<int> internalDao,
         List<(File<T> File, FileType FileType, string Extension)> mediaFiles,
+        int tenantId,
+        Guid chatId,
         int agentId)
     {
         var copiedFiles = new List<(File<int> CopiedFile, FileType FileType, string Extension)>();
@@ -169,12 +174,30 @@ public class AttachmentHandler(
                 copiedFiles.Add((copiedFile, fileType, extension));
             }
 
+            if (copiedFiles.Count <= 0)
+            {
+                return copiedFiles;
+            }
+
+            // TODO: move to transaction in fileDao.CopyFileAsync()
+            await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+            var attachments = copiedFiles.Select(x => new DbChatMessageAttachment
+            {
+                TenantId = tenantId,
+                ChatId = chatId,
+                FileId = x.CopiedFile.Id
+            });
+
+            await dbContext.MessageAttachments.AddRangeAsync(attachments);
+            await dbContext.SaveChangesAsync();
+
             return copiedFiles;
         }
         catch (Exception e)
         {
             logger.ErrorWithException(e);
-            
+
             foreach (var (copiedFile, _, _) in copiedFiles)
             {
                 await internalDao.DeleteFileAsync(copiedFile.Id);

@@ -35,23 +35,23 @@ public class ChatDao(IDbContextFactory<AiDbContext> dbContextFactory)
         AllowOutOfOrderMetadataProperties = true
     };
     
-    public async Task<ChatSession> AddChatAsync(int tenantId, int roomId, Guid userId, string title, Message message)
+    public async Task<ChatSession> AddChatAsync(int tenantId, int roomId, Guid userId, Guid chatId, string title, Message message)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
-        
+
         DbChat chat = null!;
 
         await strategy.ExecuteAsync(async () =>
         {
             await using var context = await dbContextFactory.CreateDbContextAsync();
-            
+            await using var transaction = await context.Database.BeginTransactionAsync();
+
             var now = DateTime.UtcNow;
-            var id = Guid.NewGuid();
 
             var dbMessage = new DbChatMessage
             {
-                ChatId = id,
+                ChatId = chatId,
                 Role = message.Role,
                 Content = JsonSerializer.Serialize(message.Contents, _serializerOptions),
                 CreatedOn = now
@@ -59,18 +59,32 @@ public class ChatDao(IDbContextFactory<AiDbContext> dbContextFactory)
 
             chat = new DbChat
             {
-                Id = id,
+                Id = chatId,
                 TenantId = tenantId,
-                RoomId = roomId, 
+                RoomId = roomId,
                 UserId = userId,
                 Title = title,
                 CreatedOn = now,
                 ModifiedOn = now,
                 Messages = [dbMessage]
             };
-            
+
             await context.Chats.AddAsync(chat);
             await context.SaveChangesAsync();
+
+            var fileIds = message.Contents
+                .OfType<DataMessageContent>()
+                .Select(d => d.Id)
+                .ToList();
+
+            if (fileIds.Count > 0)
+            {
+                await context.MessageAttachments
+                    .Where(a => a.TenantId == tenantId && a.ChatId == chatId && fileIds.Contains(a.FileId))
+                    .ExecuteUpdateAsync(s => s.SetProperty(a => a.MessageId, dbMessage.Id));
+            }
+
+            await transaction.CommitAsync();
         });
 
         return chat.Map();
@@ -82,23 +96,35 @@ public class ChatDao(IDbContextFactory<AiDbContext> dbContextFactory)
         var strategy = dbContext.Database.CreateExecutionStrategy();
 
         await strategy.ExecuteAsync(async () =>
-        { 
+        {
             await using var context = await dbContextFactory.CreateDbContextAsync();
             await using var transaction = await context.Database.BeginTransactionAsync();
 
             await context.UpdateChatAsync(tenantId, chatId, DateTime.UtcNow);
-            
+
             var dbMessage = new DbChatMessage
             {
-                ChatId = chatId, 
-                Role = message.Role, 
+                ChatId = chatId,
+                Role = message.Role,
                 Content = JsonSerializer.Serialize(message.Contents, _serializerOptions),
                 CreatedOn = DateTime.UtcNow
             };
-            
+
             await context.Messages.AddAsync(dbMessage);
-            
             await context.SaveChangesAsync();
+
+            var fileIds = message.Contents
+                .OfType<DataMessageContent>()
+                .Select(d => d.Id)
+                .ToList();
+
+            if (fileIds.Count > 0)
+            {
+                await context.MessageAttachments
+                    .Where(a => a.TenantId == tenantId && a.ChatId == chatId && fileIds.Contains(a.FileId))
+                    .ExecuteUpdateAsync(s => s.SetProperty(a => a.MessageId, dbMessage.Id));
+            }
+
             await transaction.CommitAsync();
         });
     }
