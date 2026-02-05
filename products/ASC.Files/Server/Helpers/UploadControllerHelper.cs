@@ -112,16 +112,20 @@ public class UploadControllerHelper(
         {
             await _filesSettingsHelper.SetStoreOriginalFiles(uploadModel.StoreOriginalFileFlag.Value);
         }
-        
+
         if (uploadModel.File == null)
         {
             throw new InvalidOperationException("No input files");
         }
 
-        var fileName = "file" + MimeMapping.GetExtention(uploadModel.ContentType.MediaType);
-        if (uploadModel.ContentDisposition != null)
+        var fileName = uploadModel.File.FileName;
+        if (string.IsNullOrEmpty(fileName))
         {
-            fileName = uploadModel.ContentDisposition.FileName;
+            fileName = "file" + MimeMapping.GetExtention(uploadModel.ContentType?.MediaType);
+            if (uploadModel.ContentDisposition != null)
+            {
+                fileName = uploadModel.ContentDisposition.FileName;
+            }
         }
 
         return [
