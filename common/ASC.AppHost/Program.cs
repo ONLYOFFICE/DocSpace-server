@@ -29,7 +29,7 @@ var builder = DistributedApplication.CreateBuilder(args);
 var basePath = Path.GetFullPath(Path.Combine("..", "..", ".."));
 var isDocker = String.Compare(builder.Configuration["Docker"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 var isPreview = String.Compare(builder.Configuration["ASPNETCORE_ENVIRONMENT"], "Preview", StringComparison.OrdinalIgnoreCase) == 0;
-var disableBuildClient = String.Compare(builder.Configuration["DISABLE_BUILD_CLIENT"], "true", StringComparison.OrdinalIgnoreCase) == 0;
+var skipClient = String.Compare(builder.Configuration["SKIP_CLIENT"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 
 var connectionManager = new ConnectionStringManager(builder)
     .AddMySql()
@@ -46,46 +46,68 @@ if (!isPreview)
 
 var configurator = new ProjectConfigurator(builder, connectionManager, basePath, isDocker);
 
-if (isPreview)
-{
-    configurator
-        .AddProject<ASC_Files>(Constants.FilesPort)
-        .AddProject<ASC_Files_Service>(Constants.FilesServicePort)
-        .AddProject<ASC_People>(Constants.PeoplePort)
-        .AddProject<ASC_Web_Api>(Constants.WebApiPort)
-        .AddProject<ASC_Web_Studio>(Constants.WebstudioPort)
-        .AddProject<ASC_AI>(Constants.AiPort)
-        .AddProject<ASC_AI_Service>(Constants.AiServicePort)
-        .AddSocketIO();
-}
-else
-{
-    configurator
-        .AddProject<ASC_Files>(Constants.FilesPort)
-        .AddProject<ASC_Files_Service>(Constants.FilesServicePort)
-        .AddProject<ASC_People>(Constants.PeoplePort)
-        .AddProject<ASC_Web_Api>(Constants.WebApiPort)
-        .AddProject<ASC_ApiSystem>(Constants.ApiSystemPort)
-        .AddProject<ASC_ClearEvents>(Constants.ClearEventsPort)
-        .AddProject<ASC_Data_Backup>(Constants.BackupPort)
-        .AddProject<ASC_Data_Backup_BackgroundTasks>(Constants.BackupBackgroundTasksPort)
-        .AddProject<ASC_Notify>(0, false)
-        .AddProject<ASC_Studio_Notify>(Constants.StudioNotifyPort)
-        .AddProject<ASC_Web_Studio>(Constants.WebstudioPort)
-        .AddProject<ASC_AI>(Constants.AiPort)
-        .AddProject<ASC_AI_Service>(Constants.AiServicePort)
-        .AddSocketIO()
-        .AddSsoAuth()
-        .AddWebDav()
-        .AddIdentity();
-}
 
+switch (builder.Configuration["ASPNETCORE_ENVIRONMENT"])
+{
+    case "Preview":
+        configurator
+            .AddProject<ASC_Files>(Constants.FilesPort)
+            .AddProject<ASC_Files_Service>(Constants.FilesServicePort)
+            .AddProject<ASC_People>(Constants.PeoplePort)
+            .AddProject<ASC_Web_Api>(Constants.WebApiPort)
+            .AddProject<ASC_Web_Studio>(Constants.WebstudioPort)
+            .AddProject<ASC_AI>(Constants.AiPort)
+            .AddProject<ASC_AI_Service>(Constants.AiServicePort)
+            .AddSocketIO();
+
+        break;
+    case "FrontendDev":
+        configurator
+            .AddProject<ASC_Files>(Constants.FilesPort)
+            .AddProject<ASC_Files_Service>(Constants.FilesServicePort)
+            .AddProject<ASC_People>(Constants.PeoplePort)
+            .AddProject<ASC_Web_Api>(Constants.WebApiPort)
+            .AddProject<ASC_ApiSystem>(Constants.ApiSystemPort)
+            .AddProject<ASC_Data_Backup>(Constants.BackupPort)
+            .AddProject<ASC_Data_Backup_BackgroundTasks>(Constants.BackupBackgroundTasksPort)
+            .AddProject<ASC_Notify>(0, false)
+            .AddProject<ASC_Studio_Notify>(Constants.StudioNotifyPort)
+            .AddProject<ASC_Web_Studio>(Constants.WebstudioPort)
+            .AddProject<ASC_AI>(Constants.AiPort)
+            .AddProject<ASC_AI_Service>(Constants.AiServicePort)
+            .AddProject<ASC_TelegramService>(0, false)
+            .AddSocketIO()
+            .AddSsoAuth();
+
+        break;
+    default:
+        configurator
+            .AddProject<ASC_Files>(Constants.FilesPort)
+            .AddProject<ASC_Files_Service>(Constants.FilesServicePort)
+            .AddProject<ASC_People>(Constants.PeoplePort)
+            .AddProject<ASC_Web_Api>(Constants.WebApiPort)
+            .AddProject<ASC_ApiSystem>(Constants.ApiSystemPort)
+            .AddProject<ASC_ClearEvents>(Constants.ClearEventsPort)
+            .AddProject<ASC_Data_Backup>(Constants.BackupPort)
+            .AddProject<ASC_Data_Backup_BackgroundTasks>(Constants.BackupBackgroundTasksPort)
+            .AddProject<ASC_Notify>(0, false)
+            .AddProject<ASC_Studio_Notify>(Constants.StudioNotifyPort)
+            .AddProject<ASC_Web_Studio>(Constants.WebstudioPort)
+            .AddProject<ASC_AI>(Constants.AiPort)
+            .AddProject<ASC_AI_Service>(Constants.AiServicePort)
+            .AddProject<ASC_TelegramService>(0, false)
+            .AddSocketIO()
+            .AddSsoAuth()
+            .AddWebDav()
+            .AddIdentity();
+        break;
+}
 
 IResourceBuilder<ExecutableResource>? startPackages = null;
 
 var clientBasePath = Path.Combine(basePath, "client");
 
-if (!disableBuildClient)
+if (!skipClient)
 {
     var installPackages = builder.AddExecutable("asc-install-packages", "pnpm", clientBasePath, "install");
     var buildPackages = builder.AddExecutable("asc-build-packages", "pnpm", clientBasePath, "build").WaitForCompletion(installPackages);
