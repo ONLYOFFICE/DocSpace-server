@@ -1317,12 +1317,13 @@ public class UserController(
         }
 
         var currentUserType = await _userManager.GetUserTypeAsync(currentUser);
+        var currentUserIsNotAdmin = currentUserType is EmployeeType.User or EmployeeType.Guest;
 
         var tenant = tenantManager.GetCurrentTenant();
 
         if (inDto.ResendAll)
         {
-            if (currentUserType is EmployeeType.User or EmployeeType.Guest)
+            if (currentUserIsNotAdmin)
             {
                 throw new SecurityException(Resource.ErrorAccessDenied);
             }
@@ -1333,6 +1334,11 @@ public class UserController(
         }
         else
         {
+            if (currentUserIsNotAdmin && inDto.UserIds.Any(x => x != currentUser.Id))
+            {
+                throw new SecurityException(Resource.ErrorAccessDenied);
+            }
+
             users = await inDto.UserIds.ToAsyncEnumerable()
                 .Where(userId => !_userManager.IsSystemUser(userId))
                 .Select(async (Guid userId, CancellationToken _) => await _userManager.GetUsersAsync(userId))
