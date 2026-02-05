@@ -42,10 +42,10 @@ public abstract class MasterFormController<T>(FileStorageService fileStorageServ
         FileDtoHelper fileDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
-    /// <summary>
+    /// <remarks>
     /// Checks if the current file is a form draft which can be filled out.
-    /// </summary>
-    /// <short>Check the form draft filling</short>
+    /// </remarks>
+    /// <summary>Check the form draft filling</summary>
     /// <path>api/2.0/files/masterform/{fileId}/checkfillformdraft</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]

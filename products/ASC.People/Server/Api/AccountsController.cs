@@ -65,10 +65,10 @@ public class AccountsController<T>(
     AuthContext authContext,
     UserManager userManager) : ControllerBase
 {
-    /// <summary>
+    /// <remarks>
     /// Returns the account entries with their sharing settings in a room with the ID specified in request.
-    /// </summary>
-    /// <short>Get account entries</short>
+    /// </remarks>
+    /// <summary>Get account entries</summary>
     /// <path>api/2.0/accounts/room/{id}/search</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
@@ -84,10 +84,10 @@ public class AccountsController<T>(
             yield return p;
         }
     }
-    /// <summary>
+    /// <remarks>
     /// Returns the account entries with their sharing settings in a folder with the ID specified in request.
-    /// </summary>
-    /// <short>Get account entries with folder sharing settings</short>
+    /// </remarks>
+    /// <summary>Get account entries with folder sharing settings</summary>
     /// <path>api/2.0/accounts/folder/{id}/search</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
@@ -103,10 +103,10 @@ public class AccountsController<T>(
             yield return p;
         }
     }
-    /// <summary>
+    /// <remarks>
     /// Returns the account entries with their sharing settings for a file with the ID specified in request.
-    /// </summary>
-    /// <short>Get account entries with file sharing settings</short>
+    /// </remarks>
+    /// <summary>Get account entries with file sharing settings</summary>
     /// <path>api/2.0/accounts/file/{id}/search</path>
     /// <collection>list</collection>
     [Tags("People / Search")]

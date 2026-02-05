@@ -33,52 +33,52 @@ namespace ASC.Web.Core.WhiteLabel;
 [EnumExtensions]
 public enum WhiteLabelLogoType
 {
-    [SwaggerEnum("Light small")]
+    [Description("Light small")]
     LightSmall = 1,
 
-    [SwaggerEnum("Login page")]
+    [Description("Login page")]
     LoginPage = 2,
 
-    [SwaggerEnum("Favicon")]
+    [Description("Favicon")]
     Favicon = 3,
 
-    [SwaggerEnum("Docs editor")]
+    [Description("Docs editor")]
     DocsEditor = 4,
 
-    [SwaggerEnum("Docs editor embed")]
+    [Description("Docs editor embed")]
     DocsEditorEmbed = 5,
 
-    [SwaggerEnum("Left menu")]
+    [Description("Left menu")]
     LeftMenu = 6,
 
-    [SwaggerEnum("About page")]
+    [Description("About page")]
     AboutPage = 7,
 
-    [SwaggerEnum("Notification")]
+    [Description("Notification")]
     Notification = 8,
 
-    [SwaggerEnum("Spreadsheet editor")]
+    [Description("Spreadsheet editor")]
     SpreadsheetEditor = 9,
 
-    [SwaggerEnum("Spreadsheet editor embed")]
+    [Description("Spreadsheet editor embed")]
     SpreadsheetEditorEmbed = 10,
 
-    [SwaggerEnum("Presentation editor")]
+    [Description("Presentation editor")]
     PresentationEditor = 11,
 
-    [SwaggerEnum("Presentation editor embed")]
+    [Description("Presentation editor embed")]
     PresentationEditorEmbed = 12,
 
-    [SwaggerEnum("Pdf editor")]
+    [Description("Pdf editor")]
     PdfEditor = 13,
 
-    [SwaggerEnum("Pdf editor embed")]
+    [Description("Pdf editor embed")]
     PdfEditorEmbed = 14,
 
-    [SwaggerEnum("Diagram editor")]
+    [Description("Diagram editor")]
     DiagramEditor = 15,
 
-    [SwaggerEnum("Diagram editor embed")]
+    [Description("Diagram editor embed")]
     DiagramEditorEmbed = 16,
 }
 

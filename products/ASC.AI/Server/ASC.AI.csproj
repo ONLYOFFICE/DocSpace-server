@@ -10,12 +10,16 @@
         <AssemblyTitle>ASC.AI</AssemblyTitle>
         <Product>ASC.AI</Product>
         <GenerateDocumentationFile>True</GenerateDocumentationFile>
+        <OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
+        <OpenApiDocumentsDirectory>$(MSBuildProjectDirectory)\..\..\..\common\Tools\ASC.Api.Documentation\ASC.Api.Documentation\json\</OpenApiDocumentsDirectory>
+        <OpenApiGenerateDocumentsOptions>--file-name ai</OpenApiGenerateDocumentsOptions>
         <NoWarn>1701;1702;1591</NoWarn>
         <ImplicitUsings>enable</ImplicitUsings>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\..\common\ASC.Analyzers\ASC.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
         <ProjectReference Include="..\..\..\common\ASC.Api.Core\ASC.Api.Core.csproj" />
         <ProjectReference Include="..\Core\ASC.AI.Core.csproj" />
     </ItemGroup>
@@ -37,6 +41,13 @@
       <Content Include="..\..\..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Extensions.ApiDescription.Server">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
     </ItemGroup>
 
 </Project>

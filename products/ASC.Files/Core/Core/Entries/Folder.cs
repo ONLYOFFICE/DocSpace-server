@@ -33,91 +33,91 @@ namespace ASC.Files.Core;
 /// </summary>
 public enum FolderType
 {
-    [SwaggerEnum(Description = "Default")]
+    [Description("Default")]
     DEFAULT = 0,
 
-    [SwaggerEnum(Description = "Coomon")]
+    [Description("Coomon")]
     COMMON = 1,
 
-    [SwaggerEnum(Description = "Bunch")]
+    [Description("Bunch")]
     BUNCH = 2,
 
-    [SwaggerEnum(Description = "Trash")]
+    [Description("Trash")]
     TRASH = 3,
 
-    [SwaggerEnum(Description = "User")]
+    [Description("User")]
     USER = 5,
 
-    [SwaggerEnum(Description = "Share")]
+    [Description("Share")]
     SHARE = 6,
 
-    [SwaggerEnum(Description = "Projects")]
+    [Description("Projects")]
     Projects = 8,
 
-    [SwaggerEnum(Description = "Favourites")]
+    [Description("Favourites")]
     Favorites = 10,
 
-    [SwaggerEnum(Description = "Recent")]
+    [Description("Recent")]
     Recent = 11,
 
-    [SwaggerEnum(Description = "Templates")]
+    [Description("Templates")]
     Templates = 12,
 
-    [SwaggerEnum(Description = "Privacy")]
+    [Description("Privacy")]
     Privacy = 13,
 
-    [SwaggerEnum(Description = "Virtual rooms")]
+    [Description("Virtual rooms")]
     VirtualRooms = 14,
 
-    [SwaggerEnum(Description = "Filling forms room")]
+    [Description("Filling forms room")]
     FillingFormsRoom = 15,
 
-    [SwaggerEnum(Description = "Editing room")]
+    [Description("Editing room")]
     EditingRoom = 16,
 
-    [SwaggerEnum(Description = "Custom room")]
+    [Description("Custom room")]
     CustomRoom = 19,
 
-    [SwaggerEnum(Description = "Archive")]
+    [Description("Archive")]
     Archive = 20,
 
-    [SwaggerEnum(Description = "Thirdparty backup")]
+    [Description("Thirdparty backup")]
     ThirdpartyBackup = 21,
 
-    [SwaggerEnum(Description = "Public room")]
+    [Description("Public room")]
     PublicRoom = 22,
 
-    [SwaggerEnum(Description = "Ready form folder")]
+    [Description("Ready form folder")]
     ReadyFormFolder = 25,
 
-    [SwaggerEnum(Description = "In process form folder")]
+    [Description("In process form folder")]
     InProcessFormFolder = 26,
 
-    [SwaggerEnum(Description = "Form filling folder done")]
+    [Description("Form filling folder done")]
     FormFillingFolderDone = 27,
 
-    [SwaggerEnum(Description = "Form filling folder in progress")]
+    [Description("Form filling folder in progress")]
     FormFillingFolderInProgress = 28,
 
-    [SwaggerEnum(Description = "Virtual Data Room")]
+    [Description("Virtual Data Room")]
     VirtualDataRoom = 29,
 
-    [SwaggerEnum(Description = "Room templates folder")]
+    [Description("Room templates folder")]
     RoomTemplates = 30,
     
-    [SwaggerEnum(Description = "AI Room")]
+    [Description("AI Room")]
     AiRoom = 31,
     
-    [SwaggerEnum(Description = "Knowledge")]
+    [Description("Knowledge")]
     Knowledge = 32,
     
-    [SwaggerEnum(Description = "Result storage")]
+    [Description("Result storage")]
     ResultStorage = 33,
 
-    [SwaggerEnum(Description = "AI Agents")]
+    [Description("AI Agents")]
     AiAgents = 34,
 
-    [SwaggerEnum(Description = "Default Templates")]
+    [Description("Default Templates")]
     DefaultTemplates = 35,
 }
 

@@ -355,10 +355,10 @@ public class Culture
 /// </summary>
 public enum SexEnum
 {
-    [SwaggerEnum("Female")]
+    [Description("Female")]
     Female = 0,
 
-    [SwaggerEnum("Male")]
+    [Description("Male")]
     Male = 1
 }
 

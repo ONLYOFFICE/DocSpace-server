@@ -34,25 +34,25 @@ public class EmailValidationKeyProvider
 {
     public enum ValidationResult
     {
-        [SwaggerEnum("Ok")]
+        [Description("Ok")]
         Ok,
 
-        [SwaggerEnum("Invalid")]
+        [Description("Invalid")]
         Invalid,
 
-        [SwaggerEnum("Expired")]
+        [Description("Expired")]
         Expired,
 
-        [SwaggerEnum("Tariff limit")]
+        [Description("Tariff limit")]
         TariffLimit,
 
-        [SwaggerEnum("User existed")]
+        [Description("User existed")]
         UserExisted,
 
-        [SwaggerEnum("User excluded")]
+        [Description("User excluded")]
         UserExcluded,
 
-        [SwaggerEnum("Quota failed")]
+        [Description("Quota failed")]
         QuotaFailed
     }
 

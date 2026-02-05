@@ -11,6 +11,9 @@
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <NoWarn>NU1701;1701;1702;1591</NoWarn>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
+    <OpenApiDocumentsDirectory>$(MSBuildProjectDirectory)\..\..\..\common\Tools\ASC.Api.Documentation\ASC.Api.Documentation\json\</OpenApiDocumentsDirectory>
+    <OpenApiGenerateDocumentsOptions>--file-name apisystem</OpenApiGenerateDocumentsOptions>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,12 +23,17 @@
   <ItemGroup>
     <PackageReference Include="Autofac.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Core" />
+    <PackageReference Include="Microsoft.Extensions.ApiDescription.Server">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\products\ASC.Files\Core\ASC.Files.Core.csproj" />
     <ProjectReference Include="..\..\..\web\ASC.Web.Core\ASC.Web.Core.csproj" />
+    <ProjectReference Include="..\..\ASC.Analyzers\ASC.Analyzers.csproj"  OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\..\ASC.Api.Core\ASC.Api.Core.csproj" />
     <ProjectReference Include="..\..\ASC.Common\ASC.Common.csproj" />
     <ProjectReference Include="..\..\ASC.Core.Common\ASC.Core.Common.csproj" />

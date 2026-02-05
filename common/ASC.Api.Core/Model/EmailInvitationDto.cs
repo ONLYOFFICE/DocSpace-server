@@ -46,6 +46,7 @@ public class EmailInvitationDto
     /// The email address.
     /// </summary>
     [EmailAddress]
+    [MaxLength(255)]
     public string Email { get; set; }
 }
 

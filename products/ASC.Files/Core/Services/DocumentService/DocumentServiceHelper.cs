@@ -94,30 +94,30 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         return await GetParamsAsync(file, lastVersion, true, editPossible, tryEdit, tryCoAuthoring, fillFormsPossible);
     }
 
-    public async Task<bool> CheckCustomQuota<T>(Folder<T> rootFolder)
+    public async Task<QuotaScope?> CheckCustomQuotaAsync<T>(Folder<T> rootFolder)
     {
         var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
         if (tenantQuotaSetting.EnableQuota)
         {
             var usedSize = (await tenantManager.FindTenantQuotaRowsAsync(tenantManager.GetCurrentTenant().Id))
-               .Where(r => !string.IsNullOrEmpty(r.Tag) && new Guid(r.Tag) != Guid.Empty)
-               .Sum(r => r.Counter);
+                .Where(r => !string.IsNullOrEmpty(r.Tag) && new Guid(r.Tag) != Guid.Empty)
+                .Sum(r => r.Counter);
             if (tenantQuotaSetting.Quota < usedSize)
             {
-                return false;
+                return QuotaScope.Tenant;
             }
         }
         if (rootFolder.IsRoom && !rootFolder.ProviderEntry)
         {
             TenantEntityQuotaSettings quotaSettings = rootFolder.FolderType is FolderType.AiRoom
-                   ? await settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
-                   : await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
+                    ? await settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()
+                    : await settingsManager.LoadAsync<TenantRoomQuotaSettings>();
             if (quotaSettings.EnableQuota)
             {
                 var roomQuotaLimit = rootFolder.SettingsQuota == TenantEntityQuotaSettings.DefaultQuotaValue ? quotaSettings.DefaultQuota : rootFolder.SettingsQuota;
                 if (roomQuotaLimit != TenantEntityQuotaSettings.NoQuota && roomQuotaLimit <= rootFolder.Counter)
                 {
-                    return false;
+                    return QuotaScope.Room;
                 }
             }
         }
@@ -134,12 +134,13 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
                     var userUsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(user.TenantId, user.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
                     if (userQuotaLimit <= userUsedSpace)
                     {
-                        return false;
+                        return QuotaScope.User;
                     }
                 }
             }
         }
-        return true;
+
+        return null;
     }
 
     private async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(File<T> file, bool lastVersion,
@@ -319,7 +320,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         if (!lastVersion)
         {
-            configuration.Document.Title = $"{file.Title} ({file.CreateOnString})";
+            configuration.Document.Title =  $"{file.Title} ({file.CreateOnString})";
         }
 
         if (fileUtility.CanWebRestrictedEditing(file.Title))
@@ -502,10 +503,10 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         var docKey = await GetDocKeyAsync(fileStable);
 
-        await DropUserAsync(docKey, usersDrop.ToArray(), file.Id);
+        await DropUserAsync(docKey, usersDrop, file.Id);
     }
 
-    public async Task<bool> DropUserAsync(string docKeyForTrack, string[] users, object fileId = null)
+    public async Task<bool> DropUserAsync(string docKeyForTrack, List<string> users, object fileId = null)
     {
         return await documentServiceConnector.CommandAsync(CommandMethod.Drop, docKeyForTrack, fileId, null, users);
     }

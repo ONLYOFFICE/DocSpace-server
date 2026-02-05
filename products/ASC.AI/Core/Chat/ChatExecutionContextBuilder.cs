@@ -70,7 +70,7 @@ public class ChatExecutionContextBuilder(
         var chatSettings = await chatSettingsTask;
         var knowledge = await knowledgeTask;
         
-        var toolsTask = chatTools.GetAsync(roomId, chatSettings, knowledge.FilesCount > 0);
+        var toolsTask = chatTools.GetAsync(agent, chatSettings, knowledge.FilesCount > 0);
         
         var resultStorage = await resultStorageTask;
         var (tools, error) = await toolsTask;

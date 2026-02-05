@@ -38,12 +38,12 @@ public class WebPluginsController(
     WebPluginMapper mapper)
     : BaseSettingsController(fusionCache, webItemManager)
 {
-    /// <summary>
+    /// <remarks>
     /// Adds a web plugin from a file to the current portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Add a web plugin
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/webplugins</path>
     /// <exception cref="CustomHttpException"></exception>
     [Tags("Settings / Webplugins")]
@@ -80,12 +80,12 @@ public class WebPluginsController(
         return outDto;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the portal web plugins.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get web plugins
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/webplugins</path>
     /// <collection>list</collection>
     [Tags("Settings / Webplugins")]
@@ -112,12 +112,12 @@ public class WebPluginsController(
         return outDto;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a web plugin by the name specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get a web plugin by name
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/webplugins/{name}</path>
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "Web plugin", typeof(WebPluginDto))]
@@ -134,12 +134,12 @@ public class WebPluginsController(
         return outDto;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Updates a web plugin with the parameters specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Update a web plugin
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/webplugins/{name}</path>
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "Ok")]
@@ -158,12 +158,12 @@ public class WebPluginsController(
         await ChangeCspSettings(webPlugin, inDto.WebPlugin.Enabled);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Deletes a web plugin by the name specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Delete a web plugin
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/webplugins/{name}</path>
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "Ok")]

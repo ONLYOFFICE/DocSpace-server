@@ -26,9 +26,9 @@
 
 namespace ASC.Api.Migration;
 
-/// <summary>
+/// <remarks>
 /// Migration API.
-/// </summary>
+/// </remarks>
 /// <name>migration</name>
 [DefaultRoute]
 [ApiController]
@@ -41,12 +41,12 @@ public class MigrationController(
     MigrationCore migrationCore,
     MigrationLogger migrationLogger) : ControllerBase
 {
-    /// <summary>
+    /// <remarks>
     /// Returns a list of available migrations.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get migrations
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/migration/list</path>
     /// <collection>list</collection>
     [Tags("Migration")]
@@ -59,12 +59,12 @@ public class MigrationController(
         return migrationCore.GetAvailableMigrations();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Uploads and initializes a migration with a migrator name specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Upload and initialize migration
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/migration/init/{migratorName}</path>
     [Tags("Migration")]
     [SwaggerResponse(200, "Ok")]
@@ -77,12 +77,12 @@ public class MigrationController(
         await migrationCore.StartParseAsync(inDto.MigratorName);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the migration status.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get migration status
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/migration/status</path>
     [Tags("Migration")]
     [SwaggerResponse(200, "Ok", typeof(MigrationStatusDto))]
@@ -113,12 +113,12 @@ public class MigrationController(
         return null;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Cancels the migration.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Cancel migration
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/migration/cancel</path>
     [Tags("Migration")]
     [SwaggerResponse(200, "Ok")]
@@ -131,12 +131,12 @@ public class MigrationController(
         await migrationCore.StopAsync();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Clears the migration.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Clear migration
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/migration/clear</path>
     [Tags("Migration")]
     [SwaggerResponse(200, "Ok")]
@@ -149,12 +149,12 @@ public class MigrationController(
         await migrationCore.ClearAsync();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Starts the migration process.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Start migration
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/migration/migrate</path>
     [Tags("Migration")]
     [SwaggerResponse(200, "Ok")]
@@ -195,12 +195,12 @@ public class MigrationController(
         await migrationCore.StartAsync(info);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the migration logs.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get migration logs
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/migration/logs</path>
     [Tags("Migration")]
     [SwaggerResponse(200, "Ok")]
@@ -225,12 +225,12 @@ public class MigrationController(
         await stream.CopyToAsync(Response.Body);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Finishes the migration process.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Finish migration
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/migration/finish</path>
     [Tags("Migration")]
     [SwaggerResponse(200, "Ok")]

@@ -119,7 +119,7 @@ public class FolderContentDtoHelper(
             currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
         }
         
-        var aiReady = await accessibility.IsAiEnabledAsync();
+        var aiStatus = await accessibility.GetStatusAsync();
 
         if (folderItems.ParentRoom is { FolderType: FolderType.VirtualDataRoom, SettingsIndexing: true })
         {
@@ -202,8 +202,8 @@ public class FolderContentDtoHelper(
         {
             return fileEntry switch
             {
-                File<int> fol1 => await fileWrapperHelper.GetAsync(fol1, entriesOrder, expiration, contextFolder, aiReady),
-                File<string> fol2 => await fileWrapperHelper.GetAsync(fol2, entriesOrder, expiration, contextFolder),
+                File<int> fol1 => await fileWrapperHelper.GetAsync(fol1, entriesOrder, expiration, contextFolder, aiStatus),
+                File<string> fol2 => await fileWrapperHelper.GetAsync(fol2, entriesOrder, expiration, contextFolder, aiStatus),
                 _ => null
             };
         }
@@ -227,7 +227,7 @@ public class FolderContentDtoHelper(
                     {
                         currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
                     }
-                    return await folderWrapperHelper.GetAsync(fol1, currentUsersRecords, entriesOrder, contextFolder, aiReady);
+                    return await folderWrapperHelper.GetAsync(fol1, currentUsersRecords, entriesOrder, contextFolder, aiStatus);
                 case Folder<string> fol2:
                     if (currentUsersRecords == null &&
                         fol2.IsRoom &&
@@ -235,7 +235,7 @@ public class FolderContentDtoHelper(
                     {
                         currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
                     }
-                    return await folderWrapperHelper.GetAsync(fol2, currentUsersRecords, entriesOrder, contextFolder);
+                    return await folderWrapperHelper.GetAsync(fol2, currentUsersRecords, entriesOrder, contextFolder, aiStatus);
             }
 
             return null;

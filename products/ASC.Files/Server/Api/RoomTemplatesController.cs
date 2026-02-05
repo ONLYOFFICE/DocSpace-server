@@ -36,10 +36,10 @@ public class RoomTemplatesController(IEventBus eventBus,
     RoomTemplatesWorker roomTemplatesWorker) : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
 
-    /// <summary>
+    /// <remarks>
     /// Starts creating the room template.
-    /// </summary>
-    /// <short>Start creating room template</short>
+    /// </remarks>
+    /// <summary>Start creating room template</summary>
     /// <path>api/2.0/files/roomtemplate</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Status", typeof(RoomTemplateStatusDto))]
@@ -94,10 +94,10 @@ public class RoomTemplatesController(IEventBus eventBus,
         return await GetRoomTemplateCreatingStatus();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the progress status of the room template creation process.
-    /// </summary>
-    /// <short>Get status of room template creation</short>
+    /// </remarks>
+    /// <summary>Get status of room template creation</summary>
     /// <path>api/2.0/files/roomtemplate/status</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Status", typeof(RoomTemplateStatusDto))]
@@ -127,10 +127,10 @@ public class RoomTemplatesController(IEventBus eventBus,
     }
 
 
-    /// <summary>
+    /// <remarks>
     /// Returns the public settings of the room template with the ID specified in the request.
-    /// </summary>
-    /// <short>Get public settings</short>
+    /// </remarks>
+    /// <summary>Get public settings</summary>
     /// <path>api/2.0/files/roomtemplate/{id}/public</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Ok", typeof(bool))]
@@ -141,10 +141,10 @@ public class RoomTemplatesController(IEventBus eventBus,
     }
 
 
-    /// <summary>
+    /// <remarks>
     /// Sets the public settings for the room template with the ID specified in the request.
-    /// </summary>
-    /// <short>Set public settings</short>
+    /// </remarks>
+    /// <summary>Set public settings</summary>
     /// <path>api/2.0/files/roomtemplate/public</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Ok")]
