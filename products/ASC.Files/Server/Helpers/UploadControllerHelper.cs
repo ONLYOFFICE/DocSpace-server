@@ -112,21 +112,30 @@ public class UploadControllerHelper(
         {
             await _filesSettingsHelper.SetStoreOriginalFiles(uploadModel.StoreOriginalFileFlag.Value);
         }
-        
-        if (uploadModel.File == null)
+
+        if (uploadModel.File != null)
         {
-            throw new InvalidOperationException("No input files");
+            var fileName = "file" + MimeMapping.GetExtention(uploadModel.ContentType?.MediaType);
+            if (uploadModel.ContentDisposition != null)
+            {
+                fileName = uploadModel.ContentDisposition.FileName;
+            }
+            return [
+                await InsertFileAsync(folderId, uploadModel.File.OpenReadStream(), fileName, uploadModel.CreateNewIfExist, uploadModel.KeepConvertStatus)
+            ];
         }
 
-        var fileName = "file" + MimeMapping.GetExtention(uploadModel.ContentType.MediaType);
-        if (uploadModel.ContentDisposition != null)
+        if (uploadModel.Files != null && uploadModel.Files.Any())
         {
-            fileName = uploadModel.ContentDisposition.FileName;
+            var result = new List<FileDto<T>>();
+            foreach (var postedFile in uploadModel.Files)
+            {
+                result.Add(await InsertFileAsync(folderId, postedFile.OpenReadStream(), postedFile.FileName, uploadModel.CreateNewIfExist, uploadModel.KeepConvertStatus));
+            }
+            return result;
         }
 
-        return [
-            await InsertFileAsync(folderId, uploadModel.File.OpenReadStream(), fileName, uploadModel.CreateNewIfExist, uploadModel.KeepConvertStatus)
-        ];
+        throw new InvalidOperationException("No input files");
     }
 }
 
