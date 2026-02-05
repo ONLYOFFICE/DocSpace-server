@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using HttpRequestExtensions = System.Web.HttpRequestExtensions;
+
 namespace ASC.Files.Core.Security;
 
 [Scope]
@@ -58,7 +60,7 @@ public class ExternalShare(
                 }
                 else
                 {
-                    url = file.DownloadUrl;
+                    url = filesLinkUtility.GetFileDownloadUrl(file.Id);
                 }
 
                 url = QueryHelpers.AddQueryString(url, FilesLinkUtility.ShareKey, key);

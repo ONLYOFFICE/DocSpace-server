@@ -226,7 +226,7 @@ public class EmployeeFullDto : EmployeeDto
     /// <summary>
     /// Specifies if the user has a personal folder or not.
     /// </summary>
-    public bool HasPersonalFolder { get; set; }
+    public bool? HasPersonalFolder { get; set; }
 
     /// <summary>
     /// Indicates whether the user has enabled two-factor authentication (TFA) using an authentication app.

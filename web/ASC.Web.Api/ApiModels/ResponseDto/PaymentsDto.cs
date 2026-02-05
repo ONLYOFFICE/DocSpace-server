@@ -169,23 +169,7 @@ public class OperationDto
             return string.Empty;
         }
         
-        if (metadata.TryGetValue(BillingClient.MetadataDetails, out var details))
-        {
-            return details;
-        }
-
-        if (metadata.TryGetValue("type", out var type))
-        {
-            switch (type)
-            {
-                case "chat":
-                    return metadata.GetValueOrDefault("model");
-                case "embedding":
-                    return Resource.AccountingAIServiceVectorizationDetails;
-            }
-        }
-        
-        return string.Empty;
+        return metadata.TryGetValue(BillingClient.MetadataDetails, out var details) ? details : string.Empty;
     }
 }
 

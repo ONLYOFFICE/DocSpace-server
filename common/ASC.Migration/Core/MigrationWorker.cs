@@ -83,6 +83,8 @@ public class MigrationWorker(
         {
             await _queue.DequeueTask(t.Id);
         }
+
+        await MigrationOperation.ClearMigrationFolder(serviceProvider, tenantId);
     }
 
     public async Task Clear(int tenantId)
@@ -93,6 +95,8 @@ public class MigrationWorker(
         {
             await _queue.DequeueTask(t.Id);
         }
+
+        await MigrationOperation.ClearMigrationFolder(serviceProvider, tenantId);
     }
 
     public async Task<MigrationOperation> GetStatusAsync(int tenantId)

@@ -117,7 +117,7 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AccountingAIServiceVectorizationDetails" xml:space="preserve">
+  <data name="AccountingCustomerOperationServiceDesc_embedding" xml:space="preserve">
     <value>Vectorization</value>
   </data>
   <data name="AccountingCustomerOperationContact" xml:space="preserve">
@@ -1388,5 +1388,80 @@
   </data>
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>What's New</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_gpt5.2input" xml:space="preserve">
+    <value>GPT 5.2 input</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_gpt5.2output" xml:space="preserve">
+    <value>GPT 5.2 output</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_gpt5.2input" xml:space="preserve">
+    <value>Tokens</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_gpt5.2output" xml:space="preserve">
+    <value>Tokens</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_embedding" xml:space="preserve">
+    <value>Tokens</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_gemini3flashinput" xml:space="preserve">
+    <value>Gemini 3 Flash input</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_gemini3flashoutput" xml:space="preserve">
+    <value>Gemini 3 Flash output</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_gemini3proinput" xml:space="preserve">
+    <value>Gemini 3 Pro input</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_gemini3prooutput" xml:space="preserve">
+    <value>Gemini 3 Pro output</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_gemini3flashinput" xml:space="preserve">
+    <value>Tokens</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_gemini3flashoutput" xml:space="preserve">
+    <value>Tokens</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_gemini3proinput" xml:space="preserve">
+    <value>Tokens</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_gemini3prooutput" xml:space="preserve">
+    <value>Tokens</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_claude4.5input" xml:space="preserve">
+    <value>Claude Sonnet 4.5 input</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_claude4.5output" xml:space="preserve">
+    <value>Claude Sonnet 4.5 output</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_claude4.5input" xml:space="preserve">
+    <value>Tokens</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_claude4.5output" xml:space="preserve">
+    <value>Tokens</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_deepseek3.2input" xml:space="preserve">
+    <value>DeepSeek V3.2 input</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_deepseek3.2output" xml:space="preserve">
+    <value>DeepSeek V3.2 output</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_deepseek3.2input" xml:space="preserve">
+    <value>Tokens</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_deepseek3.2output" xml:space="preserve">
+    <value>Tokens</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_webfetch" xml:space="preserve">
+    <value>Web crawling</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_websearch" xml:space="preserve">
+    <value>Web search</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_webfetch" xml:space="preserve">
+    <value>Request</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_websearch" xml:space="preserve">
+    <value>Request</value>
   </data>
 </root>

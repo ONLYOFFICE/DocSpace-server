@@ -37,21 +37,21 @@ public class ProjectConfigurator(
     public static string GetProjectName<TProject>() where TProject : IProjectMetadata, new() =>
         typeof(TProject).Name.ToLower().Replace('_', '-');
     
-    public ProjectConfigurator AddProject<TProject>(int projectPort, bool includeHealthCheck = true) where TProject : IProjectMetadata, new()
+    public ProjectConfigurator AddProject<TProject>(int projectPort) where TProject : IProjectMetadata, new()
     {
         if (isDocker)
         {
-            AddProjectDocker<TProject>(projectPort, includeHealthCheck);
+            AddProjectDocker<TProject>(projectPort);
         }
         else
         {
-            AddProjectWithDefaultConfiguration<TProject>(includeHealthCheck);
+            AddProjectWithDefaultConfiguration<TProject>();
         }
 
         return this;
     }
 
-    private void AddProjectWithDefaultConfiguration<TProject>(bool includeHealthCheck = true) where TProject : IProjectMetadata, new()
+    private void AddProjectWithDefaultConfiguration<TProject>() where TProject : IProjectMetadata, new()
     {
         var project = builder
             .AddProject<TProject>(GetProjectName<TProject>())
@@ -77,11 +77,11 @@ public class ProjectConfigurator(
             project.WithEnvironment("core:base-domain", "");
         }
         
-        connectionManager.AddBaseConfig(project, isDocker, includeHealthCheck);
+        connectionManager.AddBaseConfig(project, isDocker);
         connectionManager.AddWaitFor(project);
     }
 
-    private void AddProjectDocker<TProject>(int projectPort, bool includeHealthCheck = true) where TProject : IProjectMetadata, new()
+    private void AddProjectDocker<TProject>(int projectPort) where TProject : IProjectMetadata, new()
     {
         var projectMetadata = new TProject();
         var projectBasePath = Path.GetDirectoryName(projectMetadata.ProjectPath) ?? basePath;
@@ -129,7 +129,7 @@ public class ProjectConfigurator(
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
         }
 
-        connectionManager.AddBaseConfig(resourceBuilder, isDocker, includeHealthCheck);
+        connectionManager.AddBaseConfig(resourceBuilder, isDocker);
         connectionManager.AddWaitFor(resourceBuilder);
 
         var otlEnvs = new Dictionary<string, string>

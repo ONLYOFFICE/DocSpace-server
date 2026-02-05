@@ -29,7 +29,8 @@ namespace ASC.AI.Core.Provider.Data;
 [Scope(typeof(IAiProviderDao))]
 public class CachedAiProviderDao(
     AiProviderDao providerDao,
-    IFusionCache cache) : IAiProviderDao
+    IFusionCache cache,
+    AiGateway gateway) : IAiProviderDao
 {
     private static readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(10);
 
@@ -110,8 +111,16 @@ public class CachedAiProviderDao(
     {
         var cacheKey = GetDefaultProviderCacheKey(tenantId);
 
-        return await cache.GetOrSetAsync(cacheKey,
+        var result = await cache.GetOrSetAsync(cacheKey,
             async _ => await providerDao.GetDefaultProviderAsync(tenantId), _cacheExpiration);
+
+        if (result is not { ProviderId: AiGateway.ProviderId } || await gateway.IsEnabledAsync())
+        {
+            return result;
+        }
+
+        await InvalidateDefaultProviderCacheAsync(tenantId);
+        return null;
     }
 
     public async Task<int?> GetFirstProviderIdAsync(int tenantId)

@@ -37,10 +37,10 @@ public class CustomNavigationController(
     IFusionCache fusionCache)
     : BaseSettingsController(fusionCache, webItemManager)
 {
-    /// <summary>
+    /// <remarks>
     /// Returns a list of the custom navigation items.
-    /// </summary>
-    /// <short>Get the custom navigation items</short>
+    /// </remarks>
+    /// <summary>Get the custom navigation items</summary>
     /// <path>api/2.0/settings/customnavigation/getall</path>
     /// <collection>list</collection>
     [Tags("Settings / Custom Navigation")]
@@ -51,10 +51,10 @@ public class CustomNavigationController(
         return (await settingsManager.LoadAsync<CustomNavigationSettings>()).Items;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a sample of the custom navigation item.
-    /// </summary>
-    /// <short>Get a custom navigation item sample</short>
+    /// </remarks>
+    /// <summary>Get a custom navigation item sample</summary>
     /// <path>api/2.0/settings/customnavigation/getsample</path>
     [Tags("Settings / Custom Navigation")]
     [SwaggerResponse(200, "Custom navigation item", typeof(CustomNavigationItem))]
@@ -64,10 +64,10 @@ public class CustomNavigationController(
         return CustomNavigationItem.GetSample();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a custom navigation item by the ID specified in the request.
-    /// </summary>
-    /// <short>Get a custom navigation item by ID</short>
+    /// </remarks>
+    /// <summary>Get a custom navigation item by ID</summary>
     /// <path>api/2.0/settings/customnavigation/get/{id}</path>
     [Tags("Settings / Custom Navigation")]
     [SwaggerResponse(200, "Custom navigation item", typeof(CustomNavigationItem))]
@@ -77,10 +77,10 @@ public class CustomNavigationController(
         return (await settingsManager.LoadAsync<CustomNavigationSettings>()).Items.Find(item => item.Id == inDto.Id);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Adds a custom navigation item with the parameters specified in the request.
-    /// </summary>
-    /// <short>Add a custom navigation item</short>
+    /// </remarks>
+    /// <summary>Add a custom navigation item</summary>
     /// <path>api/2.0/settings/customnavigation/create</path>
     [Tags("Settings / Custom Navigation")]
     [SwaggerResponse(200, "Custom navigation item", typeof(CustomNavigationItem))]
@@ -137,10 +137,10 @@ public class CustomNavigationController(
         return inDto;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Deletes a custom navigation item with the ID specified in the request.
-    /// </summary>
-    /// <short>Delete a custom navigation item</short>
+    /// </remarks>
+    /// <summary>Delete a custom navigation item</summary>
     /// <path>api/2.0/settings/customnavigation/delete/{id}</path>
     [Tags("Settings / Custom Navigation")]
     [SwaggerResponse(200, "Ok")]

@@ -23,6 +23,7 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+using System.Reflection;
 
 using ASC.Files.Tests.ApiFactories;
 
@@ -342,5 +343,217 @@ public class QuotaTests(
             TestContext.Current.CancellationToken)).Response;
         
         await Assert.ThrowsAsync<ApiException>(async () => await CreateFile("Test Document.docx", createdRoom.Id));
+    }
+
+    [Fact]
+    public async Task CreateFile_RoomQuotaExceededButLessThan2x_AllowedOnce()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+
+        const int defaultQuotaLimit = 4 * 1024; // 4 KB
+        await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true, new QuotaSettingsRequestsDtoDefaultQuota(defaultQuotaLimit)), TestContext.Current.CancellationToken);
+
+        // Create a room
+        var createdRoom = (await _roomsApi.CreateRoomAsync(
+            new CreateRoomRequestDto(
+                "Room quota soft-limit " + Guid.NewGuid().ToString()[..8],
+                 roomType: RoomType.VirtualDataRoom),
+            TestContext.Current.CancellationToken)).Response;
+
+        const string fileName = "Test Document.docx";
+        _ = await CreateFile(fileName, createdRoom.Id);
+
+        // Verify a file exists in the room's contents
+        var roomFiles = (await _foldersApi.GetFolderByFolderIdAsync(
+            createdRoom.Id,
+            cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        roomFiles.Should().NotBeNull();
+        roomFiles.Files.Should().NotBeEmpty();
+        roomFiles.Files.Should().Contain(f => f.Title == fileName);
+    }
+
+    [Fact]
+    public async Task CreateFile_RoomQuotaExceededMoreThan2x_ReturnsFail()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+
+        const int defaultQuotaLimit = 3 * 1024; // 3 KB
+        await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true, new QuotaSettingsRequestsDtoDefaultQuota(defaultQuotaLimit)), TestContext.Current.CancellationToken);
+
+        // Create a room
+        var createdRoom = (await _roomsApi.CreateRoomAsync(
+            new CreateRoomRequestDto(
+                "Room quota soft-limit " + Guid.NewGuid().ToString()[..8],
+                 roomType: RoomType.VirtualDataRoom),
+            TestContext.Current.CancellationToken)).Response;
+
+        await Assert.ThrowsAsync<ApiException>(async () => await CreateFile("Test Document.docx", createdRoom.Id));
+    }
+
+    [Fact]
+    public async Task CreateFile_RoomQuotaExceededSecondTime_ReturnsFail()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+
+        const int defaultQuotaLimit = 4 * 1024; // 4 KB
+        await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true, new QuotaSettingsRequestsDtoDefaultQuota(defaultQuotaLimit)), TestContext.Current.CancellationToken);
+
+        var createdRoom = (await _roomsApi.CreateRoomAsync(
+            new CreateRoomRequestDto(
+                "Room quota once " + Guid.NewGuid().ToString()[..8],
+                roomType: RoomType.VirtualDataRoom),
+            TestContext.Current.CancellationToken)).Response;
+
+        const string firstFileName = "Test Document.docx";
+        _ = await CreateFile(firstFileName, createdRoom.Id);
+
+        var roomFiles = (await _foldersApi.GetFolderByFolderIdAsync(
+            createdRoom.Id,
+            cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        roomFiles.Should().NotBeNull();
+        roomFiles.Files.Should().NotBeEmpty();
+        roomFiles.Files.Should().Contain(f => f.Title == firstFileName);
+
+        const string secondFileName = "second.docx";
+        await Assert.ThrowsAsync<ApiException>(async () =>
+            await CreateFile(secondFileName, createdRoom.Id));
+    }
+
+    [Fact]
+    public async Task UploadFile_ToRoomWithQuotaExceededLessThan2x_Allowed()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+
+        const int defaultQuotaLimit = 4 * 1024; // 4 KB
+        await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true, new QuotaSettingsRequestsDtoDefaultQuota(defaultQuotaLimit)), TestContext.Current.CancellationToken);
+        const string fileName = "new.docx";
+
+        var room = (await _roomsApi.CreateRoomAsync(
+            new CreateRoomRequestDto(
+                "Upload room quota soft-limit " + Guid.NewGuid().ToString()[..8],
+                roomType: RoomType.VirtualDataRoom),
+            TestContext.Current.CancellationToken)).Response;
+
+        var settings = (await _filesSettingsApi.GetFilesSettingsAsync(
+            TestContext.Current.CancellationToken)).Response;
+
+        var assembly = Assembly.GetExecutingAssembly();
+        await using var stream =
+            assembly.GetManifestResourceStream($"ASC.Files.Tests.Data.{fileName}")!;
+
+        var contentLength = stream.Length;
+
+        var createdSession = (await _filesOperationsApi.CreateUploadSessionInFolderAsync(
+            room.Id,
+            new SessionRequest(fileName, contentLength),
+            cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        createdSession.Should().NotBeNull();
+        createdSession.Id.Should().NotBeEmpty();
+
+        var chunkSize = (int)settings.ChunkUploadSize;
+        var buffer = new byte[chunkSize];
+        var chunkNumber = 1;
+        int bytesRead;
+
+        while ((bytesRead = await stream.ReadAsync(
+                   buffer.AsMemory(0, chunkSize),
+                   TestContext.Current.CancellationToken)) > 0)
+        {
+            await using var chunkStream = new MemoryStream(buffer, 0, bytesRead);
+            var fileParameter = new FileParameter(chunkStream);
+
+            await _filesOperationsApi.UploadAsyncSessionAsync(
+                room.Id,
+                createdSession.Id,
+                chunkNumber,
+                fileParameter,
+                TestContext.Current.CancellationToken);
+
+            chunkNumber++;
+        }
+
+        var resultFile = (await _filesOperationsApi.FinalizeSessionAsync(
+            room.Id,
+            createdSession.Id,
+            TestContext.Current.CancellationToken)).Response;
+
+        resultFile.Should().NotBeNull();
+        resultFile.Uploaded.Should().BeTrue();
+        resultFile.Title.Should().Be(fileName);
+        resultFile.File.Should().NotBeNull();
+        resultFile.File.FolderId.Should().Be(room.Id);
+
+        var roomFiles = (await _foldersApi.GetFolderByFolderIdAsync(
+            room.Id,
+            cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        roomFiles.Files.Should().Contain(f => f.Title == fileName);
+    }
+
+    [Fact]
+    public async Task UploadFile_ToRoomWithQuotaExceededMoreThan2x_ReturnsFail()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Initializer.Owner);
+
+        const int defaultQuotaLimit = 3 * 1024; // 3 KB
+        await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(new QuotaSettingsRequestsDto(true, new QuotaSettingsRequestsDtoDefaultQuota(defaultQuotaLimit)), TestContext.Current.CancellationToken);
+        const string fileName = "new.docx";
+
+        var room = (await _roomsApi.CreateRoomAsync(
+            new CreateRoomRequestDto(
+                "Upload room quota hard-limit " + Guid.NewGuid().ToString()[..8],
+                roomType: RoomType.VirtualDataRoom),
+            TestContext.Current.CancellationToken)).Response;
+
+        var settings = (await _filesSettingsApi.GetFilesSettingsAsync(
+            TestContext.Current.CancellationToken)).Response;
+
+        var assembly = Assembly.GetExecutingAssembly();
+        await using var stream =
+            assembly.GetManifestResourceStream($"ASC.Files.Tests.Data.{fileName}")!;
+
+        var contentLength = stream.Length;
+
+        var createdSession = (await _filesOperationsApi.CreateUploadSessionInFolderAsync(
+            room.Id,
+            new SessionRequest(fileName, contentLength),
+            cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        var chunkSize = (int)settings.ChunkUploadSize;
+        var buffer = new byte[chunkSize];
+        var chunkNumber = 1;
+        int bytesRead;
+
+        // Act & Assert: upload must fail during chunk upload
+        var exception = await Assert.ThrowsAsync<ApiException>(async () =>
+        {
+            while ((bytesRead = await stream.ReadAsync(
+                       buffer.AsMemory(0, chunkSize),
+                       TestContext.Current.CancellationToken)) > 0)
+            {
+                await using var chunkStream = new MemoryStream(buffer, 0, bytesRead);
+                var fileParameter = new FileParameter(chunkStream);
+
+                await _filesOperationsApi.UploadAsyncSessionAsync(
+                    room.Id,
+                    createdSession.Id,
+                    chunkNumber,
+                    fileParameter,
+                    TestContext.Current.CancellationToken);
+
+                chunkNumber++;
+            }
+        });
+
+        exception.ErrorCode.Should().Be(402);
+        exception.Message.Should().Contain("quota");
     }
 }

@@ -32,7 +32,7 @@ public class DefaultRouteAttribute : RouteAttribute
 
     static DefaultRouteAttribute()
     {
-        BaseUrl = "api/2.0/[controller]";
+        BaseUrl = "api/{version:apiVersion}/[controller]";
     }
 
     public DefaultRouteAttribute() : base(BaseUrl) { }

@@ -49,12 +49,12 @@ public class MessageSettingsController(
     CountPaidUserChecker countPaidUserChecker)
     : BaseSettingsController(fusionCache, webItemManager)
 {
-    /// <summary>
+    /// <remarks>
     /// Displays the contact form on the "Sign In" page, allowing users to send a message to the DocSpace administrator in case they encounter any issues while accessing DocSpace.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Enable the administrator message settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/messagesettings</path>
     [Tags("Settings / Messages")]
     [SwaggerResponse(200, "Message about the result of saving new settings", typeof(string))]
@@ -70,12 +70,12 @@ public class MessageSettingsController(
         return Resource.SuccessfullySaveSettingsMessage;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the cookies lifetime value in minutes.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get cookies lifetime
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/cookiesettings</path>
     [Tags("Settings / Cookies")]
     [SwaggerResponse(200, "Lifetime value in minutes", typeof(CookieSettingsDto))]
@@ -91,12 +91,12 @@ public class MessageSettingsController(
         };
     }
 
-    /// <summary>
+    /// <remarks>
     /// Updates the cookies lifetime value in minutes.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Update cookies lifetime
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/cookiesettings</path>
     [Tags("Settings / Cookies")]
     [SwaggerResponse(200, "Message about the result of saving new settings", typeof(string))]
@@ -118,12 +118,12 @@ public class MessageSettingsController(
         return Resource.SuccessfullySaveSettingsMessage;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sends a message to the administrator email when unauthorized users encounter issues accessing DocSpace.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Send a message to the administrator
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/sendadmmail</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Messages")]
@@ -174,12 +174,12 @@ public class MessageSettingsController(
         return Resource.AdminMessageSent;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sends an invitation email with a link to the DocSpace.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Sends an invitation email
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/sendjoininvite</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Messages")]

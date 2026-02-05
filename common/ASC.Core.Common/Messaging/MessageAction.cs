@@ -626,6 +626,18 @@ public enum MessageAction
     [Description("Room change owner")]
     RoomChangeOwner = 5159,
 
+    [Description("File saved, user quota exceeded")]
+    FileSavedButUserQuotaExceeded = 5201,
+
+    [Description("File not saved due to user quota exceeded")]
+    FileNotSavedDueToUserQuota = 5202,
+
+    [Description("File saved, room quota exceeded")]
+    FileSavedButRoomQuotaExceeded = 5203,
+
+    [Description("File not saved due to room quota exceeded")]
+    FileNotSavedDueToRoomQuota = 5204,
+
     #endregion
 
     #region Settings

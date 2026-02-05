@@ -951,6 +951,24 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Rooms [{0}]. File not saved: {1} – storage quota for room exceeded..
+        /// </summary>
+        public static string FileNotSavedDueToRoomQuota {
+            get {
+                return ResourceManager.GetString("FileNotSavedDueToRoomQuota", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Users [{0}]. File not saved: {1} – storage quota for user exceeded..
+        /// </summary>
+        public static string FileNotSavedDueToUserQuota {
+            get {
+                return ResourceManager.GetString("FileNotSavedDueToUserQuota", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to File Opened For Change: {0}.
         /// </summary>
         public static string FileOpenedForChange {
@@ -992,6 +1010,24 @@ namespace ASC.AuditTrail {
         public static string FileRestoreVersion {
             get {
                 return ResourceManager.GetString("FileRestoreVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rooms [{0}]. File updated: {1}, exceeding the room storage quota..
+        /// </summary>
+        public static string FileSavedButRoomQuotaExceeded {
+            get {
+                return ResourceManager.GetString("FileSavedButRoomQuotaExceeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Users [{0}]. File updated: {1}, exceeding the user storage quota..
+        /// </summary>
+        public static string FileSavedButUserQuotaExceeded {
+            get {
+                return ResourceManager.GetString("FileSavedButUserQuotaExceeded", resourceCulture);
             }
         }
         

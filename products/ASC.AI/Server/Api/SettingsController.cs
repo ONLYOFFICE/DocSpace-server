@@ -32,6 +32,7 @@ namespace ASC.AI.Api;
 [ControllerName("ai")]
 public class SettingsController(AiSettingsService aiSettingsService) : ControllerBase
 {
+    [Tags("AI / Settings")]
     [HttpPut("config/web-search")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<WebSearchSettingsDto> SetWebSearchSettingsAsync(SetWebSearchConfigRequestDto inDto)
@@ -44,6 +45,7 @@ public class SettingsController(AiSettingsService aiSettingsService) : Controlle
         return settings.MapToDto();
     }
     
+    [Tags("AI / Settings")]
     [HttpGet("config/web-search")]
     public async Task<WebSearchSettingsDto> GetWebSearchSettingsAsync()
     {
@@ -51,6 +53,7 @@ public class SettingsController(AiSettingsService aiSettingsService) : Controlle
         return settings.MapToDto();
     }
     
+    [Tags("AI / Settings")]
     [HttpPut("config/vectorization")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<VectorizationSettingsDto> SetVectorizationSettingsAsync(SetEmbeddingConfigRequestDto inDto)
@@ -60,6 +63,7 @@ public class SettingsController(AiSettingsService aiSettingsService) : Controlle
         return settings.MapToDto();
     }
     
+    [Tags("AI / Settings")]
     [HttpGet("config/vectorization")]
     public async Task<VectorizationSettingsDto> GetVectorizationSettingsAsync()
     {
@@ -67,6 +71,7 @@ public class SettingsController(AiSettingsService aiSettingsService) : Controlle
         return settings.MapToDto();
     }
     
+    [Tags("AI / Settings")]
     [HttpGet("config")]
     public async Task<AiSettingsDto> GetAiSettingsAsync()
     {
