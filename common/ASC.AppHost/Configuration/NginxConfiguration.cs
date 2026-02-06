@@ -44,7 +44,7 @@ public static class NginxConfiguration
             .WithBindMount(Path.Combine(clientBasePath, "packages", "client"), "/var/www/client")
             .WithBindMount(Path.Combine(clientBasePath, "packages", "login"), "/var/www/login")
             .WithBindMount(Path.Combine(clientBasePath, "packages", "management"), "/var/www/management")
-            .WithHttpEndpoint(Constants.AppHostPort, Constants.RestyPort);
+            .WithContainerRuntimeArgs("-p", $"0.0.0.0:{Constants.AppHostPort}:{Constants.RestyPort}");
 
         if (startPackages != null)
         {
@@ -59,6 +59,7 @@ public static class NginxConfiguration
         }
 
         openResty.WithArgs("/bin/sh", "-c",
+            $"apk add --no-cache gettext && " +
             $"envsubst '{string.Join(' ', serviceUrls.Select(r => $"${r.Key}"))}' < /etc/nginx/includes/onlyoffice-upstream-map.conf.template > /etc/nginx/includes/onlyoffice-upstream-map.conf && " +
             $"/usr/local/openresty/bin/openresty -g 'daemon off;'");
 
