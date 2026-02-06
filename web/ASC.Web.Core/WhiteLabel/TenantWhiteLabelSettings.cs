@@ -24,7 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using SKSvg = SkiaSharp.Extended.Svg.SKSvg;
+using SKSvg = Svg.Skia.SKSvg;
 
 namespace ASC.Web.Core.WhiteLabel;
 
@@ -767,19 +767,23 @@ public class TenantWhiteLabelSettingsHelper(
         byte[] GetLogoDataFromSvg()
         {
             var size = GetSize(WhiteLabelLogoType.Notification);
-            var skSize = new SKSize(size.Width, size.Height);
 
-            var svg = new SKSvg(skSize);
+            var svg = new SKSvg();
 
             using (var stream = new MemoryStream(logoData))
             {
                 svg.Load(stream);
             }
 
-            using (var bitMap = new SKBitmap((int)svg.CanvasSize.Width, (int)svg.CanvasSize.Height))
+            using (var bitMap = new SKBitmap((int)size.Width, (int)size.Height))
             using (var canvas = new SKCanvas(bitMap))
             {
-                canvas.DrawPicture(svg.Picture);
+                var canvasMin = Math.Min(size.Width, size.Height);
+                var svgMax = Math.Max(svg.Picture.CullRect.Width, svg.Picture.CullRect.Height);
+                var scale = canvasMin / svgMax;
+                var matrix = SKMatrix.CreateScale(scale, scale);
+
+                canvas.DrawPicture(svg.Picture, matrix);
 
                 using (var image = SKImage.FromBitmap(bitMap))
                 using (var pngData = image.Encode())
