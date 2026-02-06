@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AiSettingsAccessDenied" xml:space="preserve">
-    <value>У вас немає дозволу на керування параметрами ШІ</value>
+    <value>У вас немає дозволу на керування параметрами AІ</value>
   </data>
   <data name="ChatAccessDenied" xml:space="preserve">
     <value>У вас немає дозволу на використання чату</value>

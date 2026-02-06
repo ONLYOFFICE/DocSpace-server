@@ -2156,7 +2156,7 @@ $TrulyYours</value>
     <value>Щиро ваша, команда ${LetterLogoText}</value>
   </data>
   <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; передав(ла) новий документ &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; до бази знань ШІ-агента &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+    <value>&lt;b&gt;{0}&lt;/b&gt; передав(ла) новий документ &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; до бази знань AІ-агента &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
   <data name="pattern_api_key_expired" xml:space="preserve">
     <value>Вітаємо, $UserName!
@@ -2179,7 +2179,7 @@ $TrulyYours</value>
   <data name="pattern_user_agent_role_changed" xml:space="preserve">
     <value>Вітаємо!
 
-Вам призначено нову роль у ШІ-агенті DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+Вам призначено нову роль у AІ-агенті DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
 
 Дізнайтеся більше про ролі та дозволи в кімнаті в "Довідковому центрі":"${HelpCenterUrl}".
 

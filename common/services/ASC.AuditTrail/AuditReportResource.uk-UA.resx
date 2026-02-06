@@ -157,13 +157,13 @@
     <value>Агенти</value>
   </data>
   <data name="AIProviderCreated" xml:space="preserve">
-    <value>Постачальника ШІ створено: {0}</value>
+    <value>Постачальника AІ створено: {0}</value>
   </data>
   <data name="AIProviderDeleted" xml:space="preserve">
-    <value>Постачальника ШІ видалено: {0}</value>
+    <value>Постачальника AI видалено: {0}</value>
   </data>
   <data name="AIProviderUpdated" xml:space="preserve">
-    <value>Постачальника ШІ оновлено: {0}</value>
+    <value>Постачальника AI оновлено: {0}</value>
   </data>
   <data name="ApiKeyCreated" xml:space="preserve">
     <value>Створено ключ API користувача: {0}</value>
@@ -253,13 +253,13 @@
     <value>Параметри настроюваної навігації оновлено</value>
   </data>
   <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
-    <value>Агенти ШІ [{0}]. Установлена квота пам'яті для агентів ШІ: {1}</value>
+    <value>Агенти AI [{0}]. Установлена квота пам'яті для агентів AI : {1}</value>
   </data>
   <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
-    <value>Агенти ШІ [{0}]. Установлена квота пам'яті за замовчуванням для агентів ШІ: {1}</value>
+    <value>Агенти AI [{0}]. Установлена квота пам'яті за замовчуванням для агентів AI: {1}</value>
   </data>
   <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
-    <value>Агенти ШІ [{0}]. Вимкнута квота пам'яті для агентів ШІ</value>
+    <value>Агенти AI [{0}]. Вимкнута квота пам'яті для агентів AI</value>
   </data>
   <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
     <value>Кімнати [{0}]. Установлена налаштовувана квота пам'яті для кімнат: {1}</value>
@@ -754,10 +754,10 @@
     <value>Список продуктів оновлено</value>
   </data>
   <data name="QuotaPerAiAgentChanged" xml:space="preserve">
-    <value>Установлена квота пам'яті для агентів ШІ: {0}</value>
+    <value>Установлена квота пам'яті для агентів AI: {0}</value>
   </data>
   <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
-    <value>Вимкнута квота пам'яті за замовчуванням для агентів ШІ</value>
+    <value>Вимкнута квота пам'яті за замовчуванням для агентів AI</value>
   </data>
   <data name="QuotaPerPortalChanged" xml:space="preserve">
     <value>Установлена квота пам'яті за замовчуванням: {0}</value>
