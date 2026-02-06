@@ -54,6 +54,9 @@ switch (builder.Configuration["ASPNETCORE_ENVIRONMENT"])
 
         break;
     case "FrontendDev":
+        connectionManager
+            .AddMailPit();
+        
         configurator
             .AddProject<ASC_Files>(Constants.FilesPort)
             .AddProject<ASC_Files_Service>(Constants.FilesServicePort)
