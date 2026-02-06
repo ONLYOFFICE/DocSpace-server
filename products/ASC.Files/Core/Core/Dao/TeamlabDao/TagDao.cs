@@ -141,6 +141,8 @@ internal abstract class BaseTagDao<T>(
             q = q.Where(r => r.Name.ToLower().Contains(lowerText));
         }
 
+        q = q.OrderByDescending(r => r.Id);
+
         if (count != 0)
         {
             q = q.Take(count);
@@ -201,8 +203,10 @@ internal abstract class BaseTagDao<T>(
 
         var folderDao = daoFactory.GetFolderDao<int>();
         var folderThirdPartyDao = daoFactory.GetFolderDao<string>();
+
         var rooms = await folderDao.GetRoomsAsync([await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)], null, new List<string> { tagInfo.Name }, Guid.Empty, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, null, QuotaFilter.All).ToListAsync();
         var thirdPartyRooms = await folderThirdPartyDao.GetProviderBasedRoomsAsync(SearchArea.Active, null, new List<string> { tagInfo.Name }, Guid.Empty, null, false, false, ProviderFilter.None, SubjectFilter.Owner, null).ToListAsync();
+
         var tasks = rooms.Select(room => socketManager.UpdateFolderAsync(room))
              .Concat(thirdPartyRooms.Select(room => socketManager.UpdateFolderAsync(room)));
         await Task.WhenAll(tasks);
@@ -595,8 +599,10 @@ internal abstract class BaseTagDao<T>(
 
             var folderDao = daoFactory.GetFolderDao<int>();
             var folderThirdPartyDao = daoFactory.GetFolderDao<string>();
+
             var rooms = await folderDao.GetRoomsAsync([await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)], null, new List<string> { tag.Name }, Guid.Empty, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, null, QuotaFilter.All).ToListAsync();
             var thirdPartyRooms = await folderThirdPartyDao.GetProviderBasedRoomsAsync(SearchArea.Active, null, new List<string> { tag.Name }, Guid.Empty, null, false, false, ProviderFilter.None, SubjectFilter.Owner, null).ToListAsync();
+
             var tasks = rooms.Select(room => socketManager.UpdateFolderAsync(room))
                  .Concat(thirdPartyRooms.Select(room => socketManager.UpdateFolderAsync(room)));
             await Task.WhenAll(tasks);

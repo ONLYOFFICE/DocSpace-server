@@ -145,56 +145,56 @@ public partial class FilesDbContext
     [PreCompileQuery([PreCompileQuery.DefaultGuid, null, TagType.Custom, PreCompileQuery.DefaultInt])]
     public Task<int> TagIdAsync(Guid owner, string name, TagType type, int tenantId)
     {
-        return TagQueries.TagIdAsync(this,  owner, name, type, tenantId);
+        return TagQueries.TagIdAsync(this, owner, name, type, tenantId);
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, FileEntryType.File, null, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultDateTime, PreCompileQuery.DefaultInt])]
     public Task<int> UpdateTagLinkAsync(int tenantId, int tagId, FileEntryType tagEntryType, string mappedId, Guid createdBy, DateTime createOn, int count)
     {
-        return TagQueries.UpdateTagLinkAsync(this,  tenantId, tagId, tagEntryType, mappedId, createdBy, createOn, count);
+        return TagQueries.UpdateTagLinkAsync(this, tenantId, tagId, tagEntryType, mappedId, createdBy, createOn, count);
     }
 
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, null, null, FileEntryType.File])]
     public Task<int> DeleteTagLinksAsync(int tenantId, IEnumerable<int> tagsIds, string entryId, FileEntryType type)
     {
-        return TagQueries.DeleteTagLinksAsync(this,  tenantId, tagsIds, entryId, type);
+        return TagQueries.DeleteTagLinksAsync(this, tenantId, tagsIds, entryId, type);
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, null, FileEntryType.File, TagType.Custom])]
     public Task<int> DeleteTagLinksByEntryIdAsync(int tenantId, string mappedId, FileEntryType entryType, TagType tagType)
     {
-        return TagQueries.DeleteTagLinksByEntryIdAsync(this,  tenantId, mappedId, entryType, tagType);
+        return TagQueries.DeleteTagLinksByEntryIdAsync(this, tenantId, mappedId, entryType, tagType);
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null, FileEntryType.File])]
     public Task<int> DeleteTagLinksByTagIdAsync(int tenantId, int id)
     {
-        return TagQueries.DeleteTagLinksByTagIdAsync(this,  tenantId, id);
+        return TagQueries.DeleteTagLinksByTagIdAsync(this, tenantId, id);
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<int> DeleteTagByIdAsync(int tenantId, int id)
     {
-        return TagQueries.DeleteTagByIdAsync(this,  tenantId, id);
+        return TagQueries.DeleteTagByIdAsync(this, tenantId, id);
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, null, null, PreCompileQuery.DefaultGuid])]
     public IAsyncEnumerable<TagLinkData> TagLinkDataAsync(int tenantId, IEnumerable<string> entryIds, IEnumerable<int> entryTypes, Guid subject)
     {
-        return TagQueries.TagLinkDataAsync(this,  tenantId, entryIds, entryTypes, subject);
+        return TagQueries.TagLinkDataAsync(this, tenantId, entryIds, entryTypes, subject);
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
     public Task<int> DeleteTagsByIdsAsync(int tenantId, IEnumerable<int> tagsIds)
     {
-        return TagQueries.DeleteTagsByIdsAsync(this,  tenantId, tagsIds);
+        return TagQueries.DeleteTagsByIdsAsync(this, tenantId, tagsIds);
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, null, FileEntryType.File, null, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultDateTime])]
     public Task<int> IncrementNewTagsAsync(int tenantId, IEnumerable<int> tagsIds, FileEntryType tagEntryType, string mappedId, Guid createdBy, DateTime createOn)
     {
-        return TagQueries.IncrementNewTagsAsync(this,  tenantId, tagsIds, tagEntryType, mappedId, createdBy, createOn);
+        return TagQueries.IncrementNewTagsAsync(this, tenantId, tagsIds, tagEntryType, mappedId, createdBy, createOn);
     }
 }
 
@@ -478,13 +478,13 @@ static file class TagQueries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx) =>
                 (from ft in ctx.Tag
-                    join ftl in ctx.TagLink.DefaultIfEmpty() on new { ft.TenantId, ft.Id } equals new
-                    {
+                 join ftl in ctx.TagLink.DefaultIfEmpty() on new { ft.TenantId, ft.Id } equals new
+                 {
                      ftl.TenantId,
                      Id = ftl.TagId
-                    }
-                    where ftl == null
-                    select ft).ExecuteDelete());
+                 }
+                 where ftl == null
+                 select ft).ExecuteDelete());
 
     public static readonly Func<FilesDbContext, Guid, string, TagType, int, Task<int>> TagIdAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
