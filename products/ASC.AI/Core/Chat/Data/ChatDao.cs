@@ -357,7 +357,7 @@ public class ChatDao(IDbContextFactory<AiDbContext> dbContextFactory)
 
         await foreach (var attachment in dbContext.GetOrphanedAttachmentsAsync(cutoffDate))
         {
-            yield return (attachment.TenantId, attachment.FileId);
+            yield return attachment;
         }
     }
 
