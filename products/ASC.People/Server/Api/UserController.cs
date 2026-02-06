@@ -1239,6 +1239,7 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(403, "No permissions to perform this action or users are not suspended")]
     [SwaggerResponse(409, "Data reassign process is not complete")]
     [HttpPut("delete", Order = -1)]
     public async IAsyncEnumerable<EmployeeFullDto> RemoveUsers(UpdateMembersRequestDto inDto)
@@ -1253,6 +1254,11 @@ public class UserController(
             .Where(u => !_userManager.IsSystemUser(u.Id) && !u.IsLDAP())
             .ToListAsync();
 
+        if (users.Any(u => u.Status != EmployeeStatus.Terminated))
+        {
+            throw new InvalidOperationException("Users are not suspended");
+        }
+
         var userNames = users.Select(x => x.DisplayUserName(false, displayUserSettingsHelper)).ToList();
         var tenant = tenantManager.GetCurrentTenant();
         var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
@@ -1260,11 +1266,6 @@ public class UserController(
 
         foreach (var user in users)
         {
-            if (user.Status != EmployeeStatus.Terminated)
-            {
-                continue;
-            }
-
             var userType = await _userManager.GetUserTypeAsync(user.Id);
             switch (userType)
             {
