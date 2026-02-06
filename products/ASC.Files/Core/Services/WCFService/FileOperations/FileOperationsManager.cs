@@ -24,6 +24,18 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Amqp.Framing;
+
+using ASC.Files.Core.Services.WCFService.FileOperations;
+
+using crypto;
+
+using Google.Apis.Drive.v3.Data;
+
+using NodaTime.Calendars;
+
+using Tweetinvi.Core.Extensions;
+
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
 [Singleton(GenericArguments = [typeof(FileDeleteOperation)])]
@@ -547,16 +559,22 @@ public class FileDeleteOperationsManager(
             return null;
         }
 
+        var permissionsCheck = _serviceProvider.GetService<PermissionsCheck>();
+
+        await CheckDataAsync(folders.Item1, files.Item1, permissionsCheck, ignoreException, immediately, versions);
+        await CheckDataAsync(folders.Item2, files.Item2, permissionsCheck, ignoreException, immediately, versions);
+
         var tenantId = tenantManager.GetCurrentTenantId();
         var userId = _authContext.CurrentAccount.ID;
         var sessionSnapshot = await _externalShare.TakeSessionSnapshotAsync();
 
+        var data = new FileDeleteOperationData<int>(folders.Item1, files.Item1, versions, tenantId, userId, GetHttpHeaders(), sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash);
+        var thirdPartyData = new FileDeleteOperationData<string>(folders.Item2, files.Item2, versions, tenantId, userId, GetHttpHeaders(), sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash);
+        
         var op = _serviceProvider.GetService<FileDeleteOperation>();
         op.Init(holdResult);
         var taskId = await _fileOperationsManagerHolder.Publish(op);
 
-        var data = new FileDeleteOperationData<int>(folders.Item1, files.Item1, versions, tenantId, userId, GetHttpHeaders(), sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash);
-        var thirdPartyData = new FileDeleteOperationData<string>(folders.Item2, files.Item2, versions, tenantId, userId, GetHttpHeaders(), sessionSnapshot, holdResult, ignoreException, immediately, isEmptyTrash);
         IntegrationEvent toPublish;
         if (isEmptyTrash)
         {
@@ -580,5 +598,61 @@ public class FileDeleteOperationsManager(
         await _eventBus.PublishAsync(toPublish);
 
         return taskId;
+    }
+
+    private async Task CheckDataAsync<T>(List<T> folders, List<T> files, PermissionsCheck security, bool ignoreException, bool immediately, List<int> versions)
+    {
+        var folderDao = _serviceProvider.GetService<IFolderDao<T>>();
+        var fileDao = _serviceProvider.GetService<IFileDao<T>>();
+
+        if (versions != null && versions.Any() && files.Count > 0)
+        {
+            await CheckVersionsAsync(files, fileDao, versions, security);
+        }
+        else
+        {
+            await CheckFolderAsync(folders, folderDao, security, ignoreException, immediately);
+            await CheckFilesAsync(files, security, fileDao);
+        }
+    }
+
+    private async Task CheckVersionsAsync<T>(List<T> files, IFileDao<T> fileDao, List<int> versions, PermissionsCheck security)
+    {
+        var fileId = files.FirstOrDefault();
+        var file = await fileDao.GetFileAsync(fileId);
+
+        var errorMsg = await security.CheckVersionPermissionsAsync(file, versions);
+        if (errorMsg != null)
+        {
+            throw new Exception(errorMsg);
+        }
+    }
+
+    private async Task CheckFolderAsync<T>(List<T> data, IFolderDao<T> folderDao, PermissionsCheck security, bool ignoreException, bool immediately)
+    {
+        foreach (var folderId in data)
+        {
+            var folder = await folderDao.GetFolderAsync(folderId);
+
+            var errorMsg = await security.CheckFolderPermissionsAsync([folder], immediately, ignoreException);
+            if (errorMsg != null)
+            {
+                throw new Exception(errorMsg);
+            }
+        }
+    }
+
+    private async Task CheckFilesAsync<T>(List<T> data, PermissionsCheck security, IFileDao<T> fileDao)
+    {
+        foreach (var fileId in data)
+        {
+            var file = await fileDao.GetFileAsync(fileId);
+
+            var errorMsg = await security.CheckFilePermissionsAsync([file], false, true);
+            if (errorMsg != null)
+            {
+                throw new Exception(errorMsg);
+            }
+        }
     }
 }

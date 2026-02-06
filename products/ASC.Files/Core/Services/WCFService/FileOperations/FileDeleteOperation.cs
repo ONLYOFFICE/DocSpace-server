@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Services.WCFService.FileOperations;
 using ASC.Webhooks.Core.EF.Model;
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
@@ -149,18 +150,13 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         }
         else
         {
+            await DeleteFilesAsync(Files, serviceScope, true);
+            await DeleteFoldersAsync(Folders, serviceScope, true);
+
             if (_isEmptyTrash)
             {
-                await DeleteFilesAsync(Files, serviceScope, true);
-                await DeleteFoldersAsync(Folders, serviceScope, true);
-
                 var trash = await folderDao.GetFolderAsync(_trashId);
                 await filesMessageService.SendAsync(MessageAction.TrashEmptied, trash, _headers);
-            }
-            else
-            {
-                await DeleteFilesAsync(Files, serviceScope, true);
-                await DeleteFoldersAsync(Folders, serviceScope, true);
             }
         }
     }
@@ -173,6 +169,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         var fileSharing = scope.ServiceProvider.GetService<FileSharing>();
         var authContext = scope.ServiceProvider.GetService<AuthContext>();
         var notifyClient = scope.ServiceProvider.GetService<NotifyClient>();
+        var permissionsManager = scope.ServiceProvider.GetService<PermissionsCheck>();
 
         var (fileMarker, filesMessageService, roomLogoManager) = scopeClass;
         roomLogoManager.EnableAudit = false;
@@ -191,19 +188,16 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             checkPermissions = isRoom ? !canDelete : checkPermissions;
 
             T canCalculate = default;
-            if (folder == null)
-            {
-                Err = FilesCommonResource.ErrorMessage_FolderNotFound;
-            }
-            else if (!_immediately && folder.IsRoom)
-            {
-                Err = FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder;
-            }
-            else if (!_ignoreException && checkPermissions && !canDelete)
-            {
-                canCalculate = FolderDao.CanCalculateSubitems(folderId) ? default : folderId;
 
-                Err = FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder;
+            var errorMsg = await permissionsManager.CheckFolderPermissionsAsync([folder], _immediately, _ignoreException);
+            if (errorMsg != null)
+            {
+                if (!_ignoreException && checkPermissions && !canDelete)
+                {
+                    canCalculate = FolderDao.CanCalculateSubitems(folderId) ? default : folderId;
+                }
+
+                Err = errorMsg;
             }
             else
             {
@@ -242,12 +236,12 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
 
                         if (isNeedSendActions)
                         {
-                            var action = isRoom 
-                                ? folder.FolderType == FolderType.AiRoom 
-                                    ? MessageAction.AgentDeleted 
-                                    : MessageAction.RoomDeleted 
+                            var action = isRoom
+                                ? folder.FolderType == FolderType.AiRoom
+                                    ? MessageAction.AgentDeleted
+                                    : MessageAction.RoomDeleted
                                 : MessageAction.ThirdPartyDeleted;
-                            
+
                             await filesMessageService.SendAsync(action, folder, _headers, folder.Id.ToString(), folder.ProviderKey);
                             await webhookManager.PublishAsync(webhookTrigger, webhookConfigs, folder);
                         }
@@ -290,9 +284,9 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                                 {
                                     await notifyClient.SendRoomRemovedAsync(folder, aces, authContext.CurrentAccount.ID);
                                     await filesMessageService.SendAsync(
-                                        folder.FolderType == FolderType.AiRoom ? MessageAction.AgentDeleted : MessageAction.RoomDeleted, 
-                                        folder, 
-                                        _headers, 
+                                        folder.FolderType == FolderType.AiRoom ? MessageAction.AgentDeleted : MessageAction.RoomDeleted,
+                                        folder,
+                                        _headers,
                                         folder.Title);
                                 }
                                 else
@@ -309,8 +303,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                     else
                     {
                         var files = await FileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false, withSubfolders: true).ToListAsync();
-                        var (isError, message) = await WithErrorAsync(scope, files, true, checkPermissions);
-
+                        
                         if (folder.FolderType is FolderType.FormFillingFolderInProgress or FolderType.FormFillingFolderDone)
                         {
                             await FolderDao.ChangeFolderTypeAsync(folder, FolderType.DEFAULT);
@@ -334,9 +327,10 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                             await Task.WhenAll(tasks);
                         }
 
-                        if (!_ignoreException && isError)
+                        errorMsg = await permissionsManager.CheckFilePermissionsAsync(files, true, checkPermissions);
+                        if (!_ignoreException && errorMsg != null)
                         {
-                            Err = message;
+                            Err = errorMsg;
                         }
                         else
                         {
@@ -365,9 +359,9 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                                     {
                                         await notifyClient.SendRoomRemovedAsync(folder, aces, authContext.CurrentAccount.ID);
                                         await filesMessageService.SendAsync(
-                                            folder.FolderType == FolderType.AiRoom ? MessageAction.AgentDeleted : MessageAction.RoomDeleted, 
-                                            folder, 
-                                            _headers, 
+                                            folder.FolderType == FolderType.AiRoom ? MessageAction.AgentDeleted : MessageAction.RoomDeleted,
+                                            folder,
+                                            _headers,
                                             folder.Title);
                                     }
                                     else
@@ -400,6 +394,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                     }
                 }
             }
+
             await ProgressStep(canCalculate);
         }
     }
@@ -409,6 +404,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         var scopeClass = scope.ServiceProvider.GetService<FileDeleteOperationScope>();
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
         var webhookManager = scope.ServiceProvider.GetService<WebhookManager>();
+        var security = scope.ServiceProvider.GetService<PermissionsCheck>();
 
         var (fileMarker, filesMessageService, _) = scopeClass;
 
@@ -420,14 +416,15 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             CancellationToken.ThrowIfCancellationRequested();
 
             var file = await FileDao.GetFileAsync(fileId);
-            var (isError, message) = await WithErrorAsync(scope, [file], false, checkPermissions);
-            if (file == null)
+
+            var errorMsg = await security.CheckFilePermissionsAsync([file], false, checkPermissions);
+            if (errorMsg == FilesCommonResource.ErrorMessage_FileNotFound)
             {
-                Err = FilesCommonResource.ErrorMessage_FileNotFound;
+                Err = errorMsg;
             }
-            else if (!_ignoreException && isError)
+            else if (!_ignoreException && errorMsg != null)
             {
-                Err = message;
+                Err = errorMsg;
             }
             else
             {
@@ -531,16 +528,14 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
         var webhookManager = scope.ServiceProvider.GetService<WebhookManager>();
         var filesMessageService = scope.ServiceProvider.GetService<FilesMessageService>();
+        var permissionManager = scope.ServiceProvider.GetService<PermissionsCheck>();
 
         var file = await FileDao.GetFileAsync(fileId);
 
-        if (file == null)
+        var errorMsg = await permissionManager.CheckVersionPermissionsAsync(file);
+        if ((errorMsg == FilesCommonResource.ErrorMessage_FileNotFound) || (errorMsg == FilesCommonResource.ErrorMessage_SecurityException))
         {
-            Err = FilesCommonResource.ErrorMessage_FileNotFound;
-        }
-        else if (file.RootFolderType is FolderType.Archive or FolderType.TRASH)
-        {
-            Err = FilesCommonResource.ErrorMessage_SecurityException;
+            Err = errorMsg;
         }
         else
         {
@@ -548,15 +543,13 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             {
                 CancellationToken.ThrowIfCancellationRequested();
 
-                var (isError, message) = await WithErrorAsync(scope, [file], false, true);
-
                 if (file.Version == v)
                 {
                     Err = FilesCommonResource.ErrorMessage_SecurityException_FileVersion;
                 }
-                else if (!_ignoreException && isError)
+                else if (!_ignoreException && errorMsg != null)
                 {
-                    Err = message;
+                    Err = errorMsg;
                 }
                 else
                 {
