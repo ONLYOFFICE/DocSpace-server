@@ -127,7 +127,7 @@ public class SettingsController(
     public async Task<bool> DisplayRecent(DisplayRequestDto inDto)
     {
         await filesSettingsHelper.SetRecentSection(inDto.Set);
-        return  await filesSettingsHelper.GetRecentSection();
+        return await filesSettingsHelper.GetRecentSection();
     }
 
     /// <remarks>
@@ -438,10 +438,10 @@ public class SettingsController(
         return await defaultTemplateSettingsHelper.ConvertToDtoAsync(settings);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Changes the setting that allows the user to organize the grouping of rooms.
-    /// </summary>
-    /// <short>Organize rooms grouping</short>
+    /// </remarks>
+    /// <summary>Organize rooms grouping</summary>
     /// <path>api/2.0/settings/organizegrouping</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]

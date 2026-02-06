@@ -36,10 +36,10 @@ public class GroupsController(
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
 
-    /// <summary>
+    /// <remarks>
     /// Creates a new room group with the specified name, icon, and list of rooms.
-    /// </summary>
-    /// <short>Add a new room group</short>
+    /// </remarks>
+    /// <summary>Add a new room group</summary>
     /// <path>api/2.0/files/group</path>
     [HttpPost("")]
     public async Task<RoomGroupDto> AddGroup(RoomGroupRequestDto inDto)
@@ -63,10 +63,10 @@ public class GroupsController(
         return await roomGroupDtoHelper.GetAsync(group, true);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns detailed information about a room group.
-    /// </summary>
-    /// <short>Get room group info</short>
+    /// </remarks>
+    /// <summary>Get room group info</summary>
     /// <path>api/2.0/files/group/{id}</path>
     [HttpGet("{id:int}")]
     public async Task<RoomGroupDto> GetGroupInfo(GroupIdRequestDto inDto)
@@ -75,10 +75,10 @@ public class GroupsController(
         return await roomGroupDtoHelper.GetAsync(group, inDto.IncludeMembers);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Updates room group properties and adds or removes rooms.
-    /// </summary>
-    /// <short>Update room group</short>
+    /// </remarks>
+    /// <summary>Update room group</summary>
     /// <path>api/2.0/files/group/{id}</path>
     [HttpPut("{id:int}")]
     public async Task<RoomGroupDto> UpdateGroup(UpdateGroupRequestDto inDto)
@@ -103,10 +103,10 @@ public class GroupsController(
         return await roomGroupDtoHelper.GetAsync(group, true);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Changes the icon of an existing room group.
-    /// </summary>
-    /// <short>Change group icon</short>
+    /// </remarks>
+    /// <summary>Change group icon</summary>
     /// <path>api/2.0/files/group/{id}/icon</path>
     [HttpPost("{id:int}/icon")]
     public async Task<RoomGroupDto> ChangeRoomIcon(IconRequestDto inDto)
@@ -115,10 +115,10 @@ public class GroupsController(
         return await roomGroupDtoHelper.GetAsync(group, true);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of all room groups for the current user.
-    /// </summary>
-    /// <short>List room groups</short>
+    /// </remarks>
+    /// <summary>List room groups</summary>
     /// <path>api/2.0/files/group</path>
     [HttpGet("")]
     public async IAsyncEnumerable<RoomGroupDto> GetGroups(GroupIdRequestDto inDto)
@@ -129,10 +129,10 @@ public class GroupsController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Deletes the specified room group.
-    /// </summary>
-    /// <short>Delete group</short>
+    /// </remarks>
+    /// <summary>Delete group</summary>
     /// <path>api/2.0/files/group/{id}</path>
     [HttpDelete("{id:int}")]
     public async Task DeleteGroup(GroupIdRequestDto inDto)
