@@ -29,7 +29,6 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// <summary>
 /// The request parameters for updating a group.
 /// </summary>
-
 public class UpdateGroupRequestDto
 {
     /// <summary>

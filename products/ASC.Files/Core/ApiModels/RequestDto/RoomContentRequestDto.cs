@@ -123,7 +123,7 @@ public class RoomContentRequestDto
     public string Text { get; set; }
 
     /// <summary>
-    /// The filter by room group.
+    /// The group ID
     /// </summary>
     [FromQuery(Name = "groupId")]
     public int? GroupId { get; set; }

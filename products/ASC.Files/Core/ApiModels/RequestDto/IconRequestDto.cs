@@ -37,6 +37,9 @@ public class IconRequestDto
     [FromRoute(Name = "id")]
     public required int Id { get; set; }
 
+    /// <summary>
+    /// Icon update data.
+    /// </summary>
     [FromBody]
     public IconRequest Update { get; set; }
 }

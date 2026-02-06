@@ -354,11 +354,11 @@ public class FilesSettingsDtoConverter(
         return new FilesSettingsDto
         {
             ExtsImagePreviewed = fileUtility.ExtsImagePreviewed,
-            ExtsMediaPreviewed =  fileUtility.ExtsMediaPreviewed,
+            ExtsMediaPreviewed = fileUtility.ExtsMediaPreviewed,
             ExtsWebPreviewed = fileUtility.ExtsWebPreviewed,
             ExtsWebEdited = fileUtility.ExtsWebEdited,
             ExtsWebEncrypt = fileUtility.ExtsWebEncrypt,
-            ExtsWebReviewed =  fileUtility.ExtsWebReviewed,
+            ExtsWebReviewed = fileUtility.ExtsWebReviewed,
             ExtsWebCustomFilterEditing = fileUtility.ExtsWebCustomFilterEditing,
             ExtsWebRestrictedEditing = fileUtility.ExtsWebRestrictedEditing,
             ExtsWebCommented = fileUtility.ExtsWebCommented,
