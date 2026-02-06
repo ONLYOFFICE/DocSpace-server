@@ -123,6 +123,12 @@ public partial class AiDbContext
     {
         return Queries.LinkAttachmentsToMessageAsync(this, tenantId, chatId, messageId, fileIds, modifiedOn);
     }
+
+    [PreCompileQuery([PreCompileQuery.DefaultDateTime])]
+    public IAsyncEnumerable<DbChatMessageAttachment> GetOrphanedAttachmentsAsync(DateTime cutoffDate)
+    {
+        return Queries.GetOrphanedAttachmentsAsync(this, cutoffDate);
+    }
 }
 
 static file class Queries
@@ -228,4 +234,9 @@ static file class Queries
                 .ExecuteUpdate(s => s
                     .SetProperty(a => a.MessageId, messageId)
                     .SetProperty(a => a.ModifiedOn, modifiedOn)));
+
+    public static readonly Func<AiDbContext, DateTime, IAsyncEnumerable<DbChatMessageAttachment>> GetOrphanedAttachmentsAsync =
+        EF.CompileAsyncQuery((AiDbContext ctx, DateTime cutoffDate) =>
+            ctx.MessageAttachments
+                .Where(x => x.MessageId == null && x.ModifiedOn <= cutoffDate));
 }

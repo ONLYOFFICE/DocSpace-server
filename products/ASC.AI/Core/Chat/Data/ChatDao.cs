@@ -351,6 +351,16 @@ public class ChatDao(IDbContextFactory<AiDbContext> dbContextFactory)
             : settings.Map();
     }
     
+    public async IAsyncEnumerable<(int TenantId, int FileId)> GetOrphanedAttachmentsAsync(DateTime cutoffDate)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+        await foreach (var attachment in dbContext.GetOrphanedAttachmentsAsync(cutoffDate))
+        {
+            yield return (attachment.TenantId, attachment.FileId);
+        }
+    }
+
     private static async Task LinkAttachmentsToMessageAsync(
         int tenantId, 
         Guid chatId, 

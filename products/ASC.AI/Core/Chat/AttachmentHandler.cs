@@ -24,10 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System.Buffers;
-
-using ASC.Web.Core.Files;
-
 namespace ASC.AI.Core.Chat;
 
 public class AttachmentResult

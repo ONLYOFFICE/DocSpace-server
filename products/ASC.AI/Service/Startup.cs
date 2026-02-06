@@ -60,5 +60,7 @@ public class Startup : BaseWorkerStartup
         services.RegisterQueue<AsyncTaskData<int>>();
         services.RegisterQueue<AsyncTaskData<string>>();
         services.RegisterQueue<ChatDeletionTask>();
+        
+        services.AddActivePassiveHostedService<OrphanAttachmentCleanerService>(Configuration);
     }
 }

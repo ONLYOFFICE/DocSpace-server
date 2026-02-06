@@ -86,6 +86,7 @@ global using ASC.MessagingSystem.EF.Model;
 global using ASC.Security.Cryptography;
 
 global using ASC.Web.Core;
+global using ASC.Web.Core.Files;
 global using ASC.Web.Files.Services.WCFService.FileOperations;
 global using ASC.Web.Files.Utils;
 global using ASC.Web.Studio.Utility;
@@ -106,6 +107,7 @@ global using OpenAI;
 
 global using ProtoBuf;
 
+global using System.Buffers;
 global using System.ClientModel;
 global using System.ClientModel.Primitives;
 global using System.ComponentModel;
