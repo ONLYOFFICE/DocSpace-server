@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    [Migration("20260205110854_MigrationContext_Upgrade71")]
+    [Migration("20260206112817_MigrationContext_Upgrade71")]
     partial class MigrationContext_Upgrade71
     {
         /// <inheritdoc />
@@ -1808,6 +1808,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime")
                         .HasColumnName("created_on");
+
+                    b.Property<bool>("Deleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false)
+                        .HasColumnName("deleted");
 
                     b.Property<DateTime>("ModifiedOn")
                         .HasColumnType("datetime")
@@ -3713,6 +3719,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Property<long?>("MessageId")
                         .HasColumnType("bigint")
                         .HasColumnName("message_id");
+
+                    b.Property<DateTime>("ModifiedOn")
+                        .HasColumnType("datetime")
+                        .HasColumnName("modified_on");
 
                     b.HasKey("TenantId", "ChatId", "FileId")
                         .HasName("PRIMARY");

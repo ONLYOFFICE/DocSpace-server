@@ -3717,6 +3717,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("message_id");
 
+                    b.Property<DateTime>("ModifiedOn")
+                        .HasColumnType("datetime")
+                        .HasColumnName("modified_on");
+
                     b.HasKey("TenantId", "ChatId", "FileId")
                         .HasName("PRIMARY");
 

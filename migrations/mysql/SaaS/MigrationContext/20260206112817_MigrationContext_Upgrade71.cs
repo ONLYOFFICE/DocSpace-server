@@ -11,6 +11,13 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AddColumn<bool>(
+                name: "deleted",
+                table: "ai_chats",
+                type: "tinyint(1)",
+                nullable: false,
+                defaultValue: false);
+
             migrationBuilder.CreateTable(
                 name: "files_chat_message_attachment",
                 columns: table => new
@@ -19,7 +26,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     chat_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
                     file_id = table.Column<int>(type: "int", nullable: false),
-                    message_id = table.Column<long>(type: "bigint", nullable: true)
+                    message_id = table.Column<long>(type: "bigint", nullable: true),
+                    modified_on = table.Column<DateTime>(type: "datetime", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -50,6 +58,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
         {
             migrationBuilder.DropTable(
                 name: "files_chat_message_attachment");
+
+            migrationBuilder.DropColumn(
+                name: "deleted",
+                table: "ai_chats");
         }
     }
 }
