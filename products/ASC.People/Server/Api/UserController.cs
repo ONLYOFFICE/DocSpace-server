@@ -534,7 +534,7 @@ public class UserController(
             return null;
         }
 
-        if (_userManager.IsSystemUser(user.Id) || user.Status == EmployeeStatus.Terminated)
+        if (_userManager.IsSystemUser(user.Id) || user.Status != EmployeeStatus.Active)
         {
             throw new SecurityException();
         }
