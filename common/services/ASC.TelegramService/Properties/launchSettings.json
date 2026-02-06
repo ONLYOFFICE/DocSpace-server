@@ -3,6 +3,7 @@
     "Kestrel WebServer": {
       "commandName": "Project",
       "launchBrowser": false,
+      "applicationUrl": "http://localhost:5050",
       "environmentVariables": {
         "$STORAGE_ROOT": "../../../Data",
         "log__name": "telegram",

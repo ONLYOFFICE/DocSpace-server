@@ -51,7 +51,7 @@ public abstract class FilesHelperBase(
     {
         try
         {
-            var resultFile = await _fileUploader.ExecAsync(folderId, title, file.Length, file, !createNewIfExist, !keepConvertStatus);
+            var resultFile = await _fileUploader.ExecAsync(folderId, title, file.Length, file, createNewIfExist, !keepConvertStatus);
 
             await socketManager.CreateFileAsync(resultFile);
 
