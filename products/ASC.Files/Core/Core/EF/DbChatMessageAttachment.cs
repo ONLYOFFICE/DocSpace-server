@@ -32,6 +32,7 @@ public class DbChatMessageAttachment : BaseEntity
     public Guid ChatId { get; set; }
     public long? MessageId { get; set; }
     public int FileId { get; set; }
+    public DateTime ModifiedOn { get; set; }
 
     public DbTenant Tenant { get; set; }
 
@@ -77,6 +78,10 @@ public static class DbChatMessageAttachmentExtension
 
             entity.Property(e => e.FileId)
                 .HasColumnName("file_id");
+
+            entity.Property(e => e.ModifiedOn)
+                .HasColumnName("modified_on")
+                .HasColumnType("datetime");
 
             entity.HasIndex(e => e.ChatId)
                 .HasDatabaseName("IX_chat_id");

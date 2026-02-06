@@ -117,6 +117,12 @@ public partial class AiDbContext
     {
         return Queries.HardDeleteChatAsync(this, tenantId, chatId, userId);
     }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, 0L, null, PreCompileQuery.DefaultDateTime])]
+    public Task<int> LinkAttachmentsToMessageAsync(int tenantId, Guid chatId, long messageId, IEnumerable<int> fileIds, DateTime modifiedOn)
+    {
+        return Queries.LinkAttachmentsToMessageAsync(this, tenantId, chatId, messageId, fileIds, modifiedOn);
+    }
 }
 
 static file class Queries
@@ -214,4 +220,12 @@ static file class Queries
             ctx.Chats
                 .Where(x => x.TenantId == tenantId && x.Id == chatId && x.UserId == userId)
                 .ExecuteDelete());
+
+    public static readonly Func<AiDbContext, int, Guid, long, IEnumerable<int>, DateTime, Task<int>> LinkAttachmentsToMessageAsync =
+        EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, Guid chatId, long messageId, IEnumerable<int> fileIds, DateTime modifiedOn) =>
+            ctx.MessageAttachments
+                .Where(a => a.TenantId == tenantId && a.ChatId == chatId && fileIds.Contains(a.FileId))
+                .ExecuteUpdate(s => s
+                    .SetProperty(a => a.MessageId, messageId)
+                    .SetProperty(a => a.ModifiedOn, modifiedOn)));
 }

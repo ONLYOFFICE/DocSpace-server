@@ -72,17 +72,7 @@ public class ChatDao(IDbContextFactory<AiDbContext> dbContextFactory)
             await context.Chats.AddAsync(chat);
             await context.SaveChangesAsync();
 
-            var fileIds = message.Contents
-                .OfType<DataMessageContent>()
-                .Select(d => d.Id)
-                .ToList();
-
-            if (fileIds.Count > 0)
-            {
-                await context.MessageAttachments
-                    .Where(a => a.TenantId == tenantId && a.ChatId == chatId && fileIds.Contains(a.FileId))
-                    .ExecuteUpdateAsync(s => s.SetProperty(a => a.MessageId, dbMessage.Id));
-            }
+            await LinkAttachmentsToMessageAsync(tenantId, chatId, message, context, dbMessage);
 
             await transaction.CommitAsync();
         });
@@ -113,17 +103,7 @@ public class ChatDao(IDbContextFactory<AiDbContext> dbContextFactory)
             await context.Messages.AddAsync(dbMessage);
             await context.SaveChangesAsync();
 
-            var fileIds = message.Contents
-                .OfType<DataMessageContent>()
-                .Select(d => d.Id)
-                .ToList();
-
-            if (fileIds.Count > 0)
-            {
-                await context.MessageAttachments
-                    .Where(a => a.TenantId == tenantId && a.ChatId == chatId && fileIds.Contains(a.FileId))
-                    .ExecuteUpdateAsync(s => s.SetProperty(a => a.MessageId, dbMessage.Id));
-            }
+            await LinkAttachmentsToMessageAsync(tenantId, chatId, message, context, dbMessage);
 
             await transaction.CommitAsync();
         });
@@ -369,5 +349,23 @@ public class ChatDao(IDbContextFactory<AiDbContext> dbContextFactory)
         return settings == null
             ? new UserChatSettings()
             : settings.Map();
+    }
+    
+    private static async Task LinkAttachmentsToMessageAsync(
+        int tenantId, 
+        Guid chatId, 
+        Message message, 
+        AiDbContext context,
+        DbChatMessage dbMessage)
+    {
+        var fileIds = message.Contents
+            .OfType<DataMessageContent>()
+            .Select(d => d.Id)
+            .ToList();
+
+        if (fileIds.Count > 0)
+        {
+            await context.LinkAttachmentsToMessageAsync(tenantId, chatId, dbMessage.Id, fileIds, DateTime.UtcNow);
+        }
     }
 }

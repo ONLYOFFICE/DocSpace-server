@@ -616,7 +616,8 @@ internal class FileDao(
                             {
                                 TenantId = tenantId,
                                 ChatId = chatId,
-                                FileId = file.Id
+                                FileId = file.Id,
+                                ModifiedOn = DateTime.UtcNow
                             };
 
                             await filesDbContext.MessageAttachments.AddAsync(attachment);
