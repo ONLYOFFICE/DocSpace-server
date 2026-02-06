@@ -27,6 +27,7 @@
 global using ASC.AI.Core.Database;
 global using ASC.AI.Core.Database.Models;
 global using ASC.AI.Core.Chat.Data;
+global using ASC.AI.Core.Chat.Deletion;
 global using ASC.AI.Core.Chat.History;
 global using ASC.AI.Core.MCP;
 global using ASC.AI.Core.MCP.Auth;
@@ -45,6 +46,7 @@ global using ASC.AI.Core.Utils;
 
 global using ASC.Common;
 global using ASC.Common.Log;
+global using ASC.Common.Threading;
 global using ASC.Common.Threading.DistributedLock.Abstractions;
 global using ASC.Common.Web;
 
@@ -59,6 +61,10 @@ global using ASC.Core.Common.Settings;
 global using ASC.Core.Notify.Socket;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
+
+global using ASC.EventBus.Abstractions;
+global using ASC.EventBus.Events;
+
 global using ASC.Files.Core;
 global using ASC.Files.Core.EF;
 global using ASC.Files.Core.Helpers;
@@ -97,6 +103,8 @@ global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.Logging;
 
 global using OpenAI;
+
+global using ProtoBuf;
 
 global using System.ClientModel;
 global using System.ClientModel.Primitives;

@@ -28,12 +28,13 @@ namespace ASC.AI.Core.Chat;
 
 [Scope]
 public class ChatService(
-    ChatDao chatDao, 
+    ChatDao chatDao,
     AuthContext authContext,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     TenantManager tenantManager,
-    AiProviderService aiProviderService)
+    AiProviderService aiProviderService,
+    IEventBus eventBus)
 {
     public async Task<ChatSession> RenameChatAsync(Guid chatId, string title)
     {
@@ -81,7 +82,16 @@ public class ChatService(
     public async Task DeleteChatAsync(Guid chatId)
     {
         var chat = await GetChatAsync(chatId);
-        await chatDao.DeleteChatAsync(tenantManager.GetCurrentTenantId(), chat.Id);
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var userId = authContext.CurrentAccount.ID;
+
+        await chatDao.SoftDeleteChatAsync(tenantId, chat.Id, userId, async () =>
+        {
+            await eventBus.PublishAsync(new ChatDeletionIntegrationEvent(userId, tenantId)
+            {
+                ChatId = chat.Id
+            });
+        });
     }
 
     public Task<IEnumerable<ModelData>> GetModelsAsync(int providerId)

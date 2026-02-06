@@ -76,10 +76,10 @@ public partial class AiDbContext
         return Queries.GetMessagesTotalCountAsync(this, chatId);
     }
     
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
-    public async Task<bool> MarkChatAsDeletedAsync(int tenantId, Guid chatId)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid])]
+    public async Task<bool> MarkChatAsDeletedAsync(int tenantId, Guid chatId, Guid userId)
     {
-        return await Queries.MarkChatAsDeletedAsync(this, tenantId, chatId) > 0;
+        return await Queries.MarkChatAsDeletedAsync(this, tenantId, chatId, userId) > 0;
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
@@ -104,6 +104,18 @@ public partial class AiDbContext
     public Task<DbChatMessage?> GetUserMessageByAssistantMessageIdAsync(int assistantMessageId, Guid chatId)
     {
         return Queries.GetUserMessageByAssistantMessageIdAsync(this, assistantMessageId, chatId);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    public IAsyncEnumerable<int> GetChatAttachmentFileIdsAsync(int tenantId, Guid chatId)
+    {
+        return Queries.GetChatAttachmentFileIdsAsync(this, tenantId, chatId);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid])]
+    public Task<int> HardDeleteChatAsync(int tenantId, Guid chatId, Guid userId)
+    {
+        return Queries.HardDeleteChatAsync(this, tenantId, chatId, userId);
     }
 }
 
@@ -162,10 +174,10 @@ static file class Queries
             (AiDbContext ctx, Guid chatId) => 
                 ctx.Messages.Count(x => x.ChatId == chatId));
     
-    public static readonly Func<AiDbContext, int, Guid, Task<int>> MarkChatAsDeletedAsync =
+    public static readonly Func<AiDbContext, int, Guid, Guid, Task<int>> MarkChatAsDeletedAsync =
         EF.CompileAsyncQuery(
-            (AiDbContext ctx, int tenantId, Guid chatId) =>
-                ctx.Chats.Where(x => x.TenantId == tenantId && x.Id == chatId)
+            (AiDbContext ctx, int tenantId, Guid chatId, Guid userId) =>
+                ctx.Chats.Where(x => x.TenantId == tenantId && x.Id == chatId && x.UserId == userId)
                     .ExecuteUpdate(x => x.SetProperty(y => y.Deleted, true)));
     
     public static readonly Func<AiDbContext, int, Guid, Task<DbChatMessage?>> GetMessageAsync =
@@ -190,4 +202,16 @@ static file class Queries
             ctx.Messages.Where(x => x.ChatId == chatId && x.Role == Role.User && x.Id < assistantMessageId)
                 .OrderByDescending(x => x.Id)
                 .FirstOrDefault());
+
+    public static readonly Func<AiDbContext, int, Guid, IAsyncEnumerable<int>> GetChatAttachmentFileIdsAsync =
+        EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, Guid chatId) =>
+            ctx.MessageAttachments
+                .Where(x => x.TenantId == tenantId && x.ChatId == chatId)
+                .Select(x => x.FileId));
+
+    public static readonly Func<AiDbContext, int, Guid, Guid, Task<int>> HardDeleteChatAsync =
+        EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, Guid chatId, Guid userId) =>
+            ctx.Chats
+                .Where(x => x.TenantId == tenantId && x.Id == chatId && x.UserId == userId)
+                .ExecuteDelete());
 }

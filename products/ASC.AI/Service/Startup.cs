@@ -24,11 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.AI.Core.Export;
-using ASC.Common.Threading;
-using ASC.Files.Core.Vectorization;
-using ASC.Web.Files.Utils;
-
 namespace ASC.AI.Service;
 
 public class Startup : BaseWorkerStartup
@@ -64,5 +59,6 @@ public class Startup : BaseWorkerStartup
         services.RegisterQueue<ChatExportTask>();
         services.RegisterQueue<AsyncTaskData<int>>();
         services.RegisterQueue<AsyncTaskData<string>>();
+        services.RegisterQueue<ChatDeletionTask>();
     }
 }

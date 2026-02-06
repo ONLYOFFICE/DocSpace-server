@@ -175,20 +175,39 @@ public class ChatDao(IDbContextFactory<AiDbContext> dbContextFactory)
         return await dbContext.GetChatsTotalCountAsync(tenantId, roomId, userId);
     }
 
-    public async Task DeleteChatAsync(int tenantId, Guid chatId)
+    public async Task SoftDeleteChatAsync(int tenantId, Guid chatId, Guid userId, Func<Task>? onDeleted = null)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = dbContext.Database.CreateExecutionStrategy();
-
-        var deleted = await strategy.ExecuteAsync(async () =>
+        
+        await strategy.ExecuteAsync(async () =>
         {
             await using var context = await dbContextFactory.CreateDbContextAsync();
-            return await context.MarkChatAsDeletedAsync(tenantId, chatId);
-        });
+            await using var transaction = await context.Database.BeginTransactionAsync();
 
-        if (deleted)
+            var deleted = await context.MarkChatAsDeletedAsync(tenantId, chatId, userId);
+            if (deleted && onDeleted != null)
+            {
+                await onDeleted();
+            }
+
+            await transaction.CommitAsync();
+        });
+    }
+
+    public async Task HardDeleteChatAsync(int tenantId, Guid chatId, Guid userId)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        await dbContext.HardDeleteChatAsync(tenantId, chatId, userId);
+    }
+
+    public async IAsyncEnumerable<int> GetAttachmentFileIdsAsync(int tenantId, Guid chatId)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+        await foreach (var fileId in dbContext.GetChatAttachmentFileIdsAsync(tenantId, chatId))
         {
-            // TODO: Publish chat deletion task to worker queue for cleanup of attachments
+            yield return fileId;
         }
     }
 
