@@ -37,15 +37,7 @@ var connectionManager = new ConnectionStringManager(builder)
     .AddRedis()
     .AddEditors();
 
-if (!isPreview)
-{
-    connectionManager
-        .AddOpensearch()
-        .AddMailPit();
-}
-
 var configurator = new ProjectConfigurator(builder, connectionManager, basePath, isDocker);
-
 
 switch (builder.Configuration["ASPNETCORE_ENVIRONMENT"])
 {
@@ -81,6 +73,10 @@ switch (builder.Configuration["ASPNETCORE_ENVIRONMENT"])
 
         break;
     default:
+        connectionManager
+            .AddOpensearch()
+            .AddMailPit();
+        
         configurator
             .AddProject<ASC_Files>(Constants.FilesPort)
             .AddProject<ASC_Files_Service>(Constants.FilesServicePort)
