@@ -67,7 +67,6 @@ public class RoomGroupDtoHelper(FolderDtoHelper folderWrapperHelper, IDaoFactory
 {
     public async Task<RoomGroupDto> GetAsync(RoomGroup group, bool includeMembers)
     {
-
         var result = new RoomGroupDto
         {
             Id = group.Id,
@@ -81,26 +80,29 @@ public class RoomGroupDtoHelper(FolderDtoHelper folderWrapperHelper, IDaoFactory
         var fInt = new List<int>();
         var fString = new List<string>();
 
-        foreach (var roomGroupRef in roomGroupRefs)
+        foreach (var r in roomGroupRefs)
         {
-            if (roomGroupRef.InternalRoomId != null)
+            if (r.InternalRoomId.HasValue) 
             {
-                fInt.Add((int)roomGroupRef.InternalRoomId);
-            }
-            else
+                fInt.Add(r.InternalRoomId.Value);
+            } 
+            else 
             {
-                fString.Add(roomGroupRef.ThirdpartyRoomId);
+                fString.Add(r.ThirdpartyRoomId);
             }
         }
 
-        var internalRoomsTask = GetFoldersAsync(fInt).ToListAsync();
-        var thirdPartyRoomsTask = GetFoldersAsync(fString).ToListAsync();
+        var internalRoomsTask = GetFoldersAsync(fInt).ToListAsync().AsTask();
+        var thirdPartyRoomsTask = GetFoldersAsync(fString).ToListAsync().AsTask();
 
-        var internalRooms = await internalRoomsTask;
-        var thirdPartyRooms = await thirdPartyRoomsTask;
+        await Task.WhenAll(internalRoomsTask, thirdPartyRoomsTask);
 
-        var totalRooms = internalRooms.Count + thirdPartyRooms.Count;
-        result.TotalRooms = totalRooms;
+        var internalRooms = internalRoomsTask.Result;
+        var thirdPartyRooms = thirdPartyRoomsTask.Result;
+
+        result.TotalRooms =
+            internalRooms.Count +
+            thirdPartyRooms.Count;
 
         MultiSizeLogoCover cover = null;
         if (!string.IsNullOrEmpty(group.Icon) &&
