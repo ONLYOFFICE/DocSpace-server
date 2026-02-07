@@ -75,7 +75,7 @@ public class RoomGroupDtoHelper(FolderDtoHelper folderWrapperHelper, IDaoFactory
             UserId = group.UserID
         };
 
-        var roomGroupDao = daoFactory.RoomGroupDao;
+        var roomGroupDao = daoFactory.GetRoomGroupDao<int>();
         var roomGroupRefs = await roomGroupDao.GetRoomsByGroupAsync(group.Id).ToListAsync();
 
         var fInt = new List<int>();

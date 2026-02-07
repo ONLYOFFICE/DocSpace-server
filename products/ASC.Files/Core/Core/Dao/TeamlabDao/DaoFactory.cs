@@ -27,10 +27,9 @@
 namespace ASC.Files.Core.Data;
 
 [Scope(typeof(IDaoFactory))]
-public class DaoFactory(IServiceProvider serviceProvider, IProviderDao providerDao, IRoomGroupDao roomGroupDao) : IDaoFactory
+public class DaoFactory(IServiceProvider serviceProvider, IProviderDao providerDao) : IDaoFactory
 {
     public IProviderDao ProviderDao { get; } = providerDao;
-    public IRoomGroupDao RoomGroupDao { get; } = roomGroupDao;
 
     public IFileDao<T> GetFileDao<T>()
     {
@@ -59,6 +58,10 @@ public class DaoFactory(IServiceProvider serviceProvider, IProviderDao providerD
         return serviceProvider.GetService<ITagDao<T>>();
     }
 
+    public IRoomGroupDao<T> GetRoomGroupDao<T>()
+    {
+        return serviceProvider.GetService<IRoomGroupDao<T>>();
+    }
     public ISecurityDao<T> GetSecurityDao<T>()
     {
         return serviceProvider.GetService<ISecurityDao<T>>();

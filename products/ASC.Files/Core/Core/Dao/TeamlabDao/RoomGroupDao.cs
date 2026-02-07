@@ -26,8 +26,9 @@
 
 namespace ASC.Files.Core.Data;
 
-[Scope(typeof(IRoomGroupDao))]
-internal class RoomGroupDao(
+[Scope(typeof(IRoomGroupDao<int>), GenericArguments = [typeof(int)])]
+[Scope(typeof(IRoomGroupDao<string>), GenericArguments = [typeof(string)])]
+internal class RoomGroupDao<T>(
     UserManager userManager,
     IDbContextFactory<FilesDbContext> dbContextManager,
     TenantManager tenantManager,
@@ -47,7 +48,7 @@ internal class RoomGroupDao(
         settingsManager,
         authContext,
         serviceProvider,
-        distributedLockProvider), IRoomGroupDao
+        distributedLockProvider), IRoomGroupDao<T>
 {
     public async Task<RoomGroup> SaveRoomGroupAsync(RoomGroup groupInfo)
     {
@@ -74,6 +75,7 @@ internal class RoomGroupDao(
         var tenantId = _tenantManager.GetCurrentTenantId();
         var group = await GetGroupQuery(dbContext, tenantId)
             .Where(r => r.Id == roomGroupId)
+            .Where(r => r.UserId == authContext.CurrentAccount.ID)
             .FirstOrDefaultAsync();
 
         return group.MapToRoomGroup();
@@ -132,73 +134,80 @@ internal class RoomGroupDao(
         return q;
     }
 
-    public async Task AddInternalRoomToGroupAsync(int roomId, int groupId)
+    public async Task AddRoomToGroupAsync(T roomId, int groupId)
     {
-        await using (var roomGroupDbContext = await _dbContextFactory.CreateDbContextAsync())
-        {
-            var tenantId = _tenantManager.GetCurrentTenantId();
-            if(!await roomGroupDbContext.AnyRoomGroupRefAsync(tenantId, groupId, roomId))
-            {
-                var roomGroupRef = new DbFilesRoomGroup { TenantId = tenantId, InternalRoomId = roomId, GroupId = groupId };
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
 
-                await roomGroupDbContext.AddOrUpdateAsync(q => q.RoomGroupRef, roomGroupRef);
-                await roomGroupDbContext.SaveChangesAsync();
+        int? internalRoomId = null;
+        string thirdpartyRoomId = null;
+
+        if (roomId is int intRoomId)
+        {
+            if (await db.AnyRoomGroupRefAsync(tenantId, groupId, intRoomId)) 
+            {
+                return;
             }
+            internalRoomId = intRoomId;
         }
+
+        if (roomId is string stringRoomId)
+        {
+            if (await db.AnyRoomGroupRefAsync(tenantId, groupId, stringRoomId))
+            {
+                return;
+            }
+            thirdpartyRoomId = stringRoomId;
+        }
+
+        if (internalRoomId == null && thirdpartyRoomId == null)
+        {
+            throw new InvalidOperationException();
+        }
+        
+        await db.AddOrUpdateAsync(
+            q => q.RoomGroupRef,
+            new DbFilesRoomGroup
+            {
+                TenantId = tenantId,
+                GroupId = groupId,
+                InternalRoomId = internalRoomId,
+                ThirdpartyRoomId = thirdpartyRoomId
+            });
+
+        await db.SaveChangesAsync();
     }
 
-    public async Task AddThirdpartyRoomToGroupAsync(string roomId, int groupId)
+    public async Task RemoveRoomFromGroupAsync(T roomId, int groupId)
     {
-        await using (var roomGroupDbContext = await _dbContextFactory.CreateDbContextAsync())
+        await using var db = await _dbContextFactory.CreateDbContextAsync();
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        DbFilesRoomGroup entity = null;
+
+        if (roomId is int intRoomId)
         {
-            var tenantId = _tenantManager.GetCurrentTenantId();
-            if (!await roomGroupDbContext.AnyRoomGroupRefAsync(tenantId, groupId, roomId))
-            {
-                var roomGroupRef = new DbFilesRoomGroup { TenantId = tenantId, ThirdpartyRoomId = roomId, GroupId = groupId };
-
-                await roomGroupDbContext.AddOrUpdateAsync(q => q.RoomGroupRef, roomGroupRef);
-                await roomGroupDbContext.SaveChangesAsync();
-            }  
+            entity = await db.RoomGroupRef.FirstOrDefaultAsync(r =>
+                r.TenantId == tenantId &&
+                r.GroupId == groupId &&
+                r.InternalRoomId == intRoomId);
         }
-    }
 
-    public async Task RemoveInternalRoomFromGroupAsync(int roomId, int groupId)
-    {
-        await using (var roomGroupDbContext = await _dbContextFactory.CreateDbContextAsync())
+        if (roomId is string stringRoomId)
         {
-            var tenantId = _tenantManager.GetCurrentTenantId();
-
-            var entity = await roomGroupDbContext.RoomGroupRef
-                .FirstOrDefaultAsync(r =>
-                    r.TenantId == tenantId &&
-                    r.InternalRoomId == roomId &&
-                    r.GroupId == groupId);
-
-            if (entity != null)
-            {
-                roomGroupDbContext.RoomGroupRef.Remove(entity);
-                await roomGroupDbContext.SaveChangesAsync();
-            }
+            entity = await db.RoomGroupRef.FirstOrDefaultAsync(r =>
+                r.TenantId == tenantId &&
+                r.GroupId == groupId &&
+                r.ThirdpartyRoomId == stringRoomId);
         }
-    }
-    public async Task RemoveThirdpartyRoomFromGroupAsync(string roomId, int groupId)
-    {
-        await using (var roomGroupDbContext = await _dbContextFactory.CreateDbContextAsync())
+
+        if (entity == null) 
         {
-            var tenantId = _tenantManager.GetCurrentTenantId();
-
-            var entity = await roomGroupDbContext.RoomGroupRef
-                .FirstOrDefaultAsync(r =>
-                    r.TenantId == tenantId &&
-                    r.ThirdpartyRoomId == roomId &&
-                    r.GroupId == groupId);
-
-            if (entity != null)
-            {
-                roomGroupDbContext.RoomGroupRef.Remove(entity);
-                await roomGroupDbContext.SaveChangesAsync();
-            }
+            return;
         }
+
+        db.RoomGroupRef.Remove(entity);
+        await db.SaveChangesAsync();
     }
 
     public async IAsyncEnumerable<RoomGroupRef> GetRoomsByGroupAsync(int groupId)

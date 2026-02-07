@@ -5273,57 +5273,47 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<RoomGroup> SaveRoomGroupAsync(RoomGroup roomGroup)
     {
-        var group = await daoFactory.RoomGroupDao.SaveRoomGroupAsync(roomGroup);
+        var roomGroupDao = daoFactory.GetRoomGroupDao<int>();
+        var group = await roomGroupDao.SaveRoomGroupAsync(roomGroup);
         return group;
     }
 
 
     public async Task DeleteGroup(int groupId)
     {
-        await daoFactory.RoomGroupDao.DeleteGroup(groupId);
+        await daoFactory.GetRoomGroupDao<int>().DeleteGroup(groupId);
     }
 
     public async Task<RoomGroup> GetGroupInfoAsync(int roomGroupId)
     {
-        var group = await daoFactory.RoomGroupDao.GetGroupInfoAsync(roomGroupId);
+        var group = await daoFactory.GetRoomGroupDao<int>().GetGroupInfoAsync(roomGroupId);
         return group;
     }
 
     public IAsyncEnumerable<RoomGroup> GetGroupsAsync()
     {
-        return daoFactory.RoomGroupDao.GetGroupsAsync();
+        return daoFactory.GetRoomGroupDao<int>().GetGroupsAsync();
     }
     public async Task<int> GetGroupRoomsCountAsync(int groupId)
     {
-        return await daoFactory.RoomGroupDao.GetGroupRoomsCountAsync(groupId);
+        return await daoFactory.GetRoomGroupDao<int>().GetGroupRoomsCountAsync(groupId);
     }
 
-    public async Task AddRoomToGroupAsync(int roomId, int groupId)
+    public async Task AddRoomToGroupAsync<T>(T roomId, int groupId)
     {
         await CheckRoomAvailability(roomId);
-        await daoFactory.RoomGroupDao.AddInternalRoomToGroupAsync(roomId, groupId);
+        await daoFactory.GetRoomGroupDao<T>().AddRoomToGroupAsync(roomId, groupId);
     }
 
-    public async Task AddRoomToGroupAsync(string roomId, int groupId)
+    public async Task RemoveRoomFromGroupAsync<T>(T roomId, int groupId)
     {
         await CheckRoomAvailability(roomId);
-        await daoFactory.RoomGroupDao.AddThirdpartyRoomToGroupAsync(roomId, groupId);
+        await daoFactory.GetRoomGroupDao<T>().RemoveRoomFromGroupAsync(roomId, groupId);
     }
 
-    public async Task RemoveRoomFromGroupAsync(int roomId, int groupId)
-    {
-        await CheckRoomAvailability(roomId);
-        await daoFactory.RoomGroupDao.RemoveInternalRoomFromGroupAsync(roomId, groupId);
-    }
-
-    public async Task RemoveRoomFromGroupAsync(string roomId, int groupId)
-    {
-        await CheckRoomAvailability(roomId);
-        await daoFactory.RoomGroupDao.RemoveThirdpartyRoomFromGroupAsync(roomId, groupId);
-    }
     public async Task<RoomGroup> ChangeGroupIconAsync(int groupId, string icon)
     {
-        var group = await daoFactory.RoomGroupDao.GetGroupInfoAsync(groupId);
+        var group = await daoFactory.GetRoomGroupDao<int>().GetGroupInfoAsync(groupId);
         if (icon != null)
         {
             var covers = await RoomLogoManager.GetCoversAsync();
