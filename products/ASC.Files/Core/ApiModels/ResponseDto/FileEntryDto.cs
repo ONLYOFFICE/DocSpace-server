@@ -47,12 +47,13 @@ public abstract class FileEntryBaseDto
     /// <summary>
     /// The file entry title.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Some titile.txt/ Some title")]
+    /// <example>Some title.txt</example>
     public string Title { get; set; }
 
     /// <summary>
     /// The access rights to the file entry.
     /// </summary>
+    /// <example>1</example>
     public FileShare Access { get; set; }
 
     /// <summary>
@@ -68,23 +69,25 @@ public abstract class FileEntryBaseDto
     /// <summary>
     /// Specifies if the file entry is shared via link or not.
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    /// <example>false</example>
     public bool Shared { get; set; }
 
     /// <summary>
     /// Specifies if the file entry is shared for user or not.
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    /// <example>false</example>
     public bool SharedForUser { get; set; }
 
     /// <summary>
     /// Indicates whether the parent entity is shared.
     /// </summary>
+    /// <example>false</example>
     public bool ParentShared { get; set; }
 
     /// <summary>
     /// The short Web URL.
     /// </summary>
+    /// <example>http://localhost/s/abc123</example>
     [Url]
     public string ShortWebUrl { get; set; }
 
@@ -115,11 +118,13 @@ public abstract class FileEntryBaseDto
     /// <summary>
     /// The root folder type of the file entry.
     /// </summary>
+    /// <example>0</example>
     public FolderType RootFolderType { get; set; }
 
     /// <summary>
     /// The parent room type of the file entry.
     /// </summary>
+    /// <example>0</example>
     public FolderType? ParentRoomType { get; set; }
 
     /// <summary>
@@ -130,26 +135,31 @@ public abstract class FileEntryBaseDto
     /// <summary>
     /// Specifies if the file entry provider is specified or not.
     /// </summary>
+    /// <example>false</example>
     public bool? ProviderItem { get; set; }
 
     /// <summary>
     /// The provider key of the file entry.
     /// </summary>
+    /// <example>google-drive</example>
     public string ProviderKey { get; set; }
 
     /// <summary>
     /// The provider ID of the file entry.
     /// </summary>
+    /// <example>1</example>
     public int? ProviderId { get; set; }
 
     /// <summary>
     /// The order of the file entry.
     /// </summary>
+    /// <example>1</example>
     public string Order { get; set; }
 
     /// <summary>
     /// Specifies if the file is a favorite or not.
     /// </summary>
+    /// <example>false</example>
     public bool? IsFavorite { get; set; }
 
     /// <summary>
@@ -183,12 +193,13 @@ public abstract class FileEntryDto<T> : FileEntryBaseDto
     /// <summary>
     /// The file entry ID.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 10)]
+    /// <example>10</example>
     public T Id { get; set; }
 
     /// <summary>
     /// The root folder ID of the file entry.
     /// </summary>
+    /// <example>1</example>
     public T RootFolderId { get; set; }
 
     /// <summary>
@@ -206,16 +217,19 @@ public abstract class FileEntryDto<T> : FileEntryBaseDto
     /// <summary>
     /// The origin title of the file entry.
     /// </summary>
+    /// <example>Original Title</example>
     public string OriginTitle { get; set; }
 
     /// <summary>
     /// The origin room title of the file entry.
     /// </summary>
+    /// <example>Original Room</example>
     public string OriginRoomTitle { get; set; }
 
     /// <summary>
     /// Specifies if the file entry can be shared or not.
     /// </summary>
+    /// <example>true</example>
     public bool CanShare { get; set; }
 
     /// <summary>
@@ -236,11 +250,13 @@ public abstract class FileEntryDto<T> : FileEntryBaseDto
     /// <summary>
     /// The request token of the file entry.
     /// </summary>
+    /// <example>token-abc-123</example>
     public string RequestToken { get; set; }
 
     /// <summary>
     /// Specifies if the folder can be accessed via an external link or not.
     /// </summary>
+    /// <example>false</example>
     public bool? External { get; set; }
 
     /// <summary>
@@ -251,6 +267,7 @@ public abstract class FileEntryDto<T> : FileEntryBaseDto
     /// <summary>
     /// Indicates whether the shareable link associated with the file or folder has expired.
     /// </summary>
+    /// <example>false</example>
     public bool? IsLinkExpired { get; set; }
 
     protected FileEntryDto(FileEntry<T> entry)

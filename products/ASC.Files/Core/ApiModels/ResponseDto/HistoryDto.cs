@@ -34,11 +34,13 @@ public record HistoryDto
     /// <summary>
     /// The unique identifier for the file history entry.
     /// </summary>
+    /// <example>123</example>
     public required int Id { get; init; }
-    
+
     /// <summary>
     /// The action performed on the file.
     /// </summary>
+    /// <example>0</example>
     public required HistoryAction Action { get; init; }
 
     /// <summary>

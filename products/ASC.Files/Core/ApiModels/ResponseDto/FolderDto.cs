@@ -34,34 +34,37 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <summary>
     /// The parent folder ID of the folder.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 10)]
+    /// <example>10</example>
     public T ParentId { get; set; }
 
     /// <summary>
     /// The number of files that the folder contains.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 5)]
+    /// <example>5</example>
     public int FilesCount { get; set; }
 
     /// <summary>
     /// The number of folders that the folder contains.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 7)]
+    /// <example>7</example>
     public int FoldersCount { get; set; }
 
     /// <summary>
     /// Specifies if the folder can be shared or not.
     /// </summary>
+    /// <example>true</example>
     public bool? IsShareable { get; set; }
 
     /// <summary>
     /// The new element index in the folder.
     /// </summary>
+    /// <example>0</example>
     public int New { get; set; }
 
     /// <summary>
     /// Specifies if the folder notifications are enabled or not.
     /// </summary>
+    /// <example>false</example>
     public bool Mute { get; set; }
 
     /// <summary>
@@ -77,26 +80,31 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <summary>
     /// Specifies if the folder is pinned or not.
     /// </summary>
+    /// <example>false</example>
     public bool Pinned { get; set; }
 
     /// <summary>
     /// The room type of the folder.
     /// </summary>
+    /// <example>0</example>
     public RoomType? RoomType { get; set; }
 
     /// <summary>
     /// Specifies if the folder is private or not.
     /// </summary>
+    /// <example>false</example>
     public bool Private { get; set; }
 
     /// <summary>
     /// Specifies if the folder is indexed or not.
     /// </summary>
+    /// <example>true</example>
     public bool Indexing { get; set; }
 
     /// <summary>
     /// Specifies if the folder can be downloaded or not.
     /// </summary>
+    /// <example>false</example>
     public bool DenyDownload { get; set; }
 
     /// <summary>
@@ -112,36 +120,43 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <summary>
     /// The folder type.
     /// </summary>
+    /// <example>0</example>
     public FolderType? Type { get; set; }
 
     /// <summary>
     /// Specifies if the folder is placed in the room or not.
     /// </summary>
+    /// <example>false</example>
     public bool? InRoom { get; set; }
 
     /// <summary>
     /// The folder quota limit.
     /// </summary>
+    /// <example>1073741824</example>
     public long? QuotaLimit { get; set; }
 
     /// <summary>
     /// Specifies if the folder room has a custom quota or not.
     /// </summary>
+    /// <example>false</example>
     public bool? IsCustomQuota { get; set; }
 
     /// <summary>
     /// How much folder space is used (counter).
     /// </summary>
+    /// <example>524288000</example>
     public long? UsedSpace { get; set; }
 
     /// <summary>
     /// Specifies if the folder is password protected or not.
     /// </summary>
+    /// <example>false</example>
     public bool? PasswordProtected { get; set; }
 
     /// <summary>
     /// Specifies if an external link to the folder is expired or not.
     /// </summary>
+    /// <example>false</example>
     [Obsolete("Use IsLinkExpired instead")]
     public bool? Expired { get; set; }
 

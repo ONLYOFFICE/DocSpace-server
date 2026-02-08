@@ -49,30 +49,31 @@ public class FolderContentDto<T>
     /// <summary>
     /// The folder path.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "{key = \"Key\", path = \"//path//to//folder\"}")]
+    /// <example>{key = "Key", path = "//path//to//folder"}</example>
     public required object PathParts { get; set; }
 
     /// <summary>
     /// The folder start index.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 0)]
+    /// <example>0</example>
     public int StartIndex { get; set; }
 
     /// <summary>
     /// The number of folder elements.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 4)]
+    /// <example>4</example>
     public int Count { get; set; }
 
     /// <summary>
     /// The total number of elements in the folder.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 4)]
+    /// <example>4</example>
     public required int Total { get; set; }
 
     /// <summary>
     /// The new element index in the folder.
     /// </summary>
+    /// <example>0</example>
     public int New { get; set; }
 }
 

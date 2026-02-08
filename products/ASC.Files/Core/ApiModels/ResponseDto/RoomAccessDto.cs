@@ -39,11 +39,13 @@ public class RoomSecurityDto
     /// <summary>
     /// The warning message.
     /// </summary>
+    /// <example>Warning message</example>
     public string Warning { get; set; }
 
     /// <summary>
     /// The error type.
     /// </summary>
+    /// <example>0</example>
     public RoomSecurityError Error { get; set; }
 }
 

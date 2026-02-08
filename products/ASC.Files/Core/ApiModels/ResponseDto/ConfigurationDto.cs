@@ -54,17 +54,20 @@ public class ConfigurationDto<T>
     /// <summary>
     /// The editor URL.
     /// </summary>
+    /// <example>http://localhost/editor</example>
     [Url]
     public required string EditorUrl { get; set; }
 
     /// <summary>
     /// The token of the file configuration.
     /// </summary>
+    /// <example>token-abc-123</example>
     public string Token { get; set; }
 
     /// <summary>
     /// The platform type.
     /// </summary>
+    /// <example>desktop</example>
     public string Type { get; set; }
 
     /// <summary>
@@ -75,31 +78,37 @@ public class ConfigurationDto<T>
     /// <summary>
     /// The error message.
     /// </summary>
+    /// <example>Configuration error</example>
     public string ErrorMessage { get; set; }
 
     /// <summary>
     /// Specifies if the file filling has started or not.
     /// </summary>
+    /// <example>false</example>
     public bool? StartFilling { get; set; }
 
     /// <summary>
     /// The file filling status.
     /// </summary>
+    /// <example>false</example>
     public bool? FillingStatus { get; set; }
 
     /// <summary>
     /// The start filling mode.
     /// </summary>
+    /// <example>0</example>
     public StartFillingMode StartFillingMode { get; set; }
 
     /// <summary>
     /// The file filling session ID.
     /// </summary>
+    /// <example>session-123-456</example>
     public string FillingSessionId { get; set; }
 
     /// <summary>
     /// Indicates which quota scope has been exceeded.
     /// </summary>
+    /// <example>0</example>
     public QuotaScope? QuotaExceededScope { get; set; }
 }
 
@@ -147,6 +156,7 @@ public class EditorConfigurationDto
     /// <summary>
     /// The callback URL of the editor.
     /// </summary>
+    /// <example>http://localhost/callback</example>
     [Url]
     public string CallbackUrl { get; set; }
 
@@ -158,6 +168,7 @@ public class EditorConfigurationDto
     /// <summary>
     /// The creation URL of the editor.
     /// </summary>
+    /// <example>http://localhost/create</example>
     public string CreateUrl { get; set; }
 
     /// <summary>
@@ -178,16 +189,19 @@ public class EditorConfigurationDto
     /// <summary>
     /// The language of the editor configuration.
     /// </summary>
+    /// <example>en-US</example>
     public required string Lang { get; set; }
 
     /// <summary>
     /// The mode of the editor configuration.
     /// </summary>
+    /// <example>edit</example>
     public required string Mode { get; set; }
 
     /// <summary>
     /// Specifies if the mode is write of the editor configuration.
     /// </summary>
+    /// <example>true</example>
     public bool ModeWrite { get; set; }
 
     /// <summary>
@@ -219,6 +233,7 @@ public class CustomizationConfigDto
     /// <summary>
     /// Specifies if the customization is about.
     /// </summary>
+    /// <example>true</example>
     public bool About { get; set; }
 
     /// <summary>
@@ -239,6 +254,7 @@ public class CustomizationConfigDto
     /// <summary>
     /// Specifies if the customization should be force saved.
     /// </summary>
+    /// <example>false</example>
     public bool? Forcesave { get; set; }
 
     /// <summary>
@@ -259,6 +275,7 @@ public class CustomizationConfigDto
     /// <summary>
     /// Specifies if the share should be mentioned.
     /// </summary>
+    /// <example>true</example>
     public bool MentionShare { get; set; }
 
     /// <summary>
@@ -280,10 +297,12 @@ public class SubmitForm
     /// <summary>
     /// Specifies whether the "Complete  &amp; Submit" button will be displayed or hidden on the top toolbar.
     /// </summary>
+    /// <example>true</example>
     public bool Visible { get; set; }
     /// <summary>
     /// A message displayed after forms are submitted.
     /// </summary>
+    /// <example>Form submitted successfully</example>
     public string ResultMessage { get; set; }
 }
 
@@ -295,6 +314,7 @@ public class StartFillingForm
     /// <summary>
     /// The caption of the button that starts filling out the form.
     /// </summary>
+    /// <example>Start Filling</example>
     public string Text { get; set; }
 }
 
@@ -306,31 +326,37 @@ public class LogoConfigDto
     /// <summary>
     /// The image of the logo.
     /// </summary>
+    /// <example>http://localhost/logo.png</example>
     public string Image { get; set; }
 
     /// <summary>
     /// The dark image of the logo.
     /// </summary>
+    /// <example>http://localhost/logo-dark.png</example>
     public string ImageDark { get; set; }
 
     /// <summary>
     /// The light image of the logo.
     /// </summary>
+    /// <example>http://localhost/logo-light.png</example>
     public string ImageLight { get; set; }
 
     /// <summary>
     /// The embedded image of the logo.
     /// </summary>
+    /// <example>http://localhost/logo-embedded.png</example>
     public string ImageEmbedded { get; set; }
 
     /// <summary>
     /// The url link of the logo.
     /// </summary>
+    /// <example>http://localhost</example>
     public string Url { get; set; }
 
     /// <summary>
     /// Specifies if the logo is visible.
     /// </summary>
+    /// <example>true</example>
     public bool Visible { get; set; }
 }
 
@@ -342,6 +368,7 @@ public class AnonymousConfigDto
     /// <summary>
     /// Specifies if the anonymous is a request.
     /// </summary>
+    /// <example>false</example>
     public required bool Request { get; set; }
 }
 
@@ -353,31 +380,37 @@ public class CustomerConfigDto
     /// <summary>
     /// The address of the customer configuration.
     /// </summary>
+    /// <example>123 Main Street, City</example>
     public string Address { get; set; }
 
     /// <summary>
     /// The logo of the customer configuration.
     /// </summary>
+    /// <example>http://localhost/customer-logo.png</example>
     public string Logo { get; set; }
 
     /// <summary>
     /// The dark logo of the customer configuration.
     /// </summary>
+    /// <example>http://localhost/customer-logo-dark.png</example>
     public string LogoDark { get; set; }
 
     /// <summary>
     /// The mail address of the customer configuration.
     /// </summary>
+    /// <example>contact@example.com</example>
     public string Mail { get; set; }
 
     /// <summary>
     /// The name of the customer configuration.
     /// </summary>
+    /// <example>ONLYOFFICE</example>
     public string Name { get; set; }
 
     /// <summary>
     /// The site web address of the customer configuration.
     /// </summary>
+    /// <example>https://www.example.com</example>
     public string Www { get; set; }
 }
 
@@ -389,6 +422,7 @@ public class DocumentConfigDto
     /// <summary>
     /// The file type of the document.
     /// </summary>
+    /// <example>docx</example>
     public string FileType { get; set; }
 
     /// <summary>
@@ -399,11 +433,13 @@ public class DocumentConfigDto
     /// <summary>
     /// Specifies if the documnet is linked for current user.
     /// </summary>
+    /// <example>false</example>
     public bool IsLinkedForMe { get; set; }
 
     /// <summary>
     /// The document key.
     /// </summary>
+    /// <example>doc-key-123-abc</example>
     public string Key { get; set; }
 
     /// <summary>
@@ -414,11 +450,13 @@ public class DocumentConfigDto
     /// <summary>
     /// The shared link parameter of the document.
     /// </summary>
+    /// <example>share-param-123</example>
     public string SharedLinkParam { get; set; }
 
     /// <summary>
     /// The shared link key of the document.
     /// </summary>
+    /// <example>share-key-abc</example>
     public string SharedLinkKey { get; set; }
 
     /// <summary>
@@ -429,17 +467,20 @@ public class DocumentConfigDto
     /// <summary>
     /// The document title.
     /// </summary>
+    /// <example>Document Title</example>
     public string Title { get; set; }
 
     /// <summary>
     /// The document url.
     /// </summary>
+    /// <example>http://localhost/documents/doc.docx</example>
     [Url]
     public string Url { get; set; }
 
     /// <summary>
     /// Indicates whether this is a form.
     /// </summary>
+    /// <example>false</example>
     public bool IsForm { get; set; }
 
     /// <summary>
@@ -456,16 +497,19 @@ public class InfoConfigDto
     /// <summary>
     /// Specifies if the file is favorite or not.
     /// </summary>
+    /// <example>false</example>
     public bool? Favorite { get; set; }
 
     /// <summary>
     /// The folder of the file.
     /// </summary>
+    /// <example>My Documents</example>
     public string Folder { get; set; }
 
     /// <summary>
     /// The file owner.
     /// </summary>
+    /// <example>John Doe</example>
     public string Owner { get; set; }
 
     /// <summary>
@@ -481,6 +525,7 @@ public class InfoConfigDto
     /// <summary>
     /// The uploaded file.
     /// </summary>
+    /// <example>2025-01-01T00:00:00</example>
     public string Uploaded { get; set; }
 }
 

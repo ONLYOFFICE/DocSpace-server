@@ -65,10 +65,12 @@ public class FilesStatisticsFolder
     /// <summary>
     /// The folder title.
     /// </summary>
+    /// <example>My Documents</example>
     public string Title { get; set; }
 
     /// <summary>
     /// The used space in the folder.
     /// </summary>
+    /// <example>1048576</example>
     public long UsedSpace { get; set; }
 }

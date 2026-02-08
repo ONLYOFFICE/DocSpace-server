@@ -34,40 +34,44 @@ public class FileOperationDto
     /// <summary>
     /// The file operation ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public required string Id { get; set; }
 
     /// <summary>
     /// The file operation type.
     /// </summary>
+    /// <example>0</example>
     [JsonPropertyName("Operation")]
     public required FileOperationType OperationType { get; init; }
 
     /// <summary>
     /// The file operation progress in percentage.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 100)]
+    /// <example>100</example>
     public required int Progress { get; set; }
 
     /// <summary>
     /// The file operation error message.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "")]
+    /// <example></example>
     public required string Error { get; set; }
 
     /// <summary>
     /// The file operation processing status.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "1")]
+    /// <example>1</example>
     public required string Processed { get; set; }
 
     /// <summary>
     /// Specifies if the file operation is finished or not.
     /// </summary>
+    /// <example>true</example>
     public required bool Finished { get; set; }
 
     /// <summary>
     /// The file operation URL.
     /// </summary>
+    /// <example>http://localhost/download</example>
     [Url]
     public string Url { get; set; }
 

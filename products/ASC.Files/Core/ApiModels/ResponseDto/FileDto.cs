@@ -36,34 +36,37 @@ public class FileDto<T> : FileEntryDto<T>
     /// <summary>
     /// The folder ID where the file is located.
     /// </summary>
+    /// <example>10</example>
     public T FolderId { get; set; }
 
     /// <summary>
     /// The file version.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 3)]
+    /// <example>3</example>
     public int Version { get; set; }
 
     /// <summary>
     /// The version group of the file.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 1)]
+    /// <example>1</example>
     public int VersionGroup { get; set; }
 
     /// <summary>
     /// The content length of the file.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "12345")]
+    /// <example>12345</example>
     public string ContentLength { get; set; }
 
     /// <summary>
     /// The pure content length of the file.
     /// </summary>
+    /// <example>12345</example>
     public long? PureContentLength { get; set; }
 
     /// <summary>
     /// The current status of the file.
     /// </summary>
+    /// <example>0</example>
     public FileStatus FileStatus { get; set; }
 
     /// <summary>
@@ -74,107 +77,118 @@ public class FileDto<T> : FileEntryDto<T>
     /// <summary>
     /// Specifies if the file is muted or not.
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    /// <example>false</example>
     public bool Mute { get; set; }
 
     /// <summary>
     /// The URL link to view the file.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "https://www.onlyoffice.com/viewfile?fileid=2221")]
+    /// <example>https://www.onlyoffice.com/viewfile?fileid=2221</example>
     [Url]
     public string ViewUrl { get; set; }
 
     /// <summary>
     /// The Web URL link to the file.
     /// </summary>
+    /// <example>http://localhost/files/document.docx</example>
     [Url]
     public string WebUrl { get; set; }
 
     /// <summary>
     /// The file type.
     /// </summary>
+    /// <example>0</example>
     public FileType FileType { get; set; }
 
     /// <summary>
     /// The file extension.
     /// </summary>
-    [SwaggerSchemaCustom(Example = ".txt")]
+    /// <example>.txt</example>
     public string FileExst { get; set; }
 
     /// <summary>
     /// The comment to the file.
     /// </summary>
+    /// <example>This is a comment</example>
     public string Comment { get; set; }
 
     /// <summary>
     /// Specifies if the file is encrypted or not.
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    /// <example>false</example>
     public bool? Encrypted { get; set; }
 
     /// <summary>
     /// The thumbnail URL of the file.
     /// </summary>
+    /// <example>http://localhost/thumbnails/file.png</example>
     [Url]
     public string ThumbnailUrl { get; set; }
 
     /// <summary>
     /// The current thumbnail status of the file.
     /// </summary>
+    /// <example>0</example>
     public Thumbnail ThumbnailStatus { get; set; }
 
     /// <summary>
     /// Specifies if the file is locked or not.
     /// </summary>
+    /// <example>false</example>
     public bool? Locked { get; set; }
 
     /// <summary>
     /// The user ID of the person who locked the file.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public string LockedBy { get; set; }
 
     /// <summary>
     /// Specifies if the file has a draft or not.
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    /// <example>false</example>
     public bool? HasDraft { get; set; }
 
     /// <summary>
     /// The status of the form filling process.
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    /// <example>0</example>
     public FormFillingStatus FormFillingStatus { get; set; } = FormFillingStatus.None;
 
     /// <summary>
     /// Specifies if the file is a form or not.
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    /// <example>false</example>
     public bool? IsForm { get; set; }
 
     /// <summary>
     /// Specifies if the Custom Filter editing mode is enabled for a file or not.
     /// </summary>
+    /// <example>false</example>
     public bool? CustomFilterEnabled { get; set; }
 
     /// <summary>
     /// The name of the user who enabled a Custom Filter editing mode for a file.
     /// </summary>
+    /// <example>John Doe</example>
     public string CustomFilterEnabledBy { get; set; }
 
     /// <summary>
     /// Specifies if the filling has started or not.
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    /// <example>false</example>
     public bool? StartFilling { get; set; }
 
     /// <summary>
     /// The InProcess folder ID of the file.
     /// </summary>
+    /// <example>10</example>
     public int? InProcessFolderId { get; set; }
 
     /// <summary>
     /// The InProcess folder title of the file.
     /// </summary>
+    /// <example>In Process</example>
     public string InProcessFolderTitle { get; set; }
 
     /// <summary>
@@ -205,6 +219,7 @@ public class FileDto<T> : FileEntryDto<T>
     /// <summary>
     /// The vectorization status of the file.
     /// </summary>
+    /// <example>0</example>
     public VectorizationStatus? VectorizationStatus { get; set; }
     
     public Size Dimensions { get; set; }
@@ -644,21 +659,25 @@ public class DraftLocation<T>
 {
     /// <summary>
     /// The InProcess folder ID of the draft.
-    /// </summary> 
+    /// </summary>
+    /// <example>10</example>
     public T FolderId { get; set; }
 
     /// <summary>
     /// The InProcess folder title of the draft.
     /// </summary>
+    /// <example>Draft Folder</example>
     public string FolderTitle { get; set; }
 
     /// <summary>
     /// The draft ID.
     /// </summary>
+    /// <example>123</example>
     public T FileId { get; set; }
 
     /// <summary>
     /// The draft title.
     /// </summary>
+    /// <example>Draft Document</example>
     public string FileTitle { get; set; }
 }

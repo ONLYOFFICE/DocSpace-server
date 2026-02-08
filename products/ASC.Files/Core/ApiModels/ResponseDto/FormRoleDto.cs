@@ -35,11 +35,13 @@ public class FormRoleDto
     /// <summary>
     /// The role name.
     /// </summary>
+    /// <example>Approver</example>
     public required string RoleName { get; set; }
 
     /// <summary>
     /// The role color.
     /// </summary>
+    /// <example>#FF5733</example>
     public string RoleColor { get; set; }
 
     /// <summary>
@@ -50,11 +52,13 @@ public class FormRoleDto
     /// <summary>
     /// The role sequence.
     /// </summary>
+    /// <example>1</example>
     public required int Sequence { get; set; }
 
     /// <summary>
     /// Specifies if the role is submitted.
     /// </summary>
+    /// <example>false</example>
     public required bool Submitted { get; set; }
 
     /// <summary>
@@ -70,6 +74,7 @@ public class FormRoleDto
     /// <summary>
     /// The role status.
     /// </summary>
+    /// <example>0</example>
     public FormFillingStatus RoleStatus { get; set; }
 }
 [Scope]

@@ -34,6 +34,7 @@ public class CheckDestFolderDto
     /// <summary>
     /// The result of the validation operation.
     /// </summary>
+    /// <example>0</example>
     public CheckDestFolderResult Result { get; set; }
 
     /// <summary>
