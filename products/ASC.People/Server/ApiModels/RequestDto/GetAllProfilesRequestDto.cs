@@ -38,6 +38,7 @@ public class GetAllProfilesRequestDto
     /// <summary>
     /// The maximum number of items to be retrieved in the response.
     /// </summary>
+    /// <example>25</example>
     [FromQuery(Name = "count")]
     [Range(1, ApiContext.MaxCount)]
     public int Count { get; set; } = ApiContext.DefaultCount;
@@ -45,30 +46,35 @@ public class GetAllProfilesRequestDto
     /// <summary>
     /// The zero-based index of the first item to be retrieved in a filtered result set.
     /// </summary>
+    /// <example>0</example>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
 
     /// <summary>
     /// Specifies the filter criteria for user-related queries.
     /// </summary>
+    /// <example>displayName</example>
     [FromQuery(Name = "filterBy")]
     public string FilterBy { get; set; }
 
     /// <summary>
     /// Specifies the property or field name by which the results should be sorted.
     /// </summary>
+    /// <example>displayName</example>
     [FromQuery(Name = "sortBy")]
     public string SortBy { get; set; }
 
     /// <summary>
     /// The order in which the results are sorted.
     /// </summary>
+    /// <example>0</example>
     [FromQuery(Name = "sortOrder")]
     public SortOrder SortOrder { get; set; }
 
     /// <summary>
     /// The character or string used to separate multiple filter values in a filtering query.
     /// </summary>
+    /// <example>,</example>
     /// <remarks>
     /// This property defines the delimiter applied when multiple filter criteria are provided.
     /// It allows the request to parse and handle multiple filtering values effectively.
@@ -79,6 +85,7 @@ public class GetAllProfilesRequestDto
     /// <summary>
     /// The text value used as an additional filter criterion for profiles retrieval.
     /// </summary>
+    /// <example>John</example>
     [FromQuery(Name = "filterValue")]
     public string Text { get; set; }
 }

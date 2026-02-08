@@ -34,11 +34,13 @@ public class UpdateMembersRequestDto
     /// <summary>
     /// The list of user IDs.
     /// </summary>
+    /// <example>["00000000-0000-0000-0000-000000000000", "11111111-1111-1111-1111-111111111111"]</example>
     public IEnumerable<Guid> UserIds { get; set; }
 
     /// <summary>
     /// Specifies whether to resend invitation letters to all the users or not.
     /// </summary>
+    /// <example>false</example>
     public bool ResendAll { get; set; }
 }
 
@@ -50,12 +52,14 @@ public class UpdateMemberStatusRequestDto
     /// <summary>
     /// The new user status.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "status")]
     public required EmployeeStatus Status { get; set; }
 
     /// <summary>
     /// The request parameters for updating the user information.
     /// </summary>
+    /// <example>{"userIds":["00000000-0000-0000-0000-000000000000"],"resendAll":false}</example>
     [FromBody]
     public required UpdateMembersRequestDto UpdateMembers { get; set; }
 }
@@ -68,12 +72,14 @@ public class UpdateMemberTypeRequestDto
     /// <summary>
     /// The new user type.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "type")]
     public required EmployeeType Type { get; set; }
 
     /// <summary>
     /// The request parameters for updating the user information.
     /// </summary>
+    /// <example>{"userIds":["00000000-0000-0000-0000-000000000000"],"resendAll":false}</example>
     [FromBody]
     public required UpdateMembersRequestDto UpdateMembers { get; set; }
 }
@@ -86,12 +92,14 @@ public class UpdateMemberActivationStatusRequestDto
     /// <summary>
     /// The new user activation status.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "activationstatus")]
     public required EmployeeActivationStatus ActivationStatus { get; set; }
 
     /// <summary>
     /// The request parameters for updating the user information.
     /// </summary>
+    /// <example>{"userIds":["00000000-0000-0000-0000-000000000000"],"resendAll":false}</example>
     [FromBody]
     public required UpdateMembersRequestDto UpdateMembers { get; set; }
 }

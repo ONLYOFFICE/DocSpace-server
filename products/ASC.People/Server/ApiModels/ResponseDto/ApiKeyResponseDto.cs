@@ -34,26 +34,31 @@ public class ApiKeyResponseDto
     /// <summary>
     /// The API key unique identifier.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public required Guid Id { get; set; }
 
     /// <summary>
     /// The API key name.
     /// </summary>
+    /// <example>My API Key</example>
     public required string Name { get; set; }
 
     /// <summary>
     /// The full API key value (only returned when creating a new key).
     /// </summary>
+    /// <example>api_key_1234567890abcdef</example>
     public required string Key { get; set; }
 
     /// <summary>
     /// The API key postfix (used for identification).
     /// </summary>
+    /// <example>...cdef</example>
     public string KeyPostfix { get; set; }
 
     /// <summary>
     /// The list of permissions granted to the API key.
     /// </summary>
+    /// <example>["read", "write", "delete"]</example>
     public required List<string> Permissions { get; set; }
 
     /// <summary>
@@ -79,6 +84,7 @@ public class ApiKeyResponseDto
     /// <summary>
     /// Indicates whether the API key is active or not.
     /// </summary>
+    /// <example>true</example>
     public required bool IsActive { get; set; } = true;
 }
 

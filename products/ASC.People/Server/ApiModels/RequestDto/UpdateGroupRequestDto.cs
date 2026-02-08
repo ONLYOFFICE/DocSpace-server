@@ -34,21 +34,25 @@ public class UpdateGroupRequest
     /// <summary>
     /// The list of user IDs to add to the group.
     /// </summary>
+    /// <example>["00000000-0000-0000-0000-000000000000"]</example>
     public IEnumerable<Guid> MembersToAdd { get; set; }
 
     /// <summary>
     /// The list of user IDs to remove from the group.
     /// </summary>
+    /// <example>["11111111-1111-1111-1111-111111111111"]</example>
     public IEnumerable<Guid> MembersToRemove { get; set; }
 
     /// <summary>
     /// The group manager ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid GroupManager { get; set; }
 
     /// <summary>
     /// The group name.
     /// </summary>
+    /// <example>Sales Team</example>
     [StringLength(128)]
     public string GroupName { get; set; }
 }
@@ -61,12 +65,14 @@ public class UpdateGroupRequestDto
     /// <summary>
     /// The group ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "id")]
     public required Guid Id { get; set; }
 
     /// <summary>
     /// The request for updating a group.
     /// </summary>
+    /// <example>{"groupName":"Updated Team","groupManager":"00000000-0000-0000-0000-000000000000"}</example>
     [FromBody]
     public required UpdateGroupRequest Update { get; set; }
 }

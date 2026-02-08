@@ -34,5 +34,6 @@ public class DarkThemeSettingsRequestDto
     /// <summary>
     /// The portal theme settings type.
     /// </summary>
+    /// <example>0</example>
     public required DarkThemeSettingsType Theme { get; set; }
 }
