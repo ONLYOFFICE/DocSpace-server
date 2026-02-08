@@ -34,67 +34,80 @@ public class CreateRoomFromTemplateDto
     /// <summary>
     /// The template ID from which the room to be created.
     /// </summary>
+    /// <example>1</example>
     public required int TemplateId { get; set; }
 
     /// <summary>
     /// The room title.
     /// </summary>
+    /// <example>My Room From Template</example>
     public required string Title { get; set; }
 
     /// <summary>
     /// The logo request parameters.
     /// </summary>
+    /// <example>{"tmpFile": "/temp/logo.png", "x": 0, "y": 0, "width": 100, "height": 100}</example>
     public LogoRequest Logo { get; set; }
 
     /// <summary>
     /// Specifies whether to copy a logo or not.
     /// </summary>
+    /// <example>false</example>
     public bool CopyLogo { get; set; }
 
     /// <summary>
     /// The collection of tags.
     /// </summary>
+    /// <example>["tag1", "tag2", "tag3"]</example>
     public IEnumerable<string> Tags { get; set; }
 
     /// <summary>
     /// The color of the room to be created.
     /// </summary>
+    /// <example>FF0000</example>
     [StringLength(6)]
     public string Color { get; set; }
 
     /// <summary>
     /// The cover of the room to be created.
     /// </summary>
+    /// <example>cover1.jpg</example>
     [StringLength(50)]
     public string Cover { get; set; }
 
     /// <summary>
     /// The room quota.
     /// </summary>
+    /// <example>1073741824</example>
     public long? Quota { get; set; }
 
     /// <summary>
     /// Specifies whether to create a room with indexing.
     /// </summary>
+    /// <example>true</example>
     public bool? Indexing { get; set; }
 
     /// <summary>
     /// Specifies whether to deny downloads from the room.
     /// </summary>
+    /// <example>false</example>
     public bool? DenyDownload { get; set; }
 
     /// <summary>
     /// The room data lifetime information.
     /// </summary>
+    /// <example>{"deletePermanently": false, "period": 0, "value": 30, "enabled": true}</example>
     public RoomDataLifetimeDto Lifetime { get; set; }
 
     /// <summary>
     /// The watermark settings.
     /// </summary>
+    /// <example>{"enabled": true, "text": "Confidential", "rotate": -45, "imageScale": 100}</example>
     public WatermarkRequestDto Watermark { get; set; }
 
     /// <summary>
     /// Specifies whether the room to be created is private or not.
     /// </summary>
+    /// <example>false</example>
     public bool? Private { get; set; }
 }

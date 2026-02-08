@@ -81,72 +81,89 @@ public class CreateRoomRequestDto
     /// <summary>
     /// The room name.
     /// </summary>
+    /// <example>My Room</example>
     [StringLength(170)]
     public required string Title { get; set; }
 
     /// <summary>
     /// The room quota.
     /// </summary>
+    /// <example>1073741824</example>
     public long? Quota { get; set; }
 
     /// <summary>
     /// Specifies whether to create a room with indexing.
     /// </summary>
+    /// <example>true</example>
     public bool? Indexing { get; set; }
 
     /// <summary>
     /// Specifies whether to deny downloads from the room.
     /// </summary>
+    /// <example>false</example>
     public bool? DenyDownload { get; set; }
 
     /// <summary>
     /// The room data lifetime information.
     /// </summary>
+    /// <example>{"deletePermanently": false, "period": 0, "value": 30, "enabled": true}</example>
     public RoomDataLifetimeDto Lifetime { get; set; }
 
     /// <summary>
     /// The watermark settings.
     /// </summary>
+    /// <example>{"enabled": true, "text": "Confidential", "rotate": -45, "imageScale": 100}</example>
     public WatermarkRequestDto Watermark { get; set; }
 
     /// <summary>
     /// The room logo.
     /// </summary>
+    /// <example>{"tmpFile": "/temp/logo.png", "x": 0, "y": 0, "width": 100, "height": 100}</example>
     public LogoRequest Logo { get; set; }
 
     /// <summary>
     /// The list of tags.
     /// </summary>
+    /// <example>["tag1", "tag2", "tag3"]</example>
     public IEnumerable<string> Tags { get; set; }
 
     /// <summary>
     /// The room color.
     /// </summary>
+    /// <example>FF0000</example>
     [StringLength(6)]
     public string Color { get; set; }
 
     /// <summary>
     /// The room cover.
     /// </summary>
+    /// <example>cover1.jpg</example>
     [StringLength(50)]
     public string Cover { get; set; }
 
     /// <summary>
     /// The room type.
     /// </summary>
+    /// <example>2</example>
     [JsonConverter(typeof(JsonStringEnumConverter<RoomType>))]
     public required RoomType RoomType { get; set; }
 
     /// <summary>
     /// Specifies whether the room to be created is private or not.
     /// </summary>
+    /// <example>false</example>
     public bool Private { get; set; }
 
     /// <summary>
     /// The collection of sharing parameters.
     /// </summary>
+    /// <example>[{"shareTo": "00000000-0000-0000-0000-000000000000", "access": 1}]</example>
     [MaxEmailInvitations]
     public IEnumerable<FileShareParams> Share { get; set; }
-    
+
+    /// <summary>
+    /// The chat settings.
+    /// </summary>
+    /// <example>{"providerId": 1, "modelId": "gpt-4", "prompt": "Please analyze this document"}</example>
     public ChatSettings ChatSettings { get; set; }
 }

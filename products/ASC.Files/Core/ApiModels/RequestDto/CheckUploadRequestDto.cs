@@ -34,6 +34,7 @@ public class CheckUploadRequest
     /// <summary>
     /// The list of file titles.
     /// </summary>
+    /// <example>["file1.docx", "file2.pdf", "file3.xlsx"]</example>
     public IReadOnlyList<string> FilesTitle { get; set; }
 }
 
@@ -45,12 +46,14 @@ public class CheckUploadRequestDto<T>
     /// <summary>
     /// The folder ID.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "folderId")]
     public required T FolderId { get; set; }
 
     /// <summary>
     /// The request parameters for checking file uploads.
     /// </summary>
+    /// <example>{"filesTitle": ["file1.docx", "file2.pdf", "file3.xlsx"]}</example>
     [FromBody]
     public required CheckUploadRequest Check { get; set; }
 }
