@@ -2103,7 +2103,7 @@ public class FileSecurity(
                         if (isRoom)
                         {
                             return !folder.SettingsDenyDownload;
-                            }
+                        }
 
                         return room is not { SettingsDenyDownload: true };
                 }
@@ -3314,7 +3314,7 @@ public class FileSecurity(
 
         if (userId != ASC.Core.Configuration.Constants.Guest.ID)
         {
-        result.Add(new(Constants.GroupEveryone.ID, SubjectOrderType.Group));
+            result.Add(new(Constants.GroupEveryone.ID, SubjectOrderType.Group));
         }
 
         var linkId = await externalShare.GetLinkIdAsync();

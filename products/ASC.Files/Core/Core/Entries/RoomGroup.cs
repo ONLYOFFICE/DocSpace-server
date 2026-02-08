@@ -33,6 +33,7 @@ public class RoomGroup
     public string Icon { get; set; }
     public Guid UserID { get; set; }
 }
+
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class RoomGroupMapper
 {

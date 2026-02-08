@@ -31,7 +31,6 @@ public interface IRoomGroupDao<T>
     Task<RoomGroup> SaveRoomGroupAsync(RoomGroup group);
     IAsyncEnumerable<RoomGroup> GetGroupsAsync();
     Task<RoomGroup> GetGroupInfoAsync(int groupId);
-    Task<int> GetGroupRoomsCountAsync(int groupId);
     Task DeleteGroup(int groupId);
     Task AddRoomToGroupAsync(T roomId, int groupId);
     Task RemoveRoomFromGroupAsync(T roomId, int groupId);

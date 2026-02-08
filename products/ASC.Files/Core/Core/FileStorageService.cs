@@ -1643,24 +1643,24 @@ public class FileStorageService //: IFileStorageService
 
                 var counter = 0;
 
-                if (!string.IsNullOrWhiteSpace( docTemplate.ThumbnailPath))
+                if (!string.IsNullOrWhiteSpace(docTemplate.ThumbnailPath))
                 {
-                foreach (var size in thumbnailSettings.Sizes)
-                {
+                    foreach (var size in thumbnailSettings.Sizes)
+                    {
                         var pathThumb = $"{docTemplate.ThumbnailPath}{fileExt.Trim('.')}.{size.Width}x{size.Height}.{global.ThumbnailExtension}";
 
-                    if (!await storeTemplate.IsFileAsync("", pathThumb))
-                    {
-                        break;
-                    }
+                        if (!await storeTemplate.IsFileAsync("", pathThumb))
+                        {
+                            break;
+                        }
 
-                    await using (var streamThumb = await storeTemplate.GetReadStreamAsync("", pathThumb, 0))
-                    {
-                        await (await globalStore.GetStoreAsync()).SaveAsync(fileDao.GetUniqThumbnailPath(file, size.Width, size.Height), streamThumb);
-                    }
+                        await using (var streamThumb = await storeTemplate.GetReadStreamAsync("", pathThumb, 0))
+                        {
+                            await (await globalStore.GetStoreAsync()).SaveAsync(fileDao.GetUniqThumbnailPath(file, size.Width, size.Height), streamThumb);
+                        }
 
-                    counter++;
-                }
+                        counter++;
+                    }
                 }
 
                 if (thumbnailSettings.Sizes.Count() == counter)
@@ -5007,7 +5007,7 @@ public class FileStorageService //: IFileStorageService
                 finish = true;
             }
         }
-            }
+    }
 
     public async Task<List<MentionWrapper>> ProtectUsersAsync<T>(T fileId)
     {
@@ -5278,7 +5278,6 @@ public class FileStorageService //: IFileStorageService
         return group;
     }
 
-
     public async Task DeleteGroup(int groupId)
     {
         await daoFactory.GetRoomGroupDao<int>().DeleteGroup(groupId);
@@ -5293,10 +5292,6 @@ public class FileStorageService //: IFileStorageService
     public IAsyncEnumerable<RoomGroup> GetGroupsAsync()
     {
         return daoFactory.GetRoomGroupDao<int>().GetGroupsAsync();
-    }
-    public async Task<int> GetGroupRoomsCountAsync(int groupId)
-    {
-        return await daoFactory.GetRoomGroupDao<int>().GetGroupRoomsCountAsync(groupId);
     }
 
     public async Task AddRoomToGroupAsync<T>(T roomId, int groupId)

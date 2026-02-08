@@ -28,27 +28,11 @@ namespace ASC.Files.Core.EF;
 
 public partial class FilesDbContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt])]
-    public IAsyncEnumerable<DbFilesGroup> GetGroupsAsync(int tenantId)
-    {
-        return GroupsQueries.GetGroupsAsync(this, tenantId);
-    }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<DbFilesGroup> GroupForUpdateAsync(int tenantId, int id)
     {
         return GroupsQueries.GroupForUpdateAsync(this, tenantId, id);
-    }
-
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
-    public Task<DbFilesRoomGroup> FirstOrDefaultInternalRoomGroupAsync(int tenantId, int groupId, int roomId)
-    {
-        return GroupsQueries.FirstOrDefaultInternalRoomGroupAsync(this, tenantId, groupId, roomId);
-    }
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null])]
-    public Task<DbFilesRoomGroup> FirstOrDefaultThirdpartyRoomGroupAsync(int tenantId, int groupId, string roomId)
-    {
-        return GroupsQueries.FirstOrDefaultThirdpartyRoomGroupAsync(this, tenantId, groupId, roomId);
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null])]
@@ -72,29 +56,10 @@ public partial class FilesDbContext
 
 static partial class GroupsQueries
 {
-    public static readonly Func<FilesDbContext, int, IAsyncEnumerable<DbFilesGroup>> GetGroupsAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId) =>
-                ctx.Set<DbFilesGroup>()
-                    .AsTracking()
-                    .Where(g => g.TenantId == tenantId));
-
     public static readonly Func<FilesDbContext, int, int, Task<DbFilesGroup>> GroupForUpdateAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, int id) =>
                 ctx.RoomGroup.FirstOrDefault(r => r.TenantId == tenantId && r.Id == id));
-
-    public static readonly Func<FilesDbContext, int, int, int, Task<DbFilesRoomGroup>> FirstOrDefaultInternalRoomGroupAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int groupId, int roomId) =>
-                ctx.RoomGroupRef
-                    .FirstOrDefault(r => r.TenantId == tenantId && r.GroupId == groupId && r.InternalRoomId == roomId));
-
-    public static readonly Func<FilesDbContext, int, int, string, Task<DbFilesRoomGroup>> FirstOrDefaultThirdpartyRoomGroupAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int groupId, string roomId) =>
-                ctx.RoomGroupRef
-                    .FirstOrDefault(r => r.TenantId == tenantId && r.GroupId == groupId && r.ThirdpartyRoomId == roomId));
 
     public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<DbFilesRoomGroup>> GetRoomsByGroupAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
