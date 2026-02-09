@@ -189,15 +189,27 @@ public class TelegramHandlerService(
 
     private readonly int[] _stopErrorCodes = [
         401, // Unathorized
-        409 // Keys Conflict
+        409, // Keys Conflict
     ];
+
+    private readonly int[] _silentErrorCodes = [
+        502,
+    ];
+
     Task HandleErrorAsync(Exception exception, int tenantId, CancellationTokenSource cts)
     {
         string message;
         if (exception is ApiRequestException apiException)
         {
             message = $"Telegram API Error:\n[{apiException.ErrorCode}]\n(TenantId: {tenantId})\n{apiException.Message}";
-            logger.Error(message);
+            if (_silentErrorCodes.Contains(apiException.ErrorCode))
+            {
+                logger.Information(message);
+            }
+            else
+            {
+                logger.Error(message);
+            }
 
             if (_stopErrorCodes.Contains(apiException.ErrorCode))
             {
@@ -207,8 +219,8 @@ public class TelegramHandlerService(
         else
         {
             message = exception.ToString();
+            logger.Error(message);
         }
-        logger.Error(message);
 
         return Task.CompletedTask;
     }
