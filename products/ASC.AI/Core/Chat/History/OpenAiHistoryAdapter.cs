@@ -26,7 +26,7 @@
 
 namespace ASC.AI.Core.Chat.History;
 
-public class OpenAiHistoryAdapter : HistoryAdapter
+public class OpenAiHistoryAdapter(DataContentLoader dataContentLoader) : HistoryAdapter(dataContentLoader)
 {
     protected override IEnumerable<ChatMessage> AdaptAssistantMessage(Message message)
     {

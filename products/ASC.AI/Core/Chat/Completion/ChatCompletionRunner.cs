@@ -35,6 +35,7 @@ public class ChatCompletionRunner(
     ChatClientFactory chatClientFactory,
     ILogger<ChatCompletionGenerator> logger,
     AttachmentHandler attachmentHandler,
+    DataContentLoader dataContentLoader,
     SocketManager socketManager,
     ChatNameGenerator chatNameGenerator,
     IServiceScopeFactory serviceScopeFactory)
@@ -122,7 +123,7 @@ public class ChatCompletionRunner(
         
         var userMessage = FormatUserMessage(message, attachments);
 
-        var historyAdapter = HistoryHelper.GetAdapter(context.ClientOptions.Provider);
+        var historyAdapter = HistoryHelper.GetAdapter(context.ClientOptions.Provider, dataContentLoader);
         var messages = await chatHistory.GetMessagesAsync(chatId, historyAdapter, systemMessage, userMessage)
             .ToListAsync();
         

@@ -40,6 +40,7 @@ public class AttachmentHandler(
     ITextExtractor textExtractor,
     VectorizationGlobalSettings vectorizationGlobalSettings,
     ProviderSettings providerSettings,
+    DataContentLoader dataContentLoader,
     ILogger<AttachmentHandler> logger)
 {
     public async IAsyncEnumerable<AttachmentResult> HandleAsync(
@@ -141,7 +142,7 @@ public class AttachmentHandler(
 
         foreach (var (copiedFile, fileType, extension) in copiedFiles)
         {
-            yield return await HandleMediaAsync(internalDao, copiedFile, fileType, extension);
+            yield return await HandleMediaAsync(copiedFile, fileType, extension);
         }
 
         foreach (var (file, extension) in textFiles)
@@ -222,38 +223,16 @@ public class AttachmentHandler(
         }
     }
     
-    private static async Task<AttachmentResult> HandleMediaAsync(
-        IFileDao<int> internalDao,
+    private async Task<AttachmentResult> HandleMediaAsync(
         File<int> file,
         FileType fileType,
         string extension)
     {
-        await using var stream = await internalDao.GetFileStreamAsync(file);
-
-        var length = (int)file.ContentLength;
-        var memoryOwner = MemoryPool<byte>.Shared.Rent(length);
-        await stream.ReadExactlyAsync(memoryOwner.Memory[..length]);
-
         return new AttachmentResult
         {
             File = file,
             Success = true,
-            Content = new DataMessageContent
-            {
-                Id = file.Id,
-                FileType = fileType,
-                Data = (memoryOwner, length),
-                MediaType = GetMediaType(extension)
-            }
+            Content = await dataContentLoader.CreateAsync(file, fileType, extension)
         };
     }
-
-    private static string GetMediaType(string extension) => extension.ToLowerInvariant() switch
-    {
-        ".png" => "image/png",
-        ".jpg" or ".jpeg" or ".jpe" or ".jfif" => "image/jpeg",
-        ".gif" => "image/gif",
-        ".webp" => "image/webp",
-        _ => throw new ArgumentOutOfRangeException(nameof(extension), extension, null)
-    };
 }
