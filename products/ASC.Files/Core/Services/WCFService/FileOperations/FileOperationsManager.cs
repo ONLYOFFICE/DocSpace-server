@@ -24,17 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Amqp.Framing;
-
 using ASC.Files.Core.Services.WCFService.FileOperations;
-
-using crypto;
-
-using Google.Apis.Drive.v3.Data;
-
-using NodaTime.Calendars;
-
-using Tweetinvi.Core.Extensions;
 
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
@@ -621,11 +611,8 @@ public class FileDeleteOperationsManager(
         var fileId = files.FirstOrDefault();
         var file = await fileDao.GetFileAsync(fileId);
 
-        var errorMsg = await security.CheckVersionPermissionsAsync(file, versions);
-        if (errorMsg != null)
-        {
-            throw new Exception(errorMsg);
-        }
+        var throwException = true;
+        await security.CheckVersionPermissionsAsync(file, versions, throwException);
     }
 
     private async Task CheckFolderAsync<T>(List<T> data, IFolderDao<T> folderDao, PermissionsCheck security, bool ignoreException, bool immediately)
@@ -634,11 +621,8 @@ public class FileDeleteOperationsManager(
         {
             var folder = await folderDao.GetFolderAsync(folderId);
 
-            var errorMsg = await security.CheckFolderPermissionsAsync([folder], immediately, ignoreException);
-            if (errorMsg != null)
-            {
-                throw new Exception(errorMsg);
-            }
+            var throwException = true;
+            await security.CheckFolderPermissionsAsync([folder], immediately, ignoreException, throwException);
         }
     }
 
@@ -648,11 +632,10 @@ public class FileDeleteOperationsManager(
         {
             var file = await fileDao.GetFileAsync(fileId);
 
-            var errorMsg = await security.CheckFilePermissionsAsync([file], false, true);
-            if (errorMsg != null)
-            {
-                throw new Exception(errorMsg);
-            }
+            var folder = false;
+            var checkPermissions = true;
+            var throwException = true;
+            await security.CheckFilePermissionsAsync([file], folder, checkPermissions, throwException);
         }
     }
 }

@@ -150,13 +150,18 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         }
         else
         {
-            await DeleteFilesAsync(Files, serviceScope, true);
-            await DeleteFoldersAsync(Folders, serviceScope, true);
-
             if (_isEmptyTrash)
             {
+                await DeleteFilesAsync(Files, serviceScope, true);
+                await DeleteFoldersAsync(Folders, serviceScope, true);
+
                 var trash = await folderDao.GetFolderAsync(_trashId);
                 await filesMessageService.SendAsync(MessageAction.TrashEmptied, trash, _headers);
+            }
+            else
+            {
+                await DeleteFilesAsync(Files, serviceScope, true);
+                await DeleteFoldersAsync(Folders, serviceScope, true);
             }
         }
     }

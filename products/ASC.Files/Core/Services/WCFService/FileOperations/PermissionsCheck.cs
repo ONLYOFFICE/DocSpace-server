@@ -29,68 +29,125 @@ namespace ASC.Files.Core.Services.WCFService.FileOperations;
 [Scope]
 public class PermissionsCheck(LockerManager lockerManager, FileTrackerHelper fileTracker, FileSecurity security)
 {
-    public async Task<string> CheckFilePermissionsAsync<T>(IEnumerable<File<T>> files, bool folder, bool checkPermissions)
+    public async Task<string> CheckFilePermissionsAsync<T>(IEnumerable<File<T>> files, bool folder, bool checkPermissions, bool throwExeption = false)
     {
+        string errorMsg = null;
+
         foreach (var file in files)
         {
             if (file == null)
             {
-                return FilesCommonResource.ErrorMessage_FileNotFound;
+                errorMsg = FilesCommonResource.ErrorMessage_FileNotFound;
+
+                if (throwExeption)
+                {
+                    throw new FileNotFoundException(errorMsg);
+                }
+
+                return errorMsg;
             }
+
             if (checkPermissions && !await security.CanDeleteAsync(file))
             {
-                return FilesCommonResource.ErrorMessage_SecurityException_DeleteFile;
+                errorMsg = FilesCommonResource.ErrorMessage_SecurityException_DeleteFile;
+
+                if (throwExeption)
+                {
+                    throw new SecurityException(errorMsg);
+                }
+
+                return errorMsg;
             }
+
             if (checkPermissions && await lockerManager.FileLockedForMeAsync(file.Id))
             {
-                return FilesCommonResource.ErrorMessage_LockedFile;
+                errorMsg = FilesCommonResource.ErrorMessage_LockedFile;
+
+                if (throwExeption)
+                {
+                    throw new SecurityException(errorMsg);
+                }
+
+                return errorMsg;
             }
+
             if (await fileTracker.IsEditingAsync(file.Id, false))
             {
-                return folder ?
+                errorMsg = folder ?
                     FilesCommonResource.ErrorMessage_SecurityException_DeleteEditingFolder :
                     FilesCommonResource.ErrorMessage_SecurityException_DeleteEditingFile;
+
+                if (throwExeption)
+                {
+                    throw new SecurityException(errorMsg);
+                }
+
+                return errorMsg;
             }
         }
         
         return null;
     }
 
-    public async Task<string> CheckFolderPermissionsAsync<T>(IEnumerable<Folder<T>> folders, bool immediately, bool ignoreException)
+    public async Task<string> CheckFolderPermissionsAsync<T>(IEnumerable<Folder<T>> folders, bool immediately, bool ignoreException, bool throwException = false)
     {
+        string errorMsg = null;
         foreach (var folder in folders)
         {
             if (folder == null)
             {
-                return FilesCommonResource.ErrorMessage_FolderNotFound;
+                errorMsg = FilesCommonResource.ErrorMessage_FolderNotFound;
+
+                if (throwException)
+                {
+                    throw new FileNotFoundException(errorMsg);
+                }
+
+                return errorMsg;
             }
 
             var canDelete = await security.CanDeleteAsync(folder);
             var checkPermissions = !folder.IsRoom || !canDelete;
+            if ((immediately && folder.IsRoom) || (ignoreException && checkPermissions && !canDelete))
+            {
+                errorMsg = FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder;
 
-            if (immediately && folder.IsRoom)
-            {
-                return FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder;
-            }
-            else if (ignoreException && checkPermissions && !canDelete)
-            {
-                return FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder;
+                if (throwException)
+                {
+                    throw new SecurityException(errorMsg);
+                }
+
+                return errorMsg;
             }
         }
         
         return null;
     }
 
-    public async Task<string> CheckVersionPermissionsAsync<T>(File<T> file, IEnumerable<int> versions = null)
+    public async Task<string> CheckVersionPermissionsAsync<T>(File<T> file, IEnumerable<int> versions = null, bool throwException = false)
     {
+        string errorMsg = null;
+
         if (file == null)
         {
-            return FilesCommonResource.ErrorMessage_FileNotFound;
+            errorMsg = FilesCommonResource.ErrorMessage_FileNotFound;
+            if (throwException)
+            {
+                throw new FileNotFoundException(errorMsg);
+            }
+
+            return errorMsg;
         }
 
         if (file.RootFolderType is FolderType.Archive or FolderType.TRASH)
         {
-            return FilesCommonResource.ErrorMessage_SecurityException;
+            errorMsg = FilesCommonResource.ErrorMessage_SecurityException;
+            if (throwException)
+            {
+                throw new SecurityException(errorMsg); 
+            }
+
+            return errorMsg;
         }
 
         if (versions != null)
@@ -99,12 +156,18 @@ public class PermissionsCheck(LockerManager lockerManager, FileTrackerHelper fil
             {
                 if (file.Version == version)
                 {
-                    return FilesCommonResource.ErrorMessage_SecurityException_FileVersion;
+                    errorMsg = FilesCommonResource.ErrorMessage_SecurityException_FileVersion;
+                    if (throwException)
+                    {
+                        throw new SecurityException(errorMsg);
+                    }
+
+                    return errorMsg;
                 }
             }
         }
         
-        var errorMsg = await CheckFilePermissionsAsync([file], false, true);
+        errorMsg = await CheckFilePermissionsAsync([file], false, true, throwException);
         if (errorMsg != null)
         {
             return errorMsg;

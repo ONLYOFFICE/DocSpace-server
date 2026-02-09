@@ -111,7 +111,7 @@ public class FileDeleteTests(
                 new Delete(false, true), 
                 TestContext.Current.CancellationToken));
         
-        exception.ErrorCode.Should().Be(423);
+        exception.ErrorCode.Should().Be(403);
     }
 
     [Fact]
@@ -130,7 +130,7 @@ public class FileDeleteTests(
                 new Delete(false, true),
                 TestContext.Current.CancellationToken));
 
-        exception.ErrorCode.Should().Be(423);
+        exception.ErrorCode.Should().Be(403);
     }
 
     // [Fact]
