@@ -11,7 +11,6 @@ import org.openapitools.codegen.*;
 
 import java.util.*;
 import java.io.File;
-import com.example.codegen.TagParts;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
@@ -127,12 +126,12 @@ public class MyPythonCodegen extends PythonClientCodegen {
             if (model.getComposedSchemas() != null && model.getComposedSchemas().getAllOf() != null) {
                 model.getVendorExtensions().put("x-uses-allOf", true);
                 Set<String> localPropertyNames = new HashSet<>();
-                Schema modelSchema = this.openAPI.getComponents().getSchemas().get(model.schemaName);
+                Schema<?> modelSchema = this.openAPI.getComponents().getSchemas().get(model.schemaName);
 
                 if (ModelUtils.isAllOf(modelSchema)) {
                     for (Object obj : modelSchema.getAllOf()) {
                         if (obj instanceof Schema) {
-                            Schema allOfSchema = (Schema) obj;
+                            Schema<?> allOfSchema = (Schema<?>) obj;
                             if ("object".equals(ModelUtils.getType(allOfSchema)) && allOfSchema.getProperties() != null) {
                                 localPropertyNames.addAll(allOfSchema.getProperties().keySet());
                             }
@@ -193,6 +192,36 @@ public class MyPythonCodegen extends PythonClientCodegen {
         objs.put("x-openIdConnectUrl", "{{authBaseUrl}}/.well-known/openid-configuration");
 
         return objs;
+    }
+
+    @Override
+    public Map<String, ModelsMap> postProcessAllModels(Map<String, ModelsMap> objs) {
+        final Map<String, ModelsMap> processed = super.postProcessAllModels(objs);
+
+        for (Map.Entry<String, ModelsMap> entry : processed.entrySet()) {
+            ModelsMap modelsMap = entry.getValue();
+
+            for (ModelMap m : modelsMap.getModels()) {
+                CodegenModel model = m.getModel();
+
+                if (model.isEnum && model.getAllowableValues() != null) {
+                    
+                    List<Map<String, Object>> enumVars = (List<Map<String, Object>>) model.getAllowableValues().get("enumVars");
+
+                    if (enumVars != null) {
+                        for (Map<String, Object> ev : enumVars) {
+                            String name = (String) ev.get("name");
+
+                            if ("None".equals(name)) {
+                                ev.put("name", "None_");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return processed;
     }
 
     @Override

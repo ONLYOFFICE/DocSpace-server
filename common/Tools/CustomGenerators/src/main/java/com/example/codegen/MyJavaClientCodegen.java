@@ -219,7 +219,6 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
     }
 
     private final Map<String, String> seenApiFilenames = new HashMap<String, String>();
-    private final Set<String> usedApiClassNames = new HashSet<>();
 
     @Override
     public String apiFilename(String templateName, String tag) {
