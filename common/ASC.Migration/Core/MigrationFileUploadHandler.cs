@@ -50,7 +50,7 @@ public class MigrationFileUploadHandler
             }
 
             var tenantId = tenantManager.GetCurrentTenantId();
-            var key = $"migration folder - {tenantId}";
+            var key = MigrationOperation.GetMigrationFolderCacheKey(tenantId);
             if (context.Request.Query["Init"].ToString() == "true")
             {
 
@@ -60,16 +60,7 @@ public class MigrationFileUploadHandler
                     var discStore = await storageFactory.GetStorageAsync(tenantId, "migration", (IQuotaController)null) as DiscDataStore;
 
                     var path = await hybridCache.GetOrDefaultAsync<string>(key);
-                    if (!string.IsNullOrEmpty(path))
-                    {
-                        _ = Task.Factory.StartNew(() =>
-                        {
-                            if (Directory.Exists(path))
-                            {
-                                Directory.Delete(path, true);
-                            }
-                        });
-                    }
+                    MigrationOperation.ClearMigrationFolder(path);
 
                     var newPath = Path.GetRandomFileName();
                     var newFolder = discStore.GetPhysicalPath("", newPath);

@@ -931,7 +931,7 @@ public class FileStorageService //: IFileStorageService
 
             if (chatSettings != null)
             {
-                if (chatSettings.ProviderId <= 0 && !(chatSettings.ProviderId == -1 && gateway.Configured))
+                if (chatSettings.ProviderId <= 0 && !(chatSettings.ProviderId == -1 && await gateway.IsEnabledAsync()))
                 {
                     throw new ArgumentException(nameof(chatSettings.ProviderId));
                 }
@@ -1171,7 +1171,7 @@ public class FileStorageService //: IFileStorageService
             {
                 var chatSettings = updateData.ChatSettings;
                 
-                if (chatSettings.ProviderId <= 0 && !(chatSettings.ProviderId == -1 && gateway.Configured))
+                if (chatSettings.ProviderId <= 0 && !(chatSettings.ProviderId == -1 && await gateway.IsEnabledAsync()))
                 {
                     throw new ArgumentException(nameof(updateData.ChatSettings.ProviderId));
                 }

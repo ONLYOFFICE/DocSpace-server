@@ -42,7 +42,7 @@ public class EmbeddingGeneratorFactory(
         string key;
         string modelId;
 
-        if (gateway.Configured && providerId == AiGateway.ProviderId)
+        if (providerId == AiGateway.ProviderId)
         {
             url = gateway.Url;
             key = await gateway.GetKeyAsync();

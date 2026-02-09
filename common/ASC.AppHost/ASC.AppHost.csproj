@@ -14,6 +14,7 @@
         <PackageReference Include="Aspire.Hosting.RabbitMQ" />
         <PackageReference Include="Aspire.Hosting.Redis" />
         <PackageReference Include="CommunityToolkit.Aspire.Hosting.MailPit" />
+        <PackageReference Include="CommunityToolkit.Aspire.Hosting.MySql.Extensions" />
     </ItemGroup>
 
     <ItemGroup>
@@ -25,6 +26,7 @@
       <ProjectReference Include="..\services\ASC.Data.Backup\ASC.Data.Backup.csproj" />
       <ProjectReference Include="..\services\ASC.Notify\ASC.Notify.csproj" />
       <ProjectReference Include="..\services\ASC.Studio.Notify\ASC.Studio.Notify.csproj" />
+      <ProjectReference Include="..\services\ASC.TelegramService\ASC.TelegramService.csproj" />
       <ProjectReference Include="..\Tools\ASC.Migration.Runner\ASC.Migration.Runner.csproj" />
       <ProjectReference Include="..\..\products\ASC.Files\Server\ASC.Files.csproj" />
       <ProjectReference Include="..\..\products\ASC.Files\Service\ASC.Files.Service.csproj" />

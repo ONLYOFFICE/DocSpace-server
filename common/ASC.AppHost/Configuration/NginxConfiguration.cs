@@ -35,8 +35,9 @@ public static class NginxConfiguration
         IResourceBuilder<ExecutableResource>? startPackages,
         bool isDocker)
     {
+        var isArm64 = System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture == System.Runtime.InteropServices.Architecture.Arm64;
         
-        var openResty = builder.AddContainer(Constants.OpenRestyContainer, "openresty/openresty", "latest")
+        var openResty = builder.AddContainer(Constants.OpenRestyContainer, "openresty/openresty", "1.27.1.2-10-alpine" + (isArm64 ? "-arm64" : ""))
             .WithBindMount(Path.Combine(basePath, "buildtools", "config", "nginx"), "/etc/nginx/conf.d/")
             .WithBindMount(Path.Combine(basePath, "buildtools", "config", "nginx", "includes"), "/etc/nginx/includes/")
             .WithBindMount(Path.Combine(basePath, "buildtools", "install", "docker", "config", "nginx", "templates"), "/etc/nginx/templates/")
@@ -44,7 +45,7 @@ public static class NginxConfiguration
             .WithBindMount(Path.Combine(clientBasePath, "packages", "client"), "/var/www/client")
             .WithBindMount(Path.Combine(clientBasePath, "packages", "login"), "/var/www/login")
             .WithBindMount(Path.Combine(clientBasePath, "packages", "management"), "/var/www/management")
-            .WithHttpEndpoint(Constants.AppHostPort, Constants.RestyPort);
+            .WithContainerRuntimeArgs("-p", $"0.0.0.0:{Constants.AppHostPort}:{Constants.RestyPort}");
 
         if (startPackages != null)
         {
@@ -59,6 +60,7 @@ public static class NginxConfiguration
         }
 
         openResty.WithArgs("/bin/sh", "-c",
+            $"apk add --no-cache gettext && " +
             $"envsubst '{string.Join(' ', serviceUrls.Select(r => $"${r.Key}"))}' < /etc/nginx/includes/onlyoffice-upstream-map.conf.template > /etc/nginx/includes/onlyoffice-upstream-map.conf && " +
             $"/usr/local/openresty/bin/openresty -g 'daemon off;'");
 

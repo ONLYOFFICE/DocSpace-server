@@ -116,7 +116,15 @@ public abstract class UploadController<T>(
             Data = data
         };
     }
-    
+
+    /// <summary>Creates a session for uploading a file to a specific folder in chunks.</summary>
+    /// <remarks>
+    /// The session allows the user to upload a file in smaller chunks to the folder identified by its ID.
+    /// The file information, such as name, size, and additional metadata, must be provided in the request.
+    /// This method facilitates large file upload scenarios by enabling chunked file uploads.
+    /// </remarks>
+    /// <param name="inDto">The request object containing the folder ID and session details, including file name, size, relative path, and additional upload settings.</param>
+    /// <returns>A response containing details about the created upload session, such as session ID, expiration information, and upload progress data.</returns>
     [Tags("Files / Operations")]
     [SwaggerResponse(200)]
     [HttpPost("{folderId}/session")]
@@ -124,7 +132,14 @@ public abstract class UploadController<T>(
     {
         return await filesControllerHelper.CreateUploadSessionAsync(inDto.FolderId, inDto.Session.FileName, inDto.Session.FileSize, inDto.Session.RelativePath, inDto.Session.Encrypted, inDto.Session.CreateOn, inDto.Session.CreateNewIfExist);
     }
-    
+
+    /// <summary>Aborts an in-progress file upload session.</summary>
+    /// <remarks>
+    /// This method allows users to cancel an ongoing upload session identified by the session ID.
+    /// Once the session is aborted, the associated resources will be cleaned up, and the session will no longer accept further uploads.
+    /// </remarks>
+    /// <param name="inDto">A request object containing the session ID of the upload session to be aborted.</param>
+    /// <returns>A Task representing the asynchronous operation.</returns>
     [Tags("Files / Operations")]
     [SwaggerResponse(200)]
     [HttpDelete("{folderId}/session/{sessionId}")]
@@ -144,7 +159,23 @@ public abstract class UploadController<T>(
     //     return await chunkedUploadSessionHelper.ToResponseObjectAsync(createdSession, true);
     // }
     //
-    
+
+    /// <summary>Resumes an ongoing file upload session for uploading additional chunks of data.</summary>
+    /// <remarks>
+    /// This method allows continuing an interrupted or partially completed file upload session by uploading subsequent data chunks.
+    /// The server will validate each uploaded chunk, update the session state, and respond with the status of the current upload. Once
+    /// the total bytes uploaded match the total file size, the file upload process is finalized and related events are triggered.
+    /// If the file is newly uploaded, the server responds with a "201 Created" status upon completion. If it overwrites an existing file,
+    /// versioning information is updated accordingly. The method also triggers associated webhooks and socket notifications to reflect
+    /// the updated file state.
+    /// </remarks>
+    /// <param name="inDto">
+    /// Contains information about the ongoing upload session, including the session ID, the file chunk data, and its size.
+    /// </param>
+    /// <returns>
+    /// A DTO containing information about the current state of the upload session, including the uploaded file's metadata (e.g., file ID, folder ID,
+    /// version, title, and additional details), as well as whether the upload process has been completed.
+    /// </returns>
     [Tags("Files / Operations")]
     [SwaggerResponse(200)]
     [HttpPost("{folderId}/session/{sessionId}")]
@@ -213,7 +244,26 @@ public abstract class UploadController<T>(
             File = await _fileDtoHelper.GetAsync(resumedSession.File)
         };
     }
-    
+
+    /// <summary>Handles the upload of a chunk for an existing upload session.</summary>
+    /// <remarks>
+    /// This method allows the caller to upload a specific chunk of a file to an ongoing upload session.
+    /// The session is identified by the session ID provided in the request. The chunk can be of any size
+    /// within the limits allowed during the session initialization. Each chunk must be uploaded in the
+    /// correct order for the server to process it appropriately.
+    /// The server updates the upload session status and stores the progress information after processing
+    /// each chunk. The updated session details are returned in the response.
+    /// </remarks>
+    /// <param name="inDto">
+    /// An object containing the necessary parameters for uploading a chunk, including:
+    /// <b>SessionId</b>: The unique identifier for the upload session.
+    /// <b>ChunkNumber</b>: The sequence number of the current chunk being uploaded (optional).
+    /// <b>File</b>: The file stream for the chunk that is being uploaded.
+    /// </param>
+    /// <returns>
+    /// A response object containing updated session information, including the current progress and
+    /// details about the upload session.
+    /// </returns>
     [Tags("Files / Operations")]
     [SwaggerResponse(200)]
     [HttpPost("{folderId}/session/{sessionId}/upload")]
@@ -224,6 +274,13 @@ public abstract class UploadController<T>(
         return await chunkedUploadSessionHelper.ToResponseObjectAsync(resumedSession);
     }
 
+    /// <summary>Finalize an upload session</summary>
+    /// <remarks>
+    /// Finalizes the upload session by processing the uploaded file chunks and marking the upload as complete.
+    /// This method consolidates chunked uploads into a complete file if required, sends notifications about the upload event,
+    /// and performs any additional cleanup or related actions, such as socket updates and webhook publishing.
+    /// </remarks>
+    /// <returns>An object containing details about the completed upload session, including file metadata and upload status.</returns>
     [Tags("Files / Operations")]
     [SwaggerResponse(200)]
     [HttpPut("{folderId}/session/{sessionId}/finalize")]

@@ -322,9 +322,15 @@ public class PortalController(
     }
 
     /// <summary>
-    /// Delete an invitation link
+    /// Deletes an invitation link.
     /// </summary>
+    /// <remarks>
+    /// Ensures that the current user has permission to delete the specified invitation link.
+    /// Throws security or not-found exceptions if required conditions are not met.
+    /// </remarks>
     /// <path>api/2.0/portal/users/invitationlink</path>
+    /// <param name="inDto">The data transfer object containing the details of the invitation link to be deleted.</param>
+    /// <returns>A task that represents the asynchronous delete operation.</returns>
     [Tags("Portal / Users")]
     [SwaggerResponse(200, "Invitation link", typeof(string))]
     [HttpDelete("users/invitationlink")]

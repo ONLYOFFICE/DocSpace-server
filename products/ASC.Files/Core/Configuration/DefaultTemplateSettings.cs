@@ -49,7 +49,6 @@ namespace ASC.Files.Core.Configuration
     [Scope]
     public class DefaultTemplateSettingsHelper(IServiceProvider serviceProvider,
                                                SettingsManager settingsManager,
-                                               PermissionContext permissionContext,
                                                GlobalStore globalStore,
                                                IFileDao<int> fileDao,
                                                IFolderDao<int> folderDao,
@@ -99,24 +98,23 @@ namespace ASC.Files.Core.Configuration
             var settings = await settingsManager.LoadAsync<DefaultTemplateSettings>();
             var templatesExtensions = await GetSampleDocumentsExtensionsListAsync();
 
-            _ = settings.Items.RemoveAll(item => !templatesExtensions.Contains(item.FileExtension));
-            var existingExtensions = new HashSet<string>(settings.Items.Select(item => item.FileExtension));
+            var result = new DefaultTemplateSettings { LastModified = settings.LastModified, Items = settings.Items.ToList() };
+            _ = result.Items.RemoveAll(item => !templatesExtensions.Contains(item.FileExtension));
+            var existingExtensions = new HashSet<string>(result.Items.Select(item => item.FileExtension));
 
             foreach (var key in templatesExtensions)
             {
                 if (!existingExtensions.Contains(key))
                 {
-                    settings.Items.Add(new DefaultTempalteItem() { FileExtension = key, SelectedFile = null });
+                    result.Items.Add(new DefaultTempalteItem() { FileExtension = key, SelectedFile = null });
                 }
             }
 
-            return settings;
+            return result;
         }
 
         public async Task<DefaultTemplateSettings> SetTemplateAsync(string extension, int? fileId)
         {
-            await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
             var settings = await GetSettingsAsync();
             var setting = settings.Items.FirstOrDefault(item => item.FileExtension.Equals(extension, StringComparison.OrdinalIgnoreCase));
             if (setting == null)
@@ -149,8 +147,6 @@ namespace ASC.Files.Core.Configuration
         {
             try
             {
-                await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
                 var settings = await GetSettingsAsync();
                 var setting = settings.Items.FirstOrDefault(item => item.FileExtension.Equals(extension, StringComparison.OrdinalIgnoreCase));
                 if (setting == null)

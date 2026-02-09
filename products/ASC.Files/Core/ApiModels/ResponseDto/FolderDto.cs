@@ -185,16 +185,20 @@ public class FolderDtoHelper(
 {
     private readonly EmployeeDtoHelper _employeeWrapperHelper = employeeWrapperHelper;
 
-    public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<FileShareRecord<string>> currentUserRecords = null, string order = null, IFolder contextFolder = null, bool? aiReady = null)
+    public async Task<FolderDto<T>> GetAsync<T>(
+        Folder<T> folder, 
+        List<FileShareRecord<string>> currentUserRecords = null, 
+        string order = null, 
+        IFolder contextFolder = null, 
+        AiStatus aiStatus = null)
     {
-        Task<bool> aiReadyTask = null;
-        if (folder.RootFolderType == FolderType.AiAgents && aiReady == null)
-        {
-            aiReadyTask = accessibility.IsAiEnabledAsync();
-        }
-        
         var result = await GetFolderWrapperAsync(folder);
         result.ParentId = folder.ParentId;
+        
+        if (folder.RootFolderType == FolderType.AiAgents && aiStatus == null)
+        {
+            aiStatus = await accessibility.GetStatusAsync();
+        }
 
         if (folder.IsRoom)
         {
@@ -321,6 +325,11 @@ public class FolderDtoHelper(
         
         if (folder.SettingsChatParameters != null)
         {
+            if (folder.SettingsChatProviderId == AiGateway.ProviderId && !aiStatus.GatewayEnabled)
+            {
+                folder.SettingsChatProviderId = 0;
+            }
+            
             var modelId = folder.SettingsChatProviderId == 0 ? null : folder.SettingsChatParameters.ModelId;
             ChatMultimodalSettingsDto multimodal = null;
             string modelAlias = null;
@@ -423,12 +432,7 @@ public class FolderDtoHelper(
             result.FoldersCount -= 2;
         }
         
-        if (aiReadyTask != null)
-        {
-            aiReady = await aiReadyTask;
-        }
-        
-        if (aiReady is false)
+        if (aiStatus is { Enabled: false})
         {
             switch (folder.FolderType)
             {

@@ -47,14 +47,16 @@ public static class Constants
     public const int ClearEventsPort = 5027;
     public const int BackupBackgroundTasksPort = 5032;
     public const int FilesServicePort = 5009;
+    public const int NotifyPort = 5005;
     public const int StudioNotifyPort = 5006;
     public const int OpensearchPort = 9200;
+    public const int TelegramPort = 5050;
     
     public const string HostDockerInternal = "host.docker.internal";
-    public const string OpenRestyContainer = "asc-openresty";
-    public const string EditorsContainer = "asc-editors";
+    public const string OpenRestyContainer = "onlyoffice-openresty";
+    public const string EditorsContainer = "onlyoffice-editors";
     public const string OpensearchContainer = "opensearch";
-    public const string SocketIoContainer = "asc-socketIO";
-    public const string IdentityRegistrationContainer = "asc-identity-registration";
-    public const string IdentityAuthorizationContainer = "asc-identity-authorization";
+    public const string SocketIoContainer = "onlyoffice-socketIO";
+    public const string IdentityRegistrationContainer = "onlyoffice-identity-registration";
+    public const string IdentityAuthorizationContainer = "onlyoffice-identity-authorization";
 }

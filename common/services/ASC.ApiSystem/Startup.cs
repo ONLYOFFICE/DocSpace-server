@@ -134,7 +134,7 @@ public class Startup
 
         if (_configuration.GetValue<bool>("openApi:enable"))
         {
-            services.AddOpenApi(_configuration);
+            services.AddOpenApi(_configuration, "common");
         }
         if (!_hostEnvironment.IsDevelopment())
         {
