@@ -518,7 +518,7 @@ public class UserController(
     [HttpPut("{userid:guid}/password")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PasswordChange")]
-    public async Task<EmployeeFullDto> ChangeUserPassword(MemberBaseByIdRequestDto inDto)
+    public async Task<EmployeeFullDto> ChangeUserPassword(ChangePasswordByIdRequestDto inDto)
     {
         await securityContext.AuthByClaimAsync();
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(inDto.UserId), Constants.Action_EditUser);
@@ -545,22 +545,22 @@ public class UserController(
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
-        if (string.IsNullOrEmpty(inDto.MemberBase.PasswordHash) && string.IsNullOrEmpty(inDto.MemberBase.Password))
+        if (string.IsNullOrEmpty(inDto.ChangePasswordData.PasswordHash) && string.IsNullOrEmpty(inDto.ChangePasswordData.Password))
         {
             throw new ArgumentException(Resource.ErrorPasswordEmpty);
         }
 
-        inDto.MemberBase.PasswordHash = (inDto.MemberBase.PasswordHash ?? "").Trim();
-        if (string.IsNullOrEmpty(inDto.MemberBase.PasswordHash))
+        inDto.ChangePasswordData.PasswordHash = (inDto.ChangePasswordData.PasswordHash ?? "").Trim();
+        if (string.IsNullOrEmpty(inDto.ChangePasswordData.PasswordHash))
         {
-            inDto.MemberBase.Password = (inDto.MemberBase.Password ?? "").Trim();
-            await userManagerWrapper.CheckPasswordPolicyAsync(inDto.MemberBase.Password);
-            inDto.MemberBase.PasswordHash = passwordHasher.GetClientPassword(inDto.MemberBase.Password);
+            inDto.ChangePasswordData.Password = (inDto.ChangePasswordData.Password ?? "").Trim();
+            await userManagerWrapper.CheckPasswordPolicyAsync(inDto.ChangePasswordData.Password);
+            inDto.ChangePasswordData.PasswordHash = passwordHasher.GetClientPassword(inDto.ChangePasswordData.Password);
         }
 
         try
         {
-            await securityContext.SetUserPasswordHashAsync(inDto.UserId, inDto.MemberBase.PasswordHash);
+            await securityContext.SetUserPasswordHashAsync(inDto.UserId, inDto.ChangePasswordData.PasswordHash);
 
             var messageTarget = MessageTarget.Create(inDto.UserId);
             await messageService.SendAsync(MessageAction.UserUpdatedPassword, messageTarget);
@@ -599,7 +599,7 @@ public class UserController(
     [HttpPut("{userid:guid}/email")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "EmailChange,Activation,EmailActivation")]
-    public async Task<EmployeeFullDto> ChangeUserEmail(MemberBaseByIdRequestDto inDto)
+    public async Task<EmployeeFullDto> ChangeUserEmail(ChangeEmailByIdRequestDto inDto)
     {
         await securityContext.AuthByClaimAsync();
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(inDto.UserId), Constants.Action_EditUser);
@@ -626,9 +626,9 @@ public class UserController(
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
         
-        var email = string.IsNullOrEmpty(inDto.MemberBase.Email) && !string.IsNullOrEmpty(inDto.MemberBase.EncEmail)
-            ? emailValidationKeyModelHelper.DecryptEmail(inDto.MemberBase.EncEmail)
-            : inDto.MemberBase.Email;
+        var email = string.IsNullOrEmpty(inDto.ChangeEmailData.Email) && !string.IsNullOrEmpty(inDto.ChangeEmailData.EncEmail)
+            ? emailValidationKeyModelHelper.DecryptEmail(inDto.ChangeEmailData.EncEmail)
+            : inDto.ChangeEmailData.Email;
 
         if (string.IsNullOrEmpty(email))
         {
