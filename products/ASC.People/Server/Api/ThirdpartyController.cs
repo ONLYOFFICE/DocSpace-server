@@ -186,9 +186,20 @@ public class ThirdpartyController(
             return null;
         }
 
-        if (string.IsNullOrEmpty(thirdPartyProfile.EMail))
+        if (string.IsNullOrWhiteSpace(thirdPartyProfile.EMail) && string.IsNullOrWhiteSpace(inDto.Email))
         {
-            throw new Exception(Resource.ErrorNotCorrectEmail);
+            if (ProviderManager.DummyEmailProviders.Contains(thirdPartyProfile.Provider))
+            {
+                if (providerManager.GetLoginProvider(thirdPartyProfile.Provider) is IDummyEmailProvider provider)
+                {
+                    inDto.Email = provider.GenerateEmail(thirdPartyProfile);
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(thirdPartyProfile.EMail) && string.IsNullOrWhiteSpace(inDto.Email))
+            {
+                throw new Exception(Resource.ErrorNotCorrectEmail);
+            }
         }
 
         var model = emailValidationKeyModelHelper.GetModel();

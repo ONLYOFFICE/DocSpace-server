@@ -28,6 +28,7 @@ using System.Text.Json;
 
 using ASC.Core.Common;
 using ASC.FederatedLogin;
+using ASC.FederatedLogin.LoginProviders;
 using ASC.FederatedLogin.Profile;
 using ASC.Files.Core.Helpers;
 using ASC.Files.Core.Utils;
@@ -59,6 +60,7 @@ public class PortalController(
         QuotaUsageManager quotaUsageManager,
         PasswordSettingsManager passwordSettingsManager,
         LoginProfileTransport loginProfileTransport,
+        ProviderManager providerManager,
         AccountLinker accountLinker,
         DocumentServiceLicense documentServiceLicense,
         CsvFileHelper csvFileHelper,
@@ -382,13 +384,21 @@ public class PortalController(
             try
             {
                 var profile = await loginProfileTransport.FromPureTransport(model.ThirdPartyProfile);
-                if (profile != null && string.IsNullOrEmpty(profile.AuthorizationError))
+                if (profile != null && string.IsNullOrWhiteSpace(profile.AuthorizationError))
                 {
                     loginProfile = profile;
-                    if (!string.IsNullOrEmpty(loginProfile.EMail))
+                    if (!string.IsNullOrWhiteSpace(loginProfile.EMail))
                     {
                         model.Email = loginProfile.EMail;
                     }
+                    else if (string.IsNullOrWhiteSpace(model.Email) && ProviderManager.DummyEmailProviders.Contains(loginProfile.Provider))
+                    {
+                        if (providerManager.GetLoginProvider(loginProfile.Provider) is IDummyEmailProvider provider)
+                        {
+                            model.Email = provider.GenerateEmail(loginProfile);
+                        }
+                    }
+
                     if (!string.IsNullOrEmpty(loginProfile.FirstName))
                     {
                         model.FirstName = loginProfile.FirstName;
@@ -405,7 +415,7 @@ public class PortalController(
             }
         }
 
-        if (string.IsNullOrEmpty(model.Email))
+        if (string.IsNullOrWhiteSpace(model.Email))
         {
             return BadRequest(new
             {
