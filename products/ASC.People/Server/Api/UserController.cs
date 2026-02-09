@@ -1726,19 +1726,26 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Updates the user culture code with the parameters specified in the request.
+    /// Updates the user culture with the parameters specified in the request.
     /// </remarks>
     /// <summary>
-    /// Update a user culture code
+    /// Update a user culture
     /// </summary>
     /// <path>api/2.0/people/{userid}/culture</path>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Detailed user information", typeof(EmployeeFullDto))]
+    [SwaggerResponse(400, "The specified culture is not in the list of available ones")]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "User not found")]
     [HttpPut("{userid}/culture")]
     public async Task<EmployeeFullDto> UpdateMemberCulture(UpdateMemberCultureByIdRequestDto inDto)
     {
+        if (!coreBaseSettings.EnabledCultures.Any(c =>
+                string.Equals(c.Name, inDto.Culture.CultureName, StringComparison.InvariantCultureIgnoreCase)))
+        {
+            throw new ArgumentException("The specified culture is not in the list of available ones");
+        }
+
         var user = await GetUserInfoAsync(inDto.UserId);
 
         if (_userManager.IsSystemUser(user.Id) || !user.Id.Equals(securityContext.CurrentAccount.ID))
