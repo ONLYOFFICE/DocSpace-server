@@ -111,10 +111,10 @@ var clientBasePath = Path.Combine(basePath, "client");
 
 if (!skipClient)
 {
-    var installPackages = builder.AddExecutable("asc-install-packages", "pnpm", clientBasePath, "install");
-    var buildPackages = builder.AddExecutable("asc-build-packages", "pnpm", clientBasePath, "build").WaitForCompletion(installPackages);
+    var installPackages = builder.AddExecutable("onlyoffice-install-packages", "pnpm", clientBasePath, "install");
+    var buildPackages = builder.AddExecutable("onlyoffice-build-packages", "pnpm", clientBasePath, "build").WaitForCompletion(installPackages);
 
-    startPackages = builder.AddExecutable("asc-start-packages", "pnpm", clientBasePath, "start").WaitForCompletion(buildPackages);
+    startPackages = builder.AddExecutable("onlyoffice-start-packages", "pnpm", clientBasePath, "start").WaitForCompletion(buildPackages);
     installPackages.WithChildRelationship(buildPackages);
     buildPackages.WithChildRelationship(startPackages);
 }

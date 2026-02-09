@@ -34,8 +34,11 @@ public class ProjectConfigurator(
     string basePath,
     bool isDocker)
 {
-    public static string GetProjectName<TProject>() where TProject : IProjectMetadata, new() =>
-        typeof(TProject).Name.ToLower().Replace('_', '-');
+    public static string GetProjectName<TProject>() where TProject : IProjectMetadata, new()
+    {
+        var name = typeof(TProject).Name.ToLower().Replace('_', '-');
+        return name.StartsWith("asc-") ? "onlyoffice-" + name.Substring(4) : name;
+    }
     
     public ProjectConfigurator AddProject<TProject>(int projectPort) where TProject : IProjectMetadata, new()
     {
@@ -102,7 +105,7 @@ public class ProjectConfigurator(
         resourceBuilder
             .WithImageTag("dev")
             .WithBindMount(projectBasePath, "/app")
-            .WithEnvironment("log:name", $"/{name.ToLower()["asc-".Length..].Replace('_', '.')}")
+            .WithEnvironment("log:name", $"/{name.ToLower()["onlyoffice-".Length..].Replace('_', '.')}")
             .WithEnvironment("$STORAGE_ROOT", "/data")
             .WithEnvironment("web:hub:internal", new UriBuilder(Uri.UriSchemeHttp, Constants.SocketIoContainer, Constants.SocketIoPort).ToString())
             .WithEnvironment("core:hosting:singletonMode", true.ToString())
@@ -197,7 +200,7 @@ public class ProjectConfigurator(
 
     public ProjectConfigurator AddSsoAuth()
     {
-        var name = "asc-ssoAuth";
+        var name = "onlyoffice-ssoAuth";
         var path = Path.Combine("..", "ASC.SSoAuth");
         var port = Constants.SsoAuthPort;
         
@@ -229,7 +232,7 @@ public class ProjectConfigurator(
 
     public ProjectConfigurator AddWebDav()
     {
-        var name = "asc-webDav";
+        var name = "onlyoffice-webDav";
         var path = Path.Combine("..", "ASC.WebDav");
         var port = Constants.WebDavPort;
         
@@ -259,8 +262,8 @@ public class ProjectConfigurator(
     
     public ProjectConfigurator AddIdentity()
     {
-        var ascIdentityRegistration = "asc-identity-registration";
-        var ascIdentityAuthorization = "asc-identity-authorization";
+        var ascIdentityRegistration = "onlyoffice-identity-registration";
+        var ascIdentityAuthorization = "onlyoffice-identity-authorization";
         var path = Path.Combine("..", "ASC.Identity");
         
         var registrationBuilder = builder
