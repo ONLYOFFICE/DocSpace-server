@@ -48,7 +48,7 @@ public class MyPythonCodegen extends PythonClientCodegen {
             if (serverVars != null){
                 ServerVariable baseUrlVar = serverVars.get("baseUrl");
                 if(baseUrlVar != null && "".equals(baseUrlVar.getDefault())){
-                    baseUrlVar.setDefault("http://localhost:8092/");
+                    baseUrlVar.setDefault("http://localhost:8092");
                 }
             }
         }
