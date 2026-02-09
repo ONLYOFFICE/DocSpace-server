@@ -598,7 +598,7 @@ public class UserController(
     [AllowNotPayment]
     [HttpPut("{userid:guid}/email")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
-    [Authorize(AuthenticationSchemes = "confirm", Roles = "EmailChange,Activation,EmailActivation")]
+    [Authorize(AuthenticationSchemes = "confirm", Roles = "EmailChange")]
     public async Task<EmployeeFullDto> ChangeUserEmail(ChangeEmailByIdRequestDto inDto)
     {
         await securityContext.AuthByClaimAsync();
