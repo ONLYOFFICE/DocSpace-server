@@ -186,6 +186,7 @@ public class ProjectConfigurator(
         else
         {
             var resourceBuilder = builder.AddNpmApp(name, path, "start:build")
+                .WithEnvironment("NODE_ENV", "development")
                 .WithEnvironment("Redis:Hosts:0:Host", () => connectionManager.Redis?.Host ?? string.Empty)
                 .WithEnvironment("Redis:Hosts:0:Port", () => connectionManager.Redis?.Port ?? string.Empty)
                 .WithHttpEndpoint(targetPort: port)
@@ -222,6 +223,7 @@ public class ProjectConfigurator(
         else
         {
             builder.AddNpmApp(name, path, "start:build")
+                .WithEnvironment("NODE_ENV", "development")
                 .WithHttpEndpoint(targetPort: port)
                 .WithHttpHealthCheck("/health")
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
@@ -252,6 +254,7 @@ public class ProjectConfigurator(
         else
         {
             builder.AddNpmApp(name, path, "start:build")
+                .WithEnvironment("NODE_ENV", "development")
                 .WithHttpEndpoint(targetPort: port)
                 .WithHttpHealthCheck("/health")
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
