@@ -77,9 +77,9 @@ public partial class AiDbContext
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultDateTime])]
-    public async Task<bool> MarkChatAsDeletedAsync(int tenantId, Guid chatId, Guid userId, DateTime modifiedOn)
+    public async Task<bool> MarkChatAsDeletedAsync(int tenantId, Guid chatId, Guid userId, DateTime deletedOn)
     {
-        return await Queries.MarkChatAsDeletedAsync(this, tenantId, chatId, userId, modifiedOn) > 0;
+        return await Queries.MarkChatAsDeletedAsync(this, tenantId, chatId, userId, deletedOn) > 0;
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
@@ -131,9 +131,9 @@ public partial class AiDbContext
     }
 
     [PreCompileQuery([null, PreCompileQuery.DefaultDateTime])]
-    public Task<int> UpdateDeletedChatsModifiedOnAsync(IEnumerable<Guid> chatIds, DateTime modifiedOn)
+    public Task<int> UpdateDeletedChatsDeletedOnAsync(IEnumerable<Guid> chatIds, DateTime deletedOn)
     {
-        return Queries.UpdateDeletedChatsModifiedOnAsync(this, chatIds, modifiedOn);
+        return Queries.UpdateDeletedChatsDeletedOnAsync(this, chatIds, deletedOn);
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultDateTime])]
@@ -148,13 +148,13 @@ static file class Queries
     public static readonly Func<AiDbContext, int, Guid, Task<DbChat?>> GetChatAsync =
         EF.CompileAsyncQuery(
             (AiDbContext ctx, int tenantId, Guid chatId) =>
-                ctx.Chats.FirstOrDefault(x => x.TenantId == tenantId && x.Id == chatId && !x.Deleted));
+                ctx.Chats.FirstOrDefault(x => x.TenantId == tenantId && x.Id == chatId && x.DeletedOn == null));
     
     public static readonly Func<AiDbContext, int, int, Guid, int, int, IAsyncEnumerable<DbChat>> GetChatsAsync =
         EF.CompileAsyncQuery(
             (AiDbContext ctx, int tenantId, int roomId, Guid userId, int offset, int limit) =>
                 ctx.Chats
-                    .Where(x => x.TenantId == tenantId && x.RoomId == roomId && x.UserId == userId && !x.Deleted)
+                    .Where(x => x.TenantId == tenantId && x.RoomId == roomId && x.UserId == userId && x.DeletedOn == null)
                     .OrderByDescending(x => x.ModifiedOn)
                     .Skip(offset)
                     .Take(limit));
@@ -162,7 +162,7 @@ static file class Queries
     public static readonly Func<AiDbContext, int, int, Guid, Task<int>> GetChatsTotalCountAsync =
         EF.CompileAsyncQuery(
             (AiDbContext ctx, int tenantId, int roomId, Guid userId) =>
-                ctx.Chats.Count(x => x.TenantId == tenantId && x.RoomId == roomId && x.UserId == userId && !x.Deleted));
+                ctx.Chats.Count(x => x.TenantId == tenantId && x.RoomId == roomId && x.UserId == userId && x.DeletedOn == null));
 
     public static readonly Func<AiDbContext, int, Guid, DateTime, Task<int>> UpdateChatDateAsync =
         EF.CompileAsyncQuery((AiDbContext ctx, int tenantId, Guid chatId, DateTime date) =>
@@ -200,11 +200,10 @@ static file class Queries
     
     public static readonly Func<AiDbContext, int, Guid, Guid, DateTime, Task<int>> MarkChatAsDeletedAsync =
         EF.CompileAsyncQuery(
-            (AiDbContext ctx, int tenantId, Guid chatId, Guid userId, DateTime modifiedOn) =>
+            (AiDbContext ctx, int tenantId, Guid chatId, Guid userId, DateTime deletedOn) =>
                 ctx.Chats.Where(x => x.TenantId == tenantId && x.Id == chatId && x.UserId == userId)
                     .ExecuteUpdate(x => x
-                        .SetProperty(y => y.Deleted, true)
-                        .SetProperty(y => y.ModifiedOn, modifiedOn)));
+                        .SetProperty(y => y.DeletedOn, deletedOn)));
     
     public static readonly Func<AiDbContext, int, Guid, Task<DbChatMessage?>> GetMessageAsync =
         EF.CompileAsyncQuery(
@@ -252,15 +251,15 @@ static file class Queries
     public static readonly Func<AiDbContext, DateTime, int, IAsyncEnumerable<(int TenantId, Guid UserId, Guid ChatId)>> GetDeletedChatsAsync =
         EF.CompileAsyncQuery((AiDbContext ctx, DateTime cutoffDate, int limit) =>
             ctx.Chats
-                .Where(x => x.Deleted && x.ModifiedOn <= cutoffDate)
+                .Where(x => x.DeletedOn != null && x.DeletedOn <= cutoffDate)
                 .Take(limit)
                 .Select(x => new ValueTuple<int, Guid, Guid>(x.TenantId, x.UserId, x.Id)));
 
-    public static readonly Func<AiDbContext, IEnumerable<Guid>, DateTime, Task<int>> UpdateDeletedChatsModifiedOnAsync =
-        EF.CompileAsyncQuery((AiDbContext ctx, IEnumerable<Guid> chatIds, DateTime modifiedOn) =>
+    public static readonly Func<AiDbContext, IEnumerable<Guid>, DateTime, Task<int>> UpdateDeletedChatsDeletedOnAsync =
+        EF.CompileAsyncQuery((AiDbContext ctx, IEnumerable<Guid> chatIds, DateTime deletedOn) =>
             ctx.Chats
                 .Where(x => chatIds.Contains(x.Id))
-                .ExecuteUpdate(s => s.SetProperty(y => y.ModifiedOn, modifiedOn)));
+                .ExecuteUpdate(s => s.SetProperty(y => y.DeletedOn, deletedOn)));
 
     public static readonly Func<AiDbContext, DateTime, IAsyncEnumerable<(int TenantId, int FileId)>> GetOrphanedAttachmentsAsync =
         EF.CompileAsyncQuery((AiDbContext ctx, DateTime cutoffDate) =>

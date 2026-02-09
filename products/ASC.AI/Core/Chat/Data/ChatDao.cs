@@ -361,10 +361,10 @@ public class ChatDao(IDbContextFactory<AiDbContext> dbContextFactory)
         }
     }
 
-    public async Task UpdateDeletedChatsModifiedOnAsync(IEnumerable<Guid> chatIds, DateTime modifiedOn)
+    public async Task UpdateDeletedChatsDeletedOnAsync(IEnumerable<Guid> chatIds, DateTime deletedOn)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        await dbContext.UpdateDeletedChatsModifiedOnAsync(chatIds, modifiedOn);
+        await dbContext.UpdateDeletedChatsDeletedOnAsync(chatIds, deletedOn);
     }
 
     public async IAsyncEnumerable<(int TenantId, int FileId)> GetOrphanedAttachmentsAsync(DateTime cutoffDate)

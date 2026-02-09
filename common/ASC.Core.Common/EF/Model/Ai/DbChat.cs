@@ -37,7 +37,7 @@ public class DbChat : BaseEntity
     public required string Title { get; set; }
     public DateTime CreatedOn { get; set; }
     public DateTime ModifiedOn { get; set; }
-    public bool Deleted { get; set; }
+    public DateTime? DeletedOn { get; set; }
 
     public DbTenant Tenant { get; set; }
     public List<DbChatMessage> Messages { get; set; }
@@ -102,13 +102,15 @@ public static class DbChatSessionExtensions
                 .HasColumnName("modified_on")
                 .HasColumnType("datetime");
 
-            entity.Property(e => e.Deleted)
-                .HasColumnName("deleted")
-                .HasColumnType("tinyint(1)")
-                .HasDefaultValue(false);
+            entity.Property(e => e.DeletedOn)
+                .HasColumnName("deleted_on")
+                .HasColumnType("datetime");
 
             entity.HasIndex(e => new { e.TenantId, e.Id })
                 .HasDatabaseName("IX_tenant_id_id");
+
+            entity.HasIndex(e => e.DeletedOn)
+                .HasDatabaseName("IX_deleted_on");
             
             entity.HasIndex(e => new { e.TenantId, e.RoomId, e.UserId, e.ModifiedOn })
                 .HasDatabaseName("IX_tenant_id_room_id_user_id_modified_on");

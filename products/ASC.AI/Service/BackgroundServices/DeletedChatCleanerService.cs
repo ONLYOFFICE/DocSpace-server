@@ -57,7 +57,7 @@ public class DeletedChatCleanerService(
                     break;
                 }
 
-                await chatDao.UpdateDeletedChatsModifiedOnAsync(chats.Select(x => x.ChatId), DateTime.UtcNow);
+                await chatDao.UpdateDeletedChatsDeletedOnAsync(chats.Select(x => x.ChatId), DateTime.UtcNow);
 
                 foreach (var (tenantId, userId, chatId) in chats)
                 {
