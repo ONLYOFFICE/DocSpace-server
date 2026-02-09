@@ -26,47 +26,17 @@
 
 using ASC.Api.Documentation;
 
-public class RemoveEnumCommand : AsyncCommand<FilePathSettings>
+public class EnumCleaner
 {
-    public override async Task<int> ExecuteAsync(CommandContext context, FilePathSettings settings, CancellationToken cancellationToken)
+    public static void Clean(JsonObject root)
     {
-        await AnsiConsole.Progress()
-            .StartAsync(async ctx =>
-            {
-                var task = ctx.AddTask($"Remove enum [green]{settings.File}[/]");
-                await ProcessFileAsync(settings.File, task, cancellationToken);
-                task.Value = 100;
-            });
-
-        return 0;
-    }
-
-    private static async Task ProcessFileAsync(string filePath, ProgressTask task, CancellationToken cancellationToken)
-    {
-        if (!File.Exists(filePath))
+        if (root == null)
         {
-            throw new FileNotFoundException(filePath);
+            throw new ArgumentNullException(nameof(root));
         }
 
-        var jsonText = await File.ReadAllTextAsync(filePath, cancellationToken);
-        task.Increment(20);
-
-        var root = JsonNode.Parse(jsonText)?.AsObject() ?? throw new InvalidOperationException("Invalid JSON");
-        task.Increment(10);
-
         ProcessNode(root);
-        task.Increment(50);
-
-        var options = new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-        };
-
-        await File.WriteAllTextAsync(filePath, root.ToJsonString(options), cancellationToken);
-        task.Increment(20);
     }
-
     private static void ProcessNode(JsonNode node, string? preferredEnumType = null, JsonObject? parentNode = null)
     {
         if (node is not JsonObject obj)
@@ -117,6 +87,7 @@ public class RemoveEnumCommand : AsyncCommand<FilePathSettings>
                     obj["description"] = parentNode?["description"]?.DeepClone() ?? preferred["description"]?.DeepClone();
 
                     obj.Remove(key);
+                    obj.Remove("x-enum-type");
                 }
 
                 continue;
