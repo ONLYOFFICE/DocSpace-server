@@ -1806,11 +1806,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("created_on");
 
-                    b.Property<bool>("Deleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("tinyint(1)")
-                        .HasDefaultValue(false)
-                        .HasColumnName("deleted");
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("datetime")
+                        .HasColumnName("deleted_on");
 
                     b.Property<DateTime>("ModifiedOn")
                         .HasColumnType("datetime")
@@ -1839,6 +1837,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.HasKey("Id")
                         .HasName("PRIMARY");
+
+                    b.HasIndex("DeletedOn")
+                        .HasDatabaseName("IX_deleted_on");
 
                     b.HasIndex("TenantId", "Id")
                         .HasDatabaseName("IX_tenant_id_id");

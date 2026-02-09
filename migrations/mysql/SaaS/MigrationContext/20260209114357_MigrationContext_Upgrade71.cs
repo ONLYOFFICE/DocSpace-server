@@ -11,12 +11,11 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<bool>(
-                name: "deleted",
+            migrationBuilder.AddColumn<DateTime>(
+                name: "deleted_on",
                 table: "ai_chats",
-                type: "tinyint(1)",
-                nullable: false,
-                defaultValue: false);
+                type: "datetime",
+                nullable: true);
 
             migrationBuilder.CreateTable(
                 name: "files_chat_message_attachment",
@@ -43,6 +42,11 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 .Annotation("Relational:Collation", "utf8_general_ci");
 
             migrationBuilder.CreateIndex(
+                name: "IX_deleted_on",
+                table: "ai_chats",
+                column: "deleted_on");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_chat_id",
                 table: "files_chat_message_attachment",
                 column: "chat_id");
@@ -59,8 +63,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             migrationBuilder.DropTable(
                 name: "files_chat_message_attachment");
 
+            migrationBuilder.DropIndex(
+                name: "IX_deleted_on",
+                table: "ai_chats");
+
             migrationBuilder.DropColumn(
-                name: "deleted",
+                name: "deleted_on",
                 table: "ai_chats");
         }
     }
