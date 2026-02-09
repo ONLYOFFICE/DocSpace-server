@@ -73,7 +73,7 @@ public class CreateFolderWithFilesDepthCommand : AsyncCommand<CreateFolderWithFi
             var k = 0;
             for (var j = 0; j < filesCount; j++)
             {
-                tasks.Add(filesApi.CreateFileAsync(folderId, new CreateFileJsonElement(system.FileName("pdf")), cancellationToken: token));
+                tasks.Add(filesApi.CreateFileAsync(newFolder.Id, new CreateFileJsonElement(system.FileName("pdf")), cancellationToken: token));
                 k++;
                 if (k == 100)
                 {
