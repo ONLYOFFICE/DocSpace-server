@@ -298,4 +298,18 @@ $Message</value>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
     <value>DocSpace obvestilo.</value>
   </data>
+  <data name="pattern_AgentRemoved" xml:space="preserve">
+    <value>h1. $__AuthorName je izbrisal agenta umetne inteligence
+
+$__AuthorName je izbrisal agenta umetne inteligence: $RoomTitle</value>
+  </data>
+  <data name="pattern_AgentUpdateAccessForUser_push" xml:space="preserve">
+    <value>Vaša vloga v agentu umetne inteligence "$RoomTitle" je bila spremenjena v "$RoomRole"</value>
+  </data>
+  <data name="pattern_InvitedToAgent_push" xml:space="preserve">
+    <value>Povabljeni ste bili k agentu umetne inteligence "$RoomTitle"</value>
+  </data>
+  <data name="subject_AgentRemoved" xml:space="preserve">
+    <value>DocSpace obvestilo. Agent umetne inteligence izbrisan</value>
+  </data>
 </root>

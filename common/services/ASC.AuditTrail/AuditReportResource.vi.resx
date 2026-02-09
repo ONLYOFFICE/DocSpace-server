@@ -1107,4 +1107,52 @@
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Webhook đã được cập nhật: {0}</value>
   </data>
+  <data name="BackupCompleted" xml:space="preserve">
+    <value>Đã hoàn tất sao lưu</value>
+  </data>
+  <data name="BackupFailed" xml:space="preserve">
+    <value>Sao lưu không thành công</value>
+  </data>
+  <data name="InvitationSettingsUpdated" xml:space="preserve">
+    <value>Đã cập nhật cài đặt lời mời</value>
+  </data>
+  <data name="IPRestrictionsSettingsUpdated" xml:space="preserve">
+    <value>Đã cập nhật cài đặt Bảo mật IP</value>
+  </data>
+  <data name="LoginSettingsUpdated" xml:space="preserve">
+    <value>Đã cập nhật cài đặt bảo vệ chống tấn công brute force</value>
+  </data>
+  <data name="ScheduledBackupCompleted" xml:space="preserve">
+    <value>Đã hoàn tất sao lưu theo lịch</value>
+  </data>
+  <data name="ScheduledBackupFailed" xml:space="preserve">
+    <value>Sao lưu theo lịch không thành công</value>
+  </data>
+  <data name="ScheduledBackupStarted" xml:space="preserve">
+    <value>Đã bắt đầu sao lưu theo lịch</value>
+  </data>
+  <data name="WebpluginDeleted" xml:space="preserve">
+    <value>Plugin đã bị xóa: {0}</value>
+  </data>
+  <data name="WebpluginUpdated" xml:space="preserve">
+    <value>Plugin đã được cập nhật : {0}</value>
+  </data>
+  <data name="WebpluginUploaded" xml:space="preserve">
+    <value>Plugin đã tải lên: {0}</value>
+  </data>
+  <data name="WhiteLabelAdditionalSettingsUpdated" xml:space="preserve">
+    <value>Đã cập nhật cài đặt thương hiệu bổ sung</value>
+  </data>
+  <data name="WhiteLabelCompanySettingsUpdated" xml:space="preserve">
+    <value>Đã cập nhật cài đặt thông tin công ty</value>
+  </data>
+  <data name="WhiteLabelMailSettingsUpdated" xml:space="preserve">
+    <value>Đã cập nhật cài đặt thư</value>
+  </data>
+  <data name="WhiteLabelSettingsLogosUpdated" xml:space="preserve">
+    <value>Đã cập nhật cài đặt Logo</value>
+  </data>
+  <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
+    <value>Đã cập nhật tên thương hiệu</value>
+  </data>
 </root>

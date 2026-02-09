@@ -171,4 +171,7 @@
   <data name="UnavailableServers" xml:space="preserve">
     <value>Máy chủ MCP hiện không khả dụng: {0}. Kiểm tra cài đặt kết nối</value>
   </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>Không thể xử lý tập tin: {0}. Các tập tin có thể bị hỏng hoặc bị mã hóa</value>
+  </data>
 </root>

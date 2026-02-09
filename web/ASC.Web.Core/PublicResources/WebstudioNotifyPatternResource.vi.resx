@@ -2155,4 +2155,43 @@ $TrulyYours</value>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>Trân trọng, Nhóm ${LetterLogoText}</value>
   </data>
+  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; đã tải lên một tài liệu mới: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; vào cơ sở kiến thức của tác nhân AI: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="pattern_api_key_expired" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Email này nhằm thông báo rằng khóa API "*$Message*" của bạn đã hết hạn và đã bị vô hiệu hóa.
+
+Bạn có thể tạo khóa API mới trong "Công cụ dành cho nhà phát triển":"${__VirtualRootPath}/developer-tools/api-keys".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace đã bị xóa
+
+*Cổng thông tin:* ${PortalUrl}
+*Chủ sở hữu:* ${UserName} ${UserEmail}
+*Khách hàng:* ${OwnerName}
+
+Xin hãy đảm bảo rằng tính năng thanh toán tự động đã tắt. Hãy kiểm tra trạng thái thanh toán tự động trong tài khoản Stripe của khách hàng.</value>
+  </data>
+  <data name="pattern_user_agent_role_changed" xml:space="preserve">
+    <value>Xin chào!
+
+Bạn được chỉ định một vai trò mới trong tác nhân AI DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+Hãy tìm hiểu thêm về vai trò và quyền hạn của phòng trong "Trung Tâm Hỗ Trợ":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_api_key_expired" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace: Khóa API của bạn đã hết hạn</value>
+  </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace đã bị xóa</value>
+  </data>
+  <data name="subject_user_agent_role_changed" xml:space="preserve">
+    <value>Vai trò của bạn trong tác nhân AI DocSpace đã thay đổi</value>
+  </data>
 </root>

@@ -2185,4 +2185,13 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
+  <data name="subject_api_key_expired" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace: Термін дії вашого API-ключа закінчився</value>
+  </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace видалено</value>
+  </data>
+  <data name="subject_user_agent_role_changed" xml:space="preserve">
+    <value>Ваша роль у ШІ-агенті DocSpace змінилася</value>
+  </data>
 </root>

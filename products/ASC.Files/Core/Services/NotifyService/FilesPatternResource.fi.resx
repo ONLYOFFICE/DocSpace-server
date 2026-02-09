@@ -298,4 +298,18 @@ $Message</value>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
     <value>DocSpace-ilmoitus.</value>
   </data>
+  <data name="pattern_AgentRemoved" xml:space="preserve">
+    <value>h1. $__AuthorName poisti tekoälyagentin
+
+$__AuthorName poisti tekoälyagentin: $RoomTitle</value>
+  </data>
+  <data name="pattern_AgentUpdateAccessForUser_push" xml:space="preserve">
+    <value>Roolisi tekoälyagentin "$RoomTitle" on muuttunut "$RoomRole"</value>
+  </data>
+  <data name="pattern_InvitedToAgent_push" xml:space="preserve">
+    <value>Sinut on kutsuttu tekoälyagenttiin "$RoomTitle"</value>
+  </data>
+  <data name="subject_AgentRemoved" xml:space="preserve">
+    <value>DocSpace ilmoitus. tekoälyagentti poistettu</value>
+  </data>
 </root>

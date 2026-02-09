@@ -2154,4 +2154,43 @@ $TrulyYours</value>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>Lep pozdrav, ekipa ${LetterLogoText}</value>
   </data>
+  <data name="subject_user_agent_role_changed" xml:space="preserve">
+    <value>Vaša vloga v agentu umetne inteligence DocSpace se je spremenila</value>
+  </data>
+  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; naložil nov dokument: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; v bazo znanja agenta umetne inteligence: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="pattern_api_key_expired" xml:space="preserve">
+    <value>Pozdravljen, $UserName!
+
+S tem e-mail sporočilom vas obveščamo, da je vaš API ključ "*$Message*" potekel in je bil deaktiviran.
+
+Nov API ključ lahko aktivirate v "Orodja razvijalca":"${__VirtualRootPath}/developer-tools/api-keys".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace je bil izbrisan.
+
+*Portal:* ${PortalUrl}
+*Lastnik:* ${UserName} ${UserEmail} 
+*Stranka:* ${OwnerName}
+
+Prepričajte se, da je samodejno zaračunavanje izklopljeno. Preverite stanje samodejnega zaračunavanja v Stripe računu stranke.</value>
+  </data>
+  <data name="pattern_user_agent_role_changed" xml:space="preserve">
+    <value>Pozdravljeni!
+
+Dodeljena vam je nova vloga v agentu umetne inteligence DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+Več o vlogah in dovoljenjih v sobah si lahko preberete v "Centru za pomoč":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_api_key_expired" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace: Vaš API ključ je potekel</value>
+  </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>Dokumentni prostor ${LetterLogoText} je izbrisan</value>
+  </data>
 </root>

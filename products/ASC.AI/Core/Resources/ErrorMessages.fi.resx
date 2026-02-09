@@ -171,4 +171,7 @@
   <data name="UnavailableServers" xml:space="preserve">
     <value>MCP-palvelimet eivät ole käytettävissä: {0}. Tarkista yhteysasetukset</value>
   </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>Tiedostoja ei voida prosessoida: {0}. Tiedostot voivat olla korruptoituneita tai salattuja</value>
+  </data>
 </root>

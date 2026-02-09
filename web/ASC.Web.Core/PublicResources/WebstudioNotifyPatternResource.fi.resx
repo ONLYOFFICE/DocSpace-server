@@ -2152,4 +2152,43 @@ $TrulyYours</value>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>Ystävällisin terveisin, ${LetterLogoText}-tiimi</value>
   </data>
+  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; latasi uuden asiakirjan: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; tekoälagentin tietokantaan: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="pattern_api_key_expired" xml:space="preserve">
+    <value>Hei, $UserName!
+
+Tämä sähköposti on ilmoitus, että API-avaimesi "*$Message*" on vanhentunut ja deaktivoitu. 
+
+Voit luoda uuden API-avaimen "Kehittäjän työkaluissa":"${__VirtualRootPath}/developer-tools/api-keys".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace on poistettu.
+
+*Portaali:* ${PortalUrl}
+*Omistaja:* ${UserName} ${UserEmail} 
+*Asiakas:* ${OwnerName}
+
+Ole hyvä ja varmista, että automaattinen laskutus on pois päältä. Tarkista automaattisen laskutuksen tila asiakkaan Stripe-tililtä.</value>
+  </data>
+  <data name="pattern_user_agent_role_changed" xml:space="preserve">
+    <value>ei!
+
+Sinulle on annettu uusi rooli DocSpace tekoälyagentissa "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+Lue lisää huoneen rooleista ja oikeuksista "Apukeskuksessa":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_api_key_expired" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace: API-avaimesi on vanhentunut</value>
+  </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace on poistettu</value>
+  </data>
+  <data name="subject_user_agent_role_changed" xml:space="preserve">
+    <value>Roolisi DocSpace tekoälyagentissa on muuttunut</value>
+  </data>
 </root>

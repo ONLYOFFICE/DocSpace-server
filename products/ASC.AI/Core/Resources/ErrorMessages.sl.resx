@@ -171,4 +171,7 @@
   <data name="UnavailableServers" xml:space="preserve">
     <value>Strežniki MCP niso na voljo: {0}. Preverite nastavitve povezave</value>
   </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>Datotek ni mogoče obdelati: {0}. Datoteke so morda poškodovane ali šifrirane</value>
+  </data>
 </root>

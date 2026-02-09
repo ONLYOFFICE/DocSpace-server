@@ -298,4 +298,18 @@ $Message</value>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
     <value>Thông báo DocSpace.</value>
   </data>
+  <data name="pattern_AgentRemoved" xml:space="preserve">
+    <value>h1. $__AuthorName đã xóa một tác nhân AI
+
+$__AuthorName đã xóa tác nhân AI: $RoomTitle</value>
+  </data>
+  <data name="pattern_AgentUpdateAccessForUser_push" xml:space="preserve">
+    <value>Vai trò của bạn trong tác nhân AI "$RoomTitle" đã được thay đổi thành "$RoomRole"</value>
+  </data>
+  <data name="pattern_InvitedToAgent_push" xml:space="preserve">
+    <value>Bạn đã được mời vào tác nhân AI "$RoomTitle"</value>
+  </data>
+  <data name="subject_AgentRemoved" xml:space="preserve">
+    <value>Thông báo DocSpace. Tác nhân Agent đã bị xóa</value>
+  </data>
 </root>

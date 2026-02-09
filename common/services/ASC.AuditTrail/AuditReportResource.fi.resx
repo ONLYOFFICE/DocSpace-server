@@ -1107,4 +1107,52 @@
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Webhook päivitetty: {0}</value>
   </data>
+  <data name="BackupCompleted" xml:space="preserve">
+    <value>Varmuuskopiointi suoritettu</value>
+  </data>
+  <data name="BackupFailed" xml:space="preserve">
+    <value>Varmuuskopiointi epäonnistui</value>
+  </data>
+  <data name="InvitationSettingsUpdated" xml:space="preserve">
+    <value>Kutsuasetukset päivitetty</value>
+  </data>
+  <data name="IPRestrictionsSettingsUpdated" xml:space="preserve">
+    <value>IP-turvallisuusasetukset päivitetty</value>
+  </data>
+  <data name="LoginSettingsUpdated" xml:space="preserve">
+    <value>Raa’an voiman suojausasetukset päivitetty</value>
+  </data>
+  <data name="ScheduledBackupCompleted" xml:space="preserve">
+    <value>Ajastettu varmuuskopiointi suoritettu</value>
+  </data>
+  <data name="ScheduledBackupFailed" xml:space="preserve">
+    <value>Ajastettu varmuuskopiointi epäonnistui</value>
+  </data>
+  <data name="ScheduledBackupStarted" xml:space="preserve">
+    <value>Ajastettu varmuuskopiointi alkoi</value>
+  </data>
+  <data name="WebpluginDeleted" xml:space="preserve">
+    <value>Laajennus poistettu: {0}</value>
+  </data>
+  <data name="WebpluginUpdated" xml:space="preserve">
+    <value>Laajennus päivitetty: {0}</value>
+  </data>
+  <data name="WebpluginUploaded" xml:space="preserve">
+    <value>Laajennus ladattu: {0}</value>
+  </data>
+  <data name="WhiteLabelAdditionalSettingsUpdated" xml:space="preserve">
+    <value>Lisäbrändäysasetukset päivitetty</value>
+  </data>
+  <data name="WhiteLabelCompanySettingsUpdated" xml:space="preserve">
+    <value>Yrityksen infoasetukset päivitetty</value>
+  </data>
+  <data name="WhiteLabelMailSettingsUpdated" xml:space="preserve">
+    <value>Postiasetukset päivitetty</value>
+  </data>
+  <data name="WhiteLabelSettingsLogosUpdated" xml:space="preserve">
+    <value>Logoasetukset päivitetty</value>
+  </data>
+  <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
+    <value>Brändinimi päivitetty</value>
+  </data>
 </root>
