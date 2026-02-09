@@ -9,7 +9,7 @@ public class CreateFolderWithFilesDepthCommand : AsyncCommand<CreateFolderWithFi
     {
         public static Settings Default = new()
         {
-            Email = "paul.bannov@gmail.com",
+            Email = "test@onlyoffice.com",
             Password = "11111111"
         };
         

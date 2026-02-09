@@ -13,7 +13,7 @@ public class ExecuteFileCreationAndSharingCommand : AsyncCommand<ExecuteFileCrea
         public static Settings Default = new()
         {
             Iterations = 100,
-            Email = "paul.bannov@gmail.com",
+            Email = "test@onlyoffice.com",
             Password = "11111111"
         };
         
