@@ -333,20 +333,22 @@ public class UpdateMemberCultureByIdRequestDto
     public required string UserId { get; set; }
 
     /// <summary>
-    /// The culture code parameters.
+    /// The culture name parameters.
     /// </summary>
     [FromBody]
     public Culture Culture { get; set; }
 }
 
 /// <summary>
-/// The culture code parameters.
+/// The culture name parameters.
 /// </summary>
 public class Culture
 {
     /// <summary>
-    /// The user language.
+    /// The user culture name (en-US, de, fr, es, ...).
     /// </summary>
+    [Required]
+    [StringLength(85)]
     public string CultureName { get; set; }
 }
 
