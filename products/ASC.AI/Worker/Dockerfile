@@ -1,11 +1,11 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 WORKDIR /app
 EXPOSE 5124
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["products/ASC.AI/Service/ASC.AI.Service.csproj", "products/ASC.AI/Service/"]
+COPY ["products/ASC.AI/Worker/ASC.AI.Worker.csproj", "products/ASC.AI/Worker/"]
 COPY ["products/ASC.AI/Core/ASC.AI.Core.csproj", "products/ASC.AI/Core/"]
 COPY ["common/ASC.Common/ASC.Common.csproj", "common/ASC.Common/"]
 COPY ["common/ASC.EventBus/ASC.EventBus.csproj", "common/ASC.EventBus/"]
@@ -24,16 +24,16 @@ COPY ["common/ASC.EventBus.ActiveMQ/ASC.EventBus.ActiveMQ.csproj", "common/ASC.E
 COPY ["common/ASC.EventBus.Extensions.Logger/ASC.EventBus.Extensions.Logger.csproj", "common/ASC.EventBus.Extensions.Logger/"]
 COPY ["common/ASC.EventBus.RabbitMQ/ASC.EventBus.RabbitMQ.csproj", "common/ASC.EventBus.RabbitMQ/"]
 COPY ["common/ASC.Webhooks.Core/ASC.Webhooks.Core.csproj", "common/ASC.Webhooks.Core/"]
-RUN dotnet restore "products/ASC.AI/Service/ASC.AI.Service.csproj"
+RUN dotnet restore "products/ASC.AI/Worker/ASC.AI.Worker.csproj"
 COPY . .
-WORKDIR "/src/products/ASC.AI/Service"
-RUN dotnet build "./ASC.AI.Service.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/products/ASC.AI/Worker"
+RUN dotnet build "./ASC.AI.Worker.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./ASC.AI.Service.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./ASC.AI.Worker.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "ASC.AI.Service.dll"]
+ENTRYPOINT ["dotnet", "ASC.AI.Worker.dll"]

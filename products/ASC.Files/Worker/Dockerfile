@@ -1,11 +1,11 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 USER $APP_UID
 WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["products/ASC.Files/Service/ASC.Files.Service.csproj", "products/ASC.Files/Service/"]
+COPY ["products/ASC.Files/Worker/ASC.Files.Worker.csproj", "products/ASC.Files/Worker/"]
 COPY ["common/ASC.Api.Core/ASC.Api.Core.csproj", "common/ASC.Api.Core/"]
 COPY ["web/ASC.Web.Core/ASC.Web.Core.csproj", "web/ASC.Web.Core/"]
 COPY ["common/ASC.Core.Common/ASC.Core.Common.csproj", "common/ASC.Core.Common/"]
@@ -23,16 +23,16 @@ COPY ["common/ASC.EventBus.Extensions.Logger/ASC.EventBus.Extensions.Logger.cspr
 COPY ["common/ASC.EventBus.RabbitMQ/ASC.EventBus.RabbitMQ.csproj", "common/ASC.EventBus.RabbitMQ/"]
 COPY ["common/ASC.Webhooks.Core/ASC.Webhooks.Core.csproj", "common/ASC.Webhooks.Core/"]
 COPY ["products/ASC.Files/Core/ASC.Files.Core.csproj", "products/ASC.Files/Core/"]
-RUN dotnet restore "products/ASC.Files/Service/ASC.Files.Service.csproj"
+RUN dotnet restore "products/ASC.Files/Worker/ASC.Files.Worker.csproj"
 COPY . .
-WORKDIR "/src/products/ASC.Files/Service"
-RUN dotnet build "ASC.Files.Service.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/products/ASC.Files/Worker"
+RUN dotnet build "ASC.Files.Worker.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "ASC.Files.Service.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "ASC.Files.Worker.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "ASC.Files.Service.dll"]
+ENTRYPOINT ["dotnet", "ASC.Files.Worker.dll"]

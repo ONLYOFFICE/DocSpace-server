@@ -1,11 +1,11 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 WORKDIR /app
 EXPOSE 5032
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["common/services/ASC.Data.Backup.BackgroundTasks/ASC.Data.Backup.BackgroundTasks.csproj", "common/services/ASC.Data.Backup.BackgroundTasks/"]
+COPY ["common/services/ASC.Data.Backup.Worker/ASC.Data.Backup.Worker.csproj", "common/services/ASC.Data.Backup.Worker/"]
 COPY ["common/ASC.Data.Backup.Core/ASC.Data.Backup.Core.csproj", "common/ASC.Data.Backup.Core/"]
 COPY ["products/ASC.Files/Core/ASC.Files.Core.csproj", "products/ASC.Files/Core/"]
 COPY ["common/ASC.Api.Core/ASC.Api.Core.csproj", "common/ASC.Api.Core/"]
@@ -24,16 +24,16 @@ COPY ["common/ASC.EventBus.ActiveMQ/ASC.EventBus.ActiveMQ.csproj", "common/ASC.E
 COPY ["common/ASC.EventBus.Extensions.Logger/ASC.EventBus.Extensions.Logger.csproj", "common/ASC.EventBus.Extensions.Logger/"]
 COPY ["common/ASC.EventBus.RabbitMQ/ASC.EventBus.RabbitMQ.csproj", "common/ASC.EventBus.RabbitMQ/"]
 COPY ["common/ASC.Webhooks.Core/ASC.Webhooks.Core.csproj", "common/ASC.Webhooks.Core/"]
-RUN dotnet restore "common/services/ASC.Data.Backup.BackgroundTasks/ASC.Data.Backup.BackgroundTasks.csproj"
+RUN dotnet restore "common/services/ASC.Data.Backup.Worker/ASC.Data.Backup.Worker.csproj"
 COPY . .
-WORKDIR "/src/common/services/ASC.Data.Backup.BackgroundTasks"
-RUN dotnet build "ASC.Data.Backup.BackgroundTasks.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/common/services/ASC.Data.Backup.Worker"
+RUN dotnet build "ASC.Data.Backup.Worker.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "ASC.Data.Backup.BackgroundTasks.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "ASC.Data.Backup.Worker.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "ASC.Data.Backup.BackgroundTasks.dll"]
+ENTRYPOINT ["dotnet", "ASC.Data.Backup.Worker.dll"]
