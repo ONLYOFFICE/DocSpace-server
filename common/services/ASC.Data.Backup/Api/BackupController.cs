@@ -153,7 +153,7 @@ public class BackupController(
 
         await backupService.DeleteScheduleAsync(tenantId);
 
-        messageService.Send(MessageAction.ScheduledBackupDeleted, MessageTarget.Create(tenantId));
+        await messageService.SendAsync(MessageAction.ScheduledBackupDeleted, MessageTarget.Create(tenantId));
 
         return true;
     }
@@ -311,7 +311,7 @@ public class BackupController(
 
         if (result)
         {
-            messageService.Send(MessageAction.BackupCancelled, MessageTarget.Create(tenantId));
+            await messageService.SendAsync(MessageAction.BackupCancelled, MessageTarget.Create(tenantId));
         }
 
         return result;
@@ -335,7 +335,7 @@ public class BackupController(
     //
     //     if (result)
     //     {
-    //         messageService.Send(MessageAction.RestoreCancelled, MessageTarget.Create(tenantId));
+    //         await messageService.SendAsync(MessageAction.RestoreCancelled, MessageTarget.Create(tenantId));
     //     }
     //
     //     return result;
