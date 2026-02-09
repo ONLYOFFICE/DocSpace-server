@@ -171,6 +171,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
     public ConnectionStringManager AddMailPit()
     {
         MailResource = builder.AddMailPit("mailpit");
+        
         return this;
     }
 
@@ -232,7 +233,9 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
         if (MailResource != null)
         {
             resourceBuilder
-                .WithReference(MailResource);
+                .WithReference(MailResource)
+                .WithEnvironment("core:notify:postman", "mailpit");
+            
         }
 
         if (isDocker)
@@ -296,5 +299,5 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
         AddWaitFor(resourceBuilder, includeEditors: false);
     }
     
-    public static string? SubstituteLocalhost(string? host) => host?.Replace("localhost", Constants.HostDockerInternal);
+    public static string? SubstituteLocalhost(string? host) => host?.Replace(KnownHostNames.Localhost, KnownHostNames.DockerDesktopHostBridge);
 }

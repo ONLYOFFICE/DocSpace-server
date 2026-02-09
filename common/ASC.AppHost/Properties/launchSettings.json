@@ -5,7 +5,7 @@
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
-      "applicationUrl": "http://localhost:15208",
+      "applicationUrl": "http://0.0.0.0:15208",
       "environmentVariables": {
         "Docker": "true",
         "APP_HOSTING_STANDALONE": "true",
@@ -20,7 +20,7 @@
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
-      "applicationUrl": "http://localhost:15208",
+      "applicationUrl": "http://0.0.0.0:15208",
       "environmentVariables": {
         "ASPIRE_ALLOW_UNSECURED_TRANSPORT": "true",
         "ASPNETCORE_ENVIRONMENT": "Preview",
@@ -36,7 +36,7 @@
       "commandName": "Project",
       "dotnetRunMessages": false,
       "launchBrowser": true,
-      "applicationUrl": "http://localhost:15208",
+      "applicationUrl": "http://0.0.0.0:15208",
       "environmentVariables": {
         "ASPIRE_ALLOW_UNSECURED_TRANSPORT": "true",
         "APP_HOSTING_STANDALONE": "true",
