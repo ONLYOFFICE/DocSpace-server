@@ -62,5 +62,6 @@ public class Startup : BaseWorkerStartup
         services.RegisterQueue<ChatDeletionTask>();
         
         services.AddActivePassiveHostedService<OrphanAttachmentCleanerService>(Configuration);
+        services.AddActivePassiveHostedService<DeletedChatCleanerService>(Configuration);
     }
 }

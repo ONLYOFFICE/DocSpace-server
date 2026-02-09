@@ -76,10 +76,10 @@ public partial class AiDbContext
         return Queries.GetMessagesTotalCountAsync(this, chatId);
     }
     
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid])]
-    public async Task<bool> MarkChatAsDeletedAsync(int tenantId, Guid chatId, Guid userId)
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultDateTime])]
+    public async Task<bool> MarkChatAsDeletedAsync(int tenantId, Guid chatId, Guid userId, DateTime modifiedOn)
     {
-        return await Queries.MarkChatAsDeletedAsync(this, tenantId, chatId, userId) > 0;
+        return await Queries.MarkChatAsDeletedAsync(this, tenantId, chatId, userId, modifiedOn) > 0;
     }
     
     [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
@@ -122,6 +122,18 @@ public partial class AiDbContext
     public Task<int> LinkAttachmentsToMessageAsync(int tenantId, Guid chatId, long messageId, IEnumerable<int> fileIds, DateTime modifiedOn)
     {
         return Queries.LinkAttachmentsToMessageAsync(this, tenantId, chatId, messageId, fileIds, modifiedOn);
+    }
+
+    [PreCompileQuery([PreCompileQuery.DefaultDateTime, PreCompileQuery.DefaultInt])]
+    public IAsyncEnumerable<(int TenantId, Guid UserId, Guid ChatId)> GetDeletedChatsAsync(DateTime cutoffDate, int limit)
+    {
+        return Queries.GetDeletedChatsAsync(this, cutoffDate, limit);
+    }
+
+    [PreCompileQuery([null, PreCompileQuery.DefaultDateTime])]
+    public Task<int> UpdateDeletedChatsModifiedOnAsync(IEnumerable<Guid> chatIds, DateTime modifiedOn)
+    {
+        return Queries.UpdateDeletedChatsModifiedOnAsync(this, chatIds, modifiedOn);
     }
 
     [PreCompileQuery([PreCompileQuery.DefaultDateTime])]
@@ -186,11 +198,13 @@ static file class Queries
             (AiDbContext ctx, Guid chatId) => 
                 ctx.Messages.Count(x => x.ChatId == chatId));
     
-    public static readonly Func<AiDbContext, int, Guid, Guid, Task<int>> MarkChatAsDeletedAsync =
+    public static readonly Func<AiDbContext, int, Guid, Guid, DateTime, Task<int>> MarkChatAsDeletedAsync =
         EF.CompileAsyncQuery(
-            (AiDbContext ctx, int tenantId, Guid chatId, Guid userId) =>
+            (AiDbContext ctx, int tenantId, Guid chatId, Guid userId, DateTime modifiedOn) =>
                 ctx.Chats.Where(x => x.TenantId == tenantId && x.Id == chatId && x.UserId == userId)
-                    .ExecuteUpdate(x => x.SetProperty(y => y.Deleted, true)));
+                    .ExecuteUpdate(x => x
+                        .SetProperty(y => y.Deleted, true)
+                        .SetProperty(y => y.ModifiedOn, modifiedOn)));
     
     public static readonly Func<AiDbContext, int, Guid, Task<DbChatMessage?>> GetMessageAsync =
         EF.CompileAsyncQuery(
@@ -234,6 +248,19 @@ static file class Queries
                 .ExecuteUpdate(s => s
                     .SetProperty(a => a.MessageId, messageId)
                     .SetProperty(a => a.ModifiedOn, modifiedOn)));
+
+    public static readonly Func<AiDbContext, DateTime, int, IAsyncEnumerable<(int TenantId, Guid UserId, Guid ChatId)>> GetDeletedChatsAsync =
+        EF.CompileAsyncQuery((AiDbContext ctx, DateTime cutoffDate, int limit) =>
+            ctx.Chats
+                .Where(x => x.Deleted && x.ModifiedOn <= cutoffDate)
+                .Take(limit)
+                .Select(x => new ValueTuple<int, Guid, Guid>(x.TenantId, x.UserId, x.Id)));
+
+    public static readonly Func<AiDbContext, IEnumerable<Guid>, DateTime, Task<int>> UpdateDeletedChatsModifiedOnAsync =
+        EF.CompileAsyncQuery((AiDbContext ctx, IEnumerable<Guid> chatIds, DateTime modifiedOn) =>
+            ctx.Chats
+                .Where(x => chatIds.Contains(x.Id))
+                .ExecuteUpdate(s => s.SetProperty(y => y.ModifiedOn, modifiedOn)));
 
     public static readonly Func<AiDbContext, DateTime, IAsyncEnumerable<(int TenantId, int FileId)>> GetOrphanedAttachmentsAsync =
         EF.CompileAsyncQuery((AiDbContext ctx, DateTime cutoffDate) =>

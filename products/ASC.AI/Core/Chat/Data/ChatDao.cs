@@ -165,7 +165,7 @@ public class ChatDao(IDbContextFactory<AiDbContext> dbContextFactory)
             await using var context = await dbContextFactory.CreateDbContextAsync();
             await using var transaction = await context.Database.BeginTransactionAsync();
 
-            var deleted = await context.MarkChatAsDeletedAsync(tenantId, chatId, userId);
+            var deleted = await context.MarkChatAsDeletedAsync(tenantId, chatId, userId, DateTime.UtcNow);
             if (deleted && onDeleted != null)
             {
                 await onDeleted();
@@ -351,6 +351,22 @@ public class ChatDao(IDbContextFactory<AiDbContext> dbContextFactory)
             : settings.Map();
     }
     
+    public async IAsyncEnumerable<(int TenantId, Guid UserId, Guid ChatId)> GetDeletedChatsAsync(DateTime cutoffDate, int limit)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+        await foreach (var chat in dbContext.GetDeletedChatsAsync(cutoffDate, limit))
+        {
+            yield return chat;
+        }
+    }
+
+    public async Task UpdateDeletedChatsModifiedOnAsync(IEnumerable<Guid> chatIds, DateTime modifiedOn)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        await dbContext.UpdateDeletedChatsModifiedOnAsync(chatIds, modifiedOn);
+    }
+
     public async IAsyncEnumerable<(int TenantId, int FileId)> GetOrphanedAttachmentsAsync(DateTime cutoffDate)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();

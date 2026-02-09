@@ -39,4 +39,13 @@ internal static partial class ChatCleanerServiceLogger
 
     [LoggerMessage(LogLevel.Error, "Failed to clean up orphaned attachments")]
     public static partial void ErrorCleanUpOrphanedAttachments(this ILogger logger, Exception exception);
+
+    [LoggerMessage(LogLevel.Error, "Failed to requeue deleted chat {ChatId}")]
+    public static partial void ErrorRequeuingDeletedChat(this ILogger logger, Guid chatId, Exception exception);
+
+    [LoggerMessage(LogLevel.Information, "Requeued {Count} deleted chats for permanent deletion")]
+    public static partial void InformationRequeuedDeletedChats(this ILogger logger, int count);
+
+    [LoggerMessage(LogLevel.Error, "Failed to clean up deleted chats")]
+    public static partial void ErrorCleanUpDeletedChats(this ILogger logger, Exception exception);
 }
