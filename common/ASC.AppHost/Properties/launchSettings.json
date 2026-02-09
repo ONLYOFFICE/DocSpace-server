@@ -7,10 +7,10 @@
       "launchBrowser": true,
       "applicationUrl": "http://0.0.0.0:15208",
       "environmentVariables": {
-        "Docker": "true",
+        "Docker": "false",
+        "APP_LAUNCH_PROFILE": "Development",
         "APP_HOSTING_STANDALONE": "true",
         "ASPIRE_ALLOW_UNSECURED_TRANSPORT": "true",
-        "ASPNETCORE_ENVIRONMENT": "Development",
         "DOTNET_ENVIRONMENT": "Development",
         "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "http://localhost:19085",
         "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "http://localhost:20013"
@@ -23,9 +23,9 @@
       "applicationUrl": "http://0.0.0.0:15208",
       "environmentVariables": {
         "ASPIRE_ALLOW_UNSECURED_TRANSPORT": "true",
-        "ASPNETCORE_ENVIRONMENT": "Preview",
         "DOTNET_ENVIRONMENT": "Development",
         "Docker": "true",
+        "APP_LAUNCH_PROFILE": "Preview",
         "APP_HOSTING_STANDALONE": "true",
         "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "http://localhost:19085",
         "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "http://localhost:20013",
@@ -40,8 +40,8 @@
       "environmentVariables": {
         "ASPIRE_ALLOW_UNSECURED_TRANSPORT": "true",
         "APP_HOSTING_STANDALONE": "true",
+        "APP_LAUNCH_PROFILE": "FrontendDev",
         "Docker": "false",
-        "ASPNETCORE_ENVIRONMENT": "FrontendDev",
         "SKIP_CLIENT": "true",
         "DOTNET_ENVIRONMENT": "Development",
         "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "http://localhost:19085",

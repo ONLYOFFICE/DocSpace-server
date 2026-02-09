@@ -68,15 +68,17 @@ public class ProjectConfigurator(
         
         var isStandalone = String.Compare(builder.Configuration["APP_HOSTING_STANDALONE"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 
-        if (isStandalone)
+        project.WithEnvironment("core:base-domain", isStandalone ? "localhost" : "")
+               .WithEnvironment("DOTNET_ENVIRONMENT", builder.Environment.EnvironmentName);
+               
+        switch (builder.Environment.EnvironmentName)
         {
-            project.WithEnvironment("core:base-domain", "localhost");
+            case "enterprise":
+            case "developer":
+                project.WithEnvironment("license:file:path", Path.Combine(basePath, "Data", "license.lic"));
+                break;
         }
-        else
-        {
-            project.WithEnvironment("core:base-domain", "");
-        }
-        
+
         connectionManager.AddBaseConfig(project, isDocker);
         connectionManager.AddWaitFor(project);
     }
@@ -91,6 +93,7 @@ public class ProjectConfigurator(
 
         var netVersion = $"net{Environment.Version.Major}.{Environment.Version.Minor}";
         var dllPath = "/app/bin/Debug/";
+        
         if (Directory.Exists(Path.Combine(projectBasePath, "bin", "Debug", netVersion)))
         {
             dllPath += $"{netVersion}/";
@@ -104,21 +107,22 @@ public class ProjectConfigurator(
             .WithEnvironment("web:hub:internal", new UriBuilder(Uri.UriSchemeHttp, Constants.SocketIoContainer, Constants.SocketIoPort).ToString())
             .WithEnvironment("core:hosting:singletonMode", true.ToString())
             .WithEnvironment("pathToConf", "/buildtools/config/")
+            .WithEnvironment("DOTNET_ENVIRONMENT", builder.Environment.EnvironmentName)
             .WithArgs($"{dllPath}{name.Replace('_', '.')}.dll")
             .WithEntrypoint("dotnet");
+        
+        switch (builder.Environment.EnvironmentName)
+        {
+            case "enterprise":
+            case "developer":
+                resourceBuilder.WithEnvironment("license:file:path", "/data/license.lic");
+                break;
+        }
 
         var isStandalone = String.Compare(builder.Configuration["APP_HOSTING_STANDALONE"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 
-        if (isStandalone)
-        {
-            resourceBuilder.WithEnvironment("core:base-domain", "localhost");
-        }
-        else
-        {
-            resourceBuilder.WithEnvironment("core:base-domain", "");
-        }
+        resourceBuilder.WithEnvironment("core:base-domain", isStandalone ? "localhost" : "");
 
-        
         AddBaseBind(resourceBuilder);
 
         if (projectPort != 0)

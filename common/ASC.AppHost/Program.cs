@@ -24,24 +24,25 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using Microsoft.Extensions.Hosting;
+
 var builder = DistributedApplication.CreateBuilder(args);
 
 var basePath = Path.GetFullPath(Path.Combine("..", "..", ".."));
 var isDocker = String.Compare(builder.Configuration["Docker"], "true", StringComparison.OrdinalIgnoreCase) == 0;
-var isPreview = String.Compare(builder.Configuration["ASPNETCORE_ENVIRONMENT"], "Preview", StringComparison.OrdinalIgnoreCase) == 0;
 var skipClient = String.Compare(builder.Configuration["SKIP_CLIENT"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 
-var connectionManager = new ConnectionStringManager(builder)
-    .AddMySql()
+var connectionManager = new ConnectionStringManager(builder, basePath)
     .AddRabbitMq()
-    .AddRedis()
     .AddEditors();
 
 var configurator = new ProjectConfigurator(builder, connectionManager, basePath, isDocker);
 
-switch (builder.Configuration["ASPNETCORE_ENVIRONMENT"])
+switch (builder.Configuration["APP_LAUNCH_PROFILE"])
 {
     case "Preview":
+        connectionManager.AddMySql()
+                         .AddRedis();
         configurator
             .AddProject<ASC_Files>(Constants.FilesPort)
             .AddProject<ASC_Files_Service>(Constants.FilesServicePort)
@@ -54,7 +55,8 @@ switch (builder.Configuration["ASPNETCORE_ENVIRONMENT"])
 
         break;
     case "FrontendDev":
-        connectionManager
+        connectionManager.AddMySql(withDbGate: true)
+            .AddRedis()
             .AddMailPit();
         
         configurator
@@ -76,7 +78,8 @@ switch (builder.Configuration["ASPNETCORE_ENVIRONMENT"])
 
         break;
     default:
-        connectionManager
+        connectionManager.AddMySql(withDbGate: true)
+            .AddRedis(withRedisInsight: true)
             .AddOpensearch()
             .AddMailPit();
         
