@@ -511,7 +511,7 @@ public class UserController(
     /// <path>api/2.0/people/{userid}/password</path>
     [Tags("People / Password")]
     [SwaggerResponse(200, "Detailed user information", typeof(EmployeeFullDto))]
-    [SwaggerResponse(400, "Invalid user ID or the password is incorrect")]
+    [SwaggerResponse(400, "Incorrect userId or password")]
     [SwaggerResponse(403, "The link is invalid or no permissions to perform this action")]
     [SwaggerResponse(404, "The user could not be found")]
     [AllowNotPayment]
@@ -592,7 +592,7 @@ public class UserController(
     /// <path>api/2.0/people/{userid}/email</path>
     [Tags("People / Email")]
     [SwaggerResponse(200, "Detailed user information", typeof(EmployeeFullDto))]
-    [SwaggerResponse(400, "Invalid user ID or the email is incorrect")]
+    [SwaggerResponse(400, "Incorrect userId or email")]
     [SwaggerResponse(403, "The link is invalid or no permissions to perform this action")]
     [SwaggerResponse(404, "The user could not be found")]
     [AllowNotPayment]
