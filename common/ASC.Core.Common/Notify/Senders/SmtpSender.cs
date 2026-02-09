@@ -150,54 +150,60 @@ public class SmtpSender(
 
     private async Task BuildSmtpSettingsAsync(CoreConfiguration coreConfiguration)
     {
-        var connectionString = configuration.GetConnectionString("mailpit")?.Split("=")?[1];
-        if (connectionString != null && connectionString.StartsWith("smtp://"))
+        if ("mailpit".Equals(configuration["core:notify:postman"], StringComparison.InvariantCultureIgnoreCase))
         {
-            var uri = new Uri(connectionString);
-            _host = uri.Host;
-            _port = uri.Port;
-        }
-        else if ((await coreConfiguration.GetDefaultSmtpSettingsAsync()).IsDefaultSettings && _initProperties.ContainsKey("host") && !string.IsNullOrEmpty(_initProperties["host"]))
-        {
-            _host = _initProperties["host"];
-
-            if (_initProperties.ContainsKey("port") && !string.IsNullOrEmpty(_initProperties["port"]))
+            var connectionString = configuration.GetConnectionString("mailpit")?.Split("=")[1];
+            if (connectionString != null && connectionString.StartsWith("smtp://"))
             {
-                _port = int.Parse(_initProperties["port"]);
-            }
-            else
-            {
-                _port = 25;
-            }
-
-            if (_initProperties.ContainsKey("enableSsl") && !string.IsNullOrEmpty(_initProperties["enableSsl"]))
-            {
-                _ssl = bool.Parse(_initProperties["enableSsl"]);
-            }
-            else
-            {
-                _ssl = false;
-            }
-
-            if (_initProperties.ContainsKey("userName"))
-            {
-                var useNtlm = _initProperties.ContainsKey("useNtlm") && bool.Parse(_initProperties["useNtlm"]);
-                _credentials = !useNtlm ? new NetworkCredential(_initProperties["userName"], _initProperties["password"]) : null;
-                _saslMechanism = useNtlm ? new SaslMechanismNtlm(_initProperties["userName"], _initProperties["password"]) : null;
+                var uri = new Uri(connectionString);
+                _host = uri.Host;
+                _port = uri.Port;
             }
         }
         else
         {
-            var s = await coreConfiguration.GetDefaultSmtpSettingsAsync();
-
-            _host = s.Host;
-            _port = s.Port;
-            _ssl = s.EnableSSL;
-
-            if (!string.IsNullOrEmpty(s.CredentialsUserName))
+            if ((await coreConfiguration.GetDefaultSmtpSettingsAsync()).IsDefaultSettings && _initProperties.ContainsKey("host") && !string.IsNullOrEmpty(_initProperties["host"]))
             {
-                _credentials = !s.UseNtlm ? new NetworkCredential(s.CredentialsUserName, s.CredentialsUserPassword) : null;
-                _saslMechanism = s.UseNtlm ? new SaslMechanismNtlm(s.CredentialsUserName, s.CredentialsUserPassword) : null;
+                _host = _initProperties["host"];
+
+                if (_initProperties.ContainsKey("port") && !string.IsNullOrEmpty(_initProperties["port"]))
+                {
+                    _port = int.Parse(_initProperties["port"]);
+                }
+                else
+                {
+                    _port = 25;
+                }
+
+                if (_initProperties.ContainsKey("enableSsl") && !string.IsNullOrEmpty(_initProperties["enableSsl"]))
+                {
+                    _ssl = bool.Parse(_initProperties["enableSsl"]);
+                }
+                else
+                {
+                    _ssl = false;
+                }
+
+                if (_initProperties.ContainsKey("userName"))
+                {
+                    var useNtlm = _initProperties.ContainsKey("useNtlm") && bool.Parse(_initProperties["useNtlm"]);
+                    _credentials = !useNtlm ? new NetworkCredential(_initProperties["userName"], _initProperties["password"]) : null;
+                    _saslMechanism = useNtlm ? new SaslMechanismNtlm(_initProperties["userName"], _initProperties["password"]) : null;
+                }
+            }
+            else
+            {
+                var s = await coreConfiguration.GetDefaultSmtpSettingsAsync();
+
+                _host = s.Host;
+                _port = s.Port;
+                _ssl = s.EnableSSL;
+
+                if (!string.IsNullOrEmpty(s.CredentialsUserName))
+                {
+                    _credentials = !s.UseNtlm ? new NetworkCredential(s.CredentialsUserName, s.CredentialsUserPassword) : null;
+                    _saslMechanism = s.UseNtlm ? new SaslMechanismNtlm(s.CredentialsUserName, s.CredentialsUserPassword) : null;
+                }
             }
         }
     }

@@ -534,7 +534,7 @@ public class UserController(
             return null;
         }
 
-        if (_userManager.IsSystemUser(user.Id) || user.Status == EmployeeStatus.Terminated)
+        if (_userManager.IsSystemUser(user.Id) || user.Status != EmployeeStatus.Active)
         {
             throw new SecurityException();
         }
@@ -1239,6 +1239,7 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(403, "No permissions to perform this action or users are not suspended")]
     [SwaggerResponse(409, "Data reassign process is not complete")]
     [HttpPut("delete", Order = -1)]
     public async IAsyncEnumerable<EmployeeFullDto> RemoveUsers(UpdateMembersRequestDto inDto)
@@ -1253,6 +1254,11 @@ public class UserController(
             .Where(u => !_userManager.IsSystemUser(u.Id) && !u.IsLDAP())
             .ToListAsync();
 
+        if (users.Any(u => u.Status != EmployeeStatus.Terminated))
+        {
+            throw new InvalidOperationException("Users are not suspended");
+        }
+
         var userNames = users.Select(x => x.DisplayUserName(false, displayUserSettingsHelper)).ToList();
         var tenant = tenantManager.GetCurrentTenant();
         var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
@@ -1260,11 +1266,6 @@ public class UserController(
 
         foreach (var user in users)
         {
-            if (user.Status != EmployeeStatus.Terminated)
-            {
-                continue;
-            }
-
             var userType = await _userManager.GetUserTypeAsync(user.Id);
             switch (userType)
             {
@@ -1935,25 +1936,39 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / User status")]
     [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(400, "Incorrect status")]
+    [SwaggerResponse(403, "No permissions to perform this action or cannot change status for a specific user (yourself, owner, LDAP ...)")]
     [HttpPut("status/{status}")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserStatus(UpdateMemberStatusRequestDto inDto)
     {
+        if (inDto.Status is not (EmployeeStatus.Active or EmployeeStatus.Terminated))
+        {
+            throw new ArgumentException($"Incorrect status");
+        }
+
         await _permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
         var tenant = tenantManager.GetCurrentTenant();
         var users = await inDto.UpdateMembers.UserIds
             .ToAsyncEnumerable()
             .Select(async (Guid userId, CancellationToken _) => await _userManager.GetUsersAsync(userId))
-            .Where(u => !_userManager.IsSystemUser(u.Id) && !u.IsLDAP())
             .ToListAsync();
+
+        var currentUserIsOwner = authContext.CurrentAccount.ID == tenant.OwnerId;
+        foreach (var u in users)
+        {
+            if (_userManager.IsSystemUser(u.Id)
+                || u.IsLDAP()
+                || u.IsOwner(tenant)
+                || u.IsMe(authContext)
+                || !currentUserIsOwner && await _userManager.IsDocSpaceAdminAsync(u))
+            {
+                throw new SecurityException(Resource.ErrorAccessDenied);
+            }
+        }
 
         foreach (var user in users)
         {
-            if (user.IsOwner(tenant) || authContext.CurrentAccount.ID != tenant.OwnerId && await _userManager.IsDocSpaceAdminAsync(user) || user.IsMe(authContext))
-            {
-                continue;
-            }
-
             switch (inDto.Status)
             {
                 case EmployeeStatus.Active:
@@ -2050,6 +2065,7 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / User type")]
     [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("type/{type}")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserType(UpdateMemberTypeRequestDto inDto)
     {
