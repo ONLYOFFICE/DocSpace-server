@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
@@ -38,7 +38,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASC.ElasticSearch", "common
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASC.Files", "products\ASC.Files\Server\ASC.Files.csproj", "{77BA2F61-6155-4283-BB39-F8E42F46A0B0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASC.Files.Service", "products\ASC.Files\Service\ASC.Files.Service.csproj", "{5D41FFFF-816C-40B2-95CD-E2DDDCB83784}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASC.Files.Worker", "products\ASC.Files\Worker\ASC.Files.Worker.csproj", "{5D41FFFF-816C-40B2-95CD-E2DDDCB83784}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASC.Files.Core", "products\ASC.Files\Core\ASC.Files.Core.csproj", "{F0A39728-940D-4DBE-A37A-05D4EB57F342}"
 EndProject
@@ -64,7 +64,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASC.Data.Backup", "common\s
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASC.Webhooks.Core", "common\ASC.Webhooks.Core\ASC.Webhooks.Core.csproj", "{760BFF3A-1A67-43A1-A94C-78D11A4BB1E6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASC.Data.Backup.BackgroundTasks", "common\services\ASC.Data.Backup.BackgroundTasks\ASC.Data.Backup.BackgroundTasks.csproj", "{C0C28A02-943C-4A38-B474-A2B49C6201ED}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASC.Data.Backup.Worker", "common\services\ASC.Data.Backup.Worker\ASC.Data.Backup.Worker.csproj", "{C0C28A02-943C-4A38-B474-A2B49C6201ED}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASC.EventBus", "common\ASC.EventBus\ASC.EventBus.csproj", "{26540DA7-604B-474B-97BA-9CDC85A84B6D}"
 EndProject
@@ -98,7 +98,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASC.AI.Core", "products\ASC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASC.AI", "products\ASC.AI\Server\ASC.AI.csproj", "{1F2AEF6E-12EB-4E8E-8A13-D12F711F51A9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASC.AI.Service", "products\ASC.AI\Service\ASC.AI.Service.csproj", "{91B8E070-9067-4198-9619-1157E2559106}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASC.AI.Worker", "products\ASC.AI\Worker\ASC.AI.Worker.csproj", "{91B8E070-9067-4198-9619-1157E2559106}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASC.EventBus.RedisMQ", "common\ASC.EventBus.RedisMQ\ASC.EventBus.RedisMQ.csproj", "{F16B835A-4332-4831-99DB-95D53D522E82}"
 EndProject
