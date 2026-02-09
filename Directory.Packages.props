@@ -33,7 +33,7 @@
     <PackageVersion Include="AspNetCore.HealthChecks.Rabbitmq" Version="9.0.0" />
     <PackageVersion Include="AspNetCore.HealthChecks.Redis" Version="9.0.0" />
     <PackageVersion Include="AspNetCore.HealthChecks.UI.Client" Version="9.0.0" />
-    <PackageVersion Include="AWSSDK.Extensions.CloudFront.Signers" Version="4.0.0.19" />
+    <PackageVersion Include="AWSSDK.Extensions.CloudFront.Signers" Version="4.0.0.24" />
     <PackageVersion Include="CommunityToolkit.Aspire.Hosting.MailPit" Version="13.1.1" />
     <PackageVersion Include="CommunityToolkit.Aspire.Hosting.MySql.Extensions" Version="13.1.1" />
     <PackageVersion Include="DocSpace.API.SDK" Version="3.6.0" />
@@ -49,14 +49,14 @@
     <PackageVersion Include="Mscc.GenerativeAI.Microsoft" Version="2.9.8" />
     <PackageVersion Include="NLog.Targets.ElasticSearch" Version="7.7.0" />
     <PackageVersion Include="NLog.Web.AspNetCore" Version="5.5.0" />
-    <PackageVersion Include="OpenTelemetry" Version="1.14.0" />
-    <PackageVersion Include="OpenTelemetry.Api" Version="1.14.0" />
+    <PackageVersion Include="OpenTelemetry" Version="1.15.0" />
+    <PackageVersion Include="OpenTelemetry.Api" Version="1.15.0" />
     <PackageVersion Include="OpenTelemetry.Exporter.InfluxDB" Version="1.0.0-alpha.4" />
-    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.14.0" />
-    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.14.0" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.14.0" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.14.0" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.14.0" />
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.15.0" />
+    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.15.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.15.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.15.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.15.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Process" Version="1.10.0-beta.1" />
     <PackageVersion Include="RedisRateLimiting" Version="1.2.1" />
     <PackageVersion Include="RedisRateLimiting.AspNetCore" Version="1.2.1" />
@@ -66,7 +66,7 @@
     <PackageVersion Include="StackExchange.Redis.Extensions.AspNetCore" Version="11.0.0" />
     <PackageVersion Include="StackExchange.Redis.Extensions.Newtonsoft" Version="11.0.0" />
     <PackageVersion Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />
-    <PackageVersion Include="Swashbuckle.AspNetCore" Version="10.1.0" />
+    <PackageVersion Include="Swashbuckle.AspNetCore" Version="10.1.2" />
     <PackageVersion Include="Swashbuckle.AspNetCore.Annotations" Version="10.1.2" />
     <PackageVersion Include="Swashbuckle.AspNetCore.SwaggerGen" Version="10.1.2" />
     <PackageVersion Include="ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis" Version="2.5.0" />
@@ -107,11 +107,11 @@
     <PackageVersion Include="Aspire.Hosting.Redis" Version="13.1.0" />
     <PackageVersion Include="AspNetCore.HealthChecks.UI" Version="9.0.0" />
     <PackageVersion Include="AspNetCore.HealthChecks.UI.InMemory.Storage" Version="9.0.0" />
-    <PackageVersion Include="AWSSDK.CloudFront" Version="4.0.10.4" />
-    <PackageVersion Include="AWSSDK.Core" Version="4.0.3.6" />
-    <PackageVersion Include="AWSSDK.DynamoDBv2" Version="4.0.10.4" />
-    <PackageVersion Include="AWSSDK.S3" Version="4.0.15.2" />
-    <PackageVersion Include="AWSSDK.SimpleEmail" Version="4.0.2.8" />
+    <PackageVersion Include="AWSSDK.CloudFront" Version="4.0.12" />
+    <PackageVersion Include="AWSSDK.Core" Version="4.0.3.12" />
+    <PackageVersion Include="AWSSDK.DynamoDBv2" Version="4.0.14" />
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.18.3" />
+    <PackageVersion Include="AWSSDK.SimpleEmail" Version="4.0.2.13" />
     <PackageVersion Include="Box.V2.Core" Version="5.8.0" />
     <PackageVersion Include="CommandLineParser" Version="2.9.1" />
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
@@ -178,9 +178,9 @@
     <PackageVersion Include="Respawn" Version="7.0.0" />
     <PackageVersion Include="ResXResourceReader.NetStandard" Version="1.1.0" />
     <PackageVersion Include="SharpZipLib" Version="2.4.3" />
-    <PackageVersion Include="SkiaSharp" Version="3.119.1" />
-    <PackageVersion Include="SkiaSharp.NativeAssets.Linux" Version="3.119.1" />
-    <PackageVersion Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="3.119.1" />
+    <PackageVersion Include="SkiaSharp" Version="3.119.2" />
+    <PackageVersion Include="SkiaSharp.NativeAssets.Linux" Version="3.119.2" />
+    <PackageVersion Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="3.119.2" />
     <PackageVersion Include="Svg.Skia" Version="3.4.1" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
     <PackageVersion Include="System.ServiceModel.Primitives" Version="10.0.652802" />
