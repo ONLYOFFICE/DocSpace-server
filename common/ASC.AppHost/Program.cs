@@ -26,6 +26,11 @@
 
 using Microsoft.Extensions.Hosting;
 
+if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")))
+{
+    Environment.SetEnvironmentVariable("DOTNET_ENVIRONMENT", "Development");
+}
+
 var builder = DistributedApplication.CreateBuilder(args);
 
 var basePath = Path.GetFullPath(Path.Combine("..", "..", ".."));
