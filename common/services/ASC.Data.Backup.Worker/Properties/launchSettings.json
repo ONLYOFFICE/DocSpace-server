@@ -1,0 +1,17 @@
+{
+  "profiles": {
+    "http": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:5032",
+      "environmentVariables": {
+        "$STORAGE_ROOT": "../../../../Data",
+        "log__name": "backup.backgoundtasks",
+        "log__dir": "../../../../Logs",
+        "core__products__folder": "../../../products",
+        "core__eventBus__subscriptionClientName": "asc_event_bus_backup_queue",
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

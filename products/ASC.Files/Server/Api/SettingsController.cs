@@ -37,7 +37,8 @@ public class SettingsController(
     CompressToArchive compressToArchive,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper,
-    DefaultTemplateSettingsHelper defaultTemplateSettingsHelper)
+    DefaultTemplateSettingsHelper defaultTemplateSettingsHelper,
+    PermissionContext permissionContext)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <remarks>
@@ -396,9 +397,11 @@ public class SettingsController(
     /// <path>api/2.0/files/settings/defaulttemplate</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Default template settings", typeof(DefaultTemplateSettingsDto))]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpGet("settings/defaulttemplate")]
     public async Task<DefaultTemplateSettingsDto> GetDefaultTemplates()
     {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var settings = await defaultTemplateSettingsHelper.GetSettingsAsync();
         return await defaultTemplateSettingsHelper.ConvertToDtoAsync(settings);
     }
@@ -410,9 +413,11 @@ public class SettingsController(
     /// <path>api/2.0/files/settings/defaulttemplate</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "New default template settings", typeof(DefaultTemplateSettingsDto))]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpPut("settings/defaulttemplate")]
     public async Task<DefaultTemplateSettingsDto> SetDefaultTemplate(DefaultTemplateSettingsRequestDto inDto)
     {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var settings = await defaultTemplateSettingsHelper.SetTemplateAsync(inDto.FileExtension, inDto.SelectedFile);
         return await defaultTemplateSettingsHelper.ConvertToDtoAsync(settings);
     }
@@ -424,9 +429,11 @@ public class SettingsController(
     /// <path>api/2.0/files/settings/defaulttemplate</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "New default template settings", typeof(DefaultTemplateSettingsDto))]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpPost("settings/defaulttemplate")]
     public async Task<DefaultTemplateSettingsDto> UploadDefaultTemplate(DefaultTemplateSettingsUploadRequestDto inDto)
     {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         var settings = await defaultTemplateSettingsHelper.SetTemplateAsync(inDto.FileExtension, inDto.File.FileName, inDto?.File.OpenReadStream());
         return await defaultTemplateSettingsHelper.ConvertToDtoAsync(settings);
     }
