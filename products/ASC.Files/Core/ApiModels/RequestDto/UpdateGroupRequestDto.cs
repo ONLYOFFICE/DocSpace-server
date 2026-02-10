@@ -59,5 +59,6 @@ public class UpdateGroupRequest
     /// <summary>
     /// The group name.
     /// </summary>
+    [StringLength(128)]
     public string GroupName { get; set; }
 }

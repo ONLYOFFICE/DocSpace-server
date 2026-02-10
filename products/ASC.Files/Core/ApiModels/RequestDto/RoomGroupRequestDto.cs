@@ -32,22 +32,22 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 public class RoomGroupRequestDto
 {
     /// <summary>
-    /// Group id
-    /// </summary>
-    public int Id { get; set; }
-
-    /// <summary>
     /// Group name
     /// </summary>
+    [Required]
+    [StringLength(128)]
     public string Name { get; set; }
 
     /// <summary>
     /// Group icon
     /// </summary>
+    [Required]
+    [StringLength(50)]
     public string Icon { get; set; }
 
     /// <summary>
     /// The list of room IDs.
     /// </summary>
+    [Required]
     public List<JsonElement> Rooms { get; set; } = [];
 }
