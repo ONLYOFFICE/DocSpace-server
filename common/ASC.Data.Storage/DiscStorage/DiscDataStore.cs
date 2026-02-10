@@ -189,13 +189,21 @@ public class DiscDataStore(
             CreateDirectory(target);
             //Copy stream
 
-            
-            await using var fs = File.Open(target, FileMode.Create);
-            await buffered.CopyToAsync(fs, token);
+            //optimaze disk file copy
+            long fslen;
+            if (buffered is FileStream fileStream)
+            {
+                File.Copy(fileStream.Name, target, true);
+                fslen = fileStream.Length;
+            }
+            else
+            {
+                await using var fs = File.Open(target, FileMode.Create);
+                await buffered.CopyToAsync(fs, token);
+                fslen = fs.Length;
+            }
 
             token.ThrowIfCancellationRequested();
-
-            var fslen = fs.Length;
 
             await QuotaUsedAddAsync(domain, fslen, ownerId);
 
