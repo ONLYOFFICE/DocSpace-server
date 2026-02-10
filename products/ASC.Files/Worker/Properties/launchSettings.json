@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "Kestrel WebServer": {
+    "http": {
       "commandName": "Project",
       "launchBrowser": false,
       "applicationUrl": "http://localhost:5009",
@@ -11,18 +11,6 @@
         "core__eventBus__subscriptionClientName": "asc_event_bus_files_service_queue",
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
-    },
-    "WSL 2 : Ubuntu 20.04": {
-      "commandName": "WSL2",
-      "launchBrowser": false,
-      "applicationUrl": "http://localhost:5009",
-      "environmentVariables": {
-        "$STORAGE_ROOT": "../../../../Data",
-        "log__name": "files.service",
-        "log__dir": "../../../../Logs",
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "distributionName": "Ubuntu-20.04"
     }
   }
 }
