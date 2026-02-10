@@ -304,10 +304,10 @@ $Message</value>
 $__AuthorName видалив(ла) AІ-агента $RoomTitle</value>
   </data>
   <data name="pattern_AgentUpdateAccessForUser_push" xml:space="preserve">
-    <value>Вашу роль у AІ-агенті «$RoomTitle» змінено на «$RoomRole»</value>
+    <value>Вашу роль у AІ-агенті "$RoomTitle" змінено на "$RoomRole"</value>
   </data>
   <data name="pattern_InvitedToAgent_push" xml:space="preserve">
-    <value>Вас запрошено до AІІ-агента "$RoomTitle"</value>
+    <value>Вас запрошено до AІ-агента "$RoomTitle"</value>
   </data>
   <data name="subject_AgentRemoved" xml:space="preserve">
     <value>Сповіщення DocSpace. AІ-агента видалено</value>

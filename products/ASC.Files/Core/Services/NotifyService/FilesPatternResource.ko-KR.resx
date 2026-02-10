@@ -302,14 +302,14 @@ $Message</value>
     <value>DocSpace AI 에이전트에서의 역할이 변경되었습니다</value>
   </data>
   <data name="pattern_InvitedToAgent_push" xml:space="preserve">
-    <value>AI 에이전트 "$RoomTitle"에 초대받으셨습니다</value>
+    <value>AI 에이전트 "$RoomTitle" 에 초대받으셨습니다</value>
   </data>
   <data name="subject_AgentRemoved" xml:space="preserve">
     <value>DocSpace 알림. AI 에이전트가 삭제되었습니다</value>
   </data>
   <data name="pattern_AgentRemoved" xml:space="preserve">
-    <value>h1. $__AuthorName님이 AI 에이전트를 삭제하셨습니다
+    <value>h1. $__AuthorName 님이 AI 에이전트를 삭제하셨습니다
 
-$__AuthorName님이 AI 에이전트: $RoomTitle를 삭제하셨습니다</value>
+$__AuthorName 님이 AI 에이전트: $RoomTitle 를 삭제하셨습니다</value>
   </data>
 </root>

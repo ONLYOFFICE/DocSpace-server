@@ -2105,7 +2105,7 @@ $TrulyYours</value>
 
 Este e-mail é para informar que a sua chave API "*$Message*" expirou e foi desativada.
 
-Pode gerar uma nova chave API em “Ferramentas do desenvolvedor”: «${__VirtualRootPath}/developer-tools/api-keys”.
+Pode gerar uma nova chave API em "Ferramentas do desenvolvedor":"${__VirtualRootPath}/developer-tools/api-keys".
 
 $TrulyYours</value>
   </data>

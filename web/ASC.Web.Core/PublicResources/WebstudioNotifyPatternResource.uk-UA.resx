@@ -2161,9 +2161,9 @@ $TrulyYours</value>
   <data name="pattern_api_key_expired" xml:space="preserve">
     <value>Вітаємо, $UserName!
 
-Цим листом повідомляємо, що термін дії вашого API-ключа «*$Message*» закінчився і його було деактивовано.
+Цим листом повідомляємо, що термін дії вашого API-ключа "*$Message*" закінчився і його було деактивовано.
 
-Ви можете згенерувати новий API-ключ у розділі "Інструменти розробника": ${__VirtualRootPath}/developer-tools/api-keys".
+Ви можете згенерувати новий API-ключ у розділі "Інструменти розробника":"${__VirtualRootPath}/developer-tools/api-keys".
 
 $TrulyYours</value>
   </data>
