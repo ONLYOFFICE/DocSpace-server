@@ -52,12 +52,11 @@ public class ZipWriteOperator : IDataWriteOperator
     {
         CancellationToken.ThrowIfCancellationRequested();
 
-        var fileStream = await ActionInvoker.TryAsync(async () => await store.GetReadStreamAsync(domain, path), 5, error => throw error);
+        await using var fileStream = await ActionInvoker.TryAsync(async () => await store.GetReadStreamAsync(domain, path), 5, error => throw error);
 
         if (fileStream != null)
         {
             await WriteEntryAsync(tarKey, fileStream, action);
-            await fileStream.DisposeAsync();
         }
     }
 

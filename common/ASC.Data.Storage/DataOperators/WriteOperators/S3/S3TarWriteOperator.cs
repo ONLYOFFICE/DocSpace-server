@@ -65,10 +65,10 @@ public class S3TarWriteOperator : IDataWriteOperator
 
     public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store, Func<Task> action)
     {
+        CancellationToken.ThrowIfCancellationRequested();
+
         if (store is S3Storage s3Store)
         {
-            CancellationToken.ThrowIfCancellationRequested();
-
             if (_cts.IsCancellationRequested)
             {
                 return;
@@ -98,12 +98,11 @@ public class S3TarWriteOperator : IDataWriteOperator
         }
         else
         {
-            var fileStream = await store.GetReadStreamAsync(domain, path);
+            await using var fileStream = await store.GetReadStreamAsync(domain, path);
 
             if (fileStream != null)
             {
                 await WriteEntryAsync(tarKey, fileStream, action);
-                await fileStream.DisposeAsync();
             }
         }
     }

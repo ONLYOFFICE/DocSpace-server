@@ -68,12 +68,11 @@ public class S3ZipWriteOperator : IDataWriteOperator
     {
         CancellationToken.ThrowIfCancellationRequested();
 
-        var fileStream = await ActionInvoker.TryAsync(async () => await store.GetReadStreamAsync(domain, path), 5, error => throw error);
+        await using var fileStream = await ActionInvoker.TryAsync(async () => await store.GetReadStreamAsync(domain, path), 5, error => throw error);
 
         if (fileStream != null)
         {
             await WriteEntryAsync(tarKey, fileStream, action);
-            await fileStream.DisposeAsync();
         }
     }
 
@@ -110,7 +109,15 @@ public class S3ZipWriteOperator : IDataWriteOperator
         {
             var fs = _fileStream;
             _fileStream = null;
-            await SplitAndUploadAsync(fs);
+
+            try
+            {
+                await SplitAndUploadAsync(fs);
+            }
+            finally
+            {
+                await fs.DisposeAsync();
+            }
         }
     }
 
@@ -155,8 +162,6 @@ public class S3ZipWriteOperator : IDataWriteOperator
         }
 
         CancellationToken.ThrowIfCancellationRequested();
-
-        await stream.DisposeAsync();
     }
 
     private async Task ComputeHashAsync(Stream stream, bool last)
@@ -209,7 +214,14 @@ public class S3ZipWriteOperator : IDataWriteOperator
         _tarOutputStream.Close();
         await _tarOutputStream.DisposeAsync();
 
-        await SplitAndUploadAsync(_fileStream, true);
+        try
+        {
+            await SplitAndUploadAsync(_fileStream, true);
+        }
+        finally
+        {
+            await _fileStream.DisposeAsync();
+        }
 
         Task.WaitAll(_tasks.ToArray(), CancellationToken);
 
