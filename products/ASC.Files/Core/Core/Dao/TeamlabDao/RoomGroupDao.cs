@@ -115,7 +115,7 @@ internal class RoomGroupDao<T>(
 
     private IQueryable<DbFilesGroup> GetGroupQuery(FilesDbContext dbContext, int tenant)
     {
-        var q = dbContext.RoomGroup.Where(r => true);
+        var q = dbContext.RoomGroup.AsQueryable();
 
         if (tenant != Tenant.DefaultTenant)
         {
