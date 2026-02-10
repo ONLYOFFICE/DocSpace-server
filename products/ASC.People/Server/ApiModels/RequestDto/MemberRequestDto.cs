@@ -382,7 +382,7 @@ public class UpdateMemberCultureByIdRequestDto
     public required string UserId { get; set; }
 
     /// <summary>
-    /// The culture code parameters.
+    /// The culture name parameters.
     /// </summary>
     /// <example>{"cultureName": "en-US"}</example>
     [FromBody]
@@ -390,14 +390,16 @@ public class UpdateMemberCultureByIdRequestDto
 }
 
 /// <summary>
-/// The culture code parameters.
+/// The culture name parameters.
 /// </summary>
 public class Culture
 {
     /// <summary>
-    /// The user language.
+    /// The user culture name (en-US, de, fr, es, ...).
     /// </summary>
     /// <example>en-US</example>
+    [Required]
+    [StringLength(85)]
     public string CultureName { get; set; }
 }
 
