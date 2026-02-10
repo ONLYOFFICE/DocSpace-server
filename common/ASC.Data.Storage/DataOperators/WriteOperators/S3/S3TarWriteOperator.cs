@@ -37,9 +37,21 @@ public class S3TarWriteOperator : IDataWriteOperator
     private readonly List<Task> _tasks = [];
     private readonly TaskScheduler _scheduler = new ConcurrentExclusiveSchedulerPair(TaskScheduler.Default, Limit).ConcurrentScheduler;
     private readonly ConcurrentQueue<int> _queue = new();
-    private readonly CancellationTokenSource _cts = new();
     private readonly IFusionCache _cache;
-    public CancellationToken CancellationToken { get; set; }
+
+    private CancellationTokenSource _cts = new();
+
+    public CancellationToken CancellationToken
+    {
+        get
+        {
+            return _cts.Token;
+        }
+        set
+        {
+            _cts = CancellationTokenSource.CreateLinkedTokenSource(value);
+        }
+    }
 
     public string Hash { get; private set; }
     public string StoragePath { get; private set; }
@@ -69,22 +81,16 @@ public class S3TarWriteOperator : IDataWriteOperator
 
         if (store is S3Storage s3Store)
         {
-            if (_cts.IsCancellationRequested)
-            {
-                return;
-            }
             var task = new Task(() =>
             {
-                CancellationToken.ThrowIfCancellationRequested();
-
-                if (_cts.Token.IsCancellationRequested)
+                if (CancellationToken.IsCancellationRequested)
                 {
                     return;
                 }
                 try
                 {
                     var fullPath = s3Store.MakePath(domain, path);
-                    _store.ConcatFileAsync(fullPath, tarKey, _domain, _key, _queue, _cts.Token).Wait(CancellationToken);
+                    _store.ConcatFileAsync(fullPath, tarKey, _domain, _key, _queue, CancellationToken).Wait(CancellationToken);
                 }
                 catch
                 {
@@ -111,25 +117,19 @@ public class S3TarWriteOperator : IDataWriteOperator
     {
         CancellationToken.ThrowIfCancellationRequested();
 
-        if (_cts.IsCancellationRequested)
-        {
-            return;
-        }
         var tStream = _tempStream.Create();
         stream.Position = 0;
         await stream.CopyToAsync(tStream, CancellationToken);
 
         var task = new Task(() =>
         {
-            CancellationToken.ThrowIfCancellationRequested();
-
-            if (_cts.Token.IsCancellationRequested)
+            if (CancellationToken.IsCancellationRequested)
             {
                 return;
             }
             try
             {
-                _store.ConcatFileStreamAsync(tStream, tarKey, _domain, _key, _queue, _cts.Token).Wait(CancellationToken);
+                _store.ConcatFileStreamAsync(tStream, tarKey, _domain, _key, _queue, CancellationToken).Wait(CancellationToken);
             }
             catch
             {
