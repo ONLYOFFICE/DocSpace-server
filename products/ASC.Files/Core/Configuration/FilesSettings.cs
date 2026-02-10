@@ -198,7 +198,7 @@ public class FilesSettings : ISettings<FilesSettings>
             AutomaticallyCleanUpSetting = null,
             DefaultSharingAccessRightsSetting = null,
             OpenEditorInSameTab = false,
-            OrganizeRoomsGrouping = false
+            OrganizeRoomsGrouping = true
         };
     }
 
