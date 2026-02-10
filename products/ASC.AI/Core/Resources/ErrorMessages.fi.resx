@@ -120,6 +120,9 @@
   <data name="AiSettingsAccessDenied" xml:space="preserve">
     <value>Sinulla ei ole oikeutta hallita tekoälyasetuksia</value>
   </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>Tiedostoja ei voida prosessoida: {0}. Tiedostot voivat olla korruptoituneita tai salattuja</value>
+  </data>
   <data name="ChatAccessDenied" xml:space="preserve">
     <value>Sinulla ei ole oikeutta käyttää chattia</value>
   </data>
@@ -170,8 +173,5 @@
   </data>
   <data name="UnavailableServers" xml:space="preserve">
     <value>MCP-palvelimet eivät ole käytettävissä: {0}. Tarkista yhteysasetukset</value>
-  </data>
-  <data name="AttachmentProcessFailed" xml:space="preserve">
-    <value>Tiedostoja ei voida prosessoida: {0}. Tiedostot voivat olla korruptoituneita tai salattuja</value>
   </data>
 </root>

@@ -138,6 +138,9 @@
   <data name="ActionFileUploaded" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; đã tải lên một tài liệu mới: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; trong phòng: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
+  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; đã tải lên một tài liệu mới: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; vào cơ sở kiến thức của tác nhân AI: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
   <data name="ActionNewComment" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; đã thêm nhận xét mới vào phiên bản tài liệu: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; trong phòng: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
@@ -310,6 +313,15 @@ Xin chào!
 $OrangeButton
 
 Liên kết này chỉ có hiệu lực trong 7 ngày. Vui lòng hoàn tất kích hoạt email của bạn trong khoảng thời gian đó.</value>
+  </data>
+  <data name="pattern_api_key_expired" xml:space="preserve">
+    <value>Xin chào $UserName!
+
+Email này nhằm thông báo rằng khóa API "*$Message*" của bạn đã hết hạn và đã bị vô hiệu hóa.
+
+Bạn có thể tạo khóa API mới trong "Công cụ dành cho nhà phát triển":"${__VirtualRootPath}/developer-tools/api-keys".
+
+$TrulyYours</value>
   </data>
   <data name="pattern_backup_created" xml:space="preserve">
     <value>h1.Bản sao lưu cổng thông tin "${__VirtualRootPath}":"${__VirtualRootPath}" đã được tạo
@@ -1117,6 +1129,15 @@ Nếu bạn có câu hỏi hoặc cần hỗ trợ, vui lòng liên hệ với c
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace đã bị xóa
+
+*Cổng thông tin:* ${PortalUrl}
+*Chủ sở hữu:* ${UserName} ${UserEmail}
+*Khách hàng:* ${OwnerName}
+
+Xin hãy đảm bảo rằng tính năng thanh toán tự động đã tắt. Hãy kiểm tra trạng thái thanh toán tự động trong tài khoản Stripe của khách hàng.</value>
+  </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace &lt;span style="color: #FF6F3D;"&gt;đã bị xóa&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
@@ -1780,6 +1801,15 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_user_agent_role_changed" xml:space="preserve">
+    <value>Xin chào!
+
+Bạn được chỉ định một vai trò mới trong tác nhân AI DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+Hãy tìm hiểu thêm về vai trò và quyền hạn của phòng trong "Trung Tâm Hỗ Trợ":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_user_has_join" xml:space="preserve">
     <value>h1.Người dùng mới được thêm vào cổng "${__VirtualRootPath}":"${__VirtualRootPath}"
 
@@ -1839,6 +1869,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_activate_email" xml:space="preserve">
     <value>${LetterLogoText}. Vui lòng kích hoạt địa chỉ email của bạn</value>
+  </data>
+  <data name="subject_api_key_expired" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace: Khóa API của bạn đã hết hạn</value>
   </data>
   <data name="subject_backup_created" xml:space="preserve">
     <value>${LetterLogoText}. ${__VirtualRootHost} đã tạo bản sao lưu của cổng</value>
@@ -1990,6 +2023,9 @@ $TrulyYours</value>
   <data name="subject_portal_delete" xml:space="preserve">
     <value>Xoá cổng ${__VirtualRootHost}</value>
   </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace đã bị xóa</value>
+  </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
     <value>${LetterLogoText} DocSpace đã bị xóa</value>
   </data>
@@ -2137,6 +2173,9 @@ $TrulyYours</value>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>Cần hành động: Không thể tự động nạp tiền vào số dư Ví trong DocSpace ${LetterLogoText} của bạn</value>
   </data>
+  <data name="subject_user_agent_role_changed" xml:space="preserve">
+    <value>Vai trò của bạn trong tác nhân AI DocSpace đã thay đổi</value>
+  </data>
   <data name="subject_user_has_join" xml:space="preserve">
     <value>Đã thêm người dùng mới vào cổng ${LetterLogoText}</value>
   </data>
@@ -2154,44 +2193,5 @@ $TrulyYours</value>
   </data>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>Trân trọng, Nhóm ${LetterLogoText}</value>
-  </data>
-  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; đã tải lên một tài liệu mới: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; vào cơ sở kiến thức của tác nhân AI: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
-  </data>
-  <data name="pattern_api_key_expired" xml:space="preserve">
-    <value>Xin chào $UserName!
-
-Email này nhằm thông báo rằng khóa API "*$Message*" của bạn đã hết hạn và đã bị vô hiệu hóa.
-
-Bạn có thể tạo khóa API mới trong "Công cụ dành cho nhà phát triển":"${__VirtualRootPath}/developer-tools/api-keys".
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace đã bị xóa
-
-*Cổng thông tin:* ${PortalUrl}
-*Chủ sở hữu:* ${UserName} ${UserEmail}
-*Khách hàng:* ${OwnerName}
-
-Xin hãy đảm bảo rằng tính năng thanh toán tự động đã tắt. Hãy kiểm tra trạng thái thanh toán tự động trong tài khoản Stripe của khách hàng.</value>
-  </data>
-  <data name="pattern_user_agent_role_changed" xml:space="preserve">
-    <value>Xin chào!
-
-Bạn được chỉ định một vai trò mới trong tác nhân AI DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
-
-Hãy tìm hiểu thêm về vai trò và quyền hạn của phòng trong "Trung Tâm Hỗ Trợ":"${HelpCenterUrl}".
-
-$TrulyYours</value>
-  </data>
-  <data name="subject_api_key_expired" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace: Khóa API của bạn đã hết hạn</value>
-  </data>
-  <data name="subject_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace đã bị xóa</value>
-  </data>
-  <data name="subject_user_agent_role_changed" xml:space="preserve">
-    <value>Vai trò của bạn trong tác nhân AI DocSpace đã thay đổi</value>
   </data>
 </root>

@@ -138,6 +138,9 @@
   <data name="ActionFileUploaded" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; yeni bir belge yükledi: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
+  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; tarafından yeni belge &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; Yapay Zekâ Ajanının bilgi tabanına yüklendi:&lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
   <data name="ActionNewComment" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt; odasında belge sürümüne yeni bir yorum ekledi &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;</value>
   </data>
@@ -310,6 +313,15 @@ Merhaba!
 $OrangeButton
 
 Bu link 7 gün boyunca geçerli olacaktır. Lütfen bu dönem içerisinde e-posta aktivasyonunuzu tamamlayın.</value>
+  </data>
+  <data name="pattern_api_key_expired" xml:space="preserve">
+    <value>Merhaba, $UserName!
+
+Bu e-posta, "*$Message*" API anahtarınızın süresinin dolduğunu ve devre dışı bırakıldığını bildirmek için tarafınıza gönderilmiştir.
+
+"Geliştirici Araçları":"${__VirtualRootPath}/developer-tools/api-keys" bölümünden yeni bir API anahtarı oluşturabilirsiniz.
+
+$TrulyYours</value>
   </data>
   <data name="pattern_backup_created" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" portal yedeklemesi tamamlandı
@@ -1110,6 +1122,15 @@ Herhangi bir sorunuz veya yardıma ihtiyacınız varsa "${__SalesEmail}":"mailto
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace silindi.
+
+*Portal:* ${PortalUrl}
+*Sahip:* ${UserName} ${UserEmail}
+*Müşteri:* ${OwnerName}
+
+Otomatik faturalandırmanın kapalı olduğundan lütfen emin olun. Otomatik faturalandırma durumunu müşteri Stripe hesabından kontrol edin.</value>
+  </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace &lt;span style="color: #FF6F3D;"&gt;silindi&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
@@ -1772,6 +1793,15 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_user_agent_role_changed" xml:space="preserve">
+    <value>Merhaba!
+
+DocSpace Yapay Zekâ Ajanı "${RoomTitle}":"${RoomUrl}" içinde size yeni bir rol atandı: ${UserRole}.
+
+Oda rolleri ve izinleri hakkında daha fazla bilgi edinmek için "Yardım Merkezi":"${HelpCenterUrl}" sayfasını ziyaret edebilirsiniz.
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_user_has_join" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" portalına yeni kişi eklendi
 
@@ -1832,6 +1862,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_activate_email" xml:space="preserve">
     <value>${LetterLogoText}. Lütfen e-posta adresinizi etkinleştirin</value>
+  </data>
+  <data name="subject_api_key_expired" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace: API anahtarınızın süresi doldu</value>
   </data>
   <data name="subject_backup_created" xml:space="preserve">
     <value>${LetterLogoText}. ${__VirtualRootHost} portal yedeklemesi oluşturuldu</value>
@@ -1983,6 +2016,9 @@ $TrulyYours</value>
   <data name="subject_portal_delete" xml:space="preserve">
     <value>${__VirtualRootHost} portalı silinmesi</value>
   </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace silindi</value>
+  </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
     <value>${LetterLogoText} DocSpace silindi</value>
   </data>
@@ -2130,6 +2166,9 @@ $TrulyYours</value>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>Eylem Gerekiyor: ${LetterLogoText} DocSpace cüzdan bakiyeniz otomatik olarak yüklenemedi</value>
   </data>
+  <data name="subject_user_agent_role_changed" xml:space="preserve">
+    <value>DocSpace Yapay Zekâ Ajanındaki rolünüz değişti</value>
+  </data>
   <data name="subject_user_has_join" xml:space="preserve">
     <value>${LetterLogoText} portalına yeni kullanıcı eklendi</value>
   </data>
@@ -2147,44 +2186,5 @@ $TrulyYours</value>
   </data>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>Saygılarımızla, ${LetterLogoText} Ekibi</value>
-  </data>
-  <data name="subject_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace silindi</value>
-  </data>
-  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; tarafından yeni belge &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; Yapay Zekâ Ajanının bilgi tabanına yüklendi:&lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
-  </data>
-  <data name="pattern_api_key_expired" xml:space="preserve">
-    <value>Merhaba, $UserName!
-
-Bu e-posta, "*$Message*" API anahtarınızın süresinin dolduğunu ve devre dışı bırakıldığını bildirmek için tarafınıza gönderilmiştir.
-
-"Geliştirici Araçları":"${__VirtualRootPath}/developer-tools/api-keys" bölümünden yeni bir API anahtarı oluşturabilirsiniz.
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace silindi.
-
-*Portal:* ${PortalUrl}
-*Sahip:* ${UserName} ${UserEmail}
-*Müşteri:* ${OwnerName}
-
-Otomatik faturalandırmanın kapalı olduğundan lütfen emin olun. Otomatik faturalandırma durumunu müşteri Stripe hesabından kontrol edin.</value>
-  </data>
-  <data name="pattern_user_agent_role_changed" xml:space="preserve">
-    <value>Merhaba!
-
-DocSpace Yapay Zekâ Ajanı "${RoomTitle}":"${RoomUrl}" içinde size yeni bir rol atandı: ${UserRole}.
-
-Oda rolleri ve izinleri hakkında daha fazla bilgi edinmek için "Yardım Merkezi":"${HelpCenterUrl}" sayfasını ziyaret edebilirsiniz.
-
-$TrulyYours</value>
-  </data>
-  <data name="subject_api_key_expired" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace: API anahtarınızın süresi doldu</value>
-  </data>
-  <data name="subject_user_agent_role_changed" xml:space="preserve">
-    <value>DocSpace Yapay Zekâ Ajanındaki rolünüz değişti</value>
   </data>
 </root>

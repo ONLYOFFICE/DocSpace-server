@@ -120,6 +120,9 @@
   <data name="AiSettingsAccessDenied" xml:space="preserve">
     <value>Yapay zekâ ayarlarını yönetme izniniz yok</value>
   </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>{0} dosyaları işlenemiyor. Dosyalar bozuk veya şifreli olabilir</value>
+  </data>
   <data name="ChatAccessDenied" xml:space="preserve">
     <value>Sohbeti kullanma izniniz yok</value>
   </data>
@@ -170,8 +173,5 @@
   </data>
   <data name="UnavailableServers" xml:space="preserve">
     <value>MCP sunucuları kullanılamıyor: {0}. Bağlantı ayarlarını kontrol edin</value>
-  </data>
-  <data name="AttachmentProcessFailed" xml:space="preserve">
-    <value>{0} dosyaları işlenemiyor. Dosyalar bozuk veya şifreli olabilir</value>
   </data>
 </root>

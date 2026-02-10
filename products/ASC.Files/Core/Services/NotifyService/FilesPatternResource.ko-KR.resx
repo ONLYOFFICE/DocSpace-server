@@ -120,6 +120,14 @@
   <data name="button_CheckReadyForms" xml:space="preserve">
     <value>준비된 양식 확인</value>
   </data>
+  <data name="pattern_AgentRemoved" xml:space="preserve">
+    <value>h1. $__AuthorName 님이 AI 에이전트를 삭제하셨습니다
+
+$__AuthorName 님이 AI 에이전트: $RoomTitle 를 삭제하셨습니다</value>
+  </data>
+  <data name="pattern_AgentUpdateAccessForUser_push" xml:space="preserve">
+    <value>DocSpace AI 에이전트에서의 역할이 변경되었습니다</value>
+  </data>
   <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
     <value>"$RoomTitle" 룸에 새 문서("$DocumentTitle")가 생성되었습니다</value>
   </data>
@@ -187,6 +195,9 @@ $OrangeButton
       활동 알림. "$RoomTitle":"$RoomURL" 룸에서 "$DocumentTitle":"$DocumentURL" 양식 작성이 완료되었습니다 — $__DateTime.
 </value>
   </data>
+  <data name="pattern_InvitedToAgent_push" xml:space="preserve">
+    <value>AI 에이전트 "$RoomTitle" 에 초대받으셨습니다</value>
+  </data>
   <data name="pattern_InvitedToRoom_push" xml:space="preserve">
     <value>"$RoomTitle" 방에 초대되었습니다</value>
   </data>
@@ -231,6 +242,9 @@ $Message</value>
     <value>
       활동 알림. 고객님의 차례입니다! "$RoomTitle":"$RoomURL" 룸에서 "$DocumentTitle":"$DocumentURL" 양식을 작성하세요 — $__DateTime.
     </value>
+  </data>
+  <data name="subject_AgentRemoved" xml:space="preserve">
+    <value>DocSpace 알림. AI 에이전트가 삭제되었습니다</value>
   </data>
   <data name="subject_DocuSignComplete" xml:space="preserve">
     <value>문서. 모든 서명자가 $DocumentTitle을 완료했습니다</value>
@@ -297,19 +311,5 @@ $Message</value>
   </data>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
     <value>DocSpace 알림.</value>
-  </data>
-  <data name="pattern_AgentUpdateAccessForUser_push" xml:space="preserve">
-    <value>DocSpace AI 에이전트에서의 역할이 변경되었습니다</value>
-  </data>
-  <data name="pattern_InvitedToAgent_push" xml:space="preserve">
-    <value>AI 에이전트 "$RoomTitle" 에 초대받으셨습니다</value>
-  </data>
-  <data name="subject_AgentRemoved" xml:space="preserve">
-    <value>DocSpace 알림. AI 에이전트가 삭제되었습니다</value>
-  </data>
-  <data name="pattern_AgentRemoved" xml:space="preserve">
-    <value>h1. $__AuthorName 님이 AI 에이전트를 삭제하셨습니다
-
-$__AuthorName 님이 AI 에이전트: $RoomTitle 를 삭제하셨습니다</value>
   </data>
 </root>

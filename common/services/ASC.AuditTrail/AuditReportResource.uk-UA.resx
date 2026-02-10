@@ -192,6 +192,12 @@
   <data name="AuthorizationKeysSetting" xml:space="preserve">
     <value>Ключі авторизації третьої сторони оновлено</value>
   </data>
+  <data name="BackupCompleted" xml:space="preserve">
+    <value>Резервне копіювання виконано</value>
+  </data>
+  <data name="BackupFailed" xml:space="preserve">
+    <value>Збій резервного копіювання</value>
+  </data>
   <data name="BackupStarted" xml:space="preserve">
     <value>Почати резервне копіювання</value>
   </data>
@@ -567,8 +573,14 @@
   <data name="ImportActionType" xml:space="preserve">
     <value>Імпорт</value>
   </data>
+  <data name="InvitationSettingsUpdated" xml:space="preserve">
+    <value>Параметри запрошення оновлено</value>
+  </data>
   <data name="IpCol" xml:space="preserve">
     <value>IP</value>
+  </data>
+  <data name="IPRestrictionsSettingsUpdated" xml:space="preserve">
+    <value>Параметри безпеки IP оновлено</value>
   </data>
   <data name="LanguageSettingsUpdated" xml:space="preserve">
     <value>Налаштування мови оновлено</value>
@@ -638,6 +650,9 @@
   </data>
   <data name="LoginHistoryReportName" xml:space="preserve">
     <value>Звіт історії входу ({0} - {1})</value>
+  </data>
+  <data name="LoginSettingsUpdated" xml:space="preserve">
+    <value>Параметри захисту від атак грубою силою оновлено</value>
   </data>
   <data name="LoginSuccess" xml:space="preserve">
     <value>Вхід виконано успішно</value>
@@ -888,6 +903,15 @@
   <data name="RoomWatermarkSet" xml:space="preserve">
     <value>Кімната: {0}. Водяний знак ввімкнено</value>
   </data>
+  <data name="ScheduledBackupCompleted" xml:space="preserve">
+    <value>Заплановане резервне копіювання виконано</value>
+  </data>
+  <data name="ScheduledBackupFailed" xml:space="preserve">
+    <value>Збій запланованого резервного копіювання</value>
+  </data>
+  <data name="ScheduledBackupStarted" xml:space="preserve">
+    <value>Заплановане резервне копіювання розпочато</value>
+  </data>
   <data name="SendActionType" xml:space="preserve">
     <value>Надіслати</value>
   </data>
@@ -1106,30 +1130,6 @@
   </data>
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Вебхук оновлено: {0}</value>
-  </data>
-  <data name="BackupCompleted" xml:space="preserve">
-    <value>Резервне копіювання виконано</value>
-  </data>
-  <data name="BackupFailed" xml:space="preserve">
-    <value>Збій резервного копіювання</value>
-  </data>
-  <data name="InvitationSettingsUpdated" xml:space="preserve">
-    <value>Параметри запрошення оновлено</value>
-  </data>
-  <data name="IPRestrictionsSettingsUpdated" xml:space="preserve">
-    <value>Параметри безпеки IP оновлено</value>
-  </data>
-  <data name="LoginSettingsUpdated" xml:space="preserve">
-    <value>Параметри захисту від атак грубою силою оновлено</value>
-  </data>
-  <data name="ScheduledBackupCompleted" xml:space="preserve">
-    <value>Заплановане резервне копіювання виконано</value>
-  </data>
-  <data name="ScheduledBackupFailed" xml:space="preserve">
-    <value>Збій запланованого резервного копіювання</value>
-  </data>
-  <data name="ScheduledBackupStarted" xml:space="preserve">
-    <value>Заплановане резервне копіювання розпочато</value>
   </data>
   <data name="WebpluginDeleted" xml:space="preserve">
     <value>Плагін видалено: {0}</value>

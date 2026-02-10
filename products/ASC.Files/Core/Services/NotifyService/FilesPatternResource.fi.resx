@@ -120,6 +120,14 @@
   <data name="button_CheckReadyForms" xml:space="preserve">
     <value>Katso valmiit lomakkeet</value>
   </data>
+  <data name="pattern_AgentRemoved" xml:space="preserve">
+    <value>h1. $__AuthorName poisti tekoälyagentin
+
+$__AuthorName poisti tekoälyagentin: $RoomTitle</value>
+  </data>
+  <data name="pattern_AgentUpdateAccessForUser_push" xml:space="preserve">
+    <value>Roolisi tekoälyagentin "$RoomTitle" on muuttunut "$RoomRole"</value>
+  </data>
   <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
     <value>Uusi asiakirja "$DocumentTitle" on luotu huoneessa "$RoomTitle"</value>
   </data>
@@ -187,6 +195,9 @@ $OrangeButton
       Toimintailmoitus. Lomake "$DocumentTitle":"$DocumentURL" on täytetty huoneessa:"$RoomTitle":"$RoomURL" — $__DateTime.
     </value>
   </data>
+  <data name="pattern_InvitedToAgent_push" xml:space="preserve">
+    <value>Sinut on kutsuttu tekoälyagenttiin "$RoomTitle"</value>
+  </data>
   <data name="pattern_InvitedToRoom_push" xml:space="preserve">
     <value>Sinut on kutsuttu huoneeseen "$RoomTitle"</value>
   </data>
@@ -231,6 +242,9 @@ $Message</value>
     <value>
       Toimintailmoitus. On sinun vuorosi! Lomakkeen täyttäminen vaaditaan: "$DocumentTitle":"$DocumentURL" huoneessa "$RoomTitle":"$RoomURL" — $__DateTime.
     </value>
+  </data>
+  <data name="subject_AgentRemoved" xml:space="preserve">
+    <value>DocSpace ilmoitus. tekoälyagentti poistettu</value>
   </data>
   <data name="subject_DocuSignComplete" xml:space="preserve">
     <value>Asiakirjat. Kaikki allekirjoittajat viimeistelivät $DocumentTitle</value>
@@ -297,19 +311,5 @@ $Message</value>
   </data>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
     <value>DocSpace-ilmoitus.</value>
-  </data>
-  <data name="pattern_AgentRemoved" xml:space="preserve">
-    <value>h1. $__AuthorName poisti tekoälyagentin
-
-$__AuthorName poisti tekoälyagentin: $RoomTitle</value>
-  </data>
-  <data name="pattern_AgentUpdateAccessForUser_push" xml:space="preserve">
-    <value>Roolisi tekoälyagentin "$RoomTitle" on muuttunut "$RoomRole"</value>
-  </data>
-  <data name="pattern_InvitedToAgent_push" xml:space="preserve">
-    <value>Sinut on kutsuttu tekoälyagenttiin "$RoomTitle"</value>
-  </data>
-  <data name="subject_AgentRemoved" xml:space="preserve">
-    <value>DocSpace ilmoitus. tekoälyagentti poistettu</value>
   </data>
 </root>

@@ -138,6 +138,9 @@
   <data name="ActionFileUploaded" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; 님이 &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; 방에 새로운 &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; 문서를 업로드했습니다</value>
   </data>
+  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt;님이 새 문서: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;를 AI 에이전트의 지식 기반: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;에 업로드하셨습니다</value>
+  </data>
   <data name="ActionNewComment" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; 님이 &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; 방에서 &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; 문서 버전에 새로운 주석을 추가했습니다 - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
@@ -310,6 +313,15 @@
 $OrangeButton
 
 이 링크는 7일 동안만 유효합니다. 기간 내에 이메일 활성화를 완료하세요.</value>
+  </data>
+  <data name="pattern_api_key_expired" xml:space="preserve">
+    <value>$UserName님, 안녕하세요!
+
+고객님의 API 키("*$Message*")가 만료되어 비활성화되었음을 알려드립니다.
+
+새로운 API 키는 "개발자 도구":"${__VirtualRootPath}/developer-tools/api-keys" 에서 생성할 수 있습니다.
+
+$TrulyYours</value>
   </data>
   <data name="pattern_backup_created" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" 포털 백업이 생성되었습니다
@@ -1117,6 +1129,15 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace가 삭제되었습니다.
+
+*포털:* ${PortalUrl}
+*소유자:* ${UserName} ${UserEmail} 
+*고객:* ${OwnerName}
+
+자동 결제를 해제 상태로 해주세요. 고객의 Stripe 계정에서 자동 결제 상태를 확인하세요.</value>
+  </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace가&lt;span style="color: #FF6F3D;"&gt;삭제되었습니다&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
@@ -1777,6 +1798,15 @@ DocSpace 지갑 잔액 자동 충전이 실패했음을 알려드립니다.
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_user_agent_role_changed" xml:space="preserve">
+    <value>안녕하세요! 
+
+DocSpace AI 에이전트 "${RoomTitle}":"${RoomUrl}": ${UserRole}에서 새로운 역할을 부여받으셨습니다.
+
+룸 역할 및 권한에 대한 자세한 사항은 "도움말 센터":"${HelpCenterUrl}" 를 참고하세요.
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_user_has_join" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" 포털에 새로운 사용자가 추가되었습니다
 
@@ -1987,6 +2017,9 @@ $TrulyYours</value>
   <data name="subject_portal_delete" xml:space="preserve">
     <value>${__VirtualRootHost} 포털 삭제</value>
   </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace가 삭제되었습니다</value>
+  </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
     <value>${LetterLogoText} DocSpace가 삭제되었습니다</value>
   </data>
@@ -2151,38 +2184,5 @@ $TrulyYours</value>
   </data>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>감사드립니다, ${LetterLogoText} 팀</value>
-  </data>
-  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt;님이 새 문서: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt;를 AI 에이전트의 지식 기반: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;에 업로드하셨습니다</value>
-  </data>
-  <data name="pattern_api_key_expired" xml:space="preserve">
-    <value>$UserName님, 안녕하세요!
-
-고객님의 API 키("*$Message*")가 만료되어 비활성화되었음을 알려드립니다.
-
-새로운 API 키는 "개발자 도구":"${__VirtualRootPath}/developer-tools/api-keys" 에서 생성할 수 있습니다.
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace가 삭제되었습니다.
-
-*포털:* ${PortalUrl}
-*소유자:* ${UserName} ${UserEmail} 
-*고객:* ${OwnerName}
-
-자동 결제를 해제 상태로 해주세요. 고객의 Stripe 계정에서 자동 결제 상태를 확인하세요.</value>
-  </data>
-  <data name="pattern_user_agent_role_changed" xml:space="preserve">
-    <value>안녕하세요! 
-
-DocSpace AI 에이전트 "${RoomTitle}":"${RoomUrl}": ${UserRole}에서 새로운 역할을 부여받으셨습니다.
-
-룸 역할 및 권한에 대한 자세한 사항은 "도움말 센터":"${HelpCenterUrl}" 를 참고하세요.
-
-$TrulyYours</value>
-  </data>
-  <data name="subject_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace가 삭제되었습니다</value>
   </data>
 </root>

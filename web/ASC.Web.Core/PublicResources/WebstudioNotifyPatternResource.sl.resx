@@ -138,6 +138,9 @@
   <data name="ActionFileUploaded" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; je naložil nov dokument: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; v sobi: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
+  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; naložil nov dokument: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; v bazo znanja agenta umetne inteligence: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
   <data name="ActionNewComment" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; je dodal nov komentar na verzijo dokumenta: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; v sobi: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
@@ -310,6 +313,15 @@ Za začetek sodelovanja na "${__VirtualRootPath}":"$InviteLink" portalu morate a
 $OrangeButton
 
 Ta povezava velja samo 7 dni. Prosimo, dokončajte svojo email aktivacijo v tem obdobju.</value>
+  </data>
+  <data name="pattern_api_key_expired" xml:space="preserve">
+    <value>Pozdravljen, $UserName!
+
+S tem e-mail sporočilom vas obveščamo, da je vaš API ključ "*$Message*" potekel in je bil deaktiviran.
+
+Nov API ključ lahko aktivirate v "Orodja razvijalca":"${__VirtualRootPath}/developer-tools/api-keys".
+
+$TrulyYours</value>
   </data>
   <data name="pattern_backup_created" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" ustvarjena varnostna kopija portala
@@ -1117,6 +1129,15 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace je bil izbrisan.
+
+*Portal:* ${PortalUrl}
+*Lastnik:* ${UserName} ${UserEmail} 
+*Stranka:* ${OwnerName}
+
+Prepričajte se, da je samodejno zaračunavanje izklopljeno. Preverite stanje samodejnega zaračunavanja v Stripe računu stranke.</value>
+  </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace je &lt;span style="color: #FF6F3D;"&gt;izbrisan&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
@@ -1779,6 +1800,15 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_user_agent_role_changed" xml:space="preserve">
+    <value>Pozdravljeni!
+
+Dodeljena vam je nova vloga v agentu umetne inteligence DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+Več o vlogah in dovoljenjih v sobah si lahko preberete v "Centru za pomoč":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_user_has_join" xml:space="preserve">
     <value>h1.Nov uporabnik je dodan v portal "${__VirtualRootPath}":"${__VirtualRootPath}"
 
@@ -1838,6 +1868,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_activate_email" xml:space="preserve">
     <value>${LetterLogoText}. Aktivirajte svoj email naslov</value>
+  </data>
+  <data name="subject_api_key_expired" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace: Vaš API ključ je potekel</value>
   </data>
   <data name="subject_backup_created" xml:space="preserve">
     <value>${LetterLogoText}. ${__VirtualRootHost} ustvarjena varnostna kopija portala</value>
@@ -1989,6 +2022,9 @@ $TrulyYours</value>
   <data name="subject_portal_delete" xml:space="preserve">
     <value>Brisanje portala ${__VirtualRootHost}</value>
   </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>Dokumentni prostor ${LetterLogoText} je izbrisan</value>
+  </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
     <value>Dokumentni prostor ${LetterLogoText} je izbrisan</value>
   </data>
@@ -2136,6 +2172,9 @@ $TrulyYours</value>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>Zahtevano dejanje: Stanja v denarnici ${LetterLogoText} v vašem DocSpace ni mogoče samodejno napolniti</value>
   </data>
+  <data name="subject_user_agent_role_changed" xml:space="preserve">
+    <value>Vaša vloga v agentu umetne inteligence DocSpace se je spremenila</value>
+  </data>
   <data name="subject_user_has_join" xml:space="preserve">
     <value>Novi uporabniki dodani na portal ${LetterLogoText}</value>
   </data>
@@ -2153,44 +2192,5 @@ $TrulyYours</value>
   </data>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>Lep pozdrav, ekipa ${LetterLogoText}</value>
-  </data>
-  <data name="subject_user_agent_role_changed" xml:space="preserve">
-    <value>Vaša vloga v agentu umetne inteligence DocSpace se je spremenila</value>
-  </data>
-  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
-    <value>&lt;b&gt;{0}&lt;/b&gt; naložil nov dokument: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; v bazo znanja agenta umetne inteligence: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
-  </data>
-  <data name="pattern_api_key_expired" xml:space="preserve">
-    <value>Pozdravljen, $UserName!
-
-S tem e-mail sporočilom vas obveščamo, da je vaš API ključ "*$Message*" potekel in je bil deaktiviran.
-
-Nov API ključ lahko aktivirate v "Orodja razvijalca":"${__VirtualRootPath}/developer-tools/api-keys".
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace je bil izbrisan.
-
-*Portal:* ${PortalUrl}
-*Lastnik:* ${UserName} ${UserEmail} 
-*Stranka:* ${OwnerName}
-
-Prepričajte se, da je samodejno zaračunavanje izklopljeno. Preverite stanje samodejnega zaračunavanja v Stripe računu stranke.</value>
-  </data>
-  <data name="pattern_user_agent_role_changed" xml:space="preserve">
-    <value>Pozdravljeni!
-
-Dodeljena vam je nova vloga v agentu umetne inteligence DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
-
-Več o vlogah in dovoljenjih v sobah si lahko preberete v "Centru za pomoč":"${HelpCenterUrl}".
-
-$TrulyYours</value>
-  </data>
-  <data name="subject_api_key_expired" xml:space="preserve">
-    <value>${LetterLogoText} DocSpace: Vaš API ključ je potekel</value>
-  </data>
-  <data name="subject_portal_deleted_to_support" xml:space="preserve">
-    <value>Dokumentni prostor ${LetterLogoText} je izbrisan</value>
   </data>
 </root>

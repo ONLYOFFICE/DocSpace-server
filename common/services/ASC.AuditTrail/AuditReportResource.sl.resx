@@ -192,6 +192,12 @@
   <data name="AuthorizationKeysSetting" xml:space="preserve">
     <value>Posodobljeni avtorizacijski ključi tretjih strani</value>
   </data>
+  <data name="BackupCompleted" xml:space="preserve">
+    <value>Varnostno kopiranje zaključeno</value>
+  </data>
+  <data name="BackupFailed" xml:space="preserve">
+    <value>Varnostno kopiranje ni uspelo</value>
+  </data>
   <data name="BackupStarted" xml:space="preserve">
     <value>Začni varnostno kopiranje</value>
   </data>
@@ -639,6 +645,9 @@
   <data name="LoginHistoryReportName" xml:space="preserve">
     <value>Poročilo zgodovine vpisa ({0}-{1})</value>
   </data>
+  <data name="LoginSettingsUpdated" xml:space="preserve">
+    <value>Nastavitve zaščite pred vdorom posodobljene</value>
+  </data>
   <data name="LoginSuccess" xml:space="preserve">
     <value>Uspešen vpis</value>
   </data>
@@ -888,6 +897,15 @@
   <data name="RoomWatermarkSet" xml:space="preserve">
     <value>Soba: {0}. Vodni žig omogočen</value>
   </data>
+  <data name="ScheduledBackupCompleted" xml:space="preserve">
+    <value>Načrtovano varnostno kopiranje zaključeno</value>
+  </data>
+  <data name="ScheduledBackupFailed" xml:space="preserve">
+    <value>Načrtovano varnostno kopiranje ni uspelo</value>
+  </data>
+  <data name="ScheduledBackupStarted" xml:space="preserve">
+    <value>Načrtovano varnostno kopiranje se je začelo</value>
+  </data>
   <data name="SendActionType" xml:space="preserve">
     <value>Pošlji</value>
   </data>
@@ -1106,24 +1124,6 @@
   </data>
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Webhook posodobljen: {0}</value>
-  </data>
-  <data name="BackupCompleted" xml:space="preserve">
-    <value>Varnostno kopiranje zaključeno</value>
-  </data>
-  <data name="BackupFailed" xml:space="preserve">
-    <value>Varnostno kopiranje ni uspelo</value>
-  </data>
-  <data name="LoginSettingsUpdated" xml:space="preserve">
-    <value>Nastavitve zaščite pred vdorom posodobljene</value>
-  </data>
-  <data name="ScheduledBackupCompleted" xml:space="preserve">
-    <value>Načrtovano varnostno kopiranje zaključeno</value>
-  </data>
-  <data name="ScheduledBackupFailed" xml:space="preserve">
-    <value>Načrtovano varnostno kopiranje ni uspelo</value>
-  </data>
-  <data name="ScheduledBackupStarted" xml:space="preserve">
-    <value>Načrtovano varnostno kopiranje se je začelo</value>
   </data>
   <data name="WebpluginDeleted" xml:space="preserve">
     <value>Vtičnik izbrisan: {0}</value>
