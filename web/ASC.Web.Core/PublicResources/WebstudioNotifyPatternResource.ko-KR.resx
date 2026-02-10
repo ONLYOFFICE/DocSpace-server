@@ -2182,4 +2182,7 @@ DocSpace AI 에이전트 "${RoomTitle}":"${RoomUrl}": ${UserRole}에서 새로�
 
 $TrulyYours</value>
   </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace가 삭제되었습니다</value>
+  </data>
 </root>

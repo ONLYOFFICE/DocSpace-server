@@ -1107,4 +1107,52 @@
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Tīmekļa aizķere atjaunināta: {0}</value>
   </data>
+  <data name="BackupCompleted" xml:space="preserve">
+    <value>Rezerves kopēšana pabeigta</value>
+  </data>
+  <data name="BackupFailed" xml:space="preserve">
+    <value>Rezerves kopēšana neizdevās</value>
+  </data>
+  <data name="InvitationSettingsUpdated" xml:space="preserve">
+    <value>Uzaicinājumu iestatījumi atjaunināti</value>
+  </data>
+  <data name="IPRestrictionsSettingsUpdated" xml:space="preserve">
+    <value>IP drošības iestatījumi atjaunināti</value>
+  </data>
+  <data name="LoginSettingsUpdated" xml:space="preserve">
+    <value>Aizsardzības pret pārlases uzbrukumiem iestatījumi atjaunināti</value>
+  </data>
+  <data name="ScheduledBackupCompleted" xml:space="preserve">
+    <value>Plānotā rezerves kopēšana pabeigta</value>
+  </data>
+  <data name="ScheduledBackupFailed" xml:space="preserve">
+    <value>Plānotā rezerves kopēšana neizdevās</value>
+  </data>
+  <data name="ScheduledBackupStarted" xml:space="preserve">
+    <value>Plānotā rezerves kopēšana sākta</value>
+  </data>
+  <data name="WebpluginDeleted" xml:space="preserve">
+    <value>Spraudnis dzēsts: {0}</value>
+  </data>
+  <data name="WebpluginUpdated" xml:space="preserve">
+    <value>Spraudnis atjaunināts: {0}</value>
+  </data>
+  <data name="WebpluginUploaded" xml:space="preserve">
+    <value>Spraudnis lejupielādēts: {0}</value>
+  </data>
+  <data name="WhiteLabelAdditionalSettingsUpdated" xml:space="preserve">
+    <value>Papildu zīmola iestatījumi atjaunināti</value>
+  </data>
+  <data name="WhiteLabelCompanySettingsUpdated" xml:space="preserve">
+    <value>Uzņēmuma informācijas iestatījumi atjaunināti</value>
+  </data>
+  <data name="WhiteLabelMailSettingsUpdated" xml:space="preserve">
+    <value>Pasta iestatījumi atjaunināti</value>
+  </data>
+  <data name="WhiteLabelSettingsLogosUpdated" xml:space="preserve">
+    <value>Logotipa iestatījumi atjaunināti</value>
+  </data>
+  <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
+    <value>Zīmola nosaukums atjaunināts</value>
+  </data>
 </root>

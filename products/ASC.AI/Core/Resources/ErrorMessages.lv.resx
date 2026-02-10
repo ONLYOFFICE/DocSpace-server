@@ -171,4 +171,7 @@
   <data name="UnavailableServers" xml:space="preserve">
     <value>MCP serveri nav pieejami: {0}. Pārbaudiet savienojuma iestatījumus</value>
   </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>Nevar apstrādāt failus: {0}. Faili var būt bojāti vai šifrēti</value>
+  </data>
 </root>

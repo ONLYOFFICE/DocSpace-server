@@ -298,4 +298,18 @@ $Message</value>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
     <value>DocSpace bildirimi.</value>
   </data>
+  <data name="pattern_AgentRemoved" xml:space="preserve">
+    <value>h1. $__AuthorName bir Yapay Zekâ Ajanını sildi
+
+$__AuthorName, $RoomTitle adlı Yapay Zekâ Ajanını sildi</value>
+  </data>
+  <data name="pattern_AgentUpdateAccessForUser_push" xml:space="preserve">
+    <value>"$RoomTitle" Yapay Zekâ Ajanındaki rolünüz "$RoomRole" olarak değiştirildi</value>
+  </data>
+  <data name="pattern_InvitedToAgent_push" xml:space="preserve">
+    <value>"$RoomTitle" Yapay Zekâ Ajanına davet edildiniz</value>
+  </data>
+  <data name="subject_AgentRemoved" xml:space="preserve">
+    <value>DocSpace bildirimi. Yapay Zekâ Ajanı silindi</value>
+  </data>
 </root>

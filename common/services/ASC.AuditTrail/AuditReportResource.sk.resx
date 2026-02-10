@@ -1113,4 +1113,46 @@
   <data name="BackupFailed" xml:space="preserve">
     <value>Zálohovanie zlyhalo</value>
   </data>
+  <data name="InvitationSettingsUpdated" xml:space="preserve">
+    <value>Nastavenia pozvánok boli aktualizované</value>
+  </data>
+  <data name="IPRestrictionsSettingsUpdated" xml:space="preserve">
+    <value>Nastavenia zabezpečenia IP boli aktualizované</value>
+  </data>
+  <data name="LoginSettingsUpdated" xml:space="preserve">
+    <value>Nastavenia ochrany proti útokom hrubou silou boli aktualizované</value>
+  </data>
+  <data name="ScheduledBackupCompleted" xml:space="preserve">
+    <value>Plánované zálohovanie dokončené</value>
+  </data>
+  <data name="ScheduledBackupFailed" xml:space="preserve">
+    <value>Plánované zálohovanie zlyhalo</value>
+  </data>
+  <data name="ScheduledBackupStarted" xml:space="preserve">
+    <value>Plánované zálohovanie spustené</value>
+  </data>
+  <data name="WebpluginDeleted" xml:space="preserve">
+    <value>Plugin odstránený: {0}</value>
+  </data>
+  <data name="WebpluginUpdated" xml:space="preserve">
+    <value>Plugin aktualizovaný: {0}</value>
+  </data>
+  <data name="WebpluginUploaded" xml:space="preserve">
+    <value>Plugin nahraný: {0}</value>
+  </data>
+  <data name="WhiteLabelAdditionalSettingsUpdated" xml:space="preserve">
+    <value>Dodatočné nastavenia brandingu boli aktualizované</value>
+  </data>
+  <data name="WhiteLabelCompanySettingsUpdated" xml:space="preserve">
+    <value>Nastavenia informácií o spoločnosti boli aktualizované</value>
+  </data>
+  <data name="WhiteLabelMailSettingsUpdated" xml:space="preserve">
+    <value>Nastavenia e-mailu boli aktualizované</value>
+  </data>
+  <data name="WhiteLabelSettingsLogosUpdated" xml:space="preserve">
+    <value>Nastavenia loga boli aktualizované</value>
+  </data>
+  <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
+    <value>Názov značky bol aktualizovaný</value>
+  </data>
 </root>

@@ -2114,4 +2114,83 @@ $TrulyYours</value>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>Jūsu ${LetterLogoText} komanda</value>
   </data>
+  <data name="pattern_backup_failed" xml:space="preserve">
+    <value>Sveiki, $UserName!
+
+Jūsu DocSpace "${__VirtualRootPath}":"${__VirtualRootPath}" dublēšanas process nav izdevies.
+
+Ja jums ir kādi jautājumi vai nepieciešama palīdzība, lūdzu, sazinieties ar mums, izmantojot "${__SupportLink}":"${__SupportLink}"
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_backup_failed_tg" xml:space="preserve">
+    <value>Sveiki, $UserName!
+
+Jūsu DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) dublēšanas process nav izdevies.
+
+Ja jums ir kādi jautājumi vai nepieciešama palīdzība, lūdzu, sazinieties ar mums, izmantojot [${__SupportLink}](${__SupportLink})
+
+Ar cieņu,
+${LetterLogoText} atbalsta komanda
+[${__SiteLink}](${__SiteLink})</value>
+  </data>
+  <data name="pattern_api_key_expired" xml:space="preserve">
+    <value>Sveiki, $UserName!
+
+Vēlamies jūs informēt, ka jūsu API atslēgas "*$Message*" derīguma termiņš ir beidzies un tā ir deaktivizēta.
+
+Jaunu API atslēgu var ģenerēt sadaļā "Izstrādātāja rīki":"${__VirtualRootPath}/developer-tools/api-keys".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace ir dzēsts.
+
+*Portāls:* ${PortalUrl}
+*Īpašnieks:* ${UserName} ${UserEmail} 
+*Klients:* ${OwnerName}
+
+Lūdzu, pārliecinieties, ka automātiskā rēķinu apmaksa ir izslēgta. Pārbaudiet automātiskās rēķinu apmaksas statusu klienta Stripe kontā.</value>
+  </data>
+  <data name="pattern_saas_agent_invite" xml:space="preserve">
+    <value>Sveiki!
+
+Jūs esat uzaicināts pievienoties DocSpace MI aģentam "${__VirtualRootPath}":"${__VirtualRootPath}". Pieņemiet uzaicinājumu, noklikšķinot uz saites:
+
+$OrangeButton
+
+Pēc noklikšķināšanas uz uzaicinājuma saites, lūdzu, iestatiet savam kontam jaunu paroli.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_agent_invite_existing_user" xml:space="preserve">
+    <value>Sveiki!
+
+$__AuthorName uzaicināja jūs pievienoties MI aģentam "$Message":"$InviteLink" "${__VirtualRootPath}":"${__VirtualRootPath}".
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_user_agent_role_changed" xml:space="preserve">
+    <value>Sveiki!
+
+Jums ir piešķirta jauna loma DocSpace MI aģentā "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+Uzziniet vairāk par telpas lomām un atļaujām sadaļā "Palīdzības centrs":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_api_key_expired" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace: jūsu API atslēgas derīguma termiņš ir beidzies</value>
+  </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace ir dzēsts</value>
+  </data>
+  <data name="subject_user_agent_role_changed" xml:space="preserve">
+    <value>Jūsu loma DocSpace MI aģentā ir mainīta</value>
+  </data>
+  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; augšupielādēja jaunu dokumentu: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; MI aģenta zināšanu bāzē: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
 </root>

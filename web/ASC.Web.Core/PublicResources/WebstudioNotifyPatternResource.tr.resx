@@ -2148,4 +2148,43 @@ $TrulyYours</value>
   <data name="TrulyYoursText" xml:space="preserve">
     <value>Saygılarımızla, ${LetterLogoText} Ekibi</value>
   </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace silindi</value>
+  </data>
+  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; tarafından yeni belge &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; Yapay Zekâ Ajanının bilgi tabanına yüklendi:&lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
+  <data name="pattern_api_key_expired" xml:space="preserve">
+    <value>Merhaba, $UserName!
+
+Bu e-posta, "*$Message*" API anahtarınızın süresinin dolduğunu ve devre dışı bırakıldığını bildirmek için tarafınıza gönderilmiştir.
+
+"Geliştirici Araçları":"${__VirtualRootPath}/developer-tools/api-keys" bölümünden yeni bir API anahtarı oluşturabilirsiniz.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace silindi.
+
+*Portal: *${PortalUrl}
+*Sahip: *${UserName} ${UserEmail}
+*Müşteri: *${OwnerName}
+
+Otomatik faturalandırmanın kapalı olduğundan lütfen emin olun. Otomatik faturalandırma durumunu müşteri Stripe hesabından kontrol edin.</value>
+  </data>
+  <data name="pattern_user_agent_role_changed" xml:space="preserve">
+    <value>Merhaba!
+
+DocSpace Yapay Zekâ Ajanı "${RoomTitle}":"${RoomUrl}" içinde size yeni bir rol atandı: ${UserRole}.
+
+Oda rolleri ve izinleri hakkında daha fazla bilgi edinmek için "Yardım Merkezi":"${HelpCenterUrl}" sayfasını ziyaret edebilirsiniz.
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_api_key_expired" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace: API anahtarınızın süresi doldu</value>
+  </data>
+  <data name="subject_user_agent_role_changed" xml:space="preserve">
+    <value>DocSpace Yapay Zekâ Ajanındaki rolünüz değişti</value>
+  </data>
 </root>

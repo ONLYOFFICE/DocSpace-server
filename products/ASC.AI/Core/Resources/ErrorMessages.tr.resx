@@ -171,4 +171,7 @@
   <data name="UnavailableServers" xml:space="preserve">
     <value>MCP sunucuları kullanılamıyor: {0}. Bağlantı ayarlarını kontrol edin</value>
   </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>{0} dosyaları işlenemiyor. Dosyalar bozuk veya şifreli olabilir</value>
+  </data>
 </root>

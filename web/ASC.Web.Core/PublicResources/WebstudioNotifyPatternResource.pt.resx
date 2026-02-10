@@ -2182,4 +2182,10 @@ Cumprimentos,
 ${LetterLogoText} Equipa de Suporte
 [${__SiteLink}](${__SiteLink})</value>
   </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} O DocSpace foi eliminado</value>
+  </data>
+  <data name="subject_api_key_expired" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace: A sua chave API expirou</value>
+  </data>
 </root>
