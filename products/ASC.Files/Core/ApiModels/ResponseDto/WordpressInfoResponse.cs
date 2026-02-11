@@ -34,10 +34,12 @@ public class WordpressInfoResponse
     /// <summary>
     /// Indicates whether the WordPress operation was successful.
     /// </summary>
+    /// <example>true</example>
     public bool Success { get; set; }
 
     /// <summary>
     /// The WordPress-related data or information.
     /// </summary>
+    /// <example>https://myblog.wordpress.com</example>
     public string Data { get; set; }
 }

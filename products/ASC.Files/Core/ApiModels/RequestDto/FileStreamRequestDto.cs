@@ -34,6 +34,7 @@ public class FileStreamRequestDto<T> : IModelWithFile
     /// <summary>
     /// The file ID.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
@@ -46,18 +47,21 @@ public class FileStreamRequestDto<T> : IModelWithFile
     /// <summary>
     /// Specifies whether to encrypt the file or not.
     /// </summary>
+    /// <example>false</example>
     [FromForm(Name = "Encrypted")]
     public bool Encrypted { get; set; }
 
     /// <summary>
     /// Specifies whether to force save the file or not.
     /// </summary>
+    /// <example>false</example>
     [FromForm(Name = "Forcesave")]
     public bool Forcesave { get; set; }
 
     /// <summary>
     /// The file extension.
     /// </summary>
+    /// <example>.docx</example>
     [FromForm(Name = "FileExtension")]
     public string FileExtension { get; set; }
 }

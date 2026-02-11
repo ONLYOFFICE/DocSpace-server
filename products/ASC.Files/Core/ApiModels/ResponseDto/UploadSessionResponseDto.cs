@@ -26,13 +26,49 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The upload session response parameters.
+/// </summary>
 public class UploadSessionResponseDto<T>
 {
+    /// <summary>
+    /// The upload session ID.
+    /// </summary>
+    /// <example>1</example>
     public T ID { get; set; }
+
+    /// <summary>
+    /// The folder ID where the file is being uploaded.
+    /// </summary>
+    /// <example>1</example>
     public T FolderId { get; set; }
+
+    /// <summary>
+    /// The file version number.
+    /// </summary>
+    /// <example>1</example>
     public int Version { get; set; }
+
+    /// <summary>
+    /// The file title.
+    /// </summary>
+    /// <example>My Document.docx</example>
     public string Title { get; set; }
+
+    /// <summary>
+    /// The third-party provider key.
+    /// </summary>
+    /// <example>Google</example>
     public string ProviderKey { get; set; }
+
+    /// <summary>
+    /// Specifies whether the file has been uploaded.
+    /// </summary>
+    /// <example>false</example>
     public bool Uploaded { get; set; }
+
+    /// <summary>
+    /// The uploaded file information.
+    /// </summary>
     public FileDto<T> File { get; set; }
 }

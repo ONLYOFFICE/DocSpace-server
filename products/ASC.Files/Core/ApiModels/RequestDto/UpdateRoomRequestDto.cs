@@ -34,12 +34,14 @@ public class UpdateRoomRequest
     /// <summary>
     /// The room title.
     /// </summary>
+    /// <example>My Document</example>
     [StringLength(170)]
     public string Title { get; set; }
 
     /// <summary>
     /// The room quota.
     /// </summary>
+    /// <example>10485760</example>
     public long? Quota { get; set; }
 
     /// <summary>

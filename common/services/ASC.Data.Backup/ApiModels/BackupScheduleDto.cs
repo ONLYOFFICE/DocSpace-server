@@ -36,6 +36,7 @@ public class BackupScheduleDto
     /// <summary>
     /// The backup storage type.
     /// </summary>
+    /// <example>Documents</example>
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public BackupStorageType? StorageType { get; set; }
 
@@ -47,6 +48,7 @@ public class BackupScheduleDto
     /// <summary>
     /// The maximum number of the stored backup copies.
     /// </summary>
+    /// <example>5</example>
     public int? BackupsStored { get; set; }
 
     /// <summary>
@@ -57,6 +59,7 @@ public class BackupScheduleDto
     /// <summary>
     /// Specifies if a dump will be created or not.
     /// </summary>
+    /// <example>false</example>
     public bool Dump { get; set; }
 }
 
@@ -68,18 +71,21 @@ public class Cron
     /// <summary>
     /// The backup period type.
     /// </summary>
+    /// <example>EveryDay</example>
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public BackupPeriod? Period { get; set; }
 
     /// <summary>
     /// The time of the day to start the backup process.
     /// </summary>
+    /// <example>0</example>
     [SwaggerSchemaCustom(Example = 0)]
     public int Hour { get; set; }
 
     /// <summary>
     /// The day of the week to start the backup process.
     /// </summary>
+    /// <example>0</example>
     [SwaggerSchemaCustom(Example = 0)]
     public int? Day { get; set; }
 }

@@ -34,10 +34,12 @@ namespace ASC.Files.Core.ApiModels.RequestDto
         /// <summary>
         /// File id to replace template with (or null to use default template)
         /// </summary>
+        /// <example>1</example>
         public int? SelectedFile { get; set; }
         /// <summary>
         /// File extension of a template to replace
         /// </summary>
+        /// <example>.docx</example>
         public required string FileExtension { get; set; }
     }
 
@@ -49,6 +51,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto
         /// <summary>
         /// File extension of a template to replace
         /// </summary>
+        /// <example>.docx</example>
         public required string FileExtension { get; set; }
 
         /// <summary>

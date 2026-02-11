@@ -34,6 +34,7 @@ public class OrderRequestDto
     /// <summary>
     /// The order value.
     /// </summary>
+    /// <example>1</example>
     [Range(1, int.MaxValue)]
     [JsonConverter(typeof(OrderRequestDtoConverter))]
     public int Order { get; set; }
@@ -47,16 +48,19 @@ public class OrdersItemRequestDto<T>
     /// <summary>
     /// The entry unique identifier (file or folder).
     /// </summary>
+    /// <example>1</example>
     public required T EntryId { get; set; }
 
     /// <summary>
     /// The entry type (file or folder).
     /// </summary>
+    /// <example>1</example>
     public required FileEntryType EntryType { get; set; }
 
     /// <summary>
     /// The order value.
     /// </summary>
+    /// <example>1</example>
     [Range(1, int.MaxValue)]
     [JsonConverter(typeof(OrderRequestDtoConverter))]
     public required int Order { get; set; }
@@ -115,6 +119,7 @@ public class OrderFileRequestDto<T>
     /// <summary>
     /// The file unique identifier.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
@@ -133,6 +138,7 @@ public class OrderFolderRequestDto<T>
     /// <summary>
     /// The folder unique identifier.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "folderId")]
     public required T FolderId { get; set; }
 

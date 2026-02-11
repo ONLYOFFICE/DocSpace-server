@@ -40,21 +40,25 @@ public class RoomInvitationRequest
     /// <summary>
     /// Specifies whether to notify users about the shared room or not.
     /// </summary>
+    /// <example>true</example>
     public bool Notify { get; set; }
 
     /// <summary>
     /// The message to send when notifying about the shared room.
     /// </summary>
+    /// <example>You have been invited to the room</example>
     public string Message { get; set; }
 
     /// <summary>
     /// The language of the room invitation.
     /// </summary>
+    /// <example>en-US</example>
     public string Culture { get; set; }
 
     /// <summary>
     /// Specifies whether to forcibly delete a user with form roles from the room.
     /// </summary>
+    /// <example>false</example>
     public bool Force { get; set; }
 }
 
@@ -66,6 +70,7 @@ public class RoomInvitationRequestDto<T>
     /// <summary>
     /// The room ID.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 

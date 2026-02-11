@@ -34,6 +34,7 @@ public class SaveEditingRequestDto<T> : IModelWithFile
     /// <summary>
     /// The editing file ID from the request.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 

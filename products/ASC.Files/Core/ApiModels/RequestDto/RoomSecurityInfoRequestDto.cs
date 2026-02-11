@@ -34,18 +34,21 @@ public class RoomSecurityInfoRequestDto<T>
     /// <summary>
     /// The room ID.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 
     /// <summary>
     /// The filter type of the access rights.
     /// </summary>
+    /// <example>1</example>
     [FromQuery(Name = "filterType")]
     public ShareFilterType FilterType { get; set; } = ShareFilterType.UserOrGroup;
 
     /// <summary>
     /// The number of items to be retrieved or processed.
     /// </summary>
+    /// <example>25</example>
     [FromQuery(Name = "count")]
     [Range(1, ApiContext.MaxCount)]
     public int Count { get; set; } = ApiContext.DefaultCount;
@@ -53,12 +56,14 @@ public class RoomSecurityInfoRequestDto<T>
     /// <summary>
     /// The starting index of the items to retrieve in a paginated request.
     /// </summary>
+    /// <example>0</example>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
 
     /// <summary>
     /// The text filter value used for filtering room security information.
     /// </summary>
+    /// <example>Sample filter</example>
     [FromQuery(Name = "filterValue")]
     public string Text { get; set; }
 }

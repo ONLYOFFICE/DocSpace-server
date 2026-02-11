@@ -39,16 +39,19 @@ public class InsertFileRequestDto : IModelWithFile, IDisposable
     /// <summary>
     /// The file title to be inserted.
     /// </summary>
+    /// <example>My Document</example>
     public string Title { get; set; }
 
     /// <summary>
     /// Specifies whether to create a new file if it already exists or not.
     /// </summary>
+    /// <example>true</example>
     public bool CreateNewIfExist { get; set; }
 
     /// <summary>
     /// Specifies whether to keep the file converting status or not.
     /// </summary>
+    /// <example>false</example>
     public bool KeepConvertStatus { get; set; }
 
 
@@ -99,6 +102,7 @@ public class InsertWithFileRequestDto<T>
     /// <summary>
     /// The folder ID for inserting a file.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "folderId")]
     public required T FolderId { get; set; }
 

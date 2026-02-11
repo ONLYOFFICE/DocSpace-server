@@ -34,11 +34,13 @@ public class ManageFormFillingDto<T>
     /// <summary>
     /// The ID of the form to manage.
     /// </summary>
+    /// <example>1</example>
     public required T FormId { get; set; }
 
     /// <summary>
     /// The action to perform on the form.
     /// </summary>
+    /// <example>1</example>
     public FormFillingManageAction Action { get; set; }
 }
 
