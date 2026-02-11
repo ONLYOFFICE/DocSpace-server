@@ -43,9 +43,9 @@ var connectionManager = new ConnectionStringManager(builder, basePath)
 
 var configurator = new ProjectConfigurator(builder, connectionManager, basePath, isDocker);
 
-switch (builder.Configuration["APP_LAUNCH_PROFILE"])
+switch (builder.Configuration["DOTNET_LAUNCH_PROFILE"])
 {
-    case "Preview":
+    case "preview":
         connectionManager.AddMySql()
                          .AddRedis();
         configurator
@@ -59,7 +59,7 @@ switch (builder.Configuration["APP_LAUNCH_PROFILE"])
             .AddSocketIO();
 
         break;
-    case "FrontendDev":
+    case "frontend-dev":
         connectionManager.AddMySql(withDbGate: true)
             .AddRedis()
             .AddMailPit();

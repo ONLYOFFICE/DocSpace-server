@@ -105,7 +105,7 @@ public class ProjectConfigurator(
         resourceBuilder
             .WithImageTag("dev")
             .WithBindMount(projectBasePath, "/app")
-            .WithEnvironment("log:name", $"/{name.ToLower()["onlyoffice-".Length..].Replace('_', '.')}")
+            .WithEnvironment("log:name", $"/{name.ToLower()["asc-".Length..].Replace('_', '.')}")
             .WithEnvironment("$STORAGE_ROOT", "/data")
             .WithEnvironment("web:hub:internal", new UriBuilder(Uri.UriSchemeHttp, Constants.SocketIoContainer, Constants.SocketIoPort).ToString())
             .WithEnvironment("core:hosting:singletonMode", true.ToString())
