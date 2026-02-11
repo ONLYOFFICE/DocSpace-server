@@ -201,7 +201,7 @@ public static class DbQuotaExtension
                     ProductId = null,
                     ServiceName = null,
                     ServiceGroup = null,
-                    Visible = true,
+                    Visible = false,
                     Wallet = true
                 },
                 new DbQuota
@@ -423,6 +423,19 @@ public static class DbQuotaExtension
                     ServiceName = "gemini3flashoutput",
                     ServiceGroup = "aitools",
                     Visible = false,
+                    Wallet = true
+                },
+                new DbQuota
+                {
+                    TenantId = -31,
+                    Name = "aiservice",
+                    Description = null,
+                    Features = "aiservice",
+                    Price = 1,
+                    ProductId = null,
+                    ServiceName = "ai-tools",
+                    ServiceGroup = null,
+                    Visible = true,
                     Wallet = true
                 }
                 );

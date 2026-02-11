@@ -142,12 +142,22 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             migrationBuilder.InsertData(
                 table: "tenants_quota",
                 columns: new[] { "tenant", "description", "features", "name", "product_id", "service_group", "service_name", "visible", "wallet" },
-                values: new object[] { -13, null, "aitools", "aitools", null, null, null, true, true });
+                values: new object[] { -13, null, "aitools", "aitools", null, null, null, false, true });
+
+            migrationBuilder.InsertData(
+                table: "tenants_quota",
+                columns: new[] { "tenant", "description", "features", "name", "price", "product_id", "service_group", "service_name", "visible", "wallet" },
+                values: new object[] { -31, null, "aiservice", "aiservice", 1m, null, null, "ai-tools", true, true });
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DeleteData(
+                table: "tenants_quota",
+                keyColumn: "tenant",
+                keyValue: -31);
+
             migrationBuilder.DeleteData(
                 table: "tenants_quota",
                 keyColumn: "tenant",

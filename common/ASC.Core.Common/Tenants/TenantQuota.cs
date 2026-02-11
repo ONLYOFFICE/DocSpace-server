@@ -393,7 +393,7 @@ public class TenantQuota
     private readonly WalletFeatureFlag _backup;
 
     /// <summary>
-    /// Specifies if the backup anabled as a wallet service or not.
+    /// Specifies if the backup enabled as a wallet service or not.
     /// </summary>
     public bool Backup
     {
@@ -415,7 +415,7 @@ public class TenantQuota
     private readonly WalletFeatureFlag _aiTools;
 
     /// <summary>
-    /// Specifies if the AI tools anabled as a wallet service or not.
+    /// Specifies if the AI tools enabled as a wallet service or not.
     /// </summary>
     public bool AITools
     {
@@ -610,6 +610,17 @@ public class TenantQuota
         set => _aiToolsGemini3FlashOutput.Value = value;
     }
 
+    private readonly WalletFeatureFlag _aiService;
+
+    /// <summary>
+    /// Specifies if the AI service enabled as a wallet service or not.
+    /// </summary>
+    public bool AIService
+    {
+        get => _aiService.Value;
+        set => _aiService.Value = value;
+    }
+    
     public TenantQuota()
     {
         _featuresList = [];
@@ -659,6 +670,7 @@ public class TenantQuota
         _aiToolsGemini3ProOutput = new WalletFeatureFlag(this, "gemini3prooutput") { EmployeeType = EmployeeType.DocSpaceAdmin };
         _aiToolsGemini3FlashInput = new WalletFeatureFlag(this, "gemini3flashinput") { EmployeeType = EmployeeType.DocSpaceAdmin };
         _aiToolsGemini3FlashOutput = new WalletFeatureFlag(this, "gemini3flashoutput") { EmployeeType = EmployeeType.DocSpaceAdmin };
+        _aiService = new WalletFeatureFlag(this, "aiservice") { EmployeeType = EmployeeType.DocSpaceAdmin };
 
         TenantQuotaFeatures = new List<TenantQuotaFeature>
         {
@@ -706,7 +718,8 @@ public class TenantQuota
             _aiToolsGemini3ProInput,
             _aiToolsGemini3ProOutput,
             _aiToolsGemini3FlashInput,
-            _aiToolsGemini3FlashOutput
+            _aiToolsGemini3FlashOutput,
+            _aiService
         };
     }
 

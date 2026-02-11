@@ -1003,7 +1003,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Features = "aitools",
                             Name = "aitools",
                             Price = 0m,
-                            Visible = true,
+                            Visible = false,
                             Wallet = true
                         },
                         new
@@ -1191,6 +1191,16 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             ServiceGroup = "aitools",
                             ServiceName = "gemini3flashoutput",
                             Visible = false,
+                            Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -31,
+                            Features = "aiservice",
+                            Name = "aiservice",
+                            Price = 1m,
+                            ServiceName = "ai-tools",
+                            Visible = true,
                             Wallet = true
                         });
                 });
