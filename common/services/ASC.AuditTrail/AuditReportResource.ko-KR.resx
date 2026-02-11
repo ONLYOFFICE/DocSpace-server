@@ -192,6 +192,12 @@
   <data name="AuthorizationKeysSetting" xml:space="preserve">
     <value>제3자 인증 키가 업데이트되었습니다</value>
   </data>
+  <data name="BackupCompleted" xml:space="preserve">
+    <value>백업이 완료되었습니다</value>
+  </data>
+  <data name="BackupFailed" xml:space="preserve">
+    <value>백업에 실패했습니다</value>
+  </data>
   <data name="BackupStarted" xml:space="preserve">
     <value>백업 시작</value>
   </data>
@@ -567,8 +573,14 @@
   <data name="ImportActionType" xml:space="preserve">
     <value>가져오기</value>
   </data>
+  <data name="InvitationSettingsUpdated" xml:space="preserve">
+    <value>초대 설정이 업데이트되었습니다</value>
+  </data>
   <data name="IpCol" xml:space="preserve">
     <value>IP</value>
+  </data>
+  <data name="IPRestrictionsSettingsUpdated" xml:space="preserve">
+    <value>IP 보안 설정이 업데이트되었습니다</value>
   </data>
   <data name="LanguageSettingsUpdated" xml:space="preserve">
     <value>언어 설정이 업데이트되었습니다</value>
@@ -638,6 +650,9 @@
   </data>
   <data name="LoginHistoryReportName" xml:space="preserve">
     <value>로그인 기록 보고서 ({0}-{1})</value>
+  </data>
+  <data name="LoginSettingsUpdated" xml:space="preserve">
+    <value>무차별 대입 공격 방지 설정이 업데이트되었습니다</value>
   </data>
   <data name="LoginSuccess" xml:space="preserve">
     <value>로그인에 성공했습니다</value>
@@ -888,6 +903,15 @@
   <data name="RoomWatermarkSet" xml:space="preserve">
     <value>룸: {0}. 워터마크가 활성화되었습니다</value>
   </data>
+  <data name="ScheduledBackupCompleted" xml:space="preserve">
+    <value>예약된 백업이 완료되었습니다</value>
+  </data>
+  <data name="ScheduledBackupFailed" xml:space="preserve">
+    <value>예약된 백업에 실패했습니다</value>
+  </data>
+  <data name="ScheduledBackupStarted" xml:space="preserve">
+    <value>예약된 백업이 시작되었습니다</value>
+  </data>
   <data name="SendActionType" xml:space="preserve">
     <value>전송</value>
   </data>
@@ -1106,5 +1130,29 @@
   </data>
   <data name="WebhookUpdated" xml:space="preserve">
     <value>웹훅이 업데이트되었습니다: {0}</value>
+  </data>
+  <data name="WebpluginDeleted" xml:space="preserve">
+    <value>플러그인이 삭제되었습니다: {0}</value>
+  </data>
+  <data name="WebpluginUpdated" xml:space="preserve">
+    <value>플러그인이 업데이트되었습니다: {0}</value>
+  </data>
+  <data name="WebpluginUploaded" xml:space="preserve">
+    <value>플러그인이 업로드되었습니다: {0}</value>
+  </data>
+  <data name="WhiteLabelAdditionalSettingsUpdated" xml:space="preserve">
+    <value>추가 브랜딩 설정이 업데이트되었습니다</value>
+  </data>
+  <data name="WhiteLabelCompanySettingsUpdated" xml:space="preserve">
+    <value>회사 정보 설정이 업데이트되었습니다</value>
+  </data>
+  <data name="WhiteLabelMailSettingsUpdated" xml:space="preserve">
+    <value>메일 설정이 업데이트되었습니다</value>
+  </data>
+  <data name="WhiteLabelSettingsLogosUpdated" xml:space="preserve">
+    <value>로고 설정이 업데이트되었습니다</value>
+  </data>
+  <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
+    <value>브랜드 이름이 업데이트되었습니다</value>
   </data>
 </root>
