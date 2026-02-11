@@ -144,6 +144,9 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
 
     private int _stepsCount = 1;
     private volatile int _stepsCompleted;
+    private DateTime _lastProgressUpdate = DateTime.MinValue;
+    private readonly SemaphoreSlim _progressSemaphore = new(1, 1);
+    private const int ProgressUpdateIntervalMs = 1000;
 
     protected void SetStepsCount(int value)
     {
@@ -189,8 +192,31 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
         {
             throw new ArgumentOutOfRangeException(nameof(value));
         }
-        Progress = value;
-        await OnProgressChanged(new ProgressChangedEventArgs(value));
+
+        if (value < Progress)
+        {
+            return;
+        }
+
+        await _progressSemaphore.WaitAsync();
+        try
+        {
+            var now = DateTime.UtcNow;
+            var timeSinceLastUpdate = (now - _lastProgressUpdate).TotalMilliseconds;
+
+            if (timeSinceLastUpdate < ProgressUpdateIntervalMs && value < 100)
+            {
+                return;
+            }
+
+            Progress = value;
+            _lastProgressUpdate = now;
+            await OnProgressChanged(new ProgressChangedEventArgs(value));
+        }
+        finally
+        {
+            _progressSemaphore.Release();
+        }
     }
 
     private async Task OnProgressChanged(ProgressChangedEventArgs eventArgs)
