@@ -87,7 +87,7 @@ public class CustomTagsService(
             throw new ItemNotFoundException();
         }
         var tag = await tagDao.GetTagsInfoAsync(newName, TagType.Custom, true).FirstOrDefaultAsync();
-        if (tag != null && tag.Id != existedTag.Id)
+        if (tag != null)
         {
             throw new ArgumentException($"Tag with name '{newName}' already exists");
         }
