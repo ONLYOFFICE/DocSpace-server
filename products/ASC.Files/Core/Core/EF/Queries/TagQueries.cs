@@ -167,7 +167,7 @@ public partial class FilesDbContext
         return TagQueries.DeleteTagLinksByEntryIdAsync(this, tenantId, mappedId, entryType, tagType);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, null, FileEntryType.File])]
+    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
     public Task<int> DeleteTagLinksByTagIdAsync(int tenantId, int id)
     {
         return TagQueries.DeleteTagLinksByTagIdAsync(this, tenantId, id);
