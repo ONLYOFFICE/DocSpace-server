@@ -28,6 +28,10 @@ namespace ASC.AI.Models.RequestDto;
 
 public class GetMessagesRequestDto : PaginatedRequestDto
 {
+    /// <summary>
+    /// The chat ID.
+    /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "chatId")]
     public Guid ChatId { get; set; }
 }

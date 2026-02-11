@@ -31,42 +31,49 @@ namespace ASC.AI.Models.RequestDto
         /// <summary>
         /// The filter by user ID.
         /// </summary>
+        /// <example>00000000-0000-0000-0000-000000000000</example>
         [FromQuery(Name = "subjectId")]
         public string? SubjectId { get; set; }
 
         /// <summary>
         /// Specifies whether to search by tags or not.
         /// </summary>
+        /// <example>false</example>
         [FromQuery(Name = "withoutTags")]
         public bool? WithoutTags { get; set; }
 
         /// <summary>
         /// The tags in the serialized format.
         /// </summary>
+        /// <example>ai,assistant</example>
         [FromQuery(Name = "tags")]
         public string? Tags { get; set; }
 
         /// <summary>
         /// Specifies whether to exclude search by user or group ID.
         /// </summary>
+        /// <example>false</example>
         [FromQuery(Name = "excludeSubject")]
         public bool? ExcludeSubject { get; set; }
 
         /// <summary>
         /// The filter by user (Owner - 0, Member - 1).
         /// </summary>
+        /// <example>0</example>
         [FromQuery(Name = "subjectFilter")]
         public SubjectFilter? SubjectFilter { get; set; }
 
         /// <summary>
         /// The filter by quota (All - 0, Default - 1, Custom - 2).
         /// </summary>
+        /// <example>0</example>
         [FromQuery(Name = "quotaFilter")]
         public QuotaFilter? QuotaFilter { get; set; }
 
         /// <summary>
         /// Specifies the maximum number of items to retrieve.
         /// </summary>
+        /// <example>25</example>
         [FromQuery(Name = "count")]
         [Range(1, ApiContext.MaxCount)]
         public int Count { get; set; } = ApiContext.DefaultCount;
@@ -74,24 +81,28 @@ namespace ASC.AI.Models.RequestDto
         /// <summary>
         /// The index from which to start retrieving the room content.
         /// </summary>
+        /// <example>0</example>
         [FromQuery(Name = "startIndex")]
         public int StartIndex { get; set; }
 
         /// <summary>
         /// Specifies the field by which the room content should be sorted.
         /// </summary>
+        /// <example>DateAndTime</example>
         [FromQuery(Name = "sortBy")]
         public string? SortBy { get; set; }
 
         /// <summary>
         /// The order in which the results are sorted.
         /// </summary>
+        /// <example>1</example>
         [FromQuery(Name = "sortOrder")]
         public SortOrder SortOrder { get; set; }
 
         /// <summary>
         /// The text filter value used to refine search or query operations.
         /// </summary>
+        /// <example>my agent</example>
         [FromQuery(Name = "filterValue")]
         public string? Text { get; set; }
     }

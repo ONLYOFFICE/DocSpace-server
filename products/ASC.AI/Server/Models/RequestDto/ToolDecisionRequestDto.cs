@@ -30,14 +30,18 @@ namespace ASC.AI.Models.RequestDto;
 
 public class ToolDecisionRequestDto
 {
+    /// <summary>The tool call ID.</summary>
+    /// <example>call_abc123</example>
     [FromRoute(Name = "callId")]
     public required string CallId { get; init; }
-    
+
     [FromBody]
     public required ToolDecisionRequestBody Body { get; init; }
 }
 
 public class ToolDecisionRequestBody
 {
+    /// <summary>The tool execution decision.</summary>
+    /// <example>1</example>
     public ToolExecutionDecision Decision { get; init; }
 }

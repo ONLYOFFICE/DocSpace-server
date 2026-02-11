@@ -28,6 +28,8 @@ namespace ASC.AI.Models.RequestDto;
 
 public class ExportChatRequestDto<T>
 {
+    /// <summary>The chat ID.</summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "chatId")]
     public Guid ChatId { get; init; }
 
@@ -37,6 +39,10 @@ public class ExportChatRequestDto<T>
 
 public class ExportChatRequestBody<T>
 {
+    /// <summary>The destination folder ID.</summary>
+    /// <example>123</example>
     public required T FolderId { get; init; }
+    /// <summary>The export file title.</summary>
+    /// <example>Chat Export</example>
     public required string Title { get; init; }
 }

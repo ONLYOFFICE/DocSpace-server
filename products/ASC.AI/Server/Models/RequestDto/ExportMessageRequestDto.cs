@@ -28,15 +28,21 @@ namespace ASC.AI.Models.RequestDto;
 
 public class ExportMessageRequestDto<T>
 {
+    /// <summary>The message ID.</summary>
+    /// <example>1</example>
     [FromRoute(Name = "messageId")]
     public int MessageId { get; init; }
-    
+
     [FromBody]
     public required ExportMessageRequestBody<T> Body { get; init; }
 }
 
 public class ExportMessageRequestBody<T>
 {
+    /// <summary>The destination folder ID.</summary>
+    /// <example>123</example>
     public required T FolderId { get; init; }
+    /// <summary>The export file title.</summary>
+    /// <example>Message Export</example>
     public required string Title { get; init; }
 }

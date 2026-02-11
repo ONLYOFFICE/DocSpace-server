@@ -28,9 +28,17 @@ namespace ASC.AI.Models.RequestDto;
 
 public class GetMcpToolsRequestDto
 {
+    /// <summary>
+    /// The room ID.
+    /// </summary>
+    /// <example>42</example>
     [FromRoute(Name = "roomId")]
     public int RoomId { get; init; }
-    
+
+    /// <summary>
+    /// The MCP server ID.
+    /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "serverId")]
     public Guid ServerId { get; init; }
 }

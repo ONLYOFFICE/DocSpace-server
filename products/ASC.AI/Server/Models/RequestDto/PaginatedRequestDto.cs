@@ -28,9 +28,13 @@ namespace ASC.AI.Models.RequestDto;
 
 public class PaginatedRequestDto
 {
+    /// <summary>The index from which to start retrieving items.</summary>
+    /// <example>0</example>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; } = 0;
 
-    [FromQuery(Name = "count")] 
+    /// <summary>The number of items to retrieve.</summary>
+    /// <example>100</example>
+    [FromQuery(Name = "count")]
     public int Count { get; set; } = 100;
 }

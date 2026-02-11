@@ -28,6 +28,11 @@ namespace ASC.AI.Models.RequestDto;
 
 public class SetChatSettingsRequestDto
 {
+    /// <summary>The AI provider ID.</summary>
+    /// <example>1</example>
     public int ProviderId { get; set; }
+
+    /// <summary>The AI model ID.</summary>
+    /// <example>gpt-4</example>
     public required string ModelId { get; set; }
 }

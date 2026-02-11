@@ -28,16 +28,24 @@ namespace ASC.AI.Models.RequestDto;
 
 public class ContinueChatRequestDto
 {
+    /// <summary>The chat ID.</summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "chatId")]
     public required Guid ChatId { get; set; }
-    
+
     [FromBody]
     public required ContinueChatBody Body { get; set; }
 }
 
 public class ContinueChatBody
 {
+    /// <summary>The message text.</summary>
+    /// <example>Summarize this document for me</example>
     public required string Message { get; set; }
+    /// <summary>The context folder ID.</summary>
+    /// <example>123</example>
     public int ContextFolderId { get; set; }
+    /// <summary>The list of attached files.</summary>
+    /// <example>[{"id": 1, "type": "file"}]</example>
     public IEnumerable<JsonElement>? Files { get; set; }
 }

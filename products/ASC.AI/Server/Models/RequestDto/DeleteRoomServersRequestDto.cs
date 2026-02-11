@@ -28,14 +28,18 @@ namespace ASC.AI.Models.RequestDto;
 
 public class DeleteRoomServersRequestDto
 {
+    /// <summary>The room ID.</summary>
+    /// <example>42</example>
     [FromRoute(Name = "roomId")]
     public int RoomId { get; init; }
-    
+
     [FromBody]
     public required DeleteRoomServersRequestBody Body { get; init; }
 }
 
 public class DeleteRoomServersRequestBody
 {
+    /// <summary>The set of server IDs to remove from the room.</summary>
+    /// <example>["00000000-0000-0000-0000-000000000000"]</example>
     public required HashSet<Guid> Servers { get; init; }
 }

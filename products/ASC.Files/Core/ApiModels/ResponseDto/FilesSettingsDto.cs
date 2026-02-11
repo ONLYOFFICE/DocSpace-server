@@ -34,21 +34,25 @@ public class FilesSettingsDto
     /// <summary>
     /// The list of extensions of the viewed images.
     /// </summary>
+    /// <example>[".bmp", ".gif", ".jpeg", ".jpg", ".png", ".svg"]</example>
     public List<string> ExtsImagePreviewed { get; set; }
 
     /// <summary>
     /// The list of extensions of the viewed media files.
     /// </summary>
+    /// <example>[".mp4", ".webm", ".mp3", ".ogg"]</example>
     public List<string> ExtsMediaPreviewed { get; set; }
 
     /// <summary>
     /// The list of extensions of the viewed files.
     /// </summary>
+    /// <example>[".docx", ".xlsx", ".pptx", ".pdf"]</example>
     public List<string> ExtsWebPreviewed { get; set; }
 
     /// <summary>
     /// The list of extensions of the edited files.
     /// </summary>
+    /// <example>[".docx", ".xlsx", ".pptx"]</example>
     public List<string> ExtsWebEdited { get; set; }
 
     /// <summary>

@@ -28,5 +28,7 @@ namespace ASC.AI.Models.RequestDto;
 
 public class RemoveProviderRequestDto
 {
+    /// <summary>The set of AI provider IDs to remove.</summary>
+    /// <example>[1, 2, 3]</example>
     public required HashSet<int> Ids { get; set; }
 }

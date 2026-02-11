@@ -34,7 +34,15 @@ public class SetWebSearchConfigRequestDto
 
 public class SetWebSearchSettingsRequestBody
 {
+    /// <summary>Specifies whether the web search is enabled.</summary>
+    /// <example>true</example>
     public bool Enabled { get; init; }
+
+    /// <summary>The web search engine type.</summary>
+    /// <example>1</example>
     public EngineType Type { get; init; }
+
+    /// <summary>The web search API key.</summary>
+    /// <example>search-api-key-123</example>
     public string? Key { get; init; }
 }

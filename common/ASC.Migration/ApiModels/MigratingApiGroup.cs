@@ -36,18 +36,21 @@ public class MigratingApiGroup : ImportableApiEntity
     /// <summary>
     /// The group name.
     /// </summary>
+    /// <example>Marketing Team</example>
     [ProtoMember(2)]
     public string GroupName { get; set; }
 
     /// <summary>
     /// The group module name.
     /// </summary>
+    /// <example>Projects</example>
     [ProtoMember(3)]
     public string ModuleName { get; set; }
 
     /// <summary>
     /// The list of group user UIDs.
     /// </summary>
+    /// <example>["user1-uid", "user2-uid"]</example>
     [ProtoMember(4)]
     public List<string> UserUidList { get; set; }
 }

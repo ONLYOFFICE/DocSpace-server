@@ -34,14 +34,24 @@ public class AddServerRequestDto
 
 public class AddMcpServerRequestBody
 {
+    /// <summary>The MCP server name.</summary>
+    /// <example>My MCP Server</example>
     [MaxLength(128)]
     public required string Name { get; init; }
-    
+
+    /// <summary>The MCP server description.</summary>
+    /// <example>A server for document processing</example>
     [MaxLength(255)]
     public required string Description { get; init; }
-    
+
+    /// <summary>The MCP server endpoint URL.</summary>
+    /// <example>https://mcp.example.com/sse</example>
     [Url]
     public required string Endpoint { get; init; }
+    /// <summary>The optional HTTP headers for the MCP server.</summary>
+    /// <example>{"Authorization": "Bearer token123"}</example>
     public Dictionary<string, string>? Headers { get; init; }
+    /// <summary>The MCP server icon URL.</summary>
+    /// <example>https://example.com/icon.png</example>
     public string? Icon { get; init; }
 }

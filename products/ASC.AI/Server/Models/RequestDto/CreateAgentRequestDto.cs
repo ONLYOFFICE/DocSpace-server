@@ -33,22 +33,26 @@ public class CreateAgentRequestDto
     /// <summary>
     /// The room name.
     /// </summary>
+    /// <example>My AI Agent Room</example>
     [StringLength(170)]
     public required string Title { get; set; }
 
     /// <summary>
     /// The room quota.
     /// </summary>
+    /// <example>10485760</example>
     public long? Quota { get; set; }
 
     /// <summary>
     /// Specifies whether to create a room with indexing.
     /// </summary>
+    /// <example>true</example>
     public bool? Indexing { get; set; }
 
     /// <summary>
     /// Specifies whether to deny downloads from the room.
     /// </summary>
+    /// <example>false</example>
     public bool? DenyDownload { get; set; }
 
     /// <summary>
@@ -69,23 +73,27 @@ public class CreateAgentRequestDto
     /// <summary>
     /// The list of tags.
     /// </summary>
+    /// <example>["ai", "assistant"]</example>
     public IEnumerable<string>? Tags { get; set; }
 
     /// <summary>
     /// The room color.
     /// </summary>
+    /// <example>FF6600</example>
     [StringLength(6)]
     public string? Color { get; set; }
 
     /// <summary>
     /// The room cover.
     /// </summary>
+    /// <example>cover1.jpg</example>
     [StringLength(50)]
     public string? Cover { get; set; }
 
     /// <summary>
     /// Specifies whether the room to be created is private or not.
     /// </summary>
+    /// <example>false</example>
     public bool Private { get; set; }
 
     /// <summary>
@@ -102,5 +110,6 @@ public class CreateAgentRequestDto
     /// <summary>
     /// Specifies whether to attach default tools to the agent or not.
     /// </summary>
+    /// <example>true</example>
     public bool AttachDefaultTools { get; set; } = true;
 }

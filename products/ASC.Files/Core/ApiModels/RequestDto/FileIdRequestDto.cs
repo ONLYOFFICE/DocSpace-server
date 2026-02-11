@@ -34,6 +34,7 @@ public class FileIdRequestDto<T>
     /// <summary>
     /// The file unique identifier.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 }

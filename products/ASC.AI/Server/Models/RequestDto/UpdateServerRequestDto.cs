@@ -28,25 +28,41 @@ namespace ASC.AI.Models.RequestDto;
 
 public class UpdateServerRequestDto
 {
+    /// <summary>The server ID.</summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "id")]
     public Guid Id { get; init; }
-    
+
     [FromBody]
     public required UpdateServerRequestBody Body { get; init; }
 }
 
 public class UpdateServerRequestBody
 {
+    /// <summary>The MCP server name.</summary>
+    /// <example>Updated MCP Server</example>
     [MaxLength(128)]
     public string? Name { get; init; }
-    
+
+    /// <summary>The MCP server description.</summary>
+    /// <example>Updated server description</example>
     [MaxLength(255)]
     public string? Description { get; init; }
-    
+
+    /// <summary>The MCP server endpoint URL.</summary>
+    /// <example>https://mcp.example.com/sse</example>
     [Url]
     public string? Endpoint { get; init; }
-    
+
+    /// <summary>The optional HTTP headers.</summary>
+    /// <example>{"Authorization": "Bearer token123"}</example>
     public Dictionary<string, string>? Headers { get; init; }
+
+    /// <summary>Specifies whether to update the server icon.</summary>
+    /// <example>true</example>
     public bool UpdateIcon { get; init; }
+
+    /// <summary>The MCP server icon URL.</summary>
+    /// <example>https://example.com/icon.png</example>
     public string? Icon { get; init; }
 }

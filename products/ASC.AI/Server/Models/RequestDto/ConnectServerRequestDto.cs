@@ -28,17 +28,23 @@ namespace ASC.AI.Models.RequestDto;
 
 public class ConnectServerRequestDto
 {
+    /// <summary>The room ID.</summary>
+    /// <example>42</example>
     [FromRoute(Name = "roomId")]
     public int RoomId { get; init; }
-    
+
+    /// <summary>The server ID.</summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "serverId")]
     public Guid ServerId { get; init; }
-    
+
     [FromBody]
     public required ConnectServerRequestBody Body { get; init; }
 }
 
 public class ConnectServerRequestBody
 {
+    /// <summary>The connection authorization code.</summary>
+    /// <example>abc123def456</example>
     public required string Code { get; init; }
 }

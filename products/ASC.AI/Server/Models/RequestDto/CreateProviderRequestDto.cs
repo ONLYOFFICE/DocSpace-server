@@ -28,8 +28,27 @@ namespace ASC.AI.Models.RequestDto;
 
 public class CreateProviderRequestDto
 {
+    /// <summary>
+    /// The AI provider type.
+    /// </summary>
+    /// <example>1</example>
     public ProviderType Type { get; set; }
+
+    /// <summary>
+    /// The AI provider title.
+    /// </summary>
+    /// <example>OpenAI Provider</example>
     public required string Title { get; set; }
+
+    /// <summary>
+    /// The AI provider URL.
+    /// </summary>
+    /// <example>https://api.openai.com/v1</example>
     public string? Url { get; set; }
+
+    /// <summary>
+    /// The AI provider API key.
+    /// </summary>
+    /// <example>sk-example-key-123</example>
     public required string Key { get; set; }
 }

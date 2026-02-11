@@ -34,5 +34,7 @@ public class DeleteServersRequestDto
 
 public class DeleteServersRequestBody
 {
+    /// <summary>The set of server IDs to delete.</summary>
+    /// <example>["00000000-0000-0000-0000-000000000000"]</example>
     public required HashSet<Guid> Servers { get; init; }
 }

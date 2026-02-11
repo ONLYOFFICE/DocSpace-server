@@ -28,6 +28,10 @@ namespace ASC.AI.Models.RequestDto;
 
 public class GetServersRequestDto
 {
+    /// <summary>
+    /// The server ID.
+    /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "id")]
     public Guid Id { get; init; }
 }

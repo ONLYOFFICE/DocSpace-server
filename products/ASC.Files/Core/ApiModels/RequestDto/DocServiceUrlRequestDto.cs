@@ -34,6 +34,7 @@ public class DocServiceUrlRequestDto
     /// <summary>
     /// Specifies whether to return the editor version or not.
     /// </summary>
+    /// <example>true</example>
     [FromQuery(Name = "version")]
     public bool Version { get; set; }
 }

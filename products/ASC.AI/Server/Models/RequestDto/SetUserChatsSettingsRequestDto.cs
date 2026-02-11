@@ -28,14 +28,18 @@ namespace ASC.AI.Models.RequestDto;
 
 public class SetUserChatsSettingsRequestDto
 {
+    /// <summary>The room ID.</summary>
+    /// <example>42</example>
     [FromRoute(Name = "roomId")]
     public int RoomId { get; init; }
-    
+
     [FromBody]
     public required SetUserChatSettingsRequestBody Body { get; init; }
 }
 
 public class SetUserChatSettingsRequestBody
 {
+    /// <summary>Specifies whether the web search is enabled.</summary>
+    /// <example>true</example>
     public bool? WebSearchEnabled { get; init; }
 }

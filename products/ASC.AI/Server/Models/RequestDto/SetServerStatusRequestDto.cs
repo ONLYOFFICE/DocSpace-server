@@ -28,14 +28,18 @@ namespace ASC.AI.Models.RequestDto;
 
 public class SetServerStatusRequestDto
 {
+    /// <summary>The server ID.</summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute]
     public Guid Id { get; set; }
-    
+
     [FromBody]
     public required SetServerStatusRequestBody Body { get; set; }
 }
 
 public class SetServerStatusRequestBody
 {
+    /// <summary>Specifies whether the server is enabled.</summary>
+    /// <example>true</example>
     public bool Enabled { get; set; }
 }

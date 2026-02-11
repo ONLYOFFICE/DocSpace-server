@@ -28,16 +28,26 @@ namespace ASC.AI.Models.RequestDto;
 
 public class UpdateProviderRequestDto
 {
+    /// <summary>The AI provider ID.</summary>
+    /// <example>1</example>
     [FromRoute(Name = "id")]
     public int Id { get; set; }
-    
+
     [FromBody]
     public required UpdateProviderBody Body { get; set; }
 }
 
 public class UpdateProviderBody
 {
+    /// <summary>The AI provider title.</summary>
+    /// <example>Updated Provider</example>
     public string? Title { get; set; }
+
+    /// <summary>The AI provider URL.</summary>
+    /// <example>https://api.openai.com/v1</example>
     public string? Url { get; set; }
+
+    /// <summary>The AI provider API key.</summary>
+    /// <example>sk-example-key-123</example>
     public string? Key { get; set; }
 }

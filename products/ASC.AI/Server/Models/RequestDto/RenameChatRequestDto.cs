@@ -28,15 +28,19 @@ namespace ASC.AI.Models.RequestDto;
 
 public class RenameChatRequestDto
 {
+    /// <summary>The chat ID.</summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "chatId")]
     public required Guid ChatId { get; set; }
-    
+
     [FromBody]
     public required RenameChatBody Body { get; set; }
 }
 
 public class RenameChatBody
 {
+    /// <summary>The new chat name.</summary>
+    /// <example>Project Discussion</example>
     [MaxLength(255)]
     public required string Name { get; set; }
 }

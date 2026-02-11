@@ -34,6 +34,7 @@ public class DeleteFolder
     /// <summary>
     /// Specifies whether to delete a folder after the editing session is finished or not.
     /// </summary>
+    /// <example>false</example>
     public bool DeleteAfter { get; set; }
 
     /// <summary>

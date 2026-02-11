@@ -28,16 +28,26 @@ namespace ASC.AI.Models.RequestDto;
 
 public class StartNewChatRequestDto
 {
+    /// <summary>The room ID.</summary>
+    /// <example>42</example>
     [FromRoute(Name = "roomId")]
     public required int RoomId { get; set; }
-    
+
     [FromBody]
     public required StartNewChatBody Body { get; set; }
 }
 
 public class StartNewChatBody
 {
+    /// <summary>The initial message text.</summary>
+    /// <example>Hello, can you help me with this document?</example>
     public required string Message { get; set; }
+
+    /// <summary>The context folder ID.</summary>
+    /// <example>123</example>
     public int? ContextFolderId { get; set; }
+
+    /// <summary>The list of attached files.</summary>
+    /// <example>[{"id": 1, "type": "file"}]</example>
     public IEnumerable<JsonElement>? Files { get; set; }
 }

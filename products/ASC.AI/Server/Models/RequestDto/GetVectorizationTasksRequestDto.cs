@@ -28,6 +28,8 @@ namespace ASC.AI.Models.RequestDto;
 
 public class GetVectorizationTasksRequestDto
 {
+    /// <summary>The room ID.</summary>
+    /// <example>42</example>
     [FromRoute(Name = "roomId")]
     public int RoomId { get; init; }
 }

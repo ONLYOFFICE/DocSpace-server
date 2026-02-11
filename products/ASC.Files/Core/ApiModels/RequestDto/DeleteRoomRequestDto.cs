@@ -34,6 +34,7 @@ public class DeleteRoomRequest
     /// <summary>
     /// Specifies whether to delete a room after the editing session is finished or not.
     /// </summary>
+    /// <example>false</example>
     public bool DeleteAfter { get; set; }
 }
 

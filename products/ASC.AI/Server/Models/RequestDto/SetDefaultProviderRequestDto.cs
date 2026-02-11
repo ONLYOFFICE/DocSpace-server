@@ -34,11 +34,13 @@ public class SetDefaultProviderRequestDto
     /// <summary>
     /// AI provider identifier.
     /// </summary>
+    /// <example>1</example>
     public int ProviderId { get; set; }
 
     /// <summary>
     /// Default model identifier to use with this provider.
     /// </summary>
+    /// <example>gpt-4</example>
     [MaxLength(255)]
     public required string DefaultModel { get; set; }
 }

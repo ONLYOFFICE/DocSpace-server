@@ -34,6 +34,7 @@ public class FolderIdRequestDto<T>
     /// <summary>
     /// The folder unique identifier.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "folderId")]
     public required T FolderId { get; set; }
 }
