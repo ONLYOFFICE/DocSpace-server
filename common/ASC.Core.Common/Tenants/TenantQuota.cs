@@ -423,6 +423,17 @@ public class TenantQuota
         set => _aiTools.Value = value;
     }
 
+    private readonly WalletFeatureFlag _aiService;
+
+    /// <summary>
+    /// Specifies if the AI service enabled as a wallet service or not.
+    /// </summary>
+    public bool AIService
+    {
+        get => _aiService.Value;
+        set => _aiService.Value = value;
+    }
+
     private readonly WalletFeatureFlag _aiToolsWebSearch;
 
     /// <summary>
@@ -610,17 +621,6 @@ public class TenantQuota
         set => _aiToolsGemini3FlashOutput.Value = value;
     }
 
-    private readonly WalletFeatureFlag _aiService;
-
-    /// <summary>
-    /// Specifies if the AI service enabled as a wallet service or not.
-    /// </summary>
-    public bool AIService
-    {
-        get => _aiService.Value;
-        set => _aiService.Value = value;
-    }
-    
     public TenantQuota()
     {
         _featuresList = [];
@@ -653,6 +653,7 @@ public class TenantQuota
         _backup = new WalletFeatureFlag(this, "backup") { EmployeeType = EmployeeType.DocSpaceAdmin };
         _countAIAgentFeature = new CountAIAgentFeature(this) { Order = 11 };
         _aiTools = new WalletFeatureFlag(this, "aitools") { EmployeeType = EmployeeType.DocSpaceAdmin };
+        _aiService = new WalletFeatureFlag(this, "aiservice") { EmployeeType = EmployeeType.DocSpaceAdmin };
         _aiToolsWebSearch = new WalletFeatureFlag(this, "websearch") { EmployeeType = EmployeeType.DocSpaceAdmin };
         _aiToolsWebFetch = new WalletFeatureFlag(this, "webfetch") { EmployeeType = EmployeeType.DocSpaceAdmin };
         _aiToolsEmbedding = new WalletFeatureFlag(this, "embedding") { EmployeeType = EmployeeType.DocSpaceAdmin };
@@ -670,7 +671,6 @@ public class TenantQuota
         _aiToolsGemini3ProOutput = new WalletFeatureFlag(this, "gemini3prooutput") { EmployeeType = EmployeeType.DocSpaceAdmin };
         _aiToolsGemini3FlashInput = new WalletFeatureFlag(this, "gemini3flashinput") { EmployeeType = EmployeeType.DocSpaceAdmin };
         _aiToolsGemini3FlashOutput = new WalletFeatureFlag(this, "gemini3flashoutput") { EmployeeType = EmployeeType.DocSpaceAdmin };
-        _aiService = new WalletFeatureFlag(this, "aiservice") { EmployeeType = EmployeeType.DocSpaceAdmin };
 
         TenantQuotaFeatures = new List<TenantQuotaFeature>
         {
@@ -702,6 +702,7 @@ public class TenantQuota
             _backup,
             _countAIAgentFeature,
             _aiTools,
+            _aiService,
             _aiToolsWebSearch,
             _aiToolsWebFetch,
             _aiToolsEmbedding,
@@ -718,8 +719,7 @@ public class TenantQuota
             _aiToolsGemini3ProInput,
             _aiToolsGemini3ProOutput,
             _aiToolsGemini3FlashInput,
-            _aiToolsGemini3FlashOutput,
-            _aiService
+            _aiToolsGemini3FlashOutput
         };
     }
 

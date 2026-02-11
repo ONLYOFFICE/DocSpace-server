@@ -117,37 +117,37 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
             migrationBuilder.InsertData(
                 table: "tenants_quota",
-                columns: new[] { "tenant", "description", "features", "name", "price", "product_id", "service_group", "service_name", "wallet" },
-                values: new object[,]
-                {
-                    { -30, null, "gemini3flashoutput", "gemini3flashoutput", 0.0000036m, null, "aitools", "gemini3flashoutput", true },
-                    { -29, null, "gemini3flashinput", "gemini3flashinput", 0.0000006m, null, "aitools", "gemini3flashinput", true },
-                    { -28, null, "gemini3prooutput", "gemini3prooutput", 0.0000144m, null, "aitools", "gemini3prooutput", true },
-                    { -27, null, "gemini3proinput", "gemini3proinput", 0.0000024m, null, "aitools", "gemini3proinput", true },
-                    { -26, null, "gpt52output", "gpt52output", 0.0000168m, null, "aitools", "gpt5.2output", true },
-                    { -25, null, "gpt52input", "gpt52input", 0.0000021m, null, "aitools", "gpt5.2input", true },
-                    { -24, null, "deepseek32output", "deepseek32output", 0.000000456m, null, "aitools", "deepseek3.2output", true },
-                    { -23, null, "deepseek32input", "deepseek32input", 0.0000003m, null, "aitools", "deepseek3.2input", true },
-                    { -22, null, "gpt5output", "gpt5output", 0.000012m, null, "aitools", "gpt5output", true },
-                    { -21, null, "gpt5input", "gpt5input", 0.0000015m, null, "aitools", "gpt5input", true },
-                    { -20, null, "claude45output", "claude45output", 0.000018m, null, "aitools", "claude4.5output", true },
-                    { -19, null, "claude45input", "claude45input", 0.0000036m, null, "aitools", "claude4.5input", true },
-                    { -18, null, "deepseek31output", "deepseek31output", 0.000000948m, null, "aitools", "deepseek3.1output", true },
-                    { -17, null, "deepseek31input", "deepseek31input", 0.000000252m, null, "aitools", "deepseek3.1input", true },
-                    { -16, null, "embedding", "embedding", 0.000000024m, null, "aitools", "embedding", true },
-                    { -15, null, "webfetch", "webfetch", 0.0012m, null, "aitools", "webfetch", true },
-                    { -14, null, "websearch", "websearch", 0.006m, null, "aitools", "websearch", true }
-                });
+                columns: new[] { "tenant", "description", "features", "name", "price", "product_id", "service_group", "service_name", "visible", "wallet" },
+                values: new object[] { -13, null, "aitools", "aitools", 1m, null, null, "ai-tools", true, true });
 
             migrationBuilder.InsertData(
                 table: "tenants_quota",
                 columns: new[] { "tenant", "description", "features", "name", "product_id", "service_group", "service_name", "visible", "wallet" },
-                values: new object[] { -13, null, "aitools", "aitools", null, null, null, false, true });
+                values: new object[] { -14, null, "aiservice", "aiservice", null, null, null, false, true });
 
             migrationBuilder.InsertData(
                 table: "tenants_quota",
-                columns: new[] { "tenant", "description", "features", "name", "price", "product_id", "service_group", "service_name", "visible", "wallet" },
-                values: new object[] { -31, null, "aiservice", "aiservice", 1m, null, null, "ai-tools", true, true });
+                columns: new[] { "tenant", "description", "features", "name", "price", "product_id", "service_group", "service_name", "wallet" },
+                values: new object[,]
+                {
+                    { -31, null, "gemini3flashoutput", "gemini3flashoutput", 0.0000036m, null, "aiservice", "gemini3flashoutput", true },
+                    { -30, null, "gemini3flashinput", "gemini3flashinput", 0.0000006m, null, "aiservice", "gemini3flashinput", true },
+                    { -29, null, "gemini3prooutput", "gemini3prooutput", 0.0000144m, null, "aiservice", "gemini3prooutput", true },
+                    { -28, null, "gemini3proinput", "gemini3proinput", 0.0000024m, null, "aiservice", "gemini3proinput", true },
+                    { -27, null, "gpt52output", "gpt52output", 0.0000168m, null, "aiservice", "gpt5.2output", true },
+                    { -26, null, "gpt52input", "gpt52input", 0.0000021m, null, "aiservice", "gpt5.2input", true },
+                    { -25, null, "deepseek32output", "deepseek32output", 0.000000456m, null, "aiservice", "deepseek3.2output", true },
+                    { -24, null, "deepseek32input", "deepseek32input", 0.0000003m, null, "aiservice", "deepseek3.2input", true },
+                    { -23, null, "gpt5output", "gpt5output", 0.000012m, null, "aiservice", "gpt5output", true },
+                    { -22, null, "gpt5input", "gpt5input", 0.0000015m, null, "aiservice", "gpt5input", true },
+                    { -21, null, "claude45output", "claude45output", 0.000018m, null, "aiservice", "claude4.5output", true },
+                    { -20, null, "claude45input", "claude45input", 0.0000036m, null, "aiservice", "claude4.5input", true },
+                    { -19, null, "deepseek31output", "deepseek31output", 0.000000948m, null, "aiservice", "deepseek3.1output", true },
+                    { -18, null, "deepseek31input", "deepseek31input", 0.000000252m, null, "aiservice", "deepseek3.1input", true },
+                    { -17, null, "embedding", "embedding", 0.000000024m, null, "aiservice", "embedding", true },
+                    { -16, null, "webfetch", "webfetch", 0.0012m, null, "aiservice", "webfetch", true },
+                    { -15, null, "websearch", "websearch", 0.006m, null, "aiservice", "websearch", true }
+                });
         }
 
         /// <inheritdoc />
