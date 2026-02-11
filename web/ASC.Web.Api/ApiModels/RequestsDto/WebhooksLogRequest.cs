@@ -29,40 +29,58 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 /// <summary>
 /// The request parameters for querying webhook delivery logs with filtering criteria.
 /// </summary>
+/// <example>
+/// {
+///   "deliveryFrom": "2024-01-15T10:30:00Z",
+///   "deliveryTo": "2024-01-15T10:30:00Z",
+///   "hookUri": "https://example.com/webhook",
+///   "webhookId": 1,
+///   "configId": 1,
+///   "eventId": 1,
+///   "groupStatus": "EnumValue"
+/// }
+/// </example>
 public class WebhooksLogRequest
 {
     /// <summary>
     /// Start of the time range for filtering webhook deliveries.
     /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
     public DateTime? DeliveryFrom { get; set; }
 
     /// <summary>
     /// The end of the time range for filtering webhook deliveries.
     /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
     public DateTime? DeliveryTo { get; set; }
 
     /// <summary>
     /// The destination URL where webhooks are delivered.
     /// </summary>
+    /// <example>https://example.com</example>
     public string HookUri { get; set; }
 
     /// <summary>
     /// The ID of a specific webhook delivery.
     /// </summary>
+    /// <example>1</example>
     public int? WebhookId { get; set; }
 
     /// <summary>
     /// The ID of the webhook configuration identifier.
     /// </summary>
+    /// <example>1</example>
     public int? ConfigId { get; set; }
 
     /// <summary>
     /// The ID of the event that triggered the webhook.
     /// </summary>
+    /// <example>1</example>
     public int? EventId { get; set; }
 
     /// <summary>
     /// The status of the webhook delivery group.
     /// </summary>
+    /// <example>EnumValue</example>
     public WebhookGroupStatus? GroupStatus { get; set; }
 }

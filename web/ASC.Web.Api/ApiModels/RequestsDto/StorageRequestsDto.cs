@@ -29,6 +29,11 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 /// <summary>
 /// The request parameters for configuring the storage module settings.
 /// </summary>
+/// <example>
+/// {
+///   "props": ["item1", "item2"]
+/// }
+/// </example>
 public class StorageRequestsDto
 {
     /// <summary>
@@ -39,5 +44,6 @@ public class StorageRequestsDto
     /// <summary>
     /// The list of configuration key-value pairs for the storage module.
     /// </summary>
+    /// <example>["item1", "item2"]</example>
     public IEnumerable<ItemKeyValuePair<string, string>> Props { get; set; }
 }

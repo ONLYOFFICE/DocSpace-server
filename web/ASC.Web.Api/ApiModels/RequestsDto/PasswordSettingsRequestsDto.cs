@@ -39,15 +39,18 @@ public class PasswordSettingsRequestsDto
     /// <summary>
     /// Specifies whether the password should contain the uppercase letters or not.
     /// </summary>
+    /// <example>true</example>
     public bool UpperCase { get; set; }
 
     /// <summary>
     /// Specifies whether the password should contain the digits or not.
     /// </summary>
+    /// <example>true</example>
     public bool Digits { get; set; }
 
     /// <summary>
     /// Specifies whether the password should contain the special symbols or not.
     /// </summary>
+    /// <example>true</example>
     public bool SpecSymbols { get; set; }
 }

@@ -29,11 +29,17 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 /// <summary>
 /// The request parameters for handling the payment redirect URL.
 /// </summary>
+/// <example>
+/// {
+///   "backUrl": "https://example.com/payment/success"
+/// }
+/// </example>
 public class PaymentUrlRequestDto
 {
     /// <summary>
     /// The URL where the user will be redirected after payment processing.
     /// </summary>
+    /// <example>https://example.com/payment/success</example>
     [FromQuery(Name = "backUrl")]
     public string BackUrl { get; set; }
 }
@@ -47,6 +53,7 @@ public class PaymentInformationRequestDto
     /// <summary>
     /// Specifies whether to refresh the payment information cache or not.
     /// </summary>
+    /// <example>true</example>
     [FromQuery(Name = "refresh")]
     public bool Refresh { get; set; }
 }
@@ -59,6 +66,7 @@ public class QuotasRequestDto
     /// <summary>
     /// Specifies whether to return the wallet quotas only.
     /// </summary>
+    /// <example>true</example>
     [FromQuery(Name = "wallet")]
     public bool Wallet { get; set; }
 }

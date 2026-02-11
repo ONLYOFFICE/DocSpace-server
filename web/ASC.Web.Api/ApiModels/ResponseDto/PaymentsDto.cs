@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2026
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,31 +29,47 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// Represents a report containing a collection of operations.
 /// </summary>
+/// <example>
+/// {
+///   "collection": [],
+///   "offset": 1,
+///   "limit": 1,
+///   "totalQuantity": 1,
+///   "totalPage": 1,
+///   "currentPage": 1
+/// }
+/// </example>
 public class ReportDto
 {
     /// <summary>
     /// A collection of operations.
     /// </summary>
+    /// <example>[]</example>
     public List<OperationDto> Collection { get; set; }
     /// <summary>
     /// The report data offset.
     /// </summary>
+    /// <example>1</example>
     public int Offset { get; set; }
     /// <summary>
     /// The report data limit.
     /// </summary>
+    /// <example>1</example>
     public int Limit { get; set; }
     /// <summary>
     /// The total quantity of operations in the report.
     /// </summary>
+    /// <example>1</example>
     public int TotalQuantity { get; set; }
     /// <summary>
     /// The total number of pages in the report.
     /// </summary>
+    /// <example>1</example>
     public int TotalPage { get; set; }
     /// <summary>
     /// The current page number of the report.
     /// </summary>
+    /// <example>1</example>
     public int CurrentPage { get; set; }
 
     public ReportDto(Report report, ApiDateTimeHelper apiDateTimeHelper, Dictionary<string, string> participantDisplayNames)
@@ -84,46 +100,57 @@ public class OperationDto
     /// <summary>
     /// The date when the operation took place.
     /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
     public ApiDateTime Date { get; set; }
     /// <summary>
     /// The service related to the operation.
     /// </summary>
+    /// <example>Storage</example>
     public string Service { get; set; }
     /// <summary>
     /// The brief operation description.
     /// </summary>
+    /// <example>Storage quota increase</example>
     public string Description { get; set; }
     /// <summary>
     /// The detailed information about the operation.
     /// </summary>
+    /// <example>Increased storage from 50GB to 100GB</example>
     public string Details { get; set; }
     /// <summary>
     /// The service unit.
     /// </summary>
+    /// <example>GB</example>
     public string ServiceUnit { get; set; }
     /// <summary>
     /// The quantity of the service used.
     /// </summary>
+    /// <example>1</example>
     public int Quantity { get; set; }
     /// <summary>
     /// The three-character ISO 4217 currency symbol of the operation.
     /// </summary>
+    /// <example>USD</example>
     public string Currency { get; set; }
     /// <summary>
     /// The credit amount of the operation.
     /// </summary>
+    /// <example>99.99</example>
     public decimal Credit { get; set; }
     /// <summary>
     /// The debit amount of the operation.
     /// </summary>
+    /// <example>99.99</example>
     public decimal Debit { get; set; }
     /// <summary>
     /// The participant original name.
     /// </summary>
+    /// <example>Example Name</example>
     public string ParticipantName { get; set; }
     /// <summary>
     /// The participant display name.
     /// </summary>
+    /// <example>Example Name</example>
     public string ParticipantDisplayName { get; set; }
 
     public OperationDto(Operation operation, ApiDateTimeHelper apiDateTimeHelper, Dictionary<string, string> participantDisplayNames)

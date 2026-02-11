@@ -29,26 +29,38 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// The migration status parameters.
 /// </summary>
+/// <example>
+/// {
+///   "progress": 99.99,
+///   "error": "Connection failed",
+///   "parseResult": {},
+///   "isCompleted": true
+/// }
+/// </example>
 public class MigrationStatusDto
 {
     /// <summary>
     /// The migration progress.
     /// </summary>
+    /// <example>99.99</example>
     [SwaggerSchemaCustom(Example = 1.0)]
     public double Progress { get; set; }
 
     /// <summary>
     /// The migration error.
     /// </summary>
+    /// <example>Connection failed</example>
     public string Error { get; set; }
 
     /// <summary>
     /// The migration API information.
     /// </summary>
+    /// <example>{}</example>
     public MigrationApiInfo ParseResult { get; set; }
 
     /// <summary>
     /// Specifies whether the migration is completed or not.
     /// </summary>
+    /// <example>true</example>
     public bool IsCompleted { get; set; }
 }

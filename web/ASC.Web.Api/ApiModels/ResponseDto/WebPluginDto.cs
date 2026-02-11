@@ -31,6 +31,13 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// The web plugin information.
 /// </summary>
+/// <example>
+/// {
+///   "minDocSpaceVersion": "12.0.0",
+///   "nameLocale": {},
+///   "descriptionLocale": {}
+/// }
+/// </example>
 public class WebPluginDto
 {
     /// <summary>
@@ -46,6 +53,7 @@ public class WebPluginDto
     /// <summary>
     /// The minimum version of DocSpace with which the plugin is guaranteed to work.
     /// </summary>
+    /// <example>12.0.0</example>
     public string MinDocSpaceVersion { get; set; }
 
     /// <summary>
@@ -121,11 +129,13 @@ public class WebPluginDto
     /// <summary>
     /// The web plugin localized name.
     /// </summary>
+    /// <example>{}</example>
     public Dictionary<string, string> NameLocale { get; set; }
 
     /// <summary>
     /// The web plugin localized description.
     /// </summary>
+    /// <example>{}</example>
     public Dictionary<string, string> DescriptionLocale { get; set; }
 }
 

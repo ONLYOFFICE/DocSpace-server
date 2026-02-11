@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2026
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,6 +29,11 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// The payment settings parameters.
 /// </summary>
+/// <example>
+/// {
+///   "feedbackAndSupportUrl": "example value"
+/// }
+/// </example>
 public class PaymentSettingsDto
 {
     /// <summary>
@@ -39,6 +44,7 @@ public class PaymentSettingsDto
     /// <summary>
     /// The URL for accessing the feedback and support resources.
     /// </summary>
+    /// <example>https://example.com</example>
     public string FeedbackAndSupportUrl { get; set; }
 
     /// <summary>

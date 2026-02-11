@@ -29,11 +29,17 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 /// <summary>
 /// The request parameters for handling sales and payment inquiries in the portal.
 /// </summary>
+/// <example>
+/// {
+///   "userName": "John Doe"
+/// }
+/// </example>
 public class SalesRequestsDto
 {
     /// <summary>
     /// The name of the user submitting the sales request.
     /// </summary>
+    /// <example>John Doe</example>
     [MaxLength(255)]
     public string UserName { get; set; }
 

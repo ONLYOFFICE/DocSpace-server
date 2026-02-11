@@ -40,6 +40,7 @@ public class TenantDeepLinkSettings : ISettings<TenantDeepLinkSettings>
     /// <summary>
     /// The deep link handling mode.
     /// </summary>
+    /// <example>ProvideChoice</example>
     public DeepLinkHandlingMode HandlingMode { get; set; }
 
     public TenantDeepLinkSettings GetDefault()

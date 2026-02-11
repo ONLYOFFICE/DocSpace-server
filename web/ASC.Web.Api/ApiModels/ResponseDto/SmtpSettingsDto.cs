@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2026
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,11 +29,26 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 /// <summary>
 /// The SMTP settings parameters.
 /// </summary>
+/// <example>
+/// {
+///   "host": "example value",
+///   "port": 1,
+///   "senderAddress": "example value",
+///   "senderDisplayName": "example value",
+///   "credentialsUserName": "example value",
+///   "credentialsUserPassword": "example value",
+///   "enableSSL": true,
+///   "enableAuth": true,
+///   "useNtlm": true,
+///   "isDefaultSettings": true
+/// }
+/// </example>
 public class SmtpSettingsDto
 {
     /// <summary>
     /// The SMTP host.
     /// </summary>
+    /// <example>example value</example>
     [SwaggerSchemaCustom(Example = "mail.example.com")]
     [StringLength(255)]
     public string Host { get; set; }
@@ -41,6 +56,7 @@ public class SmtpSettingsDto
     /// <summary>
     /// The SMTP port.
     /// </summary>
+    /// <example>1</example>
     [SwaggerSchemaCustom(Example = 25)]
     [Range(1, 65535)]
     public int? Port { get; set; }
@@ -48,6 +64,7 @@ public class SmtpSettingsDto
     /// <summary>
     /// The sender address.
     /// </summary>
+    /// <example>example value</example>
     [SwaggerSchemaCustom(Example = "notify@example.com")]
     [StringLength(255)]
     public string SenderAddress { get; set; }
@@ -55,6 +72,7 @@ public class SmtpSettingsDto
     /// <summary>
     /// The sender display name.
     /// </summary>
+    /// <example>example value</example>
     [SwaggerSchemaCustom(Example = "Postman")]
     [StringLength(255)]
     public string SenderDisplayName { get; set; }
@@ -62,6 +80,7 @@ public class SmtpSettingsDto
     /// <summary>
     /// The credentials username.
     /// </summary>
+    /// <example>example value</example>
     [SwaggerSchemaCustom(Example = "notify@example.com")]
     [StringLength(255)]
     public string CredentialsUserName { get; set; }
@@ -69,29 +88,34 @@ public class SmtpSettingsDto
     /// <summary>
     /// The credentials user password.
     /// </summary>
+    /// <example>example value</example>
     [SwaggerSchemaCustom(Example = "{password}")]
     public string CredentialsUserPassword { get; set; }
 
     /// <summary>
     /// Specifies whether the SSL is enabled or not.
     /// </summary>
+    /// <example>true</example>
     [SwaggerSchemaCustom(Example = false)]
     public bool EnableSSL { get; set; }
 
     /// <summary>
     /// Specifies whether the authentication is enabled or not.
     /// </summary>
+    /// <example>true</example>
     public bool EnableAuth { get; set; }
 
     /// <summary>
     /// Specifies whether to use NTLM or not.
     /// </summary>
+    /// <example>true</example>
     [SwaggerSchemaCustom(Example = false)]
     public bool UseNtlm { get; set; }
 
     /// <summary>
     /// Specifies if the current settings are default or not.
     /// </summary>
+    /// <example>true</example>
     [SwaggerSchemaCustom(Example = false)]
     public bool IsDefaultSettings { get; set; }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2026
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,17 +29,26 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 /// <summary>
 /// The security information.
 /// </summary>
+/// <example>
+/// {
+///   "webItemId": "{00000000-0000-0000-0000-000000000000}",
+///   "users": [],
+///   "groups": true,
+///   "isSubItem": true
+/// }
+/// </example>
 public class SecurityDto
 {
     /// <summary>
     /// The module ID.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "{00000000-0000-0000-0000-000000000000}")]
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public string WebItemId { get; set; }
 
     /// <summary>
     /// The list of users with the access to the module.
     /// </summary>
+    /// <example>[]</example>
     public List<EmployeeDto> Users { get; set; }
 
     /// <summary>
@@ -50,12 +59,14 @@ public class SecurityDto
     /// <summary>
     /// Specifies if the security settings are enabled or not.
     /// </summary>
+    /// <example>true</example>
     [SwaggerSchemaCustom(Example = true)]
     public bool Enabled { get; set; }
 
     /// <summary>
     /// Specifies if the module is a subitem or not.
     /// </summary>
+    /// <example>true</example>
     [SwaggerSchemaCustom(Example = false)]
     public bool IsSubItem { get; set; }
 }

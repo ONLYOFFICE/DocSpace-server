@@ -29,6 +29,11 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 /// <summary>
 /// The request parameters for uploading the software license files.
 /// </summary>
+/// <example>
+/// {
+///   // TODO: Add appropriate JSON example
+/// }
+/// </example>
 public class UploadLicenseRequestsDto
 {
     /// <summary>

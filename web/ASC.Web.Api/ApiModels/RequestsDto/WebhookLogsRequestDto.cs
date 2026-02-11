@@ -29,59 +29,82 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 /// <summary>
 /// The request parameters for querying the webhook delivery logs with various filter criteria.
 /// </summary>
+/// <example>
+/// {
+///   "deliveryFrom": "2024-01-15T10:30:00Z",
+///   "deliveryTo": "2024-01-15T10:30:00Z",
+///   "hookUri": "https://example.com/webhook",
+///   "configId": 1,
+///   "eventId": 1,
+///   "groupStatus": "EnumValue",
+///   "userId": {},
+///   "trigger": {},
+///   "count": 1,
+///   "startIndex": 1
+/// }
+/// </example>
 public class WebhookLogsRequestDto
 {
     /// <summary>
     /// The delivery start time for filtering webhook logs.
     /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
     [FromQuery(Name = "deliveryFrom")]
     public DateTime? DeliveryFrom { get; set; }
 
     /// <summary>
     /// The delivery end time for filtering webhook logs.
     /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
     [FromQuery(Name = "deliveryTo")]
     public DateTime? DeliveryTo { get; set; }
 
     /// <summary>
     /// The destination URL where webhooks are delivered.
     /// </summary>
+    /// <example>https://example.com/webhook</example>
     [FromQuery(Name = "hookUri")]
     public string HookUri { get; set; }
 
     /// <summary>
     /// The webhook configuration identifier.
     /// </summary>
+    /// <example>1</example>
     [FromQuery(Name = "configId")]
     public int? ConfigId { get; set; }
 
     /// <summary>
     /// The unique identifier of the event that triggered the webhook.
     /// </summary>
+    /// <example>1</example>
     [FromQuery(Name = "eventId")]
     public int? EventId { get; set; }
 
     /// <summary>
     /// The status of the webhook delivery group.
     /// </summary>
+    /// <example>EnumValue</example>
     [FromQuery(Name = "groupStatus")]
     public WebhookGroupStatus? GroupStatus { get; set; }
 
     /// <summary>
     /// The identifier of the user associated with the webhook event.
     /// </summary>
+    /// <example>{}</example>
     [FromQuery(Name = "userId")]
     public Guid? UserId { get; set; }
 
     /// <summary>
     /// The type of event that triggered the webhook.
     /// </summary>
+    /// <example>{}</example>
     [FromQuery(Name = "trigger")]
     public WebhookTrigger? Trigger { get; set; }
 
     /// <summary>
     /// The maximum number of webhook log records to return in the query response.
     /// </summary>
+    /// <example>1</example>
     [FromQuery(Name = "count")]
     [Range(1, ApiContext.MaxCount)]
     public int Count { get; set; } = ApiContext.DefaultCount;
@@ -90,6 +113,7 @@ public class WebhookLogsRequestDto
     /// Specifies the starting index for retrieving webhook logs.
     /// Used for pagination in the webhook delivery log queries.
     /// </summary>
+    /// <example>1</example>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
 }

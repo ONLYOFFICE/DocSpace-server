@@ -29,11 +29,17 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// The rooms notification settings.
 /// </summary>
+/// <example>
+/// {
+///   "disabledRooms": []
+/// }
+/// </example>
 public class RoomsNotificationSettingsDto
 {
     /// <summary>
     /// The list of rooms with the disabled notifications.
     /// </summary>
+    /// <example>[]</example>
     public List<object> DisabledRooms { get; set; }
 }
 

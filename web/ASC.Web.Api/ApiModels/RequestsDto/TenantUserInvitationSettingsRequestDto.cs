@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2026
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,6 +29,11 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 /// <summary>
 /// The request parameters for updating the user invitation settings.
 /// </summary>
+/// <example>
+/// {
+///   // TODO: Add appropriate JSON example
+/// }
+/// </example>
 public class TenantUserInvitationSettingsRequestDto
 {
     /// <summary>

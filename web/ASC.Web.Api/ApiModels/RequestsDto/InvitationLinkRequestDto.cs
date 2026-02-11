@@ -34,6 +34,7 @@ public class InvitationLinkRequestDto
     /// <summary>
     /// The type of employee role for the invitation link (DocSpaceAdmin, RoomAdmin or User).
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "employeeType")]
     public required EmployeeType EmployeeType { get; set; }
 }
@@ -56,6 +57,7 @@ public class InvitationLinkCreateRequestDto
     /// <summary>
     /// The maximum number of times the invitation link can be used.
     /// </summary>
+    /// <example>1</example>
     [Range(1, 1000)]
     public int? MaxUseCount { get; set; }
 }
@@ -73,11 +75,13 @@ public class InvitationLinkUpdateRequestDto
     /// <summary>
     /// The expiration date of the invitation link.
     /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
     public DateTime? Expiration { get; set; }
 
     /// <summary>
     /// The maximum number of times the invitation link can be used.
     /// </summary>
+    /// <example>1</example>
     [Range(1, 1000)]
     public int? MaxUseCount { get; set; }
 }

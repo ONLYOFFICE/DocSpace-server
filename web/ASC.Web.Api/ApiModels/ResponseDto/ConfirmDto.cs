@@ -39,21 +39,25 @@ public class ConfirmDto
     /// <summary>
     /// The confirmation room ID.
     /// </summary>
+    /// <example>1</example>
     public string RoomId { get; set; }
 
     /// <summary>
     /// The confirmation title.
     /// </summary>
+    /// <example>Conference Room</example>
     public string Title { get; set; }
 
     /// <summary>
     /// The confirmation email.
     /// </summary>
+    /// <example>user@example.com</example>
     public string Email { get; set; }
     
     /// <summary>
     /// The confirmation is agent.
     /// </summary>
+    /// <example>true</example>
     public bool IsAgent { get; set; }
 }
 

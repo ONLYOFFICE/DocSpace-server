@@ -29,16 +29,23 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 /// <summary>
 /// The configuration settings for the web plugin instance.
 /// </summary>
+/// <example>
+/// {
+///   "enabled": true
+/// }
+/// </example>
 public class WebPluginRequests
 {
     /// <summary>
     /// Controls whether the web plugin is active and operational.
     /// </summary>
+    /// <example>true</example>
     public bool Enabled { get; set; }
 
     /// <summary>
     /// The JSON-formatted configuration settings for the web plugin.
     /// </summary>
+    /// <example>true</example>
     [StringLength(255)]
     public required string Settings { get; set; }
 }
@@ -64,6 +71,11 @@ public class WebPluginRequestsDto
 /// <summary>
 /// The request parameters for operations that require only a plugin name.
 /// </summary>
+/// <example>
+/// {
+///   // TODO: Add appropriate JSON example
+/// }
+/// </example>
 public class WebPluginNameRequestDto
 {
     /// <summary>
@@ -76,6 +88,11 @@ public class WebPluginNameRequestDto
 /// <summary>
 /// The request parameters for loading plugins from file system.
 /// </summary>
+/// <example>
+/// {
+///   // TODO: Add appropriate JSON example
+/// }
+/// </example>
 public class WebPluginFromFileRequestDto
 {
     /// <summary>
@@ -89,11 +106,17 @@ public class WebPluginFromFileRequestDto
 /// <summary>
 /// The request parameters for querying the installed plugins.
 /// </summary>
+/// <example>
+/// {
+///   "enabled": true
+/// }
+/// </example>
 public class GetWebPluginsRequestDto
 {
     /// <summary>
     /// The optional filter for the plugin enabled state.
     /// </summary>
+    /// <example>true</example>
     [FromQuery(Name = "enabled")]
     public bool? Enabled { get; set; }
 }

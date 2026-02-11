@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2026
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,35 +29,49 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 /// <summary>
 /// The parameters of the usage space statistics item.
 /// </summary>
+/// <example>
+/// {
+///   "name": "example value",
+///   "icon": "example value",
+///   "disabled": true,
+///   "size": "example value",
+///   "url": "example value"
+/// }
+/// </example>
 public class UsageSpaceStatItemDto
 {
     /// <summary>
     /// The item name.
     /// </summary>
+    /// <example>example value</example>
     [SwaggerSchemaCustom(Example = "Item name")]
     public string Name { get; set; }
 
     /// <summary>
     /// The item icon path.
     /// </summary>
+    /// <example>example value</example>
     [SwaggerSchemaCustom(Example = "Item icon path")]
     public string Icon { get; set; }
 
     /// <summary>
     /// Specifies if the item is disabled or not.
     /// </summary>
+    /// <example>true</example>
     [SwaggerSchemaCustom(Example = false)]
     public bool Disabled { get; set; }
 
     /// <summary>
     /// The item used space.
     /// </summary>
+    /// <example>example value</example>
     [SwaggerSchemaCustom(Example = "0 Byte")]
     public string Size { get; set; }
 
     /// <summary>
     /// The item URL.
     /// </summary>
+    /// <example>example value</example>
     [SwaggerSchemaCustom(Example = "Item url")]
     public string Url { get; set; }
 }
@@ -70,6 +84,7 @@ public class ChartPointDto
     /// <summary>
     /// The display date.
     /// </summary>
+    /// <example>example value</example>
     [SwaggerSchemaCustom(Example = "6/1/2024")]
     public string DisplayDate { get; set; }
 
@@ -81,12 +96,14 @@ public class ChartPointDto
     /// <summary>
     /// The number of hosts.
     /// </summary>
+    /// <example>1</example>
     [SwaggerSchemaCustom(Example = 0)]
     public int Hosts { get; set; }
 
     /// <summary>
     /// The number of hits.
     /// </summary>
+    /// <example>1</example>
     [SwaggerSchemaCustom(Example = 0)]
     public int Hits { get; set; }
 }

@@ -29,16 +29,24 @@ namespace ASC.Web.Api.Models;
 /// <summary>
 /// The request parameters for the payment URL configuration with quantity information.
 /// </summary>
+/// <example>
+/// {
+///   "backUrl": "https://example.com/payment/success",
+///   "quantity": {}
+/// }
+/// </example>
 public class PaymentUrlRequestsDto
 {
     /// <summary>
     /// The URL where the user will be redirected after payment processing.
     /// </summary>
+    /// <example>https://example.com</example>
     public string BackUrl { get; set; }
 
     /// <summary>
     /// The payment quantity.
     /// </summary>
+    /// <example>{}</example>
     public Dictionary<string, int> Quantity { get; set; }
 }
 
@@ -50,6 +58,7 @@ public class QuantityRequestDto
     /// <summary>
     /// The mapping of item identifiers to their respective quantities in the payment.
     /// </summary>
+    /// <example>{}</example>
     public Dictionary<string, int> Quantity { get; set; }
 }
 
@@ -61,11 +70,13 @@ public class WalletQuantityRequestDto
     /// <summary>
     /// The mapping of item identifiers to their respective quantities in the payment.
     /// </summary>
+    /// <example>{}</example>
     public Dictionary<string, int?> Quantity { get; set; }
 
     /// <summary>
     /// The type of action performed on a product's quantity.
     /// </summary>
+    /// <example>EnumValue</example>
     public ProductQuantityType ProductQuantityType { get; set; }
 }
 
@@ -77,6 +88,7 @@ public class CheckoutSetupUrlRequestsDto
     /// <summary>
     /// The URL where the user will be redirected after completing the setup.
     /// </summary>
+    /// <example>https://example.com/setup/complete</example>
     [FromQuery]
     public string BackUrl { get; set; }
 }
@@ -89,12 +101,14 @@ public class TopUpDepositRequestDto
     /// <summary>
     /// The amount of money for the operation.
     /// </summary>
+    /// <example>1</example>
     [Range(1, 999999)]
     public int Amount { get; set; }
 
     /// <summary>
     /// The three-character ISO 4217 currency symbol.
     /// </summary>
+    /// <example>USD</example>
     public string Currency { get; set; }
 }
 
@@ -106,6 +120,7 @@ public class GetWalletServiceRequestDto
     /// <summary>
     /// The wallet service type.
     /// </summary>
+    /// <example>Storage</example>
     [JsonConverter(typeof(JsonStringEnumConverter))]
     [FromQuery(Name = "service")]
     public required TenantWalletService Service { get; set; }
@@ -125,5 +140,6 @@ public class ChangeWalletServiceStateRequestDto
     /// <summary>
     /// Specifies whether the wallet service is enabled.
     /// </summary>
+    /// <example>true</example>
     public bool Enabled { get; set; }
 }

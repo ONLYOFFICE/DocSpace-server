@@ -29,55 +29,79 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// The tariff parameters.
 /// </summary>
+/// <example>
+/// {
+///   "openSource": true,
+///   "enterprise": true,
+///   "developer": true,
+///   "id": 1,
+///   "state": {},
+///   "dueDate": "2024-01-15T10:30:00Z",
+///   "delayDueDate": "2024-01-15T10:30:00Z",
+///   "licenseDate": "2024-01-15T10:30:00Z",
+///   "customerId": "example value",
+///   "quotas": []
+/// }
+/// </example>
 public class TariffDto
 {
     /// <summary>
     /// Specifies whether the tariff is Community or not.
     /// </summary>
+    /// <example>true</example>
     public bool? OpenSource { get; set; }
 
     /// <summary>
     /// Specifies whether the tariff is Enterprise or not.
     /// </summary>
+    /// <example>true</example>
     public bool? Enterprise { get; set; }
 
     /// <summary>
     /// Specifies whether the tariff is Developer or not.
     /// </summary>
+    /// <example>true</example>
     public bool? Developer { get; set; }
 
     /// <summary>
     /// The tariff ID.
     /// </summary>
+    /// <example>1</example>
     public int Id { get; set; }
 
     /// <summary>
     /// The tariff state.
     /// </summary>
+    /// <example>{}</example>
     public TariffState State { get; set; }
 
     /// <summary>
     /// The tariff due date.
     /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
     public ApiDateTime DueDate { get; set; }
 
     /// <summary>
     /// The tariff delay due date.
     /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
     public ApiDateTime DelayDueDate { get; set; }
 
     /// <summary>
     /// The tariff license date.
     /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
     public ApiDateTime LicenseDate { get; set; }
 
     /// <summary>
     /// The customer ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000001</example>
     public string CustomerId { get; set; }
 
     /// <summary>
     /// The list of quotas.
     /// </summary>
+    /// <example>[]</example>
     public List<Quota> Quotas { get; set; }
 }

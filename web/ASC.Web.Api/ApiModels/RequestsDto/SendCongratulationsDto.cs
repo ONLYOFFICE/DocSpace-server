@@ -29,6 +29,11 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 /// <summary>
 /// The parameters for sending congratulatory email notifications.
 /// </summary>
+/// <example>
+/// {
+///   // TODO: Add appropriate JSON example
+/// }
+/// </example>
 public class SendCongratulationsDto
 {
     /// <summary>

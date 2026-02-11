@@ -36,60 +36,67 @@ public class EmployeeDto
     /// <summary>
     /// The user ID.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "{00000000-0000-0000-0000-000000000000}")]
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid Id { get; set; }
 
     /// <summary>
     /// The user display name.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Mike Zanyatski")]
+    /// <example>Mike Zanyatski</example>
     public string DisplayName { get; set; }
 
     /// <summary>
     /// The user title.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Manager")]
+    /// <example>Manager</example>
     public string Title { get; set; }
 
     /// <summary>
     /// The user avatar.
     /// </summary>
+    /// <example>https://example.com/avatar.jpg</example>
     public string Avatar { get; set; }
 
     /// <summary>
     /// The user original size avatar.
     /// </summary>
+    /// <example>https://example.com/avatar_original.jpg</example>
     public string AvatarOriginal { get; set; }
 
     /// <summary>
     /// The user maximum size avatar.
     /// </summary>
+    /// <example>https://example.com/avatar_max.jpg</example>
     public string AvatarMax { get; set; }
 
     /// <summary>
     /// The user medium size avatar.
     /// </summary>
+    /// <example>https://example.com/avatar_medium.jpg</example>
     public string AvatarMedium { get; set; }
 
     /// <summary>
     /// The user small size avatar.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "url to small avatar")]
+    /// <example>https://example.com/avatar_small.jpg</example>
     public string AvatarSmall { get; set; }
 
     /// <summary>
     /// The user profile URL.
     /// </summary>
+    /// <example>https://example.com/profile/user123</example>
     public string ProfileUrl { get; set; }
 
     /// <summary>
     /// Specifies if the user has an avatar or not.
     /// </summary>
+    /// <example>true</example>
     public bool HasAvatar { get; set; }
 
     /// <summary>
     /// Specifies if the user is anonymous or not.
     /// </summary>
+    /// <example>false</example>
     public bool IsAnonim { get; set; }
 }
 

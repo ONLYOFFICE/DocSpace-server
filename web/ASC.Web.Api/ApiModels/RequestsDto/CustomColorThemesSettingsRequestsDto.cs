@@ -34,10 +34,12 @@ public class CustomColorThemesSettingsRequestsDto
     /// <summary>
     /// The custom color theme configuration.
     /// </summary>
+    /// <example>{}</example>
     public CustomColorThemesSettingsItem Theme { get; set; }
 
     /// <summary>
     /// Specifies the optional value indicating the selected custom color theme.
     /// </summary>
+    /// <example>1</example>
     public int? Selected { get; set; }
 }

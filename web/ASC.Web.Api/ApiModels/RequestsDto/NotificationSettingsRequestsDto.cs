@@ -29,6 +29,11 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 /// <summary>
 /// The request parameters for configuring notification settings.
 /// </summary>
+/// <example>
+/// {
+///   "isEnabled": true
+/// }
+/// </example>
 public class NotificationSettingsRequestsDto
 {
     /// <summary>
@@ -39,6 +44,7 @@ public class NotificationSettingsRequestsDto
     /// <summary>
     /// Specifies if the specified notification type is enabled or not.
     /// </summary>
+    /// <example>true</example>
     public bool IsEnabled { get; set; }
 }
 

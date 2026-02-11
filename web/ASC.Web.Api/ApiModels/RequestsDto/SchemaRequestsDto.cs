@@ -29,6 +29,11 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 /// <summary>
 /// The request parameters for the team template identification.
 /// </summary>
+/// <example>
+/// {
+///   // TODO: Add appropriate JSON example
+/// }
+/// </example>
 public class SchemaBaseRequestsDto
 {
     /// <summary>
@@ -40,6 +45,11 @@ public class SchemaBaseRequestsDto
 /// <summary>
 /// The request parameters for the comprehensive team template configuration.
 /// </summary>
+/// <example>
+/// {
+///   "name": "Sales Team"
+/// }
+/// </example>
 public class SchemaRequestsDto
 {
     /// <summary>
@@ -50,6 +60,7 @@ public class SchemaRequestsDto
     /// <summary>
     /// The display name for the team template.
     /// </summary>
+    /// <example>Example Name</example>
     public string Name { get; set; }
 
     /// <summary>

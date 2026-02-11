@@ -29,6 +29,12 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 /// <summary>
 /// The request parameters for configuring security settings of a single web module.
 /// </summary>
+/// <example>
+/// {
+///   "enabled": true,
+///   "subjects": []
+/// }
+/// </example>
 public class WebItemSecurityRequestsDto
 {
     /// <summary>
@@ -39,11 +45,13 @@ public class WebItemSecurityRequestsDto
     /// <summary>
     /// Controls whether the security restrictions are enforced for this module.
     /// </summary>
+    /// <example>true</example>
     public bool Enabled { get; set; }
 
     /// <summary>
     /// The collection of user and group identifiers granted access to the module.
     /// </summary>
+    /// <example>[]</example>
     public IEnumerable<Guid> Subjects { get; set; }
 }
 
@@ -55,5 +63,6 @@ public class WebItemsSecurityRequestsDto
     /// <summary>
     /// The list of module security configurations.
     /// </summary>
+    /// <example>["item1", "item2"]</example>
     public IEnumerable<ItemKeyValuePair<string, bool>> Items { get; set; }
 }

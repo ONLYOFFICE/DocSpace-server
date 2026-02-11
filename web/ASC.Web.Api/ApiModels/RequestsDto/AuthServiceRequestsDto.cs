@@ -29,41 +29,59 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 /// <summary>
 /// The request parameters for handling the authorization service.
 /// </summary>
+/// <example>
+/// {
+///   "name": "google",
+///   "title": "Google",
+///   "description": "Google OAuth authentication",
+///   "instruction": "Configure your Google OAuth credentials",
+///   "canSet": true,
+///   "paid": false,
+///   "props": []
+/// }
+/// </example>
 public class AuthServiceRequestsDto
 {
     /// <summary>
     /// The name of the authorization service.
     /// </summary>
+    /// <example>google</example>
     public string Name { get; set; }
 
     /// <summary>
     /// The user-friendly display title of the authorization service.
     /// </summary>
+    /// <example>Google</example>
     public string Title { get; set; }
 
     /// <summary>
     /// The brief description of the authorization service.
     /// </summary>
+    /// <example>Google OAuth authentication</example>
     public string Description { get; set; }
 
     /// <summary>
     /// The detailed instructions for configuring or using the authorization service.
     /// </summary>
+    /// <example>Configure your Google OAuth credentials</example>
     public string Instruction { get; set; }
 
     /// <summary>
     /// Specifies whether the authorization service can be configured by the user.
     /// </summary>
+    /// <example>true</example>
     public bool CanSet { get; set; }
 
     /// <summary>
     /// Specifies whether the authorization service is paid or not.
     /// </summary>
+    /// <example>false</example>
     public bool Paid { get; set; }
 
     /// <summary>
     /// The collection of authorization keys associated with the authorization service.
     /// </summary>
+    /// <example>[]</example>
     public List<AuthKey> Props { get; set; }
 
     public static async Task<AuthServiceRequestsDto> From(Consumer consumer, string logoText)

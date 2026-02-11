@@ -31,26 +31,38 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// The white label item parameters.
 /// </summary>
+/// <example>
+/// {
+///   "type": "EnumValue",
+///   "name": "example value",
+///   "size": {},
+///   "path": {}
+/// }
+/// </example>
 public class WhiteLabelItemDto
 {
     /// <summary>
     /// The white label logo type.
     /// </summary>
+    /// <example>EnumValue</example>
     public WhiteLabelLogoType Type { get; set; }
 
     /// <summary>
     /// The white label file name.
     /// </summary>
+    /// <example>Example Name</example>
     public string Name { get; set; }
 
     /// <summary>
     /// The white label file size.
     /// </summary>
+    /// <example>{}</example>
     public IMagickGeometry Size { get; set; }
 
     /// <summary>
     /// The white label file path.
     /// </summary>
+    /// <example>{}</example>
     public WhiteLabelItemPathDto Path { get; set; }
 }
 
@@ -62,10 +74,12 @@ public class WhiteLabelItemPathDto
     /// <summary>
     /// The path to the light theme logo.
     /// </summary>
+    /// <example>/images/logo-light.png</example>
     public string Light { get; set; }
 
     /// <summary>
     /// The path to the dark theme logo.
     /// </summary>
+    /// <example>/images/logo-dark.png</example>
     public string Dark { get; set; }
 }

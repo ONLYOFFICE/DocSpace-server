@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2026
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -29,6 +29,11 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 /// <summary>
 /// The storage information.
 /// </summary>
+/// <example>
+/// {
+///   "properties": []
+/// }
+/// </example>
 public class StorageDto
 {
     /// <summary>
@@ -44,6 +49,7 @@ public class StorageDto
     /// <summary>
     /// The list of storage authentication keys.
     /// </summary>
+    /// <example>[]</example>
     public List<AuthKey> Properties { get; set; }
 
     /// <summary>
