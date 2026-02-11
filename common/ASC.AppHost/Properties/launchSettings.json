@@ -8,7 +8,6 @@
       "applicationUrl": "http://0.0.0.0:15208",
       "environmentVariables": {
         "Docker": "false",
-        "APP_LAUNCH_PROFILE": "Development",
         "APP_HOSTING_STANDALONE": "true",
         "ASPIRE_ALLOW_UNSECURED_TRANSPORT": "true",
         "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "http://localhost:19085",
@@ -23,7 +22,6 @@
       "environmentVariables": {
         "ASPIRE_ALLOW_UNSECURED_TRANSPORT": "true",
         "Docker": "true",
-        "APP_LAUNCH_PROFILE": "Preview",
         "APP_HOSTING_STANDALONE": "true",
         "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "http://localhost:19085",
         "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "http://localhost:20013",
@@ -38,7 +36,6 @@
       "environmentVariables": {
         "ASPIRE_ALLOW_UNSECURED_TRANSPORT": "true",
         "APP_HOSTING_STANDALONE": "true",
-        "APP_LAUNCH_PROFILE": "FrontendDev",
         "Docker": "false",
         "SKIP_CLIENT": "true",
         "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "http://localhost:19085",
