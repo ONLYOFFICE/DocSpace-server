@@ -117,9 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AccountingCustomerOperationServiceDesc_embedding" xml:space="preserve">
-    <value>Vektorizácia</value>
-  </data>
   <data name="AccountingCustomerOperationContact" xml:space="preserve">
     <value>Kontakt</value>
   </data>
@@ -141,7 +138,10 @@
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Množstvo</value>
   </data>
-  <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
+  <data name="AccountingCustomerOperationServiceDesc_aiservice" xml:space="preserve">
+    <value>Nástroje AI</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_aitools" xml:space="preserve">
     <value>Nástroje AI</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
@@ -150,13 +150,19 @@
   <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
     <value>Miesto na disku</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_embedding" xml:space="preserve">
+    <value>Vektorizácia</value>
+  </data>
   <data name="AccountingCustomerOperationServiceDesc_top-up" xml:space="preserve">
     <value>Dobitie zostatku</value>
   </data>
   <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
     <value>Jednotka merania</value>
   </data>
-  <data name="AccountingCustomerOperationServiceUOM_ai-service" xml:space="preserve">
+  <data name="AccountingCustomerOperationServiceUOM_aiservice" xml:space="preserve">
+    <value>Tokeny</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_aitools" xml:space="preserve">
     <value>Tokeny</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
@@ -1148,6 +1154,12 @@
   </data>
   <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
     <value>Počet agentov AI by nemal prekročiť {0}</value>
+  </data>
+  <data name="TariffsFeature_aiservice_wallet" xml:space="preserve">
+    <value>Nástroje AI</value>
+  </data>
+  <data name="TariffsFeature_aiservice_wallet_price_count" xml:space="preserve">
+    <value>Aktivujte funkcie AI vo vašom DocSpace a zvýšte produktivitu.</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>Nástroje AI</value>

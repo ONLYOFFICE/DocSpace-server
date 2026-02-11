@@ -125,9 +125,18 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to AI tools.
         /// </summary>
-        public static string AccountingCustomerOperationServiceDesc_ai_service {
+        public static string AccountingCustomerOperationServiceDesc_aiservice {
             get {
-                return ResourceManager.GetString("AccountingCustomerOperationServiceDesc_ai-service", resourceCulture);
+                return ResourceManager.GetString("AccountingCustomerOperationServiceDesc_aiservice", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AI tools.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceDesc_aitools {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceDesc_aitools", resourceCulture);
             }
         }
         
@@ -155,6 +164,24 @@ namespace ASC.Web.Core.PublicResources {
         public static string AccountingCustomerOperationServiceDesc_claude4_5output {
             get {
                 return ResourceManager.GetString("AccountingCustomerOperationServiceDesc_claude4.5output", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DeepSeek V3.1 input.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceDesc_deepseek3_1input {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceDesc_deepseek3.1input", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DeepSeek V3.1 output.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceDesc_deepseek3_1output {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceDesc_deepseek3.1output", resourceCulture);
             }
         }
         
@@ -249,6 +276,24 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to GPT 5 input.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceDesc_gpt5input {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceDesc_gpt5input", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to GPT 5 output.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceDesc_gpt5output {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceDesc_gpt5output", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Balance top-up.
         /// </summary>
         public static string AccountingCustomerOperationServiceDesc_top_up {
@@ -287,9 +332,18 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Tokens.
         /// </summary>
-        public static string AccountingCustomerOperationServiceUOM_ai_service {
+        public static string AccountingCustomerOperationServiceUOM_aiservice {
             get {
-                return ResourceManager.GetString("AccountingCustomerOperationServiceUOM_ai-service", resourceCulture);
+                return ResourceManager.GetString("AccountingCustomerOperationServiceUOM_aiservice", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tokens.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceUOM_aitools {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceUOM_aitools", resourceCulture);
             }
         }
         
@@ -317,6 +371,24 @@ namespace ASC.Web.Core.PublicResources {
         public static string AccountingCustomerOperationServiceUOM_claude4_5output {
             get {
                 return ResourceManager.GetString("AccountingCustomerOperationServiceUOM_claude4.5output", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tokens.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceUOM_deepseek3_1input {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceUOM_deepseek3.1input", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tokens.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceUOM_deepseek3_1output {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceUOM_deepseek3.1output", resourceCulture);
             }
         }
         
@@ -407,6 +479,24 @@ namespace ASC.Web.Core.PublicResources {
         public static string AccountingCustomerOperationServiceUOM_gpt5_2output {
             get {
                 return ResourceManager.GetString("AccountingCustomerOperationServiceUOM_gpt5.2output", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tokens.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceUOM_gpt5input {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceUOM_gpt5input", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tokens.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceUOM_gpt5output {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceUOM_gpt5output", resourceCulture);
             }
         }
         
@@ -3413,6 +3503,24 @@ namespace ASC.Web.Core.PublicResources {
         public static string TariffsFeature_aiagent_exception {
             get {
                 return ResourceManager.GetString("TariffsFeature_aiagent_exception", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AI tools.
+        /// </summary>
+        public static string TariffsFeature_aiservice_wallet {
+            get {
+                return ResourceManager.GetString("TariffsFeature_aiservice_wallet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enable AI features in your DocSpace to boost productivity..
+        /// </summary>
+        public static string TariffsFeature_aiservice_wallet_price_count {
+            get {
+                return ResourceManager.GetString("TariffsFeature_aiservice_wallet_price_count", resourceCulture);
             }
         }
         
