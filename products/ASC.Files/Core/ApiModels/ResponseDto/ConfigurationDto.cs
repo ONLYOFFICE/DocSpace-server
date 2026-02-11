@@ -96,6 +96,32 @@ public class ConfigurationDto<T>
     /// The file filling session ID.
     /// </summary>
     public string FillingSessionId { get; set; }
+
+    /// <summary>
+    /// Indicates which quota scope has been exceeded.
+    /// </summary>
+    public QuotaScope? QuotaExceededScope { get; set; }
+}
+
+/// <summary>
+/// The quota scope.
+/// </summary>
+public enum QuotaScope
+{
+    /// <summary>
+    /// The user-level quota.
+    /// </summary>
+    User,
+
+    /// <summary>
+    /// The room-level quota.
+    /// </summary>
+    Room,
+
+    /// <summary>
+    /// The tenant-level quota.
+    /// </summary>
+    Tenant
 }
 
 /// <summary>

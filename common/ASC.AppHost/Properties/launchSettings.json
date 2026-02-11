@@ -1,29 +1,15 @@
 {
   "$schema": "https://json.schemastore.org/launchsettings.json",
   "profiles": {
-    "https": {
+    "development": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
-      "applicationUrl": "https://localhost:17258;http://localhost:15208",
+      "applicationUrl": "http://0.0.0.0:15208",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "DOTNET_ENVIRONMENT": "Development",
-        "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "https://localhost:21150",
-        "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:22282"
-      }
-    },
-    "http": {
-      "commandName": "Project",
-      "dotnetRunMessages": true,
-      "launchBrowser": true,
-      "applicationUrl": "http://localhost:15208",
-      "environmentVariables": {
+        "Docker": "false",
         "APP_HOSTING_STANDALONE": "true",
-        "DISABLE_BUILD_CLIENT": "false",
         "ASPIRE_ALLOW_UNSECURED_TRANSPORT": "true",
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "DOTNET_ENVIRONMENT": "Development",
         "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "http://localhost:19085",
         "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "http://localhost:20013"
       }
@@ -32,14 +18,30 @@
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
-      "applicationUrl": "http://localhost:15208",
+      "applicationUrl": "http://0.0.0.0:15208",
       "environmentVariables": {
         "ASPIRE_ALLOW_UNSECURED_TRANSPORT": "true",
-        "ASPNETCORE_ENVIRONMENT": "Preview",
-        "DOTNET_ENVIRONMENT": "Development",
+        "Docker": "true",
+        "APP_HOSTING_STANDALONE": "true",
         "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "http://localhost:19085",
-        "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "http://localhost:20013"
+        "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "http://localhost:20013",
+        "Logging__LogLevel__Default": "Information"
       }
-    }
+    },
+    "frontend-dev": {
+      "commandName": "Project",
+      "dotnetRunMessages": false,
+      "launchBrowser": true,
+      "applicationUrl": "http://0.0.0.0:15208",
+      "environmentVariables": {
+        "ASPIRE_ALLOW_UNSECURED_TRANSPORT": "true",
+        "APP_HOSTING_STANDALONE": "true",
+        "Docker": "false",
+        "SKIP_CLIENT": "true",
+        "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "http://localhost:19085",
+        "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "http://localhost:20013",
+        "Logging__LogLevel__Default": "Information"
+      }
+    } 
   }
 }

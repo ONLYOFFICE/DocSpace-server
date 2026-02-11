@@ -23,6 +23,7 @@
 
 	</Target>
 	<ItemGroup>
+	  <ProjectReference Include="..\..\ASC.Analyzers\ASC.Analyzers.csproj"  OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 	  <ProjectReference Include="..\..\ASC.Api.Core\ASC.Api.Core.csproj" />
 	  <ProjectReference Include="..\..\ASC.Data.Backup.Core\ASC.Data.Backup.Core.csproj" />
 	</ItemGroup>

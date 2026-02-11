@@ -72,7 +72,8 @@ internal class FileDao(
         CustomQuota customQuota, 
         VectorStore vectorStore,
         IEventBus eventBus,
-        VectorizationGlobalSettings vectorizationGlobalSettings)
+        VectorizationGlobalSettings vectorizationGlobalSettings,
+        DisplayUserSettingsHelper displayUserSettingsHelper)
     : AbstractDao(dbContextManager,
               userManager,
               tenantManager,
@@ -453,7 +454,14 @@ internal class FileDao(
                     {
                         if (roomQuotaLimit - currentRoom.Counter < file.ContentLength)
                         {
-                            throw FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit, currentRoom.FolderType is FolderType.AiRoom);
+                            if ((roomQuotaLimit * 2 < currentRoom.Counter + file.ContentLength) || roomQuotaLimit < currentRoom.Counter)
+                            {
+                                await filesMessageService.SendAsync(MessageAction.FileNotSavedDueToRoomQuota, file, MessageInitiator.DocsService, currentRoom.Title, file.Title);
+                                throw FileSizeComment.GetRoomFreeSpaceException(roomQuotaLimit, currentRoom.FolderType is FolderType.AiRoom);
+                            }
+                            await quotaSocketManager.RoomQuotaExceededAsync(roomId);
+                            await filesMessageService.SendAsync(MessageAction.FileSavedButRoomQuotaExceeded, file, MessageInitiator.DocsService, currentRoom.Title, file.Title);
+
                         }
                     }
                 }
@@ -473,12 +481,18 @@ internal class FileDao(
 
                         if (userQuotaLimit - userUsedSpace < file.ContentLength)
                         {
-                            throw FileSizeComment.GetUserFreeSpaceException(userQuotaLimit);
+                            if ((userQuotaLimit * 2 < userUsedSpace + file.ContentLength) || userQuotaLimit < userUsedSpace)
+                            {
+                                await filesMessageService.SendAsync(MessageAction.FileNotSavedDueToUserQuota, file, MessageInitiator.DocsService, user.DisplayUserName(false, displayUserSettingsHelper), file.Title);
+                                throw FileSizeComment.GetUserFreeSpaceException(userQuotaLimit);
+                            }
+                            await quotaSocketManager.UserQuotaExceededAsync(file.CreateBy);
+                            await filesMessageService.SendAsync(MessageAction.FileSavedButUserQuotaExceeded, file, MessageInitiator.DocsService, user.DisplayUserName(false, displayUserSettingsHelper), file.Title);
                         }
                     }
                 }
             }
-            
+       
             var isNew = false;
             DbFile toInsert = null;
             var cloneStreamForSave = new MemoryStream();
@@ -490,7 +504,7 @@ internal class FileDao(
                 var parentFolders = await filesDbContext.DbFolderTreesAsync(file.ParentId).ToListAsync();
 
                 var parentFoldersIds = parentFolders.Select(r => r.ParentId).ToList();
-                
+            
                 await using (await _distributedLockProvider.TryAcquireFairLockAsync(LockKey))
                 {
                     var strategy = filesDbContext.Database.CreateExecutionStrategy();
@@ -512,7 +526,7 @@ internal class FileDao(
 
                         file.ModifiedBy = _authContext.CurrentAccount.ID;
                         file.ModifiedOn = _tenantUtil.DateTimeNow();
-                            
+                        
                         if (file.CreateBy == Guid.Empty)
                         {
                             file.CreateBy = _authContext.CurrentAccount.ID;
@@ -586,23 +600,23 @@ internal class FileDao(
                             await filesDbContext.Files.AddAsync(toInsert);
                         }
                         else
-                        {                    
+                        {
                             await filesDbContext.AddOrUpdateAsync(r => r.Files, toInsert);
                         }
 
                         if (file.VectorizationStatus.HasValue)
                         {
                             await filesDbContext.AddOrUpdateAsync(
-                                x => x.FileVectorization,
-                                new DbFileVectorization
-                                {
-                                    TenantId = tenantId, 
-                                    FileId = file.Id,
-                                    Status = file.VectorizationStatus.Value,
-                                    UpdatedOn = DateTime.UtcNow
-                                });
+                            x => x.FileVectorization,
+                            new DbFileVectorization
+                                    {
+                                        TenantId = tenantId,
+                                        FileId = file.Id,
+                                        Status = file.VectorizationStatus.Value,
+                                        UpdatedOn = DateTime.UtcNow
+                                    });
                         }
-                            
+
                         await filesDbContext.SaveChangesAsync();
                         await tx.CommitAsync();
                     });
@@ -627,7 +641,7 @@ internal class FileDao(
                 if (isNew)
                 {
                     await IncrementCountAsync(filesDbContext, file.ParentId, tenantId, FileEntryType.File);
-            
+
                     if (roomId != -1 && checkFolder)
                     {
                         var currentRoom = await folderDao.GetFolderAsync(roomId);
@@ -648,10 +662,10 @@ internal class FileDao(
                                     {
                                         var (readyFormFolderId, inProcessFormFolderId) = await entryManager.InitSystemFormFillingFolders(currentRoom.Id, folderDao, file.CreateBy);
                                         var systemFormFillingFolders = new List<Folder<int>>
-                                        {
-                                            await folderDao.GetFolderAsync(readyFormFolderId),
-                                            await folderDao.GetFolderAsync(inProcessFormFolderId)
-                                        };
+                                            {
+                                                await folderDao.GetFolderAsync(readyFormFolderId),
+                                                await folderDao.GetFolderAsync(inProcessFormFolderId)
+                                            };
                                         foreach (var formFolder in systemFormFillingFolders)
                                         {
                                             var a = await fileSharing.GetSharedInfoAsync(formFolder);
@@ -661,11 +675,11 @@ internal class FileDao(
                                             await filesMessageService.SendAsync(MessageAction.FolderCreated, formFolder, formFolder.Title);
                                         }
                                     }
-                                    
+
                                     properties.FormFilling.StartFilling = true;
                                     properties.FormFilling.OriginalFormId = file.Id;
                                     await fileDao.SaveProperties(file.Id, properties);
-                                    
+
                                     var count = await fileStorageService.GetPureSharesCountAsync(currentRoom.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
                                     if (file.IsForm)
                                     {
@@ -1315,7 +1329,7 @@ internal class FileDao(
                 await eventBus.PublishAsync(new VectorizationIntegrationEvent(file.CreateBy, tenantId)
                 {
                     FileId = fileId
-                });
+        });
             }
         });
 
@@ -1385,9 +1399,9 @@ internal class FileDao(
         foreach (var size in thumbnailSettings.Sizes)
         {
             await dataStore.CopyAsync(string.Empty,
-                GetUniqThumbnailPath(file, size.Width, size.Height),
-                string.Empty,
-                GetUniqThumbnailPath(copy, size.Width, size.Height));
+                                 GetUniqThumbnailPath(file, size.Width, size.Height),
+                                 string.Empty,
+                                 GetUniqThumbnailPath(copy, size.Width, size.Height));
         }
 
         await SetThumbnailStatusAsync(copy, Thumbnail.Created);
@@ -2402,7 +2416,7 @@ internal class FileDao(
                         select rs.Indexing).FirstOrDefault() && f.EntryId == r.Id && f.TenantId == tenantId && f.EntryType == FileEntryType.File
                     select f.Order
                 ).FirstOrDefault(),
-                VectorizationStatus = attachVectorizationStatus 
+                VectorizationStatus = attachVectorizationStatus
                     ? filesDbContext.FileVectorization
                         .FirstOrDefault(x => x.TenantId == tenantId && x.FileId == r.Id).Status
                     : null
@@ -2419,9 +2433,9 @@ internal class FileDao(
                 Root = (from f in filesDbContext.Folders
                         where f.Id ==
                               (from t in filesDbContext.Tree
-                               where t.FolderId == r.Entry.ParentId
-                               orderby t.Level descending
-                               select t.ParentId
+                                  where t.FolderId == r.Entry.ParentId
+                                  orderby t.Level descending
+                                  select t.ParentId
                               ).FirstOrDefault()
                         where f.TenantId == tenantId
                         select f
@@ -2443,9 +2457,9 @@ internal class FileDao(
                 Root = (from f in filesDbContext.Folders
                         where f.Id ==
                               (from t in filesDbContext.Tree
-                               where t.FolderId == r.ParentId
-                               orderby t.Level descending
-                               select t.ParentId
+                                  where t.FolderId == r.ParentId
+                                  orderby t.Level descending
+                                  select t.ParentId
                               ).FirstOrDefault()
                         where f.TenantId == tenantId
                         select f
@@ -2523,7 +2537,7 @@ internal class FileDao(
         try
         {
             await using var stream = await GetFileStreamForTenantAsync(file, tenantId);
-            
+
             if (stream == null)
             {
                 return dbFile;
@@ -2829,7 +2843,7 @@ internal class FileDao(
             OriginRoom = x.t.Type != TagType.RecentByLink ?
                 filesDbContext.Folders
                 .Where(f => f.TenantId == tenantId && f.FolderType != FolderType.VirtualRooms)
-                .Join(filesDbContext.Tree, f => new { f.Id, x.f.ParentId}, t => new { Id = t.ParentId, ParentId = t.FolderId}, (folder, tree) => new { folder, tree })
+                .Join(filesDbContext.Tree, f => new { f.Id, x.f.ParentId }, t => new { Id = t.ParentId, ParentId = t.FolderId }, (folder, tree) => new { folder, tree })
                 .OrderByDescending(t => t.tree.Level)
                 .Select(t => new DbFolder { Id = t.folder.Id, Title = t.folder.Title })
                 .FirstOrDefault() :
@@ -2837,7 +2851,7 @@ internal class FileDao(
             Origin = x.t.Type != TagType.RecentByLink ?
                 filesDbContext.Folders
                     .Where(f => f.TenantId == tenantId && f.FolderType != FolderType.VirtualRooms)
-                    .Join(filesDbContext.Tree, f => new { f.Id, x.f.ParentId}, t => new { Id = t.FolderId, ParentId = t.FolderId}, (folder, tree) => new { folder, tree })
+                    .Join(filesDbContext.Tree, f => new { f.Id, x.f.ParentId }, t => new { Id = t.FolderId, ParentId = t.FolderId }, (folder, tree) => new { folder, tree })
                     .OrderByDescending(t => t.tree.Level)
                     .Select(t => new DbFolder { Id = t.folder.Id, Title = t.folder.Title })
                     .FirstOrDefault() :
@@ -2860,7 +2874,7 @@ internal class FileDao(
                     query.Where(x => x.Tag == documentsTagType &&
                          filesDbContext.Folders
                          .Where(f => f.TenantId == tenantId && (f.FolderType == FolderType.CustomRoom || f.FolderType == FolderType.EditingRoom || f.FolderType == FolderType.FillingFormsRoom || f.FolderType == FolderType.PublicRoom || f.FolderType == FolderType.VirtualDataRoom))
-                         .Join(filesDbContext.Tree, f => new { f.Id, x.Entry.ParentId}, t => new { Id = t.ParentId, ParentId = t.FolderId}, (folder, tree) => new { folder, tree })
+                         .Join(filesDbContext.Tree, f => new { f.Id, x.Entry.ParentId }, t => new { Id = t.ParentId, ParentId = t.FolderId }, (folder, tree) => new { folder, tree })
                          .Any()),
                 Location.Link => query.Where(x =>
                     x.Tag == TagType.RecentByLink && x.Security.Share != FileShare.Restrict && (x.Security.Options.ExpirationDate.Year == 1 || x.Security.Options.ExpirationDate > DateTime.UtcNow) &&
@@ -2898,7 +2912,7 @@ internal class FileDao(
 
         return q;
     }
-    
+
     private async ValueTask DeleteVectorsAsync(int tenantId, int fileId)
     {
         var collection = vectorStore.GetCollection<VectorChunk>(VectorChunk.IndexName, null);
@@ -2989,7 +3003,8 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         CustomQuota customQuota,
         VectorStore vectorStore,
         IEventBus eventBus,
-        VectorizationGlobalSettings vectorizationGlobalSettings)
+        VectorizationGlobalSettings vectorizationGlobalSettings,
+        DisplayUserSettingsHelper displayUserSettingsHelper)
     : FileDao(
         logger,
         factoryIndexer,
@@ -3032,7 +3047,8 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         customQuota, 
         vectorStore,
         eventBus,
-        vectorizationGlobalSettings), ICacheFileDao<int>
+        vectorizationGlobalSettings,
+        displayUserSettingsHelper), ICacheFileDao<int>
 {
 
     private readonly ConcurrentDictionary<int, IEnumerable<FormRole>> _cache = new();

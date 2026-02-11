@@ -19,6 +19,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\..\common\ASC.Analyzers\ASC.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
         <ProjectReference Include="..\..\..\common\ASC.Api.Core\ASC.Api.Core.csproj" />
         <ProjectReference Include="..\Core\ASC.AI.Core.csproj" />
     </ItemGroup>
