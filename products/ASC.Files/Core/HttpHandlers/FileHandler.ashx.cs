@@ -795,7 +795,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             var storeTemplate = await globalStore.GetStoreTemplateAsync();
             var docTemplate = await globalStore.GetNewDocTemplate(serviceProvider, storeTemplate, fileExtension);
 
-            if (docTemplate != null)
+            if (docTemplate == null)
             {
                 context.Response.StatusCode = (int)HttpStatusCode.NotFound;
                 await context.Response.WriteAsync(FilesCommonResource.ErrorMessage_FileNotFound);

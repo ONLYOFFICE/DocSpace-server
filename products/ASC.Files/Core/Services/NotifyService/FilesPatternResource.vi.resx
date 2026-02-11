@@ -120,6 +120,14 @@
   <data name="button_CheckReadyForms" xml:space="preserve">
     <value>Kiểm tra các biểu mẫu đã sẵn sàng</value>
   </data>
+  <data name="pattern_AgentRemoved" xml:space="preserve">
+    <value>h1. $__AuthorName đã xóa một tác nhân AI
+
+$__AuthorName đã xóa tác nhân AI: $RoomTitle</value>
+  </data>
+  <data name="pattern_AgentUpdateAccessForUser_push" xml:space="preserve">
+    <value>Vai trò của bạn trong tác nhân AI "$RoomTitle" đã được thay đổi thành "$RoomRole"</value>
+  </data>
   <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
     <value>Một tài liệu mới "$DocumentTitle" đã được tạo trong phòng "$RoomTitle"</value>
   </data>
@@ -187,6 +195,9 @@ $OrangeButton
       Thông báo hoạt động. Biểu mẫu "$DocumentTitle":"$DocumentURL" đã được điền đầy đủ trong phòng: "$RoomTitle":"$RoomURL" — $__DateTime.
     </value>
   </data>
+  <data name="pattern_InvitedToAgent_push" xml:space="preserve">
+    <value>Bạn đã được mời vào tác nhân AI "$RoomTitle"</value>
+  </data>
   <data name="pattern_InvitedToRoom_push" xml:space="preserve">
     <value>Bạn đã được mời vào phòng "$RoomTitle"</value>
   </data>
@@ -231,6 +242,9 @@ $Message</value>
     <value>
       Thông báo hoạt động. Đến lượt bạn! Yêu cầu điền biểu mẫu: "$DocumentTitle":"$DocumentURL" trong phòng: "$RoomTitle":"$RoomURL" — $__DateTime.
     </value>
+  </data>
+  <data name="subject_AgentRemoved" xml:space="preserve">
+    <value>Thông báo DocSpace. Tác nhân Agent đã bị xóa</value>
   </data>
   <data name="subject_DocuSignComplete" xml:space="preserve">
     <value>Tài liệu. Tất cả đã hoàn tất ký tên vào $DocumentTitle</value>

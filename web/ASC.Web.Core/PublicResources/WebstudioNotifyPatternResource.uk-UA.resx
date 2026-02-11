@@ -138,6 +138,9 @@
   <data name="ActionFileUploaded" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; передав(-ла) новий документ: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; в кімнаті: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
+  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; передав(ла) новий документ &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; до бази знань AІ-агента &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
   <data name="ActionNewComment" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; додав(-ла) новий коментар до версії документа: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; в кімнаті: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
@@ -310,6 +313,15 @@
 $OrangeButton
 
 Це посилання дійсне лише 7 днів. Будь ласка, завершіть активацію вашої електронної пошти протягом цього періоду.</value>
+  </data>
+  <data name="pattern_api_key_expired" xml:space="preserve">
+    <value>Вітаємо, $UserName!
+
+Цим листом повідомляємо, що термін дії вашого API-ключа "*$Message*" закінчився і його було деактивовано.
+
+Ви можете згенерувати новий API-ключ у розділі "Інструменти розробника":"${__VirtualRootPath}/developer-tools/api-keys".
+
+$TrulyYours</value>
   </data>
   <data name="pattern_backup_created" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" створено резервну копію порталу
@@ -1117,6 +1129,15 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace видалено.
+
+*Портал:* ${PortalUrl}
+*Власник:* ${UserName} ${UserEmail} 
+*Клієнт:* ${OwnerName}
+
+Переконайтеся, що автоматичне виставлення рахунків вимкнено. Перевірте статус автоматичного виставлення рахунків в обліковому записі клієнта Stripe.</value>
+  </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace&lt;span style="color: #FF6F3D;"&gt;видалено&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
@@ -1779,6 +1800,15 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_user_agent_role_changed" xml:space="preserve">
+    <value>Вітаємо!
+
+Вам призначено нову роль у AІ-агенті DocSpace "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+Дізнайтеся більше про ролі та дозволи в кімнаті в "Довідковому центрі":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_user_has_join" xml:space="preserve">
     <value>h1.Нового користувача додано до "${__VirtualRootPath}":"${__VirtualRootPath}" порталу
 
@@ -1839,6 +1869,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_activate_email" xml:space="preserve">
     <value>${LetterLogoText}. Будь ласка, активуйте свою адресу електронної пошти</value>
+  </data>
+  <data name="subject_api_key_expired" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace: Термін дії вашого API-ключа закінчився</value>
   </data>
   <data name="subject_backup_created" xml:space="preserve">
     <value>${LetterLogoText}. ${__VirtualRootHost} створення резервної копії порталу</value>
@@ -1990,6 +2023,9 @@ $TrulyYours</value>
   <data name="subject_portal_delete" xml:space="preserve">
     <value>Видалення порталу ${__VirtualRootHost}</value>
   </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace видалено</value>
+  </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
     <value>Документаційний простір ${LetterLogoText} видалено</value>
   </data>
@@ -2136,6 +2172,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>Потрібна дія: не вдається автоматично поповнити баланс гаманця у вашому ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_user_agent_role_changed" xml:space="preserve">
+    <value>Ваша роль у ШІ-агенті DocSpace змінилася</value>
   </data>
   <data name="subject_user_has_join" xml:space="preserve">
     <value>Новий користувач був доданий до порталу ${LetterLogoText}</value>

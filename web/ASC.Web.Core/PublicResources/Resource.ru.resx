@@ -1164,8 +1164,50 @@
   <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
     <value>Включить резервное копирование для вашего DocSpace. Оплата будет списываться автоматически.</value>
   </data>
+  <data name="TariffsFeature_claude45input_wallet" xml:space="preserve">
+    <value>Входной токен ИИ Claude 4.5</value>
+  </data>
+  <data name="TariffsFeature_claude45input_wallet_price_count" xml:space="preserve">
+    <value>Единица измерения входного текста для Claude 4.5</value>
+  </data>
+  <data name="TariffsFeature_claude45output_wallet" xml:space="preserve">
+    <value>Выходной токен ИИ Claude 4.5</value>
+  </data>
+  <data name="TariffsFeature_claude45output_wallet_price_count" xml:space="preserve">
+    <value>Единица измерения выходного текста для Claude 4.5</value>
+  </data>
   <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Брендинг и кастомизация</value>
+  </data>
+  <data name="TariffsFeature_deepseek31input_wallet" xml:space="preserve">
+    <value>Входной токен ИИ Deepseek 3.1</value>
+  </data>
+  <data name="TariffsFeature_deepseek31input_wallet_price_count" xml:space="preserve">
+    <value>Единица измерения входного текста для Deepseek 3.1</value>
+  </data>
+  <data name="TariffsFeature_deepseek31output_wallet" xml:space="preserve">
+    <value>Выходной токен ИИ Deepseek 3.1</value>
+  </data>
+  <data name="TariffsFeature_deepseek31output_wallet_price_count" xml:space="preserve">
+    <value>Единица измерения выходного текста для Deepseek 3.1</value>
+  </data>
+  <data name="TariffsFeature_deepseek32input_wallet" xml:space="preserve">
+    <value>Входной токен ИИ Deepseek 3.2</value>
+  </data>
+  <data name="TariffsFeature_deepseek32input_wallet_price_count" xml:space="preserve">
+    <value>Единица измерения входного текста для Deepseek 3.2</value>
+  </data>
+  <data name="TariffsFeature_deepseek32output_wallet" xml:space="preserve">
+    <value>Выходной токен ИИ Deepseek 3.2</value>
+  </data>
+  <data name="TariffsFeature_deepseek32output_wallet_price_count" xml:space="preserve">
+    <value>Единица измерения выходного текста для Deepseek 3.2</value>
+  </data>
+  <data name="TariffsFeature_embedding_wallet" xml:space="preserve">
+    <value>Встраивание ИИ</value>
+  </data>
+  <data name="TariffsFeature_embedding_wallet_price_count" xml:space="preserve">
+    <value>Единица измерения встраивания, которую могут обрабатывать большие языковые модели (LLM)</value>
   </data>
   <data name="TariffsFeature_file_size" xml:space="preserve">
     <value>Максимальный размер файла</value>
@@ -1178,6 +1220,54 @@
   </data>
   <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
     <value>Количество бесплатных резервных копий не должно превышать {0} в течение месяца</value>
+  </data>
+  <data name="TariffsFeature_gemini3flashinput_wallet" xml:space="preserve">
+    <value>Входной токен ИИ Gemini 3 Flash</value>
+  </data>
+  <data name="TariffsFeature_gemini3flashinput_wallet_price_count" xml:space="preserve">
+    <value>Единица измерения входного текста для Gemini 3 Flash</value>
+  </data>
+  <data name="TariffsFeature_gemini3flashoutput_wallet" xml:space="preserve">
+    <value>Выходной токен ИИ Gemini 3 Flash</value>
+  </data>
+  <data name="TariffsFeature_gemini3flashoutput_wallet_price_count" xml:space="preserve">
+    <value>Единица измерения выходного текста для Gemini 3 Flash</value>
+  </data>
+  <data name="TariffsFeature_gemini3proinput_wallet" xml:space="preserve">
+    <value>Входной токен ИИ Gemini 3 Pro</value>
+  </data>
+  <data name="TariffsFeature_gemini3proinput_wallet_price_count" xml:space="preserve">
+    <value>Единица измерения входного текста для Gemini 3 Pro</value>
+  </data>
+  <data name="TariffsFeature_gemini3prooutput_wallet" xml:space="preserve">
+    <value>Выходной токен ИИ Gemini 3 Pro</value>
+  </data>
+  <data name="TariffsFeature_gemini3prooutput_wallet_price_count" xml:space="preserve">
+    <value>Единица измерения выходного текста для Gemini 3 Pro</value>
+  </data>
+  <data name="TariffsFeature_gpt52input_wallet" xml:space="preserve">
+    <value>Входной токен ИИ GPT 5.2</value>
+  </data>
+  <data name="TariffsFeature_gpt52input_wallet_price_count" xml:space="preserve">
+    <value>Единица измерения входного текста для GPT 5.2</value>
+  </data>
+  <data name="TariffsFeature_gpt52output_wallet" xml:space="preserve">
+    <value>Выходной токен ИИ GPT 5.2</value>
+  </data>
+  <data name="TariffsFeature_gpt52output_wallet_price_count" xml:space="preserve">
+    <value>Единица измерения выходного текста для GPT 5.2</value>
+  </data>
+  <data name="TariffsFeature_gpt5input_wallet" xml:space="preserve">
+    <value>Входной токен ИИ GPT 5</value>
+  </data>
+  <data name="TariffsFeature_gpt5input_wallet_price_count" xml:space="preserve">
+    <value>Единица измерения входного текста для GPT 5</value>
+  </data>
+  <data name="TariffsFeature_gpt5output_wallet" xml:space="preserve">
+    <value>Выходной токен ИИ GPT 5</value>
+  </data>
+  <data name="TariffsFeature_gpt5output_wallet_price_count" xml:space="preserve">
+    <value>Единица измерения выходного текста для GPT 5</value>
   </data>
   <data name="TariffsFeature_manager_exception" xml:space="preserve">
     <value>Количество администраторов не должно превышать {0}</value>
@@ -1247,6 +1337,12 @@
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>Количество пользователей не должно превышать {0}</value>
+  </data>
+  <data name="TariffsFeature_webfetch_wallet" xml:space="preserve">
+    <value>Веб-загрузка на основе ИИ</value>
+  </data>
+  <data name="TariffsFeature_webfetch_wallet_price_count" xml:space="preserve">
+    <value>Единица измерения текстовой страницы, которую могут обрабатывать большие языковые модели (LLM)</value>
   </data>
   <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
     <value>Веб-поиск на основе ИИ</value>

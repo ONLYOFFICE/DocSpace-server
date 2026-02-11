@@ -156,6 +156,12 @@
   <data name="AgentsModule" xml:space="preserve">
     <value>Агенты</value>
   </data>
+  <data name="AIDefaultProviderDeleted" xml:space="preserve">
+    <value>Провайдер по умолчанию удален</value>
+  </data>
+  <data name="AIDefaultProviderSet" xml:space="preserve">
+    <value>ИИ-провайдер по умолчанию: Имя: {0}, Модель по умолчанию: {1}</value>
+  </data>
   <data name="AIProviderCreated" xml:space="preserve">
     <value>Создан ИИ-провайдер: {0}</value>
   </data>
@@ -163,7 +169,7 @@
     <value>ИИ-провайдер удален: {0}</value>
   </data>
   <data name="AIProviderUpdated" xml:space="preserve">
-    <value>ИИ-поставщик обновлен: {0}</value>
+    <value>ИИ-провайдер обновлен: {0}</value>
   </data>
   <data name="ApiKeyCreated" xml:space="preserve">
     <value>Создан Api Key пользователя: {0}</value>
@@ -573,8 +579,14 @@
   <data name="ImportActionType" xml:space="preserve">
     <value>Импорт</value>
   </data>
+  <data name="InvitationSettingsUpdated" xml:space="preserve">
+    <value>Обновлены настройки приглашений</value>
+  </data>
   <data name="IpCol" xml:space="preserve">
     <value>IP-адрес</value>
+  </data>
+  <data name="IPRestrictionsSettingsUpdated" xml:space="preserve">
+    <value>Обновлены настройки безопасности IP-адреса</value>
   </data>
   <data name="LanguageSettingsUpdated" xml:space="preserve">
     <value>Обновлены языковые настройки</value>
@@ -644,6 +656,9 @@
   </data>
   <data name="LoginHistoryReportName" xml:space="preserve">
     <value>Отчет по истории входов в систему ({0}-{1})</value>
+  </data>
+  <data name="LoginSettingsUpdated" xml:space="preserve">
+    <value>Обновлены настройки защиты от брутфорс-атак</value>
   </data>
   <data name="LoginSuccess" xml:space="preserve">
     <value>Успешный вход в систему</value>
@@ -1130,5 +1145,20 @@
   </data>
   <data name="WebpluginUploaded" xml:space="preserve">
     <value>Плагин загружен: {0}</value>
+  </data>
+  <data name="WhiteLabelAdditionalSettingsUpdated" xml:space="preserve">
+    <value>Обновлены дополнительные настройки брендинга</value>
+  </data>
+  <data name="WhiteLabelCompanySettingsUpdated" xml:space="preserve">
+    <value>Обновлены настройки информации о компании</value>
+  </data>
+  <data name="WhiteLabelMailSettingsUpdated" xml:space="preserve">
+    <value>Обновлены  настройки почты</value>
+  </data>
+  <data name="WhiteLabelSettingsLogosUpdated" xml:space="preserve">
+    <value>Обновлены  настройки логотипа</value>
+  </data>
+  <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
+    <value>Обновлено название бренда</value>
   </data>
 </root>

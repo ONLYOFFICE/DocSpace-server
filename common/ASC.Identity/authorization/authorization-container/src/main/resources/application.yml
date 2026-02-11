@@ -5,6 +5,7 @@ server:
   tomcat:
     max-swallow-size: 5MB
     max-http-form-post-size: 5MB
+    max-part-count: 50
   host: ${SERVER_HOST:127.0.0.1}
   port: ${SERVER_PORT:9090}
   shutdown: graceful
