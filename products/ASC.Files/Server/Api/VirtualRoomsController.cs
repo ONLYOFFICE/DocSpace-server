@@ -642,7 +642,6 @@ public abstract class VirtualRoomsController<T>(
     public async Task<FolderDto<T>> AddRoomTags(BatchTagsRequestDto<T> inDto)
     {
         var room = await customTagsService.AddRoomTagsAsync(inDto.Id, inDto.BatchTags.Names);
-        await socketManager.UpdateFolderAsync(room);
         return await _folderDtoHelper.GetAsync(room);
     }
 
@@ -658,7 +657,6 @@ public abstract class VirtualRoomsController<T>(
     public async Task<FolderDto<T>> DeleteRoomTags(BatchTagsRequestDto<T> inDto)
     {
         var room = await customTagsService.DeleteRoomTagsAsync(inDto.Id, inDto.BatchTags.Names);
-        await socketManager.UpdateFolderAsync(room);
         return await _folderDtoHelper.GetAsync(room);
     }
 

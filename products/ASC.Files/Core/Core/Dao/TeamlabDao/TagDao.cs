@@ -594,14 +594,14 @@ internal abstract class BaseTagDao<T>(
 
         if (id != 0)
         {
-            await filesDbContext.DeleteTagLinksByTagIdAsync(tenantId, id);
-            await filesDbContext.DeleteTagByIdAsync(tenantId, id);
-
             var folderDao = daoFactory.GetFolderDao<int>();
             var folderThirdPartyDao = daoFactory.GetFolderDao<string>();
 
             var rooms = await folderDao.GetRoomsAsync([await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)], null, new List<string> { tag.Name }, Guid.Empty, null, false, false, false, ProviderFilter.None, SubjectFilter.Owner, null, QuotaFilter.All).ToListAsync();
             var thirdPartyRooms = await folderThirdPartyDao.GetProviderBasedRoomsAsync(SearchArea.Active, null, new List<string> { tag.Name }, Guid.Empty, null, false, false, ProviderFilter.None, SubjectFilter.Owner, null).ToListAsync();
+
+            await filesDbContext.DeleteTagLinksByTagIdAsync(tenantId, id);
+            await filesDbContext.DeleteTagByIdAsync(tenantId, id);
 
             var tasks = rooms.Select(room => socketManager.UpdateFolderAsync(room))
                  .Concat(thirdPartyRooms.Select(room => socketManager.UpdateFolderAsync(room)));

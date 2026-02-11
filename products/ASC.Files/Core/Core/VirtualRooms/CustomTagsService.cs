@@ -33,7 +33,8 @@ public class CustomTagsService(
     AuthContext authContext,
     FilesMessageService filesMessageService,
     UserManager userManager,
-    FileSecurityCommon fileSecurityCommon)
+    FileSecurityCommon fileSecurityCommon,
+    SocketManager socketManager)
 {
     public async Task<TagInfo> CreateTagAsync(string name)
     {
@@ -157,6 +158,7 @@ public class CustomTagsService(
         await tagDao.SaveTagsAsync(tags);
 
         await filesMessageService.SendAsync(MessageAction.AddedRoomTags, folder, folder.Title, string.Join(',', tagsInfos.Select(t => t.Name)));
+        await socketManager.UpdateFolderAsync(folder);
 
         return folder;
     }
@@ -182,6 +184,7 @@ public class CustomTagsService(
         await tagDao.RemoveTagsAsync(folder, tagsInfos.Select(t => t.Id).ToList());
 
         await filesMessageService.SendAsync(MessageAction.DeletedRoomTags, folder, folder.Title, string.Join(',', tagsInfos.Select(t => t.Name)));
+        await socketManager.UpdateFolderAsync(folder);
 
         return folder;
     }
