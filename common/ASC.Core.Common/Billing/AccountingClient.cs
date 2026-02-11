@@ -73,7 +73,7 @@ public class AccountingClient
 
     public async Task<Balance> GetCustomerBalanceAsync(string portalId, bool addPolicy = false)
     {
-        return await RequestAsync<Balance>(HttpMethod.Get, $"/customer/balance/{portalId}", addPolicy: addPolicy);
+        return await RequestAsync<Balance>(HttpMethod.Get, $"/customer/{portalId}/balance", addPolicy: addPolicy);
     }
 
     public async Task<Session> OpenCustomerSessionAsync(string portalId, string serviceName, string externalRef, int quantity, int duration)
@@ -159,7 +159,7 @@ public class AccountingClient
             queryParams.Add("limit", limit.Value.ToString());
         }
 
-        return await RequestAsync<Report>(HttpMethod.Get, $"/customer/operations/{portalId}", queryParams);
+        return await RequestAsync<Report>(HttpMethod.Get, $"/customer/{portalId}/operations", queryParams);
     }
 
     public async Task<List<Currency>> GetAllCurrenciesAsync()
@@ -181,7 +181,7 @@ public class AccountingClient
 
     public async Task<ServiceInfo> GetServiceInfoAsync(string serviceName)
     {
-        return await RequestAsync<ServiceInfo>(HttpMethod.Get, $"/service/name/{serviceName}");
+        return await RequestAsync<ServiceInfo>(HttpMethod.Get, $"/service/{serviceName}/name");
     }
 
     public async Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, List<string> serviceNames)
