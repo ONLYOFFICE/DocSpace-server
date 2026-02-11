@@ -912,7 +912,7 @@ public class VirtualRoomsCommonController(
     /// <summary>Create a room tag</summary>
     /// <path>api/2.0/files/tags</path>
     [Tags("Rooms")]
-    [SwaggerResponse(200, "New tag name", typeof(object))]
+    [SwaggerResponse(200, "New tag name", typeof(string))]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpPost("tags")]
     public async Task<string> CreateRoomTag(CreateTagRequestDto inDto)
@@ -927,7 +927,7 @@ public class VirtualRoomsCommonController(
     /// <summary>Update tag</summary>
     /// <path>api/2.0/files/tags</path>
     [Tags("Rooms")]
-    [SwaggerResponse(200, "Updated tag name", typeof(object))]
+    [SwaggerResponse(200, "Updated tag name", typeof(string))]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpPut("tags")]
     public async Task<string> UpdateRoomTag(UpdateTagRequestDto inDto)
@@ -954,16 +954,16 @@ public class VirtualRoomsCommonController(
     /// Checks if a specific custom tag has linked items.
     /// </remarks>
     /// <summary>Has tag links</summary>
-    /// <path>api/2.0/files/tags/{tagName}/has-links</path>
+    /// <path>api/2.0/files/tags/{tagName}/haslinks</path>
     /// <collection>item</collection>
     [Tags("Rooms")]
     [SwaggerResponse(200, "True if tag has links, false otherwise", typeof(bool))]
     [SwaggerResponse(404, "Tag not found")]
-    [HttpGet("tags/{tagName}/has-links")]
+    [HttpGet("tags/{tagName}/haslinks")]
     public async Task<bool> HasTagLinks(string tagName)
     {
-        var hasTagLiks = await customTagsService.HasTagLiks(tagName);
-        return hasTagLiks;
+        var hasTagLinks = await customTagsService.HasTagLinks(tagName);
+        return hasTagLinks;
     }
 
     /// <remarks>

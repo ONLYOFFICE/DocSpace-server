@@ -213,7 +213,7 @@ internal abstract class BaseTagDao<T>(
 
         return existingTag.MapToTagInfo();
     }
-    public async Task<bool> HasTagLiksAsync(TagInfo tag)
+    public async Task<bool> HasTagLinksAsync(TagInfo tag)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();

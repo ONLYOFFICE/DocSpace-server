@@ -130,7 +130,7 @@ public class CustomTagsService(
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
         }
 
-        if (names.Count == 0)
+        if (names == null || names.Count == 0)
         {
             return folder;
         }
@@ -138,14 +138,11 @@ public class CustomTagsService(
         var tagDao = daoFactory.GetTagDao<T>();
 
         var tagsInfos = await tagDao.GetTagsInfoAsync(names, TagType.Custom).ToListAsync();
-        var notFoundTags = names?.Where(x => tagsInfos.All(r => r.Name != x));
+        var notFoundTags = names.Where(x => tagsInfos.All(r => r.Name != x)).Distinct().ToList();
 
-        if (notFoundTags != null)
+        foreach (var tagInfo in notFoundTags)
         {
-            foreach (var tagInfo in notFoundTags)
-            {
-                tagsInfos.Add(await CreateTagAsync(tagInfo));
-            }
+            tagsInfos.Add(await CreateTagAsync(tagInfo));
         }
 
         if (tagsInfos.Count == 0)
@@ -218,7 +215,7 @@ public class CustomTagsService(
         }
     }
 
-    public async Task<bool> HasTagLiks(string name)
+    public async Task<bool> HasTagLinks(string name)
     {
         var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
         if (userType is not EmployeeType.DocSpaceAdmin)
@@ -233,7 +230,7 @@ public class CustomTagsService(
             throw new ItemNotFoundException();
         }
 
-        var hasTagLiks = await tagDao.HasTagLiksAsync(existedTag);
+        var hasTagLiks = await tagDao.HasTagLinksAsync(existedTag);
 
         return hasTagLiks;
     }
