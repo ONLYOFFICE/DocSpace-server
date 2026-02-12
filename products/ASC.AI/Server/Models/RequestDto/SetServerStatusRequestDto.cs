@@ -30,7 +30,7 @@ public class SetServerStatusRequestDto
 {
     /// <summary>The server ID.</summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
-    [FromRoute]
+    [FromRoute(Name = "id")]
     public Guid Id { get; set; }
 
     [FromBody]

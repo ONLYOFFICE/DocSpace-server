@@ -153,6 +153,9 @@
   <data name="ManageServers" xml:space="preserve">
     <value>У вас нет разрешения на управление MCP-серверами</value>
   </data>
+  <data name="NoModelsAvailable" xml:space="preserve">
+    <value>Нет доступных моделей для этого провайдера</value>
+  </data>
   <data name="ProviderNotFound" xml:space="preserve">
     <value>Провайдер не найден</value>
   </data>

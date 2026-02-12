@@ -120,6 +120,14 @@
   <data name="button_CheckReadyForms" xml:space="preserve">
     <value>Verificar formulários prontos</value>
   </data>
+  <data name="pattern_AgentRemoved" xml:space="preserve">
+    <value>h1. $__AuthorName excluiu um agente de IA
+
+$__AuthorName eliminou o agente de IA: $RoomTitle</value>
+  </data>
+  <data name="pattern_AgentUpdateAccessForUser_push" xml:space="preserve">
+    <value>A sua função no agente de IA "$RoomTitle" foi alterada para "$RoomRole"</value>
+  </data>
   <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
     <value>Foi criado um novo documento "$DocumentTitle" na sala "$RoomTitle"</value>
   </data>
@@ -187,6 +195,9 @@ $OrangeButton
       Notificação de atividade. O formulário "$DocumentTitle":"$DocumentURL" foi completamente preenchido na sala: "$RoomTitle":"$RoomURL" - $__DateTime.
     </value>
   </data>
+  <data name="pattern_InvitedToAgent_push" xml:space="preserve">
+    <value>Foi convidado para o agente de IA "$RoomTitle"</value>
+  </data>
   <data name="pattern_InvitedToRoom_push" xml:space="preserve">
     <value>Foi convidado para a sala "$RoomTitle"</value>
   </data>
@@ -231,6 +242,9 @@ $Message</value>
     <value>
       Notificação de atividade. A sua vez! É necessário preencher um formulário: "$DocumentTitle":"$DocumentURL" na sala: "$RoomTitle":"$RoomURL" - $__DateTime.
     </value>
+  </data>
+  <data name="subject_AgentRemoved" xml:space="preserve">
+    <value>Notificação do DocSpace. Agente de IA eliminado</value>
   </data>
   <data name="subject_DocuSignComplete" xml:space="preserve">
     <value>Documentos. Todos os assinantes completaram o $DocumentTitle</value>

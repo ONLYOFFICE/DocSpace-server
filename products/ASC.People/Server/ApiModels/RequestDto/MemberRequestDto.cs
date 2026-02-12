@@ -54,9 +54,9 @@ public class EmailMemberRequestDto
 }
 
 /// <summary>
-/// The request parameters for the user generic information.
+/// The request parameters for updating a user password.
 /// </summary>
-public class MemberBaseRequestDto
+public class ChangePasswordRequest
 {
     /// <summary>
     /// The user password.
@@ -69,7 +69,31 @@ public class MemberBaseRequestDto
     /// </summary>
     /// <example>5f4dcc3b5aa765d61d8327deb882cf99</example>
     public string PasswordHash { get; set; }
+}
 
+/// <summary>
+/// The request parameters for updating a user password by their ID.
+/// </summary>
+public class ChangePasswordByIdRequestDto
+{
+    /// <summary>
+    /// The user ID.
+    /// </summary>
+    [FromRoute(Name = "userid")]
+    public required Guid UserId { get; set; }
+
+    /// <summary>
+    /// The request parameters for updating a user password.
+    /// </summary>
+    [FromBody]
+    public required ChangePasswordRequest ChangePasswordData { get; set; }
+}
+
+/// <summary>
+/// The request parameters for updating a user email.
+/// </summary>
+public class ChangeEmailRequest
+{
     /// <summary>
     /// The user email address.
     /// </summary>
@@ -86,9 +110,9 @@ public class MemberBaseRequestDto
 }
 
 /// <summary>
-/// The request parameters for getting the generic user information by their ID.
+/// The request parameters for updating a user email by their ID.
 /// </summary>
-public class MemberBaseByIdRequestDto
+public class ChangeEmailByIdRequestDto
 {
     /// <summary>
     /// The user ID.
@@ -98,11 +122,11 @@ public class MemberBaseByIdRequestDto
     public required Guid UserId { get; set; }
 
     /// <summary>
-    /// The request parameters for the user generic information.
+    /// The request parameters for updating a user email.
     /// </summary>
     /// <example>{"password": "P@ssw0rd", "email": "john.doe@example.com"}</example>
     [FromBody]
-    public required MemberBaseRequestDto MemberBase { get; set; }
+    public required ChangeEmailRequest ChangeEmailData { get; set; }
 }
 
 /// <summary>

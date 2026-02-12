@@ -120,6 +120,9 @@
   <data name="AiSettingsAccessDenied" xml:space="preserve">
     <value>Bạn không có quyền quản lý cài đặt AI</value>
   </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>Không thể xử lý tập tin: {0}. Các tập tin có thể bị hỏng hoặc bị mã hóa</value>
+  </data>
   <data name="ChatAccessDenied" xml:space="preserve">
     <value>Bạn không có quyền sử dụng trò chuyện</value>
   </data>
