@@ -26,6 +26,8 @@
 
 using Microsoft.Extensions.Configuration;
 
+using static System.Collections.Specialized.BitVector32;
+
 namespace ASC.Api.Documentation;
 
 public class Settings : CommandSettings
@@ -78,32 +80,74 @@ public class Settings : CommandSettings
     }
 }
 
-public class FilePathSettings : CommandSettings
+public class JoinSettings : CommandSettings
 {
-    [CommandOption("--file <FILE>")]
-    public string File { get; set; } = null!;
+    [CommandOption("-o|--output <OUTPUT>")]
+    public string Output { get; set; } = null!;
+
+    [CommandOption("-f|--file <FILES>")]
+    public IEnumerable<string>? Files { get; set; }
 
     public override ValidationResult Validate()
     {
-        if (!string.IsNullOrWhiteSpace(File))
-        {
-            File = Path.GetFullPath(File);
-            return ValidationResult.Success();
-        }
-
         var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
 
-        var pathParts = configuration.GetSection("pathToFile").Get<string[]>();
-
-        if (pathParts == null || pathParts.Length == 0)
+        if (!string.IsNullOrWhiteSpace(Output))
         {
-            return ValidationResult.Error(
-                "File path not specified. Use --file <FILE> or configure file in appsettings.json"
-            );
+            Output = Path.GetFullPath(Output);
+        }
+        else
+        {
+            var outputPath = configuration.GetSection("pathToFile").Get<string[]>();
+            if (outputPath == null || outputPath.Length == 0)
+            {
+                return ValidationResult.Error("File path not specified. Use -o|--output <OUTPUT> or configure file in appsettings.json");
+            }
+            Output = Path.GetFullPath(Path.Combine(outputPath));
         }
 
-        File = Path.GetFullPath(Path.Combine(pathParts));
+        if (Files == null || !Files.Any())
+        {
+            var list = new List<string>();
 
-        return !System.IO.File.Exists(File) ? ValidationResult.Error($"File not found: {File}") : ValidationResult.Success();
+            var joinSection = configuration.GetSection("join");
+
+            foreach (var child in joinSection.GetChildren())
+            {
+                AddFromConfig(child, list);
+            }
+
+            if (list.Count == 0)
+            {
+                return ValidationResult.Error("No input files specified and config is empty");
+            }
+
+            Files = [.. list];
+        }
+        else
+        {
+            Files = [.. Files.Select(Path.GetFullPath)];
+        }
+
+        return ValidationResult.Success();
+    }
+
+    private static void AddFromConfig(IConfigurationSection section, List<string> list)
+    {
+        var parts = section.Get<string[]>();
+
+        if (parts == null || parts.Length == 0)
+        {
+            return;
+        }
+
+        var fullPath = Path.GetFullPath(Path.Combine(parts));
+
+        if (!File.Exists(fullPath))
+        {
+            throw new FileNotFoundException($"Swagger file not found: {fullPath}");
+        }
+
+        list.Add(fullPath);
     }
 }
