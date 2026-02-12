@@ -43,36 +43,31 @@ public class UsageSpaceStatItemDto
     /// <summary>
     /// The item name.
     /// </summary>
-    /// <example>example value</example>
-    [SwaggerSchemaCustom(Example = "Item name")]
+    /// <example>Item name</example>
     public string Name { get; set; }
 
     /// <summary>
     /// The item icon path.
     /// </summary>
-    /// <example>example value</example>
-    [SwaggerSchemaCustom(Example = "Item icon path")]
+    /// <example>Item icon path</example>
     public string Icon { get; set; }
 
     /// <summary>
     /// Specifies if the item is disabled or not.
     /// </summary>
     /// <example>true</example>
-    [SwaggerSchemaCustom(Example = false)]
     public bool Disabled { get; set; }
 
     /// <summary>
     /// The item used space.
     /// </summary>
-    /// <example>example value</example>
-    [SwaggerSchemaCustom(Example = "0 Byte")]
+    /// <example>0 Byte</example>
     public string Size { get; set; }
 
     /// <summary>
     /// The item URL.
     /// </summary>
-    /// <example>example value</example>
-    [SwaggerSchemaCustom(Example = "Item url")]
+    /// <example>Item url</example>
     public string Url { get; set; }
 }
 
@@ -85,25 +80,23 @@ public class ChartPointDto
     /// The display date.
     /// </summary>
     /// <example>example value</example>
-    [SwaggerSchemaCustom(Example = "6/1/2024")]
     public string DisplayDate { get; set; }
 
     /// <summary>
     /// The chart point date.
     /// </summary>
+    /// <example>example value</example>
     public DateTime Date { get; init; }
 
     /// <summary>
     /// The number of hosts.
     /// </summary>
     /// <example>1</example>
-    [SwaggerSchemaCustom(Example = 0)]
     public int Hosts { get; set; }
 
     /// <summary>
     /// The number of hits.
     /// </summary>
     /// <example>1</example>
-    [SwaggerSchemaCustom(Example = 0)]
     public int Hits { get; set; }
 }

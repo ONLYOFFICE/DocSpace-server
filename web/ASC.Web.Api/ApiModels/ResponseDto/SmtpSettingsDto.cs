@@ -29,59 +29,40 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 /// <summary>
 /// The SMTP settings parameters.
 /// </summary>
-/// <example>
-/// {
-///   "host": "example value",
-///   "port": 1,
-///   "senderAddress": "example value",
-///   "senderDisplayName": "example value",
-///   "credentialsUserName": "example value",
-///   "credentialsUserPassword": "example value",
-///   "enableSSL": true,
-///   "enableAuth": true,
-///   "useNtlm": true,
-///   "isDefaultSettings": true
-/// }
-/// </example>
 public class SmtpSettingsDto
 {
     /// <summary>
     /// The SMTP host.
     /// </summary>
-    /// <example>example value</example>
-    [SwaggerSchemaCustom(Example = "mail.example.com")]
+    /// <example>mail.example.com</example>
     [StringLength(255)]
     public string Host { get; set; }
 
     /// <summary>
     /// The SMTP port.
     /// </summary>
-    /// <example>1</example>
-    [SwaggerSchemaCustom(Example = 25)]
+    /// <example>25</example>
     [Range(1, 65535)]
     public int? Port { get; set; }
 
     /// <summary>
     /// The sender address.
     /// </summary>
-    /// <example>example value</example>
-    [SwaggerSchemaCustom(Example = "notify@example.com")]
+    /// <example>notify@example.com</example>
     [StringLength(255)]
     public string SenderAddress { get; set; }
 
     /// <summary>
     /// The sender display name.
     /// </summary>
-    /// <example>example value</example>
-    [SwaggerSchemaCustom(Example = "Postman")]
+    /// <example>Postman</example>
     [StringLength(255)]
     public string SenderDisplayName { get; set; }
 
     /// <summary>
     /// The credentials username.
     /// </summary>
-    /// <example>example value</example>
-    [SwaggerSchemaCustom(Example = "notify@example.com")]
+    /// <example>notify@example.com</example>
     [StringLength(255)]
     public string CredentialsUserName { get; set; }
 
@@ -89,14 +70,12 @@ public class SmtpSettingsDto
     /// The credentials user password.
     /// </summary>
     /// <example>example value</example>
-    [SwaggerSchemaCustom(Example = "{password}")]
     public string CredentialsUserPassword { get; set; }
 
     /// <summary>
     /// Specifies whether the SSL is enabled or not.
     /// </summary>
     /// <example>true</example>
-    [SwaggerSchemaCustom(Example = false)]
     public bool EnableSSL { get; set; }
 
     /// <summary>
@@ -109,14 +88,12 @@ public class SmtpSettingsDto
     /// Specifies whether to use NTLM or not.
     /// </summary>
     /// <example>true</example>
-    [SwaggerSchemaCustom(Example = false)]
     public bool UseNtlm { get; set; }
 
     /// <summary>
     /// Specifies if the current settings are default or not.
     /// </summary>
     /// <example>true</example>
-    [SwaggerSchemaCustom(Example = false)]
     public bool IsDefaultSettings { get; set; }
 }
 

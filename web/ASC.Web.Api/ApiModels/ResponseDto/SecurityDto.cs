@@ -60,13 +60,11 @@ public class SecurityDto
     /// Specifies if the security settings are enabled or not.
     /// </summary>
     /// <example>true</example>
-    [SwaggerSchemaCustom(Example = true)]
     public bool Enabled { get; set; }
 
     /// <summary>
     /// Specifies if the module is a subitem or not.
     /// </summary>
     /// <example>true</example>
-    [SwaggerSchemaCustom(Example = false)]
     public bool IsSubItem { get; set; }
 }

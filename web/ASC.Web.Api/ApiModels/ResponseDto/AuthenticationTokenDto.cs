@@ -35,7 +35,6 @@ public class AuthenticationTokenDto
     /// The authentication token.
     /// </summary>
     /// <example>abcde12345</example>
-    [SwaggerSchemaCustom(Example = "abcde12345")]
     public string Token { get; set; }
 
     /// <summary>
@@ -48,28 +47,24 @@ public class AuthenticationTokenDto
     /// Specifies if the authentication code is sent by SMS or not.
     /// </summary>
     /// <example>true</example>
-    [SwaggerSchemaCustom(Example = false)]
     public bool Sms { get; set; }
 
     /// <summary>
     /// The phone number.
     /// </summary>
     /// <example>+1***1234</example>
-    [SwaggerSchemaCustom(Example = "")]
     public string PhoneNoise { get; set; }
 
     /// <summary>
     /// Specifies if the two-factor application is used or not.
     /// </summary>
     /// <example>true</example>
-    [SwaggerSchemaCustom(Example = false)]
     public bool Tfa { get; set; }
 
     /// <summary>
     /// The two-factor authentication key.
     /// </summary>
     /// <example>JBSWY3DPEHPK3PXP</example>
-    [SwaggerSchemaCustom(Example = "")]
     public string TfaKey { get; set; }
 
     /// <summary>

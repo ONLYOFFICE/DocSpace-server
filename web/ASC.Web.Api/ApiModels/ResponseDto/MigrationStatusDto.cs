@@ -43,7 +43,6 @@ public class MigrationStatusDto
     /// The migration progress.
     /// </summary>
     /// <example>99.99</example>
-    [SwaggerSchemaCustom(Example = 1.0)]
     public double Progress { get; set; }
 
     /// <summary>

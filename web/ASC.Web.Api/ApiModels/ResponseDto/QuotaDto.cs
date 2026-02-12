@@ -184,7 +184,6 @@ public class PriceDto
     /// The price value.
     /// </summary>
     /// <example>99.99</example>
-    [SwaggerSchemaCustom(Example = 10.0)]
     public decimal? Value { get; set; }
 
     /// <summary>

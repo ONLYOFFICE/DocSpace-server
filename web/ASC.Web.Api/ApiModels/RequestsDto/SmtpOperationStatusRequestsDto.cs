@@ -44,34 +44,29 @@ public class SmtpOperationStatusRequestsDto
     /// Specifies whether the SMTP operation has finished processing.
     /// </summary>
     /// <example>true</example>
-    [SwaggerSchemaCustom(Example = true)]
     public bool Completed { get; set; }
 
     /// <summary>
     /// The unique identifier for tracking the SMTP operation.
     /// </summary>
     /// <example>example value</example>
-    [SwaggerSchemaCustom(Example = "{some-random-guid}")]
     public string Id { get; set; }
 
     /// <summary>
     /// The error message if the SMTP operation encountered issues.
     /// </summary>
     /// <example>example value</example>
-    [SwaggerSchemaCustom(Example = "")]
     public string Error { get; set; }
 
     /// <summary>
     /// The current state of the SMTP operation.
     /// </summary>
     /// <example>example value</example>
-    [SwaggerSchemaCustom(Example = "")]
     public string Status { get; set; }
 
     /// <summary>
     /// The progress indicator showing completion percentage of the operation.
     /// </summary>
     /// <example>1</example>
-    [SwaggerSchemaCustom(Example = 0)]
     public int Percents { get; set; }
 }

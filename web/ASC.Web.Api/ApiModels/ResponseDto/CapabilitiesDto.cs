@@ -35,7 +35,6 @@ public class CapabilitiesDto
     /// Specifies if the LDAP settings are enabled or not.
     /// </summary>
     /// <example>false</example>
-    [SwaggerSchemaCustom(Example = false)]
     public required bool LdapEnabled { get; set; }
 
     /// <summary>
@@ -54,7 +53,6 @@ public class CapabilitiesDto
     /// The SP login label.
     /// </summary>
     /// <example>Enterprise SSO</example>
-    [SwaggerSchemaCustom(Example = "")]
     public required string SsoLabel { get; set; }
 
     /// <summary>
@@ -67,7 +65,6 @@ public class CapabilitiesDto
     /// The SSO URL. If this parameter is empty, then the SSO settings are disabled.
     /// </summary>
     /// <example>https://sso.example.com/login</example>
-    [SwaggerSchemaCustom(Example = "")]
     [Url]
     public required string SsoUrl { get; set; }
     

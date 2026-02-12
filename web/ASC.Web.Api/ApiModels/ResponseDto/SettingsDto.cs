@@ -61,7 +61,6 @@ public class SettingsDto
     /// The UTC offset in the TimeSpan format.
     /// </summary>
     /// <example>-08:30:00</example>
-    [SwaggerSchemaCustom(Example = "-8.5")]
     public TimeSpan UtcOffset { get; set; }
 
     /// <summary>
