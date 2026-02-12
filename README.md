@@ -412,3 +412,7 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/):
 ## Licensing
 
 ONLYOFFICE DocSpace is released under AGPLv3 license. See the LICENSE file for more information.
+
+## Need help for developers? 
+
+Check our [official API documentation](https://api.onlyoffice.com/docspace/).
