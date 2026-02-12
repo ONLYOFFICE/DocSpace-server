@@ -29,7 +29,7 @@ namespace ASC.Web.Api.Models;
 /// <summary>
 /// The request parameters for the payment URL configuration with quantity information.
 /// </summary>
-public class PaymentUrlRequestsDto
+public class PaymentUrlRequestDto
 {
     /// <summary>
     /// The URL where the user will be redirected after payment processing.
@@ -40,6 +40,54 @@ public class PaymentUrlRequestsDto
     /// The payment quantity.
     /// </summary>
     public Dictionary<string, int> Quantity { get; set; }
+}
+
+/// <summary>
+/// The request parameters for handling the payment redirect URL.
+/// </summary>
+public class PaymentAccountRequestDto
+{
+    /// <summary>
+    /// The URL where the user will be redirected after payment processing.
+    /// </summary>
+    [FromQuery(Name = "backUrl")]
+    public string BackUrl { get; set; }
+}
+
+/// <summary>
+/// The request parameters for managing the payment information.
+/// </summary>
+public class PaymentInformationRequestDto
+{
+    /// <summary>
+    /// Specifies whether to refresh the payment information cache or not.
+    /// </summary>
+    [FromQuery(Name = "refresh")]
+    public bool Refresh { get; set; }
+}
+
+/// <summary>
+/// The request parameters for getting the quotas.
+/// </summary>
+public class QuotasRequestDto
+{
+    /// <summary>
+    /// Specifies whether to return the wallet quotas only.
+    /// </summary>
+    [FromQuery(Name = "wallet")]
+    public bool Wallet { get; set; }
+}
+
+/// <summary>
+/// The request parameters for getting service quota.
+/// </summary>
+public class CustomerServiceQuotaRequestDto: PaymentInformationRequestDto
+{
+    /// <summary>
+    /// The service name.
+    /// </summary>
+    [FromQuery(Name = "serviceName")]
+    public string ServiceName { get; set; }
 }
 
 /// <summary>
@@ -96,6 +144,23 @@ public class TopUpDepositRequestDto
     /// The three-character ISO 4217 currency symbol.
     /// </summary>
     public string Currency { get; set; }
+}
+
+/// <summary>
+/// The request parameters for buying wallet service.
+/// </summary>
+public class BuyWalletServiceRequestDto
+{
+    /// <summary>
+    /// Number of services provided.
+    /// </summary>
+    [Range(1, 999999)]
+    public int Quantity { get; set; }
+
+    /// <summary>
+    /// The service name.
+    /// </summary>
+    public string ServiceName { get; set; }
 }
 
 /// <summary>

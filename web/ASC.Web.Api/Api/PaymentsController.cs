@@ -79,7 +79,7 @@ public class PaymentController(
     [SwaggerResponse(200, "The URL to the payment page", typeof(Uri))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("url")]
-    public async Task<Uri> GetPaymentUrl(PaymentUrlRequestsDto inDto)
+    public async Task<Uri> GetPaymentUrl(PaymentUrlRequestDto inDto)
     {
         await DemandAdminAsync();
 
@@ -405,7 +405,7 @@ public class PaymentController(
     [SwaggerResponse(200, "The URL to the payment account", typeof(string))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("account")]
-    public async Task<string> GetPaymentAccount(PaymentUrlRequestDto inDto)
+    public async Task<string> GetPaymentAccount(PaymentAccountRequestDto inDto)
     {
         if (!tariffService.IsConfigured())
         {
@@ -760,17 +760,18 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Returns the report of customer operations from the accounting service.
+    /// Returns the service quota from the accounting service.
     /// </remarks>
     /// <summary>
-    /// Get the customer operations
+    /// Get the service quota
     /// </summary>
-    /// <path>api/2.0/portal/payment/customer/operations</path>
+    /// <path>api/2.0/portal/payment/customer/servicequota</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The customer operations", typeof(ReportDto))]
+    [SwaggerResponse(200, "The service quota", typeof(Balance))]
     [SwaggerResponse(403, "No permissions to perform this action")]
-    [HttpGet("customer/operations")]
-    public async Task<ReportDto> GetCustomerOperations(CustomerOperationsRequestDto inDto)
+    [SwaggerResponse(404, "Service could not be found")]
+    [HttpGet("customer/servicequota")]
+    public async Task<Balance> GetCustomerServiceQuota(CustomerServiceQuotaRequestDto inDto)
     {
         await DemandAdminAsync();
 
@@ -787,10 +788,62 @@ public class PaymentController(
             return null;
         }
 
-        var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate);
-        var utcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate);
-        var report = await tariffService.GetCustomerOperationsAsync(tenant.Id, utcStartDate, utcEndDate, inDto.ParticipantName, inDto.Credit, inDto.Debit, inDto.Offset, inDto.Limit);
+        var serviceName = await GetPaymentServiceName(inDto.ServiceName);
 
+        var result = await tariffService.GetCustomerServiceQuotaAsync(tenant.Id, serviceName, inDto.Refresh);
+        return result;
+    }
+
+    /// <remarks>
+    /// Returns the report of customer operations from the accounting service.
+    /// </remarks>
+    /// <summary>
+    /// Get the customer operations
+    /// </summary>
+    /// <path>api/2.0/portal/payment/customer/operations</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The customer operations", typeof(ReportDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "Service could not be found")]
+    [HttpGet("customer/operations")]
+    public async Task<ReportDto> GetCustomerOperations([FromQuery]CustomerOperationsRequestDto inDto)
+    {
+        await DemandAdminAsync();
+
+        if (!tariffService.IsConfigured())
+        {
+            return null;
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null)
+        {
+            return null;
+        }
+
+        var serviceName = string.IsNullOrEmpty(inDto.ServiceName) ? null : await GetPaymentServiceName(inDto.ServiceName);
+        var utcStartDate = tenantUtil.DateTimeToUtc(inDto.StartDate ?? tenant.CreationDateTime);
+        var utcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate ?? DateTime.UtcNow);
+
+        var filter = new OperationFilter
+        {
+            ServiceName = serviceName,
+            UtcStartDate = utcStartDate,
+            UtcEndDate = utcEndDate,
+            ParticipantName = inDto.ParticipantName,
+            Credit = inDto.Credit,
+            Debit = inDto.Debit,
+            Offset = inDto.Offset,
+            Limit = inDto.Limit,
+            Types = inDto.Types,
+            Status = inDto.Status,
+            OrderBy = inDto.OrderBy,
+            OrderType = inDto.OrderType
+        };
+
+        var report = await tariffService.GetCustomerOperationsAsync(tenant.Id, filter);
         if (report == null)
         {
             return null;
@@ -810,6 +863,8 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/customer/operationsreport</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Ok", typeof(DocumentBuilderTaskDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "Service could not be found")]
     [HttpPost("customer/operationsreport")]
     public async Task<DocumentBuilderTaskDto> CreateCustomerOperationsReport(CustomerOperationsReportRequestDto inDto)
     {
@@ -828,7 +883,9 @@ public class PaymentController(
             return null;
         }
 
-        inDto = inDto ?? new CustomerOperationsReportRequestDto();
+        var serviceName = string.IsNullOrEmpty(inDto.ServiceName) ? null : await GetPaymentServiceName(inDto.ServiceName);
+
+        inDto ??= new CustomerOperationsReportRequestDto();
 
         var userId = securityContext.CurrentAccount.ID;
 
@@ -840,9 +897,24 @@ public class PaymentController(
 
         var taskProgress = await documentBuilderTaskManager.StartTask(task, false);
 
-        var headers = MessageSettings.GetHttpHeaders(Request)?.ToDictionary(x => x.Key, x => x.Value.ToString()) ?? [];
+        var headers = MessageSettings.GetHttpHeaders(Request)?
+            .ToDictionary(x => x.Key, x => x.Value.ToString()) ?? [];
 
-        var evt = new CustomerOperationsReportIntegrationEvent(userId, tenantId, baseUri, inDto.StartDate, inDto.EndDate, inDto.ParticipantName, inDto.Credit, inDto.Debit, headers, false);
+        var evt = new CustomerOperationsReportIntegrationEvent(
+            userId,
+            tenantId,
+            baseUri,
+            serviceName,
+            inDto.StartDate,
+            inDto.EndDate,
+            inDto.ParticipantName,
+            inDto.Credit,
+            inDto.Debit,
+            inDto.Types,
+            inDto.Status,
+            inDto.OrderBy,
+            inDto.OrderType,
+            headers);
 
         await eventBus.PublishAsync(evt);
 
@@ -904,7 +976,7 @@ public class PaymentController(
             return;
         }
 
-        var evt = new CustomerOperationsReportIntegrationEvent(securityContext.CurrentAccount.ID, tenantId, null, terminate: true);
+        var evt = new CustomerOperationsReportIntegrationEvent(securityContext.CurrentAccount.ID, tenantId, null, null, terminate: true);
 
         await eventBus.PublishAsync(evt);
     }
@@ -1089,6 +1161,50 @@ public class PaymentController(
         }
     }
 
+    /// <remarks>
+    /// The request for buying wallet service.
+    /// </remarks>
+    /// <summary>
+    /// Buy wallet service
+    /// </summary>
+    /// <path>api/2.0/portal/payment/buywalletservice</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The service payment information", typeof(ServicePayment))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(404, "Service could not be found")]
+    [HttpPost("buywalletservice")]
+    [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
+    public async Task<ServicePayment> BuyWalletService(BuyWalletServiceRequestDto inDto)
+    {
+        if (!tariffService.IsConfigured())
+        {
+            return null;
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo is not { PaymentMethodStatus: PaymentMethodStatus.Set })
+        {
+            return null;
+        }
+
+        await DemandPayerAsync(customerInfo);
+
+        var serviceName = await GetPaymentServiceName(inDto.ServiceName);
+        var customerParticipantName = securityContext.CurrentAccount.ID.ToString();
+        var details = $"{serviceName} {inDto.Quantity}";
+        var metadata = new Dictionary<string, string> { { BillingClient.MetadataDetails, details } };
+
+        var result = await tariffService.MakeServicePaymentAsync(tenant.Id, serviceName, inDto.Quantity, customerParticipantName, metadata);
+        if (result != null)
+        {
+            messageService.Send(MessageAction.CustomerOperationPerformed, null, details);
+        }
+
+        return result;
+    }
+
     private async Task DemandPayerAsync(CustomerInfo customerInfo)
     {
         var payer = await userManager.GetUserByEmailAsync(customerInfo?.Email);
@@ -1123,5 +1239,20 @@ public class PaymentController(
         }
 
         await fusionCache.SetAsync(key, count + 1, TimeSpan.FromMinutes(_expirationMinutes));
+    }
+
+    private async Task<string> GetPaymentServiceName(string quotaName)
+    {
+        var quotaList = await tenantManager.GetTenantQuotasAsync(true, true);
+
+        var selectedQuota = quotaList.FirstOrDefault(x =>
+            x.Name.Equals(quotaName, StringComparison.InvariantCultureIgnoreCase));
+
+        // only aitools available for purchasing!
+        var serviceName = selectedQuota is not { TenantId: (int)TenantWalletService.AITools }
+            ? throw new ItemNotFoundException("Service could not be found")
+            : selectedQuota.GetPaymentId();
+
+        return serviceName;
     }
 }

@@ -106,8 +106,8 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         CultureInfo.CurrentCulture = usertCulture;
         CultureInfo.CurrentUICulture = usertCulture;
 
-        var utcStartDate = taskData.StartDate != null ? tenantUtil.DateTimeToUtc(taskData.StartDate.Value) : tenant.CreationDateTime;
-        var utcEndDate = taskData.EndDate != null ? tenantUtil.DateTimeToUtc(taskData.EndDate.Value) : DateTime.UtcNow;
+        var utcStartDate = tenantUtil.DateTimeToUtc(taskData.StartDate ?? tenant.CreationDateTime);
+        var utcEndDate = tenantUtil.DateTimeToUtc(taskData.EndDate ?? DateTime.UtcNow);
 
         var script = await DocumentBuilderScriptHelper.ReadTemplateFromEmbeddedResource(ScriptName) ?? throw new Exception("Template not found");
 
@@ -146,7 +146,26 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         {
             await writer.WriteAsync(scriptParts[0]);
 
-            var partialRecords = GetCustomerOperationsReportDataAsync(tariffService, tenantUtil, displayUserSettingsHelper, tenant.Id, utcStartDate, utcEndDate, taskData.ParticipantName, taskData.Credit, taskData.Debit);
+            var filter = new OperationFilter
+            {
+                ServiceName = taskData.ServiceName,
+                UtcStartDate = utcStartDate,
+                UtcEndDate = utcEndDate,
+                ParticipantName = taskData.ParticipantName,
+                Credit = taskData.Credit,
+                Debit = taskData.Debit,
+                Types = taskData.Types,
+                Status = taskData.Status,
+                OrderBy = taskData.OrderBy,
+                OrderType = taskData.OrderType
+            };
+
+            var partialRecords = GetCustomerOperationsReportDataAsync(
+                tariffService,
+                tenantUtil,
+                displayUserSettingsHelper,
+                tenant.Id,
+                filter);
 
             if (partialRecords != null)
             {
@@ -163,14 +182,22 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         return (scriptFilePath, tempFileName, outputFileName);
     }
 
-    private static async IAsyncEnumerable<List<Operation>> GetCustomerOperationsReportDataAsync(TariffService tariffService, TenantUtil tenantUtil, DisplayUserSettingsHelper displayUserSettingsHelper, int tenantId, DateTime utcStartDate, DateTime utcEndDate, string participantName, bool? credit, bool? debit)
+    private static async IAsyncEnumerable<List<Operation>> GetCustomerOperationsReportDataAsync(
+        TariffService tariffService,
+        TenantUtil tenantUtil,
+        DisplayUserSettingsHelper displayUserSettingsHelper,
+        int tenantId,
+        OperationFilter filter)
     {
         var offset = 0;
         var limit = 1000;
 
         while (true)
         {
-            var report = await tariffService.GetCustomerOperationsAsync(tenantId, utcStartDate, utcEndDate, participantName, credit, debit, offset, limit);
+            filter.Offset = offset;
+            filter.Limit = limit;
+
+            var report = await tariffService.GetCustomerOperationsAsync(tenantId, filter);
 
             if (report?.Collection == null)
             {
@@ -254,4 +281,16 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
     record PropertyValue(string Value, string Format, string Halign = null);
 }
 
-public record CustomerOperationsReportTaskData(IDictionary<string, string> Headers, DateTime? StartDate, DateTime? EndDate, string ParticipantName, bool? Credit, bool? Debit);
+public record CustomerOperationsReportTaskData(
+    IDictionary<string, string> Headers,
+    string ServiceName,
+    DateTime? StartDate,
+    DateTime? EndDate,
+    string ParticipantName,
+    bool? Credit,
+    bool? Debit,
+    OperationType? Types,
+    OperationStatus? Status,
+    string OrderBy,
+    OperationOrderType? OrderType
+);
