@@ -34,6 +34,7 @@ public class SaveFormRoleMappingDto<T>
     /// <summary>
     /// The form ID.
     /// </summary>
+    /// <example>1</example>
     public required T FormId { get; set; }
 
     /// <summary>

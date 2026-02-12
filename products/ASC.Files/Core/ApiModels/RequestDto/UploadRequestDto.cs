@@ -54,16 +54,19 @@ public class UploadRequestDto : IModelWithFile, IDisposable
     /// <summary>
     /// Specifies whether to create the new file if it already exists or not.
     /// </summary>
+    /// <example>true</example>
     public bool CreateNewIfExist { get; set; }
 
     /// <summary>
     /// Specifies whether to upload documents in the original formats as well or not.
     /// </summary>
+    /// <example>true</example>
     public bool? StoreOriginalFileFlag { get; set; }
 
     /// <summary>
     /// Specifies whether to keep the file converting status or not.
     /// </summary>
+    /// <example>false</example>
     public bool KeepConvertStatus { get; set; }
 
     private Stream _stream;
@@ -113,6 +116,7 @@ public class UploadWithFolderRequestDto<T>
     /// <summary>
     /// The folder ID to upload a file.
     /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "folderId")]
     public required T FolderId { get; set; }
 

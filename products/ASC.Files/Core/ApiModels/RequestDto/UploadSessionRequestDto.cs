@@ -26,28 +26,54 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The request parameters for uploading a file in a session.
+/// </summary>
 public class UploadSessionRequestDto<T>
-{    
+{
+    /// <summary>
+    /// The folder ID.
+    /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "folderId")]
     public T FolderId { get; set; }
-    
+
+    /// <summary>
+    /// The upload session ID.
+    /// </summary>
+    /// <example>session_abc123</example>
     [FromRoute(Name = "sessionId")]
     public string SessionId { get; set; }
-    
+
     public IFormFile File { get; set; }
 }
 
+/// <summary>
+/// The request parameters for async uploading a file chunk in a session.
+/// </summary>
 public class UploadSessionAsyncRequestDto<T>
 {
+    /// <summary>
+    /// The folder ID.
+    /// </summary>
+    /// <example>1</example>
     [FromRoute(Name = "folderId")]
     public T FolderId { get; set; }
-    
+
+    /// <summary>
+    /// The upload session ID.
+    /// </summary>
+    /// <example>session_abc123</example>
     [FromRoute(Name = "sessionId")]
     public string SessionId { get; set; }
-    
+
+    /// <summary>
+    /// The chunk number.
+    /// </summary>
+    /// <example>1</example>
     [FromQuery]
     public int? ChunkNumber { get; set; }
-    
+
     [FromForm]
     public IFormFile File { get; set; }
 }
