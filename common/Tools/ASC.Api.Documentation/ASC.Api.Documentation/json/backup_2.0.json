@@ -478,7 +478,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -689,7 +689,7 @@
             "description": "Specifies if a dump will be created or not.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           }
         ],
@@ -723,7 +723,7 @@
             "schema": {
               "type": "string",
               "format": "date-time",
-              "example": "2008-04-10T06:30:00.0000000+04:00"
+              "example": "2025-01-01T00:00:00Z"
             }
           },
           {
@@ -733,7 +733,7 @@
             "schema": {
               "type": "string",
               "format": "date-time",
-              "example": "2008-04-10T06:30:00.0000000+04:00"
+              "example": "2025-12-31T23:59:59Z"
             }
           },
           {
@@ -742,7 +742,7 @@
             "description": "Specifies if the backups are paid or not.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           }
         ],
@@ -872,7 +872,7 @@
           "dump": {
             "type": "boolean",
             "description": "Specifies if a dump will be created or not.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -1108,7 +1108,7 @@
             "type": "string",
             "description": "The backup ID.",
             "nullable": true,
-            "example": "some text"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "storageType": {
             "$ref": "#/components/schemas/BackupStorageType"
@@ -1129,7 +1129,7 @@
           "dump": {
             "type": "boolean",
             "description": "Specifies if a dump will be created or not.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -1154,7 +1154,7 @@
             "description": "The maximum number of the stored backup copies.",
             "format": "int32",
             "nullable": true,
-            "example": 1234
+            "example": 5
           },
           "cronParams": {
             "$ref": "#/components/schemas/Cron"
@@ -1162,7 +1162,7 @@
           "dump": {
             "type": "boolean",
             "description": "Specifies if a dump will be created or not.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,

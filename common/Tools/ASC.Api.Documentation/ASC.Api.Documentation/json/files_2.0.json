@@ -303,7 +303,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -312,7 +312,7 @@
             "description": "The document key for tracking changes.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "abc123"
             }
           },
           {
@@ -369,7 +369,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 1
             }
           },
           {
@@ -378,7 +378,7 @@
             "description": "Specifies if the document will be opened for viewing only or not.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -387,7 +387,8 @@
             "description": "The editor type to open the file.",
             "schema": {
               "$ref": "#/components/schemas/EditorType"
-            }
+            },
+            "example": 1
           },
           {
             "name": "edit",
@@ -395,7 +396,7 @@
             "description": "Specifies if the document is opened in the editing mode or not.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -404,7 +405,7 @@
             "description": "Specifies if the document is opened in the form-filling mode or not.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           }
         ],
@@ -648,7 +649,8 @@
             "description": "The start date of the history.",
             "schema": {
               "$ref": "#/components/schemas/ApiDateTime"
-            }
+            },
+            "example": "2025-01-01T00:00:00.0000000Z"
           },
           {
             "name": "toDate",
@@ -656,7 +658,8 @@
             "description": "The end date of the history.",
             "schema": {
               "$ref": "#/components/schemas/ApiDateTime"
-            }
+            },
+            "example": "2025-12-31T23:59:59.0000000Z"
           },
           {
             "name": "count",
@@ -667,7 +670,7 @@
               "minimum": 1,
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 25
             }
           },
           {
@@ -677,7 +680,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           }
         ],
@@ -1408,7 +1411,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 1
             }
           }
         ],
@@ -1488,7 +1491,7 @@
             "description": "The form-filling session ID.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "doc_key_123"
             }
           }
         ],
@@ -1533,7 +1536,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 1
             }
           }
         ],
@@ -1769,7 +1772,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 1
             }
           },
           {
@@ -1778,7 +1781,7 @@
             "description": "The file version URL of the restore.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "https://example.com"
             }
           }
         ],
@@ -3110,7 +3113,9 @@
                 },
                 "description": "The file IDs.",
                 "example": [
-                  1234
+                  1,
+                  2,
+                  3
                 ]
               }
             }
@@ -3239,7 +3244,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -3248,7 +3253,8 @@
             "description": "The filter type.",
             "schema": {
               "$ref": "#/components/schemas/FilterType"
-            }
+            },
+            "example": 1
           },
           {
             "name": "excludeSubject",
@@ -3256,7 +3262,7 @@
             "description": "Specifies whether to exclude search by user or group ID.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -3265,7 +3271,8 @@
             "description": "Specifies whether to return only files, only folders or all elements.",
             "schema": {
               "$ref": "#/components/schemas/ApplyFilterOption"
-            }
+            },
+            "example": 1
           },
           {
             "name": "searchArea",
@@ -3273,7 +3280,8 @@
             "description": "The search area.",
             "schema": {
               "$ref": "#/components/schemas/SearchArea"
-            }
+            },
+            "example": 1
           },
           {
             "name": "extension",
@@ -3285,7 +3293,7 @@
               "items": {
                 "type": "string"
               },
-              "example": ".txt"
+              "example": ".docx"
             }
           },
           {
@@ -3297,7 +3305,7 @@
               "minimum": 1,
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 25
             }
           },
           {
@@ -3307,7 +3315,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
@@ -3316,7 +3324,7 @@
             "description": "Specifies the sorting criteria for the folder request.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "DateAndTime"
             }
           },
           {
@@ -3325,7 +3333,8 @@
             "description": "The order in which the results are sorted.",
             "schema": {
               "$ref": "#/components/schemas/SortOrder"
-            }
+            },
+            "example": 1
           },
           {
             "name": "filterValue",
@@ -3333,7 +3342,7 @@
             "description": "The text used for filtering or searching folder contents.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "My Document"
             }
           }
         ],
@@ -3416,7 +3425,7 @@
             "schema": {
               "type": "integer",
               "format": "int64",
-              "example": 1234
+              "example": 1024
             }
           }
         ],
@@ -3495,7 +3504,8 @@
             "description": "The start date of the history request.",
             "schema": {
               "$ref": "#/components/schemas/ApiDateTime"
-            }
+            },
+            "example": "2025-01-01T00:00:00.0000000Z"
           },
           {
             "name": "toDate",
@@ -3503,7 +3513,8 @@
             "description": "The end date of the history request.",
             "schema": {
               "$ref": "#/components/schemas/ApiDateTime"
-            }
+            },
+            "example": "2025-12-31T23:59:59.0000000Z"
           },
           {
             "name": "count",
@@ -3514,7 +3525,7 @@
               "minimum": 1,
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 25
             }
           },
           {
@@ -3524,7 +3535,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           }
         ],
@@ -4056,7 +4067,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -4066,7 +4077,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -4075,7 +4086,8 @@
             "description": "The filter type.",
             "schema": {
               "$ref": "#/components/schemas/FilterType"
-            }
+            },
+            "example": 1
           },
           {
             "name": "roomId",
@@ -4093,7 +4105,7 @@
             "description": "Specifies whether to exclude search by user or group ID.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -4102,7 +4114,8 @@
             "description": "Specifies whether to return only files, only folders, or all elements from the specified folder.",
             "schema": {
               "$ref": "#/components/schemas/ApplyFilterOption"
-            }
+            },
+            "example": 1
           },
           {
             "name": "extension",
@@ -4110,7 +4123,7 @@
             "description": "Specifies whether to search for the specific file extension.",
             "schema": {
               "type": "string",
-              "example": ".txt"
+              "example": ".docx"
             }
           },
           {
@@ -4119,7 +4132,8 @@
             "description": "The search area.",
             "schema": {
               "$ref": "#/components/schemas/SearchArea"
-            }
+            },
+            "example": 1
           },
           {
             "name": "formsItemKey",
@@ -4127,7 +4141,7 @@
             "description": "The forms item key.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "doc_key_123"
             }
           },
           {
@@ -4136,7 +4150,7 @@
             "description": "The forms item type.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "text"
             }
           },
           {
@@ -4148,7 +4162,7 @@
               "minimum": 1,
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 25
             }
           },
           {
@@ -4158,7 +4172,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
@@ -4167,7 +4181,7 @@
             "description": "The property used for sorting the folder request results.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "DateAndTime"
             }
           },
           {
@@ -4176,7 +4190,8 @@
             "description": "The order in which the results are sorted.",
             "schema": {
               "$ref": "#/components/schemas/SortOrder"
-            }
+            },
+            "example": 1
           },
           {
             "name": "filterValue",
@@ -4184,7 +4199,7 @@
             "description": "The text value used as a filter parameter for folder content queries.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "My Document"
             }
           },
           {
@@ -4193,7 +4208,8 @@
             "description": "The location context of the request, specifying the area\r\nwhere the operation is performed, such as a room, documents, or a link.",
             "schema": {
               "$ref": "#/components/schemas/Location"
-            }
+            },
+            "example": 1
           }
         ],
         "responses": {
@@ -4778,7 +4794,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -4787,7 +4803,8 @@
             "description": "The filter type.",
             "schema": {
               "$ref": "#/components/schemas/FilterType"
-            }
+            },
+            "example": 1
           },
           {
             "name": "count",
@@ -4798,7 +4815,7 @@
               "minimum": 1,
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 25
             }
           },
           {
@@ -4808,7 +4825,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
@@ -4817,7 +4834,7 @@
             "description": "Specifies the field by which the folder content should be sorted.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "DateAndTime"
             }
           },
           {
@@ -4826,7 +4843,8 @@
             "description": "The order in which the results are sorted.",
             "schema": {
               "$ref": "#/components/schemas/SortOrder"
-            }
+            },
+            "example": 1
           },
           {
             "name": "filterValue",
@@ -4834,7 +4852,7 @@
             "description": "The text used as a filter or search criterion for folder content queries.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "My Document"
             }
           }
         ],
@@ -4906,7 +4924,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -4915,7 +4933,8 @@
             "description": "The filter type.",
             "schema": {
               "$ref": "#/components/schemas/FilterType"
-            }
+            },
+            "example": 1
           },
           {
             "name": "applyFilterOption",
@@ -4923,7 +4942,8 @@
             "description": "Specifies whether to return only files, only folders or all elements.",
             "schema": {
               "$ref": "#/components/schemas/ApplyFilterOption"
-            }
+            },
+            "example": 1
           },
           {
             "name": "count",
@@ -4934,7 +4954,7 @@
               "minimum": 1,
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 25
             }
           },
           {
@@ -4944,7 +4964,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
@@ -4953,7 +4973,7 @@
             "description": "The property used to specify the sorting criteria for folder contents.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "DateAndTime"
             }
           },
           {
@@ -4962,7 +4982,8 @@
             "description": "The order in which the results are sorted.",
             "schema": {
               "$ref": "#/components/schemas/SortOrder"
-            }
+            },
+            "example": 1
           },
           {
             "name": "filterValue",
@@ -4970,7 +4991,7 @@
             "description": "The text used for filtering or searching folder contents.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "My Document"
             }
           }
         ],
@@ -5042,7 +5063,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -5051,7 +5072,8 @@
             "description": "The filter type.",
             "schema": {
               "$ref": "#/components/schemas/FilterType"
-            }
+            },
+            "example": 1
           },
           {
             "name": "count",
@@ -5062,7 +5084,7 @@
               "minimum": 1,
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 25
             }
           },
           {
@@ -5072,7 +5094,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
@@ -5081,7 +5103,7 @@
             "description": "Specifies the field by which the folder content should be sorted.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "DateAndTime"
             }
           },
           {
@@ -5090,7 +5112,8 @@
             "description": "The order in which the results are sorted.",
             "schema": {
               "$ref": "#/components/schemas/SortOrder"
-            }
+            },
+            "example": 1
           },
           {
             "name": "filterValue",
@@ -5098,7 +5121,7 @@
             "description": "The text used as a filter or search criterion for folder content queries.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "My Document"
             }
           }
         ],
@@ -5170,7 +5193,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -5179,7 +5202,8 @@
             "description": "The filter type.",
             "schema": {
               "$ref": "#/components/schemas/FilterType"
-            }
+            },
+            "example": 1
           },
           {
             "name": "withoutTrash",
@@ -5187,7 +5211,7 @@
             "description": "Specifies whether to return the \"Trash\" section or not.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -5199,7 +5223,7 @@
               "minimum": 1,
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 25
             }
           },
           {
@@ -5209,7 +5233,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
@@ -5218,7 +5242,7 @@
             "description": "Specifies the field by which the folder content should be sorted.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "DateAndTime"
             }
           },
           {
@@ -5227,7 +5251,8 @@
             "description": "The order in which the results are sorted.",
             "schema": {
               "$ref": "#/components/schemas/SortOrder"
-            }
+            },
+            "example": 1
           },
           {
             "name": "filterValue",
@@ -5235,7 +5260,7 @@
             "description": "The text used as a filter for searching or retrieving folder contents.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "My Document"
             }
           }
         ],
@@ -5307,7 +5332,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -5316,7 +5341,8 @@
             "description": "The filter type.",
             "schema": {
               "$ref": "#/components/schemas/FilterType"
-            }
+            },
+            "example": 1
           },
           {
             "name": "applyFilterOption",
@@ -5324,7 +5350,8 @@
             "description": "Specifies whether to return only files, only folders or all elements.",
             "schema": {
               "$ref": "#/components/schemas/ApplyFilterOption"
-            }
+            },
+            "example": 1
           },
           {
             "name": "count",
@@ -5335,7 +5362,7 @@
               "minimum": 1,
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 25
             }
           },
           {
@@ -5345,7 +5372,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
@@ -5354,7 +5381,7 @@
             "description": "The property used to specify the sorting criteria for folder contents.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "DateAndTime"
             }
           },
           {
@@ -5363,7 +5390,8 @@
             "description": "The order in which the results are sorted.",
             "schema": {
               "$ref": "#/components/schemas/SortOrder"
-            }
+            },
+            "example": 1
           },
           {
             "name": "filterValue",
@@ -5371,7 +5399,7 @@
             "description": "The text used for filtering or searching folder contents.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "My Document"
             }
           }
         ],
@@ -5540,7 +5568,7 @@
                   "InsertFile.Title": {
                     "type": "string",
                     "description": "The file title to be inserted.",
-                    "example": "SampleFile"
+                    "example": "My Document"
                   },
                   "InsertFile.CreateNewIfExist": {
                     "type": "boolean",
@@ -5550,7 +5578,7 @@
                   "InsertFile.KeepConvertStatus": {
                     "type": "boolean",
                     "description": "Specifies whether to keep the file converting status or not.",
-                    "example": true
+                    "example": false
                   },
                   "InsertFile.Stream.CanRead": {
                     "type": "boolean",
@@ -5788,7 +5816,7 @@
                   "Title": {
                     "type": "string",
                     "description": "The file title to be inserted.",
-                    "example": "SampleFile"
+                    "example": "My Document"
                   },
                   "CreateNewIfExist": {
                     "type": "boolean",
@@ -5798,7 +5826,7 @@
                   "KeepConvertStatus": {
                     "type": "boolean",
                     "description": "Specifies whether to keep the file converting status or not.",
-                    "example": true
+                    "example": false
                   },
                   "Stream.CanRead": {
                     "type": "boolean",
@@ -6027,7 +6055,7 @@
             "description": "Specifies whether a conversion operation is started or not.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           }
         ],
@@ -6474,7 +6502,7 @@
             "description": "Specifies whether to return only the current operation",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           }
         ],
@@ -6539,7 +6567,7 @@
             "description": "The ID of the file operation.",
             "schema": {
               "type": "string",
-              "example": "1"
+              "example": "operation-123-abc"
             }
           }
         ],
@@ -6573,7 +6601,8 @@
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/FileOperationType"
-            }
+            },
+            "example": 0
           },
           {
             "name": "id",
@@ -6581,7 +6610,7 @@
             "description": "The ID of the file operation.",
             "schema": {
               "type": "string",
-              "example": "1"
+              "example": "operation-123-abc"
             }
           }
         ],
@@ -7259,15 +7288,17 @@
           {
             "name": "sessionId",
             "in": "path",
+            "description": "The session ID.",
             "required": true,
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "session-123-abc"
             }
           },
           {
             "name": "folderId",
             "in": "path",
+            "description": "The folder ID.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -7325,6 +7356,7 @@
           {
             "name": "folderId",
             "in": "path",
+            "description": "The folder ID.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -7335,10 +7367,11 @@
           {
             "name": "sessionId",
             "in": "path",
+            "description": "The upload session ID.",
             "required": true,
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "session_abc123"
             }
           }
         ],
@@ -7420,6 +7453,7 @@
           {
             "name": "folderId",
             "in": "path",
+            "description": "The folder ID.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -7430,19 +7464,21 @@
           {
             "name": "sessionId",
             "in": "path",
+            "description": "The upload session ID.",
             "required": true,
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "session_abc123"
             }
           },
           {
             "name": "ChunkNumber",
             "in": "query",
+            "description": "The chunk number.",
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 1
             }
           }
         ],
@@ -7524,6 +7560,7 @@
           {
             "name": "folderId",
             "in": "path",
+            "description": "The folder ID.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -7534,10 +7571,11 @@
           {
             "name": "sessionId",
             "in": "path",
+            "description": "The session ID.",
             "required": true,
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "doc_key_123"
             }
           }
         ],
@@ -9182,7 +9220,10 @@
                     }
                   ]
                 },
-                "description": "Sharing rights (None, ReadWrite, Read, Restrict, Varies, Review, Comment, FillForms, CustomFilter, RoomAdmin, Editing, Collaborator)."
+                "description": "Sharing rights (None, ReadWrite, Read, Restrict, Varies, Review, Comment, FillForms, CustomFilter, RoomAdmin, Editing, Collaborator).",
+                "example": [
+                  1
+                ]
               }
             }
           }
@@ -9431,7 +9472,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": ".txt"
+              "example": ".docx"
             }
           }
         ],
@@ -10014,7 +10055,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -10026,7 +10067,7 @@
               "minimum": 1,
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 25
             }
           },
           {
@@ -10036,7 +10077,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
@@ -10045,7 +10086,7 @@
             "description": "The filter value used for searching or querying group members based on text input.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "My Document"
             }
           }
         ],
@@ -10123,7 +10164,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -10135,7 +10176,7 @@
               "minimum": 1,
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 25
             }
           },
           {
@@ -10145,7 +10186,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
@@ -10154,7 +10195,7 @@
             "description": "The filter value used for searching or querying group members based on text input.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "My Document"
             }
           }
         ],
@@ -10468,7 +10509,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "doc_key_123"
             }
           },
           {
@@ -10520,7 +10561,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "doc_key_123"
             }
           }
         ],
@@ -10623,7 +10664,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 1
             }
           }
         ],
@@ -10857,7 +10898,7 @@
             "description": "Specifies whether WebDAV resources should be excluded from the result..",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           }
         ],
@@ -11226,7 +11267,8 @@
               "type": "array",
               "items": {
                 "$ref": "#/components/schemas/RoomType"
-              }
+              },
+              "example": 1
             }
           },
           {
@@ -11235,7 +11277,7 @@
             "description": "The filter by user ID.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -11244,7 +11286,8 @@
             "description": "The room search area (Active, Archive, Any, Recent by links).",
             "schema": {
               "$ref": "#/components/schemas/SearchArea"
-            }
+            },
+            "example": 1
           },
           {
             "name": "withoutTags",
@@ -11252,7 +11295,7 @@
             "description": "Specifies whether to search by tags or not.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -11261,7 +11304,7 @@
             "description": "The tags in the serialized format.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "tag1"
             }
           },
           {
@@ -11270,7 +11313,7 @@
             "description": "Specifies whether to exclude search by user or group ID.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -11279,7 +11322,8 @@
             "description": "The filter by provider name (None, Box, DropBox, GoogleDrive, kDrive, OneDrive, SharePoint, WebDav, Yandex, Storage).",
             "schema": {
               "$ref": "#/components/schemas/ProviderFilter"
-            }
+            },
+            "example": 1
           },
           {
             "name": "subjectFilter",
@@ -11287,7 +11331,8 @@
             "description": "The filter by user (Owner - 0, Member - 1).",
             "schema": {
               "$ref": "#/components/schemas/SubjectFilter"
-            }
+            },
+            "example": 1
           },
           {
             "name": "quotaFilter",
@@ -11295,7 +11340,8 @@
             "description": "The filter by quota (All - 0, Default - 1, Custom - 2).",
             "schema": {
               "$ref": "#/components/schemas/QuotaFilter"
-            }
+            },
+            "example": 1
           },
           {
             "name": "storageFilter",
@@ -11303,7 +11349,8 @@
             "description": "The filter by storage (None - 0, Internal - 1, ThirdParty - 2).",
             "schema": {
               "$ref": "#/components/schemas/StorageFilter"
-            }
+            },
+            "example": 1
           },
           {
             "name": "count",
@@ -11314,7 +11361,7 @@
               "minimum": 1,
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 25
             }
           },
           {
@@ -11324,7 +11371,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
@@ -11333,7 +11380,7 @@
             "description": "Specifies the field by which the room content should be sorted.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "DateAndTime"
             }
           },
           {
@@ -11342,7 +11389,8 @@
             "description": "The order in which the results are sorted.",
             "schema": {
               "$ref": "#/components/schemas/SortOrder"
-            }
+            },
+            "example": 1
           },
           {
             "name": "filterValue",
@@ -11350,7 +11398,7 @@
             "description": "The text filter value used to refine search or query operations.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "My Document"
             }
           }
         ],
@@ -11963,7 +12011,8 @@
             "description": "The filter type of the access rights.",
             "schema": {
               "$ref": "#/components/schemas/ShareFilterType"
-            }
+            },
+            "example": 1
           },
           {
             "name": "count",
@@ -11974,7 +12023,7 @@
               "minimum": 1,
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 25
             }
           },
           {
@@ -11984,7 +12033,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
@@ -11993,7 +12042,7 @@
             "description": "The text filter value used for filtering room security information.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "Sample filter"
             }
           }
         ],
@@ -12145,7 +12194,8 @@
             "description": "The link type.",
             "schema": {
               "$ref": "#/components/schemas/LinkType"
-            }
+            },
+            "example": 1
           }
         ],
         "responses": {
@@ -13061,7 +13111,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "1"
+              "example": "folder-123-abc"
             }
           }
         ],
@@ -13204,7 +13254,7 @@
               "minimum": 1,
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 25
             }
           },
           {
@@ -13214,7 +13264,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
@@ -13223,7 +13273,7 @@
             "description": "Gets or sets the text value used for searching tags.\r\nThis property is typically used as a filter value when retrieving tag information.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "My Document"
             }
           }
         ],
@@ -13735,7 +13785,7 @@
           "request": {
             "type": "boolean",
             "description": "Specifies if the anonymous is a request.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -13804,7 +13854,7 @@
           "deleteAfter": {
             "type": "boolean",
             "description": "Specifies whether to archive a room after the editing session is finished or not.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -13978,7 +14028,12 @@
                   ]
                 },
                 "description": "The list of folder IDs of the base batch request.",
-                "nullable": true
+                "nullable": true,
+                "example": [
+                  1,
+                  2,
+                  3
+                ]
               },
               "fileIds": {
                 "type": "array",
@@ -13995,7 +14050,12 @@
                   ]
                 },
                 "description": "The list of file IDs of the base batch request.",
-                "nullable": true
+                "nullable": true,
+                "example": [
+                  1,
+                  2,
+                  3
+                ]
               }
             }
           }
@@ -14026,7 +14086,12 @@
                   ]
                 },
                 "description": "The list of folder IDs to be copied/moved.",
-                "nullable": true
+                "nullable": true,
+                "example": [
+                  1,
+                  2,
+                  3
+                ]
               },
               "fileIds": {
                 "type": "array",
@@ -14043,7 +14108,12 @@
                   ]
                 },
                 "description": "The list of file IDs to be copied/moved.",
-                "nullable": true
+                "nullable": true,
+                "example": [
+                  1,
+                  2,
+                  3
+                ]
               },
               "destFolderId": {
                 "oneOf": [
@@ -14056,7 +14126,8 @@
                     "example": "some text"
                   }
                 ],
-                "description": "The destination folder ID."
+                "description": "The destination folder ID.",
+                "example": 1
               },
               "conflictResolveType": {
                 "$ref": "#/components/schemas/FileConflictResolveType"
@@ -14064,17 +14135,17 @@
               "deleteAfter": {
                 "type": "boolean",
                 "description": "Specifies whether to delete the source files/folders after they are moved or copied to the destination folder.",
-                "example": true
+                "example": false
               },
               "content": {
                 "type": "boolean",
                 "description": "Specifies whether to copy or move the folder content or not.",
-                "example": true
+                "example": false
               },
               "toFillOut": {
                 "type": "boolean",
                 "description": "Specifies whether the file is copied for filling out",
-                "example": true
+                "example": false
               }
             }
           }
@@ -14093,7 +14164,9 @@
             "description": "The list of tag names.",
             "nullable": true,
             "example": [
-              "some text"
+              "tag1",
+              "tag2",
+              "tag3"
             ]
           }
         },
@@ -14144,12 +14217,12 @@
             "type": "integer",
             "description": "The file version of the change history.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           },
           "continueVersion": {
             "type": "boolean",
             "description": "Specifies whether to start a new version or continue revision of the change history.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -14176,7 +14249,12 @@
               ]
             },
             "description": "The list of folder IDs to change the owner.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              1,
+              2,
+              3
+            ]
           },
           "fileIds": {
             "type": "array",
@@ -14193,7 +14271,12 @@
               ]
             },
             "description": "The list of file IDs to change the owner.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              1,
+              2,
+              3
+            ]
           },
           "userId": {
             "type": "string",
@@ -14210,26 +14293,31 @@
         "properties": {
           "providerId": {
             "type": "integer",
+            "description": "The provider ID.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           },
           "modelId": {
             "type": "string",
+            "description": "The model ID.",
             "nullable": true,
-            "example": "some text"
+            "example": "gpt-4"
           },
           "prompt": {
             "type": "string",
+            "description": "The prompt.",
             "nullable": true,
-            "example": "some text"
+            "example": "Please analyze this document"
           },
           "internal": {
             "type": "boolean",
+            "description": "Specifies whether the provider is internal or not.",
             "readOnly": true,
-            "example": true
+            "example": false
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The chat settings."
       },
       "CheckConversionRequestDtoInteger": {
         "type": "object",
@@ -14243,7 +14331,7 @@
           "sync": {
             "type": "boolean",
             "description": "Specifies if the conversion process is synchronous or not.",
-            "example": true
+            "example": false
           },
           "startConvert": {
             "type": "boolean",
@@ -14254,24 +14342,24 @@
             "type": "integer",
             "description": "The file version that is converted.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           },
           "password": {
             "type": "string",
             "description": "The password of the converted file.",
             "nullable": true,
-            "example": "P@ssw0rd123"
+            "example": "password123"
           },
           "outputType": {
             "type": "string",
             "description": "The conversion output type.",
             "nullable": true,
-            "example": "some text"
+            "example": "pdf"
           },
           "createNewIfExist": {
             "type": "boolean",
             "description": "Specifies whether to create a new file if it exists or not.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -14375,31 +14463,31 @@
             "type": "string",
             "description": "The ONLYOFFICE Docs URL address.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://documentserver.example.com"
           },
           "docServiceUrlInternal": {
             "type": "string",
             "description": "The ONLYOFFICE Docs URL address in the local private network.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://documentserver-internal.example.com"
           },
           "docServiceUrlPortal": {
             "type": "string",
             "description": "The ONLYOFFICE Docs URL address.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://documentserver-portal.example.com"
           },
           "docServiceSignatureSecret": {
             "type": "string",
             "description": "The signature secret of the ONLYOFFICE Docs.",
             "nullable": true,
-            "example": "some text"
+            "example": "secret-key-123"
           },
           "docServiceSignatureHeader": {
             "type": "string",
             "description": "The signature header of the ONLYOFFICE Docs.",
             "nullable": true,
-            "example": "some text"
+            "example": "Authorization"
           },
           "docServiceSslVerification": {
             "type": "boolean",
@@ -14421,25 +14509,25 @@
             "type": "integer",
             "description": "The file version of the form draft.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           },
           "action": {
             "type": "string",
             "description": "The action with the form draft.",
             "nullable": true,
-            "example": "some text"
+            "example": "view"
           },
           "requestView": {
             "type": "boolean",
             "description": "Specifies whether to request the form for viewing or not.",
             "readOnly": true,
-            "example": true
+            "example": false
           },
           "requestEmbedded": {
             "type": "boolean",
             "description": "Specifies whether to request an embedded form or not.",
             "readOnly": true,
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -14456,7 +14544,9 @@
             "description": "The list of file titles.",
             "nullable": true,
             "example": [
-              "some text"
+              "file1.docx",
+              "file2.pdf",
+              "file3.xlsx"
             ]
           }
         },
@@ -14669,19 +14759,19 @@
             "description": "The editor URL.",
             "format": "uri",
             "nullable": true,
-            "example": "some text"
+            "example": "http://localhost/editor"
           },
           "token": {
             "type": "string",
             "description": "The token of the file configuration.",
             "nullable": true,
-            "example": "some text"
+            "example": "token-abc-123"
           },
           "type": {
             "type": "string",
             "description": "The platform type.",
             "nullable": true,
-            "example": "some text"
+            "example": "desktop"
           },
           "file": {
             "$ref": "#/components/schemas/FileDtoInteger"
@@ -14690,19 +14780,19 @@
             "type": "string",
             "description": "The error message.",
             "nullable": true,
-            "example": "some text"
+            "example": "Configuration error"
           },
           "startFilling": {
             "type": "boolean",
             "description": "Specifies if the file filling has started or not.",
             "nullable": true,
-            "example": true
+            "example": false
           },
           "fillingStatus": {
             "type": "boolean",
             "description": "The file filling status.",
             "nullable": true,
-            "example": true
+            "example": false
           },
           "startFillingMode": {
             "$ref": "#/components/schemas/StartFillingMode"
@@ -14711,7 +14801,7 @@
             "type": "string",
             "description": "The file filling session ID.",
             "nullable": true,
-            "example": "some text"
+            "example": "session-123-456"
           },
           "quotaExceededScope": {
             "$ref": "#/components/schemas/QuotaScope"
@@ -14900,7 +14990,7 @@
             "type": "string",
             "description": "The conversion operation ID.",
             "nullable": true,
-            "example": "1"
+            "example": 12345
           },
           "Operation": {
             "$ref": "#/components/schemas/FileOperationType"
@@ -14909,13 +14999,13 @@
             "type": "integer",
             "description": "The conversion operation progress.",
             "format": "int32",
-            "example": 1234
+            "example": 50
           },
           "source": {
             "type": "string",
             "description": "The source file for the conversion.",
             "nullable": true,
-            "example": "some text"
+            "example": "document.docx"
           },
           "result": {
             "description": "The resulting file after the conversion.",
@@ -14925,13 +15015,13 @@
             "type": "string",
             "description": "The conversion operation error message.",
             "nullable": true,
-            "example": "some text"
+            "example": "Conversion failed"
           },
           "processed": {
             "type": "string",
             "description": "Specifies if the conversion operation is processed or not.",
             "nullable": true,
-            "example": "some text"
+            "example": true
           }
         },
         "additionalProperties": false,
@@ -14948,7 +15038,7 @@
             "type": "string",
             "description": "The copied file name.",
             "nullable": true,
-            "example": "some text"
+            "example": "Document Copy.docx"
           },
           "destFolderId": {
             "oneOf": [
@@ -14961,23 +15051,24 @@
                 "example": "some text"
               }
             ],
-            "description": "The destination folder ID of the copied file."
+            "description": "The destination folder ID of the copied file.",
+            "example": 1
           },
           "enableExternalExt": {
             "type": "boolean",
             "description": "Specifies whether to allow creating the copied file of an external extension or not.",
-            "example": true
+            "example": false
           },
           "password": {
             "type": "string",
             "description": "The copied file password.",
             "nullable": true,
-            "example": "P@ssw0rd123"
+            "example": "password123"
           },
           "toForm": {
             "type": "boolean",
             "description": "Specifies whether to convert the file to form or not.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -14990,13 +15081,13 @@
             "type": "string",
             "description": "The cover color.",
             "nullable": true,
-            "example": "some text"
+            "example": "#FF0000"
           },
           "cover": {
             "type": "string",
             "description": "The cover name.",
             "nullable": true,
-            "example": "some text"
+            "example": "cover1.jpg"
           }
         },
         "additionalProperties": false,
@@ -15050,13 +15141,13 @@
             "type": "string",
             "description": "The cover unique identifier.",
             "nullable": true,
-            "example": "1"
+            "example": "cover-123"
           },
           "data": {
             "type": "string",
             "description": "The cover image data.",
             "nullable": true,
-            "example": "some text"
+            "example": "base64EncodedImageData"
           }
         },
         "additionalProperties": false,
@@ -15074,7 +15165,7 @@
             "type": "string",
             "description": "The file title for creation.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "New Document.docx"
           },
           "templateId": {
             "oneOf": [
@@ -15087,18 +15178,19 @@
                 "example": "some text"
               }
             ],
-            "description": "The template file ID for creation."
+            "description": "The template file ID for creation.",
+            "example": 1
           },
           "enableExternalExt": {
             "type": "boolean",
             "description": "Specifies whether to allow creating a file of an external extension or not.",
-            "example": true
+            "example": false
           },
           "formId": {
             "type": "integer",
             "description": "The form ID for creation.",
             "format": "int32",
-            "example": 1234
+            "example": 0
           }
         },
         "additionalProperties": false,
@@ -15116,7 +15208,7 @@
             "type": "string",
             "description": "The folder title to create.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "New Folder"
           }
         },
         "additionalProperties": false,
@@ -15133,13 +15225,13 @@
             "type": "integer",
             "description": "The template ID from which the room to be created.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           },
           "title": {
             "type": "string",
             "description": "The room title.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "My Room From Template"
           },
           "logo": {
             "$ref": "#/components/schemas/LogoRequest"
@@ -15147,7 +15239,7 @@
           "copyLogo": {
             "type": "boolean",
             "description": "Specifies whether to copy a logo or not.",
-            "example": true
+            "example": false
           },
           "tags": {
             "type": "array",
@@ -15157,7 +15249,9 @@
             "description": "The collection of tags.",
             "nullable": true,
             "example": [
-              "some text"
+              "tag1",
+              "tag2",
+              "tag3"
             ]
           },
           "color": {
@@ -15166,7 +15260,7 @@
             "type": "string",
             "description": "The color of the room to be created.",
             "nullable": true,
-            "example": "some text"
+            "example": "FF0000"
           },
           "cover": {
             "maxLength": 50,
@@ -15174,14 +15268,14 @@
             "type": "string",
             "description": "The cover of the room to be created.",
             "nullable": true,
-            "example": "some text"
+            "example": "cover1.jpg"
           },
           "quota": {
             "type": "integer",
             "description": "The room quota.",
             "format": "int64",
             "nullable": true,
-            "example": 1234
+            "example": 1073741824
           },
           "indexing": {
             "type": "boolean",
@@ -15193,7 +15287,7 @@
             "type": "boolean",
             "description": "Specifies whether to deny downloads from the room.",
             "nullable": true,
-            "example": true
+            "example": false
           },
           "lifetime": {
             "$ref": "#/components/schemas/RoomDataLifetimeDto"
@@ -15205,7 +15299,7 @@
             "type": "boolean",
             "description": "Specifies whether the room to be created is private or not.",
             "nullable": true,
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -15224,14 +15318,14 @@
             "type": "string",
             "description": "The room name.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "My Room"
           },
           "quota": {
             "type": "integer",
             "description": "The room quota.",
             "format": "int64",
             "nullable": true,
-            "example": 1234
+            "example": 1073741824
           },
           "indexing": {
             "type": "boolean",
@@ -15243,7 +15337,7 @@
             "type": "boolean",
             "description": "Specifies whether to deny downloads from the room.",
             "nullable": true,
-            "example": true
+            "example": false
           },
           "lifetime": {
             "$ref": "#/components/schemas/RoomDataLifetimeDto"
@@ -15262,7 +15356,9 @@
             "description": "The list of tags.",
             "nullable": true,
             "example": [
-              "some text"
+              "tag1",
+              "tag2",
+              "tag3"
             ]
           },
           "color": {
@@ -15271,7 +15367,7 @@
             "type": "string",
             "description": "The room color.",
             "nullable": true,
-            "example": "some text"
+            "example": "FF0000"
           },
           "cover": {
             "maxLength": 50,
@@ -15279,7 +15375,7 @@
             "type": "string",
             "description": "The room cover.",
             "nullable": true,
-            "example": "some text"
+            "example": "cover1.jpg"
           },
           "roomType": {
             "$ref": "#/components/schemas/RoomType"
@@ -15287,7 +15383,7 @@
           "private": {
             "type": "boolean",
             "description": "Specifies whether the room to be created is private or not.",
-            "example": true
+            "example": false
           },
           "share": {
             "type": "array",
@@ -15295,7 +15391,13 @@
               "$ref": "#/components/schemas/FileShareParams"
             },
             "description": "The collection of sharing parameters.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              {
+                "shareTo": "00000000-0000-0000-0000-000000000000",
+                "access": 1
+              }
+            ]
           },
           "chatSettings": {
             "$ref": "#/components/schemas/ChatSettings"
@@ -15316,7 +15418,7 @@
             "type": "string",
             "description": "The tag name.",
             "nullable": true,
-            "example": "John Doe"
+            "example": "Important"
           }
         },
         "additionalProperties": false,
@@ -15334,18 +15436,18 @@
             "type": "string",
             "description": "The file title for text or HTML file.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "Document.txt"
           },
           "content": {
             "type": "string",
             "description": "The text or HTML file contents.",
             "nullable": true,
-            "example": "some text"
+            "example": "This is the file content"
           },
           "createNewIfExist": {
             "type": "boolean",
             "description": "Specifies whether to create a new text or HTML file if it exists or not.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -15361,13 +15463,13 @@
           "createAsNewFolder": {
             "type": "boolean",
             "description": "Specifies whether to create a third-party room as a new folder or not.",
-            "example": true
+            "example": false
           },
           "title": {
             "type": "string",
             "description": "The third-party room name to be created.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "My Third-Party Room"
           },
           "roomType": {
             "$ref": "#/components/schemas/RoomType"
@@ -15375,7 +15477,7 @@
           "private": {
             "type": "boolean",
             "description": "Specifies whether to create the private third-party room or not.",
-            "example": true
+            "example": false
           },
           "indexing": {
             "type": "boolean",
@@ -15385,19 +15487,19 @@
           "denyDownload": {
             "type": "boolean",
             "description": "Specifies whether to deny downloads from the third-party room.",
-            "example": true
+            "example": false
           },
           "color": {
             "type": "string",
             "description": "The color of the third-party room.",
             "nullable": true,
-            "example": "some text"
+            "example": "FF0000"
           },
           "cover": {
             "type": "string",
             "description": "The cover of the third-party room.",
             "nullable": true,
-            "example": "some text"
+            "example": "cover1.jpg"
           },
           "tags": {
             "type": "array",
@@ -15407,7 +15509,9 @@
             "description": "The list of tags of the third-party room.",
             "nullable": true,
             "example": [
-              "some text"
+              "tag1",
+              "tag2",
+              "tag3"
             ]
           },
           "logo": {
@@ -15436,37 +15540,37 @@
             "type": "string",
             "description": "The address of the customer configuration.",
             "nullable": true,
-            "example": "some text"
+            "example": "123 Main Street, City"
           },
           "logo": {
             "type": "string",
             "description": "The logo of the customer configuration.",
             "nullable": true,
-            "example": "some text"
+            "example": "http://localhost/customer-logo.png"
           },
           "logoDark": {
             "type": "string",
             "description": "The dark logo of the customer configuration.",
             "nullable": true,
-            "example": "some text"
+            "example": "http://localhost/customer-logo-dark.png"
           },
           "mail": {
             "type": "string",
             "description": "The mail address of the customer configuration.",
             "nullable": true,
-            "example": "some text"
+            "example": "contact@example.com"
           },
           "name": {
             "type": "string",
             "description": "The name of the customer configuration.",
             "nullable": true,
-            "example": "John Doe"
+            "example": "ONLYOFFICE"
           },
           "www": {
             "type": "string",
             "description": "The site web address of the customer configuration.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://www.example.com"
           }
         },
         "additionalProperties": false,
@@ -15493,7 +15597,7 @@
             "type": "boolean",
             "description": "Specifies if the customization should be force saved.",
             "nullable": true,
-            "example": true
+            "example": false
           },
           "goback": {
             "$ref": "#/components/schemas/GobackConfig"
@@ -15614,32 +15718,32 @@
             "description": "File id to use as a default template",
             "format": "int32",
             "nullable": true,
-            "example": 1234
+            "example": 123
           },
           "fileExtension": {
             "type": "string",
             "description": "Extension of a default template",
             "nullable": true,
-            "example": ".txt"
+            "example": ".docx"
           },
           "fileTitle": {
             "type": "string",
             "description": "Title of a default template",
             "nullable": true,
-            "example": "some text"
+            "example": "Default Template"
           },
           "lastModified": {
             "type": "string",
             "description": "Last modified date of a default template",
             "format": "date-time",
             "nullable": true,
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2025-01-01T00:00:00"
           },
           "viewUrl": {
             "type": "string",
             "description": "View url of a default template",
             "nullable": true,
-            "example": "some text"
+            "example": "http://localhost/template/view"
           }
         },
         "additionalProperties": false,
@@ -15674,13 +15778,13 @@
             "description": "File id to replace template with (or null to use default template)",
             "format": "int32",
             "nullable": true,
-            "example": 1234
+            "example": 1
           },
           "fileExtension": {
             "type": "string",
             "description": "File extension of a template to replace",
             "nullable": true,
-            "example": ".txt"
+            "example": ".docx"
           }
         },
         "additionalProperties": false,
@@ -15726,12 +15830,12 @@
           "deleteAfter": {
             "type": "boolean",
             "description": "Specifies whether to delete a file after the editing session is finished or not.",
-            "example": true
+            "example": false
           },
           "immediately": {
             "type": "boolean",
             "description": "Specifies whether to move a file to the \\\"Trash\\\" folder or delete it immediately.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -15760,7 +15864,12 @@
                   ]
                 },
                 "description": "The list of folder IDs to be deleted.",
-                "nullable": true
+                "nullable": true,
+                "example": [
+                  1,
+                  2,
+                  3
+                ]
               },
               "fileIds": {
                 "type": "array",
@@ -15777,17 +15886,22 @@
                   ]
                 },
                 "description": "The list of file IDs to be deleted.",
-                "nullable": true
+                "nullable": true,
+                "example": [
+                  1,
+                  2,
+                  3
+                ]
               },
               "deleteAfter": {
                 "type": "boolean",
                 "description": "Specifies whether to delete a file after the editing session is finished or not",
-                "example": true
+                "example": false
               },
               "immediately": {
                 "type": "boolean",
                 "description": "Specifies whether to move a file to the \\\"Trash\\\" folder or delete it immediately.",
-                "example": true
+                "example": false
               }
             }
           }
@@ -15801,7 +15915,7 @@
           "deleteAfter": {
             "type": "boolean",
             "description": "Specifies whether to delete a folder after the editing session is finished or not.",
-            "example": true
+            "example": false
           },
           "immediately": {
             "type": "boolean",
@@ -15818,7 +15932,7 @@
           "deleteAfter": {
             "type": "boolean",
             "description": "Specifies whether to delete a room after the editing session is finished or not.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -15839,7 +15953,7 @@
               "deleteAfter": {
                 "type": "boolean",
                 "description": "Specifies whether to delete a file after the editing session is finished or not.",
-                "example": true
+                "example": false
               },
               "fileId": {
                 "type": "integer",
@@ -15856,7 +15970,9 @@
                 "description": "The collection of file versions to be deleted.",
                 "nullable": true,
                 "example": [
-                  1234
+                  1,
+                  2,
+                  3
                 ]
               }
             }
@@ -15938,43 +16054,43 @@
             "type": "string",
             "description": "The version of the document service.",
             "nullable": true,
-            "example": "some text"
+            "example": "8.0.1"
           },
           "docServiceUrlApi": {
             "type": "string",
             "description": "The document service URL API.",
             "nullable": true,
-            "example": "some text"
+            "example": "http://localhost/api"
           },
           "docServiceUrl": {
             "type": "string",
             "description": "The document service URL.",
             "nullable": true,
-            "example": "some text"
+            "example": "http://localhost/docservice"
           },
           "docServicePreloadUrl": {
             "type": "string",
             "description": "The URL used to preload the document service scripts.",
             "nullable": true,
-            "example": "some text"
+            "example": "http://localhost/preload"
           },
           "docServiceUrlInternal": {
             "type": "string",
             "description": "The internal document service URL.",
             "nullable": true,
-            "example": "some text"
+            "example": "http://localhost/internal"
           },
           "docServicePortalUrl": {
             "type": "string",
             "description": "The document service portal URL.",
             "nullable": true,
-            "example": "some text"
+            "example": "http://localhost/portal"
           },
           "docServiceSignatureHeader": {
             "type": "string",
             "description": "The document service signature header.",
             "nullable": true,
-            "example": "some text"
+            "example": "Authorization"
           },
           "docServiceSslVerification": {
             "type": "boolean",
@@ -16041,43 +16157,44 @@
             "type": "string",
             "description": "The Document Builder task ID.",
             "nullable": true,
-            "example": "1"
+            "example": "task-123-456"
           },
           "error": {
             "type": "string",
             "description": "The error message occurred during the document building process.",
             "nullable": true,
-            "example": "some text"
+            "example": "Build failed"
           },
           "percentage": {
             "type": "integer",
             "description": "The progress percentage of the document building process.",
             "format": "int32",
-            "example": 1234
+            "example": 75
           },
           "isCompleted": {
             "type": "boolean",
             "description": "Specifies whether the document building process is completed or not.",
-            "example": true
+            "example": false
           },
           "status": {
             "$ref": "#/components/schemas/DistributedTaskStatus"
           },
           "resultFileId": {
             "description": "The result file ID.",
-            "nullable": true
+            "nullable": true,
+            "example": 123
           },
           "resultFileName": {
             "type": "string",
             "description": "The result file name.",
             "nullable": true,
-            "example": "some text"
+            "example": "result.docx"
           },
           "resultFileUrl": {
             "type": "string",
             "description": "The result file URL.",
             "nullable": true,
-            "example": "some text"
+            "example": "http://localhost/files/result.docx"
           }
         },
         "additionalProperties": false,
@@ -16124,7 +16241,7 @@
             "type": "string",
             "description": "The file type of the document.",
             "nullable": true,
-            "example": "some text"
+            "example": "docx"
           },
           "info": {
             "$ref": "#/components/schemas/InfoConfigDto"
@@ -16132,13 +16249,13 @@
           "isLinkedForMe": {
             "type": "boolean",
             "description": "Specifies if the documnet is linked for current user.",
-            "example": true
+            "example": false
           },
           "key": {
             "type": "string",
             "description": "The document key.",
             "nullable": true,
-            "example": "some text"
+            "example": "doc-key-123-abc"
           },
           "permissions": {
             "$ref": "#/components/schemas/PermissionsConfig"
@@ -16147,13 +16264,13 @@
             "type": "string",
             "description": "The shared link parameter of the document.",
             "nullable": true,
-            "example": "some text"
+            "example": "share-param-123"
           },
           "sharedLinkKey": {
             "type": "string",
             "description": "The shared link key of the document.",
             "nullable": true,
-            "example": "some text"
+            "example": "share-key-abc"
           },
           "referenceData": {
             "$ref": "#/components/schemas/FileReferenceData"
@@ -16162,19 +16279,19 @@
             "type": "string",
             "description": "The document title.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "Document Title"
           },
           "url": {
             "type": "string",
             "description": "The document url.",
             "format": "uri",
             "nullable": true,
-            "example": "some text"
+            "example": "http://localhost/documents/doc.docx"
           },
           "isForm": {
             "type": "boolean",
             "description": "Indicates whether this is a form.",
-            "example": true
+            "example": false
           },
           "options": {
             "$ref": "#/components/schemas/Options"
@@ -16206,7 +16323,12 @@
                   ]
                 },
                 "description": "The list of folder IDs to be downloaded.",
-                "nullable": true
+                "nullable": true,
+                "example": [
+                  1,
+                  2,
+                  3
+                ]
               },
               "fileIds": {
                 "type": "array",
@@ -16223,7 +16345,12 @@
                   ]
                 },
                 "description": "The list of file IDs to be downloaded.",
-                "nullable": true
+                "nullable": true,
+                "example": [
+                  1,
+                  2,
+                  3
+                ]
               },
               "fileConvertIds": {
                 "type": "array",
@@ -16231,7 +16358,14 @@
                   "$ref": "#/components/schemas/DownloadRequestItemDto"
                 },
                 "description": "The list of file IDs which will be converted.",
-                "nullable": true
+                "nullable": true,
+                "example": [
+                  {
+                    "key": "1",
+                    "value": "pdf",
+                    "password": "password123"
+                  }
+                ]
               }
             }
           }
@@ -16257,19 +16391,20 @@
                 "example": "some text"
               }
             ],
-            "description": "The unique identifier or reference key for the file to be downloaded."
+            "description": "The unique identifier or reference key for the file to be downloaded.",
+            "example": 1
           },
           "value": {
             "type": "string",
             "description": "The target format or conversion type for the file download.",
             "nullable": true,
-            "example": "some text"
+            "example": "pdf"
           },
           "password": {
             "type": "string",
             "description": "The optional password for accessing protected files.",
             "nullable": true,
-            "example": "P@ssw0rd123"
+            "example": "password123"
           }
         },
         "additionalProperties": false,
@@ -16282,25 +16417,25 @@
             "type": "integer",
             "description": "The InProcess folder ID of the draft.",
             "format": "int32",
-            "example": 1
+            "example": 10
           },
           "folderTitle": {
             "type": "string",
             "description": "The InProcess folder title of the draft.",
             "nullable": true,
-            "example": "some text"
+            "example": "Draft Folder"
           },
           "fileId": {
             "type": "integer",
             "description": "The draft ID.",
             "format": "int32",
-            "example": 1
+            "example": 123
           },
           "fileTitle": {
             "type": "string",
             "description": "The draft title.",
             "nullable": true,
-            "example": "some text"
+            "example": "Draft Document"
           }
         },
         "additionalProperties": false,
@@ -16329,7 +16464,12 @@
                   ]
                 },
                 "description": "The list of folder IDs.",
-                "nullable": true
+                "nullable": true,
+                "example": [
+                  1,
+                  2,
+                  3
+                ]
               },
               "fileIds": {
                 "type": "array",
@@ -16426,7 +16566,7 @@
             "type": "string",
             "description": "The document hash generated by the SHA-256 algorithm.",
             "nullable": true,
-            "example": "some text"
+            "example": "a1b2c3d4e5f6g7h8i9j0"
           }
         },
         "additionalProperties": false,
@@ -16527,25 +16667,25 @@
             "type": "integer",
             "description": "The document ID.",
             "format": "int32",
-            "example": 1234
+            "example": 123
           },
           "key": {
             "type": "string",
             "description": "The document identifier used to unambiguously identify the document file.",
             "nullable": true,
-            "example": "some text"
+            "example": "doc-key-abc123"
           },
           "version": {
             "type": "integer",
             "description": "The document version number.",
             "format": "int32",
-            "example": 1234
+            "example": 2
           },
           "versionGroup": {
             "type": "integer",
             "description": "The document version group.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           },
           "user": {
             "$ref": "#/components/schemas/EditHistoryAuthor"
@@ -16557,7 +16697,7 @@
             "type": "string",
             "description": "The file history changes in the string format.",
             "nullable": true,
-            "example": "some text"
+            "example": "Changes history text"
           },
           "changes": {
             "type": "array",
@@ -16571,7 +16711,7 @@
             "type": "string",
             "description": "The current server version number.",
             "nullable": true,
-            "example": "some text"
+            "example": "8.0.1"
           }
         },
         "additionalProperties": false,
@@ -16616,7 +16756,7 @@
             "description": "The callback URL of the editor.",
             "format": "uri",
             "nullable": true,
-            "example": "some text"
+            "example": "http://localhost/callback"
           },
           "coEditing": {
             "$ref": "#/components/schemas/CoEditingConfig"
@@ -16625,7 +16765,7 @@
             "type": "string",
             "description": "The creation URL of the editor.",
             "nullable": true,
-            "example": "some text"
+            "example": "http://localhost/create"
           },
           "customization": {
             "$ref": "#/components/schemas/CustomizationConfigDto"
@@ -16640,13 +16780,13 @@
             "type": "string",
             "description": "The language of the editor configuration.",
             "nullable": true,
-            "example": "some text"
+            "example": "en-US"
           },
           "mode": {
             "type": "string",
             "description": "The mode of the editor configuration.",
             "nullable": true,
-            "example": "some text"
+            "example": "edit"
           },
           "modeWrite": {
             "type": "boolean",
@@ -16816,7 +16956,7 @@
             "type": "string",
             "description": "The user ID.",
             "format": "uuid",
-            "example": "{00000000-0000-0000-0000-000000000000}"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "displayName": {
             "type": "string",
@@ -16834,37 +16974,37 @@
             "type": "string",
             "description": "The user avatar.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/avatar.jpg"
           },
           "avatarOriginal": {
             "type": "string",
             "description": "The user original size avatar.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/avatar_original.jpg"
           },
           "avatarMax": {
             "type": "string",
             "description": "The user maximum size avatar.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/avatar_max.jpg"
           },
           "avatarMedium": {
             "type": "string",
             "description": "The user medium size avatar.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/avatar_medium.jpg"
           },
           "avatarSmall": {
             "type": "string",
             "description": "The user small size avatar.",
             "nullable": true,
-            "example": "url to small avatar"
+            "example": "https://example.com/avatar_small.jpg"
           },
           "profileUrl": {
             "type": "string",
             "description": "The user profile URL.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/profile/user123"
           },
           "hasAvatar": {
             "type": "boolean",
@@ -16874,7 +17014,7 @@
           "isAnonim": {
             "type": "boolean",
             "description": "Specifies if the user is anonymous or not.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -17183,13 +17323,13 @@
             "type": "string",
             "description": "The external data ID.",
             "nullable": true,
-            "example": "1"
+            "example": 123
           },
           "title": {
             "type": "string",
             "description": "The external data title.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "Shared Document"
           },
           "type": {
             "$ref": "#/components/schemas/FileEntryType"
@@ -17198,19 +17338,19 @@
             "type": "integer",
             "description": "The tenant ID.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           },
           "entityId": {
             "type": "string",
             "description": "The unique identifier of the shared entity.",
             "nullable": true,
-            "example": "some text"
+            "example": 456
           },
           "entityTitle": {
             "type": "string",
             "description": "The title of the shared entity.",
             "nullable": true,
-            "example": "some text"
+            "example": "Entity Title"
           },
           "entityType": {
             "$ref": "#/components/schemas/FileEntryType"
@@ -17219,7 +17359,7 @@
             "type": "boolean",
             "description": "Indicates whether the entity represents a room.",
             "nullable": true,
-            "example": true
+            "example": false
           },
           "shared": {
             "type": "boolean",
@@ -17230,7 +17370,7 @@
             "type": "string",
             "description": "The link ID of the external data.",
             "format": "uuid",
-            "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "isAuthenticated": {
             "type": "boolean",
@@ -17240,7 +17380,7 @@
           "isRoomMember": {
             "type": "boolean",
             "description": "The room ID of the external data.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -17253,7 +17393,7 @@
             "type": "string",
             "description": "The password to share external data.",
             "nullable": true,
-            "example": "P@ssw0rd123"
+            "example": "p@ssw0rd"
           }
         },
         "additionalProperties": false,
@@ -17360,7 +17500,7 @@
                 "type": "integer",
                 "description": "The folder ID where the file is located.",
                 "format": "int32",
-                "example": 1
+                "example": 10
               },
               "version": {
                 "type": "integer",
@@ -17378,14 +17518,14 @@
                 "type": "string",
                 "description": "The content length of the file.",
                 "nullable": true,
-                "example": "12345"
+                "example": 12345
               },
               "pureContentLength": {
                 "type": "integer",
                 "description": "The pure content length of the file.",
                 "format": "int64",
                 "nullable": true,
-                "example": 1234
+                "example": 12345
               },
               "fileStatus": {
                 "$ref": "#/components/schemas/FileStatus"
@@ -17422,7 +17562,7 @@
                 "description": "The Web URL link to the file.",
                 "format": "uri",
                 "nullable": true,
-                "example": "some text"
+                "example": "http://localhost/files/document.docx"
               },
               "fileType": {
                 "$ref": "#/components/schemas/FileType"
@@ -17437,7 +17577,7 @@
                 "type": "string",
                 "description": "The comment to the file.",
                 "nullable": true,
-                "example": "some text"
+                "example": "This is a comment"
               },
               "encrypted": {
                 "type": "boolean",
@@ -17450,7 +17590,7 @@
                 "description": "The thumbnail URL of the file.",
                 "format": "uri",
                 "nullable": true,
-                "example": "some text"
+                "example": "http://localhost/thumbnails/file.png"
               },
               "thumbnailStatus": {
                 "$ref": "#/components/schemas/Thumbnail"
@@ -17459,13 +17599,13 @@
                 "type": "boolean",
                 "description": "Specifies if the file is locked or not.",
                 "nullable": true,
-                "example": true
+                "example": false
               },
               "lockedBy": {
                 "type": "string",
                 "description": "The user ID of the person who locked the file.",
                 "nullable": true,
-                "example": "some text"
+                "example": "00000000-0000-0000-0000-000000000000"
               },
               "hasDraft": {
                 "type": "boolean",
@@ -17486,13 +17626,13 @@
                 "type": "boolean",
                 "description": "Specifies if the Custom Filter editing mode is enabled for a file or not.",
                 "nullable": true,
-                "example": true
+                "example": false
               },
               "customFilterEnabledBy": {
                 "type": "string",
                 "description": "The name of the user who enabled a Custom Filter editing mode for a file.",
                 "nullable": true,
-                "example": "some text"
+                "example": "John Doe"
               },
               "startFilling": {
                 "type": "boolean",
@@ -17505,13 +17645,13 @@
                 "description": "The InProcess folder ID of the file.",
                 "format": "int32",
                 "nullable": true,
-                "example": 1234
+                "example": 10
               },
               "inProcessFolderTitle": {
                 "type": "string",
                 "description": "The InProcess folder title of the file.",
                 "nullable": true,
-                "example": "some text"
+                "example": "In Process"
               },
               "draftLocation": {
                 "$ref": "#/components/schemas/DraftLocationInteger"
@@ -17621,7 +17761,7 @@
             "type": "string",
             "description": "The file entry title.",
             "nullable": true,
-            "example": "Some titile.txt/ Some title"
+            "example": "Some title.txt"
           },
           "access": {
             "$ref": "#/components/schemas/FileShare"
@@ -17645,14 +17785,14 @@
           "parentShared": {
             "type": "boolean",
             "description": "Indicates whether the parent entity is shared.",
-            "example": true
+            "example": false
           },
           "shortWebUrl": {
             "type": "string",
             "description": "The short Web URL.",
             "format": "uri",
             "nullable": true,
-            "example": "some text"
+            "example": "http://localhost/s/abc123"
           },
           "created": {
             "$ref": "#/components/schemas/ApiDateTime"
@@ -17679,32 +17819,32 @@
             "type": "boolean",
             "description": "Specifies if the file entry provider is specified or not.",
             "nullable": true,
-            "example": true
+            "example": false
           },
           "providerKey": {
             "type": "string",
             "description": "The provider key of the file entry.",
             "nullable": true,
-            "example": "some text"
+            "example": "google-drive"
           },
           "providerId": {
             "type": "integer",
             "description": "The provider ID of the file entry.",
             "format": "int32",
             "nullable": true,
-            "example": 1234
+            "example": 1
           },
           "order": {
             "type": "string",
             "description": "The order of the file entry.",
             "nullable": true,
-            "example": "some text"
+            "example": 1
           },
           "isFavorite": {
             "type": "boolean",
             "description": "Specifies if the file is a favorite or not.",
             "nullable": true,
-            "example": true
+            "example": false
           },
           "fileEntryType": {
             "$ref": "#/components/schemas/FileEntryType"
@@ -17772,7 +17912,7 @@
                 "type": "integer",
                 "description": "The root folder ID of the file entry.",
                 "format": "int32",
-                "example": 1234
+                "example": 1
               },
               "originId": {
                 "type": "integer",
@@ -17790,13 +17930,13 @@
                 "type": "string",
                 "description": "The origin title of the file entry.",
                 "nullable": true,
-                "example": "some text"
+                "example": "Original Title"
               },
               "originRoomTitle": {
                 "type": "string",
                 "description": "The origin room title of the file entry.",
                 "nullable": true,
-                "example": "some text"
+                "example": "Original Room"
               },
               "canShare": {
                 "type": "boolean",
@@ -18027,13 +18167,13 @@
                 "type": "string",
                 "description": "The request token of the file entry.",
                 "nullable": true,
-                "example": "some text"
+                "example": "token-abc-123"
               },
               "external": {
                 "type": "boolean",
                 "description": "Specifies if the folder can be accessed via an external link or not.",
                 "nullable": true,
-                "example": true
+                "example": false
               },
               "expirationDate": {
                 "$ref": "#/components/schemas/ApiDateTime"
@@ -18042,7 +18182,7 @@
                 "type": "boolean",
                 "description": "Indicates whether the shareable link associated with the file or folder has expired.",
                 "nullable": true,
-                "example": true
+                "example": false
               }
             }
           }
@@ -18068,7 +18208,7 @@
                 "type": "string",
                 "description": "The root folder ID of the file entry.",
                 "nullable": true,
-                "example": "some text"
+                "example": 1
               },
               "originId": {
                 "type": "string",
@@ -18086,13 +18226,13 @@
                 "type": "string",
                 "description": "The origin title of the file entry.",
                 "nullable": true,
-                "example": "some text"
+                "example": "Original Title"
               },
               "originRoomTitle": {
                 "type": "string",
                 "description": "The origin room title of the file entry.",
                 "nullable": true,
-                "example": "some text"
+                "example": "Original Room"
               },
               "canShare": {
                 "type": "boolean",
@@ -18323,13 +18463,13 @@
                 "type": "string",
                 "description": "The request token of the file entry.",
                 "nullable": true,
-                "example": "some text"
+                "example": "token-abc-123"
               },
               "external": {
                 "type": "boolean",
                 "description": "Specifies if the folder can be accessed via an external link or not.",
                 "nullable": true,
-                "example": true
+                "example": false
               },
               "expirationDate": {
                 "$ref": "#/components/schemas/ApiDateTime"
@@ -18338,7 +18478,7 @@
                 "type": "boolean",
                 "description": "Indicates whether the shareable link associated with the file or folder has expired.",
                 "nullable": true,
-                "example": true
+                "example": false
               }
             }
           }
@@ -18523,7 +18663,7 @@
             "type": "string",
             "description": "The external link ID.",
             "format": "uuid",
-            "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "access": {
             "$ref": "#/components/schemas/FileShare"
@@ -18537,12 +18677,12 @@
             "type": "string",
             "description": "The link name.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "My Document"
           },
           "internal": {
             "type": "boolean",
             "description": "The link scope, whether it is internal or not.",
-            "example": true
+            "example": false
           },
           "primary": {
             "type": "boolean",
@@ -18552,7 +18692,7 @@
           "denyDownload": {
             "type": "boolean",
             "description": "Specifies whether to deny downloading the file or not.",
-            "example": true
+            "example": false
           },
           "password": {
             "maxLength": 255,
@@ -18560,7 +18700,7 @@
             "type": "string",
             "description": "Password for access via link.",
             "nullable": true,
-            "example": "P@ssw0rd123"
+            "example": "p@ssw0rd"
           }
         },
         "additionalProperties": false,
@@ -18652,7 +18792,7 @@
             "type": "string",
             "description": "The file operation ID.",
             "nullable": true,
-            "example": "1"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "Operation": {
             "$ref": "#/components/schemas/FileOperationType"
@@ -18673,7 +18813,7 @@
             "type": "string",
             "description": "The file operation processing status.",
             "nullable": true,
-            "example": "1"
+            "example": 1
           },
           "finished": {
             "type": "boolean",
@@ -18685,7 +18825,7 @@
             "description": "The file operation URL.",
             "format": "uri",
             "nullable": true,
-            "example": "some text"
+            "example": "http://localhost/download"
           },
           "files": {
             "type": "array",
@@ -18716,7 +18856,7 @@
           "returnSingleOperation": {
             "type": "boolean",
             "description": "Specifies whether to return only the current operation",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -19076,7 +19216,7 @@
           "isOwner": {
             "type": "boolean",
             "description": "Specifies if the user is an owner of the specified file or not.",
-            "example": true
+            "example": false
           },
           "canEditAccess": {
             "type": "boolean",
@@ -19123,13 +19263,13 @@
             "type": "string",
             "description": "The title of the shared content.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "Shared Document"
           },
           "shareLink": {
             "type": "string",
             "description": "The URL for accessing the shared content.",
             "nullable": true,
-            "example": "some text"
+            "example": "http://localhost/share/abc123"
           },
           "expirationDate": {
             "$ref": "#/components/schemas/ApiDateTime"
@@ -19141,19 +19281,19 @@
             "type": "string",
             "description": "The password protection for accessing the shared content.",
             "nullable": true,
-            "example": "P@ssw0rd123"
+            "example": "password123"
           },
           "denyDownload": {
             "type": "boolean",
             "description": "Indicates whether downloading of the shared content is prohibited.",
             "nullable": true,
-            "example": true
+            "example": false
           },
           "isExpired": {
             "type": "boolean",
             "description": "Indicates whether the shared link has expired.",
             "nullable": true,
-            "example": true
+            "example": false
           },
           "primary": {
             "type": "boolean",
@@ -19164,27 +19304,27 @@
             "type": "boolean",
             "description": "Indicates whether the link is for the internal sharing only.",
             "nullable": true,
-            "example": true
+            "example": false
           },
           "requestToken": {
             "type": "string",
             "description": "The token for validating access requests.",
             "nullable": true,
-            "example": "some text"
+            "example": "token-abc-123"
           },
           "maxUseCount": {
             "type": "integer",
             "description": "The maximum number of times the invitation link can be used.",
             "format": "int32",
             "nullable": true,
-            "example": 1234
+            "example": 10
           },
           "currentUseCount": {
             "type": "integer",
             "description": "The current number of times the invitation link has been used.",
             "format": "int32",
             "nullable": true,
-            "example": 1234
+            "example": 5
           }
         },
         "additionalProperties": false,
@@ -19386,7 +19526,12 @@
             "description": "The list of extensions of the viewed images.",
             "nullable": true,
             "example": [
-              "some text"
+              ".bmp",
+              ".gif",
+              ".jpeg",
+              ".jpg",
+              ".png",
+              ".svg"
             ]
           },
           "extsMediaPreviewed": {
@@ -19397,7 +19542,10 @@
             "description": "The list of extensions of the viewed media files.",
             "nullable": true,
             "example": [
-              "some text"
+              ".mp4",
+              ".webm",
+              ".mp3",
+              ".ogg"
             ]
           },
           "extsWebPreviewed": {
@@ -19408,7 +19556,10 @@
             "description": "The list of extensions of the viewed files.",
             "nullable": true,
             "example": [
-              "some text"
+              ".docx",
+              ".xlsx",
+              ".pptx",
+              ".pdf"
             ]
           },
           "extsWebEdited": {
@@ -19419,7 +19570,9 @@
             "description": "The list of extensions of the edited files.",
             "nullable": true,
             "example": [
-              "some text"
+              ".docx",
+              ".xlsx",
+              ".pptx"
             ]
           },
           "extsWebEncrypt": {
@@ -19430,7 +19583,9 @@
             "description": "The list of extensions of the encrypted files.",
             "nullable": true,
             "example": [
-              "some text"
+              ".docx",
+              ".xlsx",
+              ".pptx"
             ]
           },
           "extsWebReviewed": {
@@ -19441,7 +19596,7 @@
             "description": "The list of extensions of the reviewed files.",
             "nullable": true,
             "example": [
-              "some text"
+              ".docx"
             ]
           },
           "extsWebCustomFilterEditing": {
@@ -19452,7 +19607,7 @@
             "description": "The list of extensions of the custom filter files.",
             "nullable": true,
             "example": [
-              "some text"
+              ".xlsx"
             ]
           },
           "extsWebRestrictedEditing": {
@@ -19463,7 +19618,7 @@
             "description": "The list of extensions of the files that are restricted for editing.",
             "nullable": true,
             "example": [
-              "some text"
+              ".pdf"
             ]
           },
           "extsWebCommented": {
@@ -19474,7 +19629,7 @@
             "description": "The list of extensions of the commented files.",
             "nullable": true,
             "example": [
-              "some text"
+              ".docx"
             ]
           },
           "extsWebTemplate": {
@@ -19485,7 +19640,9 @@
             "description": "The list of extensions of the template files.",
             "nullable": true,
             "example": [
-              "some text"
+              ".docx",
+              ".xlsx",
+              ".pptx"
             ]
           },
           "extsMustConvert": {
@@ -19496,7 +19653,9 @@
             "description": "The list of extensions of the files that must be converted.",
             "nullable": true,
             "example": [
-              "some text"
+              ".doc",
+              ".xls",
+              ".ppt"
             ]
           },
           "extsConvertible": {
@@ -19527,7 +19686,9 @@
             "description": "The list of the uploadable extensions.",
             "nullable": true,
             "example": [
-              "some text"
+              ".docx",
+              ".xlsx",
+              ".pdf"
             ]
           },
           "extsArchive": {
@@ -19538,7 +19699,9 @@
             "description": "The list of extensions of the archive files.",
             "nullable": true,
             "example": [
-              "some text"
+              ".zip",
+              ".rar",
+              ".7z"
             ]
           },
           "extsVideo": {
@@ -19549,7 +19712,9 @@
             "description": "The list of the video extensions.",
             "nullable": true,
             "example": [
-              "some text"
+              ".mp4",
+              ".webm",
+              ".avi"
             ]
           },
           "extsAudio": {
@@ -19560,7 +19725,9 @@
             "description": "The list of the audio extensions.",
             "nullable": true,
             "example": [
-              "some text"
+              ".mp3",
+              ".ogg",
+              ".wav"
             ]
           },
           "extsImage": {
@@ -19571,7 +19738,9 @@
             "description": "The list of the image extensions.",
             "nullable": true,
             "example": [
-              "some text"
+              ".png",
+              ".jpg",
+              ".gif"
             ]
           },
           "extsSpreadsheet": {
@@ -19582,7 +19751,9 @@
             "description": "The list of the spreadsheet extensions.",
             "nullable": true,
             "example": [
-              "some text"
+              ".xlsx",
+              ".xls",
+              ".ods"
             ]
           },
           "extsPresentation": {
@@ -19593,7 +19764,9 @@
             "description": "The list of the presentation extensions.",
             "nullable": true,
             "example": [
-              "some text"
+              ".pptx",
+              ".ppt",
+              ".odp"
             ]
           },
           "extsDocument": {
@@ -19604,7 +19777,9 @@
             "description": "The list of the text document extensions.",
             "nullable": true,
             "example": [
-              "some text"
+              ".docx",
+              ".doc",
+              ".odt"
             ]
           },
           "extsDiagram": {
@@ -19615,7 +19790,7 @@
             "description": "The list of the diagram extensions.",
             "nullable": true,
             "example": [
-              "some text"
+              ".vsdx"
             ]
           },
           "internalFormats": {
@@ -19665,66 +19840,66 @@
             "type": "string",
             "description": "The master form extension.",
             "nullable": true,
-            "example": "some text"
+            "example": ".docxf"
           },
           "paramVersion": {
             "type": "string",
             "description": "The URL parameter which specifies the file version.",
             "nullable": true,
-            "example": "some text"
+            "example": "ver"
           },
           "paramOutType": {
             "type": "string",
             "description": "The URL parameter which specifies the output type of the converted file.",
             "nullable": true,
-            "example": "some text"
+            "example": "otype"
           },
           "fileDownloadUrlString": {
             "type": "string",
             "description": "The URL to download a file.",
             "format": "uri",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/products/files/httphandlers/filehandler.ashx?action=download&fileid={0}"
           },
           "fileWebViewerUrlString": {
             "type": "string",
             "description": "The URL to the file web viewer.",
             "nullable": true,
-            "example": "some text"
+            "example": "/products/files/doceditor?fileid={0}&action=view"
           },
           "fileWebViewerExternalUrlString": {
             "type": "string",
             "description": "The external URL to the file web viewer.",
             "format": "uri",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/products/files/doceditor?fileid={0}&action=view"
           },
           "fileWebEditorUrlString": {
             "type": "string",
             "description": "The URL to the file web editor.",
             "nullable": true,
-            "example": "some text"
+            "example": "/products/files/doceditor?fileid={0}&action=edit"
           },
           "fileWebEditorExternalUrlString": {
             "type": "string",
             "description": "The external URL to the file web editor.",
             "format": "uri",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/products/files/doceditor?fileid={0}&action=edit"
           },
           "fileRedirectPreviewUrlString": {
             "type": "string",
             "description": "The redirect URL to the file viewer.",
             "format": "uri",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/products/files/{0}"
           },
           "fileThumbnailUrlString": {
             "type": "string",
             "description": "The URL to the file thumbnail.",
             "format": "uri",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/products/files/httphandlers/filehandler.ashx?action=thumb&fileid={0}"
           },
           "confirmDelete": {
             "type": "boolean",
@@ -19754,7 +19929,7 @@
           "keepNewFileName": {
             "type": "boolean",
             "description": "Specifies whether to keep the new file name.",
-            "example": true
+            "example": false
           },
           "displayFileExtension": {
             "type": "boolean",
@@ -19769,22 +19944,22 @@
           "hideConfirmCancelOperation": {
             "type": "boolean",
             "description": "Specifies whether to hide the confirmation dialog for the cancel operation.",
-            "example": true
+            "example": false
           },
           "hideConfirmConvertSave": {
             "type": "boolean",
             "description": "Specifies whether to hide the confirmation dialog\r\nfor saving the file copy in the original format when converting a file.",
-            "example": true
+            "example": false
           },
           "hideConfirmConvertOpen": {
             "type": "boolean",
             "description": "Specifies whether to hide the confirmation dialog\r\nfor opening the conversion result.",
-            "example": true
+            "example": false
           },
           "hideConfirmRoomLifetime": {
             "type": "boolean",
             "description": "Specifies whether to hide the confirmation dialog about the file lifetime in the room.",
-            "example": true
+            "example": false
           },
           "defaultOrder": {
             "$ref": "#/components/schemas/OrderBy"
@@ -19792,12 +19967,12 @@
           "forcesave": {
             "type": "boolean",
             "description": "Specifies whether to forcesave the files or not.",
-            "example": true
+            "example": false
           },
           "storeForcesave": {
             "type": "boolean",
             "description": "Specifies whether to store the forcesaved file versions or not.",
-            "example": true
+            "example": false
           },
           "recentSection": {
             "type": "boolean",
@@ -19906,18 +20081,18 @@
             "type": "integer",
             "description": "The maximum number of upload threads.",
             "format": "int32",
-            "example": 1234
+            "example": 10
           },
           "chunkUploadSize": {
             "type": "integer",
             "description": "The size of a large file that is uploaded in chunks.",
             "format": "int64",
-            "example": 1234
+            "example": 10485760
           },
           "openEditorInSameTab": {
             "type": "boolean",
             "description": "Specifies whether to open the editor in the same tab or not.",
-            "example": true
+            "example": false
           },
           "extsFilesVectorized": {
             "type": "array",
@@ -19927,14 +20102,16 @@
             "description": "List of extensions available for vectorization",
             "nullable": true,
             "example": [
-              "some text"
+              ".docx",
+              ".pdf",
+              ".txt"
             ]
           },
           "maxVectorizationFileSize": {
             "type": "integer",
             "description": "The maximum file size for vectorization",
             "format": "int64",
-            "example": 1234
+            "example": 5242880
           }
         },
         "additionalProperties": false,
@@ -19981,13 +20158,13 @@
             "type": "string",
             "description": "The folder title.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "My Documents"
           },
           "usedSpace": {
             "type": "integer",
             "description": "The used space in the folder.",
             "format": "int64",
-            "example": 1234
+            "example": 1048576
           }
         },
         "additionalProperties": false,
@@ -20060,7 +20237,7 @@
             "type": "integer",
             "description": "The filling form number.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           },
           "completedForm": {
             "$ref": "#/components/schemas/FileDtoInteger"
@@ -20075,7 +20252,7 @@
             "type": "integer",
             "description": "The room ID where filling the form.",
             "format": "int32",
-            "example": 1
+            "example": 123
           },
           "isRoomMember": {
             "type": "boolean",
@@ -20281,7 +20458,7 @@
             "type": "integer",
             "description": "The new element index in the folder.",
             "format": "int32",
-            "example": 1234
+            "example": 0
           }
         },
         "additionalProperties": false,
@@ -20394,12 +20571,12 @@
                 "type": "integer",
                 "description": "The new element index in the folder.",
                 "format": "int32",
-                "example": 1234
+                "example": 0
               },
               "mute": {
                 "type": "boolean",
                 "description": "Specifies if the folder notifications are enabled or not.",
-                "example": true
+                "example": false
               },
               "tags": {
                 "type": "array",
@@ -20418,7 +20595,7 @@
               "pinned": {
                 "type": "boolean",
                 "description": "Specifies if the folder is pinned or not.",
-                "example": true
+                "example": false
               },
               "roomType": {
                 "$ref": "#/components/schemas/RoomType"
@@ -20426,7 +20603,7 @@
               "private": {
                 "type": "boolean",
                 "description": "Specifies if the folder is private or not.",
-                "example": true
+                "example": false
               },
               "indexing": {
                 "type": "boolean",
@@ -20436,7 +20613,7 @@
               "denyDownload": {
                 "type": "boolean",
                 "description": "Specifies if the folder can be downloaded or not.",
-                "example": true
+                "example": false
               },
               "lifetime": {
                 "$ref": "#/components/schemas/RoomDataLifetimeDto"
@@ -20451,39 +20628,39 @@
                 "type": "boolean",
                 "description": "Specifies if the folder is placed in the room or not.",
                 "nullable": true,
-                "example": true
+                "example": false
               },
               "quotaLimit": {
                 "type": "integer",
                 "description": "The folder quota limit.",
                 "format": "int64",
                 "nullable": true,
-                "example": 1234
+                "example": 1073741824
               },
               "isCustomQuota": {
                 "type": "boolean",
                 "description": "Specifies if the folder room has a custom quota or not.",
                 "nullable": true,
-                "example": true
+                "example": false
               },
               "usedSpace": {
                 "type": "integer",
                 "description": "How much folder space is used (counter).",
                 "format": "int64",
                 "nullable": true,
-                "example": 1234
+                "example": 524288000
               },
               "passwordProtected": {
                 "type": "boolean",
                 "description": "Specifies if the folder is password protected or not.",
                 "nullable": true,
-                "example": true
+                "example": false
               },
               "expired": {
                 "type": "boolean",
                 "description": "Specifies if an external link to the folder is expired or not.",
                 "nullable": true,
-                "example": true,
+                "example": false,
                 "deprecated": true
               },
               "chatSettings": {
@@ -20534,12 +20711,12 @@
                 "type": "integer",
                 "description": "The new element index in the folder.",
                 "format": "int32",
-                "example": 1234
+                "example": 0
               },
               "mute": {
                 "type": "boolean",
                 "description": "Specifies if the folder notifications are enabled or not.",
-                "example": true
+                "example": false
               },
               "tags": {
                 "type": "array",
@@ -20558,7 +20735,7 @@
               "pinned": {
                 "type": "boolean",
                 "description": "Specifies if the folder is pinned or not.",
-                "example": true
+                "example": false
               },
               "roomType": {
                 "$ref": "#/components/schemas/RoomType"
@@ -20566,7 +20743,7 @@
               "private": {
                 "type": "boolean",
                 "description": "Specifies if the folder is private or not.",
-                "example": true
+                "example": false
               },
               "indexing": {
                 "type": "boolean",
@@ -20576,7 +20753,7 @@
               "denyDownload": {
                 "type": "boolean",
                 "description": "Specifies if the folder can be downloaded or not.",
-                "example": true
+                "example": false
               },
               "lifetime": {
                 "$ref": "#/components/schemas/RoomDataLifetimeDto"
@@ -20591,39 +20768,39 @@
                 "type": "boolean",
                 "description": "Specifies if the folder is placed in the room or not.",
                 "nullable": true,
-                "example": true
+                "example": false
               },
               "quotaLimit": {
                 "type": "integer",
                 "description": "The folder quota limit.",
                 "format": "int64",
                 "nullable": true,
-                "example": 1234
+                "example": 1073741824
               },
               "isCustomQuota": {
                 "type": "boolean",
                 "description": "Specifies if the folder room has a custom quota or not.",
                 "nullable": true,
-                "example": true
+                "example": false
               },
               "usedSpace": {
                 "type": "integer",
                 "description": "How much folder space is used (counter).",
                 "format": "int64",
                 "nullable": true,
-                "example": 1234
+                "example": 524288000
               },
               "passwordProtected": {
                 "type": "boolean",
                 "description": "Specifies if the folder is password protected or not.",
                 "nullable": true,
-                "example": true
+                "example": false
               },
               "expired": {
                 "type": "boolean",
                 "description": "Specifies if an external link to the folder is expired or not.",
                 "nullable": true,
-                "example": true,
+                "example": false,
                 "deprecated": true
               },
               "chatSettings": {
@@ -20716,7 +20893,7 @@
             "type": "string",
             "description": "The folder link ID.",
             "format": "uuid",
-            "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "access": {
             "$ref": "#/components/schemas/FileShare"
@@ -20730,7 +20907,7 @@
             "type": "string",
             "description": "The link name.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "My Document"
           },
           "password": {
             "maxLength": 255,
@@ -20738,17 +20915,17 @@
             "type": "string",
             "description": "The link password.",
             "nullable": true,
-            "example": "P@ssw0rd123"
+            "example": "p@ssw0rd"
           },
           "denyDownload": {
             "type": "boolean",
             "description": "Specifies if downloading the file from the link is disabled or not.",
-            "example": true
+            "example": false
           },
           "internal": {
             "type": "boolean",
             "description": "The link scope, whether it is internal or not.",
-            "example": true
+            "example": false
           },
           "primary": {
             "type": "boolean",
@@ -21094,7 +21271,7 @@
             "type": "string",
             "description": "The date and time when the form was created.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2025-01-01T00:00:00"
           },
           "formsData": {
             "type": "array",
@@ -21210,13 +21387,13 @@
             "type": "string",
             "description": "The role name.",
             "nullable": true,
-            "example": "some text"
+            "example": "Approver"
           },
           "roleColor": {
             "type": "string",
             "description": "The role color.",
             "nullable": true,
-            "example": "some text"
+            "example": "#FF5733"
           },
           "user": {
             "$ref": "#/components/schemas/EmployeeFullDto"
@@ -21225,12 +21402,12 @@
             "type": "integer",
             "description": "The role sequence.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           },
           "submitted": {
             "type": "boolean",
             "description": "Specifies if the role is submitted.",
-            "example": true
+            "example": false
           },
           "stopedBy": {
             "$ref": "#/components/schemas/EmployeeFullDto"
@@ -21330,11 +21507,13 @@
         "properties": {
           "key": {
             "type": "string",
+            "description": "The form item key.\r\n            <example>field_name</example>",
             "nullable": true,
             "example": "some text"
           },
           "type": {
             "type": "string",
+            "description": "The form item type.\r\n            <example>text</example>",
             "nullable": true,
             "example": "some text"
           }
@@ -21353,31 +21532,31 @@
             "type": "string",
             "description": "The unique document identifier used by the service to get a link to the file.",
             "nullable": true,
-            "example": "some text"
+            "example": "doc_key_123"
           },
           "instanceId": {
             "type": "string",
             "description": "The unique system identifier.",
             "nullable": true,
-            "example": "1"
+            "example": "doc_key_123"
           },
           "sourceFileId": {
             "type": "integer",
             "description": "The source file ID.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           },
           "path": {
             "type": "string",
             "description": "The file name or relative path for the formula editor.",
             "nullable": true,
-            "example": "some text"
+            "example": "My Document"
           },
           "link": {
             "type": "string",
             "description": "The file link.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com"
           }
         },
         "additionalProperties": false,
@@ -21455,7 +21634,7 @@
           "overridden": {
             "type": "boolean",
             "description": "Specifies if the group access rights are overridden or not.",
-            "example": true
+            "example": false
           },
           "canEditAccess": {
             "type": "boolean",
@@ -21465,7 +21644,7 @@
           "owner": {
             "type": "boolean",
             "description": "Specifies if the group member is a group owner or not.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -21617,7 +21796,7 @@
             "type": "integer",
             "description": "The unique identifier for the file history entry.",
             "format": "int32",
-            "example": 1
+            "example": 123
           },
           "action": {
             "$ref": "#/components/schemas/HistoryAction"
@@ -21689,19 +21868,19 @@
             "type": "boolean",
             "description": "Specifies if the file is favorite or not.",
             "nullable": true,
-            "example": true
+            "example": false
           },
           "folder": {
             "type": "string",
             "description": "The folder of the file.",
             "nullable": true,
-            "example": "some text"
+            "example": "My Documents"
           },
           "owner": {
             "type": "string",
             "description": "The file owner.",
             "nullable": true,
-            "example": "some text"
+            "example": "John Doe"
           },
           "sharingSettings": {
             "type": "array",
@@ -21718,7 +21897,7 @@
             "type": "string",
             "description": "The uploaded file.",
             "nullable": true,
-            "example": "some text"
+            "example": "2025-01-01T00:00:00"
           }
         },
         "additionalProperties": false,
@@ -21900,31 +22079,31 @@
             "type": "string",
             "description": "The image of the logo.",
             "nullable": true,
-            "example": "some text"
+            "example": "http://localhost/logo.png"
           },
           "imageDark": {
             "type": "string",
             "description": "The dark image of the logo.",
             "nullable": true,
-            "example": "some text"
+            "example": "http://localhost/logo-dark.png"
           },
           "imageLight": {
             "type": "string",
             "description": "The light image of the logo.",
             "nullable": true,
-            "example": "some text"
+            "example": "http://localhost/logo-light.png"
           },
           "imageEmbedded": {
             "type": "string",
             "description": "The embedded image of the logo.",
             "nullable": true,
-            "example": "some text"
+            "example": "http://localhost/logo-embedded.png"
           },
           "url": {
             "type": "string",
             "description": "The url link of the logo.",
             "nullable": true,
-            "example": "some text"
+            "example": "http://localhost"
           },
           "visible": {
             "type": "boolean",
@@ -21965,29 +22144,31 @@
             "type": "string",
             "description": "The path to the temporary image file.",
             "nullable": true,
-            "example": "some text"
+            "example": "/tmp/logo.png"
           },
           "x": {
             "type": "integer",
             "description": "The X coordinate of the rectangle starting point.",
             "format": "int32",
-            "example": 1234
+            "example": 0
           },
           "y": {
             "type": "integer",
             "description": "The Y coordinate of the rectangle starting point.",
             "format": "int32",
-            "example": 1234
+            "example": 0
           },
           "width": {
             "type": "integer",
             "description": "The rectangle width.",
-            "format": "int32"
+            "format": "int32",
+            "example": 100
           },
           "height": {
             "type": "integer",
             "description": "The rectangle height.",
-            "format": "int32"
+            "format": "int32",
+            "example": 100
           }
         },
         "additionalProperties": false,
@@ -22003,7 +22184,7 @@
             "type": "integer",
             "description": "The ID of the form to manage.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           },
           "action": {
             "$ref": "#/components/schemas/FormFillingManageAction"
@@ -23892,7 +24073,7 @@
             "type": "integer",
             "description": "The order value.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           }
         },
         "additionalProperties": false,
@@ -23910,7 +24091,7 @@
             "type": "integer",
             "description": "The entry unique identifier (file or folder).",
             "format": "int32",
-            "example": 1234
+            "example": 1
           },
           "entryType": {
             "$ref": "#/components/schemas/FileEntryType"
@@ -23921,7 +24102,7 @@
             "type": "integer",
             "description": "The order value.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           }
         },
         "additionalProperties": false,
@@ -24086,13 +24267,13 @@
             "type": "string",
             "description": "The provider name.",
             "nullable": true,
-            "example": "John Doe"
+            "example": "GoogleDrive"
           },
           "key": {
             "type": "string",
             "description": "The provider key.",
             "nullable": true,
-            "example": "some text"
+            "example": "google-drive"
           },
           "connected": {
             "type": "boolean",
@@ -24108,18 +24289,18 @@
             "type": "string",
             "description": "The provider redirect URL.",
             "nullable": true,
-            "example": "some text"
+            "example": "http://localhost/redirect"
           },
           "requiredConnectionUrl": {
             "type": "boolean",
             "description": "The required connection URL flag.",
-            "example": true
+            "example": false
           },
           "clientId": {
             "type": "string",
             "description": "The provider OAuth client ID.",
             "nullable": true,
-            "example": "some text"
+            "example": "client-id-123"
           }
         },
         "additionalProperties": false,
@@ -24351,24 +24532,24 @@
             "type": "integer",
             "description": "The room ID.",
             "format": "int32",
-            "example": 1
+            "example": 456
           },
           "progress": {
             "type": "number",
             "description": "The progress of creating a room from the template.",
             "format": "double",
-            "example": -8.5
+            "example": 50.0
           },
           "error": {
             "type": "string",
             "description": "The error message that is sent when a room is not created successfully from the template.",
             "nullable": true,
-            "example": "some text"
+            "example": "Room creation failed"
           },
           "isCompleted": {
             "type": "boolean",
             "description": "Specifies whether the process of creating a room from the template is completed.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -24451,18 +24632,18 @@
             "type": "string",
             "description": "The message to send when notifying about the shared room.",
             "nullable": true,
-            "example": "some text"
+            "example": "You have been invited to the room"
           },
           "culture": {
             "type": "string",
             "description": "The language of the room invitation.",
             "nullable": true,
-            "example": "some text"
+            "example": "en-US"
           },
           "force": {
             "type": "boolean",
             "description": "Specifies whether to forcibly delete a user with form roles from the room.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -24475,7 +24656,7 @@
             "type": "string",
             "description": "The room link ID.",
             "format": "uuid",
-            "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "access": {
             "$ref": "#/components/schemas/FileShare"
@@ -24486,7 +24667,7 @@
           "internal": {
             "type": "boolean",
             "description": "The link scope, whether it is internal or not.",
-            "example": true
+            "example": false
           },
           "title": {
             "maxLength": 255,
@@ -24494,7 +24675,7 @@
             "type": "string",
             "description": "The link name.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "My Document"
           },
           "linkType": {
             "$ref": "#/components/schemas/LinkType"
@@ -24505,12 +24686,12 @@
             "type": "string",
             "description": "The link password.",
             "nullable": true,
-            "example": "P@ssw0rd123"
+            "example": "doc_key_123"
           },
           "denyDownload": {
             "type": "boolean",
             "description": "Specifies if downloading the file from the link is disabled or not.",
-            "example": true
+            "example": false
           },
           "maxUseCount": {
             "maximum": 1000,
@@ -24519,13 +24700,13 @@
             "description": "The maximum number of times the invitation link can be used.",
             "format": "int32",
             "nullable": true,
-            "example": 1234
+            "example": 25
           },
           "currentUseCount": {
             "type": "integer",
             "description": "The current number of times the invitation link has been used.",
             "format": "int32",
-            "example": 1234
+            "example": 0
           }
         },
         "additionalProperties": false,
@@ -24564,7 +24745,7 @@
             "type": "string",
             "description": "The warning message.",
             "nullable": true,
-            "example": "some text"
+            "example": "Warning message"
           },
           "error": {
             "$ref": "#/components/schemas/RoomSecurityError"
@@ -24655,7 +24836,7 @@
             "type": "string",
             "description": "The room template title.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "My Document"
           },
           "logo": {
             "$ref": "#/components/schemas/LogoRequest"
@@ -24673,7 +24854,8 @@
             "description": "The collection of email addresses of users with whom to share a room.",
             "nullable": true,
             "example": [
-              "some text"
+              "user1@example.com",
+              "user2@example.com"
             ]
           },
           "groups": {
@@ -24685,7 +24867,7 @@
             "description": "The collection of groups with whom to share a room.",
             "nullable": true,
             "example": [
-              "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "00000000-0000-0000-0000-000000000000"
             ]
           },
           "public": {
@@ -24701,7 +24883,8 @@
             "description": "The collection of tags.",
             "nullable": true,
             "example": [
-              "some text"
+              "tag1",
+              "tag2"
             ]
           },
           "color": {
@@ -24710,7 +24893,7 @@
             "type": "string",
             "description": "The color of the room template.",
             "nullable": true,
-            "example": "some text"
+            "example": "FF0000"
           },
           "cover": {
             "maxLength": 50,
@@ -24718,14 +24901,14 @@
             "type": "string",
             "description": "The cover of the room template.",
             "nullable": true,
-            "example": "some text"
+            "example": "cover1"
           },
           "quota": {
             "type": "integer",
             "description": "Room quota",
             "format": "int64",
             "nullable": true,
-            "example": 1234
+            "example": 10485760
           }
         },
         "additionalProperties": false,
@@ -24743,24 +24926,24 @@
             "type": "integer",
             "description": "The room template ID.",
             "format": "int32",
-            "example": 1234
+            "example": 123
           },
           "progress": {
             "type": "number",
             "description": "The progress of the room template creation process.",
             "format": "double",
-            "example": -8.5
+            "example": 75.5
           },
           "error": {
             "type": "string",
             "description": "The error message that is sent when the room template is not created successfully.",
             "nullable": true,
-            "example": "some text"
+            "example": "Template creation failed"
           },
           "isCompleted": {
             "type": "boolean",
             "description": "Specifies whether the process of creating the room template is completed.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -24933,7 +25116,7 @@
             "type": "string",
             "description": "The file title to save as PDF.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "My Document"
           }
         },
         "additionalProperties": false,
@@ -24950,7 +25133,7 @@
             "type": "integer",
             "description": "The form ID.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           },
           "roles": {
             "type": "array",
@@ -25038,7 +25221,12 @@
               ]
             },
             "description": "The list of the shared folder IDs.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              1,
+              2,
+              3
+            ]
           },
           "fileIds": {
             "type": "array",
@@ -25055,7 +25243,12 @@
               ]
             },
             "description": "The list of the shared file IDs.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              1,
+              2,
+              3
+            ]
           },
           "share": {
             "type": "array",
@@ -25076,7 +25269,7 @@
             "type": "string",
             "description": "The message to send when notifying about the shared file.",
             "nullable": true,
-            "example": "some text"
+            "example": "You have been granted access to the file"
           }
         },
         "additionalProperties": false,
@@ -25104,7 +25297,7 @@
             "type": "string",
             "description": "The message to send when notifying about the shared file.",
             "nullable": true,
-            "example": "some text"
+            "example": "You have been granted access to the file"
           }
         },
         "additionalProperties": false,
@@ -25120,19 +25313,19 @@
             "type": "string",
             "description": "The file name.",
             "nullable": true,
-            "example": "some text"
+            "example": "My Document.docx"
           },
           "fileSize": {
             "type": "integer",
             "description": "The file size.",
             "format": "int64",
-            "example": 1234
+            "example": 10485760
           },
           "relativePath": {
             "type": "string",
             "description": "The relative path to the file.",
             "nullable": true,
-            "example": "some text"
+            "example": "subfolder/documents"
           },
           "createOn": {
             "$ref": "#/components/schemas/ApiDateTime"
@@ -25140,7 +25333,7 @@
           "encrypted": {
             "type": "boolean",
             "description": "Specifies whether the file is encrypted or not.",
-            "example": true
+            "example": false
           },
           "createNewIfExist": {
             "type": "boolean",
@@ -25364,7 +25557,7 @@
           "editingAlone": {
             "type": "boolean",
             "description": "Specifies whether to share the file with other users for editing or not.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -25377,7 +25570,7 @@
             "type": "string",
             "description": "The caption of the button that starts filling out the form.",
             "nullable": true,
-            "example": "some text"
+            "example": "Start Filling"
           }
         },
         "additionalProperties": false,
@@ -25634,7 +25827,7 @@
             "type": "string",
             "description": "A message displayed after forms are submitted.",
             "nullable": true,
-            "example": "some text"
+            "example": "Form submitted successfully"
           }
         },
         "additionalProperties": false,
@@ -25678,7 +25871,9 @@
             "description": "The list of file IDs.",
             "nullable": true,
             "example": [
-              1234
+              1,
+              2,
+              3
             ]
           }
         },
@@ -25692,37 +25887,37 @@
             "type": "string",
             "description": "The connection URL for the sharepoint.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://sharepoint.example.com"
           },
           "login": {
             "type": "string",
             "description": "The login.",
             "nullable": true,
-            "example": "some text"
+            "example": "admin"
           },
           "password": {
             "type": "string",
             "description": "The password.",
             "nullable": true,
-            "example": "P@ssw0rd123"
+            "example": "P@ssw0rd"
           },
           "token": {
             "type": "string",
             "description": "The authentication token.",
             "nullable": true,
-            "example": "some text"
+            "example": "abc123def456"
           },
           "customerTitle": {
             "type": "string",
             "description": "The customer title.",
             "nullable": true,
-            "example": "some text"
+            "example": "My Cloud Storage"
           },
           "providerKey": {
             "type": "string",
             "description": "The provider key.",
             "nullable": true,
-            "example": "some text"
+            "example": "SharePoint"
           }
         },
         "additionalProperties": false,
@@ -25815,44 +26010,44 @@
             "type": "string",
             "description": "The connection URL for the sharepoint.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com"
           },
           "login": {
             "type": "string",
             "description": "The third-party request login.",
             "nullable": true,
-            "example": "some text"
+            "example": "admin"
           },
           "password": {
             "type": "string",
             "description": "The third-party request password.",
             "nullable": true,
-            "example": "P@ssw0rd123"
+            "example": "password123"
           },
           "token": {
             "type": "string",
             "description": "The authentication token.",
             "nullable": true,
-            "example": "some text"
+            "example": "abc123"
           },
           "customerTitle": {
             "type": "string",
             "description": "The customer title.",
             "nullable": true,
-            "example": "some text"
+            "example": "My Document"
           },
           "providerKey": {
             "type": "string",
             "description": "The provider key.",
             "nullable": true,
-            "example": "some text"
+            "example": "abc123"
           },
           "providerId": {
             "type": "integer",
             "description": "The provider ID.",
             "format": "int32",
             "nullable": true,
-            "example": 1234
+            "example": 1
           }
         },
         "additionalProperties": false,
@@ -25912,13 +26107,13 @@
             "type": "integer",
             "description": "The comment version.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           },
           "comment": {
             "type": "string",
             "description": "The comment text.",
             "nullable": true,
-            "example": "some text"
+            "example": "This is a comment"
           }
         },
         "additionalProperties": false,
@@ -25933,13 +26128,13 @@
             "type": "string",
             "description": "The file title to update.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "My Document"
           },
           "lastVersion": {
             "type": "integer",
             "description": "The number of the latest file version.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           }
         },
         "additionalProperties": false,
@@ -25954,14 +26149,14 @@
             "type": "string",
             "description": "The room title.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "My Document"
           },
           "quota": {
             "type": "integer",
             "description": "The room quota.",
             "format": "int64",
             "nullable": true,
-            "example": 1234
+            "example": 10485760
           },
           "indexing": {
             "type": "boolean",
@@ -26036,13 +26231,18 @@
               ]
             },
             "description": "The list of room IDs.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              1,
+              2,
+              3
+            ]
           },
           "quota": {
             "type": "integer",
             "description": "The room quota.",
             "format": "int64",
-            "example": 1234
+            "example": 10485760
           }
         },
         "additionalProperties": false,
@@ -26066,7 +26266,12 @@
               ]
             },
             "description": "The list of room IDs.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              1,
+              2,
+              3
+            ]
           }
         },
         "additionalProperties": false,
@@ -26110,7 +26315,7 @@
           "keepConvertStatus": {
             "type": "boolean",
             "description": "Specifies whether to keep the file converting status or not.",
-            "example": true
+            "example": false
           },
           "stream": {
             "type": "string",
@@ -26138,7 +26343,7 @@
             "type": "string",
             "description": "The message sent after the successful upload operation.",
             "nullable": true,
-            "example": "some text"
+            "example": "File uploaded successfully"
           }
         },
         "additionalProperties": false,
@@ -26183,38 +26388,45 @@
         "properties": {
           "id": {
             "type": "integer",
+            "description": "The upload session ID.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           },
           "folderId": {
             "type": "integer",
+            "description": "The folder ID where the file is being uploaded.",
             "format": "int32",
             "example": 1
           },
           "version": {
             "type": "integer",
+            "description": "The file version number.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           },
           "title": {
             "type": "string",
+            "description": "The file title.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "My Document.docx"
           },
           "providerKey": {
             "type": "string",
+            "description": "The third-party provider key.",
             "nullable": true,
-            "example": "some text"
+            "example": "Google"
           },
           "uploaded": {
             "type": "boolean",
-            "example": true
+            "description": "Specifies whether the file has been uploaded.",
+            "example": false
           },
           "file": {
             "$ref": "#/components/schemas/FileDtoInteger"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The upload session response parameters."
       },
       "UploadSessionResponseIntegerWrapper": {
         "type": "object",
@@ -26302,13 +26514,13 @@
           },
           "firstName": {
             "type": "string",
-            "description": "The user first name.",
+            "description": "The user's first name.",
             "nullable": true,
             "example": "John"
           },
           "lastName": {
             "type": "string",
-            "description": "The user last name.",
+            "description": "The user's last name.",
             "nullable": true,
             "example": "Doe"
           },
@@ -26316,14 +26528,14 @@
             "type": "string",
             "description": "The user username.",
             "nullable": true,
-            "example": "some text"
+            "example": "johndoe"
           },
           "birthDate": {
             "type": "string",
             "description": "The user birthday.",
             "format": "date-time",
             "nullable": true,
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "1990-01-01T00:00:00Z"
           },
           "sex": {
             "type": "boolean",
@@ -26342,33 +26554,33 @@
             "description": "The date and time when the user account was terminated.",
             "format": "date-time",
             "nullable": true,
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2025-12-31T23:59:59Z"
           },
           "title": {
             "type": "string",
             "description": "The user title.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "Manager"
           },
           "workFromDate": {
             "type": "string",
             "description": "The user registration date.",
             "format": "date-time",
             "nullable": true,
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2020-01-15T00:00:00Z"
           },
           "email": {
             "type": "string",
             "description": "The user email address.",
             "format": "email",
             "nullable": true,
-            "example": "example@onlyoffice.com"
+            "example": "john.doe@example.com"
           },
           "contacts": {
             "type": "string",
             "description": "The list of user contacts in the string format.",
             "nullable": true,
-            "example": "some text"
+            "example": "skype:johndoe|telegram:@johndoe"
           },
           "contactsList": {
             "type": "array",
@@ -26378,37 +26590,38 @@
             "description": "The list of user contacts.",
             "nullable": true,
             "example": [
-              "some text"
+              "skype:johndoe",
+              "telegram:@johndoe"
             ]
           },
           "location": {
             "type": "string",
             "description": "The user location.",
             "nullable": true,
-            "example": "001 Schroeder Run, New Tabithaport, Colombia"
+            "example": "New York, USA"
           },
           "notes": {
             "type": "string",
             "description": "The user notes.",
             "nullable": true,
-            "example": "some text"
+            "example": "Additional information about the user"
           },
           "removed": {
             "type": "boolean",
             "description": "Specifies if the user account was removed or not.",
-            "example": true
+            "example": false
           },
           "lastModified": {
             "type": "string",
             "description": "The date and time when the user account was last modified.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2025-02-08T10:30:00Z"
           },
           "tenantId": {
             "type": "integer",
             "description": "The tenant ID.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           },
           "isActive": {
             "type": "boolean",
@@ -26420,13 +26633,13 @@
             "type": "string",
             "description": "The user culture code.",
             "nullable": true,
-            "example": "some text"
+            "example": "en-US"
           },
           "mobilePhone": {
             "type": "string",
             "description": "The user mobile phone.",
             "nullable": true,
-            "example": "some text"
+            "example": "+1234567890"
           },
           "mobilePhoneActivationStatus": {
             "$ref": "#/components/schemas/MobilePhoneActivationStatus"
@@ -26435,44 +26648,44 @@
             "type": "string",
             "description": "The LDAP user identificator.",
             "nullable": true,
-            "example": "some text"
+            "example": "S-1-5-21-3623811015-3361044348-30300820-1013"
           },
           "ldapQouta": {
             "type": "integer",
             "description": "The LDAP user quota attribute.",
             "format": "int64",
-            "example": 1234
+            "example": 1073741824
           },
           "ssoNameId": {
             "type": "string",
             "description": "The SSO SAML user identificator.",
             "nullable": true,
-            "example": "some text"
+            "example": "johndoe@example.com"
           },
           "ssoSessionId": {
             "type": "string",
             "description": "The SSO SAML user session identificator.",
             "nullable": true,
-            "example": "some text"
+            "example": "_1a2b3c4d5e6f7g8h9i0j"
           },
           "createDate": {
             "type": "string",
             "description": "The date and time when the user account was created.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2020-01-15T00:00:00Z"
           },
           "createdBy": {
             "type": "string",
             "description": "The ID of the user who created the current user account.",
             "format": "uuid",
             "nullable": true,
-            "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "spam": {
             "type": "boolean",
             "description": "Specifies if tips, updates and offers are allowed to be sent to the user or not.",
             "nullable": true,
-            "example": true
+            "example": false
           },
           "checkActivation": {
             "type": "boolean",
@@ -26495,13 +26708,13 @@
             "description": "The list of user IDs.",
             "nullable": true,
             "example": [
-              "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "00000000-0000-0000-0000-000000000000"
             ]
           },
           "resendAll": {
             "type": "boolean",
             "description": "Specifies whether to resend all user invitations or not.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -26603,37 +26816,37 @@
             "type": "string",
             "description": "The watermark text.",
             "nullable": true,
-            "example": "some text"
+            "example": "Confidential"
           },
           "rotate": {
             "type": "integer",
             "description": "The watermark text and image rotate.",
             "format": "int32",
-            "example": 1234
+            "example": 45
           },
           "imageScale": {
             "type": "integer",
             "description": "The watermark image scale.",
             "format": "int32",
-            "example": 1234
+            "example": 100
           },
           "imageUrl": {
             "type": "string",
             "description": "The watermark image url.",
             "nullable": true,
-            "example": "some text"
+            "example": "http://localhost/watermark.png"
           },
           "imageHeight": {
             "type": "number",
             "description": "The watermark image height.",
             "format": "double",
-            "example": -8.5
+            "example": 100.0
           },
           "imageWidth": {
             "type": "number",
             "description": "The watermark image width.",
             "format": "double",
-            "example": -8.5
+            "example": 200.0
           }
         },
         "additionalProperties": false,
@@ -26714,37 +26927,37 @@
             "type": "string",
             "description": "The watermark text.",
             "nullable": true,
-            "example": "some text"
+            "example": "Confidential"
           },
           "rotate": {
             "type": "integer",
             "description": "The watermark text and image rotate angle.",
             "format": "int32",
-            "example": 1234
+            "example": -45
           },
           "imageScale": {
             "type": "integer",
             "description": "The watermark image scale.",
             "format": "int32",
-            "example": 1234
+            "example": 100
           },
           "imageUrl": {
             "type": "string",
             "description": "The path to the temporary image file.",
             "nullable": true,
-            "example": "some text"
+            "example": "/tmp/watermark.png"
           },
           "imageHeight": {
             "type": "number",
             "description": "The watermark image height.",
             "format": "double",
-            "example": -8.5
+            "example": 100.0
           },
           "imageWidth": {
             "type": "number",
             "description": "The watermark image width.",
             "format": "double",
-            "example": -8.5
+            "example": 200.0
           }
         },
         "additionalProperties": false,

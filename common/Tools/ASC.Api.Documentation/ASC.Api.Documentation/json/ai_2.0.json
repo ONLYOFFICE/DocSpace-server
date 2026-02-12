@@ -54,7 +54,7 @@
             "description": "The filter by user ID.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -63,7 +63,7 @@
             "description": "Specifies whether to search by tags or not.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -72,7 +72,7 @@
             "description": "The tags in the serialized format.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "ai,assistant"
             }
           },
           {
@@ -81,7 +81,7 @@
             "description": "Specifies whether to exclude search by user or group ID.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -90,7 +90,8 @@
             "description": "The filter by user (Owner - 0, Member - 1).",
             "schema": {
               "$ref": "#/components/schemas/SubjectFilter"
-            }
+            },
+            "example": 0
           },
           {
             "name": "quotaFilter",
@@ -98,7 +99,8 @@
             "description": "The filter by quota (All - 0, Default - 1, Custom - 2).",
             "schema": {
               "$ref": "#/components/schemas/QuotaFilter"
-            }
+            },
+            "example": 0
           },
           {
             "name": "count",
@@ -109,7 +111,7 @@
               "minimum": 1,
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 25
             }
           },
           {
@@ -119,7 +121,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
@@ -128,7 +130,7 @@
             "description": "Specifies the field by which the room content should be sorted.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "DateAndTime"
             }
           },
           {
@@ -137,7 +139,8 @@
             "description": "The order in which the results are sorted.",
             "schema": {
               "$ref": "#/components/schemas/SortOrder"
-            }
+            },
+            "example": 1
           },
           {
             "name": "filterValue",
@@ -145,7 +148,7 @@
             "description": "The text filter value used to refine search or query operations.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "my agent"
             }
           }
         ],
@@ -665,11 +668,12 @@
           {
             "name": "roomId",
             "in": "path",
+            "description": "The room ID.",
             "required": true,
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1
+              "example": 42
             }
           }
         ],
@@ -730,29 +734,32 @@
           {
             "name": "roomId",
             "in": "path",
+            "description": "The room ID.",
             "required": true,
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1
+              "example": 42
             }
           },
           {
             "name": "startIndex",
             "in": "query",
+            "description": "The index from which to start retrieving items.",
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
             "name": "count",
             "in": "query",
+            "description": "The number of items to retrieve.",
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 100
             }
           }
         ],
@@ -812,11 +819,12 @@
           {
             "name": "chatId",
             "in": "path",
+            "description": "The chat ID.",
             "required": true,
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -877,29 +885,32 @@
           {
             "name": "chatId",
             "in": "path",
+            "description": "The chat ID.",
             "required": true,
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
             "name": "startIndex",
             "in": "query",
+            "description": "The index from which to start retrieving items.",
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
             "name": "count",
             "in": "query",
+            "description": "The number of items to retrieve.",
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 100
             }
           }
         ],
@@ -959,11 +970,12 @@
           {
             "name": "chatId",
             "in": "path",
+            "description": "The chat ID.",
             "required": true,
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -1031,11 +1043,12 @@
           {
             "name": "chatId",
             "in": "path",
+            "description": "The chat ID.",
             "required": true,
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -1093,11 +1106,12 @@
           {
             "name": "chatId",
             "in": "path",
+            "description": "The chat ID.",
             "required": true,
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -1150,11 +1164,12 @@
           {
             "name": "chatId",
             "in": "path",
+            "description": "The chat ID.",
             "required": true,
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -1217,10 +1232,11 @@
           {
             "name": "provider",
             "in": "query",
+            "description": "The AI provider ID.",
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 1
             }
           }
         ],
@@ -1280,10 +1296,11 @@
           {
             "name": "callId",
             "in": "path",
+            "description": "The tool call ID.",
             "required": true,
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "call_abc123"
             }
           }
         ],
@@ -1346,11 +1363,12 @@
           {
             "name": "roomId",
             "in": "path",
+            "description": "The room ID.",
             "required": true,
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1
+              "example": 42
             }
           }
         ],
@@ -1418,11 +1436,12 @@
           {
             "name": "roomId",
             "in": "path",
+            "description": "The room ID.",
             "required": true,
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1
+              "example": 42
             }
           }
         ],
@@ -1595,19 +1614,21 @@
           {
             "name": "startIndex",
             "in": "query",
+            "description": "The index from which to start retrieving items.",
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
             "name": "count",
             "in": "query",
+            "description": "The number of items to retrieve.",
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 100
             }
           }
         ],
@@ -1667,6 +1688,7 @@
           {
             "name": "id",
             "in": "path",
+            "description": "The server ID.",
             "required": true,
             "schema": {
               "type": "string",
@@ -1739,6 +1761,7 @@
           {
             "name": "id",
             "in": "path",
+            "description": "The server ID.",
             "required": true,
             "schema": {
               "type": "string",
@@ -1803,6 +1826,7 @@
           {
             "name": "id",
             "in": "path",
+            "description": "The server ID.",
             "required": true,
             "schema": {
               "type": "string",
@@ -1877,19 +1901,21 @@
           {
             "name": "startIndex",
             "in": "query",
+            "description": "The index from which to start retrieving items.",
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
             "name": "count",
             "in": "query",
+            "description": "The number of items to retrieve.",
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 100
             }
           }
         ],
@@ -1949,11 +1975,12 @@
           {
             "name": "roomId",
             "in": "path",
+            "description": "The room ID.",
             "required": true,
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1
+              "example": 42
             }
           }
         ],
@@ -2021,11 +2048,12 @@
           {
             "name": "roomId",
             "in": "path",
+            "description": "The room ID.",
             "required": true,
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1
+              "example": 42
             }
           }
         ],
@@ -2083,11 +2111,12 @@
           {
             "name": "roomId",
             "in": "path",
+            "description": "The room ID.",
             "required": true,
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1
+              "example": 42
             }
           }
         ],
@@ -2150,21 +2179,23 @@
           {
             "name": "roomId",
             "in": "path",
+            "description": "The room ID.",
             "required": true,
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1
+              "example": 42
             }
           },
           {
             "name": "serverId",
             "in": "path",
+            "description": "The MCP server ID.",
             "required": true,
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -2232,21 +2263,23 @@
           {
             "name": "roomId",
             "in": "path",
+            "description": "The room ID.",
             "required": true,
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1
+              "example": 42
             }
           },
           {
             "name": "serverId",
             "in": "path",
+            "description": "The MCP server ID.",
             "required": true,
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -2306,21 +2339,23 @@
           {
             "name": "roomId",
             "in": "path",
+            "description": "The room ID.",
             "required": true,
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1
+              "example": 42
             }
           },
           {
             "name": "serverId",
             "in": "path",
+            "description": "The server ID.",
             "required": true,
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -2390,21 +2425,23 @@
           {
             "name": "roomId",
             "in": "path",
+            "description": "The room ID.",
             "required": true,
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1
+              "example": 42
             }
           },
           {
             "name": "serverId",
             "in": "path",
+            "description": "The server ID.",
             "required": true,
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -2464,11 +2501,12 @@
           {
             "name": "messageId",
             "in": "path",
+            "description": "The message ID.",
             "required": true,
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 1
             }
           }
         ],
@@ -2590,19 +2628,21 @@
           {
             "name": "startIndex",
             "in": "query",
+            "description": "The index from which to start retrieving items.",
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
             "name": "count",
             "in": "query",
+            "description": "The number of items to retrieve.",
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 100
             }
           }
         ],
@@ -2714,6 +2754,7 @@
           {
             "name": "id",
             "in": "path",
+            "description": "The AI provider ID.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -3294,38 +3335,40 @@
           "name": {
             "maxLength": 128,
             "type": "string",
+            "description": "The MCP server name.",
             "nullable": true,
-            "example": "John Doe"
+            "example": "My MCP Server"
           },
           "description": {
             "maxLength": 255,
             "type": "string",
+            "description": "The MCP server description.",
             "nullable": true,
-            "example": "some text"
+            "example": "A server for document processing"
           },
           "endpoint": {
             "type": "string",
+            "description": "The MCP server endpoint URL.",
             "format": "uri",
             "nullable": true,
-            "example": "some text"
+            "example": "https://mcp.example.com/sse"
           },
           "headers": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
             },
+            "description": "The optional HTTP headers for the MCP server.",
             "nullable": true,
-            "example": [
-              {
-                "key": "some text",
-                "value": "some text"
-              }
-            ]
+            "example": {
+              "Authorization": "Bearer token123"
+            }
           },
           "icon": {
             "type": "string",
+            "description": "The MCP server icon URL.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/icon.png"
           }
         },
         "additionalProperties": false
@@ -3343,9 +3386,10 @@
               "type": "string",
               "format": "uuid"
             },
+            "description": "The set of server IDs to add to the room.",
             "nullable": true,
             "example": [
-              "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "00000000-0000-0000-0000-000000000000"
             ]
           }
         },
@@ -3671,26 +3715,31 @@
         "properties": {
           "providerId": {
             "type": "integer",
+            "description": "The provider ID.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           },
           "modelId": {
             "type": "string",
+            "description": "The model ID.",
             "nullable": true,
-            "example": "some text"
+            "example": "gpt-4"
           },
           "prompt": {
             "type": "string",
+            "description": "The prompt.",
             "nullable": true,
-            "example": "some text"
+            "example": "Please analyze this document"
           },
           "internal": {
             "type": "boolean",
+            "description": "Specifies whether the provider is internal or not.",
             "readOnly": true,
-            "example": true
+            "example": false
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The chat settings."
       },
       "ChatWrapper": {
         "type": "object",
@@ -3734,8 +3783,9 @@
         "properties": {
           "code": {
             "type": "string",
+            "description": "The connection authorization code.",
             "nullable": true,
-            "example": "some text"
+            "example": "abc123def456"
           }
         },
         "additionalProperties": false
@@ -3748,13 +3798,15 @@
         "properties": {
           "message": {
             "type": "string",
+            "description": "The message text.",
             "nullable": true,
-            "example": "some text"
+            "example": "Summarize this document for me"
           },
           "contextFolderId": {
             "type": "integer",
+            "description": "The context folder ID.",
             "format": "int32",
-            "example": 1234
+            "example": 123
           },
           "files": {
             "type": "array",
@@ -3770,7 +3822,14 @@
                 }
               ]
             },
-            "nullable": true
+            "description": "The list of attached files.",
+            "nullable": true,
+            "example": [
+              {
+                "id": 1,
+                "type": "file"
+              }
+            ]
           }
         },
         "additionalProperties": false
@@ -3788,14 +3847,14 @@
             "type": "string",
             "description": "The room name.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "My AI Agent Room"
           },
           "quota": {
             "type": "integer",
             "description": "The room quota.",
             "format": "int64",
             "nullable": true,
-            "example": 1234
+            "example": 10485760
           },
           "indexing": {
             "type": "boolean",
@@ -3807,7 +3866,7 @@
             "type": "boolean",
             "description": "Specifies whether to deny downloads from the room.",
             "nullable": true,
-            "example": true
+            "example": false
           },
           "lifetime": {
             "$ref": "#/components/schemas/RoomDataLifetimeDto"
@@ -3826,7 +3885,8 @@
             "description": "The list of tags.",
             "nullable": true,
             "example": [
-              "some text"
+              "ai",
+              "assistant"
             ]
           },
           "color": {
@@ -3835,7 +3895,7 @@
             "type": "string",
             "description": "The room color.",
             "nullable": true,
-            "example": "some text"
+            "example": "FF6600"
           },
           "cover": {
             "maxLength": 50,
@@ -3843,12 +3903,12 @@
             "type": "string",
             "description": "The room cover.",
             "nullable": true,
-            "example": "some text"
+            "example": "cover1.jpg"
           },
           "private": {
             "type": "boolean",
             "description": "Specifies whether the room to be created is private or not.",
-            "example": true
+            "example": false
           },
           "share": {
             "type": "array",
@@ -3881,18 +3941,21 @@
           },
           "title": {
             "type": "string",
+            "description": "The AI provider title.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "OpenAI Provider"
           },
           "url": {
             "type": "string",
+            "description": "The AI provider URL.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://api.openai.com/v1"
           },
           "key": {
             "type": "string",
+            "description": "The AI provider API key.",
             "nullable": true,
-            "example": "some text"
+            "example": "sk-example-key-123"
           }
         },
         "additionalProperties": false
@@ -3965,7 +4028,7 @@
           "deleteAfter": {
             "type": "boolean",
             "description": "Specifies whether to delete a room after the editing session is finished or not.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -3984,9 +4047,10 @@
               "type": "string",
               "format": "uuid"
             },
+            "description": "The set of server IDs to remove from the room.",
             "nullable": true,
             "example": [
-              "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "00000000-0000-0000-0000-000000000000"
             ]
           }
         },
@@ -4005,9 +4069,10 @@
               "type": "string",
               "format": "uuid"
             },
+            "description": "The set of server IDs to delete.",
             "nullable": true,
             "example": [
-              "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "00000000-0000-0000-0000-000000000000"
             ]
           }
         },
@@ -4087,7 +4152,7 @@
             "type": "string",
             "description": "The user ID.",
             "format": "uuid",
-            "example": "{00000000-0000-0000-0000-000000000000}"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "displayName": {
             "type": "string",
@@ -4105,37 +4170,37 @@
             "type": "string",
             "description": "The user avatar.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/avatar.jpg"
           },
           "avatarOriginal": {
             "type": "string",
             "description": "The user original size avatar.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/avatar_original.jpg"
           },
           "avatarMax": {
             "type": "string",
             "description": "The user maximum size avatar.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/avatar_max.jpg"
           },
           "avatarMedium": {
             "type": "string",
             "description": "The user medium size avatar.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/avatar_medium.jpg"
           },
           "avatarSmall": {
             "type": "string",
             "description": "The user small size avatar.",
             "nullable": true,
-            "example": "url to small avatar"
+            "example": "https://example.com/avatar_small.jpg"
           },
           "profileUrl": {
             "type": "string",
             "description": "The user profile URL.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/profile/user123"
           },
           "hasAvatar": {
             "type": "boolean",
@@ -4145,7 +4210,7 @@
           "isAnonim": {
             "type": "boolean",
             "description": "Specifies if the user is anonymous or not.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -4168,13 +4233,15 @@
         "properties": {
           "folderId": {
             "type": "integer",
+            "description": "The destination folder ID.",
             "format": "int32",
-            "example": 1
+            "example": 123
           },
           "title": {
             "type": "string",
+            "description": "The export file title.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "Chat Export"
           }
         },
         "additionalProperties": false
@@ -4188,13 +4255,15 @@
         "properties": {
           "folderId": {
             "type": "integer",
+            "description": "The destination folder ID.",
             "format": "int32",
-            "example": 1
+            "example": 123
           },
           "title": {
             "type": "string",
+            "description": "The export file title.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "Message Export"
           }
         },
         "additionalProperties": false
@@ -4206,7 +4275,7 @@
             "type": "string",
             "description": "The file entry title.",
             "nullable": true,
-            "example": "Some titile.txt/ Some title"
+            "example": "Some title.txt"
           },
           "access": {
             "$ref": "#/components/schemas/FileShare"
@@ -4230,14 +4299,14 @@
           "parentShared": {
             "type": "boolean",
             "description": "Indicates whether the parent entity is shared.",
-            "example": true
+            "example": false
           },
           "shortWebUrl": {
             "type": "string",
             "description": "The short Web URL.",
             "format": "uri",
             "nullable": true,
-            "example": "some text"
+            "example": "http://localhost/s/abc123"
           },
           "created": {
             "$ref": "#/components/schemas/ApiDateTime"
@@ -4264,32 +4333,32 @@
             "type": "boolean",
             "description": "Specifies if the file entry provider is specified or not.",
             "nullable": true,
-            "example": true
+            "example": false
           },
           "providerKey": {
             "type": "string",
             "description": "The provider key of the file entry.",
             "nullable": true,
-            "example": "some text"
+            "example": "google-drive"
           },
           "providerId": {
             "type": "integer",
             "description": "The provider ID of the file entry.",
             "format": "int32",
             "nullable": true,
-            "example": 1234
+            "example": 1
           },
           "order": {
             "type": "string",
             "description": "The order of the file entry.",
             "nullable": true,
-            "example": "some text"
+            "example": 1
           },
           "isFavorite": {
             "type": "boolean",
             "description": "Specifies if the file is a favorite or not.",
             "nullable": true,
-            "example": true
+            "example": false
           },
           "fileEntryType": {
             "$ref": "#/components/schemas/FileEntryType"
@@ -4323,7 +4392,7 @@
                 "type": "integer",
                 "description": "The root folder ID of the file entry.",
                 "format": "int32",
-                "example": 1234
+                "example": 1
               },
               "originId": {
                 "type": "integer",
@@ -4341,13 +4410,13 @@
                 "type": "string",
                 "description": "The origin title of the file entry.",
                 "nullable": true,
-                "example": "some text"
+                "example": "Original Title"
               },
               "originRoomTitle": {
                 "type": "string",
                 "description": "The origin room title of the file entry.",
                 "nullable": true,
-                "example": "some text"
+                "example": "Original Room"
               },
               "canShare": {
                 "type": "boolean",
@@ -4578,13 +4647,13 @@
                 "type": "string",
                 "description": "The request token of the file entry.",
                 "nullable": true,
-                "example": "some text"
+                "example": "token-abc-123"
               },
               "external": {
                 "type": "boolean",
                 "description": "Specifies if the folder can be accessed via an external link or not.",
                 "nullable": true,
-                "example": true
+                "example": false
               },
               "expirationDate": {
                 "$ref": "#/components/schemas/ApiDateTime"
@@ -4593,7 +4662,7 @@
                 "type": "boolean",
                 "description": "Indicates whether the shareable link associated with the file or folder has expired.",
                 "nullable": true,
-                "example": true
+                "example": false
               }
             }
           }
@@ -4648,7 +4717,7 @@
             "type": "string",
             "description": "The file operation ID.",
             "nullable": true,
-            "example": "1"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "Operation": {
             "$ref": "#/components/schemas/FileOperationType"
@@ -4669,7 +4738,7 @@
             "type": "string",
             "description": "The file operation processing status.",
             "nullable": true,
-            "example": "1"
+            "example": 1
           },
           "finished": {
             "type": "boolean",
@@ -4681,7 +4750,7 @@
             "description": "The file operation URL.",
             "format": "uri",
             "nullable": true,
-            "example": "some text"
+            "example": "http://localhost/download"
           },
           "files": {
             "type": "array",
@@ -4944,7 +5013,7 @@
             "type": "integer",
             "description": "The new element index in the folder.",
             "format": "int32",
-            "example": 1234
+            "example": 0
           }
         },
         "additionalProperties": false,
@@ -5020,12 +5089,12 @@
                 "type": "integer",
                 "description": "The new element index in the folder.",
                 "format": "int32",
-                "example": 1234
+                "example": 0
               },
               "mute": {
                 "type": "boolean",
                 "description": "Specifies if the folder notifications are enabled or not.",
-                "example": true
+                "example": false
               },
               "tags": {
                 "type": "array",
@@ -5044,7 +5113,7 @@
               "pinned": {
                 "type": "boolean",
                 "description": "Specifies if the folder is pinned or not.",
-                "example": true
+                "example": false
               },
               "roomType": {
                 "$ref": "#/components/schemas/RoomType"
@@ -5052,7 +5121,7 @@
               "private": {
                 "type": "boolean",
                 "description": "Specifies if the folder is private or not.",
-                "example": true
+                "example": false
               },
               "indexing": {
                 "type": "boolean",
@@ -5062,7 +5131,7 @@
               "denyDownload": {
                 "type": "boolean",
                 "description": "Specifies if the folder can be downloaded or not.",
-                "example": true
+                "example": false
               },
               "lifetime": {
                 "$ref": "#/components/schemas/RoomDataLifetimeDto"
@@ -5077,39 +5146,39 @@
                 "type": "boolean",
                 "description": "Specifies if the folder is placed in the room or not.",
                 "nullable": true,
-                "example": true
+                "example": false
               },
               "quotaLimit": {
                 "type": "integer",
                 "description": "The folder quota limit.",
                 "format": "int64",
                 "nullable": true,
-                "example": 1234
+                "example": 1073741824
               },
               "isCustomQuota": {
                 "type": "boolean",
                 "description": "Specifies if the folder room has a custom quota or not.",
                 "nullable": true,
-                "example": true
+                "example": false
               },
               "usedSpace": {
                 "type": "integer",
                 "description": "How much folder space is used (counter).",
                 "format": "int64",
                 "nullable": true,
-                "example": 1234
+                "example": 524288000
               },
               "passwordProtected": {
                 "type": "boolean",
                 "description": "Specifies if the folder is password protected or not.",
                 "nullable": true,
-                "example": true
+                "example": false
               },
               "expired": {
                 "type": "boolean",
                 "description": "Specifies if an external link to the folder is expired or not.",
                 "nullable": true,
-                "example": true,
+                "example": false,
                 "deprecated": true
               },
               "chatSettings": {
@@ -5443,29 +5512,31 @@
             "type": "string",
             "description": "The path to the temporary image file.",
             "nullable": true,
-            "example": "some text"
+            "example": "/tmp/logo.png"
           },
           "x": {
             "type": "integer",
             "description": "The X coordinate of the rectangle starting point.",
             "format": "int32",
-            "example": 1234
+            "example": 0
           },
           "y": {
             "type": "integer",
             "description": "The Y coordinate of the rectangle starting point.",
             "format": "int32",
-            "example": 1234
+            "example": 0
           },
           "width": {
             "type": "integer",
             "description": "The rectangle width.",
-            "format": "int32"
+            "format": "int32",
+            "example": 100
           },
           "height": {
             "type": "integer",
             "description": "The rectangle height.",
-            "format": "int32"
+            "format": "int32",
+            "example": 100
           }
         },
         "additionalProperties": false,
@@ -6179,9 +6250,12 @@
               "type": "integer",
               "format": "int32"
             },
+            "description": "The set of AI provider IDs to remove.",
             "nullable": true,
             "example": [
-              1234
+              1,
+              2,
+              3
             ]
           }
         },
@@ -6196,8 +6270,9 @@
           "name": {
             "maxLength": 255,
             "type": "string",
+            "description": "The new chat name.",
             "nullable": true,
-            "example": "John Doe"
+            "example": "Project Discussion"
           }
         },
         "additionalProperties": false
@@ -6344,14 +6419,14 @@
             "type": "integer",
             "description": "AI provider identifier.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           },
           "defaultModel": {
             "maxLength": 255,
             "type": "string",
             "description": "Default model identifier to use with this provider.",
             "nullable": true,
-            "example": "some text"
+            "example": "gpt-4"
           }
         },
         "additionalProperties": false,
@@ -6365,8 +6440,9 @@
           },
           "key": {
             "type": "string",
+            "description": "The embedding provider API key.",
             "nullable": true,
-            "example": "some text"
+            "example": "sk-example-key-123"
           }
         },
         "additionalProperties": false
@@ -6382,9 +6458,11 @@
             "items": {
               "type": "string"
             },
+            "description": "The list of disabled tool names.",
             "nullable": true,
             "example": [
-              "some text"
+              "tool1",
+              "tool2"
             ]
           }
         },
@@ -6395,6 +6473,7 @@
         "properties": {
           "enabled": {
             "type": "boolean",
+            "description": "Specifies whether the server is enabled.",
             "example": true
           }
         },
@@ -6405,6 +6484,7 @@
         "properties": {
           "webSearchEnabled": {
             "type": "boolean",
+            "description": "Specifies whether the web search is enabled.",
             "nullable": true,
             "example": true
           }
@@ -6416,6 +6496,7 @@
         "properties": {
           "enabled": {
             "type": "boolean",
+            "description": "Specifies whether the web search is enabled.",
             "example": true
           },
           "type": {
@@ -6423,8 +6504,9 @@
           },
           "key": {
             "type": "string",
+            "description": "The web search API key.",
             "nullable": true,
-            "example": "some text"
+            "example": "search-api-key-123"
           }
         },
         "additionalProperties": false
@@ -6469,14 +6551,16 @@
         "properties": {
           "message": {
             "type": "string",
+            "description": "The initial message text.",
             "nullable": true,
-            "example": "some text"
+            "example": "Hello, can you help me with this document?"
           },
           "contextFolderId": {
             "type": "integer",
+            "description": "The context folder ID.",
             "format": "int32",
             "nullable": true,
-            "example": 1234
+            "example": 123
           },
           "files": {
             "type": "array",
@@ -6492,7 +6576,14 @@
                 }
               ]
             },
-            "nullable": true
+            "description": "The list of attached files.",
+            "nullable": true,
+            "example": [
+              {
+                "id": 1,
+                "type": "file"
+              }
+            ]
           }
         },
         "additionalProperties": false
@@ -6551,18 +6642,21 @@
         "properties": {
           "title": {
             "type": "string",
+            "description": "The AI provider title.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "Updated Provider"
           },
           "url": {
             "type": "string",
+            "description": "The AI provider URL.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://api.openai.com/v1"
           },
           "key": {
             "type": "string",
+            "description": "The AI provider API key.",
             "nullable": true,
-            "example": "some text"
+            "example": "sk-example-key-123"
           }
         },
         "additionalProperties": false
@@ -6576,14 +6670,14 @@
             "type": "string",
             "description": "The room title.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "My Document"
           },
           "quota": {
             "type": "integer",
             "description": "The room quota.",
             "format": "int64",
             "nullable": true,
-            "example": 1234
+            "example": 10485760
           },
           "indexing": {
             "type": "boolean",
@@ -6658,13 +6752,18 @@
               ]
             },
             "description": "The list of room IDs.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              1,
+              2,
+              3
+            ]
           },
           "quota": {
             "type": "integer",
             "description": "The room quota.",
             "format": "int64",
-            "example": 1234
+            "example": 10485760
           }
         },
         "additionalProperties": false,
@@ -6688,7 +6787,12 @@
               ]
             },
             "description": "The list of room IDs.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              1,
+              2,
+              3
+            ]
           }
         },
         "additionalProperties": false,
@@ -6700,42 +6804,45 @@
           "name": {
             "maxLength": 128,
             "type": "string",
+            "description": "The MCP server name.",
             "nullable": true,
-            "example": "John Doe"
+            "example": "Updated MCP Server"
           },
           "description": {
             "maxLength": 255,
             "type": "string",
+            "description": "The MCP server description.",
             "nullable": true,
-            "example": "some text"
+            "example": "Updated server description"
           },
           "endpoint": {
             "type": "string",
+            "description": "The MCP server endpoint URL.",
             "format": "uri",
             "nullable": true,
-            "example": "some text"
+            "example": "https://mcp.example.com/sse"
           },
           "headers": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
             },
+            "description": "The optional HTTP headers.",
             "nullable": true,
-            "example": [
-              {
-                "key": "some text",
-                "value": "some text"
-              }
-            ]
+            "example": {
+              "Authorization": "Bearer token123"
+            }
           },
           "updateIcon": {
             "type": "boolean",
+            "description": "Specifies whether to update the server icon.",
             "example": true
           },
           "icon": {
             "type": "string",
+            "description": "The MCP server icon URL.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/icon.png"
           }
         },
         "additionalProperties": false
@@ -6844,9 +6951,12 @@
               "type": "integer",
               "format": "int32"
             },
+            "description": "The set of file IDs to vectorize.",
             "nullable": true,
             "example": [
-              1234
+              101,
+              102,
+              103
             ]
           }
         },
@@ -6913,37 +7023,37 @@
             "type": "string",
             "description": "The watermark text.",
             "nullable": true,
-            "example": "some text"
+            "example": "Confidential"
           },
           "rotate": {
             "type": "integer",
             "description": "The watermark text and image rotate.",
             "format": "int32",
-            "example": 1234
+            "example": 45
           },
           "imageScale": {
             "type": "integer",
             "description": "The watermark image scale.",
             "format": "int32",
-            "example": 1234
+            "example": 100
           },
           "imageUrl": {
             "type": "string",
             "description": "The watermark image url.",
             "nullable": true,
-            "example": "some text"
+            "example": "http://localhost/watermark.png"
           },
           "imageHeight": {
             "type": "number",
             "description": "The watermark image height.",
             "format": "double",
-            "example": -8.5
+            "example": 100.0
           },
           "imageWidth": {
             "type": "number",
             "description": "The watermark image width.",
             "format": "double",
-            "example": -8.5
+            "example": 200.0
           }
         },
         "additionalProperties": false,
@@ -6967,37 +7077,37 @@
             "type": "string",
             "description": "The watermark text.",
             "nullable": true,
-            "example": "some text"
+            "example": "Confidential"
           },
           "rotate": {
             "type": "integer",
             "description": "The watermark text and image rotate angle.",
             "format": "int32",
-            "example": 1234
+            "example": -45
           },
           "imageScale": {
             "type": "integer",
             "description": "The watermark image scale.",
             "format": "int32",
-            "example": 1234
+            "example": 100
           },
           "imageUrl": {
             "type": "string",
             "description": "The path to the temporary image file.",
             "nullable": true,
-            "example": "some text"
+            "example": "/tmp/watermark.png"
           },
           "imageHeight": {
             "type": "number",
             "description": "The watermark image height.",
             "format": "double",
-            "example": -8.5
+            "example": 100.0
           },
           "imageWidth": {
             "type": "number",
             "description": "The watermark image width.",
             "format": "double",
-            "example": -8.5
+            "example": 200.0
           }
         },
         "additionalProperties": false,

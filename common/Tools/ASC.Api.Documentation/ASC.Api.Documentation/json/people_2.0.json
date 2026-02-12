@@ -279,7 +279,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -429,7 +429,7 @@
             "description": "Specifies if the user is a manager or not.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -441,7 +441,7 @@
               "minimum": 1,
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 25
             }
           },
           {
@@ -451,7 +451,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
@@ -460,7 +460,7 @@
             "description": "Specifies the property used to sort the query results.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "displayName"
             }
           },
           {
@@ -469,7 +469,8 @@
             "description": "The order in which the results are sorted.",
             "schema": {
               "$ref": "#/components/schemas/SortOrder"
-            }
+            },
+            "example": 0
           },
           {
             "name": "filterValue",
@@ -477,7 +478,7 @@
             "description": "The text used for filtering or searching group data.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "John"
             }
           }
         ],
@@ -898,7 +899,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -909,7 +910,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "11111111-1111-1111-1111-111111111111"
             }
           }
         ],
@@ -1296,7 +1297,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -1305,7 +1306,7 @@
             "description": "Specifies whether to exclude the group sharing settings from the response.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -1317,7 +1318,7 @@
               "minimum": 1,
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 25
             }
           },
           {
@@ -1327,7 +1328,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
@@ -1336,7 +1337,7 @@
             "description": "The text used as a filter for retrieving groups with their sharing settings.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "John"
             }
           }
         ],
@@ -1406,7 +1407,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -1415,7 +1416,7 @@
             "description": "Specifies whether to exclude the group sharing settings from the response.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -1427,7 +1428,7 @@
               "minimum": 1,
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 25
             }
           },
           {
@@ -1437,7 +1438,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
@@ -1446,7 +1447,7 @@
             "description": "The text used as a filter for retrieving groups with their sharing settings.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "John"
             }
           }
         ],
@@ -1516,7 +1517,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -1525,7 +1526,7 @@
             "description": "Specifies whether to exclude the group sharing settings from the response.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -1537,7 +1538,7 @@
               "minimum": 1,
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 25
             }
           },
           {
@@ -1547,7 +1548,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
@@ -1556,7 +1557,7 @@
             "description": "The text used as a filter for retrieving groups with their sharing settings.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "John"
             }
           }
         ],
@@ -1784,7 +1785,7 @@
               "minLength": 0,
               "type": "string",
               "format": "email",
-              "example": "example@onlyoffice.com"
+              "example": "john.doe@example.com"
             }
           },
           {
@@ -1793,7 +1794,7 @@
             "description": "The user encrypted email address.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "encrypted_email_string"
             }
           },
           {
@@ -1802,7 +1803,7 @@
             "description": "Culture",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "en-US"
             }
           }
         ],
@@ -2120,7 +2121,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "1"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -2203,7 +2204,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "1"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -2273,7 +2274,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "1"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -2343,7 +2344,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "1"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -2424,7 +2425,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "1"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -2442,7 +2443,10 @@
                     "items": {
                       "$ref": "#/components/schemas/KeyValuePairStringStringValues"
                     },
-                    "description": "The image data."
+                    "description": "The image data.",
+                    "example": {
+                      "file": "photo.jpg"
+                    }
                   }
                 }
               },
@@ -2648,7 +2652,7 @@
               "minimum": 1,
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 25
             }
           },
           {
@@ -2658,7 +2662,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
@@ -2667,7 +2671,7 @@
             "description": "Specifies the filter criteria for user-related queries.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "displayName"
             }
           },
           {
@@ -2676,7 +2680,7 @@
             "description": "Specifies the property or field name by which the results should be sorted.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "displayName"
             }
           },
           {
@@ -2685,7 +2689,8 @@
             "description": "The order in which the results are sorted.",
             "schema": {
               "$ref": "#/components/schemas/SortOrder"
-            }
+            },
+            "example": 0
           },
           {
             "name": "filterSeparator",
@@ -2693,7 +2698,7 @@
             "description": "The character or string used to separate multiple filter values in a filtering query.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": ","
             }
           },
           {
@@ -2702,7 +2707,7 @@
             "description": "The text value used as an additional filter criterion for profiles retrieval.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "John"
             }
           }
         ],
@@ -2904,7 +2909,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "1"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -2974,7 +2979,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "1"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -3044,7 +3049,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "1"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -3311,7 +3316,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "1"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -3535,7 +3540,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -3544,7 +3549,8 @@
             "description": "The user status.",
             "schema": {
               "$ref": "#/components/schemas/EmployeeStatus"
-            }
+            },
+            "example": 1
           },
           {
             "name": "activationStatus",
@@ -3552,7 +3558,8 @@
             "description": "The user activation status.",
             "schema": {
               "$ref": "#/components/schemas/EmployeeActivationStatus"
-            }
+            },
+            "example": 1
           },
           {
             "name": "excludeShared",
@@ -3560,7 +3567,7 @@
             "description": "Specifies whether to exclude the account sharing settings from the response.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -3569,7 +3576,7 @@
             "description": "Specifies whether to include the account sharing settings in the response.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -3578,7 +3585,7 @@
             "description": "Specifies whether the user is invited by the current user or not.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -3588,7 +3595,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -3597,7 +3604,8 @@
             "description": "The area of the account entries.",
             "schema": {
               "$ref": "#/components/schemas/Area"
-            }
+            },
+            "example": 0
           },
           {
             "name": "employeeTypes",
@@ -3608,7 +3616,11 @@
               "type": "array",
               "items": {
                 "$ref": "#/components/schemas/EmployeeType"
-              }
+              },
+              "example": [
+                1,
+                2
+              ]
             }
           },
           {
@@ -3620,7 +3632,7 @@
               "minimum": 1,
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 25
             }
           },
           {
@@ -3630,7 +3642,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
@@ -3639,7 +3651,7 @@
             "description": "Specifies the separator used in filter expressions.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": ","
             }
           },
           {
@@ -3648,7 +3660,7 @@
             "description": "The text filter applied to the accounts search query.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "John"
             }
           }
         ],
@@ -3718,7 +3730,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -3727,7 +3739,8 @@
             "description": "The user status.",
             "schema": {
               "$ref": "#/components/schemas/EmployeeStatus"
-            }
+            },
+            "example": 1
           },
           {
             "name": "activationStatus",
@@ -3735,7 +3748,8 @@
             "description": "The user activation status.",
             "schema": {
               "$ref": "#/components/schemas/EmployeeActivationStatus"
-            }
+            },
+            "example": 1
           },
           {
             "name": "excludeShared",
@@ -3743,7 +3757,7 @@
             "description": "Specifies whether to exclude the account sharing settings from the response.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -3752,7 +3766,7 @@
             "description": "Specifies whether to include the account sharing settings in the response.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -3761,7 +3775,7 @@
             "description": "Specifies whether the user is invited by the current user or not.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -3771,7 +3785,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -3780,7 +3794,8 @@
             "description": "The area of the account entries.",
             "schema": {
               "$ref": "#/components/schemas/Area"
-            }
+            },
+            "example": 0
           },
           {
             "name": "employeeTypes",
@@ -3791,7 +3806,11 @@
               "type": "array",
               "items": {
                 "$ref": "#/components/schemas/EmployeeType"
-              }
+              },
+              "example": [
+                1,
+                2
+              ]
             }
           },
           {
@@ -3803,7 +3822,7 @@
               "minimum": 1,
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 25
             }
           },
           {
@@ -3813,7 +3832,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
@@ -3822,7 +3841,7 @@
             "description": "Specifies the separator used in filter expressions.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": ","
             }
           },
           {
@@ -3831,7 +3850,7 @@
             "description": "The text filter applied to the accounts search query.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "John"
             }
           }
         ],
@@ -3901,7 +3920,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -3910,7 +3929,8 @@
             "description": "The user status.",
             "schema": {
               "$ref": "#/components/schemas/EmployeeStatus"
-            }
+            },
+            "example": 1
           },
           {
             "name": "activationStatus",
@@ -3918,7 +3938,8 @@
             "description": "The user activation status.",
             "schema": {
               "$ref": "#/components/schemas/EmployeeActivationStatus"
-            }
+            },
+            "example": 1
           },
           {
             "name": "excludeShared",
@@ -3926,7 +3947,7 @@
             "description": "Specifies whether to exclude the account sharing settings from the response.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -3935,7 +3956,7 @@
             "description": "Specifies whether to include the account sharing settings in the response.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -3944,7 +3965,7 @@
             "description": "Specifies whether the user is invited by the current user or not.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -3954,7 +3975,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -3963,7 +3984,8 @@
             "description": "The area of the account entries.",
             "schema": {
               "$ref": "#/components/schemas/Area"
-            }
+            },
+            "example": 0
           },
           {
             "name": "employeeTypes",
@@ -3974,7 +3996,11 @@
               "type": "array",
               "items": {
                 "$ref": "#/components/schemas/EmployeeType"
-              }
+              },
+              "example": [
+                1,
+                2
+              ]
             }
           },
           {
@@ -3986,7 +4012,7 @@
               "minimum": 1,
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 25
             }
           },
           {
@@ -3996,7 +4022,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
@@ -4005,7 +4031,7 @@
             "description": "Specifies the separator used in filter expressions.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": ","
             }
           },
           {
@@ -4014,7 +4040,7 @@
             "description": "The text filter applied to the accounts search query.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "John"
             }
           }
         ],
@@ -4083,7 +4109,8 @@
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/EmployeeStatus"
-            }
+            },
+            "example": 1
           },
           {
             "name": "query",
@@ -4091,7 +4118,7 @@
             "description": "The advanced search query.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "John"
             }
           },
           {
@@ -4100,7 +4127,7 @@
             "description": "Specifies the criteria used to filter search results in advanced queries.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "displayName"
             }
           },
           {
@@ -4109,7 +4136,7 @@
             "description": "The value used to filter the search query.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "John"
             }
           }
         ],
@@ -4177,7 +4204,8 @@
             "description": "The user status.",
             "schema": {
               "$ref": "#/components/schemas/EmployeeStatus"
-            }
+            },
+            "example": 1
           },
           {
             "name": "groupId",
@@ -4186,7 +4214,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -4195,7 +4223,8 @@
             "description": "The user activation status.",
             "schema": {
               "$ref": "#/components/schemas/EmployeeActivationStatus"
-            }
+            },
+            "example": 1
           },
           {
             "name": "employeeType",
@@ -4203,7 +4232,8 @@
             "description": "The user type.",
             "schema": {
               "$ref": "#/components/schemas/EmployeeType"
-            }
+            },
+            "example": 1
           },
           {
             "name": "employeeTypes",
@@ -4253,7 +4283,11 @@
                     ]
                   }
                 ]
-              }
+              },
+              "example": [
+                1,
+                2
+              ]
             }
           },
           {
@@ -4262,7 +4296,7 @@
             "description": "Specifies if the user is an administrator or not.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -4271,7 +4305,8 @@
             "description": "The user payment status.",
             "schema": {
               "$ref": "#/components/schemas/Payments"
-            }
+            },
+            "example": 0
           },
           {
             "name": "accountLoginType",
@@ -4279,7 +4314,8 @@
             "description": "The account login type.",
             "schema": {
               "$ref": "#/components/schemas/AccountLoginType"
-            }
+            },
+            "example": 0
           },
           {
             "name": "quotaFilter",
@@ -4287,7 +4323,8 @@
             "description": "The quota filter (All - 0, Default - 1, Custom - 2).",
             "schema": {
               "$ref": "#/components/schemas/QuotaFilter"
-            }
+            },
+            "example": 0
           },
           {
             "name": "withoutGroup",
@@ -4295,7 +4332,7 @@
             "description": "Specifies whether the user should be a member of a group or not.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -4304,7 +4341,7 @@
             "description": "Specifies whether the user should be a member of the group with the specified ID.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -4313,7 +4350,7 @@
             "description": "Specifies whether the user is invited by the current user or not.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -4323,7 +4360,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -4332,7 +4369,8 @@
             "description": "The filter area.",
             "schema": {
               "$ref": "#/components/schemas/Area"
-            }
+            },
+            "example": 0
           },
           {
             "name": "count",
@@ -4343,7 +4381,7 @@
               "minimum": 1,
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 25
             }
           },
           {
@@ -4353,7 +4391,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
@@ -4362,7 +4400,7 @@
             "description": "Specifies the property or field name by which the results should be sorted.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "displayName"
             }
           },
           {
@@ -4371,7 +4409,8 @@
             "description": "The order in which the results are sorted.",
             "schema": {
               "$ref": "#/components/schemas/SortOrder"
-            }
+            },
+            "example": 0
           },
           {
             "name": "filterSeparator",
@@ -4379,7 +4418,7 @@
             "description": "Represents the separator used to split filter criteria in query parameters.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": ","
             }
           },
           {
@@ -4388,7 +4427,7 @@
             "description": "The search text used to filter results based on user input.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "John"
             }
           }
         ],
@@ -4456,7 +4495,7 @@
             "description": "The search query.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "John"
             }
           }
         ],
@@ -4522,7 +4561,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "John"
             }
           },
           {
@@ -4531,7 +4570,7 @@
             "description": "Specifies a filter criteria for the user search query.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "displayName"
             }
           },
           {
@@ -4540,7 +4579,7 @@
             "description": "The value used for filtering users, allowing additional constraints for the query.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "John"
             }
           }
         ],
@@ -4608,7 +4647,8 @@
             "description": "The user status.",
             "schema": {
               "$ref": "#/components/schemas/EmployeeStatus"
-            }
+            },
+            "example": 1
           },
           {
             "name": "groupId",
@@ -4617,7 +4657,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -4626,7 +4666,8 @@
             "description": "The user activation status.",
             "schema": {
               "$ref": "#/components/schemas/EmployeeActivationStatus"
-            }
+            },
+            "example": 1
           },
           {
             "name": "employeeType",
@@ -4634,7 +4675,8 @@
             "description": "The user type.",
             "schema": {
               "$ref": "#/components/schemas/EmployeeType"
-            }
+            },
+            "example": 1
           },
           {
             "name": "employeeTypes",
@@ -4684,7 +4726,11 @@
                     ]
                   }
                 ]
-              }
+              },
+              "example": [
+                1,
+                2
+              ]
             }
           },
           {
@@ -4693,7 +4739,7 @@
             "description": "Specifies if the user is an administrator or not.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -4702,7 +4748,8 @@
             "description": "The user payment status.",
             "schema": {
               "$ref": "#/components/schemas/Payments"
-            }
+            },
+            "example": 0
           },
           {
             "name": "accountLoginType",
@@ -4710,7 +4757,8 @@
             "description": "The account login type.",
             "schema": {
               "$ref": "#/components/schemas/AccountLoginType"
-            }
+            },
+            "example": 0
           },
           {
             "name": "quotaFilter",
@@ -4718,7 +4766,8 @@
             "description": "The quota filter (All - 0, Default - 1, Custom - 2).",
             "schema": {
               "$ref": "#/components/schemas/QuotaFilter"
-            }
+            },
+            "example": 0
           },
           {
             "name": "withoutGroup",
@@ -4726,7 +4775,7 @@
             "description": "Specifies whether the user should be a member of a group or not.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -4735,7 +4784,7 @@
             "description": "Specifies whether the user should be a member of the group with the specified ID.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -4744,7 +4793,7 @@
             "description": "Specifies whether the user is invited by the current user or not.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -4754,7 +4803,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -4763,7 +4812,8 @@
             "description": "The filter area.",
             "schema": {
               "$ref": "#/components/schemas/Area"
-            }
+            },
+            "example": 0
           },
           {
             "name": "count",
@@ -4774,7 +4824,7 @@
               "minimum": 1,
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 25
             }
           },
           {
@@ -4784,7 +4834,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
@@ -4793,7 +4843,7 @@
             "description": "Specifies the property or field name by which the results should be sorted.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "displayName"
             }
           },
           {
@@ -4802,7 +4852,8 @@
             "description": "The order in which the results are sorted.",
             "schema": {
               "$ref": "#/components/schemas/SortOrder"
-            }
+            },
+            "example": 0
           },
           {
             "name": "filterSeparator",
@@ -4810,7 +4861,7 @@
             "description": "Represents the separator used to split filter criteria in query parameters.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": ","
             }
           },
           {
@@ -4819,7 +4870,7 @@
             "description": "The search text used to filter results based on user input.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "John"
             }
           }
         ],
@@ -4889,7 +4940,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -4898,7 +4949,8 @@
             "description": "The user status.",
             "schema": {
               "$ref": "#/components/schemas/EmployeeStatus"
-            }
+            },
+            "example": 1
           },
           {
             "name": "activationStatus",
@@ -4906,7 +4958,8 @@
             "description": "The user activation status.",
             "schema": {
               "$ref": "#/components/schemas/EmployeeActivationStatus"
-            }
+            },
+            "example": 1
           },
           {
             "name": "excludeShared",
@@ -4914,7 +4967,7 @@
             "description": "Specifies whether to exclude the user sharing settings or not.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -4923,7 +4976,7 @@
             "description": "Specifies whether to include the user sharing settings or not.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -4932,7 +4985,7 @@
             "description": "Specifies whether the user was invited by the current user or not.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -4942,7 +4995,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -4951,7 +5004,8 @@
             "description": "The user area.",
             "schema": {
               "$ref": "#/components/schemas/Area"
-            }
+            },
+            "example": 0
           },
           {
             "name": "employeeTypes",
@@ -4962,7 +5016,11 @@
               "type": "array",
               "items": {
                 "$ref": "#/components/schemas/EmployeeType"
-              }
+              },
+              "example": [
+                1,
+                2
+              ]
             }
           },
           {
@@ -4974,7 +5032,7 @@
               "minimum": 1,
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 25
             }
           },
           {
@@ -4984,7 +5042,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
@@ -4993,7 +5051,7 @@
             "description": "The character or string used to separate multiple filter values in a filtering query.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": ","
             }
           },
           {
@@ -5002,7 +5060,7 @@
             "description": "The filter text value used for searching or filtering user results.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "John"
             }
           }
         ],
@@ -5072,7 +5130,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -5081,7 +5139,8 @@
             "description": "The user status.",
             "schema": {
               "$ref": "#/components/schemas/EmployeeStatus"
-            }
+            },
+            "example": 1
           },
           {
             "name": "activationStatus",
@@ -5089,7 +5148,8 @@
             "description": "The user activation status.",
             "schema": {
               "$ref": "#/components/schemas/EmployeeActivationStatus"
-            }
+            },
+            "example": 1
           },
           {
             "name": "excludeShared",
@@ -5097,7 +5157,7 @@
             "description": "Specifies whether to exclude the user sharing settings or not.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -5106,7 +5166,7 @@
             "description": "Specifies whether to include the user sharing settings or not.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -5115,7 +5175,7 @@
             "description": "Specifies whether the user was invited by the current user or not.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -5125,7 +5185,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -5134,7 +5194,8 @@
             "description": "The user area.",
             "schema": {
               "$ref": "#/components/schemas/Area"
-            }
+            },
+            "example": 0
           },
           {
             "name": "employeeTypes",
@@ -5145,7 +5206,11 @@
               "type": "array",
               "items": {
                 "$ref": "#/components/schemas/EmployeeType"
-              }
+              },
+              "example": [
+                1,
+                2
+              ]
             }
           },
           {
@@ -5157,7 +5222,7 @@
               "minimum": 1,
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 25
             }
           },
           {
@@ -5167,7 +5232,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
@@ -5176,7 +5241,7 @@
             "description": "The character or string used to separate multiple filter values in a filtering query.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": ","
             }
           },
           {
@@ -5185,7 +5250,7 @@
             "description": "The filter text value used for searching or filtering user results.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "John"
             }
           }
         ],
@@ -5255,7 +5320,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -5264,7 +5329,8 @@
             "description": "The user status.",
             "schema": {
               "$ref": "#/components/schemas/EmployeeStatus"
-            }
+            },
+            "example": 1
           },
           {
             "name": "activationStatus",
@@ -5272,7 +5338,8 @@
             "description": "The user activation status.",
             "schema": {
               "$ref": "#/components/schemas/EmployeeActivationStatus"
-            }
+            },
+            "example": 1
           },
           {
             "name": "excludeShared",
@@ -5280,7 +5347,7 @@
             "description": "Specifies whether to exclude the user sharing settings or not.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -5289,7 +5356,7 @@
             "description": "Specifies whether to include the user sharing settings or not.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -5298,7 +5365,7 @@
             "description": "Specifies whether the user was invited by the current user or not.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -5308,7 +5375,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -5317,7 +5384,8 @@
             "description": "The user area.",
             "schema": {
               "$ref": "#/components/schemas/Area"
-            }
+            },
+            "example": 0
           },
           {
             "name": "employeeTypes",
@@ -5328,7 +5396,11 @@
               "type": "array",
               "items": {
                 "$ref": "#/components/schemas/EmployeeType"
-              }
+              },
+              "example": [
+                1,
+                2
+              ]
             }
           },
           {
@@ -5340,7 +5412,7 @@
               "minimum": 1,
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 25
             }
           },
           {
@@ -5350,7 +5422,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
@@ -5359,7 +5431,7 @@
             "description": "The character or string used to separate multiple filter values in a filtering query.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": ","
             }
           },
           {
@@ -5368,7 +5440,7 @@
             "description": "The filter text value used for searching or filtering user results.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "John"
             }
           }
         ],
@@ -5551,7 +5623,7 @@
             "description": "Specifies whether to return providers that are available for invitation links, i.e. the user can login or register through these providers.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -5560,7 +5632,7 @@
             "description": "Specifies whether to display the provider settings in a pop-up window (true) or redirect them to the desktop application (false).",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           },
           {
@@ -5569,7 +5641,7 @@
             "description": "The method that is called after authentication.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "onAuthCallback"
             }
           },
           {
@@ -5578,7 +5650,7 @@
             "description": "The provider name if a response is required only from this provider.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "Google"
             }
           }
         ],
@@ -5707,7 +5779,7 @@
             "description": "The provider name.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "Google"
             }
           }
         ],
@@ -5971,7 +6043,8 @@
             "description": "The expected user type.",
             "schema": {
               "$ref": "#/components/schemas/EmployeeType"
-            }
+            },
+            "example": 1
           }
         ],
         "responses": {
@@ -6399,7 +6472,8 @@
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/EmployeeStatus"
-            }
+            },
+            "example": 1
           },
           {
             "name": "filterBy",
@@ -6407,7 +6481,7 @@
             "description": "Specifies the criteria used to filter the profiles in the request.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "displayName"
             }
           },
           {
@@ -6419,7 +6493,7 @@
               "minimum": 1,
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 25
             }
           },
           {
@@ -6429,7 +6503,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1234
+              "example": 0
             }
           },
           {
@@ -6438,7 +6512,7 @@
             "description": "Specifies the property or field name by which the results should be sorted.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "displayName"
             }
           },
           {
@@ -6447,7 +6521,8 @@
             "description": "The order in which the results are sorted.",
             "schema": {
               "$ref": "#/components/schemas/SortOrder"
-            }
+            },
+            "example": 0
           },
           {
             "name": "filterSeparator",
@@ -6455,7 +6530,7 @@
             "description": "Represents the separator used to split multiple filter criteria in a query string.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": ","
             }
           },
           {
@@ -6464,7 +6539,7 @@
             "description": "A string value representing additional filter criteria used in query parameters.",
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "John"
             }
           }
         ],
@@ -6528,7 +6603,8 @@
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/EmployeeStatus"
-            }
+            },
+            "example": 1
           }
         ],
         "requestBody": {
@@ -6610,7 +6686,8 @@
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/EmployeeActivationStatus"
-            }
+            },
+            "example": 1
           }
         ],
         "requestBody": {
@@ -6686,7 +6763,8 @@
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/EmployeeType"
-            }
+            },
+            "example": 1
           }
         ],
         "requestBody": {
@@ -7070,14 +7148,14 @@
             "type": "string",
             "description": "The account provider.",
             "nullable": true,
-            "example": "some text"
+            "example": "Google"
           },
           "url": {
             "type": "string",
             "description": "The account URL.",
             "format": "uri",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/account"
           },
           "linked": {
             "type": "boolean",
@@ -7202,19 +7280,19 @@
             "type": "string",
             "description": "The API key name.",
             "nullable": true,
-            "example": "John Doe"
+            "example": "My API Key"
           },
           "key": {
             "type": "string",
             "description": "The full API key value (only returned when creating a new key).",
             "nullable": true,
-            "example": "some text"
+            "example": "api_key_1234567890abcdef"
           },
           "keyPostfix": {
             "type": "string",
             "description": "The API key postfix (used for identification).",
             "nullable": true,
-            "example": "some text"
+            "example": "...cdef"
           },
           "permissions": {
             "type": "array",
@@ -7224,7 +7302,9 @@
             "description": "The list of permissions granted to the API key.",
             "nullable": true,
             "example": [
-              "some text"
+              "read",
+              "write",
+              "delete"
             ]
           },
           "lastUsed": {
@@ -7362,13 +7442,13 @@
             "description": "The user email address.",
             "format": "email",
             "nullable": true,
-            "example": "example@onlyoffice.com"
+            "example": "john.doe@example.com"
           },
           "encEmail": {
             "type": "string",
             "description": "The user encrypted email address.",
             "nullable": true,
-            "example": "some text"
+            "example": "encrypted_email_string"
           }
         },
         "additionalProperties": false,
@@ -7381,13 +7461,13 @@
             "type": "string",
             "description": "The user password.",
             "nullable": true,
-            "example": "P@ssw0rd123"
+            "example": "P@ssw0rd"
           },
           "passwordHash": {
             "type": "string",
             "description": "The user password hash.",
             "nullable": true,
-            "example": "some text"
+            "example": "5f4dcc3b5aa765d61d8327deb882cf99"
           }
         },
         "additionalProperties": false,
@@ -7423,7 +7503,7 @@
             "minLength": 0,
             "type": "string",
             "description": "The API key name.",
-            "example": "John Doe"
+            "example": "My API Key"
           },
           "permissions": {
             "type": "array",
@@ -7433,7 +7513,8 @@
             "description": "The list of permissions granted to the API key.",
             "nullable": true,
             "example": [
-              "some text"
+              "read",
+              "write"
             ]
           },
           "expiresInDays": {
@@ -7443,7 +7524,7 @@
             "description": "The number of days until the API key expires (null for no expiration).",
             "format": "int32",
             "nullable": true,
-            "example": 1234
+            "example": 30
           }
         },
         "additionalProperties": false,
@@ -7460,7 +7541,7 @@
             "minLength": 0,
             "type": "string",
             "description": "The user culture name (en-US, de, fr, es, ...).",
-            "example": "some text"
+            "example": "en-US"
           }
         },
         "additionalProperties": false,
@@ -7635,7 +7716,7 @@
             "type": "string",
             "description": "The user email address.",
             "format": "email",
-            "example": "example@onlyoffice.com"
+            "example": "john.doe@example.com"
           },
           "recaptchaType": {
             "$ref": "#/components/schemas/RecaptchaType"
@@ -7644,7 +7725,7 @@
             "type": "string",
             "description": "The user's response to the CAPTCHA challenge.",
             "nullable": true,
-            "example": "some text"
+            "example": "03AGdBq27..."
           }
         },
         "additionalProperties": false,
@@ -7734,7 +7815,7 @@
             "type": "string",
             "description": "The user ID.",
             "format": "uuid",
-            "example": "{00000000-0000-0000-0000-000000000000}"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "displayName": {
             "type": "string",
@@ -7752,37 +7833,37 @@
             "type": "string",
             "description": "The user avatar.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/avatar.jpg"
           },
           "avatarOriginal": {
             "type": "string",
             "description": "The user original size avatar.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/avatar_original.jpg"
           },
           "avatarMax": {
             "type": "string",
             "description": "The user maximum size avatar.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/avatar_max.jpg"
           },
           "avatarMedium": {
             "type": "string",
             "description": "The user medium size avatar.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/avatar_medium.jpg"
           },
           "avatarSmall": {
             "type": "string",
             "description": "The user small size avatar.",
             "nullable": true,
-            "example": "url to small avatar"
+            "example": "https://example.com/avatar_small.jpg"
           },
           "profileUrl": {
             "type": "string",
             "description": "The user profile URL.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/profile/user123"
           },
           "hasAvatar": {
             "type": "boolean",
@@ -7792,7 +7873,7 @@
           "isAnonim": {
             "type": "boolean",
             "description": "Specifies if the user is anonymous or not.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -8215,13 +8296,17 @@
           },
           "data": {
             "description": "The file upload result data.",
-            "nullable": true
+            "nullable": true,
+            "example": {
+              "fileId": "123",
+              "fileName": "photo.jpg"
+            }
           },
           "message": {
             "type": "string",
             "description": "The file upload result message.",
             "nullable": true,
-            "example": "some text"
+            "example": "File uploaded successfully"
           }
         },
         "additionalProperties": false,
@@ -8385,14 +8470,15 @@
             "description": "The list of group member IDs.",
             "nullable": true,
             "example": [
-              "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "00000000-0000-0000-0000-000000000000",
+              "11111111-1111-1111-1111-111111111111"
             ]
           },
           "groupManager": {
             "type": "string",
             "description": "The group manager ID.",
             "format": "uuid",
-            "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "groupName": {
             "maxLength": 128,
@@ -8400,7 +8486,7 @@
             "type": "string",
             "description": "The group name.",
             "nullable": true,
-            "example": "some text"
+            "example": "Marketing Team"
           }
         },
         "additionalProperties": false,
@@ -8523,13 +8609,19 @@
             "items": {
               "$ref": "#/components/schemas/UserInvitationRequestDto"
             },
-            "description": "The list of user invitations."
+            "description": "The list of user invitations.",
+            "example": [
+              {
+                "email": "user@example.com",
+                "type": 1
+              }
+            ]
           },
           "culture": {
             "type": "string",
             "description": "The culture code of invitations.",
             "nullable": true,
-            "example": "some text"
+            "example": "en-US"
           }
         },
         "additionalProperties": false,
@@ -8562,7 +8654,10 @@
             "type": "string",
             "description": "The third-party profile in the serialized format.",
             "nullable": true,
-            "example": "some text"
+            "example": {
+              "provider": "Google",
+              "id": "123456"
+            }
           }
         },
         "additionalProperties": false,
@@ -8575,13 +8670,13 @@
             "type": "string",
             "description": "The user password.",
             "nullable": true,
-            "example": "P@ssw0rd123"
+            "example": "P@ssw0rd"
           },
           "passwordHash": {
             "type": "string",
             "description": "The user password hash.",
             "nullable": true,
-            "example": "some text"
+            "example": "5f4dcc3b5aa765d61d8327deb882cf99"
           },
           "email": {
             "maxLength": 255,
@@ -8590,7 +8685,7 @@
             "description": "The user email address.",
             "format": "email",
             "nullable": true,
-            "example": "example@onlyoffice.com"
+            "example": "john.doe@example.com"
           },
           "type": {
             "$ref": "#/components/schemas/EmployeeType"
@@ -8626,7 +8721,7 @@
             "description": "The list of the user departments IDs.",
             "nullable": true,
             "example": [
-              "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "00000000-0000-0000-0000-000000000000"
             ]
           },
           "title": {
@@ -8635,13 +8730,13 @@
             "type": "string",
             "description": "The user title.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "Manager"
           },
           "location": {
             "type": "string",
             "description": "The user location.",
             "nullable": true,
-            "example": "001 Schroeder Run, New Tabithaport, Colombia"
+            "example": "New York"
           },
           "sex": {
             "$ref": "#/components/schemas/SexEnum"
@@ -8656,7 +8751,7 @@
             "type": "string",
             "description": "The user comment.",
             "nullable": true,
-            "example": "some text"
+            "example": "User comment"
           },
           "contacts": {
             "type": "array",
@@ -8664,42 +8759,48 @@
               "$ref": "#/components/schemas/Contact"
             },
             "description": "The list of the user contacts.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              {
+                "type": "email",
+                "value": "john.doe@example.com"
+              }
+            ]
           },
           "files": {
             "type": "string",
             "description": "The avatar photo URL.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/avatar.jpg"
           },
           "fromInviteLink": {
             "type": "boolean",
             "description": "Specifies if the user is added via the invitation link or not.",
-            "example": true
+            "example": false
           },
           "key": {
             "type": "string",
             "description": "The user key.",
             "nullable": true,
-            "example": "some text"
+            "example": "user_key_string"
           },
           "cultureName": {
             "type": "string",
             "description": "The user culture code.",
             "nullable": true,
-            "example": "some text"
+            "example": "en-US"
           },
           "target": {
             "type": "string",
             "description": "The user target ID.",
             "format": "uuid",
-            "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "spam": {
             "type": "boolean",
             "description": "Specifies if tips, updates and offers are allowed to be sent to the user or not.",
             "nullable": true,
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -8717,7 +8818,8 @@
             "description": "The list of group member IDs.",
             "nullable": true,
             "example": [
-              "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "00000000-0000-0000-0000-000000000000",
+              "11111111-1111-1111-1111-111111111111"
             ]
           }
         },
@@ -9092,31 +9194,34 @@
             "description": "The user email address.",
             "format": "email",
             "nullable": true,
-            "example": "example@onlyoffice.com"
+            "example": "john.doe@example.com"
           },
           "passwordHash": {
             "type": "string",
             "description": "The user password hash.",
             "nullable": true,
-            "example": "some text"
+            "example": "$2a$10$abcdefghijklmnopqrstuv"
           },
           "key": {
             "type": "string",
             "description": "The user link key.",
             "nullable": true,
-            "example": "some text"
+            "example": "invite_key_123456"
           },
           "culture": {
             "type": "string",
             "description": "The user culture code.",
             "nullable": true,
-            "example": "some text"
+            "example": "en-US"
           },
           "serializedProfile": {
             "type": "string",
             "description": "The third-party profile in the serialized format",
             "nullable": true,
-            "example": "some text"
+            "example": {
+              "provider": "Google",
+              "id": "123456"
+            }
           }
         },
         "additionalProperties": false,
@@ -9165,18 +9270,18 @@
             "type": "string",
             "description": "The user ID whose data will be reassigned to another user.",
             "format": "uuid",
-            "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "toUserId": {
             "type": "string",
             "description": "The user ID to whom all the data will be reassigned.",
             "format": "uuid",
-            "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+            "example": "11111111-1111-1111-1111-111111111111"
           },
           "deleteProfile": {
             "type": "boolean",
             "description": "Specifies whether to delete a profile when the data reassignment will be finished or not.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -9199,7 +9304,7 @@
             "description": "The user ID to reassign.",
             "format": "uuid",
             "nullable": true,
-            "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+            "example": "11111111-1111-1111-1111-111111111111"
           }
         },
         "additionalProperties": false,
@@ -9263,24 +9368,24 @@
             "type": "string",
             "description": "The task progress ID.",
             "nullable": true,
-            "example": "1"
+            "example": "task-123456"
           },
           "error": {
             "type": "string",
             "description": "The task progress error message.",
             "nullable": true,
-            "example": "some text"
+            "example": "An error occurred during processing"
           },
           "percentage": {
             "type": "integer",
             "description": "The percentage of the task progress.",
             "format": "int32",
-            "example": 1234
+            "example": 75
           },
           "isCompleted": {
             "type": "boolean",
             "description": "Specifies if the task peogress is completed or not.",
-            "example": true
+            "example": false
           },
           "status": {
             "$ref": "#/components/schemas/DistributedTaskStatus"
@@ -9423,29 +9528,31 @@
             "type": "string",
             "description": "The path to the temporary thumbnail file.",
             "nullable": true,
-            "example": "some text"
+            "example": "/tmp/photo_temp_123.jpg"
           },
           "x": {
             "type": "integer",
             "description": "The thumbnail horizontal coordinate.",
             "format": "int32",
-            "example": 1234
+            "example": 100
           },
           "y": {
             "type": "integer",
             "description": "The thumbnail vertical coordinate.",
             "format": "int32",
-            "example": 1234
+            "example": 50
           },
           "width": {
             "type": "integer",
             "description": "The thumbnail width.",
-            "format": "int32"
+            "format": "int32",
+            "example": 200
           },
           "height": {
             "type": "integer",
             "description": "The thumbnail height.",
-            "format": "int32"
+            "format": "int32",
+            "example": 200
           }
         },
         "additionalProperties": false,
@@ -9460,7 +9567,7 @@
             "type": "string",
             "description": "The new name for the API key.",
             "nullable": true,
-            "example": "John Doe"
+            "example": "Updated API Key"
           },
           "permissions": {
             "type": "array",
@@ -9470,7 +9577,9 @@
             "description": "The new list of permissions for the API key.",
             "nullable": true,
             "example": [
-              "some text"
+              "read",
+              "write",
+              "delete"
             ]
           },
           "isActive": {
@@ -9495,7 +9604,7 @@
             "description": "The list of user IDs to add to the group.",
             "nullable": true,
             "example": [
-              "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "00000000-0000-0000-0000-000000000000"
             ]
           },
           "membersToRemove": {
@@ -9507,14 +9616,14 @@
             "description": "The list of user IDs to remove from the group.",
             "nullable": true,
             "example": [
-              "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "11111111-1111-1111-1111-111111111111"
             ]
           },
           "groupManager": {
             "type": "string",
             "description": "The group manager ID.",
             "format": "uuid",
-            "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "groupName": {
             "maxLength": 128,
@@ -9522,7 +9631,7 @@
             "type": "string",
             "description": "The group name.",
             "nullable": true,
-            "example": "some text"
+            "example": "Sales Team"
           }
         },
         "additionalProperties": false,
@@ -9535,13 +9644,13 @@
             "type": "string",
             "description": "The user ID.",
             "nullable": true,
-            "example": "1"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "disable": {
             "type": "boolean",
             "description": "Specifies whether to disable a user or not.",
             "nullable": true,
-            "example": true
+            "example": false
           },
           "email": {
             "maxLength": 255,
@@ -9550,7 +9659,7 @@
             "description": "The user email address.",
             "format": "email",
             "nullable": true,
-            "example": "example@onlyoffice.com"
+            "example": "john.doe@example.com"
           },
           "isUser": {
             "type": "boolean",
@@ -9583,7 +9692,7 @@
             "description": "The list of the user departments.",
             "nullable": true,
             "example": [
-              "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "00000000-0000-0000-0000-000000000000"
             ]
           },
           "title": {
@@ -9592,13 +9701,13 @@
             "type": "string",
             "description": "The user title.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "Manager"
           },
           "location": {
             "type": "string",
             "description": "The user location.",
             "nullable": true,
-            "example": "001 Schroeder Run, New Tabithaport, Colombia"
+            "example": "New York"
           },
           "sex": {
             "$ref": "#/components/schemas/SexEnum"
@@ -9613,7 +9722,7 @@
             "type": "string",
             "description": "The user comment.",
             "nullable": true,
-            "example": "some text"
+            "example": "User comment"
           },
           "contacts": {
             "type": "array",
@@ -9621,19 +9730,25 @@
               "$ref": "#/components/schemas/Contact"
             },
             "description": "The list of the user contacts.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              {
+                "type": "email",
+                "value": "john.doe@example.com"
+              }
+            ]
           },
           "files": {
             "type": "string",
             "description": "The user avatar photo URL.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/avatar.jpg"
           },
           "spam": {
             "type": "boolean",
             "description": "Specifies if tips, updates and offers are allowed to be sent to the user or not.",
             "nullable": true,
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -9651,7 +9766,8 @@
             "description": "The list of user IDs.",
             "nullable": true,
             "example": [
-              "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "00000000-0000-0000-0000-000000000000",
+              "11111111-1111-1111-1111-111111111111"
             ]
           },
           "quota": {
@@ -9665,7 +9781,10 @@
                 "example": "some text"
               }
             ],
-            "description": "The quota in JSON format."
+            "description": "The quota in JSON format.",
+            "example": {
+              "maxSize": 1073741824
+            }
           }
         },
         "additionalProperties": false,
@@ -9683,13 +9802,14 @@
             "description": "The list of user IDs.",
             "nullable": true,
             "example": [
-              "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "00000000-0000-0000-0000-000000000000",
+              "11111111-1111-1111-1111-111111111111"
             ]
           },
           "resendAll": {
             "type": "boolean",
             "description": "Specifies whether to resend invitation letters to all the users or not.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -9702,7 +9822,7 @@
             "type": "string",
             "description": "The avatar photo URL.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/avatar.jpg"
           }
         },
         "additionalProperties": false,
