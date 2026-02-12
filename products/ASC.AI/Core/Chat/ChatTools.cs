@@ -32,6 +32,9 @@ public class ChatTools(
     WebSearchTool webSearchTool,
     WebCrawlingTool webCrawlingTool,
     KnowledgeSearchTool knowledgeSearchTool,
+    GeneratePresentationTool generatePresentationTool,
+    GenerateDocxTool generateDocxTool,
+    GenerateFormTool generateFormTool,
     AiSettingsStore aiSettingsStore,
     AiGateway aiGateway,
     AiAccessibility aiAccessibility)
@@ -39,6 +42,10 @@ public class ChatTools(
     public async Task<(ToolHolder, string? error)> GetAsync(Folder<int> agent, UserChatSettings chatSettings, bool knowledgeHasFiles)
     {
         var (holder, error) = await mcpService.GetToolsAsync(agent.Id);
+
+        holder.AddTool(SystemToolType.GeneratePresentation, ToWrapper(agent.Id, generatePresentationTool.Init()));
+        holder.AddTool(SystemToolType.GenerateDocx, ToWrapper(agent.Id, generateDocxTool.Init()));
+        holder.AddTool(SystemToolType.GenerateForm, ToWrapper(agent.Id, generateFormTool.Init()));
 
         if (knowledgeHasFiles && await aiAccessibility.IsVectorizationEnabledAsync(agent))
         {
