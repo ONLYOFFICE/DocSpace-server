@@ -24,13 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Microsoft.Extensions.Hosting;
-
-if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")))
-{
-    Environment.SetEnvironmentVariable("DOTNET_ENVIRONMENT", "Development");
-}
-
 var builder = DistributedApplication.CreateBuilder(args);
 
 var basePath = Path.GetFullPath(Path.Combine("..", "..", ".."));
