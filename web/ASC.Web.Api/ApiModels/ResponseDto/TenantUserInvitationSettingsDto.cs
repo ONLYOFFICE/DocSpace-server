@@ -29,21 +29,18 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// The user invitation settings.
 /// </summary>
-/// <example>
-/// {
-///   // TODO: Add appropriate JSON example
-/// }
-/// </example>
 public class TenantUserInvitationSettingsDto
 {
     /// <summary>
     /// Specifies whether to allow inviting new DocSpace members through the Contacts section.
     /// </summary>
+    /// <example>true</example>
     public required bool AllowInvitingMembers { get; init; }
 
     /// <summary>
     /// Specifies whether to allow all DocSpace members to invite external guests to the rooms.
     /// </summary>
+    /// <example>false</example>
     public required bool AllowInvitingGuests { get; init; }
 }
 

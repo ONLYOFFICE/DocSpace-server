@@ -29,15 +29,11 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 /// <summary>
 /// The request parameters for uploading the software license files.
 /// </summary>
-/// <example>
-/// {
-///   // TODO: Add appropriate JSON example
-/// }
-/// </example>
 public class UploadLicenseRequestsDto
 {
     /// <summary>
     /// The list of license files to be uploaded.
     /// </summary>
+    /// <example>license.lic</example>
     public required IEnumerable<IFormFile> Files { get; set; }
 }

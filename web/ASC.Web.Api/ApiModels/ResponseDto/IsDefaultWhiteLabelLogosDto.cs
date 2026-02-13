@@ -29,20 +29,17 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// The default white label logo parameters.
 /// </summary>
-/// <example>
-/// {
-///   // TODO: Add appropriate JSON example
-/// }
-/// </example>
 public class IsDefaultWhiteLabelLogosDto
 {
     /// <summary>
     /// The white label logo name.
     /// </summary>
+    /// <example>logo_light</example>
     public required string Name { get; set; }
 
     /// <summary>
     /// Specifies if the white label logo is default or not.
     /// </summary>
+    /// <example>true</example>
     public required bool Default { get; set; }
 }

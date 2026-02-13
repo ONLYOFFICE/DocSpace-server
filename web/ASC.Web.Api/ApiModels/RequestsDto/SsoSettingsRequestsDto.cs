@@ -29,15 +29,11 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 /// <summary>
 /// The request parameters for the Single Sign-On (SSO) configuration settings.
 /// </summary>
-/// <example>
-/// {
-///   // TODO: Add appropriate JSON example
-/// }
-/// </example>
 public class SsoSettingsRequestsDto
 {
     /// <summary>
     /// The JSON-serialized SSO configuration settings.
     /// </summary>
+    /// <example>{"enableSso":true,"idpSettings":{"entityId":"https://idp.example.com"}}</example>
     public required string SerializeSettings { get; set; }
 }

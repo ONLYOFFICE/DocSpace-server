@@ -29,82 +29,83 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 /// <summary>
 /// The request parameters for the team template identification.
 /// </summary>
-/// <example>
-/// {
-///   // TODO: Add appropriate JSON example
-/// }
-/// </example>
 public class SchemaBaseRequestsDto
 {
     /// <summary>
     /// The team template ID.
     /// </summary>
+    /// <example>sales-team-template</example>
     public required string Id { get; init; }
 }
 
 /// <summary>
 /// The request parameters for the comprehensive team template configuration.
 /// </summary>
-/// <example>
-/// {
-///   "name": "Sales Team"
-/// }
-/// </example>
 public class SchemaRequestsDto
 {
     /// <summary>
     /// The team template ID.
     /// </summary>
+    /// <example>sales-team-template</example>
     public required string Id { get; init; }
 
     /// <summary>
     /// The display name for the team template.
     /// </summary>
-    /// <example>Example Name</example>
+    /// <example>Sales Team</example>
     public string Name { get; set; }
 
     /// <summary>
     /// The label for the single user references.
     /// </summary>
+    /// <example>User</example>
     public string UserCaption { get; init; }
 
     /// <summary>
     /// The label for the multiple user references.
     /// </summary>
+    /// <example>Users</example>
     public string UsersCaption { get; init; }
 
     /// <summary>
     /// The label for the single group references.
     /// </summary>
+    /// <example>Group</example>
     public string GroupCaption { get; init; }
 
     /// <summary>
     /// The label for the multiple group references.
     /// </summary>
+    /// <example>Groups</example>
     public string GroupsCaption { get; init; }
 
     /// <summary>
     /// The label for the user position or status.
     /// </summary>
+    /// <example>Position</example>
     public string UserPostCaption { get; init; }
 
     /// <summary>
     /// The label for the member registration date.
     /// </summary>
+    /// <example>Registration Date</example>
     public string RegDateCaption { get; init; }
 
     /// <summary>
     /// The label for the group leader position.
     /// </summary>
+    /// <example>Head</example>
     public string GroupHeadCaption { get; init; }
 
     /// <summary>
     /// The label for the single guest/external user references.
     /// </summary>
+    /// <example>Guest</example>
     public string GuestCaption { get; init; }
 
     /// <summary>
     /// The label for the multiple guest/external user references.
     /// </summary>
+    /// <example>Guests</example>
     public string GuestsCaption { get; init; }
 }

@@ -29,20 +29,17 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 /// <summary>
 /// The request parameters for managing the time zone configurations.
 /// </summary>
-/// <example>
-/// {
-///   // TODO: Add appropriate JSON example
-/// }
-/// </example>
 public class TimezonesRequestsDto
 {
     /// <summary>
     /// The IANA time zone identifier.
     /// </summary>
+    /// <example>America/New_York</example>
     public required string Id { get; set; }
 
     /// <summary>
     /// The user-friendly name for the time zone.
     /// </summary>
+    /// <example>(UTC-05:00) Eastern Time (US & Canada)</example>
     public required string DisplayName { get; set; }
 }

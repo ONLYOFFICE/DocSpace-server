@@ -29,11 +29,6 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 /// <summary>
 /// The configuration settings for the web plugin instance.
 /// </summary>
-/// <example>
-/// {
-///   "enabled": true
-/// }
-/// </example>
 public class WebPluginRequests
 {
     /// <summary>
@@ -45,7 +40,7 @@ public class WebPluginRequests
     /// <summary>
     /// The JSON-formatted configuration settings for the web plugin.
     /// </summary>
-    /// <example>true</example>
+    /// <example>{"theme":"dark","autoSave":true}</example>
     [StringLength(255)]
     public required string Settings { get; set; }
 }
@@ -58,6 +53,7 @@ public class WebPluginRequestsDto
     /// <summary>
     /// The web plugin name.
     /// </summary>
+    /// <example>example-plugin</example>
     [FromRoute(Name = "name")]
     public required string Name { get; set; }
 
@@ -71,16 +67,12 @@ public class WebPluginRequestsDto
 /// <summary>
 /// The request parameters for operations that require only a plugin name.
 /// </summary>
-/// <example>
-/// {
-///   // TODO: Add appropriate JSON example
-/// }
-/// </example>
 public class WebPluginNameRequestDto
 {
     /// <summary>
     /// The web plugin name.
     /// </summary>
+    /// <example>example-plugin</example>
     [FromRoute(Name = "name")]
     public required string Name { get; set; }
 }
@@ -88,16 +80,12 @@ public class WebPluginNameRequestDto
 /// <summary>
 /// The request parameters for loading plugins from file system.
 /// </summary>
-/// <example>
-/// {
-///   // TODO: Add appropriate JSON example
-/// }
-/// </example>
 public class WebPluginFromFileRequestDto
 {
     /// <summary>
     /// Specifies whether to load the system plugins or not.
     /// </summary>
+    /// <example>false</example>
     [FromQuery(Name = "system")]
     public bool System { get; set; }
 }
@@ -106,11 +94,6 @@ public class WebPluginFromFileRequestDto
 /// <summary>
 /// The request parameters for querying the installed plugins.
 /// </summary>
-/// <example>
-/// {
-///   "enabled": true
-/// }
-/// </example>
 public class GetWebPluginsRequestDto
 {
     /// <summary>

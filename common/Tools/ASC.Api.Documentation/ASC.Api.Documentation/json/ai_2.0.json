@@ -663,6 +663,8 @@
         "tags": [
           "AI / Chat"
         ],
+        "summary": "Start a new chat",
+        "description": "Starts a new chat session in the specified AI agent room. The response is streamed as Server-Sent Events (SSE).",
         "operationId": "startNewChat",
         "parameters": [
           {
@@ -678,6 +680,7 @@
           }
         ],
         "requestBody": {
+          "description": "The body of the request to start a new chat.",
           "content": {
             "application/json": {
               "schema": {
@@ -689,7 +692,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Chat completion stream"
           },
           "401": {
             "description": "Unauthorized"
@@ -729,6 +732,8 @@
         "tags": [
           "AI / Chat"
         ],
+        "summary": "Get chats in a room",
+        "description": "Returns a list of chat sessions in the specified AI agent room.",
         "operationId": "getChats",
         "parameters": [
           {
@@ -765,7 +770,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "List of chat sessions",
             "content": {
               "application/json": {
                 "schema": {
@@ -814,6 +819,8 @@
         "tags": [
           "AI / Chat"
         ],
+        "summary": "Continue a chat",
+        "description": "Sends a new message to an existing chat session. The response is streamed as Server-Sent Events (SSE).",
         "operationId": "continueChat",
         "parameters": [
           {
@@ -829,6 +836,7 @@
           }
         ],
         "requestBody": {
+          "description": "Represents the body content of a request to continue a chat session.",
           "content": {
             "application/json": {
               "schema": {
@@ -840,7 +848,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Chat completion stream"
           },
           "401": {
             "description": "Unauthorized"
@@ -880,6 +888,8 @@
         "tags": [
           "AI / Chat"
         ],
+        "summary": "Get chat messages",
+        "description": "Returns a list of messages in the specified chat session.",
         "operationId": "getMessages",
         "parameters": [
           {
@@ -916,7 +926,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "List of messages",
             "content": {
               "application/json": {
                 "schema": {
@@ -965,6 +975,8 @@
         "tags": [
           "AI / Chat"
         ],
+        "summary": "Rename a chat",
+        "description": "Renames an existing chat session with a new name.",
         "operationId": "renameChat",
         "parameters": [
           {
@@ -980,6 +992,7 @@
           }
         ],
         "requestBody": {
+          "description": "Represents the body of the request for renaming a chat.",
           "content": {
             "application/json": {
               "schema": {
@@ -991,7 +1004,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Chat information",
             "content": {
               "application/json": {
                 "schema": {
@@ -1038,6 +1051,8 @@
         "tags": [
           "AI / Chat"
         ],
+        "summary": "Get a chat",
+        "description": "Returns the detailed information about a chat session by its ID.",
         "operationId": "getChat",
         "parameters": [
           {
@@ -1054,7 +1069,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Chat information",
             "content": {
               "application/json": {
                 "schema": {
@@ -1101,6 +1116,8 @@
         "tags": [
           "AI / Chat"
         ],
+        "summary": "Delete a chat",
+        "description": "Deletes a chat session and all its messages by the chat ID.",
         "operationId": "deleteChat",
         "parameters": [
           {
@@ -1116,8 +1133,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "Chat deleted successfully"
           },
           "401": {
             "description": "Unauthorized"
@@ -1159,6 +1176,8 @@
         "tags": [
           "AI / Chat"
         ],
+        "summary": "Export chat messages",
+        "description": "Exports all messages from a chat session to a file in the specified folder.",
         "operationId": "exportChat",
         "parameters": [
           {
@@ -1174,6 +1193,7 @@
           }
         ],
         "requestBody": {
+          "description": "The request body containing details for exporting chat messages.",
           "content": {
             "application/json": {
               "schema": {
@@ -1185,7 +1205,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Chat exported successfully"
           },
           "401": {
             "description": "Unauthorized"
@@ -1227,6 +1247,8 @@
         "tags": [
           "AI / Chat"
         ],
+        "summary": "Get available chat models",
+        "description": "Returns a list of available AI models for the specified provider.",
         "operationId": "getChatModels",
         "parameters": [
           {
@@ -1242,7 +1264,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "List of available models",
             "content": {
               "application/json": {
                 "schema": {
@@ -1291,6 +1313,8 @@
         "tags": [
           "AI / Chat"
         ],
+        "summary": "Provide tool permission decision",
+        "description": "Provides a permission decision (allow or deny) for an MCP tool call during a chat session.",
         "operationId": "providePermission",
         "parameters": [
           {
@@ -1305,6 +1329,7 @@
           }
         ],
         "requestBody": {
+          "description": "The body of the tool decision request, containing the decision regarding tool execution.",
           "content": {
             "application/json": {
               "schema": {
@@ -1316,7 +1341,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Permission decision applied"
           },
           "401": {
             "description": "Unauthorized"
@@ -1358,6 +1383,8 @@
         "tags": [
           "AI / Chat"
         ],
+        "summary": "Set user chat settings",
+        "description": "Updates the current user's chat settings for the specified AI agent room.",
         "operationId": "setUserChatsSettings",
         "parameters": [
           {
@@ -1373,6 +1400,7 @@
           }
         ],
         "requestBody": {
+          "description": "Represents the body of the request for setting user chat settings.",
           "content": {
             "application/json": {
               "schema": {
@@ -1384,7 +1412,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Updated user chat settings",
             "content": {
               "application/json": {
                 "schema": {
@@ -1431,6 +1459,8 @@
         "tags": [
           "AI / Chat"
         ],
+        "summary": "Get user chat settings",
+        "description": "Returns the current user's chat settings for the specified AI agent room.",
         "operationId": "getUserChatsSettings",
         "parameters": [
           {
@@ -1447,7 +1477,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "User chat settings",
             "content": {
               "application/json": {
                 "schema": {
@@ -1496,8 +1526,11 @@
         "tags": [
           "AI / MCP"
         ],
+        "summary": "Add an MCP server",
+        "description": "Adds a new custom MCP server with the specified endpoint, name, description, headers, and icon.",
         "operationId": "addServer",
         "requestBody": {
+          "description": "The request body containing details for adding an MCP server.",
           "content": {
             "application/json": {
               "schema": {
@@ -1509,7 +1542,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "MCP server information",
             "content": {
               "application/json": {
                 "schema": {
@@ -1556,8 +1589,11 @@
         "tags": [
           "AI / MCP"
         ],
+        "summary": "Delete MCP servers",
+        "description": "Deletes one or more MCP servers by their IDs.",
         "operationId": "deleteServer",
         "requestBody": {
+          "description": "The request body containing the set of server IDs to be deleted.",
           "content": {
             "application/json": {
               "schema": {
@@ -1568,8 +1604,8 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "Servers deleted successfully"
           },
           "401": {
             "description": "Unauthorized"
@@ -1609,6 +1645,8 @@
         "tags": [
           "AI / MCP"
         ],
+        "summary": "Get all MCP servers",
+        "description": "Returns a paginated list of all MCP servers configured for the current tenant.",
         "operationId": "getServers",
         "parameters": [
           {
@@ -1634,7 +1672,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "List of MCP servers",
             "content": {
               "application/json": {
                 "schema": {
@@ -1683,6 +1721,8 @@
         "tags": [
           "AI / MCP"
         ],
+        "summary": "Update an MCP server",
+        "description": "Updates the properties of an existing custom MCP server by its ID.",
         "operationId": "updateServer",
         "parameters": [
           {
@@ -1698,6 +1738,7 @@
           }
         ],
         "requestBody": {
+          "description": "Contains the request body data for updating a server.",
           "content": {
             "application/json": {
               "schema": {
@@ -1709,7 +1750,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Updated MCP server information",
             "content": {
               "application/json": {
                 "schema": {
@@ -1756,6 +1797,8 @@
         "tags": [
           "AI / MCP"
         ],
+        "summary": "Get an MCP server",
+        "description": "Returns the information about an MCP server by its ID.",
         "operationId": "getServer",
         "parameters": [
           {
@@ -1772,7 +1815,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "MCP server information",
             "content": {
               "application/json": {
                 "schema": {
@@ -1821,6 +1864,8 @@
         "tags": [
           "AI / MCP"
         ],
+        "summary": "Set MCP server status",
+        "description": "Enables or disables an MCP server by its ID.",
         "operationId": "setServerStatus",
         "parameters": [
           {
@@ -1836,6 +1881,7 @@
           }
         ],
         "requestBody": {
+          "description": "Represents the request body containing the server status details.",
           "content": {
             "application/json": {
               "schema": {
@@ -1847,7 +1893,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Updated MCP server information",
             "content": {
               "application/json": {
                 "schema": {
@@ -1896,6 +1942,8 @@
         "tags": [
           "AI / MCP"
         ],
+        "summary": "Get available MCP servers",
+        "description": "Returns a paginated list of active (enabled) MCP servers available for use.",
         "operationId": "getAvailableServers",
         "parameters": [
           {
@@ -1921,7 +1969,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "List of available MCP servers",
             "content": {
               "application/json": {
                 "schema": {
@@ -1970,6 +2018,8 @@
         "tags": [
           "AI / MCP"
         ],
+        "summary": "Add MCP servers to a room",
+        "description": "Attaches one or more MCP servers to the specified AI agent room.",
         "operationId": "addRoomServers",
         "parameters": [
           {
@@ -1985,6 +2035,7 @@
           }
         ],
         "requestBody": {
+          "description": "Represents the body of the request for adding servers to a room.",
           "content": {
             "application/json": {
               "schema": {
@@ -1996,7 +2047,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "List of MCP server statuses in the room",
             "content": {
               "application/json": {
                 "schema": {
@@ -2043,6 +2094,8 @@
         "tags": [
           "AI / MCP"
         ],
+        "summary": "Get room MCP servers",
+        "description": "Returns a list of MCP servers attached to the specified AI agent room with their statuses.",
         "operationId": "getRoomServers",
         "parameters": [
           {
@@ -2059,7 +2112,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "List of MCP server statuses in the room",
             "content": {
               "application/json": {
                 "schema": {
@@ -2106,6 +2159,8 @@
         "tags": [
           "AI / MCP"
         ],
+        "summary": "Remove MCP servers from a room",
+        "description": "Removes one or more MCP servers from the specified AI agent room.",
         "operationId": "deleteRoomServers",
         "parameters": [
           {
@@ -2121,6 +2176,7 @@
           }
         ],
         "requestBody": {
+          "description": "The request body containing server identifiers to be removed from the room.",
           "content": {
             "application/json": {
               "schema": {
@@ -2131,8 +2187,8 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "Servers removed from room successfully"
           },
           "401": {
             "description": "Unauthorized"
@@ -2174,6 +2230,8 @@
         "tags": [
           "AI / MCP"
         ],
+        "summary": "Set MCP server tools",
+        "description": "Sets the list of disabled tools for an MCP server in the specified AI agent room.",
         "operationId": "setTools",
         "parameters": [
           {
@@ -2200,6 +2258,7 @@
           }
         ],
         "requestBody": {
+          "description": "Represents the body of the request containing the tools to be updated.",
           "content": {
             "application/json": {
               "schema": {
@@ -2211,7 +2270,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "List of MCP tools with their enabled status",
             "content": {
               "application/json": {
                 "schema": {
@@ -2258,6 +2317,8 @@
         "tags": [
           "AI / MCP"
         ],
+        "summary": "Get MCP server tools",
+        "description": "Returns the list of tools provided by an MCP server in the specified AI agent room with their enabled status.",
         "operationId": "getTools",
         "parameters": [
           {
@@ -2285,7 +2346,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "List of MCP tools with their enabled status",
             "content": {
               "application/json": {
                 "schema": {
@@ -2334,6 +2395,8 @@
         "tags": [
           "AI / MCP"
         ],
+        "summary": "Connect an MCP server",
+        "description": "Establishes a connection to an MCP server in the specified AI agent room. An optional authorization code can be provided for OAuth-based servers.",
         "operationId": "connectServer",
         "parameters": [
           {
@@ -2360,6 +2423,7 @@
           }
         ],
         "requestBody": {
+          "description": "The request body containing additional data necessary for connecting to the server,\r\nsuch as authentication or operation-specific information.",
           "content": {
             "application/json": {
               "schema": {
@@ -2371,7 +2435,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "MCP server connection status",
             "content": {
               "application/json": {
                 "schema": {
@@ -2420,6 +2484,8 @@
         "tags": [
           "AI / MCP"
         ],
+        "summary": "Disconnect an MCP server",
+        "description": "Disconnects an MCP server from the specified AI agent room.",
         "operationId": "disconnectServer",
         "parameters": [
           {
@@ -2447,7 +2513,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "MCP server disconnection status",
             "content": {
               "application/json": {
                 "schema": {
@@ -2496,6 +2562,8 @@
         "tags": [
           "AI / Messages"
         ],
+        "summary": "Export a message",
+        "description": "Exports a single chat message to a file in the specified folder.",
         "operationId": "exportMessage",
         "parameters": [
           {
@@ -2511,6 +2579,7 @@
           }
         ],
         "requestBody": {
+          "description": "Represents the body of the request for exporting a message.",
           "content": {
             "application/json": {
               "schema": {
@@ -2522,7 +2591,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Message exported successfully"
           },
           "401": {
             "description": "Unauthorized"
@@ -2564,6 +2633,8 @@
         "tags": [
           "AI / Providers"
         ],
+        "summary": "Add an AI provider",
+        "description": "Adds a new AI provider with the specified title, URL, API key, and type.",
         "operationId": "addProvider",
         "requestBody": {
           "content": {
@@ -2576,7 +2647,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "AI provider information",
             "content": {
               "application/json": {
                 "schema": {
@@ -2623,6 +2694,8 @@
         "tags": [
           "AI / Providers"
         ],
+        "summary": "Get AI providers",
+        "description": "Returns a paginated list of AI providers configured for the current tenant.",
         "operationId": "getProviders",
         "parameters": [
           {
@@ -2648,7 +2721,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "List of AI providers",
             "content": {
               "application/json": {
                 "schema": {
@@ -2695,6 +2768,8 @@
         "tags": [
           "AI / Providers"
         ],
+        "summary": "Delete AI providers",
+        "description": "Deletes one or more AI providers by their IDs.",
         "operationId": "deleteProviders",
         "requestBody": {
           "content": {
@@ -2706,8 +2781,8 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "Providers deleted successfully"
           },
           "401": {
             "description": "Unauthorized"
@@ -2749,6 +2824,8 @@
         "tags": [
           "AI / Providers"
         ],
+        "summary": "Update an AI provider",
+        "description": "Updates the properties of an existing AI provider by its ID.",
         "operationId": "updateProvider",
         "parameters": [
           {
@@ -2764,6 +2841,7 @@
           }
         ],
         "requestBody": {
+          "description": "The body of the update request for an AI provider.",
           "content": {
             "application/json": {
               "schema": {
@@ -2775,7 +2853,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Updated AI provider information",
             "content": {
               "application/json": {
                 "schema": {
@@ -2824,10 +2902,12 @@
         "tags": [
           "AI / Providers"
         ],
+        "summary": "Get available AI provider types",
+        "description": "Returns a list of available AI provider types that can be configured.",
         "operationId": "getAvailableProviders",
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "List of available provider types",
             "content": {
               "application/json": {
                 "schema": {
@@ -2876,7 +2956,8 @@
         "tags": [
           "AI / Providers"
         ],
-        "summary": "Sets the default AI provider for the current tenant.",
+        "summary": "Set the default AI provider",
+        "description": "Sets the default AI provider for the current tenant.",
         "operationId": "setDefaultProvider",
         "requestBody": {
           "content": {
@@ -2942,7 +3023,8 @@
         "tags": [
           "AI / Providers"
         ],
-        "summary": "Returns the default AI provider for the current tenant.",
+        "summary": "Get the default AI provider",
+        "description": "Returns the default AI provider for the current tenant.",
         "operationId": "getDefaultProvider",
         "responses": {
           "200": {
@@ -2995,8 +3077,11 @@
         "tags": [
           "AI / Settings"
         ],
+        "summary": "Set web search settings",
+        "description": "Updates the web search configuration for the AI module, including the search provider type and API key.",
         "operationId": "setWebSearchSettings",
         "requestBody": {
+          "description": "Defines the request body containing web search settings.",
           "content": {
             "application/json": {
               "schema": {
@@ -3008,7 +3093,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Updated web search settings",
             "content": {
               "application/json": {
                 "schema": {
@@ -3055,10 +3140,12 @@
         "tags": [
           "AI / Settings"
         ],
+        "summary": "Get web search settings",
+        "description": "Returns the current web search configuration for the AI module.",
         "operationId": "getWebSearchSettings",
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Web search settings",
             "content": {
               "application/json": {
                 "schema": {
@@ -3107,8 +3194,11 @@
         "tags": [
           "AI / Settings"
         ],
+        "summary": "Set vectorization settings",
+        "description": "Updates the vectorization (embedding) configuration for the AI module, including the embedding provider type and API key.",
         "operationId": "setVectorizationSettings",
         "requestBody": {
+          "description": "Represents the request body containing the vectorization configuration settings.",
           "content": {
             "application/json": {
               "schema": {
@@ -3120,7 +3210,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Updated vectorization settings",
             "content": {
               "application/json": {
                 "schema": {
@@ -3167,10 +3257,12 @@
         "tags": [
           "AI / Settings"
         ],
+        "summary": "Get vectorization settings",
+        "description": "Returns the current vectorization (embedding) configuration for the AI module.",
         "operationId": "getVectorizationSettings",
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Vectorization settings",
             "content": {
               "application/json": {
                 "schema": {
@@ -3219,10 +3311,12 @@
         "tags": [
           "AI / Settings"
         ],
+        "summary": "Get AI settings",
+        "description": "Returns the combined AI settings including web search and vectorization configuration.",
         "operationId": "getAiSettings",
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "AI settings",
             "content": {
               "application/json": {
                 "schema": {
@@ -3271,8 +3365,11 @@
         "tags": [
           "AI / Vectorization"
         ],
+        "summary": "Start a vectorization task",
+        "description": "Starts a vectorization task for the specified files. The files will be processed and their content will be converted to vector embeddings for AI search.",
         "operationId": "startTask",
         "requestBody": {
+          "description": "Represents the body of the vectorization start request.",
           "content": {
             "application/json": {
               "schema": {
@@ -3284,7 +3381,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Vectorization task started"
           },
           "401": {
             "description": "Unauthorized"
@@ -3464,21 +3561,24 @@
         "properties": {
           "id": {
             "type": "integer",
+            "description": "The AI provider identifier.",
             "format": "int32",
             "example": 1
           },
           "title": {
             "type": "string",
+            "description": "The AI provider title.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "OpenAI"
           },
           "type": {
             "$ref": "#/components/schemas/ProviderType"
           },
           "url": {
             "type": "string",
+            "description": "The AI provider URL.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://api.openai.com/v1"
           },
           "createdOn": {
             "$ref": "#/components/schemas/ApiDateTime"
@@ -3488,14 +3588,17 @@
           },
           "needReset": {
             "type": "boolean",
-            "example": true
+            "description": "Indicates whether the provider API key needs to be reset.",
+            "example": false
           },
           "isDefault": {
             "type": "boolean",
+            "description": "Indicates whether this is the default provider.",
             "example": true
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The AI provider information."
       },
       "AiProviderWrapper": {
         "type": "object",
@@ -3542,56 +3645,68 @@
         "properties": {
           "webSearchEnabled": {
             "type": "boolean",
+            "description": "Specifies whether the web search feature is enabled.",
             "example": true
           },
           "webSearchNeedReset": {
             "type": "boolean",
-            "example": true
+            "description": "Specifies whether the web search settings need to be reset.",
+            "example": false
           },
           "vectorizationEnabled": {
             "type": "boolean",
+            "description": "Specifies whether the vectorization feature is enabled.",
             "example": true
           },
           "vectorizationNeedReset": {
             "type": "boolean",
-            "example": true
+            "description": "Specifies whether the vectorization settings need to be reset.",
+            "example": false
           },
           "aiReady": {
             "type": "boolean",
+            "description": "Specifies whether the AI module is ready for use.",
             "example": true
           },
           "aiReadyNeedReset": {
             "type": "boolean",
-            "example": true
+            "description": "Specifies whether the AI readiness settings need to be reset.",
+            "example": false
           },
           "portalMcpServerId": {
             "type": "string",
+            "description": "The portal MCP server ID.",
             "format": "uuid",
             "nullable": true,
-            "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "embeddingModel": {
             "type": "string",
+            "description": "The name of the embedding model used for vectorization.",
             "nullable": true,
-            "example": "some text"
+            "example": "text-embedding-3-small"
           },
           "knowledgeSearchToolName": {
             "type": "string",
+            "description": "The name of the knowledge search tool.",
             "nullable": true,
-            "example": "some text"
+            "example": "knowledge_search"
           },
           "webSearchToolName": {
             "type": "string",
+            "description": "The name of the web search tool.",
             "nullable": true,
-            "example": "some text"
+            "example": "web_search"
           },
           "webCrawlingToolName": {
             "type": "string",
+            "description": "The name of the web crawling tool.",
             "nullable": true,
-            "example": "some text"
+            "example": "web_crawling"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The AI module settings."
       },
       "AiSettingsWrapper": {
         "type": "object",
@@ -3690,13 +3805,15 @@
         "properties": {
           "id": {
             "type": "string",
+            "description": "The chat session ID.",
             "format": "uuid",
             "example": "00000000-0000-0000-0000-000000000000"
           },
           "title": {
             "type": "string",
+            "description": "The chat session title.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "Project discussion"
           },
           "createdOn": {
             "$ref": "#/components/schemas/ApiDateTime"
@@ -3708,7 +3825,8 @@
             "$ref": "#/components/schemas/EmployeeDto"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The chat session information."
       },
       "ChatSettings": {
         "type": "object",
@@ -3970,19 +4088,19 @@
             "type": "integer",
             "description": "AI provider identifier.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           },
           "defaultModel": {
             "type": "string",
             "description": "Default model identifier used with this provider.",
             "nullable": true,
-            "example": "some text"
+            "example": "gpt-4o"
           },
           "providerTitle": {
             "type": "string",
             "description": "AI provider title.",
             "nullable": true,
-            "example": "some text"
+            "example": "OpenAI"
           }
         },
         "additionalProperties": false,
@@ -5584,23 +5702,27 @@
         "properties": {
           "id": {
             "type": "string",
+            "description": "The MCP server ID.",
             "format": "uuid",
             "example": "00000000-0000-0000-0000-000000000000"
           },
           "name": {
             "type": "string",
+            "description": "The MCP server name.",
             "nullable": true,
-            "example": "John Doe"
+            "example": "DocSpace Tools"
           },
           "description": {
             "type": "string",
+            "description": "The MCP server description.",
             "nullable": true,
-            "example": "some text"
+            "example": "Provides document management tools"
           },
           "endpoint": {
             "type": "string",
+            "description": "The MCP server endpoint URL.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://mcp.example.com/sse"
           },
           "serverType": {
             "$ref": "#/components/schemas/ServerType"
@@ -5610,6 +5732,7 @@
             "additionalProperties": {
               "type": "string"
             },
+            "description": "The custom HTTP headers for the MCP server connection.",
             "nullable": true,
             "example": [
               {
@@ -5620,6 +5743,7 @@
           },
           "enabled": {
             "type": "boolean",
+            "description": "Specifies whether the MCP server is enabled.",
             "example": true
           },
           "icon": {
@@ -5627,10 +5751,12 @@
           },
           "needReset": {
             "type": "boolean",
-            "example": true
+            "description": "Specifies whether the MCP server settings need to be reset.",
+            "example": false
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The MCP server detailed information."
       },
       "McpServerShortArrayWrapper": {
         "type": "object",
@@ -5674,19 +5800,22 @@
         "properties": {
           "id": {
             "type": "string",
+            "description": "The MCP server ID.",
             "format": "uuid",
             "example": "00000000-0000-0000-0000-000000000000"
           },
           "name": {
             "type": "string",
+            "description": "The MCP server name.",
             "nullable": true,
-            "example": "John Doe"
+            "example": "DocSpace Tools"
           },
           "serverType": {
             "$ref": "#/components/schemas/ServerType"
           },
           "enabled": {
             "type": "boolean",
+            "description": "Specifies whether the MCP server is enabled.",
             "example": true
           },
           "icon": {
@@ -5694,10 +5823,12 @@
           },
           "needReset": {
             "type": "boolean",
-            "example": true
+            "description": "Specifies whether the MCP server settings need to be reset.",
+            "example": false
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The MCP server short information."
       },
       "McpServerShortWrapper": {
         "type": "object",
@@ -5778,19 +5909,22 @@
         "properties": {
           "id": {
             "type": "string",
+            "description": "The MCP server ID.",
             "format": "uuid",
             "example": "00000000-0000-0000-0000-000000000000"
           },
           "name": {
             "type": "string",
+            "description": "The MCP server name.",
             "nullable": true,
-            "example": "John Doe"
+            "example": "DocSpace Tools"
           },
           "serverType": {
             "$ref": "#/components/schemas/ServerType"
           },
           "connected": {
             "type": "boolean",
+            "description": "Specifies whether the MCP server is connected.",
             "example": true
           },
           "icon": {
@@ -5798,10 +5932,12 @@
           },
           "needReset": {
             "type": "boolean",
-            "example": true
+            "description": "Specifies whether the MCP server settings need to be reset.",
+            "example": false
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The MCP server status information."
       },
       "McpServerStatusWrapper": {
         "type": "object",
@@ -5916,15 +6052,18 @@
         "properties": {
           "name": {
             "type": "string",
+            "description": "The MCP tool name.",
             "nullable": true,
-            "example": "John Doe"
+            "example": "search_documents"
           },
           "enabled": {
             "type": "boolean",
+            "description": "Specifies whether the MCP tool is enabled.",
             "example": true
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The MCP tool information."
       },
       "MessageArrayWrapper": {
         "type": "object",
@@ -5971,6 +6110,7 @@
           }
         },
         "additionalProperties": false,
+        "description": "The base class for message content blocks.",
         "x-derived": true,
         "x-derived-types": [
           "TextContentDto",
@@ -5985,6 +6125,7 @@
           2
         ],
         "type": "integer",
+        "description": "The type of message content.",
         "format": "int32"
       },
       "MessageDto": {
@@ -5992,8 +6133,9 @@
         "properties": {
           "id": {
             "type": "integer",
+            "description": "The message ID.",
             "format": "int64",
-            "example": "00000000-0000-0000-0000-000000000000"
+            "example": 42
           },
           "role": {
             "$ref": "#/components/schemas/Role"
@@ -6003,13 +6145,15 @@
             "items": {
               "$ref": "#/components/schemas/MessageContentDto"
             },
+            "description": "The message content blocks.",
             "nullable": true
           },
           "createdOn": {
             "$ref": "#/components/schemas/ApiDateTime"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The chat message information."
       },
       "ModelArrayWrapper": {
         "type": "object",
@@ -6057,21 +6201,25 @@
         "properties": {
           "providerId": {
             "type": "integer",
+            "description": "The provider ID.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           },
           "providerTitle": {
             "type": "string",
+            "description": "The provider title.",
             "nullable": true,
-            "example": "some text"
+            "example": "OpenAI"
           },
           "modelId": {
             "type": "string",
+            "description": "The model ID.",
             "nullable": true,
-            "example": "some text"
+            "example": "gpt-4o"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The AI model information."
       },
       "NewItemsAgentNewItemsArrayWrapper": {
         "type": "object",
@@ -6180,11 +6328,13 @@
           },
           "url": {
             "type": "string",
+            "description": "The provider URL.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://api.openai.com/v1"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The AI provider settings."
       },
       "ProviderType": {
         "enum": [
@@ -6852,10 +7002,12 @@
         "properties": {
           "webSearchEnabled": {
             "type": "boolean",
+            "description": "Indicates whether web search is enabled for the user.",
             "example": true
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The user chat settings."
       },
       "UserChatSettingsWrapper": {
         "type": "object",
@@ -6899,10 +7051,12 @@
           },
           "needReset": {
             "type": "boolean",
-            "example": true
+            "description": "Indicates whether the vectorization API key needs to be reset.",
+            "example": false
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The vectorization settings."
       },
       "VectorizationSettingsWrapper": {
         "type": "object",
@@ -7118,6 +7272,7 @@
         "properties": {
           "enabled": {
             "type": "boolean",
+            "description": "Indicates whether web search is enabled.",
             "example": true
           },
           "type": {
@@ -7125,10 +7280,12 @@
           },
           "needReset": {
             "type": "boolean",
-            "example": true
+            "description": "Indicates whether the web search API key needs to be reset.",
+            "example": false
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The web search settings."
       },
       "WebSearchSettingsWrapper": {
         "type": "object",
