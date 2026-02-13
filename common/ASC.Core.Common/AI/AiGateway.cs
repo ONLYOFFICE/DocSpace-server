@@ -24,22 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Web.Core.Files;
-
 using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Core.Common.AI;
 
-public class AiGatewaySettings
-{
-    public string Url { get; init; }
-    public string Secret { get; init; }
-    public TimeSpan TokenExpiration { get; init; }
-}
-
 [Scope]
 public class AiGateway(
     IConfiguration configuration,
+    IHttpClientFactory httpClientFactory,
     TenantManager tenantManager,
     ITariffService tariffService,
     UserManager userManager,
@@ -72,7 +64,26 @@ public class AiGateway(
         {
             throw new InvalidOperationException("AI Gateway is not enabled");
         }
-        
+
+        return await GenerateKeyAsync();
+    }
+
+    public async Task<AiPricesResponse> GetPricesAsync()
+    {
+        var key = await GenerateKeyAsync();
+
+        using var request = new HttpRequestMessage(HttpMethod.Get, $"{Url}/prices");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", key);
+
+        var httpClient = httpClientFactory.CreateClient();
+        using var response = await httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadFromJsonAsync<AiPricesResponse>();
+    }
+
+    private async Task<string> GenerateKeyAsync()
+    {
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenantManager.GetCurrentTenantId());
         if (customerInfo == null)
         {
@@ -84,15 +95,58 @@ public class AiGateway(
         {
             throw new SecurityException();
         }
-        
+
         var payload = new
         {
-            customerId = customerInfo.PortalId, 
+            customerId = customerInfo.PortalId,
             id = user.Id,
             iat = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
             exp = DateTimeOffset.UtcNow.Add(Settings.TokenExpiration).ToUnixTimeSeconds()
         };
-        
+
         return JsonWebToken.Encode(payload, Settings.Secret);
     }
+}
+
+public class AiGatewaySettings
+{
+    public string Url { get; init; }
+    public string Secret { get; init; }
+    public TimeSpan TokenExpiration { get; init; }
+}
+
+public record AiPricesResponse
+{
+    public required List<AiChatModelPricing> Chat { get; init; }
+    public required List<AiEmbeddingModelPricing> Embedding { get; init; }
+    public required AiWebSearchPricing WebSearch { get; init; }
+}
+
+public record AiChatModelPricing
+{
+    public required string Id { get; init; }
+    public required AiChatPrice Price { get; init; }
+}
+
+public record AiChatPrice
+{
+    public decimal Prompt { get; init; }
+    public decimal Completion { get; init; }
+}
+
+public record AiEmbeddingModelPricing
+{
+    public required string Id { get; init; }
+    public required AiEmbeddingPrice Price { get; init; }
+}
+
+public record AiEmbeddingPrice
+{
+    public decimal Prompt { get; init; }
+}
+
+public record AiWebSearchPricing
+{
+    public decimal Search { get; init; }
+    public decimal Contents { get; init; }
 }
