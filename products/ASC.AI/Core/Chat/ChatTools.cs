@@ -37,24 +37,29 @@ public class ChatTools(
     GenerateFormTool generateFormTool,
     AiSettingsStore aiSettingsStore,
     AiGateway aiGateway,
-    AiAccessibility aiAccessibility)
+    AiAccessibility aiAccessibility,
+    TenantManager tenantManager)
 {
     public async Task<(ToolHolder, string? error)> GetAsync(Folder<int> agent, UserChatSettings chatSettings, bool knowledgeHasFiles, int resultStorageId)
     {
         var (holder, error) = await mcpService.GetToolsAsync(agent.Id);
 
-        holder.AddTool(
-            SystemToolType.GeneratePresentation, 
-            ToWrapper(agent.Id, generatePresentationTool.Init(resultStorageId))
+        var tenantQuota = await tenantManager.GetCurrentTenantQuotaAsync();
+        if (tenantQuota.AutomationApi)
+        {
+            holder.AddTool(
+                SystemToolType.GeneratePresentation, 
+                ToWrapper(agent.Id, generatePresentationTool.Init(resultStorageId))
             );
-        holder.AddTool(
-            SystemToolType.GenerateDocx, 
-            ToWrapper(agent.Id, generateDocxTool.Init(resultStorageId))
+            holder.AddTool(
+                SystemToolType.GenerateDocx, 
+                ToWrapper(agent.Id, generateDocxTool.Init(resultStorageId))
             );
-        holder.AddTool(
-            SystemToolType.GenerateForm, 
-            ToWrapper(agent.Id, generateFormTool.Init(resultStorageId))
+            holder.AddTool(
+                SystemToolType.GenerateForm, 
+                ToWrapper(agent.Id, generateFormTool.Init(resultStorageId))
             );
+        }
 
         if (knowledgeHasFiles && await aiAccessibility.IsVectorizationEnabledAsync(agent))
         {
