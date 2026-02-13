@@ -1173,4 +1173,7 @@
   <data name="FileNotSavedDueToRoomQuota" xml:space="preserve">
     <value>Rooms [{0}]. File not saved: {1} – storage quota for room exceeded.</value>
   </data>
+  <data name="DocumentsDefaultTemplatesSettingsUpdated" xml:space="preserve">
+    <value>Default template settings updated: {0}</value>
+  </data>
 </root>
