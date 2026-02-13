@@ -55,10 +55,10 @@ public class GenerateDocxTool(FileStorageService fileService, EditorToolCallStat
                     Title = $"{fileName}.docx"
                 });
 
-                await callStateStore.SetAsync(file.Id, new GenerateDocxToolCallState
+                await callStateStore.SetAsync(file.Id, new EditorToolCallState
                 {
-                    ToolName = "generateDocx", 
-                    Description = description
+                    ToolName = "generateDocx",
+                    Parameters = new GenerateDocxToolCallParameters { Description = description }
                 });
 
                 return new ToolResponse<GeneratedFileResult>

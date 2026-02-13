@@ -27,26 +27,29 @@
 #nullable enable
 namespace ASC.Files.Core.Core.AI;
 
-[JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
-[JsonDerivedType(typeof(GenerateDocxToolCallState), "generate_docx")]
-[JsonDerivedType(typeof(GenerateFormToolCallState), "generate_form")]
-[JsonDerivedType(typeof(GeneratePresentationToolCallState), "generate_presentation")]
-public abstract class EditorToolCallState
+public class EditorToolCallState
 {
     public required string ToolName { get; init; }
+    public required EditorToolCallParameters Parameters { get; init; }
 }
 
-public class GenerateDocxToolCallState : EditorToolCallState
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
+[JsonDerivedType(typeof(GenerateDocxToolCallParameters), "generate_docx")]
+[JsonDerivedType(typeof(GenerateFormToolCallParameters), "generate_form")]
+[JsonDerivedType(typeof(GeneratePresentationToolCallParameters), "generate_presentation")]
+public abstract class EditorToolCallParameters;
+
+public class GenerateDocxToolCallParameters : EditorToolCallParameters
 {
     public required string Description { get; init; }
 }
 
-public class GenerateFormToolCallState : EditorToolCallState
+public class GenerateFormToolCallParameters : EditorToolCallParameters
 {
     public required string Description { get; init; }
 }
 
-public class GeneratePresentationToolCallState : EditorToolCallState
+public class GeneratePresentationToolCallParameters : EditorToolCallParameters
 {
     public string? Topic { get; init; }
     public string? SlideCount { get; init; }

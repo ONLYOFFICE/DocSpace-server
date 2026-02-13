@@ -53,10 +53,10 @@ public class GenerateFormTool(FileStorageService fileService, EditorToolCallStat
                     Title = $"{fileName}.pdf"
                 });
 
-                await callStateStore.SetAsync(file.Id, new GenerateFormToolCallState
+                await callStateStore.SetAsync(file.Id, new EditorToolCallState
                 {
-                    ToolName = "generateForm", 
-                    Description = description
+                    ToolName = "generateForm",
+                    Parameters = new GenerateFormToolCallParameters { Description = description }
                 });
 
                 return new ToolResponse<GeneratedFileResult>

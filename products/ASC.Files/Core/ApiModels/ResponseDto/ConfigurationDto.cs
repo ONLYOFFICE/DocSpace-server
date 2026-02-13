@@ -759,21 +759,31 @@ public class InfoConfigConverter<T>
 /// <summary>
 /// The editor tool call state. Used to run the agent flow in the editor.
 /// </summary>
-[JsonDerivedType(typeof(GenerateDocxToolCallStateDto))]
-[JsonDerivedType(typeof(GenerateFormToolCallStateDto))]
-[JsonDerivedType(typeof(GeneratePresentationToolCallStateDto))]
-public abstract class EditorToolCallStateDto
+public class EditorToolCallStateDto
 {
     /// <summary>
     /// The tool name.
     /// </summary>
     public required string ToolName { get; init; }
+
+    /// <summary>
+    /// The tool call parameters.
+    /// </summary>
+    public required EditorToolCallParametersDto Parameters { get; init; }
 }
 
 /// <summary>
-/// The generate docx tool call state.
+/// The editor tool call parameters.
 /// </summary>
-public class GenerateDocxToolCallStateDto : EditorToolCallStateDto
+[JsonDerivedType(typeof(GenerateDocxToolCallParametersDto))]
+[JsonDerivedType(typeof(GenerateFormToolCallParametersDto))]
+[JsonDerivedType(typeof(GeneratePresentationToolCallParametersDto))]
+public abstract class EditorToolCallParametersDto;
+
+/// <summary>
+/// The generate docx tool call parameters.
+/// </summary>
+public class GenerateDocxToolCallParametersDto : EditorToolCallParametersDto
 {
     /// <summary>
     /// The description of the document to generate.
@@ -782,9 +792,9 @@ public class GenerateDocxToolCallStateDto : EditorToolCallStateDto
 }
 
 /// <summary>
-/// The generate form tool call state.
+/// The generate form tool call parameters.
 /// </summary>
-public class GenerateFormToolCallStateDto : EditorToolCallStateDto
+public class GenerateFormToolCallParametersDto : EditorToolCallParametersDto
 {
     /// <summary>
     /// The description of the form to generate.
@@ -793,9 +803,9 @@ public class GenerateFormToolCallStateDto : EditorToolCallStateDto
 }
 
 /// <summary>
-/// The generate presentation tool call state.
+/// The generate presentation tool call parameters.
 /// </summary>
-public class GeneratePresentationToolCallStateDto : EditorToolCallStateDto
+public class GeneratePresentationToolCallParametersDto : EditorToolCallParametersDto
 {
     /// <summary>
     /// The presentation topic.
@@ -816,8 +826,10 @@ public class GeneratePresentationToolCallStateDto : EditorToolCallStateDto
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class EditorToolCallStateMapper
 {
-    [MapDerivedType<GenerateDocxToolCallState, GenerateDocxToolCallStateDto>]
-    [MapDerivedType<GenerateFormToolCallState, GenerateFormToolCallStateDto>]
-    [MapDerivedType<GeneratePresentationToolCallState, GeneratePresentationToolCallStateDto>]
     public static partial EditorToolCallStateDto MapToDto(this EditorToolCallState source);
+
+    [MapDerivedType<GenerateDocxToolCallParameters, GenerateDocxToolCallParametersDto>]
+    [MapDerivedType<GenerateFormToolCallParameters, GenerateFormToolCallParametersDto>]
+    [MapDerivedType<GeneratePresentationToolCallParameters, GeneratePresentationToolCallParametersDto>]
+    private static partial EditorToolCallParametersDto MapToDto(EditorToolCallParameters source);
 }

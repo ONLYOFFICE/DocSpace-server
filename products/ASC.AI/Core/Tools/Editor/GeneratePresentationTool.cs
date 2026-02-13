@@ -55,12 +55,15 @@ public class GeneratePresentationTool(FileStorageService fileService, EditorTool
                     Title = $"{fileName}.pptx"
                 });
 
-                await callStateStore.SetAsync(file.Id, new GeneratePresentationToolCallState
+                await callStateStore.SetAsync(file.Id, new EditorToolCallState
                 {
                     ToolName = "generatePresentationWithTheme",
-                    Topic = topic,
-                    SlideCount = slideCount,
-                    Style = style
+                    Parameters = new GeneratePresentationToolCallParameters
+                    {
+                        Topic = topic,
+                        SlideCount = slideCount,
+                        Style = style
+                    }
                 });
 
                 return new ToolResponse<GeneratedFileResult>
