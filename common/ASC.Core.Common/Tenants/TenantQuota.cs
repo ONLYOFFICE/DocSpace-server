@@ -313,6 +313,17 @@ public class TenantQuota
         set => _lifetimeFeature.Value = value;
     }
 
+    private readonly TenantQuotaFeatureFlag _automationApiFeature;
+
+    /// <summary>
+    /// Specifies if the Automation API is available or not.
+    /// </summary>
+    public bool AutomationApi
+    {
+        get => _automationApiFeature.Value;
+        set => _automationApiFeature.Value = value;
+    }
+
     private readonly TenantQuotaFeatureFlag _customFeature;
 
     /// <summary>
@@ -631,6 +642,7 @@ public class TenantQuota
         _brandingFeature = new TenantQuotaFeatureFlag(this, "branding") { EmployeeType = EmployeeType.DocSpaceAdmin };
         _customizationFeature = new TenantQuotaFeatureFlag(this, "customization") { Order = 3, EmployeeType = EmployeeType.DocSpaceAdmin };
         _lifetimeFeature = new TenantQuotaFeatureFlag(this, "lifetime") { Standalone = true };
+        _automationApiFeature = new TenantQuotaFeatureFlag(this, "automationapi") { Standalone = true };
         _customFeature = new TenantQuotaFeatureFlag(this, "custom") { Visible = false };
         _restoreFeature = new TenantQuotaFeatureFlag(this, "restore") { Order = 7, EmployeeType = EmployeeType.DocSpaceAdmin };
         _oauthFeature = new TenantQuotaFeatureFlag(this, "oauth");
@@ -679,6 +691,7 @@ public class TenantQuota
             _brandingFeature,
             _customizationFeature,
             _lifetimeFeature,
+            _automationApiFeature,
             _customFeature,
             _restoreFeature,
             _oauthFeature,
