@@ -626,6 +626,9 @@ public enum MessageAction
     [Description("Room change owner")]
     RoomChangeOwner = 5159,
 
+    [Description("Documents default templates settings updated")]
+    DocumentsDefaultTemplatesSettingsUpdated = 5160,
+    
     [Description("File saved, user quota exceeded")]
     FileSavedButUserQuotaExceeded = 5201,
 
