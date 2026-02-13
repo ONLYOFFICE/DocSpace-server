@@ -45,7 +45,15 @@ public class ChatController(
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
     
+    /// <remarks>
+    /// Starts a new chat session in the specified AI agent room. The response is streamed as Server-Sent Events (SSE).
+    /// </remarks>
+    /// <summary>
+    /// Start a new chat
+    /// </summary>
+    /// <path>api/2.0/ai/rooms/{roomId}/chats</path>
     [Tags("AI / Chat")]
+    [SwaggerResponse(200, "Chat completion stream")]
     [HttpPost("rooms/{roomId}/chats")]
     public async Task<IActionResult> StartNewChatAsync(StartNewChatRequestDto inDto)
     {
@@ -59,7 +67,15 @@ public class ChatController(
         return Ok();
     }
     
+    /// <remarks>
+    /// Sends a new message to an existing chat session. The response is streamed as Server-Sent Events (SSE).
+    /// </remarks>
+    /// <summary>
+    /// Continue a chat
+    /// </summary>
+    /// <path>api/2.0/ai/chats/{chatId}/messages</path>
     [Tags("AI / Chat")]
+    [SwaggerResponse(200, "Chat completion stream")]
     [HttpPost("chats/{chatId}/messages")]
     public async Task<IActionResult> ContinueChatAsync(ContinueChatRequestDto inDto)
     {
@@ -73,7 +89,15 @@ public class ChatController(
         return Ok();
     }
 
+    /// <remarks>
+    /// Renames an existing chat session with a new name.
+    /// </remarks>
+    /// <summary>
+    /// Rename a chat
+    /// </summary>
+    /// <path>api/2.0/ai/chats/{chatId}</path>
     [Tags("AI / Chat")]
+    [SwaggerResponse(200, "Chat information", typeof(ChatDto))]
     [HttpPut("chats/{chatId}")]
     public async Task<ChatDto> RenameChatAsync(RenameChatRequestDto inDto)
     {
@@ -82,7 +106,15 @@ public class ChatController(
         return await chat.ToDtoAsync(employeeDtoHelper, apiDateTimeHelper);
     }
 
+    /// <remarks>
+    /// Returns the detailed information about a chat session by its ID.
+    /// </remarks>
+    /// <summary>
+    /// Get a chat
+    /// </summary>
+    /// <path>api/2.0/ai/chats/{chatId}</path>
     [Tags("AI / Chat")]
+    [SwaggerResponse(200, "Chat information", typeof(ChatDto))]
     [HttpGet("chats/{chatId}")]
     public async Task<ChatDto> GetChatAsync(GetChatRequestDto inDto)
     {
@@ -90,7 +122,15 @@ public class ChatController(
         return await chat.ToDtoAsync(employeeDtoHelper, apiDateTimeHelper);
     }
 
+    /// <remarks>
+    /// Returns a list of chat sessions in the specified AI agent room.
+    /// </remarks>
+    /// <summary>
+    /// Get chats in a room
+    /// </summary>
+    /// <path>api/2.0/ai/rooms/{roomId}/chats</path>
     [Tags("AI / Chat")]
+    [SwaggerResponse(200, "List of chat sessions", typeof(List<ChatDto>))]
     [HttpGet("rooms/{roomId}/chats")]
     public async Task<List<ChatDto>> GetChatsAsync(GetChatsRequestDto inDto)
     {
@@ -105,7 +145,15 @@ public class ChatController(
         return chatsDto;       
     }
     
+    /// <remarks>
+    /// Returns a list of messages in the specified chat session.
+    /// </remarks>
+    /// <summary>
+    /// Get chat messages
+    /// </summary>
+    /// <path>api/2.0/ai/chats/{chatId}/messages</path>
     [Tags("AI / Chat")]
+    [SwaggerResponse(200, "List of messages", typeof(List<MessageDto>))]
     [HttpGet("chats/{chatId}/messages")]
     public async Task<List<MessageDto>> GetMessagesAsync(GetMessagesRequestDto inDto)
     {
@@ -119,7 +167,15 @@ public class ChatController(
         return messagesDto;
     }
 
+    /// <remarks>
+    /// Deletes a chat session and all its messages by the chat ID.
+    /// </remarks>
+    /// <summary>
+    /// Delete a chat
+    /// </summary>
+    /// <path>api/2.0/ai/chats/{chatId}</path>
     [Tags("AI / Chat")]
+    [SwaggerResponse(204, "Chat deleted successfully")]
     [HttpDelete("chats/{chatId}")]
     public async Task<NoContentResult> DeleteChatAsync(DeleteChatRequestDto inDto)
     {
@@ -127,14 +183,30 @@ public class ChatController(
         return NoContent();
     }
     
+    /// <remarks>
+    /// Exports all messages from a chat session to a file in the specified folder.
+    /// </remarks>
+    /// <summary>
+    /// Export chat messages
+    /// </summary>
+    /// <path>api/2.0/ai/chats/{chatId}/messages/export</path>
     [Tags("AI / Chat")]
+    [SwaggerResponse(200, "Chat exported successfully")]
     [HttpPost("chats/{chatId}/messages/export")]
     public async Task ExportChatAsync(ExportChatRequestDto<int> inDto)
     {
         await exporter.ExportMessagesAsync(inDto.Body.FolderId, inDto.Body.Title, inDto.ChatId);
     }
 
+    /// <remarks>
+    /// Returns a list of available AI models for the specified provider.
+    /// </remarks>
+    /// <summary>
+    /// Get available chat models
+    /// </summary>
+    /// <path>api/2.0/ai/chats/models</path>
     [Tags("AI / Chat")]
+    [SwaggerResponse(200, "List of available models", typeof(IEnumerable<ModelDto>))]
     [HttpGet("chats/models")]
     public async Task<IEnumerable<ModelDto>> GetChatModelsAsync(GetChatModelsRequestDto inDto)
     {
@@ -142,14 +214,30 @@ public class ChatController(
         return models.Select(x => x.MapToDto()).ToList();
     }
 
+    /// <remarks>
+    /// Provides a permission decision (allow or deny) for an MCP tool call during a chat session.
+    /// </remarks>
+    /// <summary>
+    /// Provide tool permission decision
+    /// </summary>
+    /// <path>api/2.0/ai/chats/tool-permissions/{callId}/decision</path>
     [Tags("AI / Chat")]
+    [SwaggerResponse(200, "Permission decision applied")]
     [HttpPost("chats/tool-permissions/{callId}/decision")]
     public async Task ProvidePermissionAsync(ToolDecisionRequestDto inDto)
     {
         await mcpService.ProvideMcpToolPermissionAsync(inDto.CallId, inDto.Body.Decision);
     }
 
+    /// <remarks>
+    /// Updates the current user's chat settings for the specified AI agent room.
+    /// </remarks>
+    /// <summary>
+    /// Set user chat settings
+    /// </summary>
+    /// <path>api/2.0/ai/rooms/{roomId}/chats/config</path>
     [Tags("AI / Chat")]
+    [SwaggerResponse(200, "Updated user chat settings", typeof(UserChatSettingsDto))]
     [HttpPut("rooms/{roomId}/chats/config")]
     public async Task<UserChatSettingsDto> SetUserChatsSettingsAsync(SetUserChatsSettingsRequestDto inDto)
     {
@@ -157,7 +245,15 @@ public class ChatController(
         return settings.MapToDto();
     }
     
+    /// <remarks>
+    /// Returns the current user's chat settings for the specified AI agent room.
+    /// </remarks>
+    /// <summary>
+    /// Get user chat settings
+    /// </summary>
+    /// <path>api/2.0/ai/rooms/{roomId}/chats/config</path>
     [Tags("AI / Chat")]
+    [SwaggerResponse(200, "User chat settings", typeof(UserChatSettingsDto))]
     [HttpGet("rooms/{roomId}/chats/config")]
     public async Task<UserChatSettingsDto> GetUserChatsSettingsAsync(GetUserChatsSettingsRequestDto inDto)
     {

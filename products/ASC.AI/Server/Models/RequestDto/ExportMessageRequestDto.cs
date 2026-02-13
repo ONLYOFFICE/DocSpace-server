@@ -33,6 +33,9 @@ public class ExportMessageRequestDto<T>
     [FromRoute(Name = "messageId")]
     public int MessageId { get; init; }
 
+    /// <summary>
+    /// Represents the body of the request for exporting a message.
+    /// </summary>
     [FromBody]
     public required ExportMessageRequestBody<T> Body { get; init; }
 }

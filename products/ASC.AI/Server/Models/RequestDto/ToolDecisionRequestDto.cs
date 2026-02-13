@@ -35,6 +35,9 @@ public class ToolDecisionRequestDto
     [FromRoute(Name = "callId")]
     public required string CallId { get; init; }
 
+    /// <summary>
+    /// The body of the tool decision request, containing the decision regarding tool execution.
+    /// </summary>
     [FromBody]
     public required ToolDecisionRequestBody Body { get; init; }
 }

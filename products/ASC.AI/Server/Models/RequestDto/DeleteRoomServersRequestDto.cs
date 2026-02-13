@@ -33,6 +33,7 @@ public class DeleteRoomServersRequestDto
     [FromRoute(Name = "roomId")]
     public int RoomId { get; init; }
 
+    /// <summary>The request body containing server identifiers to be removed from the room.</summary>
     [FromBody]
     public required DeleteRoomServersRequestBody Body { get; init; }
 }

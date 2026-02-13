@@ -33,6 +33,9 @@ public class SetServerStatusRequestDto
     [FromRoute(Name = "id")]
     public Guid Id { get; set; }
 
+    /// <summary>
+    /// Represents the request body containing the server status details.
+    /// </summary>
     [FromBody]
     public required SetServerStatusRequestBody Body { get; set; }
 }

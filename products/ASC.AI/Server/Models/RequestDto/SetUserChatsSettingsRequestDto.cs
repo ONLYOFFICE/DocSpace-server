@@ -33,6 +33,9 @@ public class SetUserChatsSettingsRequestDto
     [FromRoute(Name = "roomId")]
     public int RoomId { get; init; }
 
+    /// <summary>
+    /// Represents the body of the request for setting user chat settings.
+    /// </summary>
     [FromBody]
     public required SetUserChatSettingsRequestBody Body { get; init; }
 }

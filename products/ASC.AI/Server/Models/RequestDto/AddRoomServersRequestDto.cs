@@ -33,6 +33,9 @@ public class AddRoomServersRequestDto
     [FromRoute(Name = "roomId")]
     public int RoomId { get; init; }
 
+    /// <summary>
+    /// Represents the body of the request for adding servers to a room.
+    /// </summary>
     [FromBody]
     public required AddRoomServersRequestBody Body { get; init; }
 }

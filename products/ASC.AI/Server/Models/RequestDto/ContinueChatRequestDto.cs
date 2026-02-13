@@ -33,6 +33,7 @@ public class ContinueChatRequestDto
     [FromRoute(Name = "chatId")]
     public required Guid ChatId { get; set; }
 
+    /// <summary>Represents the body content of a request to continue a chat session.</summary>
     [FromBody]
     public required ContinueChatBody Body { get; set; }
 }

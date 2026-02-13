@@ -32,7 +32,15 @@ namespace ASC.AI.Api;
 [ControllerName("ai")]
 public class SettingsController(AiSettingsService aiSettingsService) : ControllerBase
 {
+    /// <remarks>
+    /// Updates the web search configuration for the AI module, including the search provider type and API key.
+    /// </remarks>
+    /// <summary>
+    /// Set web search settings
+    /// </summary>
+    /// <path>api/2.0/ai/config/web-search</path>
     [Tags("AI / Settings")]
+    [SwaggerResponse(200, "Updated web search settings", typeof(WebSearchSettingsDto))]
     [HttpPut("config/web-search")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<WebSearchSettingsDto> SetWebSearchSettingsAsync(SetWebSearchConfigRequestDto inDto)
@@ -45,7 +53,15 @@ public class SettingsController(AiSettingsService aiSettingsService) : Controlle
         return settings.MapToDto();
     }
     
+    /// <remarks>
+    /// Returns the current web search configuration for the AI module.
+    /// </remarks>
+    /// <summary>
+    /// Get web search settings
+    /// </summary>
+    /// <path>api/2.0/ai/config/web-search</path>
     [Tags("AI / Settings")]
+    [SwaggerResponse(200, "Web search settings", typeof(WebSearchSettingsDto))]
     [HttpGet("config/web-search")]
     public async Task<WebSearchSettingsDto> GetWebSearchSettingsAsync()
     {
@@ -53,7 +69,15 @@ public class SettingsController(AiSettingsService aiSettingsService) : Controlle
         return settings.MapToDto();
     }
     
+    /// <remarks>
+    /// Updates the vectorization (embedding) configuration for the AI module, including the embedding provider type and API key.
+    /// </remarks>
+    /// <summary>
+    /// Set vectorization settings
+    /// </summary>
+    /// <path>api/2.0/ai/config/vectorization</path>
     [Tags("AI / Settings")]
+    [SwaggerResponse(200, "Updated vectorization settings", typeof(VectorizationSettingsDto))]
     [HttpPut("config/vectorization")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<VectorizationSettingsDto> SetVectorizationSettingsAsync(SetEmbeddingConfigRequestDto inDto)
@@ -63,7 +87,15 @@ public class SettingsController(AiSettingsService aiSettingsService) : Controlle
         return settings.MapToDto();
     }
     
+    /// <remarks>
+    /// Returns the current vectorization (embedding) configuration for the AI module.
+    /// </remarks>
+    /// <summary>
+    /// Get vectorization settings
+    /// </summary>
+    /// <path>api/2.0/ai/config/vectorization</path>
     [Tags("AI / Settings")]
+    [SwaggerResponse(200, "Vectorization settings", typeof(VectorizationSettingsDto))]
     [HttpGet("config/vectorization")]
     public async Task<VectorizationSettingsDto> GetVectorizationSettingsAsync()
     {
@@ -71,7 +103,15 @@ public class SettingsController(AiSettingsService aiSettingsService) : Controlle
         return settings.MapToDto();
     }
     
+    /// <remarks>
+    /// Returns the combined AI settings including web search and vectorization configuration.
+    /// </remarks>
+    /// <summary>
+    /// Get AI settings
+    /// </summary>
+    /// <path>api/2.0/ai/config</path>
     [Tags("AI / Settings")]
+    [SwaggerResponse(200, "AI settings", typeof(AiSettingsDto))]
     [HttpGet("config")]
     public async Task<AiSettingsDto> GetAiSettingsAsync()
     {

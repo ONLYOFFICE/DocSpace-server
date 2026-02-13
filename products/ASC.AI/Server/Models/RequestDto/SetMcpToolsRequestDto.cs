@@ -38,6 +38,7 @@ public class SetMcpToolsRequestDto
     [FromRoute(Name = "serverId")]
     public Guid ServerId { get; init; }
 
+    /// <summary>Represents the body of the request containing the tools to be updated.</summary>
     [FromBody]
     public required SetMcpToolsRequestBody Body { get; init; }
 }

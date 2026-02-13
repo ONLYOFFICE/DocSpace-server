@@ -28,6 +28,7 @@ namespace ASC.AI.Models.RequestDto;
 
 public class SetWebSearchConfigRequestDto
 {
+    /// <summary>Defines the request body containing web search settings.</summary>
     [FromBody]
     public required SetWebSearchSettingsRequestBody Body { get; init; }
 }

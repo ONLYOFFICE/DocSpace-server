@@ -28,6 +28,9 @@ namespace ASC.AI.Models.RequestDto;
 
 public class AddServerRequestDto
 {
+    /// <summary>
+    /// The request body containing details for adding an MCP server.
+    /// </summary>
     [FromBody]
     public required AddMcpServerRequestBody Body { get; init; }
 }

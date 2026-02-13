@@ -36,7 +36,15 @@ public class ProviderController(
     MessageService messageService,
     ProviderMapper providerMapper) : ControllerBase
 {
+    /// <remarks>
+    /// Adds a new AI provider with the specified title, URL, API key, and type.
+    /// </remarks>
+    /// <summary>
+    /// Add an AI provider
+    /// </summary>
+    /// <path>api/2.0/ai/providers</path>
     [Tags("AI / Providers")]
+    [SwaggerResponse(200, "AI provider information", typeof(AiProviderDto))]
     [HttpPost("providers")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<AiProviderDto> AddProviderAsync(CreateProviderRequestDto inDto)
@@ -48,7 +56,15 @@ public class ProviderController(
         return providerMapper.MapToDto(provider);
     }
 
+    /// <remarks>
+    /// Returns a paginated list of AI providers configured for the current tenant.
+    /// </remarks>
+    /// <summary>
+    /// Get AI providers
+    /// </summary>
+    /// <path>api/2.0/ai/providers</path>
     [Tags("AI / Providers")]
+    [SwaggerResponse(200, "List of AI providers", typeof(List<AiProviderDto>))]
     [HttpGet("providers")]
     public async Task<List<AiProviderDto>> GetProvidersAsync(PaginatedRequestDto inDto)
     {
@@ -65,7 +81,15 @@ public class ProviderController(
         return providers;
     }
     
+    /// <remarks>
+    /// Updates the properties of an existing AI provider by its ID.
+    /// </remarks>
+    /// <summary>
+    /// Update an AI provider
+    /// </summary>
+    /// <path>api/2.0/ai/providers/{id}</path>
     [Tags("AI / Providers")]
+    [SwaggerResponse(200, "Updated AI provider information", typeof(AiProviderDto))]
     [HttpPut("providers/{id}")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<AiProviderDto> UpdateProviderAsync(UpdateProviderRequestDto inDto)
@@ -77,7 +101,15 @@ public class ProviderController(
         return providerMapper.MapToDto(provider);
     }
 
+    /// <remarks>
+    /// Deletes one or more AI providers by their IDs.
+    /// </remarks>
+    /// <summary>
+    /// Delete AI providers
+    /// </summary>
+    /// <path>api/2.0/ai/providers</path>
     [Tags("AI / Providers")]
+    [SwaggerResponse(204, "Providers deleted successfully")]
     [HttpDelete("providers")]
     public async Task<NoContentResult> DeleteProvidersAsync(RemoveProviderRequestDto inDto)
     {
@@ -102,7 +134,15 @@ public class ProviderController(
         return NoContent();
     }
 
+    /// <remarks>
+    /// Returns a list of available AI provider types that can be configured.
+    /// </remarks>
+    /// <summary>
+    /// Get available AI provider types
+    /// </summary>
+    /// <path>api/2.0/ai/providers/available</path>
     [Tags("AI / Providers")]
+    [SwaggerResponse(200, "List of available provider types", typeof(List<ProviderSettingsDto>))]
     [HttpGet("providers/available")]
     public async Task<List<ProviderSettingsDto>> GetAvailableProvidersAsync()
     {
@@ -111,10 +151,12 @@ public class ProviderController(
         return providers.Select(x => x.MapToDto()).ToList();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sets the default AI provider for the current tenant.
+    /// </remarks>
+    /// <summary>
+    /// Set the default AI provider
     /// </summary>
-    /// <short>Set default AI provider</short>
     /// <path>api/2.0/ai/providers/default</path>
     [Tags("AI / Providers")]
     [SwaggerResponse(200, "Default provider information", typeof(DefaultProviderDto))]
@@ -128,10 +170,12 @@ public class ProviderController(
         return result.MapToDto();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the default AI provider for the current tenant.
+    /// </remarks>
+    /// <summary>
+    /// Get the default AI provider
     /// </summary>
-    /// <short>Get default AI provider</short>
     /// <path>api/2.0/ai/providers/default</path>
     [Tags("AI / Providers")]
     [SwaggerResponse(200, "Default provider information or null if not set", typeof(DefaultProviderDto))]

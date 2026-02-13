@@ -33,6 +33,7 @@ public class StartNewChatRequestDto
     [FromRoute(Name = "roomId")]
     public required int RoomId { get; set; }
 
+    /// <summary>The body of the request to start a new chat.</summary>
     [FromBody]
     public required StartNewChatBody Body { get; set; }
 }

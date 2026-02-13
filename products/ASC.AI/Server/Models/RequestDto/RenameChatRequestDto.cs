@@ -33,6 +33,7 @@ public class RenameChatRequestDto
     [FromRoute(Name = "chatId")]
     public required Guid ChatId { get; set; }
 
+    /// <summary>Represents the body of the request for renaming a chat.</summary>
     [FromBody]
     public required RenameChatBody Body { get; set; }
 }

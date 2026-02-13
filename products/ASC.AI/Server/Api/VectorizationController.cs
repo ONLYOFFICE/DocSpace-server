@@ -33,7 +33,15 @@ namespace ASC.AI.Api;
 public class VectorizationController(
     VectorizationTaskPublisher vectorizationTaskPublisher) : ControllerBase
 {
+    /// <remarks>
+    /// Starts a vectorization task for the specified files. The files will be processed and their content will be converted to vector embeddings for AI search.
+    /// </remarks>
+    /// <summary>
+    /// Start a vectorization task
+    /// </summary>
+    /// <path>api/2.0/ai/vectorization/tasks</path>
     [Tags("AI / Vectorization")]
+    [SwaggerResponse(200, "Vectorization task started")]
     [HttpPost("vectorization/tasks")]
     public async Task StartTaskAsync(VectorizationStartRequestDto inDto)
     {

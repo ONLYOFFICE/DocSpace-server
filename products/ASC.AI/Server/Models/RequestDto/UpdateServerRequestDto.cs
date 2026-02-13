@@ -33,6 +33,8 @@ public class UpdateServerRequestDto
     [FromRoute(Name = "id")]
     public Guid Id { get; init; }
 
+    /// <summary>Contains the request body data for updating a server.</summary>
+    /// <remarks>This property encapsulates server-related details, such as endpoint, name, headers, and other optional metadata.</remarks>
     [FromBody]
     public required UpdateServerRequestBody Body { get; init; }
 }

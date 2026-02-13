@@ -33,6 +33,9 @@ public class ExportChatRequestDto<T>
     [FromRoute(Name = "chatId")]
     public Guid ChatId { get; init; }
 
+    /// <summary>
+    /// The request body containing details for exporting chat messages.
+    /// </summary>
     [FromBody]
     public required ExportChatRequestBody<T> Body { get; init; }
 }

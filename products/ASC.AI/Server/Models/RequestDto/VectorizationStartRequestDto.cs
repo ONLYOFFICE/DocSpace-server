@@ -28,6 +28,12 @@ namespace ASC.AI.Models.RequestDto;
 
 public class VectorizationStartRequestDto
 {
+    /// <summary>
+    /// Represents the body of the vectorization start request.
+    /// </summary>
+    /// <remarks>
+    /// The body contains data required to initiate a vectorization task, including a collection of file IDs.
+    /// </remarks>
     [FromBody]
     public required VectorizationStartRequestBody Body { get; init; }
 }

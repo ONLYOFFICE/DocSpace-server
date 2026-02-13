@@ -38,6 +38,10 @@ public class ConnectServerRequestDto
     [FromRoute(Name = "serverId")]
     public Guid ServerId { get; init; }
 
+    /// <summary>
+    /// The request body containing additional data necessary for connecting to the server,
+    /// such as authentication or operation-specific information.
+    /// </summary>
     [FromBody]
     public required ConnectServerRequestBody Body { get; init; }
 }

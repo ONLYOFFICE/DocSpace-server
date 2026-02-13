@@ -28,6 +28,9 @@ namespace ASC.AI.Models.RequestDto;
 
 public class DeleteServersRequestDto
 {
+    /// <summary>
+    /// The request body containing the set of server IDs to be deleted.
+    /// </summary>
     [FromBody]
     public required DeleteServersRequestBody Body { get; init; }
 }

@@ -32,7 +32,15 @@ namespace ASC.AI.Api;
 [ControllerName("ai")]
 public class MessageController(MessageExporter exporter) : ControllerBase
 {
+    /// <remarks>
+    /// Exports a single chat message to a file in the specified folder.
+    /// </remarks>
+    /// <summary>
+    /// Export a message
+    /// </summary>
+    /// <path>api/2.0/ai/messages/{messageId}/export</path>
     [Tags("AI / Messages")]
+    [SwaggerResponse(200, "Message exported successfully")]
     [HttpPost("messages/{messageId}/export")]
     public async Task ExportMessageAsync(ExportMessageRequestDto<int> inDto)
     {

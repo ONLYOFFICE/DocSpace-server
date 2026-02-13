@@ -32,7 +32,15 @@ namespace ASC.AI.Api;
 [ControllerName("ai")]
 public class McpController(McpService mcpService, ApiContext apiContext) : ControllerBase
 {
+    /// <remarks>
+    /// Adds a new custom MCP server with the specified endpoint, name, description, headers, and icon.
+    /// </remarks>
+    /// <summary>
+    /// Add an MCP server
+    /// </summary>
+    /// <path>api/2.0/ai/servers</path>
     [Tags("AI / MCP")]
+    [SwaggerResponse(200, "MCP server information", typeof(McpServerDto))]
     [HttpPost("servers")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<McpServerDto> AddServerAsync(AddServerRequestDto inDto)
@@ -47,7 +55,15 @@ public class McpController(McpService mcpService, ApiContext apiContext) : Contr
         return server.MapToDto();
     }
     
+    /// <remarks>
+    /// Updates the properties of an existing custom MCP server by its ID.
+    /// </remarks>
+    /// <summary>
+    /// Update an MCP server
+    /// </summary>
+    /// <path>api/2.0/ai/servers/{id}</path>
     [Tags("AI / MCP")]
+    [SwaggerResponse(200, "Updated MCP server information", typeof(McpServerDto))]
     [HttpPut("servers/{id}")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<McpServerDto> UpdateServerAsync(UpdateServerRequestDto inDto)
@@ -64,7 +80,15 @@ public class McpController(McpService mcpService, ApiContext apiContext) : Contr
         return server.MapToDto();
     }
     
+    /// <remarks>
+    /// Enables or disables an MCP server by its ID.
+    /// </remarks>
+    /// <summary>
+    /// Set MCP server status
+    /// </summary>
+    /// <path>api/2.0/ai/servers/{id}/status</path>
     [Tags("AI / MCP")]
+    [SwaggerResponse(200, "Updated MCP server information", typeof(McpServerDto))]
     [HttpPut("servers/{id}/status")]
     public async Task<McpServerDto> SetServerStatusAsync(SetServerStatusRequestDto inDto)
     {
@@ -73,7 +97,15 @@ public class McpController(McpService mcpService, ApiContext apiContext) : Contr
         return server.MapToDto();
     }
     
+    /// <remarks>
+    /// Deletes one or more MCP servers by their IDs.
+    /// </remarks>
+    /// <summary>
+    /// Delete MCP servers
+    /// </summary>
+    /// <path>api/2.0/ai/servers</path>
     [Tags("AI / MCP")]
+    [SwaggerResponse(204, "Servers deleted successfully")]
     [HttpDelete("servers")]
     public async Task<NoContentResult> DeleteServerAsync(DeleteServersRequestDto inDto)
     {
@@ -82,7 +114,15 @@ public class McpController(McpService mcpService, ApiContext apiContext) : Contr
         return NoContent();
     }
 
+    /// <remarks>
+    /// Returns the information about an MCP server by its ID.
+    /// </remarks>
+    /// <summary>
+    /// Get an MCP server
+    /// </summary>
+    /// <path>api/2.0/ai/servers/{id}</path>
     [Tags("AI / MCP")]
+    [SwaggerResponse(200, "MCP server information", typeof(McpServerShortDto))]
     [HttpGet("servers/{id}")]
     public async Task<McpServerShortDto> GetServerAsync(GetServersRequestDto inDto)
     {
@@ -91,7 +131,15 @@ public class McpController(McpService mcpService, ApiContext apiContext) : Contr
         return server.MapToShortDto();
     }
     
+    /// <remarks>
+    /// Returns a paginated list of all MCP servers configured for the current tenant.
+    /// </remarks>
+    /// <summary>
+    /// Get all MCP servers
+    /// </summary>
+    /// <path>api/2.0/ai/servers</path>
     [Tags("AI / MCP")]
+    [SwaggerResponse(200, "List of MCP servers", typeof(List<McpServerDto>))]
     [HttpGet("servers")]
     public async Task<List<McpServerDto>> GetServersAsync(PaginatedRequestDto inDto)
     {
@@ -102,7 +150,15 @@ public class McpController(McpService mcpService, ApiContext apiContext) : Contr
         return servers.Select(x => x.MapToDto()).ToList();
     }
 
+    /// <remarks>
+    /// Returns a paginated list of active (enabled) MCP servers available for use.
+    /// </remarks>
+    /// <summary>
+    /// Get available MCP servers
+    /// </summary>
+    /// <path>api/2.0/ai/servers/available</path>
     [Tags("AI / MCP")]
+    [SwaggerResponse(200, "List of available MCP servers", typeof(List<McpServerShortDto>))]
     [HttpGet("servers/available")]
     public async Task<List<McpServerShortDto>> GetAvailableServersAsync(PaginatedRequestDto inDto)
     {
@@ -113,7 +169,15 @@ public class McpController(McpService mcpService, ApiContext apiContext) : Contr
         return servers.Select(x => x.MapToShortDto()).ToList();
     }
     
+    /// <remarks>
+    /// Attaches one or more MCP servers to the specified AI agent room.
+    /// </remarks>
+    /// <summary>
+    /// Add MCP servers to a room
+    /// </summary>
+    /// <path>api/2.0/ai/rooms/{roomId}/servers</path>
     [Tags("AI / MCP")]
+    [SwaggerResponse(200, "List of MCP server statuses in the room", typeof(List<McpServerStatusDto>))]
     [HttpPost("rooms/{roomId}/servers")]
     public async Task<List<McpServerStatusDto>> AddRoomServersAsync(AddRoomServersRequestDto inDto)
     {
@@ -122,7 +186,15 @@ public class McpController(McpService mcpService, ApiContext apiContext) : Contr
         return statuses.Select(x => x.MapToStatusDto()).ToList();
     }
 
+    /// <remarks>
+    /// Returns a list of MCP servers attached to the specified AI agent room with their statuses.
+    /// </remarks>
+    /// <summary>
+    /// Get room MCP servers
+    /// </summary>
+    /// <path>api/2.0/ai/rooms/{roomId}/servers</path>
     [Tags("AI / MCP")]
+    [SwaggerResponse(200, "List of MCP server statuses in the room", typeof(List<McpServerStatusDto>))]
     [HttpGet("rooms/{roomId}/servers")]
     public async Task<List<McpServerStatusDto>> GetRoomServersAsync(GetRoomServersRequestDto inDto)
     {
@@ -131,7 +203,15 @@ public class McpController(McpService mcpService, ApiContext apiContext) : Contr
         return statuses.Select(x => x.MapToStatusDto()).ToList();
     }
 
+    /// <remarks>
+    /// Removes one or more MCP servers from the specified AI agent room.
+    /// </remarks>
+    /// <summary>
+    /// Remove MCP servers from a room
+    /// </summary>
+    /// <path>api/2.0/ai/rooms/{roomId}/servers</path>
     [Tags("AI / MCP")]
+    [SwaggerResponse(204, "Servers removed from room successfully")]
     [HttpDelete("rooms/{roomId}/servers")]
     public async Task<NoContentResult> DeleteRoomServersAsync(DeleteRoomServersRequestDto inDto)
     {
@@ -140,7 +220,15 @@ public class McpController(McpService mcpService, ApiContext apiContext) : Contr
         return NoContent();
     }
 
+    /// <remarks>
+    /// Sets the list of disabled tools for an MCP server in the specified AI agent room.
+    /// </remarks>
+    /// <summary>
+    /// Set MCP server tools
+    /// </summary>
+    /// <path>api/2.0/ai/rooms/{roomId}/servers/{serverId}/tools</path>
     [Tags("AI / MCP")]
+    [SwaggerResponse(200, "List of MCP tools with their enabled status", typeof(List<McpToolDto>))]
     [HttpPut("rooms/{roomId}/servers/{serverId}/tools")]
     public async Task<List<McpToolDto>> SetToolsAsync(SetMcpToolsRequestDto inDto)
     {
@@ -154,7 +242,15 @@ public class McpController(McpService mcpService, ApiContext apiContext) : Contr
         }).ToList();
     }
 
+    /// <remarks>
+    /// Returns the list of tools provided by an MCP server in the specified AI agent room with their enabled status.
+    /// </remarks>
+    /// <summary>
+    /// Get MCP server tools
+    /// </summary>
+    /// <path>api/2.0/ai/rooms/{roomId}/servers/{serverId}/tools</path>
     [Tags("AI / MCP")]
+    [SwaggerResponse(200, "List of MCP tools with their enabled status", typeof(List<McpToolDto>))]
     [HttpGet("rooms/{roomId}/servers/{serverId}/tools")]
     public async Task<List<McpToolDto>> GetToolsAsync(GetMcpToolsRequestDto inDto)
     {
@@ -167,7 +263,15 @@ public class McpController(McpService mcpService, ApiContext apiContext) : Contr
         }).ToList();
     }
 
+    /// <remarks>
+    /// Establishes a connection to an MCP server in the specified AI agent room. An optional authorization code can be provided for OAuth-based servers.
+    /// </remarks>
+    /// <summary>
+    /// Connect an MCP server
+    /// </summary>
+    /// <path>api/2.0/ai/rooms/{roomId}/servers/{serverId}/connect</path>
     [Tags("AI / MCP")]
+    [SwaggerResponse(200, "MCP server connection status", typeof(McpServerStatusDto))]
     [HttpPost("rooms/{roomId}/servers/{serverId}/connect")]
     public async Task<McpServerStatusDto> ConnectServerAsync(ConnectServerRequestDto inDto)
     {
@@ -176,7 +280,15 @@ public class McpController(McpService mcpService, ApiContext apiContext) : Contr
         return status.MapToStatusDto();
     }
     
+    /// <remarks>
+    /// Disconnects an MCP server from the specified AI agent room.
+    /// </remarks>
+    /// <summary>
+    /// Disconnect an MCP server
+    /// </summary>
+    /// <path>api/2.0/ai/rooms/{roomId}/servers/{serverId}/disconnect</path>
     [Tags("AI / MCP")]
+    [SwaggerResponse(200, "MCP server disconnection status", typeof(McpServerStatusDto))]
     [HttpPost("rooms/{roomId}/servers/{serverId}/disconnect")]
     public async Task<McpServerStatusDto> DisconnectServerAsync(DisconnectServerRequestDto inDto)
     {

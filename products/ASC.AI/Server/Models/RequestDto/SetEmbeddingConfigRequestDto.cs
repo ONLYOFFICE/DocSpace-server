@@ -28,6 +28,9 @@ namespace ASC.AI.Models.RequestDto;
 
 public class SetEmbeddingConfigRequestDto
 {
+    /// <summary>
+    /// Represents the request body containing the vectorization configuration settings.
+    /// </summary>
     [FromBody]
     public required SetEmbeddingConfigRequestBody Body { get; init; }
 }

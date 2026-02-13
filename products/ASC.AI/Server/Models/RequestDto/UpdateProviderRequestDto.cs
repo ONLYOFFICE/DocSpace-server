@@ -33,6 +33,9 @@ public class UpdateProviderRequestDto
     [FromRoute(Name = "id")]
     public int Id { get; set; }
 
+    /// <summary>
+    /// The body of the update request for an AI provider.
+    /// </summary>
     [FromBody]
     public required UpdateProviderBody Body { get; set; }
 }
