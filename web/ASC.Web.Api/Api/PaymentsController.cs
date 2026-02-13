@@ -24,6 +24,7 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.AI;
 using ASC.Files.Core.ApiModels.ResponseDto;
 using ASC.Files.Core.IntegrationEvents.Events;
 using ASC.Files.Core.Services.DocumentBuilderService;
@@ -56,6 +57,7 @@ public class PaymentController(
     StudioNotifyService studioNotifyService,
     PermissionContext permissionContext,
     TenantUtil tenantUtil,
+    AiGateway aiGateway,
     ApiDateTimeHelper apiDateTimeHelper,
     EmployeeDtoHelper employeeWrapperHelper,
     DisplayUserSettingsHelper displayUserSettingsHelper,
@@ -1203,6 +1205,30 @@ public class PaymentController(
         }
 
         return result;
+    }
+
+    /// <remarks>
+    /// Returns prices for AI models available for use.
+    /// </remarks>
+    /// <summary>
+    /// Get prices for AI models
+    /// </summary>
+    /// <path>api/2.0/portal/payment/aiprices</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "Prices for AI models", typeof(AiPricesResponse))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpGet("aiprices")]
+    public async Task<AiPricesResponse> GetAiPrices()
+    {
+        if (!tariffService.IsConfigured())
+        {
+            return null;
+        }
+
+        await DemandAdminAsync();
+
+        var aiPrices = await aiGateway.GetPricesAsync();
+        return aiPrices;
     }
 
     private async Task DemandPayerAsync(CustomerInfo customerInfo)
