@@ -852,6 +852,18 @@ public enum MessageAction
     [Description("Scheduled backup failed")]
     ScheduledBackupFailed = 5129,
 
+    [Description("Scheduled backup deleted")]
+    ScheduledBackupDeleted = 5130,
+
+    [Description("Backup cancelled")]
+    BackupCancelled = 5131,
+
+    [Description("Restore started")]
+    RestoreStarted = 5132,
+
+    [Description("Restore cancelled")]
+    RestoreCancelled = 5133,
+
     [Description("License key uploaded")]
     LicenseKeyUploaded = 5042,
 
