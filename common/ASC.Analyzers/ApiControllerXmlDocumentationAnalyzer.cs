@@ -245,14 +245,6 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
                     var syntaxNode = syntaxReference.GetSyntax();
                     if (syntaxNode is ClassDeclarationSyntax modelDeclaration)
                     {
-                        if (!HasXmlDocumentation(modelDeclaration))
-                        {
-                            context.ReportDiagnostic(Diagnostic.Create(
-                                _modelRule,
-                                modelDeclaration.Identifier.GetLocation(),
-                                modelDeclaration.Identifier.Text));
-                        }
-
                         foreach (var prop in modelDeclaration.ChildNodes().OfType<PropertyDeclarationSyntax>())
                         {
                             if (!HasXmlDocumentation(prop))
