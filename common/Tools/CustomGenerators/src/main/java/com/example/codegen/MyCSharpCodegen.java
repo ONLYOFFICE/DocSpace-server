@@ -1,21 +1,17 @@
 package com.example.codegen;
 
 import io.swagger.v3.oas.models.servers.*;
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.tags.Tag;
 import io.swagger.v3.oas.models.media.Schema;
 
 import org.openapitools.codegen.model.*;
 import org.openapitools.codegen.languages.CSharpClientCodegen;
 import org.openapitools.codegen.*;
-import static org.openapitools.codegen.utils.CamelizeOption.LOWERCASE_FIRST_LETTER;
 import static org.openapitools.codegen.utils.StringUtils.camelize;
 import org.openapitools.codegen.utils.ModelUtils;
 
 import java.io.File;
 import java.util.stream.Collectors;
 import java.util.Map.Entry;
-import com.example.codegen.TagParts;
 import java.util.*;
 
 public class MyCSharpCodegen extends CSharpClientCodegen {
@@ -34,7 +30,6 @@ public class MyCSharpCodegen extends CSharpClientCodegen {
 
         this.outputFolder = "../../../sdk/docspace-api-sdk-csharp";
 
-        String baseURL = openAPI.getServers().get(0).getUrl();
         if (openAPI.getServers() != null && !openAPI.getServers().isEmpty()) {
             Server server = openAPI.getServers().get(0);
             ServerVariables serverVars = server.getVariables();
@@ -113,12 +108,12 @@ public class MyCSharpCodegen extends CSharpClientCodegen {
             if (model.getComposedSchemas() != null && model.getComposedSchemas().getAllOf() != null) {
                 model.getVendorExtensions().put("x-uses-allOf", true);
                 Set<String> localPropertyNames = new HashSet<>();
-                Schema modelSchema = this.openAPI.getComponents().getSchemas().get(model.schemaName);
+                Schema<?> modelSchema = this.openAPI.getComponents().getSchemas().get(model.schemaName);
 
                 if (ModelUtils.isAllOf(modelSchema)) {
                     for (Object obj : modelSchema.getAllOf()) {
                         if (obj instanceof Schema) {
-                            Schema allOfSchema = (Schema) obj;
+                            Schema<?> allOfSchema = (Schema<?>) obj;
                             if ("object".equals(ModelUtils.getType(allOfSchema)) && allOfSchema.getProperties() != null) {
                                 localPropertyNames.addAll(allOfSchema.getProperties().keySet());
                             }
