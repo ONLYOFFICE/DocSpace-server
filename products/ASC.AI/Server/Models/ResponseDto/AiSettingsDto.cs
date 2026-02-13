@@ -39,6 +39,9 @@ public class AiSettingsDto
     public required string KnowledgeSearchToolName { get; init; }
     public required string WebSearchToolName { get; init; }
     public required string WebCrawlingToolName { get; init; }
+    public required string GenerateDocxToolName { get; init; }
+    public required string GenerateFormToolName { get; init; }
+    public required string GeneratePresentationToolName { get; init; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
