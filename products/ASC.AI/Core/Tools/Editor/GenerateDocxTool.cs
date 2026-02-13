@@ -24,29 +24,50 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Tools;
+using ASC.Web.Files.Services.WCFService;
 
-[Singleton]
-public class GenerateFormTool
+namespace ASC.AI.Core.Tools.Editor;
+
+[Scope]
+public class GenerateDocxTool(FileStorageService fileService)
 {
-    public const string Name = "docspace_generate_form";
-    private const string Description = "Use this function if you are asked to generate a form or document template (contract, any document for filling) based on a description. Input: a detailed description of the desired form or template.";
+    public const string Name = "docspace_generate_docx";
+    private const string Description = "Use this function if you are asked to generate a textual document (report, article, letter, etc.) based on a description. Input: Short description of what needs to be generated.";
     private static AIFunctionFactoryOptions FactoryOptions => new()
     {
         Name = Name,
         Description = Description
     };
 
-    private readonly Lazy<AIFunction> _function = new(() => AIFunctionFactory.Create(Function, FactoryOptions));
-
-    public AIFunction Init() => _function.Value;
-
-    private static Task<ToolResponse<string>> Function(
-        [Description("Detailed description of the form or template to generate, including purpose, structure")] string description)
+    public AIFunction Init(int resultStorageId)
     {
-        return Task.FromResult(new ToolResponse<string>
+        return AIFunctionFactory.Create(Function, FactoryOptions);
+
+        async Task<ToolResponse<GeneratedFileResult>> Function(
+            [Description("File name without extension. Use normal spaces, no underscores or special characters")] string fileName,
+            [Description("Short description of the document to generate")] string description)
         {
-            Data = "The form generation flow has been initiated in the editor. The user will see the form being created based on the provided description."
-        });
+            try
+            {
+                var file = await fileService.CreateNewFileAsync(new FileModel<int, int>
+                {
+                    ParentId = resultStorageId,
+                    Title = $"{fileName}.docx"
+                });
+
+                return new ToolResponse<GeneratedFileResult>
+                {
+                    Data = new GeneratedFileResult
+                    {
+                        Id = file.Id,
+                        Title = file.Title
+                    }
+                };
+            }
+            catch (Exception e)
+            {
+                return new ToolResponse<GeneratedFileResult> { Error = e.Message };
+            }
+        }
     }
 }

@@ -24,14 +24,13 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Tools;
+namespace ASC.AI.Core.Tools.Retrieval;
 
 [Scope]
-public class WebCrawlingTool(WebSearchEngineFactory searchEngineFactory, IFaviconService faviconService)
+public class WebSearchTool(WebSearchEngineFactory searchEngineFactory, IFaviconService faviconService)
 {
-    public const string Name = "docspace_web_crawling";
-    private const string Description = "Extract and crawl content from specific URLs - retrieves full text content, metadata, and structured information from web pages. Ideal for extracting detailed content from known URLs.";
-    
+    public const string Name = "docspace_web_search";
+    private const string Description = "Search the web - performs real-time web searches and can scrape content from specific URLs.";
     private static AIFunctionFactoryOptions FactoryOptions => new()
     {
         Name = Name, 
@@ -41,35 +40,46 @@ public class WebCrawlingTool(WebSearchEngineFactory searchEngineFactory, IFavico
     public AIFunction Init(EngineConfig config)
     {
         var engine = searchEngineFactory.Create(config);
-        
+
         return AIFunctionFactory.Create(Function, FactoryOptions);
         
-        async Task<ToolResponse<WebSearchResult>> Function(
-            [Description("URL to crawl and extract content from")] string url,
-            [Description("Maximum characters to extract (default: 10000)")] int? maxCharacters)
+        async Task<ToolResponse<List<WebSearchResult>>> Function([Description("Search query")] string query)
         {
             try
             {
-                url = url.Trim();
-                ArgumentException.ThrowIfNullOrEmpty(url);
+                query = query.Trim();
+                ArgumentException.ThrowIfNullOrEmpty(query);
                 
-                var result = await engine.GetPageContentAsync(new PageContentQuery
+                var results = await engine.SearchAsync(new SearchQuery
                 {
-                    Url = url,
-                    MaxCharacters = maxCharacters ?? 10000
+                    Query = query, 
+                    MaxResults = 5
                 });
 
-                if (result != null && !string.IsNullOrEmpty(url))
+                var response = results.Select(x =>
                 {
-                    var domain = new Uri(url).Host;
-                    result.FaviconUrl = faviconService.GetFaviconUrl(domain);
-                }
+                    var faviconUrl = x.FaviconUrl;
+                    
+                    if (!string.IsNullOrEmpty(x.Url))
+                    {
+                        var domain = new Uri(x.Url).Host;
+                        faviconUrl = faviconService.GetFaviconUrl(domain);
+                    }
 
-                return new ToolResponse<WebSearchResult> { Data = result };
+                    return new WebSearchResult
+                    {
+                        Title = x.Title,
+                        Url = x.Url,
+                        FaviconUrl = faviconUrl,
+                        Text = x.Text
+                    };
+                }).ToList();
+
+                return new ToolResponse<List<WebSearchResult>> { Data = response };
             }
             catch (Exception e)
             {
-                return new ToolResponse<WebSearchResult> { Error = e.Message };
+                return new ToolResponse<List<WebSearchResult>> { Error = e.Message };
             }
         }
     }

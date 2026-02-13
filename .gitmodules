@@ -34,3 +34,7 @@
 	path = sdk/docspace-api-postman-collections
 	url = https://github.com/ONLYOFFICE/docspace-api-postman-collections.git
 	branch = master
+[submodule "products/ASC.AI/Server/DocStore"]
+	path = products/ASC.AI/Server/DocStore
+	url = https://github.com/ONLYOFFICE/document-templates
+	branch = main/community-server

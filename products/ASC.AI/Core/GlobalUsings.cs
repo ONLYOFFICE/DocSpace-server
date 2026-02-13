@@ -33,6 +33,8 @@ global using ASC.AI.Core.MCP.Auth;
 global using ASC.AI.Core.MCP.Data;
 global using ASC.AI.Core.MCP.Transport;
 global using ASC.AI.Core.Tools;
+global using ASC.AI.Core.Tools.Editor;
+global using ASC.AI.Core.Tools.Retrieval;
 global using ASC.AI.Core.Provider;
 global using ASC.AI.Core.Provider.Data;
 global using ASC.AI.Core.Provider.Model;
@@ -80,6 +82,7 @@ global using ASC.MessagingSystem.EF.Model;
 global using ASC.Security.Cryptography;
 
 global using ASC.Web.Core;
+global using ASC.Web.Files.Services.WCFService;
 global using ASC.Web.Files.Services.WCFService.FileOperations;
 global using ASC.Web.Files.Utils;
 global using ASC.Web.Studio.Utility;
