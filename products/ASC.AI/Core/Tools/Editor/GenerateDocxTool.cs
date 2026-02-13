@@ -29,7 +29,7 @@ using ASC.Web.Files.Services.WCFService;
 namespace ASC.AI.Core.Tools.Editor;
 
 [Scope]
-public class GenerateDocxTool(FileStorageService fileService)
+public class GenerateDocxTool(FileStorageService fileService, EditorToolCallStateStore callStateStore)
 {
     public const string Name = "docspace_generate_docx";
     private const string Description = "Use this function if you are asked to generate a textual document (report, article, letter, etc.) based on a description. Input: Short description of what needs to be generated.";
@@ -53,6 +53,12 @@ public class GenerateDocxTool(FileStorageService fileService)
                 {
                     ParentId = resultStorageId,
                     Title = $"{fileName}.docx"
+                });
+
+                await callStateStore.SetAsync(file.Id, new GenerateDocxToolCallState
+                {
+                    ToolName = "generateDocx", 
+                    Description = description
                 });
 
                 return new ToolResponse<GeneratedFileResult>

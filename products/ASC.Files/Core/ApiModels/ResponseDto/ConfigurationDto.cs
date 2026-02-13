@@ -101,6 +101,11 @@ public class ConfigurationDto<T>
     /// Indicates which quota scope has been exceeded.
     /// </summary>
     public QuotaScope? QuotaExceededScope { get; set; }
+
+    /// <summary>
+    /// The generation tool call state. Used to run the agent flow in the editor.
+    /// </summary>
+    public EditorToolCallStateDto GenerationToolCallState { get; set; }
 }
 
 /// <summary>
@@ -209,6 +214,7 @@ public class EditorConfigurationDto
     /// The user configuration of the editor.
     /// </summary>
     public required UserConfig User { get; set; }
+
 }
 
 /// <summary>
@@ -493,7 +499,8 @@ public class ConfigurationConverter<T>(
     EditorConfigurationConverter<T> editorConfigurationConverter,
     DocumentConfigConverter<T> documentConfigConverter,
     DocumentServiceHelper documentServiceHelper,
-    ExternalShare externalShare)
+    ExternalShare externalShare,
+    EditorToolCallStateStore callStateStore)
 {
     public async Task<ConfigurationDto<T>> Convert(Configuration<T> source, File<T> file)
     {
@@ -529,6 +536,13 @@ public class ConfigurationConverter<T>(
 
             result.EditorConfig.Embedded.ShareLinkParam = $"&{FilesLinkUtility.FileId}={file.Id}{shareParam}";
         }
+
+        if (file.Id is int fileId)
+        {
+            var callState = await callStateStore.GetAsync(fileId);
+            result.GenerationToolCallState = callState?.MapToDto();
+        }
+
         return result;
     }
 }
@@ -740,4 +754,70 @@ public class InfoConfigConverter<T>
 
         return result;
     }
+}
+
+/// <summary>
+/// The editor tool call state. Used to run the agent flow in the editor.
+/// </summary>
+[JsonDerivedType(typeof(GenerateDocxToolCallStateDto))]
+[JsonDerivedType(typeof(GenerateFormToolCallStateDto))]
+[JsonDerivedType(typeof(GeneratePresentationToolCallStateDto))]
+public abstract class EditorToolCallStateDto
+{
+    /// <summary>
+    /// The tool name.
+    /// </summary>
+    public required string ToolName { get; init; }
+}
+
+/// <summary>
+/// The generate docx tool call state.
+/// </summary>
+public class GenerateDocxToolCallStateDto : EditorToolCallStateDto
+{
+    /// <summary>
+    /// The description of the document to generate.
+    /// </summary>
+    public required string Description { get; init; }
+}
+
+/// <summary>
+/// The generate form tool call state.
+/// </summary>
+public class GenerateFormToolCallStateDto : EditorToolCallStateDto
+{
+    /// <summary>
+    /// The description of the form to generate.
+    /// </summary>
+    public required string Description { get; init; }
+}
+
+/// <summary>
+/// The generate presentation tool call state.
+/// </summary>
+public class GeneratePresentationToolCallStateDto : EditorToolCallStateDto
+{
+    /// <summary>
+    /// The presentation topic.
+    /// </summary>
+    public string Topic { get; init; }
+
+    /// <summary>
+    /// The number of slides.
+    /// </summary>
+    public string SlideCount { get; init; }
+
+    /// <summary>
+    /// The visual style.
+    /// </summary>
+    public string Style { get; init; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class EditorToolCallStateMapper
+{
+    [MapDerivedType<GenerateDocxToolCallState, GenerateDocxToolCallStateDto>]
+    [MapDerivedType<GenerateFormToolCallState, GenerateFormToolCallStateDto>]
+    [MapDerivedType<GeneratePresentationToolCallState, GeneratePresentationToolCallStateDto>]
+    public static partial EditorToolCallStateDto MapToDto(this EditorToolCallState source);
 }

@@ -27,7 +27,7 @@
 namespace ASC.AI.Core.Tools.Editor;
 
 [Scope]
-public class GenerateFormTool(FileStorageService fileService)
+public class GenerateFormTool(FileStorageService fileService, EditorToolCallStateStore callStateStore)
 {
     public const string Name = "docspace_generate_form";
     private const string Description = "Use this function if you are asked to generate a form or document template (contract, any document for filling) based on a description. Input: a detailed description of the desired form or template.";
@@ -51,6 +51,12 @@ public class GenerateFormTool(FileStorageService fileService)
                 {
                     ParentId = resultStorageId,
                     Title = $"{fileName}.pdf"
+                });
+
+                await callStateStore.SetAsync(file.Id, new GenerateFormToolCallState
+                {
+                    ToolName = "generateForm", 
+                    Description = description
                 });
 
                 return new ToolResponse<GeneratedFileResult>

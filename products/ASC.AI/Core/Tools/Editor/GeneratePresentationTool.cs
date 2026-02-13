@@ -27,7 +27,7 @@
 namespace ASC.AI.Core.Tools.Editor;
 
 [Scope]
-public class GeneratePresentationTool(FileStorageService fileService)
+public class GeneratePresentationTool(FileStorageService fileService, EditorToolCallStateStore callStateStore)
 {
     public const string Name = "docspace_generate_presentation";
     private const string Description = "Generates a complete presentation with custom theme, fonts, and streaming content.";
@@ -53,6 +53,14 @@ public class GeneratePresentationTool(FileStorageService fileService)
                 {
                     ParentId = resultStorageId,
                     Title = $"{fileName}.pptx"
+                });
+
+                await callStateStore.SetAsync(file.Id, new GeneratePresentationToolCallState
+                {
+                    ToolName = "generatePresentationWithTheme",
+                    Topic = topic,
+                    SlideCount = slideCount,
+                    Style = style
                 });
 
                 return new ToolResponse<GeneratedFileResult>
