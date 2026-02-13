@@ -1194,9 +1194,9 @@ public class PaymentController(
         var serviceName = await GetPaymentServiceName(inDto.ServiceName);
         var customerParticipantName = securityContext.CurrentAccount.ID.ToString();
         var details = $"{serviceName} {inDto.Quantity}";
-        var metadata = new Dictionary<string, string> { { BillingClient.MetadataDetails, details } };
+        //var metadata = new Dictionary<string, string> { { BillingClient.MetadataDetails, details } };
 
-        var result = await tariffService.MakeServicePaymentAsync(tenant.Id, serviceName, inDto.Quantity, customerParticipantName, metadata);
+        var result = await tariffService.MakeServicePaymentAsync(tenant.Id, serviceName, inDto.Quantity, customerParticipantName, metadata: null);
         if (result != null)
         {
             messageService.Send(MessageAction.CustomerOperationPerformed, null, details);
