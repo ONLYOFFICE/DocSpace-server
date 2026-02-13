@@ -47,12 +47,14 @@ public class GeneratePresentationTool(FileStorageService fileService, EditorTool
             [Description("Number of slides")] string? slideCount,
             [Description("Visual style - modern, classic, minimal, corporate")] string? style)
         {
+            const string extension = ".pptx";
+            
             try
             {
                 var file = await fileService.CreateNewFileAsync(new FileModel<int, int>
                 {
                     ParentId = resultStorageId,
-                    Title = $"{fileName}.pptx"
+                    Title = $"{fileName}{extension}"
                 });
 
                 await callStateStore.SetAsync(file.Id, new EditorToolCallState
@@ -71,7 +73,8 @@ public class GeneratePresentationTool(FileStorageService fileService, EditorTool
                     Data = new GeneratedFileResult
                     {
                         Id = file.Id,
-                        Title = file.Title
+                        Title = file.Title,
+                        Extension = extension
                     }
                 };
             }

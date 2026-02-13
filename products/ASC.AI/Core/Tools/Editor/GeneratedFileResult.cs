@@ -30,4 +30,5 @@ public class GeneratedFileResult
 {
     public required int Id { get; init; }
     public required string Title { get; init; }
+    public required string Extension { get; init; }
 }

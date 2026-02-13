@@ -47,12 +47,14 @@ public class GenerateDocxTool(FileStorageService fileService, EditorToolCallStat
             [Description("File name without extension. Use normal spaces, no underscores or special characters")] string fileName,
             [Description("Short description of the document to generate")] string description)
         {
+            const string extension = ".docx";
+            
             try
             {
                 var file = await fileService.CreateNewFileAsync(new FileModel<int, int>
                 {
                     ParentId = resultStorageId,
-                    Title = $"{fileName}.docx"
+                    Title = $"{fileName}{extension}"
                 });
 
                 await callStateStore.SetAsync(file.Id, new EditorToolCallState
@@ -66,7 +68,8 @@ public class GenerateDocxTool(FileStorageService fileService, EditorToolCallStat
                     Data = new GeneratedFileResult
                     {
                         Id = file.Id,
-                        Title = file.Title
+                        Title = file.Title,
+                        Extension = extension
                     }
                 };
             }
