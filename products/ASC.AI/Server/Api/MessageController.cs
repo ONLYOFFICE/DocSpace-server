@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,6 +32,7 @@ namespace ASC.AI.Api;
 [ControllerName("ai")]
 public class MessageController(MessageExporter exporter) : ControllerBase
 {
+    [Tags("AI / Messages")]
     [HttpPost("messages/{messageId}/export")]
     public async Task ExportMessageAsync(ExportMessageRequestDto<int> inDto)
     {

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,15 +27,15 @@
 namespace ASC.Core.Encryption;
 public enum EncryprtionStatus
 {
-    [SwaggerEnum("Decrypted")]
+    [Description("Decrypted")]
     Decrypted,
 
-    [SwaggerEnum("Encryption started")]
+    [Description("Encryption started")]
     EncryptionStarted,
 
-    [SwaggerEnum("Encrypted")]
+    [Description("Encrypted")]
     Encrypted,
 
-    [SwaggerEnum("Decryption started")]
+    [Description("Decryption started")]
     DecryptionStarted
 }

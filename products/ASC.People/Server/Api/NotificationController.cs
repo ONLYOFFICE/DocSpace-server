@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,9 +26,9 @@
 
 namespace ASC.People.Api;
 
-///<summary>
+///<remarks>
 /// Notification API.
-///</summary>
+///</remarks>
 public class NotificationController : ApiControllerBase
 // UserManager userManager,
 //     SecurityContext securityContext,
@@ -38,12 +38,12 @@ public class NotificationController : ApiControllerBase
 //     StudioNotifyService studioNotifyService
 
 {
-    /// <summary>
+    /// <remarks>
     /// Sends a notification to the user with the ID specified in the request to change their phone number.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Send a notification to change a phone
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/phone</path>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Notification", typeof(string))]

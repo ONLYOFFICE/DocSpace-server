@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -47,12 +47,12 @@ public class SecurityController(
     PasswordSettingsManager passwordSettingsManager)
     : BaseSettingsController(fusionCache, webItemManager)
 {
-    /// <summary>
+    /// <remarks>
     /// Returns the security settings for the modules specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the security settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/security</path>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
@@ -94,12 +94,12 @@ public class SecurityController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the availability of the module with the ID specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the module availability
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/security/{id}</path>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "Boolean value: true - module is enabled, false - module is disabled", typeof(bool))]
@@ -111,12 +111,12 @@ public class SecurityController(
         return module != null && !await module.IsDisabledAsync(webItemSecurity, authContext);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of all the enabled modules.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the enabled modules
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/security/modules</path>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "List of enabled modules", typeof(object))]
@@ -130,12 +130,12 @@ public class SecurityController(
         return enabledModules;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the portal password settings.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the password settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/security/password</path>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "Password settings", typeof(PasswordSettingsDto))]
@@ -149,12 +149,12 @@ public class SecurityController(
         return HttpContext.TryGetFromCache(settings.LastModified) ? null : passwordSettingsConverter.Convert(settings);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sets the portal password settings.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Set the password settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/security/password</path>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "Password settings", typeof(PasswordSettingsDto))]
@@ -183,12 +183,12 @@ public class SecurityController(
         return passwordSettingsConverter.Convert(userPasswordSettings);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sets the security settings to the module with the ID specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Set the module security settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/security</path>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
@@ -234,12 +234,12 @@ public class SecurityController(
         return securityInfo;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sets the security settings to the modules with the IDs specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Set the security settings to modules
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/security/access</path>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
@@ -285,12 +285,12 @@ public class SecurityController(
         return await GetWebItemSettingsSecurityInfo(new SecuritySettingsRequestDto { Ids = itemList.Keys.ToList() }).ToListAsync();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of all the administrators of a product with the ID specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the product administrators
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/security/administrator/{productid}</path>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
@@ -307,12 +307,12 @@ public class SecurityController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Checks if the selected user is an administrator of a product with the ID specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Check a product administrator
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/security/administrator</path>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "Object with the user security information: product ID, user ID, administrator or not", typeof(ProductAdministratorDto))]
@@ -324,12 +324,12 @@ public class SecurityController(
         return new ProductAdministratorDto { ProductId = inDto.ProductId, UserId = inDto.UserId, Administrator = result };
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sets the selected user as an administrator of a product with the ID specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Set a product administrator
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/security/administrator</path>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "Object with the user security information: product ID, user ID, administrator or not", typeof(ProductAdministratorDto))]
@@ -371,12 +371,12 @@ public class SecurityController(
         return new ProductAdministratorDto { ProductId = inDto.ProductId, UserId = inDto.UserId, Administrator = inDto.Administrator };
     }
 
-    /// <summary>
+    /// <remarks>
     /// Updates the login settings with the parameters specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Update the login settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/security/loginsettings</path>
     [Tags("Settings / Login settings")]
     [SwaggerResponse(200, "Updated login settings", typeof(LoginSettingsDto))]
@@ -394,15 +394,17 @@ public class SecurityController(
 
         await settingsManager.SaveAsync(settings);
 
+        messageService.Send(MessageAction.LoginSettingsUpdated);
+
         return settings.Map();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the portal login settings.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the login settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/security/loginsettings</path>
     [Tags("Settings / Login settings")]
     [SwaggerResponse(200, "Login settings", typeof(LoginSettingsDto))]
@@ -416,12 +418,12 @@ public class SecurityController(
         return HttpContext.TryGetFromCache(settings.LastModified) ? null : settings.Map();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Resets the portal login settings to default.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Reset the login settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/security/loginsettings</path>
     [Tags("Settings / Login settings")]
     [SwaggerResponse(200, "Login settings", typeof(LoginSettingsDto))]
@@ -433,6 +435,8 @@ public class SecurityController(
         var defaultSettings = new LoginSettings().GetDefault();
 
         await settingsManager.SaveAsync(defaultSettings);
+
+        messageService.Send(MessageAction.LoginSettingsUpdated);
 
         return defaultSettings.Map();
     }

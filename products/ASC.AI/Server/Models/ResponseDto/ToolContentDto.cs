@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,7 +30,7 @@ namespace ASC.AI.Models.ResponseDto;
 
 public class ToolContentDto : MessageContentDto
 {
-    public override ContentType Type => ContentType.Tool;
+    public override MessageContentType Type => MessageContentType.Tool;
     public required string Name { get; init; }
     public IDictionary<string, object?>? Arguments { get; init; }
     public object? Result { get; init; }

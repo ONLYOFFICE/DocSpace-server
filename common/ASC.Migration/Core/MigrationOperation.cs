@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -82,6 +82,8 @@ public class MigrationOperation : DistributedTaskProgress
 
     protected override async Task DoJob()
     {
+        var clearMigrationFolder = false;
+        string folder = null;
         Migrator migrator = null;
         try
         {
@@ -107,7 +109,8 @@ public class MigrationOperation : DistributedTaskProgress
                 throw new ItemNotFoundException(MigrationResource.MigrationNotFoundException);
             }
 
-            var folder = await _hybridCache.GetOrDefaultAsync<string>($"migration folder - {TenantId}");
+            var key = GetMigrationFolderCacheKey(TenantId);
+            folder = await _hybridCache.GetOrDefaultAsync<string>(key);
             await migrator.InitAsync(folder, onlyParse ? OperationType.Parse : OperationType.Migration, CancellationToken);
 
             var tenantQuota = await _tenantManager.GetTenantQuotaAsync(TenantId);
@@ -115,8 +118,13 @@ public class MigrationOperation : DistributedTaskProgress
 
             if (maxTotalSize > 0 && maxTotalSize != long.MaxValue)
             {
+                var sourceFiles = onlyParse
+                    ? []
+                    : migrator.MigrationInfo.Files.Select(x=>Path.Combine(folder, x));
+
                 var size = Directory
                     .EnumerateFiles(folder, "*", SearchOption.AllDirectories)
+                    .Where(x => !sourceFiles.Contains(x))
                     .Sum(file => new FileInfo(file).Length);
 
                 if (size > maxTotalSize)
@@ -129,15 +137,18 @@ public class MigrationOperation : DistributedTaskProgress
             if (!onlyParse)
             {
                 await migrator.MigrateAsync(copyInfo);
+                clearMigrationFolder =  true;
             }
         }
         catch (DirectoryNotFoundException)
         {
             Exception = new Exception(FilesCommonResource.ErrorMessage_FileNotFound);
+            clearMigrationFolder =  true;
         }
         catch (Exception e)
         {
             Exception = e;
+            clearMigrationFolder =  true;
             _logger.ErrorWithException(e);
             if (migrator is { MigrationInfo: not null })
             {
@@ -157,6 +168,10 @@ public class MigrationOperation : DistributedTaskProgress
                 IsCompleted = true;
                 await PublishChanges();
             }
+            if (clearMigrationFolder || CancellationToken.IsCancellationRequested)
+            {
+                ClearMigrationFolder(folder);
+            }
         }
 
         async Task Migrator_OnProgressUpdateAsync(double arg1, string arg2)
@@ -168,5 +183,34 @@ public class MigrationOperation : DistributedTaskProgress
             }
             await PublishChanges();
         }
+    }
+
+    public static string GetMigrationFolderCacheKey(int tenantId)
+    {
+        return $"migrationFolder_{tenantId}";
+    }
+
+    public static async Task ClearMigrationFolder(IServiceProvider serviceProvider, int tenantId)
+    {
+        var hybridCache = serviceProvider.GetService<IFusionCache>();
+        var key = GetMigrationFolderCacheKey(tenantId);
+        var path = await hybridCache.GetOrDefaultAsync<string>(key);
+        ClearMigrationFolder(path);
+    }
+
+    public static void ClearMigrationFolder(string path)
+    {
+        if (string.IsNullOrEmpty(path))
+        {
+            return;
+        }
+
+        _ = Task.Factory.StartNew(() =>
+        {
+            if (Directory.Exists(path))
+            {
+                Directory.Delete(path, true);
+            }
+        });
     }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -27,7 +27,7 @@
 namespace ASC.Data.Storage;
 
 [Transient]
-public class TenantQuotaController(TenantManager tenantManager, AuthContext authContext, SettingsManager settingsManager,
+public class TenantQuotaController(TenantManager tenantManager, AuthContext authContext, SettingsManager settingsManager, QuotaSocketManager quotaSocketManager,
         TenantQuotaFeatureChecker<MaxFileSizeFeature, long> maxFileSizeChecker,
         TenantQuotaFeatureChecker<MaxTotalSizeFeature, long> maxTotalSizeChecker)
     : IQuotaController
@@ -63,8 +63,12 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
         size = Math.Abs(size);
         if (UsedInQuota(dataTag))
         {
-            await QuotaUsedCheckAsync(size, quotaCheckFileSize, ownerId);
+            var result = await QuotaUsedCheckAsync(size, quotaCheckFileSize, ownerId);
             CurrentSize += size;
+            if (result == QuotaCheckResult.QuotaExceeded)
+            {
+                await quotaSocketManager.TenantQuotaExceededAsync();
+            }
         }
         await SetTenantQuotaRowAsync(module, domain, size, dataTag, true, ownerId != Guid.Empty ? ownerId : authContext.CurrentAccount.ID);
 
@@ -78,8 +82,12 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
         size = Math.Abs(size);
         if (UsedInQuota(dataTag))
         {
-            await QuotaUsedCheckAsync(size, quotaCheckFileSize, ownerId);
+            var result = await QuotaUsedCheckAsync(size, quotaCheckFileSize, ownerId);
             CurrentSize += size;
+            if (result == QuotaCheckResult.QuotaExceeded)
+            {
+                await quotaSocketManager.TenantQuotaExceededAsync();
+            }
         }
 
         await SetTenantQuotaRowAsync(module, domain, size, dataTag, true, Guid.Empty);
@@ -135,7 +143,7 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
         await QuotaUsedCheckAsync(size, true, ownedId);
     }
 
-    public async Task QuotaUsedCheckAsync(long size, bool quotaCheckFileSize, Guid ownerId)
+    public async Task<QuotaCheckResult> QuotaUsedCheckAsync(long size, bool quotaCheckFileSize, Guid ownerId)
     {
         var quota = await tenantManager.GetTenantQuotaAsync(_tenant);
         if (quota != null)
@@ -151,16 +159,31 @@ public class TenantQuotaController(TenantManager tenantManager, AuthContext auth
             }
         }
         var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
-        if (tenantQuotaSetting.EnableQuota)
+        if (!tenantQuotaSetting.EnableQuota)
         {
-            if (tenantQuotaSetting.Quota < CurrentSize + size)
-            {
-                throw new TenantQuotaException(maxTotalSizeChecker.GetExceptionMessage(tenantQuotaSetting.Quota));
-            }
+            return QuotaCheckResult.Ok;
         }
+
+        if ((CurrentSize + size > 2 * tenantQuotaSetting.Quota )
+                || CurrentSize > tenantQuotaSetting.Quota)
+        {
+            throw new TenantQuotaException(
+                maxTotalSizeChecker.GetExceptionMessage(tenantQuotaSetting.Quota));
+        }
+
+        if (CurrentSize + size > tenantQuotaSetting.Quota)
+        {
+            return QuotaCheckResult.QuotaExceeded;
+        }
+
+        return QuotaCheckResult.Ok;
     }
 
-
+    public enum QuotaCheckResult
+    {
+        Ok,
+        QuotaExceeded,
+    }
     private async Task SetTenantQuotaRowAsync(string module, string domain, long size, string dataTag, bool exchange, Guid userId)
     {
         await tenantManager.SetTenantQuotaRowAsync(

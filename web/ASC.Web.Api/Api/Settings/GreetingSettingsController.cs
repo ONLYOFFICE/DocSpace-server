@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -37,10 +37,10 @@ public class GreetingSettingsController(
     CoreBaseSettings coreBaseSettings)
     : BaseSettingsController(fusionCache, webItemManager)
 {
-    /// <summary>
+    /// <remarks>
     /// Returns the greeting settings for the current portal.
-    /// </summary>
-    /// <short>Get greeting settings</short>
+    /// </remarks>
+    /// <summary>Get greeting settings</summary>
     /// <path>api/2.0/settings/greetingsettings</path>
     [Tags("Settings / Greeting settings")]
     [SwaggerResponse(200, "Greeting settings: tenant name", typeof(object))]
@@ -51,10 +51,10 @@ public class GreetingSettingsController(
         return tenant.Name == "" ? Resource.PortalName : tenant.Name;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Checks if the greeting settings of the current portal are set to default or not.
-    /// </summary>
-    /// <short>Check the default greeting settings</short>
+    /// </remarks>
+    /// <summary>Check the default greeting settings</summary>
     /// <path>api/2.0/settings/greetingsettings/isdefault</path>
     [Tags("Settings / Greeting settings")]
     [SwaggerResponse(200, "Boolean value: true if the greeting settings of the current portal are set to default", typeof(bool))]
@@ -65,10 +65,10 @@ public class GreetingSettingsController(
         return tenant.Name == "";
     }
 
-    /// <summary>
+    /// <remarks>
     /// Saves the greeting settings specified in the request to the current portal.
-    /// </summary>
-    /// <short>Save the greeting settings</short>
+    /// </remarks>
+    /// <summary>Save the greeting settings</summary>
     /// <path>api/2.0/settings/greetingsettings</path>
     [Tags("Settings / Greeting settings")]
     [SwaggerResponse(200, "Message about saving greeting settings successfully", typeof(string))]
@@ -103,10 +103,10 @@ public class GreetingSettingsController(
         return Resource.SuccessfullySaveGreetingSettingsMessage;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Restores the current portal greeting settings.
-    /// </summary>
-    /// <short>Restore the greeting settings</short>
+    /// </remarks>
+    /// <summary>Restore the greeting settings</summary>
     /// <path>api/2.0/settings/greetingsettings/restore</path>
     [Tags("Settings / Greeting settings")]
     [SwaggerResponse(200, "Greeting settings: tenant name", typeof(string))]

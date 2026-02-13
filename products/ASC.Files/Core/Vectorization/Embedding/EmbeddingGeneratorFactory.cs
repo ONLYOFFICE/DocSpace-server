@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,13 +36,13 @@ public class EmbeddingGeneratorFactory(
     InstanceCrypto instanceCrypto,
     VectorizationGlobalSettings vectorizationGlobalSettings)
 {
-    public async Task<IEmbeddingGenerator<string, Embedding<float>>> CreateAsync()
+    public async Task<IEmbeddingGenerator<string, Embedding<float>>> CreateAsync(int providerId)
     {
         string url;
         string key;
         string modelId;
 
-        if (gateway.Configured)
+        if (providerId == AiGateway.ProviderId)
         {
             url = gateway.Url;
             key = await gateway.GetKeyAsync();

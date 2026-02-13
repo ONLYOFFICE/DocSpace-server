@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,9 +31,9 @@ using Constants = ASC.Core.Configuration.Constants;
 
 namespace ASC.People.Api;
 
-///<summary>
+///<remarks>
 /// Third-party API.
-///</summary>
+///</remarks>
 [DefaultRoute("thirdparty")]
 public class ThirdpartyController(
     ILogger<ThirdpartyController> logger,
@@ -63,10 +63,10 @@ public class ThirdpartyController(
 {
 
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of the available third-party accounts.
-    /// </summary>
-    /// <short>Get third-party accounts</short>
+    /// </remarks>
+    /// <summary>Get third-party accounts</summary>
     /// <path>api/2.0/people/thirdparty/providers</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
@@ -115,12 +115,12 @@ public class ThirdpartyController(
         return infos;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Links a third-party account specified in the request to the user profile.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Link a third-pary account
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/thirdparty/linkaccount</path>
     [Tags("People / Third-party accounts")]
     [SwaggerResponse(200, "Ok")]
@@ -150,12 +150,12 @@ public class ThirdpartyController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Creates a third-party account with the parameters specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Create a third-pary account
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/thirdparty/signup</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("People / Third-party accounts")]
@@ -304,12 +304,12 @@ public class ThirdpartyController(
         return ASC.Core.Users.Constants.LostUser;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Unlinks a third-party account specified in the request from the user profile.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Unlink a third-pary account
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/thirdparty/unlinkaccount</path>
     [Tags("People / Third-party accounts")]
     [HttpDelete("unlinkaccount")]

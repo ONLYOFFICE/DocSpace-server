@@ -120,6 +120,14 @@
   <data name="button_CheckReadyForms" xml:space="preserve">
     <value>Δείτε τις έτοιμες φόρμες</value>
   </data>
+  <data name="pattern_AgentRemoved" xml:space="preserve">
+    <value>h1. Ο $__AuthorName διέγραψε έναν πράκτορα AI
+
+Ο $__AuthorName διέγραψε τον πράκτορα AI: $RoomTitle</value>
+  </data>
+  <data name="pattern_AgentUpdateAccessForUser_push" xml:space="preserve">
+    <value>Ο ρόλος σας στον παράγοντα AI "$RoomTitle" έχει αλλάξει σε "$RoomRole"</value>
+  </data>
   <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
     <value>Δημιουργήθηκε ένα νέο έγγραφο "$DocumentTitle" στο δωμάτιο "$RoomTitle"</value>
   </data>
@@ -187,6 +195,9 @@ $OrangeButton
       Ειδοποίηση δραστηριότητας. Η φόρμα "$DocumentTitle":"$DocumentURL" συμπληρώθηκε πλήρως στο δωμάτιο: "$RoomTitle":"$RoomURL" – $__DateTime.
     </value>
   </data>
+  <data name="pattern_InvitedToAgent_push" xml:space="preserve">
+    <value>Έχετε προσκληθεί στον παράγοντα AI "$RoomTitle"</value>
+  </data>
   <data name="pattern_InvitedToRoom_push" xml:space="preserve">
     <value>Έχετε προσκληθεί στην αίθουσα "$RoomTitle"</value>
   </data>
@@ -231,6 +242,9 @@ $Message</value>
     <value>
       Ειδοποίηση δραστηριότητας. Σειρά σας! Απαιτείται η συμπλήρωση φόρμας: "$DocumentTitle":"$DocumentURL" στο δωμάτιο: "$RoomTitle":"$RoomURL" – $__DateTime.
     </value>
+  </data>
+  <data name="subject_AgentRemoved" xml:space="preserve">
+    <value>Ειδοποίηση DocSpace. Ο πράκτορας τεχνητής νοημοσύνης διαγράφηκε</value>
   </data>
   <data name="subject_DocuSignComplete" xml:space="preserve">
     <value>Έγγραφα. Όλοι οι υπογράφοντες συμπλήρωσαν το $DocumentTitle</value>

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -48,10 +48,10 @@ public class LicenseController(
 {
     private readonly ILogger _log = option.CreateLogger("ASC.Api");
 
-    /// <summary>
+    /// <remarks>
     /// Refreshes the portal license.
-    /// </summary>
-    /// <short>Refresh the license</short>
+    /// </remarks>
+    /// <summary>Refresh the license</summary>
     /// <path>api/2.0/settings/license/refresh</path>
     [Tags("Settings / License")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -68,12 +68,12 @@ public class LicenseController(
         return true;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Activates a license for the portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Activate a license
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/license/accept</path>
     [Tags("Settings / License")]
     [SwaggerResponse(200, "Message about the result of activating license", typeof(string))]
@@ -119,12 +119,12 @@ public class LicenseController(
         return "";
     }
 
-    /// <summary>
+    /// <remarks>
     /// Activates a trial license for the portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Activate a trial license
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/license/trial</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / License")]
@@ -187,12 +187,12 @@ public class LicenseController(
         return true;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Requests a portal license if necessary.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Request a license
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/license/required</path>
     /// <requiresAuthorization>false</requiresAuthorization>\
     [Tags("Settings / License")]
@@ -206,12 +206,12 @@ public class LicenseController(
     }
 
 
-    /// <summary>
+    /// <remarks>
     /// Uploads a portal license specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Upload a license
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/license</path>
     [Tags("Settings / License")]
     [SwaggerResponse(200, "License", typeof(string))]

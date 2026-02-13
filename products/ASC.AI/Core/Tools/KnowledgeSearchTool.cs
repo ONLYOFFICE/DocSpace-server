@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,7 +38,7 @@ public class KnowledgeSearchTool(KnowledgeSearchEngine searchEngine)
         Description = Description
     };
 
-    public AIFunction Init(int roomId)
+    public AIFunction Init(Folder<int> agent)
     {
         return AIFunctionFactory.Create(Function, FactoryOptions);
         
@@ -46,7 +46,7 @@ public class KnowledgeSearchTool(KnowledgeSearchEngine searchEngine)
         {
             try
             {
-                var results = await searchEngine.SearchAsync(roomId, query);
+                var results = await searchEngine.SearchAsync(agent, query);
                 
                 return new ToolResponse<List<KnowledgeSearchResult>>
                 {

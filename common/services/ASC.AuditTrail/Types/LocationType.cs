@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,27 +32,27 @@ namespace ASC.AuditTrail.Types;
 [EnumExtensions]
 public enum LocationType
 {
-    [SwaggerEnum("None")]
+    [Description("None")]
     None = 0,
 
-    [SwaggerEnum("Files")]
+    [Description("Files")]
     Files = 1,
 
-    [SwaggerEnum("Folders")]
+    [Description("Folders")]
     Folders = 2,
 
-    [SwaggerEnum("Documents settings")]
+    [Description("Documents settings")]
     DocumentsSettings = 3,
 
-    [SwaggerEnum("Rooms")]
+    [Description("Rooms")]
     Rooms = 27,
 
-    [SwaggerEnum("Settings")]
+    [Description("Settings")]
     Settings = 29,
 
-    [SwaggerEnum("Contacts")]
+    [Description("Contacts")]
     Contacts = 30,
     
-    [SwaggerEnum("Agents")]
+    [Description("Agents")]
     Agents = 31
 }

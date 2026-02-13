@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -65,6 +65,11 @@ public class FileDto<T> : FileEntryDto<T>
     /// The current status of the file.
     /// </summary>
     public FileStatus FileStatus { get; set; }
+
+    /// <summary>
+    /// The list of users editing the file.
+    /// </summary>
+    public Dictionary<Guid, string> EditingBy { get; set; }
 
     /// <summary>
     /// Specifies if the file is muted or not.
@@ -219,6 +224,7 @@ public class FileDtoHelper(
     FileUtility fileUtility,
     FileSharingHelper fileSharingHelper,
     BadgesSettingsHelper badgesSettingsHelper,
+    FileHelper fileHelper,
     FilesSettingsHelper filesSettingsHelper,
     FileDateTime fileDateTime,
     ExternalShare externalShare,
@@ -232,19 +238,14 @@ public class FileDtoHelper(
 {
     private readonly EmployeeDtoHelper _employeeWrapperHelper = employeeWrapperHelper;
 
-    public async Task<FileDto<T>> GetAsync<T>(File<T> file, string order = null, TimeSpan? expiration = null, IFolder contextFolder = null, bool? aiReady = null)
+    public async Task<FileDto<T>> GetAsync<T>(File<T> file, string order = null, TimeSpan? expiration = null, IFolder contextFolder = null, AiStatus aiStatus = null)
     {
-        Task<bool> aiReadyTask = null;
-        if (aiReady == null)
-        {
-            aiReadyTask = aiAccessibility.IsAiEnabledAsync();
-        }
-        
         var result = await GetFileWrapperAsync(file, order, expiration, contextFolder);
         
         result.ViewAccessibility = await fileUtility.GetAccessibility(file);
         result.AvailableShareRights =  (await _fileSecurity.GetAccesses(file)).ToDictionary(r => r.Key, r => r.Value.Select(v => v.ToStringFast()));
         result.VectorizationStatus = file.VectorizationStatus;
+        aiStatus ??= await aiAccessibility.GetStatusAsync();
         
         if (contextFolder == null)
         {
@@ -378,16 +379,11 @@ public class FileDtoHelper(
             }
             catch (Exception)
             {
+                // ignored
             }
-
         }
         
-        if (aiReadyTask != null)
-        {
-            aiReady = await aiReadyTask;
-        }
-        
-        if (aiReady is false)
+        if (aiStatus is { Enabled: true})
         {
             if (result.Security.ContainsKey(FileSecurity.FilesSecurityActions.AskAi))
             {
@@ -405,22 +401,27 @@ public class FileDtoHelper(
 
         var getFileTask = GetAsync<FileDto<T>, T>(file);
         var badgesTask = badgesSettingsHelper.GetEnabledForCurrentUserAsync();
-        var fileStatusTask = file.GetFileStatus();
+        var fileStateTask = fileHelper.GetFileState(file);
 
         var extension = FileUtility.GetFileExtension(file.Title);
         var fileType = FileUtility.GetFileTypeByExtention(extension);
 
-        await Task.WhenAll(getFileTask, badgesTask, fileStatusTask);
+        await Task.WhenAll(getFileTask, badgesTask, fileStateTask);
 
         var result = getFileTask.Result;
         var isEnabledBadges = badgesTask.Result;
+        var fileState = fileStateTask.Result;
+
+        file.SetFileState(fileState);
+
         result.FolderId = file.ParentId;
         result.FileExst = extension;
         result.FileType = fileType;
         result.Version = file.Version;
         result.VersionGroup = file.VersionGroup;
         result.ContentLength = file.ContentLengthString;
-        result.FileStatus = fileStatusTask.Result;
+        result.FileStatus = file.FileStatus;
+        result.EditingBy = file.EditingBy;
         result.Mute = !isEnabledBadges;
         result.PureContentLength = file.ContentLength.NullIfDefault();
         result.Comment = file.Comment;
@@ -457,7 +458,7 @@ public class FileDtoHelper(
             var currentFolder = currentFolderTask.Result;
 
             Folder<T> currentRoom;
-            if (!currentFolder.IsRoom && file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates)
+            if (!currentFolder.IsRoom && file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates or FolderType.DefaultTemplates)
             {
                 currentRoom = await DocSpaceHelper.GetParentRoom(file, folderDao) ?? currentFolder;
             }
@@ -616,7 +617,7 @@ public class FileDtoHelper(
                 }
             }
             
-            result.ViewUrl = _externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(file.DownloadUrl), result.RequestToken);
+            result.ViewUrl = _externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileDownloadUrl(file.Id)), result.RequestToken);
             result.WebUrl = _externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version, externalMediaAccess)), result.RequestToken);
             result.ThumbnailStatus = file.ThumbnailStatus;
             

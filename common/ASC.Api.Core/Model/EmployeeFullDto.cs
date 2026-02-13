@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -226,7 +226,7 @@ public class EmployeeFullDto : EmployeeDto
     /// <summary>
     /// Specifies if the user has a personal folder or not.
     /// </summary>
-    public bool HasPersonalFolder { get; set; }
+    public bool? HasPersonalFolder { get; set; }
 
     /// <summary>
     /// Indicates whether the user has enabled two-factor authentication (TFA) using an authentication app.

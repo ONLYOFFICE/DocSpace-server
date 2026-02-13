@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -115,7 +115,7 @@ internal class LinkDao<T>(
             .ToAsyncEnumerable()
             .Select(async (T x, CancellationToken _) => await mapping.MappingIdAsync(x))
             .ToListAsync();
-        var source = mappedIds.Select(x => x.ToString());
+        var source = mappedIds.Select(x => x.Item1);
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 

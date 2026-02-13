@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,6 +25,17 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 namespace ASC.Web.Api.ApiModels.ResponseDto;
+
+/// <summary>
+/// The wallet service information.
+/// </summary>
+public class WalletServiceDto : QuotaDto
+{
+    /// <summary>
+    /// The list of inner services.
+    /// </summary>
+    public List<QuotaDto> InnerServices { get; set; }
+}
 
 /// <summary>
 /// The quota information.
@@ -182,4 +193,10 @@ public class FeatureUsedDto
     /// The used space title.
     /// </summary>
     public string Title { get; set; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class WalletServiceDtoMapper
+{
+    public static partial WalletServiceDto MapToWalletServiceDto(this QuotaDto source);
 }

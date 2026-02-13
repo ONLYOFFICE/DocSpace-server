@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -102,7 +102,11 @@ public class HistoryService(
         MessageAction.FormCompletelyFilled,
         MessageAction.FormStopped,
         MessageAction.AgentCreated,
-        MessageAction.AgentRenamed
+        MessageAction.AgentRenamed,
+        MessageAction.FileSavedButUserQuotaExceeded,
+        MessageAction.FileNotSavedDueToUserQuota,
+        MessageAction.FileSavedButRoomQuotaExceeded,
+        MessageAction.FileNotSavedDueToRoomQuota
     ];
 
     private static HashSet<int> FilterFolderActions => [

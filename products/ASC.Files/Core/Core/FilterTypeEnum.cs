@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,66 +31,66 @@ namespace ASC.Files.Core;
 /// </summary>
 public enum FilterType
 {
-    [SwaggerEnum("None")]
+    [Description("None")]
     [EnumMember] None = 0,
 
-    [SwaggerEnum("Files  only")]
+    [Description("Files  only")]
     [EnumMember] FilesOnly = 1,
 
-    [SwaggerEnum("Folders only")]
+    [Description("Folders only")]
     [EnumMember] FoldersOnly = 2,
 
-    [SwaggerEnum("Documents only")]
+    [Description("Documents only")]
     [EnumMember] DocumentsOnly = 3,
 
-    [SwaggerEnum("Presentations only")]
+    [Description("Presentations only")]
     [EnumMember] PresentationsOnly = 4,
 
-    [SwaggerEnum("Spreadsheets only")]
+    [Description("Spreadsheets only")]
     [EnumMember] SpreadsheetsOnly = 5,
 
-    [SwaggerEnum("Images only")]
+    [Description("Images only")]
     [EnumMember] ImagesOnly = 7,
 
-    [SwaggerEnum("By user")]
+    [Description("By user")]
     [EnumMember] ByUser = 8,
 
-    [SwaggerEnum("By department")]
+    [Description("By department")]
     [EnumMember] ByDepartment = 9,
 
-    [SwaggerEnum("Archive only")]
+    [Description("Archive only")]
     [EnumMember] ArchiveOnly = 10,
 
-    [SwaggerEnum("By extension")]
+    [Description("By extension")]
     [EnumMember] ByExtension = 11,
 
-    [SwaggerEnum("Media only")]
+    [Description("Media only")]
     [EnumMember] MediaOnly = 12,
 
-    [SwaggerEnum("Filling forms rooms")]
+    [Description("Filling forms rooms")]
     [EnumMember] FillingFormsRooms = 13,
 
-    [SwaggerEnum("Editing rooms")]
+    [Description("Editing rooms")]
     [EnumMember] EditingRooms = 14,
 
-    [SwaggerEnum("Custom rooms")]
+    [Description("Custom rooms")]
     [EnumMember] CustomRooms = 17,
 
-    [SwaggerEnum("Public rooms")]
+    [Description("Public rooms")]
     [EnumMember] PublicRooms = 20,
 
-    [SwaggerEnum("Pdf")]
+    [Description("Pdf")]
     [EnumMember] Pdf = 22,
 
-    [SwaggerEnum("Pdf form")]
+    [Description("Pdf form")]
     [EnumMember] PdfForm = 23,
 
-    [SwaggerEnum("Virtual data rooms")]
+    [Description("Virtual data rooms")]
     [EnumMember] VirtualDataRooms = 24,
 
-    [SwaggerEnum("Diagrams only")]
+    [Description("Diagrams only")]
     [EnumMember] DiagramsOnly = 25,
     
-    [SwaggerEnum("Ai rooms")]
+    [Description("Ai rooms")]
     [EnumMember] AiRooms = 26
 }

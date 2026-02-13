@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -482,7 +482,7 @@ public class TariffService(
 
         if (billingClient.Configured)
         {
-            var allQuotas = (await quotaService.GetTenantQuotasAsync()).Where(q => !string.IsNullOrEmpty(q.ProductId) && q.Visible).ToList();
+            var allQuotas = (await quotaService.GetTenantQuotasAsync()).Where(q => !string.IsNullOrEmpty(q.ProductId) && q.Visible && !q.Wallet).ToList();
             newQuotas = quantity.Select(item => allQuotas.Find(q => q.Name == item.Key)).ToList();
 
             TenantQuota updatedQuota = null;

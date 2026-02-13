@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,13 +32,13 @@ namespace ASC.Web.Files.Services.DocumentService;
 [EnumExtensions]
 public enum EditorType
 {
-    [SwaggerEnum(Description = "Desktop")]
+    [Description("Desktop")]
     Desktop,
 
-    [SwaggerEnum(Description = "Mobile")]
+    [Description("Mobile")]
     Mobile,
 
-    [SwaggerEnum(Description = "Embedded")]
+    [Description("Embedded")]
     Embedded
 }
 
@@ -104,10 +104,10 @@ public class CoEditingConfig
 [EnumExtensions]
 public enum CoEditingConfigMode
 {
-    [SwaggerEnum("Fast")]
+    [Description("Fast")]
     Fast,
 
-    [SwaggerEnum("Strict")]
+    [Description("Strict")]
     Strict
 }
 

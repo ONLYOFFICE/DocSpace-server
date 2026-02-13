@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,9 +26,9 @@
 
 namespace ASC.People.Api;
 
-///<summary>
+///<remarks>
 /// Reassign API.
-///</summary>
+///</remarks>
 [DefaultRoute("reassign")]
 public class ReassignController(
     PermissionContext permissionContext,
@@ -41,10 +41,10 @@ public class ReassignController(
     FileStorageService fileStorageService)
     : ApiControllerBase
 {
-    /// <summary>
+    /// <remarks>
     /// Returns the progress of the started data reassignment for the user with the ID specified in the request.
-    /// </summary>
-    /// <short>Get the reassignment progress</short>
+    /// </remarks>
+    /// <summary>Get the reassignment progress</summary>
     /// <path>api/2.0/people/reassign/progress/{userid}</path>
     [Tags("People / User data")]
     [SwaggerResponse(200, "Reassignment progress", typeof(TaskProgressResponseDto))]
@@ -54,15 +54,22 @@ public class ReassignController(
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
         var tenant = tenantManager.GetCurrentTenant();
+        var userType = await userManager.GetUserTypeAsync(inDto.UserId);
+
+        if (userType is EmployeeType.DocSpaceAdmin && !securityContext.CurrentAccount.ID.Equals(tenant.OwnerId))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
         var progressItem = await queueWorkerReassign.GetProgressItemStatus(tenant.Id, inDto.UserId);
 
         return TaskProgressResponseDto.Get(progressItem);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Starts the data reassignment for the user with the ID specified in the request.
-    /// </summary>
-    /// <short>Start the data reassignment</short>
+    /// </remarks>
+    /// <summary>Start the data reassignment</summary>
     /// <path>api/2.0/people/reassign/start</path>
     [Tags("People / User data")]
     [SwaggerResponse(200, "Reassignment progress", typeof(TaskProgressResponseDto))]
@@ -102,10 +109,10 @@ public class ReassignController(
         return TaskProgressResponseDto.Get(progressItem);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Terminates the data reassignment for the user with the ID specified in the request.
-    /// </summary>
-    /// <short>Terminate the data reassignment</short>
+    /// </remarks>
+    /// <summary>Terminate the data reassignment</summary>
     /// <path>api/2.0/people/reassign/terminate</path>
     [Tags("People / User data")]
     [SwaggerResponse(200, "Reassignment progress", typeof(TaskProgressResponseDto))]
@@ -115,6 +122,13 @@ public class ReassignController(
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
         var tenant = tenantManager.GetCurrentTenant();
+        var userType = await userManager.GetUserTypeAsync(inDto.UserId);
+
+        if (userType is EmployeeType.DocSpaceAdmin && !securityContext.CurrentAccount.ID.Equals(tenant.OwnerId))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
         var progressItem = await queueWorkerReassign.GetProgressItemStatus(tenant.Id, inDto.UserId);
 
         if (progressItem != null)
@@ -128,10 +142,10 @@ public class ReassignController(
         return TaskProgressResponseDto.Get(progressItem);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Checks whether the reassignment of rooms and shared files is required.
-    /// </summary>
-    /// <short>Check data for reassignment need</short>
+    /// </remarks>
+    /// <summary>Check data for reassignment need</summary>
     /// <path>api/2.0/people/reassign/necessary</path>
     [Tags("People / User data")]
     [SwaggerResponse(200, "Boolean value: true if neccessary reassign", typeof(bool))]

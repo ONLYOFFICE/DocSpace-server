@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,18 +31,18 @@ namespace ASC.Common.Threading;
 /// </summary>
 public enum DistributedTaskStatus
 {
-    [SwaggerEnum("Created")]
+    [Description("Created")]
     Created,
 
-    [SwaggerEnum("Running")]
+    [Description("Running")]
     Running,
 
-    [SwaggerEnum("Completed")]
+    [Description("Completed")]
     Completed,
 
-    [SwaggerEnum("Canceled")]
+    [Description("Canceled")]
     Canceled,
 
-    [SwaggerEnum("Failted")]
+    [Description("Failted")]
     Failted
 }

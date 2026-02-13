@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -45,6 +45,7 @@ public class ChatController(
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
     
+    [Tags("AI / Chat")]
     [HttpPost("rooms/{roomId}/chats")]
     public async Task<IActionResult> StartNewChatAsync(StartNewChatRequestDto inDto)
     {
@@ -58,6 +59,7 @@ public class ChatController(
         return Ok();
     }
     
+    [Tags("AI / Chat")]
     [HttpPost("chats/{chatId}/messages")]
     public async Task<IActionResult> ContinueChatAsync(ContinueChatRequestDto inDto)
     {
@@ -71,6 +73,7 @@ public class ChatController(
         return Ok();
     }
 
+    [Tags("AI / Chat")]
     [HttpPut("chats/{chatId}")]
     public async Task<ChatDto> RenameChatAsync(RenameChatRequestDto inDto)
     {
@@ -79,6 +82,7 @@ public class ChatController(
         return await chat.ToDtoAsync(employeeDtoHelper, apiDateTimeHelper);
     }
 
+    [Tags("AI / Chat")]
     [HttpGet("chats/{chatId}")]
     public async Task<ChatDto> GetChatAsync(GetChatRequestDto inDto)
     {
@@ -86,6 +90,7 @@ public class ChatController(
         return await chat.ToDtoAsync(employeeDtoHelper, apiDateTimeHelper);
     }
 
+    [Tags("AI / Chat")]
     [HttpGet("rooms/{roomId}/chats")]
     public async Task<List<ChatDto>> GetChatsAsync(GetChatsRequestDto inDto)
     {
@@ -100,6 +105,7 @@ public class ChatController(
         return chatsDto;       
     }
     
+    [Tags("AI / Chat")]
     [HttpGet("chats/{chatId}/messages")]
     public async Task<List<MessageDto>> GetMessagesAsync(GetMessagesRequestDto inDto)
     {
@@ -113,6 +119,7 @@ public class ChatController(
         return messagesDto;
     }
 
+    [Tags("AI / Chat")]
     [HttpDelete("chats/{chatId}")]
     public async Task<NoContentResult> DeleteChatAsync(DeleteChatRequestDto inDto)
     {
@@ -120,12 +127,14 @@ public class ChatController(
         return NoContent();
     }
     
+    [Tags("AI / Chat")]
     [HttpPost("chats/{chatId}/messages/export")]
     public async Task ExportChatAsync(ExportChatRequestDto<int> inDto)
     {
         await exporter.ExportMessagesAsync(inDto.Body.FolderId, inDto.Body.Title, inDto.ChatId);
     }
 
+    [Tags("AI / Chat")]
     [HttpGet("chats/models")]
     public async Task<IEnumerable<ModelDto>> GetChatModelsAsync(GetChatModelsRequestDto inDto)
     {
@@ -133,12 +142,14 @@ public class ChatController(
         return models.Select(x => x.MapToDto()).ToList();
     }
 
+    [Tags("AI / Chat")]
     [HttpPost("chats/tool-permissions/{callId}/decision")]
     public async Task ProvidePermissionAsync(ToolDecisionRequestDto inDto)
     {
         await mcpService.ProvideMcpToolPermissionAsync(inDto.CallId, inDto.Body.Decision);
     }
 
+    [Tags("AI / Chat")]
     [HttpPut("rooms/{roomId}/chats/config")]
     public async Task<UserChatSettingsDto> SetUserChatsSettingsAsync(SetUserChatsSettingsRequestDto inDto)
     {
@@ -146,6 +157,7 @@ public class ChatController(
         return settings.MapToDto();
     }
     
+    [Tags("AI / Chat")]
     [HttpGet("rooms/{roomId}/chats/config")]
     public async Task<UserChatSettingsDto> GetUserChatsSettingsAsync(GetUserChatsSettingsRequestDto inDto)
     {

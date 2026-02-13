@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,27 +31,27 @@ namespace ASC.Files.Core.VirtualRooms;
 /// </summary>
 public enum SearchArea
 {
-    [SwaggerEnum("Active")]
+    [Description("Active")]
     Active,
 
-    [SwaggerEnum("Archive")]
+    [Description("Archive")]
     Archive,
 
-    [SwaggerEnum("Any")]
+    [Description("Any")]
     Any,
 
-    [SwaggerEnum("Recent by links")]
+    [Description("Recent by links")]
     RecentByLinks,
 
-    [SwaggerEnum("Template")]
+    [Description("Template")]
     Templates,
     
-    [SwaggerEnum("Knowledge")]
+    [Description("Knowledge")]
     Knowledge,
     
-    [SwaggerEnum("Result storage")]
+    [Description("Result storage")]
     ResultStorage,
 
-    [SwaggerEnum("AiAgents")]
+    [Description("AiAgents")]
     AiAgents
 }

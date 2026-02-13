@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,22 +31,22 @@ namespace ASC.Data.Backup.Contracts;
 /// </summary>
 public enum BackupStorageType
 {
-    [SwaggerEnum(Description = "Documents")]
+    [Description("Documents")]
     Documents = 0,
 
-    [SwaggerEnum(Description = "Thridparty documents")]
+    [Description("Thridparty documents")]
     ThridpartyDocuments = 1,
 
-    [SwaggerEnum(Description = "Custom cloud")]
+    [Description("Custom cloud")]
     CustomCloud = 2,
 
-    [SwaggerEnum(Description = "Local")]
+    [Description("Local")]
     Local = 3,
 
-    [SwaggerEnum(Description = "Data store")]
+    [Description("Data store")]
     DataStore = 4,
 
-    [SwaggerEnum(Description = "Thirdparty consumer")]
+    [Description("Thirdparty consumer")]
     ThirdPartyConsumer = 5
 }
 

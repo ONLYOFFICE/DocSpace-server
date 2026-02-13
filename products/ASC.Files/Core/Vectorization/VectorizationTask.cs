@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -107,21 +107,21 @@ public class VectorizationTask : DistributedTaskProgress
             {
                 throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
             }
-
-            await collection.EnsureCollectionExistsAsync(CancellationToken);
-            var embeddingGenerator = await generatorFactory.CreateAsync();
-
+            
             var parents = await folderDao.GetParentFoldersAsync(file.ParentId).ToListAsync();
             if (!parents.Exists(x => x.FolderType == FolderType.Knowledge))
             {
                 throw new InvalidOperationException("File is not in knowledge folder");
             }
-
+            
             var room = parents.FirstOrDefault(x => x.FolderType == FolderType.AiRoom);
             if (room == null)
             {
                 throw new InvalidOperationException("File is not in ai room");
             }
+
+            await collection.EnsureCollectionExistsAsync(CancellationToken);
+            var embeddingGenerator = await generatorFactory.CreateAsync(room.SettingsChatProviderId);
 
             var textChunks = await fileProcessor.GetTextChunksAsync(file, splitterSettings);
 

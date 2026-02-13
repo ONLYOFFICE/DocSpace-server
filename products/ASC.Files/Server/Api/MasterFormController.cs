@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -42,10 +42,10 @@ public abstract class MasterFormController<T>(FileStorageService fileStorageServ
         FileDtoHelper fileDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
-    /// <summary>
+    /// <remarks>
     /// Checks if the current file is a form draft which can be filled out.
-    /// </summary>
-    /// <short>Check the form draft filling</short>
+    /// </remarks>
+    /// <summary>Check the form draft filling</summary>
     /// <path>api/2.0/files/masterform/{fileId}/checkfillformdraft</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]

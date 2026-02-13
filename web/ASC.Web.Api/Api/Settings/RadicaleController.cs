@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -41,12 +41,12 @@ public class RadicaleController(
     WebItemManager webItemManager)
     : BaseSettingsController(fusionCache, webItemManager)
 {
-    /// <summary>
+    /// <remarks>
     /// Creates a CardDav address book for a user with all portal users and returns a link to this address book.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the CardDav address book URL
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/carddavurl</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / CardDav address book")]
@@ -112,12 +112,12 @@ public class RadicaleController(
 
     }
 
-    /// <summary>
+    /// <remarks>
     /// Deletes a CardDav address book with all portal users.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Delete a CardDav address book
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/deletebook</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / CardDav address book")]

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,12 +31,12 @@ namespace ASC.Core;
 /// </summary>
 public enum QuotaFilter
 {
-    [SwaggerEnum("All")]
+    [Description("All")]
     All = 0,
 
-    [SwaggerEnum("Default")]
+    [Description("Default")]
     Default = 1,
 
-    [SwaggerEnum("Custom")]
+    [Description("Custom")]
     Custom = 2
 }

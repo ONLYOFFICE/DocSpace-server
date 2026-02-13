@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,22 +31,22 @@ namespace ASC.Files.Core;
 /// </summary>
 public enum DateToAutoCleanUp
 {
-    [SwaggerEnum(Description = "One week")]
+    [Description("One week")]
     OneWeek = 1,
 
-    [SwaggerEnum(Description = "Two weeks")]
+    [Description("Two weeks")]
     TwoWeeks,
 
-    [SwaggerEnum(Description = "One month")]
+    [Description("One month")]
     OneMonth,
 
-    [SwaggerEnum(Description = "Thirty days")]
+    [Description("Thirty days")]
     ThirtyDays,
 
-    [SwaggerEnum(Description = "Two months")]
+    [Description("Two months")]
     TwoMonths,
 
-    [SwaggerEnum(Description = "Three months")]
+    [Description("Three months")]
     ThreeMonths
 }
 

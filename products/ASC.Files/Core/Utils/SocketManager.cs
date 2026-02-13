@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -44,10 +44,10 @@ public class SocketManager(
 {
     protected override string Hub => "files";
 
-    public async Task StartEditAsync<T>(T fileId)
+    public async Task StartEditAsync<T>(T fileId, Dictionary<Guid, string> editingBy)
     {
         var room = FileRoom(fileId);
-        await MakeRequest("start-edit", new { room, fileId });
+        await MakeRequest("start-edit", new { room, fileId, editingBy });
     }
 
     public async Task StopEditAsync<T>(T fileId)

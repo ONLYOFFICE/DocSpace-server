@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -38,15 +38,15 @@ public class TipsController(
     IFusionCache fusionCache,
     IHttpClientFactory clientFactory,
     TenantManager tenantManager,
-    Actions actions)
+    IServiceProvider serviceProvider)
     : BaseSettingsController(fusionCache, webItemManager)
 {
     private readonly ILogger _log = option.CreateLogger("ASC.Api");
 
-    /// <summary>
+    /// <remarks>
     /// Updates the user interface tip settings with the parameters specified in the request.
-    /// </summary>
-    /// <short>Update the tip settings</short>
+    /// </remarks>
+    /// <summary>Update the tip settings</summary>
     /// <path>api/2.0/settings/tips</path>
     [Tags("Settings / Tips")]
     [SwaggerResponse(200, "Updated tip settings", typeof(TipsSettings))]
@@ -87,10 +87,10 @@ public class TipsController(
         return settings;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Updates the tip subscription.
-    /// </summary>
-    /// <short>Update the tip subscription</short>
+    /// </remarks>
+    /// <summary>Update the tip subscription</summary>
     /// <path>api/2.0/settings/tips/change/subscription</path>
     [Tags("Settings / Tips")]
     [SwaggerResponse(200, "Boolean value: true if the user is subscribed to the tips", typeof(bool))]
@@ -99,23 +99,23 @@ public class TipsController(
     {
         var recipient = await studioNotifyHelper.ToRecipientAsync(authContext.CurrentAccount.ID);
 
-        var isSubscribe = await studioNotifyHelper.IsSubscribedToNotifyAsync(recipient, actions.PeriodicNotify);
+        var isSubscribe = await studioNotifyHelper.IsSubscribedToNotifyAsync(recipient,  serviceProvider.GetService<PeriodicNotifyAction>());
 
-        await studioNotifyHelper.SubscribeToNotifyAsync(recipient, actions.PeriodicNotify, !isSubscribe);
+        await studioNotifyHelper.SubscribeToNotifyAsync(recipient, serviceProvider.GetService<PeriodicNotifyAction>(), !isSubscribe);
 
         return !isSubscribe;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Checks if the current user is subscribed to the tips or not.
-    /// </summary>
-    /// <short>Check the tip subscription</short>
+    /// </remarks>
+    /// <summary>Check the tip subscription</summary>
     /// <path>api/2.0/settings/tips/subscription</path>
     [Tags("Settings / Tips")]
     [SwaggerResponse(200, "Boolean value: true if the user is subscribed to the tips", typeof(bool))]
     [HttpGet("subscription")]
     public async Task<bool> GetTipsSubscription()
     {
-        return await studioNotifyHelper.IsSubscribedToNotifyAsync(authContext.CurrentAccount.ID, actions.PeriodicNotify);
+        return await studioNotifyHelper.IsSubscribedToNotifyAsync(authContext.CurrentAccount.ID, serviceProvider.GetService<PeriodicNotifyAction>());
     }
 }

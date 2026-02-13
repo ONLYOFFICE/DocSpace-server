@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,7 +33,7 @@ public class KnowledgeSearchEngine(
     EmbeddingGeneratorFactory embeddingGeneratorFactory,
     FilesLinkUtility filesLinkUtility)
 {
-    public async Task<List<KnowledgeSearchResult>> SearchAsync(int roomId, string query)
+    public async Task<List<KnowledgeSearchResult>> SearchAsync(Folder<int> agent, string query)
     {
         query = query.Trim();
         
@@ -41,10 +41,11 @@ public class KnowledgeSearchEngine(
         
         var tenantId = tenantManager.GetCurrentTenantId();
 
-        var generator = await embeddingGeneratorFactory.CreateAsync();
+        var generator = await embeddingGeneratorFactory.CreateAsync(agent.SettingsChatProviderId);
         var embedding = await generator.GenerateAsync(query);
 
         var collection = vectorStore.GetCollection<Chunk>(Chunk.IndexName, null);
+        var roomId = agent.Id;
         var searchOptions = new VectorSearchOptions<Chunk>
         {
             Filter = x => x.TenantId == tenantId && x.RoomId == roomId

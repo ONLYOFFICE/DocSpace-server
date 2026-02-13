@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -43,6 +43,11 @@ public class HostedSolution(ITenantService tenantService,
     public async Task<List<Tenant>> GetTenantsAsync(DateTime from)
     {
         return (await tenantService.GetTenantsAsync(from)).ToList();
+    }
+
+    public async Task<List<Tenant>> GetTenantsAsync(List<int> ids)
+    {
+        return (await tenantService.GetTenantsAsync(ids)).ToList();
     }
 
     public async Task<List<Tenant>> FindTenantsAsync(string login, string passwordHash = null)

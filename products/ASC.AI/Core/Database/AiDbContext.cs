@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,6 +31,7 @@ public partial class AiDbContext(DbContextOptions<AiDbContext> options) : BaseDb
     public DbSet<DbChat> Chats { get; set; }
     public DbSet<DbChatMessage> Messages { get; set; }
     public DbSet<DbAiProvider> Providers { get; set; }
+    public DbSet<DbDefaultAiProvider> DefaultProviders { get; set; }
     public DbSet<DbRoomSettings> RoomSettings { get; set; }
     public DbSet<DbMcpServer> McpServers { get; set; }
     public DbSet<DbMcpServerState> McpServerStates { get; set; }
@@ -46,6 +47,7 @@ public partial class AiDbContext(DbContextOptions<AiDbContext> options) : BaseDb
             .AddDbFolder()
             .AddDbRoomSettings()
             .AddDbAiProviders()
+            .AddDbDefaultAiProviders()
             .AddDbChats()
             .AddDbChatsMessages()
             .AddDbMcpServers()

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -40,9 +40,9 @@ public class SettingsController(CommonMethods commonMethods,
 
     #region For TEST api
 
-    /// <summary>
+    /// <remarks>
     /// Test API.
-    /// </summary>
+    /// </remarks>
     /// <path>apisystem/settings/test</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [SwaggerResponse(200, "Settings api works")]
@@ -60,12 +60,12 @@ public class SettingsController(CommonMethods commonMethods,
 
     #region API methods
 
-    /// <summary>
+    /// <remarks>
     /// Returns the portal settings by the parameters specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get settings
-    /// </short>
+    /// </summary>
     /// <path>apisystem/settings/get</path>
     [Tags("Settings")]
     [SwaggerResponse(200, "Settings", typeof(IActionResult))]
@@ -96,12 +96,12 @@ public class SettingsController(CommonMethods commonMethods,
         });
     }
 
-    /// <summary>
+    /// <remarks>
     /// Saves the settings specified in the request for the current portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Save settings
-    /// </short>
+    /// </summary>
     /// <path>apisystem/settings/save</path>
     [Tags("Settings")]
     [SwaggerResponse(200, "Settings", typeof(IActionResult))]
@@ -157,12 +157,12 @@ public class SettingsController(CommonMethods commonMethods,
         });
     }
 
-    /// <summary>
+    /// <remarks>
     /// Checks the domain with the name specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Check the domain name
-    /// </short>
+    /// </summary>
     /// <path>apisystem/settings/checkdomain</path>
     [Tags("Settings")]
     [SwaggerResponse(200, "True if success", typeof(IActionResult))]

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,40 +28,46 @@ using ASC.Files.Core.Mapping;
 
 namespace ASC.Files.Core;
 
+
+/// <summary>
+/// The file state.
+/// </summary>
+public record FileState(FileStatus FileStatus, Dictionary<Guid, string> EditingBy);
+
 /// <summary>
 /// The file status.
 /// </summary>
 [Flags]
 public enum FileStatus
 {
-    [SwaggerEnum(Description = "None")]
+    [Description("None")]
     None = 0x0,
 
-    [SwaggerEnum(Description = "Is editing")]
+    [Description("Is editing")]
     IsEditing = 0x1,
 
-    [SwaggerEnum(Description = "Is new")]
+    [Description("Is new")]
     IsNew = 0x2,
 
-    [SwaggerEnum(Description = "Is converting")]
+    [Description("Is converting")]
     IsConverting = 0x4,
 
-    [SwaggerEnum(Description = "Is original")]
+    [Description("Is original")]
     IsOriginal = 0x8,
 
-    [SwaggerEnum(Description = "Is editing alone")]
+    [Description("Is editing alone")]
     IsEditingAlone = 0x10,
 
-    [SwaggerEnum(Description = "Is favorite")]
+    [Description("Is favorite")]
     IsFavorite = 0x20,
 
-    [SwaggerEnum(Description = "Is template")]
+    [Description("Is template")]
     IsTemplate = 0x40,
 
-    [SwaggerEnum(Description = "Is fill form draft")]
+    [Description("Is fill form draft")]
     IsFillFormDraft = 0x80,
 
-    [SwaggerEnum(Description = "Is completed form")]
+    [Description("Is completed form")]
     IsCompletedForm = 0x100
 }
 
@@ -74,6 +80,7 @@ public enum FileStatus
 public class File<T> : FileEntry<T>
 {
     private FileStatus _status;
+    private Dictionary<Guid, string> _editingBy;
 
     [JsonConstructor]
     protected File()
@@ -95,6 +102,13 @@ public class File<T> : FileEntry<T>
         get => _status;
         set => _status = value;
     }
+
+    public Dictionary<Guid, string> EditingBy
+    {
+        get => _editingBy;
+        set => _editingBy = value;
+    }
+
     /// <summary>
     /// The file version.
     /// </summary>
@@ -154,18 +168,13 @@ public class File<T> : FileEntry<T>
         }
     }
     /// <summary>
-    /// Returns the file status.
+    /// Set the file state.
     /// </summary>
-    public async Task<FileStatus> GetFileStatus()
+    public void SetFileState(FileState fileState)
     {
-        _status = await ServiceProvider.GetService<FileHelper>().GetFileStatus(this, _status);
-        return _status;
+        _status = fileState.FileStatus;
+        _editingBy = fileState.EditingBy;
     }
-
-    /// <summary>
-    /// Sets the file status.
-    /// </summary>
-    public void SetFileStatus(FileStatus value) => _status = value;
 
     /// <summary>
     /// Sets the file unique ID.
@@ -180,12 +189,6 @@ public class File<T> : FileEntry<T>
         string.IsNullOrEmpty(ConvertedType)
             ? PureTitle
             : FileUtility.ReplaceFileExtension(PureTitle, ServiceProvider.GetService<FileUtility>().GetInternalExtension(PureTitle));
-
-    /// <summary>
-    /// The file download URL.
-    /// </summary>
-    [JsonIgnore]
-    public string DownloadUrl => ServiceProvider.GetService<FileHelper>().GetDownloadUrl(this);
 
     /// <summary>
     /// Specifies whether the file is locked or not.

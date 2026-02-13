@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -35,6 +35,7 @@ public class Login(
     private string Callback => _params.Get("callback") ?? "loginCallback";
     private string Auth => _params.Get("auth");
     private string ReturnUrl => _params.Get("returnurl"); //TODO?? FormsAuthentication.LoginUrl;
+    private string Pure => _params.Get("pure");
 
     private LoginMode Mode
     {
@@ -143,6 +144,8 @@ public class Login(
 
     private async Task SendJsCallbackAsync(HttpContext context, LoginProfile profile)
     {
+        bool.TryParse(Pure, out var pureTransport);
+
         var desktop = Mode == LoginMode.Redirect;
         var returnUrl = desktop && !string.IsNullOrWhiteSpace(ReturnUrl) ? ReturnUrl : "/";
 
@@ -150,7 +153,7 @@ public class Login(
         context.Response.ContentType = "text/html";
         await context.Response.WriteAsync(
             JsCallbackHelper.GetCallbackPage()
-            .Replace("%PROFILE%", $"\"{await loginProfileTransport.ToString(profile)}\"")
+            .Replace("%PROFILE%", $"\"{await loginProfileTransport.ToString(profile, pureTransport)}\"")
             .Replace("%CALLBACK%", Callback)
             .Replace("%RETURNURL%", $"\"{returnUrl}\"")
             .Replace("%DESKTOP%", desktop.ToString().ToLowerInvariant())

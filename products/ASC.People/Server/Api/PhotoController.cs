@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,9 +30,9 @@ using UnknownImageFormatException = ASC.Web.Core.Users.UnknownImageFormatExcepti
 
 namespace ASC.People.Api;
 
-///<summary>
+///<remarks>
 /// Photo API.
-///</summary>
+///</remarks>
 public class PhotoController(
     UserManager userManager,
     PermissionContext permissionContext,
@@ -49,12 +49,12 @@ public class PhotoController(
     UserWebhookManager webhookManager)
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpClientFactory, httpContextAccessor)
 {
-    /// <summary>
+    /// <remarks>
     /// Creates the user photo thumbnails by coordinates of the original image specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Create photo thumbnails
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/{userid}/photo/thumbnails</path>
     [Tags("People / Photos")]
     [SwaggerResponse(200, "Thumbnail parameters", typeof(ThumbnailsDataDto))]
@@ -105,12 +105,12 @@ public class PhotoController(
         return await ThumbnailsDataDto.Create(user, _userPhotoManager);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Deletes a photo of the user with the ID specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Delete a user photo
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/{userid}/photo</path>
     [Tags("People / Photos")]
     [SwaggerResponse(200, "Thumbnail parameters: original photo, retina, maximum size photo, big, medium, small", typeof(ThumbnailsDataDto))]
@@ -136,12 +136,12 @@ public class PhotoController(
         return await ThumbnailsDataDto.Create(user, _userPhotoManager);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a photo of the user with the ID specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get a user photo
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/{userid}/photo</path>
     [Tags("People / Photos")]
     [SwaggerResponse(200, "Thumbnail parameters: original photo, retina, maximum size photo, big, medium, small", typeof(ThumbnailsDataDto))]
@@ -160,12 +160,12 @@ public class PhotoController(
         return await ThumbnailsDataDto.Create(user, _userPhotoManager);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Updates a photo of the user with the ID specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Update a user photo
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/{userid}/photo</path>
     [Tags("People / Photos")]
     [SwaggerResponse(200, "Updated thumbnail parameters: original photo, retina, maximum size photo, big, medium, small", typeof(ThumbnailsDataDto))]
@@ -195,12 +195,12 @@ public class PhotoController(
         return await ThumbnailsDataDto.Create(user, _userPhotoManager);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Uploads a photo of the user with the ID specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Upload a user photo
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/people/{userid}/photo</path>
     [Tags("People / Photos")]
     [SwaggerResponse(200, "Result of file uploading", typeof(FileUploadResultDto))]

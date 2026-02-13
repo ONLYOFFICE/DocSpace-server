@@ -535,7 +535,7 @@
     <PackageReference Include="SkiaSharp" />
     <PackageReference Include="SkiaSharp.NativeAssets.Linux" />
     <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" />
-    <PackageReference Include="SkiaSharp.Svg" />
+    <PackageReference Include="Svg.Skia" />
     <PackageReference Include="Twilio" />
   </ItemGroup>
 </Project>

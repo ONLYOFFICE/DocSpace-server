@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -70,7 +70,7 @@ public class ChatExecutionContextBuilder(
         var chatSettings = await chatSettingsTask;
         var knowledge = await knowledgeTask;
         
-        var toolsTask = chatTools.GetAsync(roomId, chatSettings, knowledge.FilesCount > 0);
+        var toolsTask = chatTools.GetAsync(agent, chatSettings, knowledge.FilesCount > 0);
         
         var resultStorage = await resultStorageTask;
         var (tools, error) = await toolsTask;

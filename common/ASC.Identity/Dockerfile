@@ -1,5 +1,5 @@
 # Stage 1: Build the application
-FROM maven:3.8.8-eclipse-temurin-21 AS builder
+FROM maven:3.9.12-eclipse-temurin-21 AS builder
 WORKDIR /app
 
 # Copy the root pom.xml and all necessary module pom.xml files
@@ -24,7 +24,6 @@ COPY common/common-utilities/pom.xml common/common-utilities/
 COPY infrastructure/pom.xml infrastructure/
 COPY infrastructure/infrastructure-benchmark/pom.xml infrastructure/infrastructure-benchmark/
 COPY infrastructure/infrastructure-migration-runner/pom.xml infrastructure/infrastructure-migration-runner/
-COPY infrastructure/infrastructure-data-transfer/pom.xml infrastructure/infrastructure-data-transfer/
 COPY infrastructure/infrastructure-configuration/pom.xml infrastructure/infrastructure-configuration/
 
 COPY registration/pom.xml registration/

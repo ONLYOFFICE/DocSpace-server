@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -69,10 +69,10 @@ public abstract class EditorController<T>(
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
 
-    /// <summary>
+    /// <remarks>
     /// Saves edits to a file with the ID specified in the request.
-    /// </summary>
-    /// <short>Save file edits</short>
+    /// </remarks>
+    /// <summary>Save file edits</summary>
     /// <path>api/2.0/files/file/{fileId}/saveediting</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Saved file parameters", typeof(FileDto<int>))]
@@ -85,10 +85,10 @@ public abstract class EditorController<T>(
         return await _fileDtoHelper.GetAsync(await fileStorageService.SaveEditingAsync(inDto.FileId, inDto.FileExtension, inDto.DownloadUri, stream, inDto.Forcesave));
     }
 
-    /// <summary>
+    /// <remarks>
     /// Informs about opening a file with the ID specified in the request for editing, locking it from being deleted or moved (this method is called by the mobile editors).
-    /// </summary>
-    /// <short>Start file editing</short>
+    /// </remarks>
+    /// <summary>Start file editing</summary>
     /// <path>api/2.0/files/file/{fileId}/startedit</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
@@ -101,10 +101,10 @@ public abstract class EditorController<T>(
         return await fileStorageService.StartEditAsync(inDto.FileId, inDto.File.EditingAlone);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Starts filling a file with the ID specified in the request.
-    /// </summary>
-    /// <short>Start file filling</short>
+    /// </remarks>
+    /// <summary>Start file filling</summary>
     /// <path>api/2.0/files/file/{fileId}/startfilling</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File information", typeof(FileDto<int>))]
@@ -117,10 +117,10 @@ public abstract class EditorController<T>(
         return await _fileDtoHelper.GetAsync(file);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Tracks file changes when editing.
-    /// </summary>
-    /// <short>Track file editing</short>
+    /// </remarks>
+    /// <summary>Track file editing</summary>
     /// <path>api/2.0/files/file/{fileId}/trackeditfile</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
@@ -133,10 +133,10 @@ public abstract class EditorController<T>(
         return await fileStorageService.TrackEditFileAsync(inDto.FileId, inDto.TabId, inDto.DocKeyForTrack, inDto.IsFinish);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the initialization configuration of a file to open it in the editor.
-    /// </summary>
-    /// <short>Open a file configuration</short>
+    /// </remarks>
+    /// <summary>Open a file configuration</summary>
     /// <path>api/2.0/files/file/{fileId}/openedit</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
@@ -169,11 +169,16 @@ public abstract class EditorController<T>(
 
             formOpenSetup.RootFolder = rootFolder;
         }
+        var quotaExceededScope = await documentServiceHelper.CheckCustomQuotaAsync(rootFolder);
+
+        var canEdit =
+            quotaExceededScope == null &&
+            (formOpenSetup?.CanEdit ?? !file.IsCompletedForm);
 
         var docParams = await documentServiceHelper.GetParamsAsync(
             formOpenSetup is { Draft: not null } ? formOpenSetup.Draft : file,
             lastVersion,
-            await documentServiceHelper.CheckCustomQuota(rootFolder) && (formOpenSetup?.CanEdit ?? !file.IsCompletedForm),
+            canEdit,
             !inDto.View,
             true, formOpenSetup == null || formOpenSetup.CanFill,
             formOpenSetup?.EditorType ?? inDto.EditorType,
@@ -200,7 +205,10 @@ public abstract class EditorController<T>(
         }
 
         var result = await configurationConverter.Convert(configuration, file);
-
+        if (quotaExceededScope != null)
+        {
+            result.QuotaExceededScope = quotaExceededScope;
+        }
         if (formOpenSetup != null && formOpenSetup.DisableEmbeddedConfig && result.EditorConfig.Embedded != null)
         {
             result.EditorConfig.Embedded.EmbedUrl = "";
@@ -252,10 +260,10 @@ public abstract class EditorController<T>(
         return result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a link to download a file with the ID specified in the request asynchronously.
-    /// </summary>
-    /// <short>Get file download link asynchronously</short>
+    /// </remarks>
+    /// <summary>Get file download link asynchronously</summary>
     /// <path>api/2.0/files/file/{fileId}/presigned</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File download link", typeof(DocumentService.FileLink))]
@@ -265,10 +273,10 @@ public abstract class EditorController<T>(
         return await fileStorageService.GetPresignedUriAsync(inDto.FileId);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of users with their access rights to the file with the ID specified in the request.
-    /// </summary>
-    /// <short>Get user access rights by file ID</short>
+    /// </remarks>
+    /// <summary>Get user access rights by file ID</summary>
     /// <path>api/2.0/files/file/{fileId}/sharedusers</path>
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
@@ -284,10 +292,10 @@ public abstract class EditorController<T>(
         return fileStorageService.SharedUsersAsync(inDto.FileId);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of users with their access rights to the file.
-    /// </summary>
-    /// <short>Get user access rights</short>
+    /// </remarks>
+    /// <summary>Get user access rights</summary>
     /// <path>api/2.0/files/infousers</path>
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
@@ -299,10 +307,10 @@ public abstract class EditorController<T>(
         return await fileStorageService.GetInfoUsersAsync(inDto.UserIds);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the reference data to uniquely identify a file in its system and check the availability of insering data into the destination spreadsheet by the external link.
-    /// </summary>
-    /// <short>Get reference data</short>
+    /// </remarks>
+    /// <summary>Get reference data</summary>
     /// <path>api/2.0/files/file/referencedata</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "File reference data", typeof(FileReference))]
@@ -312,10 +320,10 @@ public abstract class EditorController<T>(
         return await fileStorageService.GetReferenceDataAsync(inDto.FileKey, inDto.InstanceId, inDto.SourceFileId, inDto.Path, inDto.Link);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of users with their access rights to the protected file with the ID specified in the request.
-    /// </summary>
-    /// <short>Get users access rights to the protected file</short>
+    /// </remarks>
+    /// <summary>Get users access rights to the protected file</summary>
     /// <path>api/2.0/files/file/{fileId}/protectusers</path>
     /// <collection>list</collection>
     [Tags("Files / Files")]
@@ -337,10 +345,10 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
         PermissionContext permissionContext)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
-    /// <summary>
+    /// <remarks>
     /// Checks the document service location URL.
-    /// </summary>
-    /// <short>Check the document service URL</short>
+    /// </remarks>
+    /// <summary>Check the document service URL</summary>
     /// <path>api/2.0/files/docservice</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Document service information: the Document Server address, the Document Server address in the local private network, the Community Server address", typeof(DocServiceUrlDto))]
@@ -427,10 +435,10 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the URL address of the connected editors.
-    /// </summary>
-    /// <short>Get the document service URL</short>
+    /// </remarks>
+    /// <summary>Get the document service URL</summary>
     /// <path>api/2.0/files/docservice</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Settings")]

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -107,6 +107,11 @@ public class WebPluginDto
     /// The web plugin URL.
     /// </summary>
     public required string Url { get; set; }
+
+    /// <summary>
+    /// The web plugin css URL.
+    /// </summary>
+    public required string CssUrl { get; set; }
 
     /// <summary>
     /// The web plugin settings.

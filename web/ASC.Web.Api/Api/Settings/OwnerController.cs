@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -44,12 +44,12 @@ public class OwnerController(
     UserManagerWrapper userManagerWrapper)
     : BaseSettingsController(fusionCache, webItemManager)
 {
-    /// <summary>
+    /// <remarks>
     /// Sends the instructions to change the DocSpace owner.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Send the owner change instructions
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/owner</path>
     [Tags("Settings / Owner")]
     [SwaggerResponse(200, "Message about changing the portal owner", typeof(OwnerChangeInstructionsDto))]
@@ -90,12 +90,12 @@ public class OwnerController(
         return new OwnerChangeInstructionsDto { Status = 1, Message = Resource.ChangePortalOwnerMsg.Replace(":email", emailLink) };
     }
 
-    /// <summary>
+    /// <remarks>
     /// Updates the current portal owner with a new one specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Update the portal owner
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/owner</path>
     [Tags("Settings / Owner")]
     [SwaggerResponse(200, "Ok")]

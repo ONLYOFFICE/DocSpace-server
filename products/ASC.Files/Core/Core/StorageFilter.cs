@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,12 +28,12 @@ namespace ASC.Files.Core.Core;
 
 public enum StorageFilter
 {
-    [SwaggerEnum("None")]
+    [Description("None")]
     None = 0,
 
-    [SwaggerEnum("Internal")]
+    [Description("Internal")]
     Internal = 1,
 
-    [SwaggerEnum("ThirdParty")]
+    [Description("ThirdParty")]
     ThirdParty = 2
 }

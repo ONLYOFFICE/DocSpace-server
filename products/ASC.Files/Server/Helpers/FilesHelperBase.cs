@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,7 +33,6 @@ public abstract class FilesHelperBase(
     FileDtoHelper fileDtoHelper,
     FileStorageService fileStorageService,
     FileChecker fileChecker,
-    IHttpContextAccessor httpContextAccessor,
     WebhookManager webhookManager,
     IDaoFactory daoFactory,
     IEventBus eventBus,
@@ -45,16 +44,14 @@ public abstract class FilesHelperBase(
     protected readonly FileDtoHelper _fileDtoHelper = fileDtoHelper;
     protected readonly FileStorageService _fileStorageService = fileStorageService;
     protected readonly IDaoFactory _daoFactory = daoFactory;
-    protected readonly TenantManager _tenantManager = tenantManager;
 
     protected readonly FileChecker _fileChecker = fileChecker;
-    protected readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
     public async Task<FileDto<T>> InsertFileAsync<T>(T folderId, Stream file, string title, bool createNewIfExist, bool keepConvertStatus = false)
     {
         try
         {
-            var resultFile = await _fileUploader.ExecAsync(folderId, title, file.Length, file, !createNewIfExist, !keepConvertStatus);
+            var resultFile = await _fileUploader.ExecAsync(folderId, title, file.Length, file, createNewIfExist, !keepConvertStatus);
 
             await socketManager.CreateFileAsync(resultFile);
 
@@ -72,7 +69,7 @@ public abstract class FilesHelperBase(
                     ? new RoomNotifyIntegrationData<string> { RoomId = srId, FileId = sfId }
                 : null;
 
-                var evt = new RoomNotifyIntegrationEvent(authContext.CurrentAccount.ID, _tenantManager.GetCurrentTenant().Id)
+                var evt = new RoomNotifyIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenant().Id)
                 {
                     Data = data,
                     ThirdPartyData = thirdPartyData

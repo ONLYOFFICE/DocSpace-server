@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using System.ComponentModel;
+
 namespace ASC.Api.Core.Core;
 
 /// <summary>
@@ -31,9 +33,9 @@ namespace ASC.Api.Core.Core;
 /// </summary>
 public enum SortOrder
 {
-    [SwaggerEnum("Ascending")]
+    [Description("Ascending")]
     Ascending,
 
-    [SwaggerEnum("Descending")]
+    [Description("Descending")]
     Descending
 }

@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -147,6 +147,7 @@ public class DocumentServiceTrackerHelper(
     EmailValidationKeyProvider emailValidationKeyProvider,
     BaseCommonLinkUtility baseCommonLinkUtility,
     SocketManager socketManager,
+    Global global,
     GlobalStore globalStore,
     DisplayUserSettingsHelper displayUserSettingsHelper,
     IDaoFactory daoFactory,
@@ -285,6 +286,8 @@ public class DocumentServiceTrackerHelper(
         }
         else
         {
+            var anonymousSessions = new List<string>();
+
             foreach (var user in fileData.Users)
             {
                 if (!Guid.TryParse(user, out var userId))
@@ -292,6 +295,7 @@ public class DocumentServiceTrackerHelper(
                     if (!string.IsNullOrEmpty(user) && user.StartsWith("uid-"))
                     {
                         userId = Guid.Empty;
+                        anonymousSessions.Add(user);
                     }
                     else
                     {
@@ -311,9 +315,11 @@ public class DocumentServiceTrackerHelper(
                     usersDrop.Add(userId.ToString());
                 }
             }
+
+            await fileTracker.SetAnonymousSessionsAsync(fileId, anonymousSessions);
         }
 
-        if (usersDrop.Count > 0 && !await documentServiceHelper.DropUserAsync(fileData.Key, usersDrop.ToArray(), fileId))
+        if (usersDrop.Count > 0 && !await documentServiceHelper.DropUserAsync(fileData.Key, usersDrop, fileId))
         {
             logger.ErrorDocServiceDropFailed(usersDrop);
         }
@@ -323,7 +329,9 @@ public class DocumentServiceTrackerHelper(
             await fileTracker.RemoveAsync(fileId, userId: removeUserId);
         }
 
-        await socketManager.StartEditAsync(fileId);
+        var editingBy = await fileTracker.GetEditingSessionsAsync(fileId, global);
+
+        await socketManager.StartEditAsync(fileId, editingBy);
 
         if (file != null && fileData.Actions != null && fileData.Actions.Any(r => r.Type == 1))
         {

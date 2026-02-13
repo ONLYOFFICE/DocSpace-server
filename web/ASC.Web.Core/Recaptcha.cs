@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,16 +31,16 @@ namespace ASC.Web.Core;
 /// </summary>
 public enum RecaptchaType
 {
-    [SwaggerEnum("Default")]
+    [Description("Default")]
     Default = 0,
 
-    [SwaggerEnum("AndroidV2")]
+    [Description("AndroidV2")]
     AndroidV2 = 1,
 
-    [SwaggerEnum("iOSV2")]
+    [Description("iOSV2")]
     iOSV2 = 2,
 
-    [SwaggerEnum("hCaptcha")]
+    [Description("hCaptcha")]
     hCaptcha = 3
 }
 

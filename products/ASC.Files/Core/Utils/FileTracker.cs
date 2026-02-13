@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -47,7 +47,7 @@ public class FileTrackerHelper(IFusionCache cache, IServiceProvider serviceProvi
             if (tracker.EditingBy.TryGetValue(tabId, out var trackInfo))
             {
                 trackInfo.TrackTime = DateTime.UtcNow;
-                checkRight = DateTime.UtcNow - tracker.EditingBy[tabId].CheckRightTime > _checkRightTimeout;
+                checkRight = DateTime.UtcNow - trackInfo.CheckRightTime > _checkRightTimeout;
             }
             else
             {
@@ -76,22 +76,22 @@ public class FileTrackerHelper(IFusionCache cache, IServiceProvider serviceProvi
         cache.Events.Memory.Eviction += MemoryOnEviction;
     }
 
-    public async Task RemoveAsync<T>(T fileId, Guid tabId = default, Guid userId = default)
+    public async Task RemoveAsync<T>(T fileId, Guid? tabId = null, Guid? userId = null)
     {
         var tracker = await GetTrackerAsync(fileId);
         if (tracker != null)
         {
-            if (tabId != Guid.Empty)
+            if (tabId.HasValue)
             {
-                tracker.EditingBy.TryRemove(tabId, out _);
+                tracker.EditingBy.TryRemove(tabId.Value, out _);
                 await SetTrackerAsync(fileId, tracker);
 
                 return;
             }
 
-            if (userId != Guid.Empty)
+            if (userId.HasValue)
             {
-                var listForRemove = tracker.EditingBy.Where(b => tracker.EditingBy[b.Key].UserId == userId);
+                var listForRemove = tracker.EditingBy.Where(b => tracker.EditingBy[b.Key].UserId == userId.Value);
 
                 foreach (var editTab in listForRemove)
                 {
@@ -105,6 +105,28 @@ public class FileTrackerHelper(IFusionCache cache, IServiceProvider serviceProvi
         }
 
         await RemoveTrackerAsync(fileId);
+    }
+
+    public async Task SetAnonymousSessionsAsync<T>(T fileId, List<string> anonymousSessions)
+    {
+        var tracker = await GetTrackerAsync(fileId);
+
+        if (tracker == null)
+        {
+            return;
+        }
+
+        tracker.AnonymousSessions.Clear();
+
+        if (anonymousSessions != null)
+        {
+            foreach (var session in anonymousSessions)
+            {
+                tracker.AnonymousSessions.TryAdd(session, 0);
+            }
+        }
+
+        await SetTrackerAsync(fileId, tracker);
     }
 
     public record EditingStatus(bool IsEditing, bool IsEditingAlone);
@@ -207,6 +229,47 @@ public class FileTrackerHelper(IFusionCache cache, IServiceProvider serviceProvi
         return tracker != null && await IsEditingAsync(fileId)
             ? tracker.EditingBy.Values.Select(i => i.UserId).Distinct().ToList()
             : [];
+    }
+
+    public async Task<List<string>> GetAnonymousEditingSessionsAsync<T>(T fileId)
+    {
+        var tracker = await GetTrackerAsync(fileId);
+
+        return tracker != null && await IsEditingAsync(fileId)
+            ? tracker.AnonymousSessions.Keys.ToList()
+            : [];
+    }
+
+    public async Task<Dictionary<Guid, string>> GetEditingSessionsAsync<T>(T fileId, Global global)
+    {
+        var result = new Dictionary<Guid, string>();
+
+        var tracker = await GetTrackerAsync(fileId);
+        if (tracker == null || !await IsEditingAsync(fileId))
+        {
+            return result;
+        }
+
+        foreach (var trackInfo in tracker.EditingBy.Values)
+        {
+            if (result.ContainsKey(trackInfo.UserId))
+            {
+                continue;
+            }
+
+            var userName = await global.GetUserNameAsync(trackInfo.UserId, true);
+            if (trackInfo.UserId == Guid.Empty)
+            {
+                var count = tracker.AnonymousSessions.Count;
+                result.Add(trackInfo.UserId, count > 1 ? $"{userName} ({count})" : userName);
+            }
+            else
+            {
+                result.Add(trackInfo.UserId, userName);
+            }
+        }
+
+        return result;
     }
 
     public async Task<string> GetTrackerDocKey<T>(T fileId)
@@ -349,9 +412,12 @@ public record FileTracker
     [ProtoMember(5)]
     public string FillingSessionId { get; set; }
 
+    [ProtoMember(6)]
+    public ConcurrentDictionary<string, byte> AnonymousSessions { get; set; }
+
     public FileTracker() { }
 
-    internal FileTracker(Guid tabId, Guid userId, bool newScheme, bool editingAlone, Tenant tenant, string baseUri, string docKey, string token = null, string fillingSessionId = null)
+    internal FileTracker(Guid tabId, Guid userId, bool newScheme, bool editingAlone, Tenant tenant, string baseUri, string docKey, string token = null, string fillingSessionId = null, string anonymousSessionId = null)
     {
         DocKey = docKey;
         Tenant = tenant;
@@ -365,6 +431,7 @@ public record FileTracker
             EditingAlone = editingAlone,
             Token = token
         });
+        AnonymousSessions = new ConcurrentDictionary<string, byte>();
     }
 
     [ProtoContract]

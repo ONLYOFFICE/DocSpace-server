@@ -232,5 +232,10 @@ module.exports = (files) => {
     res.end();
   });
 
+  router.post("/quota_exceeded", (req, res) => {
+     files.quotaExceeded(req.body);
+     res.end();
+  });
+
   return router;
 };

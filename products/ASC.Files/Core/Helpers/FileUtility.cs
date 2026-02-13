@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -133,34 +133,34 @@ public class LogoColor
 /// </summary>
 public enum Accessibility
 {
-    [SwaggerEnum("Image view")]
+    [Description("Image view")]
     ImageView = 0,
 
-    [SwaggerEnum("Media view")]
+    [Description("Media view")]
     MediaView = 1,
 
-    [SwaggerEnum("Web view")]
+    [Description("Web view")]
     WebView = 2,
 
-    [SwaggerEnum("Web edit")]
+    [Description("Web edit")]
     WebEdit = 3,
 
-    [SwaggerEnum("Web review")]
+    [Description("Web review")]
     WebReview = 4,
 
-    [SwaggerEnum("Web custom filter editing")]
+    [Description("Web custom filter editing")]
     WebCustomFilterEditing = 5,
 
-    [SwaggerEnum("Web restricted editing")]
+    [Description("Web restricted editing")]
     WebRestrictedEditing = 6,
 
-    [SwaggerEnum("Web comment")]
+    [Description("Web comment")]
     WebComment = 7,
 
-    [SwaggerEnum("Can convert")]
+    [Description("Can convert")]
     CanConvert = 9,
 
-    [SwaggerEnum("Must convert")]
+    [Description("Must convert")]
     MustConvert = 10
 }
 

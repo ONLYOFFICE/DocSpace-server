@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -58,10 +58,10 @@ public class StorageController(
 {
     private readonly ILogger _log = option.CreateLogger("ASC.Api");
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of all the portal storages.
-    /// </summary>
-    /// <short>Get storages</short>
+    /// </remarks>
+    /// <summary>Get storages</summary>
     /// <path>api/2.0/settings/storage</path>
     /// <collection>list</collection>
     [Tags("Settings / Storage")]
@@ -84,10 +84,10 @@ public class StorageController(
         return result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the storage progress.
-    /// </summary>
-    /// <short>Get the storage progress</short>
+    /// </remarks>
+    /// <summary>Get the storage progress</summary>
     /// <path>api/2.0/settings/storage/progress</path>
     [Tags("Settings / Storage")]
     [SwaggerResponse(200, "Storage progress", typeof(double))]
@@ -106,10 +106,10 @@ public class StorageController(
         return serviceClient.GetProgress(tenant.Id);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Starts the storage encryption process.
-    /// </summary>
-    /// <short>Start the storage encryption process</short>
+    /// </remarks>
+    /// <summary>Start the storage encryption process</summary>
     /// <path>api/2.0/settings/encryption/start</path>
     [Tags("Settings / Encryption")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -238,10 +238,10 @@ public class StorageController(
         ));
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the storage encryption settings.
-    /// </summary>
-    /// <short>Get the storage encryption settings</short>
+    /// </remarks>
+    /// <summary>Get the storage encryption settings</summary>
     /// <path>api/2.0/settings/encryption/settings</path>
     [Tags("Settings / Encryption")]
     [SwaggerResponse(200, "Storage encryption settings", typeof(EncryptionSettings))]
@@ -279,10 +279,10 @@ public class StorageController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the storage encryption progress.
-    /// </summary>
-    /// <short>Get the storage encryption progress</short>
+    /// </remarks>
+    /// <summary>Get the storage encryption progress</summary>
     /// <path>api/2.0/settings/encryption/progress</path>
     [Tags("Settings / Encryption")]
     [SwaggerResponse(200, "Storage encryption progress", typeof(double?))]
@@ -308,10 +308,10 @@ public class StorageController(
         return await encryptionWorker.GetEncryptionProgress();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Updates a storage with the parameters specified in the request.
-    /// </summary>
-    /// <short>Update a storage</short>
+    /// </remarks>
+    /// <summary>Update a storage</summary>
     /// <path>api/2.0/settings/storage</path>
     [Tags("Settings / Storage")]
     [SwaggerResponse(200, "Updated storage settings", typeof(StorageSettings))]
@@ -351,10 +351,10 @@ public class StorageController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Resets the storage settings to the default parameters.
-    /// </summary>
-    /// <short>Reset the storage settings</short>
+    /// </remarks>
+    /// <summary>Reset the storage settings</summary>
     /// <path>api/2.0/settings/storage</path>
     [Tags("Settings / Storage")]
     [SwaggerResponse(200, "Ok")]
@@ -383,10 +383,10 @@ public class StorageController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of all the CDN storages.
-    /// </summary>
-    /// <short>Get the CDN storages</short>
+    /// </remarks>
+    /// <summary>Get the CDN storages</summary>
     /// <path>api/2.0/settings/storage/cdn</path>
     /// <collection>list</collection>
     [Tags("Settings / Storage")]
@@ -409,10 +409,10 @@ public class StorageController(
         return result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Updates the CDN storage with the parameters specified in the request.
-    /// </summary>
-    /// <short>Update the CDN storage</short>
+    /// </remarks>
+    /// <summary>Update the CDN storage</summary>
     /// <path>api/2.0/settings/storage/cdn</path>
     [Tags("Settings / Storage")]
     [SwaggerResponse(200, "Updated CDN storage", typeof(CdnStorageSettings))]
@@ -454,10 +454,10 @@ public class StorageController(
         return settings;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Resets the CDN storage settings to the default parameters.
-    /// </summary>
-    /// <short>Reset the CDN storage settings</short>
+    /// </remarks>
+    /// <summary>Reset the CDN storage settings</summary>
     /// <path>api/2.0/settings/storage/cdn</path>
     [Tags("Settings / Storage")]
     [SwaggerResponse(200, "Ok")]
@@ -472,15 +472,15 @@ public class StorageController(
         await storageSettingsHelper.ClearAsync(await settingsManager.LoadAsync<CdnStorageSettings>());
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of all the backup storages.
-    /// </summary>
-    /// <short>Get the backup storages</short>
+    /// </remarks>
+    /// <summary>Get the backup storages</summary>
     /// <path>api/2.0/settings/storage/backup</path>
     /// <collection>list</collection>
     [Tags("Settings / Storage")]
     [SwaggerResponse(200, "List of the backup storages with the following parameters", typeof(List<StorageDto>))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "Access denied")]
     [HttpGet("storage/backup")]
     public async Task<List<StorageDto>> GetAllBackupStorages(AllBackupStoragesDto dto)
     {
@@ -516,10 +516,10 @@ public class StorageController(
         await tenantManager.SaveTenantAsync(tenant);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of all Amazon regions.
-    /// </summary>
-    /// <short>Get Amazon regions</short>
+    /// </remarks>
+    /// <summary>Get Amazon regions</summary>
     /// <path>api/2.0/settings/storage/s3/regions</path>
     [Tags("Settings / Storage")]
     [SwaggerResponse(200, "List of the Amazon regions", typeof(object))]

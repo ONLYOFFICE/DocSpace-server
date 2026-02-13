@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -300,6 +300,7 @@ public class EntryManager(IDaoFactory daoFactory,
     SettingsManager settingsManager,
     IServiceProvider serviceProvider,
     ICache cache,
+    FileHelper fileHelper,
     FileTrackerHelper fileTracker,
     EntryStatusManager entryStatusManager,
     IHttpClientFactory clientFactory,
@@ -321,7 +322,6 @@ public class EntryManager(IDaoFactory daoFactory,
     ExternalShare externalShare,
     FileSharingAceHelper fileSharingAceHelper,
     DisplayUserSettingsHelper displayUserSettingsHelper,
-    NotifyConstants notifyConstants,
     WebhookManager webhookManager)
 {
     private const string UpdateList = "filesUpdateList";
@@ -479,6 +479,15 @@ public class EntryManager(IDaoFactory daoFactory,
             var folderDao = daoFactory.GetFolderDao<T>();
             var fileDao = daoFactory.GetFileDao<T>();
             var files = await GetTemplatesAsync(folderDao, fileDao, filterType, subjectGroup, subjectId, searchText, extension, searchInContent).ToListAsync();
+            entries.AddRange(files);
+
+            CalculateTotal();
+        }
+        else if (parent.FolderType == FolderType.DefaultTemplates)
+        {
+            var folderDao = daoFactory.GetFolderDao<T>();
+            var fileDao = daoFactory.GetFileDao<T>();
+            var files = await fileDao.GetFilesAsync(parent.Id, orderBy, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, withSubfolders).ToListAsync();
             entries.AddRange(files);
 
             CalculateTotal();
@@ -1214,9 +1223,13 @@ public class EntryManager(IDaoFactory daoFactory,
                 }
                 linkedFile.Category = (int)FilterType.PdfForm;
 
+                var fileState = await fileHelper.GetFileState(sourceFile);
+
+                sourceFile.SetFileState(fileState);
 
                 linkedFile.Title = Global.ReplaceInvalidCharsAndTruncate(title);
-                linkedFile.SetFileStatus(await sourceFile.GetFileStatus());
+                linkedFile.FileStatus = sourceFile.FileStatus;
+                linkedFile.EditingBy = sourceFile.EditingBy;
                 linkedFile.ConvertedType = sourceFile.ConvertedType;
                 linkedFile.Comment = FilesCommonResource.CommentCreateFillFormDraft;
                 linkedFile.Encrypted = sourceFile.Encrypted;
@@ -1677,12 +1690,16 @@ public class EntryManager(IDaoFactory daoFactory,
         {
             var currFile = await fileDao.GetFileAsync(fileId);
             var newFile = serviceProvider.GetService<File<T>>();
+            var fileState = await fileHelper.GetFileState(currFile);
+
+            currFile.SetFileState(fileState);
 
             newFile.Id = file.Id;
             newFile.Version = currFile.Version + 1;
             newFile.VersionGroup = currFile.VersionGroup + 1;
             newFile.Title = FileUtility.ReplaceFileExtension(currFile.Title, FileUtility.GetFileExtension(file.Title));
-            newFile.SetFileStatus(await currFile.GetFileStatus());
+            newFile.FileStatus = currFile.FileStatus;
+            newFile.EditingBy = currFile.EditingBy;
             newFile.ParentId = currFile.ParentId;
             newFile.CreateBy = currFile.CreateBy;
             newFile.CreateOn = currFile.CreateOn;
@@ -2260,12 +2277,12 @@ public class EntryManager(IDaoFactory daoFactory,
                     await socketManager.StopEditAsync(form.Id);
                     await webhookManager.PublishAsync(WebhookTrigger.FormFilledOut, form);
                     await filesMessageService.SendAsync(MessageAction.FormCompletelyFilled, form, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
-                    await notifyClient.SendFormFillingEvent(room, form, allRoles.Select(role => role.UserId).ToList(), notifyConstants.EventFormWasCompletelyFilled);
+                    await notifyClient.SendFormFillingEvent(room, form, allRoles.Select(role => role.UserId).ToList(), typeof(FormWasCompletelyFilledNotifyAction));
                 }
                 else if (nextRoleUserIds.Count != 0)
                 {
                     await filesMessageService.SendAsync(MessageAction.FormPartiallyFilled, form, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
-                    await notifyClient.SendFormFillingEvent(room, form, nextRoleUserIds, notifyConstants.EventYourTurnFormFilling);
+                    await notifyClient.SendFormFillingEvent(room, form, nextRoleUserIds,  typeof(YourTurnFormFillingNotifyAction));
                 }
             }
         }

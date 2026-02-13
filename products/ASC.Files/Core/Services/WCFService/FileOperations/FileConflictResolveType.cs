@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,12 +33,12 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations;
 [EnumExtensions]
 public enum FileConflictResolveType
 {
-    [SwaggerEnum(Description = "Skip")]
+    [Description("Skip")]
     Skip = 0,
 
-    [SwaggerEnum(Description = "Overwrite")]
+    [Description("Overwrite")]
     Overwrite = 1,
 
-    [SwaggerEnum(Description = "Duplicate")]
+    [Description("Duplicate")]
     Duplicate = 2
 }

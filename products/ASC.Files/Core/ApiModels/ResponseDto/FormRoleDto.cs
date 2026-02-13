@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -116,12 +116,12 @@ public class FormRoleDtoHelper(TenantUtil tenantUtil, EmployeeFullDtoHelper empl
 /// </summary>
 public enum FormRoleHistory
 {
-    [SwaggerEnum("Opened at date")]
+    [Description("Opened at date")]
     OpenedAtDate = 0,
 
-    [SwaggerEnum("Submission date")]
+    [Description("Submission date")]
     SubmissionDate = 1,
 
-    [SwaggerEnum("Stop date")]
+    [Description("Stop date")]
     StopDate = 2
 }

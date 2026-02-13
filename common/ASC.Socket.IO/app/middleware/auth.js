@@ -62,7 +62,7 @@ module.exports = (socket, next) => {
 
   let headers = {};
   var basePath = portalManager(req)?.replace(/\/$/g, "");
-  const basePathFromConfig = config.get("API_HOST");
+  const basePathFromConfig = config.get("API_HOST")?.replace(/\/$/g, "");
   if (basePathFromConfig) {
     headers.Origin = basePath;
     basePath = basePathFromConfig;

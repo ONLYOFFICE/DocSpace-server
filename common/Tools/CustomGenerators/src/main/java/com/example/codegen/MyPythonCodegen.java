@@ -1,40 +1,18 @@
 package com.example.codegen;
 
-import org.openapitools.codegen.model.ModelMap;
-import org.openapitools.codegen.model.ModelsMap;
+import org.openapitools.codegen.model.*;
 import org.openapitools.codegen.languages.PythonClientCodegen;
-import org.openapitools.codegen.SupportingFile;
-import org.openapitools.codegen.CodegenModel;
-import io.swagger.v3.oas.models.servers.ServerVariables;
-import io.swagger.v3.oas.models.servers.Server;
-import io.swagger.v3.oas.models.servers.ServerVariable;
-import org.openapitools.codegen.model.OperationsMap;
-import org.openapitools.codegen.model.OperationMap;
-import org.openapitools.codegen.CodegenParameter;
-import org.openapitools.codegen.CodegenOperation;
-import org.openapitools.codegen.model.ApiInfoMap;
+import io.swagger.v3.oas.models.servers.*;
 import static org.openapitools.codegen.utils.StringUtils.underscore;
 import static org.openapitools.codegen.utils.StringUtils.camelize;
-import org.openapitools.codegen.model.ApiInfoMap;
 import io.swagger.v3.oas.models.media.Schema;
-import org.openapitools.codegen.utils.ModelUtils;
-import org.openapitools.codegen.utils.StringUtils;
-import org.openapitools.codegen.CodegenProperty;
+import org.openapitools.codegen.utils.*;
+import org.openapitools.codegen.*;
 
-import java.util.List;
+import java.util.*;
 import java.io.File;
-import com.example.codegen.TagParts;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.LinkedHashMap;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Collections;
 
 public class MyPythonCodegen extends PythonClientCodegen {
 
@@ -69,7 +47,7 @@ public class MyPythonCodegen extends PythonClientCodegen {
             if (serverVars != null){
                 ServerVariable baseUrlVar = serverVars.get("baseUrl");
                 if(baseUrlVar != null && "".equals(baseUrlVar.getDefault())){
-                    baseUrlVar.setDefault("http://localhost:8092/");
+                    baseUrlVar.setDefault("http://localhost:8092");
                 }
             }
         }
@@ -103,6 +81,7 @@ public class MyPythonCodegen extends PythonClientCodegen {
             operationMap.put("x-folder", underscore(tagParts.folderPart));
             operationMap.put("x-classname", tagParts.classPart + apiNameSuffix);
             boolean shouldSupportFields = false;
+            boolean supportUseAt = false;
 
             if (operationList != null) {
                 for (CodegenOperation op : operationList) { 
@@ -119,9 +98,16 @@ public class MyPythonCodegen extends PythonClientCodegen {
                             shouldSupportFields = true;
                         }
                     }
+                    if ("GET".equalsIgnoreCase(op.httpMethod)
+                        && "/api/2.0/files/recent".equals(op.path)) {
+
+                        op.vendorExtensions.put("x-supportsUseAtMethod", true);
+                        supportUseAt = true;
+                    }
                 }
             }
             operationMap.put("x-supportsFields", shouldSupportFields);
+            operationMap.put("x-supportsUseAt", supportUseAt);
         }
 
         return objs;
@@ -140,12 +126,12 @@ public class MyPythonCodegen extends PythonClientCodegen {
             if (model.getComposedSchemas() != null && model.getComposedSchemas().getAllOf() != null) {
                 model.getVendorExtensions().put("x-uses-allOf", true);
                 Set<String> localPropertyNames = new HashSet<>();
-                Schema modelSchema = this.openAPI.getComponents().getSchemas().get(model.schemaName);
+                Schema<?> modelSchema = this.openAPI.getComponents().getSchemas().get(model.schemaName);
 
                 if (ModelUtils.isAllOf(modelSchema)) {
                     for (Object obj : modelSchema.getAllOf()) {
                         if (obj instanceof Schema) {
-                            Schema allOfSchema = (Schema) obj;
+                            Schema<?> allOfSchema = (Schema<?>) obj;
                             if ("object".equals(ModelUtils.getType(allOfSchema)) && allOfSchema.getProperties() != null) {
                                 localPropertyNames.addAll(allOfSchema.getProperties().keySet());
                             }
@@ -206,6 +192,36 @@ public class MyPythonCodegen extends PythonClientCodegen {
         objs.put("x-openIdConnectUrl", "{{authBaseUrl}}/.well-known/openid-configuration");
 
         return objs;
+    }
+
+    @Override
+    public Map<String, ModelsMap> postProcessAllModels(Map<String, ModelsMap> objs) {
+        final Map<String, ModelsMap> processed = super.postProcessAllModels(objs);
+
+        for (Map.Entry<String, ModelsMap> entry : processed.entrySet()) {
+            ModelsMap modelsMap = entry.getValue();
+
+            for (ModelMap m : modelsMap.getModels()) {
+                CodegenModel model = m.getModel();
+
+                if (model.isEnum && model.getAllowableValues() != null) {
+                    
+                    List<Map<String, Object>> enumVars = (List<Map<String, Object>>) model.getAllowableValues().get("enumVars");
+
+                    if (enumVars != null) {
+                        for (Map<String, Object> ev : enumVars) {
+                            String name = (String) ev.get("name");
+
+                            if ("None".equals(name)) {
+                                ev.put("name", "None_");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return processed;
     }
 
     @Override

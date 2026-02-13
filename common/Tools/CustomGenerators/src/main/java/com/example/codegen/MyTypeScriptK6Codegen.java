@@ -1,36 +1,17 @@
 package com.example.codegen;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.Map.Entry;
-import java.util.List;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.HashSet;
 
-import org.openapitools.codegen.model.OperationMap;
-import org.openapitools.codegen.model.OperationsMap;
-import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.*;
 import org.openapitools.codegen.languages.TypeScriptAxiosClientCodegen;
-import org.openapitools.codegen.CodegenOperation;
-import org.openapitools.codegen.SupportingFile;
-import org.openapitools.codegen.CodegenParameter;
-import org.openapitools.codegen.model.ApiInfoMap;
 import static org.openapitools.codegen.utils.StringUtils.camelize;
-import org.openapitools.codegen.model.ModelsMap;
-import org.openapitools.codegen.CodegenModel;
-import org.openapitools.codegen.CodegenProperty;
+import org.openapitools.codegen.*;
 import org.openapitools.codegen.utils.ModelUtils;
 
-import io.swagger.v3.oas.models.servers.ServerVariables;
-import io.swagger.v3.oas.models.servers.Server;
-import io.swagger.v3.oas.models.servers.ServerVariable;
+import io.swagger.v3.oas.models.servers.*;
 import io.swagger.v3.oas.models.media.Schema;
 
 public class MyTypeScriptK6Codegen extends TypeScriptAxiosClientCodegen {
@@ -106,12 +87,12 @@ public class MyTypeScriptK6Codegen extends TypeScriptAxiosClientCodegen {
             if (model.getComposedSchemas() != null && model.getComposedSchemas().getAllOf() != null) {
                 model.getVendorExtensions().put("x-uses-allOf", true);
                 Set<String> localPropertyNames = new HashSet<>();
-                Schema modelSchema = this.openAPI.getComponents().getSchemas().get(model.schemaName);
+                Schema<?> modelSchema = this.openAPI.getComponents().getSchemas().get(model.schemaName);
 
                 if (ModelUtils.isAllOf(modelSchema)) {
                     for (Object obj : modelSchema.getAllOf()) {
                         if (obj instanceof Schema) {
-                            Schema allOfSchema = (Schema) obj;
+                            Schema<?> allOfSchema = (Schema<?>) obj;
                             if ("object".equals(ModelUtils.getType(allOfSchema)) && allOfSchema.getProperties() != null) {
                                 localPropertyNames.addAll(allOfSchema.getProperties().keySet());
                             }

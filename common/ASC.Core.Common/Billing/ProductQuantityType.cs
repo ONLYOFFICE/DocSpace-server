@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,15 +31,15 @@ namespace ASC.Core.Billing;
 /// </summary>
 public enum ProductQuantityType
 {
-    [SwaggerEnum("Set")]
+    [Description("Set")]
     Set = 0,
 
-    [SwaggerEnum("Add")]
+    [Description("Add")]
     Add = 1,
 
-    [SwaggerEnum("Sub")]
+    [Description("Sub")]
     Sub = 2,
 
-    [SwaggerEnum("Renew")]
+    [Description("Renew")]
     Renew = 3
 }

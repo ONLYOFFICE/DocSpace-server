@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -28,7 +28,7 @@ namespace ASC.AI.Models.ResponseDto;
 
 public class AttachmentContentDto : MessageContentDto
 {
-    public override ContentType Type => ContentType.Attachment;
+    public override MessageContentType Type => MessageContentType.Attachment;
     public required JsonElement Id { get; init; }
     public required string Title { get; init; }
     public required string Extension { get; init; }

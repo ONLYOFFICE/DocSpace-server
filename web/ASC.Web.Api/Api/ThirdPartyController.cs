@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,9 +26,9 @@
 
 namespace ASC.Web.Api.Controllers;
 
-///<summary>
+///<remarks>
 /// Third-party API.
-///</summary>
+///</remarks>
 ///<name>thirdparty</name>
 [Scope]
 [DefaultRoute]
@@ -36,10 +36,10 @@ namespace ASC.Web.Api.Controllers;
 [ControllerName("thirdparty")]
 public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : ControllerBase
 {
-    /// <summary>
+    /// <remarks>
     /// Returns a request to get the confirmation code from URL.
-    /// </summary>
-    /// <short>Get the code request</short>
+    /// </remarks>
+    /// <summary>Get the code request</summary>
     /// <remarks>List of providers: Google, Dropbox, Docusign, Box, OneDrive, Wordpress.</remarks>
     /// <path>api/2.0/thirdparty/{provider}</path>
     [Tags("ThirdParty")]
@@ -79,10 +79,10 @@ public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : Contr
         };
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the confirmation code for requesting an OAuth token.
-    /// </summary>
-    /// <short>Get the confirmation code</short>
+    /// </remarks>
+    /// <summary>Get the confirmation code</summary>
     /// <path>api/2.0/thirdparty/{provider}/code</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("ThirdParty")]

@@ -1,25 +1,11 @@
 package com.example.codegen;
 
 import org.openapitools.codegen.languages.PostmanCollectionCodegen;
-import org.openapitools.codegen.model.OperationsMap;
-import org.openapitools.codegen.model.ModelMap;
-import org.openapitools.codegen.CodegenOperation;
-import org.openapitools.codegen.model.OperationMap;
-import org.openapitools.codegen.CodegenParameter;
-import org.openapitools.codegen.CodegenProperty;
-import org.openapitools.codegen.SupportingFile;
-import io.swagger.v3.oas.models.servers.ServerVariable;
-import io.swagger.v3.oas.models.servers.ServerVariables;
-import io.swagger.v3.oas.models.servers.Server;
+import org.openapitools.codegen.model.*;
+import org.openapitools.codegen.*;
+import io.swagger.v3.oas.models.servers.*;
 
-import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.*;
 
 public class MyPostmanCollectionCodegen extends PostmanCollectionCodegen {
 
@@ -34,14 +20,13 @@ public class MyPostmanCollectionCodegen extends PostmanCollectionCodegen {
         super.processOpts();
         this.outputFolder = "../../../sdk/docspace-api-postman-collections";
 
-        String baseURL = openAPI.getServers().get(0).getUrl();
         if (openAPI.getServers() != null && !openAPI.getServers().isEmpty()) {
             Server server = openAPI.getServers().get(0);
             ServerVariables serverVars = server.getVariables();
             if (serverVars != null){
                 ServerVariable baseUrlVar = serverVars.get("baseUrl");
                 if(baseUrlVar != null && "".equals(baseUrlVar.getDefault())){
-                    baseUrlVar.setDefault("http://localhost:8092/");
+                    baseUrlVar.setDefault("http://localhost:8092");
                 }
             }
         }
@@ -62,11 +47,13 @@ public class MyPostmanCollectionCodegen extends PostmanCollectionCodegen {
 
     public static class TagGroup {
         public String name;
+        public String description; 
         public List<ChildGroup> children = new ArrayList<>();
     }
 
     public static class ChildGroup {
         public String name;
+        public String description;
         public List<CodegenOperation> operations = new ArrayList<>();
         public boolean isSelf;
     }
@@ -80,6 +67,10 @@ public class MyPostmanCollectionCodegen extends PostmanCollectionCodegen {
 
         for (CodegenOperation codegenOperation : opList) {
 
+            codegenOperation.vendorExtensions.put("hasVariables", codegenOperation.pathParams != null && !codegenOperation.pathParams.isEmpty());
+
+            codegenOperation.vendorExtensions.put("hasQueryParams", codegenOperation.queryParams != null && !codegenOperation.queryParams.isEmpty());
+
             if (folderStrategy.equalsIgnoreCase("tags")) {
                 addToMap(codegenOperation);
             } else {
@@ -91,14 +82,23 @@ public class MyPostmanCollectionCodegen extends PostmanCollectionCodegen {
         List<TagGroup> groups = new ArrayList<>();
         for (Map.Entry<String, Map<String, List<CodegenOperation>>> parentEntry : codegenOperationsByTag.entrySet()) {
             TagGroup tg = new TagGroup();
-            String parentKey = parentEntry.getKey();
             tg.name = parentEntry.getKey();
 
-            for (Map.Entry<String, List<CodegenOperation>> childEntry : parentEntry.getValue().entrySet()) {
+            Map<String, List<CodegenOperation>> childrenMap = parentEntry.getValue();
+
+            for (Map.Entry<String, List<CodegenOperation>> childEntry : childrenMap.entrySet()) {
                 ChildGroup cg = new ChildGroup();
                 cg.name = childEntry.getKey();
                 cg.operations = childEntry.getValue();
                 cg.isSelf = "_self".equals(cg.name);
+                if (cg.isSelf)
+                {
+                    tg.description = getTagDescription(tg.name, null);
+                }
+                else
+                {
+                    cg.description = getTagDescription(tg.name, cg.name);
+                }
                 tg.children.add(cg);
             }
             groups.add(tg);
@@ -107,6 +107,33 @@ public class MyPostmanCollectionCodegen extends PostmanCollectionCodegen {
         additionalProperties.put("tagGroups", groups);
 
         return results;
+    }
+
+    private String getTagDescription(String parent, String child) {
+
+        if (openAPI.getTags() == null) {
+            return "";
+        }
+
+        if (child == null || child.equals("Group")) {
+            return findTagDescription(parent);
+        }
+        String fullTag = parent + " / " + child;
+        String fullTagDescription = findTagDescription(fullTag);
+        if (!fullTagDescription.isEmpty()) {
+            return fullTagDescription;
+        }
+
+        return "";
+    }
+
+    private String findTagDescription(String tagName) {
+        for (io.swagger.v3.oas.models.tags.Tag tag : openAPI.getTags()) {
+            if (tagName.equals(tag.getName())) {
+                return tag.getDescription() != null ? tag.getDescription() : "";
+            }
+        }
+        return "";
     }
 
     private Map<String, Map<String, List<CodegenOperation>>> codegenOperationsByTag = new HashMap<>();

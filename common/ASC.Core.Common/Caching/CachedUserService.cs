@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -372,5 +372,40 @@ public class CachedUserService : IUserService
     public async Task<IEnumerable<string>> GetDavUserEmailsAsync(int tenant)
     {
         return await _service.GetDavUserEmailsAsync(tenant);
+    }
+
+    public async Task<InvitationLink> CreateInvitationLinkAsync(int tenantId, EmployeeType employeeType, DateTime expiration, int? maxUseCount)
+    {
+        return await _service.CreateInvitationLinkAsync(tenantId, employeeType, expiration, maxUseCount);
+    }
+
+    public async Task<InvitationLink> GetInvitationLinkAsync(int tenantId, Guid id)
+    {
+        return await _service.GetInvitationLinkAsync(tenantId, id);
+    }
+
+    public async Task<InvitationLink> GetInvitationLinkAsync(int tenantId, EmployeeType employeeType)
+    {
+        return await _service.GetInvitationLinkAsync(tenantId, employeeType);
+    }
+
+    public async Task<List<InvitationLink>> GetInvitationLinksAsync(int tenantId)
+    {
+        return await _service.GetInvitationLinksAsync(tenantId);
+    }
+
+    public async Task UpdateInvitationLinkAsync(int tenantId, Guid id, DateTime expiration, int? maxUseCount)
+    {
+        await _service.UpdateInvitationLinkAsync(tenantId, id, expiration, maxUseCount);
+    }
+
+    public async Task IncreaseInvitationLinkUsageAsync(int tenantId, Guid id)
+    {
+        await _service.IncreaseInvitationLinkUsageAsync(tenantId, id);
+    }
+
+    public async Task DeleteInvitationLinkAsync(int tenantId, Guid id)
+    {
+        await _service.DeleteInvitationLinkAsync(tenantId, id);
     }
 }

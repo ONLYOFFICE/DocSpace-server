@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -322,6 +322,11 @@ public class UploadModelBinder : IModelBinder
         if (bindingContext.GetFirstValue(nameof(result.ContentDisposition), out var contentDisposition) && !string.IsNullOrEmpty(contentDisposition))
         {
             result.ContentDisposition = new ContentDisposition(contentDisposition);
+        }
+
+        if (bindingContext.HttpContext.Request.HasFormContentType)
+        {
+            result.File = bindingContext.HttpContext.Request.Form.Files.FirstOrDefault();
         }
 
         bindingContext.HttpContext.Request.EnableBuffering();

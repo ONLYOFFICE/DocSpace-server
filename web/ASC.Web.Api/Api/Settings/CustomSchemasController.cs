@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -37,10 +37,10 @@ public class CustomSchemasController(
     IFusionCache fusionCache)
     : BaseSettingsController(fusionCache, webItemManager)
 {
-    /// <summary>
+    /// <remarks>
     /// Returns all portal team templates that allow users to name their organization (or group), add members, and define their activities within the portal.
-    /// </summary>
-    /// <short>Get team templates</short>
+    /// </remarks>
+    /// <summary>Get team templates</summary>
     /// <path>api/2.0/settings/customschemas</path>
     /// <collection>list</collection>
     [Tags("Settings / Team templates")]
@@ -72,10 +72,10 @@ public class CustomSchemasController(
                 .ToListAsync();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Saves the names from the team template with the ID specified in the request.
-    /// </summary>
-    /// <short>Save the naming settings</short>
+    /// </remarks>
+    /// <summary>Save the naming settings</summary>
     /// <path>api/2.0/settings/customschemas</path>
     [Tags("Settings / Team templates")]
     [SwaggerResponse(200, "Team template with the following parameters", typeof(SchemaRequestsDto))]
@@ -95,10 +95,10 @@ public class CustomSchemasController(
         return await GetPeopleSchema(people);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Creates a custom team template with the parameters specified in the request.
-    /// </summary>
-    /// <short>Create a custom team template</short>
+    /// </remarks>
+    /// <summary>Create a custom team template</summary>
     /// <path>api/2.0/settings/customschemas</path>
     [Tags("Settings / Team templates")]
     [SwaggerResponse(200, "Custom team template with the following parameters", typeof(SchemaRequestsDto))]
@@ -155,10 +155,10 @@ public class CustomSchemasController(
         return await GetPeopleSchema(people);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a team template by the ID specified in the request.
-    /// </summary>
-    /// <short>Get a team template by ID</short>
+    /// </remarks>
+    /// <summary>Get a team template by ID</summary>
     /// <path>api/2.0/settings/customschemas/{id}</path>
     [Tags("Settings / Team templates")]
     [SwaggerResponse(200, "Team template with the following parameters", typeof(SchemaRequestsDto))]

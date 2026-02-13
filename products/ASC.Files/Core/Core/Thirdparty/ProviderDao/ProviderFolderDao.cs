@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -715,7 +715,8 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
             FolderType.VirtualRooms => IdConverter.Convert<T>(await globalFolderHelper.FolderVirtualRoomsAsync),
             FolderType.Archive => IdConverter.Convert<T>(await globalFolderHelper.FolderArchiveAsync),
             FolderType.Templates => IdConverter.Convert<T>(await globalFolderHelper.FolderRoomTemplatesAsync),
-            FolderType.AiAgents => IdConverter.Convert<T>(await globalFolderHelper.FolderRoomTemplatesAsync),
+            FolderType.DefaultTemplates => IdConverter.Convert<T>(await globalFolderHelper.FolderDefaultTemplatesAsync),
+            FolderType.AiAgents => IdConverter.Convert<T>(await globalFolderHelper.FolderAiAgentsAsync),
             _ => folder.FolderIdDisplay
         };
 

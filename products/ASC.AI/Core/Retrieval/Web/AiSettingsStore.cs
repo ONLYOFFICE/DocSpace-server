@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,8 +30,7 @@ namespace ASC.AI.Core.Retrieval.Web;
 public class AiSettingsStore(
     SettingsManager settingsManager,
     InstanceCrypto instanceCrypto,
-    TenantManager tenantManager,
-    AiGateway aiGateway)
+    TenantManager tenantManager)
 {
     public async Task SetWebSearchSettingsAsync(WebSearchSettings webSearchSettings)
     {
@@ -86,12 +85,6 @@ public class AiSettingsStore(
     public async Task<bool> IsWebSearchEnabledAsync()
     {
         var tenantId = tenantManager.GetCurrentTenantId();
-        
-        if (aiGateway.Configured)
-        {
-            var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>(tenantId);
-            return settings.EnabledServices != null && settings.EnabledServices.Contains(TenantWalletService.WebSearch);
-        }
         
         var webSearchSettingsRaw = await settingsManager.LoadAsync<EncryptedWebSearchSettings>(tenantId);
         

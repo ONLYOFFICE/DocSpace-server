@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,6 +23,8 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+using HttpRequestExtensions = System.Web.HttpRequestExtensions;
 
 namespace ASC.Files.Core.Security;
 
@@ -58,7 +60,7 @@ public class ExternalShare(
                 }
                 else
                 {
-                    url = file.DownloadUrl;
+                    url = filesLinkUtility.GetFileDownloadUrl(file.Id);
                 }
 
                 url = QueryHelpers.AddQueryString(url, FilesLinkUtility.ShareKey, key);
@@ -462,22 +464,22 @@ public class ExternalSessionSnapshot
 /// </summary>
 public enum Status
 {
-    [SwaggerEnum(Description = "Ok")]
+    [Description("Ok")]
     Ok,
 
-    [SwaggerEnum(Description = "Invalid")]
+    [Description("Invalid")]
     Invalid,
 
-    [SwaggerEnum(Description = "Expired")]
+    [Description("Expired")]
     Expired,
 
-    [SwaggerEnum(Description = "Required password")]
+    [Description("Required password")]
     RequiredPassword,
 
-    [SwaggerEnum(Description = "Invalid password")]
+    [Description("Invalid password")]
     InvalidPassword,
 
-    [SwaggerEnum(Description = "External access denied")]
+    [Description("External access denied")]
     ExternalAccessDenied
 }
 

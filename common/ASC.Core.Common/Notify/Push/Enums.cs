@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -58,18 +58,18 @@ public enum PushModule
 /// </summary>
 public enum MobileAppType
 {
-    [SwaggerEnum("Ios projects")]
+    [Description("Ios projects")]
     IosProjects = 0,
 
-    [SwaggerEnum("Android projects")]
+    [Description("Android projects")]
     AndroidProjects = 1,
 
-    [SwaggerEnum("Ios documents")]
+    [Description("Ios documents")]
     IosDocuments = 2,
 
-    [SwaggerEnum("Android documents")]
+    [Description("Android documents")]
     AndroidDocuments = 3,
 
-    [SwaggerEnum("Desktop editor")]
+    [Description("Desktop editor")]
     DesktopEditor = 4
 }

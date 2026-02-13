@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -73,6 +73,9 @@ global using ASC.Files.Core.Vectorization.Settings;
 global using ASC.FederatedLogin;
 global using ASC.FederatedLogin.Helpers;
 global using ASC.FederatedLogin.LoginProviders;
+
+global using ASC.MessagingSystem.Core;
+global using ASC.MessagingSystem.EF.Model;
 
 global using ASC.Security.Cryptography;
 

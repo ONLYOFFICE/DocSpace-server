@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Api.Core.Extensions;
-
 namespace ASC.FederatedLogin.LoginProviders;
 
 /// <summary>
@@ -33,46 +31,46 @@ namespace ASC.FederatedLogin.LoginProviders;
 /// </summary>
 public enum LoginProvider
 {
-    [SwaggerEnum("Facebook")]
+    [Description("Facebook")]
     Facebook,
 
-    [SwaggerEnum("Google")]
+    [Description("Google")]
     Google,
 
-    [SwaggerEnum("Dropbox")]
+    [Description("Dropbox")]
     Dropbox,
 
-    [SwaggerEnum("Docusign")]
+    [Description("Docusign")]
     Docusign,
 
-    [SwaggerEnum("Box")]
+    [Description("Box")]
     Box,
 
-    [SwaggerEnum("OneDrive")]
+    [Description("OneDrive")]
     OneDrive,
 
-    [SwaggerEnum("GosUslugi")]
+    [Description("GosUslugi")]
     GosUslugi,
 
-    [SwaggerEnum("LinkedIn")]
+    [Description("LinkedIn")]
     LinkedIn,
 
-    [SwaggerEnum("MailRu")]
+    [Description("MailRu")]
     MailRu,
 
-    [SwaggerEnum("VK")]
+    [Description("VK")]
     VK,
 
-    [SwaggerEnum("Wordpress")]
+    [Description("Wordpress")]
     Wordpress,
 
-    [SwaggerEnum("Yahoo")]
+    [Description("Yahoo")]
     Yahoo,
 
-    [SwaggerEnum("Yandex")]
+    [Description("Yandex")]
     Yandex,
     
-    [SwaggerEnum("Github")]
+    [Description("Github")]
     Github
 }
 

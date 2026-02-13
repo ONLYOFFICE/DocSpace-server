@@ -14,6 +14,9 @@ import {{import}};
 {{#serializableModel}}
 import java.io.Serializable;
 {{/serializableModel}}
+{{#models}}{{#model}}{{#vendorExtensions.isApiDateTime}}
+import java.time.ZoneOffset;
+{{/vendorExtensions.isApiDateTime}}{{/model}}{{/models}}
 {{#jackson}}
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;

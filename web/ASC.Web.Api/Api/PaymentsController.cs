@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,9 +32,9 @@ using Microsoft.AspNetCore.RateLimiting;
 
 namespace ASC.Web.Api.Controllers;
 
-///<summary>
+///<remarks>
 /// Portal information access.
-///</summary>
+///</remarks>
 ///<name>portal</name>
 [Scope]
 [DefaultRoute("payment")]
@@ -68,12 +68,12 @@ public class PaymentController(
     private readonly int _maxCount = 10;
     private readonly int _expirationMinutes = 2;
 
-    /// <summary>
+    /// <remarks>
     /// Returns the URL to the payment page.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the payment page URL
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/payment/url</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The URL to the payment page", typeof(Uri))]
@@ -101,7 +101,7 @@ public class PaymentController(
         }
 
         var monthQuotas = (await quotaService.GetTenantQuotasAsync())
-            .Where(q => !string.IsNullOrEmpty(q.ProductId) && q.Visible && !q.Year)
+            .Where(q => !string.IsNullOrEmpty(q.ProductId) && q.Visible && !q.Wallet && !q.Year)
             .ToList();
 
         // TODO: Temporary restriction.
@@ -125,12 +125,12 @@ public class PaymentController(
             inDto.BackUrl);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Updates the payment quantity with the parameters specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Update the payment quantity
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/payment/update</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -199,12 +199,12 @@ public class PaymentController(
         return result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Updates the wallet payment quantity with the parameters specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Update the wallet payment quantity
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/payment/updatewallet</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -316,12 +316,12 @@ public class PaymentController(
         return result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Calculates an amount of the wallet payment with the parameters specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Calculate the wallet payment amount
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/payment/calculatewallet</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Payment calculation", typeof(PaymentCalculation))]
@@ -394,12 +394,12 @@ public class PaymentController(
         return result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the URL to the payment account.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the payment account
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/payment/account</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The URL to the payment account", typeof(string))]
@@ -426,12 +426,12 @@ public class PaymentController(
         return !string.IsNullOrEmpty(inDto.BackUrl) ? $"{result}?backUrl={inDto.BackUrl}" : result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the available portal prices.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get prices
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/payment/prices</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "List of available portal prices", typeof(Dictionary<string, decimal>))]
@@ -445,12 +445,12 @@ public class PaymentController(
     }
 
 
-    /// <summary>
+    /// <remarks>
     /// Returns the available portal currencies.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get currencies
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/payment/currencies</path>
     /// <collection>list</collection>
     [Tags("Portal / Payment")]
@@ -469,12 +469,12 @@ public class PaymentController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the available portal quotas.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get quotas
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/payment/quotas</path>
     /// <collection>list</collection>
     [Tags("Portal / Payment")]
@@ -496,30 +496,30 @@ public class PaymentController(
         return await tariffHelper.GetQuotasAsync(false, inDto.Wallet).ToListAsync();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the available wallet services.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get wallet services
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/payment/walletservices</path>
     /// <collection>list</collection>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "List of available wallet services", typeof(IEnumerable<QuotaDto>))]
+    [SwaggerResponse(200, "List of available wallet services", typeof(IEnumerable<WalletServiceDto>))]
     [HttpGet("walletservices")]
-    public async Task<IEnumerable<QuotaDto>> GetWalletServices()
+    public async Task<IEnumerable<WalletServiceDto>> GetWalletServices()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        return await tariffHelper.GetQuotasAsync(true, true).ToListAsync();
+        return await tariffHelper.GetWalletServicesAsync();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the specified wallet service.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get wallet service
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/payment/walletservice</path>
     /// <collection>list</collection>
     [Tags("Portal / Payment")]
@@ -539,12 +539,12 @@ public class PaymentController(
         return await tariffHelper.ToQuotaDtoAsync(quota, false);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the payment information about the current portal quota.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get quota payment information
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/payment/quota</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Payment information about the current portal quota", typeof(QuotaDto))]
@@ -560,12 +560,12 @@ public class PaymentController(
         return await tariffHelper.GetCurrentQuotaAsync(inDto.Refresh);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sends a request for the portal payment.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Send a payment request
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/payment/request</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Ok")]
@@ -591,12 +591,12 @@ public class PaymentController(
     }
 
 
-    /// <summary>
+    /// <remarks>
     /// Returns the URL to the checkout setup page.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the checkout setup page URL
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/payment/checkoutsetupurl</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The URL to the checkout setup page", typeof(Uri))]
@@ -639,12 +639,12 @@ public class PaymentController(
             true);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the customer information.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the customer information
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/payment/customerinfo</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The customer info", typeof(CustomerInfoDto))]
@@ -679,12 +679,12 @@ public class PaymentController(
         return result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the result of putting money on deposit.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Put money on deposit
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/payment/deposit</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -727,12 +727,12 @@ public class PaymentController(
         return result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the customer balance from the accounting service.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the customer balance
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/payment/customer/balance</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The customer balance", typeof(Balance))]
@@ -759,12 +759,12 @@ public class PaymentController(
         return result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the report of customer operations from the accounting service.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the customer operations
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/payment/customer/operations</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The customer operations", typeof(ReportDto))]
@@ -801,12 +801,12 @@ public class PaymentController(
         return new ReportDto(report, apiDateTimeHelper, participantDisplayNames);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Starts generating a customer operations report as an "xlsx" file and saves it in Documents.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Start the customer operations report generation
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/payment/customer/operationsreport</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Ok", typeof(DocumentBuilderTaskDto))]
@@ -849,10 +849,10 @@ public class PaymentController(
         return DocumentBuilderTaskDto.Get(taskProgress);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the status of generating a customer operations report.
-    /// </summary>
-    /// <short>Get the status of the customer operations report generation</short>
+    /// </remarks>
+    /// <summary>Get the status of the customer operations report generation</summary>
     /// <path>api/2.0/portal/payment/customer/operationsreport</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Ok", typeof(DocumentBuilderTaskDto))]
@@ -879,10 +879,10 @@ public class PaymentController(
         return DocumentBuilderTaskDto.Get(task);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Terminates generating a customer operations report.
-    /// </summary>
-    /// <short>Terminate the customer operations report generation</short>
+    /// </remarks>
+    /// <summary>Terminate the customer operations report generation</summary>
     /// <path>api/2.0/portal/payment/customer/operationsreport</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Ok")]
@@ -909,12 +909,12 @@ public class PaymentController(
         await eventBus.PublishAsync(evt);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the list of available currencies from the accounting service.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get currencies from the accounting service
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/payment/accounting/currencies</path>
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
@@ -938,12 +938,12 @@ public class PaymentController(
         return allCurrencies.Where(x => supportedCurrencies.Contains(x.Code)).ToList();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the wallet auto top-up settings.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get wallet auto top-up settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/payment/topupsettings</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The wallet auto top up settings", typeof(TenantWalletSettings))]
@@ -957,12 +957,12 @@ public class PaymentController(
         return result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sets the wallet auto top-up settings.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Set wallet auto top-up settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/payment/topupsettings</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The wallet auto top up settings", typeof(TenantWalletSettings))]
@@ -1000,12 +1000,12 @@ public class PaymentController(
         return settings;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the wallet services settings.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get wallet services settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/payment/servicessettings</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The wallet services settings", typeof(TenantWalletServiceSettings))]
@@ -1025,12 +1025,12 @@ public class PaymentController(
         return settings;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Changes the wallet service state.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Change wallet service state
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/payment/servicestate</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The wallet service settings", typeof(TenantWalletServiceSettings))]

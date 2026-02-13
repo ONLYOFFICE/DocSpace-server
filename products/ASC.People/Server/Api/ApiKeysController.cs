@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2024
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -39,12 +39,12 @@ public class ApiKeysController(
     ApiKeyMapper mapper,
     IHttpContextAccessor httpContextAccessor) : ControllerBase
 {
-    /// <summary>
+    /// <remarks>
     ///  Creates a user API key with the parameters specified in the request.
-    /// </summary>  
-    /// <short>
+    /// </remarks>  
+    /// <summary>
     ///  Create a user API key
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/keys</path>
     [Tags("Api keys")]
     [SwaggerResponse(200, "Create a user api key", typeof(ApiKeyResponseDto))]
@@ -87,12 +87,12 @@ public class ApiKeysController(
         return apiKeyResponseDto;
     }
 
-    /// <summary>
+    /// <remarks>
     ///  Returns a list of all available permissions for the API key.
-    /// </summary>  
-    /// <short>
+    /// </remarks>  
+    /// <summary>
     /// Get API key permissions
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/keys/permissions</path>
     /// <collection>list</collection>
     [Tags("Api keys")]
@@ -112,12 +112,12 @@ public class ApiKeysController(
     }
 
 
-    /// <summary>
+    /// <remarks>
     ///  Returns a list of all API keys for the current user.
-    /// </summary>  
-    /// <short>
+    /// </remarks>  
+    /// <summary>
     ///  Get current user's API keys
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/keys</path>
     /// <collection>list</collection>
     [Tags("Api keys")]
@@ -147,12 +147,12 @@ public class ApiKeysController(
     }
 
 
-    /// <summary>
+    /// <remarks>
     /// Returns information about the current user's API key.
-    /// </summary>  
-    /// <short>
+    /// </remarks>  
+    /// <summary>
     ///  Get current user's API key
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/keys/@self</path>
     [Tags("Api keys")]
     [SwaggerResponse(200, "List of api keys for user", typeof(ApiKeyResponseDto))]
@@ -166,12 +166,12 @@ public class ApiKeysController(
     }
 
 
-    /// <summary>
+    /// <remarks>
     ///  Updates an existing API key changing its name, permissions, and status.
-    /// </summary>  
-    /// <short>
+    /// </remarks>  
+    /// <summary>
     ///  Update an API key
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/keys/{keyId}</path>
     [Tags("Api keys")]
     [SwaggerResponse(200, "Update optional params for user api keys", typeof(bool))]
@@ -215,12 +215,12 @@ public class ApiKeysController(
         return result;
     }
 
-    /// <summary>
+    /// <remarks>
     ///  Deletes a user API key by its ID.
-    /// </summary>  
-    /// <short>
+    /// </remarks>  
+    /// <summary>
     ///  Delete a user API key
-    /// </short>
+    /// </summary>
     /// <param name="keyId">The API key ID.</param>
     /// <path>api/2.0/keys/{keyId}</path>
     [Tags("Api keys")]

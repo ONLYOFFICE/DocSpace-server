@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -23,10 +23,6 @@
 // All the Product's GUI elements, including illustrations and icon sets, as well as technical writing
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
-
-using System.ComponentModel;
-
-using Actions = ASC.Web.Studio.Core.Notify.Actions;
 
 namespace ASC.Files.Core.Security;
 
@@ -57,7 +53,7 @@ public class FileSecurity(
     VectorizationGlobalSettings vectorizationGlobalSettings,
     VectorizationHelper vectorizationHelper,
     AiAccessibility aiAccessibility,
-    Actions actions)
+    IServiceProvider serviceProvider)
     : IFileSecurity
 {
     public readonly FileShare DefaultMyShare = FileShare.Restrict;
@@ -1165,7 +1161,7 @@ public class FileSecurity(
                 return false;
             }
 
-            if (action is FilesSecurityActions.Vectorization && !await aiAccessibility.IsVectorizationEnabledAsync())
+            if (action is FilesSecurityActions.Vectorization && !await aiAccessibility.IsVectorizationEnabledAsync(room))
             {
                 return false;
             }
@@ -1242,7 +1238,7 @@ public class FileSecurity(
                 }
                 
                 if (action is FilesSecurityActions.CopyTo or FilesSecurityActions.MoveTo or FilesSecurityActions.Create &&
-                    !await aiAccessibility.IsVectorizationEnabledAsync())
+                    !await aiAccessibility.IsVectorizationEnabledAsync(room))
                 {
                     return false;
                 }
@@ -3395,8 +3391,8 @@ public class FileSecurity(
         var userId = authContext.CurrentAccount.ID;
 
         if (!await badgesSettingsHelper.GetEnabledForCurrentUserAsync()
-            && !await studioNotifyHelper.IsSubscribedToNotifyAsync(userId, actions.RoomsActivity)
-            && !await studioNotifyHelper.IsSubscribedToNotifyAsync(userId, actions.SendWhatsNew))
+            && !await studioNotifyHelper.IsSubscribedToNotifyAsync(userId, serviceProvider.GetService<RoomsActivityNotifyAction>())
+            && !await studioNotifyHelper.IsSubscribedToNotifyAsync(userId, serviceProvider.GetService<SendWhatsNewNotifyAction>()))
         {
             return true;
         }
@@ -3460,118 +3456,118 @@ public class FileSecurity(
     /// </summary>
     public enum FilesSecurityActions
     {
-        [SwaggerEnum("Read")]
+        [Description("Read")]
         Read,
 
-        [SwaggerEnum("Comment")]
+        [Description("Comment")]
         Comment,
 
-        [SwaggerEnum("Fill forms")]
+        [Description("Fill forms")]
         FillForms,
 
-        [SwaggerEnum("Review")]
+        [Description("Review")]
         Review,
 
-        [SwaggerEnum("Create")]
+        [Description("Create")]
         Create,
 
-        [SwaggerEnum("CreateFrom")]
+        [Description("CreateFrom")]
         CreateFrom,
 
-        [SwaggerEnum("Edit")]
+        [Description("Edit")]
         Edit,
 
-        [SwaggerEnum("Delete")]
+        [Description("Delete")]
         Delete,
 
-        [SwaggerEnum("Custom filter")]
+        [Description("Custom filter")]
         CustomFilter,
 
-        [SwaggerEnum("Edit room")]
+        [Description("Edit room")]
         EditRoom,
 
-        [SwaggerEnum("Rename")]
+        [Description("Rename")]
         Rename,
 
-        [SwaggerEnum("Read history")]
+        [Description("Read history")]
         ReadHistory,
 
-        [SwaggerEnum("Lock")]
+        [Description("Lock")]
         Lock,
 
-        [SwaggerEnum("Edit history")]
+        [Description("Edit history")]
         EditHistory,
 
-        [SwaggerEnum("Copy to")]
+        [Description("Copy to")]
         CopyTo,
 
-        [SwaggerEnum("Copy")]
+        [Description("Copy")]
         Copy,
 
-        [SwaggerEnum("Move to")]
+        [Description("Move to")]
         MoveTo,
 
-        [SwaggerEnum("Move")]
+        [Description("Move")]
         Move,
 
-        [SwaggerEnum("Pin")]
+        [Description("Pin")]
         Pin,
 
-        [SwaggerEnum("Mute")]
+        [Description("Mute")]
         Mute,
 
-        [SwaggerEnum("Edit access")]
+        [Description("Edit access")]
         EditAccess,
 
-        [SwaggerEnum("Duplicate")]
+        [Description("Duplicate")]
         Duplicate,
 
-        [SwaggerEnum("Submit to form gallery")]
+        [Description("Submit to form gallery")]
         SubmitToFormGallery,
 
-        [SwaggerEnum("Download")]
+        [Description("Download")]
         Download,
 
-        [SwaggerEnum("Convert")]
+        [Description("Convert")]
         Convert,
 
-        [SwaggerEnum("Copy shared link")]
+        [Description("Copy shared link")]
         CopySharedLink,
 
-        [SwaggerEnum("Read links")]
+        [Description("Read links")]
         ReadLinks,
 
-        [SwaggerEnum("Reconnect")]
+        [Description("Reconnect")]
         Reconnect,
 
-        [SwaggerEnum("Create room from")]
+        [Description("Create room from")]
         CreateRoomFrom,
 
-        [SwaggerEnum("Copy link")]
+        [Description("Copy link")]
         CopyLink,
 
-        [SwaggerEnum("Embed")]
+        [Description("Embed")]
         Embed,
 
-        [SwaggerEnum("Change owner")]
+        [Description("Change owner")]
         ChangeOwner,
 
-        [SwaggerEnum("Index export")]
+        [Description("Index export")]
         IndexExport,
 
-        [SwaggerEnum("Start filling")]
+        [Description("Start filling")]
         StartFilling,
 
-        [SwaggerEnum("Filling status")]
+        [Description("Filling status")]
         FillingStatus,
 
-        [SwaggerEnum("Reset filling")]
+        [Description("Reset filling")]
         ResetFilling,
 
-        [SwaggerEnum("Start filling")]
+        [Description("Start filling")]
         StopFilling,
 
-        [SwaggerEnum("Open form")]
+        [Description("Open form")]
         OpenForm,
 
         [Description("Edit internal")]

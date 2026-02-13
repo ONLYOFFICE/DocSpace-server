@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,4 +31,5 @@ public class ChatSettings
     public int ProviderId { get; set; }
     public string ModelId { get; init; }
     public string Prompt { get; init; }
+    public bool Internal => ProviderId == AiGateway.ProviderId;
 }

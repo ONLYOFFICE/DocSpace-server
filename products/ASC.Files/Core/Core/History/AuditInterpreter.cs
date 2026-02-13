@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -118,7 +118,11 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
         { (int)MessageAction.RoomIndexExportSaved, new RoomIndexExportSavedInterpreter() },
         { (int)MessageAction.RoomInviteResend, new RoomInviteResendInterpreter() },
         { (int)MessageAction.AgentCreated, _roomCreateInterpreter },
-        { (int)MessageAction.AgentRenamed, _roomRenamedInterpreter }
+        { (int)MessageAction.AgentRenamed, _roomRenamedInterpreter },
+        { (int)MessageAction.FileSavedButUserQuotaExceeded, _userFileUpdatedInterpreter },
+        { (int)MessageAction.FileNotSavedDueToUserQuota, _userFileUpdatedInterpreter },
+        { (int)MessageAction.FileSavedButRoomQuotaExceeded, _userFileUpdatedInterpreter },
+        { (int)MessageAction.FileNotSavedDueToRoomQuota, _userFileUpdatedInterpreter }
     }.ToFrozenDictionary();
 
     public ValueTask<HistoryEntry> ToHistoryAsync(DbAuditEvent @event, DbFilesAuditReference reference)

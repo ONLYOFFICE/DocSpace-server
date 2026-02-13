@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -25,6 +25,8 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using Microsoft.Extensions.Configuration;
+
+using static System.Collections.Specialized.BitVector32;
 
 namespace ASC.Api.Documentation;
 
@@ -75,5 +77,77 @@ public class Settings : CommandSettings
         Endpoints = configuration.GetSection("openApi:endpoints").Get<Dictionary<string, string>>()!;
         
         return ValidationResult.Success();
+    }
+}
+
+public class JoinSettings : CommandSettings
+{
+    [CommandOption("-o|--output <OUTPUT>")]
+    public string Output { get; set; } = null!;
+
+    [CommandOption("-f|--file <FILES>")]
+    public IEnumerable<string>? Files { get; set; }
+
+    public override ValidationResult Validate()
+    {
+        var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+
+        if (!string.IsNullOrWhiteSpace(Output))
+        {
+            Output = Path.GetFullPath(Output);
+        }
+        else
+        {
+            var outputPath = configuration.GetSection("pathToFile").Get<string[]>();
+            if (outputPath == null || outputPath.Length == 0)
+            {
+                return ValidationResult.Error("File path not specified. Use -o|--output <OUTPUT> or configure file in appsettings.json");
+            }
+            Output = Path.GetFullPath(Path.Combine(outputPath));
+        }
+
+        if (Files == null || !Files.Any())
+        {
+            var list = new List<string>();
+
+            var joinSection = configuration.GetSection("join");
+
+            foreach (var child in joinSection.GetChildren())
+            {
+                AddFromConfig(child, list);
+            }
+
+            if (list.Count == 0)
+            {
+                return ValidationResult.Error("No input files specified and config is empty");
+            }
+
+            Files = [.. list];
+        }
+        else
+        {
+            Files = [.. Files.Select(Path.GetFullPath)];
+        }
+
+        return ValidationResult.Success();
+    }
+
+    private static void AddFromConfig(IConfigurationSection section, List<string> list)
+    {
+        var parts = section.Get<string[]>();
+
+        if (parts == null || parts.Length == 0)
+        {
+            return;
+        }
+
+        var fullPath = Path.GetFullPath(Path.Combine(parts));
+
+        if (!File.Exists(fullPath))
+        {
+            throw new FileNotFoundException($"Swagger file not found: {fullPath}");
+        }
+
+        list.Add(fullPath);
     }
 }

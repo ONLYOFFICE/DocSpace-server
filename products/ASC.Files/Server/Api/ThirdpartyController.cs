@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -45,10 +45,10 @@ public class ThirdpartyController(
         TenantManager tenantManager)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
-    /// <summary>
+    /// <remarks>
     /// Returns the list of the available providers.
-    /// </summary>
-    /// <short>Get providers</short>
+    /// </remarks>
+    /// <summary>Get providers</summary>
     /// <remarks>Available provider keys: DropboxV2, Box, WebDav, Yandex, OneDrive, SharePoint, GoogleDrive, kDrive.</remarks>
     /// <path>api/2.0/files/thirdparty/capabilities</path>
     /// <collection>list</collection>
@@ -65,10 +65,10 @@ public class ThirdpartyController(
         return thirdPartyConfiguration.GetProviders();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Creates a WordPress post with the parameters specified in the request.
-    /// </summary>
-    /// <short>Create a WordPress post</short>
+    /// </remarks>
+    /// <summary>Create a WordPress post</summary>
     /// <path>api/2.0/files/wordpress</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / WordPress")]
@@ -96,10 +96,10 @@ public class ThirdpartyController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Removes the third-party storage service account with the ID specified in the request.
-    /// </summary>
-    /// <short>Remove a third-party account</short>
+    /// </remarks>
+    /// <summary>Remove a third-party account</summary>
     /// <path>api/2.0/files/thirdparty/{providerId}</path>
     /// <exception cref="ArgumentException"></exception>
     [Tags("Files / Third-party integration")]
@@ -117,10 +117,10 @@ public class ThirdpartyController(
         return providerInfo.RootFolderId;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Deletes the WordPress plugin information.
-    /// </summary>
-    /// <short>Delete the WordPress information</short>
+    /// </remarks>
+    /// <summary>Delete the WordPress information</summary>
     /// <path>api/2.0/files/wordpress-delete</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / WordPress")]
@@ -138,10 +138,10 @@ public class ThirdpartyController(
         return DeleteWordpressInfoResponse.Failed();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of the third-party services connected to the "Common" section.
-    /// </summary>
-    /// <short>Get the common third-party services</short>
+    /// </remarks>
+    /// <summary>Get the common third-party services</summary>
     /// <path>api/2.0/files/thirdparty/common</path>
     /// <collection>list</collection>
     [Tags("Files / Third-party integration")]
@@ -158,10 +158,10 @@ public class ThirdpartyController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of all the connected third-party accounts.
-    /// </summary>
-    /// <short>Get the third-party accounts</short>
+    /// </remarks>
+    /// <summary>Get the third-party accounts</summary>
     /// <path>api/2.0/files/thirdparty</path>
     /// <collection>list</collection>
     [Tags("Files / Third-party integration")]
@@ -172,10 +172,10 @@ public class ThirdpartyController(
         return fileStorageService.GetThirdPartyAsync();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a backup of the connected third-party account.
-    /// </summary>
-    /// <short>Get a third-party account backup</short>
+    /// </remarks>
+    /// <summary>Get a third-party account backup</summary>
     /// <path>api/2.0/files/thirdparty/backup</path>
     [Tags("Files / Third-party integration")]
     [SwaggerResponse(200, "Folder for the third-party account backup", typeof(FolderDto<string>))]
@@ -192,10 +192,10 @@ public class ThirdpartyController(
         return null;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the WordPress plugin information.
-    /// </summary>
-    /// <short>Get the WordPress information</short>
+    /// </remarks>
+    /// <summary>Get the WordPress information</summary>
     /// <path>api/2.0/files/wordpress-info</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / WordPress")]
@@ -220,10 +220,10 @@ public class ThirdpartyController(
         return new WordpressInfoResponse { Success = false, Data = null };
     }
 
-    /// <summary>
+    /// <remarks>
     /// Saves the third-party storage service account. For WebDav, Yandex, kDrive and SharePoint, the login and password are used for authentication. For other providers, the authentication is performed using a token received via OAuth 2.0.
-    /// </summary>
-    /// <short>Save a third-party account</short>
+    /// </remarks>
+    /// <summary>Save a third-party account</summary>
     /// <remarks>List of provider keys: DropboxV2, Box, WebDav, Yandex, OneDrive, SharePoint, GoogleDrive, kDrive.</remarks>
     /// <path>api/2.0/files/thirdparty</path>
     /// <exception cref="ArgumentException"></exception>
@@ -246,10 +246,10 @@ public class ThirdpartyController(
         return await _folderDtoHelper.GetAsync(folder);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Saves a backup of the connected third-party account.
-    /// </summary>
-    /// <short>Save a third-party account backup</short>
+    /// </remarks>
+    /// <summary>Save a third-party account backup</summary>
     /// <remarks>List of provider keys: DropboxV2, Box, WebDav, Yandex, OneDrive, SharePoint, GoogleDrive, kDrive.</remarks>
     /// <path>api/2.0/files/thirdparty/backup</path>
     /// <exception cref="ArgumentException"></exception>
@@ -275,10 +275,10 @@ public class ThirdpartyController(
         return await _folderDtoHelper.GetAsync(folder);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Saves the user WordPress information when logging in.
-    /// </summary>
-    /// <short>Save the user WordPress information</short>
+    /// </remarks>
+    /// <summary>Save the user WordPress information</summary>
     /// <path>api/2.0/files/wordpress-save</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / WordPress")]
@@ -315,10 +315,10 @@ public class ThirdpartyController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of all providers.
-    /// </summary>
-    /// <short>Get all providers</short>
+    /// </remarks>
+    /// <summary>Get all providers</summary>
     /// <remarks>Available provider keys: Dropbox, Box, WebDav, OneDrive, GoogleDrive, kDrive, ownCloud, Nextcloud.</remarks>
     /// <path>api/2.0/files/thirdparty/providers</path>
     /// <collection>list</collection>

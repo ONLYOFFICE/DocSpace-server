@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -36,7 +36,6 @@ import com.asc.registration.service.ports.output.repository.ClientCommandReposit
 import com.asc.registration.service.transfer.request.create.CreateTenantClientCommand;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 /**
  * ClientCreateCommandHandler handles the creation of new clients. This component coordinates the
@@ -44,13 +43,14 @@ import org.springframework.stereotype.Component;
  * and event publisher.
  */
 @Slf4j
-@Component
 @RequiredArgsConstructor
 public class ClientCreateCommandHandler {
   private final ClientCommandRepository clientCommandRepository;
-  private final ClientDataMapper clientDataMapper;
+
   private final ClientDomainService clientDomainService;
   private final EncryptionService encryptionService;
+
+  private final ClientDataMapper clientDataMapper;
 
   /**
    * Creates a new client based on the provided command and audit information.

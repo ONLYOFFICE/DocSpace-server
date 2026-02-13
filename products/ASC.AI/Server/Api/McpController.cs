@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -32,6 +32,7 @@ namespace ASC.AI.Api;
 [ControllerName("ai")]
 public class McpController(McpService mcpService, ApiContext apiContext) : ControllerBase
 {
+    [Tags("AI / MCP")]
     [HttpPost("servers")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<McpServerDto> AddServerAsync(AddServerRequestDto inDto)
@@ -46,6 +47,7 @@ public class McpController(McpService mcpService, ApiContext apiContext) : Contr
         return server.MapToDto();
     }
     
+    [Tags("AI / MCP")]
     [HttpPut("servers/{id}")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<McpServerDto> UpdateServerAsync(UpdateServerRequestDto inDto)
@@ -62,6 +64,7 @@ public class McpController(McpService mcpService, ApiContext apiContext) : Contr
         return server.MapToDto();
     }
     
+    [Tags("AI / MCP")]
     [HttpPut("servers/{id}/status")]
     public async Task<McpServerDto> SetServerStatusAsync(SetServerStatusRequestDto inDto)
     {
@@ -70,6 +73,7 @@ public class McpController(McpService mcpService, ApiContext apiContext) : Contr
         return server.MapToDto();
     }
     
+    [Tags("AI / MCP")]
     [HttpDelete("servers")]
     public async Task<NoContentResult> DeleteServerAsync(DeleteServersRequestDto inDto)
     {
@@ -78,6 +82,7 @@ public class McpController(McpService mcpService, ApiContext apiContext) : Contr
         return NoContent();
     }
 
+    [Tags("AI / MCP")]
     [HttpGet("servers/{id}")]
     public async Task<McpServerShortDto> GetServerAsync(GetServersRequestDto inDto)
     {
@@ -86,6 +91,7 @@ public class McpController(McpService mcpService, ApiContext apiContext) : Contr
         return server.MapToShortDto();
     }
     
+    [Tags("AI / MCP")]
     [HttpGet("servers")]
     public async Task<List<McpServerDto>> GetServersAsync(PaginatedRequestDto inDto)
     {
@@ -96,6 +102,7 @@ public class McpController(McpService mcpService, ApiContext apiContext) : Contr
         return servers.Select(x => x.MapToDto()).ToList();
     }
 
+    [Tags("AI / MCP")]
     [HttpGet("servers/available")]
     public async Task<List<McpServerShortDto>> GetAvailableServersAsync(PaginatedRequestDto inDto)
     {
@@ -106,6 +113,7 @@ public class McpController(McpService mcpService, ApiContext apiContext) : Contr
         return servers.Select(x => x.MapToShortDto()).ToList();
     }
     
+    [Tags("AI / MCP")]
     [HttpPost("rooms/{roomId}/servers")]
     public async Task<List<McpServerStatusDto>> AddRoomServersAsync(AddRoomServersRequestDto inDto)
     {
@@ -114,6 +122,7 @@ public class McpController(McpService mcpService, ApiContext apiContext) : Contr
         return statuses.Select(x => x.MapToStatusDto()).ToList();
     }
 
+    [Tags("AI / MCP")]
     [HttpGet("rooms/{roomId}/servers")]
     public async Task<List<McpServerStatusDto>> GetRoomServersAsync(GetRoomServersRequestDto inDto)
     {
@@ -122,6 +131,7 @@ public class McpController(McpService mcpService, ApiContext apiContext) : Contr
         return statuses.Select(x => x.MapToStatusDto()).ToList();
     }
 
+    [Tags("AI / MCP")]
     [HttpDelete("rooms/{roomId}/servers")]
     public async Task<NoContentResult> DeleteRoomServersAsync(DeleteRoomServersRequestDto inDto)
     {
@@ -130,6 +140,7 @@ public class McpController(McpService mcpService, ApiContext apiContext) : Contr
         return NoContent();
     }
 
+    [Tags("AI / MCP")]
     [HttpPut("rooms/{roomId}/servers/{serverId}/tools")]
     public async Task<List<McpToolDto>> SetToolsAsync(SetMcpToolsRequestDto inDto)
     {
@@ -143,6 +154,7 @@ public class McpController(McpService mcpService, ApiContext apiContext) : Contr
         }).ToList();
     }
 
+    [Tags("AI / MCP")]
     [HttpGet("rooms/{roomId}/servers/{serverId}/tools")]
     public async Task<List<McpToolDto>> GetToolsAsync(GetMcpToolsRequestDto inDto)
     {
@@ -155,6 +167,7 @@ public class McpController(McpService mcpService, ApiContext apiContext) : Contr
         }).ToList();
     }
 
+    [Tags("AI / MCP")]
     [HttpPost("rooms/{roomId}/servers/{serverId}/connect")]
     public async Task<McpServerStatusDto> ConnectServerAsync(ConnectServerRequestDto inDto)
     {
@@ -163,6 +176,7 @@ public class McpController(McpService mcpService, ApiContext apiContext) : Contr
         return status.MapToStatusDto();
     }
     
+    [Tags("AI / MCP")]
     [HttpPost("rooms/{roomId}/servers/{serverId}/disconnect")]
     public async Task<McpServerStatusDto> DisconnectServerAsync(DisconnectServerRequestDto inDto)
     {

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -30,6 +30,8 @@ using ASC.Api.Core.Cors;
 using ASC.Api.Core.Cors.Enums;
 using ASC.Api.Core.Cors.Middlewares;
 using ASC.MessagingSystem;
+
+using Asp.Versioning;
 
 using Flurl.Util;
 
@@ -90,6 +92,22 @@ public abstract class BaseStartup
         services.AddExceptionHandler<CustomExceptionHandler>();
         services.AddProblemDetails();
 
+        services.AddApiVersioning(options =>
+        {
+            options.DefaultApiVersion = new ApiVersion(2, 0);
+            options.ApiVersionReader = new UrlSegmentApiVersionReader();
+            options.AssumeDefaultVersionWhenUnspecified = true;
+            options.ReportApiVersions = true;
+        }).AddMvc()
+        .AddApiExplorer(options =>
+        {
+            options.GroupNameFormat = "VV";
+            options.SubstitutionFormat = "VV";
+            options.AssumeDefaultVersionWhenUnspecified = true;
+            options.SubstituteApiVersionInUrl = true;
+            options.DefaultApiVersion = new ApiVersion(2, 0);
+        });
+        
         services.Configure<ForwardedHeadersOptions>(options =>
         {
             options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
@@ -303,7 +321,11 @@ public abstract class BaseStartup
                     var json = new StreamReader(httpContext.Request.Body).ReadToEndAsync().Result;
 
                     var userInvitationsDto = JsonSerializer.Deserialize<EmailInvitationsDto>(json, _serializerOptions);
-                    invitationsCount = userInvitationsDto.Invitations.Count(x => !string.IsNullOrEmpty(x.Email));
+
+                    if (userInvitationsDto?.Invitations != null)
+                    {
+                        invitationsCount = userInvitationsDto.Invitations.Count(x => !string.IsNullOrEmpty(x.Email));
+                    }
 
                     httpContext.Request.Body.Position = 0;
                 }
@@ -428,6 +450,7 @@ public abstract class BaseStartup
         if (OpenApiEnabled)
         {
             mvcBuilder.AddApiExplorer();
+            
             services.AddOpenApi(_configuration);
         }
         if (OpenTelemetryEnabled)

@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -26,9 +26,9 @@
 
 namespace ASC.Web.Api.Controllers;
 
-/// <summary>
+/// <remarks>
 /// Portal capabilities API.
-/// </summary>
+/// </remarks>
 /// <name>capabilities</name>
 [DefaultRoute, Route("api/2.0/capabilities.json")]
 [ApiController]
@@ -46,12 +46,12 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
     private readonly ILogger _log = logger;
 
 
-    ///<summary>
+    ///<remarks>
     /// Returns the information about portal capabilities.
-    ///</summary>
-    ///<short>
+    ///</remarks>
+    ///<summary>
     /// Get portal capabilities
-    ///</short>
+    ///</summary>
     ///<path>api/2.0/capabilities</path>
     [Tags("Capabilities")]
     [SwaggerResponse(200, "Portal capabilities", typeof(CapabilitiesDto))]

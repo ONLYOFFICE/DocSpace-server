@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -192,9 +192,9 @@ public class LoginProfile
 [Scope]
 public class LoginProfileTransport(InstanceCrypto instanceCrypto, TenantManager tenantManager)
 {
-    public async Task<string> ToString(LoginProfile profile)
+    public async Task<string> ToString(LoginProfile profile, bool pureTransport = false)
     {
-        var tenantId = tenantManager.GetCurrentTenant(false)?.Id;
+        var tenantId = pureTransport ? null : tenantManager.GetCurrentTenant(false)?.Id;
         var input = await instanceCrypto.EncryptAsync(Encoding.UTF8.GetBytes(profile.ToString() + tenantId));
         return WebEncoders.Base64UrlEncode(input);
     }

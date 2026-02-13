@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -33,9 +33,9 @@ public class PrivacyRoomControllerInternal(SettingsManager settingsManager, Encr
 public class PrivacyRoomControllerThirdparty(SettingsManager settingsManager, EncryptionKeyPairDtoHelper encryptionKeyPairHelper)
     : PrivacyRoomController<string>(settingsManager, encryptionKeyPairHelper);
 
-/// <summary>
+/// <remarks>
 /// Provides access to Private Room.
-/// </summary>
+/// </remarks>
 /// <name>privacyroom</name>
 [Scope]
 [DefaultRoute]
@@ -46,10 +46,10 @@ public abstract class PrivacyRoomController<T>(
     EncryptionKeyPairDtoHelper encryptionKeyPairHelper)
     : ControllerBase
 {
-    /// <summary>
+    /// <remarks>
     /// Returns all the key pairs of the users who have access to the file with the ID specified in the request.
-    /// </summary>
-    /// <short>Get file key pairs</short>
+    /// </remarks>
+    /// <summary>Get file key pairs</summary>
     /// <path>api/2.0/privacyroom/access/{fileId}</path>
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
@@ -82,10 +82,10 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
 {
     private readonly ILogger _logger = option.CreateLogger("ASC.Api.Documents");
 
-    /// <summary>
+    /// <remarks>
     /// Returns a key pair for the current user.
-    /// </summary>
-    /// <short>Get encryption keys</short>
+    /// </remarks>
+    /// <summary>Get encryption keys</summary>
     /// <path>api/2.0/privacyroom/keys</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
@@ -105,10 +105,10 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
     }
 
 
-    /// <summary>
+    /// <remarks>
     /// Checks if the Private Room settings are enabled or not.
-    /// </summary>
-    /// <short>Check the Private Room settings</short>
+    /// </remarks>
+    /// <summary>Check the Private Room settings</summary>
     /// <path>api/2.0/privacyroom</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
@@ -121,10 +121,10 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
         return await PrivacyRoomSettings.GetEnabledAsync(settingsManager);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sets the key pair for the current user.
-    /// </summary>
-    /// <short>Set encryption keys</short>
+    /// </remarks>
+    /// <summary>Set encryption keys</summary>
     /// <path>api/2.0/privacyroom/keys</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]
@@ -156,10 +156,10 @@ public class PrivacyRoomControllerCommon(AuthContext authContext,
         return new PrivacyRoomKeysResponse { IsSet = true };
     }
 
-    /// <summary>
+    /// <remarks>
     /// Enables the Private Room settings.
-    /// </summary>
-    /// <short>Enable the Private Room settings</short>
+    /// </remarks>
+    /// <summary>Enable the Private Room settings</summary>
     /// <path>api/2.0/privacyroom</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Private room")]

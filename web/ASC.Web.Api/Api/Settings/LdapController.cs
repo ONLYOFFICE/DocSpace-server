@@ -1,4 +1,4 @@
-﻿// (c) Copyright Ascensio System SIA 2009-2025
+﻿// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -40,12 +40,12 @@ public class LdapController(
     CoreBaseSettings coreBaseSettings)
     : BaseSettingsController(fusionCache, webItemManager)
 {
-    /// <summary>
+    /// <remarks>
     /// Returns the current portal LDAP settings.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the LDAP settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/ldap</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
@@ -83,12 +83,12 @@ public class LdapController(
         return settings.MapToSettingsDto();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the LDAP asynchronous cron expression for the current portal if it exists.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the LDAP cron expression
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/ldap/cron</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
@@ -108,12 +108,12 @@ public class LdapController(
         return settings.MapToDto();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sets the LDAP asynchronous cron expression to the current portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Set the LDAP cron expression
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/ldap/cron</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
@@ -151,12 +151,12 @@ public class LdapController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Synchronizes the portal data with the new information from the LDAP server.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Synchronize with LDAP server
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/ldap/sync</path>
     [Tags("Settings / LDAP")]
     [SwaggerResponse(200, "LDAP operation status", typeof(LdapStatusDto))]
@@ -176,12 +176,12 @@ public class LdapController(
         return result.MapToDto();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Starts the process of collecting preliminary changes on the portal during the synchronization process according to the selected LDAP settings.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Test the LDAP synchronization
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/ldap/sync/test</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
@@ -200,12 +200,12 @@ public class LdapController(
         return result.MapToDto();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Saves the LDAP settings specified in the request and starts importing/synchronizing users and groups by LDAP.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Save the LDAP settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/ldap</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
@@ -231,12 +231,12 @@ public class LdapController(
         return result.MapToDto();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Starts the process of saving LDAP settings and collecting preliminary changes on the portal according to them.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Test the LDAP saving process
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/ldap/save/test</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
@@ -255,12 +255,12 @@ public class LdapController(
         return result.MapToDto();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the LDAP synchronization process status.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the LDAP synchronization status
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/ldap/status</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]
@@ -277,12 +277,12 @@ public class LdapController(
         return result.MapToDto();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the LDAP default settings.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the LDAP default settings
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/settings/ldap/default</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / LDAP")]

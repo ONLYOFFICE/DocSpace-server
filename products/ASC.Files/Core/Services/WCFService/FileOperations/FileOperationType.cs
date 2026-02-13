@@ -1,4 +1,4 @@
-// (c) Copyright Ascensio System SIA 2009-2025
+// (c) Copyright Ascensio System SIA 2009-2026
 // 
 // This program is a free software product.
 // You can redistribute it and/or modify it under the terms
@@ -31,27 +31,27 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations;
 /// </summary>
 public enum FileOperationType
 {
-    [SwaggerEnum(Description = "Move")]
+    [Description("Move")]
     Move,
 
-    [SwaggerEnum(Description = "Copy")]
+    [Description("Copy")]
     Copy,
 
-    [SwaggerEnum(Description = "Delete")]
+    [Description("Delete")]
     Delete,
 
-    [SwaggerEnum(Description = "Download")]
+    [Description("Download")]
     Download,
 
-    [SwaggerEnum(Description = "MarkAsRead")]
+    [Description("MarkAsRead")]
     MarkAsRead,
 
-    [SwaggerEnum(Description = "Import")]
+    [Description("Import")]
     Import,
 
-    [SwaggerEnum(Description = "Convert")]
+    [Description("Convert")]
     Convert,
 
-    [SwaggerEnum(Description = "Duplicate")]
+    [Description("Duplicate")]
     Duplicate
 }
