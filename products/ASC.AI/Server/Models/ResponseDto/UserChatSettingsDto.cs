@@ -26,8 +26,15 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
+/// <summary>
+/// The user chat settings.
+/// </summary>
 public class UserChatSettingsDto
 {
+    /// <summary>
+    /// Indicates whether web search is enabled for the user.
+    /// </summary>
+    /// <example>true</example>
     public bool WebSearchEnabled { get; init; }
 }
 

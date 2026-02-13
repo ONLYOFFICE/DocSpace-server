@@ -26,10 +26,27 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
+/// <summary>
+/// The AI model information.
+/// </summary>
 public class ModelDto
 {
+    /// <summary>
+    /// The provider ID.
+    /// </summary>
+    /// <example>1</example>
     public int ProviderId { get; init; }
+
+    /// <summary>
+    /// The provider title.
+    /// </summary>
+    /// <example>OpenAI</example>
     public required string ProviderTitle { get; init; }
+
+    /// <summary>
+    /// The model ID.
+    /// </summary>
+    /// <example>gpt-4o</example>
     public required string ModelId { get; init; }
 }
 

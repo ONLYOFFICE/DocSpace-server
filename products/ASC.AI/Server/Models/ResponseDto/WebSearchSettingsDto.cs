@@ -26,11 +26,27 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
+/// <summary>
+/// The web search settings.
+/// </summary>
 public class WebSearchSettingsDto
 {
+    /// <summary>
+    /// Indicates whether web search is enabled.
+    /// </summary>
+    /// <example>true</example>
     public bool Enabled { get; init; }
+
+    /// <summary>
+    /// The search engine type.
+    /// </summary>
+    /// <example>0</example>
     public EngineType Type { get; init; }
 
+    /// <summary>
+    /// Indicates whether the web search API key needs to be reset.
+    /// </summary>
+    /// <example>false</example>
     public bool NeedReset { get; init; }
 }
 

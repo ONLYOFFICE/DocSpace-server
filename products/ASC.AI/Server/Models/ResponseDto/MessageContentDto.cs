@@ -26,17 +26,38 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
+/// <summary>
+/// The type of message content.
+/// </summary>
 public enum MessageContentType
 {
+    /// <summary>
+    /// The text content type.
+    /// </summary>
     Text,
+
+    /// <summary>
+    /// The tool call content type.
+    /// </summary>
     Tool,
+
+    /// <summary>
+    /// The attachment content type.
+    /// </summary>
     Attachment
 }
 
+/// <summary>
+/// The base class for message content blocks.
+/// </summary>
 [JsonDerivedType(typeof(TextContentDto))]
 [JsonDerivedType(typeof(ToolContentDto))]
 [JsonDerivedType(typeof(AttachmentContentDto))]
 public abstract class MessageContentDto
 {
+    /// <summary>
+    /// The content type.
+    /// </summary>
+    /// <example>0</example>
     public abstract MessageContentType Type { get; }
 }

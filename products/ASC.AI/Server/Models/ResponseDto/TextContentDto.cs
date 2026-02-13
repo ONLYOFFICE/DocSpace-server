@@ -26,9 +26,21 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
+/// <summary>
+/// The text message content.
+/// </summary>
 public class TextContentDto : MessageContentDto
 {
+    /// <summary>
+    /// The content type.
+    /// </summary>
+    /// <example>0</example>
     public override MessageContentType Type => MessageContentType.Text;
+
+    /// <summary>
+    /// The text value.
+    /// </summary>
+    /// <example>Hello! How can I help you today?</example>
     public string? Text { get; init; }
 }
 

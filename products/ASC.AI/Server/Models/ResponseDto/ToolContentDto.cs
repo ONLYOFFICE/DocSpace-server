@@ -28,12 +28,36 @@ using ASC.AI.Core.Chat.Tool;
 
 namespace ASC.AI.Models.ResponseDto;
 
+/// <summary>
+/// The tool call message content.
+/// </summary>
 public class ToolContentDto : MessageContentDto
 {
+    /// <summary>
+    /// The content type.
+    /// </summary>
+    /// <example>1</example>
     public override MessageContentType Type => MessageContentType.Tool;
+
+    /// <summary>
+    /// The tool name.
+    /// </summary>
+    /// <example>search_documents</example>
     public required string Name { get; init; }
+
+    /// <summary>
+    /// The tool call arguments.
+    /// </summary>
     public IDictionary<string, object?>? Arguments { get; init; }
+
+    /// <summary>
+    /// The tool call result.
+    /// </summary>
     public object? Result { get; init; }
+
+    /// <summary>
+    /// The MCP server information.
+    /// </summary>
     public McpServerInfo? McpServerInfo { get; init; }
 }
 

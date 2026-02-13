@@ -26,9 +26,21 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
+/// <summary>
+/// The AI provider settings.
+/// </summary>
 public class ProviderSettingsDto
 {
+    /// <summary>
+    /// The provider type.
+    /// </summary>
+    /// <example>0</example>
     public ProviderType Type { get; init; }
+
+    /// <summary>
+    /// The provider URL.
+    /// </summary>
+    /// <example>https://api.openai.com/v1</example>
     public required string Url { get; init; }
 }
 

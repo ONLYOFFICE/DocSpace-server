@@ -26,12 +26,38 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
+/// <summary>
+/// The chat session information.
+/// </summary>
 public record ChatDto(Guid Id, string Title, ApiDateTime CreatedOn, ApiDateTime ModifiedOn, EmployeeDto CreatedBy)
 {
+    /// <summary>
+    /// The chat session ID.
+    /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid Id { get; } = Id;
+
+    /// <summary>
+    /// The chat session title.
+    /// </summary>
+    /// <example>Project discussion</example>
     public string Title { get; } = Title;
+
+    /// <summary>
+    /// The date and time when the chat session was created.
+    /// </summary>
+    /// <example>2025-06-15T10:30:00.0000000Z</example>
     public ApiDateTime CreatedOn { get; } = CreatedOn;
+
+    /// <summary>
+    /// The date and time when the chat session was last modified.
+    /// </summary>
+    /// <example>2025-06-15T12:45:00.0000000Z</example>
     public ApiDateTime ModifiedOn { get; } = ModifiedOn;
+
+    /// <summary>
+    /// The user who created the chat session.
+    /// </summary>
     public EmployeeDto CreatedBy { get; } = CreatedBy;
 }
 

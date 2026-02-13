@@ -26,8 +26,20 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
+/// <summary>
+/// The MCP tool information.
+/// </summary>
 public class McpToolDto
 {
+    /// <summary>
+    /// The MCP tool name.
+    /// </summary>
+    /// <example>search_documents</example>
     public required string Name { get; init; }
+
+    /// <summary>
+    /// Specifies whether the MCP tool is enabled.
+    /// </summary>
+    /// <example>true</example>
     public bool Enabled { get; init; }
 }

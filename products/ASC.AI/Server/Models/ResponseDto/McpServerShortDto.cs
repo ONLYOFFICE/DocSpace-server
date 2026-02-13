@@ -26,14 +26,44 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
+/// <summary>
+/// The MCP server short information.
+/// </summary>
 public class McpServerShortDto
 {
+    /// <summary>
+    /// The MCP server ID.
+    /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid Id { get; init; }
+
+    /// <summary>
+    /// The MCP server name.
+    /// </summary>
+    /// <example>DocSpace Tools</example>
     public string? Name { get; init; }
+
+    /// <summary>
+    /// The MCP server type.
+    /// </summary>
+    /// <example>0</example>
     public ServerType ServerType { get; init; }
+
+    /// <summary>
+    /// Specifies whether the MCP server is enabled.
+    /// </summary>
+    /// <example>true</example>
     public bool Enabled { get; init; }
+
+    /// <summary>
+    /// The MCP server icon.
+    /// </summary>
     public Icon? Icon { get; init; }
 
+    /// <summary>
+    /// Specifies whether the MCP server settings need to be reset.
+    /// </summary>
+    /// <example>false</example>
     public bool NeedReset { get; init; }
 }
 

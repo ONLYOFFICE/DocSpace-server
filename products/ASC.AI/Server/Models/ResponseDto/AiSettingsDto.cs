@@ -26,18 +26,75 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
+/// <summary>
+/// The AI module settings.
+/// </summary>
 public class AiSettingsDto
 {
+    /// <summary>
+    /// Specifies whether the web search feature is enabled.
+    /// </summary>
+    /// <example>true</example>
     public bool WebSearchEnabled { get; init; }
+
+    /// <summary>
+    /// Specifies whether the web search settings need to be reset.
+    /// </summary>
+    /// <example>false</example>
     public bool WebSearchNeedReset { get; init; }
+
+    /// <summary>
+    /// Specifies whether the vectorization feature is enabled.
+    /// </summary>
+    /// <example>true</example>
     public bool VectorizationEnabled { get; init; }
+
+    /// <summary>
+    /// Specifies whether the vectorization settings need to be reset.
+    /// </summary>
+    /// <example>false</example>
     public bool VectorizationNeedReset { get; init; }
+
+    /// <summary>
+    /// Specifies whether the AI module is ready for use.
+    /// </summary>
+    /// <example>true</example>
     public bool AiReady { get; init; }
+
+    /// <summary>
+    /// Specifies whether the AI readiness settings need to be reset.
+    /// </summary>
+    /// <example>false</example>
     public bool AiReadyNeedReset { get; init; }
+
+    /// <summary>
+    /// The portal MCP server ID.
+    /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid? PortalMcpServerId { get; init; }
+
+    /// <summary>
+    /// The name of the embedding model used for vectorization.
+    /// </summary>
+    /// <example>text-embedding-3-small</example>
     public required string EmbeddingModel { get; init; }
+
+    /// <summary>
+    /// The name of the knowledge search tool.
+    /// </summary>
+    /// <example>knowledge_search</example>
     public required string KnowledgeSearchToolName { get; init; }
+
+    /// <summary>
+    /// The name of the web search tool.
+    /// </summary>
+    /// <example>web_search</example>
     public required string WebSearchToolName { get; init; }
+
+    /// <summary>
+    /// The name of the web crawling tool.
+    /// </summary>
+    /// <example>web_crawling</example>
     public required string WebCrawlingToolName { get; init; }
 }
 

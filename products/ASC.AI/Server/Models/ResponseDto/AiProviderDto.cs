@@ -26,16 +26,57 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
+/// <summary>
+/// The AI provider information.
+/// </summary>
 public class AiProviderDto
 {
+    /// <summary>
+    /// The AI provider identifier.
+    /// </summary>
+    /// <example>1</example>
     public int Id { get; init; }
+
+    /// <summary>
+    /// The AI provider title.
+    /// </summary>
+    /// <example>OpenAI</example>
     public required string Title { get; init; }
+
+    /// <summary>
+    /// The AI provider type.
+    /// </summary>
+    /// <example>0</example>
     public ProviderType Type { get; init; }
+
+    /// <summary>
+    /// The AI provider URL.
+    /// </summary>
+    /// <example>https://api.openai.com/v1</example>
     public string? Url { get; init; }
+
+    /// <summary>
+    /// The creation date and time.
+    /// </summary>
+    /// <example>2025-06-15T10:30:00.0000000Z</example>
     public required ApiDateTime CreatedOn { get; init; }
+
+    /// <summary>
+    /// The last modification date and time.
+    /// </summary>
+    /// <example>2025-06-15T12:45:00.0000000Z</example>
     public required ApiDateTime ModifiedOn { get; init; }
 
+    /// <summary>
+    /// Indicates whether the provider API key needs to be reset.
+    /// </summary>
+    /// <example>false</example>
     public bool NeedReset { get; init; }
+
+    /// <summary>
+    /// Indicates whether this is the default provider.
+    /// </summary>
+    /// <example>true</example>
     public bool IsDefault { get; init; }
 }
 
