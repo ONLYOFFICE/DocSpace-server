@@ -26,6 +26,9 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Pagination parameters for list endpoints. Supports offset-based pagination via startIndex and count.
+/// </summary>
 public class PaginatedRequestDto
 {
     /// <summary>
