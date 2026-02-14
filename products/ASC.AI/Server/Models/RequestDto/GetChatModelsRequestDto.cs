@@ -28,6 +28,9 @@ namespace ASC.AI.Models.RequestDto;
 
 public class GetChatModelsRequestDto
 {
+    /// <summary>
+    /// The optional AI provider identifier to filter models by. When set to 0, models from all providers are returned.
+    /// </summary>
     [FromQuery(Name = "provider")]
     public int ProviderId { get; set; }
 }

@@ -30,14 +30,20 @@ namespace ASC.AI.Models.RequestDto;
 
 public class ToolDecisionRequestDto
 {
+    /// <summary>
+    /// The unique identifier of the pending tool execution call awaiting a permission decision.
+    /// </summary>
     [FromRoute(Name = "callId")]
     public required string CallId { get; init; }
-    
+
     [FromBody]
     public required ToolDecisionRequestBody Body { get; init; }
 }
 
 public class ToolDecisionRequestBody
 {
+    /// <summary>
+    /// The user's permission decision for the tool execution request: Allow, AlwaysAllow, or Deny.
+    /// </summary>
     public ToolExecutionDecision Decision { get; init; }
 }

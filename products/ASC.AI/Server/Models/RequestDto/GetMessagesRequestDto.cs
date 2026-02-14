@@ -28,6 +28,9 @@ namespace ASC.AI.Models.RequestDto;
 
 public class GetMessagesRequestDto : PaginatedRequestDto
 {
+    /// <summary>
+    /// The unique identifier of the AI chat session whose messages are to be listed.
+    /// </summary>
     [FromRoute(Name = "chatId")]
     public Guid ChatId { get; set; }
 }

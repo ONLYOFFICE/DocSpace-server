@@ -28,6 +28,9 @@ namespace ASC.AI.Models.RequestDto;
 
 public class GetChatRequestDto
 {
+    /// <summary>
+    /// The unique identifier of the AI chat session to retrieve.
+    /// </summary>
     [FromRoute(Name = "chatId")]
     public Guid ChatId { get; init; }
 }

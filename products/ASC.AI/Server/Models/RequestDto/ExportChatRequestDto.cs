@@ -28,6 +28,9 @@ namespace ASC.AI.Models.RequestDto;
 
 public class ExportChatRequestDto<T>
 {
+    /// <summary>
+    /// The unique identifier of the AI chat session to export.
+    /// </summary>
     [FromRoute(Name = "chatId")]
     public Guid ChatId { get; init; }
 
@@ -37,6 +40,13 @@ public class ExportChatRequestDto<T>
 
 public class ExportChatRequestBody<T>
 {
+    /// <summary>
+    /// The identifier of the destination folder where the exported document will be saved.
+    /// </summary>
     public required T FolderId { get; init; }
+
+    /// <summary>
+    /// The file name (without extension) to use for the exported document.
+    /// </summary>
     public required string Title { get; init; }
 }
