@@ -134,8 +134,18 @@ public class UploadControllerHelper(
     }
 }
 
+/// <summary>
+/// Represents a wrapper for the response of a chunked upload session operation.
+/// </summary>
 public class ChunkedUploadSessionResponseWrapper<T>
 {
+    /// <summary>
+    /// Gets or sets a value indicating whether the operation was successful.
+    /// </summary>
     public bool Success { get; set; }
+
+    /// <summary>
+    /// Gets or sets the data of the chunked upload session response.
+    /// </summary>
     public ChunkedUploadSessionResponse<T> Data { get; set; }
 }

@@ -86,7 +86,6 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
         context.RegisterSyntaxNodeAction(AnalyzeMethod, SyntaxKind.MethodDeclaration);
     }
     
-
     private static void AnalyzeMethod(SyntaxNodeAnalysisContext context)
     {    
         var methodDeclaration = (MethodDeclarationSyntax)context.Node;
@@ -187,13 +186,22 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
                                t.IsKind(SyntaxKind.MultiLineDocumentationCommentTrivia));
     }
 
+    private static bool IsSystemNamespace(ITypeSymbol typeSymbol)
+    {
+        var ns = typeSymbol.ContainingNamespace;
+        while (ns is { IsGlobalNamespace: false })
+        {
+            if (ns.Name == "System" || ns.Name.StartsWith("Microsoft"))
+            {
+                return true;
+            }
+            ns = ns.ContainingNamespace;
+        }
+        return false;
+    }
+
     private static void CheckDocumentation(SyntaxNodeAnalysisContext context, MethodDeclarationSyntax methodDeclaration)
     {
-        if (methodDeclaration.ParameterList.Parameters.Count == 0)
-        {
-            return;
-        }
-
         var xmlTrivia = methodDeclaration.GetLeadingTrivia()
             .FirstOrDefault(t => t.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia) ||
                                  t.IsKind(SyntaxKind.MultiLineDocumentationCommentTrivia));
@@ -227,36 +235,84 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
         if (!summaryExists)
         {
             context.ReportDiagnostic(Diagnostic.Create(
-                _remarksRule,
+                _summaryRule,
                 methodDeclaration.Identifier.GetLocation(), 
                 methodDeclaration.Identifier.Text));
         }
         
+        // Check return type, unwrapping Task<T> if needed
+        var returnTypeToCheck = methodDeclaration.ReturnType;
+
+        if (context.SemanticModel.GetTypeInfo(returnTypeToCheck).Type is { } returnTypeSymbol)
+        {
+            // Unwrap Task<T> or ValueTask<T>
+            if (returnTypeSymbol is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol && IsSystemNamespace(namedTypeSymbol))
+            {
+                var typeArgument = namedTypeSymbol.TypeArguments.FirstOrDefault();
+                if (typeArgument != null && !IsSystemNamespace(typeArgument))
+                {
+                    // if (typeArgument.Name.Contains("DocServiceUrlDto"))MigrationStatusDto
+                    // {
+                    //     if (!System.Diagnostics.Debugger.IsAttached)
+                    //     {
+                    //         System.Diagnostics.Debugger.Launch();
+                    //     }
+                    // }
+
+                    ReportMissingXmlDocumentation(context, methodDeclaration, typeArgument);
+                }
+            }
+            else if (!IsSystemNamespace(returnTypeSymbol))
+            {  
+                // if (!System.Diagnostics.Debugger.IsAttached)
+                // {
+                //     System.Diagnostics.Debugger.Launch();
+                // }
+                ReportMissingXmlDocumentation(context, methodDeclaration, returnTypeSymbol);
+            }
+        }
+
         foreach (var parameter in methodDeclaration.ParameterList.Parameters)
         {
             var parameterType = parameter.Type;
 
-            if (parameterType != null && context.SemanticModel.GetSymbolInfo(parameterType).Symbol is ITypeSymbol typeSymbol)
+            if (parameterType == null || context.SemanticModel.GetSymbolInfo(parameterType).Symbol is not ITypeSymbol typeSymbol)
             {
-                var syntaxReferences = typeSymbol.DeclaringSyntaxReferences;
-        
-                foreach (var syntaxReference in syntaxReferences)
+                continue;
+            }
+            
+            ReportMissingXmlDocumentation(context, methodDeclaration, typeSymbol);
+        }
+    }
+
+    private static void ReportMissingXmlDocumentation(SyntaxNodeAnalysisContext context, MethodDeclarationSyntax methodDeclaration, ITypeSymbol returnTypeSymbol)
+    {
+        var syntaxReferences = returnTypeSymbol.DeclaringSyntaxReferences;
+        foreach (var syntaxReference in syntaxReferences)
+        {
+            var syntaxNode = syntaxReference.GetSyntax();
+            // if (!HasXmlDocumentation(syntaxNode))
+            // {            
+            //     context.ReportDiagnostic(Diagnostic.Create(
+            //         _modelRule,
+            //         methodDeclaration.ReturnType.GetLocation(),
+            //         returnTypeSymbol.Name));
+            // }
+            
+            if (syntaxNode is not ClassDeclarationSyntax modelDeclaration)
+            {
+                continue;
+            }
+
+            foreach (var prop in modelDeclaration.ChildNodes().OfType<PropertyDeclarationSyntax>())
+            {
+                if (!HasXmlDocumentation(prop))
                 {
-                    var syntaxNode = syntaxReference.GetSyntax();
-                    if (syntaxNode is ClassDeclarationSyntax modelDeclaration)
-                    {
-                        foreach (var prop in modelDeclaration.ChildNodes().OfType<PropertyDeclarationSyntax>())
-                        {
-                            if (!HasXmlDocumentation(prop))
-                            {
-                                context.ReportDiagnostic(Diagnostic.Create(
-                                    _modelDtoRule,
-                                    prop.Identifier.GetLocation(),
-                                    modelDeclaration.Identifier.Text,
-                                    prop.Identifier.Text));
-                            }
-                        }
-                    }
+                    context.ReportDiagnostic(Diagnostic.Create(
+                        _modelDtoRule,
+                        prop.Identifier.GetLocation(),
+                        modelDeclaration.Identifier.Text,
+                        prop.Identifier.Text));
                 }
             }
         }

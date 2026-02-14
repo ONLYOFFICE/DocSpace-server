@@ -40,6 +40,6 @@ public class TimezonesRequestsDto
     /// <summary>
     /// The user-friendly name for the time zone.
     /// </summary>
-    /// <example>(UTC-05:00) Eastern Time (US & Canada)</example>
+    /// <example>(UTC-05:00) Eastern Time (US and Canada)</example>
     public required string DisplayName { get; set; }
 }
