@@ -109,7 +109,7 @@ public class BackupProgressItem : BaseBackupProgressItem, IDisposable
         var backupStorageFactory = scope.ServiceProvider.GetService<BackupStorageFactory>();
         var backupService = scope.ServiceProvider.GetService<BackupService>();
         var backupRepository = scope.ServiceProvider.GetService<BackupRepository>();
-        var backupPortalTask = scope.ServiceProvider.GetService<BackupPortalTask>();
+        using var backupPortalTask = scope.ServiceProvider.GetService<BackupPortalTask>();
         var tempStream = scope.ServiceProvider.GetService<TempStream>();
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
         var messageService = scope.ServiceProvider.GetService<MessageService>();
