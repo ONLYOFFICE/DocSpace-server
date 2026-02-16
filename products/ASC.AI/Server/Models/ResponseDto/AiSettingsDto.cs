@@ -28,16 +28,59 @@ namespace ASC.AI.Models.ResponseDto;
 
 public class AiSettingsDto
 {
+    /// <summary>
+    /// Indicates whether web search is enabled for AI chat sessions.
+    /// </summary>
     public bool WebSearchEnabled { get; init; }
+
+    /// <summary>
+    /// Indicates whether the web search API key needs to be reconfigured.
+    /// </summary>
     public bool WebSearchNeedReset { get; init; }
+
+    /// <summary>
+    /// Indicates whether document vectorization is enabled.
+    /// </summary>
     public bool VectorizationEnabled { get; init; }
+
+    /// <summary>
+    /// Indicates whether the embedding provider API key needs to be reconfigured.
+    /// </summary>
     public bool VectorizationNeedReset { get; init; }
+
+    /// <summary>
+    /// Indicates whether the AI subsystem is fully configured and operational.
+    /// </summary>
     public bool AiReady { get; init; }
+
+    /// <summary>
+    /// Indicates whether the AI provider API key needs to be reconfigured.
+    /// </summary>
     public bool AiReadyNeedReset { get; init; }
+
+    /// <summary>
+    /// The unique identifier of the portal-level MCP server, if configured.
+    /// </summary>
     public Guid? PortalMcpServerId { get; init; }
+
+    /// <summary>
+    /// The name of the embedding model used for document vectorization.
+    /// </summary>
     public required string EmbeddingModel { get; init; }
+
+    /// <summary>
+    /// The tool name used by the AI assistant for knowledge base search.
+    /// </summary>
     public required string KnowledgeSearchToolName { get; init; }
+
+    /// <summary>
+    /// The tool name used by the AI assistant for web search.
+    /// </summary>
     public required string WebSearchToolName { get; init; }
+
+    /// <summary>
+    /// The tool name used by the AI assistant for web page crawling.
+    /// </summary>
     public required string WebCrawlingToolName { get; init; }
 }
 

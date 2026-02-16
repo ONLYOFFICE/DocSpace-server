@@ -34,7 +34,18 @@ public class SetWebSearchConfigRequestDto
 
 public class SetWebSearchSettingsRequestBody
 {
+    /// <summary>
+    /// Indicates whether web search is enabled for AI chat sessions.
+    /// </summary>
     public bool Enabled { get; init; }
+
+    /// <summary>
+    /// The type of web search engine to use.
+    /// </summary>
     public EngineType Type { get; init; }
+
+    /// <summary>
+    /// The API key for the selected web search engine. Pass null to keep the existing key unchanged.
+    /// </summary>
     public string? Key { get; init; }
 }

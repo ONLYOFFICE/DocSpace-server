@@ -34,6 +34,13 @@ public class SetEmbeddingConfigRequestDto
 
 public class SetEmbeddingConfigRequestBody
 {
+    /// <summary>
+    /// The type of embedding provider to use for document vectorization.
+    /// </summary>
     public EmbeddingProviderType Type { get; init; }
+
+    /// <summary>
+    /// The API key for the selected embedding provider. Pass null to keep the existing key unchanged.
+    /// </summary>
     public string? Key { get; init; }
 }
