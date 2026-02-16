@@ -39,8 +39,20 @@ public class AiSettingsDto
     public required string KnowledgeSearchToolName { get; init; }
     public required string WebSearchToolName { get; init; }
     public required string WebCrawlingToolName { get; init; }
+    
+    /// <summary>
+    /// The tool name used by the AI to launch docx creation in the editor.
+    /// </summary>
     public required string GenerateDocxToolName { get; init; }
+    
+    /// <summary>
+    /// The tool name used by the AI assistant to launch form creation in the editor.
+    /// </summary>
     public required string GenerateFormToolName { get; init; }
+    
+    /// <summary>
+    /// The tool name used by the AI assistant to launch presentation creation in the editor.
+    /// </summary>
     public required string GeneratePresentationToolName { get; init; }
 }
 
