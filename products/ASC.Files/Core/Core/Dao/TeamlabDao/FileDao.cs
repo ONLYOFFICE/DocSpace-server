@@ -2362,6 +2362,14 @@ internal class FileDao(
                              file.CreateBy == currentUserId &&
                              file.CreateBy != guestUserId) ||
                             defaultFolderIds.Contains(file.ParentId));
+
+                        q = q.Where(file =>
+                            filesDbContext.FilesProperties.Any(p =>
+                                p.TenantId == tenantId &&
+                                p.StartFilling == true &&
+                                p.TenantId == file.TenantId &&
+                                p.EntryId == file.Id.ToString()
+                            ));
                         break;
 
                     default:
