@@ -241,10 +241,13 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         }
     }
 
-    public void AddBaseConfig<T>(IResourceBuilder<T> resourceBuilder, bool isDocker) where T : IResourceWithEnvironment, IResourceWithWaitSupport, IResourceWithEndpoints
+    public void AddBaseConfig<T>(IResourceBuilder<T> resourceBuilder, bool isDocker, bool withHealth = true) where T : IResourceWithEnvironment, IResourceWithWaitSupport, IResourceWithEndpoints
     {
-        resourceBuilder.WithHttpHealthCheck("/health");
-       
+        if (withHealth)
+        {
+            resourceBuilder.WithHttpHealthCheck("/health");
+        }
+
         resourceBuilder
             .WithEnvironment("openTelemetry:enable", "true")
             .WithEnvironment("files:docservice:url:portal", SubstituteLocalhost("http://localhost") + ":" + Constants.AppHostPort)

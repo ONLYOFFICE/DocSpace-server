@@ -117,6 +117,15 @@ if (!skipClient)
     buildPackages.WithChildRelationship(startPackages);
 }
 
+var pluginsBasePath = Path.Combine(basePath, "plugins");
+
+foreach (var pluginDirectory in Directory.GetDirectories(pluginsBasePath))
+{
+    var pluginBuilder = builder.AddExecutable("onlyoffice-plugin-start", "dotnet", Path.Combine(pluginDirectory, "bin", "Debug", "net10.0"), "ASC.Plugin.OnlyOffice.dll");
+    connectionManager.AddWaitFor(pluginBuilder);
+    connectionManager.AddBaseConfig(pluginBuilder, false, false);
+}
+
 NginxConfiguration.ConfigureOpenResty(builder, basePath, clientBasePath, startPackages, isDocker);
 
 await builder.Build().RunAsync();

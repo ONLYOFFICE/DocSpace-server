@@ -27,8 +27,20 @@
 using System.Threading.Channels;
 
 using ASC.Common.Threading;
+using ASC.EventBus.Log;
 
 namespace ASC.Core.Notify.Socket;
+
+[ProtoContract]
+public record SocketIntegrationEvent : IntegrationEvent
+{
+    private SocketIntegrationEvent() : base() { }
+
+    public SocketIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId) { }
+    
+    [ProtoMember(1)]
+    public required string Data { get; set; }
+}
 
 [Scope]
 public class SocketServiceClient(
@@ -47,28 +59,20 @@ public class SocketServiceClient(
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
-    protected virtual string Hub => "default";
+    protected virtual string Hub => "files";
 
     public async Task MakeRequest(string method, object data, int? tenantId = null)
+    {
+        await MakeRequest(method, JsonSerializer.Serialize(data, _options), tenantId);
+    }
+    
+    public async Task MakeRequest(string method, string jsonData, int? tenantId = null)
     {
         if (string.IsNullOrEmpty(Url))
         {
             return;
         }
-
-        var request = GenerateRequest(method, data);
-        if (await channelWriter.WaitToWriteAsync())
-        {
-            var tenant = tenantId ?? _tenantManager.GetCurrentTenantId();
-
-            var tariff = await tariffService.GetTariffAsync(tenant);
-            await channelWriter.WriteAsync(new SocketData(request, tariff.State));
-        }
-    }
-
-    private HttpRequestMessage GenerateRequest(string method, object data)
-    {
-        var jsonData = JsonSerializer.Serialize(data, _options);
+        
         var request = new HttpRequestMessage
         {
             Method = HttpMethod.Post,
@@ -77,7 +81,14 @@ public class SocketServiceClient(
         };
 
         request.Headers.Add("Authorization", CreateAuthToken());
-        return request;
+        
+        if (await channelWriter.WaitToWriteAsync())
+        {
+            var tenant = tenantId ?? _tenantManager.GetCurrentTenantId();
+
+            var tariff = await tariffService.GetTariffAsync(tenant);
+            await channelWriter.WriteAsync(new SocketData(request, tariff.State));
+        }
     }
 
     private string Method(string method)
@@ -93,6 +104,8 @@ public class SocketServiceClient(
         return $"ASC {pkey}:{now}:{hash}";
     }
 }
+
+
 
 [Singleton]
 public class SocketService(

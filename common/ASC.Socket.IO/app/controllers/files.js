@@ -237,5 +237,10 @@ module.exports = (files) => {
      res.end();
   });
 
+  router.post("/custom", (req, res) => {
+     files.custom(req.body);
+     res.end();
+  });
+
   return router;
 };

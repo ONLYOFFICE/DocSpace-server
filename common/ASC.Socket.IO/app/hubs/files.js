@@ -585,6 +585,11 @@ module.exports = (io) => {
     filesIO.to(data.room).emit(`s:quota_exceeded`, { data });
   }
 
+  function custom(data) {
+      logger.info(`custom room: ${data.room} event: ${data.event}, message: ${data.message}, tenantId: ${data.tenantId}`);
+    filesIO.to(`${data.tenantId}-${data.room}`).emit(data.event, { message: data.message });
+  }
+
   return {
     startEdit,
     stopEdit,
@@ -627,6 +632,7 @@ module.exports = (io) => {
     exportChat,
     changeAccessRightsForFile,
     changeAccessRightsForFolder,
-    quotaExceeded
+    quotaExceeded,
+      custom
   };
 };
