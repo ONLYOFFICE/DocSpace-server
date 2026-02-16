@@ -676,7 +676,7 @@ internal class FileDao(
                                         }
                                     }
 
-                                    properties.FormFilling.StartFilling = true;
+                                    properties.FormFilling.StartFilling = false;
                                     properties.FormFilling.OriginalFormId = file.Id;
                                     await fileDao.SaveProperties(file.Id, properties);
 
