@@ -291,7 +291,7 @@ public class UserController(
 
         if (!byEmail)
         {
-            user.CreatedBy = model?.UiD;
+            user.CreatedBy = linkData != null ? model?.UiD : securityContext.CurrentAccount.ID;
         }
 
         inDto.PasswordHash = (inDto.PasswordHash ?? "").Trim();
