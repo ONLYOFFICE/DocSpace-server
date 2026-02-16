@@ -162,6 +162,38 @@ public class BackupWorker(
         }
     }
 
+    public async Task<bool> CancelBackupAsync(int tenantId)
+    {
+        var tasks = (await _backupProgressQueue.GetAllTasks()).Where(t => t.TenantId == tenantId && t.BackupProgressItemType == BackupProgressItemType.Backup);
+        var dequeued = false;
+
+        foreach (var t in tasks)
+        {
+            await _backupProgressQueue.DequeueTask(t.Id);
+            dequeued = true;
+        }
+
+        return dequeued;
+    }
+
+    public async Task<bool> CancelRestoreAsync(int tenantId)
+    {
+        var tasks = (await _restoreProgressQueue.GetAllTasks()).Where(t => (t.TenantId == tenantId || t.NewTenantId == tenantId) && t.BackupProgressItemType == BackupProgressItemType.Restore);
+        var dequeued = false;
+
+        foreach (var t in tasks)
+        {
+            // dump restoring cannot be cancelled
+            if (!t.Dump)
+            {
+                await _restoreProgressQueue.DequeueTask(t.Id);
+                dequeued = true;
+            }
+        }
+
+        return dequeued;
+    }
+
     public async Task<BackupProgress> GetBackupProgressAsync(int tenantId)
     {
         await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))

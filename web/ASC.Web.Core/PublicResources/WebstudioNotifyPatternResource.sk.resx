@@ -138,6 +138,9 @@
   <data name="ActionFileUploaded" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; nahral nový dokument: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; v miestnosti: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
   </data>
+  <data name="ActionFileUploadedToAgentKnowledge" xml:space="preserve">
+    <value>&lt;b&gt;{0}&lt;/b&gt; nahral nový dokument: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; do bázy znalostí AI agenta: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt;</value>
+  </data>
   <data name="ActionNewComment" xml:space="preserve">
     <value>&lt;b&gt;{0}&lt;/b&gt; pridal nový komentár k verzii dokumentu: &lt;a href="{1}" style="color:#FF6F3D;"&gt;{2}&lt;/a&gt; v miestnosti: &lt;a href="{3}" style="color:#FF6F3D;"&gt;{4}&lt;/a&gt; - &lt;b&gt;{5}&lt;/b&gt;</value>
   </data>
@@ -310,6 +313,15 @@ Pre začatie účasti na "${__VirtualRootPath}":"$InviteLink" živote portálu p
 $OrangeButton
 
 Tento link je platný len 7 dní. Prosím dokončite proces aktivácie Vašej e-mailovej adresy v tomto období.</value>
+  </data>
+  <data name="pattern_api_key_expired" xml:space="preserve">
+    <value>Dobrý deň, $UserName,
+
+oznamujeme vám, že platnosť vášho kľúča API "*$Message*" vypršala a kľúč bol deaktivovaný.
+
+Nový kľúč API si môžete vygenerovať v časti "Developer Tools":"${__VirtualRootPath}/developer-tools/api-keys".
+
+$TrulyYours</value>
   </data>
   <data name="pattern_backup_created" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" záloha portálu vytvorená
@@ -1117,6 +1129,15 @@ Ak máte nejaké otázky alebo potrebujete asistenciu, prosím neváhajte nás k
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_portal_deleted_to_support" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace bol vymazaný.
+
+*Portál:* ${PortalUrl}
+*Vlastník:* ${UserName} ${UserEmail} 
+*Zákazník:* ${OwnerName}
+
+Odporúčame skontrolovať stav automatickej fakturácie v zákazníckom účte Stripe a uistiť sa, že je vypnutá.</value>
+  </data>
   <data name="pattern_portal_delete_success_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText} DocSpace bol &lt;span style="color: #FF6F3D;"&gt;odstránený&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
@@ -1779,6 +1800,15 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_user_agent_role_changed" xml:space="preserve">
+    <value>Dobrý deň!
+
+Máte priradenú novú rolu v DocSpace AI agente "${RoomTitle}":"${RoomUrl}": ${UserRole}.
+
+Viac o rolách v miestnostiach a povoleniach nájdete v "Help Center":"${HelpCenterUrl}".
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_user_has_join" xml:space="preserve">
     <value>h1.Nový používateľ pridaný do "${__VirtualRootPath}":"${__VirtualRootPath}" portálu
 
@@ -1838,6 +1868,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_activate_email" xml:space="preserve">
     <value>${LetterLogoText}. Prosím aktivujte svoju e-mailovú adresu</value>
+  </data>
+  <data name="subject_api_key_expired" xml:space="preserve">
+    <value>${LetterLogoText} DocSpace: Platnosť vášho kľúča API vypršala</value>
   </data>
   <data name="subject_backup_created" xml:space="preserve">
     <value>${LetterLogoText}. Záloha portálu ${__VirtualRootHost} bola vytvorená</value>
@@ -1989,6 +2022,9 @@ $TrulyYours</value>
   <data name="subject_portal_delete" xml:space="preserve">
     <value>Vymazanie ${__VirtualRootHost} portálu</value>
   </data>
+  <data name="subject_portal_deleted_to_support" xml:space="preserve">
+    <value>Dokumentačný priestor ${LetterLogoText} bol odstránený</value>
+  </data>
   <data name="subject_portal_delete_success_v1" xml:space="preserve">
     <value>Dokumentačný priestor ${LetterLogoText} bol odstránený</value>
   </data>
@@ -2135,6 +2171,9 @@ $TrulyYours</value>
   </data>
   <data name="subject_top_up_wallet_error" xml:space="preserve">
     <value>Je potrebná akcia: Nie je možné automaticky dobiť zostatok peňaženky vo vašom ${LetterLogoText} DocSpace</value>
+  </data>
+  <data name="subject_user_agent_role_changed" xml:space="preserve">
+    <value>Vaša rola v AI agente DocSpace bola zmenená</value>
   </data>
   <data name="subject_user_has_join" xml:space="preserve">
     <value>Nový používateľ pridaný do ${LetterLogoText} portálu</value>

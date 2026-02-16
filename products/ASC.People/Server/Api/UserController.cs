@@ -511,14 +511,14 @@ public class UserController(
     /// <path>api/2.0/people/{userid}/password</path>
     [Tags("People / Password")]
     [SwaggerResponse(200, "Detailed user information", typeof(EmployeeFullDto))]
-    [SwaggerResponse(400, "Incorrect email")]
-    [SwaggerResponse(403, "The invitation link is invalid or its validity has expired")]
-    [SwaggerResponse(404, "User not found")]
+    [SwaggerResponse(400, "Incorrect userId or password")]
+    [SwaggerResponse(403, "The link is invalid or no permissions to perform this action")]
+    [SwaggerResponse(404, "The user could not be found")]
     [AllowNotPayment]
     [HttpPut("{userid:guid}/password")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
-    [Authorize(AuthenticationSchemes = "confirm", Roles = "PasswordChange,EmailChange,Activation,EmailActivation,Everyone")]
-    public async Task<EmployeeFullDto> ChangeUserPassword(MemberBaseByIdRequestDto inDto)
+    [Authorize(AuthenticationSchemes = "confirm", Roles = "PasswordChange")]
+    public async Task<EmployeeFullDto> ChangeUserPassword(ChangePasswordByIdRequestDto inDto)
     {
         await securityContext.AuthByClaimAsync();
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(inDto.UserId), Constants.Action_EditUser);
@@ -528,10 +528,9 @@ public class UserController(
         }
 
         var user = await _userManager.GetUsersAsync(inDto.UserId);
-
         if (!_userManager.UserExists(user))
         {
-            return null;
+            throw new ItemNotFoundException(Resource.ErrorUserNotFound);
         }
 
         if (_userManager.IsSystemUser(user.Id) || user.Status != EmployeeStatus.Active)
@@ -540,73 +539,113 @@ public class UserController(
         }
 
         var viewer = await _userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
-
         var tenant = tenantManager.GetCurrentTenant();
         if (user.IsOwner(tenant) && viewer.Id != user.Id)
         {
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
-        var email = string.IsNullOrEmpty(inDto.MemberBase.Email) && !string.IsNullOrEmpty(inDto.MemberBase.EncEmail)
-            ? emailValidationKeyModelHelper.DecryptEmail(inDto.MemberBase.EncEmail)
-            : inDto.MemberBase.Email;
-
-        if (!string.IsNullOrEmpty(email))
+        if (string.IsNullOrEmpty(inDto.ChangePasswordData.PasswordHash) && string.IsNullOrEmpty(inDto.ChangePasswordData.Password))
         {
-            email = email.Trim();
-
-            if (!email.TestEmailRegex())
-            {
-                throw new ArgumentException(Resource.ErrorNotCorrectEmail);
-            }
-
-            var address = new MailAddress(email);
-            if (!string.Equals(address.Address, user.Email, StringComparison.OrdinalIgnoreCase))
-            {
-                user.Email = address.Address.ToLowerInvariant();
-                user.ActivationStatus = EmployeeActivationStatus.Activated;
-                await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
-            }
+            throw new ArgumentException(Resource.ErrorPasswordEmpty);
         }
 
-        inDto.MemberBase.PasswordHash = (inDto.MemberBase.PasswordHash ?? "").Trim();
-
-        if (string.IsNullOrEmpty(inDto.MemberBase.PasswordHash))
+        inDto.ChangePasswordData.PasswordHash = (inDto.ChangePasswordData.PasswordHash ?? "").Trim();
+        if (string.IsNullOrEmpty(inDto.ChangePasswordData.PasswordHash))
         {
-            inDto.MemberBase.Password = (inDto.MemberBase.Password ?? "").Trim();
-
-            if (!string.IsNullOrEmpty(inDto.MemberBase.Password))
-            {
-                await userManagerWrapper.CheckPasswordPolicyAsync(inDto.MemberBase.Password);
-                inDto.MemberBase.PasswordHash = passwordHasher.GetClientPassword(inDto.MemberBase.Password);
-            }
+            inDto.ChangePasswordData.Password = (inDto.ChangePasswordData.Password ?? "").Trim();
+            await userManagerWrapper.CheckPasswordPolicyAsync(inDto.ChangePasswordData.Password);
+            inDto.ChangePasswordData.PasswordHash = passwordHasher.GetClientPassword(inDto.ChangePasswordData.Password);
         }
 
-        if (!string.IsNullOrEmpty(inDto.MemberBase.PasswordHash))
+        try
         {
-            try
-            {
-                await securityContext.SetUserPasswordHashAsync(inDto.UserId, inDto.MemberBase.PasswordHash);
+            await securityContext.SetUserPasswordHashAsync(inDto.UserId, inDto.ChangePasswordData.PasswordHash);
 
-                var messageTarget = MessageTarget.Create(inDto.UserId);
-                await messageService.SendAsync(MessageAction.UserUpdatedPassword, messageTarget);
+            var messageTarget = MessageTarget.Create(inDto.UserId);
+            await messageService.SendAsync(MessageAction.UserUpdatedPassword, messageTarget);
 
-                var passwordChangeEvent = (await auditEventsRepository.GetByFilterAsync(
-                    userId: securityContext.CurrentAccount.ID,
-                    action: MessageAction.UserUpdatedPassword,
-                    target: messageTarget.ToString(),
-                    limit: 1))
-                    .FirstOrDefault();
+            var passwordChangeEvent = (await auditEventsRepository.GetByFilterAsync(
+                userId: securityContext.CurrentAccount.ID,
+                action: MessageAction.UserUpdatedPassword,
+                target: messageTarget.ToString(),
+                limit: 1))
+                .FirstOrDefault();
 
-                await studioNotifyService.SendUserPasswordChangedAsync(user, passwordChangeEvent);
+            await studioNotifyService.SendUserPasswordChangedAsync(user, passwordChangeEvent);
 
-                await cookiesManager.ResetUserCookieAsync(inDto.UserId, false);
-                messageService.Send(MessageAction.CookieSettingsUpdated);
-            }
-            catch (SecurityContext.PasswordException ex)
-            {
-                throw new ArgumentException(ex.Message);
-            }
+            await cookiesManager.ResetUserCookieAsync(inDto.UserId, false);
+            messageService.Send(MessageAction.CookieSettingsUpdated);
+        }
+        catch (SecurityContext.PasswordException ex)
+        {
+            throw new ArgumentException(ex.Message);
+        }
+
+        return await employeeFullDtoHelper.GetFullAsync(await GetUserInfoAsync(inDto.UserId.ToString()));
+    }
+
+    /// <remarks>
+    /// Sets a new email to the user with the ID specified in the request.
+    /// </remarks>
+    /// <summary>Change a user email</summary>
+    /// <path>api/2.0/people/{userid}/email</path>
+    [Tags("People / Email")]
+    [SwaggerResponse(200, "Detailed user information", typeof(EmployeeFullDto))]
+    [SwaggerResponse(400, "Incorrect userId or email")]
+    [SwaggerResponse(403, "The link is invalid or no permissions to perform this action")]
+    [SwaggerResponse(404, "The user could not be found")]
+    [AllowNotPayment]
+    [HttpPut("{userid:guid}/email")]
+    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
+    [Authorize(AuthenticationSchemes = "confirm", Roles = "EmailChange")]
+    public async Task<EmployeeFullDto> ChangeUserEmail(ChangeEmailByIdRequestDto inDto)
+    {
+        await securityContext.AuthByClaimAsync();
+        await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(inDto.UserId), Constants.Action_EditUser);
+        if (inDto.UserId == Guid.Empty)
+        {
+            throw new ArgumentNullException(nameof(inDto.UserId));
+        }
+
+        var user = await _userManager.GetUsersAsync(inDto.UserId);
+        if (!_userManager.UserExists(user))
+        {
+            throw new ItemNotFoundException(Resource.ErrorUserNotFound);
+        }
+
+        if (_userManager.IsSystemUser(user.Id) || user.Status != EmployeeStatus.Active)
+        {
+            throw new SecurityException();
+        }
+
+        var viewer = await _userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
+        var tenant = tenantManager.GetCurrentTenant();
+        if (user.IsOwner(tenant) && viewer.Id != user.Id)
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+        
+        var email = string.IsNullOrEmpty(inDto.ChangeEmailData.Email) && !string.IsNullOrEmpty(inDto.ChangeEmailData.EncEmail)
+            ? emailValidationKeyModelHelper.DecryptEmail(inDto.ChangeEmailData.EncEmail)
+            : inDto.ChangeEmailData.Email;
+
+        if (string.IsNullOrEmpty(email))
+        {
+            throw new ArgumentException(Resource.ErrorEmailEmpty);
+        }
+
+        if (!email.TestEmailRegex())
+        {
+            throw new ArgumentException(Resource.ErrorNotCorrectEmail);
+        }
+
+        var address = new MailAddress(email);
+        if (!string.Equals(address.Address, user.Email, StringComparison.OrdinalIgnoreCase))
+        {
+            user.Email = address.Address.ToLowerInvariant();
+            user.ActivationStatus = EmployeeActivationStatus.Activated;
+            await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
         }
 
         return await employeeFullDtoHelper.GetFullAsync(await GetUserInfoAsync(inDto.UserId.ToString()));
@@ -1530,7 +1569,7 @@ public class UserController(
     /// Send instructions to change email
     /// </summary>
     /// <path>api/2.0/people/email</path>
-    [Tags("People / Profiles")]
+    [Tags("People / Email")]
     [SwaggerResponse(200, "Message text", typeof(string))]
     [SwaggerResponse(400, "Incorrect userId or email")]
     [SwaggerResponse(403, "No permissions to perform this action")]
@@ -1726,19 +1765,26 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Updates the user culture code with the parameters specified in the request.
+    /// Updates the user culture with the parameters specified in the request.
     /// </remarks>
     /// <summary>
-    /// Update a user culture code
+    /// Update a user culture
     /// </summary>
     /// <path>api/2.0/people/{userid}/culture</path>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Detailed user information", typeof(EmployeeFullDto))]
+    [SwaggerResponse(400, "The specified culture is not in the list of available ones")]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "User not found")]
     [HttpPut("{userid}/culture")]
     public async Task<EmployeeFullDto> UpdateMemberCulture(UpdateMemberCultureByIdRequestDto inDto)
     {
+        if (!coreBaseSettings.EnabledCultures.Any(c =>
+                string.Equals(c.Name, inDto.Culture.CultureName, StringComparison.InvariantCultureIgnoreCase)))
+        {
+            throw new ArgumentException("The specified culture is not in the list of available ones");
+        }
+
         var user = await GetUserInfoAsync(inDto.UserId);
 
         if (_userManager.IsSystemUser(user.Id) || !user.Id.Equals(securityContext.CurrentAccount.ID))

@@ -28,7 +28,7 @@ namespace ASC.AI.Models.RequestDto;
 
 public class SetServerStatusRequestDto
 {
-    [FromRoute]
+    [FromRoute(Name = "id")]
     public Guid Id { get; set; }
     
     [FromBody]

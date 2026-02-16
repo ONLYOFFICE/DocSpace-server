@@ -9,7 +9,7 @@ public class CreateFolderWithFilesDepthCommand : AsyncCommand<CreateFolderWithFi
     {
         public static Settings Default = new()
         {
-            Email = "paul.bannov@gmail.com",
+            Email = "test@onlyoffice.com",
             Password = "11111111"
         };
         
@@ -73,7 +73,7 @@ public class CreateFolderWithFilesDepthCommand : AsyncCommand<CreateFolderWithFi
             var k = 0;
             for (var j = 0; j < filesCount; j++)
             {
-                tasks.Add(filesApi.CreateFileAsync(folderId, new CreateFileJsonElement(system.FileName("pdf")), cancellationToken: token));
+                tasks.Add(filesApi.CreateFileAsync(newFolder.Id, new CreateFileJsonElement(system.FileName("pdf")), cancellationToken: token));
                 k++;
                 if (k == 100)
                 {

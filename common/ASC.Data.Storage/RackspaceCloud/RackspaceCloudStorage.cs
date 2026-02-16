@@ -182,32 +182,34 @@ public class RackspaceCloudStorage(TempPath tempPath,
         return GetReadStreamAsync(domain, path, offset);
     }
 
-    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, Guid ownerId)
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, Guid ownerId, CancellationToken token = default)
     {
-        return SaveAsync(domain, path, ownerId, stream, string.Empty, string.Empty);
-    }
-    public override Task<Uri> SaveAsync(string domain, string path, Stream stream)
-    {
-        return SaveAsync(domain, path, Guid.Empty, stream, string.Empty, string.Empty);
+        return SaveAsync(domain, path, ownerId, stream, string.Empty, string.Empty, token);
     }
 
-    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, ACL acl)
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, CancellationToken token = default)
     {
-        return SaveAsync(domain, path, stream, null, null, acl);
+        return SaveAsync(domain, path, Guid.Empty, stream, string.Empty, string.Empty, token);
     }
 
-    public override Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType, string contentDisposition)
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, ACL acl, CancellationToken token = default)
     {
-        return SaveAsync(domain, path, ownerId, stream, contentType, contentDisposition, ACL.Auto);
-    }
-    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType, string contentDisposition)
-    {
-        return SaveAsync(domain, path, stream, contentType, contentDisposition, ACL.Auto);
+        return SaveAsync(domain, path, stream, null, null, acl, token: token);
     }
 
-    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentEncoding, int cacheDays)
+    public override Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType, string contentDisposition, CancellationToken token = default)
     {
-        return SaveAsync(domain, path, stream, string.Empty, string.Empty, ACL.Auto, contentEncoding, cacheDays);
+        return SaveAsync(domain, path, ownerId, stream, contentType, contentDisposition, ACL.Auto, token: token);
+    }
+
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType, string contentDisposition, CancellationToken token = default)
+    {
+        return SaveAsync(domain, path, stream, contentType, contentDisposition, ACL.Auto, token: token);
+    }
+
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentEncoding, int cacheDays, CancellationToken token = default)
+    {
+        return SaveAsync(domain, path, stream, string.Empty, string.Empty, ACL.Auto, contentEncoding, cacheDays, token: token);
     }
 
     private bool EnableQuotaCheck(string domain)
@@ -217,14 +219,14 @@ public class RackspaceCloudStorage(TempPath tempPath,
 
     public async Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType,
                      string contentDisposition, ACL acl, string contentEncoding = null, int cacheDays = 5,
-     DateTime? deleteAt = null, long? deleteAfter = null)
+     DateTime? deleteAt = null, long? deleteAfter = null, CancellationToken token = default)
     {
-        return await SaveAsync(domain, path, Guid.Empty, stream, contentType, contentDisposition, acl, contentEncoding, cacheDays, deleteAt, deleteAfter);
+        return await SaveAsync(domain, path, Guid.Empty, stream, contentType, contentDisposition, acl, contentEncoding, cacheDays, deleteAt, deleteAfter, token);
     }
 
     public async Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType,
                       string contentDisposition, ACL acl, string contentEncoding = null, int cacheDays = 5,
-    DateTime? deleteAt = null, long? deleteAfter = null)
+    DateTime? deleteAt = null, long? deleteAfter = null, CancellationToken token = default)
     {
         var (buffered, isNew) = await _tempStream.TryGetBufferedAsync(stream);
 
@@ -303,6 +305,8 @@ public class RackspaceCloudStorage(TempPath tempPath,
             }
 
             stream.Position = 0;
+
+            token.ThrowIfCancellationRequested();
 
             client.CreateObject(_private_container,
                                 stream,
@@ -472,11 +476,11 @@ public class RackspaceCloudStorage(TempPath tempPath,
         return await GetUriAsync(newDomain, newPath);
     }
 
-    public override async Task<(Uri, string)> SaveTempAsync(string domain, Stream stream)
+    public override async Task<(Uri, string)> SaveTempAsync(string domain, Stream stream, CancellationToken token = default)
     {
         var assignedPath = Guid.NewGuid().ToString();
 
-        return (await SaveAsync(domain, assignedPath, stream), assignedPath);
+        return (await SaveAsync(domain, assignedPath, stream, token), assignedPath);
     }
 
     public override IAsyncEnumerable<string> ListDirectoriesRelativeAsync(string domain, string path, bool recursive)
@@ -625,9 +629,9 @@ public class RackspaceCloudStorage(TempPath tempPath,
         }
     }
 
-    public override async Task<string> SavePrivateAsync(string domain, string path, Stream stream, DateTime expires)
+    public override async Task<string> SavePrivateAsync(string domain, string path, Stream stream, DateTime expires, CancellationToken token = default)
     {
-        var uri = await SaveAsync(domain, path, stream, "application/octet-stream", "attachment", ACL.Auto, null, 5, expires);
+        var uri = await SaveAsync(domain, path, stream, "application/octet-stream", "attachment", ACL.Auto, null, 5, expires, token: token);
 
         return uri.ToString();
     }
@@ -711,11 +715,11 @@ public class RackspaceCloudStorage(TempPath tempPath,
 
     #endregion
 
-    protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Stream stream, string attachmentFileName)
+    protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Stream stream, string attachmentFileName, CancellationToken token = default)
     {
-        return SaveWithAutoAttachmentAsync(domain, path, Guid.Empty, stream, attachmentFileName);
+        return SaveWithAutoAttachmentAsync(domain, path, Guid.Empty, stream, attachmentFileName, token);
     }
-    protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName)
+    protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName, CancellationToken token = default)
     {
         var contentDisposition = $"attachment; filename={HttpUtility.UrlPathEncode(attachmentFileName)};";
         if (attachmentFileName.Any(c => c >= 0 && c <= 127))
@@ -723,7 +727,7 @@ public class RackspaceCloudStorage(TempPath tempPath,
             contentDisposition = $"attachment; filename*=utf-8''{HttpUtility.UrlPathEncode(attachmentFileName)};";
         }
 
-        return SaveAsync(domain, path, ownerId, stream, null, contentDisposition);
+        return SaveAsync(domain, path, ownerId, stream, null, contentDisposition, token);
     }
 
     private string MakePath(string domain, string path)

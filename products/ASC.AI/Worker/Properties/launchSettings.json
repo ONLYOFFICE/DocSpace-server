@@ -1,0 +1,16 @@
+{
+  "profiles": {
+    "http": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:5124",
+      "launchUrl": "http://localhost:5124",
+      "environmentVariables": {
+        "$STORAGE_ROOT": "../../../../Data",
+        "log__dir": "../../../../Logs",
+        "log__name": "ai.service",
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

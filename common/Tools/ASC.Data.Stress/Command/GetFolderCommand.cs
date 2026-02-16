@@ -15,7 +15,7 @@ public partial class GetFolderCommand : AsyncCommand<GetFolderCommand.Settings>,
         public static readonly Settings Default = new()
         {
             Iterations = 100,
-            Email = "paul.bannov@gmail.com",
+            Email = "test@onlyoffice.com",
             Password = "11111111",
             FolderType = DocSpace.API.SDK.Model.FolderType.USER
         };

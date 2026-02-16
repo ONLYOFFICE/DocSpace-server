@@ -244,7 +244,7 @@ $Message</value>
     </value>
   </data>
   <data name="subject_AgentRemoved" xml:space="preserve">
-    <value>Уведомление DocSpace. ИИ-агент удален.</value>
+    <value>Уведомление DocSpace. ИИ-агент удален</value>
   </data>
   <data name="subject_DocuSignComplete" xml:space="preserve">
     <value>Документы. Все стороны подписали $DocumentTitle</value>

@@ -33,6 +33,8 @@ using ASC.Data.Backup.Core.Quota;
 using ASC.Data.Backup.Services;
 using ASC.Data.Storage;
 using ASC.MessagingSystem;
+using ASC.MessagingSystem.Core;
+using ASC.MessagingSystem.EF.Model;
 using ASC.Web.Core.PublicResources;
 
 using Swashbuckle.AspNetCore.Annotations;
@@ -56,6 +58,7 @@ public class BackupController(
     CommonLinkUtility commonLinkUtility,
     CoreSettings coreSettings,
     BackupService backupService,
+    MessageService messageService,
     IDistributedLockProvider distributedLockProvider,
     IHttpContextAccessor httpContextAccessor,
     CountFreeBackupChecker freeBackupsChecker)
@@ -145,7 +148,12 @@ public class BackupController(
         {
             await tenantExtra.DemandAccessSpacePermissionAsync();
         }
-        await backupService.DeleteScheduleAsync(dto.Dump);
+
+        var tenantId = dto.Dump ? Tenant.DefaultTenant : tenantManager.GetCurrentTenantId();
+
+        await backupService.DeleteScheduleAsync(tenantId);
+
+        await messageService.SendAsync(MessageAction.ScheduledBackupDeleted, MessageTarget.Create(tenantId));
 
         return true;
     }
@@ -287,6 +295,53 @@ public class BackupController(
     }
 
     /// <remarks>
+    /// Cancel current backup.
+    /// </remarks>
+    /// <summary>Cancel current backup</summary>
+    /// <path>api/2.0/backup/cancelbackup</path>
+    [Tags("Backup")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [AllowNotPayment]
+    [HttpPost("cancelbackup")]
+    public async Task<bool> CancelBackupAsync()
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        var result = await backupService.CancelBackupAsync(tenantId);
+
+        if (result)
+        {
+            await messageService.SendAsync(MessageAction.BackupCancelled, MessageTarget.Create(tenantId));
+        }
+
+        return result;
+    }
+
+    // /// <remarks>
+    // /// Cancel current restore.(Only from saas backup)
+    // /// </remarks>
+    // /// <summary>Cancel current restore</summary>
+    // /// <path>api/2.0/backup/cancelrestore</path>
+    // [Tags("Backup")]
+    // [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    // [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    // [AllowNotPayment]
+    // [HttpPost("cancelrestore")]
+    // public async Task<bool> CancelRestoreAsync()
+    // {
+    //     var tenantId = tenantManager.GetCurrentTenantId();
+    //
+    //     var result = await backupService.CancelRestoreAsync(tenantId);
+    //
+    //     if (result)
+    //     {
+    //         await messageService.SendAsync(MessageAction.RestoreCancelled, MessageTarget.Create(tenantId));
+    //     }
+    //
+    //     return result;
+    // }
+
+    /// <remarks>
     /// Returns the progress of the started backup.
     /// </remarks>
     /// <summary>Get the backup progress</summary>
@@ -417,6 +472,7 @@ public class BackupController(
                              taskId: taskId
                         ));
 
+        messageService.Send(MessageAction.RestoreStarted, MessageTarget.Create(tenantId), inDto.Dump ? "dump" : string.Empty);
 
         return await backupService.GetRestoreProgressAsync(inDto.Dump);
     }

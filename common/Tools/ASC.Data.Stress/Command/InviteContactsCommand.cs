@@ -20,7 +20,7 @@ public class InviteContactsCommand : AsyncCommand<InviteContactsCommand.Settings
         
         public static readonly Settings Default = new()
         {
-            Email = "paul.bannov@gmail.com",
+            Email = "test@onlyoffice.com",
             Password = "11111111"
         };
     }

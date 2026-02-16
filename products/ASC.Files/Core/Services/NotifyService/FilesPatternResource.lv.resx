@@ -120,6 +120,14 @@
   <data name="button_CheckReadyForms" xml:space="preserve">
     <value>Pārbaudīt gatavās veidlapas</value>
   </data>
+  <data name="pattern_AgentRemoved" xml:space="preserve">
+    <value>h1. $__AuthorName izdzēsa MI aģentu
+
+$__AuthorName izdzēsa MI aģentu: $RoomTitle</value>
+  </data>
+  <data name="pattern_AgentUpdateAccessForUser_push" xml:space="preserve">
+    <value>Jūsu loma MI aģentā "$RoomTitle" ir mainīta uz "$RoomRole"</value>
+  </data>
   <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
     <value>Telpā "$RoomTitle" ir izveidots jauns dokuments "$DocumentTitle"</value>
   </data>
@@ -187,6 +195,9 @@ $OrangeButton
       Paziņojums par aktivitāti. Veidlapa "$DocumentTitle":"$DocumentURL" tika pilnībā aizpildīta telpā: "$RoomTitle":"$RoomURL" — $__DateTime.
     </value>
   </data>
+  <data name="pattern_InvitedToAgent_push" xml:space="preserve">
+    <value>Jūs esat uzaicināts pievienoties MI aģentam "$RoomTitle"</value>
+  </data>
   <data name="pattern_InvitedToRoom_push" xml:space="preserve">
     <value>Jūs esat uzaicināts uz istabu "$RoomTitle"</value>
   </data>
@@ -231,6 +242,9 @@ $Message</value>
     <value>
       Paziņojums par aktivitāti. Jūsu kārta! Nepieciešams aizpildīt veidlapu: "$DocumentTitle":"$DocumentURL" telpā: "$RoomTitle":"$RoomURL" — $__DateTime.
     </value>
+  </data>
+  <data name="subject_AgentRemoved" xml:space="preserve">
+    <value>DocSpace paziņojums. MI aģents dzēsts</value>
   </data>
   <data name="subject_DocuSignComplete" xml:space="preserve">
     <value>Dokumenti. Visas parakstošās puses ir pabeigušas $DocumentTitle</value>
