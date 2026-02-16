@@ -26,6 +26,9 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request to retrieve a specific AI chat session by its identifier.
+/// </summary>
 public class GetChatRequestDto
 {
     /// <summary>

@@ -26,6 +26,9 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request to start a new AI chat session in a room.
+/// </summary>
 public class StartNewChatRequestDto
 {
     /// <summary>
@@ -34,10 +37,16 @@ public class StartNewChatRequestDto
     [FromRoute(Name = "roomId")]
     public required int RoomId { get; set; }
 
+    /// <summary>
+    /// The initial message and optional file attachments.
+    /// </summary>
     [FromBody]
     public required StartNewChatBody Body { get; set; }
 }
 
+/// <summary>
+/// Parameters for starting a new AI chat session.
+/// </summary>
 public class StartNewChatBody
 {
     /// <summary>

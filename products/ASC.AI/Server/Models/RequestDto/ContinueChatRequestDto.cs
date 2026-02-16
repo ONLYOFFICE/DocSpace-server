@@ -26,6 +26,9 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request to continue an existing AI chat session with a new message.
+/// </summary>
 public class ContinueChatRequestDto
 {
     /// <summary>
@@ -34,10 +37,16 @@ public class ContinueChatRequestDto
     [FromRoute(Name = "chatId")]
     public required Guid ChatId { get; set; }
 
+    /// <summary>
+    /// The message and optional file attachments.
+    /// </summary>
     [FromBody]
     public required ContinueChatBody Body { get; set; }
 }
 
+/// <summary>
+/// Parameters for continuing an AI chat session.
+/// </summary>
 public class ContinueChatBody
 {
     /// <summary>

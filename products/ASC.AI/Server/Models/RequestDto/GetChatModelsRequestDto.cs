@@ -26,6 +26,9 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request to retrieve available AI chat models.
+/// </summary>
 public class GetChatModelsRequestDto
 {
     /// <summary>

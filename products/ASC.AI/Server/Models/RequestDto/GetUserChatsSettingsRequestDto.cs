@@ -26,6 +26,9 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request to retrieve chat settings for a specific room.
+/// </summary>
 public class GetUserChatsSettingsRequestDto
 {
     /// <summary>

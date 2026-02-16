@@ -26,12 +26,21 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request to configure the document vectorization embedding provider.
+/// </summary>
 public class SetEmbeddingConfigRequestDto
 {
+    /// <summary>
+    /// The embedding provider configuration parameters.
+    /// </summary>
     [FromBody]
     public required SetEmbeddingConfigRequestBody Body { get; init; }
 }
 
+/// <summary>
+/// Parameters for configuring the embedding provider.
+/// </summary>
 public class SetEmbeddingConfigRequestBody
 {
     /// <summary>

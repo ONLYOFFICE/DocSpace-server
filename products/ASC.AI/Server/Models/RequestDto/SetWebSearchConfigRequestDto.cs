@@ -26,12 +26,21 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request to configure the global web search settings for AI chat sessions.
+/// </summary>
 public class SetWebSearchConfigRequestDto
 {
+    /// <summary>
+    /// The web search configuration parameters.
+    /// </summary>
     [FromBody]
     public required SetWebSearchSettingsRequestBody Body { get; init; }
 }
 
+/// <summary>
+/// Parameters for configuring web search settings.
+/// </summary>
 public class SetWebSearchSettingsRequestBody
 {
     /// <summary>

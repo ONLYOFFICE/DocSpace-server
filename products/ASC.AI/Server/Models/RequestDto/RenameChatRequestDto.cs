@@ -26,6 +26,9 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request to rename an AI chat session.
+/// </summary>
 public class RenameChatRequestDto
 {
     /// <summary>
@@ -34,10 +37,16 @@ public class RenameChatRequestDto
     [FromRoute(Name = "chatId")]
     public required Guid ChatId { get; set; }
 
+    /// <summary>
+    /// The new chat name.
+    /// </summary>
     [FromBody]
     public required RenameChatBody Body { get; set; }
 }
 
+/// <summary>
+/// Parameters for renaming an AI chat session.
+/// </summary>
 public class RenameChatBody
 {
     /// <summary>

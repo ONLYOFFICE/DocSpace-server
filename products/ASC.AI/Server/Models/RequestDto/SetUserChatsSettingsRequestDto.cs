@@ -26,6 +26,9 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request to update chat settings for a specific room.
+/// </summary>
 public class SetUserChatsSettingsRequestDto
 {
     /// <summary>
@@ -34,10 +37,16 @@ public class SetUserChatsSettingsRequestDto
     [FromRoute(Name = "roomId")]
     public int RoomId { get; init; }
 
+    /// <summary>
+    /// The chat settings to apply.
+    /// </summary>
     [FromBody]
     public required SetUserChatSettingsRequestBody Body { get; init; }
 }
 
+/// <summary>
+/// Parameters for updating user chat settings.
+/// </summary>
 public class SetUserChatSettingsRequestBody
 {
     /// <summary>

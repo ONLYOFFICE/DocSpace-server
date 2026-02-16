@@ -26,6 +26,9 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request to delete an AI chat session.
+/// </summary>
 public class DeleteChatRequestDto
 {
     /// <summary>

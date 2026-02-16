@@ -37,10 +37,16 @@ public class UpdateProviderRequestDto
     [FromRoute(Name = "id")]
     public int Id { get; set; }
 
+    /// <summary>
+    /// The AI provider configuration parameters to update.
+    /// </summary>
     [FromBody]
     public required UpdateProviderBody Body { get; set; }
 }
 
+/// <summary>
+/// Parameters for updating an AI provider's configuration.
+/// </summary>
 public class UpdateProviderBody
 {
     /// <summary>
