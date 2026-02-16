@@ -1,10 +1,3 @@
-using System.Collections.Immutable;
-
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Diagnostics;
-
 namespace ASC.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
@@ -87,7 +80,7 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
     }
     
     private static void AnalyzeMethod(SyntaxNodeAnalysisContext context)
-    {    
+    {
         var methodDeclaration = (MethodDeclarationSyntax)context.Node;
             
         if (!IsApiActionMethod(context, methodDeclaration))
@@ -251,23 +244,11 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
                 var typeArgument = namedTypeSymbol.TypeArguments.FirstOrDefault();
                 if (typeArgument != null && !IsSystemNamespace(typeArgument))
                 {
-                    // if (typeArgument.Name.Contains("DocServiceUrlDto"))MigrationStatusDto
-                    // {
-                    //     if (!System.Diagnostics.Debugger.IsAttached)
-                    //     {
-                    //         System.Diagnostics.Debugger.Launch();
-                    //     }
-                    // }
-
                     ReportMissingXmlDocumentation(context, methodDeclaration, typeArgument);
                 }
             }
             else if (!IsSystemNamespace(returnTypeSymbol))
             {  
-                // if (!System.Diagnostics.Debugger.IsAttached)
-                // {
-                //     System.Diagnostics.Debugger.Launch();
-                // }
                 ReportMissingXmlDocumentation(context, methodDeclaration, returnTypeSymbol);
             }
         }
@@ -288,17 +269,22 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
     private static void ReportMissingXmlDocumentation(SyntaxNodeAnalysisContext context, MethodDeclarationSyntax methodDeclaration, ITypeSymbol returnTypeSymbol)
     {
         var syntaxReferences = returnTypeSymbol.DeclaringSyntaxReferences;
+        if (syntaxReferences.Length > 0)
+        {
+            CheckPropertiesFromSyntax(context, syntaxReferences);
+        }
+        else
+        {
+            CheckPropertiesFromMetadata(context, methodDeclaration, returnTypeSymbol);
+        }
+    }
+
+    private static void CheckPropertiesFromSyntax(SyntaxNodeAnalysisContext context, ImmutableArray<SyntaxReference> syntaxReferences)
+    {
         foreach (var syntaxReference in syntaxReferences)
         {
             var syntaxNode = syntaxReference.GetSyntax();
-            // if (!HasXmlDocumentation(syntaxNode))
-            // {            
-            //     context.ReportDiagnostic(Diagnostic.Create(
-            //         _modelRule,
-            //         methodDeclaration.ReturnType.GetLocation(),
-            //         returnTypeSymbol.Name));
-            // }
-            
+
             if (syntaxNode is not ClassDeclarationSyntax modelDeclaration)
             {
                 continue;
@@ -314,6 +300,76 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
                         modelDeclaration.Identifier.Text,
                         prop.Identifier.Text));
                 }
+            }
+        }
+    }
+    
+    private static readonly ConcurrentDictionary<string, XDocument?> _xmlDocCache = new();
+
+    private static void CheckPropertiesFromMetadata(SyntaxNodeAnalysisContext context, MethodDeclarationSyntax methodDeclaration, ITypeSymbol typeSymbol)
+    {
+        var members = typeSymbol.GetMembers();
+        foreach (var member in members)
+        {
+            if (member is not IPropertySymbol propertySymbol)
+            {
+                continue;
+            }
+
+            if (propertySymbol.IsImplicitlyDeclared ||
+                propertySymbol.DeclaredAccessibility != Accessibility.Public)
+            {
+                continue;
+            }
+
+            var xmlDoc = propertySymbol.GetDocumentationCommentXml();
+
+            if (string.IsNullOrWhiteSpace(xmlDoc))
+            {
+                var reference = context.Compilation.GetMetadataReference(propertySymbol.ContainingAssembly);
+                if (reference is PortableExecutableReference peRef)
+                {
+                    var xmlPath = Path.ChangeExtension(peRef.FilePath, ".xml");
+
+                    if (string.IsNullOrEmpty(xmlPath))
+                    {
+                        return;
+                    }
+
+                    var doc = _xmlDocCache.GetOrAdd(xmlPath, path =>
+                    {
+                        try { return XDocument.Load(path); }
+                        catch { return null; }
+                    });
+                    
+                    if (doc is null)
+                    {
+                        return;
+                    }
+                    
+                    var docId = propertySymbol.GetDocumentationCommentId();
+                    if (docId is null)
+                    {
+                        continue;
+                    }
+                    
+                    xmlDoc = doc.Descendants("member").FirstOrDefault(e =>
+                    {
+                        var name = e.Attribute("name")?.Value;
+                        return name == docId.Replace("{`0}", "`1") ||
+                               name == docId.Replace($"{{{typeof(int).FullName!}}}", "`1") ||
+                               name == docId.Replace($"{{{typeof(string).FullName!}}}", "`1");
+                    })?.ToString();
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(xmlDoc) || !xmlDoc.Contains("<summary>"))
+            {
+                context.ReportDiagnostic(Diagnostic.Create(
+                    _modelDtoRule,
+                    methodDeclaration.Identifier.GetLocation(),
+                    typeSymbol.Name,
+                    propertySymbol.Name));
             }
         }
     }

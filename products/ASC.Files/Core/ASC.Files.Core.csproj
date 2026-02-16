@@ -5,6 +5,7 @@
     <OutputType>Library</OutputType>
     <NoWarn>NU1701;1591</NoWarn>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
   <ItemGroup>
 
