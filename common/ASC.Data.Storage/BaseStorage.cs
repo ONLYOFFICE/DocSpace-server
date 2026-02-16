@@ -163,42 +163,45 @@ public abstract class BaseStorage(TempStream tempStream,
 
     public abstract Task<Stream> GetReadStreamAsync(string domain, string path, long offset, long length);
 
-    public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream);
-    public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream, Guid ownerId);
-    public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream, ACL acl);
+    public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream, CancellationToken token = default);
+    public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream, Guid ownerId, CancellationToken token = default);
+    public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream, ACL acl, CancellationToken token = default);
 
-    public async Task<Uri> SaveAsync(string domain, string path, Stream stream, string attachmentFileName)
+    public async Task<Uri> SaveAsync(string domain, string path, Stream stream, string attachmentFileName, CancellationToken token = default)
     {
-        return await SaveAsync(domain, path, Guid.Empty, stream, attachmentFileName);
+        return await SaveAsync(domain, path, Guid.Empty, stream, attachmentFileName, token);
     }
-    public async Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName)
+
+    public async Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName, CancellationToken token = default)
     {
         if (!string.IsNullOrEmpty(attachmentFileName))
         {
-            return await SaveWithAutoAttachmentAsync(domain, path, ownerId, stream, attachmentFileName);
+            return await SaveWithAutoAttachmentAsync(domain, path, ownerId, stream, attachmentFileName, token);
         }
-        return await SaveAsync(domain, path, stream, ownerId);
+        return await SaveAsync(domain, path, stream, ownerId, token);
     }
 
-    protected abstract Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName);
+    protected abstract Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName, CancellationToken token = default);
+
     public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentType,
-                            string contentDisposition);
+                            string contentDisposition, CancellationToken token = default);
 
-    public abstract Task<Uri> SaveAsync(string domain, string path, Guid ownerId, Stream stream, string contentType,
-                            string contentDisposition);
-    public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentEncoding, int cacheDays);
+    public abstract Task<Uri> SaveAsync(string domain, string path,Guid ownerId, Stream stream, string contentType,
+                            string contentDisposition, CancellationToken token = default);
 
-    public async Task<Uri> SaveAsync(string path, Stream stream, string attachmentFileName)
+    public abstract Task<Uri> SaveAsync(string domain, string path, Stream stream, string contentEncoding, int cacheDays, CancellationToken token = default);
+
+    public async Task<Uri> SaveAsync(string path, Stream stream, string attachmentFileName, CancellationToken token = default)
     {
-        return await SaveAsync(string.Empty, path, stream, attachmentFileName);
+        return await SaveAsync(string.Empty, path, stream, attachmentFileName, token);
     }
 
-    public async Task<Uri> SaveAsync(string path, Stream stream)
+    public async Task<Uri> SaveAsync(string path, Stream stream, CancellationToken token = default)
     {
-        return await SaveAsync(string.Empty, path, stream);
+        return await SaveAsync(string.Empty, path, stream, token);
     }
-
-    protected abstract Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Stream stream, string attachmentFileName);
+    
+    protected abstract Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Stream stream, string attachmentFileName, CancellationToken token = default);
 
     #region chunking
 
@@ -244,7 +247,7 @@ public abstract class BaseStorage(TempStream tempStream,
     public abstract Task MoveDirectoryAsync(string srcDomain, string srcDir, string newDomain, string newDir);
     public abstract Task<Uri> MoveAsync(string srcDomain, string srcPath, string newDomain, string newPath, bool quotaCheckFileSize = true);
     public abstract Task<Uri> MoveAsync(string srcdomain, string srcpath, string newdomain, string newpath, Guid ownerId, bool quotaCheckFileSize = true);
-    public abstract Task<(Uri, string)> SaveTempAsync(string domain, Stream stream);
+    public abstract Task<(Uri, string)> SaveTempAsync(string domain, Stream stream, CancellationToken token = default);
     public virtual string GetRootDirectory(string domain)
     {
         return domain;
@@ -283,9 +286,9 @@ public abstract class BaseStorage(TempStream tempStream,
         return await MoveAsync(string.Empty, srcPath, newDomain, newPath);
     }
 
-    public async Task<(Uri, string)> SaveTempAsync(Stream stream)
+    public async Task<(Uri, string)> SaveTempAsync(Stream stream, CancellationToken token = default)
     {
-        return await SaveTempAsync(string.Empty, stream);
+        return await SaveTempAsync(string.Empty, stream, token);
     }
 
     public IAsyncEnumerable<string> ListDirectoriesRelativeAsync(string path, bool recursive)
@@ -359,7 +362,7 @@ public abstract class BaseStorage(TempStream tempStream,
         return this;
     }
 
-    public abstract Task<string> SavePrivateAsync(string domain, string path, Stream stream, DateTime expires);
+    public abstract Task<string> SavePrivateAsync(string domain, string path, Stream stream, DateTime expires, CancellationToken token = default);
     public abstract Task DeleteExpiredAsync(string domain, string path, TimeSpan oldThreshold);
 
     public abstract string GetUploadForm(string domain, string directoryPath, string redirectTo, long maxUploadSize,
@@ -389,7 +392,7 @@ public abstract class BaseStorage(TempStream tempStream,
 
     internal async Task QuotaUsedDeleteAsync(string domain, long size)
     {
-        await QuotaUsedDeleteAsync(domain, size, Guid.Empty);
+       await QuotaUsedDeleteAsync(domain, size, Guid.Empty);
     }
     internal async Task QuotaUsedDeleteAsync(string domain, long size, Guid ownerId)
     {

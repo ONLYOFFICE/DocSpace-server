@@ -50,8 +50,9 @@ public class RestorePortalTask(DbFactory dbFactory,
     private ColumnMapper _columnMapper;
     private string _region;
     private bool _expectDump;
+    private CancellationToken _cancellationToken;
 
-    public void Init(string region, string fromFilePath, bool expectDump, int tenantId = -1, ColumnMapper columnMapper = null, string upgradesPath = null)
+    public void Init(string region, string fromFilePath, bool expectDump, int tenantId = -1, ColumnMapper columnMapper = null, string upgradesPath = null, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(fromFilePath);
 
@@ -64,7 +65,8 @@ public class RestorePortalTask(DbFactory dbFactory,
         UpgradesPath = upgradesPath;
         _columnMapper = columnMapper ?? new ColumnMapper();
         _region = region;
-        _expectDump = expectDump;
+        _cancellationToken = cancellationToken;
+        _expectDump = expectDump; 
         Init(tenantId);
     }
 
@@ -74,7 +76,7 @@ public class RestorePortalTask(DbFactory dbFactory,
 
         options.DebugBeginRestoreData();
 
-        using (var dataReader = DataOperatorFactory.GetReadOperator(BackupFilePath))
+        using (var dataReader = DataOperatorFactory.GetReadOperator(BackupFilePath, true, _cancellationToken))
         {
             await using (var entry = dataReader.GetEntry(KeyHelper.GetDumpKey()))
             {
@@ -205,7 +207,9 @@ public class RestorePortalTask(DbFactory dbFactory,
                 tasks.Add(RestoreFromDumpFile(dataReader, key1, key2));
             }
 
-            Task.WaitAll(tasks.ToArray());
+            Task.WaitAll(tasks.ToArray(), _cancellationToken);
+
+            _cancellationToken.ThrowIfCancellationRequested();
         }
 
         var comparer = new SqlComparer();
@@ -334,7 +338,7 @@ public class RestorePortalTask(DbFactory dbFactory,
                         await using var stream = dataReader.GetEntry(key);
                         try
                         {
-                            await storage.SaveAsync(file.Domain, adjustedPath, module != null ? module.PrepareData(key, stream, _columnMapper) : stream);
+                            await storage.SaveAsync(file.Domain, adjustedPath, module != null ? module.PrepareData(key, stream, _columnMapper) : stream, _cancellationToken);
                         }
                         catch (Exception error)
                         {

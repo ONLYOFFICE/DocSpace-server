@@ -317,6 +317,20 @@ public class BackupService(
 
         return await backupWorker.GetBackupProgressAsync(tenantId);
     }
+    
+    public async Task<bool> CancelBackupAsync(int tenantId)
+    {
+        await DemandPermissionsBackupAsync();
+
+        return await backupWorker.CancelBackupAsync(tenantId);
+    }
+
+    public async Task<bool> CancelRestoreAsync(int tenantId)
+    {
+        await DemandPermissionsBackupAsync();
+
+        return await backupWorker.CancelRestoreAsync(tenantId);
+    }
 
     public async Task<BackupProgress> GetDumpBackupProgress()
     {
@@ -413,14 +427,6 @@ public class BackupService(
                 StorageParams = JsonSerializer.Serialize(scheduleRequest.StorageParams),
                 Dump = scheduleRequest.Dump
             });
-    }
-
-    public async Task DeleteScheduleAsync(bool dump)
-    {
-        await DemandPermissionsBackupAsync();
-
-        var tenantId = dump ? -1 : tenantManager.GetCurrentTenantId();
-        await backupRepository.DeleteBackupScheduleAsync(tenantId);
     }
 
     public async Task DeleteScheduleAsync(int tenantId)

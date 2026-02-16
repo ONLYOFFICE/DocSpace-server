@@ -151,7 +151,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     {
         var image = "onlyoffice/documentserver";
         
-        switch (builder.Environment.EnvironmentName)
+        switch (builder.Configuration["APP_EDITION"])
         {
             case "enterprise":
                 image = "onlyoffice/documentserver-ee";
