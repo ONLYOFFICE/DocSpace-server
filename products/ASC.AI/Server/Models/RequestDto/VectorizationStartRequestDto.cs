@@ -34,5 +34,8 @@ public class VectorizationStartRequestDto
 
 public class VectorizationStartRequestBody
 {
+    /// <summary>
+    /// The set of file identifiers to submit for vectorization.
+    /// </summary>
     public required HashSet<int> Files { get; init; }
 }
