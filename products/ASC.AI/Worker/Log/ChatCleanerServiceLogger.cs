@@ -27,7 +27,7 @@
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
-namespace ASC.AI.Service.Log;
+namespace ASC.AI.Worker.Log;
 
 internal static partial class ChatCleanerServiceLogger
 {

@@ -31,11 +31,11 @@ global using ASC.AI.Core.Chat.Data;
 global using ASC.AI.Core.Chat.Deletion;
 global using ASC.Api.Core.Extensions;
 global using ASC.AI.Core.Export;
-global using ASC.AI.Service;
-global using ASC.AI.Service.BackgroundServices;
-global using ASC.AI.Service.Extensions;
-global using ASC.AI.Service.Handlers;
-global using ASC.AI.Service.Log;
+global using ASC.AI.Worker;
+global using ASC.AI.Worker.BackgroundServices;
+global using ASC.AI.Worker.Extensions;
+global using ASC.AI.Worker.Handlers;
+global using ASC.AI.Worker.Log;
 
 global using ASC.Core;
 global using ASC.Core.Common.EF;
