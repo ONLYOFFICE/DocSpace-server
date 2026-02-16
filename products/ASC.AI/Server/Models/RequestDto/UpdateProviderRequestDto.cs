@@ -26,18 +26,35 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request parameters for updating an existing AI provider.
+/// </summary>
 public class UpdateProviderRequestDto
 {
+    /// <summary>
+    /// The identifier of the AI provider to update.
+    /// </summary>
     [FromRoute(Name = "id")]
     public int Id { get; set; }
-    
+
     [FromBody]
     public required UpdateProviderBody Body { get; set; }
 }
 
 public class UpdateProviderBody
 {
+    /// <summary>
+    /// The new display title for the AI provider. If null, the title is not changed.
+    /// </summary>
     public string? Title { get; set; }
+
+    /// <summary>
+    /// The new API endpoint URL for the AI provider. If null, the URL is not changed.
+    /// </summary>
     public string? Url { get; set; }
+
+    /// <summary>
+    /// The new authentication API key for the AI provider. If null, the key is not changed.
+    /// </summary>
     public string? Key { get; set; }
 }
