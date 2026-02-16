@@ -1031,7 +1031,7 @@ public class UserController(
     /// <path>api/2.0/people/{userid}</path>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Detailed profile information", typeof(EmployeeFullDto))]
-    [SwaggerResponse(400, "Incorect UserId")]
+    [SwaggerResponse(400, "Incorrect UserId")]
     [SwaggerResponse(404, "User not found")]
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,Everyone")]
@@ -1278,11 +1278,14 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(400, "Incorrect UserIds")]
     [SwaggerResponse(403, "No permissions to perform this action or users are not suspended")]
     [SwaggerResponse(409, "Data reassign process is not complete")]
     [HttpPut("delete", Order = -1)]
     public async IAsyncEnumerable<EmployeeFullDto> RemoveUsers(UpdateMembersRequestDto inDto)
     {
+        ArgumentNullException.ThrowIfNull(inDto?.UserIds);
+
         await _permissionContext.DemandPermissionsAsync(Constants.Action_AddRemoveUser);
 
         await CheckReassignProcessAsync(inDto.UserIds);
