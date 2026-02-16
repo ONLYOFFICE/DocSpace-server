@@ -222,14 +222,14 @@ $OrangeButton
   <data name="pattern_ShareDocument" xml:space="preserve">
     <value>h1.$__DateTime User "$__AuthorName":"$__AuthorUrl"
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" σας παραχωρεί την πρόσβαση στο "$DocumentTitle":"$DocumentURL" με δικαιώματα πρόσβασης: "$AccessRights". 
+$__DateTime $__AuthorName σας παραχωρεί την πρόσβαση στο "$DocumentTitle":"$DocumentURL" με δικαιώματα πρόσβασης: "$AccessRights". 
 
 $Message</value>
   </data>
   <data name="pattern_ShareFolder" xml:space="preserve">
     <value>h1.$__DateTime User "$__AuthorName":"$__AuthorUrl"
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" σας παραχωρεί την πρόσβαση στο φάκελο "$DocumentTitle":"$DocumentURL" με δικαιώματα πρόσβασης: "$AccessRights". 
+$__DateTime $__AuthorName σας παραχωρεί την πρόσβαση στο φάκελο "$DocumentTitle":"$DocumentURL" με δικαιώματα πρόσβασης: "$AccessRights". 
 
 $Message</value>
   </data>

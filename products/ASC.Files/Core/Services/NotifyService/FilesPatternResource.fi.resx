@@ -222,14 +222,14 @@ $__AuthorName poisti huoneen: $RoomTitle</value>
   <data name="pattern_ShareDocument" xml:space="preserve">
     <value>h1. Pääsy myönnetty asiakirjaan: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" on myöntänyt sinulle pääsyn asiakirjaan "$DocumentTitle":"$DocumentURL" seuraavin oikeuksin: "$AccessRights". 
+$__DateTime $__AuthorName on myöntänyt sinulle pääsyn asiakirjaan "$DocumentTitle":"$DocumentURL" seuraavin oikeuksin: "$AccessRights". 
 
 $Message</value>
   </data>
   <data name="pattern_ShareFolder" xml:space="preserve">
     <value>h1. Pääsyoikeus myönnetty kansioon: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" on myöntänyt sinulle pääsyn kansioon "$DocumentTitle":"$DocumentURL" seuraavin oikeuksin: "$AccessRights". 
+$__DateTime $__AuthorName on myöntänyt sinulle pääsyn kansioon "$DocumentTitle":"$DocumentURL" seuraavin oikeuksin: "$AccessRights". 
 
 $Message</value>
   </data>
