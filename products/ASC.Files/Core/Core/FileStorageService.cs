@@ -5186,26 +5186,48 @@ public class FileStorageService //: IFileStorageService
                 {
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
                 }
-                var role = await fileDao.GetFormRoles(formId).Where(r => !r.Submitted).FirstOrDefaultAsync();
-                properties.FormFilling.FillingStopedDate = DateTime.UtcNow;
-                properties.FormFilling.FormFillingInterruption =
-                    new FormFillingInterruption
-                    {
-                        UserId = authContext.CurrentAccount.ID,
-                        RoleName = role?.RoleName
-                    };
                 var room = await DocSpaceHelper.GetParentRoom(form, folderDao);
-                var allRoleUserIds = await fileDao.GetFormRoles(form.Id).Where(role => role.UserId != authContext.CurrentAccount.ID).Select(r => r.UserId).ToListAsync();
+                if (room.FolderType == FolderType.VirtualDataRoom)
+                {
+                    var role = await fileDao.GetFormRoles(formId).Where(r => !r.Submitted).FirstOrDefaultAsync();
+                    properties.FormFilling.FillingStopedDate = DateTime.UtcNow;
+                    properties.FormFilling.FormFillingInterruption =
+                        new FormFillingInterruption
+                        {
+                            UserId = authContext.CurrentAccount.ID,
+                            RoleName = role?.RoleName
+                        };
+
+                    var allRoleUserIds = await fileDao.GetFormRoles(form.Id).Where(role => role.UserId != authContext.CurrentAccount.ID).Select(r => r.UserId).ToListAsync();
+                    await notifyClient.SendFormFillingEvent(room, form, allRoleUserIds, typeof(StoppedFormFillingNotifyAction), authContext.CurrentAccount.ID);
+                }
+                if (room.FolderType == FolderType.FillingFormsRoom)
+                {
+                    properties.FormFilling.StartFilling = false;
+                }
 
                 var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
                 await webhookManager.PublishAsync(WebhookTrigger.FormStopped, form);
                 await filesMessageService.SendAsync(MessageAction.FormStopped, form, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
-                await notifyClient.SendFormFillingEvent(room, form, allRoleUserIds, typeof(StoppedFormFillingNotifyAction), authContext.CurrentAccount.ID);
+
                 break;
 
             case FormFillingManageAction.Resume:
                 properties.FormFilling.FillingStopedDate = DateTime.MinValue;
                 properties.FormFilling.FormFillingInterruption = null;
+                break;
+
+            case FormFillingManageAction.Start:
+                if (!await fileSecurity.CanStartFillingAsync(form, authContext.CurrentAccount.ID))
+                {
+                    throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+                }
+                var currentRoom = await DocSpaceHelper.GetParentRoom(form, folderDao);
+                if (currentRoom.FolderType == FolderType.FillingFormsRoom)
+                {
+                    properties.FormFilling.StartFilling = true;
+                }
+
                 break;
 
             default:
