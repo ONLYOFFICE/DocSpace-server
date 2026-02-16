@@ -174,7 +174,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         var fileSharing = scope.ServiceProvider.GetService<FileSharing>();
         var authContext = scope.ServiceProvider.GetService<AuthContext>();
         var notifyClient = scope.ServiceProvider.GetService<NotifyClient>();
-        var permissionsManager = scope.ServiceProvider.GetService<PermissionsCheck>();
+        var permissionsManager = scope.ServiceProvider.GetService<DeletePermissionsCheck>();
 
         var (fileMarker, filesMessageService, roomLogoManager) = scopeClass;
         roomLogoManager.EnableAudit = false;
@@ -409,7 +409,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         var scopeClass = scope.ServiceProvider.GetService<FileDeleteOperationScope>();
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
         var webhookManager = scope.ServiceProvider.GetService<WebhookManager>();
-        var security = scope.ServiceProvider.GetService<PermissionsCheck>();
+        var security = scope.ServiceProvider.GetService<DeletePermissionsCheck>();
 
         var (fileMarker, filesMessageService, _) = scopeClass;
 
@@ -421,7 +421,6 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             CancellationToken.ThrowIfCancellationRequested();
 
             var file = await FileDao.GetFileAsync(fileId);
-
             var errorMsg = await security.CheckFilePermissionsAsync([file], false, checkPermissions);
             if (errorMsg == FilesCommonResource.ErrorMessage_FileNotFound)
             {
@@ -476,7 +475,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
                     {
                         var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
                         var tagDao = daoFactory.GetTagDao<T>();
-                        var fromRoomTags = tagDao.GetTagsAsync(fileId, FileEntryType.File, TagType.FromRoom);
+                        var fromRoomTags = tagDao.GetTagsAsync(fileId, FileEntryType.File, TagType.FromRoom); //why no await?
                         var fromRoomTag = await fromRoomTags.FirstOrDefaultAsync();
                         var hasHeaders = _headers is { Count: > 0 };
 
@@ -533,7 +532,7 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
         var webhookManager = scope.ServiceProvider.GetService<WebhookManager>();
         var filesMessageService = scope.ServiceProvider.GetService<FilesMessageService>();
-        var permissionManager = scope.ServiceProvider.GetService<PermissionsCheck>();
+        var permissionManager = scope.ServiceProvider.GetService<DeletePermissionsCheck>();
 
         var file = await FileDao.GetFileAsync(fileId);
 

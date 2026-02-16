@@ -27,7 +27,7 @@
 namespace ASC.Files.Core.Services.WCFService.FileOperations;
 
 [Scope]
-public class PermissionsCheck(LockerManager lockerManager, FileTrackerHelper fileTracker, FileSecurity security)
+public class DeletePermissionsCheck(LockerManager lockerManager, FileTrackerHelper fileTracker, FileSecurity security)
 {
     public async Task<string> CheckFilePermissionsAsync<T>(IEnumerable<File<T>> files, bool folder, bool checkPermissions, bool throwExeption = false)
     {

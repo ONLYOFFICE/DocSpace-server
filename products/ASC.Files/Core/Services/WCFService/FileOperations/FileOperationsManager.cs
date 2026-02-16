@@ -26,6 +26,8 @@
 
 using ASC.Files.Core.Services.WCFService.FileOperations;
 
+using Google.Apis.Storage.v1.Data;
+
 namespace ASC.Web.Files.Services.WCFService.FileOperations;
 
 [Singleton(GenericArguments = [typeof(FileDeleteOperation)])]
@@ -345,6 +347,17 @@ public class FileDownloadOperationsManager(
         var data = new FileDownloadOperationData<int>(folderIntIds, fileIntIds, tenantId, userId, GetHttpHeaders(), sessionSnapshot, baseUri);
         var thirdPartyData = new FileDownloadOperationData<string>(folderStringIds, fileStringIds, tenantId, userId, GetHttpHeaders(), sessionSnapshot, baseUri);
 
+        var permissionsCheck = _serviceProvider.GetService<DownloadPermissionsCheck>();
+
+        var ctx = new DownloadPermissionsCheckContext<int>
+        { 
+            Files = data.Files?.ToList() ?? [],
+            Folders = data.Folders?.ToList() ?? [],
+            FileDao = _serviceProvider.GetService<IFileDao<int>>(),
+            FolderDao = _serviceProvider.GetService<IFolderDao<int>>()
+        };
+        await permissionsCheck.CheckEntriesPermissionsAsync(ctx);
+
         await _eventBus.PublishAsync(new BulkDownloadIntegrationEvent(await GetUserIdAsync(), tenantId)
         {
             TaskId = taskId,
@@ -549,7 +562,7 @@ public class FileDeleteOperationsManager(
             return null;
         }
 
-        var permissionsCheck = _serviceProvider.GetService<PermissionsCheck>();
+        var permissionsCheck = _serviceProvider.GetService<DeletePermissionsCheck>();
 
         await CheckDataAsync(folders.Item1, files.Item1, permissionsCheck, ignoreException, immediately, versions);
         await CheckDataAsync(folders.Item2, files.Item2, permissionsCheck, ignoreException, immediately, versions);
@@ -590,7 +603,7 @@ public class FileDeleteOperationsManager(
         return taskId;
     }
 
-    private async Task CheckDataAsync<T>(List<T> folders, List<T> files, PermissionsCheck security, bool ignoreException, bool immediately, List<int> versions)
+    private async Task CheckDataAsync<T>(List<T> folders, List<T> files, DeletePermissionsCheck security, bool ignoreException, bool immediately, List<int> versions)
     {
         var folderDao = _serviceProvider.GetService<IFolderDao<T>>();
         var fileDao = _serviceProvider.GetService<IFileDao<T>>();
@@ -606,7 +619,7 @@ public class FileDeleteOperationsManager(
         }
     }
 
-    private async Task CheckVersionsAsync<T>(List<T> files, IFileDao<T> fileDao, List<int> versions, PermissionsCheck security)
+    private async Task CheckVersionsAsync<T>(List<T> files, IFileDao<T> fileDao, List<int> versions, DeletePermissionsCheck security)
     {
         var fileId = files.FirstOrDefault();
         var file = await fileDao.GetFileAsync(fileId);
@@ -615,7 +628,7 @@ public class FileDeleteOperationsManager(
         await security.CheckVersionPermissionsAsync(file, versions, throwException);
     }
 
-    private async Task CheckFolderAsync<T>(List<T> data, IFolderDao<T> folderDao, PermissionsCheck security, bool ignoreException, bool immediately)
+    private async Task CheckFolderAsync<T>(List<T> data, IFolderDao<T> folderDao, DeletePermissionsCheck security, bool ignoreException, bool immediately)
     {
         foreach (var folderId in data)
         {
@@ -626,7 +639,7 @@ public class FileDeleteOperationsManager(
         }
     }
 
-    private async Task CheckFilesAsync<T>(List<T> data, PermissionsCheck security, IFileDao<T> fileDao)
+    private async Task CheckFilesAsync<T>(List<T> data, DeletePermissionsCheck security, IFileDao<T> fileDao)
     {
         foreach (var fileId in data)
         {
