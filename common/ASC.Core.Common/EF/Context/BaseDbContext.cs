@@ -56,8 +56,13 @@ public class InstallerOptionsAction(string region, string nameConnectionString)
         switch (provider)
         {
             case Provider.MySql:
+                var mysqlVersionString = sp.GetRequiredService<IConfiguration>()["mysqlServerVersion"];
+                var serverVersion = !string.IsNullOrEmpty(mysqlVersionString)
+                    ? ServerVersion.Parse(mysqlVersionString)
+                    : ServerVersion.AutoDetect(connectionString.ConnectionString);
+
                 optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-                optionsBuilder.UseMySql(connectionString.ConnectionString, ServerVersion.AutoDetect(connectionString.ConnectionString), providerOptions =>
+                optionsBuilder.UseMySql(connectionString.ConnectionString, serverVersion, providerOptions =>
                 {
                     if (!string.IsNullOrEmpty(migrateAssembly))
                     {
