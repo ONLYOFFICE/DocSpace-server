@@ -49,30 +49,76 @@ var app = builder.Build();
 var providersInfo = app.Configuration.GetSection("options").Get<Options>();
 var configurationInfo = !string.IsNullOrEmpty(app.Configuration["standalone"]) ? ConfigurationInfo.Standalone : ConfigurationInfo.SaaS;
 var targetMigration = app.Configuration["targetMigration"];
+var generateScript = !string.IsNullOrEmpty(app.Configuration["generate-script"]);
+var outputPath = app.Configuration["output"];
 
-if (!string.IsNullOrEmpty(connectionString))
+if (generateScript)
 {
-    var migrationCreator = new MigrationRunner(app.Services);
-    migrationCreator.RunApplyMigrations(new ProviderInfo
+    var scripts = new List<string>();
+
+    if (!string.IsNullOrEmpty(connectionString))
     {
-        Provider = Provider.MySql,
-        ConnectionString = connectionString,
-        ProviderFullName = "MySql.Data.MySqlClient"
-    }, configurationInfo, typeof(MigrationContext), targetMigration);
+        var runner = new MigrationRunner(app.Services);
+        scripts.Add(runner.RunGenerateScript(new ProviderInfo
+        {
+            Provider = Provider.MySql,
+            ConnectionString = connectionString,
+            ProviderFullName = "MySql.Data.MySqlClient"
+        }, configurationInfo, typeof(MigrationContext), targetMigration));
+    }
+    else
+    {
+        foreach (var providerInfo in providersInfo.Providers)
+        {
+            var runner = new MigrationRunner(app.Services);
+            scripts.Add(runner.RunGenerateScript(providerInfo, configurationInfo, typeof(MigrationContext), targetMigration));
+        }
+
+        foreach (var providerInfo in providersInfo.TeamlabsiteProviders)
+        {
+            var runner = new MigrationRunner(app.Services);
+            scripts.Add(runner.RunGenerateScript(providerInfo, configurationInfo, typeof(TeamlabSiteContext), targetMigration));
+        }
+    }
+
+    var result = string.Join(Environment.NewLine, scripts);
+
+    if (!string.IsNullOrEmpty(outputPath))
+    {
+        File.WriteAllText(outputPath, result);
+        Console.WriteLine($"Script saved to {outputPath}");
+    }
+    else
+    {
+        Console.WriteLine(result);
+    }
 }
 else
 {
-    foreach (var providerInfo in providersInfo.Providers)
+    if (!string.IsNullOrEmpty(connectionString))
     {
         var migrationCreator = new MigrationRunner(app.Services);
-        migrationCreator.RunApplyMigrations(providerInfo, configurationInfo, typeof(MigrationContext), targetMigration);
+        migrationCreator.RunApplyMigrations(new ProviderInfo
+        {
+            Provider = Provider.MySql,
+            ConnectionString = connectionString,
+            ProviderFullName = "MySql.Data.MySqlClient"
+        }, configurationInfo, typeof(MigrationContext), targetMigration);
+    }
+    else
+    {
+        foreach (var providerInfo in providersInfo.Providers)
+        {
+            var migrationCreator = new MigrationRunner(app.Services);
+            migrationCreator.RunApplyMigrations(providerInfo, configurationInfo, typeof(MigrationContext), targetMigration);
+        }
+
+        foreach (var providerInfo in providersInfo.TeamlabsiteProviders)
+        {
+            var migrationCreator = new MigrationRunner(app.Services);
+            migrationCreator.RunApplyMigrations(providerInfo, configurationInfo, typeof(TeamlabSiteContext), targetMigration);
+        }
     }
 
-    foreach (var providerInfo in providersInfo.TeamlabsiteProviders)
-    {
-        var migrationCreator = new MigrationRunner(app.Services);
-        migrationCreator.RunApplyMigrations(providerInfo, configurationInfo, typeof(TeamlabSiteContext), targetMigration);
-    }
+    Console.WriteLine("Migrations applied");
 }
-
-Console.WriteLine("Migrations applied");

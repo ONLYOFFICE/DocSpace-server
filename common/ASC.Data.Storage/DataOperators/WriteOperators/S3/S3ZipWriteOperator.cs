@@ -42,6 +42,7 @@ public class S3ZipWriteOperator : IDataWriteOperator
     private readonly Lock _locker = new();
 
     public string Hash { get; private set; }
+    public CancellationToken CancellationToken { get; set; }
     public string StoragePath { get; private set; }
     public bool NeedUpload => false;
 
@@ -65,17 +66,20 @@ public class S3ZipWriteOperator : IDataWriteOperator
 
     public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store, Func<Task> action)
     {
-        var fileStream = await ActionInvoker.TryAsync(async () => await store.GetReadStreamAsync(domain, path), 5, error => throw error);
+        CancellationToken.ThrowIfCancellationRequested();
+
+        await using var fileStream = await ActionInvoker.TryAsync(async () => await store.GetReadStreamAsync(domain, path), 5, error => throw error);
 
         if (fileStream != null)
         {
             await WriteEntryAsync(tarKey, fileStream, action);
-            await fileStream.DisposeAsync();
         }
     }
 
     public async Task WriteEntryAsync(string tarKey, Stream stream, Func<Task> action)
     {
+        CancellationToken.ThrowIfCancellationRequested();
+
         if (_fileStream == null)
         {
             _fileStream = _tempStream.Create();
@@ -87,11 +91,11 @@ public class S3ZipWriteOperator : IDataWriteOperator
         {
             var entry = TarEntry.CreateTarEntry(tarKey);
             entry.Size = buffered.Length;
-            await _tarOutputStream.PutNextEntryAsync(entry, CancellationToken.None);
+            await _tarOutputStream.PutNextEntryAsync(entry, CancellationToken);
             buffered.Position = 0;
-            await buffered.CopyToAsync(_tarOutputStream);
-            await _tarOutputStream.FlushAsync();
-            await _tarOutputStream.CloseEntryAsync(CancellationToken.None).ContinueWith(async _ => await action());
+            await buffered.CopyToAsync(_tarOutputStream, CancellationToken);
+            await _tarOutputStream.FlushAsync(CancellationToken);
+            await _tarOutputStream.CloseEntryAsync(CancellationToken).ContinueWith(async _ => await action(), CancellationToken);
         }
         finally
         {
@@ -105,7 +109,15 @@ public class S3ZipWriteOperator : IDataWriteOperator
         {
             var fs = _fileStream;
             _fileStream = null;
-            await SplitAndUploadAsync(fs);
+
+            try
+            {
+                await SplitAndUploadAsync(fs);
+            }
+            finally
+            {
+                await fs.DisposeAsync();
+            }
         }
     }
 
@@ -116,11 +128,17 @@ public class S3ZipWriteOperator : IDataWriteOperator
 
         int bytesRead;
 
-        while ((bytesRead = await stream.ReadAsync(buffer.AsMemory(0, (int)_sessionHolder.MaxChunkUploadSize))) > 0)
+        while ((bytesRead = await stream.ReadAsync(buffer.AsMemory(0, (int)_sessionHolder.MaxChunkUploadSize), CancellationToken)) > 0)
         {
             var tempStream = _tempStream.Create();
 
-            await tempStream.WriteAsync(buffer.AsMemory(0, bytesRead));
+            await tempStream.WriteAsync(buffer.AsMemory(0, bytesRead), CancellationToken);
+
+            if (CancellationToken.IsCancellationRequested)
+            {
+                break;
+            }
+
             if (tempStream.Length == _sessionHolder.MaxChunkUploadSize)
             {
                 tempStream.Position = 0;
@@ -143,7 +161,7 @@ public class S3ZipWriteOperator : IDataWriteOperator
             }
         }
 
-        await stream.DisposeAsync();
+        CancellationToken.ThrowIfCancellationRequested();
     }
 
     private async Task ComputeHashAsync(Stream stream, bool last)
@@ -151,7 +169,7 @@ public class S3ZipWriteOperator : IDataWriteOperator
         stream.Position = 0;
         var buffer = new byte[_sessionHolder.MaxChunkUploadSize];
         int bytesRead;
-        while ((bytesRead = await stream.ReadAsync(buffer.AsMemory(0, (int)_sessionHolder.MaxChunkUploadSize))) > 0)
+        while ((bytesRead = await stream.ReadAsync(buffer.AsMemory(0, (int)_sessionHolder.MaxChunkUploadSize), CancellationToken)) > 0)
         {
             _sha.TransformBlock(buffer, 0, bytesRead, buffer, 0);
         }
@@ -196,9 +214,16 @@ public class S3ZipWriteOperator : IDataWriteOperator
         _tarOutputStream.Close();
         await _tarOutputStream.DisposeAsync();
 
-        await SplitAndUploadAsync(_fileStream, true);
+        try
+        {
+            await SplitAndUploadAsync(_fileStream, true);
+        }
+        finally
+        {
+            await _fileStream.DisposeAsync();
+        }
 
-        Task.WaitAll(_tasks.ToArray());
+        Task.WaitAll(_tasks.ToArray(), CancellationToken);
 
         _chunkedUploadSession.BytesTotal++;
         StoragePath = await _sessionHolder.FinalizeAsync(_chunkedUploadSession);

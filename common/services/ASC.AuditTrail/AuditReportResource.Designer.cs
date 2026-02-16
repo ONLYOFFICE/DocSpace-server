@@ -303,6 +303,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Backup cancelled.
+        /// </summary>
+        public static string BackupCancelled {
+            get {
+                return ResourceManager.GetString("BackupCancelled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Backup completed.
         /// </summary>
         public static string BackupCompleted {
@@ -2184,6 +2193,24 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Restore cancelled.
+        /// </summary>
+        public static string RestoreCancelled {
+            get {
+                return ResourceManager.GetString("RestoreCancelled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Restore started.
+        /// </summary>
+        public static string RestoreStarted {
+            get {
+                return ResourceManager.GetString("RestoreStarted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Revoked client {0} access.
         /// </summary>
         public static string RevokeUserClient {
@@ -2486,6 +2513,15 @@ namespace ASC.AuditTrail {
         public static string ScheduledBackupCompleted {
             get {
                 return ResourceManager.GetString("ScheduledBackupCompleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Schedule backup deleted.
+        /// </summary>
+        public static string ScheduledBackupDeleted {
+            get {
+                return ResourceManager.GetString("ScheduledBackupDeleted", resourceCulture);
             }
         }
         
