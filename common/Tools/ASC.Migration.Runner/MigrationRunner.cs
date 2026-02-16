@@ -47,6 +47,20 @@ public class MigrationRunner
         }
     }
 
+    public string RunGenerateScript(ProviderInfo dbProvider, ConfigurationInfo configurationInfo, Type type, string targetMigration)
+    {
+        var migrationContext = _dbContextActivator.CreateInstance(type, dbProvider, skipConnection: true);
+        var script = GenerateScript(migrationContext, targetMigration);
+
+        if (type.Name == typeof(MigrationContext).Name && configurationInfo == ConfigurationInfo.Standalone)
+        {
+            migrationContext = _dbContextActivator.CreateInstance(type, dbProvider, ConfigurationInfo.Standalone, skipConnection: true);
+            script += Environment.NewLine + GenerateScript(migrationContext, targetMigration);
+        }
+
+        return script;
+    }
+
     private void Migrate(DbContext migrationContext, string targetMigration)
     {
         if (string.IsNullOrEmpty(targetMigration))
@@ -64,5 +78,11 @@ public class MigrationRunner
                 migrator.Migrate(targetMigration);
             }
         }
+    }
+
+    private string GenerateScript(DbContext migrationContext, string targetMigration)
+    {
+        var migrator = migrationContext.Database.GetService<IMigrator>();
+        return migrator.GenerateScript(fromMigration: null, toMigration: targetMigration);
     }
 }
