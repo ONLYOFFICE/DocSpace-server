@@ -642,7 +642,6 @@ public abstract class VirtualRoomsController<T>(
     public async Task<FolderDto<T>> AddRoomTags(BatchTagsRequestDto<T> inDto)
     {
         var room = await customTagsService.AddRoomTagsAsync(inDto.Id, inDto.BatchTags.Names);
-
         return await _folderDtoHelper.GetAsync(room);
     }
 
@@ -658,7 +657,6 @@ public abstract class VirtualRoomsController<T>(
     public async Task<FolderDto<T>> DeleteRoomTags(BatchTagsRequestDto<T> inDto)
     {
         var room = await customTagsService.DeleteRoomTagsAsync(inDto.Id, inDto.BatchTags.Names);
-
         return await _folderDtoHelper.GetAsync(room);
     }
 
@@ -914,7 +912,7 @@ public class VirtualRoomsCommonController(
     /// <summary>Create a room tag</summary>
     /// <path>api/2.0/files/tags</path>
     [Tags("Rooms")]
-    [SwaggerResponse(200, "New tag name", typeof(object))]
+    [SwaggerResponse(200, "New tag name", typeof(string))]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpPost("tags")]
     public async Task<string> CreateRoomTag(CreateTagRequestDto inDto)
@@ -924,7 +922,22 @@ public class VirtualRoomsCommonController(
     }
 
     /// <remarks>
-    /// Returns a list of custom room tags.
+    /// Updates the name of a custom tag.
+    /// </remarks>
+    /// <summary>Update tag</summary>
+    /// <path>api/2.0/files/tags</path>
+    [Tags("Rooms")]
+    [SwaggerResponse(200, "Updated tag name", typeof(string))]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
+    [HttpPut("tags")]
+    public async Task<string> UpdateRoomTag(UpdateTagRequestDto inDto)
+    {
+        var updatedTag = await customTagsService.UpdateTagAsync(inDto.OldName, inDto.NewName);
+        return updatedTag.Name;
+    }
+
+    /// <remarks>
+    /// Returns a list of custom tags.
     /// </remarks>
     /// <summary>Get the room tags</summary>
     /// <path>api/2.0/files/tags</path>
@@ -938,7 +951,23 @@ public class VirtualRoomsCommonController(
     }
 
     /// <remarks>
-    /// Deletes a bunch of custom room tags specified in the request.
+    /// Checks if a specific custom tag has linked items.
+    /// </remarks>
+    /// <summary>Has tag links</summary>
+    /// <path>api/2.0/files/tags/{tagName}/haslinks</path>
+    /// <collection>item</collection>
+    [Tags("Rooms")]
+    [SwaggerResponse(200, "True if tag has links, false otherwise", typeof(bool))]
+    [SwaggerResponse(404, "Tag not found")]
+    [HttpGet("tags/{tagName}/haslinks")]
+    public async Task<bool> HasTagLinks(string tagName)
+    {
+        var hasTagLinks = await customTagsService.HasTagLinks(tagName);
+        return hasTagLinks;
+    }
+
+    /// <remarks>
+    /// Deletes a bunch of custom tags specified in the request.
     /// </remarks>
     /// <summary>Delete the custom room tags</summary>
     /// <path>api/2.0/files/tags</path>
