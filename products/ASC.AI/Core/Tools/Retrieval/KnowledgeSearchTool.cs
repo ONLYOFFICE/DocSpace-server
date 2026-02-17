@@ -24,62 +24,41 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Tools;
+namespace ASC.AI.Core.Tools.Retrieval;
 
 [Scope]
-public class WebSearchTool(WebSearchEngineFactory searchEngineFactory, IFaviconService faviconService)
+public class KnowledgeSearchTool(KnowledgeSearchEngine searchEngine)
 {
-    public const string Name = "docspace_web_search";
-    private const string Description = "Search the web - performs real-time web searches and can scrape content from specific URLs.";
+    public const string Name = "docspace_knowledge_search";
+    private const string Description = "Search the DocSpace knowledge base using semantic search to find relevant information from documents and resources stored in the workspace. Finds content based on meaning and context, not just exact keyword matches. Use for questions about company policies, procedures, reports, documentation, and other organizational knowledge stored in DocSpace.";
+    
     private static AIFunctionFactoryOptions FactoryOptions => new()
     {
         Name = Name, 
         Description = Description
     };
 
-    public AIFunction Init(EngineConfig config)
+    public AIFunction Init(Folder<int> agent)
     {
-        var engine = searchEngineFactory.Create(config);
-
         return AIFunctionFactory.Create(Function, FactoryOptions);
         
-        async Task<ToolResponse<List<WebSearchResult>>> Function([Description("Search query")] string query)
+        async Task<ToolResponse<List<KnowledgeSearchResult>>> Function([Description("Search query")] string query)
         {
             try
             {
-                query = query.Trim();
-                ArgumentException.ThrowIfNullOrEmpty(query);
+                var results = await searchEngine.SearchAsync(agent, query);
                 
-                var results = await engine.SearchAsync(new SearchQuery
+                return new ToolResponse<List<KnowledgeSearchResult>>
                 {
-                    Query = query, 
-                    MaxResults = 5
-                });
-
-                var response = results.Select(x =>
-                {
-                    var faviconUrl = x.FaviconUrl;
-                    
-                    if (!string.IsNullOrEmpty(x.Url))
-                    {
-                        var domain = new Uri(x.Url).Host;
-                        faviconUrl = faviconService.GetFaviconUrl(domain);
-                    }
-
-                    return new WebSearchResult
-                    {
-                        Title = x.Title,
-                        Url = x.Url,
-                        FaviconUrl = faviconUrl,
-                        Text = x.Text
-                    };
-                }).ToList();
-
-                return new ToolResponse<List<WebSearchResult>> { Data = response };
+                    Data = results
+                };
             }
             catch (Exception e)
             {
-                return new ToolResponse<List<WebSearchResult>> { Error = e.Message };
+                return new ToolResponse<List<KnowledgeSearchResult>>
+                {
+                    Error = e.Message
+                };
             }
         }
     }

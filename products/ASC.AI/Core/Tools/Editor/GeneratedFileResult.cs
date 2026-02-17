@@ -24,42 +24,11 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.AI.Core.Tools;
+namespace ASC.AI.Core.Tools.Editor;
 
-[Scope]
-public class KnowledgeSearchTool(KnowledgeSearchEngine searchEngine)
+public class GeneratedFileResult
 {
-    public const string Name = "docspace_knowledge_search";
-    private const string Description = "Search the DocSpace knowledge base using semantic search to find relevant information from documents and resources stored in the workspace. Finds content based on meaning and context, not just exact keyword matches. Use for questions about company policies, procedures, reports, documentation, and other organizational knowledge stored in DocSpace.";
-    
-    private static AIFunctionFactoryOptions FactoryOptions => new()
-    {
-        Name = Name, 
-        Description = Description
-    };
-
-    public AIFunction Init(Folder<int> agent)
-    {
-        return AIFunctionFactory.Create(Function, FactoryOptions);
-        
-        async Task<ToolResponse<List<KnowledgeSearchResult>>> Function([Description("Search query")] string query)
-        {
-            try
-            {
-                var results = await searchEngine.SearchAsync(agent, query);
-                
-                return new ToolResponse<List<KnowledgeSearchResult>>
-                {
-                    Data = results
-                };
-            }
-            catch (Exception e)
-            {
-                return new ToolResponse<List<KnowledgeSearchResult>>
-                {
-                    Error = e.Message
-                };
-            }
-        }
-    }
+    public required int Id { get; init; }
+    public required string Title { get; init; }
+    public required string Extension { get; init; }
 }
