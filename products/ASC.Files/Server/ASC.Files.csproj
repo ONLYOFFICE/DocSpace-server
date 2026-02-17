@@ -27,13 +27,6 @@
     <ProjectReference Include="..\Core\ASC.Files.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
-      <None Include="..\..\..\common\resources\DocStore\**\*"
-            Exclude="..\..\..\common\resources\DocStore\.git;..\..\..\common\resources\DocStore\**\*.md;..\..\..\common\resources\DocStore\LICENSE"
-            CopyToOutputDirectory="PreserveNewest">
-          <Link>DocStore\%(RecursiveDir)%(FileName)%(Extension)</Link>
-      </None>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="..\..\..\.dockerignore">
       <Link>.dockerignore</Link>
     </Content>
@@ -44,4 +37,22 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
+    <ItemGroup>
+        <DocStoreSourceFiles Include="..\..\..\common\resources\DocStore\**\*"
+                             Exclude="..\..\..\common\resources\DocStore\.git\**\*;..\..\..\common\resources\DocStore\**\*.md;..\..\..\common\resources\DocStore\LICENSE"
+                             Visible="false"/>
+    </ItemGroup>
+    <Target Name="CopyDocStoreToProject" BeforeTargets="BeforeBuild">
+        <Copy SourceFiles="@(DocStoreSourceFiles)"
+              DestinationFiles="@(DocStoreSourceFiles->'$(ProjectDir)DocStore\%(RecursiveDir)%(FileName)%(Extension)')"
+              SkipUnchangedFiles="true" />
+    </Target>
+    <ItemGroup>
+        <None Update="DocStore\**\*">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+    <Target Name="CleanDocStore" AfterTargets="Clean">
+        <RemoveDir Directories="$(ProjectDir)DocStore" />
+    </Target>
 </Project>
