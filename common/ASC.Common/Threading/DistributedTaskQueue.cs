@@ -210,7 +210,7 @@ public class DistributedTaskQueueService<T>(
                 _cancellations[distributedTask.Id] = cancellation;
 
                 var task = distributedTask.RunJob(token);
-                await task.ContinueWith(async t => await OnCompleted(t, distributedTask)).ConfigureAwait(false);
+                await task.ContinueWith(async t => await OnCompleted(t, distributedTask), CancellationToken.None).ConfigureAwait(false);
             }
         }, stoppingToken)).ToList();
 

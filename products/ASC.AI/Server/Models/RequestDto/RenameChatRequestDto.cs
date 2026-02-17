@@ -26,17 +26,32 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request to rename an AI chat session.
+/// </summary>
 public class RenameChatRequestDto
 {
+    /// <summary>
+    /// The unique identifier of the AI chat session to rename.
+    /// </summary>
     [FromRoute(Name = "chatId")]
     public required Guid ChatId { get; set; }
-    
+
+    /// <summary>
+    /// The new chat name.
+    /// </summary>
     [FromBody]
     public required RenameChatBody Body { get; set; }
 }
 
+/// <summary>
+/// Parameters for renaming an AI chat session.
+/// </summary>
 public class RenameChatBody
 {
+    /// <summary>
+    /// The new display name for the chat session (maximum 255 characters).
+    /// </summary>
     [MaxLength(255)]
     public required string Name { get; set; }
 }

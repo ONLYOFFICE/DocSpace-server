@@ -5249,8 +5249,8 @@ public class FileStorageService //: IFileStorageService
 
         await Task.WhenAll(resultsFileTask, roomTask);
 
-        var resultsFile = await resultsFileTask;
-        var room = await roomTask;
+        var resultsFile = resultsFileTask.Result;
+        var room = roomTask.Result;
 
         if (room == null ||
             resultsFile == null ||

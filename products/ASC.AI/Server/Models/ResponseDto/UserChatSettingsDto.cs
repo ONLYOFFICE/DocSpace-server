@@ -28,6 +28,9 @@ namespace ASC.AI.Models.ResponseDto;
 
 public class UserChatSettingsDto
 {
+    /// <summary>
+    /// Indicates whether the AI assistant is allowed to perform web searches when generating responses in this room.
+    /// </summary>
     public bool WebSearchEnabled { get; init; }
 }
 

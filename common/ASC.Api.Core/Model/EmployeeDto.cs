@@ -40,7 +40,7 @@ public class EmployeeDto
     public Guid Id { get; set; }
 
     /// <summary>
-    /// The user display name.
+    /// The HTML-encoded user's display name formatted according to the default format for the current culture.
     /// </summary>
     [SwaggerSchemaCustom(Example = "Mike Zanyatski")]
     public string DisplayName { get; set; }

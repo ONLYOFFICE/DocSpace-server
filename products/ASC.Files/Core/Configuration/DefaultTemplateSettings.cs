@@ -54,7 +54,8 @@ namespace ASC.Files.Core.Configuration
                                                IFolderDao<int> folderDao,
                                                ExternalShare externalShare,
                                                CommonLinkUtility commonLinkUtility,
-                                               FilesLinkUtility filesLinkUtility)
+                                               FilesLinkUtility filesLinkUtility,
+                                               FilesMessageService fileMessageService)
     {
         public async Task<DefaultTemplateSettingsDto> ConvertToDtoAsync(DefaultTemplateSettings settings)
         {
@@ -140,6 +141,9 @@ namespace ASC.Files.Core.Configuration
             }
 
             _ = await settingsManager.SaveAsync(settings);
+
+            fileMessageService.Send(MessageAction.DocumentsDefaultTemplatesSettingsUpdated, setting.FileExtension, fileId?.ToString());
+
             return settings;
         }
 
@@ -168,6 +172,9 @@ namespace ASC.Files.Core.Configuration
                 }
 
                 _ = await settingsManager.SaveAsync(settings);
+
+                fileMessageService.Send(MessageAction.DocumentsDefaultTemplatesSettingsUpdated, setting.FileExtension, file.Id.ToString());
+
                 return settings;
             }
             catch

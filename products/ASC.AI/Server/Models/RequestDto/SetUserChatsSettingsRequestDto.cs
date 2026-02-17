@@ -26,16 +26,31 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request to update chat settings for a specific room.
+/// </summary>
 public class SetUserChatsSettingsRequestDto
 {
+    /// <summary>
+    /// The identifier of the room whose chat settings are to be updated.
+    /// </summary>
     [FromRoute(Name = "roomId")]
     public int RoomId { get; init; }
-    
+
+    /// <summary>
+    /// The chat settings to apply.
+    /// </summary>
     [FromBody]
     public required SetUserChatSettingsRequestBody Body { get; init; }
 }
 
+/// <summary>
+/// Parameters for updating user chat settings.
+/// </summary>
 public class SetUserChatSettingsRequestBody
 {
+    /// <summary>
+    /// Indicates whether the AI assistant is allowed to perform web searches when generating responses.
+    /// </summary>
     public bool? WebSearchEnabled { get; init; }
 }

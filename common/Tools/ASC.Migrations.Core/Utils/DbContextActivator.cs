@@ -37,7 +37,7 @@ public class DbContextActivator
         _serviceProvider = serviceProvider;
     }
 
-    public DbContext CreateInstance(Type contextType, ProviderInfo provider, ConfigurationInfo configurationInfo = ConfigurationInfo.SaaS)
+    public DbContext CreateInstance(Type contextType, ProviderInfo provider, ConfigurationInfo configurationInfo = ConfigurationInfo.SaaS, bool skipConnection = false)
     {
         var scope = _serviceProvider.CreateScope();
         var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
@@ -45,6 +45,12 @@ public class DbContextActivator
         configuration["ConnectionStrings:default:name"] = "default";
         configuration["ConnectionStrings:default:connectionString"] = provider.ConnectionString;
         configuration["ConnectionStrings:default:providerName"] = provider.ProviderFullName;
+
+        if (skipConnection && provider.Provider == Provider.MySql)
+        {
+            configuration["mysqlServerVersion"] = "9.2.0";
+        }
+
         return (DbContext)scope.ServiceProvider.GetRequiredService(contextType);
     }
 }

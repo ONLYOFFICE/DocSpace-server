@@ -109,7 +109,7 @@ public class BackupProgressItem : BaseBackupProgressItem, IDisposable
         var backupStorageFactory = scope.ServiceProvider.GetService<BackupStorageFactory>();
         var backupService = scope.ServiceProvider.GetService<BackupService>();
         var backupRepository = scope.ServiceProvider.GetService<BackupRepository>();
-        var backupPortalTask = scope.ServiceProvider.GetService<BackupPortalTask>();
+        using var backupPortalTask = scope.ServiceProvider.GetService<BackupPortalTask>();
         var tempStream = scope.ServiceProvider.GetService<TempStream>();
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
         var messageService = scope.ServiceProvider.GetService<MessageService>();
@@ -144,12 +144,16 @@ public class BackupProgressItem : BaseBackupProgressItem, IDisposable
             tempFile = CrossPlatform.PathCombine(_tempFolder, backupName);
             storagePath = tempFile;
 
-            var writer = await DataOperatorFactory.GetWriteOperatorAsync(tempStream, _storageBasePath, backupName, _tempFolder, _userId, getter);
+            var writer = await DataOperatorFactory.GetWriteOperatorAsync(tempStream, _storageBasePath, backupName, _tempFolder, _userId, getter, CancellationToken);
 
             backupPortalTask.Init(TenantId, tempFile, _limit, writer, Dump);
 
             backupPortalTask.ProgressChanged = async args =>
             {
+                if (CancellationToken.IsCancellationRequested) 
+                {
+                    return;
+                }
                 Percentage = 0.9 * args.Progress;
                 await socketManager.BackupProgressAsync((int)Percentage, Dump);
                 await PublishChanges();
@@ -174,10 +178,12 @@ public class BackupProgressItem : BaseBackupProgressItem, IDisposable
 
             await backupPortalTask.RunJob();
 
+            CancellationToken.ThrowIfCancellationRequested();
+
             string hash;
             if (writer.NeedUpload)
             {
-                storagePath = await backupStorage.UploadAsync(_storageBasePath, tempFile, _userId);
+                storagePath = await backupStorage.UploadAsync(_storageBasePath, tempFile, _userId, CancellationToken);
                 hash = BackupWorker.GetBackupHashSHA(tempFile);
             }
             else
@@ -185,6 +191,9 @@ public class BackupProgressItem : BaseBackupProgressItem, IDisposable
                 storagePath = writer.StoragePath;
                 hash = writer.Hash;
             }
+
+            CancellationToken.ThrowIfCancellationRequested();
+
             Link = await backupStorage.GetPublicLinkAsync(storagePath);
 
             var backupTenant = TenantId;
@@ -257,11 +266,20 @@ public class BackupProgressItem : BaseBackupProgressItem, IDisposable
         }
         catch (Exception error)
         {
-            _logger.ErrorRunJob(Id, TenantId, tempFile, _storageBasePath, error);
-            Exception = error;
             IsCompleted = true;
 
-            SaveAuditEvent(messageService, _isScheduled ? MessageAction.ScheduledBackupFailed : MessageAction.BackupFailed);
+            if (CancellationToken.IsCancellationRequested)
+            {
+                Status = DistributedTaskStatus.Canceled;
+                Warning = ASC.AuditTrail.AuditReportResource.BackupCancelled;
+                _logger.InfoBackupCancelled();
+            }
+            else
+            {
+                Exception = error;
+                _logger.ErrorRunJob(Id, TenantId, tempFile, _storageBasePath, error);
+                SaveAuditEvent(messageService, _isScheduled ? MessageAction.ScheduledBackupFailed : MessageAction.BackupFailed);
+            }
 
             try
             {
@@ -274,8 +292,11 @@ public class BackupProgressItem : BaseBackupProgressItem, IDisposable
 
             try
             {
-                _notifyHelper.SetServerBaseUri(_serverBaseUri);
-                await _notifyHelper.SendAboutBackupFailedAsync(TenantId, _userId, error.Message);
+                if (!CancellationToken.IsCancellationRequested)
+                {
+                    _notifyHelper.SetServerBaseUri(_serverBaseUri);
+                    await _notifyHelper.SendAboutBackupFailedAsync(TenantId, _userId, error.Message);
+                }
             }
             catch (Exception notifyError)
             {
@@ -293,7 +314,6 @@ public class BackupProgressItem : BaseBackupProgressItem, IDisposable
             {
                 _logger.ErrorPublish(error);
             }
-
             try
             {
                 if (!(storagePath == tempFile && _storageType == BackupStorageType.Local))

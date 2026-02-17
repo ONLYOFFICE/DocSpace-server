@@ -26,10 +26,28 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request parameters for creating a new AI provider.
+/// </summary>
 public class CreateProviderRequestDto
 {
+    /// <summary>
+    /// The AI provider type (e.g., OpenAi, Anthropic, GoogleAi, DeepSeek, OpenRouter, TogetherAi, XAi, OpenAiCompatible).
+    /// </summary>
     public ProviderType Type { get; set; }
+
+    /// <summary>
+    /// The display title for the AI provider.
+    /// </summary>
     public required string Title { get; set; }
+
+    /// <summary>
+    /// The API endpoint URL for the AI provider. Required for OpenAiCompatible type; optional for other types that have default URLs.
+    /// </summary>
     public string? Url { get; set; }
+
+    /// <summary>
+    /// The authentication API key for the AI provider.
+    /// </summary>
     public required string Key { get; set; }
 }

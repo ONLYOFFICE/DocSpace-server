@@ -1801,7 +1801,7 @@
         "operationId": "setServerStatus",
         "parameters": [
           {
-            "name": "Id",
+            "name": "id",
             "in": "path",
             "required": true,
             "schema": {

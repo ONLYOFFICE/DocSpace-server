@@ -137,7 +137,7 @@ public class WebPluginManager(
         }
 
         var tenantWebPlugins = await GetWebPluginsForTenantAsync(tenantId);
-        if (tenantWebPlugins.Count + 1 > webPluginConfigSettings.MaxSize)
+        if (tenantWebPlugins.Count + 1 > webPluginConfigSettings.MaxCount)
         {
             throw new InvalidOperationException(Resource.ErrorWebPluginMaxCount);
         }

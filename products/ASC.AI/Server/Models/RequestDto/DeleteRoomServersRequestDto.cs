@@ -26,16 +26,31 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request to remove MCP servers from a specific room.
+/// </summary>
 public class DeleteRoomServersRequestDto
 {
+    /// <summary>
+    /// Identifier of the room from which MCP servers will be removed.
+    /// </summary>
     [FromRoute(Name = "roomId")]
     public int RoomId { get; init; }
-    
+
+    /// <summary>
+    /// Server identifiers to remove.
+    /// </summary>
     [FromBody]
     public required DeleteRoomServersRequestBody Body { get; init; }
 }
 
+/// <summary>
+/// Parameters specifying which MCP servers to detach from the room.
+/// </summary>
 public class DeleteRoomServersRequestBody
 {
+    /// <summary>
+    /// Set of unique identifiers of MCP servers to remove from the room. Associated connections and tool configurations will also be cleaned up.
+    /// </summary>
     public required HashSet<Guid> Servers { get; init; }
 }
