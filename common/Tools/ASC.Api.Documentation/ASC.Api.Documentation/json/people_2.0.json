@@ -2990,7 +2990,7 @@
             }
           },
           "400": {
-            "description": "Incorect UserId"
+            "description": "Incorrect UserId"
           },
           "404": {
             "description": "User not found"
@@ -3253,6 +3253,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Incorrect UserIds"
           },
           "403": {
             "description": "No permissions to perform this action or users are not suspended"
@@ -7738,7 +7741,7 @@
           },
           "displayName": {
             "type": "string",
-            "description": "The user display name.",
+            "description": "The HTML-encoded user's display name formatted according to the default format for the current culture.",
             "nullable": true,
             "example": "Mike Zanyatski"
           },

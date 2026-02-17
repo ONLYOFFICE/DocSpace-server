@@ -660,11 +660,14 @@
         "tags": [
           "AI / Chat"
         ],
+        "summary": "Start a new AI chat",
+        "description": "Creates a new AI chat session within the specified room and sends the initial message to the configured AI provider.\r\nThe response is delivered as a Server-Sent Events (SSE) stream containing completion chunks (text deltas, tool calls, tool results, and message lifecycle events)\r\nwith periodic keep-alive pings every 5 seconds. File references can be included as context for the AI model.",
         "operationId": "startNewChat",
         "parameters": [
           {
             "name": "roomId",
             "in": "path",
+            "description": "The identifier of the room in which to create the new AI chat session.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -674,6 +677,7 @@
           }
         ],
         "requestBody": {
+          "description": "The initial message and optional file attachments.",
           "content": {
             "application/json": {
               "schema": {
@@ -685,7 +689,16 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "SSE stream of ChatCompletion events (text/event-stream)"
+          },
+          "400": {
+            "description": "The message is empty or one or more file attachments could not be processed"
+          },
+          "403": {
+            "description": "You don't have enough permission to access the chat in this room"
+          },
+          "404": {
+            "description": "The specified room or AI provider was not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -725,11 +738,14 @@
         "tags": [
           "AI / Chat"
         ],
+        "summary": "Get AI chats in a room",
+        "description": "Returns a paginated list of AI chat sessions that belong to the current user within the specified room.\r\nSupports pagination via the startIndex and count query parameters. The total number of chats is included in the response metadata.",
         "operationId": "getChats",
         "parameters": [
           {
             "name": "roomId",
             "in": "path",
+            "description": "The identifier of the room whose AI chat sessions are to be listed.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -740,6 +756,7 @@
           {
             "name": "startIndex",
             "in": "query",
+            "description": "The number of items to skip before returning results (zero-based offset). Defaults to 0.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -749,6 +766,7 @@
           {
             "name": "count",
             "in": "query",
+            "description": "The maximum number of items to return per page. Defaults to 100.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -758,7 +776,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Paginated list of chat sessions in the room",
             "content": {
               "application/json": {
                 "schema": {
@@ -766,6 +784,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "You don't have enough permission to access chats in this room"
+          },
+          "404": {
+            "description": "The room with the specified ID was not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -807,11 +831,14 @@
         "tags": [
           "AI / Chat"
         ],
+        "summary": "Send a message to an existing AI chat",
+        "description": "Appends a new user message to an existing chat session and streams the AI assistant's response.\r\nThe full conversation history of the chat is sent to the AI provider to maintain context.\r\nThe response is delivered as a Server-Sent Events (SSE) stream with periodic keep-alive pings.\r\nFile references can optionally be attached to provide additional context.",
         "operationId": "continueChat",
         "parameters": [
           {
             "name": "chatId",
             "in": "path",
+            "description": "The unique identifier of the existing AI chat session to continue.",
             "required": true,
             "schema": {
               "type": "string",
@@ -821,6 +848,7 @@
           }
         ],
         "requestBody": {
+          "description": "The message and optional file attachments.",
           "content": {
             "application/json": {
               "schema": {
@@ -832,7 +860,16 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "SSE stream of ChatCompletion events (text/event-stream)"
+          },
+          "400": {
+            "description": "The message is empty or one or more file attachments could not be processed"
+          },
+          "403": {
+            "description": "You don't have enough permission to access the chat in this room"
+          },
+          "404": {
+            "description": "The specified chat, room, or AI provider was not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -872,11 +909,14 @@
         "tags": [
           "AI / Chat"
         ],
+        "summary": "Get messages of an AI chat",
+        "description": "Returns a paginated list of messages from an AI chat session owned by the current user.\r\nEach message includes its role (user or assistant), content blocks (text, tool calls, attachments), and timestamp.\r\nSupports pagination via the startIndex and count query parameters. The total number of messages is included in the response metadata.",
         "operationId": "getMessages",
         "parameters": [
           {
             "name": "chatId",
             "in": "path",
+            "description": "The unique identifier of the AI chat session whose messages are to be listed.",
             "required": true,
             "schema": {
               "type": "string",
@@ -887,6 +927,7 @@
           {
             "name": "startIndex",
             "in": "query",
+            "description": "The number of items to skip before returning results (zero-based offset). Defaults to 0.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -896,6 +937,7 @@
           {
             "name": "count",
             "in": "query",
+            "description": "The maximum number of items to return per page. Defaults to 100.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -905,7 +947,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Paginated list of messages in the chat",
             "content": {
               "application/json": {
                 "schema": {
@@ -913,6 +955,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "The chat with the specified ID was not found or does not belong to the current user"
           },
           "401": {
             "description": "Unauthorized"
@@ -954,11 +999,14 @@
         "tags": [
           "AI / Chat"
         ],
+        "summary": "Rename an AI chat",
+        "description": "Updates the display title of an existing AI chat session owned by the current user.\r\nThe new name must not exceed 255 characters.",
         "operationId": "renameChat",
         "parameters": [
           {
             "name": "chatId",
             "in": "path",
+            "description": "The unique identifier of the AI chat session to rename.",
             "required": true,
             "schema": {
               "type": "string",
@@ -968,6 +1016,7 @@
           }
         ],
         "requestBody": {
+          "description": "The new chat name.",
           "content": {
             "application/json": {
               "schema": {
@@ -979,7 +1028,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Updated chat session details",
             "content": {
               "application/json": {
                 "schema": {
@@ -987,6 +1036,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "The chat with the specified ID was not found or does not belong to the current user"
           },
           "401": {
             "description": "Unauthorized"
@@ -1026,11 +1078,14 @@
         "tags": [
           "AI / Chat"
         ],
+        "summary": "Get an AI chat by ID",
+        "description": "Retrieves the metadata of a single AI chat session, including its title, creation date, and the user who created it.\r\nOnly the chat owner can access their own chat sessions.",
         "operationId": "getChat",
         "parameters": [
           {
             "name": "chatId",
             "in": "path",
+            "description": "The unique identifier of the AI chat session to retrieve.",
             "required": true,
             "schema": {
               "type": "string",
@@ -1041,7 +1096,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Chat session details",
             "content": {
               "application/json": {
                 "schema": {
@@ -1049,6 +1104,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "The chat with the specified ID was not found or does not belong to the current user"
           },
           "401": {
             "description": "Unauthorized"
@@ -1088,11 +1146,14 @@
         "tags": [
           "AI / Chat"
         ],
+        "summary": "Delete an AI chat",
+        "description": "Permanently deletes an AI chat session along with all of its messages.\r\nOnly the chat owner can delete their own chat sessions. This action cannot be undone.",
         "operationId": "deleteChat",
         "parameters": [
           {
             "name": "chatId",
             "in": "path",
+            "description": "The unique identifier of the AI chat session to delete.",
             "required": true,
             "schema": {
               "type": "string",
@@ -1102,8 +1163,11 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "The chat was successfully deleted"
+          },
+          "404": {
+            "description": "The chat with the specified ID was not found or does not belong to the current user"
           },
           "401": {
             "description": "Unauthorized"
@@ -1145,11 +1209,14 @@
         "tags": [
           "AI / Chat"
         ],
+        "summary": "Export AI chat messages to a file",
+        "description": "Exports the entire message history of an AI chat session and saves it as a document in the specified folder.\r\nThe exported file is created with the provided title. Only the chat owner can export their own chat sessions.",
         "operationId": "exportChat",
         "parameters": [
           {
             "name": "chatId",
             "in": "path",
+            "description": "The unique identifier of the AI chat session to export.",
             "required": true,
             "schema": {
               "type": "string",
@@ -1159,6 +1226,7 @@
           }
         ],
         "requestBody": {
+          "description": "The export parameters including destination folder and file title.",
           "content": {
             "application/json": {
               "schema": {
@@ -1170,7 +1238,10 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "The chat messages were successfully exported to the specified folder"
+          },
+          "404": {
+            "description": "The chat with the specified ID was not found or does not belong to the current user"
           },
           "401": {
             "description": "Unauthorized"
@@ -1212,11 +1283,14 @@
         "tags": [
           "AI / Chat"
         ],
+        "summary": "Get available AI models",
+        "description": "Returns the list of AI models available for chat conversations.\r\nOptionally filters the results to models from a specific provider when the provider query parameter is specified.\r\nEach model entry includes the provider ID, provider display name, and the model identifier.",
         "operationId": "getChatModels",
         "parameters": [
           {
             "name": "provider",
             "in": "query",
+            "description": "The optional AI provider identifier to filter models by. When set to 0, models from all providers are returned.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1226,7 +1300,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "List of available AI models",
             "content": {
               "application/json": {
                 "schema": {
@@ -1275,11 +1349,14 @@
         "tags": [
           "AI / Chat"
         ],
+        "summary": "Submit a tool execution permission decision",
+        "description": "Provides the user's approval or denial decision for a pending MCP (Model Context Protocol) tool execution request.\r\nWhen an AI assistant attempts to invoke an external tool that requires explicit user consent,\r\nthe client receives a permission prompt via the SSE stream. This endpoint is used to submit the user's decision\r\nso that the AI chat session can proceed accordingly.",
         "operationId": "providePermission",
         "parameters": [
           {
             "name": "callId",
             "in": "path",
+            "description": "The unique identifier of the pending tool execution call awaiting a permission decision.",
             "required": true,
             "schema": {
               "type": "string",
@@ -1288,6 +1365,7 @@
           }
         ],
         "requestBody": {
+          "description": "The permission decision parameters.",
           "content": {
             "application/json": {
               "schema": {
@@ -1299,7 +1377,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "The permission decision was successfully recorded"
           },
           "401": {
             "description": "Unauthorized"
@@ -1341,11 +1419,14 @@
         "tags": [
           "AI / Chat"
         ],
+        "summary": "Update user chat settings for a room",
+        "description": "Saves the current user's personal AI chat preferences for the specified room.\r\nCurrently supports toggling the web search capability, which allows the AI assistant to search the internet when generating responses.",
         "operationId": "setUserChatsSettings",
         "parameters": [
           {
             "name": "roomId",
             "in": "path",
+            "description": "The identifier of the room whose chat settings are to be updated.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -1355,6 +1436,7 @@
           }
         ],
         "requestBody": {
+          "description": "The chat settings to apply.",
           "content": {
             "application/json": {
               "schema": {
@@ -1366,7 +1448,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Updated user chat settings",
             "content": {
               "application/json": {
                 "schema": {
@@ -1374,6 +1456,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "You don't have enough permission to access chats in this room"
+          },
+          "404": {
+            "description": "The room with the specified ID was not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -1413,11 +1501,14 @@
         "tags": [
           "AI / Chat"
         ],
+        "summary": "Get user chat settings for a room",
+        "description": "Retrieves the current user's personal AI chat preferences for the specified room,\r\nincluding whether web search is enabled for AI-assisted responses.",
         "operationId": "getUserChatsSettings",
         "parameters": [
           {
             "name": "roomId",
             "in": "path",
+            "description": "The identifier of the room whose chat settings are to be retrieved.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -1428,7 +1519,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Current user chat settings",
             "content": {
               "application/json": {
                 "schema": {
@@ -1436,6 +1527,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "You don't have enough permission to access chats in this room"
+          },
+          "404": {
+            "description": "The room with the specified ID was not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -1477,8 +1574,11 @@
         "tags": [
           "AI / MCP"
         ],
+        "summary": "Register a custom MCP server",
+        "description": "Registers a new custom MCP (Model Context Protocol) server for the current tenant.\r\nThe system validates the server name (only letters, numbers, underscores, and hyphens are allowed),\r\nchecks that it is not reserved or already taken, and then attempts to connect to the provided endpoint\r\nto verify reachability and credentials before persisting the configuration.\r\nRequires DocSpace administrator privileges.",
         "operationId": "addServer",
         "requestBody": {
+          "description": "MCP server registration parameters.",
           "content": {
             "application/json": {
               "schema": {
@@ -1490,7 +1590,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Newly registered MCP server configuration",
             "content": {
               "application/json": {
                 "schema": {
@@ -1498,6 +1598,12 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid server name, reserved name, duplicate name, incorrect credentials, or invalid endpoint URL"
+          },
+          "403": {
+            "description": "You don't have permission to manage MCP servers"
           },
           "401": {
             "description": "Unauthorized"
@@ -1537,8 +1643,11 @@
         "tags": [
           "AI / MCP"
         ],
+        "summary": "Delete MCP servers",
+        "description": "Permanently removes one or more MCP servers from the current tenant by their IDs.\r\nAll room associations and connection data for the deleted servers are also cleaned up.\r\nThis action is irreversible. Requires DocSpace administrator privileges.",
         "operationId": "deleteServer",
         "requestBody": {
+          "description": "Server identifiers to delete.",
           "content": {
             "application/json": {
               "schema": {
@@ -1549,8 +1658,11 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "MCP servers were successfully deleted"
+          },
+          "403": {
+            "description": "You don't have permission to manage MCP servers"
           },
           "401": {
             "description": "Unauthorized"
@@ -1590,11 +1702,14 @@
         "tags": [
           "AI / MCP"
         ],
+        "summary": "Get all MCP servers",
+        "description": "Returns a paginated list of all MCP servers registered for the current tenant, including both\r\nenabled and disabled servers. Each entry contains the full configuration (endpoint, headers,\r\nicon, type, and status). Supports pagination via the startIndex and count query parameters.\r\nThe total number of servers is included in the response metadata.\r\nRequires DocSpace administrator privileges.",
         "operationId": "getServers",
         "parameters": [
           {
             "name": "startIndex",
             "in": "query",
+            "description": "The number of items to skip before returning results (zero-based offset). Defaults to 0.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1604,6 +1719,7 @@
           {
             "name": "count",
             "in": "query",
+            "description": "The maximum number of items to return per page. Defaults to 100.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1613,7 +1729,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Paginated list of all registered MCP servers",
             "content": {
               "application/json": {
                 "schema": {
@@ -1621,6 +1737,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "You don't have permission to manage MCP servers"
           },
           "401": {
             "description": "Unauthorized"
@@ -1662,11 +1781,14 @@
         "tags": [
           "AI / MCP"
         ],
+        "summary": "Update a custom MCP server",
+        "description": "Updates the configuration of an existing custom MCP server identified by its unique ID.\r\nAny combination of fields (name, description, endpoint, headers, icon) can be updated in a single request.\r\nIf the endpoint or headers are changed, the system re-validates connectivity by attempting to reach\r\nthe new endpoint before saving. Name uniqueness and format rules are enforced on every update.\r\nRequires DocSpace administrator privileges.",
         "operationId": "updateServer",
         "parameters": [
           {
             "name": "id",
             "in": "path",
+            "description": "Unique identifier of the MCP server to update.",
             "required": true,
             "schema": {
               "type": "string",
@@ -1676,6 +1798,7 @@
           }
         ],
         "requestBody": {
+          "description": "Updated server configuration fields.",
           "content": {
             "application/json": {
               "schema": {
@@ -1687,7 +1810,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Updated MCP server configuration",
             "content": {
               "application/json": {
                 "schema": {
@@ -1695,6 +1818,15 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid server name, reserved name, duplicate name, incorrect credentials, or invalid endpoint URL"
+          },
+          "403": {
+            "description": "You don't have permission to manage MCP servers"
+          },
+          "404": {
+            "description": "The MCP server with the specified ID was not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -1734,11 +1866,14 @@
         "tags": [
           "AI / MCP"
         ],
+        "summary": "Get an MCP server by ID",
+        "description": "Retrieves a summary view of a single MCP server by its unique identifier, including its name,\r\ntype, enabled state, and icon. This endpoint returns a compact representation without\r\nsensitive details such as endpoint URL or authentication headers.\r\nRequires DocSpace administrator privileges.",
         "operationId": "getServer",
         "parameters": [
           {
             "name": "id",
             "in": "path",
+            "description": "Unique identifier of the MCP server to retrieve.",
             "required": true,
             "schema": {
               "type": "string",
@@ -1749,7 +1884,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "MCP server summary information",
             "content": {
               "application/json": {
                 "schema": {
@@ -1757,6 +1892,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "You don't have permission to manage MCP servers"
+          },
+          "404": {
+            "description": "The MCP server with the specified ID was not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -1798,11 +1939,14 @@
         "tags": [
           "AI / MCP"
         ],
+        "summary": "Enable or disable an MCP server",
+        "description": "Toggles the enabled/disabled state of an MCP server. When a server is disabled, it becomes\r\nunavailable for assignment to rooms and will not be used during AI chat sessions.\r\nEnabling a previously disabled server restores its availability across the tenant.\r\nRequires DocSpace administrator privileges.",
         "operationId": "setServerStatus",
         "parameters": [
           {
             "name": "id",
             "in": "path",
+            "description": "Unique identifier of the MCP server whose status is being changed.",
             "required": true,
             "schema": {
               "type": "string",
@@ -1812,6 +1956,7 @@
           }
         ],
         "requestBody": {
+          "description": "New status value.",
           "content": {
             "application/json": {
               "schema": {
@@ -1823,7 +1968,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "MCP server with the updated status",
             "content": {
               "application/json": {
                 "schema": {
@@ -1831,6 +1976,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "You don't have permission to manage MCP servers"
+          },
+          "404": {
+            "description": "The MCP server with the specified ID was not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -1872,11 +2023,14 @@
         "tags": [
           "AI / MCP"
         ],
+        "summary": "Get available MCP servers",
+        "description": "Returns a paginated list of MCP servers that are currently active (enabled) and available for\r\nassignment to rooms. Only servers in the enabled state are included. Each entry contains a compact\r\nsummary with the server name, type, icon, and status. Supports pagination via startIndex and count.\r\nThe total count of available servers is included in the response metadata.",
         "operationId": "getAvailableServers",
         "parameters": [
           {
             "name": "startIndex",
             "in": "query",
+            "description": "The number of items to skip before returning results (zero-based offset). Defaults to 0.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1886,6 +2040,7 @@
           {
             "name": "count",
             "in": "query",
+            "description": "The maximum number of items to return per page. Defaults to 100.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1895,7 +2050,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Paginated list of active MCP servers available for room assignment",
             "content": {
               "application/json": {
                 "schema": {
@@ -1944,11 +2099,14 @@
         "tags": [
           "AI / MCP"
         ],
+        "summary": "Assign MCP servers to a room",
+        "description": "Associates one or more MCP servers with a specific room, making them available for AI chat sessions\r\nwithin that room. A maximum of 5 MCP servers can be assigned to a single room. If OAuth-based servers\r\nare included, each room member will need to individually authorize their connection.\r\nRequires room edit permissions.",
         "operationId": "addRoomServers",
         "parameters": [
           {
             "name": "roomId",
             "in": "path",
+            "description": "Identifier of the room to which MCP servers will be assigned.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -1958,6 +2116,7 @@
           }
         ],
         "requestBody": {
+          "description": "Server identifiers to assign.",
           "content": {
             "application/json": {
               "schema": {
@@ -1969,7 +2128,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "List of MCP server statuses after assignment",
             "content": {
               "application/json": {
                 "schema": {
@@ -1977,6 +2136,15 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "The maximum number of servers per room has been exceeded"
+          },
+          "403": {
+            "description": "You don't have enough permission to perform the operation"
+          },
+          "404": {
+            "description": "The room with the specified ID was not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -2016,11 +2184,14 @@
         "tags": [
           "AI / MCP"
         ],
+        "summary": "Get MCP servers assigned to a room",
+        "description": "Returns the list of MCP servers currently assigned to the specified room along with their connection\r\nstatuses for the current user. For OAuth-based servers, the connection status reflects whether the\r\ncurrent user has completed authorization. Requires access to the room's AI chat.",
         "operationId": "getRoomServers",
         "parameters": [
           {
             "name": "roomId",
             "in": "path",
+            "description": "Identifier of the room whose assigned MCP servers are being retrieved.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -2031,7 +2202,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "List of MCP server statuses in the room",
             "content": {
               "application/json": {
                 "schema": {
@@ -2039,6 +2210,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "You don't have enough permission to perform the operation"
+          },
+          "404": {
+            "description": "The room with the specified ID was not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -2078,11 +2255,14 @@
         "tags": [
           "AI / MCP"
         ],
+        "summary": "Remove MCP servers from a room",
+        "description": "Detaches one or more MCP servers from the specified room. After removal, the servers will no longer\r\nbe available in AI chat sessions within this room. Existing connections and tool configurations for\r\nthe removed servers are also cleaned up. Requires room edit permissions.",
         "operationId": "deleteRoomServers",
         "parameters": [
           {
             "name": "roomId",
             "in": "path",
+            "description": "Identifier of the room from which MCP servers will be removed.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -2092,6 +2272,7 @@
           }
         ],
         "requestBody": {
+          "description": "Server identifiers to remove.",
           "content": {
             "application/json": {
               "schema": {
@@ -2102,8 +2283,14 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "MCP servers were successfully removed from the room"
+          },
+          "403": {
+            "description": "You don't have enough permission to perform the operation"
+          },
+          "404": {
+            "description": "The room with the specified ID was not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -2145,11 +2332,14 @@
         "tags": [
           "AI / MCP"
         ],
+        "summary": "Configure MCP server tools in a room",
+        "description": "Updates the set of disabled tools for an MCP server within a specific room. Pass a list of tool names\r\nthat should be disabled — all other tools exposed by the server will remain enabled. This allows\r\nroom administrators to restrict which MCP capabilities are available during AI chat sessions.\r\nRequires room edit permissions.",
         "operationId": "setTools",
         "parameters": [
           {
             "name": "roomId",
             "in": "path",
+            "description": "Identifier of the room containing the MCP server.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -2160,6 +2350,7 @@
           {
             "name": "serverId",
             "in": "path",
+            "description": "Unique identifier of the MCP server whose tools are being configured.",
             "required": true,
             "schema": {
               "type": "string",
@@ -2169,6 +2360,7 @@
           }
         ],
         "requestBody": {
+          "description": "Tool configuration parameters.",
           "content": {
             "application/json": {
               "schema": {
@@ -2180,7 +2372,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Complete list of tools with their enabled/disabled states",
             "content": {
               "application/json": {
                 "schema": {
@@ -2188,6 +2380,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "You don't have enough permission to perform the operation"
+          },
+          "404": {
+            "description": "The room or MCP server was not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -2227,11 +2425,14 @@
         "tags": [
           "AI / MCP"
         ],
+        "summary": "Get MCP server tools in a room",
+        "description": "Retrieves the full list of tools exposed by an MCP server within the context of a specific room,\r\nalong with each tool's enabled or disabled state. Disabled tools will not be invoked during\r\nAI chat sessions in this room. Requires access to the room's AI chat.",
         "operationId": "getTools",
         "parameters": [
           {
             "name": "roomId",
             "in": "path",
+            "description": "Identifier of the room containing the MCP server.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -2242,6 +2443,7 @@
           {
             "name": "serverId",
             "in": "path",
+            "description": "Unique identifier of the MCP server whose tools are being retrieved.",
             "required": true,
             "schema": {
               "type": "string",
@@ -2252,7 +2454,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "List of tools with their enabled/disabled states",
             "content": {
               "application/json": {
                 "schema": {
@@ -2260,6 +2462,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "You don't have enough permission to perform the operation"
+          },
+          "404": {
+            "description": "The room or MCP server was not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -2301,11 +2509,14 @@
         "tags": [
           "AI / MCP"
         ],
+        "summary": "Connect an OAuth-based MCP server in a room",
+        "description": "Completes the OAuth authorization flow for an MCP server within a specific room on behalf of the\r\ncurrent user. The authorization code obtained from the OAuth provider must be passed in the request body.\r\nUpon successful token exchange, the system verifies connectivity to the server and stores\r\nthe credentials for the current user. Requires room edit permissions.",
         "operationId": "connectServer",
         "parameters": [
           {
             "name": "roomId",
             "in": "path",
+            "description": "Identifier of the room containing the MCP server.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -2316,6 +2527,7 @@
           {
             "name": "serverId",
             "in": "path",
+            "description": "Unique identifier of the MCP server to connect.",
             "required": true,
             "schema": {
               "type": "string",
@@ -2325,6 +2537,7 @@
           }
         ],
         "requestBody": {
+          "description": "OAuth authorization parameters.",
           "content": {
             "application/json": {
               "schema": {
@@ -2336,7 +2549,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "MCP server connection status after authorization",
             "content": {
               "application/json": {
                 "schema": {
@@ -2344,6 +2557,15 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "The provided authorization code is invalid"
+          },
+          "403": {
+            "description": "You don't have enough permission to perform the operation"
+          },
+          "404": {
+            "description": "The room or MCP server connection was not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -2385,11 +2607,14 @@
         "tags": [
           "AI / MCP"
         ],
+        "summary": "Disconnect an MCP server in a room",
+        "description": "Revokes the current user's OAuth connection to an MCP server within the specified room. After\r\ndisconnection, the server's tools will no longer be available to this user in AI chat sessions\r\nuntil they re-authorize. Other room members' connections are not affected.\r\nRequires room edit permissions.",
         "operationId": "disconnectServer",
         "parameters": [
           {
             "name": "roomId",
             "in": "path",
+            "description": "Identifier of the room containing the MCP server.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -2400,6 +2625,7 @@
           {
             "name": "serverId",
             "in": "path",
+            "description": "Unique identifier of the MCP server to disconnect from.",
             "required": true,
             "schema": {
               "type": "string",
@@ -2410,7 +2636,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "MCP server connection status after disconnection",
             "content": {
               "application/json": {
                 "schema": {
@@ -2418,6 +2644,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "You don't have enough permission to perform the operation"
+          },
+          "404": {
+            "description": "The room or MCP server connection was not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -2459,11 +2691,14 @@
         "tags": [
           "AI / Messages"
         ],
+        "summary": "Export a single AI message to a document",
+        "description": "Exports a specific AI chat message as a document into the specified folder. The system verifies that the message exists\r\nand belongs to a chat accessible by the current user, then publishes an asynchronous export task to the event bus.\r\nThe exported document will be created in the target folder with the given title once the background task completes.",
         "operationId": "exportMessage",
         "parameters": [
           {
             "name": "messageId",
             "in": "path",
+            "description": "The unique identifier of the AI chat message to export.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -2473,6 +2708,7 @@
           }
         ],
         "requestBody": {
+          "description": "The export parameters including destination folder and file title.",
           "content": {
             "application/json": {
               "schema": {
@@ -2484,7 +2720,13 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "The message export task has been successfully queued for background processing"
+          },
+          "400": {
+            "description": "The message identifier is invalid (must be greater than 0)"
+          },
+          "404": {
+            "description": "The specified message was not found or the current user does not have access to it"
           },
           "401": {
             "description": "Unauthorized"
@@ -2526,6 +2768,8 @@
         "tags": [
           "AI / Providers"
         ],
+        "summary": "Add an AI provider",
+        "description": "Registers a new AI provider for the current tenant by specifying its type, display title, API endpoint URL, and authentication key.\r\nThe provider becomes available for AI chat conversations after creation. This action is rate-limited.",
         "operationId": "addProvider",
         "requestBody": {
           "content": {
@@ -2538,7 +2782,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Created AI provider details",
             "content": {
               "application/json": {
                 "schema": {
@@ -2546,6 +2790,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "You don't have enough permission to manage providers"
           },
           "401": {
             "description": "Unauthorized"
@@ -2585,11 +2832,14 @@
         "tags": [
           "AI / Providers"
         ],
+        "summary": "Get AI providers",
+        "description": "Returns a paginated list of AI providers configured for the current tenant.\r\nSupports pagination via the startIndex and count query parameters. The total number of providers is included in the response metadata.",
         "operationId": "getProviders",
         "parameters": [
           {
             "name": "startIndex",
             "in": "query",
+            "description": "The number of items to skip before returning results (zero-based offset). Defaults to 0.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -2599,6 +2849,7 @@
           {
             "name": "count",
             "in": "query",
+            "description": "The maximum number of items to return per page. Defaults to 100.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -2608,7 +2859,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Paginated list of AI providers",
             "content": {
               "application/json": {
                 "schema": {
@@ -2655,6 +2906,8 @@
         "tags": [
           "AI / Providers"
         ],
+        "summary": "Delete AI providers",
+        "description": "Permanently deletes one or more AI providers by their identifiers.\r\nAll specified providers are removed from the current tenant. This action cannot be undone.",
         "operationId": "deleteProviders",
         "requestBody": {
           "content": {
@@ -2666,8 +2919,11 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "The providers were successfully deleted"
+          },
+          "403": {
+            "description": "You don't have enough permission to manage providers"
           },
           "401": {
             "description": "Unauthorized"
@@ -2709,11 +2965,14 @@
         "tags": [
           "AI / Providers"
         ],
+        "summary": "Update an AI provider",
+        "description": "Updates the configuration of an existing AI provider, including its display title, API endpoint URL, and authentication key.\r\nOnly the fields provided in the request body will be updated. This action is rate-limited.",
         "operationId": "updateProvider",
         "parameters": [
           {
             "name": "id",
             "in": "path",
+            "description": "The identifier of the AI provider to update.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -2723,6 +2982,7 @@
           }
         ],
         "requestBody": {
+          "description": "The AI provider configuration parameters to update.",
           "content": {
             "application/json": {
               "schema": {
@@ -2734,7 +2994,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Updated AI provider details",
             "content": {
               "application/json": {
                 "schema": {
@@ -2742,6 +3002,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "You don't have enough permission to manage providers"
+          },
+          "404": {
+            "description": "The provider with the specified ID was not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -2783,10 +3049,12 @@
         "tags": [
           "AI / Providers"
         ],
+        "summary": "Get available AI provider types",
+        "description": "Returns the list of AI provider types that are available for configuration on the current instance.\r\nEach entry includes the provider type identifier and the default API endpoint URL.",
         "operationId": "getAvailableProviders",
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "List of available AI provider types",
             "content": {
               "application/json": {
                 "schema": {
@@ -2835,7 +3103,8 @@
         "tags": [
           "AI / Providers"
         ],
-        "summary": "Sets the default AI provider for the current tenant.",
+        "summary": "Set the default AI provider",
+        "description": "Sets the default AI provider and model for the current tenant.\r\nThe specified provider and model will be used as the default for all new AI chat sessions within the tenant.",
         "operationId": "setDefaultProvider",
         "requestBody": {
           "content": {
@@ -2901,7 +3170,8 @@
         "tags": [
           "AI / Providers"
         ],
-        "summary": "Returns the default AI provider for the current tenant.",
+        "summary": "Get the default AI provider",
+        "description": "Returns the default AI provider and model configured for the current tenant.\r\nReturns null if the tenant does not have any registered providers.",
         "operationId": "getDefaultProvider",
         "responses": {
           "200": {
@@ -2954,8 +3224,11 @@
         "tags": [
           "AI / Settings"
         ],
+        "summary": "Update web search settings",
+        "description": "Configures the web search integration for AI chat sessions at the portal level.\r\nAllows enabling or disabling web search, selecting the search engine type, and providing the API key for the chosen engine.\r\nOnly portal administrators can modify these settings.",
         "operationId": "setWebSearchSettings",
         "requestBody": {
+          "description": "The web search configuration parameters.",
           "content": {
             "application/json": {
               "schema": {
@@ -2967,7 +3240,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Updated web search settings",
             "content": {
               "application/json": {
                 "schema": {
@@ -3014,10 +3287,12 @@
         "tags": [
           "AI / Settings"
         ],
+        "summary": "Get web search settings",
+        "description": "Retrieves the current web search integration settings for AI chat sessions,\r\nincluding whether web search is enabled, the configured search engine type, and whether the API key needs to be reset.",
         "operationId": "getWebSearchSettings",
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Current web search settings",
             "content": {
               "application/json": {
                 "schema": {
@@ -3066,8 +3341,11 @@
         "tags": [
           "AI / Settings"
         ],
+        "summary": "Update vectorization settings",
+        "description": "Configures the embedding provider used for document vectorization at the portal level.\r\nVectorization enables semantic search and knowledge retrieval capabilities in AI chat sessions.\r\nAllows selecting the embedding provider type and providing the API key for the chosen provider.\r\nOnly portal administrators can modify these settings.",
         "operationId": "setVectorizationSettings",
         "requestBody": {
+          "description": "The embedding provider configuration parameters.",
           "content": {
             "application/json": {
               "schema": {
@@ -3079,7 +3357,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Updated vectorization settings",
             "content": {
               "application/json": {
                 "schema": {
@@ -3126,10 +3404,12 @@
         "tags": [
           "AI / Settings"
         ],
+        "summary": "Get vectorization settings",
+        "description": "Retrieves the current embedding provider settings used for document vectorization,\r\nincluding the configured provider type and whether the API key needs to be reset.",
         "operationId": "getVectorizationSettings",
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Current vectorization settings",
             "content": {
               "application/json": {
                 "schema": {
@@ -3178,10 +3458,12 @@
         "tags": [
           "AI / Settings"
         ],
+        "summary": "Get AI settings",
+        "description": "Retrieves the combined AI configuration for the current portal, including the status of web search,\r\nvectorization, and AI readiness, along with tool names and the portal MCP server identifier.",
         "operationId": "getAiSettings",
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Current AI settings",
             "content": {
               "application/json": {
                 "schema": {
@@ -3230,8 +3512,11 @@
         "tags": [
           "AI / Vectorization"
         ],
+        "summary": "Start a vectorization task",
+        "description": "Submits the specified files for vectorization. Each file is processed asynchronously by the configured embedding provider\r\nand indexed for semantic search in AI chat sessions. Only files accessible to the current user can be vectorized.",
         "operationId": "startTask",
         "requestBody": {
+          "description": "The vectorization parameters including file identifiers.",
           "content": {
             "application/json": {
               "schema": {
@@ -3243,7 +3528,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "The vectorization task was successfully submitted"
           },
           "401": {
             "description": "Unauthorized"
@@ -3294,26 +3579,30 @@
           "name": {
             "maxLength": 128,
             "type": "string",
+            "description": "Unique display name for the server. Only letters, numbers, underscores, and hyphens are allowed. Maximum 128 characters.",
             "nullable": true,
-            "example": "John Doe"
+            "example": "my-custom-server"
           },
           "description": {
             "maxLength": 255,
             "type": "string",
+            "description": "Human-readable description of the server's purpose and capabilities. Maximum 255 characters.",
             "nullable": true,
-            "example": "some text"
+            "example": "Custom MCP server for project management tools"
           },
           "endpoint": {
             "type": "string",
+            "description": "Base URL of the MCP server endpoint. Must be a valid, reachable URL. The system will verify connectivity during registration.",
             "format": "uri",
             "nullable": true,
-            "example": "some text"
+            "example": "https://mcp.example.com/sse"
           },
           "headers": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
             },
+            "description": "Optional HTTP headers to include with every request to the MCP server (e.g., authentication tokens or API keys).",
             "nullable": true,
             "example": [
               {
@@ -3324,11 +3613,13 @@
           },
           "icon": {
             "type": "string",
+            "description": "Optional Base64-encoded icon image for the server. Used as the visual identifier in the UI.",
             "nullable": true,
             "example": "some text"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Parameters for creating a new custom MCP server."
       },
       "AddRoomServersRequestBody": {
         "required": [
@@ -3343,13 +3634,15 @@
               "type": "string",
               "format": "uuid"
             },
+            "description": "Set of unique identifiers of MCP servers to associate with the room. A maximum of 5 servers can be assigned per room.",
             "nullable": true,
             "example": [
               "75a5f745-f697-4418-b38d-0fe0d277e258"
             ]
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Parameters specifying which MCP servers to assign to the room."
       },
       "AgentNewItemsDto": {
         "required": [
@@ -3420,11 +3713,13 @@
         "properties": {
           "id": {
             "type": "integer",
+            "description": "AI provider identifier.",
             "format": "int32",
             "example": 1
           },
           "title": {
             "type": "string",
+            "description": "AI provider display title.",
             "nullable": true,
             "example": "SampleFile"
           },
@@ -3433,6 +3728,7 @@
           },
           "url": {
             "type": "string",
+            "description": "API endpoint URL for the AI provider.",
             "nullable": true,
             "example": "some text"
           },
@@ -3444,14 +3740,17 @@
           },
           "needReset": {
             "type": "boolean",
+            "description": "Indicates whether the provider's API key needs to be reset.",
             "example": true
           },
           "isDefault": {
             "type": "boolean",
+            "description": "Indicates whether this provider is the default provider for the tenant.",
             "example": true
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "AI provider details."
       },
       "AiProviderWrapper": {
         "type": "object",
@@ -3490,6 +3789,9 @@
       "AiSettingsDto": {
         "required": [
           "embeddingModel",
+          "generateDocxToolName",
+          "generateFormToolName",
+          "generatePresentationToolName",
           "knowledgeSearchToolName",
           "webCrawlingToolName",
           "webSearchToolName"
@@ -3498,51 +3800,80 @@
         "properties": {
           "webSearchEnabled": {
             "type": "boolean",
+            "description": "Indicates whether web search is enabled for AI chat sessions.",
             "example": true
           },
           "webSearchNeedReset": {
             "type": "boolean",
+            "description": "Indicates whether the web search API key needs to be reconfigured.",
             "example": true
           },
           "vectorizationEnabled": {
             "type": "boolean",
+            "description": "Indicates whether document vectorization is enabled.",
             "example": true
           },
           "vectorizationNeedReset": {
             "type": "boolean",
+            "description": "Indicates whether the embedding provider API key needs to be reconfigured.",
             "example": true
           },
           "aiReady": {
             "type": "boolean",
+            "description": "Indicates whether the AI subsystem is fully configured and operational.",
             "example": true
           },
           "aiReadyNeedReset": {
             "type": "boolean",
+            "description": "Indicates whether the AI provider API key needs to be reconfigured.",
             "example": true
           },
           "portalMcpServerId": {
             "type": "string",
+            "description": "The unique identifier of the portal-level MCP server, if configured.",
             "format": "uuid",
             "nullable": true,
             "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
           },
           "embeddingModel": {
             "type": "string",
+            "description": "The name of the embedding model used for document vectorization.",
             "nullable": true,
             "example": "some text"
           },
           "knowledgeSearchToolName": {
             "type": "string",
+            "description": "The tool name used by the AI assistant for knowledge base search.",
             "nullable": true,
             "example": "some text"
           },
           "webSearchToolName": {
             "type": "string",
+            "description": "The tool name used by the AI assistant for web search.",
             "nullable": true,
             "example": "some text"
           },
           "webCrawlingToolName": {
             "type": "string",
+            "description": "The tool name used by the AI assistant for web page crawling.",
+            "nullable": true,
+            "example": "some text"
+          },
+          "generateDocxToolName": {
+            "type": "string",
+            "description": "The tool name used by the AI to launch docx creation in the editor.",
+            "nullable": true,
+            "example": "some text"
+          },
+          "generateFormToolName": {
+            "type": "string",
+            "description": "The tool name used by the AI assistant to launch form creation in the editor.",
+            "nullable": true,
+            "example": "some text"
+          },
+          "generatePresentationToolName": {
+            "type": "string",
+            "description": "The tool name used by the AI assistant to launch presentation creation in the editor.",
             "nullable": true,
             "example": "some text"
           }
@@ -3646,11 +3977,13 @@
         "properties": {
           "id": {
             "type": "string",
+            "description": "The unique identifier of the AI chat session.",
             "format": "uuid",
             "example": "00000000-0000-0000-0000-000000000000"
           },
           "title": {
             "type": "string",
+            "description": "The display title of the chat session.",
             "nullable": true,
             "example": "SampleFile"
           },
@@ -3734,11 +4067,13 @@
         "properties": {
           "code": {
             "type": "string",
+            "description": "OAuth authorization code received from the provider's redirect. Used to exchange for access and refresh tokens.",
             "nullable": true,
             "example": "some text"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Parameters for completing an OAuth connection to an MCP server."
       },
       "ContinueChatBody": {
         "required": [
@@ -3748,13 +4083,9 @@
         "properties": {
           "message": {
             "type": "string",
+            "description": "The user message to append to the conversation.",
             "nullable": true,
             "example": "some text"
-          },
-          "contextFolderId": {
-            "type": "integer",
-            "format": "int32",
-            "example": 1234
           },
           "files": {
             "type": "array",
@@ -3770,10 +4101,12 @@
                 }
               ]
             },
+            "description": "The optional collection of file identifiers to attach as context for the AI model.",
             "nullable": true
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Parameters for continuing an AI chat session."
       },
       "CreateAgentRequestDto": {
         "required": [
@@ -3867,7 +4200,8 @@
             "example": true
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Request to create a new AI agent room."
       },
       "CreateProviderRequestDto": {
         "required": [
@@ -3881,21 +4215,25 @@
           },
           "title": {
             "type": "string",
+            "description": "The display title for the AI provider.",
             "nullable": true,
             "example": "SampleFile"
           },
           "url": {
             "type": "string",
+            "description": "The API endpoint URL for the AI provider. Required for OpenAiCompatible type; optional for other types that have default URLs.",
             "nullable": true,
             "example": "some text"
           },
           "key": {
             "type": "string",
+            "description": "The authentication API key for the AI provider.",
             "nullable": true,
             "example": "some text"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Request parameters for creating a new AI provider."
       },
       "DefaultProviderDto": {
         "required": [
@@ -3984,13 +4322,15 @@
               "type": "string",
               "format": "uuid"
             },
+            "description": "Set of unique identifiers of MCP servers to remove from the room. Associated connections and tool configurations will also be cleaned up.",
             "nullable": true,
             "example": [
               "75a5f745-f697-4418-b38d-0fe0d277e258"
             ]
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Parameters specifying which MCP servers to detach from the room."
       },
       "DeleteServersRequestBody": {
         "required": [
@@ -4005,13 +4345,15 @@
               "type": "string",
               "format": "uuid"
             },
+            "description": "Set of unique identifiers of the MCP servers to permanently remove. All room associations and connection data will also be deleted.",
             "nullable": true,
             "example": [
               "75a5f745-f697-4418-b38d-0fe0d277e258"
             ]
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Parameters specifying which MCP servers to delete."
       },
       "DistributedTaskStatus": {
         "oneOf": [
@@ -4091,7 +4433,7 @@
           },
           "displayName": {
             "type": "string",
-            "description": "The user display name.",
+            "description": "The HTML-encoded user's display name formatted according to the default format for the current culture.",
             "nullable": true,
             "example": "Mike Zanyatski"
           },
@@ -4168,16 +4510,19 @@
         "properties": {
           "folderId": {
             "type": "integer",
+            "description": "The identifier of the destination folder where the exported document will be saved.",
             "format": "int32",
             "example": 1
           },
           "title": {
             "type": "string",
+            "description": "The file name (without extension) to use for the exported document.",
             "nullable": true,
             "example": "SampleFile"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Parameters for exporting an AI chat session to a document."
       },
       "ExportMessageRequestBodyInteger": {
         "required": [
@@ -4188,16 +4533,19 @@
         "properties": {
           "folderId": {
             "type": "integer",
+            "description": "The identifier of the destination folder where the exported document will be saved.",
             "format": "int32",
             "example": 1
           },
           "title": {
             "type": "string",
+            "description": "The file name (without extension) to use for the exported document.",
             "nullable": true,
             "example": "SampleFile"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Parameters for exporting an AI chat message to a document."
       },
       "FileEntryBaseDto": {
         "type": "object",
@@ -5513,21 +5861,25 @@
         "properties": {
           "id": {
             "type": "string",
+            "description": "Unique identifier of the MCP server.",
             "format": "uuid",
             "example": "00000000-0000-0000-0000-000000000000"
           },
           "name": {
             "type": "string",
+            "description": "Display name of the MCP server.",
             "nullable": true,
             "example": "John Doe"
           },
           "description": {
             "type": "string",
+            "description": "Human-readable description of the server's purpose and capabilities.",
             "nullable": true,
             "example": "some text"
           },
           "endpoint": {
             "type": "string",
+            "description": "Base URL of the MCP server endpoint.",
             "nullable": true,
             "example": "some text"
           },
@@ -5539,6 +5891,7 @@
             "additionalProperties": {
               "type": "string"
             },
+            "description": "HTTP headers sent with every request to the server (e.g., authentication tokens).",
             "nullable": true,
             "example": [
               {
@@ -5549,6 +5902,7 @@
           },
           "enabled": {
             "type": "boolean",
+            "description": "Indicates whether the server is currently enabled and available for room assignment.",
             "example": true
           },
           "icon": {
@@ -5556,10 +5910,12 @@
           },
           "needReset": {
             "type": "boolean",
+            "description": "Indicates whether the server requires a configuration reset due to connectivity or credential issues.",
             "example": true
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Full MCP server configuration, including connection details and authentication headers. Returned for administrator-level operations."
       },
       "McpServerShortArrayWrapper": {
         "type": "object",
@@ -5603,11 +5959,13 @@
         "properties": {
           "id": {
             "type": "string",
+            "description": "Unique identifier of the MCP server.",
             "format": "uuid",
             "example": "00000000-0000-0000-0000-000000000000"
           },
           "name": {
             "type": "string",
+            "description": "Display name of the MCP server.",
             "nullable": true,
             "example": "John Doe"
           },
@@ -5616,6 +5974,7 @@
           },
           "enabled": {
             "type": "boolean",
+            "description": "Indicates whether the server is currently enabled and available for room assignment.",
             "example": true
           },
           "icon": {
@@ -5623,10 +5982,12 @@
           },
           "needReset": {
             "type": "boolean",
+            "description": "Indicates whether the server requires a configuration reset due to connectivity or credential issues.",
             "example": true
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Compact MCP server summary without sensitive details like endpoint URL or authentication headers."
       },
       "McpServerShortWrapper": {
         "type": "object",
@@ -5707,11 +6068,13 @@
         "properties": {
           "id": {
             "type": "string",
+            "description": "Unique identifier of the MCP server.",
             "format": "uuid",
             "example": "00000000-0000-0000-0000-000000000000"
           },
           "name": {
             "type": "string",
+            "description": "Display name of the MCP server.",
             "nullable": true,
             "example": "John Doe"
           },
@@ -5720,6 +6083,7 @@
           },
           "connected": {
             "type": "boolean",
+            "description": "Indicates whether the current user has an active connection to this server. For direct-connection servers this is always true; for OAuth-based servers it reflects whether the user has completed authorization.",
             "example": true
           },
           "icon": {
@@ -5727,10 +6091,12 @@
           },
           "needReset": {
             "type": "boolean",
+            "description": "Indicates whether the server requires a configuration reset due to connectivity or credential issues.",
             "example": true
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "MCP server status within a room, reflecting the current user's connection state for OAuth-based servers."
       },
       "McpServerStatusWrapper": {
         "type": "object",
@@ -5845,15 +6211,18 @@
         "properties": {
           "name": {
             "type": "string",
+            "description": "Name of the tool as reported by the MCP server.",
             "nullable": true,
             "example": "John Doe"
           },
           "enabled": {
             "type": "boolean",
+            "description": "Indicates whether this tool is enabled (true) or disabled (false) for use in AI chat sessions within the room.",
             "example": true
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Represents a single tool exposed by an MCP server, along with its enabled or disabled state within a room."
       },
       "MessageArrayWrapper": {
         "type": "object",
@@ -5914,6 +6283,7 @@
           2
         ],
         "type": "integer",
+        "description": "The type of content block within a chat message.",
         "format": "int32"
       },
       "MessageDto": {
@@ -5921,6 +6291,7 @@
         "properties": {
           "id": {
             "type": "integer",
+            "description": "The unique identifier of the message.",
             "format": "int64",
             "example": "00000000-0000-0000-0000-000000000000"
           },
@@ -5932,6 +6303,7 @@
             "items": {
               "$ref": "#/components/schemas/MessageContentDto"
             },
+            "description": "The ordered collection of content blocks that make up the message body (text, tool calls, or attachments).",
             "nullable": true
           },
           "createdOn": {
@@ -5986,16 +6358,19 @@
         "properties": {
           "providerId": {
             "type": "integer",
+            "description": "The unique identifier of the AI provider that offers this model.",
             "format": "int32",
             "example": 1234
           },
           "providerTitle": {
             "type": "string",
+            "description": "The human-readable display name of the AI provider (e.g., \"OpenAI\", \"Anthropic\").",
             "nullable": true,
             "example": "some text"
           },
           "modelId": {
             "type": "string",
+            "description": "The model identifier as recognized by the AI provider (e.g., \"gpt-4o\", \"claude-sonnet-4-20250514\").",
             "nullable": true,
             "example": "some text"
           }
@@ -6109,11 +6484,13 @@
           },
           "url": {
             "type": "string",
+            "description": "Default API endpoint URL for the provider type.",
             "nullable": true,
             "example": "some text"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Available AI provider type settings."
       },
       "ProviderType": {
         "enum": [
@@ -6179,13 +6556,15 @@
               "type": "integer",
               "format": "int32"
             },
+            "description": "The set of AI provider identifiers to delete.",
             "nullable": true,
             "example": [
               1234
             ]
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Request parameters for deleting one or more AI providers."
       },
       "RenameChatBody": {
         "required": [
@@ -6196,11 +6575,13 @@
           "name": {
             "maxLength": 255,
             "type": "string",
+            "description": "The new display name for the chat session (maximum 255 characters).",
             "nullable": true,
             "example": "John Doe"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Parameters for renaming an AI chat session."
       },
       "Role": {
         "enum": [
@@ -6325,14 +6706,43 @@
         "x-enum-type": "integer"
       },
       "ServerType": {
-        "enum": [
-          0,
-          1,
-          2,
-          3
+        "oneOf": [
+          {
+            "enum": [
+              "Custom",
+              "DocSpace",
+              "Github",
+              "Box"
+            ],
+            "type": "string",
+            "description": "[Custom - Custom, DocSpace - DocSpace, Github - Github, Box - Box]",
+            "example": "Custom"
+          },
+          {
+            "enum": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "type": "integer",
+            "description": "[0 - Custom, 1 - DocSpace, 2 - Github, 3 - Box]",
+            "example": 0,
+            "x-enum-varnames": [
+              "Custom",
+              "DocSpace",
+              "Github",
+              "Box"
+            ],
+            "x-enum-descriptions": [
+              "Custom",
+              "DocSpace",
+              "Github",
+              "Box"
+            ]
+          }
         ],
-        "type": "integer",
-        "format": "int32"
+        "x-enum-type": "integer"
       },
       "SetDefaultProviderRequestDto": {
         "required": [
@@ -6365,11 +6775,13 @@
           },
           "key": {
             "type": "string",
+            "description": "The API key for the selected embedding provider. Pass null to keep the existing key unchanged.",
             "nullable": true,
             "example": "some text"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Parameters for configuring the embedding provider."
       },
       "SetMcpToolsRequestBody": {
         "required": [
@@ -6382,40 +6794,47 @@
             "items": {
               "type": "string"
             },
+            "description": "List of tool names to disable. Tools not included in this list will remain enabled. Pass an empty list to enable all tools.",
             "nullable": true,
             "example": [
               "some text"
             ]
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Parameters for updating the disabled tools list of an MCP server in a room."
       },
       "SetServerStatusRequestBody": {
         "type": "object",
         "properties": {
           "enabled": {
             "type": "boolean",
+            "description": "Set to true to enable the server (making it available for room assignment), or false to disable it.",
             "example": true
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Parameters for toggling the MCP server status."
       },
       "SetUserChatSettingsRequestBody": {
         "type": "object",
         "properties": {
           "webSearchEnabled": {
             "type": "boolean",
+            "description": "Indicates whether the AI assistant is allowed to perform web searches when generating responses.",
             "nullable": true,
             "example": true
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Parameters for updating user chat settings."
       },
       "SetWebSearchSettingsRequestBody": {
         "type": "object",
         "properties": {
           "enabled": {
             "type": "boolean",
+            "description": "Indicates whether web search is enabled for AI chat sessions.",
             "example": true
           },
           "type": {
@@ -6423,11 +6842,13 @@
           },
           "key": {
             "type": "string",
+            "description": "The API key for the selected web search engine. Pass null to keep the existing key unchanged.",
             "nullable": true,
             "example": "some text"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Parameters for configuring web search settings."
       },
       "SortOrder": {
         "oneOf": [
@@ -6469,14 +6890,9 @@
         "properties": {
           "message": {
             "type": "string",
+            "description": "The initial user message to send to the AI assistant.",
             "nullable": true,
             "example": "some text"
-          },
-          "contextFolderId": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true,
-            "example": 1234
           },
           "files": {
             "type": "array",
@@ -6492,10 +6908,12 @@
                 }
               ]
             },
+            "description": "The optional collection of file identifiers to attach as context for the AI model.",
             "nullable": true
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Parameters for starting a new AI chat session."
       },
       "SubjectFilter": {
         "oneOf": [
@@ -6535,7 +6953,8 @@
             "$ref": "#/components/schemas/ToolExecutionDecision"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Parameters for the tool execution permission decision."
       },
       "ToolExecutionDecision": {
         "enum": [
@@ -6551,21 +6970,25 @@
         "properties": {
           "title": {
             "type": "string",
+            "description": "The new display title for the AI provider. If null, the title is not changed.",
             "nullable": true,
             "example": "SampleFile"
           },
           "url": {
             "type": "string",
+            "description": "The new API endpoint URL for the AI provider. If null, the URL is not changed.",
             "nullable": true,
             "example": "some text"
           },
           "key": {
             "type": "string",
+            "description": "The new authentication API key for the AI provider. If null, the key is not changed.",
             "nullable": true,
             "example": "some text"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Parameters for updating an AI provider's configuration."
       },
       "UpdateRoomRequest": {
         "type": "object",
@@ -6700,17 +7123,20 @@
           "name": {
             "maxLength": 128,
             "type": "string",
+            "description": "New display name for the server. Only letters, numbers, underscores, and hyphens are allowed. Maximum 128 characters.",
             "nullable": true,
             "example": "John Doe"
           },
           "description": {
             "maxLength": 255,
             "type": "string",
+            "description": "New human-readable description of the server's purpose. Maximum 255 characters.",
             "nullable": true,
             "example": "some text"
           },
           "endpoint": {
             "type": "string",
+            "description": "New base URL of the MCP server endpoint. If changed, the system will re-verify connectivity before saving.",
             "format": "uri",
             "nullable": true,
             "example": "some text"
@@ -6720,6 +7146,7 @@
             "additionalProperties": {
               "type": "string"
             },
+            "description": "New HTTP headers to include with every request. If changed alongside the endpoint, connectivity is re-verified.",
             "nullable": true,
             "example": [
               {
@@ -6730,21 +7157,25 @@
           },
           "updateIcon": {
             "type": "boolean",
+            "description": "Set to true to update the server icon. When true, the Icon field value (or null to remove) will be applied.",
             "example": true
           },
           "icon": {
             "type": "string",
+            "description": "New Base64-encoded icon image for the server, or null to remove the existing icon. Only applied when UpdateIcon is true.",
             "nullable": true,
             "example": "some text"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Parameters for updating an existing MCP server. All fields are optional — only provided fields will be modified."
       },
       "UserChatSettingsDto": {
         "type": "object",
         "properties": {
           "webSearchEnabled": {
             "type": "boolean",
+            "description": "Indicates whether the AI assistant is allowed to perform web searches when generating responses in this room.",
             "example": true
           }
         },
@@ -6792,6 +7223,7 @@
           },
           "needReset": {
             "type": "boolean",
+            "description": "Indicates whether the embedding provider API key needs to be reconfigured.",
             "example": true
           }
         },
@@ -6844,13 +7276,15 @@
               "type": "integer",
               "format": "int32"
             },
+            "description": "The set of file identifiers to submit for vectorization.",
             "nullable": true,
             "example": [
               1234
             ]
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Parameters for submitting files for vectorization."
       },
       "WatermarkAdditions": {
         "oneOf": [
@@ -7008,6 +7442,7 @@
         "properties": {
           "enabled": {
             "type": "boolean",
+            "description": "Indicates whether web search is currently enabled.",
             "example": true
           },
           "type": {
@@ -7015,6 +7450,7 @@
           },
           "needReset": {
             "type": "boolean",
+            "description": "Indicates whether the web search API key needs to be reconfigured.",
             "example": true
           }
         },
