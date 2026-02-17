@@ -26,11 +26,20 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request to retrieve the tool list for an MCP server within a room.
+/// </summary>
 public class GetMcpToolsRequestDto
 {
+    /// <summary>
+    /// Identifier of the room containing the MCP server.
+    /// </summary>
     [FromRoute(Name = "roomId")]
     public int RoomId { get; init; }
-    
+
+    /// <summary>
+    /// Unique identifier of the MCP server whose tools are being retrieved.
+    /// </summary>
     [FromRoute(Name = "serverId")]
     public Guid ServerId { get; init; }
 }

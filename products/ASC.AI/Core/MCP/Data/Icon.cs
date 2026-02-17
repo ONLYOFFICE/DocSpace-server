@@ -26,10 +26,28 @@
 
 namespace ASC.AI.Core.MCP.Data;
 
+/// <summary>
+/// Set of server icon URLs in multiple resolutions, used for rendering in different UI contexts (lists, cards, tooltips, etc.).
+/// </summary>
 public class Icon
 {
+    /// <summary>
+    /// Icon URL at 48x48 pixels resolution. Used for large previews and detail views.
+    /// </summary>
     public required string Icon48 { get; init; }
+
+    /// <summary>
+    /// Icon URL at 32x32 pixels resolution. Used for standard list items and cards.
+    /// </summary>
     public required string Icon32 { get; init; }
+
+    /// <summary>
+    /// Icon URL at 24x24 pixels resolution. Used for compact list items and inline displays.
+    /// </summary>
     public required string Icon24 { get; init; }
+
+    /// <summary>
+    /// Icon URL at 16x16 pixels resolution. Used for small indicators, tooltips, and favicons.
+    /// </summary>
     public required string Icon16 { get; init; }
 }

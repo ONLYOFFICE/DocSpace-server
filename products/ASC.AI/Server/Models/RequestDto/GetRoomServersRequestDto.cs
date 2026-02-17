@@ -26,8 +26,14 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request to retrieve the list of MCP servers assigned to a room.
+/// </summary>
 public class GetRoomServersRequestDto
 {
+    /// <summary>
+    /// Identifier of the room whose assigned MCP servers are being retrieved.
+    /// </summary>
     [FromRoute(Name = "roomId")]
     public int RoomId { get; init; }
 }

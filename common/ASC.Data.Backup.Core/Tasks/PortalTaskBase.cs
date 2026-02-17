@@ -31,7 +31,12 @@ public class ProgressChangedEventArgs(int progress) : EventArgs
     public int Progress { get; private set; } = progress;
 }
 
-public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, StorageFactory storageFactory, StorageFactoryConfig storageFactoryConfig, ModuleProvider moduleProvider)
+public abstract class PortalTaskBase(
+    DbFactory dbFactory,
+    ILogger logger,
+    StorageFactory storageFactory,
+    StorageFactoryConfig storageFactoryConfig,
+    ModuleProvider moduleProvider) : IDisposable
 {
     protected const int TasksLimit = 10;
 
@@ -367,5 +372,10 @@ public abstract class PortalTaskBase(DbFactory dbFactory, ILogger logger, Storag
                 Logger.ErrorRestore(e);
             }
         }
+    }
+
+    public void Dispose()
+    {
+        _progressSemaphore?.Dispose();
     }
 }
