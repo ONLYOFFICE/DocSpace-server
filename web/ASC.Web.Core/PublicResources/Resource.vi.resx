@@ -138,10 +138,7 @@
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Số lượng</value>
   </data>
-  <data name="AccountingCustomerOperationServiceDesc_aiservice" xml:space="preserve">
-    <value>Công cụ AI</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_aitools" xml:space="preserve">
+  <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
     <value>Công cụ AI</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
@@ -159,10 +156,7 @@
   <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
     <value>Đơn vị đo</value>
   </data>
-  <data name="AccountingCustomerOperationServiceUOM_aiservice" xml:space="preserve">
-    <value>Token</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUOM_aitools" xml:space="preserve">
+  <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>Token</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
@@ -1155,12 +1149,6 @@
   <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
     <value>Số lượng AI agent không được vượt quá {0}</value>
   </data>
-  <data name="TariffsFeature_aiservice_wallet" xml:space="preserve">
-    <value>Công cụ AI</value>
-  </data>
-  <data name="TariffsFeature_aiservice_wallet_price_count" xml:space="preserve">
-    <value>Bật các tính năng AI trong DocSpace của bạn để tăng năng suất.</value>
-  </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>Công cụ AI</value>
   </data>
@@ -1259,12 +1247,6 @@
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>Số lượng người dùng không được vượt quá {0}</value>
-  </data>
-  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
-    <value>Tìm kiếm web AI</value>
-  </data>
-  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
-    <value>Nạp tiền vào ví để mở khóa tìm kiếm web AI.</value>
   </data>
   <data name="Tariffs_admin" xml:space="preserve">
     <value>Business</value>

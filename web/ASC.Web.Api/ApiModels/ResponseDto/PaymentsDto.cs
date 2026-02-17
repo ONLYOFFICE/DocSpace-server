@@ -153,11 +153,6 @@ public class OperationDto
             serviceName = "disk-storage";
         }
 
-        if (serviceName != null && serviceName.Equals("ai-tools", StringComparison.InvariantCultureIgnoreCase))
-        {
-            serviceName = "aitools";
-        }
-
         if (string.IsNullOrEmpty(serviceName))
         {
             serviceName = "top-up";

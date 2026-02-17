@@ -12,16 +12,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterColumn<decimal>(
-                name: "price",
-                table: "tenants_quota",
-                type: "decimal(15,9)",
-                nullable: false,
-                defaultValueSql: "'0.00'",
-                oldClrType: typeof(decimal),
-                oldType: "decimal(10,4)",
-                oldDefaultValueSql: "'0.00'");
-
             migrationBuilder.AddColumn<string>(
                 name: "service_group",
                 table: "tenants_quota",
@@ -119,35 +109,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 table: "tenants_quota",
                 columns: new[] { "tenant", "description", "features", "name", "price", "product_id", "service_group", "service_name", "visible", "wallet" },
                 values: new object[] { -13, null, "aitools", "aitools", 1m, null, null, "ai-tools", true, true });
-
-            migrationBuilder.InsertData(
-                table: "tenants_quota",
-                columns: new[] { "tenant", "description", "features", "name", "product_id", "service_group", "service_name", "visible", "wallet" },
-                values: new object[] { -14, null, "aiservice", "aiservice", null, null, null, false, true });
-
-            migrationBuilder.InsertData(
-                table: "tenants_quota",
-                columns: new[] { "tenant", "description", "features", "name", "price", "product_id", "service_group", "service_name", "wallet" },
-                values: new object[,]
-                {
-                    { -31, null, "gemini3flashoutput", "gemini3flashoutput", 0.0000036m, null, "aiservice", "gemini3flashoutput", true },
-                    { -30, null, "gemini3flashinput", "gemini3flashinput", 0.0000006m, null, "aiservice", "gemini3flashinput", true },
-                    { -29, null, "gemini3prooutput", "gemini3prooutput", 0.0000144m, null, "aiservice", "gemini3prooutput", true },
-                    { -28, null, "gemini3proinput", "gemini3proinput", 0.0000024m, null, "aiservice", "gemini3proinput", true },
-                    { -27, null, "gpt52output", "gpt52output", 0.0000168m, null, "aiservice", "gpt5.2output", true },
-                    { -26, null, "gpt52input", "gpt52input", 0.0000021m, null, "aiservice", "gpt5.2input", true },
-                    { -25, null, "deepseek32output", "deepseek32output", 0.000000456m, null, "aiservice", "deepseek3.2output", true },
-                    { -24, null, "deepseek32input", "deepseek32input", 0.0000003m, null, "aiservice", "deepseek3.2input", true },
-                    { -23, null, "gpt5output", "gpt5output", 0.000012m, null, "aiservice", "gpt5output", true },
-                    { -22, null, "gpt5input", "gpt5input", 0.0000015m, null, "aiservice", "gpt5input", true },
-                    { -21, null, "claude45output", "claude45output", 0.000018m, null, "aiservice", "claude4.5output", true },
-                    { -20, null, "claude45input", "claude45input", 0.0000036m, null, "aiservice", "claude4.5input", true },
-                    { -19, null, "deepseek31output", "deepseek31output", 0.000000948m, null, "aiservice", "deepseek3.1output", true },
-                    { -18, null, "deepseek31input", "deepseek31input", 0.000000252m, null, "aiservice", "deepseek3.1input", true },
-                    { -17, null, "embedding", "embedding", 0.000000024m, null, "aiservice", "embedding", true },
-                    { -16, null, "webfetch", "webfetch", 0.0012m, null, "aiservice", "webfetch", true },
-                    { -15, null, "websearch", "websearch", 0.006m, null, "aiservice", "websearch", true }
-                });
         }
 
         /// <inheritdoc />
@@ -156,111 +117,11 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             migrationBuilder.DeleteData(
                 table: "tenants_quota",
                 keyColumn: "tenant",
-                keyValue: -31);
-
-            migrationBuilder.DeleteData(
-                table: "tenants_quota",
-                keyColumn: "tenant",
-                keyValue: -30);
-
-            migrationBuilder.DeleteData(
-                table: "tenants_quota",
-                keyColumn: "tenant",
-                keyValue: -29);
-
-            migrationBuilder.DeleteData(
-                table: "tenants_quota",
-                keyColumn: "tenant",
-                keyValue: -28);
-
-            migrationBuilder.DeleteData(
-                table: "tenants_quota",
-                keyColumn: "tenant",
-                keyValue: -27);
-
-            migrationBuilder.DeleteData(
-                table: "tenants_quota",
-                keyColumn: "tenant",
-                keyValue: -26);
-
-            migrationBuilder.DeleteData(
-                table: "tenants_quota",
-                keyColumn: "tenant",
-                keyValue: -25);
-
-            migrationBuilder.DeleteData(
-                table: "tenants_quota",
-                keyColumn: "tenant",
-                keyValue: -24);
-
-            migrationBuilder.DeleteData(
-                table: "tenants_quota",
-                keyColumn: "tenant",
-                keyValue: -23);
-
-            migrationBuilder.DeleteData(
-                table: "tenants_quota",
-                keyColumn: "tenant",
-                keyValue: -22);
-
-            migrationBuilder.DeleteData(
-                table: "tenants_quota",
-                keyColumn: "tenant",
-                keyValue: -21);
-
-            migrationBuilder.DeleteData(
-                table: "tenants_quota",
-                keyColumn: "tenant",
-                keyValue: -20);
-
-            migrationBuilder.DeleteData(
-                table: "tenants_quota",
-                keyColumn: "tenant",
-                keyValue: -19);
-
-            migrationBuilder.DeleteData(
-                table: "tenants_quota",
-                keyColumn: "tenant",
-                keyValue: -18);
-
-            migrationBuilder.DeleteData(
-                table: "tenants_quota",
-                keyColumn: "tenant",
-                keyValue: -17);
-
-            migrationBuilder.DeleteData(
-                table: "tenants_quota",
-                keyColumn: "tenant",
-                keyValue: -16);
-
-            migrationBuilder.DeleteData(
-                table: "tenants_quota",
-                keyColumn: "tenant",
-                keyValue: -15);
-
-            migrationBuilder.DeleteData(
-                table: "tenants_quota",
-                keyColumn: "tenant",
-                keyValue: -14);
-
-            migrationBuilder.DeleteData(
-                table: "tenants_quota",
-                keyColumn: "tenant",
                 keyValue: -13);
 
             migrationBuilder.DropColumn(
                 name: "service_group",
                 table: "tenants_quota");
-
-            migrationBuilder.AlterColumn<decimal>(
-                name: "price",
-                table: "tenants_quota",
-                type: "decimal(10,4)",
-                nullable: false,
-                defaultValueSql: "'0.00'",
-                oldClrType: typeof(decimal),
-                oldType: "decimal(15,9)",
-                oldDefaultValueSql: "'0.00'");
 
             migrationBuilder.UpdateData(
                 table: "tenants_quota",

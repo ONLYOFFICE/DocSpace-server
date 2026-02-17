@@ -138,10 +138,7 @@
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Quantity</value>
   </data>
-  <data name="AccountingCustomerOperationServiceDesc_aiservice" xml:space="preserve">
-    <value>AI tools</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_aitools" xml:space="preserve">
+  <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
     <value>AI tools</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
@@ -207,10 +204,7 @@
   <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
     <value>Unit of Measurement</value>
   </data>
-  <data name="AccountingCustomerOperationServiceUOM_aiservice" xml:space="preserve">
-    <value>Tokens</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUOM_aitools" xml:space="preserve">
+  <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>Tokens</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
@@ -1254,12 +1248,6 @@
   <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
     <value>The number of AI agents should not exceed {0}</value>
   </data>
-  <data name="TariffsFeature_aiservice_wallet" xml:space="preserve">
-    <value>AI tools</value>
-  </data>
-  <data name="TariffsFeature_aiservice_wallet_price_count" xml:space="preserve">
-    <value>Enable AI features in your DocSpace to boost productivity.</value>
-  </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>AI tools</value>
   </data>
@@ -1275,44 +1263,8 @@
   <data name="TariffsFeature_backup_wallet_price_count" xml:space="preserve">
     <value>Enable backups for your DocSpace. Costs will be billed automatically.</value>
   </data>
-  <data name="TariffsFeature_claude45input_wallet" xml:space="preserve">
-    <value>AI Claude 4.5 input token</value>
-  </data>
-  <data name="TariffsFeature_claude45input_wallet_price_count" xml:space="preserve">
-    <value>A unit of input text measurement for Claude 4.5</value>
-  </data>
-  <data name="TariffsFeature_claude45output_wallet" xml:space="preserve">
-    <value>AI Claude 4.5 output token</value>
-  </data>
-  <data name="TariffsFeature_claude45output_wallet_price_count" xml:space="preserve">
-    <value>A unit of output text measurement for Claude 4.5</value>
-  </data>
   <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Branding &amp; customization</value>
-  </data>
-  <data name="TariffsFeature_deepseek31input_wallet" xml:space="preserve">
-    <value>AI Deepseek 3.1 input token</value>
-  </data>
-  <data name="TariffsFeature_deepseek31input_wallet_price_count" xml:space="preserve">
-    <value>A unit of input text measurement for Deepseek 3.1</value>
-  </data>
-  <data name="TariffsFeature_deepseek31output_wallet" xml:space="preserve">
-    <value>AI Deepseek 3.1 output token</value>
-  </data>
-  <data name="TariffsFeature_deepseek31output_wallet_price_count" xml:space="preserve">
-    <value>A unit of output text measurement for Deepseek 3.1</value>
-  </data>
-  <data name="TariffsFeature_deepseek32input_wallet" xml:space="preserve">
-    <value>AI Deepseek 3.2 input token</value>
-  </data>
-  <data name="TariffsFeature_deepseek32input_wallet_price_count" xml:space="preserve">
-    <value>A unit of input text measurement for Deepseek 3.2</value>
-  </data>
-  <data name="TariffsFeature_deepseek32output_wallet" xml:space="preserve">
-    <value>AI Deepseek 3.2 output token</value>
-  </data>
-  <data name="TariffsFeature_deepseek32output_wallet_price_count" xml:space="preserve">
-    <value>A unit of output text measurement for Deepseek 3.2</value>
   </data>
   <data name="TariffsFeature_embedding_wallet" xml:space="preserve">
     <value>AI embedding</value>
@@ -1331,54 +1283,6 @@
   </data>
   <data name="TariffsFeature_free_backup_exception" xml:space="preserve">
     <value>The number of free backups should not exceed {0} within a month</value>
-  </data>
-  <data name="TariffsFeature_gemini3flashinput_wallet" xml:space="preserve">
-    <value>AI Gemini 3 Flash input token</value>
-  </data>
-  <data name="TariffsFeature_gemini3flashinput_wallet_price_count" xml:space="preserve">
-    <value>A unit of input text measurement for Gemini 3 Flash</value>
-  </data>
-  <data name="TariffsFeature_gemini3flashoutput_wallet" xml:space="preserve">
-    <value>AI Gemini 3 Flash output token</value>
-  </data>
-  <data name="TariffsFeature_gemini3flashoutput_wallet_price_count" xml:space="preserve">
-    <value>A unit of output text measurement for Gemini 3 Flash</value>
-  </data>
-  <data name="TariffsFeature_gemini3proinput_wallet" xml:space="preserve">
-    <value>AI Gemini 3 Pro input token</value>
-  </data>
-  <data name="TariffsFeature_gemini3proinput_wallet_price_count" xml:space="preserve">
-    <value>A unit of input text measurement for Gemini 3 Pro</value>
-  </data>
-  <data name="TariffsFeature_gemini3prooutput_wallet" xml:space="preserve">
-    <value>AI Gemini 3 Pro output token</value>
-  </data>
-  <data name="TariffsFeature_gemini3prooutput_wallet_price_count" xml:space="preserve">
-    <value>A unit of output text measurement for Gemini 3 Pro</value>
-  </data>
-  <data name="TariffsFeature_gpt52input_wallet" xml:space="preserve">
-    <value>AI GPT 5.2 input token</value>
-  </data>
-  <data name="TariffsFeature_gpt52input_wallet_price_count" xml:space="preserve">
-    <value>A unit of input text measurement for GPT 5.2</value>
-  </data>
-  <data name="TariffsFeature_gpt52output_wallet" xml:space="preserve">
-    <value>AI GPT 5.2 output token</value>
-  </data>
-  <data name="TariffsFeature_gpt52output_wallet_price_count" xml:space="preserve">
-    <value>A unit of output text measurement for GPT 5.2</value>
-  </data>
-  <data name="TariffsFeature_gpt5input_wallet" xml:space="preserve">
-    <value>AI GPT 5 input token</value>
-  </data>
-  <data name="TariffsFeature_gpt5input_wallet_price_count" xml:space="preserve">
-    <value>A unit of input text measurement for GPT 5</value>
-  </data>
-  <data name="TariffsFeature_gpt5output_wallet" xml:space="preserve">
-    <value>AI GPT 5 output token</value>
-  </data>
-  <data name="TariffsFeature_gpt5output_wallet_price_count" xml:space="preserve">
-    <value>A unit of output text measurement for GPT 5</value>
   </data>
   <data name="TariffsFeature_manager_exception" xml:space="preserve">
     <value>The number of admins should not exceed {0}</value>
@@ -1448,18 +1352,6 @@
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>The number of users should not exceed {0}</value>
-  </data>
-  <data name="TariffsFeature_webfetch_wallet" xml:space="preserve">
-    <value>AI web fetch</value>
-  </data>
-  <data name="TariffsFeature_webfetch_wallet_price_count" xml:space="preserve">
-    <value>A unit of text page measurement that large language models (LLMs) can handle</value>
-  </data>
-  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
-    <value>AI web search</value>
-  </data>
-  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
-    <value>Enable AI-powered web search to get information from the internet.</value>
   </data>
   <data name="Tariffs_admin" xml:space="preserve">
     <value>Business</value>

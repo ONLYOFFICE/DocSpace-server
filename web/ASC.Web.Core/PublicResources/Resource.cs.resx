@@ -138,10 +138,7 @@
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Množství</value>
   </data>
-  <data name="AccountingCustomerOperationServiceDesc_aiservice" xml:space="preserve">
-    <value>Nástroje AI</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_aitools" xml:space="preserve">
+  <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
     <value>Nástroje AI</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
@@ -159,10 +156,7 @@
   <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
     <value>Měrná jednotka</value>
   </data>
-  <data name="AccountingCustomerOperationServiceUOM_aiservice" xml:space="preserve">
-    <value>Tokeny</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceUOM_aitools" xml:space="preserve">
+  <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>Tokeny</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
@@ -1155,12 +1149,6 @@
   <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
     <value>Počet AI agentů by neměl překročit {0}</value>
   </data>
-  <data name="TariffsFeature_aiservice_wallet" xml:space="preserve">
-    <value>AI nástroje</value>
-  </data>
-  <data name="TariffsFeature_aiservice_wallet_price_count" xml:space="preserve">
-    <value>Povolte AI funkce ve vašem DocSpace a zvyšte produktivitu.</value>
-  </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>AI nástroje</value>
   </data>
@@ -1259,12 +1247,6 @@
   </data>
   <data name="TariffsFeature_users_exception" xml:space="preserve">
     <value>Počet uživatelů by neměl překročit {0}</value>
-  </data>
-  <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
-    <value>AI vyhledávání na webu</value>
-  </data>
-  <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
-    <value>Přidejte prostředky do své peněženky a odemkněte AI vyhledávání na webu.</value>
   </data>
   <data name="Tariffs_admin" xml:space="preserve">
     <value>Business</value>
