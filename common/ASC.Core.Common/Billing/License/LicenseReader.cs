@@ -248,6 +248,7 @@ public class LicenseReader(
             Branding = license.Branding,
             Customization = license.Customization,
             Lifetime = !license.Trial && !license.TimeLimited,
+            AutomationApi = license.AutomationApi,
             Statistic = true
         };
 

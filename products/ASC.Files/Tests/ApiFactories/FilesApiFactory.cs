@@ -126,6 +126,8 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         base.ConfigureWebHost(builder);
+        
+        builder.UseContentRoot(AppDomain.CurrentDomain.BaseDirectory);
         builder.ConfigureTestServices(services =>
         {
             services.AddBaseDbContext<MigrationContext>();
@@ -134,6 +136,8 @@ public class FilesApiFactory: WebApplicationFactory<FilesProgram>, IAsyncLifetim
             
             BackupTables().Wait();
         });
+
+
     }
     
     internal async Task ResetDatabaseAsync()

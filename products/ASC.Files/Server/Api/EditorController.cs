@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using ASC.Web.Api.Core;
-
 namespace ASC.Files.Api;
 
 [ConstraintRoute("int")]
@@ -39,8 +37,20 @@ public class EditorControllerInternal(FileStorageService fileStorageService,
         FileDtoHelper fileDtoHelper,
         ConfigurationConverter<int> configurationConverter,
         SecurityContext securityContext,
-        IHttpContextAccessor httpContextAccessor)
-        : EditorController<int>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, configurationConverter, securityContext, httpContextAccessor);
+        IHttpContextAccessor httpContextAccessor,
+        EditorToolCallStateStore editorToolCallStateStore)
+        : EditorController<int>(
+            fileStorageService, 
+            documentServiceHelper, 
+            encryptionKeyPairDtoHelper, 
+            settingsManager, 
+            entryManager, 
+            folderDtoHelper, 
+            fileDtoHelper, 
+            configurationConverter, 
+            securityContext, 
+            httpContextAccessor, 
+            editorToolCallStateStore);
 
 [DefaultRoute("file")]
 public class EditorControllerThirdparty(FileStorageService fileStorageService,
@@ -52,8 +62,20 @@ public class EditorControllerThirdparty(FileStorageService fileStorageService,
         FileDtoHelper fileDtoHelper,
         ConfigurationConverter<string> configurationConverter,
         SecurityContext securityContext,
-        IHttpContextAccessor httpContextAccessor)
-        : EditorController<string>(fileStorageService, documentServiceHelper, encryptionKeyPairDtoHelper, settingsManager, entryManager, folderDtoHelper, fileDtoHelper, configurationConverter, securityContext, httpContextAccessor);
+        IHttpContextAccessor httpContextAccessor,
+        EditorToolCallStateStore editorToolCallStateStore)
+        : EditorController<string>(
+            fileStorageService, 
+            documentServiceHelper, 
+            encryptionKeyPairDtoHelper, 
+            settingsManager, 
+            entryManager, 
+            folderDtoHelper, 
+            fileDtoHelper, 
+            configurationConverter, 
+            securityContext, 
+            httpContextAccessor, 
+            editorToolCallStateStore);
 
 public abstract class EditorController<T>(
     FileStorageService fileStorageService,
@@ -65,7 +87,8 @@ public abstract class EditorController<T>(
         FileDtoHelper fileDtoHelper,
         ConfigurationConverter<T> configurationConverter,
         SecurityContext securityContext,
-        IHttpContextAccessor httpContextAccessor)
+        IHttpContextAccessor httpContextAccessor,
+        EditorToolCallStateStore editorToolCallStateStore)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
 
@@ -249,6 +272,16 @@ public abstract class EditorController<T>(
         {
             result.File.CanShare = false;
         }
+
+        if (rootFolder.FolderType is FolderType.ResultStorage && file.Id is int fileId)
+        {
+            var toolCallState = await editorToolCallStateStore.GetAsync(fileId);
+            if (toolCallState is not null)
+            {
+                result.GenerationToolCallState = toolCallState.MapToDto();
+            }
+        }
+        
         return result;
     }
 

@@ -1,7 +1,3 @@
-[submodule "products/ASC.Files/Server/DocStore"]
-	path = products/ASC.Files/Server/DocStore
-	url = https://github.com/ONLYOFFICE/document-templates
-	branch = main/community-server
 [submodule "sdk/docspace-api-sdk-python"]
 	path = sdk/docspace-api-sdk-python
 	url = https://github.com/ONLYOFFICE/docspace-api-sdk-python.git
@@ -34,3 +30,7 @@
 	path = sdk/docspace-api-postman-collections
 	url = https://github.com/ONLYOFFICE/docspace-api-postman-collections.git
 	branch = master
+[submodule "common/resources/DocStore"]
+	path = common/resources/DocStore
+	url = https://github.com/ONLYOFFICE/document-templates
+	branch = main/community-server
