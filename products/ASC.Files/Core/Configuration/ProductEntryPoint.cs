@@ -40,6 +40,7 @@ public class ProductEntryPoint : Product
     private readonly TenantManager _tenantManager;
     private readonly RoomsNotificationSettingsHelper _roomsNotificationSettingsHelper;
     private readonly PathProvider _pathProvider;
+    private readonly FileUtility _fileUtility;
     private readonly FilesLinkUtility _filesLinkUtility;
     private readonly CommonLinkUtility _commonLinkUtility;
     private readonly FileSecurity _fileSecurity;
@@ -60,6 +61,7 @@ public class ProductEntryPoint : Product
         TenantManager tenantManager,
         RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
         PathProvider pathProvider,
+        FileUtility fileUtility,
         FilesLinkUtility filesLinkUtility,
         FileSecurity fileSecurity,
         GlobalFolder globalFolder,
@@ -77,6 +79,7 @@ public class ProductEntryPoint : Product
         _tenantManager = tenantManager;
         _roomsNotificationSettingsHelper = roomsNotificationSettingsHelper;
         _pathProvider = pathProvider;
+        _fileUtility = fileUtility;
         _filesLinkUtility = filesLinkUtility;
         _fileSecurity = fileSecurity;
         _globalFolder = globalFolder;
@@ -179,7 +182,7 @@ public class ProductEntryPoint : Product
                     continue;
                 case (int)MessageAction.FileCreated or (int)MessageAction.FileUpdatedRevisionComment or (int)MessageAction.FileUploaded or (int)MessageAction.UserFileUpdated:
                     fileId = e.Target.GetItems().FirstOrDefault();
-                    activityInfo.FileUrl = _commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.GetFileWebEditorUrl(fileId));
+                    activityInfo.FileUrl = _commonLinkUtility.GetFullAbsolutePath(_filesLinkUtility.GetFileWebPreviewUrl(_fileUtility, activityInfo.FileTitle, fileId));
                     break;
             }
 

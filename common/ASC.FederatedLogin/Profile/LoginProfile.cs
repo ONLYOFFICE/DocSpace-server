@@ -192,9 +192,9 @@ public class LoginProfile
 [Scope]
 public class LoginProfileTransport(InstanceCrypto instanceCrypto, TenantManager tenantManager)
 {
-    public async Task<string> ToString(LoginProfile profile)
+    public async Task<string> ToString(LoginProfile profile, bool pureTransport = false)
     {
-        var tenantId = tenantManager.GetCurrentTenant(false)?.Id;
+        var tenantId = pureTransport ? null : tenantManager.GetCurrentTenant(false)?.Id;
         var input = await instanceCrypto.EncryptAsync(Encoding.UTF8.GetBytes(profile.ToString() + tenantId));
         return WebEncoders.Base64UrlEncode(input);
     }

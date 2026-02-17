@@ -222,14 +222,14 @@ $__AuthorName님이 방을 삭제했습니다: $RoomTitle</value>
   <data name="pattern_ShareDocument" xml:space="preserve">
     <value>h1. 문서에 액세스 허가: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" 다음 액세스 권한을 당신에게 문서에 대한 액세스 권한을 부여 "$DocumentTitle":"$DocumentURL""$AccessRights". 
+$__DateTime $__AuthorName 다음 액세스 권한을 당신에게 문서에 대한 액세스 권한을 부여 "$DocumentTitle":"$DocumentURL""$AccessRights". 
 
 $Message</value>
   </data>
   <data name="pattern_ShareFolder" xml:space="preserve">
     <value>h1. Access Granted to Folder: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" 다음 액세스 권한을 당신에게 문서에 대한 액세스 권한을 부여"$DocumentTitle":"$DocumentURL" "$AccessRights". 
+$__DateTime $__AuthorName 다음 액세스 권한을 당신에게 문서에 대한 액세스 권한을 부여"$DocumentTitle":"$DocumentURL" "$AccessRights". 
 
 $Message</value>
   </data>

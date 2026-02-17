@@ -27,6 +27,9 @@
 namespace ASC.Data.Backup.Core.Log;
 internal static partial class BackupProgressItemLogger
 {
+    [LoggerMessage(LogLevel.Information, "BackupCancelled")]
+    public static partial void InfoBackupCancelled(this ILogger<BackupProgressItem> logger);
+
     [LoggerMessage(LogLevel.Error, "RunJob - Params: id: {id}, tenantId: {tenantId}, file: {file}, basePath: {basePath}")]
     public static partial void ErrorRunJob(this ILogger<BackupProgressItem> logger, string id, int tenantId, string file, string basePath, Exception exception);
 

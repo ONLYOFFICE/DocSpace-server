@@ -54,11 +54,11 @@ public class ConsumerBackupStorage(
         _sessionHolder = new CommonChunkedUploadSessionHolder(_store, Domain, cache, setupInfo.ChunkUploadSize);
     }
 
-    public async Task<string> UploadAsync(string storageBasePath, string localPath, Guid userId)
+    public async Task<string> UploadAsync(string storageBasePath, string localPath, Guid userId, CancellationToken token)
     {
         await using var stream = File.OpenRead(localPath);
         var storagePath = Path.GetFileName(localPath);
-        await _store.SaveAsync(Domain, storagePath, stream, ACL.Private);
+        await _store.SaveAsync(Domain, storagePath, stream, ACL.Private, token);
         return storagePath;
     }
 

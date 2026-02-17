@@ -34,6 +34,8 @@ public class ZipWriteOperator : IDataWriteOperator
 
     public bool NeedUpload => true;
 
+    public CancellationToken CancellationToken { get; set; }
+
     public string Hash => throw new NotImplementedException();
 
     public string StoragePath => throw new NotImplementedException();
@@ -48,17 +50,20 @@ public class ZipWriteOperator : IDataWriteOperator
 
     public async Task WriteEntryAsync(string tarKey, string domain, string path, IDataStore store, Func<Task> action)
     {
-        var fileStream = await ActionInvoker.TryAsync(async () => await store.GetReadStreamAsync(domain, path), 5, error => throw error);
+        CancellationToken.ThrowIfCancellationRequested();
+
+        await using var fileStream = await ActionInvoker.TryAsync(async () => await store.GetReadStreamAsync(domain, path), 5, error => throw error);
 
         if (fileStream != null)
         {
             await WriteEntryAsync(tarKey, fileStream, action);
-            await fileStream.DisposeAsync();
         }
     }
 
     public async Task WriteEntryAsync(string tarKey, Stream stream, Func<Task> action)
     {
+        CancellationToken.ThrowIfCancellationRequested();
+
         var (buffered, isNew) = await _tempStream.TryGetBufferedAsync(stream);
         try
         {
@@ -66,8 +71,8 @@ public class ZipWriteOperator : IDataWriteOperator
             entry.Size = buffered.Length;
             await _tarOutputStream.PutNextEntryAsync(entry, CancellationToken.None);
             buffered.Position = 0;
-            await buffered.CopyToAsync(_tarOutputStream);
-            await _tarOutputStream.CloseEntryAsync(CancellationToken.None).ContinueWith(async _ => await action());
+            await buffered.CopyToAsync(_tarOutputStream, CancellationToken);
+            await _tarOutputStream.CloseEntryAsync(CancellationToken).ContinueWith(async _ => await action(), CancellationToken);
         }
         finally
         {
@@ -83,6 +88,4 @@ public class ZipWriteOperator : IDataWriteOperator
         _tarOutputStream.Close();
         await _tarOutputStream.DisposeAsync();
     }
-
-
 }

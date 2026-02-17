@@ -211,14 +211,14 @@ $__AuthorName قام بحذف الغرفة: $RoomTitle</value>
   <data name="pattern_ShareDocument" xml:space="preserve">
     <value>h1. العنوان الرئيسي. تم منح الأذونات للمستند: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" قام بمنح الأذونات للوصول للمستند "$DocumentTitle":"$DocumentURL" تتمنع الآن بهذه الصلاحيات "$AccessRights".
+$__DateTime $__AuthorName قام بمنح الأذونات للوصول للمستند "$DocumentTitle":"$DocumentURL" تتمنع الآن بهذه الصلاحيات "$AccessRights".
 
 $Message</value>
   </data>
   <data name="pattern_ShareFolder" xml:space="preserve">
     <value>h1. العنوان الرئيسي. تم منح الأذونات للمستند: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" قام بمنح الأذونات للوصول للمجلد "$DocumentTitle":"$DocumentURL" تتمنع الآن بهذه الصلاحيات "$AccessRights".
+$__DateTime $__AuthorName قام بمنح الأذونات للوصول للمجلد "$DocumentTitle":"$DocumentURL" تتمنع الآن بهذه الصلاحيات "$AccessRights".
 
 $Message</value>
   </data>
