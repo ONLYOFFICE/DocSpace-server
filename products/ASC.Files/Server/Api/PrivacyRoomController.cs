@@ -28,7 +28,9 @@ using ASC.MessagingSystem.EF.Model;
 
 namespace ASC.Api.Documents;
 
-
+/// <summary>
+/// Provides API endpoints for managing privacy rooms and encryption keys.
+/// </summary>
 [Scope]
 [DefaultRoute]
 [ApiController]
@@ -41,25 +43,46 @@ public class PrivacyRoomControllerCommon(
     MessageService messageService)
     : ControllerBase
 {
-    /// <remarks>
+    /// <summary>
     /// Creates and sets encryption keys for the user.
     /// </summary>
+    /// <remarks>
+    /// Creates and sets encryption keys for the user.
+    /// </remarks>
     /// <param name="inDto">The request object containing public and private key information.</param>
-    /// <returns>The task result contains a collection of encryption key data transfer objects.</returns>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a collection of encryption key data transfer objects.</returns>
     [HttpPost("keys")]
     public Task<IEnumerable<EncryptionKeyDto>> SetKeys(EncryptionKeyRequestDto inDto)
     {
         return CreateKeysAsync([inDto], false);
     }
-    
-    /// <path>api/2.0/privacyroom/keys</path>
+
+    /// <summary>
+    /// Replaces an existing encryption key with a new one for the user.
+    /// </summary>
+    /// <remarks>
+    /// Replaces an existing encryption key with a new one for the user.
+    /// </remarks>
+    /// <param name="inDto">The request object containing the public and private key information to replace the existing key.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a collection of encryption key data transfer objects.</returns>
     [HttpPut("keys")]
     public Task<IEnumerable<EncryptionKeyDto>> ReplaceKey(EncryptionKeyRequestDto inDto)
     {
         return CreateKeysAsync([inDto], true);
     }
-    
-    /// <path>api/2.0/privacyroom/keys/filter</path>
+
+    /// <summary>
+    /// Retrieves a specific user encryption key based on the provided filter conditions.
+    /// </summary>
+    /// <remarks>
+    /// Retrieves a specific user encryption key based on the provided filter conditions.
+    /// </remarks>
+    /// <param name="id">The optional identifier of the encryption key to filter by.</param>
+    /// <param name="type">The optional type of the encryption key to filter by.</param>
+    /// <param name="version">The optional version of the encryption key to filter by.</param>
+    /// <param name="publicKey">The optional public key to filter by.</param>
+    /// <param name="privateKeyEnc">The optional encrypted private key to filter by.</param>
+    /// <returns>The encryption key data transfer object that matches the provided filter conditions, or null if no match is found.</returns>
     [HttpGet("keys/filter")]
     public async Task<EncryptionKeyDto> GetUserKeysByFilter(Guid? id, EncryptionKeyType? type, string version, string publicKey, string privateKeyEnc)
     {
@@ -122,8 +145,14 @@ public class PrivacyRoomControllerCommon(
             return result;
         });
     }
-    
-    /// <path>api/2.0/privacyroom/keys</path>
+
+    /// <summary>
+    /// Retrieves encryption keys associated with the current user.
+    /// </summary>
+    /// <remarks>
+    /// Retrieves encryption keys associated with the current user.
+    /// </remarks>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a collection of encryption key data transfer objects.</returns>
     [HttpGet("keys")]
     public async Task<IEnumerable<EncryptionKeyDto>> GetUserKeys()
     {
@@ -131,8 +160,15 @@ public class PrivacyRoomControllerCommon(
 
         return await encryptionKeyPairHelper.GetKeyPairAsync();
     }
-    
-    /// <path>api/2.0/privacyroom/{roomId}/access</path>
+
+    /// <summary>
+    /// Retrieves the encryption keys associated with a specific privacy room.
+    /// </summary>
+    /// <remarks>
+    /// Retrieves the encryption keys associated with a specific privacy room.
+    /// </remarks>
+    /// <param name="roomId">The identifier of the privacy room.</param>
+    /// <returns>A task containing a collection of encryption key data transfer objects for the specified room.</returns>
     [HttpGet("{roomId:int}/access")]
     public async Task<IEnumerable<EncryptionKeyDto>> GetUserKeysForRoom(int roomId)
     {
@@ -140,8 +176,15 @@ public class PrivacyRoomControllerCommon(
 
         return await encryptionKeyPairHelper.GetKeyPairForRoomAsync(roomId);
     }
-    
-    /// <path>api/2.0/privacyroom/keys</path>
+
+    /// <summary>
+    /// Deletes an encryption key and removes it from the system.
+    /// </summary>
+    /// <remarks>
+    /// Deletes an encryption key and removes it from the system based on the provided key identifier.
+    /// </remarks>
+    /// <param name="id">The unique identifier of the encryption key to be deleted.</param>
+    /// <returns>The task result contains a collection of remaining encryption key data transfer objects after the deletion.</returns>
     [HttpDelete("keys/{id:guid}")]
     public async Task<IEnumerable<EncryptionKeyDto>> DeleteKeys(Guid id)
     {
@@ -149,7 +192,14 @@ public class PrivacyRoomControllerCommon(
 
         return await encryptionKeyPairHelper.DeleteAsync(id);
     }
-    
+
+    /// <summary>
+    /// Retrieves the current settings for the Privacy Room functionality.
+    /// </summary>
+    /// <remarks>
+    /// Retrieves the current settings for the Privacy Room functionality.
+    /// </remarks>
+    /// <returns>A task result indicating whether the Privacy Room feature is enabled.</returns>
     [HttpGet]
     public async Task<bool> GetPrivacyRoomSettings()
     {
@@ -157,7 +207,15 @@ public class PrivacyRoomControllerCommon(
 
         return await PrivacyRoomSettings.GetEnabledAsync(settingsManager);
     }
-    
+
+    /// <summary>
+    /// Configures the privacy room settings for the portal.
+    /// </summary>
+    /// <remarks>
+    /// Configures the privacy room settings for the portal.
+    /// </remarks>
+    /// <param name="inDto">The request object containing the privacy room enable or disable flag.</param>
+    /// <returns>A task result indicating whether the privacy room was successfully enabled or disabled.</returns>
     [HttpPut]
     public async Task<bool> SetPrivacyRoomSettings(PrivacyRoomEnableRequestDto inDto)
     {
