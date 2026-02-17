@@ -29,7 +29,7 @@ namespace ASC.AI.Core.Chat.Data;
 public class DataMessageContent : AttachmentMessageContent, IDisposable
 {
     public int Id { get; init; }
-    public FileType FileType { get; init; }
+    public required string Title { get; init; }
 
     [JsonIgnore]
     public (IMemoryOwner<byte> Owner, int Length)? Data { get; set; }

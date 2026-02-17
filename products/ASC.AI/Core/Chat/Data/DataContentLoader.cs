@@ -54,7 +54,7 @@ public class DataContentLoader(IFileDao<int> fileDao)
         return new DataMessageContent
         {
             Id = file.Id,
-            FileType = fileType,
+            Title = file.Title,
             Data = (memoryOwner, length),
             MediaType = GetMediaType(extension)
         };

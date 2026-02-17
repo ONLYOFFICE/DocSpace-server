@@ -25,7 +25,6 @@
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
 using ASC.Files.Core.Helpers;
-using ASC.Web.Core.Files;
 using ASC.Web.Studio.Utility;
 
 namespace ASC.AI.Models.ResponseDto;
@@ -34,7 +33,7 @@ public class DataContentDto : MessageContentDto
 {
     public override MessageContentType Type => MessageContentType.Data;
     public int Id { get; init; }
-    public required FileType FileType { get; init; }
+    public required string Title { get; init; }
     public string? Url { get; set; }
 }
 
