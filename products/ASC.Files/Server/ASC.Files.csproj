@@ -27,10 +27,11 @@
     <ProjectReference Include="..\Core\ASC.Files.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="DocStore\**\*" CopyToOutputDirectory="PreserveNewest" />
-    <None Remove="DocStore\.git" />
-    <None Remove="DocStore\*.md" />
-    <None Remove="DocStore\LICENSE" />
+      <None Include="..\..\..\common\resources\DocStore\**\*"
+            Exclude="..\..\..\common\resources\DocStore\.git;..\..\..\common\resources\DocStore\**\*.md;..\..\..\common\resources\DocStore\LICENSE"
+            CopyToOutputDirectory="PreserveNewest">
+          <Link>DocStore\%(RecursiveDir)%(FileName)%(Extension)</Link>
+      </None>
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\..\..\.dockerignore">
