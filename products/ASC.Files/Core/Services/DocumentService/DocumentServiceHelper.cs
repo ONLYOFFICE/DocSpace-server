@@ -594,6 +594,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         {
             result.CanEdit = true;
             result.EditorType = editorType;
+            result.CanStartFilling = true;
             return result;
         }
 
@@ -605,6 +606,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         if (properties?.FormFilling?.StartFilling != true)
         {
             result.CanEdit = true;
+            result.CanStartFilling = true;
             return result;
         }
         var linkedId = await linkDao.GetLinkedAsync(file.Id);
