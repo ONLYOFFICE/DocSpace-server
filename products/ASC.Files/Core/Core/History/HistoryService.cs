@@ -102,7 +102,11 @@ public class HistoryService(
         MessageAction.FormCompletelyFilled,
         MessageAction.FormStopped,
         MessageAction.AgentCreated,
-        MessageAction.AgentRenamed
+        MessageAction.AgentRenamed,
+        MessageAction.FileSavedButUserQuotaExceeded,
+        MessageAction.FileNotSavedDueToUserQuota,
+        MessageAction.FileSavedButRoomQuotaExceeded,
+        MessageAction.FileNotSavedDueToRoomQuota
     ];
 
     private static HashSet<int> FilterFolderActions => [

@@ -222,14 +222,14 @@ $__AuthorName deleted the room: $RoomTitle</value>
   <data name="pattern_ShareDocument" xml:space="preserve">
     <value>h1. Access granted to document: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" granted you the access to the "$DocumentTitle":"$DocumentURL" document with the following access rights: "$AccessRights". 
+$__DateTime $__AuthorName granted you the access to the "$DocumentTitle":"$DocumentURL" document with the following access rights: "$AccessRights". 
 
 $Message</value>
   </data>
   <data name="pattern_ShareFolder" xml:space="preserve">
     <value>h1. Access granted to folder: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" granted you the access to the "$DocumentTitle":"$DocumentURL" folder with the following access rights: "$AccessRights". 
+$__DateTime $__AuthorName granted you the access to the "$DocumentTitle":"$DocumentURL" folder with the following access rights: "$AccessRights". 
 
 $Message</value>
   </data>

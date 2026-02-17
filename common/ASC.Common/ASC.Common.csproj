@@ -21,7 +21,6 @@
     <PackageReference Include="ARSoft.Tools.NetStandard.DXSdata" />
     <PackageReference Include="Autofac.Configuration" />
     <PackageReference Include="AWS.Logger.NLog" />
-    <PackageReference Include="Bogus" />
     <PackageReference Include="Confluent.Kafka" />
     <PackageReference Include="DistributedLock.Redis" />
     <PackageReference Include="DistributedLock.ZooKeeper" />

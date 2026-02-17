@@ -28,9 +28,9 @@ using Module = ASC.Api.Core.Module;
 
 namespace ASC.Web.Api.Controllers;
 
-/// <summary>
+/// <remarks>
 /// Modules API.
-/// </summary>
+/// </remarks>
 [Scope]
 [DefaultRoute]
 [ApiController]
@@ -38,12 +38,12 @@ namespace ASC.Web.Api.Controllers;
 [ApiExplorerSettings(IgnoreApi = true)]
 public class ModulesController(WebItemManagerSecurity webItemManagerSecurity) : ControllerBase
 {
-    /// <summary>
+    /// <remarks>
     /// Returns a list of all the portal modules.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get modules
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/modules</path>
     /// <collection>list</collection>
     [Tags("Modules")]
@@ -61,12 +61,12 @@ public class ModulesController(WebItemManagerSecurity webItemManagerSecurity) : 
         return result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of all the portal modules with their information.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get modules information
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/modules/info</path>
     /// <collection>list</collection>
     [Tags("Modules")]

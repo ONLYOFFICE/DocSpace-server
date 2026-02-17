@@ -2,6 +2,10 @@ server:
   servlet:
     session:
       tracking-modes: cookie
+  tomcat:
+    max-swallow-size: 5MB
+    max-http-form-post-size: 5MB
+    max-part-count: 50
   host: ${SERVER_HOST:127.0.0.1}
   port: ${SERVER_PORT:9090}
   shutdown: graceful
@@ -24,6 +28,11 @@ spring:
       secret: ${SPRING_APPLICATION_SIGNATURE_SECRET:}
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB
+      max-request-size: 5MB
   cache:
     type: redis
     redis:

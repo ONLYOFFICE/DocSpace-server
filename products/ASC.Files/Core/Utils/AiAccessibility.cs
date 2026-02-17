@@ -26,6 +26,12 @@
 
 namespace ASC.Files.Core.Utils;
 
+public class AiStatus
+{
+    public bool Enabled { get; init; }
+    public bool GatewayEnabled { get; init; }
+}
+
 [Scope]
 public class AiAccessibility(
     TenantManager tenantManager,
@@ -33,30 +39,43 @@ public class AiAccessibility(
     SettingsManager settingsManager,
     IDbContextFactory<FilesDbContext> dbContextFactory)
 {
-    public async Task<bool> IsAiEnabledAsync()
+    public async Task<AiStatus> GetStatusAsync()
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         
-        if (aiGateway.Configured)
+        if (await aiGateway.IsEnabledAsync())
         {
-            var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>(tenantId);
-            return settings.EnabledServices != null && settings.EnabledServices.Contains(TenantWalletService.AITools);
+            return new AiStatus { Enabled = true, GatewayEnabled = true };
         }
 
-        await using var db = await dbContextFactory.CreateDbContextAsync();
-        return await db.AiProviderExistsAsync(tenantId);
+        return new AiStatus { Enabled = await HasProvidersAsync(tenantId), GatewayEnabled = false };
     }
-    
-    public async Task<bool> IsVectorizationEnabledAsync()
+
+    public async Task<bool> IsVectorizationEnabledAsync<T>(Folder<T> agent)
     {
-        var tenantId = tenantManager.GetCurrentTenantId();
-        
-        if (aiGateway.Configured)
+        if (agent == null)
         {
-            return true; // TODO: added TenantWalletService check
+            return false;
         }
 
+        if (agent.SettingsChatProviderId == AiGateway.ProviderId)
+        {
+            return await aiGateway.IsEnabledAsync();
+        }
+        
+        var tenantId = tenantManager.GetCurrentTenantId();
+        if (!await HasProvidersAsync(tenantId))
+        {
+            return false;
+        }
+        
         var settings = await settingsManager.LoadAsync<EncryptedVectorizationSettings>(tenantId);
         return settings.ProviderType != EmbeddingProviderType.None;
+    }
+    
+    private async Task<bool> HasProvidersAsync(int tenantId)
+    {
+        await using var db = await dbContextFactory.CreateDbContextAsync();
+        return await db.AiProviderExistsAsync(tenantId);
     }
 }

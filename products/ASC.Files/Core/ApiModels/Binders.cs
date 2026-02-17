@@ -324,6 +324,11 @@ public class UploadModelBinder : IModelBinder
             result.ContentDisposition = new ContentDisposition(contentDisposition);
         }
 
+        if (bindingContext.HttpContext.Request.HasFormContentType)
+        {
+            result.File = bindingContext.HttpContext.Request.Form.Files.FirstOrDefault();
+        }
+
         bindingContext.HttpContext.Request.EnableBuffering();
 
         bindingContext.HttpContext.Request.Body.Position = 0;

@@ -192,6 +192,12 @@
   <data name="AuthorizationKeysSetting" xml:space="preserve">
     <value>Licenčné kľúče tretej strany boli aktualizované</value>
   </data>
+  <data name="BackupCompleted" xml:space="preserve">
+    <value>Zálohovanie dokončené</value>
+  </data>
+  <data name="BackupFailed" xml:space="preserve">
+    <value>Zálohovanie zlyhalo</value>
+  </data>
   <data name="BackupStarted" xml:space="preserve">
     <value>Spustiť zálohovanie</value>
   </data>
@@ -567,8 +573,14 @@
   <data name="ImportActionType" xml:space="preserve">
     <value>Import</value>
   </data>
+  <data name="InvitationSettingsUpdated" xml:space="preserve">
+    <value>Nastavenia pozvánok boli aktualizované</value>
+  </data>
   <data name="IpCol" xml:space="preserve">
     <value>IP</value>
+  </data>
+  <data name="IPRestrictionsSettingsUpdated" xml:space="preserve">
+    <value>Nastavenia zabezpečenia IP boli aktualizované</value>
   </data>
   <data name="LanguageSettingsUpdated" xml:space="preserve">
     <value>Jazykové nastavenia boli aktualizované</value>
@@ -638,6 +650,9 @@
   </data>
   <data name="LoginHistoryReportName" xml:space="preserve">
     <value>Report histórie prihlásení ({0} - {1})</value>
+  </data>
+  <data name="LoginSettingsUpdated" xml:space="preserve">
+    <value>Nastavenia ochrany proti útokom hrubou silou boli aktualizované</value>
   </data>
   <data name="LoginSuccess" xml:space="preserve">
     <value>Prihlásenie úspešné</value>
@@ -888,6 +903,15 @@
   <data name="RoomWatermarkSet" xml:space="preserve">
     <value>Miestnosť: {0}. Vodoznak povolený</value>
   </data>
+  <data name="ScheduledBackupCompleted" xml:space="preserve">
+    <value>Plánované zálohovanie dokončené</value>
+  </data>
+  <data name="ScheduledBackupFailed" xml:space="preserve">
+    <value>Plánované zálohovanie zlyhalo</value>
+  </data>
+  <data name="ScheduledBackupStarted" xml:space="preserve">
+    <value>Plánované zálohovanie spustené</value>
+  </data>
   <data name="SendActionType" xml:space="preserve">
     <value>Poslať</value>
   </data>
@@ -1106,5 +1130,29 @@
   </data>
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Webhook aktualizovaný: {0}</value>
+  </data>
+  <data name="WebpluginDeleted" xml:space="preserve">
+    <value>Plugin odstránený: {0}</value>
+  </data>
+  <data name="WebpluginUpdated" xml:space="preserve">
+    <value>Plugin aktualizovaný: {0}</value>
+  </data>
+  <data name="WebpluginUploaded" xml:space="preserve">
+    <value>Plugin nahraný: {0}</value>
+  </data>
+  <data name="WhiteLabelAdditionalSettingsUpdated" xml:space="preserve">
+    <value>Dodatočné nastavenia brandingu boli aktualizované</value>
+  </data>
+  <data name="WhiteLabelCompanySettingsUpdated" xml:space="preserve">
+    <value>Nastavenia informácií o spoločnosti boli aktualizované</value>
+  </data>
+  <data name="WhiteLabelMailSettingsUpdated" xml:space="preserve">
+    <value>Nastavenia e-mailu boli aktualizované</value>
+  </data>
+  <data name="WhiteLabelSettingsLogosUpdated" xml:space="preserve">
+    <value>Nastavenia loga boli aktualizované</value>
+  </data>
+  <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
+    <value>Názov značky bol aktualizovaný</value>
   </data>
 </root>

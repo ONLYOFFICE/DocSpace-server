@@ -34,10 +34,10 @@ public class NotificationController(
     RoomsNotificationSettingsHelper roomsNotificationSettingsHelper)
 : BaseSettingsController(fusionCache, webItemManager)
 {
-    /// <summary>
+    /// <remarks>
     /// Checks if the notification type specified in the request is enabled or not.
-    /// </summary>
-    /// <short>Check notification availability</short>
+    /// </remarks>
+    /// <summary>Check notification availability</summary>
     /// <path>api/2.0/settings/notification/{type}</path>
     [Tags("Settings / Notifications")]
     [SwaggerResponse(200, "Notification settings", typeof(NotificationSettingsDto))]
@@ -49,10 +49,10 @@ public class NotificationController(
         return new NotificationSettingsDto { Type = inDto.Type, IsEnabled = isEnabled };
     }
 
-    /// <summary>
+    /// <remarks>
     /// Enables the notification type specified in the request.
-    /// </summary>
-    /// <short>Enable notifications</short>
+    /// </remarks>
+    /// <summary>Enable notifications</summary>
     /// <path>api/2.0/settings/notification</path>
     [Tags("Settings / Notifications")]
     [SwaggerResponse(200, "Notification settings", typeof(NotificationSettingsDto))]
@@ -64,10 +64,10 @@ public class NotificationController(
         return inDto.Map();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of rooms with the disabled notifications.
-    /// </summary>
-    /// <short>Get room notification settings</short>
+    /// </remarks>
+    /// <summary>Get room notification settings</summary>
     /// <path>api/2.0/settings/notification/rooms</path>
     [Tags("Settings / Notifications")]
     [SwaggerResponse(200, "Room notification settings", typeof(RoomsNotificationSettingsDto))]
@@ -78,10 +78,10 @@ public class NotificationController(
         return settings.Map();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sets a notification status for a room with the ID specified in the request.
-    /// </summary>
-    /// <short>Set room notification status</short>
+    /// </remarks>
+    /// <summary>Set room notification status</summary>
     /// <path>api/2.0/settings/notification/rooms</path>
     [Tags("Settings / Notifications")]
     [SwaggerResponse(200, "Room notification settings", typeof(RoomsNotificationSettingsDto))]
@@ -92,10 +92,10 @@ public class NotificationController(
         return settings.Map();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a list of notification channels.
-    /// </summary>
-    /// <short>Get notification channels</short>
+    /// </remarks>
+    /// <summary>Get notification channels</summary>
     /// <path>api/2.0/settings/notification/channels</path>
     [Tags("Settings / Notifications")]
     [SwaggerResponse(200, "Notification settings", typeof(NotificationChannelStatusDto))]

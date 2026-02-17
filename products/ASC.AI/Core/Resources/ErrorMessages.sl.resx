@@ -120,6 +120,9 @@
   <data name="AiSettingsAccessDenied" xml:space="preserve">
     <value>Nimate dovoljenja za upravljanje AI nastavitev</value>
   </data>
+  <data name="AttachmentProcessFailed" xml:space="preserve">
+    <value>Datotek ni mogoče obdelati: {0}. Datoteke so morda poškodovane ali šifrirane</value>
+  </data>
   <data name="ChatAccessDenied" xml:space="preserve">
     <value>Nimate dovoljenja za uporabo klepeta</value>
   </data>

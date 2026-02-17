@@ -120,6 +120,14 @@
   <data name="button_CheckReadyForms" xml:space="preserve">
     <value>Skontrolovať hotové formuláre</value>
   </data>
+  <data name="pattern_AgentRemoved" xml:space="preserve">
+    <value>h1. $__AuthorName odstránil(a) AI agenta
+
+$__AuthorName odstránil(a) AI agenta: $RoomTitle</value>
+  </data>
+  <data name="pattern_AgentUpdateAccessForUser_push" xml:space="preserve">
+    <value>Vaša rola v AI agente "$RoomTitle" bola zmenená na "$RoomRole"</value>
+  </data>
   <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
     <value>$ToUserName vás spomenul v dokumente $DocumentTitle</value>
   </data>
@@ -187,6 +195,9 @@ $OrangeButton
       Hlásenie o aktivite. Formulár "$DocumentTitle":"$DocumentURL" bol vyplnený v miestnosti: "$RoomTitle":"$RoomURL" - $__DateTime.
     </value>
   </data>
+  <data name="pattern_InvitedToAgent_push" xml:space="preserve">
+    <value>Boli ste pozvaní do AI agenta "$RoomTitle"</value>
+  </data>
   <data name="pattern_InvitedToRoom_push" xml:space="preserve">
     <value>Boli ste pozvaní do miestnosti "$RoomTitle"</value>
   </data>
@@ -211,14 +222,14 @@ $__AuthorName vymazal(a) miestnosť: $RoomTitle</value>
   <data name="pattern_ShareDocument" xml:space="preserve">
     <value>h1.Prístup k dokumentu: "$DocumentTitle":"$DocumentURL" bol udelený
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" Vám udelil prístup k dokumentu "$DocumentTitle":"$DocumentURL" s právami: "$AccessRights".
+$__DateTime $__AuthorName Vám udelil prístup k dokumentu "$DocumentTitle":"$DocumentURL" s právami: "$AccessRights".
 
 $Message</value>
   </data>
   <data name="pattern_ShareFolder" xml:space="preserve">
     <value>h1.Prístup k priečinku "$DocumentTitle":"$DocumentURL" bol udelený.
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" Vám povolil prístup k priečinku "$DocumentTitle":"$DocumentURL" s právami: "$AccessRights".
+$__DateTime $__AuthorName Vám povolil prístup k priečinku "$DocumentTitle":"$DocumentURL" s právami: "$AccessRights".
 
 $Message</value>
   </data>
@@ -231,6 +242,9 @@ $Message</value>
     <value>
       Hlásenie o aktivite. Teraz ste na rade vy! Je potrebné vyplniť formulár: "$DocumentTitle":"$DocumentURL" v miestnosti: "$RoomTitle":"$RoomURL" - $__DateTime.
     </value>
+  </data>
+  <data name="subject_AgentRemoved" xml:space="preserve">
+    <value>Upozornenie DocSpace. AI agent bol odstránený</value>
   </data>
   <data name="subject_DocuSignComplete" xml:space="preserve">
     <value>Dokumenty. Všetci signatári vyplnili $DocumentTitle</value>

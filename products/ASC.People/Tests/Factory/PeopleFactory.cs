@@ -44,7 +44,8 @@ public class PeopleFactory: WebApplicationFactory<PeopleProgram>, IAsyncLifetime
     
     public HttpClient HttpClient { get; private set;} = null!;
     public ProfilesApi ProfilesApi { get; private set;} = null!;
-    
+    public GroupApi GroupApi { get; private set; } = null!;
+
     public PeopleFactory()
     {        
         var config = new ConfigurationBuilder()
@@ -150,7 +151,8 @@ public class PeopleFactory: WebApplicationFactory<PeopleProgram>, IAsyncLifetime
         HttpClient = CreateClient();
         var configuration = new Configuration { BasePath = HttpClient.BaseAddress!.ToString().TrimEnd('/') };
         ProfilesApi = new ProfilesApi(HttpClient, configuration);
-        
+        GroupApi = new GroupApi(HttpClient, configuration);
+
         var tablesToIgnore = _tablesToIgnore.Select(t => new Table(t)).ToList();
         tablesToIgnore.AddRange(_tablesToBackup.Select(r=> new Table(MakeCopyTableName(r))));
         

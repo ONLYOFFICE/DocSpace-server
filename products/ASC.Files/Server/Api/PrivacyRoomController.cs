@@ -41,7 +41,7 @@ public class PrivacyRoomControllerCommon(
     MessageService messageService)
     : ControllerBase
 {
-    /// <summary>
+    /// <remarks>
     /// Creates and sets encryption keys for the user.
     /// </summary>
     /// <param name="inDto">The request object containing public and private key information.</param>

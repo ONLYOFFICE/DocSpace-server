@@ -156,6 +156,12 @@
   <data name="AgentsModule" xml:space="preserve">
     <value>AI agents</value>
   </data>
+  <data name="AIDefaultProviderDeleted" xml:space="preserve">
+    <value>Default provider deleted</value>
+  </data>
+  <data name="AIDefaultProviderSet" xml:space="preserve">
+    <value>Default AI provider set: Name: {0}, Default Model: {1}</value>
+  </data>
   <data name="AIProviderCreated" xml:space="preserve">
     <value>AI provider created: {0}</value>
   </data>
@@ -191,6 +197,9 @@
   </data>
   <data name="AuthorizationKeysSetting" xml:space="preserve">
     <value>Third-party authorization keys updated</value>
+  </data>
+  <data name="BackupCancelled" xml:space="preserve">
+    <value>Backup cancelled</value>
   </data>
   <data name="BackupCompleted" xml:space="preserve">
     <value>Backup completed</value>
@@ -573,8 +582,14 @@
   <data name="ImportActionType" xml:space="preserve">
     <value>Import</value>
   </data>
+  <data name="InvitationSettingsUpdated" xml:space="preserve">
+    <value>Invitation settings updated</value>
+  </data>
   <data name="IpCol" xml:space="preserve">
     <value>IP</value>
+  </data>
+  <data name="IPRestrictionsSettingsUpdated" xml:space="preserve">
+    <value>IP Security settings updated</value>
   </data>
   <data name="LanguageSettingsUpdated" xml:space="preserve">
     <value>Language Settings Updated</value>
@@ -644,6 +659,9 @@
   </data>
   <data name="LoginHistoryReportName" xml:space="preserve">
     <value>Login History Report ({0}-{1})</value>
+  </data>
+  <data name="LoginSettingsUpdated" xml:space="preserve">
+    <value>Brute force protection settings updated</value>
   </data>
   <data name="LoginSuccess" xml:space="preserve">
     <value>Login Success</value>
@@ -795,6 +813,12 @@
   <data name="ResetWebSearchSettings" xml:space="preserve">
     <value>Web search settings have been reset</value>
   </data>
+  <data name="RestoreCancelled" xml:space="preserve">
+    <value>Restore cancelled</value>
+  </data>
+  <data name="RestoreStarted" xml:space="preserve">
+    <value>Restore started</value>
+  </data>
   <data name="RevokeUserClient" xml:space="preserve">
     <value>Revoked client {0} access</value>
   </data>
@@ -896,6 +920,9 @@
   </data>
   <data name="ScheduledBackupCompleted" xml:space="preserve">
     <value>Scheduled backup completed</value>
+  </data>
+  <data name="ScheduledBackupDeleted" xml:space="preserve">
+    <value>Schedule backup deleted</value>
   </data>
   <data name="ScheduledBackupFailed" xml:space="preserve">
     <value>Scheduled backup failed</value>
@@ -1145,5 +1172,20 @@
   </data>
   <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
     <value>Brand name updated</value>
+  </data>
+  <data name="FileSavedButUserQuotaExceeded" xml:space="preserve">
+    <value>Users [{0}]. File updated: {1}, exceeding the user storage quota.</value>
+  </data>
+  <data name="FileNotSavedDueToUserQuota" xml:space="preserve">
+    <value>Users [{0}]. File not saved: {1} – storage quota for user exceeded.</value>
+  </data>
+  <data name="FileSavedButRoomQuotaExceeded" xml:space="preserve">
+    <value>Rooms [{0}]. File updated: {1}, exceeding the room storage quota.</value>
+  </data>
+  <data name="FileNotSavedDueToRoomQuota" xml:space="preserve">
+    <value>Rooms [{0}]. File not saved: {1} – storage quota for room exceeded.</value>
+  </data>
+  <data name="DocumentsDefaultTemplatesSettingsUpdated" xml:space="preserve">
+    <value>Default template settings updated: {0}</value>
   </data>
 </root>

@@ -74,6 +74,9 @@ global using ASC.FederatedLogin;
 global using ASC.FederatedLogin.Helpers;
 global using ASC.FederatedLogin.LoginProviders;
 
+global using ASC.MessagingSystem.Core;
+global using ASC.MessagingSystem.EF.Model;
+
 global using ASC.Security.Cryptography;
 
 global using ASC.Web.Core;

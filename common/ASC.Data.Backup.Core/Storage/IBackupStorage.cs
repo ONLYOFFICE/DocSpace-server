@@ -30,7 +30,7 @@ public interface IBackupStorage
 {
     Task<bool> IsExistsAsync(string storagePath);
     Task<string> GetPublicLinkAsync(string storagePath);
-    Task<string> UploadAsync(string storageBasePath, string localPath, Guid userId);
+    Task<string> UploadAsync(string storageBasePath, string localPath, Guid userId, CancellationToken token);
     Task DeleteAsync(string storagePath);
     Task<string> DownloadAsync(string storagePath, string targetLocalPath);
 }

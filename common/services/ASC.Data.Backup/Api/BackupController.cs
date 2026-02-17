@@ -33,15 +33,17 @@ using ASC.Data.Backup.Core.Quota;
 using ASC.Data.Backup.Services;
 using ASC.Data.Storage;
 using ASC.MessagingSystem;
+using ASC.MessagingSystem.Core;
+using ASC.MessagingSystem.EF.Model;
 using ASC.Web.Core.PublicResources;
 
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace ASC.Data.Backup.Controllers;
 
-/// <summary>
+/// <remarks>
 /// Backup API.
-/// </summary>
+/// </remarks>
 /// <name>backup</name>
 [Scope]
 [DefaultRoute]
@@ -56,6 +58,7 @@ public class BackupController(
     CommonLinkUtility commonLinkUtility,
     CoreSettings coreSettings,
     BackupService backupService,
+    MessageService messageService,
     IDistributedLockProvider distributedLockProvider,
     IHttpContextAccessor httpContextAccessor,
     CountFreeBackupChecker freeBackupsChecker)
@@ -63,14 +66,14 @@ public class BackupController(
 {
     private Guid CurrentUserId => authContext.CurrentAccount.ID;
 
-    /// <summary>
+    /// <remarks>
     /// Returns the backup schedule of the current portal.
-    /// </summary>
-    /// <short>Get the backup schedule</short>
+    /// </remarks>
+    /// <summary>Get the backup schedule</summary>
     /// <path>api/2.0/backup/getbackupschedule</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Backup schedule", typeof(ScheduleDto))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "Access denied")]
     [HttpGet("getbackupschedule")]
     public async Task<ScheduleDto> GetBackupSchedule(DumpDto dto)
     {
@@ -81,16 +84,16 @@ public class BackupController(
         return await backupService.GetScheduleAsync(dto.Dump);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Creates the backup schedule of the current portal with the parameters specified in the request.
-    /// </summary>
-    /// <short>Create the backup schedule</short>
+    /// </remarks>
+    /// <summary>Create the backup schedule</summary>
     /// <path>api/2.0/backup/createbackupschedule</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
     [SwaggerResponse(400, "BackupStored must be 1 - 30 or backup can not start as dump")]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
-    [SwaggerResponse(403, "You don't have enough permission to create")]
+    [SwaggerResponse(403, "Access denied")]
     [SwaggerResponse(404, "The required folder was not found")]
     [HttpPost("createbackupschedule")]
     public async Task<bool> CreateBackupSchedule(BackupScheduleDto inDto)
@@ -130,14 +133,14 @@ public class BackupController(
         return true;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Deletes the backup schedule of the current portal.
-    /// </summary>
-    /// <short>Delete the backup schedule</short>
+    /// </remarks>
+    /// <summary>Delete the backup schedule</summary>
     /// <path>api/2.0/backup/deletebackupschedule</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "Access denied")]
     [HttpDelete("deletebackupschedule")]
     public async Task<bool> DeleteBackupSchedule(DumpDto dto)
     {
@@ -145,21 +148,26 @@ public class BackupController(
         {
             await tenantExtra.DemandAccessSpacePermissionAsync();
         }
-        await backupService.DeleteScheduleAsync(dto.Dump);
+
+        var tenantId = dto.Dump ? Tenant.DefaultTenant : tenantManager.GetCurrentTenantId();
+
+        await backupService.DeleteScheduleAsync(tenantId);
+
+        await messageService.SendAsync(MessageAction.ScheduledBackupDeleted, MessageTarget.Create(tenantId));
 
         return true;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Starts the backup of the current portal with the parameters specified in the request.
-    /// </summary>
-    /// <short>Start the backup</short>
+    /// </remarks>
+    /// <summary>Start the backup</summary>
     /// <path>api/2.0/backup/startbackup</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link", typeof(BackupProgress))]
     [SwaggerResponse(400, "Wrong folder type or backup can`t start as dump")]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
-    [SwaggerResponse(403, "You don't have enough permission to create")]
+    [SwaggerResponse(403, "Access denied")]
     [SwaggerResponse(404, "The required folder was not found")]
     [AllowNotPayment]
     [HttpPost("startbackup")]
@@ -286,14 +294,61 @@ public class BackupController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
+    /// Cancel current backup.
+    /// </remarks>
+    /// <summary>Cancel current backup</summary>
+    /// <path>api/2.0/backup/cancelbackup</path>
+    [Tags("Backup")]
+    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [AllowNotPayment]
+    [HttpPost("cancelbackup")]
+    public async Task<bool> CancelBackupAsync()
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        var result = await backupService.CancelBackupAsync(tenantId);
+
+        if (result)
+        {
+            await messageService.SendAsync(MessageAction.BackupCancelled, MessageTarget.Create(tenantId));
+        }
+
+        return result;
+    }
+
+    // /// <remarks>
+    // /// Cancel current restore.(Only from saas backup)
+    // /// </remarks>
+    // /// <summary>Cancel current restore</summary>
+    // /// <path>api/2.0/backup/cancelrestore</path>
+    // [Tags("Backup")]
+    // [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    // [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    // [AllowNotPayment]
+    // [HttpPost("cancelrestore")]
+    // public async Task<bool> CancelRestoreAsync()
+    // {
+    //     var tenantId = tenantManager.GetCurrentTenantId();
+    //
+    //     var result = await backupService.CancelRestoreAsync(tenantId);
+    //
+    //     if (result)
+    //     {
+    //         await messageService.SendAsync(MessageAction.RestoreCancelled, MessageTarget.Create(tenantId));
+    //     }
+    //
+    //     return result;
+    // }
+
+    /// <remarks>
     /// Returns the progress of the started backup.
-    /// </summary>
-    /// <short>Get the backup progress</short>
+    /// </remarks>
+    /// <summary>Get the backup progress</summary>
     /// <path>api/2.0/backup/getbackupprogress</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link", typeof(BackupProgress))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "Access denied")]
     [AllowNotPayment]
     [HttpGet("getbackupprogress")]
     public async Task<BackupProgress> GetBackupProgress(DumpDto dto)
@@ -305,15 +360,15 @@ public class BackupController(
         return await backupService.GetBackupProgressAsync(dto.Dump);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the history of the started backup.
-    /// </summary>
-    /// <short>Get the backup history</short>
+    /// </remarks>
+    /// <summary>Get the backup history</summary>
     /// <path>api/2.0/backup/getbackuphistory</path>
     /// <collection>list</collection>
     [Tags("Backup")]
     [SwaggerResponse(200, "List of backup history records", typeof(List<BackupHistoryRecord>))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "Access denied")]
     [HttpGet("getbackuphistory")]
     public async Task<List<BackupHistoryRecord>> GetBackupHistory(DumpDto dto)
     {
@@ -324,14 +379,14 @@ public class BackupController(
         return await backupService.GetBackupHistoryAsync(dto.Dump);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Deletes the backup with the ID specified in the request.
-    /// </summary>
-    /// <short>Delete the backup</short>
+    /// </remarks>
+    /// <summary>Delete the backup</summary>
     /// <path>api/2.0/backup/deletebackup/{id}</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "Access denied")]
     [HttpDelete("deletebackup/{id:guid}")]
     public async Task<bool> DeleteBackup([FromRoute] DeleteBackupDto inDto)
     {
@@ -339,14 +394,14 @@ public class BackupController(
         return true;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Deletes the backup history from the current portal.
-    /// </summary>
-    /// <short>Delete the backup history</short>
+    /// </remarks>
+    /// <summary>Delete the backup history</summary>
     /// <path>api/2.0/backup/deletebackuphistory</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "Access denied")]
     [HttpDelete("deletebackuphistory")]
     public async Task<bool> DeleteBackupHistory(DumpDto dto)
     {
@@ -358,16 +413,16 @@ public class BackupController(
         return true;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Starts the data restoring process of the current portal with the parameters specified in the request.
-    /// </summary>
-    /// <short>Start the restoring process</short>
+    /// </remarks>
+    /// <summary>Start the restoring process</summary>
     /// <path>api/2.0/backup/startrestore</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link", typeof(BackupProgress))]
     [SwaggerResponse(400, "Backup can not start as dump")]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
-    [SwaggerResponse(403, "You don't have enough permission to create")]
+    [SwaggerResponse(403, "Access denied")]
     [SwaggerResponse(404, "The required file or folder was not found")]
     [HttpPost("startrestore")]
     public async Task<BackupProgress> StartBackupRestore(BackupRestoreDto inDto)
@@ -417,14 +472,15 @@ public class BackupController(
                              taskId: taskId
                         ));
 
+        messageService.Send(MessageAction.RestoreStarted, MessageTarget.Create(tenantId), inDto.Dump ? "dump" : string.Empty);
 
         return await backupService.GetRestoreProgressAsync(inDto.Dump);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the progress of the started restoring process.
-    /// </summary>
-    /// <short>Get the restoring progress</short>
+    /// </remarks>
+    /// <summary>Get the restoring progress</summary>
     /// <path>api/2.0/backup/getrestoreprogress</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Backup")]
@@ -437,10 +493,10 @@ public class BackupController(
         return await backupService.GetRestoreProgressAsync(dto.Dump);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a path to the temporary folder with the stored backup.
-    /// </summary>
-    /// <short>Get the temporary backup folder</short>
+    /// </remarks>
+    /// <summary>Get the temporary backup folder</summary>
     /// <path>api/2.0/backup/backuptmp</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Backup")]
@@ -451,13 +507,15 @@ public class BackupController(
         return backupService.GetTmpFolder();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the number of backups for a period of time. The default is one month.
-    /// </summary>
-    /// <short>Get the number of backups</short>
+    /// </remarks>
+    /// <summary>Get the number of backups</summary>
     /// <path>api/2.0/backup/getbackupscount</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Number of backups", typeof(int))]
+    [SwaggerResponse(400, "From date must be less than to date")]
+    [SwaggerResponse(403, "Access denied")]
     [AllowNotPayment]
     [HttpGet("getbackupscount")]
     public async Task<int> GetBackupsCountAsync(BackupsCountDto dto)
@@ -476,10 +534,10 @@ public class BackupController(
         return result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the backup service state.
-    /// </summary>
-    /// <short>Get the backup service state</short>
+    /// </remarks>
+    /// <summary>Get the backup service state</summary>
     /// <path>api/2.0/backup/getservicestate</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "Backup service state", typeof(BackupServiceStateDto))]

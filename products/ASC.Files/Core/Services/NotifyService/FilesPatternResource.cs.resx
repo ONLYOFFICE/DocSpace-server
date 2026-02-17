@@ -211,14 +211,14 @@ $__AuthorName smazal místnost: $RoomTitle</value>
   <data name="pattern_ShareDocument" xml:space="preserve">
     <value>h1. Umožněn přístup k dokumentu: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime Uživatel "$__AuthorName":"$__AuthorUrl" vám přidal přístup k "$DocumentTitle":"$DocumentURL" s uživatelskými právy: "$AccessRights".
+$__DateTime Uživatel $__AuthorName vám přidal přístup k "$DocumentTitle":"$DocumentURL" s uživatelskými právy: "$AccessRights".
 
 $Message</value>
   </data>
   <data name="pattern_ShareFolder" xml:space="preserve">
     <value>h1. Umožněn přístup ke složce: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime Uživatel "$__AuthorName":"$__AuthorUrl" vám přidal přístup ke složce "$DocumentTitle":"$DocumentURL" s uživatelskými právy: "$AccessRights".
+$__DateTime Uživatel $__AuthorName vám přidal přístup ke složce "$DocumentTitle":"$DocumentURL" s uživatelskými právy: "$AccessRights".
 
 $Message</value>
   </data>

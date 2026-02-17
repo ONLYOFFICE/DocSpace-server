@@ -26,10 +26,24 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
-public enum ContentType
+/// <summary>
+/// The type of content block within a chat message.
+/// </summary>
+public enum MessageContentType
 {
+    /// <summary>
+    /// A plain text content block.
+    /// </summary>
     Text,
+
+    /// <summary>
+    /// A tool invocation and its result.
+    /// </summary>
     Tool,
+
+    /// <summary>
+    /// A file attachment reference.
+    /// </summary>
     Attachment
 }
 
@@ -38,5 +52,8 @@ public enum ContentType
 [JsonDerivedType(typeof(AttachmentContentDto))]
 public abstract class MessageContentDto
 {
-    public abstract ContentType Type { get; }
+    /// <summary>
+    /// The discriminator that indicates the kind of content block: Text, Tool, or Attachment.
+    /// </summary>
+    public abstract MessageContentType Type { get; }
 }

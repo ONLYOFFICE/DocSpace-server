@@ -174,7 +174,7 @@ public class BackupService(
 
         if (file == null)
         {
-            throw new DirectoryNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+            throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
         var folderDao = daoFactory.GetFolderDao<T>();
@@ -317,6 +317,20 @@ public class BackupService(
 
         return await backupWorker.GetBackupProgressAsync(tenantId);
     }
+    
+    public async Task<bool> CancelBackupAsync(int tenantId)
+    {
+        await DemandPermissionsBackupAsync();
+
+        return await backupWorker.CancelBackupAsync(tenantId);
+    }
+
+    public async Task<bool> CancelRestoreAsync(int tenantId)
+    {
+        await DemandPermissionsBackupAsync();
+
+        return await backupWorker.CancelRestoreAsync(tenantId);
+    }
 
     public async Task<BackupProgress> GetDumpBackupProgress()
     {
@@ -413,14 +427,6 @@ public class BackupService(
                 StorageParams = JsonSerializer.Serialize(scheduleRequest.StorageParams),
                 Dump = scheduleRequest.Dump
             });
-    }
-
-    public async Task DeleteScheduleAsync(bool dump)
-    {
-        await DemandPermissionsBackupAsync();
-
-        var tenantId = dump ? -1 : tenantManager.GetCurrentTenantId();
-        await backupRepository.DeleteBackupScheduleAsync(tenantId);
     }
 
     public async Task DeleteScheduleAsync(int tenantId)
@@ -601,7 +607,7 @@ public class BackupService(
 
         if (!coreBaseSettings.Standalone && !SetupInfo.IsVisibleSettings(nameof(ManagementType.Backup)))
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption);
+            throw new SecurityException(Resource.ErrorAccessDenied);
         }
     }
 
@@ -611,7 +617,7 @@ public class BackupService(
 
         if (!SetupInfo.IsVisibleSettings("AutoBackup"))
         {
-            throw new BillingException(Resource.ErrorNotAllowedOption);
+            throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
         if (coreBaseSettings.Standalone)
@@ -632,8 +638,13 @@ public class BackupService(
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
+        if (!SetupInfo.IsVisibleSettings("Restore"))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
+
         var quota = await tenantManager.GetTenantQuotaAsync(tenantManager.GetCurrentTenantId());
-        if (!SetupInfo.IsVisibleSettings("Restore") || (!coreBaseSettings.Standalone && !quota.Restore))
+        if (!coreBaseSettings.Standalone && !quota.Restore)
         {
             throw new BillingException(Resource.ErrorNotAllowedOption);
         }
@@ -745,12 +756,12 @@ public class CronParams
 /// </summary>
 public enum BackupPeriod
 {
-    [SwaggerEnum(Description = "Every day")]
+    [Description("Every day")]
     EveryDay = 0,
 
-    [SwaggerEnum(Description = "Every week")]
+    [Description("Every week")]
     EveryWeek = 1,
 
-    [SwaggerEnum(Description = "Every month")]
+    [Description("Every month")]
     EveryMonth = 2
 }

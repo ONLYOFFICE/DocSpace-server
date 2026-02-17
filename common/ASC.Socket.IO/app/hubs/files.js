@@ -253,9 +253,9 @@ module.exports = (io) => {
     filesIO.to(socket.id).emit("connection-init");
   });
 
-  function startEdit({ fileId, room } = {}) {
+  function startEdit({ fileId, room, editingBy } = {}) {
     logger.info(`start edit file ${fileId} in room ${room}`);
-    filesIO.to(room).emit("s:start-edit-file", fileId);
+    filesIO.to(room).emit("s:start-edit-file", { fileId, editingBy });
   }
 
   function stopEdit({ fileId, room } = {}) {
@@ -517,13 +517,13 @@ module.exports = (io) => {
   {
 
     if(dump)
-    {
-      var room = `backup`;
-    }
-    else
-    {
-      var room = `${tenantId}-backup`;
-    }
+      {
+        var room = `backup`;
+      }
+      else
+      {
+        var room = `${tenantId}-backup`;
+      }
     
     filesIO.to(room).emit("s:backup-progress", result);
   }
@@ -580,6 +580,11 @@ module.exports = (io) => {
     filesIO.to(`${room}-${userId}`).emit("s:change-access-rights-folder", { id, data });
   }
 
+  function quotaExceeded(data) {
+    logger.info(`quota exceeded. scope: ${data.scope} id: ${data.id}`);
+    filesIO.to(data.room).emit(`s:quota_exceeded`, { data });
+  }
+
   return {
     startEdit,
     stopEdit,
@@ -621,6 +626,7 @@ module.exports = (io) => {
     updateChat,
     exportChat,
     changeAccessRightsForFile,
-    changeAccessRightsForFolder
+    changeAccessRightsForFolder,
+    quotaExceeded
   };
 };

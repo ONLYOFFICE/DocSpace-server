@@ -119,6 +119,7 @@ public class MigrationContext : DbContext
     public DbSet<DbChat> Chats { get; set; }
     public DbSet<DbChatMessage> ChatMessages { get; set; }
     public DbSet<DbAiProvider> AiProviders { get; set; }
+    public DbSet<DbDefaultAiProvider> DefaultAiProviders { get; set; }
     
     public DbSet<DbMcpServer> McpServers { get; set; }
     public DbSet<DbMcpServerState> McpServerStates { get; set; }
@@ -127,6 +128,8 @@ public class MigrationContext : DbContext
     
     public DbSet<DbFileVectorization> FileVectorization { get; set; }
     public DbSet<DbUserChatSettings> UserChatSettings { get; set; }
+
+    public DbSet<InvitationLink> InvitationLinks { get; set; }
 
     public MigrationContext(DbContextOptions<MigrationContext> options) : base(options) { }
 
@@ -210,6 +213,9 @@ public class MigrationContext : DbContext
             .AddDbMcpServerSettings()
             .AddDbRoomMcpServers()
             .AddDbFileVectorization()
+            .AddDbUserChatSettings()
+            .AddInvitationLink()
+            .AddDbDefaultAiProviders()
             .AddDbFileKeys()
             .AddDbUserChatSettings();
     }

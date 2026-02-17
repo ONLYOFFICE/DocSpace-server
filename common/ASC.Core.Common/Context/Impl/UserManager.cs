@@ -930,6 +930,45 @@ public class UserManager(
     #endregion Groups
 
 
+    #region InvitationLinks
+
+    public async Task<InvitationLink> CreateInvitationLinkAsync(EmployeeType employeeType, DateTime expiration, int? maxUseCount)
+    {
+        return await userService.CreateInvitationLinkAsync(Tenant.Id, employeeType, expiration, maxUseCount);
+    }
+
+    public async Task<InvitationLink> GetInvitationLinkAsync(Guid id)
+    {
+        return await userService.GetInvitationLinkAsync(Tenant.Id, id);
+    }
+
+    public async Task<InvitationLink> GetInvitationLinkAsync(EmployeeType employeeType)
+    {
+        return await userService.GetInvitationLinkAsync(Tenant.Id, employeeType);
+    }
+
+    public async Task<List<InvitationLink>> GetInvitationLinksAsync()
+    {
+        return await userService.GetInvitationLinksAsync(Tenant.Id);
+    }
+
+    public async Task UpdateInvitationLinkAsync(Guid id, DateTime expiration, int? maxUseCount)
+    {
+        await userService.UpdateInvitationLinkAsync(Tenant.Id, id, expiration, maxUseCount);
+    }
+
+    public async Task IncreaseInvitationLinkUsageAsync(Guid id)
+    {
+        await userService.IncreaseInvitationLinkUsageAsync(Tenant.Id, id);
+    }
+
+    public async Task DeleteInvitationLinkAsync(Guid id)
+    {
+        await userService.DeleteInvitationLinkAsync(Tenant.Id, id);
+    }
+
+    #endregion
+
     private bool IsPropertiesContainsWords(string[] properties, IEnumerable<string> words)
     {
         foreach (var w in words)

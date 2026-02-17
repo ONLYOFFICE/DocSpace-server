@@ -31,13 +31,13 @@ namespace ASC.Data.Backup.Contracts;
 /// </summary>
 public enum BackupProgressEnum
 {
-    [SwaggerEnum(Description = "Backup")]
+    [Description("Backup")]
     Backup,
 
-    [SwaggerEnum(Description = "Restore")]
+    [Description("Restore")]
     Restore,
 
-    [SwaggerEnum(Description = "Transfer")]
+    [Description("Transfer")]
     Transfer
 }
 
@@ -80,6 +80,11 @@ public record BackupProgress
     /// The backup progress type.
     /// </summary>
     public BackupProgressEnum BackupProgressEnum { get; set; }
+    
+    /// <summary>
+    /// The backup progress status.
+    /// </summary>
+    public DistributedTaskStatus Status { get; set; }
 
     /// <summary>
     /// The task ID.

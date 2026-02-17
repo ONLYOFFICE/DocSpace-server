@@ -211,14 +211,14 @@ $__AuthorName deletando a sala:$RoomTitle</value>
   <data name="pattern_ShareDocument" xml:space="preserve">
     <value>h1. Acesso autorizado ao documento: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" concedeu-lhe acesso ao documento "$DocumentTitle":"$DocumentURL" com os direitos de acesso: "$AccessRights".
+$__DateTime $__AuthorName concedeu-lhe acesso ao documento "$DocumentTitle":"$DocumentURL" com os direitos de acesso: "$AccessRights".
 
 $Message</value>
   </data>
   <data name="pattern_ShareFolder" xml:space="preserve">
     <value>h1. Acesso concedido à pasta: "$DocumentTitle":"$DocumentURL" 
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" concedeu a você acesso à pasta "$DocumentTitle":"$DocumentURL" com os seguintes direitos de acesso: "$AccessRights".
+$__DateTime $__AuthorName concedeu a você acesso à pasta "$DocumentTitle":"$DocumentURL" com os seguintes direitos de acesso: "$AccessRights".
 
 $Message</value>
   </data>
