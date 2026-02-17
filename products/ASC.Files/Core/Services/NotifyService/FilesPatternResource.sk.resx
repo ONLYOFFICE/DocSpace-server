@@ -222,14 +222,14 @@ $__AuthorName vymazal(a) miestnosť: $RoomTitle</value>
   <data name="pattern_ShareDocument" xml:space="preserve">
     <value>h1.Prístup k dokumentu: "$DocumentTitle":"$DocumentURL" bol udelený
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" Vám udelil prístup k dokumentu "$DocumentTitle":"$DocumentURL" s právami: "$AccessRights".
+$__DateTime $__AuthorName Vám udelil prístup k dokumentu "$DocumentTitle":"$DocumentURL" s právami: "$AccessRights".
 
 $Message</value>
   </data>
   <data name="pattern_ShareFolder" xml:space="preserve">
     <value>h1.Prístup k priečinku "$DocumentTitle":"$DocumentURL" bol udelený.
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" Vám povolil prístup k priečinku "$DocumentTitle":"$DocumentURL" s právami: "$AccessRights".
+$__DateTime $__AuthorName Vám povolil prístup k priečinku "$DocumentTitle":"$DocumentURL" s právami: "$AccessRights".
 
 $Message</value>
   </data>

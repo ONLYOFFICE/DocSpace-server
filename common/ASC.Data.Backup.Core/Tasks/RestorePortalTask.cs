@@ -105,10 +105,9 @@ public class RestorePortalTask(DbFactory dbFactory,
 
                 foreach (var module in modulesToProcess)
                 {
-                    var restoreTask = new RestoreDbModuleTask(logger, module, dataReader, _columnMapper, DbFactory, ReplaceDate, Dump, _region, StorageFactory, StorageFactoryConfig, ModuleProvider)
-                    {
-                        ProgressChanged = args => SetCurrentStepProgress(args.Progress)
-                    };
+                    using var restoreTask = new RestoreDbModuleTask(logger, module, dataReader, _columnMapper, DbFactory, ReplaceDate, Dump, _region, StorageFactory, StorageFactoryConfig, ModuleProvider);
+
+                    restoreTask.ProgressChanged = args => SetCurrentStepProgress(args.Progress);
 
                     foreach (var tableName in _ignoredTables)
                     {
