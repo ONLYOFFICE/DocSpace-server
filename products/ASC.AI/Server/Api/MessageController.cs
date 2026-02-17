@@ -32,7 +32,19 @@ namespace ASC.AI.Api;
 [ControllerName("ai")]
 public class MessageController(MessageExporter exporter) : ControllerBase
 {
+    /// <summary>
+    /// Export a single AI message to a document
+    /// </summary>
+    /// <remarks>
+    /// Exports a specific AI chat message as a document into the specified folder. The system verifies that the message exists
+    /// and belongs to a chat accessible by the current user, then publishes an asynchronous export task to the event bus.
+    /// The exported document will be created in the target folder with the given title once the background task completes.
+    /// </remarks>
+    /// <path>api/2.0/ai/messages/{messageId}/export</path>
     [Tags("AI / Messages")]
+    [SwaggerResponse(200, "The message export task has been successfully queued for background processing")]
+    [SwaggerResponse(400, "The message identifier is invalid (must be greater than 0)")]
+    [SwaggerResponse(404, "The specified message was not found or the current user does not have access to it")]
     [HttpPost("messages/{messageId}/export")]
     public async Task ExportMessageAsync(ExportMessageRequestDto<int> inDto)
     {
