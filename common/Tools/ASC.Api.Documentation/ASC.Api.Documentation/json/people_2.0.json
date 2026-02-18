@@ -1609,6 +1609,252 @@
         ]
       }
     },
+    "/api/2.0/people/{userid}/email": {
+      "put": {
+        "tags": [
+          "People / Email"
+        ],
+        "summary": "Change a user email",
+        "description": "Sets a new email to the user with the ID specified in the request.",
+        "operationId": "changeUserEmail",
+        "parameters": [
+          {
+            "name": "userid",
+            "in": "path",
+            "description": "The user ID.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "00000000-0000-0000-0000-000000000000"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The request parameters for updating a user email.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeEmailRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Detailed user information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmployeeFullWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Incorrect userId or email"
+          },
+          "403": {
+            "description": "The link is invalid or no permissions to perform this action"
+          },
+          "404": {
+            "description": "The user could not be found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/people/email": {
+      "post": {
+        "tags": [
+          "People / Email"
+        ],
+        "summary": "Send instructions to change email",
+        "description": "Sends a message to the user email with the instructions to change the email address connected to the portal.",
+        "operationId": "sendEmailChangeInstructions",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMemberRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Message text",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Incorrect userId or email"
+          },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "People / Profiles"
+        ],
+        "summary": "Get a profile by user email",
+        "description": "Returns the detailed information about a profile of the user with the email specified in the request.",
+        "operationId": "getProfileByEmail",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "description": "The user email address.",
+            "schema": {
+              "maxLength": 255,
+              "minLength": 0,
+              "type": "string",
+              "format": "email",
+              "example": "example@onlyoffice.com"
+            }
+          },
+          {
+            "name": "encemail",
+            "in": "query",
+            "description": "The user encrypted email address.",
+            "schema": {
+              "type": "string",
+              "example": "some text"
+            }
+          },
+          {
+            "name": "culture",
+            "in": "query",
+            "description": "Culture",
+            "schema": {
+              "type": "string",
+              "example": "some text"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detailed profile information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmployeeFullWrapper"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
     "/api/2.0/people/guests": {
       "delete": {
         "tags": [
@@ -1759,11 +2005,11 @@
           }
         ],
         "requestBody": {
-          "description": "The request parameters for the user generic information.",
+          "description": "The request parameters for updating a user password.",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/MemberBaseRequestDto"
+                "$ref": "#/components/schemas/ChangePasswordRequest"
               }
             }
           },
@@ -1781,13 +2027,13 @@
             }
           },
           "400": {
-            "description": "Incorrect email"
+            "description": "Incorrect userId or password"
           },
           "403": {
-            "description": "The invitation link is invalid or its validity has expired"
+            "description": "The link is invalid or no permissions to perform this action"
           },
           "404": {
-            "description": "User not found"
+            "description": "The user could not be found"
           },
           "401": {
             "description": "Unauthorized"
@@ -2744,7 +2990,7 @@
             }
           },
           "400": {
-            "description": "Incorect UserId"
+            "description": "Incorrect UserId"
           },
           "404": {
             "description": "User not found"
@@ -2980,165 +3226,6 @@
         ]
       }
     },
-    "/api/2.0/people/email": {
-      "get": {
-        "tags": [
-          "People / Profiles"
-        ],
-        "summary": "Get a profile by user email",
-        "description": "Returns the detailed information about a profile of the user with the email specified in the request.",
-        "operationId": "getProfileByEmail",
-        "parameters": [
-          {
-            "name": "email",
-            "in": "query",
-            "description": "The user email address.",
-            "schema": {
-              "maxLength": 255,
-              "minLength": 0,
-              "type": "string",
-              "format": "email",
-              "example": "example@onlyoffice.com"
-            }
-          },
-          {
-            "name": "encemail",
-            "in": "query",
-            "description": "The user encrypted email address.",
-            "schema": {
-              "type": "string",
-              "example": "some text"
-            }
-          },
-          {
-            "name": "culture",
-            "in": "query",
-            "description": "Culture",
-            "schema": {
-              "type": "string",
-              "example": "some text"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Detailed profile information",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EmployeeFullWrapper"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "User not found"
-          },
-          "401": {
-            "description": "Unauthorized"
-          }
-        },
-        "security": [
-          {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Bearer": [ ]
-          },
-          {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Basic": [ ]
-          },
-          {
-            "OAuth2": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "OpenId": [ ]
-          }
-        ]
-      },
-      "post": {
-        "tags": [
-          "People / Profiles"
-        ],
-        "summary": "Send instructions to change email",
-        "description": "Sends a message to the user email with the instructions to change the email address connected to the portal.",
-        "operationId": "sendEmailChangeInstructions",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateMemberRequestDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Message text",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StringWrapper"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Incorrect userId or email"
-          },
-          "403": {
-            "description": "No permissions to perform this action"
-          },
-          "404": {
-            "description": "User not found"
-          },
-          "401": {
-            "description": "Unauthorized"
-          }
-        },
-        "security": [
-          {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Bearer": [ ]
-          },
-          {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Basic": [ ]
-          },
-          {
-            "OAuth2": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "OpenId": [ ]
-          }
-        ]
-      }
-    },
     "/api/2.0/people/delete": {
       "put": {
         "tags": [
@@ -3166,6 +3253,12 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Incorrect UserIds"
+          },
+          "403": {
+            "description": "No permissions to perform this action or users are not suspended"
           },
           "409": {
             "description": "Data reassign process is not complete"
@@ -3210,8 +3303,8 @@
         "tags": [
           "People / Profiles"
         ],
-        "summary": "Update a user culture code",
-        "description": "Updates the user culture code with the parameters specified in the request.",
+        "summary": "Update a user culture",
+        "description": "Updates the user culture with the parameters specified in the request.",
         "operationId": "updateMemberCulture",
         "parameters": [
           {
@@ -3226,7 +3319,7 @@
           }
         ],
         "requestBody": {
-          "description": "The culture code parameters.",
+          "description": "The culture name parameters.",
           "content": {
             "application/json": {
               "schema": {
@@ -3245,6 +3338,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "The specified culture is not in the list of available ones"
           },
           "403": {
             "description": "You don't have enough permission to perform the operation"
@@ -6460,6 +6556,12 @@
               }
             }
           },
+          "400": {
+            "description": "Incorrect status"
+          },
+          "403": {
+            "description": "No permissions to perform this action or cannot change status for a specific user (yourself, owner, LDAP ...)"
+          },
           "401": {
             "description": "Unauthorized"
           }
@@ -6611,6 +6713,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "No permissions to perform this action"
           },
           "401": {
             "description": "Unauthorized"
@@ -7250,6 +7355,47 @@
           }
         }
       },
+      "ChangeEmailRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string",
+            "description": "The user email address.",
+            "format": "email",
+            "nullable": true,
+            "example": "example@onlyoffice.com"
+          },
+          "encEmail": {
+            "type": "string",
+            "description": "The user encrypted email address.",
+            "nullable": true,
+            "example": "some text"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The request parameters for updating a user email."
+      },
+      "ChangePasswordRequest": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "description": "The user password.",
+            "nullable": true,
+            "example": "P@ssw0rd123"
+          },
+          "passwordHash": {
+            "type": "string",
+            "description": "The user password hash.",
+            "nullable": true,
+            "example": "some text"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The request parameters for updating a user password."
+      },
       "Contact": {
         "type": "object",
         "properties": {
@@ -7307,17 +7453,21 @@
         "description": "The request parameters for creating a new API key."
       },
       "Culture": {
+        "required": [
+          "cultureName"
+        ],
         "type": "object",
         "properties": {
           "cultureName": {
+            "maxLength": 85,
+            "minLength": 0,
             "type": "string",
-            "description": "The user language.",
-            "nullable": true,
+            "description": "The user culture name (en-US, de, fr, es, ...).",
             "example": "some text"
           }
         },
         "additionalProperties": false,
-        "description": "The culture code parameters."
+        "description": "The culture name parameters."
       },
       "DarkThemeSettings": {
         "type": "object",
@@ -7591,7 +7741,7 @@
           },
           "displayName": {
             "type": "string",
-            "description": "The user display name.",
+            "description": "The HTML-encoded user's display name formatted according to the default format for the current culture.",
             "nullable": true,
             "example": "Mike Zanyatski"
           },
@@ -8420,40 +8570,6 @@
         },
         "additionalProperties": false,
         "description": "The request parameters for linking accounts."
-      },
-      "MemberBaseRequestDto": {
-        "type": "object",
-        "properties": {
-          "password": {
-            "type": "string",
-            "description": "The user password.",
-            "nullable": true,
-            "example": "P@ssw0rd123"
-          },
-          "passwordHash": {
-            "type": "string",
-            "description": "The user password hash.",
-            "nullable": true,
-            "example": "some text"
-          },
-          "email": {
-            "maxLength": 255,
-            "minLength": 0,
-            "type": "string",
-            "description": "The user email address.",
-            "format": "email",
-            "nullable": true,
-            "example": "example@onlyoffice.com"
-          },
-          "encEmail": {
-            "type": "string",
-            "description": "The user encrypted email address.",
-            "nullable": true,
-            "example": "some text"
-          }
-        },
-        "additionalProperties": false,
-        "description": "The request parameters for the user generic information."
       },
       "MemberRequestDto": {
         "type": "object",
@@ -9675,6 +9791,11 @@
       "x-displayName": "Search"
     },
     {
+      "name": "People / Profiles",
+      "description": "Operations  for working with user profiles.",
+      "x-displayName": "Profiles"
+    },
+    {
       "name": "People / Guests",
       "description": "Operations for workig with guests",
       "x-displayName": "Guests"
@@ -9688,11 +9809,6 @@
       "name": "People / Photos",
       "description": "Operations for working with user photos.",
       "x-displayName": "Photos"
-    },
-    {
-      "name": "People / Profiles",
-      "description": "Operations  for working with user profiles.",
-      "x-displayName": "Profiles"
     },
     {
       "name": "People / Quota",
@@ -9752,10 +9868,10 @@
     {
       "name": "People",
       "tags": [
+        "People / Profiles",
         "People / Guests",
         "People / Password",
         "People / Photos",
-        "People / Profiles",
         "People / Quota",
         "People / Search",
         "People / Theme",

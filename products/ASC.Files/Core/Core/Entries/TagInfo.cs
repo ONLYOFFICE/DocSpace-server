@@ -39,7 +39,7 @@ public class TagInfo
     /// <summary>
     /// The tag name.
     /// </summary>
-    public string Name { get; init; }
+    public string Name { get; set; }
 
     /// <summary>
     /// The tag owner ID.

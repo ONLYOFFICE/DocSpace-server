@@ -18,7 +18,7 @@ namespace ASC.AuditTrail {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class AuditReportResource {
@@ -299,6 +299,15 @@ namespace ASC.AuditTrail {
         public static string AuthorizationKeysSetting {
             get {
                 return ResourceManager.GetString("AuthorizationKeysSetting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Backup cancelled.
+        /// </summary>
+        public static string BackupCancelled {
+            get {
+                return ResourceManager.GetString("BackupCancelled", resourceCulture);
             }
         }
         
@@ -659,6 +668,15 @@ namespace ASC.AuditTrail {
         public static string DnsSettingsUpdated {
             get {
                 return ResourceManager.GetString("DnsSettingsUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Default template settings updated: {0}.
+        /// </summary>
+        public static string DocumentsDefaultTemplatesSettingsUpdated {
+            get {
+                return ResourceManager.GetString("DocumentsDefaultTemplatesSettingsUpdated", resourceCulture);
             }
         }
         
@@ -2175,6 +2193,24 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Restore cancelled.
+        /// </summary>
+        public static string RestoreCancelled {
+            get {
+                return ResourceManager.GetString("RestoreCancelled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Restore started.
+        /// </summary>
+        public static string RestoreStarted {
+            get {
+                return ResourceManager.GetString("RestoreStarted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Revoked client {0} access.
         /// </summary>
         public static string RevokeUserClient {
@@ -2477,6 +2513,15 @@ namespace ASC.AuditTrail {
         public static string ScheduledBackupCompleted {
             get {
                 return ResourceManager.GetString("ScheduledBackupCompleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Schedule backup deleted.
+        /// </summary>
+        public static string ScheduledBackupDeleted {
+            get {
+                return ResourceManager.GetString("ScheduledBackupDeleted", resourceCulture);
             }
         }
         

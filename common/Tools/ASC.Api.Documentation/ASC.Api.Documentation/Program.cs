@@ -26,11 +26,5 @@
 
 using ASC.Api.Documentation;
 
-var app = new CommandApp();
-
-app.Configure(config =>
-{
-    config.AddCommand<SortTagGroupsCommand>("sort-tag-groups").WithDescription("Generate x-tagGroups");
-    config.AddCommand<RemoveEnumCommand>("remove-enum").WithDescription("Remove duplicate enum");
-});
+var app = new CommandApp<OpenapiJoiner>();
 app.Run(args);

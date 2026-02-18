@@ -211,14 +211,14 @@ $__AuthorName је избрисао собу: $RoomTitle</value>
   <data name="pattern_ShareDocument" xml:space="preserve">
     <value>h1. Приступ дозвољен документу:"$DocumentTitle":"$DocumentURL"
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" вам је дозволио приступ "$DocumentTitle":"$DocumentURL" документу са следећим правима приступа: "$AccessRights". 
+$__DateTime $__AuthorName вам је дозволио приступ "$DocumentTitle":"$DocumentURL" документу са следећим правима приступа: "$AccessRights". 
 
 $Message</value>
   </data>
   <data name="pattern_ShareFolder" xml:space="preserve">
     <value>h1. Приступ дозвољен фолдеру:"$DocumentTitle":"$DocumentURL"
 
-$__DateTime "$__AuthorName":"$__AuthorUrl " вам је дозволио приступ "$DocumentTitle":"$DocumentURL" фолдеру са следећим правима приступа: "$AccessRights".
+$__DateTime $__AuthorName вам је дозволио приступ "$DocumentTitle":"$DocumentURL" фолдеру са следећим правима приступа: "$AccessRights".
 
 $Message</value>
   </data>
