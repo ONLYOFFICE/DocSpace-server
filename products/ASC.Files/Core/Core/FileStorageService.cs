@@ -1136,7 +1136,7 @@ public class FileStorageService //: IFileStorageService
 
         if (!canEdit)
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_RenameFolder);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
         }
 
         switch (folder.RootFolderType)
@@ -5251,8 +5251,8 @@ public class FileStorageService //: IFileStorageService
 
         await Task.WhenAll(resultsFileTask, roomTask);
 
-        var resultsFile = await resultsFileTask;
-        var room = await roomTask;
+        var resultsFile = resultsFileTask.Result;
+        var room = roomTask.Result;
 
         if (room == null ||
             resultsFile == null ||

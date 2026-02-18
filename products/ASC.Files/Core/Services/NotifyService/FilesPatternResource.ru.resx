@@ -222,14 +222,14 @@ $__AuthorName удалил(а) комнату: $RoomTitle</value>
   <data name="pattern_ShareDocument" xml:space="preserve">
     <value>h1.Предоставлен доступ к документу: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime Пользователь "$__AuthorName":"$__AuthorUrl" предоставил Вам доступ к документу "$DocumentTitle":"$DocumentURL" с правами доступа: "$AccessRights". 
+$__DateTime Пользователь $__AuthorName предоставил Вам доступ к документу "$DocumentTitle":"$DocumentURL" с правами доступа: "$AccessRights". 
 
 $Message</value>
   </data>
   <data name="pattern_ShareFolder" xml:space="preserve">
     <value>h1.Предоставлен доступ к папке: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime Пользователь "$__AuthorName":"$__AuthorUrl" предоставил Вам доступ к папке "$DocumentTitle":"$DocumentURL" с правами доступа: "$AccessRights".
+$__DateTime Пользователь $__AuthorName предоставил Вам доступ к папке "$DocumentTitle":"$DocumentURL" с правами доступа: "$AccessRights".
 
 $Message</value>
   </data>

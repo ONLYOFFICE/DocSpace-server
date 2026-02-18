@@ -27,6 +27,9 @@
 namespace ASC.Data.Backup.Core.Log;
 internal static partial class RestoreProgressItemLogger
 {
+    [LoggerMessage(LogLevel.Information, "RestoreCancelled")]
+    public static partial void InfoRestoreCancelled(this ILogger<RestoreProgressItem> logger);
+
     [LoggerMessage(LogLevel.Error, "RestoreProgressItem")]
     public static partial void ErrorRestoreProgressItem(this ILogger<RestoreProgressItem> logger, Exception exception);
 

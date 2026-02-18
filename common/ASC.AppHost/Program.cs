@@ -24,13 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Microsoft.Extensions.Hosting;
-
-if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")))
-{
-    Environment.SetEnvironmentVariable("DOTNET_ENVIRONMENT", "Development");
-}
-
 var builder = DistributedApplication.CreateBuilder(args);
 
 var basePath = Path.GetFullPath(Path.Combine("..", "..", ".."));
@@ -43,9 +36,9 @@ var connectionManager = new ConnectionStringManager(builder, basePath)
 
 var configurator = new ProjectConfigurator(builder, connectionManager, basePath, isDocker);
 
-switch (builder.Configuration["APP_LAUNCH_PROFILE"])
+switch (builder.Configuration["DOTNET_LAUNCH_PROFILE"])
 {
-    case "Preview":
+    case "preview":
         connectionManager.AddMySql()
                          .AddRedis();
         configurator
@@ -59,7 +52,7 @@ switch (builder.Configuration["APP_LAUNCH_PROFILE"])
             .AddSocketIO();
 
         break;
-    case "FrontendDev":
+    case "frontend-dev":
         connectionManager.AddMySql(withDbGate: true)
             .AddRedis()
             .AddMailPit();

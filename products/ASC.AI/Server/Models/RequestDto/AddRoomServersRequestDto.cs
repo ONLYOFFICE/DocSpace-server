@@ -26,16 +26,31 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request to assign MCP servers to a specific room.
+/// </summary>
 public class AddRoomServersRequestDto
 {
+    /// <summary>
+    /// Identifier of the room to which MCP servers will be assigned.
+    /// </summary>
     [FromRoute(Name = "roomId")]
     public int RoomId { get; init; }
-    
+
+    /// <summary>
+    /// Server identifiers to assign.
+    /// </summary>
     [FromBody]
     public required AddRoomServersRequestBody Body { get; init; }
 }
 
+/// <summary>
+/// Parameters specifying which MCP servers to assign to the room.
+/// </summary>
 public class AddRoomServersRequestBody
 {
+    /// <summary>
+    /// Set of unique identifiers of MCP servers to associate with the room. A maximum of 5 servers can be assigned per room.
+    /// </summary>
     public required HashSet<Guid> Servers { get; init; }
 }

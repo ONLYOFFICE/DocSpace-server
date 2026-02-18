@@ -84,12 +84,12 @@ public class MyTypeScriptAxiosCodegen extends TypeScriptAxiosClientCodegen {
             if (model.getComposedSchemas() != null && model.getComposedSchemas().getAllOf() != null) {
                 model.getVendorExtensions().put("x-uses-allOf", true);
                 Set<String> localPropertyNames = new HashSet<>();
-                Schema modelSchema = this.openAPI.getComponents().getSchemas().get(model.schemaName);
+                Schema<?> modelSchema = this.openAPI.getComponents().getSchemas().get(model.schemaName);
 
                 if (ModelUtils.isAllOf(modelSchema)) {
                     for (Object obj : modelSchema.getAllOf()) {
                         if (obj instanceof Schema) {
-                            Schema allOfSchema = (Schema) obj;
+                            Schema<?> allOfSchema = (Schema<?>) obj;
                             if ("object".equals(ModelUtils.getType(allOfSchema)) && allOfSchema.getProperties() != null) {
                                 localPropertyNames.addAll(allOfSchema.getProperties().keySet());
                             }

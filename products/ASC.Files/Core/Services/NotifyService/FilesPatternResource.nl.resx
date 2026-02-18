@@ -211,14 +211,14 @@ $__AuthorName verwijderde de kamer: $RoomTitle</value>
   <data name="pattern_ShareDocument" xml:space="preserve">
     <value>h1. Toegang Verleend tot Document: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" heeft u toegang verleend tot het "$DocumentTitle":"$DocumentURL" document met de volgende toegangsrechten: "$AccessRights". 
+$__DateTime $__AuthorName heeft u toegang verleend tot het "$DocumentTitle":"$DocumentURL" document met de volgende toegangsrechten: "$AccessRights". 
 
 $Message</value>
   </data>
   <data name="pattern_ShareFolder" xml:space="preserve">
     <value>h1. Toegang Verleend aan Map: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" heeft je toegang gegeven tot de map "$DocumentTitle":"$DocumentURL" met de volgende rechten: "$AccessRights". 
+$__DateTime $__AuthorName heeft je toegang gegeven tot de map "$DocumentTitle":"$DocumentURL" met de volgende rechten: "$AccessRights". 
 
 $Message</value>
   </data>

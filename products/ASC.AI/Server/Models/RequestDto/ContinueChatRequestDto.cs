@@ -26,18 +26,36 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request to continue an existing AI chat session with a new message.
+/// </summary>
 public class ContinueChatRequestDto
 {
+    /// <summary>
+    /// The unique identifier of the existing AI chat session to continue.
+    /// </summary>
     [FromRoute(Name = "chatId")]
     public required Guid ChatId { get; set; }
-    
+
+    /// <summary>
+    /// The message and optional file attachments.
+    /// </summary>
     [FromBody]
     public required ContinueChatBody Body { get; set; }
 }
 
+/// <summary>
+/// Parameters for continuing an AI chat session.
+/// </summary>
 public class ContinueChatBody
 {
+    /// <summary>
+    /// The user message to append to the conversation.
+    /// </summary>
     public required string Message { get; set; }
-    public int ContextFolderId { get; set; }
+
+    /// <summary>
+    /// The optional collection of file identifiers to attach as context for the AI model.
+    /// </summary>
     public IEnumerable<JsonElement>? Files { get; set; }
 }

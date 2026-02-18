@@ -26,10 +26,32 @@
 
 namespace ASC.AI.Core.MCP.Data;
 
+/// <summary>
+/// Identifies the type of an MCP server, which determines its connection behavior and available capabilities.
+/// </summary>
 public enum ServerType
 {
+    /// <summary>
+    /// A user-registered custom MCP server with a manually configured endpoint and optional authentication headers.
+    /// </summary>
+    [Description("Custom")]
     Custom,
+
+    /// <summary>
+    /// A built-in DocSpace MCP server that provides access to DocSpace document management tools.
+    /// </summary>
+    [Description("DocSpace")]
     DocSpace,
+
+    /// <summary>
+    /// A GitHub-integrated MCP server that provides access to GitHub repositories, issues, and pull requests via OAuth.
+    /// </summary>
+    [Description("Github")]
     Github,
+
+    /// <summary>
+    /// A Box-integrated MCP server that provides access to Box cloud storage and collaboration features via OAuth.
+    /// </summary>
+    [Description("Box")]
     Box
 }
