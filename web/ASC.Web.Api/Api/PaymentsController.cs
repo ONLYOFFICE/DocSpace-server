@@ -1155,14 +1155,6 @@ public class PaymentController(
         return settings;
     }
 
-    private async Task DemandAdminAsync()
-    {
-        if (!await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID))
-        {
-            throw new SecurityException();
-        }
-    }
-
     /// <remarks>
     /// The request for buying wallet service.
     /// </remarks>
@@ -1229,6 +1221,95 @@ public class PaymentController(
 
         var aiPrices = await aiGateway.GetPricesAsync();
         return aiPrices;
+    }
+
+    /// <remarks>
+    /// Returns the AI models availability settings for current tenant.
+    /// </remarks>
+    /// <summary>
+    /// Get the AI models availability settings
+    /// </summary>
+    /// <path>api/2.0/portal/payment/aimodel/availabilitysettings</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The AI models availability settings", typeof(TenantAiModelsAvailabilitySettings))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpGet("aimodel/availabilitysettings")]
+    public async Task<TenantAiModelsAvailabilitySettings> GetTenantAiModelsAvailabilitySettings()
+    {
+        if (!tariffService.IsConfigured())
+        {
+            return null;
+        }
+
+        await DemandAdminAsync();
+
+        var settings = await settingsManager.LoadAsync<TenantAiModelsAvailabilitySettings>();
+
+        return settings;
+    }
+
+    /// <remarks>
+    /// Changes the availability state of an AI model
+    /// </remarks>
+    /// <summary>
+    /// Change AI model availability state
+    /// </summary>
+    /// <path>api/2.0/portal/payment/aimodel/availabilitystate</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The AI models availability settings", typeof(TenantAiModelsAvailabilitySettings))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
+    [HttpPost("aimodel/availabilitystate")]
+    public async Task<TenantAiModelsAvailabilitySettings> ChangeAiModelAvailabilityState(ChangeAiModelAvailabilityStateRequestDto inDto)
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        if (!tariffService.IsConfigured())
+        {
+            return null;
+        }
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null)
+        {
+            return null;
+        }
+
+        await DemandPayerAsync(customerInfo);
+
+        var settings = await settingsManager.LoadAsync<TenantAiModelsAvailabilitySettings>();
+
+        settings.DisabledModels ??= [];
+
+        if (inDto.Enabled && settings.DisabledModels.Contains(inDto.ModelId))
+        {
+            settings.DisabledModels.Remove(inDto.ModelId);
+        }
+
+        if (!inDto.Enabled && !settings.DisabledModels.Contains(inDto.ModelId))
+        {
+            settings.DisabledModels.Add(inDto.ModelId);
+        }
+
+        if (settings.DisabledModels.Count == 0)
+        {
+            settings.DisabledModels = null;
+        }
+
+        var result = await settingsManager.SaveAsync(settings);
+
+        messageService.Send(MessageAction.CustomerWalletServicesSettingsUpdated);
+
+        return settings;
+    }
+
+    private async Task DemandAdminAsync()
+    {
+        if (!await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID))
+        {
+            throw new SecurityException();
+        }
     }
 
     private async Task DemandPayerAsync(CustomerInfo customerInfo)

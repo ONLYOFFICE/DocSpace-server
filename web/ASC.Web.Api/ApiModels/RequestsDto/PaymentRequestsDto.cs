@@ -192,3 +192,19 @@ public class ChangeWalletServiceStateRequestDto
     /// </summary>
     public bool Enabled { get; set; }
 }
+
+/// <summary>
+/// The request parameters for changing the AI model availability state.
+/// </summary>
+public class ChangeAiModelAvailabilityStateRequestDto
+{
+    /// <summary>
+    /// The AI model ID.
+    /// </summary>
+    public string ModelId { get; set; }
+
+    /// <summary>
+    /// Indicates whether the AI model is available or not.
+    /// </summary>
+    public bool Enabled { get; set; }
+}
