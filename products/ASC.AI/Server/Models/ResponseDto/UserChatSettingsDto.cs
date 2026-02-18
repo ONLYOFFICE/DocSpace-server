@@ -31,15 +31,14 @@ namespace ASC.AI.Models.ResponseDto;
 /// </summary>
 public class UserChatSettingsDto
 {
-
     /// <summary>
     /// Indicates whether the AI assistant is allowed to perform web searches when generating responses in this room.
     /// </summary>
-    /// <example>true</example>    public bool WebSearchEnabled { get; init; }
+    /// <example>true</example>
+    public bool WebSearchEnabled { get; init; }
 }
 
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
-    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class UserChatSettingsDtoMapper
 {
     public static partial UserChatSettingsDto MapToDto(this UserChatSettings source);
