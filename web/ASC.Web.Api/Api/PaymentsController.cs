@@ -1257,6 +1257,7 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/aimodel/availabilitystate</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The AI models availability settings", typeof(TenantAiModelsAvailabilitySettings))]
+    [SwaggerResponse(400, "Invalid ModelId")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("aimodel/availabilitystate")]
     public async Task<TenantAiModelsAvailabilitySettings> ChangeAiModelAvailabilityState(ChangeAiModelAvailabilityStateRequestDto inDto)

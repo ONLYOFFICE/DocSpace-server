@@ -201,6 +201,8 @@ public class ChangeAiModelAvailabilityStateRequestDto
     /// <summary>
     /// The AI model ID.
     /// </summary>
+    [Required]
+    [MaxLength(128)]
     public string ModelId { get; set; }
 
     /// <summary>
