@@ -9,19 +9,22 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
     public const string ActionDiagnosticId = "API002";
     public const string SummaryDiagnosticId = "API003";
     public const string RemarksDiagnosticId = "API004";
-    public const string ModelDtoDiagnosticId = "API005";
+    public const string ModelDtoSummaryDiagnosticId = "API005";
+    public const string ModelDtoExampleDiagnosticId = "API006";
 
     private static readonly LocalizableString _modelTitle = "API DTO model missing XML documentation";
     private static readonly LocalizableString _actionTitle = "API Action method missing XML documentation";
     private static readonly LocalizableString _summaryTitle = "API Action method missing summary";
     private static readonly LocalizableString _remarksTitle = "API Action method missing remarks";
-    private static readonly LocalizableString _modelDtoTitle = "API DTO model's property missing XML documentation";
+    private static readonly LocalizableString _modelDtoSummaryTitle = "API DTO model's property missing summary";
+    private static readonly LocalizableString _modelDtoExampleTitle = "API DTO model's property missing example";
     
     private static readonly LocalizableString _modelMessageFormat = "API DTO model '{0}' should have XML documentation";
     private static readonly LocalizableString _actionMessageFormat = "API Action method '{0}' should have XML documentation";
     private static readonly LocalizableString _summaryMessageFormat = "API Action method '{0}' should have summary";
     private static readonly LocalizableString _remarksMessageFormat = "API Action method '{0}' should have remarks";
-    private static readonly LocalizableString _modelDtoMessageFormat = "API DTO model's '{0}' property '{1}' should have XML documentation";
+    private static readonly LocalizableString _modelDtoSummaryMessageFormat = "API DTO model's '{0}' property '{1}' should have summary";
+    private static readonly LocalizableString _modelDtoExampleMessageFormat = "API DTO model's '{0}' property '{1}' should have example";
 
     private static readonly LocalizableString _description = "API controllers and their methods should have XML documentation for Swagger/OpenAPI generation.";
 
@@ -63,16 +66,25 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
         isEnabledByDefault: true, 
         description: _description);
     
-    private static readonly DiagnosticDescriptor _modelDtoRule = new(
-        ModelDtoDiagnosticId, 
-        _modelDtoTitle, 
-        _modelDtoMessageFormat, 
+    private static readonly DiagnosticDescriptor _modelDtoSummaryRule = new(
+        ModelDtoSummaryDiagnosticId, 
+        _modelDtoSummaryTitle, 
+        _modelDtoSummaryMessageFormat, 
+        Category, 
+        DiagnosticSeverity.Warning, 
+        isEnabledByDefault: true, 
+        description: _description);
+    
+    private static readonly DiagnosticDescriptor _modelDtoExampleRule = new(
+        ModelDtoExampleDiagnosticId, 
+        _modelDtoExampleTitle, 
+        _modelDtoExampleMessageFormat, 
         Category, 
         DiagnosticSeverity.Warning, 
         isEnabledByDefault: true, 
         description: _description);
 
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [_modelRule, _actionRule, _remarksRule, _summaryRule, _modelDtoRule];
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [_modelRule, _actionRule, _remarksRule, _summaryRule, _modelDtoSummaryRule, _modelDtoExampleRule];
 
     public override void Initialize(AnalysisContext context)
     {
@@ -309,7 +321,7 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
                 if (!HasXmlDocumentation(prop))
                 {
                     context.ReportDiagnostic(Diagnostic.Create(
-                        _modelDtoRule,
+                        _modelDtoSummaryRule,
                         prop.Identifier.GetLocation(),
                         modelDeclaration.Identifier.Text,
                         prop.Identifier.Text));
@@ -327,17 +339,19 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
         {
             if (member is not IPropertySymbol propertySymbol || 
                 propertySymbol.IsStatic || 
-                propertySymbol.GetAttributes().Any(attr => attr.AttributeClass?.Name == "JsonIgnoreAttribute"))
-            {
-                continue;
-            }
-
-            if (propertySymbol.IsImplicitlyDeclared ||
+                propertySymbol.GetAttributes().Any(attr => attr.AttributeClass?.Name is "JsonIgnoreAttribute") ||
+                propertySymbol.IsImplicitlyDeclared ||
                 propertySymbol.DeclaredAccessibility != Accessibility.Public)
             {
                 continue;
             }
 
+            if (propertySymbol.GetAttributes().Any(attr => attr.AttributeClass?.Name is "FromBodyAttribute"))
+            {
+                CheckPropertiesFromMetadata(context, methodDeclaration, propertySymbol.Type);
+                continue;
+            }
+            
             var xmlDoc = propertySymbol.GetDocumentationCommentXml();
 
             if (string.IsNullOrWhiteSpace(xmlDoc))
@@ -384,7 +398,16 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
             if (string.IsNullOrWhiteSpace(xmlDoc) || !xmlDoc.Contains("<summary>"))
             {
                 context.ReportDiagnostic(Diagnostic.Create(
-                    _modelDtoRule,
+                    _modelDtoSummaryRule,
+                    methodDeclaration.Identifier.GetLocation(),
+                    typeSymbol.Name,
+                    propertySymbol.Name));
+            }
+            
+            if (string.IsNullOrWhiteSpace(xmlDoc) || !xmlDoc.Contains("<example>"))
+            {
+                context.ReportDiagnostic(Diagnostic.Create(
+                    _modelDtoExampleRule,
                     methodDeclaration.Identifier.GetLocation(),
                     typeSymbol.Name,
                     propertySymbol.Name));
