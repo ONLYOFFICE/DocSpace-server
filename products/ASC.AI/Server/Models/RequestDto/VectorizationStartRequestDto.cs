@@ -26,13 +26,25 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request to submit files for vectorization processing.
+/// </summary>
 public class VectorizationStartRequestDto
 {
+    /// <summary>
+    /// The vectorization parameters including file identifiers.
+    /// </summary>
     [FromBody]
     public required VectorizationStartRequestBody Body { get; init; }
 }
 
+/// <summary>
+/// Parameters for submitting files for vectorization.
+/// </summary>
 public class VectorizationStartRequestBody
 {
+    /// <summary>
+    /// The set of file identifiers to submit for vectorization.
+    /// </summary>
     public required HashSet<int> Files { get; init; }
 }

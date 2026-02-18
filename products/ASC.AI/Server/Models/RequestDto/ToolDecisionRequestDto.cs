@@ -28,16 +28,31 @@ using ASC.AI.Core.Chat.Tool;
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request to submit a permission decision for a pending tool execution.
+/// </summary>
 public class ToolDecisionRequestDto
 {
+    /// <summary>
+    /// The unique identifier of the pending tool execution call awaiting a permission decision.
+    /// </summary>
     [FromRoute(Name = "callId")]
     public required string CallId { get; init; }
-    
+
+    /// <summary>
+    /// The permission decision parameters.
+    /// </summary>
     [FromBody]
     public required ToolDecisionRequestBody Body { get; init; }
 }
 
+/// <summary>
+/// Parameters for the tool execution permission decision.
+/// </summary>
 public class ToolDecisionRequestBody
 {
+    /// <summary>
+    /// The user's permission decision for the tool execution request: Allow, AlwaysAllow, or Deny.
+    /// </summary>
     public ToolExecutionDecision Decision { get; init; }
 }

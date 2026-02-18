@@ -28,9 +28,24 @@ namespace ASC.AI.Models.ResponseDto;
 
 public class AttachmentContentDto : MessageContentDto
 {
+    /// <summary>
+    /// The content block type. Always equals "Attachment".
+    /// </summary>
     public override MessageContentType Type => MessageContentType.Attachment;
+
+    /// <summary>
+    /// The identifier of the attached file.
+    /// </summary>
     public required JsonElement Id { get; init; }
+
+    /// <summary>
+    /// The display title of the attached file.
+    /// </summary>
     public required string Title { get; init; }
+
+    /// <summary>
+    /// The file extension of the attached file (e.g., "docx", "pdf").
+    /// </summary>
     public required string Extension { get; init; }
 }
 

@@ -877,7 +877,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -1,
-                            Features = "trial,audit,ldap,sso,customization,thirdparty,restore,oauth,total_size:107374182400,file_size:100,manager:1,statistic",
+                            Features = "trial,audit,ldap,sso,customization,thirdparty,restore,oauth,total_size:107374182400,file_size:100,manager:1,statistic,automationapi",
                             Name = "trial",
                             Price = 0m,
                             Visible = false,
@@ -887,7 +887,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         {
                             TenantId = -2,
                             Description = "until 01.04.2024",
-                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:107374182400,file_size:1024,manager:1,statistic,free_backup:2:fixed",
+                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:107374182400,file_size:1024,manager:1,statistic,free_backup:2:fixed,automationapi",
                             Name = "admin",
                             Price = 15m,
                             ProductId = "1002",
@@ -897,7 +897,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -3,
-                            Features = "free,oauth,total_size:2147483648,manager:3,room:12",
+                            Features = "free,oauth,total_size:2147483648,manager:3,room:12,automationapi",
                             Name = "startup",
                             Price = 0m,
                             Visible = false,
@@ -926,7 +926,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -6,
-                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,file_size:1024,statistic,free_backup:2:fixed",
+                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,file_size:1024,statistic,free_backup:2:fixed,automationapi",
                             Name = "subscription",
                             Price = 0m,
                             ProductId = "1001",
@@ -936,7 +936,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -7,
-                            Features = "non-profit,audit,ldap,sso,thirdparty,restore,oauth,contentsearch,total_size:2147483648,file_size:1024,manager:20,statistic",
+                            Features = "non-profit,audit,ldap,sso,thirdparty,restore,oauth,contentsearch,total_size:2147483648,file_size:1024,manager:20,statistic,automationapi",
                             Name = "nonprofit",
                             Price = 0m,
                             ProductId = "1007",
@@ -946,7 +946,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -8,
-                            Features = "free,oauth,total_size:107374182400,manager:100,room:100",
+                            Features = "free,oauth,total_size:107374182400,manager:100,room:100,automationapi",
                             Name = "zoom",
                             Price = 0m,
                             Visible = false,
@@ -956,7 +956,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         {
                             TenantId = -9,
                             Description = "since 01.04.2024",
-                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,free_backup:2:fixed",
+                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,free_backup:2:fixed,automationapi",
                             Name = "admin",
                             Price = 20m,
                             ProductId = "1006",
@@ -967,7 +967,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         {
                             TenantId = -10,
                             Description = "since 10.02.2025",
-                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,year,free_backup:2:fixed",
+                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,year,free_backup:2:fixed,automationapi",
                             Name = "adminyear",
                             Price = 220m,
                             ProductId = "1009",

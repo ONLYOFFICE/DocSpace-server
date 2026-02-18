@@ -28,9 +28,19 @@ using ASC.Core.Common.AI;
 
 namespace ASC.AI.Models.ResponseDto;
 
+/// <summary>
+/// Available AI provider type settings.
+/// </summary>
 public class ProviderSettingsDto
 {
+    /// <summary>
+    /// AI provider type identifier.
+    /// </summary>
     public ProviderType Type { get; init; }
+
+    /// <summary>
+    /// Default API endpoint URL for the provider type.
+    /// </summary>
     public required string Url { get; init; }
 }
 
