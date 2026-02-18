@@ -78,8 +78,9 @@
                   },
                   "File": {
                     "type": "string",
-                    "description": "The request file stream.",
-                    "format": "binary"
+                    "description": "The edited file to be saved, uploaded as part of the multipart/form-data request.\r\nThis property represents the modified file content from the HTTP request form after editing operations.\r\nThe file is accessed via the IFormFile interface which provides access to the file name, content type, length, and stream.",
+                    "format": "binary",
+                    "example": "\r\n             Example of saving an edited file using curl:\r\n             \r\n             curl -X PUT \"https://api.example.com/api/2.0/files/file/123/saveediting\" \\\r\n               -H \"Authorization: Bearer your_token\" \\\r\n               -F \"File=@/path/to/edited_document.docx\" \\\r\n               -F \"FileExtension=.docx\" \\\r\n               -F \"Forcesave=false\"\r\n             \r\n            \r\n             Example of saving an edited file using C# HttpClient:\r\n             \r\n             using var content = new MultipartFormDataContent();\r\n             using var fileStream = File.OpenRead(\"edited_document.docx\");\r\n             content.Add(new StreamContent(fileStream), \"File\", \"edited_document.docx\");\r\n             content.Add(new StringContent(\".docx\"), \"FileExtension\");\r\n             content.Add(new StringContent(\"false\"), \"Forcesave\");\r\n            \r\n             var response = await httpClient.PutAsync(url, content);\r\n             "
                   },
                   "Forcesave": {
                     "type": "boolean",
@@ -7383,7 +7384,9 @@
                 "properties": {
                   "File": {
                     "type": "string",
-                    "format": "binary"
+                    "description": "The file to be uploaded as part of the multipart/form-data request.\r\nThis property represents the uploaded file content from the HTTP request form.\r\nThe file is accessed via the IFormFile interface which provides access to the file name, content type, length, and stream.",
+                    "format": "binary",
+                    "example": "\r\n             Example of sending a file using curl:\r\n             \r\n             curl -X POST \"https://api.example.com/api/2.0/files/folder/1/upload/session_abc123\" \\\r\n               -H \"Authorization: Bearer your_token\" \\\r\n               -F \"file=@/path/to/document.pdf\"\r\n             \r\n            \r\n             Example of sending a file using C# HttpClient:\r\n             \r\n             using var content = new MultipartFormDataContent();\r\n             using var fileStream = File.OpenRead(\"document.pdf\");\r\n             content.Add(new StreamContent(fileStream), \"file\", \"document.pdf\");\r\n            \r\n             var response = await httpClient.PostAsync(url, content);\r\n             "
                   }
                 }
               },
@@ -7490,7 +7493,9 @@
                 "properties": {
                   "File": {
                     "type": "string",
-                    "format": "binary"
+                    "description": "The file chunk to be uploaded as part of the multipart/form-data request.\r\nThis property represents the uploaded file chunk content from the HTTP request form for chunked upload operations.\r\nThe file chunk is accessed via the IFormFile interface which provides access to the chunk content and length.",
+                    "format": "binary",
+                    "example": "\r\n             Example of sending a file chunk using curl:\r\n             \r\n             curl -X POST \"https://api.example.com/api/2.0/files/folder/1/upload/session_abc123?chunkNumber=1\" \\\r\n               -H \"Authorization: Bearer your_token\" \\\r\n               -F \"file=@/path/to/chunk1.part\"\r\n             \r\n            \r\n             Example of sending a file chunk using C# HttpClient:\r\n             \r\n             using var content = new MultipartFormDataContent();\r\n             var chunkStream = new MemoryStream(chunkBytes);\r\n             content.Add(new StreamContent(chunkStream), \"file\", \"document.pdf\");\r\n            \r\n             var response = await httpClient.PostAsync($\"{url}?chunkNumber=1\", content);\r\n             "
                   }
                 }
               },
@@ -8432,7 +8437,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ModuleWrapper"
+                  "$ref": "#/components/schemas/BooleanWrapper"
                 }
               }
             }
@@ -8558,7 +8563,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ModuleWrapper"
+                  "$ref": "#/components/schemas/BooleanWrapper"
                 }
               }
             }
@@ -13195,7 +13200,71 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ObjectWrapper"
+                  "$ref": "#/components/schemas/StringWrapper"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You don't have enough permission to perform the operation"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Rooms"
+        ],
+        "summary": "Update tag",
+        "description": "Updates the name of a custom tag.",
+        "operationId": "updateRoomTag",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTagRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated tag name",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringWrapper"
                 }
               }
             }
@@ -13242,7 +13311,7 @@
           "Rooms"
         ],
         "summary": "Get the room tags",
-        "description": "Returns a list of custom room tags.",
+        "description": "Returns a list of custom tags.",
         "operationId": "getRoomTagsInfo",
         "parameters": [
           {
@@ -13327,7 +13396,7 @@
           "Rooms"
         ],
         "summary": "Delete the custom room tags",
-        "description": "Deletes a bunch of custom room tags specified in the request.",
+        "description": "Deletes a bunch of custom tags specified in the request.",
         "operationId": "deleteCustomTags",
         "requestBody": {
           "content": {
@@ -13344,6 +13413,73 @@
           },
           "403": {
             "description": "You don't have enough permission to perform the operation"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/files/tags/{tagName}/haslinks": {
+      "get": {
+        "tags": [
+          "Rooms"
+        ],
+        "summary": "Has tag links",
+        "description": "Checks if a specific custom tag has linked items.",
+        "operationId": "hasTagLinks",
+        "parameters": [
+          {
+            "name": "tagName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "True if tag has links, false otherwise",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BooleanWrapper"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Tag not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -14558,8 +14694,9 @@
         "properties": {
           "id": {
             "type": "string",
+            "description": "The unique identifier for the entity.",
             "nullable": true,
-            "example": "1"
+            "example": "0af4bc0d-9a9d-450c-a72b-f14d9ac55c89"
           },
           "path": {
             "type": "array",
@@ -14567,33 +14704,41 @@
               "type": "integer",
               "format": "int32"
             },
+            "description": "Represents the hierarchical path of folders associated with a chunked upload session.",
             "nullable": true,
             "example": [
-              1234
+              "123",
+              "456",
+              "789"
             ]
           },
           "created": {
             "type": "string",
+            "description": "The timestamp indicating when the chunked upload session was created.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2024-01-15T10:30:00Z"
           },
           "expired": {
             "type": "string",
+            "description": "The date and time when the chunked upload session is set to expire.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2024-01-15T11:30:00Z"
           },
           "location": {
             "type": "string",
+            "description": "Represents the URI or path of the chunked upload session's current location.",
             "nullable": true,
-            "example": "001 Schroeder Run, New Tabithaport, Colombia"
+            "example": "https://example.com/products/files/httphandlers/filehandler.ashx?action=upload"
           },
           "bytes_total": {
             "type": "integer",
+            "description": "The total size, in bytes, of the file being uploaded in the chunked upload session.",
             "format": "int64",
-            "example": 1234
+            "example": 10485760
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Represents the response returned from a chunked upload session."
       },
       "ChunkedUploadSessionResponseIntegerWrapper": {
         "type": "object",
@@ -14634,13 +14779,15 @@
         "properties": {
           "success": {
             "type": "boolean",
+            "description": "Gets or sets a value indicating whether the operation was successful.",
             "example": true
           },
           "data": {
             "$ref": "#/components/schemas/ChunkedUploadSessionResponseInteger"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Represents a wrapper for the response of a chunked upload session operation."
       },
       "ChunkedUploadSessionResponseWrapperIntegerWrapper": {
         "type": "object",
@@ -23718,100 +23865,6 @@
         "description": "The user mobile phone activation status.",
         "x-enum-type": "integer"
       },
-      "Module": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "The module ID.",
-            "format": "uuid",
-            "example": "00000000-0000-0000-0000-000000000000"
-          },
-          "appName": {
-            "type": "string",
-            "description": "The module product class name.",
-            "nullable": true,
-            "example": "some text"
-          },
-          "title": {
-            "type": "string",
-            "description": "The module product class name.",
-            "nullable": true,
-            "example": "SampleFile"
-          },
-          "link": {
-            "type": "string",
-            "description": "The URL to the module start page.",
-            "nullable": true,
-            "example": "some text"
-          },
-          "iconUrl": {
-            "type": "string",
-            "description": "The module icon URL.",
-            "nullable": true,
-            "example": "some text"
-          },
-          "imageUrl": {
-            "type": "string",
-            "description": "The module large image URL.",
-            "nullable": true,
-            "example": "some text"
-          },
-          "helpUrl": {
-            "type": "string",
-            "description": "The module help URL.",
-            "nullable": true,
-            "example": "some text"
-          },
-          "description": {
-            "type": "string",
-            "description": "The module description.",
-            "nullable": true,
-            "example": "some text"
-          },
-          "isPrimary": {
-            "type": "boolean",
-            "description": "Specifies if the module is primary or not.",
-            "example": true
-          }
-        },
-        "additionalProperties": false,
-        "description": "The module information."
-      },
-      "ModuleWrapper": {
-        "type": "object",
-        "properties": {
-          "response": {
-            "$ref": "#/components/schemas/Module"
-          },
-          "count": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "href": {
-                  "type": "string"
-                },
-                "action": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "status": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "statusCode": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
       "NewItemsDtoFileEntryBaseDto": {
         "required": [
           "date",
@@ -26331,6 +26384,33 @@
         "additionalProperties": false,
         "description": "The request parameters for updating the rooms."
       },
+      "UpdateTagRequestDto": {
+        "required": [
+          "newName",
+          "oldName"
+        ],
+        "type": "object",
+        "properties": {
+          "oldName": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string",
+            "description": "The old tag name.",
+            "nullable": true,
+            "example": "some text"
+          },
+          "newName": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string",
+            "description": "The new tag name.",
+            "nullable": true,
+            "example": "some text"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The request parameters for creating a tag."
+      },
       "UploadRequestDto": {
         "type": "object",
         "properties": {
@@ -26743,8 +26823,9 @@
           },
           "checkActivation": {
             "type": "boolean",
+            "description": "Indicates whether the activation status of the employee or recipient is unchecked or inactive.\r\nDepending on the context, this property evaluates the activation or eligibility status accordingly.",
             "readOnly": true,
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,

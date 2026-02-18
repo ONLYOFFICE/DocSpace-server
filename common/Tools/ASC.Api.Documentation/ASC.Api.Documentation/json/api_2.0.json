@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.0",
   "info": {
     "title": "Api",
     "contact": {
@@ -3455,7 +3455,7 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           },
           {
@@ -3465,7 +3465,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "some text"
+              "example": "birthday"
             }
           }
         ],
@@ -7307,7 +7307,8 @@
                       "type": "string",
                       "format": "binary"
                     },
-                    "description": "The list of license files to be uploaded."
+                    "description": "The list of license files to be uploaded.",
+                    "example": "license.lic"
                   }
                 }
               },
@@ -12382,7 +12383,7 @@
             "description": "Specifies whether to load the system plugins or not.",
             "schema": {
               "type": "boolean",
-              "example": true
+              "example": false
             }
           }
         ],
@@ -12520,7 +12521,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "John Doe"
+              "example": "example-plugin"
             }
           }
         ],
@@ -12587,7 +12588,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "John Doe"
+              "example": "example-plugin"
             }
           }
         ],
@@ -12658,7 +12659,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "example": "John Doe"
+              "example": "example-plugin"
             }
           }
         ],
@@ -13043,8 +13044,9 @@
           },
           "lastModified": {
             "type": "string",
+            "description": "The timestamp indicating when the settings were last modified.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "1990-01-01T00:00:00Z"
           }
         },
         "additionalProperties": false,
@@ -13993,8 +13995,9 @@
           },
           "lastModified": {
             "type": "string",
+            "description": "The timestamp indicating when the settings were last modified.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "1990-01-01T00:00:00Z"
           }
         },
         "additionalProperties": false,
@@ -15369,8 +15372,9 @@
           },
           "lastModified": {
             "type": "string",
+            "description": "The timestamp indicating when the settings were last modified.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "1990-01-01T00:00:00Z"
           }
         },
         "additionalProperties": false,
@@ -16790,7 +16794,7 @@
             "type": "string",
             "description": "The white label logo name.",
             "nullable": true,
-            "example": "John Doe"
+            "example": "logo_light"
           },
           "default": {
             "type": "boolean",
@@ -19373,7 +19377,7 @@
             "type": "integer",
             "description": "The minimum number of characters required for valid passwords.",
             "format": "int32",
-            "example": 1234
+            "example": 8
           },
           "upperCase": {
             "type": "boolean",
@@ -19388,31 +19392,31 @@
           "specSymbols": {
             "type": "boolean",
             "description": "Specifies whether the password should contain the special symbols or not.",
-            "example": true
+            "example": false
           },
           "allowedCharactersRegexStr": {
             "type": "string",
             "description": "The allowed password characters in the regex string format.",
             "nullable": true,
-            "example": "some text"
+            "example": "^[a-zA-Z0-9!@#$%^&*()]+$"
           },
           "digitsRegexStr": {
             "type": "string",
             "description": "The password digits in the regex string format.",
             "nullable": true,
-            "example": "some text"
+            "example": "(?=.*\\\\d)"
           },
           "upperCaseRegexStr": {
             "type": "string",
             "description": "The password uppercase letters in the regex string format.",
             "nullable": true,
-            "example": "some text"
+            "example": "(?=.*[A-Z])"
           },
           "specSymbolsRegexStr": {
             "type": "string",
             "description": "The passaword special symbols in the regex string format.",
             "nullable": true,
-            "example": "some text"
+            "example": "(?=.*[!@#$%^&*()])"
           }
         },
         "additionalProperties": false,
@@ -21196,7 +21200,12 @@
             "type": "string",
             "description": "The JSON-serialized SSO configuration settings.",
             "nullable": true,
-            "example": "some text"
+            "example": {
+              "enableSso": true,
+              "idpSettings": {
+                "entityId": "https://idp.example.com"
+              }
+            }
           }
         },
         "additionalProperties": false,
@@ -21207,8 +21216,9 @@
         "properties": {
           "lastModified": {
             "type": "string",
+            "description": "The timestamp indicating when the settings were last modified.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "1990-01-01T00:00:00Z"
           },
           "enableSso": {
             "type": "boolean",
@@ -21557,8 +21567,9 @@
           },
           "lastModified": {
             "type": "string",
+            "description": "The timestamp indicating when the settings were last modified.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "1990-01-01T00:00:00Z"
           }
         },
         "additionalProperties": false
@@ -21812,8 +21823,9 @@
             "properties": {
               "lastModified": {
                 "type": "string",
+                "description": "The timestamp indicating when the settings were last modified.",
                 "format": "date-time",
-                "example": "2008-04-10T06:30:00.0000000+04:00"
+                "example": "1990-01-01T00:00:00Z"
               }
             }
           }
@@ -21872,8 +21884,9 @@
           },
           "lastModified": {
             "type": "string",
+            "description": "The timestamp indicating when the settings were last modified.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "1990-01-01T00:00:00Z"
           }
         },
         "additionalProperties": false,
@@ -21899,8 +21912,9 @@
           },
           "lastModified": {
             "type": "string",
+            "description": "The timestamp indicating when the settings were last modified.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "1990-01-01T00:00:00Z"
           }
         },
         "additionalProperties": false,
@@ -21960,8 +21974,9 @@
           },
           "lastModified": {
             "type": "string",
+            "description": "The timestamp indicating when the settings were last modified.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "1990-01-01T00:00:00Z"
           }
         },
         "additionalProperties": false,
@@ -22011,8 +22026,9 @@
           },
           "lastModified": {
             "type": "string",
+            "description": "The timestamp indicating when the settings were last modified.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "1990-01-01T00:00:00Z"
           }
         },
         "additionalProperties": false,
@@ -22737,12 +22753,13 @@
             "description": "The date of the last tenant quota recalculation.",
             "format": "date-time",
             "nullable": true,
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "1990-01-01T00:00:00Z"
           },
           "lastModified": {
             "type": "string",
+            "description": "The timestamp indicating when the settings were last modified.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "1990-01-01T00:00:00Z"
           }
         },
         "additionalProperties": false,
@@ -22848,8 +22865,9 @@
             "properties": {
               "lastModified": {
                 "type": "string",
+                "description": "The timestamp indicating when the settings were last modified.",
                 "format": "date-time",
-                "example": "2008-04-10T06:30:00.0000000+04:00"
+                "example": "1990-01-01T00:00:00Z"
               }
             }
           }
@@ -22994,7 +23012,7 @@
           "allowInvitingGuests": {
             "type": "boolean",
             "description": "Specifies whether to allow all DocSpace members to invite external guests to the rooms.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -23011,7 +23029,7 @@
           "allowInvitingGuests": {
             "type": "boolean",
             "description": "Specifies whether to allow all DocSpace members to invite external guests to the rooms.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -23061,8 +23079,9 @@
             "properties": {
               "lastModified": {
                 "type": "string",
+                "description": "The timestamp indicating when the settings were last modified.",
                 "format": "date-time",
-                "example": "2008-04-10T06:30:00.0000000+04:00"
+                "example": "1990-01-01T00:00:00Z"
               }
             }
           }
@@ -23570,13 +23589,13 @@
             "type": "string",
             "description": "The IANA time zone identifier.",
             "nullable": true,
-            "example": "1"
+            "example": "America/New_York"
           },
           "displayName": {
             "type": "string",
             "description": "The user-friendly name for the time zone.",
             "nullable": true,
-            "example": "some text"
+            "example": "(UTC-05:00) Eastern Time (US and Canada)"
           }
         },
         "additionalProperties": false,
@@ -23897,8 +23916,9 @@
           },
           "checkActivation": {
             "type": "boolean",
+            "description": "Indicates whether the activation status of the employee or recipient is unchecked or inactive.\r\nDepending on the context, this property evaluates the activation or eligibility status accordingly.",
             "readOnly": true,
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -24181,13 +24201,13 @@
             "type": "string",
             "description": "The web plugin name.",
             "nullable": true,
-            "example": "John Doe"
+            "example": "Example Plugin"
           },
           "version": {
             "type": "string",
             "description": "The web plugin version.",
             "nullable": true,
-            "example": "some text"
+            "example": "1.0.0"
           },
           "minDocSpaceVersion": {
             "type": "string",
@@ -24199,43 +24219,43 @@
             "type": "string",
             "description": "The web plugin description.",
             "nullable": true,
-            "example": "some text"
+            "example": "A plugin that provides additional functionality"
           },
           "license": {
             "type": "string",
             "description": "The web plugin license.",
             "nullable": true,
-            "example": "some text"
+            "example": "MIT"
           },
           "author": {
             "type": "string",
             "description": "The web plugin author.",
             "nullable": true,
-            "example": "some text"
+            "example": "ONLYOFFICE"
           },
           "homePage": {
             "type": "string",
             "description": "The web plugin home page URL.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com"
           },
           "pluginName": {
             "type": "string",
             "description": "The name by which the web plugin is registered in the window object.",
             "nullable": true,
-            "example": "some text"
+            "example": "examplePlugin"
           },
           "scopes": {
             "type": "string",
             "description": "The web plugin scopes.",
             "nullable": true,
-            "example": "some text"
+            "example": "Files,Rooms"
           },
           "image": {
             "type": "string",
             "description": "The web plugin image.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/image.png"
           },
           "createBy": {
             "$ref": "#/components/schemas/EmployeeDto"
@@ -24244,7 +24264,7 @@
             "type": "string",
             "description": "The date and time when the web plugin was created.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2024-01-15T10:30:00Z"
           },
           "enabled": {
             "type": "boolean",
@@ -24254,25 +24274,24 @@
           "system": {
             "type": "boolean",
             "description": "Specifies if the web plugin is system or not.",
-            "example": true
+            "example": false
           },
           "url": {
             "type": "string",
             "description": "The web plugin URL.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/plugin.js"
           },
           "cssUrl": {
             "type": "string",
             "description": "The web plugin css URL.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/plugin.css"
           },
           "settings": {
             "type": "string",
             "description": "The web plugin settings.",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "nameLocale": {
             "type": "object",
@@ -24313,7 +24332,10 @@
             "type": "string",
             "description": "The JSON-formatted configuration settings for the web plugin.",
             "nullable": true,
-            "example": true
+            "example": {
+              "theme": "dark",
+              "autoSave": true
+            }
           }
         },
         "additionalProperties": false,
@@ -25132,8 +25154,9 @@
           },
           "lastModified": {
             "type": "string",
+            "description": "The timestamp indicating when the settings were last modified.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "1990-01-01T00:00:00Z"
           }
         },
         "additionalProperties": false,

@@ -944,11 +944,13 @@
         "properties": {
           "id": {
             "type": "string",
+            "description": "The backup ID.",
             "format": "uuid",
             "example": "00000000-0000-0000-0000-000000000000"
           },
           "fileName": {
             "type": "string",
+            "description": "The backup file name.",
             "nullable": true,
             "example": "some text"
           },
@@ -957,16 +959,19 @@
           },
           "createdOn": {
             "type": "string",
+            "description": "The backup creation date.",
             "format": "date-time",
             "example": "2008-04-10T06:30:00.0000000+04:00"
           },
           "expiresOn": {
             "type": "string",
+            "description": "The backup expiration date.",
             "format": "date-time",
             "example": "2008-04-10T06:30:00.0000000+04:00"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The backup history parameters."
       },
       "BackupHistoryRecordArrayWrapper": {
         "type": "object",
@@ -1038,6 +1043,7 @@
             ]
           }
         ],
+        "description": "The backup period type.",
         "x-enum-type": "integer"
       },
       "BackupProgress": {
@@ -1045,30 +1051,36 @@
         "properties": {
           "isCompleted": {
             "type": "boolean",
+            "description": "Specifies if the backup is completed or not.",
             "example": true
           },
           "progress": {
             "type": "integer",
+            "description": "The backup progress in percentage.",
             "format": "int32",
             "example": 1234
           },
           "error": {
             "type": "string",
+            "description": "The backup error message.",
             "nullable": true,
             "example": "some text"
           },
           "warning": {
             "type": "string",
+            "description": "The backup warning message.",
             "nullable": true,
             "example": "some text"
           },
           "link": {
             "type": "string",
+            "description": "The backup link.",
             "nullable": true,
             "example": "some text"
           },
           "tenantId": {
             "type": "integer",
+            "description": "The tenant ID.",
             "format": "int32",
             "example": 1234
           },
@@ -1080,11 +1092,13 @@
           },
           "taskId": {
             "type": "string",
+            "description": "The task ID.",
             "nullable": true,
             "example": "some text"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The backup progress parameters."
       },
       "BackupProgressEnum": {
         "oneOf": [
@@ -1119,6 +1133,7 @@
             ]
           }
         ],
+        "description": "The backup progress type",
         "x-enum-type": "integer"
       },
       "BackupProgressWrapper": {
@@ -1316,6 +1331,7 @@
             ]
           }
         ],
+        "description": "The backup storage type.",
         "x-enum-type": "integer"
       },
       "BooleanWrapper": {
@@ -1383,16 +1399,19 @@
           },
           "hour": {
             "type": "integer",
+            "description": "The time of the day to start the backup process.",
             "format": "int32",
             "example": 1234
           },
           "day": {
             "type": "integer",
+            "description": "The day of the week to start the backup process.",
             "format": "int32",
             "example": 1234
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The backup cron parameters."
       },
       "DistributedTaskStatus": {
         "oneOf": [
@@ -1502,6 +1521,7 @@
               "type": "string",
               "nullable": true
             },
+            "description": "The backup storage parameters.",
             "nullable": true,
             "example": [
               {
@@ -1515,21 +1535,25 @@
           },
           "backupsStored": {
             "type": "integer",
+            "description": "The maximum number of the stored backup copies.",
             "format": "int32",
             "nullable": true,
             "example": 1234
           },
           "lastBackupTime": {
             "type": "string",
+            "description": "The date and time when the last backup was reated.",
             "format": "date-time",
             "example": "2008-04-10T06:30:00.0000000+04:00"
           },
           "dump": {
             "type": "boolean",
+            "description": "Specifies if a dump will be created or not.",
             "example": false
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "The backup schedule parameters."
       },
       "ScheduleWrapper": {
         "type": "object",
