@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace ASC.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
@@ -76,13 +78,17 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterSyntaxNodeAction(AnalyzeMethod, SyntaxKind.MethodDeclaration);
+        context.RegisterCompilationStartAction(compilationContext =>
+        {
+            var reportedTypes = new ConcurrentDictionary<string, bool>();
+            compilationContext.RegisterSyntaxNodeAction(ctx => AnalyzeMethod(ctx, reportedTypes), SyntaxKind.MethodDeclaration);
+        });
     }
     
-    private static void AnalyzeMethod(SyntaxNodeAnalysisContext context)
+    private static void AnalyzeMethod(SyntaxNodeAnalysisContext context, ConcurrentDictionary<string, bool> reportedTypes)
     {
         var methodDeclaration = (MethodDeclarationSyntax)context.Node;
-            
+
         if (!IsApiActionMethod(context, methodDeclaration))
         {
             return;
@@ -91,15 +97,15 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
         if (!HasXmlDocumentation(methodDeclaration))
         {
             var diagnostic = Diagnostic.Create(
-                _actionRule, 
-                methodDeclaration.Identifier.GetLocation(), 
+                _actionRule,
+                methodDeclaration.Identifier.GetLocation(),
                 methodDeclaration.Identifier.Text);
-                
+
             context.ReportDiagnostic(diagnostic);
             return;
         }
-            
-        CheckDocumentation(context, methodDeclaration);
+
+        CheckDocumentation(context, methodDeclaration, reportedTypes);
     }
     
 
@@ -193,7 +199,7 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
         return false;
     }
 
-    private static void CheckDocumentation(SyntaxNodeAnalysisContext context, MethodDeclarationSyntax methodDeclaration)
+    private static void CheckDocumentation(SyntaxNodeAnalysisContext context, MethodDeclarationSyntax methodDeclaration, ConcurrentDictionary<string, bool> reportedTypes)
     {
         var xmlTrivia = methodDeclaration.GetLeadingTrivia()
             .FirstOrDefault(t => t.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia) ||
@@ -210,7 +216,7 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
         }
 
         var xmlElementSyntaxes = xmlStructure.Content.OfType<XmlElementSyntax>().ToList();
-        
+
         var remarkExists = xmlElementSyntaxes
             .Any(e => e.StartTag.Name.ToString() == "remarks");
 
@@ -218,21 +224,21 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
         {
             context.ReportDiagnostic(Diagnostic.Create(
                 _remarksRule,
-                methodDeclaration.Identifier.GetLocation(), 
+                methodDeclaration.Identifier.GetLocation(),
                 methodDeclaration.Identifier.Text));
         }
 
         var summaryExists = xmlElementSyntaxes
             .Any(e => e.StartTag.Name.ToString() == "summary");
-        
+
         if (!summaryExists)
         {
             context.ReportDiagnostic(Diagnostic.Create(
                 _summaryRule,
-                methodDeclaration.Identifier.GetLocation(), 
+                methodDeclaration.Identifier.GetLocation(),
                 methodDeclaration.Identifier.Text));
         }
-        
+
         // Check return type, unwrapping Task<T> if needed
         var returnTypeToCheck = methodDeclaration.ReturnType;
 
@@ -244,12 +250,12 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
                 var typeArgument = namedTypeSymbol.TypeArguments.FirstOrDefault();
                 if (typeArgument != null && !IsSystemNamespace(typeArgument))
                 {
-                    ReportMissingXmlDocumentation(context, methodDeclaration, typeArgument);
+                    ReportMissingXmlDocumentation(context, methodDeclaration, typeArgument, reportedTypes);
                 }
             }
             else if (!IsSystemNamespace(returnTypeSymbol))
-            {  
-                ReportMissingXmlDocumentation(context, methodDeclaration, returnTypeSymbol);
+            {
+                ReportMissingXmlDocumentation(context, methodDeclaration, returnTypeSymbol, reportedTypes);
             }
         }
 
@@ -261,13 +267,21 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
             {
                 continue;
             }
-            
-            ReportMissingXmlDocumentation(context, methodDeclaration, typeSymbol);
+
+            ReportMissingXmlDocumentation(context, methodDeclaration, typeSymbol, reportedTypes);
         }
     }
 
-    private static void ReportMissingXmlDocumentation(SyntaxNodeAnalysisContext context, MethodDeclarationSyntax methodDeclaration, ITypeSymbol returnTypeSymbol)
+    private static void ReportMissingXmlDocumentation(SyntaxNodeAnalysisContext context, MethodDeclarationSyntax methodDeclaration, ITypeSymbol returnTypeSymbol, ConcurrentDictionary<string, bool> reportedTypes)
     {
+        var typeKey = returnTypeSymbol.ToDisplayString();
+
+        // Skip if already reported
+        if (!reportedTypes.TryAdd(typeKey, true))
+        {
+            return;
+        }
+
         var syntaxReferences = returnTypeSymbol.DeclaringSyntaxReferences;
         if (syntaxReferences.Length > 0)
         {
@@ -358,7 +372,9 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
                         var name = e.Attribute("name")?.Value;
                         return name == docId.Replace("{`0}", "`1") ||
                                name == docId.Replace($"{{{typeof(int).FullName!}}}", "`1") ||
-                               name == docId.Replace($"{{{typeof(string).FullName!}}}", "`1");
+                               name == docId.Replace($"{{{typeof(string).FullName!}}}", "`1") ||
+                               name == docId.Replace($"{{{typeof(JsonElement).FullName!}}}", "`1")
+                               ;
                     })?.ToString();
                 }
             }
