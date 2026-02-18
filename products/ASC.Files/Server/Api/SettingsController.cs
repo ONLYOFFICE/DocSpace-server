@@ -437,4 +437,18 @@ public class SettingsController(
         var settings = await defaultTemplateSettingsHelper.SetTemplateAsync(inDto.FileExtension, inDto.File.FileName, inDto?.File.OpenReadStream());
         return await defaultTemplateSettingsHelper.ConvertToDtoAsync(settings);
     }
+
+    /// <remarks>
+    /// Changes the setting that allows the user to organize the grouping of rooms.
+    /// </remarks>
+    /// <summary>Organize rooms grouping</summary>
+    /// <path>api/2.0/settings/organizegrouping</path>
+    [Tags("Files / Settings")]
+    [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
+    [HttpPut("settings/organizegrouping")]
+    public async Task<bool> SetOrganizeRoomsGrouping(SettingsRequestDto inDto)
+    {
+        await filesSettingsHelper.SetOrganizeRoomsGroupingAsync(inDto.Set);
+        return await filesSettingsHelper.GetOrganizeRoomsGroupingAsync();
+    }
 }

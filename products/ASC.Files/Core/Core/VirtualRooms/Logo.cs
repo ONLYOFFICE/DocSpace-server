@@ -82,3 +82,16 @@ public class LogoCover
     /// </summary>
     public required string Data { get; set; }
 }
+
+public class MultiSizeLogoCover
+{
+    /// <summary>
+    /// The logo cover ID.
+    /// </summary>
+    public required string Id { get; set; }
+
+    /// <summary>
+    /// The logo cover data.
+    /// </summary>
+    public required IReadOnlyDictionary<string, string> Data { get; init; }
+}
