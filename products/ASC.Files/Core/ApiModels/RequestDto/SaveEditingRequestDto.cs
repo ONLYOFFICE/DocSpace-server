@@ -41,14 +41,14 @@ public class SaveEditingRequestDto<T> : IModelWithFile
     /// <summary>
     /// The editing file extension from the request.
     /// </summary>
+    /// <example>.txt</example>
     [FromForm(Name = "FileExtension")]
-    [SwaggerSchemaCustom(Example = ".txt")]
     public string FileExtension { get; set; }
 
     /// <summary>
     /// The URI to download the editing file.
     /// </summary>
-    [FromForm(Name = "DownloadUri")]
+    /// <example>https://example.com/file.txt</example>
     public string DownloadUri { get; set; }
 
     /// <summary>

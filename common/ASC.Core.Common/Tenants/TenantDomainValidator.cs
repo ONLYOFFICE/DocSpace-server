@@ -39,17 +39,19 @@ public class TenantDomainValidator
     /// <summary>
     /// The regex string to validate a domain.
     /// </summary>
+    /// <example>^[a-z0-9]([a-z0-9-]){1,61}[a-z0-9]$</example>
     public string Regex { get; }
 
     /// <summary>
     /// The minimum length of the valid domain.
     /// </summary>
+    /// <example>6</example>
     public int MinLength { get; }
 
     /// <summary>
     /// The maximum length of the valid domain.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 63)]
+    /// <example>63</example>
     public int MaxLength { get; }
 
     public TenantDomainValidator()

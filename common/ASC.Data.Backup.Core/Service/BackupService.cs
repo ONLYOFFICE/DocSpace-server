@@ -693,7 +693,7 @@ public class ScheduleDto
     /// <summary>
     /// Specifies if a dump will be created or not.
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    /// <example>false</example>
     public required bool Dump { get; set; }
 }
 

@@ -36,201 +36,224 @@ public class EmployeeFullDto : EmployeeDto
     /// <summary>
     /// The user first name.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Mike")]
+    /// <example>Mike</example>
     public string FirstName { get; set; }
 
     /// <summary>
     /// The user last name.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Zanyatski")]
+    /// <example>Zanyatski</example>
     public string LastName { get; set; }
 
     /// <summary>
     /// The user username.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Mike.Zanyatski")]
+    /// <example>Mike.Zanyatski</example>
     public string UserName { get; set; }
 
     /// <summary>
     /// The user email.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "my@gmail.com")]
+    /// <example>my@gmail.com</example>
     [EmailAddress]
     public string Email { get; set; }
 
     /// <summary>
     /// The list of user contacts.
     /// </summary>
+    /// <example>null</example>
     public List<Contact> Contacts { get; set; }
 
     /// <summary>
     /// The user birthday.
     /// </summary>
+    /// <example>null</example>
     public ApiDateTime Birthday { get; set; }
 
     /// <summary>
     /// The user sex.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "male")]
+    /// <example>male</example>
     public string Sex { get; set; }
 
     /// <summary>
     /// The user status.
     /// </summary>
+    /// <example>Active</example>
     public EmployeeStatus Status { get; set; }
 
     /// <summary>
     /// The user activation status.
     /// </summary>
+    /// <example>Activated</example>
     public EmployeeActivationStatus ActivationStatus { get; set; }
 
     /// <summary>
     /// The date when the user account was terminated.
     /// </summary>
+    /// <example>null</example>
     public ApiDateTime Terminated { get; set; }
 
     /// <summary>
     /// The user department.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Marketing")]
+    /// <example>Marketing</example>
     public string Department { get; set; }
 
     /// <summary>
     /// The user registration date.
     /// </summary>
+    /// <example>null</example>
     public ApiDateTime WorkFrom { get; set; }
 
     /// <summary>
     /// The list of user groups.
     /// </summary>
+    /// <example>null</example>
     public List<GroupSummaryDto> Groups { get; set; }
 
     /// <summary>
     /// The user location.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Palo Alto")]
+    /// <example>Palo Alto</example>
     public string Location { get; set; }
 
     /// <summary>
     /// The user notes.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Notes to worker")]
+    /// <example>Notes to worker</example>
     public string Notes { get; set; }
 
     /// <summary>
     /// Specifies if the user is an administrator or not.
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    /// <example>false</example>
     public bool IsAdmin { get; set; }
 
     /// <summary>
     /// Specifies if the user is a room administrator or not.
     /// </summary>
+    /// <example>false</example>
     public bool IsRoomAdmin { get; set; }
 
     /// <summary>
     /// Specifies if the LDAP settings are enabled for the user or not.
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    /// <example>false</example>
     public bool IsLDAP { get; set; }
 
     /// <summary>
     /// The list of the administrator modules.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "[\"projects\", \"crm\"]")]
+    /// <example>["projects", "crm"]</example>
     public List<string> ListAdminModules { get; set; }
 
     /// <summary>
     /// Specifies if the user is a portal owner or not.
     /// </summary>
+    /// <example>false</example>
     public bool IsOwner { get; set; }
 
     /// <summary>
     /// Specifies if the user is a portal visitor or not.
     /// </summary>
+    /// <example>false</example>
     public bool IsVisitor { get; set; }
 
     /// <summary>
     /// Specifies if the user is a portal collaborator or not.
     /// </summary>
+    /// <example>false</example>
     public bool IsCollaborator { get; set; }
 
     /// <summary>
     /// The user culture code.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "en-EN")]
+    /// <example>en-EN</example>
     public string CultureName { get; set; }
 
     /// <summary>
     /// The user mobile phone number.
     /// </summary>
+    /// <example>null</example>
     public string MobilePhone { get; set; }
 
     /// <summary>
     /// The mobile phone activation status.
     /// </summary>
+    /// <example>NotActivated</example>
     public MobilePhoneActivationStatus MobilePhoneActivationStatus { get; set; }
 
     /// <summary>
     /// Specifies if the SSO settings are enabled for the user or not.
     /// </summary>
-    [SwaggerSchemaCustom(Example = false)]
+    /// <example>false</example>
     public bool IsSSO { get; set; }
 
     /// <summary>
     /// The user theme settings.
     /// </summary>
+    /// <example>null</example>
     public DarkThemeSettingsType? Theme { get; set; }
 
     /// <summary>
     /// The user quota limit.
     /// </summary>
+    /// <example>null</example>
     public long? QuotaLimit { get; set; }
 
     /// <summary>
     /// The portal used space of the user.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 12345)]
+    /// <example>12345</example>
     public double? UsedSpace { get; set; }
 
     /// <summary>
     /// Specifies if the user has access rights.
     /// </summary>
+    /// <example>null</example>
     public bool? Shared { get; set; }
 
     /// <summary>
     /// Specifies if the user has a custom quota or not.
     /// </summary>
+    /// <example>null</example>
     public bool? IsCustomQuota { get; set; }
 
     /// <summary>
     /// The current login event ID.
     /// </summary>
+    /// <example>null</example>
     public int? LoginEventId { get; set; }
 
     /// <summary>
     /// The auth cookie lifetime in seconds.
     /// </summary>
+    /// <example>null</example>
     public double? AuthCookieLifetime { get; set; }
 
     /// <summary>
     /// The user who created the current user.
     /// </summary>
+    /// <example>null</example>
     public EmployeeDto CreatedBy { get; set; }
 
     /// <summary>
     /// The user registration date.
     /// </summary>
+    /// <example>null</example>
     public ApiDateTime RegistrationDate { get; set; }
 
     /// <summary>
     /// Specifies if the user has a personal folder or not.
     /// </summary>
+    /// <example>null</example>
     public bool? HasPersonalFolder { get; set; }
 
     /// <summary>
     /// Indicates whether the user has enabled two-factor authentication (TFA) using an authentication app.
     /// </summary>
+    /// <example>null</example>
     public bool? TfaAppEnabled { get; set; }
 }
 [Scope]

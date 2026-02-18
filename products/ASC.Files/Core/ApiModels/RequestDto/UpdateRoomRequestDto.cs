@@ -47,11 +47,13 @@ public class UpdateRoomRequest
     /// <summary>
     /// Specifies whether to create a third-party room with indexing.
     /// </summary>
+    /// <example>true</example>
     public bool? Indexing { get; set; }
 
     /// <summary>
     /// Specifies whether to deny downloads from the third-party room.
     /// </summary>
+    /// <example>true</example>
     public bool? DenyDownload { get; set; }
 
     /// <summary>
@@ -86,6 +88,9 @@ public class UpdateRoomRequest
     [StringLength(50)]
     public string Cover { get; set; }
     
+    /// <summary>
+    /// The chat settings.
+    /// </summary>
     public ChatSettings ChatSettings { get; set; }
 }
 

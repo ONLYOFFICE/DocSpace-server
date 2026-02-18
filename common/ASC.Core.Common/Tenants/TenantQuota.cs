@@ -45,58 +45,67 @@ public class TenantQuota
     /// <summary>
     /// The tenant ID.
     /// </summary>
+    /// <example>1</example>
     public int TenantId { get; set; }
 
     /// <summary>
     /// The tenant name.
     /// </summary>
-    [SwaggerSchemaCustom(Example = "Default")]
+    /// <example>Default</example>
     public string Name { get; set; }
 
     /// <summary>
     /// The tenant price.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 10.0)]
+    /// <example>10.0</example>
     public decimal Price { get; set; }
 
     /// <summary>
     /// The tenant price currency symbol.
     /// </summary>
+    /// <example>$</example>
     public string PriceCurrencySymbol { get; set; }
 
     /// <summary>
     /// The tenant price three-character ISO 4217 currency symbol.
     /// </summary>
+    /// <example>USD</example>
     public string PriceISOCurrencySymbol { get; set; }
 
     /// <summary>
     /// The tenant product ID.
     /// </summary>
+    /// <example>64</example>
     public string ProductId { get; set; }
 
     /// <summary>
     /// The service name.
     /// </summary>
+    /// <example>space</example>
     public string ServiceName { get; set; }
 
     /// <summary>
     /// The service group.
     /// </summary>
+    /// <example>ai</example>
     public string ServiceGroup { get; set; }
 
     /// <summary>
     /// Specifies if the tenant quota is visible or not.
     /// </summary>
+    /// <example>true</example>
     public bool Visible { get; set; }
 
     /// <summary>
     /// Specifies if the tenant quota applies to the wallet or not
     /// </summary>
+    /// <example>true</example>
     public bool Wallet { get; set; }
 
     /// <summary>
     /// The quota due date.
     /// </summary>
+    /// <example>2021-01-01T00:00:00</example>
     public DateTime? DueDate { get; set; }
 
     [JsonIgnore]
@@ -118,7 +127,7 @@ public class TenantQuota
     /// <summary>
     /// The tenant maximum file size.
     /// </summary>
-    [SwaggerSchemaCustom(Example = 25 * 1024 * 1024)]
+    /// <example>25000000</example>
     public long MaxFileSize
     {
         get => _maxFileSizeFeature.Value;
@@ -130,7 +139,7 @@ public class TenantQuota
     /// <summary>
     /// The tenant maximum total size.
     /// </summary>
-    [SwaggerSchemaCustom(Example = long.MaxValue)]
+    /// <example>25000000000</example>
     public long MaxTotalSize
     {
         get => _maxTotalSizeFeature.Value;
