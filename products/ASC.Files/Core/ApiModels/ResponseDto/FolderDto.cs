@@ -163,10 +163,50 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <summary>
     /// The file entry type of the folder.
     /// </summary>
+    /// <example>1</example>
     public override FileEntryType FileEntryType => FileEntryType.Folder;
 
+    /// <summary>
+    /// The AI chat settings for the folder room. Contains configuration for AI provider, model selection, and custom prompts.
+    /// Only applicable to rooms with AI chat functionality enabled. Null if the room does not have chat settings configured.
+    /// </summary>
+    /// <remarks>
+    /// This property configures AI-powered chat capabilities for a room. The settings include:
+    /// - ProviderId: Identifier for the AI provider (e.g., OpenAI, Azure, internal gateway)
+    /// - ModelId: Specific AI model to use (e.g., "gpt-4", "gpt-3.5-turbo")
+    /// - Prompt: Custom system prompt to guide AI behavior for this room
+    /// - Internal: Auto-calculated flag indicating if using the internal AI gateway
+    /// </remarks>
+    /// <example>
+    /// {
+    ///   "ProviderId": 1,
+    ///   "ModelId": "gpt-4",
+    ///   "Prompt": "You are a helpful assistant for project documentation.",
+    ///   "Internal": false
+    /// }
+    /// </example>
     public ChatSettings ChatSettings { get; set; }
-    
+
+    /// <summary>
+    /// The room type of the root folder. Indicates the type of the parent room if the current folder is nested within a room hierarchy.
+    /// This property helps identify the context in which a nested folder exists.
+    /// </summary>
+    /// <remarks>
+    /// When a folder is located inside a room (e.g., a subfolder within a collaboration room), this property indicates
+    /// the room type of the topmost room in the hierarchy. This is useful for applying room-specific logic or permissions
+    /// to nested folders.
+    ///
+    /// Common room types include:
+    /// - CustomRoom (2): Custom collaboration room
+    /// - FillingFormsRoom (4): Forms filling room
+    /// - EditingRoom (5): Document editing room
+    /// - ReviewRoom (6): Document review room
+    /// - ReadOnlyRoom (7): Read-only room
+    /// - PublicRoom (8): Public access room
+    ///
+    /// Null if the folder is not nested within a room or is itself a top-level room.
+    /// </remarks>
+    /// <example>2</example>
     public RoomType? RootRoomType { get; set; }
 }
 

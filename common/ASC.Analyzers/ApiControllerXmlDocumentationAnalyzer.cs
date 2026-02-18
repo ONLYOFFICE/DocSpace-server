@@ -325,7 +325,9 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
         var members = typeSymbol.GetMembers();
         foreach (var member in members)
         {
-            if (member is not IPropertySymbol propertySymbol)
+            if (member is not IPropertySymbol propertySymbol || 
+                propertySymbol.IsStatic || 
+                propertySymbol.GetAttributes().Any(attr => attr.AttributeClass?.Name == "JsonIgnoreAttribute"))
             {
                 continue;
             }

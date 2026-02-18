@@ -98,6 +98,10 @@ public class AdditionalWhiteLabelSettings : ISettings<AdditionalWhiteLabelSettin
             LicenseAgreementsEnabled = !string.IsNullOrWhiteSpace(ExternalResourceSettingsHelper?.Common.GetDefaultRegionalFullEntry("license"))
         };
     }
-
+    
+    /// <summary>
+    /// The timestamp indicating when the settings were last modified.
+    /// </summary>
+    /// <example>1990-01-01T00:00:00Z</example>
     public DateTime LastModified { get; set; }
 }

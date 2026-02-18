@@ -45,6 +45,32 @@ public class UploadSessionRequestDto<T>
     [FromRoute(Name = "sessionId")]
     public string SessionId { get; set; }
 
+    /// <summary>
+    /// The file to be uploaded as part of the multipart/form-data request.
+    /// This property represents the uploaded file content from the HTTP request form.
+    /// The file is accessed via the IFormFile interface which provides access to the file name, content type, length, and stream.
+    /// </summary>
+    /// <remarks>
+    /// When making a request, the file should be sent as form data with the content type set to multipart/form-data.
+    /// The file stream can be accessed using the OpenReadStream() method.
+    /// </remarks>
+    /// <example>
+    /// Example of sending a file using curl:
+    /// <code>
+    /// curl -X POST "https://api.example.com/api/2.0/files/folder/1/upload/session_abc123" \
+    ///   -H "Authorization: Bearer your_token" \
+    ///   -F "file=@/path/to/document.pdf"
+    /// </code>
+    ///
+    /// Example of sending a file using C# HttpClient:
+    /// <code>
+    /// using var content = new MultipartFormDataContent();
+    /// using var fileStream = File.OpenRead("document.pdf");
+    /// content.Add(new StreamContent(fileStream), "file", "document.pdf");
+    ///
+    /// var response = await httpClient.PostAsync(url, content);
+    /// </code>
+    /// </example>
     public IFormFile File { get; set; }
 }
 
@@ -74,6 +100,32 @@ public class UploadSessionAsyncRequestDto<T>
     [FromQuery]
     public int? ChunkNumber { get; set; }
 
+    /// <summary>
+    /// The file chunk to be uploaded as part of the multipart/form-data request.
+    /// This property represents the uploaded file chunk content from the HTTP request form for chunked upload operations.
+    /// The file chunk is accessed via the IFormFile interface which provides access to the chunk content and length.
+    /// </summary>
+    /// <remarks>
+    /// When making a request, the file chunk should be sent as form data with the content type set to multipart/form-data.
+    /// For large files, the upload can be split into multiple chunks, each sent in a separate request with a corresponding ChunkNumber.
+    /// </remarks>
+    /// <example>
+    /// Example of sending a file chunk using curl:
+    /// <code>
+    /// curl -X POST "https://api.example.com/api/2.0/files/folder/1/upload/session_abc123?chunkNumber=1" \
+    ///   -H "Authorization: Bearer your_token" \
+    ///   -F "file=@/path/to/chunk1.part"
+    /// </code>
+    ///
+    /// Example of sending a file chunk using C# HttpClient:
+    /// <code>
+    /// using var content = new MultipartFormDataContent();
+    /// var chunkStream = new MemoryStream(chunkBytes);
+    /// content.Add(new StreamContent(chunkStream), "file", "document.pdf");
+    ///
+    /// var response = await httpClient.PostAsync($"{url}?chunkNumber=1", content);
+    /// </code>
+    /// </example>
     [FromForm]
     public IFormFile File { get; set; }
 }

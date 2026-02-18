@@ -39,8 +39,38 @@ public class FileStreamRequestDto<T> : IModelWithFile
     public required T FileId { get; set; }
 
     /// <summary>
-    /// The request input stream.
+    /// The file content to update the existing file, uploaded as part of the multipart/form-data request.
+    /// This property represents the new file content from the HTTP request form that will replace the existing file content.
+    /// The file is accessed via the IFormFile interface which provides access to the file name, content type, length, and stream.
     /// </summary>
+    /// <remarks>
+    /// When making a request, the file should be sent as form data with the field name "File" and content type set to multipart/form-data.
+    /// This endpoint is used to update the contents of an existing file while preserving its metadata and location.
+    /// The file extension can be specified separately if the file format is being changed.
+    /// </remarks>
+    /// <example>
+    /// Example of updating file content using curl:
+    /// <code>
+    /// curl -X PUT "https://api.example.com/api/2.0/files/file/123/update" \
+    ///   -H "Authorization: Bearer your_token" \
+    ///   -F "File=@/path/to/new_content.docx" \
+    ///   -F "FileExtension=.docx" \
+    ///   -F "Encrypted=false" \
+    ///   -F "Forcesave=false"
+    /// </code>
+    ///
+    /// Example of updating file content using C# HttpClient:
+    /// <code>
+    /// using var content = new MultipartFormDataContent();
+    /// using var fileStream = File.OpenRead("new_content.docx");
+    /// content.Add(new StreamContent(fileStream), "File", "new_content.docx");
+    /// content.Add(new StringContent(".docx"), "FileExtension");
+    /// content.Add(new StringContent("false"), "Encrypted");
+    /// content.Add(new StringContent("false"), "Forcesave");
+    ///
+    /// var response = await httpClient.PutAsync(url, content);
+    /// </code>
+    /// </example>
     [FromForm(Name = "File")]
     public IFormFile File { get; set; }
 

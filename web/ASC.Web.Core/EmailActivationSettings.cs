@@ -45,6 +45,10 @@ public class EmailActivationSettings : ISettings<EmailActivationSettings>
     {
         return new EmailActivationSettings { Show = true };
     }
-
+    
+    /// <summary>
+    /// The timestamp indicating when the settings were last modified.
+    /// </summary>
+    /// <example>1990-01-01T00:00:00Z</example>
     public DateTime LastModified { get; set; }
 }

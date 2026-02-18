@@ -221,7 +221,22 @@ public class FileDto<T> : FileEntryDto<T>
     /// </summary>
     /// <example>0</example>
     public VectorizationStatus? VectorizationStatus { get; set; }
-    
+
+    /// <summary>
+    /// The dimensions (width and height) of the image file in pixels.
+    /// This property is populated only for image files that can be viewed (supported formats like PNG, JPEG, GIF, BMP, etc.).
+    /// For non-image files, this property remains null.
+    /// </summary>
+    /// <remarks>
+    /// The dimensions are determined using ImageMagick library during file processing.
+    /// If the image cannot be read or processed, the dimensions will not be set.
+    /// </remarks>
+    /// <example>
+    /// {
+    ///     "Width": 1920,
+    ///     "Height": 1080
+    /// }
+    /// </example>
     public Size Dimensions { get; set; }
 }
 

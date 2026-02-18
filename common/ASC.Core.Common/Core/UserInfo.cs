@@ -246,6 +246,12 @@ public sealed class UserInfo : IDirectRecipient, ICloneable
     }
 
     string[] IDirectRecipient.Addresses => !string.IsNullOrEmpty(Email) ? [Email] : [];
+
+    /// <summary>
+    /// Indicates whether the activation status of the employee or recipient is unchecked or inactive.
+    /// Depending on the context, this property evaluates the activation or eligibility status accordingly.
+    /// </summary>
+    /// <example>false</example>
     public bool CheckActivation => !IsActive; /*if user already active we don't need activation*/
     string IRecipient.ID => Id.ToString();
     string IRecipient.Name => ToString();

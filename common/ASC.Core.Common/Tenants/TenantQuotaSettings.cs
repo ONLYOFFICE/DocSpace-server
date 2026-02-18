@@ -50,6 +50,7 @@ public class TenantQuotaSettings : ISettings<TenantQuotaSettings>
     /// <summary>
     /// The date of the last tenant quota recalculation.
     /// </summary>
+    /// <example>1990-01-01T00:00:00Z</example>
     public DateTime? LastRecalculateDate { get; set; }
 
     public TenantQuotaSettings GetDefault()
@@ -60,6 +61,10 @@ public class TenantQuotaSettings : ISettings<TenantQuotaSettings>
             Quota = -1
         };
     }
-
+    
+    /// <summary>
+    /// The timestamp indicating when the settings were last modified.
+    /// </summary>
+    /// <example>1990-01-01T00:00:00Z</example>
     public DateTime LastModified { get; set; }
 }
