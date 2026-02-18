@@ -26,6 +26,9 @@
 
 namespace ASC.AI.Models.RequestDto
 {
+    /// <summary>
+    /// Request to retrieve a filtered and paginated list of AI agent rooms.
+    /// </summary>
     public class GetAgentListRequestDto
     {
         /// <summary>

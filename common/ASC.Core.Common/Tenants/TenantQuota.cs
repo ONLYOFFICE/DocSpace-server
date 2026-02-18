@@ -455,7 +455,7 @@ public class TenantQuota
         _brandingFeature = new TenantQuotaFeatureFlag(this, "branding") { EmployeeType = EmployeeType.DocSpaceAdmin };
         _customizationFeature = new TenantQuotaFeatureFlag(this, "customization") { Order = 3, EmployeeType = EmployeeType.DocSpaceAdmin };
         _lifetimeFeature = new TenantQuotaFeatureFlag(this, "lifetime") { Standalone = true };
-        _automationApiFeature = new TenantQuotaFeatureFlag(this, "automationapi") { Standalone = true };
+        _automationApiFeature = new TenantQuotaFeatureFlag(this, "automationapi") { Order = 12 };
         _customFeature = new TenantQuotaFeatureFlag(this, "custom") { Visible = false };
         _restoreFeature = new TenantQuotaFeatureFlag(this, "restore") { Order = 7, EmployeeType = EmployeeType.DocSpaceAdmin };
         _oauthFeature = new TenantQuotaFeatureFlag(this, "oauth");
