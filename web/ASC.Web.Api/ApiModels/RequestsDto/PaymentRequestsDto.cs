@@ -194,19 +194,13 @@ public class ChangeWalletServiceStateRequestDto
 }
 
 /// <summary>
-/// The request parameters for changing the AI model availability state.
+/// The request parameters for setting restricted AI models.
 /// </summary>
-public class ChangeAiModelAvailabilityStateRequestDto
+public class SetRestrictedAiModelsRequestDto
 {
     /// <summary>
-    /// The AI model ID.
+    /// The set of restricted AI model IDs.
     /// </summary>
     [Required]
-    [MaxLength(128)]
-    public string ModelId { get; set; }
-
-    /// <summary>
-    /// Indicates whether the AI model is available or not.
-    /// </summary>
-    public bool Enabled { get; set; }
+    public HashSet<string> Models { get; set; }
 }

@@ -70,16 +70,18 @@ public class AiGateway(
 
     public async Task<AiPricesResponse> GetPricesAsync()
     {
-        var key = await GenerateKeyAsync();
+        return await SendAsync<AiPricesResponse>(HttpMethod.Get, "/prices");
+    }
 
-        using var request = new HttpRequestMessage(HttpMethod.Get, $"{Url}/prices");
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", key);
+    public async Task<RestrictedModelsResponse> GetRestrictedModelsAsync()
+    {
+        return await SendAsync<RestrictedModelsResponse>(HttpMethod.Get, "/chat/models/restrictions");
+    }
 
-        var httpClient = httpClientFactory.CreateClient();
-        using var response = await httpClient.SendAsync(request);
-        response.EnsureSuccessStatusCode();
-
-        return await response.Content.ReadFromJsonAsync<AiPricesResponse>();
+    public async Task<RestrictedModelsResponse> SetRestrictedModelsAsync(HashSet<string> models)
+    {
+        var content = JsonContent.Create(new SetRestrictedModelsRequest { Models = models });
+        return await SendAsync<RestrictedModelsResponse>(HttpMethod.Put, "/chat/models/restrictions", content);
     }
 
     private async Task<string> GenerateKeyAsync()
@@ -105,6 +107,21 @@ public class AiGateway(
         };
 
         return JsonWebToken.Encode(payload, Settings.Secret);
+    }
+    
+    private async Task<T> SendAsync<T>(HttpMethod method, string path, HttpContent content = null)
+    {
+        var key = await GenerateKeyAsync();
+
+        using var request = new HttpRequestMessage(method, $"{Url}{path}");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", key);
+        request.Content = content;
+
+        var httpClient = httpClientFactory.CreateClient();
+        using var response = await httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadFromJsonAsync<T>();
     }
 }
 
@@ -149,4 +166,14 @@ public record AiWebSearchPricing
 {
     public decimal Search { get; init; }
     public decimal Contents { get; init; }
+}
+
+public class SetRestrictedModelsRequest
+{
+    public required HashSet<string> Models { get; init; }
+}
+
+public record RestrictedModelsResponse
+{
+    public required List<string> Models { get; init; }
 }

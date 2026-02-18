@@ -1223,18 +1223,20 @@ public class PaymentController(
         return aiPrices;
     }
 
-    /// <remarks>
-    /// Returns the AI models availability settings for current tenant.
-    /// </remarks>
     /// <summary>
-    /// Get the AI models availability settings
+    /// Get restricted AI models
     /// </summary>
-    /// <path>api/2.0/portal/payment/aimodel/availabilitysettings</path>
+    /// <remarks>
+    /// Returns the list of AI chat model IDs that are restricted (disabled) for the current tenant.
+    /// Restricted models cannot be used for AI chat conversations by any user within the portal.
+    /// Only DocSpace administrators can access this endpoint.
+    /// </remarks>
+    /// <path>api/2.0/portal/payment/ai-model/restrictions</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The AI models availability settings", typeof(TenantAiModelsAvailabilitySettings))]
+    [SwaggerResponse(200, "The list of restricted AI model IDs", typeof(RestrictedModelsResponse))]
     [SwaggerResponse(403, "No permissions to perform this action")]
-    [HttpGet("aimodel/availabilitysettings")]
-    public async Task<TenantAiModelsAvailabilitySettings> GetTenantAiModelsAvailabilitySettings()
+    [HttpGet("ai-model/restrictions")]
+    public async Task<RestrictedModelsResponse> GetRestrictedAiModels()
     {
         if (!tariffService.IsConfigured())
         {
@@ -1243,24 +1245,23 @@ public class PaymentController(
 
         await DemandAdminAsync();
 
-        var settings = await settingsManager.LoadAsync<TenantAiModelsAvailabilitySettings>();
-
-        return settings;
+        return await aiGateway.GetRestrictedModelsAsync();
     }
 
-    /// <remarks>
-    /// Changes the availability state of an AI model
-    /// </remarks>
     /// <summary>
-    /// Change AI model availability state
+    /// Set restricted AI models
     /// </summary>
-    /// <path>api/2.0/portal/payment/aimodel/availabilitystate</path>
+    /// <remarks>
+    /// Overwrites the entire set of restricted AI model IDs for the current tenant.
+    /// The request body must contain the complete desired set — to add a restriction, include the new model alongside existing ones;
+    /// to remove one, omit it. An empty set lifts all restrictions. Only the portal payer can perform this action.
+    /// </remarks>
+    /// <path>api/2.0/portal/payment/ai-model/restrictions</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The AI models availability settings", typeof(TenantAiModelsAvailabilitySettings))]
-    [SwaggerResponse(400, "Invalid ModelId")]
+    [SwaggerResponse(200, "The updated list of restricted AI model IDs", typeof(RestrictedModelsResponse))]
     [SwaggerResponse(403, "No permissions to perform this action")]
-    [HttpPost("aimodel/availabilitystate")]
-    public async Task<TenantAiModelsAvailabilitySettings> ChangeAiModelAvailabilityState(ChangeAiModelAvailabilityStateRequestDto inDto)
+    [HttpPut("ai-model/restrictions")]
+    public async Task<RestrictedModelsResponse> SetRestrictedAiModels(SetRestrictedAiModelsRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -1279,30 +1280,11 @@ public class PaymentController(
 
         await DemandPayerAsync(customerInfo);
 
-        var settings = await settingsManager.LoadAsync<TenantAiModelsAvailabilitySettings>();
-
-        settings.DisabledModels ??= [];
-
-        if (inDto.Enabled && settings.DisabledModels.Contains(inDto.ModelId))
-        {
-            settings.DisabledModels.Remove(inDto.ModelId);
-        }
-
-        if (!inDto.Enabled && !settings.DisabledModels.Contains(inDto.ModelId))
-        {
-            settings.DisabledModels.Add(inDto.ModelId);
-        }
-
-        if (settings.DisabledModels.Count == 0)
-        {
-            settings.DisabledModels = null;
-        }
-
-        var result = await settingsManager.SaveAsync(settings);
+        var result = await aiGateway.SetRestrictedModelsAsync(inDto.Models);
 
         messageService.Send(MessageAction.CustomerWalletServicesSettingsUpdated);
 
-        return settings;
+        return result;
     }
 
     private async Task DemandAdminAsync()
