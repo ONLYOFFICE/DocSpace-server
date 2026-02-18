@@ -26,9 +26,14 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request parameters for deleting one or more AI providers.
+/// </summary>
 public class RemoveProviderRequestDto
 {
-    /// <summary>The set of AI provider IDs to remove.</summary>
+    /// <summary>
+    /// The set of AI provider identifiers to delete.
+    /// </summary>
     /// <example>[1, 2, 3]</example>
     public required HashSet<int> Ids { get; set; }
 }

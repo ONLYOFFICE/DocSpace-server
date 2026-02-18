@@ -26,25 +26,39 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request to start a new AI chat session in a room.
+/// </summary>
 public class StartNewChatRequestDto
 {
-    /// <summary>The room ID.</summary>
+    /// <summary>
+    /// The identifier of the room in which to create the new AI chat session.
+    /// </summary>
     /// <example>42</example>
     [FromRoute(Name = "roomId")]
     public required int RoomId { get; set; }
 
-    /// <summary>The body of the request to start a new chat.</summary>
+    /// <summary>
+    /// The initial message and optional file attachments.
+    /// </summary>
     [FromBody]
     public required StartNewChatBody Body { get; set; }
 }
 
+/// <summary>
+/// Parameters for starting a new AI chat session.
+/// </summary>
 public class StartNewChatBody
 {
-    /// <summary>The initial message text.</summary>
+    /// <summary>
+    /// The initial user message to send to the AI assistant.
+    /// </summary>
     /// <example>Hello, can you help me with this document?</example>
     public required string Message { get; set; }
 
-    /// <summary>The context folder ID.</summary>
+    /// <summary>
+    /// The optional collection of file identifiers to attach as context for the AI model.
+    /// </summary>
     /// <example>123</example>
     public int? ContextFolderId { get; set; }
 

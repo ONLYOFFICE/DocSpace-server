@@ -32,14 +32,15 @@ namespace ASC.AI.Models.ResponseDto;
 public record ChatDto(Guid Id, string Title, ApiDateTime CreatedOn, ApiDateTime ModifiedOn, EmployeeDto CreatedBy)
 {
     /// <summary>
-    /// The chat session ID.
+    /// The unique identifier of the AI chat session.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid Id { get; } = Id;
 
     /// <summary>
-    /// The chat session title.
+    /// The display title of the chat session.
     /// </summary>
+
     /// <example>Project discussion</example>
     public string Title { get; } = Title;
 

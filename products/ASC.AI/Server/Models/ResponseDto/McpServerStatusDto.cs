@@ -27,41 +27,41 @@
 namespace ASC.AI.Models.ResponseDto;
 
 /// <summary>
-/// The MCP server status information.
+/// MCP server status within a room, reflecting the current user's connection state for OAuth-based servers.
 /// </summary>
 public class McpServerStatusDto
 {
     /// <summary>
-    /// The MCP server ID.
+    /// Unique identifier of the MCP server.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid Id { get; init; }
 
     /// <summary>
-    /// The MCP server name.
+    /// Display name of the MCP server.
     /// </summary>
     /// <example>DocSpace Tools</example>
     public required string Name { get; init; }
 
     /// <summary>
-    /// The MCP server type.
+    /// Type of the MCP server (Custom, DocSpace).
     /// </summary>
     /// <example>0</example>
     public ServerType ServerType { get; init; }
 
     /// <summary>
-    /// Specifies whether the MCP server is connected.
+    /// Indicates whether the current user has an active connection to this server. For direct-connection servers this is always true; for OAuth-based servers it reflects whether the user has completed authorization.
     /// </summary>
     /// <example>true</example>
     public bool Connected { get; init; }
 
     /// <summary>
-    /// The MCP server icon.
+    /// Server icon in multiple resolutions for UI display.
     /// </summary>
     public Icon? Icon { get; init; }
 
     /// <summary>
-    /// Specifies whether the MCP server settings need to be reset.
+    /// Indicates whether the server requires a configuration reset due to connectivity or credential issues.
     /// </summary>
     /// <example>false</example>
     public bool NeedReset { get; init; }

@@ -26,18 +26,26 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request to permanently delete one or more MCP servers from the tenant.
+/// </summary>
 public class DeleteServersRequestDto
 {
     /// <summary>
-    /// The request body containing the set of server IDs to be deleted.
+    /// Server identifiers to delete.
     /// </summary>
     [FromBody]
     public required DeleteServersRequestBody Body { get; init; }
 }
 
+/// <summary>
+/// Parameters specifying which MCP servers to delete.
+/// </summary>
 public class DeleteServersRequestBody
 {
-    /// <summary>The set of server IDs to delete.</summary>
+    /// <summary>
+    /// Set of unique identifiers of the MCP servers to permanently remove. All room associations and connection data will also be deleted.
+    /// </summary>
     /// <example>["00000000-0000-0000-0000-000000000000"]</example>
     public required HashSet<Guid> Servers { get; init; }
 }

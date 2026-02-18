@@ -26,10 +26,13 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request to retrieve a paginated list of AI chat sessions for a room.
+/// </summary>
 public class GetChatsRequestDto : PaginatedRequestDto
 {
     /// <summary>
-    /// The room ID.
+    /// The identifier of the room whose AI chat sessions are to be listed.
     /// </summary>
     /// <example>42</example>
     [FromRoute(Name = "roomId")]

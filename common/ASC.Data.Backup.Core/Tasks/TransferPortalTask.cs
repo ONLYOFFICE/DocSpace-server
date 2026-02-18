@@ -78,7 +78,7 @@ public class TransferPortalTask(DbFactory dbFactory,
             SetStepsCount(ProcessStorage ? 3 : 2);
 
             //save db data to temporary file
-            var backupTask = serviceProvider.GetService<BackupPortalTask>();
+            using var backupTask = serviceProvider.GetService<BackupPortalTask>();
             backupTask.Init(TenantId, backupFilePath, Limit, DataOperatorFactory.GetDefaultWriteOperator(tempStream, backupFilePath), false);
             backupTask.ProcessStorage = false;
             backupTask.ProgressChanged = args => SetCurrentStepProgress(args.Progress);
@@ -89,7 +89,7 @@ public class TransferPortalTask(DbFactory dbFactory,
             await backupTask.RunJob();
 
             //restore db data from temporary file
-            var restoreTask = serviceProvider.GetService<RestorePortalTask>();
+            using var restoreTask = serviceProvider.GetService<RestorePortalTask>();
             restoreTask.Init(ToRegion, backupFilePath, false, columnMapper: columnMapper, cancellationToken: CancellationToken.None);
             restoreTask.ProcessStorage = false;
             restoreTask.ProgressChanged = args => SetCurrentStepProgress(args.Progress);

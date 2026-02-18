@@ -223,7 +223,7 @@ public class FolderDtoHelper(
             }
             else
             {
-                result.Tags = folder.Tags.Select(t => t.Name);
+                result.Tags = folder.Tags.OrderByDescending(t => t.Id).Select(t => t.Name);
             }
 
             result.Logo = await roomLogoManager.GetLogoAsync(folder);

@@ -40,7 +40,7 @@ public class EmployeeDto
     public Guid Id { get; set; }
 
     /// <summary>
-    /// The user display name.
+    /// The HTML-encoded user's display name formatted according to the default format for the current culture.
     /// </summary>
     /// <example>Mike Zanyatski</example>
     public string DisplayName { get; set; }

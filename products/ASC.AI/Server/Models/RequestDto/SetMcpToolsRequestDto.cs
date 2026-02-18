@@ -26,26 +26,43 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request to configure which tools are disabled for an MCP server within a room.
+/// </summary>
 public class SetMcpToolsRequestDto
 {
+    /// <summary>
+    /// Identifier of the room containing the MCP server.
+    /// </summary>
     /// <summary>The room ID.</summary>
     /// <example>42</example>
     [FromRoute(Name = "roomId")]
     public int RoomId { get; init; }
+
+    /// <summary>
+    /// Unique identifier of the MCP server whose tools are being configured.
+    /// </summary>
 
     /// <summary>The MCP server ID.</summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "serverId")]
     public Guid ServerId { get; init; }
 
-    /// <summary>Represents the body of the request containing the tools to be updated.</summary>
+    /// <summary>
+    /// Tool configuration parameters.
+    /// </summary>
     [FromBody]
     public required SetMcpToolsRequestBody Body { get; init; }
 }
 
+/// <summary>
+/// Parameters for updating the disabled tools list of an MCP server in a room.
+/// </summary>
 public class SetMcpToolsRequestBody
 {
-    /// <summary>The list of disabled tool names.</summary>
+    /// <summary>
+    /// List of tool names to disable. Tools not included in this list will remain enabled. Pass an empty list to enable all tools.
+    /// </summary>
     /// <example>["tool1", "tool2"]</example>
     public required List<string> DisabledTools { get; init; }
 }

@@ -26,9 +26,14 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request to retrieve a specific vectorization task by its identifier.
+/// </summary>
 public class GetVectorizationTaskRequestDto
 {
-    /// <summary>The vectorization task ID.</summary>
+    /// <summary>
+    /// The unique identifier of the vectorization task to retrieve.
+    /// </summary>
     /// <example>task_abc123</example>
     [FromRoute(Name = "id")]
     public required string Id { get; init; }

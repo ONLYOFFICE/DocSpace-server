@@ -27,54 +27,54 @@
 namespace ASC.AI.Models.ResponseDto;
 
 /// <summary>
-/// The AI provider information.
+/// AI provider details.
 /// </summary>
 public class AiProviderDto
 {
     /// <summary>
-    /// The AI provider identifier.
+    /// AI provider identifier.
     /// </summary>
     /// <example>1</example>
     public int Id { get; init; }
 
     /// <summary>
-    /// The AI provider title.
+    /// AI provider display title.
     /// </summary>
     /// <example>OpenAI</example>
     public required string Title { get; init; }
 
     /// <summary>
-    /// The AI provider type.
+    /// AI provider type (e.g., OpenAi, Anthropic, GoogleAi).
     /// </summary>
     /// <example>0</example>
     public ProviderType Type { get; init; }
 
     /// <summary>
-    /// The AI provider URL.
+    /// API endpoint URL for the AI provider.
     /// </summary>
     /// <example>https://api.openai.com/v1</example>
     public string? Url { get; init; }
 
     /// <summary>
-    /// The creation date and time.
+    /// Date and time when the provider was created.
     /// </summary>
     /// <example>2025-06-15T10:30:00.0000000Z</example>
     public required ApiDateTime CreatedOn { get; init; }
 
     /// <summary>
-    /// The last modification date and time.
+    /// Date and time when the provider was last modified.
     /// </summary>
     /// <example>2025-06-15T12:45:00.0000000Z</example>
     public required ApiDateTime ModifiedOn { get; init; }
 
     /// <summary>
-    /// Indicates whether the provider API key needs to be reset.
+    /// Indicates whether the provider's API key needs to be reset.
     /// </summary>
     /// <example>false</example>
     public bool NeedReset { get; init; }
 
     /// <summary>
-    /// Indicates whether this is the default provider.
+    /// Indicates whether this provider is the default provider for the tenant.
     /// </summary>
     /// <example>true</example>
     public bool IsDefault { get; init; }

@@ -26,45 +26,67 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request to update an existing custom MCP server configuration.
+/// </summary>
 public class UpdateServerRequestDto
 {
-    /// <summary>The server ID.</summary>
+    /// <summary>
+    /// Unique identifier of the MCP server to update.
+    /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "id")]
     public Guid Id { get; init; }
 
-    /// <summary>Contains the request body data for updating a server.</summary>
+    /// <summary>
+    /// Updated server configuration fields.
+    /// </summary>
     /// <remarks>This property encapsulates server-related details, such as endpoint, name, headers, and other optional metadata.</remarks>
     [FromBody]
     public required UpdateServerRequestBody Body { get; init; }
 }
 
+/// <summary>
+/// Parameters for updating an existing MCP server. All fields are optional — only provided fields will be modified.
+/// </summary>
 public class UpdateServerRequestBody
 {
-    /// <summary>The MCP server name.</summary>
+    /// <summary>
+    /// New display name for the server. Only letters, numbers, underscores, and hyphens are allowed. Maximum 128 characters.
+    /// </summary>
     /// <example>Updated MCP Server</example>
     [MaxLength(128)]
     public string? Name { get; init; }
 
-    /// <summary>The MCP server description.</summary>
+    /// <summary>
+    /// New human-readable description of the server's purpose. Maximum 255 characters.
+    /// </summary>
     /// <example>Updated server description</example>
     [MaxLength(255)]
     public string? Description { get; init; }
 
-    /// <summary>The MCP server endpoint URL.</summary>
+    /// <summary>
+    /// New base URL of the MCP server endpoint. If changed, the system will re-verify connectivity before saving.
+    /// </summary>
     /// <example>https://mcp.example.com/sse</example>
     [Url]
     public string? Endpoint { get; init; }
 
-    /// <summary>The optional HTTP headers.</summary>
+    /// <summary>
+    /// New HTTP headers to include with every request. If changed alongside the endpoint, connectivity is re-verified.
+    /// </summary>
     /// <example>{"Authorization": "Bearer token123"}</example>
     public Dictionary<string, string>? Headers { get; init; }
 
-    /// <summary>Specifies whether to update the server icon.</summary>
+    /// <summary>
+    /// Set to true to update the server icon. When true, the Icon field value (or null to remove) will be applied.
+    /// </summary>
     /// <example>true</example>
     public bool UpdateIcon { get; init; }
 
-    /// <summary>The MCP server icon URL.</summary>
+    /// <summary>
+    /// New Base64-encoded icon image for the server, or null to remove the existing icon. Only applied when UpdateIcon is true.
+    /// </summary>
     /// <example>https://example.com/icon.png</example>
     public string? Icon { get; init; }
 }

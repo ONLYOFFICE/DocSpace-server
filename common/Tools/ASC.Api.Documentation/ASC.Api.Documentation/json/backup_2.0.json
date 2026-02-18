@@ -325,6 +325,60 @@
         ]
       }
     },
+    "/api/2.0/backup/cancelbackup": {
+      "post": {
+        "tags": [
+          "Backup"
+        ],
+        "summary": "Cancel current backup",
+        "description": "Cancel current backup.",
+        "operationId": "cancelBackup",
+        "responses": {
+          "200": {
+            "description": "Boolean value: true if the operation is successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BooleanWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
     "/api/2.0/backup/getbackupprogress": {
       "get": {
         "tags": [
@@ -1021,6 +1075,9 @@
           "backupProgressEnum": {
             "$ref": "#/components/schemas/BackupProgressEnum"
           },
+          "status": {
+            "$ref": "#/components/schemas/DistributedTaskStatus"
+          },
           "taskId": {
             "type": "string",
             "nullable": true,
@@ -1336,6 +1393,49 @@
           }
         },
         "additionalProperties": false
+      },
+      "DistributedTaskStatus": {
+        "oneOf": [
+          {
+            "enum": [
+              "Created",
+              "Running",
+              "Completed",
+              "Canceled",
+              "Failted"
+            ],
+            "type": "string",
+            "description": "[Created - Created, Running - Running, Completed - Completed, Canceled - Canceled, Failted - Failted]",
+            "example": "Created"
+          },
+          {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "description": "[0 - Created, 1 - Running, 2 - Completed, 3 - Canceled, 4 - Failted]",
+            "example": 0,
+            "x-enum-varnames": [
+              "Created",
+              "Running",
+              "Completed",
+              "Canceled",
+              "Failted"
+            ],
+            "x-enum-descriptions": [
+              "Created",
+              "Running",
+              "Completed",
+              "Canceled",
+              "Failted"
+            ]
+          }
+        ],
+        "x-enum-type": "integer"
       },
       "Int32Wrapper": {
         "type": "object",

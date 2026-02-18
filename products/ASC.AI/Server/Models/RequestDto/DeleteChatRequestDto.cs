@@ -26,9 +26,14 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request to delete an AI chat session.
+/// </summary>
 public class DeleteChatRequestDto
 {
-    /// <summary>The chat ID.</summary>
+    /// <summary>
+    /// The unique identifier of the AI chat session to delete.
+    /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "chatId")]
     public Guid ChatId { get; set; }

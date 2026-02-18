@@ -26,24 +26,38 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request to configure the global web search settings for AI chat sessions.
+/// </summary>
 public class SetWebSearchConfigRequestDto
 {
-    /// <summary>Defines the request body containing web search settings.</summary>
+    /// <summary>
+    /// The web search configuration parameters.
+    /// </summary>
     [FromBody]
     public required SetWebSearchSettingsRequestBody Body { get; init; }
 }
 
+/// <summary>
+/// Parameters for configuring web search settings.
+/// </summary>
 public class SetWebSearchSettingsRequestBody
 {
-    /// <summary>Specifies whether the web search is enabled.</summary>
+    /// <summary>
+    /// Indicates whether web search is enabled for AI chat sessions.
+    /// </summary>
     /// <example>true</example>
     public bool Enabled { get; init; }
 
-    /// <summary>The web search engine type.</summary>
+    /// <summary>
+    /// The type of web search engine to use.
+    /// </summary>
     /// <example>1</example>
     public EngineType Type { get; init; }
 
-    /// <summary>The web search API key.</summary>
+    /// <summary>
+    /// The API key for the selected web search engine. Pass null to keep the existing key unchanged.
+    /// </summary>
     /// <example>search-api-key-123</example>
     public string? Key { get; init; }
 }

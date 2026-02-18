@@ -28,6 +28,9 @@ using ASC.Files.Core.ApiModels;
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request to create a new AI agent room.
+/// </summary>
 public class CreateAgentRequestDto
 {
     /// <summary>

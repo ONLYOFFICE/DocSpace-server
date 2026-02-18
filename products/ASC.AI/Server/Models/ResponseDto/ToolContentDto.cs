@@ -40,23 +40,23 @@ public class ToolContentDto : MessageContentDto
     public override MessageContentType Type => MessageContentType.Tool;
 
     /// <summary>
-    /// The tool name.
+    /// The name of the tool that was invoked by the AI assistant.
     /// </summary>
     /// <example>search_documents</example>
     public required string Name { get; init; }
 
     /// <summary>
-    /// The tool call arguments.
+    /// The key-value pairs of arguments passed to the tool, or null if the tool accepts no arguments.
     /// </summary>
     public IDictionary<string, object?>? Arguments { get; init; }
 
     /// <summary>
-    /// The tool call result.
+    /// The result returned by the tool after execution, or null if the tool has not yet completed.
     /// </summary>
     public object? Result { get; init; }
 
     /// <summary>
-    /// The MCP server information.
+    /// The metadata about the MCP server that provides this tool, or null for built-in tools.
     /// </summary>
     public McpServerInfo? McpServerInfo { get; init; }
 }

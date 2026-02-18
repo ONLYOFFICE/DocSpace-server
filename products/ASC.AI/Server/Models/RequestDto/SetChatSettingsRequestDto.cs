@@ -26,13 +26,20 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request to configure the AI provider and model for a chat session.
+/// </summary>
 public class SetChatSettingsRequestDto
 {
-    /// <summary>The AI provider ID.</summary>
+    /// <summary>
+    /// The identifier of the AI provider to use.
+    /// </summary>
     /// <example>1</example>
     public int ProviderId { get; set; }
 
-    /// <summary>The AI model ID.</summary>
+    /// <summary>
+    /// The identifier of the AI model to use.
+    /// </summary>
     /// <example>gpt-4</example>
     public required string ModelId { get; set; }
 }

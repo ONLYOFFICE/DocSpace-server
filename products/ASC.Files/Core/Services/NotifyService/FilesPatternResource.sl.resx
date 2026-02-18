@@ -222,14 +222,14 @@ $__AuthorName je izbrisal sobo: $RoomTitle</value>
   <data name="pattern_ShareDocument" xml:space="preserve">
     <value>h1. Dostop dodeljen dokumentu: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" vam je dodelil dostop do "$DocumentTitle":"$DocumentURL" dokumenta s sledečimi pravicami: "$AccessRights". 
+$__DateTime $__AuthorName vam je dodelil dostop do "$DocumentTitle":"$DocumentURL" dokumenta s sledečimi pravicami: "$AccessRights". 
 
 $Message</value>
   </data>
   <data name="pattern_ShareFolder" xml:space="preserve">
     <value>h1.Dostop dodeljen mapi: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" vam je dodelil dostop do"$DocumentTitle":"$DocumentURL" mape s sledečimi pravicami dostopa: "$AccessRights". 
+$__DateTime $__AuthorName vam je dodelil dostop do"$DocumentTitle":"$DocumentURL" mape s sledečimi pravicami dostopa: "$AccessRights". 
 
 $Message</value>
   </data>

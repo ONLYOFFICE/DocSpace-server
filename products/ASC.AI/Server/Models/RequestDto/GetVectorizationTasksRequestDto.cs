@@ -26,9 +26,14 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request to retrieve vectorization tasks for a specific room.
+/// </summary>
 public class GetVectorizationTasksRequestDto
 {
-    /// <summary>The room ID.</summary>
+    /// <summary>
+    /// The identifier of the room whose vectorization tasks are to be listed.
+    /// </summary>
     /// <example>42</example>
     [FromRoute(Name = "roomId")]
     public int RoomId { get; init; }

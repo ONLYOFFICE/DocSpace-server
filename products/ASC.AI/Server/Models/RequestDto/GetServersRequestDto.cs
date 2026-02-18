@@ -26,10 +26,13 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request to retrieve a single MCP server by its identifier.
+/// </summary>
 public class GetServersRequestDto
 {
     /// <summary>
-    /// The server ID.
+    /// Unique identifier of the MCP server to retrieve.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "id")]

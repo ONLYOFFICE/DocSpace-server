@@ -26,14 +26,21 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request to revoke the current user's OAuth connection to an MCP server in a room.
+/// </summary>
 public class DisconnectServerRequestDto
 {
-    /// <summary>The room ID.</summary>
+    /// <summary>
+    /// Identifier of the room containing the MCP server.
+    /// </summary>
     /// <example>42</example>
     [FromRoute(Name = "roomId")]
     public int RoomId { get; init; }
 
-    /// <summary>The server ID.</summary>
+    /// <summary>
+    /// Unique identifier of the MCP server to disconnect from.
+    /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "serverId")]
     public Guid ServerId { get; init; }

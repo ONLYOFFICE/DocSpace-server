@@ -45,15 +45,20 @@ public class ChatController(
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
     
-    /// <remarks>
-    /// Starts a new chat session in the specified AI agent room. The response is streamed as Server-Sent Events (SSE).
-    /// </remarks>
     /// <summary>
-    /// Start a new chat
+    /// Start a new AI chat
     /// </summary>
+    /// <remarks>
+    /// Creates a new AI chat session within the specified room and sends the initial message to the configured AI provider.
+    /// The response is delivered as a Server-Sent Events (SSE) stream containing completion chunks (text deltas, tool calls, tool results, and message lifecycle events)
+    /// with periodic keep-alive pings every 5 seconds. File references can be included as context for the AI model.
+    /// </remarks>
     /// <path>api/2.0/ai/rooms/{roomId}/chats</path>
     [Tags("AI / Chat")]
-    [SwaggerResponse(200, "Chat completion stream")]
+    [SwaggerResponse(200, "SSE stream of ChatCompletion events (text/event-stream)")]
+    [SwaggerResponse(400, "The message is empty or one or more file attachments could not be processed")]
+    [SwaggerResponse(403, "You don't have enough permission to access the chat in this room")]
+    [SwaggerResponse(404, "The specified room or AI provider was not found")]
     [HttpPost("rooms/{roomId}/chats")]
     public async Task<IActionResult> StartNewChatAsync(StartNewChatRequestDto inDto)
     {
@@ -67,15 +72,21 @@ public class ChatController(
         return Ok();
     }
     
-    /// <remarks>
-    /// Sends a new message to an existing chat session. The response is streamed as Server-Sent Events (SSE).
-    /// </remarks>
     /// <summary>
-    /// Continue a chat
+    /// Send a message to an existing AI chat
     /// </summary>
+    /// <remarks>
+    /// Appends a new user message to an existing chat session and streams the AI assistant's response.
+    /// The full conversation history of the chat is sent to the AI provider to maintain context.
+    /// The response is delivered as a Server-Sent Events (SSE) stream with periodic keep-alive pings.
+    /// File references can optionally be attached to provide additional context.
+    /// </remarks>
     /// <path>api/2.0/ai/chats/{chatId}/messages</path>
     [Tags("AI / Chat")]
-    [SwaggerResponse(200, "Chat completion stream")]
+    [SwaggerResponse(200, "SSE stream of ChatCompletion events (text/event-stream)")]
+    [SwaggerResponse(400, "The message is empty or one or more file attachments could not be processed")]
+    [SwaggerResponse(403, "You don't have enough permission to access the chat in this room")]
+    [SwaggerResponse(404, "The specified chat, room, or AI provider was not found")]
     [HttpPost("chats/{chatId}/messages")]
     public async Task<IActionResult> ContinueChatAsync(ContinueChatRequestDto inDto)
     {
@@ -89,15 +100,17 @@ public class ChatController(
         return Ok();
     }
 
-    /// <remarks>
-    /// Renames an existing chat session with a new name.
-    /// </remarks>
     /// <summary>
-    /// Rename a chat
+    /// Rename an AI chat
     /// </summary>
+    /// <remarks>
+    /// Updates the display title of an existing AI chat session owned by the current user.
+    /// The new name must not exceed 255 characters.
+    /// </remarks>
     /// <path>api/2.0/ai/chats/{chatId}</path>
     [Tags("AI / Chat")]
-    [SwaggerResponse(200, "Chat information", typeof(ChatDto))]
+    [SwaggerResponse(200, "Updated chat session details", typeof(ChatDto))]
+    [SwaggerResponse(404, "The chat with the specified ID was not found or does not belong to the current user")]
     [HttpPut("chats/{chatId}")]
     public async Task<ChatDto> RenameChatAsync(RenameChatRequestDto inDto)
     {
@@ -106,15 +119,17 @@ public class ChatController(
         return await chat.ToDtoAsync(employeeDtoHelper, apiDateTimeHelper);
     }
 
-    /// <remarks>
-    /// Returns the detailed information about a chat session by its ID.
-    /// </remarks>
     /// <summary>
-    /// Get a chat
+    /// Get an AI chat by ID
     /// </summary>
+    /// <remarks>
+    /// Retrieves the metadata of a single AI chat session, including its title, creation date, and the user who created it.
+    /// Only the chat owner can access their own chat sessions.
+    /// </remarks>
     /// <path>api/2.0/ai/chats/{chatId}</path>
     [Tags("AI / Chat")]
-    [SwaggerResponse(200, "Chat information", typeof(ChatDto))]
+    [SwaggerResponse(200, "Chat session details", typeof(ChatDto))]
+    [SwaggerResponse(404, "The chat with the specified ID was not found or does not belong to the current user")]
     [HttpGet("chats/{chatId}")]
     public async Task<ChatDto> GetChatAsync(GetChatRequestDto inDto)
     {
@@ -122,15 +137,19 @@ public class ChatController(
         return await chat.ToDtoAsync(employeeDtoHelper, apiDateTimeHelper);
     }
 
-    /// <remarks>
-    /// Returns a list of chat sessions in the specified AI agent room.
-    /// </remarks>
     /// <summary>
-    /// Get chats in a room
+    /// Get AI chats in a room
     /// </summary>
+    /// <remarks>
+    /// Returns a paginated list of AI chat sessions that belong to the current user within the specified room.
+    /// Supports pagination via the startIndex and count query parameters. The total number of chats is included in the response metadata.
+    /// </remarks>
     /// <path>api/2.0/ai/rooms/{roomId}/chats</path>
+    /// <collection>list</collection>
     [Tags("AI / Chat")]
-    [SwaggerResponse(200, "List of chat sessions", typeof(List<ChatDto>))]
+    [SwaggerResponse(200, "Paginated list of chat sessions in the room", typeof(List<ChatDto>))]
+    [SwaggerResponse(403, "You don't have enough permission to access chats in this room")]
+    [SwaggerResponse(404, "The room with the specified ID was not found")]
     [HttpGet("rooms/{roomId}/chats")]
     public async Task<List<ChatDto>> GetChatsAsync(GetChatsRequestDto inDto)
     {
@@ -145,15 +164,19 @@ public class ChatController(
         return chatsDto;       
     }
     
-    /// <remarks>
-    /// Returns a list of messages in the specified chat session.
-    /// </remarks>
     /// <summary>
-    /// Get chat messages
+    /// Get messages of an AI chat
     /// </summary>
+    /// <remarks>
+    /// Returns a paginated list of messages from an AI chat session owned by the current user.
+    /// Each message includes its role (user or assistant), content blocks (text, tool calls, attachments), and timestamp.
+    /// Supports pagination via the startIndex and count query parameters. The total number of messages is included in the response metadata.
+    /// </remarks>
     /// <path>api/2.0/ai/chats/{chatId}/messages</path>
+    /// <collection>list</collection>
     [Tags("AI / Chat")]
-    [SwaggerResponse(200, "List of messages", typeof(List<MessageDto>))]
+    [SwaggerResponse(200, "Paginated list of messages in the chat", typeof(List<MessageDto>))]
+    [SwaggerResponse(404, "The chat with the specified ID was not found or does not belong to the current user")]
     [HttpGet("chats/{chatId}/messages")]
     public async Task<List<MessageDto>> GetMessagesAsync(GetMessagesRequestDto inDto)
     {
@@ -167,15 +190,17 @@ public class ChatController(
         return messagesDto;
     }
 
-    /// <remarks>
-    /// Deletes a chat session and all its messages by the chat ID.
-    /// </remarks>
     /// <summary>
-    /// Delete a chat
+    /// Delete an AI chat
     /// </summary>
+    /// <remarks>
+    /// Permanently deletes an AI chat session along with all of its messages.
+    /// Only the chat owner can delete their own chat sessions. This action cannot be undone.
+    /// </remarks>
     /// <path>api/2.0/ai/chats/{chatId}</path>
     [Tags("AI / Chat")]
-    [SwaggerResponse(204, "Chat deleted successfully")]
+    [SwaggerResponse(204, "The chat was successfully deleted")]
+    [SwaggerResponse(404, "The chat with the specified ID was not found or does not belong to the current user")]
     [HttpDelete("chats/{chatId}")]
     public async Task<NoContentResult> DeleteChatAsync(DeleteChatRequestDto inDto)
     {
@@ -183,30 +208,35 @@ public class ChatController(
         return NoContent();
     }
     
-    /// <remarks>
-    /// Exports all messages from a chat session to a file in the specified folder.
-    /// </remarks>
     /// <summary>
-    /// Export chat messages
+    /// Export AI chat messages to a file
     /// </summary>
+    /// <remarks>
+    /// Exports the entire message history of an AI chat session and saves it as a document in the specified folder.
+    /// The exported file is created with the provided title. Only the chat owner can export their own chat sessions.
+    /// </remarks>
     /// <path>api/2.0/ai/chats/{chatId}/messages/export</path>
     [Tags("AI / Chat")]
-    [SwaggerResponse(200, "Chat exported successfully")]
+    [SwaggerResponse(200, "The chat messages were successfully exported to the specified folder")]
+    [SwaggerResponse(404, "The chat with the specified ID was not found or does not belong to the current user")]
     [HttpPost("chats/{chatId}/messages/export")]
     public async Task ExportChatAsync(ExportChatRequestDto<int> inDto)
     {
         await exporter.ExportMessagesAsync(inDto.Body.FolderId, inDto.Body.Title, inDto.ChatId);
     }
 
-    /// <remarks>
-    /// Returns a list of available AI models for the specified provider.
-    /// </remarks>
     /// <summary>
-    /// Get available chat models
+    /// Get available AI models
     /// </summary>
+    /// <remarks>
+    /// Returns the list of AI models available for chat conversations.
+    /// Optionally filters the results to models from a specific provider when the provider query parameter is specified.
+    /// Each model entry includes the provider ID, provider display name, and the model identifier.
+    /// </remarks>
     /// <path>api/2.0/ai/chats/models</path>
+    /// <collection>list</collection>
     [Tags("AI / Chat")]
-    [SwaggerResponse(200, "List of available models", typeof(IEnumerable<ModelDto>))]
+    [SwaggerResponse(200, "List of available AI models", typeof(IEnumerable<ModelDto>))]
     [HttpGet("chats/models")]
     public async Task<IEnumerable<ModelDto>> GetChatModelsAsync(GetChatModelsRequestDto inDto)
     {
@@ -214,30 +244,36 @@ public class ChatController(
         return models.Select(x => x.MapToDto()).ToList();
     }
 
-    /// <remarks>
-    /// Provides a permission decision (allow or deny) for an MCP tool call during a chat session.
-    /// </remarks>
     /// <summary>
-    /// Provide tool permission decision
+    /// Submit a tool execution permission decision
     /// </summary>
+    /// <remarks>
+    /// Provides the user's approval or denial decision for a pending MCP (Model Context Protocol) tool execution request.
+    /// When an AI assistant attempts to invoke an external tool that requires explicit user consent,
+    /// the client receives a permission prompt via the SSE stream. This endpoint is used to submit the user's decision
+    /// so that the AI chat session can proceed accordingly.
+    /// </remarks>
     /// <path>api/2.0/ai/chats/tool-permissions/{callId}/decision</path>
     [Tags("AI / Chat")]
-    [SwaggerResponse(200, "Permission decision applied")]
+    [SwaggerResponse(200, "The permission decision was successfully recorded")]
     [HttpPost("chats/tool-permissions/{callId}/decision")]
     public async Task ProvidePermissionAsync(ToolDecisionRequestDto inDto)
     {
         await mcpService.ProvideMcpToolPermissionAsync(inDto.CallId, inDto.Body.Decision);
     }
 
-    /// <remarks>
-    /// Updates the current user's chat settings for the specified AI agent room.
-    /// </remarks>
     /// <summary>
-    /// Set user chat settings
+    /// Update user chat settings for a room
     /// </summary>
+    /// <remarks>
+    /// Saves the current user's personal AI chat preferences for the specified room.
+    /// Currently supports toggling the web search capability, which allows the AI assistant to search the internet when generating responses.
+    /// </remarks>
     /// <path>api/2.0/ai/rooms/{roomId}/chats/config</path>
     [Tags("AI / Chat")]
     [SwaggerResponse(200, "Updated user chat settings", typeof(UserChatSettingsDto))]
+    [SwaggerResponse(403, "You don't have enough permission to access chats in this room")]
+    [SwaggerResponse(404, "The room with the specified ID was not found")]
     [HttpPut("rooms/{roomId}/chats/config")]
     public async Task<UserChatSettingsDto> SetUserChatsSettingsAsync(SetUserChatsSettingsRequestDto inDto)
     {
@@ -245,15 +281,18 @@ public class ChatController(
         return settings.MapToDto();
     }
     
-    /// <remarks>
-    /// Returns the current user's chat settings for the specified AI agent room.
-    /// </remarks>
     /// <summary>
-    /// Get user chat settings
+    /// Get user chat settings for a room
     /// </summary>
+    /// <remarks>
+    /// Retrieves the current user's personal AI chat preferences for the specified room,
+    /// including whether web search is enabled for AI-assisted responses.
+    /// </remarks>
     /// <path>api/2.0/ai/rooms/{roomId}/chats/config</path>
     [Tags("AI / Chat")]
-    [SwaggerResponse(200, "User chat settings", typeof(UserChatSettingsDto))]
+    [SwaggerResponse(200, "Current user chat settings", typeof(UserChatSettingsDto))]
+    [SwaggerResponse(403, "You don't have enough permission to access chats in this room")]
+    [SwaggerResponse(404, "The room with the specified ID was not found")]
     [HttpGet("rooms/{roomId}/chats/config")]
     public async Task<UserChatSettingsDto> GetUserChatsSettingsAsync(GetUserChatsSettingsRequestDto inDto)
     {

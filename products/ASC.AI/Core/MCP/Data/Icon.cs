@@ -27,30 +27,30 @@
 namespace ASC.AI.Core.MCP.Data;
 
 /// <summary>
-/// Represents a set of icon URLs at different resolutions.
+/// Set of server icon URLs in multiple resolutions, used for rendering in different UI contexts (lists, cards, tooltips, etc.).
 /// </summary>
 public class Icon
 {
     /// <summary>
-    /// Gets the URL of the 48x48 pixel icon.
+    /// Icon URL at 48x48 pixels resolution. Used for large previews and detail views.
     /// </summary>
     /// <example>https://example.com/icon-48.png</example>
     public required string Icon48 { get; init; }
 
     /// <summary>
-    /// Gets the URL of the 32x32 pixel icon.
+    /// Icon URL at 32x32 pixels resolution. Used for standard list items and cards.
     /// </summary>
     /// <example>https://example.com/icon-32.png</example>
     public required string Icon32 { get; init; }
 
     /// <summary>
-    /// Gets the URL of the 24x24 pixel icon.
+    /// Icon URL at 24x24 pixels resolution. Used for compact list items and inline displays.
     /// </summary>
     /// <example>https://example.com/icon-24.png</example>
     public required string Icon24 { get; init; }
 
     /// <summary>
-    /// Gets the URL of the 16x16 pixel icon.
+    /// Icon URL at 16x16 pixels resolution. Used for small indicators, tooltips, and favicons.
     /// </summary>
     /// <example>https://example.com/icon-16.png</example>
     public required string Icon16 { get; init; }

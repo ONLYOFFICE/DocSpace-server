@@ -27,18 +27,18 @@
 namespace ASC.AI.Models.ResponseDto;
 
 /// <summary>
-/// The MCP tool information.
+/// Represents a single tool exposed by an MCP server, along with its enabled or disabled state within a room.
 /// </summary>
 public class McpToolDto
 {
     /// <summary>
-    /// The MCP tool name.
+    /// Name of the tool as reported by the MCP server.
     /// </summary>
     /// <example>search_documents</example>
     public required string Name { get; init; }
 
     /// <summary>
-    /// Specifies whether the MCP tool is enabled.
+    /// Indicates whether this tool is enabled (true) or disabled (false) for use in AI chat sessions within the room.
     /// </summary>
     /// <example>true</example>
     public bool Enabled { get; init; }

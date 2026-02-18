@@ -26,12 +26,22 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request to export a single AI chat message to a document.
+/// </summary>
 public class ExportMessageRequestDto<T>
 {
+    /// <summary>
+    /// The unique identifier of the AI chat message to export.
+    /// </summary>
     /// <summary>The message ID.</summary>
     /// <example>1</example>
     [FromRoute(Name = "messageId")]
     public int MessageId { get; init; }
+
+    /// <summary>
+    /// The export parameters including destination folder and file title.
+    /// </summary>
 
     /// <summary>
     /// Represents the body of the request for exporting a message.
@@ -40,12 +50,21 @@ public class ExportMessageRequestDto<T>
     public required ExportMessageRequestBody<T> Body { get; init; }
 }
 
+/// <summary>
+/// Parameters for exporting an AI chat message to a document.
+/// </summary>
 public class ExportMessageRequestBody<T>
 {
+    /// <summary>
+    /// The identifier of the destination folder where the exported document will be saved.
+    /// </summary>
     /// <summary>The destination folder ID.</summary>
     /// <example>123</example>
     public required T FolderId { get; init; }
-    /// <summary>The export file title.</summary>
+
+    /// <summary>
+    /// The file name (without extension) to use for the exported document.
+    /// </summary>
     /// <example>Message Export</example>
     public required string Title { get; init; }
 }

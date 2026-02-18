@@ -211,14 +211,14 @@ $__AuthorName изтри стаята: $RoomTitle</value>
   <data name="pattern_ShareDocument" xml:space="preserve">
     <value>h1. Достъп до документа: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" ви даде достъп до "$DocumentTitle":"$DocumentURL" документ със следните права за достъп: "$AccessRights". 
+$__DateTime $__AuthorName ви даде достъп до "$DocumentTitle":"$DocumentURL" документ със следните права за достъп: "$AccessRights". 
 
 $Message</value>
   </data>
   <data name="pattern_ShareFolder" xml:space="preserve">
     <value>h1. Достъпът до папката: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" ви даде достъп до "$DocumentTitle":"$DocumentURL" със следните права за достъп: "$AccessRights".
+$__DateTime $__AuthorName ви даде достъп до "$DocumentTitle":"$DocumentURL" със следните права за достъп: "$AccessRights".
 
 $Message</value>
   </data>

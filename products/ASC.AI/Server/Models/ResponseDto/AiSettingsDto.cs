@@ -32,70 +32,85 @@ namespace ASC.AI.Models.ResponseDto;
 public class AiSettingsDto
 {
     /// <summary>
-    /// Specifies whether the web search feature is enabled.
+    /// Indicates whether web search is enabled for AI chat sessions.
     /// </summary>
     /// <example>true</example>
     public bool WebSearchEnabled { get; init; }
 
     /// <summary>
-    /// Specifies whether the web search settings need to be reset.
+    /// Indicates whether the web search API key needs to be reconfigured.
     /// </summary>
     /// <example>false</example>
     public bool WebSearchNeedReset { get; init; }
 
     /// <summary>
-    /// Specifies whether the vectorization feature is enabled.
+    /// Indicates whether document vectorization is enabled.
     /// </summary>
     /// <example>true</example>
     public bool VectorizationEnabled { get; init; }
 
     /// <summary>
-    /// Specifies whether the vectorization settings need to be reset.
+    /// Indicates whether the embedding provider API key needs to be reconfigured.
     /// </summary>
     /// <example>false</example>
     public bool VectorizationNeedReset { get; init; }
 
     /// <summary>
-    /// Specifies whether the AI module is ready for use.
+    /// Indicates whether the AI subsystem is fully configured and operational.
     /// </summary>
     /// <example>true</example>
     public bool AiReady { get; init; }
 
     /// <summary>
-    /// Specifies whether the AI readiness settings need to be reset.
+    /// Indicates whether the AI provider API key needs to be reconfigured.
     /// </summary>
     /// <example>false</example>
     public bool AiReadyNeedReset { get; init; }
 
     /// <summary>
-    /// The portal MCP server ID.
+    /// The unique identifier of the portal-level MCP server, if configured.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid? PortalMcpServerId { get; init; }
 
     /// <summary>
-    /// The name of the embedding model used for vectorization.
+    /// The name of the embedding model used for document vectorization.
     /// </summary>
     /// <example>text-embedding-3-small</example>
     public required string EmbeddingModel { get; init; }
 
     /// <summary>
-    /// The name of the knowledge search tool.
+    /// The tool name used by the AI assistant for knowledge base search.
     /// </summary>
     /// <example>knowledge_search</example>
     public required string KnowledgeSearchToolName { get; init; }
 
     /// <summary>
-    /// The name of the web search tool.
+    /// The tool name used by the AI assistant for web search.
     /// </summary>
     /// <example>web_search</example>
     public required string WebSearchToolName { get; init; }
 
     /// <summary>
-    /// The name of the web crawling tool.
+    /// The tool name used by the AI assistant for web page crawling.
     /// </summary>
     /// <example>web_crawling</example>
     public required string WebCrawlingToolName { get; init; }
+    
+    /// <summary>
+    /// The tool name used by the AI to launch docx creation in the editor.
+    /// </summary>
+    public required string GenerateDocxToolName { get; init; }
+    
+    /// <summary>
+    /// The tool name used by the AI assistant to launch form creation in the editor.
+    /// </summary>
+    public required string GenerateFormToolName { get; init; }
+    
+    /// <summary>
+    /// The tool name used by the AI assistant to launch presentation creation in the editor.
+    /// </summary>
+    public required string GeneratePresentationToolName { get; init; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,

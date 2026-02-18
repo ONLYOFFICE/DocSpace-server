@@ -26,14 +26,22 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request to complete the OAuth authorization flow for an MCP server in a room.
+/// </summary>
 public class ConnectServerRequestDto
 {
-    /// <summary>The room ID.</summary>
+    /// <summary>
+    /// Identifier of the room containing the MCP server.
+    /// </summary>
     /// <example>42</example>
     [FromRoute(Name = "roomId")]
     public int RoomId { get; init; }
 
-    /// <summary>The server ID.</summary>
+    /// <summary>
+    /// Unique identifier of the MCP server to connect.
+    /// </summary>
+
     /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "serverId")]
     public Guid ServerId { get; init; }
@@ -46,9 +54,14 @@ public class ConnectServerRequestDto
     public required ConnectServerRequestBody Body { get; init; }
 }
 
+/// <summary>
+/// Parameters for completing an OAuth connection to an MCP server.
+/// </summary>
 public class ConnectServerRequestBody
 {
-    /// <summary>The connection authorization code.</summary>
+    /// <summary>
+    /// OAuth authorization code received from the provider's redirect. Used to exchange for access and refresh tokens.
+    /// </summary>
     /// <example>abc123def456</example>
     public required string Code { get; init; }
 }

@@ -27,58 +27,59 @@
 namespace ASC.AI.Models.ResponseDto;
 
 /// <summary>
-/// The MCP server detailed information.
+/// Full MCP server configuration, including connection details and authentication headers. Returned for administrator-level operations.
 /// </summary>
 public class McpServerDto
 {
     /// <summary>
-    /// The MCP server ID.
+    /// Unique identifier of the MCP server.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid Id { get; init; }
 
     /// <summary>
-    /// The MCP server name.
+    /// Display name of the MCP server.
     /// </summary>
     /// <example>DocSpace Tools</example>
     public string? Name { get; init; }
 
     /// <summary>
-    /// The MCP server description.
+    /// Human-readable description of the server's purpose and capabilities.
     /// </summary>
+
     /// <example>Provides document management tools</example>
     public string? Description { get; init; }
 
     /// <summary>
-    /// The MCP server endpoint URL.
+    /// Base URL of the MCP server endpoint.
     /// </summary>
     /// <example>https://mcp.example.com/sse</example>
     public string? Endpoint { get; init; }
 
     /// <summary>
-    /// The MCP server type.
+    /// Type of the MCP server (Custom, DocSpace).
     /// </summary>
     /// <example>0</example>
     public ServerType ServerType { get; init; }
 
     /// <summary>
-    /// The custom HTTP headers for the MCP server connection.
+    /// HTTP headers sent with every request to the server (e.g., authentication tokens).
     /// </summary>
     public IDictionary<string, string>? Headers { get; init; }
 
     /// <summary>
-    /// Specifies whether the MCP server is enabled.
+    /// Indicates whether the server is currently enabled and available for room assignment.
     /// </summary>
     /// <example>true</example>
     public bool Enabled { get; init; }
 
     /// <summary>
-    /// The MCP server icon.
+    /// Server icon in multiple resolutions for UI display.
     /// </summary>
     public Icon? Icon { get; init; }
 
     /// <summary>
-    /// Specifies whether the MCP server settings need to be reset.
+    /// Indicates whether the server requires a configuration reset due to connectivity or credential issues.
     /// </summary>
     /// <example>false</example>
     public bool NeedReset { get; init; }

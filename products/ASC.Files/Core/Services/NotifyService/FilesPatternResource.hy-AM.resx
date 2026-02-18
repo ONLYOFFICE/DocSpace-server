@@ -211,14 +211,14 @@ $__AuthorName ջնջել է սենյակ: $RoomTitle</value>
   <data name="pattern_ShareDocument" xml:space="preserve">
     <value>հ1. Փաստաթղթի մուտքը տրված է: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" Ձեզ տրամադրել է մուտք դեպի "$DocumentTitle":"$DocumentURL" փաստաթուղթը հետևյալ մուտքի իրավունքով: "$AccessRights".
+$__DateTime $__AuthorName Ձեզ տրամադրել է մուտք դեպի "$DocumentTitle":"$DocumentURL" փաստաթուղթը հետևյալ մուտքի իրավունքով: "$AccessRights".
 
 $Message</value>
   </data>
   <data name="pattern_ShareFolder" xml:space="preserve">
     <value>հ1. Մուտք տրված է թղթապանակին՝ "DocumentTitle":"$DocumentURL"
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" Ձեզ տրամադրել է մուտք դեպի "$DocumentTitle":"$DocumentURL" թղթապանակ հետևյալ մուտքի իրավունքներով: "$AccessRights".
+$__DateTime $__AuthorName Ձեզ տրամադրել է մուտք դեպի "$DocumentTitle":"$DocumentURL" թղթապանակ հետևյալ մուտքի իրավունքներով: "$AccessRights".
 
 $Message</value>
   </data>

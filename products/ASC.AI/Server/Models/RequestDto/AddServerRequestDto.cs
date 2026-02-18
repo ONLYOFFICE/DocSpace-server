@@ -26,35 +26,53 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request to register a new custom MCP server.
+/// </summary>
 public class AddServerRequestDto
 {
     /// <summary>
-    /// The request body containing details for adding an MCP server.
+    /// MCP server registration parameters.
     /// </summary>
     [FromBody]
     public required AddMcpServerRequestBody Body { get; init; }
 }
 
+/// <summary>
+/// Parameters for creating a new custom MCP server.
+/// </summary>
 public class AddMcpServerRequestBody
 {
-    /// <summary>The MCP server name.</summary>
-    /// <example>My MCP Server</example>
+    /// <summary>
+    /// Unique display name for the server. Only letters, numbers, underscores, and hyphens are allowed. Maximum 128 characters.
+    /// </summary>
+    /// <example>my-custom-server</example>
     [MaxLength(128)]
     public required string Name { get; init; }
 
-    /// <summary>The MCP server description.</summary>
-    /// <example>A server for document processing</example>
+    /// <summary>
+    /// Human-readable description of the server's purpose and capabilities. Maximum 255 characters.
+    /// </summary>
+    /// <example>Custom MCP server for project management tools</example>
     [MaxLength(255)]
     public required string Description { get; init; }
 
-    /// <summary>The MCP server endpoint URL.</summary>
+    /// <summary>
+    /// Base URL of the MCP server endpoint. Must be a valid, reachable URL. The system will verify connectivity during registration.
+    /// </summary>
     /// <example>https://mcp.example.com/sse</example>
     [Url]
     public required string Endpoint { get; init; }
-    /// <summary>The optional HTTP headers for the MCP server.</summary>
+
+    /// <summary>
+    /// Optional HTTP headers to include with every request to the MCP server (e.g., authentication tokens or API keys).
+    /// </summary>
     /// <example>{"Authorization": "Bearer token123"}</example>
     public Dictionary<string, string>? Headers { get; init; }
-    /// <summary>The MCP server icon URL.</summary>
+
+    /// <summary>
+    /// Optional Base64-encoded icon image for the server. Used as the visual identifier in the UI.
+    /// </summary>
     /// <example>https://example.com/icon.png</example>
     public string? Icon { get; init; }
 }

@@ -32,13 +32,13 @@ namespace ASC.AI.Models.ResponseDto;
 public class TextContentDto : MessageContentDto
 {
     /// <summary>
-    /// The content type.
+    /// The content block type. Always equals "Text".
     /// </summary>
     /// <example>0</example>
     public override MessageContentType Type => MessageContentType.Text;
 
     /// <summary>
-    /// The text value.
+    /// The text content of the message, which may contain Markdown formatting.
     /// </summary>
     /// <example>Hello! How can I help you today?</example>
     public string? Text { get; init; }

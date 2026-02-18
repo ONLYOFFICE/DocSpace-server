@@ -158,21 +158,19 @@ public class PortalController(
             return BadRequest(error);
         }
 
-        model.PortalName = (model.PortalName ?? "").Trim();
-        (var exists, error) = await CheckExistingNamePortalAsync(model.PortalName);
-
-        if (!exists)
+        (var portalName, error) = await GetRandomPortalName();
+        if (string.IsNullOrEmpty(portalName))
         {
-            sw.Stop();
-
-            return BadRequest(error);
+            return BadRequest(error ?? "PortalName is required");
         }
+
+        model.PortalName = portalName;
 
         option.LogDebug("PortalName = {0}; Elapsed ms. CheckExistingNamePortal: {1}", model.PortalName, sw.ElapsedMilliseconds);
 
-        var clientIP = commonMethods.GetClientIp();
+        var clientIp = commonMethods.GetClientIp();
 
-        if (commonMethods.CheckMuchRegistration(model, clientIP, sw))
+        if (commonMethods.CheckMuchRegistration(model, clientIp, sw))
         {
             return BadRequest(new
             {
@@ -181,7 +179,7 @@ public class PortalController(
             });
         }
 
-        error = await GetRecaptchaError(model, clientIP, sw);
+        error = await GetRecaptchaError(model, clientIp, sw);
 
         if (error != null)
         {
@@ -452,48 +450,19 @@ public class PortalController(
             }
         }
 
-        var prefix = configuration["web:alias:prefix"] ?? DefaultPrefix;
-        var randomLength = int.Parse(configuration["web:alias:random-length"] ?? DefaultRandomLength.ToString());
-
-        if (prefix.Length + randomLength > tenantDomainValidator.MaxLength || prefix.Length + randomLength < tenantDomainValidator.MinLength)
+        (var portalName, error) = await GetRandomPortalName();
+        if (string.IsNullOrEmpty(portalName))
         {
-            prefix = DefaultPrefix;
-            randomLength = DefaultRandomLength;
+            return BadRequest(error ?? "PortalName is required");
         }
-
-        var random = new Random();
-        random.Shuffle(_alphabetArray);
-
-        var alphabet = new string(_alphabetArray);
-        var portalName = (model.PortalName ?? $"{prefix}-{shortUrl.GenerateRandomKey(randomLength, alphabet)}").Trim();
 
         model.PortalName = portalName;
 
-        while (true)
-        {
-            (var success, error) = await CheckExistingNamePortalAsync(model.PortalName);
-
-            if (success)
-            {
-                break;
-            }
-
-            if (error.GetType().GetProperty("error")?.GetValue(error).ToString() == "portalNameExist")
-            {
-                model.PortalName = $"{prefix}-{shortUrl.GenerateRandomKey(randomLength, alphabet)}";
-            }
-            else
-            {
-                sw.Stop();
-                return BadRequest(error);
-            }
-        }
-
         option.LogDebug("PortalName = {0}; Elapsed ms. CheckExistingNamePortal: {1}", model.PortalName, sw.ElapsedMilliseconds);
 
-        var clientIP = commonMethods.GetClientIp();
+        var clientIp = commonMethods.GetClientIp();
 
-        if (commonMethods.CheckMuchRegistration(model, clientIP, sw))
+        if (commonMethods.CheckMuchRegistration(model, clientIp, sw))
         {
             return BadRequest(new
             {
@@ -1178,6 +1147,44 @@ public class PortalController(
 
     #region Validate Method
 
+    private async Task<(string, object)> GetRandomPortalName()
+    {
+        var prefix = configuration["web:alias:prefix"] ?? DefaultPrefix;
+        var randomLength = int.Parse(configuration["web:alias:random-length"] ?? DefaultRandomLength.ToString());
+
+        if (prefix.Length + randomLength > tenantDomainValidator.MaxLength || prefix.Length + randomLength < tenantDomainValidator.MinLength)
+        {
+            prefix = DefaultPrefix;
+            randomLength = DefaultRandomLength;
+        }
+
+        var random = new Random();
+        random.Shuffle(_alphabetArray);
+
+        var alphabet = new string(_alphabetArray);
+        var portalName = $"{prefix}-{shortUrl.GenerateRandomKey(randomLength, alphabet)}";
+
+        while (true)
+        {
+            var (success, error) = await CheckExistingNamePortalAsync(portalName);
+            if (success)
+            {
+                break;
+            }
+
+            if (error.GetType().GetProperty("error")?.GetValue(error)?.ToString() == "portalNameExist")
+            {
+                portalName = $"{prefix}-{shortUrl.GenerateRandomKey(randomLength, alphabet)}";
+            }
+            else
+            {
+                return (null, error);
+            }
+        }
+
+        return (portalName, null);
+    }
+    
     private async Task ValidateTenantAliasAsync(string alias)
     {
         // size
