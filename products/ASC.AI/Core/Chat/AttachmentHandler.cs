@@ -80,7 +80,6 @@ public class AttachmentHandler(
 
             try
             {
-                dataContent.Dispose();
                 await internalDao.DeleteFileAsync(dataContent.Id);
             }
             catch (Exception e)
@@ -188,39 +187,31 @@ public class AttachmentHandler(
         await using var stream = await fileDao.GetFileStreamAsync(file);
 
         var length = (int)file.ContentLength;
-        var buffer = ArrayPool<byte>.Shared.Rent(length);
-        try
+        var buffer = new byte[length];
+        await stream.ReadExactlyAsync(buffer);
+
+        var content = await textExtractor.ExtractAsync(buffer);
+        if (string.IsNullOrEmpty(content))
         {
-            var memory = buffer.AsMemory(0, length);
-            await stream.ReadExactlyAsync(memory);
-
-            var content = await textExtractor.ExtractAsync(memory);
-            if (string.IsNullOrEmpty(content))
-            {
-                return new AttachmentResult
-                {
-                    File = file,
-                    Success = false
-                };
-            }
-
             return new AttachmentResult
             {
                 File = file,
-                Success = true,
-                Content = new TextAttachmentMessageContent
-                {
-                    Id = JsonSerializer.SerializeToElement(file.Id),
-                    Title = file.Title,
-                    Extension = extension,
-                    Content = content
-                }
+                Success = false
             };
         }
-        finally
+
+        return new AttachmentResult
         {
-            ArrayPool<byte>.Shared.Return(buffer);
-        }
+            File = file,
+            Success = true,
+            Content = new TextAttachmentMessageContent
+            {
+                Id = JsonSerializer.SerializeToElement(file.Id),
+                Title = file.Title,
+                Extension = extension,
+                Content = content
+            }
+        };
     }
     
     private async Task<AttachmentResult> HandleMediaAsync(

@@ -26,32 +26,22 @@
 
 namespace ASC.AI.Core.Chat.Data;
 
-public class DataMessageContent : AttachmentMessageContent, IDisposable
+public class DataMessageContent : AttachmentMessageContent
 {
     public int Id { get; init; }
     public required string Title { get; init; }
 
     [JsonIgnore]
-    public (IMemoryOwner<byte> Owner, int Length)? Data { get; set; }
+    public byte[]? Data { get; set; }
 
     [JsonIgnore]
     public string? MediaType { get; set; }
 
     public override AIContent ToAiContent()
     {
-        if (!Data.HasValue)
-        {
-            throw new ArgumentNullException(nameof(Data));
-        }
-
+        ArgumentNullException.ThrowIfNull(Data);
         ArgumentException.ThrowIfNullOrEmpty(MediaType);
 
-        return new DataContent(Data.Value.Owner.Memory[..Data.Value.Length], MediaType);
-    }
-
-    public void Dispose()
-    {
-        Data?.Owner.Dispose();
-        Data = null;
+        return new DataContent(Data, MediaType);
     }
 }

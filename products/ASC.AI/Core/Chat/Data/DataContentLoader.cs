@@ -39,9 +39,7 @@ public class DataContentLoader(IFileDao<int> fileDao)
 
         var extension = FileUtility.GetFileExtension(file.Title);
 
-        var (memoryOwner, length) = await ReadFileAsync(file);
-
-        content.Data = (memoryOwner, length);
+        content.Data = await ReadFileAsync(file);
         content.MediaType = GetMediaType(extension);
 
         return true;
@@ -49,26 +47,23 @@ public class DataContentLoader(IFileDao<int> fileDao)
 
     public async Task<DataMessageContent> CreateAsync(File<int> file, FileType fileType, string extension)
     {
-        var (memoryOwner, length) = await ReadFileAsync(file);
-
         return new DataMessageContent
         {
             Id = file.Id,
             Title = file.Title,
-            Data = (memoryOwner, length),
+            Data = await ReadFileAsync(file),
             MediaType = GetMediaType(extension)
         };
     }
 
-    private async Task<(IMemoryOwner<byte> Owner, int Length)> ReadFileAsync(File<int> file)
+    private async Task<byte[]> ReadFileAsync(File<int> file)
     {
         await using var stream = await fileDao.GetFileStreamAsync(file);
 
-        var length = (int)file.ContentLength;
-        var memoryOwner = MemoryPool<byte>.Shared.Rent(length);
-        await stream.ReadExactlyAsync(memoryOwner.Memory[..length]);
+        var buffer = new byte[(int)file.ContentLength];
+        await stream.ReadExactlyAsync(buffer);
 
-        return (memoryOwner, length);
+        return buffer;
     }
 
     private static string GetMediaType(string extension) => extension.ToLowerInvariant() switch
