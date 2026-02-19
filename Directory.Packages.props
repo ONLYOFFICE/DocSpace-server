@@ -35,6 +35,7 @@
     <PackageVersion Include="AspNetCore.HealthChecks.UI.Client" Version="9.0.0" />
     <PackageVersion Include="AWSSDK.Extensions.CloudFront.Signers" Version="4.0.0.24" />
     <PackageVersion Include="CommunityToolkit.Aspire.Hosting.MailPit" Version="13.1.1" />
+    <PackageVersion Include="CommunityToolkit.Aspire.Hosting.McpInspector" Version="13.1.1" />
     <PackageVersion Include="CommunityToolkit.Aspire.Hosting.MySql.Extensions" Version="13.1.1" />
     <PackageVersion Include="DocSpace.API.SDK" Version="3.6.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.2" />
@@ -100,11 +101,10 @@
     <PackageVersion Include="Amazon.Extensions.S3.Encryption" Version="4.0.0" />
     <PackageVersion Include="Anthropic.SDK" Version="5.8.0" />
     <PackageVersion Include="Apache.NMS.AMQP" Version="2.4.0" />
-    <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.1.0" />
-    <PackageVersion Include="Aspire.Hosting.MySql" Version="13.1.0" />
+    <PackageVersion Include="Aspire.Hosting.MySql" Version="13.1.1" />
     <PackageVersion Include="Aspire.Hosting.NodeJs" Version="9.5.2" />
-    <PackageVersion Include="Aspire.Hosting.RabbitMQ" Version="13.1.0" />
-    <PackageVersion Include="Aspire.Hosting.Redis" Version="13.1.0" />
+    <PackageVersion Include="Aspire.Hosting.RabbitMQ" Version="13.1.1" />
+    <PackageVersion Include="Aspire.Hosting.Redis" Version="13.1.1" />
     <PackageVersion Include="AspNetCore.HealthChecks.UI" Version="9.0.0" />
     <PackageVersion Include="AspNetCore.HealthChecks.UI.InMemory.Storage" Version="9.0.0" />
     <PackageVersion Include="AWSSDK.CloudFront" Version="4.0.12" />

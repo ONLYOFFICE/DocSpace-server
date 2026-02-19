@@ -43,6 +43,9 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     private IResourceBuilder<ContainerResource>? EditorResource { get; set; }
     private IResourceBuilder<MailPitContainerResource>? MailResource { get; set; }
     private IResourceBuilder<ContainerResource>? OpensearchResource { get; set; }
+    
+    private IResourceBuilder<ContainerResource>? McpResource { get; set; }
+    
 
     public ConnectionStringManager AddMySql(bool withDbGate = false)
     {
@@ -147,6 +150,38 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         return this;
     }
 
+    public ConnectionStringManager AddMcpServer(bool withMcpInspector = false)
+    {
+        McpResource = builder
+            .AddContainer(Constants.DocSpaceMcpContainer, "onlyoffice/docspace-mcp")
+            .WithLifetime(ContainerLifetime.Persistent)
+            .WithEnvironment("DOCSPACE_INTERNAL", "true")
+            .WithEnvironment("DOCSPACE_TRANSPORT", "http")
+            .WithEnvironment("DOCSPACE_HOST", "0.0.0.0")
+            .WithEnvironment("DOCSPACE_PORT", Constants.DocSpaceMcpPort.ToString())
+            .WithHttpEndpoint(Constants.DocSpaceMcpPort, Constants.DocSpaceMcpPort);
+
+        if (withMcpInspector)
+        {
+            WithMcpInspector(McpResource);
+        }
+        
+        AddWaitFor(McpResource);
+        
+        return this;
+    }
+    
+    IResourceBuilder<McpInspectorResource> WithMcpInspector(IResourceBuilder<ContainerResource> mcp) => mcp
+        .ApplicationBuilder.AddMcpInspector("mcp-inspector")
+        .WithMcpServer(mcp)
+        .WithParentRelationship(mcp)
+        .WaitFor(mcp)
+        .WithUrls(x =>
+        {
+            x.Urls[0].DisplayText = "Inspector";
+        });
+
+    
     public ConnectionStringManager AddEditors()
     {
         var image = "onlyoffice/documentserver";

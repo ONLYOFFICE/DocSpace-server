@@ -517,7 +517,7 @@ public class UserController(
     [AllowNotPayment]
     [HttpPut("{userid:guid}/password")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
-    [Authorize(AuthenticationSchemes = "confirm", Roles = "PasswordChange")]
+    [Authorize(AuthenticationSchemes = "confirm", Roles = "PasswordChange,Activation")]
     public async Task<EmployeeFullDto> ChangeUserPassword(ChangePasswordByIdRequestDto inDto)
     {
         await securityContext.AuthByClaimAsync();

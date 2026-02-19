@@ -39,6 +39,439 @@
     }
   ],
   "paths": {
+    "/api/2.0/files/group": {
+      "post": {
+        "tags": [
+          "files"
+        ],
+        "summary": "Add a new room group",
+        "description": "Creates a new room group with the specified name, icon, and list of rooms.",
+        "operationId": "addRoomGroup",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoomGroupRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoomGroupWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "files"
+        ],
+        "summary": "List room groups",
+        "description": "Returns a list of all room groups for the current user.",
+        "operationId": "getRoomGroups",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The group unique identifier.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          },
+          {
+            "name": "includeMembers",
+            "in": "query",
+            "description": "Whether to include group members.",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoomGroupArrayWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/files/group/{id}": {
+      "get": {
+        "tags": [
+          "files"
+        ],
+        "summary": "Get room group info",
+        "description": "Returns detailed information about a room group.",
+        "operationId": "getRoomGroupInfo",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The group unique identifier.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          },
+          {
+            "name": "includeMembers",
+            "in": "query",
+            "description": "Whether to include group members.",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoomGroupWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "files"
+        ],
+        "summary": "Update room group",
+        "description": "Updates room group properties and adds or removes rooms.",
+        "operationId": "updateRoomGroup",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The group ID.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The request for updating a group.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRoomGroupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoomGroupWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "files"
+        ],
+        "summary": "Delete group",
+        "description": "Deletes the specified room group.",
+        "operationId": "deleteRoomGroup",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The group unique identifier.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          },
+          {
+            "name": "includeMembers",
+            "in": "query",
+            "description": "Whether to include group members.",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/files/group/{id}/icon": {
+      "post": {
+        "tags": [
+          "files"
+        ],
+        "summary": "Change group icon",
+        "description": "Changes the icon of an existing room group.",
+        "operationId": "changeRoomGroupIcon",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Group id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Icon update data.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IconRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoomGroupWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
     "/api/2.0/files/file/{fileId}/saveediting": {
       "put": {
         "tags": [
@@ -9508,6 +9941,69 @@
         ]
       }
     },
+    "/api/2.0/files/settings/organizegrouping": {
+      "put": {
+        "tags": [
+          "Files / Settings"
+        ],
+        "summary": "Organize rooms grouping",
+        "description": "Changes the setting that allows the user to organize the grouping of rooms.",
+        "operationId": "setOrganizeRoomsGrouping",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SettingsRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Boolean value: true if the parameter is enabled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BooleanWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
     "/api/2.0/files/file/{fileId}/sharedusers": {
       "get": {
         "tags": [
@@ -11352,6 +11848,16 @@
               "type": "string",
               "example": "some text"
             }
+          },
+          {
+            "name": "groupId",
+            "in": "query",
+            "description": "The group ID",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1234
+            }
           }
         ],
         "responses": {
@@ -13145,7 +13651,71 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ObjectWrapper"
+                  "$ref": "#/components/schemas/StringWrapper"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You don't have enough permission to perform the operation"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Rooms"
+        ],
+        "summary": "Update tag",
+        "description": "Updates the name of a custom tag.",
+        "operationId": "updateRoomTag",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTagRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated tag name",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringWrapper"
                 }
               }
             }
@@ -13192,7 +13762,7 @@
           "Rooms"
         ],
         "summary": "Get the room tags",
-        "description": "Returns a list of custom room tags.",
+        "description": "Returns a list of custom tags.",
         "operationId": "getRoomTagsInfo",
         "parameters": [
           {
@@ -13277,7 +13847,7 @@
           "Rooms"
         ],
         "summary": "Delete the custom room tags",
-        "description": "Deletes a bunch of custom room tags specified in the request.",
+        "description": "Deletes a bunch of custom tags specified in the request.",
         "operationId": "deleteCustomTags",
         "requestBody": {
           "content": {
@@ -13294,6 +13864,73 @@
           },
           "403": {
             "description": "You don't have enough permission to perform the operation"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/files/tags/{tagName}/haslinks": {
+      "get": {
+        "tags": [
+          "Rooms"
+        ],
+        "summary": "Has tag links",
+        "description": "Checks if a specific custom tag has linked items.",
+        "operationId": "hasTagLinks",
+        "parameters": [
+          {
+            "name": "tagName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "True if tag has links, false otherwise",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BooleanWrapper"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Tag not found"
           },
           "401": {
             "description": "Unauthorized"
@@ -19953,6 +20590,11 @@
             "description": "Specifies whether to open the editor in the same tab or not.",
             "example": true
           },
+          "organizeRoomsGrouping": {
+            "type": "boolean",
+            "description": "Specifies whether the grouping of rooms is enabled or not.",
+            "example": true
+          },
           "extsFilesVectorized": {
             "type": "array",
             "items": {
@@ -21715,6 +22357,18 @@
             "format": "int32"
           }
         }
+      },
+      "IconRequest": {
+        "type": "object",
+        "properties": {
+          "icon": {
+            "type": "string",
+            "description": "Group icon",
+            "nullable": true,
+            "example": "some text"
+          }
+        },
+        "additionalProperties": false
       },
       "InfoConfigDto": {
         "type": "object",
@@ -23631,6 +24285,31 @@
           }
         }
       },
+      "MultiSizeLogoCover": {
+        "required": [
+          "data",
+          "id"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The logo cover ID.",
+            "nullable": true,
+            "example": "1"
+          },
+          "data": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "nullable": true
+            },
+            "description": "The logo cover data.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "NewItemsDtoFileEntryBaseDto": {
         "required": [
           "date",
@@ -24433,6 +25112,161 @@
         "properties": {
           "response": {
             "$ref": "#/components/schemas/RoomFromTemplateStatusDto"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "RoomGroupArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoomGroupDto"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "RoomGroupDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "The group ID.",
+            "format": "int32",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "description": "Group name",
+            "nullable": true,
+            "example": "John Doe"
+          },
+          "icon": {
+            "$ref": "#/components/schemas/MultiSizeLogoCover"
+          },
+          "userId": {
+            "type": "string",
+            "description": "The user ID.",
+            "format": "uuid",
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          "rooms": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FileEntryBaseDto"
+            },
+            "description": "The list of rooms in the group.",
+            "nullable": true
+          },
+          "totalRooms": {
+            "type": "integer",
+            "description": "Total number of rooms in the group.",
+            "format": "int32",
+            "example": 1234
+          }
+        },
+        "additionalProperties": false,
+        "description": "The room security parameters."
+      },
+      "RoomGroupRequestDto": {
+        "required": [
+          "icon",
+          "name",
+          "rooms"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string",
+            "description": "Group name",
+            "example": "John Doe"
+          },
+          "icon": {
+            "maxLength": 50,
+            "minLength": 0,
+            "type": "string",
+            "description": "Group icon",
+            "example": "some text"
+          },
+          "rooms": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "example": 1234
+                },
+                {
+                  "type": "string",
+                  "example": "some text"
+                }
+              ]
+            },
+            "description": "The list of room IDs."
+          }
+        },
+        "additionalProperties": false,
+        "description": "The request parameters for creating a room group"
+      },
+      "RoomGroupWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/RoomGroupDto"
           },
           "count": {
             "type": "integer",
@@ -25999,6 +26833,54 @@
         "additionalProperties": false,
         "description": "The parameters for updating a file."
       },
+      "UpdateRoomGroupRequest": {
+        "type": "object",
+        "properties": {
+          "roomsToAdd": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "example": 1234
+                },
+                {
+                  "type": "string",
+                  "example": "some text"
+                }
+              ]
+            },
+            "description": "The list of room IDs to add to the group.",
+            "nullable": true
+          },
+          "roomsToRemove": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "example": 1234
+                },
+                {
+                  "type": "string",
+                  "example": "some text"
+                }
+              ]
+            },
+            "description": "The list of room IDs to remove from the group.",
+            "nullable": true
+          },
+          "groupName": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string",
+            "description": "The group name.",
+            "nullable": true,
+            "example": "some text"
+          }
+        },
+        "additionalProperties": false
+      },
       "UpdateRoomRequest": {
         "type": "object",
         "properties": {
@@ -26125,6 +27007,33 @@
         },
         "additionalProperties": false,
         "description": "The request parameters for updating the rooms."
+      },
+      "UpdateTagRequestDto": {
+        "required": [
+          "newName",
+          "oldName"
+        ],
+        "type": "object",
+        "properties": {
+          "oldName": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string",
+            "description": "The old tag name.",
+            "nullable": true,
+            "example": "some text"
+          },
+          "newName": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string",
+            "description": "The new tag name.",
+            "nullable": true,
+            "example": "some text"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The request parameters for creating a tag."
       },
       "UploadRequestDto": {
         "type": "object",

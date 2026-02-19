@@ -87,7 +87,7 @@ public class LdapActivationNotifyAction(CommonLinkUtility commonLinkUtility, Dis
 
     public async Task Init(UserInfo ldapUserInfo, LdapLocalization resource)
     {                   
-        var confirmLink = commonLinkUtility.GetConfirmationEmailUrl(ldapUserInfo.Email, ConfirmType.EmailActivation);
+        var confirmLink = commonLinkUtility.GetConfirmationEmailUrl(ldapUserInfo.Email, ConfirmType.EmailActivation, null, ldapUserInfo.Id);
         Tags =
         [
             new TagValue(NotifyConstants.TagUserName, ldapUserInfo.DisplayUserName(displayUserSettingsHelper)),

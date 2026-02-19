@@ -27,19 +27,27 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for accessing a group by its ID.
+/// The icon request parameters.
 /// </summary>
-public class GroupIdRequestDto
+public class RoomGroupIconRequestDto
 {
     /// <summary>
-    /// The group unique identifier.
+    /// Group id
     /// </summary>
     [FromRoute(Name = "id")]
     public required int Id { get; set; }
 
     /// <summary>
-    /// Whether to include group members.
+    /// Icon update data.
     /// </summary>
-    [FromQuery(Name = "includeMembers")]
-    public bool IncludeMembers { get; set; } = true;
+    [FromBody]
+    public IconRequest Update { get; set; }
+}
+
+public class IconRequest
+{
+    /// <summary>
+    /// Group icon
+    /// </summary>
+    public string Icon { get; set; }
 }
