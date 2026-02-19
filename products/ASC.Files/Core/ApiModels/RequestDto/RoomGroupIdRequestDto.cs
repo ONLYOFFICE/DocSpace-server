@@ -27,38 +27,19 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for updating a group.
+/// The request parameters for accessing a group by its ID.
 /// </summary>
-public class UpdateGroupRequestDto
+public class RoomGroupIdRequestDto
 {
     /// <summary>
-    /// The group ID.
+    /// The group unique identifier.
     /// </summary>
     [FromRoute(Name = "id")]
     public required int Id { get; set; }
 
     /// <summary>
-    /// The request for updating a group.
+    /// Whether to include group members.
     /// </summary>
-    [FromBody]
-    public required UpdateGroupRequest Update { get; set; }
-}
-
-public class UpdateGroupRequest
-{
-    /// <summary>
-    /// The list of room IDs to add to the group.
-    /// </summary>
-    public List<JsonElement> RoomsToAdd { get; set; }
-
-    /// <summary>
-    /// The list of room IDs to remove from the group.
-    /// </summary>
-    public List<JsonElement> RoomsToRemove { get; set; }
-
-    /// <summary>
-    /// The group name.
-    /// </summary>
-    [StringLength(128)]
-    public string GroupName { get; set; }
+    [FromQuery(Name = "includeMembers")]
+    public bool IncludeMembers { get; set; } = true;
 }
