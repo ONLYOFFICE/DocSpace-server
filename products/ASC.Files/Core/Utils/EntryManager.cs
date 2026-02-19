@@ -566,6 +566,11 @@ public class EntryManager(IDaoFactory daoFactory,
                     }
                 }
 
+                if (parent.FolderType is FolderType.AiRoom)
+                {
+                    filesFilterType = FilterType.FoldersOnly;
+                }
+
                 var foldersTask = folderDao.GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders,
                     excludeSubject, from, count, roomId, containingMyFiles, parent.FolderType);
 
