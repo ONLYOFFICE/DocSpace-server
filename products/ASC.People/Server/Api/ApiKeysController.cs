@@ -221,13 +221,13 @@ public class ApiKeysController(
     /// <summary>
     ///  Delete a user API key
     /// </summary>
-    /// <param name="keyId">The API key ID.</param>
     /// <path>api/2.0/keys/{keyId}</path>
     [Tags("Api keys")]
     [SwaggerResponse(200, "Delete a user api key", typeof(bool))]
     [HttpDelete("{keyId:guid}")]
-    public async Task<bool> DeleteApiKey(Guid keyId)
+    public async Task<bool> DeleteApiKey(DeleteApiKeyRequestDto requestDto)
     {
+        var keyId = requestDto.KeyId;
         var currentType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
         var isAdmin = currentType is EmployeeType.DocSpaceAdmin;
         var apiKey = await apiKeyManager.GetApiKeyAsync(keyId);

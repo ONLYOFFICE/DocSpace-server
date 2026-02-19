@@ -202,7 +202,7 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
         var ns = typeSymbol.ContainingNamespace;
         while (ns is { IsGlobalNamespace: false })
         {
-            if (ns.Name == "System" || ns.Name.StartsWith("Microsoft"))
+            if (ns.Name.StartsWith("System") || ns.Name.StartsWith("Microsoft"))
             {
                 return true;
             }
@@ -250,13 +250,10 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
                 methodDeclaration.Identifier.GetLocation(),
                 methodDeclaration.Identifier.Text));
         }
-
-        // Check return type, unwrapping Task<T> if needed
         var returnTypeToCheck = methodDeclaration.ReturnType;
 
         if (context.SemanticModel.GetTypeInfo(returnTypeToCheck).Type is { } returnTypeSymbol)
         {
-            // Unwrap Task<T> or ValueTask<T>
             if (returnTypeSymbol is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol && IsSystemNamespace(namedTypeSymbol))
             {
                 var typeArgument = namedTypeSymbol.TypeArguments.FirstOrDefault();
@@ -301,7 +298,10 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
         }
         else
         {
-            CheckPropertiesFromMetadata(context, methodDeclaration, returnTypeSymbol);
+            if (!IsList(returnTypeSymbol))
+            {
+                CheckPropertiesFromMetadata(context, methodDeclaration, returnTypeSymbol);
+            }
         }
     }
 
@@ -348,7 +348,11 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
 
             if (propertySymbol.GetAttributes().Any(attr => attr.AttributeClass?.Name is "FromBodyAttribute"))
             {
-                CheckPropertiesFromMetadata(context, methodDeclaration, propertySymbol.Type);
+                if (!IsList(propertySymbol.Type))
+                {
+                    CheckPropertiesFromMetadata(context, methodDeclaration, propertySymbol.Type);
+                }
+
                 continue;
             }
             
@@ -413,5 +417,16 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
                     propertySymbol.Name));
             }
         }
+    }
+    
+    private static bool IsList(ITypeSymbol typeSymbol)
+    {
+        if (typeSymbol is not INamedTypeSymbol namedType)
+        {
+            return false;
+        }
+
+        return namedType.IsGenericType 
+               && namedType.ConstructedFrom.ToString() == "System.Collections.Generic.List<T>";
     }
 }
