@@ -1125,12 +1125,19 @@ public class FileSecurity(
             return false;
         }
 
-        if (action is FilesSecurityActions.AskAi &&
-            (file == null || 
-             file.ContentLength > vectorizationGlobalSettings.MaxContentLength || 
-             !vectorizationGlobalSettings.IsSupportedContentExtraction(file.Title)))
+        if (action is FilesSecurityActions.AskAi)
         {
-            return false;
+            if (file == null)
+            {
+                return false;
+            }
+
+            if (file.FilterType != FilterType.ImagesOnly &&
+                (file.ContentLength > vectorizationGlobalSettings.MaxContentLength ||
+                 !vectorizationGlobalSettings.IsSupportedContentExtraction(file.Title)))
+            {
+                return false;
+            }
         }
 
         if (action == FilesSecurityActions.Vectorization)
