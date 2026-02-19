@@ -42,6 +42,7 @@ global using ASC.AI.Core.Settings;
 global using ASC.AI.Core.Retrieval.Web;
 global using ASC.AI.Core.Retrieval.Knowledge;
 global using ASC.Core;
+global using ASC.Core.Common.AI;
 
 global using ASC.Common;
 global using ASC.Common.Log;
