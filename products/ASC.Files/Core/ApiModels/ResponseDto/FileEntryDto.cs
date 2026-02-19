@@ -59,11 +59,13 @@ public abstract class FileEntryBaseDto
     /// <summary>
     /// Provides information about the employee who shared the file or folder.
     /// </summary>
+    /// <example>null</example>
     public EmployeeDto SharedBy { get; set; }
 
     /// <summary>
     /// The information about the employee who owns the file entry.
     /// </summary>
+    /// <example>null</example>
     public EmployeeDto OwnedBy { get; set; }
 
     /// <summary>
@@ -94,16 +96,19 @@ public abstract class FileEntryBaseDto
     /// <summary>
     /// The creation date and time of the file entry.
     /// </summary>
+    /// <example>2021-01-01T00:00:00Z</example>
     public ApiDateTime Created { get; set; }
 
     /// <summary>
     /// The file entry author.
     /// </summary>
+    /// <example>null</example>
     public EmployeeDto CreatedBy { get; set; }
 
     /// <summary>
     /// The last date and time when the file entry was updated.
     /// </summary>
+    /// <example>2021-01-01T00:00:00Z</example>
     public ApiDateTime Updated
     {
         get => field < Created ? Created : field;
@@ -113,6 +118,7 @@ public abstract class FileEntryBaseDto
     /// <summary>
     /// The date and time when the file entry will be automatically deleted.
     /// </summary>
+    /// <example>2021-01-01T00:00:00Z</example>
     public ApiDateTime AutoDelete { get; set; }
 
     /// <summary>
@@ -130,6 +136,7 @@ public abstract class FileEntryBaseDto
     /// <summary>
     /// The user who updated the file entry.
     /// </summary>
+    /// <example>null</example>
     public EmployeeDto UpdatedBy { get; set; }
 
     /// <summary>
@@ -165,6 +172,7 @@ public abstract class FileEntryBaseDto
     /// <summary>
     /// The file entry type.
     /// </summary>
+    /// <example>0</example>
     public abstract FileEntryType FileEntryType { get; }
 
     protected FileEntryBaseDto(FileEntry entry)
@@ -235,16 +243,19 @@ public abstract class FileEntryDto<T> : FileEntryBaseDto
     /// <summary>
     /// A dictionary representing the sharing settings for the file entry.
     /// </summary>
+    /// <example>[]</example>
     public IDictionary<SubjectType, int> ShareSettings { get; set; }
 
     /// <summary>
     /// The actions that can be performed with the file entry.
     /// </summary>
+    /// <example>null</example>
     public IDictionary<FilesSecurityActions, bool> Security { get; set; }
 
     /// <summary>
     /// The available external rights of the file entry.
     /// </summary>
+    /// <example>[]</example>
     public IDictionary<SubjectType, IEnumerable<string>> AvailableShareRights { get; set; }
 
     /// <summary>
@@ -262,6 +273,7 @@ public abstract class FileEntryDto<T> : FileEntryBaseDto
     /// <summary>
     /// Represents the expiration date of the file entry.
     /// </summary>
+    /// <example>2021-01-01T00:00:00Z</example>
     public ApiDateTime ExpirationDate { get; set; }
 
     /// <summary>

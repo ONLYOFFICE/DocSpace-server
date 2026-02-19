@@ -45,6 +45,7 @@ public class EncryptionSettings
     /// <summary>
     /// The encryption password.
     /// </summary>
+    /// <example>password</example>
     public string Password
     {
         get => Pass;
@@ -54,12 +55,14 @@ public class EncryptionSettings
     /// <summary>
     /// The encryption status.
     /// </summary>
+    /// <example>0</example>
     [ProtoMember(2)]
     public EncryprtionStatus Status { get; set; }
 
     /// <summary>
     /// Specifies if the users will be notified about the encryption operation or not.
     /// </summary>
+    /// <example>true</example>
     [ProtoMember(3)]
     public bool NotifyUsers { get; set; }
 

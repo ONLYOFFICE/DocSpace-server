@@ -40,6 +40,7 @@ public class UploadResultDto
     /// <summary>
     /// The uploaded data.
     /// </summary>
+    /// <example>null</example>
     public object Data { get; set; }
 
     /// <summary>

@@ -34,17 +34,21 @@ public class PaymentCalculation
     /// <summary>
     /// The operation unique identifier.
     /// </summary>
+    /// <example>op-id-123</example>
     public long OperationId { get; set; }
     /// <summary>
     /// The calculated payment amount.
     /// </summary>
+    /// <example>10.0</example>
     public decimal Amount { get; set; }
     /// <summary>
     /// The three-character ISO 4217 currency symbol used for the payment calculation.
     /// </summary>
+    /// <example>USD</example>
     public string Currency { get; set; }
     /// <summary>
     /// The quantity associated with the payment calculation.
     /// </summary>
+    /// <example>1</example>
     public int Quantity { get; set; }
 }

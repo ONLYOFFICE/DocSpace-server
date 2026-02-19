@@ -78,16 +78,19 @@ public class FileOperationDto
     /// <summary>
     /// The list of files of the file operation.
     /// </summary>
+    /// <example>[]</example>
     public List<FileEntryBaseDto> Files { get; set; }
 
     /// <summary>
     /// The list of folders of the file operation.
     /// </summary>
+    /// <example>[]</example>
     public List<FileEntryBaseDto> Folders { get; set; }
 
     /// <summary>
     /// The status of the distributed task related to the file operation.
     /// </summary>
+    /// <example>0</example>
     public DistributedTaskStatus Status { get; set; }
 }
 

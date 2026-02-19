@@ -36,6 +36,7 @@ public class TenantDevToolsAccessSettings : ISettings<TenantDevToolsAccessSettin
     /// <summary>
     /// Specifies if the Developer Tools access are limited for users or not.
     /// </summary>
+    /// <example>false</example>
     public bool LimitedAccessForUsers { get; set; }
 
     /// <summary>

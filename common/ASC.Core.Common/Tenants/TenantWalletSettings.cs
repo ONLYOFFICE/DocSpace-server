@@ -34,6 +34,7 @@ public class TenantWalletSettingsWrapper
     /// <summary>
     /// The tenant wallet settings.
     /// </summary>
+    /// <example>null</example>
     public TenantWalletSettings Settings { get; set; }
 }
 
@@ -47,23 +48,27 @@ public class TenantWalletSettings : ISettings<TenantWalletSettings>
     /// <summary>
     /// Specifies whether automatic top-up for the tenant wallet is enabled.
     /// </summary>
+    /// <example>true</example>
     public bool Enabled { get; set; }
 
     /// <summary>
     /// The minimum wallet balance at which automatic top-up will be triggered. Must be between 5 and 1000.
     /// </summary>
+    /// <example>10</example>
     [Range(5, 1000)]
     public int MinBalance { get; set; }
 
     /// <summary>
     /// The maximum wallet balance at which automatic top-up will be triggered. Must be between 6 and 5000.
     /// </summary>
+    /// <example>100</example>
     [Range(6, 5000)]
     public int UpToBalance { get; set; }
 
     /// <summary>
     /// The three-character ISO 4217 currency symbol.
     /// </summary>
+    /// <example>USD</example>
     public string Currency { get; set; }
 
 
@@ -77,5 +82,6 @@ public class TenantWalletSettings : ISettings<TenantWalletSettings>
     /// <summary>
     /// The date and time when the tenant wallet settings were last modified.
     /// </summary>
+    /// <example>1990-01-01T00:00:00Z</example>
     public DateTime LastModified { get; set; }
 }

@@ -40,6 +40,7 @@ public class CheckDestFolderDto
     /// <summary>
     /// The list of files in the destination folder.
     /// </summary>
+    /// <example>[]</example>
     public List<FileEntryBaseDto> Files { get; set; }
 }
 

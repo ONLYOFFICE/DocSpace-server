@@ -73,16 +73,19 @@ public class MentionMessageWrapper
     /// <summary>
     /// The config parameter which contains the information about the action in the document that will be scrolled to.
     /// </summary>
+    /// <example>https://example.com</example>
     public ActionLinkConfig ActionLink { get; set; }
 
     /// <summary>
     /// A list of emails that will receive the mention message.
     /// </summary>
+    /// <example>[]</example>
     public List<string> Emails { get; set; }
 
     /// <summary>
     /// The mention message.
     /// </summary>
+    /// <example>Hello</example>
     [StringLength(255)]
     public string Message { get; set; }
 }
@@ -95,6 +98,7 @@ public class MentionMessageWrapperRequestDto<T>
     /// <summary>
     /// The file ID with the mention message.
     /// </summary>
+    /// <example>file-id</example>
     [FromRoute(Name = "fileId")]
     public T FileId { get; set; }
 

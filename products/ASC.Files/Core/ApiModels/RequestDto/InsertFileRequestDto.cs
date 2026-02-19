@@ -34,6 +34,7 @@ public class InsertFileRequestDto : IModelWithFile, IDisposable
     /// <summary>
     /// The file to be inserted.
     /// </summary>
+    /// <example>null</example>
     public IFormFile File { get; set; }
 
     /// <summary>
@@ -61,6 +62,7 @@ public class InsertFileRequestDto : IModelWithFile, IDisposable
     /// <summary>
     /// The request input stream.
     /// </summary>
+    /// <example>null</example>
     public Stream Stream
     {
         get => File?.OpenReadStream() ?? _stream;
@@ -109,6 +111,7 @@ public class InsertWithFileRequestDto<T>
     /// <summary>
     /// The request parameters for inserting a file.
     /// </summary>
+    /// <example>null</example>
     [FromForm]
     [ModelBinder(BinderType = typeof(InsertFileModelBinder))]
     public InsertFileRequestDto InsertFile { get; set; }

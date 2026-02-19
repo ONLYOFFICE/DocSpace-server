@@ -367,10 +367,12 @@ public class Balance
     /// <summary>
     /// The account number.
     /// </summary>
+    /// <example>12345</example>
     public int AccountNumber { get; init; }
     /// <summary>
     /// A list of sub-accounts.
     /// </summary>
+    /// <example>[]</example>
     public List<SubAccount> SubAccounts { get; init; }
 
     public bool IsDefault()

@@ -40,11 +40,13 @@ public class TenantQuotaSettings : ISettings<TenantQuotaSettings>
     /// <summary>
     /// Specifies if the tenant quota is enabled or not.
     /// </summary>
+    /// <example>true</example>
     public bool EnableQuota { get; set; }
 
     /// <summary>
     /// The tenant quota.
     /// </summary>
+    /// <example>10737418240</example>
     public long Quota { get; set; }
 
     /// <summary>

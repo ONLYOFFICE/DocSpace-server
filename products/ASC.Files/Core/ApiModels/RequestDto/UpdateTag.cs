@@ -34,12 +34,14 @@ public class UpdateTagRequestDto
     /// <summary>
     /// The old tag name.
     /// </summary>
+    /// <example>old-tag</example>
     [StringLength(255)]
     public required string OldName { get; set; }
 
     /// <summary>
     /// The new tag name.
     /// </summary>
+    /// <example>new-tag</example>
     [StringLength(255)]
     public required string NewName { get; set; }
 }

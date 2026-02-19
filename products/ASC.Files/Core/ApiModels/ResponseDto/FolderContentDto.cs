@@ -34,16 +34,19 @@ public class FolderContentDto<T>
     /// <summary>
     /// The list of files in the folder.
     /// </summary>
+    /// <example>[]</example>
     public List<FileEntryBaseDto> Files { get; set; }
 
     /// <summary>
-    /// The list of folders in the folder. 
+    /// The list of folders in the folder.
     /// </summary>
+    /// <example>[]</example>
     public List<FileEntryBaseDto> Folders { get; set; }
 
     /// <summary>
     /// The current folder information.
     /// </summary>
+    /// <example>null</example>
     public FolderDto<T> Current { get; set; }
 
     /// <summary>

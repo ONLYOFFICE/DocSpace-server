@@ -37,6 +37,7 @@ public class FormResultsDto
     /// <summary>
     /// The list of forms data.
     /// </summary>
+    /// <example>[]</example>
     public IEnumerable<FormsItemData> FormsData { get; set; }
 }
 

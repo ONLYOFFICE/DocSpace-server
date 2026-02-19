@@ -34,6 +34,7 @@ public class WizardSettings : ISettings<WizardSettings>
     /// <summary>
     /// Specifies if the Wizard settings are completed or not
     /// </summary>
+    /// <example>true</example>
     public bool Completed { get; set; }
 
     /// <summary>

@@ -36,6 +36,7 @@ public class TenantBannerSettings : ISettings<TenantBannerSettings>
     /// <summary>
     /// The banners visibility flag.
     /// </summary>
+    /// <example>false</example>
     public bool Hidden { get; set; }
 
     /// <summary>

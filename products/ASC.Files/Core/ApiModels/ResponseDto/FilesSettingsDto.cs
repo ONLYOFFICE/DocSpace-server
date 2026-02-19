@@ -100,6 +100,7 @@ public class FilesSettingsDto
     /// <summary>
     /// The list of the convertible extensions.
     /// </summary>
+    /// <example>null</example>
     public IDictionary<string, List<string>> ExtsConvertible { get; set; }
 
     /// <summary>
@@ -159,6 +160,7 @@ public class FilesSettingsDto
     /// <summary>
     /// The internal file formats.
     /// </summary>
+    /// <example>null</example>
     public Dictionary<FileType, string> InternalFormats { get; set; }
 
     /// <summary>
@@ -303,6 +305,7 @@ public class FilesSettingsDto
     /// <summary>
     /// The default order of files.
     /// </summary>
+    /// <example>null</example>
     public OrderBy DefaultOrder { get; set; }
 
     /// <summary>
@@ -344,6 +347,7 @@ public class FilesSettingsDto
     /// <summary>
     /// The auto-clearing setting parameters.
     /// </summary>
+    /// <example>null</example>
     public AutoCleanUpData AutomaticallyCleanUp { get; set; }
 
     /// <summary>
@@ -355,6 +359,7 @@ public class FilesSettingsDto
     /// <summary>
     /// The default access rights in sharing settings.
     /// </summary>
+    /// <example>[]</example>
     public List<FileShare> DefaultSharingAccessRights { get; set; }
 
     /// <summary>

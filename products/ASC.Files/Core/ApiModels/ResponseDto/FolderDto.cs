@@ -70,11 +70,13 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <summary>
     /// The list of tags of the folder.
     /// </summary>
+    /// <example>[]</example>
     public IEnumerable<string> Tags { get; set; }
 
     /// <summary>
     /// The folder logo.
     /// </summary>
+    /// <example>null</example>
     public Logo Logo { get; set; }
 
     /// <summary>
@@ -110,11 +112,13 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <summary>
     /// The room data lifetime settings of the folder.
     /// </summary>
+    /// <example>null</example>
     public RoomDataLifetimeDto Lifetime { get; set; }
 
     /// <summary>
     /// The watermark settings of the folder.
     /// </summary>
+    /// <example>null</example>
     public WatermarkDto Watermark { get; set; }
 
     /// <summary>

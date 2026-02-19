@@ -59,6 +59,7 @@ public class ConversationResultDto
     /// <summary>
     /// The resulting file after the conversion.
     /// </summary>
+    /// <example>null</example>
     [JsonPropertyName("result")]
     public object File { get; set; }
 

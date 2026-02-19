@@ -46,21 +46,25 @@ public record HistoryDto
     /// <summary>
     /// The action initiator.
     /// </summary>
+    /// <example>null</example>
     public required EmployeeDto Initiator { get; init; }
 
     /// <summary>
     /// The date and time when an action on the file was performed.
     /// </summary>
+    /// <example>2021-01-01T00:00:00Z</example>
     public required ApiDateTime Date { get; init; }
 
     /// <summary>
     /// The history data.
     /// </summary>
+    /// <example>null</example>
     public required HistoryData Data { get; init; }
 
     /// <summary>
     /// The list of related history.
     /// </summary>
+    /// <example>[]</example>
     public List<HistoryDto> Related { get; set; }
 }
 

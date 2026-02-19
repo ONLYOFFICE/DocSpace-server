@@ -184,44 +184,52 @@ public class EmailValidationKeyProvider
 public class EmailValidationKeyModel
 {
     /// <summary>
-    /// The email validation key. 
+    /// The email validation key.
     /// </summary>
+    /// <example>abcdef123456</example>
     public string Key { get; set; }
 
     /// <summary>
     /// The user type.
     /// </summary>
+    /// <example>0</example>
     public EmployeeType? EmplType { get; init; }
 
     /// <summary>
     /// The email address.
     /// </summary>
+    /// <example>user@example.com</example>
     [EmailAddress]
     public string Email { get; init; }
 
     /// <summary>
     /// The encrypted email address.
     /// </summary>
+    /// <example>user%40example.com</example>
     public string EncEmail { get; init; }
 
     /// <summary>
     /// The user ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid? UiD { get; init; }
 
     /// <summary>
     /// The confirmation email type.
     /// </summary>
+    /// <example>0</example>
     public ConfirmType? Type { get; init; }
 
     /// <summary>
     /// Specifies whether it is the first time account access or not.
     /// </summary>
+    /// <example>false</example>
     public string First { get; init; }
 
     /// <summary>
     /// The room ID.
     /// </summary>
+    /// <example>null</example>
     public string RoomId { get; init; }
 
     public void Deconstruct(out string key, out EmployeeType? emplType, out string email, out Guid? uiD, out ConfirmType? type, out string first, out string encEmail)

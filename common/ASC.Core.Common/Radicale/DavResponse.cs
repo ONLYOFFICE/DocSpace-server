@@ -34,21 +34,25 @@ public class DavResponse
     /// <summary>
     /// Specifies if the operation of creating a CardDav address book is completed or not.
     /// </summary>
+    /// <example>true</example>
     public bool Completed { get; set; }
 
     /// <summary>
     /// The status code of creating a CardDav address book.
     /// </summary>
+    /// <example>200</example>
     public int StatusCode { get; init; }
 
     /// <summary>
     /// The link to the CardDav address book.
     /// </summary>
+    /// <example>null</example>
     public string Data { get; set; }
 
     /// <summary>
     /// The error message of creating a CardDav address book.
     /// </summary>
+    /// <example>null</example>
     public string Error { get; set; }
 
     public override string ToString()

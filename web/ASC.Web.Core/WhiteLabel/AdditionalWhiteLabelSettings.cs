@@ -34,6 +34,7 @@ public class AdditionalWhiteLabelSettingsWrapper
     /// <summary>
     /// The additional white label settings.
     /// </summary>
+    /// <example>null</example>
     public AdditionalWhiteLabelSettings Settings { get; set; }
 }
 
@@ -50,31 +51,37 @@ public class AdditionalWhiteLabelSettings : ISettings<AdditionalWhiteLabelSettin
     /// <summary>
     /// Specifies if the sample documents are displayed or hidden.
     /// </summary>
+    /// <example>true</example>
     public bool StartDocsEnabled { get; init; }
 
     /// <summary>
     /// Specifies if the Help Center link is available or not.
     /// </summary>
+    /// <example>true</example>
     public bool HelpCenterEnabled { get; init; }
 
     /// <summary>
     /// Specifies if the "Feedback &amp; Support" link is available or not.
     /// </summary>
+    /// <example>true</example>
     public bool FeedbackAndSupportEnabled { get; init; }
 
     /// <summary>
     /// Specifies if the user forum is available or not.
     /// </summary>
+    /// <example>true</example>
     public bool UserForumEnabled { get; init; }
 
     /// <summary>
     /// Specifies if the Video Guides link is available or not.
     /// </summary>
+    /// <example>true</example>
     public bool VideoGuidesEnabled { get; init; }
 
     /// <summary>
     /// Specifies if the License Agreements link is available or not.
     /// </summary>
+    /// <example>true</example>
     public bool LicenseAgreementsEnabled { get; init; }
     
     public static Guid ID => new("{0108422F-C05D-488E-B271-30C4032494DA}");

@@ -70,5 +70,6 @@ public class UploadSessionResponseDto<T>
     /// <summary>
     /// The uploaded file information.
     /// </summary>
+    /// <example>null</example>
     public FileDto<T> File { get; set; }
 }

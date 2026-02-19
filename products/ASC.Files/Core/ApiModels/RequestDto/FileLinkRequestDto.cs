@@ -46,6 +46,7 @@ public class FileLinkRequest
     /// <summary>
     /// The link expiration date.
     /// </summary>
+    /// <example>2021-01-01T00:00:00Z</example>
     public ApiDateTime ExpirationDate { get; set; }
 
     /// <summary>

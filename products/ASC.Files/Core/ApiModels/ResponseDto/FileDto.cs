@@ -72,6 +72,7 @@ public class FileDto<T> : FileEntryDto<T>
     /// <summary>
     /// The list of users editing the file.
     /// </summary>
+    /// <example>[]</example>
     public Dictionary<Guid, string> EditingBy { get; set; }
 
     /// <summary>
@@ -194,26 +195,31 @@ public class FileDto<T> : FileEntryDto<T>
     /// <summary>
     /// The file draft information with its location.
     /// </summary>
+    /// <example>null</example>
     public DraftLocation<T> DraftLocation { get; set; }
 
     /// <summary>
     /// The file accessibility.
     /// </summary>
+    /// <example>null</example>
     public IDictionary<Accessibility, bool> ViewAccessibility { get; set; }
 
     /// <summary>
     /// The time when the file was last opened.
     /// </summary>
+    /// <example>2021-01-01T00:00:00Z</example>
     public ApiDateTime LastOpened { get; set; }
 
     /// <summary>
     /// The date when the file will be expired.
     /// </summary>
+    /// <example>false</example>
     public ApiDateTime Expired { get; set; }
-    
+
     /// <summary>
     /// The file entry type.
     /// </summary>
+    /// <example>1</example>
     public override FileEntryType FileEntryType => FileEntryType.File;
 
     /// <summary>

@@ -40,5 +40,6 @@ public class SaveFormRoleMappingDto<T>
     /// <summary>
     /// The collection of roles.
     /// </summary>
+    /// <example>[]</example>
     public required IEnumerable<FormRole> Roles { get; set; }
 }

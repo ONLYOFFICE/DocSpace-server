@@ -263,38 +263,45 @@ public class EditHistoryDataDto
     /// <summary>
     /// The URL address of the file with the document changes data.
     /// </summary>
+    /// <example>https://example.com/changes</example>
     [Url]
     public string ChangesUrl { get; set; }
 
     /// <summary>
     /// The document identifier used to unambiguously identify the document file.
     /// </summary>
+    /// <example>doc1</example>
     public required string Key { get; set; }
 
     /// <summary>
     /// The object of the previous version of the document.
     /// </summary>
+    /// <example>null</example>
     public EditHistoryUrl Previous { get; set; }
 
     /// <summary>
     /// The encrypted signature added to the parameter in the form of a token.
     /// </summary>
+    /// <example>token</example>
     public string Token { get; set; }
 
     /// <summary>
     /// The URL address of the current document version.
     /// </summary>
+    /// <example>https://example.com/file.docx</example>
     [Url]
     public required string Url { get; set; }
 
     /// <summary>
     /// The document version number.
     /// </summary>
+    /// <example>1</example>
     public required int Version { get; init; }
 
     /// <summary>
     /// The document extension.
     /// </summary>
+    /// <example>docx</example>
     public required string FileType { get; set; }
 }
 

@@ -34,21 +34,25 @@ public class ConfigurationDto<T>
     /// <summary>
     /// The document configuration.
     /// </summary>
+    /// <example>null</example>
     public required DocumentConfigDto Document { get; set; }
 
     /// <summary>
     /// The document type.
     /// </summary>
+    /// <example>null</example>
     public required string DocumentType { get; set; }
 
     /// <summary>
     /// The editor configuration.
     /// </summary>
+    /// <example>null</example>
     public required EditorConfigurationDto EditorConfig { get; set; }
 
     /// <summary>
     /// The editor type.
     /// </summary>
+    /// <example>0</example>
     public required EditorType EditorType { get; set; }
 
     /// <summary>
@@ -73,6 +77,7 @@ public class ConfigurationDto<T>
     /// <summary>
     /// The file parameters.
     /// </summary>
+    /// <example>null</example>
     public required FileDto<T> File { get; set; }
 
     /// <summary>
@@ -114,6 +119,7 @@ public class ConfigurationDto<T>
     /// <summary>
     /// The generation tool call state. Used to run the agent flow in the editor.
     /// </summary>
+    /// <example>null</example>
     public EditorToolCallStateDto GenerationToolCallState { get; set; }
 }
 

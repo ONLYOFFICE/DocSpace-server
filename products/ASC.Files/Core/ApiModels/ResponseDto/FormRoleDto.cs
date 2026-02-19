@@ -47,6 +47,7 @@ public class FormRoleDto
     /// <summary>
     /// The user of the role.
     /// </summary>
+    /// <example>null</example>
     public EmployeeFullDto User { get; set; }
 
     /// <summary>
@@ -64,11 +65,13 @@ public class FormRoleDto
     /// <summary>
     /// The user who stopped the role.
     /// </summary>
+    /// <example>null</example>
     public EmployeeFullDto StopedBy { get; set; }
 
     /// <summary>
     /// The role history.
     /// </summary>
+    /// <example>[]</example>
     public Dictionary<int, DateTime> History { get; set; }
 
     /// <summary>

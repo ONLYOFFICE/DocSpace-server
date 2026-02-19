@@ -34,34 +34,40 @@ public class ThirdPartyParams
     /// <summary>
     /// The authentication data.
     /// </summary>
+    /// <example>null</example>
     [JsonPropertyName("auth_data")]
     public AuthData AuthData { get; init; }
 
     /// <summary>
     /// Specifies if this is a corporate account or not.
     /// </summary>
+    /// <example>false</example>
     public bool Corporate { get; init; }
 
     /// <summary>
     /// Specifies if this is a room storage or not.
     /// </summary>
+    /// <example>false</example>
     public bool RoomsStorage { get; init; }
 
     /// <summary>
     /// The customer title.
     /// </summary>
+    /// <example>My Storage</example>
     [JsonPropertyName("customer_title")]
     public string CustomerTitle { get; set; }
 
     /// <summary>
     /// The provider ID.
     /// </summary>
+    /// <example>1</example>
     [JsonPropertyName("provider_id")]
     public int? ProviderId { get; init; }
 
     /// <summary>
     /// The provider key.
     /// </summary>
+    /// <example>GoogleDrive</example>
     [JsonPropertyName("provider_key")]
     public string ProviderKey { get; init; }
 }

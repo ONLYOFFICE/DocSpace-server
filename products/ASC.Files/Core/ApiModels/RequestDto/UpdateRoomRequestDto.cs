@@ -59,38 +59,45 @@ public class UpdateRoomRequest
     /// <summary>
     /// The room data lifetime information.
     /// </summary>
+    /// <example>null</example>
     public RoomDataLifetimeDto Lifetime { get; set; }
 
     /// <summary>
     /// The watermark settings.
     /// </summary>
+    /// <example>null</example>
     public WatermarkRequestDto Watermark { get; set; }
 
     /// <summary>
     /// The room logo.
     /// </summary>
+    /// <example>null</example>
     public LogoRequest Logo { get; set; }
 
     /// <summary>
     /// The list of tags.
     /// </summary>
+    /// <example>[]</example>
     public IEnumerable<string> Tags { get; set; }
 
     /// <summary>
     /// The room color.
     /// </summary>
+    /// <example>null</example>
     [StringLength(6)]
     public string Color { get; set; }
 
     /// <summary>
     /// The room cover.
     /// </summary>
+    /// <example>null</example>
     [StringLength(50)]
     public string Cover { get; set; }
     
     /// <summary>
     /// The chat settings.
     /// </summary>
+    /// <example>null</example>
     public ChatSettings ChatSettings { get; set; }
 }
 
@@ -102,6 +109,7 @@ public class UpdateRoomRequestDto<T>
     /// <summary>
     /// The room ID.
     /// </summary>
+    /// <example>file-id</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 

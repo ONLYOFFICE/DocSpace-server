@@ -34,6 +34,7 @@ public class UpdateComment
     /// <summary>
     /// The comment version.
     /// </summary>
+    /// <example>1</example>
     public required int Version { get; set; }
 
     /// <summary>

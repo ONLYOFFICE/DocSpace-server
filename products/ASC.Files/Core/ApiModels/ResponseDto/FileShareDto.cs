@@ -41,22 +41,26 @@ public class FileShareDto
     /// <summary>
     /// The user who has the access to the specified file.
     /// </summary>
+    /// <example>null</example>
     [Obsolete]
     public object SharedTo { get; set; }
 
     /// <summary>
     /// The user who has the access to the specified file.
     /// </summary>
+    /// <example>null</example>
     public EmployeeFullDto SharedToUser { get; set; }
 
     /// <summary>
     /// The user who has the access to the specified file.
     /// </summary>
+    /// <example>null</example>
     public GroupSummaryDto SharedToGroup { get; set; }
 
     /// <summary>
     /// The user who has the access to the specified file.
     /// </summary>
+    /// <example>null</example>
     public FileShareLink SharedLink { get; set; }
 
     /// <summary>

@@ -34,38 +34,45 @@ public class FireBaseUser : BaseEntity
     /// <summary>
     /// The Firebase user ID.
     /// </summary>
+    /// <example>1</example>
     public int Id { get; set; }
 
     /// <summary>
     /// The user ID.
     /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid UserId { get; set; }
 
     /// <summary>
     /// The tenant ID.
     /// </summary>
+    /// <example>1</example>
     public int TenantId { get; set; }
 
     /// <summary>
     /// The Firebase device token.
     /// </summary>
+    /// <example>token123</example>
     [MaxLength(255)]
     public string FirebaseDeviceToken { get; set; }
 
     /// <summary>
     /// The Firebase application.
     /// </summary>
+    /// <example>web</example>
     [MaxLength(20)]
     public string Application { get; set; }
 
     /// <summary>
     /// Specifies if the user is subscribed to the push notifications or not.
     /// </summary>
+    /// <example>true</example>
     public bool? IsSubscribed { get; set; }
 
     /// <summary>
     /// The database tenant parameters.
     /// </summary>
+    /// <example>1</example>
     public DbTenant Tenant { get; set; }
 
     public override object[] GetKeys()

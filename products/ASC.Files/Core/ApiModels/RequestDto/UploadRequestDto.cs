@@ -34,21 +34,25 @@ public class UploadRequestDto : IModelWithFile, IDisposable
     /// <summary>
     /// The file to be uploaded.
     /// </summary>
+    /// <example>null</example>
     public IFormFile File { get; set; }
 
     /// <summary>
     /// The content-type header.
     /// </summary>
+    /// <example>application/vnd.openxmlformats-officedocument.wordprocessingml.document</example>
     public ContentType ContentType { get; set; }
 
     /// <summary>
     /// The content-disposition header.
     /// </summary>
+    /// <example>attachment; filename=file.docx</example>
     public ContentDisposition ContentDisposition { get; set; }
 
     /// <summary>
     /// The list of files when specified as multipart/form-data.
     /// </summary>
+    /// <example>[]</example>
     public IEnumerable<IFormFile> Files { get; set; }
 
     /// <summary>
@@ -75,6 +79,7 @@ public class UploadRequestDto : IModelWithFile, IDisposable
     /// <summary>
     /// The request input stream.
     /// </summary>
+    /// <example>null</example>
     public Stream Stream
     {
         get => File?.OpenReadStream() ?? _stream;

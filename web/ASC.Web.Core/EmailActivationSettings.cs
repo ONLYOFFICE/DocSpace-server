@@ -34,6 +34,7 @@ public class EmailActivationSettings : ISettings<EmailActivationSettings>
     /// <summary>
     /// Specifies whether the email activation settings are shown or hidden.
     /// </summary>
+    /// <example>true</example>
     public bool Show { get; set; }
 
     /// <summary>

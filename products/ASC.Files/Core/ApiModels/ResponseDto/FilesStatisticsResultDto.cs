@@ -34,26 +34,31 @@ public class FilesStatisticsResultDto
     /// <summary>
     /// The used space of files in the \"My Documents\" section.
     /// </summary>
+    /// <example>10240</example>
     public FilesStatisticsFolder MyDocumentsUsedSpace { get; set; }
 
     /// <summary>
     /// The used space of files in the \"Trash\" section.
     /// </summary>
+    /// <example>512</example>
     public FilesStatisticsFolder TrashUsedSpace { get; set; }
 
     /// <summary>
     /// The used space of files in the \"Archive\" section.
     /// </summary>
+    /// <example>2048</example>
     public FilesStatisticsFolder ArchiveUsedSpace { get; set; }
 
     /// <summary>
     /// The used space of files in the \"Rooms\" section.
     /// </summary>
+    /// <example>5120</example>
     public FilesStatisticsFolder RoomsUsedSpace { get; set; }
 
     /// <summary>
     /// The used space of files in the \"AI agents\" section.
     /// </summary>
+    /// <example>1024</example>
     public FilesStatisticsFolder AiAgentsUsedSpace { get; set; }
 }
 

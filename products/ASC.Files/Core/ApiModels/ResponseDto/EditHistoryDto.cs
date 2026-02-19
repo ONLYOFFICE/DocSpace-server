@@ -58,11 +58,13 @@ public class EditHistoryDto
     /// <summary>
     /// The user who updated a file.
     /// </summary>
+    /// <example>null</example>
     public EditHistoryAuthor User { get; set; }
 
     /// <summary>
     /// The document version creation date.
     /// </summary>
+    /// <example>null</example>
     public ApiDateTime Created { get; set; }
 
     /// <summary>
@@ -74,6 +76,7 @@ public class EditHistoryDto
     /// <summary>
     /// The list of file history changes.
     /// </summary>
+    /// <example>[]</example>
     public List<EditHistoryChangesWrapper> Changes { get; set; }
 
     /// <summary>

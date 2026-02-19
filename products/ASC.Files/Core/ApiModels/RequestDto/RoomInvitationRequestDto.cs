@@ -34,6 +34,7 @@ public class RoomInvitationRequest
     /// <summary>
     /// The collection of invitation parameters.
     /// </summary>
+    /// <example>[]</example>
     [MaxEmailInvitations]
     public List<RoomInvitation> Invitations { get; set; }
 

@@ -40,5 +40,6 @@ public class DuplicateRequestDto : FileOperationRequestBaseDto
     /// <summary>
     /// The list of file IDs.
     /// </summary>
+    /// <example>[]</example>
     public List<JsonElement> FileIds { get; set; } = [];
 }

@@ -99,56 +99,67 @@ public class SsoSettingsV2 : ISettings<SsoSettingsV2>
     /// <summary>
     /// Specifies if the SSO settings are enabled or not.
     /// </summary>
+    /// <example>false</example>
     public bool? EnableSso { get; set; }
 
     /// <summary>
     /// The SSO IdP settings.
     /// </summary>
+    /// <example>null</example>
     public SsoIdpSettings IdpSettings { get; set; }
 
     /// <summary>
     /// The list of the IdP certificates.
     /// </summary>
+    /// <example>[]</example>
     public List<SsoCertificate> IdpCertificates { get; set; }
 
     /// <summary>
     /// The IdP advanced certificate.
     /// </summary>
+    /// <example>null</example>
     public SsoIdpCertificateAdvanced IdpCertificateAdvanced { get; set; }
 
     /// <summary>
     /// The SP login label.
     /// </summary>
+    /// <example>Single Sign-on</example>
     public string SpLoginLabel { get; set; }
 
     /// <summary>
     /// The list of the SP certificates.
     /// </summary>
+    /// <example>[]</example>
     public List<SsoCertificate> SpCertificates { get; set; }
 
     /// <summary>
     /// The SP advanced certificate.
     /// </summary>
+    /// <example>null</example>
     public SsoSpCertificateAdvanced SpCertificateAdvanced { get; set; }
 
     /// <summary>
     /// The SSO field mapping.
     /// </summary>
+    /// <example>null</example>
     public SsoFieldMapping FieldMapping { get; set; }
 
     /// <summary>
     /// Specifies if the authentication page will be hidden or not.
     /// </summary>
+    /// <example>false</example>
     public bool HideAuthPage { get; set; }
 
     /// <summary>
     /// The user type.
     /// </summary>
+    /// <example>1</example>
     public int UsersType { get; set; }
 
     /// <summary>
     /// Specifies if the email verification is disabled or not.
     /// </summary>
+    /// <example>false</example>
     public bool DisableEmailVerification { get; set; }
 }
 

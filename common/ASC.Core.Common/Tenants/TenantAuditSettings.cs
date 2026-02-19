@@ -36,11 +36,13 @@ public class TenantAuditSettings : ISettings<TenantAuditSettings>
     /// <summary>
     /// The login history lifetime.
     /// </summary>
+    /// <example>180</example>
     public int LoginHistoryLifeTime { get; init; }
 
     /// <summary>
     /// The audit trail lifetime.
     /// </summary>
+    /// <example>180</example>
     public int AuditTrailLifeTime { get; init; }
     
     public static Guid ID => new("{8337D0FB-AD67-4552-8297-802312E7F503}");
@@ -69,5 +71,6 @@ public class TenantAuditSettingsWrapper
     /// <summary>
     /// The tenant audit settings parameters.
     /// </summary>
+    /// <example>null</example>
     public TenantAuditSettings Settings { get; set; }
 }

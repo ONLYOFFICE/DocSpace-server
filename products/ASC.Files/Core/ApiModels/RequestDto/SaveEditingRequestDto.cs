@@ -88,6 +88,7 @@ public class SaveEditingRequestDto<T> : IModelWithFile
     /// <summary>
     /// Specifies whether to force save the file or not.
     /// </summary>
+    /// <example>false</example>
     [FromForm(Name = "Forcesave")]
     public bool Forcesave { get; set; }
 }
