@@ -10,16 +10,20 @@
         <AssemblyTitle>ASC.AI</AssemblyTitle>
         <Product>ASC.AI</Product>
         <GenerateDocumentationFile>True</GenerateDocumentationFile>
+        <OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
+        <OpenApiDocumentsDirectory>$(MSBuildProjectDirectory)\..\..\..\common\Tools\ASC.Api.Documentation\ASC.Api.Documentation\json\</OpenApiDocumentsDirectory>
+        <OpenApiGenerateDocumentsOptions>--file-name ai</OpenApiGenerateDocumentsOptions>
         <NoWarn>1701;1702;1591</NoWarn>
         <ImplicitUsings>enable</ImplicitUsings>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\..\common\ASC.Analyzers\ASC.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
         <ProjectReference Include="..\..\..\common\ASC.Api.Core\ASC.Api.Core.csproj" />
         <ProjectReference Include="..\Core\ASC.AI.Core.csproj" />
     </ItemGroup>
-
+    
     <ItemGroup>
       <None Update="Properties\PublishProfiles\FolderProfile.pubxml">
         <CopyToOutputDirectory>Never</CopyToOutputDirectory>
@@ -32,11 +36,40 @@
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       </None>
     </ItemGroup>
-
+    
     <ItemGroup>
       <Content Include="..\..\..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
     </ItemGroup>
-
+    
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Extensions.ApiDescription.Server">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+    </ItemGroup>
+    
+    <ItemGroup>
+        <DocStoreSourceFiles Include="..\..\..\common\resources\DocStore\**\*"
+                             Exclude="..\..\..\common\resources\DocStore\.git\**\*;..\..\..\common\resources\DocStore\**\*.md;..\..\..\common\resources\DocStore\LICENSE"
+                             Visible="false"/>
+    </ItemGroup>
+    
+    <Target Name="CopyDocStoreToProject" BeforeTargets="BeforeBuild">
+        <Copy SourceFiles="@(DocStoreSourceFiles)"
+              DestinationFiles="@(DocStoreSourceFiles->'$(ProjectDir)DocStore\%(RecursiveDir)%(FileName)%(Extension)')"
+              SkipUnchangedFiles="true" />
+    </Target>
+    
+    <ItemGroup>
+        <None Update="DocStore\**\*">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+    
+    <Target Name="CleanDocStore" AfterTargets="Clean">
+        <RemoveDir Directories="$(ProjectDir)DocStore" />
+    </Target>
+    
 </Project>

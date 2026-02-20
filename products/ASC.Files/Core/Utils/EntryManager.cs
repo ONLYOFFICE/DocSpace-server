@@ -300,6 +300,7 @@ public class EntryManager(IDaoFactory daoFactory,
     SettingsManager settingsManager,
     IServiceProvider serviceProvider,
     ICache cache,
+    FileHelper fileHelper,
     FileTrackerHelper fileTracker,
     EntryStatusManager entryStatusManager,
     IHttpClientFactory clientFactory,
@@ -349,7 +350,8 @@ public class EntryManager(IDaoFactory daoFactory,
         QuotaFilter quotaFilter = QuotaFilter.All,
         StorageFilter storageFilter = StorageFilter.None,
         FormsItemDto formsItemDto = null,
-        Location? location = null)
+        Location? location = null,
+        int? groupId = null)
     {
         int total;
         var withShared = true;
@@ -481,6 +483,15 @@ public class EntryManager(IDaoFactory daoFactory,
 
             CalculateTotal();
         }
+        else if (parent.FolderType == FolderType.DefaultTemplates)
+        {
+            var folderDao = daoFactory.GetFolderDao<T>();
+            var fileDao = daoFactory.GetFileDao<T>();
+            var files = await fileDao.GetFilesAsync(parent.Id, orderBy, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, withSubfolders).ToListAsync();
+            entries.AddRange(files);
+
+            CalculateTotal();
+        }
         else if (parent.FolderType == FolderType.Privacy)
         {
             var folderDao = daoFactory.GetFolderDao<T>();
@@ -504,7 +515,7 @@ public class EntryManager(IDaoFactory daoFactory,
         else if (parent.FolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates or FolderType.AiAgents && !parent.ProviderEntry)
         {
             entries = await fileSecurity.GetVirtualRoomsAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject,
-                provider, subjectFilter, quotaFilter, storageFilter);
+                provider, subjectFilter, quotaFilter, storageFilter, groupId);
 
             CalculateTotal();
         }
@@ -1212,9 +1223,13 @@ public class EntryManager(IDaoFactory daoFactory,
                 }
                 linkedFile.Category = (int)FilterType.PdfForm;
 
+                var fileState = await fileHelper.GetFileState(sourceFile);
+
+                sourceFile.SetFileState(fileState);
 
                 linkedFile.Title = Global.ReplaceInvalidCharsAndTruncate(title);
-                linkedFile.SetFileStatus(await sourceFile.GetFileStatus());
+                linkedFile.FileStatus = sourceFile.FileStatus;
+                linkedFile.EditingBy = sourceFile.EditingBy;
                 linkedFile.ConvertedType = sourceFile.ConvertedType;
                 linkedFile.Comment = FilesCommonResource.CommentCreateFillFormDraft;
                 linkedFile.Encrypted = sourceFile.Encrypted;
@@ -1675,12 +1690,16 @@ public class EntryManager(IDaoFactory daoFactory,
         {
             var currFile = await fileDao.GetFileAsync(fileId);
             var newFile = serviceProvider.GetService<File<T>>();
+            var fileState = await fileHelper.GetFileState(currFile);
+
+            currFile.SetFileState(fileState);
 
             newFile.Id = file.Id;
             newFile.Version = currFile.Version + 1;
             newFile.VersionGroup = currFile.VersionGroup + 1;
             newFile.Title = FileUtility.ReplaceFileExtension(currFile.Title, FileUtility.GetFileExtension(file.Title));
-            newFile.SetFileStatus(await currFile.GetFileStatus());
+            newFile.FileStatus = currFile.FileStatus;
+            newFile.EditingBy = currFile.EditingBy;
             newFile.ParentId = currFile.ParentId;
             newFile.CreateBy = currFile.CreateBy;
             newFile.CreateOn = currFile.CreateOn;

@@ -29,8 +29,8 @@ namespace ASC.Files.Core;
 public interface IDaoFactory
 {
     IProviderDao ProviderDao { get; }
-
     IFolderDao<T> GetFolderDao<T>();
+    IRoomGroupDao<T> GetRoomGroupDao<T>();
     IFolderDao<T> GetCacheFolderDao<T>();
     IFileDao<T> GetFileDao<T>();
     IFileDao<T> GetCacheFileDao<T>();

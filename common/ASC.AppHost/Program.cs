@@ -26,45 +26,97 @@
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var connectionManager = new ConnectionStringManager(builder)
-    .AddMySql()
-    .AddRabbitMq()
-    .AddRedis()
-    .AddEditors()
-    .AddOpensearch()
-    .AddMailPit();
-
-
 var basePath = Path.GetFullPath(Path.Combine("..", "..", ".."));
 var isDocker = String.Compare(builder.Configuration["Docker"], "true", StringComparison.OrdinalIgnoreCase) == 0;
+var skipClient = String.Compare(builder.Configuration["SKIP_CLIENT"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 
-_ = new ProjectConfigurator(builder, connectionManager, basePath, isDocker)
-    .AddProject<ASC_Files>(Constants.FilesPort)
-    .AddProject<ASC_Files_Service>(Constants.FilesServicePort)
-    .AddProject<ASC_People>(Constants.PeoplePort)
-    .AddProject<ASC_Web_Api>(Constants.WebApiPort)
-    .AddProject<ASC_ApiSystem>(Constants.ApiSystemPort)
-    .AddProject<ASC_ClearEvents>(Constants.ClearEventsPort)
-    .AddProject<ASC_Data_Backup>(Constants.BackupPort)
-    .AddProject<ASC_Data_Backup_BackgroundTasks>(Constants.BackupBackgroundTasksPort)
-    .AddProject<ASC_Notify>(0, false)
-    .AddProject<ASC_Studio_Notify>(Constants.StudioNotifyPort)
-    .AddProject<ASC_Web_Studio>(Constants.WebstudioPort)
-    .AddProject<ASC_AI>(Constants.AiPort)
-    .AddProject<ASC_AI_Service>(Constants.AiServicePort)
-    .AddSocketIO()
-    .AddSsoAuth()
-    .AddWebDav()
-    .AddIdentity();
+var connectionManager = new ConnectionStringManager(builder, basePath)
+    .AddRabbitMq()
+    .AddEditors();
 
+var configurator = new ProjectConfigurator(builder, connectionManager, basePath, isDocker);
 
+switch (builder.Configuration["DOTNET_LAUNCH_PROFILE"])
+{
+    case "preview":
+        connectionManager.AddMySql()
+                         .AddRedis();
+        configurator
+            .AddProject<ASC_Files>(Constants.FilesPort)
+            .AddProject<ASC_Files_Worker>(Constants.FilesWorkerPort)
+            .AddProject<ASC_People>(Constants.PeoplePort)
+            .AddProject<ASC_Web_Api>(Constants.WebApiPort)
+            .AddProject<ASC_Web_Studio>(Constants.WebstudioPort)
+            .AddProject<ASC_AI>(Constants.AiPort)
+            .AddProject<ASC_AI_Worker>(Constants.AiWorkerPort)
+            .AddSocketIO();
+
+        break;
+    case "frontend-dev":
+        connectionManager.AddMySql(withDbGate: true)
+            .AddRedis()
+            .AddMailPit();
+        
+        configurator
+            .AddProject<ASC_Files>(Constants.FilesPort)
+            .AddProject<ASC_Files_Worker>(Constants.FilesWorkerPort)
+            .AddProject<ASC_People>(Constants.PeoplePort)
+            .AddProject<ASC_Web_Api>(Constants.WebApiPort)
+            .AddProject<ASC_ApiSystem>(Constants.ApiSystemPort)
+            .AddProject<ASC_Data_Backup>(Constants.BackupPort)
+            .AddProject<ASC_Data_Backup_Worker>(Constants.BackupWorkerPort)
+            .AddProject<ASC_Notify>(Constants.NotifyPort)
+            .AddProject<ASC_Studio_Notify>(Constants.StudioNotifyPort)
+            .AddProject<ASC_Web_Studio>(Constants.WebstudioPort)
+            .AddProject<ASC_AI>(Constants.AiPort)
+            .AddProject<ASC_AI_Worker>(Constants.AiWorkerPort)
+            .AddProject<ASC_TelegramService>(Constants.TelegramPort)
+            .AddSocketIO()
+            .AddSsoAuth();
+
+        break;
+    default:
+        connectionManager.AddMySql(withDbGate: true)
+            .AddRedis(withRedisInsight: true)
+            .AddMcpServer()
+            .AddOpensearch()
+            .AddMailPit();
+        
+        configurator
+            .AddProject<ASC_Files>(Constants.FilesPort)
+            .AddProject<ASC_Files_Worker>(Constants.FilesWorkerPort)
+            .AddProject<ASC_People>(Constants.PeoplePort)
+            .AddProject<ASC_Web_Api>(Constants.WebApiPort)
+            .AddProject<ASC_ApiSystem>(Constants.ApiSystemPort)
+            .AddProject<ASC_ClearEvents>(Constants.ClearEventsPort)
+            .AddProject<ASC_Data_Backup>(Constants.BackupPort)
+            .AddProject<ASC_Data_Backup_Worker>(Constants.BackupWorkerPort)
+            .AddProject<ASC_Notify>(Constants.NotifyPort)
+            .AddProject<ASC_Studio_Notify>(Constants.StudioNotifyPort)
+            .AddProject<ASC_Web_Studio>(Constants.WebstudioPort)
+            .AddProject<ASC_AI>(Constants.AiPort)
+            .AddProject<ASC_AI_Worker>(Constants.AiWorkerPort)
+            .AddProject<ASC_TelegramService>(Constants.TelegramPort)
+            .AddSocketIO()
+            .AddSsoAuth()
+            .AddWebDav()
+            .AddIdentity();
+        break;
+}
+
+IResourceBuilder<ExecutableResource>? startPackages = null;
 
 var clientBasePath = Path.Combine(basePath, "client");
-var installPackages = builder.AddExecutable("asc-install-packages", "pnpm", clientBasePath, "install");
-var buildPackages = builder.AddExecutable("asc-build-packages", "pnpm", clientBasePath, "build").WaitForCompletion(installPackages);
-var startPackages = builder.AddExecutable("asc-start-packages", "pnpm", clientBasePath, "start").WaitForCompletion(buildPackages);
-installPackages.WithChildRelationship(buildPackages);
-buildPackages.WithChildRelationship(startPackages);
+
+if (!skipClient)
+{
+    var installPackages = builder.AddExecutable("onlyoffice-install-packages", "pnpm", clientBasePath, "install");
+    var buildPackages = builder.AddExecutable("onlyoffice-build-packages", "pnpm", clientBasePath, "build").WaitForCompletion(installPackages);
+
+    startPackages = builder.AddExecutable("onlyoffice-start-packages", "pnpm", clientBasePath, "start").WaitForCompletion(buildPackages);
+    installPackages.WithChildRelationship(buildPackages);
+    buildPackages.WithChildRelationship(startPackages);
+}
 
 NginxConfiguration.ConfigureOpenResty(builder, basePath, clientBasePath, startPackages, isDocker);
 

@@ -71,6 +71,7 @@ internal class FolderDao(
     private const string RoomTemplates = "roomtemplates";
     private const string Archive = "archive";
     private const string AiAgents = "aiagents";
+    private const string DefaultTemplates = "defaulttemplates";
 
     public virtual async Task<Folder<int>> GetFolderAsync(int folderId)
     {
@@ -162,7 +163,8 @@ internal class FolderDao(
         ProviderFilter provider,
         SubjectFilter subjectFilter,
         IEnumerable<string> subjectEntriesIds,
-        QuotaFilter quotaFilter = QuotaFilter.All)
+        QuotaFilter quotaFilter = QuotaFilter.All,
+        int? groupId = null)
     {
         if (CheckInvalidFilters(filterTypes) || (provider != ProviderFilter.None && provider != ProviderFilter.Storage))
         {
@@ -178,7 +180,7 @@ internal class FolderDao(
         var q = GetFolderQuery(filesDbContext, r => parentsIds.Contains(r.ParentId));
 
         q = !withSubfolders ?
-            BuildRoomsQuery(filesDbContext, q, filter, tags, subjectId, searchByTags, withoutTags, searchByTypes, false, excludeSubject, subjectFilter, subjectEntriesIds, quotaFilter) :
+            BuildRoomsQuery(filesDbContext, q, filter, tags, subjectId, searchByTags, withoutTags, searchByTypes, false, excludeSubject, subjectFilter, subjectEntriesIds, quotaFilter, groupId) :
             BuildRoomsWithSubfoldersQuery(filesDbContext, parentsIds, filter, tags, searchByTags, searchByTypes, withoutTags, excludeSubject, subjectId, subjectFilter, subjectEntriesIds);
 
         if (!string.IsNullOrEmpty(searchText))
@@ -331,7 +333,7 @@ internal class FolderDao(
 
     public async Task<FilesStatisticsResultDto> GetFilesUsedSpace()
     {
-        var fileRootFolders = new List<FolderType> { FolderType.USER, FolderType.Archive, FolderType.TRASH, FolderType.VirtualRooms, FolderType.RoomTemplates, FolderType.AiAgents };
+        var fileRootFolders = new List<FolderType> { FolderType.USER, FolderType.Archive, FolderType.TRASH, FolderType.VirtualRooms, FolderType.RoomTemplates, FolderType.DefaultTemplates, FolderType.AiAgents };
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var tenantId = _tenantManager.GetCurrentTenantId();
         var result = new FilesStatisticsResultDto();
@@ -1537,6 +1539,10 @@ internal class FolderDao(
                         folder.FolderType = FolderType.Templates;
                         folder.Title = Templates;
                         break;
+                    case DefaultTemplates:
+                        folder.FolderType = FolderType.DefaultTemplates;
+                        folder.Title = DefaultTemplates;
+                        break;
                     case Privacy:
                         folder.FolderType = FolderType.Privacy;
                         folder.Title = Privacy;
@@ -1657,6 +1663,10 @@ internal class FolderDao(
                     folder.FolderType = FolderType.Templates;
                     folder.Title = Templates;
                     break;
+                case DefaultTemplates:
+                    folder.FolderType = FolderType.DefaultTemplates;
+                    folder.Title = DefaultTemplates;
+                    break;
                 case Privacy:
                     folder.FolderType = FolderType.Privacy;
                     folder.Title = Privacy;
@@ -1759,6 +1769,11 @@ internal class FolderDao(
     public async Task<int> GetFolderIDTemplatesAsync(bool createIfNotExists)
     {
         return await (this as IFolderDao<int>).GetFolderIDAsync(FileConstant.ModuleId, Templates, null, createIfNotExists);
+    }
+
+    public async Task<int> GetFolderIDDefaultTemplatesAsync(bool createIfNotExists)
+    {
+        return await (this as IFolderDao<int>).GetFolderIDAsync(FileConstant.ModuleId, DefaultTemplates, null, createIfNotExists);
     }
 
     public async Task<int> GetFolderIDPrivacyAsync(bool createIfNotExists, Guid? userId = null)
@@ -1978,7 +1993,7 @@ internal class FolderDao(
     }
 
     private IQueryable<DbFolder> BuildRoomsQuery(FilesDbContext filesDbContext, IQueryable<DbFolder> query, IEnumerable<FolderType> folderTypes, IEnumerable<string> tags, Guid subjectId, bool searchByTags, bool withoutTags,
-        bool searchByFilter, bool withSubfolders, bool excludeSubject, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, QuotaFilter quotaFilter = QuotaFilter.All)
+        bool searchByFilter, bool withSubfolders, bool excludeSubject, SubjectFilter subjectFilter, IEnumerable<string> subjectEntriesIds, QuotaFilter quotaFilter = QuotaFilter.All, int? groupId = null)
     {
         if (subjectId != Guid.Empty)
         {
@@ -2017,6 +2032,16 @@ internal class FolderDao(
                 .Join(filesDbContext.Tag, r => r.TagId, t => t.Id, (result, tagInfo) => new { result.folder, result.TagId, tagInfo.Name })
                 .Where(r => tags.Contains(r.Name))
                 .Select(r => r.folder).Distinct();
+        }
+        if (groupId.HasValue)
+        {
+            query =
+                query.Join(filesDbContext.RoomGroupRef,
+                        folder => folder.Id,
+                        rg => rg.InternalRoomId,
+                        (folder, rg) => new { folder, rg.GroupId })
+                    .Where(x => x.GroupId == groupId.Value)
+                    .Select(x => x.folder);
         }
 
         return query;

@@ -183,7 +183,8 @@ public class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationD
                 path,
                 stream,
                 MimeMapping.GetMimeMapping(path),
-                "attachment; filename=\"" + Uri.EscapeDataString(fileName) + "\"");
+                "attachment; filename=\"" + Uri.EscapeDataString(fileName) + "\"",
+                cancellationToken);
 
             Result = $"{filesLinkUtility.FileHandlerPath}?{FilesLinkUtility.Action}=bulk&filename={Uri.EscapeDataString(await instanceCrypto.EncryptAsync(fileName))}";
 

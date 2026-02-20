@@ -829,7 +829,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.Property<decimal>("Price")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(10,4)")
+                        .HasColumnType("decimal(15,9)")
                         .HasColumnName("price")
                         .HasDefaultValueSql("'0.00'");
 
@@ -837,6 +837,13 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("varchar")
                         .HasColumnName("product_id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<string>("ServiceGroup")
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar")
+                        .HasColumnName("service_group")
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
@@ -870,7 +877,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -1,
-                            Features = "trial,audit,ldap,sso,customization,thirdparty,restore,oauth,total_size:107374182400,file_size:100,manager:1,statistic",
+                            Features = "trial,audit,ldap,sso,customization,thirdparty,restore,oauth,total_size:107374182400,file_size:100,manager:1,statistic,automationapi",
                             Name = "trial",
                             Price = 0m,
                             Visible = false,
@@ -880,7 +887,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         {
                             TenantId = -2,
                             Description = "until 01.04.2024",
-                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:107374182400,file_size:1024,manager:1,statistic,free_backup:2:fixed",
+                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:107374182400,file_size:1024,manager:1,statistic,free_backup:2:fixed,automationapi",
                             Name = "admin",
                             Price = 15m,
                             ProductId = "1002",
@@ -890,7 +897,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -3,
-                            Features = "free,oauth,total_size:2147483648,manager:3,room:12",
+                            Features = "free,oauth,total_size:2147483648,manager:3,room:12,automationapi",
                             Name = "startup",
                             Price = 0m,
                             Visible = false,
@@ -919,7 +926,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -6,
-                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,file_size:1024,statistic,free_backup:2:fixed",
+                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,file_size:1024,statistic,free_backup:2:fixed,automationapi",
                             Name = "subscription",
                             Price = 0m,
                             ProductId = "1001",
@@ -929,7 +936,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -7,
-                            Features = "non-profit,audit,ldap,sso,thirdparty,restore,oauth,contentsearch,total_size:2147483648,file_size:1024,manager:20,statistic",
+                            Features = "non-profit,audit,ldap,sso,thirdparty,restore,oauth,contentsearch,total_size:2147483648,file_size:1024,manager:20,statistic,automationapi",
                             Name = "nonprofit",
                             Price = 0m,
                             ProductId = "1007",
@@ -939,7 +946,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -8,
-                            Features = "free,oauth,total_size:107374182400,manager:100,room:100",
+                            Features = "free,oauth,total_size:107374182400,manager:100,room:100,automationapi",
                             Name = "zoom",
                             Price = 0m,
                             Visible = false,
@@ -949,7 +956,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         {
                             TenantId = -9,
                             Description = "since 01.04.2024",
-                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,free_backup:2:fixed",
+                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,free_backup:2:fixed,automationapi",
                             Name = "admin",
                             Price = 20m,
                             ProductId = "1006",
@@ -960,7 +967,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         {
                             TenantId = -10,
                             Description = "since 10.02.2025",
-                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,year,free_backup:2:fixed",
+                            Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,year,free_backup:2:fixed,automationapi",
                             Name = "adminyear",
                             Price = 220m,
                             ProductId = "1009",
@@ -983,8 +990,203 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Features = "backup",
                             Name = "backup",
                             Price = 10m,
-                            ProductId = "10006",
                             ServiceName = "backup",
+                            Visible = true,
+                            Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -13,
+                            Features = "aitools",
+                            Name = "aitools",
+                            Price = 0m,
+                            Visible = true,
+                            Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -14,
+                            Features = "websearch",
+                            Name = "websearch",
+                            Price = 0.006m,
+                            ServiceGroup = "aitools",
+                            ServiceName = "websearch",
+                            Visible = false,
+                            Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -15,
+                            Features = "webfetch",
+                            Name = "webfetch",
+                            Price = 0.0012m,
+                            ServiceGroup = "aitools",
+                            ServiceName = "webfetch",
+                            Visible = false,
+                            Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -16,
+                            Features = "embedding",
+                            Name = "embedding",
+                            Price = 0.000000024m,
+                            ServiceGroup = "aitools",
+                            ServiceName = "embedding",
+                            Visible = false,
+                            Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -17,
+                            Features = "deepseek31input",
+                            Name = "deepseek31input",
+                            Price = 0.000000252m,
+                            ServiceGroup = "aitools",
+                            ServiceName = "deepseek3.1input",
+                            Visible = false,
+                            Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -18,
+                            Features = "deepseek31output",
+                            Name = "deepseek31output",
+                            Price = 0.000000948m,
+                            ServiceGroup = "aitools",
+                            ServiceName = "deepseek3.1output",
+                            Visible = false,
+                            Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -19,
+                            Features = "claude45input",
+                            Name = "claude45input",
+                            Price = 0.0000036m,
+                            ServiceGroup = "aitools",
+                            ServiceName = "claude4.5input",
+                            Visible = false,
+                            Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -20,
+                            Features = "claude45output",
+                            Name = "claude45output",
+                            Price = 0.000018m,
+                            ServiceGroup = "aitools",
+                            ServiceName = "claude4.5output",
+                            Visible = false,
+                            Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -21,
+                            Features = "gpt5input",
+                            Name = "gpt5input",
+                            Price = 0.0000015m,
+                            ServiceGroup = "aitools",
+                            ServiceName = "gpt5input",
+                            Visible = false,
+                            Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -22,
+                            Features = "gpt5output",
+                            Name = "gpt5output",
+                            Price = 0.000012m,
+                            ServiceGroup = "aitools",
+                            ServiceName = "gpt5output",
+                            Visible = false,
+                            Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -23,
+                            Features = "deepseek32input",
+                            Name = "deepseek32input",
+                            Price = 0.0000003m,
+                            ServiceGroup = "aitools",
+                            ServiceName = "deepseek3.2input",
+                            Visible = false,
+                            Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -24,
+                            Features = "deepseek32output",
+                            Name = "deepseek32output",
+                            Price = 0.000000456m,
+                            ServiceGroup = "aitools",
+                            ServiceName = "deepseek3.2output",
+                            Visible = false,
+                            Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -25,
+                            Features = "gpt52input",
+                            Name = "gpt52input",
+                            Price = 0.0000021m,
+                            ServiceGroup = "aitools",
+                            ServiceName = "gpt5.2input",
+                            Visible = false,
+                            Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -26,
+                            Features = "gpt52output",
+                            Name = "gpt52output",
+                            Price = 0.0000168m,
+                            ServiceGroup = "aitools",
+                            ServiceName = "gpt5.2output",
+                            Visible = false,
+                            Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -27,
+                            Features = "gemini3proinput",
+                            Name = "gemini3proinput",
+                            Price = 0.0000024m,
+                            ServiceGroup = "aitools",
+                            ServiceName = "gemini3proinput",
+                            Visible = false,
+                            Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -28,
+                            Features = "gemini3prooutput",
+                            Name = "gemini3prooutput",
+                            Price = 0.0000144m,
+                            ServiceGroup = "aitools",
+                            ServiceName = "gemini3prooutput",
+                            Visible = false,
+                            Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -29,
+                            Features = "gemini3flashinput",
+                            Name = "gemini3flashinput",
+                            Price = 0.0000006m,
+                            ServiceGroup = "aitools",
+                            ServiceName = "gemini3flashinput",
+                            Visible = false,
+                            Wallet = true
+                        },
+                        new
+                        {
+                            TenantId = -30,
+                            Features = "gemini3flashoutput",
+                            Name = "gemini3flashoutput",
+                            Price = 0.0000036m,
+                            ServiceGroup = "aitools",
+                            ServiceName = "gemini3flashoutput",
                             Visible = false,
                             Wallet = true
                         });
@@ -1677,6 +1879,32 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasIndex("ChatId");
 
                     b.ToTable("ai_chats_messages", (string)null);
+
+                    b.HasAnnotation("MySql:CharSet", "utf8");
+                });
+
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.Ai.DbDefaultAiProvider", b =>
+                {
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("DefaultModel")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("default_model")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<int>("ProviderId")
+                        .HasColumnType("int")
+                        .HasColumnName("provider_id");
+
+                    b.HasKey("TenantId")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("ai_providers_default", (string)null);
 
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
@@ -3767,6 +3995,46 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
 
+            modelBuilder.Entity("ASC.Files.Core.EF.DbFilesGroup", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id")
+                        .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Icon")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar")
+                        .HasColumnName("icon")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar")
+                        .HasColumnName("name")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId");
+
+                    b.ToTable("files_group", (string)null);
+
+                    b.HasAnnotation("MySql:CharSet", "utf8");
+                });
+
             modelBuilder.Entity("ASC.Files.Core.EF.DbFilesLink", b =>
                 {
                     b.Property<int>("TenantId")
@@ -3828,6 +4096,57 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasName("PRIMARY");
 
                     b.ToTable("files_properties", (string)null);
+                });
+
+            modelBuilder.Entity("ASC.Files.Core.EF.DbFilesRoomGroup", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id")
+                        .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("GroupId")
+                        .HasColumnType("int")
+                        .HasColumnName("group_id");
+
+                    b.Property<int?>("InternalRoomId")
+                        .HasColumnType("int")
+                        .HasColumnName("internal_room_id");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("ThirdpartyRoomId")
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar")
+                        .HasColumnName("thirdparty_room_id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GroupId")
+                        .HasDatabaseName("idx_group");
+
+                    b.HasIndex("InternalRoomId")
+                        .HasDatabaseName("idx_internal_room");
+
+                    b.HasIndex("ThirdpartyRoomId")
+                        .HasDatabaseName("idx_thirdparty_room");
+
+                    b.HasIndex("TenantId", "GroupId", "InternalRoomId")
+                        .IsUnique()
+                        .HasDatabaseName("uq_roomgroup_internal");
+
+                    b.HasIndex("TenantId", "GroupId", "ThirdpartyRoomId")
+                        .IsUnique()
+                        .HasDatabaseName("uq_roomgroup_thirdparty");
+
+                    b.ToTable("files_roomgroup", (string)null);
+
+                    b.HasAnnotation("MySql:CharSet", "utf8");
                 });
 
             modelBuilder.Entity("ASC.Files.Core.EF.DbFilesSecurity", b =>
@@ -5541,6 +5860,17 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Navigation("Chat");
                 });
 
+            modelBuilder.Entity("ASC.Core.Common.EF.Model.Ai.DbDefaultAiProvider", b =>
+                {
+                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
             modelBuilder.Entity("ASC.Core.Common.EF.Model.ApiKey", b =>
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
@@ -5805,6 +6135,17 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Navigation("Tenant");
                 });
 
+            modelBuilder.Entity("ASC.Files.Core.EF.DbFilesGroup", b =>
+                {
+                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
             modelBuilder.Entity("ASC.Files.Core.EF.DbFilesLink", b =>
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
@@ -5823,6 +6164,31 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("ASC.Files.Core.EF.DbFilesRoomGroup", b =>
+                {
+                    b.HasOne("ASC.Files.Core.EF.DbFilesGroup", "Group")
+                        .WithMany()
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ASC.Files.Core.EF.DbFolder", "InternalRoom")
+                        .WithMany()
+                        .HasForeignKey("InternalRoomId");
+
+                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Group");
+
+                    b.Navigation("InternalRoom");
 
                     b.Navigation("Tenant");
                 });

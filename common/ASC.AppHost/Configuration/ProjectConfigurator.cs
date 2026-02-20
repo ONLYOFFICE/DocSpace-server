@@ -34,24 +34,27 @@ public class ProjectConfigurator(
     string basePath,
     bool isDocker)
 {
-    public static string GetProjectName<TProject>() where TProject : IProjectMetadata, new() =>
-        typeof(TProject).Name.ToLower().Replace('_', '-');
+    public static string GetProjectName<TProject>() where TProject : IProjectMetadata, new()
+    {
+        var name = typeof(TProject).Name.ToLower().Replace('_', '-');
+        return name.StartsWith("asc-") ? "onlyoffice-" + name.Substring(4) : name;
+    }
     
-    public ProjectConfigurator AddProject<TProject>(int projectPort, bool includeHealthCheck = true) where TProject : IProjectMetadata, new()
+    public ProjectConfigurator AddProject<TProject>(int projectPort) where TProject : IProjectMetadata, new()
     {
         if (isDocker)
         {
-            AddProjectDocker<TProject>(projectPort, includeHealthCheck);
+            AddProjectDocker<TProject>(projectPort);
         }
         else
         {
-            AddProjectWithDefaultConfiguration<TProject>(includeHealthCheck);
+            AddProjectWithDefaultConfiguration<TProject>();
         }
 
         return this;
     }
 
-    private void AddProjectWithDefaultConfiguration<TProject>(bool includeHealthCheck = true) where TProject : IProjectMetadata, new()
+    private void AddProjectWithDefaultConfiguration<TProject>() where TProject : IProjectMetadata, new()
     {
         var project = builder
             .AddProject<TProject>(GetProjectName<TProject>())
@@ -66,11 +69,32 @@ public class ProjectConfigurator(
             project.WithEnvironment("core:hosting:singletonMode", true.ToString());
         }
         
-        connectionManager.AddBaseConfig(project, isDocker, includeHealthCheck);
+        var isStandalone = String.Compare(builder.Configuration["APP_HOSTING_STANDALONE"], "true", StringComparison.OrdinalIgnoreCase) == 0;
+
+        project.WithEnvironment("core:base-domain", isStandalone ? "localhost" : "")
+            .WithEnvironment("ai:mcp:0:endpoint",
+                new UriBuilder(Uri.UriSchemeHttp, Constants.DocSpaceMcpContainer, Constants.DocSpaceMcpPort)
+                    .ToString() + "mcp");
+
+               
+        switch (builder.Configuration["APP_EDITION"])
+        {
+            case "enterprise":
+            case "developer":
+                project.WithEnvironment("license:file:path", Path.Combine(basePath, "Data", "license.lic"))
+                       .WithEnvironment("DOTNET_ENVIRONMENT", builder.Configuration["APP_EDITION"]);
+                break;
+            default:
+                project.WithEnvironment("DOTNET_ENVIRONMENT", builder.Environment.EnvironmentName);
+
+                break;
+        }
+
+        connectionManager.AddBaseConfig(project, isDocker);
         connectionManager.AddWaitFor(project);
     }
 
-    private void AddProjectDocker<TProject>(int projectPort, bool includeHealthCheck = true) where TProject : IProjectMetadata, new()
+    private void AddProjectDocker<TProject>(int projectPort) where TProject : IProjectMetadata, new()
     {
         var projectMetadata = new TProject();
         var projectBasePath = Path.GetDirectoryName(projectMetadata.ProjectPath) ?? basePath;
@@ -80,6 +104,7 @@ public class ProjectConfigurator(
 
         var netVersion = $"net{Environment.Version.Major}.{Environment.Version.Minor}";
         var dllPath = "/app/bin/Debug/";
+        
         if (Directory.Exists(Path.Combine(projectBasePath, "bin", "Debug", netVersion)))
         {
             dllPath += $"{netVersion}/";
@@ -93,8 +118,27 @@ public class ProjectConfigurator(
             .WithEnvironment("web:hub:internal", new UriBuilder(Uri.UriSchemeHttp, Constants.SocketIoContainer, Constants.SocketIoPort).ToString())
             .WithEnvironment("core:hosting:singletonMode", true.ToString())
             .WithEnvironment("pathToConf", "/buildtools/config/")
+            .WithEnvironment("ai:mcp:0:endpoint",new UriBuilder(Uri.UriSchemeHttp, Constants.DocSpaceMcpContainer, Constants.DocSpaceMcpPort).ToString() + "mcp")
             .WithArgs($"{dllPath}{name.Replace('_', '.')}.dll")
             .WithEntrypoint("dotnet");
+       
+        switch (builder.Configuration["APP_EDITION"])
+        {
+            case "enterprise":
+            case "developer":
+                resourceBuilder.WithEnvironment("license:file:path", "/data/license.lic")
+                               .WithEnvironment("DOTNET_ENVIRONMENT", builder.Configuration["APP_EDITION"]);
+                break;
+            default:
+                resourceBuilder.WithEnvironment("DOTNET_ENVIRONMENT", builder.Environment.EnvironmentName);
+
+                break;
+        }
+
+
+        var isStandalone = String.Compare(builder.Configuration["APP_HOSTING_STANDALONE"], "true", StringComparison.OrdinalIgnoreCase) == 0;
+
+        resourceBuilder.WithEnvironment("core:base-domain", isStandalone ? "localhost" : "");
 
         AddBaseBind(resourceBuilder);
 
@@ -106,7 +150,7 @@ public class ProjectConfigurator(
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
         }
 
-        connectionManager.AddBaseConfig(resourceBuilder, isDocker, includeHealthCheck);
+        connectionManager.AddBaseConfig(resourceBuilder, isDocker);
         connectionManager.AddWaitFor(resourceBuilder);
 
         var otlEnvs = new Dictionary<string, string>
@@ -144,8 +188,8 @@ public class ProjectConfigurator(
                 .WithEnvironment("log:dir", "/logs")
                 .WithEnvironment("log:name", "socketIO")
                 .WithEnvironment("API_HOST", new UriBuilder(Uri.UriSchemeHttp, Constants.OpenRestyContainer, Constants.RestyPort).ToString())
-                .WithEnvironment("Redis:Hosts:0:Host", () => ConnectionStringManager.SubstituteLocalhost(connectionManager.RedisHost) ?? string.Empty)
-                .WithEnvironment("Redis:Hosts:0:Port", () => connectionManager.RedisPort ?? string.Empty)
+                .WithEnvironment("Redis:Hosts:0:Host", () => ConnectionStringManager.SubstituteLocalhost(connectionManager.Redis?.Host) ?? string.Empty)
+                .WithEnvironment("Redis:Hosts:0:Port", () => connectionManager.Redis?.Port ?? string.Empty)
                 .WithHttpEndpoint(port, port, isProxied: false)
                 .WithHttpHealthCheck("/health")
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
@@ -156,8 +200,9 @@ public class ProjectConfigurator(
         else
         {
             var resourceBuilder = builder.AddNpmApp(name, path, "start:build")
-                .WithEnvironment("Redis:Hosts:0:Host", () => connectionManager.RedisHost ?? string.Empty)
-                .WithEnvironment("Redis:Hosts:0:Port", () => connectionManager.RedisPort ?? string.Empty)
+                .WithEnvironment("NODE_ENV", "development")
+                .WithEnvironment("Redis:Hosts:0:Host", () => connectionManager.Redis?.Host ?? string.Empty)
+                .WithEnvironment("Redis:Hosts:0:Port", () => connectionManager.Redis?.Port ?? string.Empty)
                 .WithHttpEndpoint(targetPort: port)
                 .WithHttpHealthCheck("/health")
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
@@ -170,7 +215,7 @@ public class ProjectConfigurator(
 
     public ProjectConfigurator AddSsoAuth()
     {
-        var name = "asc-ssoAuth";
+        var name = "onlyoffice-ssoAuth";
         var path = Path.Combine("..", "ASC.SSoAuth");
         var port = Constants.SsoAuthPort;
         
@@ -192,6 +237,7 @@ public class ProjectConfigurator(
         else
         {
             builder.AddNpmApp(name, path, "start:build")
+                .WithEnvironment("NODE_ENV", "development")
                 .WithHttpEndpoint(targetPort: port)
                 .WithHttpHealthCheck("/health")
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
@@ -202,7 +248,7 @@ public class ProjectConfigurator(
 
     public ProjectConfigurator AddWebDav()
     {
-        var name = "asc-webDav";
+        var name = "onlyoffice-webDav";
         var path = Path.Combine("..", "ASC.WebDav");
         var port = Constants.WebDavPort;
         
@@ -222,6 +268,7 @@ public class ProjectConfigurator(
         else
         {
             builder.AddNpmApp(name, path, "start:build")
+                .WithEnvironment("NODE_ENV", "development")
                 .WithHttpEndpoint(targetPort: port)
                 .WithHttpHealthCheck("/health")
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
@@ -232,8 +279,8 @@ public class ProjectConfigurator(
     
     public ProjectConfigurator AddIdentity()
     {
-        var ascIdentityRegistration = "asc-identity-registration";
-        var ascIdentityAuthorization = "asc-identity-authorization";
+        var ascIdentityRegistration = "onlyoffice-identity-registration";
+        var ascIdentityAuthorization = "onlyoffice-identity-authorization";
         var path = Path.Combine("..", "ASC.Identity");
         
         var registrationBuilder = builder

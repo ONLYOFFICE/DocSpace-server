@@ -157,13 +157,13 @@
     <value>Агенти</value>
   </data>
   <data name="AIProviderCreated" xml:space="preserve">
-    <value>Постачальника ШІ створено: {0}</value>
+    <value>Постачальника AІ створено: {0}</value>
   </data>
   <data name="AIProviderDeleted" xml:space="preserve">
-    <value>Постачальника ШІ видалено: {0}</value>
+    <value>Постачальника AI видалено: {0}</value>
   </data>
   <data name="AIProviderUpdated" xml:space="preserve">
-    <value>Постачальника ШІ оновлено: {0}</value>
+    <value>Постачальника AI оновлено: {0}</value>
   </data>
   <data name="ApiKeyCreated" xml:space="preserve">
     <value>Створено ключ API користувача: {0}</value>
@@ -191,6 +191,12 @@
   </data>
   <data name="AuthorizationKeysSetting" xml:space="preserve">
     <value>Ключі авторизації третьої сторони оновлено</value>
+  </data>
+  <data name="BackupCompleted" xml:space="preserve">
+    <value>Резервне копіювання виконано</value>
+  </data>
+  <data name="BackupFailed" xml:space="preserve">
+    <value>Збій резервного копіювання</value>
   </data>
   <data name="BackupStarted" xml:space="preserve">
     <value>Почати резервне копіювання</value>
@@ -253,13 +259,13 @@
     <value>Параметри настроюваної навігації оновлено</value>
   </data>
   <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
-    <value>Агенти ШІ [{0}]. Установлена квота пам'яті для агентів ШІ: {1}</value>
+    <value>Агенти AI [{0}]. Установлена квота пам'яті для агентів AI : {1}</value>
   </data>
   <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
-    <value>Агенти ШІ [{0}]. Установлена квота пам'яті за замовчуванням для агентів ШІ: {1}</value>
+    <value>Агенти AI [{0}]. Установлена квота пам'яті за замовчуванням для агентів AI: {1}</value>
   </data>
   <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
-    <value>Агенти ШІ [{0}]. Вимкнута квота пам'яті для агентів ШІ</value>
+    <value>Агенти AI [{0}]. Вимкнута квота пам'яті для агентів AI</value>
   </data>
   <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
     <value>Кімнати [{0}]. Установлена налаштовувана квота пам'яті для кімнат: {1}</value>
@@ -567,8 +573,14 @@
   <data name="ImportActionType" xml:space="preserve">
     <value>Імпорт</value>
   </data>
+  <data name="InvitationSettingsUpdated" xml:space="preserve">
+    <value>Параметри запрошення оновлено</value>
+  </data>
   <data name="IpCol" xml:space="preserve">
     <value>IP</value>
+  </data>
+  <data name="IPRestrictionsSettingsUpdated" xml:space="preserve">
+    <value>Параметри безпеки IP оновлено</value>
   </data>
   <data name="LanguageSettingsUpdated" xml:space="preserve">
     <value>Налаштування мови оновлено</value>
@@ -638,6 +650,9 @@
   </data>
   <data name="LoginHistoryReportName" xml:space="preserve">
     <value>Звіт історії входу ({0} - {1})</value>
+  </data>
+  <data name="LoginSettingsUpdated" xml:space="preserve">
+    <value>Параметри захисту від атак грубою силою оновлено</value>
   </data>
   <data name="LoginSuccess" xml:space="preserve">
     <value>Вхід виконано успішно</value>
@@ -754,10 +769,10 @@
     <value>Список продуктів оновлено</value>
   </data>
   <data name="QuotaPerAiAgentChanged" xml:space="preserve">
-    <value>Установлена квота пам'яті для агентів ШІ: {0}</value>
+    <value>Установлена квота пам'яті для агентів AI: {0}</value>
   </data>
   <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
-    <value>Вимкнута квота пам'яті за замовчуванням для агентів ШІ</value>
+    <value>Вимкнута квота пам'яті за замовчуванням для агентів AI</value>
   </data>
   <data name="QuotaPerPortalChanged" xml:space="preserve">
     <value>Установлена квота пам'яті за замовчуванням: {0}</value>
@@ -887,6 +902,15 @@
   </data>
   <data name="RoomWatermarkSet" xml:space="preserve">
     <value>Кімната: {0}. Водяний знак ввімкнено</value>
+  </data>
+  <data name="ScheduledBackupCompleted" xml:space="preserve">
+    <value>Заплановане резервне копіювання виконано</value>
+  </data>
+  <data name="ScheduledBackupFailed" xml:space="preserve">
+    <value>Збій запланованого резервного копіювання</value>
+  </data>
+  <data name="ScheduledBackupStarted" xml:space="preserve">
+    <value>Заплановане резервне копіювання розпочато</value>
   </data>
   <data name="SendActionType" xml:space="preserve">
     <value>Надіслати</value>
@@ -1106,5 +1130,29 @@
   </data>
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Вебхук оновлено: {0}</value>
+  </data>
+  <data name="WebpluginDeleted" xml:space="preserve">
+    <value>Плагін видалено: {0}</value>
+  </data>
+  <data name="WebpluginUpdated" xml:space="preserve">
+    <value>Плагін оновлено: {0}</value>
+  </data>
+  <data name="WebpluginUploaded" xml:space="preserve">
+    <value>Плагін передано: {0}</value>
+  </data>
+  <data name="WhiteLabelAdditionalSettingsUpdated" xml:space="preserve">
+    <value>Додаткові параметри брендингу оновлено</value>
+  </data>
+  <data name="WhiteLabelCompanySettingsUpdated" xml:space="preserve">
+    <value>Параметри інформації про компанію оновлено</value>
+  </data>
+  <data name="WhiteLabelMailSettingsUpdated" xml:space="preserve">
+    <value>Параметри пошти оновлено</value>
+  </data>
+  <data name="WhiteLabelSettingsLogosUpdated" xml:space="preserve">
+    <value>Параметри логотипа оновлено</value>
+  </data>
+  <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
+    <value>Назву бренду оновлено</value>
   </data>
 </root>

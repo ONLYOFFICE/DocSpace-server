@@ -715,6 +715,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
             FolderType.VirtualRooms => IdConverter.Convert<T>(await globalFolderHelper.FolderVirtualRoomsAsync),
             FolderType.Archive => IdConverter.Convert<T>(await globalFolderHelper.FolderArchiveAsync),
             FolderType.Templates => IdConverter.Convert<T>(await globalFolderHelper.FolderRoomTemplatesAsync),
+            FolderType.DefaultTemplates => IdConverter.Convert<T>(await globalFolderHelper.FolderDefaultTemplatesAsync),
             FolderType.AiAgents => IdConverter.Convert<T>(await globalFolderHelper.FolderAiAgentsAsync),
             _ => folder.FolderIdDisplay
         };

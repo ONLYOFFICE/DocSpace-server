@@ -155,7 +155,7 @@ public class UserFormatter : IComparer<UserInfo>
             formatString = "{1}{0}";
         }
 
-        return string.Format(formatString, firstName, lastName);
+        return string.Format(formatString, firstName, lastName).Trim();
     }
 
     private static bool IsChineseText(string text)

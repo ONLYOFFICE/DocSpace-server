@@ -43,6 +43,10 @@ public class DbQuota : BaseEntity
 
     [MaxLength(128)]
     public string ServiceName { get; set; }
+
+    [MaxLength(128)]
+    public string ServiceGroup { get; set; }
+
     public bool Visible { get; set; }
     public bool Wallet { get; set; }
     public override object[] GetKeys()
@@ -69,7 +73,7 @@ public static class DbQuotaExtension
                     TenantId = -1,
                     Name = "trial",
                     Description = null,
-                    Features = "trial,audit,ldap,sso,customization,thirdparty,restore,oauth,total_size:107374182400,file_size:100,manager:1,statistic",
+                    Features = "trial,audit,ldap,sso,customization,thirdparty,restore,oauth,total_size:107374182400,file_size:100,manager:1,statistic,automationapi",
                     Price = 0,
                     ProductId = null,
                     Visible = false
@@ -79,7 +83,7 @@ public static class DbQuotaExtension
                     TenantId = -2,
                     Name = "admin",
                     Description = "until 01.04.2024",
-                    Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:107374182400,file_size:1024,manager:1,statistic,free_backup:2:fixed",
+                    Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:107374182400,file_size:1024,manager:1,statistic,free_backup:2:fixed,automationapi",
                     Price = 15,
                     ProductId = "1002",
                     Visible = false
@@ -89,7 +93,7 @@ public static class DbQuotaExtension
                     TenantId = -3,
                     Name = "startup",
                     Description = null,
-                    Features = "free,oauth,total_size:2147483648,manager:3,room:12",
+                    Features = "free,oauth,total_size:2147483648,manager:3,room:12,automationapi",
                     Price = 0,
                     ProductId = null,
                     Visible = false
@@ -119,7 +123,7 @@ public static class DbQuotaExtension
                     TenantId = -6,
                     Name = "subscription",
                     Description = null,
-                    Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,file_size:1024,statistic,free_backup:2:fixed",
+                    Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,file_size:1024,statistic,free_backup:2:fixed,automationapi",
                     Price = 0,
                     ProductId = "1001",
                     Visible = false
@@ -129,7 +133,7 @@ public static class DbQuotaExtension
                     TenantId = -7,
                     Name = "nonprofit",
                     Description = null,
-                    Features = "non-profit,audit,ldap,sso,thirdparty,restore,oauth,contentsearch,total_size:2147483648,file_size:1024,manager:20,statistic",
+                    Features = "non-profit,audit,ldap,sso,thirdparty,restore,oauth,contentsearch,total_size:2147483648,file_size:1024,manager:20,statistic,automationapi",
                     Price = 0,
                     ProductId = "1007",
                     Visible = false
@@ -139,7 +143,7 @@ public static class DbQuotaExtension
                     TenantId = -8,
                     Name = "zoom",
                     Description = null,
-                    Features = "free,oauth,total_size:107374182400,manager:100,room:100",
+                    Features = "free,oauth,total_size:107374182400,manager:100,room:100,automationapi",
                     Price = 0,
                     ProductId = null,
                     Visible = false
@@ -149,7 +153,7 @@ public static class DbQuotaExtension
                     TenantId = -9,
                     Name = "admin",
                     Description = "since 01.04.2024",
-                    Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,free_backup:2:fixed",
+                    Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,free_backup:2:fixed,automationapi",
                     Price = 20,
                     ProductId = "1006",
                     Visible = true
@@ -159,7 +163,7 @@ public static class DbQuotaExtension
                     TenantId = -10,
                     Name = "adminyear",
                     Description = "since 10.02.2025",
-                    Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,year,free_backup:2:fixed",
+                    Features = "audit,ldap,sso,customization,thirdparty,restore,oauth,contentsearch,total_size:268435456000,file_size:1024,manager:1,statistic,year,free_backup:2:fixed,automationapi",
                     Price = 220,
                     ProductId = "1009",
                     Visible = true
@@ -182,8 +186,242 @@ public static class DbQuotaExtension
                     Description = null,
                     Features = "backup",
                     Price = 10,
-                    ProductId = "10006",
+                    ProductId = null,
                     ServiceName = "backup",
+                    Visible = true,
+                    Wallet = true
+                },
+                new DbQuota
+                {
+                    TenantId = -13,
+                    Name = "aitools",
+                    Description = null,
+                    Features = "aitools",
+                    Price = 0,
+                    ProductId = null,
+                    ServiceName = null,
+                    ServiceGroup = null,
+                    Visible = true,
+                    Wallet = true
+                },
+                new DbQuota
+                {
+                    TenantId = -14,
+                    Name = "websearch",
+                    Description = null,
+                    Features = "websearch",
+                    Price = 0.006m,
+                    ProductId = null,
+                    ServiceName = "websearch",
+                    ServiceGroup = "aitools",
+                    Visible = false,
+                    Wallet = true
+                },
+                new DbQuota
+                {
+                    TenantId = -15,
+                    Name = "webfetch",
+                    Description = null,
+                    Features = "webfetch",
+                    Price = 0.0012m,
+                    ProductId = null,
+                    ServiceName = "webfetch",
+                    ServiceGroup = "aitools",
+                    Visible = false,
+                    Wallet = true
+                },
+                new DbQuota
+                {
+                    TenantId = -16,
+                    Name = "embedding",
+                    Description = null,
+                    Features = "embedding",
+                    Price = 0.000000024m,
+                    ProductId = null,
+                    ServiceName = "embedding",
+                    ServiceGroup = "aitools",
+                    Visible = false,
+                    Wallet = true
+                },
+                new DbQuota
+                {
+                    TenantId = -17,
+                    Name = "deepseek31input",
+                    Description = null,
+                    Features = "deepseek31input",
+                    Price = 0.000000252m,
+                    ProductId = null,
+                    ServiceName = "deepseek3.1input",
+                    ServiceGroup = "aitools",
+                    Visible = false,
+                    Wallet = true
+                },
+                new DbQuota
+                {
+                    TenantId = -18,
+                    Name = "deepseek31output",
+                    Description = null,
+                    Features = "deepseek31output",
+                    Price = 0.000000948m,
+                    ProductId = null,
+                    ServiceName = "deepseek3.1output",
+                    ServiceGroup = "aitools",
+                    Visible = false,
+                    Wallet = true
+                },
+                new DbQuota
+                {
+                    TenantId = -19,
+                    Name = "claude45input",
+                    Description = null,
+                    Features = "claude45input",
+                    Price = 0.0000036m,
+                    ProductId = null,
+                    ServiceName = "claude4.5input",
+                    ServiceGroup = "aitools",
+                    Visible = false,
+                    Wallet = true
+                },
+                new DbQuota
+                {
+                    TenantId = -20,
+                    Name = "claude45output",
+                    Description = null,
+                    Features = "claude45output",
+                    Price = 0.000018m,
+                    ProductId = null,
+                    ServiceName = "claude4.5output",
+                    ServiceGroup = "aitools",
+                    Visible = false,
+                    Wallet = true
+                },
+                new DbQuota
+                {
+                    TenantId = -21,
+                    Name = "gpt5input",
+                    Description = null,
+                    Features = "gpt5input",
+                    Price = 0.0000015m,
+                    ProductId = null,
+                    ServiceName = "gpt5input",
+                    ServiceGroup = "aitools",
+                    Visible = false,
+                    Wallet = true
+                },
+                new DbQuota
+                {
+                    TenantId = -22,
+                    Name = "gpt5output",
+                    Description = null,
+                    Features = "gpt5output",
+                    Price = 0.000012m,
+                    ProductId = null,
+                    ServiceName = "gpt5output",
+                    ServiceGroup = "aitools",
+                    Visible = false,
+                    Wallet = true
+                },
+                new DbQuota
+                {
+                    TenantId = -23,
+                    Name = "deepseek32input",
+                    Description = null,
+                    Features = "deepseek32input",
+                    Price = 0.0000003m,
+                    ProductId = null,
+                    ServiceName = "deepseek3.2input",
+                    ServiceGroup = "aitools",
+                    Visible = false,
+                    Wallet = true
+                },
+                new DbQuota
+                {
+                    TenantId = -24,
+                    Name = "deepseek32output",
+                    Description = null,
+                    Features = "deepseek32output",
+                    Price = 0.000000456m,
+                    ProductId = null,
+                    ServiceName = "deepseek3.2output",
+                    ServiceGroup = "aitools",
+                    Visible = false,
+                    Wallet = true
+                },
+                new DbQuota
+                {
+                    TenantId = -25,
+                    Name = "gpt52input",
+                    Description = null,
+                    Features = "gpt52input",
+                    Price = 0.0000021m,
+                    ProductId = null,
+                    ServiceName = "gpt5.2input",
+                    ServiceGroup = "aitools",
+                    Visible = false,
+                    Wallet = true
+                },
+                new DbQuota
+                {
+                    TenantId = -26,
+                    Name = "gpt52output",
+                    Description = null,
+                    Features = "gpt52output",
+                    Price = 0.0000168m,
+                    ProductId = null,
+                    ServiceName = "gpt5.2output",
+                    ServiceGroup = "aitools",
+                    Visible = false,
+                    Wallet = true
+                },
+                new DbQuota
+                {
+                    TenantId = -27,
+                    Name = "gemini3proinput",
+                    Description = null,
+                    Features = "gemini3proinput",
+                    Price = 0.0000024m,
+                    ProductId = null,
+                    ServiceName = "gemini3proinput",
+                    ServiceGroup = "aitools",
+                    Visible = false,
+                    Wallet = true
+                },
+                new DbQuota
+                {
+                    TenantId = -28,
+                    Name = "gemini3prooutput",
+                    Description = null,
+                    Features = "gemini3prooutput",
+                    Price = 0.0000144m,
+                    ProductId = null,
+                    ServiceName = "gemini3prooutput",
+                    ServiceGroup = "aitools",
+                    Visible = false,
+                    Wallet = true
+                },
+                new DbQuota
+                {
+                    TenantId = -29,
+                    Name = "gemini3flashinput",
+                    Description = null,
+                    Features = "gemini3flashinput",
+                    Price = 0.0000006m,
+                    ProductId = null,
+                    ServiceName = "gemini3flashinput",
+                    ServiceGroup = "aitools",
+                    Visible = false,
+                    Wallet = true
+                },
+                new DbQuota
+                {
+                    TenantId = -30,
+                    Name = "gemini3flashoutput",
+                    Description = null,
+                    Features = "gemini3flashoutput",
+                    Price = 0.0000036m,
+                    ProductId = null,
+                    ServiceName = "gemini3flashoutput",
+                    ServiceGroup = "aitools",
                     Visible = false,
                     Wallet = true
                 }
@@ -219,6 +457,12 @@ public static class DbQuotaExtension
                     .HasCharSet("utf8")
                     .UseCollation("utf8_general_ci");
 
+                entity.Property(e => e.ServiceGroup)
+                    .HasColumnName("service_group")
+                    .HasColumnType("varchar")
+                    .HasCharSet("utf8")
+                    .UseCollation("utf8_general_ci");
+
                 entity.Property(e => e.Description)
                     .HasColumnName("description")
                     .HasColumnType("varchar")
@@ -238,7 +482,7 @@ public static class DbQuotaExtension
                 entity.Property(e => e.Price)
                     .HasColumnName("price")
                     .HasDefaultValueSql("'0.00'")
-                    .HasColumnType("decimal(10,4)");
+                    .HasColumnType("decimal(15,9)");
 
                 entity.Property(e => e.Visible)
                     .HasColumnName("visible")
@@ -272,6 +516,10 @@ public static class DbQuotaExtension
                     .HasColumnName("service_name")
                     .HasColumnType("varchar(128)");
 
+                entity.Property(e => e.ServiceGroup)
+                    .HasColumnName("service_group")
+                    .HasColumnType("varchar(128)");
+
                 entity.Property(e => e.Description)
                     .HasColumnName("description")
                     .HasColumnType("varchar(128)");
@@ -287,7 +535,7 @@ public static class DbQuotaExtension
                 entity.Property(e => e.Price)
                     .HasColumnName("price")
                     .HasDefaultValue(0.00m)
-                    .HasColumnType("decimal(10,4)");
+                    .HasColumnType("decimal(15,9)");
 
                 entity.Property(e => e.Visible)
                     .HasColumnName("visible")

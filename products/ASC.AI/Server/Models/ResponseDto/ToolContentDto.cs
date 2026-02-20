@@ -30,10 +30,29 @@ namespace ASC.AI.Models.ResponseDto;
 
 public class ToolContentDto : MessageContentDto
 {
-    public override ContentType Type => ContentType.Tool;
+    /// <summary>
+    /// The content block type. Always equals "Tool".
+    /// </summary>
+    public override MessageContentType Type => MessageContentType.Tool;
+
+    /// <summary>
+    /// The name of the tool that was invoked by the AI assistant.
+    /// </summary>
     public required string Name { get; init; }
+
+    /// <summary>
+    /// The key-value pairs of arguments passed to the tool, or null if the tool accepts no arguments.
+    /// </summary>
     public IDictionary<string, object?>? Arguments { get; init; }
+
+    /// <summary>
+    /// The result returned by the tool after execution, or null if the tool has not yet completed.
+    /// </summary>
     public object? Result { get; init; }
+
+    /// <summary>
+    /// The metadata about the MCP server that provides this tool, or null for built-in tools.
+    /// </summary>
     public McpServerInfo? McpServerInfo { get; init; }
 }
 

@@ -247,7 +247,8 @@ public class LicenseReader(
             DocsEdition = true,
             Branding = license.Branding,
             Customization = license.Customization,
-            Lifetime = !license.TimeLimited,
+            Lifetime = !license.Trial && !license.TimeLimited,
+            AutomationApi = license.AutomationApi,
             Statistic = true
         };
 

@@ -47,12 +47,12 @@ public class CheckDestFolderDto
 /// </summary>
 public enum CheckDestFolderResult
 {
-    [SwaggerEnum(Description = "All allowed")]
+    [Description("All allowed")]
     AllAllowed,
 
-    [SwaggerEnum(Description = "Part allowed")]
+    [Description("Part allowed")]
     PartAllowed,
 
-    [SwaggerEnum(Description = "None allowed")]
+    [Description("None allowed")]
     NoneAllowed
 }

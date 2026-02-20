@@ -184,16 +184,20 @@ public class FolderDtoHelper(
 {
     private readonly EmployeeDtoHelper _employeeWrapperHelper = employeeWrapperHelper;
 
-    public async Task<FolderDto<T>> GetAsync<T>(Folder<T> folder, List<FileShareRecord<string>> currentUserRecords = null, string order = null, IFolder contextFolder = null, bool? aiReady = null)
+    public async Task<FolderDto<T>> GetAsync<T>(
+        Folder<T> folder, 
+        List<FileShareRecord<string>> currentUserRecords = null, 
+        string order = null, 
+        IFolder contextFolder = null, 
+        AiStatus aiStatus = null)
     {
-        Task<bool> aiReadyTask = null;
-        if (folder.RootFolderType == FolderType.AiAgents && aiReady == null)
-        {
-            aiReadyTask = accessibility.IsAiEnabledAsync();
-        }
-        
         var result = await GetFolderWrapperAsync(folder);
         result.ParentId = folder.ParentId;
+        
+        if (folder.RootFolderType == FolderType.AiAgents && aiStatus == null)
+        {
+            aiStatus = await accessibility.GetStatusAsync();
+        }
 
         if (folder.IsRoom)
         {
@@ -204,7 +208,7 @@ public class FolderDtoHelper(
             }
             else
             {
-                result.Tags = folder.Tags.Select(t => t.Name);
+                result.Tags = folder.Tags.OrderByDescending(t => t.Id).Select(t => t.Name);
             }
 
             result.Logo = await roomLogoManager.GetLogoAsync(folder);
@@ -217,6 +221,7 @@ public class FolderDtoHelper(
                     FolderType.VirtualRooms => IdConverter.Convert<T>(await _globalFolderHelper.FolderVirtualRoomsAsync),
                     FolderType.Archive => IdConverter.Convert<T>(await _globalFolderHelper.FolderArchiveAsync),
                     FolderType.RoomTemplates => IdConverter.Convert<T>(await _globalFolderHelper.FolderRoomTemplatesAsync),
+                    FolderType.DefaultTemplates => IdConverter.Convert<T>(await _globalFolderHelper.FolderDefaultTemplatesAsync),
                     _ => result.ParentId
                 };
             }
@@ -319,6 +324,11 @@ public class FolderDtoHelper(
         
         if (folder.SettingsChatParameters != null)
         {
+            if (folder.SettingsChatProviderId == AiGateway.ProviderId && !aiStatus.GatewayEnabled)
+            {
+                folder.SettingsChatProviderId = 0;
+            }
+            
             result.ChatSettings = new ChatSettings
             {
                 ProviderId = folder.SettingsChatProviderId,
@@ -399,12 +409,7 @@ public class FolderDtoHelper(
             result.FoldersCount -= 2;
         }
         
-        if (aiReadyTask != null)
-        {
-            aiReady = await aiReadyTask;
-        }
-        
-        if (aiReady is false)
+        if (aiStatus is { Enabled: false})
         {
             switch (folder.FolderType)
             {
@@ -442,7 +447,7 @@ public class FolderDtoHelper(
     {
         var newBadges = folder.NewForMe;
 
-        if (folder.RootFolderType is FolderType.VirtualRooms or FolderType.RoomTemplates)
+        if (folder.RootFolderType is FolderType.VirtualRooms or FolderType.RoomTemplates or FolderType.DefaultTemplates)
         {
             var isEnabledBadges = await badgesSettingsHelper.GetEnabledForCurrentUserAsync();
 
@@ -453,7 +458,7 @@ public class FolderDtoHelper(
         }
 
         var result = await GetAsync<FolderDto<T>, T>(folder);
-        if (folder.FolderType != FolderType.VirtualRooms && folder.FolderType != FolderType.RoomTemplates)
+        if (folder.FolderType != FolderType.VirtualRooms && folder.FolderType != FolderType.RoomTemplates && folder.FolderType != FolderType.DefaultTemplates)
         {
             result.FilesCount = folder.FilesCount;
             result.FoldersCount = folder.FoldersCount;

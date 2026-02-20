@@ -77,10 +77,77 @@ public class QuotaSocketManager(
         await MakeRequest("encryption-progress", new { room = "storage-encryption", percentage, error }, tenantId: -1);
     }
 
+    public async Task UserQuotaExceededAsync(Guid userId)
+    {
+        await QuotaExceededAsync(QuotaScope.User, userId);
+    }
+
+    public async Task RoomQuotaExceededAsync(int roomId)
+    {
+        await QuotaExceededAsync(QuotaScope.Room, roomId);
+    }
+
+    public async Task TenantQuotaExceededAsync()
+    {
+        await QuotaExceededAsync(QuotaScope.Tenant, _tenantManager.GetCurrentTenantId());
+    }
+
+    private async Task QuotaExceededAsync(QuotaScope scope, Guid entityId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        var room = scope switch
+        {
+            QuotaScope.User => $"{tenantId}-user-{entityId}-quota",
+            _ => throw new ArgumentException("Invalid scope for Guid entityId", nameof(scope))
+        };
+
+        await MakeRequest(
+            "quota_exceeded",
+            new
+            {
+                room,
+                scope = scope.ToString().ToLower(),
+                id = entityId
+            });
+    }
+
+    private async Task QuotaExceededAsync(QuotaScope scope, int entityId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        var room = scope switch
+        {
+            QuotaScope.Room => $"{tenantId}-room-{entityId}-quota",
+            QuotaScope.Tenant => $"{tenantId}-tenant-quota",
+            _ => throw new ArgumentException("Invalid scope for int entityId", nameof(scope))
+        };
+
+        await MakeRequest(
+            "quota_exceeded",
+            new
+            {
+                room,
+                scope = scope.ToString().ToLower(),
+                id = entityId
+            });
+    }
     private string GetQuotaRoom()
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
 
         return $"{tenantId}-quota";
+    }
+
+    private enum QuotaScope
+    {
+        [Description("User")]
+        User,
+
+        [Description("Room")]
+        Room,
+
+        [Description("Tenant")]
+        Tenant
     }
 }

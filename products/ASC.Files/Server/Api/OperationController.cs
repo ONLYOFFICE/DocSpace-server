@@ -40,10 +40,10 @@ public class OperationController(
     CommonLinkUtility commonLinkUtility)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
-    /// <summary>
+    /// <remarks>
     /// Starts the download process of files and folders with the IDs specified in the request.
-    /// </summary>
-    /// <short>Bulk download</short>
+    /// </remarks>
+    /// <summary>Bulk download</summary>
     /// <path>api/2.0/files/fileops/bulkdownload</path>
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
@@ -65,10 +65,10 @@ public class OperationController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Copies all the selected files and folders to the folder with the ID specified in the request.
-    /// </summary>
-    /// <short>Copy to the folder</short>
+    /// </remarks>
+    /// <summary>Copy to the folder</summary>
     /// <path>api/2.0/files/fileops/copy</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
@@ -86,10 +86,10 @@ public class OperationController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Deletes the files and folders with the IDs specified in the request.
-    /// </summary>
-    /// <short>Delete files and folders</short>
+    /// </remarks>
+    /// <summary>Delete files and folders</summary>
     /// <path>api/2.0/files/fileops/delete</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
@@ -106,10 +106,10 @@ public class OperationController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Deletes the file versions with the IDs specified in the request.
-    /// </summary>
-    /// <short>Delete file versions</short>
+    /// </remarks>
+    /// <summary>Delete file versions</summary>
     /// <path>api/2.0/files/fileops/deleteversion</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
@@ -125,10 +125,10 @@ public class OperationController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Deletes all the files and folders from the "Trash" folder.
-    /// </summary>
-    /// <short>Empty the "Trash" folder</short>
+    /// </remarks>
+    /// <summary>Empty the "Trash" folder</summary>
     /// <path>api/2.0/files/fileops/emptytrash</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
@@ -146,10 +146,10 @@ public class OperationController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     ///  Returns a list of all the active file operations.
-    /// </summary>
-    /// <short>Get active file operations</short>
+    /// </remarks>
+    /// <summary>Get active file operations</summary>
     /// <path>api/2.0/files/fileops</path>
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
@@ -170,10 +170,10 @@ public class OperationController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Retrieves the statuses of operations filtered by the specified operation type.
-    /// </summary>
-    /// <short>Get file operation statuses</short>
+    /// </remarks>
+    /// <summary>Get file operation statuses</summary>
     /// <path>api/2.0/files/fileops/{operationType}</path>
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
@@ -200,10 +200,10 @@ public class OperationController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Marks the files and folders with the IDs specified in the request as read.
-    /// </summary>
-    /// <short>Mark as read</short>
+    /// </remarks>
+    /// <summary>Mark as read</summary>
     /// <path>api/2.0/files/fileops/markasread</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
@@ -219,10 +219,10 @@ public class OperationController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Moves or copies all the selected files and folders to the folder with the ID specified in the request.
-    /// </summary>
-    /// <short>Move or copy to a folder</short>
+    /// </remarks>
+    /// <summary>Move or copy to a folder</summary>
     /// <path>api/2.0/files/fileops/move</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
@@ -240,10 +240,10 @@ public class OperationController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Duplicates all the selected files and folders.
-    /// </summary>
-    /// <short>Duplicate files and folders</short>
+    /// </remarks>
+    /// <summary>Duplicate files and folders</summary>
     /// <path>api/2.0/files/fileops/duplicate</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
@@ -260,10 +260,10 @@ public class OperationController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Checks if files can be moved or copied to the specified folder.
-    /// </summary>
-    /// <short>Check for moving or copying files to a folder</short>
+    /// </remarks>
+    /// <summary>Check for moving or copying files to a folder</summary>
     /// <path>api/2.0/files/fileops/checkdestfolder</path>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Result", typeof(CheckDestFolderDto))]
@@ -305,10 +305,10 @@ public class OperationController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Checks if files or folders can be moved or copied to the specified folder, moves or copies them, and returns their information.
-    /// </summary>
-    /// <short>Move or copy files to a folder</short>
+    /// </remarks>
+    /// <summary>Move or copy files to a folder</summary>
     /// <path>api/2.0/files/fileops/move</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
@@ -338,10 +338,10 @@ public class OperationController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Finishes an operation with the ID specified in the request or all the active operations.
-    /// </summary>
-    /// <short>Finish active operations</short>
+    /// </remarks>
+    /// <summary>Finish active operations</summary>
     /// <path>api/2.0/files/fileops/terminate/{id}</path>
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>

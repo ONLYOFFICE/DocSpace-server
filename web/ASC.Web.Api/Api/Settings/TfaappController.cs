@@ -52,10 +52,10 @@ public class TfaappController(
     UserSocketManager userSocketManager)
     : BaseSettingsController(fusionCache, webItemManager)
 {
-    /// <summary>
+    /// <remarks>
     /// Returns the current two-factor authentication settings.
-    /// </summary>
-    /// <short>Get the TFA settings</short>
+    /// </remarks>
+    /// <summary>Get the TFA settings</summary>
     ///<path>api/2.0/settings/tfaapp</path>
     ///<collection>list</collection>
     [Tags("Settings / TFA settings")]
@@ -103,16 +103,16 @@ public class TfaappController(
         return result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Validates the two-factor authentication code specified in the request.
-    /// </summary>
-    /// <short>Validate the TFA code</short>
+    /// </remarks>
+    /// <summary>Validate the TFA code</summary>
     ///<path>api/2.0/settings/tfaapp/validate</path>
     [Tags("Settings / TFA settings")]
     [SwaggerResponse(200, "True if the code is valid", typeof(bool))]
     [HttpPost("tfaapp/validate")]
     [AllowNotPayment]
-    [Authorize(AuthenticationSchemes = "confirm", Roles = "TfaActivation,TfaAuth,Everyone")]
+    [Authorize(AuthenticationSchemes = "confirm", Roles = "TfaActivation,TfaAuth")]
     public async Task<bool> TfaValidateAuthCode(TfaValidateRequestsDto inDto)
     {
         await securityContext.AuthByClaimAsync();
@@ -129,10 +129,10 @@ public class TfaappController(
         return result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the confirmation email URL for authorization via SMS or TFA application.
-    /// </summary>
-    /// <short>Get confirmation email</short>
+    /// </remarks>
+    /// <summary>Get confirmation email</summary>
     ///<path>api/2.0/settings/tfaapp/confirm</path>
     [Tags("Settings / TFA settings")]
     [SwaggerResponse(200, "Confirmation email URL", typeof(string))]
@@ -166,10 +166,10 @@ public class TfaappController(
         return string.Empty;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Updates the two-factor authentication settings with the parameters specified in the request.
-    /// </summary>
-    /// <short>Update the TFA settings</short>
+    /// </remarks>
+    /// <summary>Update the TFA settings</summary>
     ///<path>api/2.0/settings/tfaapp</path>
     [Tags("Settings / TFA settings")]
     [SwaggerResponse(200, "True if the operation is successful", typeof(bool))]
@@ -180,7 +180,8 @@ public class TfaappController(
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         
         var ownerId = tenantManager.GetCurrentTenant().OwnerId;
-        if ((inDto.Id == ownerId || inDto.MandatoryUsers.Contains(ownerId)) && inDto.Id != authContext.CurrentAccount.ID)
+        if ((inDto.Id == ownerId || (inDto.MandatoryUsers != null && inDto.MandatoryUsers.Contains(ownerId)))
+            && inDto.Id != authContext.CurrentAccount.ID)
         {
             throw new InvalidOperationException(Resource.ErrorAccessDenied);
         }
@@ -272,10 +273,10 @@ public class TfaappController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the confirmation email URL for updating TFA settings.
-    /// </summary>
-    /// <short>Get a confirmation email for updating TFA settings</short>
+    /// </remarks>
+    /// <summary>Get a confirmation email for updating TFA settings</summary>
     /// <path>api/2.0/settings/tfaappwithlink</path>
     [Tags("Settings / TFA settings")]
     [SwaggerResponse(200, "Confirmation email URL", typeof(string))]
@@ -292,10 +293,10 @@ public class TfaappController(
         return string.Empty;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Generates the setup TFA code for the current user.
-    /// </summary>
-    /// <short>Generate setup code</short>
+    /// </remarks>
+    /// <summary>Generate setup code</summary>
     /// <path>api/2.0/settings/tfaapp/setup</path>
     [Tags("Settings / TFA settings")]
     [SwaggerResponse(200, "Setup code", typeof(SetupCode))]
@@ -323,10 +324,10 @@ public class TfaappController(
         return await tfaManager.GenerateSetupCodeAsync(currentUser);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the two-factor authentication application codes.
-    /// </summary>
-    /// <short>Get the TFA codes</short>
+    /// </remarks>
+    /// <summary>Get the TFA codes</summary>
     /// <path>api/2.0/settings/tfaappcodes</path>
     /// <collection>list</collection>
     [Tags("Settings / TFA settings")]
@@ -352,10 +353,10 @@ public class TfaappController(
         return (await settingsManager.LoadForCurrentUserAsync<TfaAppUserSettings>()).CodesSetting.Select(r => new { r.IsUsed, Code = r.GetEncryptedCode(instanceCrypto, signature) }).ToList();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Requests the new backup codes for the two-factor authentication application.
-    /// </summary>
-    /// <short>Update the TFA codes</short>
+    /// </remarks>
+    /// <summary>Update the TFA codes</summary>
     /// <path>api/2.0/settings/tfaappnewcodes</path>
     /// <collection>list</collection>
     [Tags("Settings / TFA settings")]
@@ -382,10 +383,10 @@ public class TfaappController(
         return codes;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Unlinks the current two-factor authentication application from the user account specified in the request.
-    /// </summary>
-    /// <short>Unlink the TFA application</short>
+    /// </remarks>
+    /// <summary>Unlink the TFA application</summary>
     /// <path>api/2.0/settings/tfaappnewapp</path>
     [Tags("Settings / TFA settings")]
     [SwaggerResponse(200, "Login URL", typeof(string))]

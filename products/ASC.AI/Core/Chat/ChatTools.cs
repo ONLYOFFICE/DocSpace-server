@@ -32,18 +32,39 @@ public class ChatTools(
     WebSearchTool webSearchTool,
     WebCrawlingTool webCrawlingTool,
     KnowledgeSearchTool knowledgeSearchTool,
+    GeneratePresentationTool generatePresentationTool,
+    GenerateDocxTool generateDocxTool,
+    GenerateFormTool generateFormTool,
     AiSettingsStore aiSettingsStore,
     AiGateway aiGateway,
-    AiAccessibility aiAccessibility)
+    AiAccessibility aiAccessibility,
+    TenantManager tenantManager)
 {
-    public async Task<(ToolHolder, string? error)> GetAsync(int roomId, UserChatSettings chatSettings, bool knowledgeHasFiles)
+    public async Task<(ToolHolder, string? error)> GetAsync(Folder<int> agent, UserChatSettings chatSettings, bool knowledgeHasFiles, int resultStorageId)
     {
-        var (holder, error) = await mcpService.GetToolsAsync(roomId);
+        var (holder, error) = await mcpService.GetToolsAsync(agent.Id);
 
-        if (knowledgeHasFiles && await aiAccessibility.IsVectorizationEnabledAsync())
+        var tenantQuota = await tenantManager.GetCurrentTenantQuotaAsync();
+        if (tenantQuota.AutomationApi)
         {
-            var knowledgeFunc = knowledgeSearchTool.Init(roomId);
-            var knowledgeWrapper = ToWrapper(roomId, knowledgeFunc);
+            holder.AddTool(
+                SystemToolType.GeneratePresentation, 
+                ToWrapper(agent.Id, generatePresentationTool.Init(resultStorageId))
+            );
+            holder.AddTool(
+                SystemToolType.GenerateDocx, 
+                ToWrapper(agent.Id, generateDocxTool.Init(resultStorageId))
+            );
+            holder.AddTool(
+                SystemToolType.GenerateForm, 
+                ToWrapper(agent.Id, generateFormTool.Init(resultStorageId))
+            );
+        }
+
+        if (knowledgeHasFiles && await aiAccessibility.IsVectorizationEnabledAsync(agent))
+        {
+            var knowledgeFunc = knowledgeSearchTool.Init(agent);
+            var knowledgeWrapper = ToWrapper(agent.Id, knowledgeFunc);
             holder.AddTool(SystemToolType.KnowledgeSearch, knowledgeWrapper);
         }
 
@@ -52,14 +73,14 @@ public class ChatTools(
             return (holder, error);
         }
 
-        var config = await GetWebConfigAsync();
+        var config = await GetWebConfigAsync(agent);
         if (config == null)
         {
             return (holder, error);
         }
 
         var webTool = webSearchTool.Init(config);
-        var webWrapper = ToWrapper(roomId, webTool);
+        var webWrapper = ToWrapper(agent.Id, webTool);
         holder.AddTool(SystemToolType.WebSearch, webWrapper);
 
         if (!config.CrawlingSupported())
@@ -68,26 +89,26 @@ public class ChatTools(
         }
 
         var crawlTool = webCrawlingTool.Init(config);
-        var crawlWrapper = ToWrapper(roomId, crawlTool);
+        var crawlWrapper = ToWrapper(agent.Id, crawlTool);
         holder.AddTool(SystemToolType.WebCrawling, crawlWrapper);
 
         return (holder, error);
     }
 
-    private async Task<EngineConfig?> GetWebConfigAsync()
+    private async Task<EngineConfig?> GetWebConfigAsync(Folder<int> agent)
     {
-        if (!await aiSettingsStore.IsWebSearchEnabledAsync())
-        {
-            return null;
-        }
-        
-        if (aiGateway.Configured)
+        if (agent.SettingsChatProviderId == AiGateway.ProviderId && await aiGateway.IsEnabledAsync())
         {
             return new DocSpaceWebSearchConfig 
             { 
                 BaseUrl = aiGateway.Url, 
                 ApiKey = await aiGateway.GetKeyAsync() 
             };
+        }
+        
+        if (!await aiSettingsStore.IsWebSearchEnabledAsync())
+        {
+            return null;
         }
         
         var settings = await aiSettingsStore.GetWebSearchSettingsAsync();

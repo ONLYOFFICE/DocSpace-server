@@ -28,46 +28,64 @@ using MySqlConnector;
 
 namespace ASC.AppHost.Configuration;
 
-public class ConnectionStringManager(IDistributedApplicationBuilder builder)
+public record RedisConfig(string Host, string Port, string? Password = null);
+
+public class ConnectionStringManager(IDistributedApplicationBuilder builder, string basePath)
 {
     private MySqlConnectionStringBuilder? MySqlConnectionStringBuilder { get; set; }
     public Uri? RabbitMqUri { get; private set; }
-    
-    //TODO:create record
-    public string? RedisHost { get; private set; }
-    public string? RedisPort { get; private set; }
-    public string? RedisPassword { get; private set; }
+    public RedisConfig? Redis { get; private set; }
 
-    private IResourceBuilder<MySqlDatabaseResource>? MySqlResource { get; set; }
+    private IResourceBuilder<MySqlDatabaseResource>? MySqlDatabaseResource { get; set; }
     private IResourceBuilder<RabbitMQServerResource>? RabbitMqResource { get; set; }
     private IResourceBuilder<RedisResource>? RedisResource { get; set; }
     private IResourceBuilder<ExecutableResource>? MigrateResource { get; set; }
     private IResourceBuilder<ContainerResource>? EditorResource { get; set; }
     private IResourceBuilder<MailPitContainerResource>? MailResource { get; set; }
     private IResourceBuilder<ContainerResource>? OpensearchResource { get; set; }
+    
+    private IResourceBuilder<ContainerResource>? McpResource { get; set; }
+    
 
-    public ConnectionStringManager AddMySql()
+    public ConnectionStringManager AddMySql(bool withDbGate = false)
     {
-        MySqlResource = builder
-            .AddMySql("mysql")
-            .WithLifetime(ContainerLifetime.Persistent)
-            .AddDatabase("docspace");
+        var mysqlResourceBuilder = builder.AddMySql("mysql")
+            .WithLifetime(ContainerLifetime.Persistent);
 
-        builder.Eventing.Subscribe(MySqlResource.Resource, async (ConnectionStringAvailableEvent _, CancellationToken ct) =>
+        if (withDbGate)
         {
-            var connectionString = await MySqlResource.Resource.ConnectionStringExpression.GetValueAsync(ct).ConfigureAwait(false);
+            mysqlResourceBuilder = mysqlResourceBuilder.WithDbGate();
+        }
+        
+        MySqlDatabaseResource = mysqlResourceBuilder.AddDatabase("docspace");
+
+        builder.Eventing.Subscribe(MySqlDatabaseResource.Resource, async (ConnectionStringAvailableEvent _, CancellationToken ct) =>
+        {
+            var connectionString = await MySqlDatabaseResource.Resource.ConnectionStringExpression.GetValueAsync(ct).ConfigureAwait(false);
             if (connectionString != null && MySqlConnectionStringBuilder == null)
             {
                 MySqlConnectionStringBuilder = new MySqlConnectionStringBuilder(connectionString);
             }
         });
         
-        var path = Path.GetFullPath(Path.Combine("..", "Tools", "ASC.Migration.Runner", "bin", "Debug", "ASC.Migration.Runner.exe"));
+        var executableName = OperatingSystem.IsWindows() ? "ASC.Migration.Runner.exe" : "ASC.Migration.Runner";
+        var path = Path.GetFullPath(Path.Combine("..", "Tools", "ASC.Migration.Runner", "bin", "Debug", executableName));
         
         MigrateResource = builder
             .AddExecutable("migrate", path, Path.GetDirectoryName(path) ?? "")
-            .WithReference(MySqlResource)
-            .WaitFor(MySqlResource);
+            .WithReference(MySqlDatabaseResource)
+            .WaitFor(MySqlDatabaseResource);
+        
+        var isStandalone = String.Compare(builder.Configuration["APP_HOSTING_STANDALONE"], "true", StringComparison.OrdinalIgnoreCase) == 0;
+
+        if (isStandalone)
+        {
+            MigrateResource.WithEnvironment("standalone", "true");
+        }
+        else
+        {
+            MigrateResource.WithEnvironment("standalone", "");
+        }
         
         return this;
     }
@@ -91,37 +109,40 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
         return this;
     }
 
-    public ConnectionStringManager AddRedis()
+    public ConnectionStringManager AddRedis(bool withRedisInsight = false)
     {
 #pragma warning disable ASPIRECERTIFICATES001
         RedisResource = builder
             .AddRedis("cache")
             .WithPassword(null)
             .WithoutHttpsCertificate()
-            .WithLifetime(ContainerLifetime.Persistent)
-            .WithRedisInsight();
+            .WithLifetime(ContainerLifetime.Persistent);
 #pragma warning restore ASPIRECERTIFICATES001
+
+        if (withRedisInsight)
+        {
+            RedisResource = RedisResource.WithRedisInsight();
+        }
         
         builder.Eventing.Subscribe(RedisResource.Resource, async (ConnectionStringAvailableEvent _, CancellationToken ct) =>
         {
             var connectionString = await RedisResource.Resource.ConnectionStringExpression.GetValueAsync(ct).ConfigureAwait(false);
-            if (connectionString != null)
+            if (connectionString != null && Redis == null)
             {
                 var hostAndPassword = connectionString.Split(',');
                 var splitted = hostAndPassword[0].Split(':');
                 if (splitted.Length == 2)
                 {
-                    RedisHost = splitted[0];
-                    RedisPort = splitted[1];
-                }
-
-                if (hostAndPassword.Length > 1)
-                {
-                    var splittedHostAndPassword = hostAndPassword[1].Split('=');
-                    if (splittedHostAndPassword.Length == 2)
+                    string? password = null;
+                    if (hostAndPassword.Length > 1)
                     {
-                        RedisPassword = splittedHostAndPassword[1];
+                        var splittedHostAndPassword = hostAndPassword[1].Split('=');
+                        if (splittedHostAndPassword.Length == 2)
+                        {
+                            password = splittedHostAndPassword[1];
+                        }
                     }
+                    Redis = new RedisConfig(splitted[0], splitted[1], password);
                 }
             }
         });
@@ -129,14 +150,62 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
         return this;
     }
 
+    public ConnectionStringManager AddMcpServer(bool withMcpInspector = false)
+    {
+        McpResource = builder
+            .AddContainer(Constants.DocSpaceMcpContainer, "onlyoffice/docspace-mcp")
+            .WithLifetime(ContainerLifetime.Persistent)
+            .WithEnvironment("DOCSPACE_INTERNAL", "true")
+            .WithEnvironment("DOCSPACE_TRANSPORT", "http")
+            .WithEnvironment("DOCSPACE_HOST", "0.0.0.0")
+            .WithEnvironment("DOCSPACE_PORT", Constants.DocSpaceMcpPort.ToString())
+            .WithHttpEndpoint(Constants.DocSpaceMcpPort, Constants.DocSpaceMcpPort);
+
+        if (withMcpInspector)
+        {
+            WithMcpInspector(McpResource);
+        }
+        
+        AddWaitFor(McpResource);
+        
+        return this;
+    }
+    
+    IResourceBuilder<McpInspectorResource> WithMcpInspector(IResourceBuilder<ContainerResource> mcp) => mcp
+        .ApplicationBuilder.AddMcpInspector("mcp-inspector")
+        .WithMcpServer(mcp)
+        .WithParentRelationship(mcp)
+        .WaitFor(mcp)
+        .WithUrls(x =>
+        {
+            x.Urls[0].DisplayText = "Inspector";
+        });
+
+    
     public ConnectionStringManager AddEditors()
     {
+        var image = "onlyoffice/documentserver";
+        
+        switch (builder.Configuration["APP_EDITION"])
+        {
+            case "enterprise":
+                image = "onlyoffice/documentserver-ee";
+                break;
+            case "developer":
+                image = "onlyoffice/documentserver-de";
+                break;
+            default:
+                break;
+        }
+
         EditorResource = builder
-            .AddContainer(Constants.EditorsContainer, "onlyoffice/documentserver", "latest")
+            .AddContainer(Constants.EditorsContainer, image, "latest")
             //TODO:get from config or set for the rest projects
             .WithEnvironment("JWT_ENABLED", "true")
             .WithEnvironment("JWT_SECRET", "secret")
-            .WithEnvironment("JWT_HEADER", "AuthorizationJwt");
+            .WithEnvironment("JWT_HEADER", "AuthorizationJwt")
+            .WithBindMount(Path.Combine(basePath, "Data"), "/var/www/onlyoffice/Data");
+           
 
         return this;
     }
@@ -163,6 +232,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
     public ConnectionStringManager AddMailPit()
     {
         MailResource = builder.AddMailPit("mailpit");
+        
         return this;
     }
 
@@ -206,28 +276,27 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
         }
     }
 
-    public void AddBaseConfig<T>(IResourceBuilder<T> resourceBuilder, bool isDocker, bool includeHealthCheck = true) where T : IResourceWithEnvironment, IResourceWithWaitSupport, IResourceWithEndpoints
+    public void AddBaseConfig<T>(IResourceBuilder<T> resourceBuilder, bool isDocker) where T : IResourceWithEnvironment, IResourceWithWaitSupport, IResourceWithEndpoints
     {
-        if (includeHealthCheck)
-        {
-            resourceBuilder.WithHttpHealthCheck("/health");
-        }
-
+        resourceBuilder.WithHttpHealthCheck("/health");
+       
         resourceBuilder
             .WithEnvironment("openTelemetry:enable", "true")
-            .WithEnvironment("files:docservice:url:portal", SubstituteLocalhost("http://localhost"))
-            .WithEnvironment("files:docservice:url:public", "http://localhost/ds-vpath");
+            .WithEnvironment("files:docservice:url:portal", SubstituteLocalhost("http://localhost") + ":" + Constants.AppHostPort)
+            .WithEnvironment("files:docservice:url:public", $"http://localhost:{Constants.AppHostPort.ToString()}/ds-vpath");
 
-        if (MySqlResource != null)
+        if (MySqlDatabaseResource != null)
         {
             resourceBuilder
-                .WithReference(MySqlResource, "default:connectionString");
+                .WithReference(MySqlDatabaseResource, "default:connectionString");
         }
         
         if (MailResource != null)
         {
             resourceBuilder
-                .WithReference(MailResource);
+                .WithReference(MailResource)
+                .WithEnvironment("core:notify:postman", "mailpit");
+            
         }
 
         if (isDocker)
@@ -244,16 +313,16 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
                 .WithEnvironment("RabbitMQ:Password", () => RabbitMqUri != null ? $"{RabbitMqUri.UserInfo.Split(':')[1]}" : "")
                 .WithEnvironment("RabbitMQ:VirtualHost", () => RabbitMqUri != null ? $"{RabbitMqUri.PathAndQuery}" : "");
         }
-
+      
         if (RedisResource != null)
         {
             resourceBuilder
-                .WithEnvironment("Redis:Hosts:0:Host", () => (isDocker ? SubstituteLocalhost(RedisHost) : RedisHost) ?? string.Empty)
-                .WithEnvironment("Redis:Hosts:0:Port", () => RedisPort ?? string.Empty);
+                .WithEnvironment("Redis:Hosts:0:Host", () => (isDocker ? SubstituteLocalhost(Redis?.Host) : Redis?.Host) ?? string.Empty)
+                .WithEnvironment("Redis:Hosts:0:Port", () => Redis?.Port ?? string.Empty);
 
-            if (!string.IsNullOrEmpty(RedisPassword))
+            if (!string.IsNullOrEmpty(Redis?.Password))
             {
-                resourceBuilder.WithEnvironment("Redis:Password", () => RedisPassword ?? string.Empty);
+                resourceBuilder.WithEnvironment("Redis:Password", () => Redis?.Password ?? string.Empty);
             }
         }
 
@@ -280,16 +349,16 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder)
             .WithEnvironment("RABBIT_URI", () => RabbitMqUri != null ? $"{SubstituteLocalhost(RabbitMqUri.ToString())}" : string.Empty);
 
         resourceBuilder
-            .WithEnvironment("REDIS_HOST", () => SubstituteLocalhost(RedisHost) ?? string.Empty)
-            .WithEnvironment("REDIS_PORT", () => RedisPort ?? string.Empty);
+            .WithEnvironment("REDIS_HOST", () => SubstituteLocalhost(Redis?.Host) ?? string.Empty)
+            .WithEnvironment("REDIS_PORT", () => Redis?.Port ?? string.Empty);
 
-        if (!string.IsNullOrEmpty(RedisPassword))
+        if (!string.IsNullOrEmpty(Redis?.Password))
         {
-            resourceBuilder.WithEnvironment("REDIS_PASSWORD", () => RedisPassword ?? string.Empty);
+            resourceBuilder.WithEnvironment("REDIS_PASSWORD", () => Redis?.Password ?? string.Empty);
         }
 
         AddWaitFor(resourceBuilder, includeEditors: false);
     }
     
-    public static string? SubstituteLocalhost(string? host) => host?.Replace("localhost", Constants.HostDockerInternal);
+    public static string? SubstituteLocalhost(string? host) => host?.Replace(KnownHostNames.Localhost, KnownHostNames.DockerDesktopHostBridge);
 }

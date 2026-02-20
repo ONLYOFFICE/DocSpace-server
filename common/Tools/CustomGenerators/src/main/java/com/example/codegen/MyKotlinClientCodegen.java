@@ -18,7 +18,7 @@ public class MyKotlinClientCodegen extends KotlinClientCodegen {
     public MyKotlinClientCodegen() {
         super();
         this.templateDir = "templates/kotlin";
-        this.embeddedTemplateDir = "kotlin";
+        this.embeddedTemplateDir = "kotlin-client";
     }
 
     @Override

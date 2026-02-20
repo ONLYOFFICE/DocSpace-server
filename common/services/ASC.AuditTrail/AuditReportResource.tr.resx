@@ -192,6 +192,12 @@
   <data name="AuthorizationKeysSetting" xml:space="preserve">
     <value>Üçüncü şahıs yetkilendirme anahtarları güncellendi</value>
   </data>
+  <data name="BackupCompleted" xml:space="preserve">
+    <value>Yedekleme tamamlandı</value>
+  </data>
+  <data name="BackupFailed" xml:space="preserve">
+    <value>Yedekleme başarısız oldu</value>
+  </data>
   <data name="BackupStarted" xml:space="preserve">
     <value>Yedeklemeyi başlat</value>
   </data>
@@ -567,8 +573,14 @@
   <data name="ImportActionType" xml:space="preserve">
     <value>Aktar</value>
   </data>
+  <data name="InvitationSettingsUpdated" xml:space="preserve">
+    <value>Davet ayarları güncellendi</value>
+  </data>
   <data name="IpCol" xml:space="preserve">
     <value>IP</value>
+  </data>
+  <data name="IPRestrictionsSettingsUpdated" xml:space="preserve">
+    <value>IP Güvenliği ayarları güncellendi</value>
   </data>
   <data name="LanguageSettingsUpdated" xml:space="preserve">
     <value>Dil Ayarları Güncellendi</value>
@@ -638,6 +650,9 @@
   </data>
   <data name="LoginHistoryReportName" xml:space="preserve">
     <value>Giriş Geçmişi Raporu ({0}-{1})</value>
+  </data>
+  <data name="LoginSettingsUpdated" xml:space="preserve">
+    <value>Brute force koruması ayarları güncellendi</value>
   </data>
   <data name="LoginSuccess" xml:space="preserve">
     <value>Giriş Başarılı</value>
@@ -888,6 +903,15 @@
   <data name="RoomWatermarkSet" xml:space="preserve">
     <value>Oda: {0}. Filigran etkinleştirildi</value>
   </data>
+  <data name="ScheduledBackupCompleted" xml:space="preserve">
+    <value>Zamanlanmış yedekleme tamamlandı</value>
+  </data>
+  <data name="ScheduledBackupFailed" xml:space="preserve">
+    <value>Zamanlanmış yedekleme başarısız oldu</value>
+  </data>
+  <data name="ScheduledBackupStarted" xml:space="preserve">
+    <value>Zamanlanmış yedekleme başlatıldı</value>
+  </data>
   <data name="SendActionType" xml:space="preserve">
     <value>Gönder</value>
   </data>
@@ -1106,5 +1130,29 @@
   </data>
   <data name="WebhookUpdated" xml:space="preserve">
     <value>Webhook güncellendi: {0}</value>
+  </data>
+  <data name="WebpluginDeleted" xml:space="preserve">
+    <value>Eklenti silindi: {0}</value>
+  </data>
+  <data name="WebpluginUpdated" xml:space="preserve">
+    <value>Eklenti güncellendi: {0}</value>
+  </data>
+  <data name="WebpluginUploaded" xml:space="preserve">
+    <value>Eklenti yüklendi: {0}</value>
+  </data>
+  <data name="WhiteLabelAdditionalSettingsUpdated" xml:space="preserve">
+    <value>Ek markalama ayarları güncellendi</value>
+  </data>
+  <data name="WhiteLabelCompanySettingsUpdated" xml:space="preserve">
+    <value>Şirket bilgisi ayarları güncellendi</value>
+  </data>
+  <data name="WhiteLabelMailSettingsUpdated" xml:space="preserve">
+    <value>E-posta ayarları güncellendi</value>
+  </data>
+  <data name="WhiteLabelSettingsLogosUpdated" xml:space="preserve">
+    <value>Logo ayarları güncellendi</value>
+  </data>
+  <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
+    <value>Marka adı güncellendi</value>
   </data>
 </root>

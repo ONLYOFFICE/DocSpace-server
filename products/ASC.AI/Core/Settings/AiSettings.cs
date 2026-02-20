@@ -39,4 +39,7 @@ public class AiSettings
     public string KnowledgeSearchToolName => KnowledgeSearchTool.Name;
     public string WebSearchToolName => WebSearchTool.Name;
     public string WebCrawlingToolName => WebCrawlingTool.Name;
+    public string GenerateDocxToolName => GenerateDocxTool.Name;
+    public string GenerateFormToolName => GenerateFormTool.Name;
+    public string GeneratePresentationToolName => GeneratePresentationTool.Name;
 }

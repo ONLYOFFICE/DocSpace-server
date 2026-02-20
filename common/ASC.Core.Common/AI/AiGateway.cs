@@ -39,39 +39,41 @@ public class AiGatewaySettings
 
 [Scope]
 public class AiGateway(
-    IConfiguration configuration, 
-    TenantManager tenantManager, 
-    ITariffService tariffService, 
+    IConfiguration configuration,
+    TenantManager tenantManager,
+    ITariffService tariffService,
     UserManager userManager,
     AuthContext authContext,
     SettingsManager settingsManager)
 {
     public const int ProviderId = -1;
+    public const string ProviderTitle = "ONLYOFFICE AI";
     public string Url => Settings?.Url;
-    
-    public bool Configured => !string.IsNullOrEmpty(Url) && !string.IsNullOrEmpty(Settings?.Secret);
 
     private static AiGatewaySettings _settings;
 
     private AiGatewaySettings Settings => _settings ??= 
         configuration.GetSection("ai:gateway").Get<AiGatewaySettings>() ?? new AiGatewaySettings();
+
+    public async Task<bool> IsEnabledAsync()
+    {
+        if (string.IsNullOrEmpty(Url) || string.IsNullOrEmpty(Settings?.Secret))
+        {
+            return false;
+        }
+        
+        var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>(tenantManager.GetCurrentTenantId());
+        return settings.EnabledServices != null && settings.EnabledServices.Contains(TenantWalletService.AITools);
+    }
     
     public async Task<string> GetKeyAsync()
     {
-        if (!Configured)
+        if (!await IsEnabledAsync())
         {
-            return null;
+            throw new InvalidOperationException("AI Gateway is not enabled");
         }
         
-        var tenantId = tenantManager.GetCurrentTenantId();
-        
-        var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>(tenantId);
-        if (settings.EnabledServices == null || !settings.EnabledServices.Contains(TenantWalletService.AITools))
-        {
-            throw new SecurityException("Service is not enabled");
-        }
-        
-        var customerInfo = await tariffService.GetCustomerInfoAsync(tenantId);
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenantManager.GetCurrentTenantId());
         if (customerInfo == null)
         {
             throw new AccountingPaymentRequiredException();

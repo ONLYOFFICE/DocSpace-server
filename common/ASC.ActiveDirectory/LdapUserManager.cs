@@ -275,7 +275,7 @@ public class LdapUserManager(ILogger<LdapUserManager> logger,
                     var client = workContext.RegisterClient(scope.ServiceProvider, source);
                     
                     var action = serviceProvider.GetService<LdapActivationNotifyAction>();
-                    await action.Init(ldapUserInfo, _resource);
+                    await action.Init(wrapper.UserInfo, _resource);
                     
                     await client.SendNoticeToAsync(action, [new DirectRecipient(ldapUserInfo.Email, null, [ldapUserInfo.Email], false)], [Core.Configuration.Constants.NotifyEMailSenderSysName]);
                 }

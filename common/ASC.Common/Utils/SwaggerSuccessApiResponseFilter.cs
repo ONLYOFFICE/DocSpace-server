@@ -59,12 +59,16 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
     {
          var originalSchemaRef = (schema as OpenApiSchemaReference)?.Reference.Id;
 
-        var isPrimitive = schema.Type != null && schema.Type != JsonSchemaType.Array;
-        string responseSchemaKey;
+        var isPrimitive = schema.Type != null && schema.Type != JsonSchemaType.Array && schema.Type != JsonSchemaType.Object;
+        string responseSchemaKey = null;
         OpenApiSchema responseSchema = null;
         if (isPrimitive)
         {
             var typeName = GetPrimitiveTypeName(schema);
+            if ((schema.Type & JsonSchemaType.Null) == JsonSchemaType.Null)
+            {
+                typeName += "Nullable";
+            }
             responseSchemaKey = $"{typeName}Wrapper";
             var primitiveResponseProperty = new OpenApiSchema
             {
@@ -149,32 +153,62 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
         }
         else
         {
-            responseSchemaKey = originalSchemaRef.Contains("Dto") ? originalSchemaRef.Replace("Dto", "") + "Wrapper" : originalSchemaRef + "Wrapper";
+            if (originalSchemaRef != null)
+            {
+                responseSchemaKey = originalSchemaRef.Contains("Dto") ? originalSchemaRef.Replace("Dto", "") + "Wrapper" : originalSchemaRef + "Wrapper";
+            }
+
             var responseProperty = originalSchemaRef != null
             ? new OpenApiSchemaReference(originalSchemaRef)
             : schema;
             responseSchema = CreateSuccessApiResponseSchema(responseProperty);
         }
-        
-        schemas.TryAdd(responseSchemaKey, responseSchema);
-       // schema.Reference = new OpenApiSchemaReference(responseSchemaKey);
-        //schema.Type = null;
-        //schema.Properties = null;
-        return new OpenApiSchemaReference(responseSchemaKey);
+
+        if (responseSchemaKey != null)
+        {
+            schemas.TryAdd(responseSchemaKey, responseSchema);
+            // schema.Reference = new OpenApiSchemaReference(responseSchemaKey);
+            //schema.Type = null;
+            //schema.Properties = null;
+            return new OpenApiSchemaReference(responseSchemaKey);
+        }
+
+        return responseSchema;
     }
     
     private static string GetPrimitiveTypeName(IOpenApiSchema primitiveSchema)
     {
-        return primitiveSchema.Type switch
+        if ((primitiveSchema.Type & JsonSchemaType.String) == JsonSchemaType.String)
         {
-            JsonSchemaType.String => "String",
-            JsonSchemaType.Boolean => "Boolean",
-            JsonSchemaType.Integer when primitiveSchema.Format == "int32" => "Int32",
-            JsonSchemaType.Integer when primitiveSchema.Format == "int64" => "Int64",
-            JsonSchemaType.Number when primitiveSchema.Format == "float" => "Float",
-            JsonSchemaType.Number when primitiveSchema.Format == "double" => "Double",
-            _ => "Unknown"
-        };
+            return "String";
+        }
+        
+        if ((primitiveSchema.Type & JsonSchemaType.Boolean) == JsonSchemaType.Boolean)
+        {
+            return "Boolean";
+        }
+        
+        if ((primitiveSchema.Type & JsonSchemaType.Integer) == JsonSchemaType.Integer && primitiveSchema.Format == "int32")
+        {
+            return "Int32";
+        }
+        
+        if ((primitiveSchema.Type & JsonSchemaType.Integer) == JsonSchemaType.Integer && primitiveSchema.Format == "int64")
+        {
+            return "Int64";
+        }
+        
+        if ((primitiveSchema.Type & JsonSchemaType.Number) == JsonSchemaType.Number && primitiveSchema.Format == "float")
+        {
+            return "Float";
+        }
+        
+        if ((primitiveSchema.Type & JsonSchemaType.Number) == JsonSchemaType.Number && primitiveSchema.Format == "double")
+        {
+            return "Double";
+        }
+
+        return "Unknown";
     }
     private static OpenApiSchema CreateSuccessApiResponseSchema(IOpenApiSchema responseProperty)
     {
@@ -184,22 +218,23 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
             Properties = new Dictionary<string, IOpenApiSchema>
             {
                 { "response", responseProperty },
-                { "count", new OpenApiSchema { Type = JsonSchemaType.Integer, Format = "int32" } },
+                { "count", new OpenApiSchema { Type = JsonSchemaType.Integer, Format = "int32", Description = "The total number of items in the response"  } },
                 { "links", new OpenApiSchema
                     {
                         Type = JsonSchemaType.Array,
+                        Description = "List of links related to the response",
                         Items = new OpenApiSchema
                         {
                             Type = JsonSchemaType.Object,
                             Properties = new Dictionary<string, IOpenApiSchema>
                             {
-                                { "href", new OpenApiSchema { Type = JsonSchemaType.String } },
-                                { "action", new OpenApiSchema { Type = JsonSchemaType.String } }
+                                { "href", new OpenApiSchema { Type = JsonSchemaType.String, Description = "URL of the link" } },
+                                { "action", new OpenApiSchema { Type = JsonSchemaType.String, Description = "Action associated with the link" } }
                             }
                         }
                     } },
-                { "status", new OpenApiSchema { Type = JsonSchemaType.Integer, Format = "int32" } },
-                { "statusCode", new OpenApiSchema { Type = JsonSchemaType.Integer, Format = "int32" } }
+                { "status", new OpenApiSchema { Type = JsonSchemaType.Integer, Format = "int32", Description = "HTTP status code of the response"  } },
+                { "statusCode", new OpenApiSchema { Type = JsonSchemaType.Integer, Format = "int32", Description = "HTTP status code of the response (duplicate of status)"  } }
             }
         };
     }

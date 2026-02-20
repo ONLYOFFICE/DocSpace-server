@@ -30,5 +30,8 @@ public enum SystemToolType
 {
     KnowledgeSearch,
     WebSearch,
-    WebCrawling
+    WebCrawling,
+    GeneratePresentation,
+    GenerateDocx,
+    GenerateForm
 }

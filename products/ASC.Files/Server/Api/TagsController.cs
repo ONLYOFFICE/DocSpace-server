@@ -45,10 +45,10 @@ public abstract class TagsController<T>(FileStorageService fileStorageService,
         FileDtoHelper fileDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
-    /// <summary>
+    /// <remarks>
     /// Adds a file with the ID specified in the request to the "Recent" section.
-    /// </summary>
-    /// <short>Add a file to the "Recent" section</short>
+    /// </remarks>
+    /// <summary>Add a file to the "Recent" section</summary>
     /// <path>api/2.0/files/file/{fileId}/recent</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
@@ -62,10 +62,10 @@ public abstract class TagsController<T>(FileStorageService fileStorageService,
         return await _fileDtoHelper.GetAsync(file);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Changes the favorite status of the file with the ID specified in the request.
-    /// </summary>
-    /// <short>Change the file favorite status</short>
+    /// </remarks>
+    /// <summary>Change the file favorite status</summary>
     /// <path>api/2.0/files/favorites/{fileId}</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Boolean value: true - the file is favorite, false - the file is not favorite", typeof(bool))]
@@ -82,10 +82,10 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
         FileDtoHelper fileDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
-    /// <summary>
+    /// <remarks>
     /// Adds files and folders with the IDs specified in the request to the favorite list.
-    /// </summary>
-    /// <short>Add favorite files and folders</short>
+    /// </remarks>
+    /// <summary>Add favorite files and folders</summary>
     /// <path>api/2.0/files/favorites</path>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -102,10 +102,10 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
         return true;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Adds files with the IDs specified in the request to the template list.
-    /// </summary>
-    /// <short>Add template files</short>
+    /// </remarks>
+    /// <summary>Add template files</summary>
     /// <path>api/2.0/files/templates</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -117,10 +117,10 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
         return true;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Removes files and folders with the IDs specified in the request from the favorite list. This method uses the body parameters.
-    /// </summary>
-    /// <short>Delete favorite files and folders (using body parameters)</short>
+    /// </remarks>
+    /// <summary>Delete favorite files and folders (using body parameters)</summary>
     /// <path>api/2.0/files/favorites</path>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -131,10 +131,10 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
         return await DeleteFavorites(inDto);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Removes files and folders with the IDs specified in the request from the favorite list. This method uses the query parameters.
-    /// </summary>
-    /// <short>Delete favorite files and folders (using query parameters)</short>
+    /// </remarks>
+    /// <summary>Delete favorite files and folders (using query parameters)</summary>
     /// <path>api/2.0/files/favorites</path>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -144,10 +144,10 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
         return await DeleteFavorites(inDto);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Removes files with the IDs specified in the request from the template list.
-    /// </summary>
-    /// <short>Delete template files</short>
+    /// </remarks>
+    /// <summary>Delete template files</summary>
     /// <path>api/2.0/files/templates</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -159,10 +159,10 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
         return true;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Removes files with the IDs specified in the request from the "Recent" section.
-    /// </summary>
-    /// <short>Delete recent files</short>
+    /// </remarks>
+    /// <summary>Delete recent files</summary>
     /// <path>api/2.0/files/recent</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "No content", typeof(NoContentResult))]

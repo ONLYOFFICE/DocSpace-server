@@ -32,40 +32,40 @@ namespace ASC.Files.Core;
 [Flags]
 public enum TagType
 {
-    [SwaggerEnum("New")]
+    [Description("New")]
     New = 1,
 
-    [SwaggerEnum("Favorite")]
+    [Description("Favorite")]
     Favorite = 2,
 
-    [SwaggerEnum("System")]
+    [Description("System")]
     System = 4,
 
-    [SwaggerEnum("Locked")]
+    [Description("Locked")]
     Locked = 8,
 
-    [SwaggerEnum("Recent")]
+    [Description("Recent")]
     Recent = 16,
 
-    [SwaggerEnum("Template")]
+    [Description("Template")]
     Template = 32,
 
-    [SwaggerEnum("Custom")]
+    [Description("Custom")]
     Custom = 64,
 
-    [SwaggerEnum("Pin")]
+    [Description("Pin")]
     Pin = 128,
 
-    [SwaggerEnum("Origin")]
+    [Description("Origin")]
     Origin = 256,
 
-    [SwaggerEnum("Recent by link")]
+    [Description("Recent by link")]
     RecentByLink = 512,
 
-    [SwaggerEnum("From room")]
+    [Description("From room")]
     FromRoom = 1024,
 
-    [SwaggerEnum("Custom filter")]
+    [Description("Custom filter")]
     CustomFilter = 2048
 }
 

@@ -1,8 +1,9 @@
-{
+﻿{
   "solution": {
     "path": "ASC.Web.sln",
     "projects": [
       "common\\ASC.ActiveDirectory\\ASC.ActiveDirectory.csproj",
+      "common\\ASC.Analyzers\\ASC.Analyzers.csproj",
       "common\\ASC.Api.Core\\ASC.Api.Core.csproj",
       "common\\ASC.AppHost\\ASC.AppHost.csproj",
       "common\\ASC.Common\\ASC.Common.csproj",
@@ -24,7 +25,7 @@
       "common\\services\\ASC.ApiSystem\\ASC.ApiSystem.csproj",
       "common\\services\\ASC.AuditTrail\\ASC.AuditTrail.csproj",
       "common\\services\\ASC.ClearEvents\\ASC.ClearEvents.csproj",
-      "common\\services\\ASC.Data.Backup.BackgroundTasks\\ASC.Data.Backup.BackgroundTasks.csproj",
+      "common\\services\\ASC.Data.Backup.Worker\\ASC.Data.Backup.Worker.csproj",
       "common\\services\\ASC.Data.Backup\\ASC.Data.Backup.csproj",
       "common\\services\\ASC.ElasticSearch\\ASC.ElasticSearch.csproj",
       "common\\services\\ASC.Notify\\ASC.Notify.csproj",
@@ -37,10 +38,10 @@
       "migrations\\postgre\\SaaS\\ASC.Migrations.PostgreSql.SaaS.csproj",
       "products\\ASC.AI\\Core\\ASC.AI.Core.csproj",
       "products\\ASC.AI\\Server\\ASC.AI.csproj",
-      "products\\ASC.AI\\Service\\ASC.AI.Service.csproj",
+      "products\\ASC.AI\\Worker\\ASC.AI.Worker.csproj",
       "products\\ASC.Files\\Core\\ASC.Files.Core.csproj",
       "products\\ASC.Files\\Server\\ASC.Files.csproj",
-      "products\\ASC.Files\\Service\\ASC.Files.Service.csproj",
+      "products\\ASC.Files\\Worker\\ASC.Files.Worker.csproj",
       "products\\ASC.People\\Server\\ASC.People.csproj",
       "web\\ASC.Web.Api\\ASC.Web.Api.csproj",
       "web\\ASC.Web.Core\\ASC.Web.Core.csproj",

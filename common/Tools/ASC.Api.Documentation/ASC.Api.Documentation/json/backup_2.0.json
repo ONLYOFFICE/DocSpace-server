@@ -1,0 +1,1640 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Api",
+    "contact": {
+      "name": "API Support",
+      "url": "https://helpdesk.onlyoffice.com/hc/en-us",
+      "email": "support@onlyoffice.com"
+    },
+    "version": "3.6.0",
+    "x-scalar-sdk-installation": [
+      {
+        "lang": "Node",
+        "description": "Install our **ONLYOFFICE SDK** for Node.js from npm:",
+        "source": "npm install @onlyoffice/docspace-api-sdk"
+      },
+      {
+        "lang": "Python",
+        "description": "Install our **ONLYOFFICE SDK** for Python app from pip:",
+        "source": "pip install docspace-api-sdk"
+      },
+      {
+        "lang": "CSharp",
+        "description": "Install our **ONLYOFFICE SDK** for .Net from nuget:",
+        "source": "dotnet add package DocSpace.API.SDK"
+      }
+    ]
+  },
+  "servers": [
+    {
+      "url": "{baseUrl}",
+      "description": "Server configuration",
+      "variables": {
+        "baseUrl": {
+          "default": "",
+          "description": "Default URL"
+        }
+      }
+    }
+  ],
+  "paths": {
+    "/api/2.0/backup/getbackupschedule": {
+      "get": {
+        "tags": [
+          "Backup"
+        ],
+        "summary": "Get the backup schedule",
+        "description": "Returns the backup schedule of the current portal.",
+        "operationId": "getBackupSchedule",
+        "parameters": [
+          {
+            "name": "Dump",
+            "in": "query",
+            "description": "Specifies if a dump will be created or not.",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Backup schedule",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduleWrapper"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/backup/createbackupschedule": {
+      "post": {
+        "tags": [
+          "Backup"
+        ],
+        "summary": "Create the backup schedule",
+        "description": "Creates the backup schedule of the current portal with the parameters specified in the request.",
+        "operationId": "createBackupSchedule",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BackupScheduleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Boolean value: true if the operation is successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BooleanWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "BackupStored must be 1 - 30 or backup can not start as dump"
+          },
+          "402": {
+            "description": "Your pricing plan does not support this option"
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "404": {
+            "description": "The required folder was not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/backup/deletebackupschedule": {
+      "delete": {
+        "tags": [
+          "Backup"
+        ],
+        "summary": "Delete the backup schedule",
+        "description": "Deletes the backup schedule of the current portal.",
+        "operationId": "deleteBackupSchedule",
+        "parameters": [
+          {
+            "name": "Dump",
+            "in": "query",
+            "description": "Specifies if a dump will be created or not.",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Boolean value: true if the operation is successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BooleanWrapper"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/backup/startbackup": {
+      "post": {
+        "tags": [
+          "Backup"
+        ],
+        "summary": "Start the backup",
+        "description": "Starts the backup of the current portal with the parameters specified in the request.",
+        "operationId": "startBackup",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BackupDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackupProgressWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Wrong folder type or backup can`t start as dump"
+          },
+          "402": {
+            "description": "Your pricing plan does not support this option"
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "404": {
+            "description": "The required folder was not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/backup/cancelbackup": {
+      "post": {
+        "tags": [
+          "Backup"
+        ],
+        "summary": "Cancel current backup",
+        "description": "Cancel current backup.",
+        "operationId": "cancelBackup",
+        "responses": {
+          "200": {
+            "description": "Boolean value: true if the operation is successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BooleanWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/backup/getbackupprogress": {
+      "get": {
+        "tags": [
+          "Backup"
+        ],
+        "summary": "Get the backup progress",
+        "description": "Returns the progress of the started backup.",
+        "operationId": "getBackupProgress",
+        "parameters": [
+          {
+            "name": "Dump",
+            "in": "query",
+            "description": "Specifies if a dump will be created or not.",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackupProgressWrapper"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/backup/getbackuphistory": {
+      "get": {
+        "tags": [
+          "Backup"
+        ],
+        "summary": "Get the backup history",
+        "description": "Returns the history of the started backup.",
+        "operationId": "getBackupHistory",
+        "parameters": [
+          {
+            "name": "Dump",
+            "in": "query",
+            "description": "Specifies if a dump will be created or not.",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of backup history records",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackupHistoryRecordArrayWrapper"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/backup/deletebackup/{id}": {
+      "delete": {
+        "tags": [
+          "Backup"
+        ],
+        "summary": "Delete the backup",
+        "description": "Deletes the backup with the ID specified in the request.",
+        "operationId": "deleteBackup",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The backup ID.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Boolean value: true if the operation is successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BooleanWrapper"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/backup/deletebackuphistory": {
+      "delete": {
+        "tags": [
+          "Backup"
+        ],
+        "summary": "Delete the backup history",
+        "description": "Deletes the backup history from the current portal.",
+        "operationId": "deleteBackupHistory",
+        "parameters": [
+          {
+            "name": "Dump",
+            "in": "query",
+            "description": "Specifies if a dump will be created or not.",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Boolean value: true if the operation is successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BooleanWrapper"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/backup/startrestore": {
+      "post": {
+        "tags": [
+          "Backup"
+        ],
+        "summary": "Start the restoring process",
+        "description": "Starts the data restoring process of the current portal with the parameters specified in the request.",
+        "operationId": "startBackupRestore",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BackupRestoreDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackupProgressWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Backup can not start as dump"
+          },
+          "402": {
+            "description": "Your pricing plan does not support this option"
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "404": {
+            "description": "The required file or folder was not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/backup/getrestoreprogress": {
+      "get": {
+        "tags": [
+          "Backup"
+        ],
+        "summary": "Get the restoring progress",
+        "description": "Returns the progress of the started restoring process.",
+        "operationId": "getRestoreProgress",
+        "parameters": [
+          {
+            "name": "Dump",
+            "in": "query",
+            "description": "Specifies if a dump will be created or not.",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackupProgressWrapper"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/2.0/backup/getbackupscount": {
+      "get": {
+        "tags": [
+          "Backup"
+        ],
+        "summary": "Get the number of backups",
+        "description": "Returns the number of backups for a period of time. The default is one month.",
+        "operationId": "getBackupsCount",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "description": "The from date.",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "example": "2008-04-10T06:30:00.0000000+04:00"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "The to date.",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "example": "2008-04-10T06:30:00.0000000+04:00"
+            }
+          },
+          {
+            "name": "paid",
+            "in": "query",
+            "description": "Specifies if the backups are paid or not.",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Number of backups",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Int32Wrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "From date must be less than to date"
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/backup/getservicestate": {
+      "get": {
+        "tags": [
+          "Backup"
+        ],
+        "summary": "Get the backup service state",
+        "description": "Returns the backup service state.",
+        "operationId": "getBackupsServiceState",
+        "responses": {
+          "200": {
+            "description": "Backup service state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackupServiceStateWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BackupDto": {
+        "type": "object",
+        "properties": {
+          "storageType": {
+            "$ref": "#/components/schemas/BackupStorageType"
+          },
+          "storageParams": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ItemKeyValuePairObjectObject"
+            },
+            "description": "The backup storage parameters.",
+            "nullable": true
+          },
+          "dump": {
+            "type": "boolean",
+            "description": "Specifies if a dump will be created or not.",
+            "example": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The backup parameters."
+      },
+      "BackupHistoryRecord": {
+        "required": [
+          "createdOn",
+          "expiresOn",
+          "fileName",
+          "id",
+          "storageType"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          "fileName": {
+            "type": "string",
+            "nullable": true,
+            "example": "some text"
+          },
+          "storageType": {
+            "$ref": "#/components/schemas/BackupStorageType"
+          },
+          "createdOn": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2008-04-10T06:30:00.0000000+04:00"
+          },
+          "expiresOn": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2008-04-10T06:30:00.0000000+04:00"
+          }
+        },
+        "additionalProperties": false
+      },
+      "BackupHistoryRecordArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BackupHistoryRecord"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
+      "BackupPeriod": {
+        "oneOf": [
+          {
+            "enum": [
+              "EveryDay",
+              "EveryWeek",
+              "EveryMonth"
+            ],
+            "type": "string",
+            "description": "[EveryDay - Every day, EveryWeek - Every week, EveryMonth - Every month]",
+            "example": "EveryDay"
+          },
+          {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "[0 - Every day, 1 - Every week, 2 - Every month]",
+            "example": 0,
+            "x-enum-varnames": [
+              "EveryDay",
+              "EveryWeek",
+              "EveryMonth"
+            ]
+          }
+        ],
+        "x-enum-type": "integer"
+      },
+      "BackupProgress": {
+        "type": "object",
+        "properties": {
+          "isCompleted": {
+            "type": "boolean",
+            "example": true
+          },
+          "progress": {
+            "type": "integer",
+            "format": "int32",
+            "example": 1234
+          },
+          "error": {
+            "type": "string",
+            "nullable": true,
+            "example": "some text"
+          },
+          "warning": {
+            "type": "string",
+            "nullable": true,
+            "example": "some text"
+          },
+          "link": {
+            "type": "string",
+            "nullable": true,
+            "example": "some text"
+          },
+          "tenantId": {
+            "type": "integer",
+            "format": "int32",
+            "example": 1234
+          },
+          "backupProgressEnum": {
+            "$ref": "#/components/schemas/BackupProgressEnum"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DistributedTaskStatus"
+          },
+          "taskId": {
+            "type": "string",
+            "nullable": true,
+            "example": "some text"
+          }
+        },
+        "additionalProperties": false
+      },
+      "BackupProgressEnum": {
+        "oneOf": [
+          {
+            "enum": [
+              "Backup",
+              "Restore",
+              "Transfer"
+            ],
+            "type": "string",
+            "description": "[Backup - Backup, Restore - Restore, Transfer - Transfer]",
+            "example": "Backup"
+          },
+          {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "[0 - Backup, 1 - Restore, 2 - Transfer]",
+            "example": 0,
+            "x-enum-varnames": [
+              "Backup",
+              "Restore",
+              "Transfer"
+            ]
+          }
+        ],
+        "x-enum-type": "integer"
+      },
+      "BackupProgressWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/BackupProgress"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
+      "BackupRestoreDto": {
+        "required": [
+          "backupId"
+        ],
+        "type": "object",
+        "properties": {
+          "backupId": {
+            "type": "string",
+            "description": "The backup ID.",
+            "nullable": true,
+            "example": "some text"
+          },
+          "storageType": {
+            "$ref": "#/components/schemas/BackupStorageType"
+          },
+          "storageParams": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ItemKeyValuePairObjectObject"
+            },
+            "description": "The backup storage parameters.",
+            "nullable": true
+          },
+          "notify": {
+            "type": "boolean",
+            "description": "Notifies users about the portal restoring process or not.",
+            "example": true
+          },
+          "dump": {
+            "type": "boolean",
+            "description": "Specifies if a dump will be created or not.",
+            "example": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The backup restoring parameters."
+      },
+      "BackupScheduleDto": {
+        "type": "object",
+        "properties": {
+          "storageType": {
+            "$ref": "#/components/schemas/BackupStorageType"
+          },
+          "storageParams": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ItemKeyValuePairObjectObject"
+            },
+            "description": "The backup storage parameters.",
+            "nullable": true
+          },
+          "backupsStored": {
+            "type": "integer",
+            "description": "The maximum number of the stored backup copies.",
+            "format": "int32",
+            "nullable": true,
+            "example": 1234
+          },
+          "cronParams": {
+            "$ref": "#/components/schemas/Cron"
+          },
+          "dump": {
+            "type": "boolean",
+            "description": "Specifies if a dump will be created or not.",
+            "example": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The backup schedule parameters."
+      },
+      "BackupServiceStateDto": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Specifies if the backup service is enabled or not.",
+            "example": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Backup service state."
+      },
+      "BackupServiceStateWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/BackupServiceStateDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
+      "BackupStorageType": {
+        "oneOf": [
+          {
+            "enum": [
+              "Documents",
+              "ThridpartyDocuments",
+              "CustomCloud",
+              "Local",
+              "DataStore",
+              "ThirdPartyConsumer"
+            ],
+            "type": "string",
+            "description": "[Documents - Documents, ThridpartyDocuments - Thridparty documents, CustomCloud - Custom cloud, Local - Local, DataStore - Data store, ThirdPartyConsumer - Thirdparty consumer]",
+            "example": "Documents"
+          },
+          {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "type": "integer",
+            "description": "[0 - Documents, 1 - Thridparty documents, 2 - Custom cloud, 3 - Local, 4 - Data store, 5 - Thirdparty consumer]",
+            "example": 0,
+            "x-enum-varnames": [
+              "Documents",
+              "ThridpartyDocuments",
+              "CustomCloud",
+              "Local",
+              "DataStore",
+              "ThirdPartyConsumer"
+            ]
+          }
+        ],
+        "x-enum-type": "integer"
+      },
+      "BooleanWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "boolean"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
+      "Cron": {
+        "type": "object",
+        "properties": {
+          "period": {
+            "$ref": "#/components/schemas/BackupPeriod"
+          },
+          "hour": {
+            "type": "integer",
+            "description": "The time of the day to start the backup process.",
+            "format": "int32",
+            "example": 0
+          },
+          "day": {
+            "type": "integer",
+            "description": "The day of the week to start the backup process.",
+            "format": "int32",
+            "nullable": true,
+            "example": 0
+          }
+        },
+        "additionalProperties": false,
+        "description": "The backup cron parameters."
+      },
+      "CronParams": {
+        "type": "object",
+        "properties": {
+          "period": {
+            "$ref": "#/components/schemas/BackupPeriod"
+          },
+          "hour": {
+            "type": "integer",
+            "format": "int32",
+            "example": 1234
+          },
+          "day": {
+            "type": "integer",
+            "format": "int32",
+            "example": 1234
+          }
+        },
+        "additionalProperties": false
+      },
+      "DistributedTaskStatus": {
+        "oneOf": [
+          {
+            "enum": [
+              "Created",
+              "Running",
+              "Completed",
+              "Canceled",
+              "Failted"
+            ],
+            "type": "string",
+            "description": "[Created - Created, Running - Running, Completed - Completed, Canceled - Canceled, Failted - Failted]",
+            "example": "Created"
+          },
+          {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "description": "[0 - Created, 1 - Running, 2 - Completed, 3 - Canceled, 4 - Failted]",
+            "example": 0,
+            "x-enum-varnames": [
+              "Created",
+              "Running",
+              "Completed",
+              "Canceled",
+              "Failted"
+            ]
+          }
+        ],
+        "x-enum-type": "integer"
+      },
+      "Int32Wrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "integer"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      },
+      "ItemKeyValuePairObjectObject": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "nullable": true
+          },
+          "value": {
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ScheduleDto": {
+        "required": [
+          "cronParams",
+          "dump",
+          "lastBackupTime",
+          "storageParams",
+          "storageType"
+        ],
+        "type": "object",
+        "properties": {
+          "storageType": {
+            "$ref": "#/components/schemas/BackupStorageType"
+          },
+          "storageParams": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "nullable": true
+            },
+            "nullable": true,
+            "example": [
+              {
+                "key": "some text",
+                "value": "some text"
+              }
+            ]
+          },
+          "cronParams": {
+            "$ref": "#/components/schemas/CronParams"
+          },
+          "backupsStored": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true,
+            "example": 1234
+          },
+          "lastBackupTime": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2008-04-10T06:30:00.0000000+04:00"
+          },
+          "dump": {
+            "type": "boolean",
+            "example": false
+          }
+        },
+        "additionalProperties": false
+      },
+      "ScheduleWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/ScheduleDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "asc_auth_key": {
+        "type": "apiKey",
+        "description": "Use Cookie authentication",
+        "name": "asc_auth_key",
+        "in": "cookie"
+      },
+      "Basic": {
+        "type": "http",
+        "description": "Enter your username and password",
+        "scheme": "basic"
+      },
+      "Bearer": {
+        "type": "http",
+        "description": "Enter 'Bearer {JWT Token}'",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      },
+      "ApiKeyBearer": {
+        "type": "apiKey",
+        "description": "Authentication is determined by the 'Authorization' header",
+        "name": "ApiKeyBearer",
+        "in": "header"
+      },
+      "OAuth2": {
+        "type": "oauth2",
+        "description": "OAuth2 flow with Authorization Code",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "",
+            "tokenUrl": "",
+            "scopes": {
+              "read": "Read access to protected resources",
+              "write": "Write access to protected resources"
+            }
+          }
+        }
+      },
+      "OpenId": {
+        "type": "openIdConnect",
+        "description": "OpenID Connect authentication",
+        "openIdConnectUrl": ""
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Backup",
+      "description": "Operations for working with backup",
+      "x-displayName": "Backup"
+    }
+  ],
+  "x-tagGroups": [
+    {
+      "name": "Backup",
+      "tags": [
+        "Backup"
+      ]
+    }
+  ]
+}

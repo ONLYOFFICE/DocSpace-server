@@ -248,7 +248,7 @@ public static class DocumentService
         CommandMethod method,
         string documentRevisionId,
         string callbackUrl,
-        string[] users,
+        List<string> users,
         MetaData meta,
         string signatureSecret,
         string signatureHeader,
@@ -286,7 +286,7 @@ public static class DocumentService
             body.Callback = callbackUrl;
         }
 
-        if (users is { Length: > 0 })
+        if (users is { Count: > 0 })
         {
             body.Users = users;
         }
@@ -666,7 +666,7 @@ public static class DocumentService
         /// <summary>
         /// The list of the user identifiers.
         /// </summary>
-        public string[] Users { get; set; }
+        public List<string> Users { get; set; }
 
         /// <summary>
         /// The encrypted signature added to the config in the form of a token.

@@ -7,6 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Asp.Versioning.Http" />
+    <PackageReference Include="Asp.Versioning.Mvc" />
+    <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" />
     <PackageReference Include="AspNetCore.HealthChecks.Kafka" />
     <PackageReference Include="AspNetCore.HealthChecks.MySql" />
     <PackageReference Include="AspNetCore.HealthChecks.NpgSql" />
@@ -14,6 +17,8 @@
     <PackageReference Include="AspNetCore.HealthChecks.Redis" />
     <PackageReference Include="AspNetCore.HealthChecks.UI.Client" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" />
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" />
     <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" />
@@ -30,6 +35,8 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.Process" />
     <PackageReference Include="RedisRateLimiting" />
     <PackageReference Include="RedisRateLimiting.AspNetCore" />
+    <PackageReference Include="Scalar.AspNetCore" />
+    <PackageReference Include="Scalar.AspNetCore.Swashbuckle" />
     <PackageReference Include="StackExchange.Redis.Extensions.AspNetCore" />
     <PackageReference Include="StackExchange.Redis.Extensions.Newtonsoft" />
 	<PackageReference Include="Autofac.Extensions.DependencyInjection" />

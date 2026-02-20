@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Files.Core.Configuration;
+
 using Module = ASC.Api.Core.Module;
 
 namespace ASC.Files.Api;
@@ -34,13 +36,15 @@ public class SettingsController(
     FilesSettingsDtoConverter settingsDtoConverter,
     CompressToArchive compressToArchive,
     FolderDtoHelper folderDtoHelper,
-    FileDtoHelper fileDtoHelper)
+    FileDtoHelper fileDtoHelper,
+    DefaultTemplateSettingsHelper defaultTemplateSettingsHelper,
+    PermissionContext permissionContext)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
-    /// <summary>
+    /// <remarks>
     /// Changes the access to the third-party settings.
-    /// </summary>
-    /// <short>Change the third-party settings access</short>
+    /// </remarks>
+    /// <summary>Change the third-party settings access</summary>
     /// <path>api/2.0/files/thirdparty</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -52,10 +56,10 @@ public class SettingsController(
         return await filesSettingsHelper.GetEnableThirdParty();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Specifies whether to confirm the file deletion or not.
-    /// </summary>
-    /// <short>Confirm the file deletion</short>
+    /// </remarks>
+    /// <summary>Confirm the file deletion</summary>
     /// <path>api/2.0/files/changedeleteconfim</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -66,10 +70,10 @@ public class SettingsController(
         return await filesSettingsHelper.GetConfirmDelete();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Changes the format of the downloaded archive from .zip to .tar.gz. This method uses the body parameters.
-    /// </summary>
-    /// <short>Change the archive format (using body parameters)</short>
+    /// </remarks>
+    /// <summary>Change the archive format (using body parameters)</summary>
     /// <path>api/2.0/files/settings/downloadtargz</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Archive", typeof(ICompress))]
@@ -80,10 +84,10 @@ public class SettingsController(
         return compressToArchive;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Changes the format of the downloaded archive from .zip to .tar.gz. This method uses the form parameters.
-    /// </summary>
-    /// <short>Change the archive format (using form parameters)</short>
+    /// </remarks>
+    /// <summary>Change the archive format (using form parameters)</summary>
     /// <path>api/2.0/files/settings/downloadtargz</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
@@ -95,10 +99,10 @@ public class SettingsController(
         return compressToArchive;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Displays the "Favorites" folder.
-    /// </summary>
-    /// <short>Display the "Favorites" folder</short>
+    /// </remarks>
+    /// <summary>Display the "Favorites" folder</summary>
     /// <path>api/2.0/files/settings/favorites</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
@@ -111,10 +115,10 @@ public class SettingsController(
         return await filesSettingsHelper.GetFavoritesSection();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Displays the "Recent" folder.
-    /// </summary>
-    /// <short>Display the "Recent" folder</short>
+    /// </remarks>
+    /// <summary>Display the "Recent" folder</summary>
     /// <path>api/2.0/files/displayRecent</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
@@ -126,10 +130,10 @@ public class SettingsController(
         return await filesSettingsHelper.GetRecentSection();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Displays the "Templates" folder.
-    /// </summary>
-    /// <short>Display the "Templates" folder</short>
+    /// </remarks>
+    /// <summary>Display the "Templates" folder</summary>
     /// <path>api/2.0/files/settings/templates</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Settings")]
@@ -142,10 +146,10 @@ public class SettingsController(
         return await filesSettingsHelper.GetTemplatesSection();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Changes the ability to share a file externally.
-    /// </summary>
-    /// <short>Change the external sharing ability</short>
+    /// </remarks>
+    /// <summary>Change the external sharing ability</summary>
     /// <path>api/2.0/files/settings/external</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
@@ -155,10 +159,10 @@ public class SettingsController(
         return await filesSettingsHelper.ChangeExternalShareSettingsAsync(inDto.Set);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Changes the ability to share a file externally on social networks.
-    /// </summary>
-    /// <short>Change the external sharing ability on social networks</short>
+    /// </remarks>
+    /// <summary>Change the external sharing ability on social networks</summary>
     /// <path>api/2.0/files/settings/externalsocialmedia</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
@@ -168,10 +172,10 @@ public class SettingsController(
         return await filesSettingsHelper.ChangeExternalShareSocialMediaSettingsAsync(inDto.Set);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Specifies if the file forcesaving is enabled or not.
-    /// </summary>
-    /// <short>Change the forcesaving ability</short>
+    /// </remarks>
+    /// <summary>Change the forcesaving ability</summary>
     /// <path>api/2.0/files/forcesave</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
@@ -182,10 +186,10 @@ public class SettingsController(
         //return _fileStorageServiceString.Forcesave(inDto.Set);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns all the file settings.
-    /// </summary>
-    /// <short>Get file settings</short>
+    /// </remarks>
+    /// <summary>Get file settings</summary>
     /// <path>api/2.0/files/settings</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Settings")]
@@ -197,10 +201,10 @@ public class SettingsController(
         return await settingsDtoConverter.Get();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the information about the "Documents" module.
-    /// </summary>
-    /// <short>Get the "Documents" information</short>
+    /// </remarks>
+    /// <summary>Get the "Documents" information</summary>
     /// <path>api/2.0/files/info</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Module information: ID, product class name, title, description, icon URL, large icon URL, start URL, primary or nor, help URL", typeof(Module))]
@@ -211,10 +215,10 @@ public class SettingsController(
         return new Module(productEntryPoint);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Hides the confirmation dialog when canceling operations.
-    /// </summary>
-    /// <short>Hide confirmation dialog when canceling operations</short>
+    /// </remarks>
+    /// <summary>Hide confirmation dialog when canceling operations</summary>
     /// <path>api/2.0/files/hideconfirmcanceloperation</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
@@ -224,10 +228,10 @@ public class SettingsController(
         return await filesSettingsHelper.SetHideConfirmCancelOperation(inDto.Set);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Hides the confirmation dialog for saving the file copy in the original format when converting a file.
-    /// </summary>
-    /// <short>Hide the confirmation dialog when converting</short>
+    /// </remarks>
+    /// <summary>Hide the confirmation dialog when converting</summary>
     /// <path>api/2.0/files/hideconfirmconvert</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(Module))]
@@ -237,10 +241,10 @@ public class SettingsController(
         return await filesSettingsHelper.HideConfirmConvert(inDto.Save);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Hides the confirmation dialog when changing the room lifetime settings.
-    /// </summary>
-    /// <short>Hide confirmation dialog when changing room lifetime settings</short>
+    /// </remarks>
+    /// <summary>Hide confirmation dialog when changing room lifetime settings</summary>
     /// <path>api/2.0/files/hideconfirmroomlifetime</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
@@ -250,10 +254,10 @@ public class SettingsController(
         return await filesSettingsHelper.SetHideConfirmRoomLifetime(inDto.Set);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Checks if the "Private Room" settings are available or not.
-    /// </summary>
-    /// <short>Check the "Private Room" availability</short>
+    /// </remarks>
+    /// <summary>Check the "Private Room" availability</summary>
     /// <path>api/2.0/files/@privacy/available</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the Private Room settings are available", typeof(bool))]
@@ -263,10 +267,10 @@ public class SettingsController(
         return PrivacyRoomSettings.IsAvailable();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Changes the ability to store the forcesaved file versions.
-    /// </summary>
-    /// <short>Change the ability to store the forcesaved files</short>
+    /// </remarks>
+    /// <summary>Change the ability to store the forcesaved files</summary>
     /// <path>api/2.0/files/storeforcesave</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -277,10 +281,10 @@ public class SettingsController(
         //return _fileStorageServiceString.StoreForcesave(inDto.Set);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Changes the ability to upload documents in the original formats as well.
-    /// </summary>
-    /// <short>Change the ability to upload original formats</short>
+    /// </remarks>
+    /// <summary>Change the ability to upload original formats</summary>
     /// <path>api/2.0/files/storeoriginal</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -291,10 +295,10 @@ public class SettingsController(
         return await filesSettingsHelper.GetStoreOriginalFiles();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Specifies whether to ask a user for a file name on creation or not.
-    /// </summary>
-    /// <short>Ask a new file name</short>
+    /// </remarks>
+    /// <summary>Ask a new file name</summary>
     /// <path>api/2.0/files/keepnewfilename</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -304,10 +308,10 @@ public class SettingsController(
         return await filesSettingsHelper.SetKeepNewFileName(inDto.Set);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Specifies whether to display a file extension or not.
-    /// </summary>
-    /// <short>Display a file extension</short>
+    /// </remarks>
+    /// <summary>Display a file extension</summary>
     /// <path>api/2.0/files/displayfileextension</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
@@ -317,10 +321,10 @@ public class SettingsController(
         return await filesSettingsHelper.SetDisplayFileExtension(inDto.Set);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Updates a file version if a file with such a name already exists.
-    /// </summary>
-    /// <short>Update a file version if it exists</short>
+    /// </remarks>
+    /// <summary>Update a file version if it exists</summary>
     /// <path>api/2.0/files/updateifexist</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
@@ -330,10 +334,10 @@ public class SettingsController(
         return Task.FromResult(false);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the trash bin auto-clearing setting.
-    /// </summary>
-    /// <short>Get the trash bin auto-clearing setting</short>
+    /// </remarks>
+    /// <summary>Get the trash bin auto-clearing setting</summary>
     /// <path>api/2.0/files/settings/autocleanup</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "The auto-clearing setting properties: auto-clearing or not, a time interval when the auto-clearing will be performed", typeof(AutoCleanUpData))]
@@ -343,10 +347,10 @@ public class SettingsController(
         return await filesSettingsHelper.GetAutomaticallyCleanUp();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Updates the trash bin auto-clearing setting.
-    /// </summary>
-    /// <short>Update the trash bin auto-clearing setting</short>
+    /// </remarks>
+    /// <summary>Update the trash bin auto-clearing setting</summary>
     /// <path>api/2.0/files/settings/autocleanup</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "The auto-clearing setting properties: auto-clearing or not, a time interval when the auto-clearing will be performed", typeof(AutoCleanUpData))]
@@ -357,10 +361,10 @@ public class SettingsController(
         return await filesSettingsHelper.GetAutomaticallyCleanUp();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Changes the default access rights in the sharing settings.
-    /// </summary>
-    /// <short>Change the default access rights</short>
+    /// </remarks>
+    /// <summary>Change the default access rights</summary>
     /// <path>api/2.0/files/settings/dafaultaccessrights</path>
     /// <collection>list</collection>
     [Tags("Files / Settings")]
@@ -372,10 +376,10 @@ public class SettingsController(
         return await filesSettingsHelper.GetDefaultSharingAccessRights();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Changes the ability to open the document in the same browser tab.
-    /// </summary>
-    /// <short>Open document in the same browser tab</short>
+    /// </remarks>
+    /// <summary>Open document in the same browser tab</summary>
     /// <path>api/2.0/files/settings/openeditorinsametab</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
@@ -384,5 +388,67 @@ public class SettingsController(
     {
         await filesSettingsHelper.SetOpenEditorInSameTabAsync(inDto.Set);
         return await filesSettingsHelper.GetOpenEditorInSameTabAsync();
+    }
+
+    /// <remarks>
+    /// Returns the default template setting.
+    /// </remarks>
+    /// <summary>Get the default template setting</summary>
+    /// <path>api/2.0/files/settings/defaulttemplate</path>
+    [Tags("Files / Settings")]
+    [SwaggerResponse(200, "Default template settings", typeof(DefaultTemplateSettingsDto))]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
+    [HttpGet("settings/defaulttemplate")]
+    public async Task<DefaultTemplateSettingsDto> GetDefaultTemplates()
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        var settings = await defaultTemplateSettingsHelper.GetSettingsAsync();
+        return await defaultTemplateSettingsHelper.ConvertToDtoAsync(settings);
+    }
+
+    /// <remarks>
+    /// Changes the default template setting.
+    /// </remarks>
+    /// <summary>Change the default template setting</summary>
+    /// <path>api/2.0/files/settings/defaulttemplate</path>
+    [Tags("Files / Settings")]
+    [SwaggerResponse(200, "New default template settings", typeof(DefaultTemplateSettingsDto))]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
+    [HttpPut("settings/defaulttemplate")]
+    public async Task<DefaultTemplateSettingsDto> SetDefaultTemplate(DefaultTemplateSettingsRequestDto inDto)
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        var settings = await defaultTemplateSettingsHelper.SetTemplateAsync(inDto.FileExtension, inDto.SelectedFile);
+        return await defaultTemplateSettingsHelper.ConvertToDtoAsync(settings);
+    }
+
+    /// <remarks>
+    /// Uploads a file to use as the default template setting.
+    /// </remarks>
+    /// <summary>Upload a file as the default template setting</summary>
+    /// <path>api/2.0/files/settings/defaulttemplate</path>
+    [Tags("Files / Settings")]
+    [SwaggerResponse(200, "New default template settings", typeof(DefaultTemplateSettingsDto))]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
+    [HttpPost("settings/defaulttemplate")]
+    public async Task<DefaultTemplateSettingsDto> UploadDefaultTemplate(DefaultTemplateSettingsUploadRequestDto inDto)
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        var settings = await defaultTemplateSettingsHelper.SetTemplateAsync(inDto.FileExtension, inDto.File.FileName, inDto?.File.OpenReadStream());
+        return await defaultTemplateSettingsHelper.ConvertToDtoAsync(settings);
+    }
+
+    /// <remarks>
+    /// Changes the setting that allows the user to organize the grouping of rooms.
+    /// </remarks>
+    /// <summary>Organize rooms grouping</summary>
+    /// <path>api/2.0/settings/organizegrouping</path>
+    [Tags("Files / Settings")]
+    [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
+    [HttpPut("settings/organizegrouping")]
+    public async Task<bool> SetOrganizeRoomsGrouping(SettingsRequestDto inDto)
+    {
+        await filesSettingsHelper.SetOrganizeRoomsGroupingAsync(inDto.Set);
+        return await filesSettingsHelper.GetOrganizeRoomsGroupingAsync();
     }
 }

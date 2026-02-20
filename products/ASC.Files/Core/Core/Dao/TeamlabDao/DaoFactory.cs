@@ -58,6 +58,10 @@ public class DaoFactory(IServiceProvider serviceProvider, IProviderDao providerD
         return serviceProvider.GetService<ITagDao<T>>();
     }
 
+    public IRoomGroupDao<T> GetRoomGroupDao<T>()
+    {
+        return serviceProvider.GetService<IRoomGroupDao<T>>();
+    }
     public ISecurityDao<T> GetSecurityDao<T>()
     {
         return serviceProvider.GetService<ISecurityDao<T>>();

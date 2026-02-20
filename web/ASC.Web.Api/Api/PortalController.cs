@@ -32,9 +32,9 @@ using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Api.Controllers;
 
-///<summary>
+///<remarks>
 /// Portal information access.
-///</summary>
+///</remarks>
 ///<name>portal</name>
 [Scope]
 [DefaultRoute]
@@ -52,6 +52,7 @@ public class PortalController(
     CookiesManager cookiesManager,
     SecurityContext securityContext,
     SettingsManager settingsManager,
+    IDistributedLockProvider distributedLockProvider,
     IMobileAppInstallRegistrator mobileAppInstallRegistrator,
     TenantExtra tenantExtra,
     IConfiguration configuration,
@@ -79,12 +80,12 @@ public class PortalController(
     InvitationLinkDtoHelper invitationLinkDtoHelper)
     : ControllerBase
 {
-    /// <summary>
+    /// <remarks>
     /// Returns the current portal information.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get a portal
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal</path>
     [Tags("Portal / Settings")]
     [SwaggerResponse(200, "Current portal information", typeof(TenantDto))]
@@ -108,12 +109,12 @@ public class PortalController(
         return dto;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a user with the ID specified in the request from the current portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get a user by ID
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/users/{userID}</path>
     [Tags("Portal / Users")]
     [SwaggerResponse(200, "User information", typeof(UserInfo))]
@@ -128,12 +129,12 @@ public class PortalController(
         return await userManager.GetUsersAsync(inDto.Id);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns an invitation link for joining the portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get an invitation link
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/users/invite/{employeeType}</path>
     [Tags("Portal / Users")]
     [SwaggerResponse(200, "Invitation link", typeof(string))]
@@ -165,12 +166,12 @@ public class PortalController(
         return await urlShortener.GetShortenLinkAsync(link);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns an invitation link for joining the portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Create an invitation link
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/users/invitationlink</path>
     [Tags("Portal / Users")]
     [SwaggerResponse(200, "Invitation link", typeof(InvitationLinkDto))]
@@ -207,25 +208,28 @@ public class PortalController(
             throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
-        var existedInvitationLink = await userManager.GetInvitationLinkAsync(inDto.EmployeeType);
-        if (existedInvitationLink != null)
+        await using (await distributedLockProvider.TryAcquireFairLockAsync($"invitationlink_{tenant.Id}"))
         {
-            throw new ArgumentException("link with the same EmployeeType already exists");
+            var existedInvitationLink = await userManager.GetInvitationLinkAsync(inDto.EmployeeType);
+            if (existedInvitationLink != null)
+            {
+                throw new ArgumentException("link with the same EmployeeType already exists");
+            }
+
+            var invitationLink = await userManager.CreateInvitationLinkAsync(inDto.EmployeeType, expiration, inDto.MaxUseCount);
+
+            var result = await invitationLinkDtoHelper.GetAsync(invitationLink, tenant.Alias, currentUserId);
+
+            return result;
         }
-
-        var invitationLink = await userManager.CreateInvitationLinkAsync(inDto.EmployeeType, expiration, inDto.MaxUseCount);
-
-        var result = await invitationLinkDtoHelper.GetAsync(invitationLink, tenant.Alias, currentUserId);
-
-        return result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns an invitation link for joining the portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get an invitation link
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/users/invitationlink/{employeeType}</path>
     [Tags("Portal / Users")]
     [SwaggerResponse(200, "Invitation link", typeof(InvitationLinkDto))]
@@ -263,12 +267,12 @@ public class PortalController(
         return result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns an invitation link for joining the portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Update an invitation link
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/users/invitationlink</path>
     [Tags("Portal / Users")]
     [SwaggerResponse(200, "Invitation link", typeof(InvitationLinkDto))]
@@ -321,10 +325,16 @@ public class PortalController(
         return result;
     }
 
-    /// <short>
-    /// Delete an invitation link
-    /// </short>
+    /// <summary>
+    /// Deletes an invitation link.
+    /// </summary>
+    /// <remarks>
+    /// Ensures that the current user has permission to delete the specified invitation link.
+    /// Throws security or not-found exceptions if required conditions are not met.
+    /// </remarks>
     /// <path>api/2.0/portal/users/invitationlink</path>
+    /// <param name="inDto">The data transfer object containing the details of the invitation link to be deleted.</param>
+    /// <returns>A task that represents the asynchronous delete operation.</returns>
     [Tags("Portal / Users")]
     [SwaggerResponse(200, "Invitation link", typeof(string))]
     [HttpDelete("users/invitationlink")]
@@ -354,12 +364,12 @@ public class PortalController(
         await userManager.DeleteInvitationLinkAsync(invitationLink.Id);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns an extra tenant license for the portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get an extra tenant license
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/tenantextra</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Quota")]
@@ -394,12 +404,12 @@ public class PortalController(
     }
 
 
-    /// <summary>
+    /// <remarks>
     /// Returns the used space of the current portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the portal used space
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/usedspace</path>
     [Tags("Portal / Quota")]
     [SwaggerResponse(200, "Used portal space", typeof(double))]
@@ -415,12 +425,12 @@ public class PortalController(
     }
 
 
-    /// <summary>
+    /// <remarks>
     /// Returns a number of portal users.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get a number of portal users
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/userscount</path>
     [Tags("Portal / Users")]
     [SwaggerResponse(200, "Number of portal users", typeof(long))]
@@ -431,12 +441,12 @@ public class PortalController(
         return (await userManager.GetUserNamesAsync(EmployeeStatus.Active)).Length;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the current portal tariff.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get a portal tariff
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/tariff</path>
     [Tags("Portal / Quota")]
     [SwaggerResponse(200, "Current portal tariff", typeof(Tariff))]
@@ -474,12 +484,12 @@ public class PortalController(
         return result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the current portal quota.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get a portal quota
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/quota</path>
     [Tags("Portal / Quota")]
     [SwaggerResponse(200, "Current portal quota", typeof(TenantQuota))]
@@ -504,12 +514,12 @@ public class PortalController(
         return result;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns the recommended quota for the current portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get the recommended quota
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/quota/right</path>
     [Tags("Portal / Quota")]
     [SwaggerResponse(200, "Recommended portal quota", typeof(TenantQuota))]
@@ -527,12 +537,12 @@ public class PortalController(
     }
 
 
-    /// <summary>
+    /// <remarks>
     /// Returns the full absolute path to the current portal.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get a path to the portal
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/path</path>
     [Tags("Portal / Settings")]
     [SwaggerResponse(200, "Portal path", typeof(object))]
@@ -542,12 +552,12 @@ public class PortalController(
         return commonLinkUtility.GetFullAbsolutePath(inDto.VirtualPath);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Returns a thumbnail for the URL specified in the request.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Get a portal thumbnail
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/thumb</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Settings")]
@@ -576,12 +586,12 @@ public class PortalController(
         return File(bytes, type);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Marks a gift message as read.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Mark a gift message as read
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/present/mark</path>
     [Tags("Portal / Users")]
     [HttpPost("present/mark")]
@@ -599,12 +609,12 @@ public class PortalController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Registers the mobile application installation by its type.
-    /// </summary>
-    /// <short>
+    /// </remarks>
+    /// <summary>
     /// Register the mobile app installation by its type
-    /// </short>
+    /// </summary>
     /// <path>api/2.0/portal/mobile/registration</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Settings")]
@@ -615,10 +625,10 @@ public class PortalController(
         await mobileAppInstallRegistrator.RegisterInstallAsync(currentUser.Email, inDto.Type);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Updates a portal name with a new one specified in the request.
-    /// </summary>
-    /// <short>Update a portal name</short>
+    /// </remarks>
+    /// <summary>Update a portal name</summary>
     /// <path>api/2.0/portal/portalrename</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Settings")]
@@ -725,10 +735,10 @@ public class PortalController(
         return confirmUrl;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Deletes the current portal immediately.
-    /// </summary>
-    /// <short>Delete a portal immediately</short>
+    /// </remarks>
+    /// <summary>Delete a portal immediately</summary>
     /// <path>api/2.0/portal/deleteportalimmediately</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Settings")]
@@ -749,10 +759,10 @@ public class PortalController(
         return await DeletePortal();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sends the instructions to suspend the current portal.
-    /// </summary>
-    /// <short>Send suspension instructions</short>
+    /// </remarks>
+    /// <summary>Send suspension instructions</summary>
     /// <path>api/2.0/portal/suspend</path>
     [Tags("Portal / Settings")]
     [AllowNotPayment]
@@ -775,10 +785,10 @@ public class PortalController(
         messageService.Send(MessageAction.OwnerSentPortalDeactivationInstructions, MessageTarget.Create(owner.Id), owner.DisplayUserName(false, displayUserSettingsHelper));
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sends the instructions to remove the current portal.
-    /// </summary>
-    /// <short>Send removal instructions</short>
+    /// </remarks>
+    /// <summary>Send removal instructions</summary>
     /// <path>api/2.0/portal/delete</path>
     [Tags("Portal / Settings")]
     [AllowNotPayment]
@@ -803,10 +813,10 @@ public class PortalController(
         await studioNotifyService.SendMsgPortalDeletionAsync(tenant, await urlShortener.GetShortenLinkAsync(confirmLink), showAutoRenewText);
     }
 
-    /// <summary>
+    /// <remarks>
     /// Restores the current portal.
-    /// </summary>
-    /// <short>Restore a portal</short>
+    /// </remarks>
+    /// <summary>Restore a portal</summary>
     /// <path>api/2.0/portal/continue</path>
     [Tags("Portal / Settings")]
     [AllowSuspended]
@@ -821,10 +831,10 @@ public class PortalController(
         await cspSettingsHelper.UpdateBaseDomain();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Deactivates the current portal.
-    /// </summary>
-    /// <short>Deactivate a portal</short>
+    /// </remarks>
+    /// <summary>Deactivate a portal</summary>
     /// <path>api/2.0/portal/suspend</path>
     [Tags("Portal / Settings")]
     [HttpPut("suspend")]
@@ -842,10 +852,10 @@ public class PortalController(
         await cspSettingsHelper.UpdateBaseDomain();
     }
 
-    /// <summary>
+    /// <remarks>
     /// Deletes the current portal.
-    /// </summary>
-    /// <short>Delete a portal</short>
+    /// </remarks>
+    /// <summary>Delete a portal</summary>
     /// <path>api/2.0/portal/delete</path>
     [Tags("Portal / Settings")]
     [SwaggerResponse(200, "URL to the feedback form about removing a portal", typeof(string))]
@@ -892,10 +902,10 @@ public class PortalController(
         return redirectLink;
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sends congratulations to the user after registering a portal.
-    /// </summary>
-    /// <short>Send congratulations</short>
+    /// </remarks>
+    /// <summary>Send congratulations</summary>
     /// <path>api/2.0/portal/sendcongratulations</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Portal / Users")]
@@ -933,10 +943,10 @@ public class PortalController(
         }
     }
 
-    /// <summary>
+    /// <remarks>
     /// Sends the instructions to remove a portal of a user with the ID specified in the request.
-    /// </summary>
-    /// <short>Send removal instructions to the user</short>
+    /// </remarks>
+    /// <summary>Send removal instructions to the user</summary>
     /// <path>api/2.0/portal/sendremoveinstructions</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Users")]
