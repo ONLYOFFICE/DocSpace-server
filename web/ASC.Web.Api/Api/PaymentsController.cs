@@ -853,7 +853,7 @@ public class PaymentController(
 
         var participantDisplayNames = await report.GetParticipantDisplayNamesAsync(displayUserSettingsHelper);
 
-        return new ReportDto(report, apiDateTimeHelper, participantDisplayNames);
+        return new ReportDto(report, apiDateTimeHelper, participantDisplayNames, serviceName);
     }
 
     /// <remarks>
