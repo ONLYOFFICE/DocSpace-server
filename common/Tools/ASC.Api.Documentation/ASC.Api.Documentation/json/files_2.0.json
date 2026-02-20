@@ -39,439 +39,6 @@
     }
   ],
   "paths": {
-    "/api/2.0/files/group": {
-      "post": {
-        "tags": [
-          "files"
-        ],
-        "summary": "Add a new room group",
-        "description": "Creates a new room group with the specified name, icon, and list of rooms.",
-        "operationId": "addRoomGroup",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RoomGroupRequestDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RoomGroupWrapper"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          }
-        },
-        "security": [
-          {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Bearer": [ ]
-          },
-          {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Basic": [ ]
-          },
-          {
-            "OAuth2": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "OpenId": [ ]
-          }
-        ]
-      },
-      "get": {
-        "tags": [
-          "files"
-        ],
-        "summary": "List room groups",
-        "description": "Returns a list of all room groups for the current user.",
-        "operationId": "getRoomGroups",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "The group unique identifier.",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "example": 1
-            }
-          },
-          {
-            "name": "includeMembers",
-            "in": "query",
-            "description": "Whether to include group members.",
-            "schema": {
-              "type": "boolean",
-              "example": true
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RoomGroupArrayWrapper"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          }
-        },
-        "security": [
-          {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Bearer": [ ]
-          },
-          {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Basic": [ ]
-          },
-          {
-            "OAuth2": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "OpenId": [ ]
-          }
-        ]
-      }
-    },
-    "/api/2.0/files/group/{id}": {
-      "get": {
-        "tags": [
-          "files"
-        ],
-        "summary": "Get room group info",
-        "description": "Returns detailed information about a room group.",
-        "operationId": "getRoomGroupInfo",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "The group unique identifier.",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "example": 1
-            }
-          },
-          {
-            "name": "includeMembers",
-            "in": "query",
-            "description": "Whether to include group members.",
-            "schema": {
-              "type": "boolean",
-              "example": true
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RoomGroupWrapper"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          }
-        },
-        "security": [
-          {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Bearer": [ ]
-          },
-          {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Basic": [ ]
-          },
-          {
-            "OAuth2": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "OpenId": [ ]
-          }
-        ]
-      },
-      "put": {
-        "tags": [
-          "files"
-        ],
-        "summary": "Update room group",
-        "description": "Updates room group properties and adds or removes rooms.",
-        "operationId": "updateRoomGroup",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "The group ID.",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "example": 1
-            }
-          }
-        ],
-        "requestBody": {
-          "description": "The request for updating a group.",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateRoomGroupRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RoomGroupWrapper"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          }
-        },
-        "security": [
-          {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Bearer": [ ]
-          },
-          {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Basic": [ ]
-          },
-          {
-            "OAuth2": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "OpenId": [ ]
-          }
-        ]
-      },
-      "delete": {
-        "tags": [
-          "files"
-        ],
-        "summary": "Delete group",
-        "description": "Deletes the specified room group.",
-        "operationId": "deleteRoomGroup",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "The group unique identifier.",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "example": 1
-            }
-          },
-          {
-            "name": "includeMembers",
-            "in": "query",
-            "description": "Whether to include group members.",
-            "schema": {
-              "type": "boolean",
-              "example": true
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized"
-          }
-        },
-        "security": [
-          {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Bearer": [ ]
-          },
-          {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Basic": [ ]
-          },
-          {
-            "OAuth2": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "OpenId": [ ]
-          }
-        ]
-      }
-    },
-    "/api/2.0/files/group/{id}/icon": {
-      "post": {
-        "tags": [
-          "files"
-        ],
-        "summary": "Change group icon",
-        "description": "Changes the icon of an existing room group.",
-        "operationId": "changeRoomGroupIcon",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "Group id",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "example": 1
-            }
-          }
-        ],
-        "requestBody": {
-          "description": "Icon update data.",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/IconRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RoomGroupWrapper"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          }
-        },
-        "security": [
-          {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Bearer": [ ]
-          },
-          {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "Basic": [ ]
-          },
-          {
-            "OAuth2": [
-              "read",
-              "write"
-            ]
-          },
-          {
-            "OpenId": [ ]
-          }
-        ]
-      }
-    },
     "/api/2.0/files/file/{fileId}/saveediting": {
       "put": {
         "tags": [
@@ -9597,20 +9164,6 @@
                         "RoomManager",
                         "Editing",
                         "ContentCreator"
-                      ],
-                      "x-enum-descriptions": [
-                        "None",
-                        "Read and write",
-                        "Read",
-                        "Restrict",
-                        "Varies",
-                        "Review",
-                        "Comment",
-                        "Fill forms",
-                        "Custom filter",
-                        "Room manager",
-                        "Editing",
-                        "Content creator"
                       ]
                     }
                   ]
@@ -14269,6 +13822,439 @@
           }
         ]
       }
+    },
+    "/api/2.0/files/group": {
+      "post": {
+        "tags": [
+          "Rooms / Groups"
+        ],
+        "summary": "Add a new room group",
+        "description": "Creates a new room group with the specified name, icon, and list of rooms.",
+        "operationId": "addRoomGroup",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoomGroupRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoomGroupWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "Rooms / Groups"
+        ],
+        "summary": "List room groups",
+        "description": "Returns a list of all room groups for the current user.",
+        "operationId": "getRoomGroups",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The group unique identifier.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          },
+          {
+            "name": "includeMembers",
+            "in": "query",
+            "description": "Whether to include group members.",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoomGroupArrayWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/files/group/{id}": {
+      "get": {
+        "tags": [
+          "Rooms / Groups"
+        ],
+        "summary": "Get room group info",
+        "description": "Returns detailed information about a room group.",
+        "operationId": "getRoomGroupInfo",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The group unique identifier.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          },
+          {
+            "name": "includeMembers",
+            "in": "query",
+            "description": "Whether to include group members.",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoomGroupWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Rooms / Groups"
+        ],
+        "summary": "Update room group",
+        "description": "Updates room group properties and adds or removes rooms.",
+        "operationId": "updateRoomGroup",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The group ID.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The request for updating a group.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRoomGroupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoomGroupWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Rooms / Groups"
+        ],
+        "summary": "Delete group",
+        "description": "Deletes the specified room group.",
+        "operationId": "deleteRoomGroup",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The group unique identifier.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          },
+          {
+            "name": "includeMembers",
+            "in": "query",
+            "description": "Whether to include group members.",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/files/group/{id}/icon": {
+      "post": {
+        "tags": [
+          "Rooms / Groups"
+        ],
+        "summary": "Change group icon",
+        "description": "Changes the icon of an existing room group.",
+        "operationId": "changeRoomGroupIcon",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Group id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Icon update data.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IconRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoomGroupWrapper"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -14308,6 +14294,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -14316,20 +14303,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -14424,11 +14416,6 @@
               "All",
               "Files",
               "Folders"
-            ],
-            "x-enum-descriptions": [
-              "All",
-              "Files",
-              "Folders"
             ]
           }
         ],
@@ -14461,6 +14448,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -14469,20 +14457,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -14551,6 +14544,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -14559,20 +14553,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -14745,6 +14744,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -14753,20 +14753,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -14957,11 +14962,6 @@
               "AllAllowed",
               "PartAllowed",
               "NoneAllowed"
-            ],
-            "x-enum-descriptions": [
-              "All allowed",
-              "Part allowed",
-              "None allowed"
             ]
           }
         ],
@@ -14976,6 +14976,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -14984,20 +14985,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -15150,6 +15156,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -15158,20 +15165,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -15197,6 +15209,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -15205,20 +15218,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -15263,10 +15281,6 @@
             "description": "[0 - Fast, 1 - Strict]",
             "example": 0,
             "x-enum-varnames": [
-              "Fast",
-              "Strict"
-            ],
-            "x-enum-descriptions": [
               "Fast",
               "Strict"
             ]
@@ -15368,6 +15382,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -15376,20 +15391,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -15502,6 +15522,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -15510,20 +15531,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -15653,6 +15679,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -15661,20 +15688,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -16184,11 +16216,6 @@
               "Base",
               "Dark",
               "System"
-            ],
-            "x-enum-descriptions": [
-              "Base",
-              "Dark",
-              "System"
             ]
           }
         ],
@@ -16229,14 +16256,6 @@
               "ThirtyDays",
               "TwoMonths",
               "ThreeMonths"
-            ],
-            "x-enum-descriptions": [
-              "One week",
-              "Two weeks",
-              "One month",
-              "Thirty days",
-              "Two months",
-              "Three months"
             ]
           }
         ],
@@ -16334,6 +16353,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -16342,20 +16362,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -16548,13 +16573,6 @@
               "Completed",
               "Canceled",
               "Failted"
-            ],
-            "x-enum-descriptions": [
-              "Created",
-              "Running",
-              "Completed",
-              "Canceled",
-              "Failted"
             ]
           }
         ],
@@ -16638,6 +16656,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -16646,20 +16665,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -16731,6 +16755,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -16739,20 +16764,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -17005,6 +17035,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -17013,20 +17044,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -17134,6 +17170,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -17142,20 +17179,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -17375,11 +17417,6 @@
               "Desktop",
               "Mobile",
               "Embedded"
-            ],
-            "x-enum-descriptions": [
-              "Desktop",
-              "Mobile",
-              "Embedded"
             ]
           }
         ],
@@ -17468,12 +17505,6 @@
               "Activated",
               "Pending",
               "AutoGenerated"
-            ],
-            "x-enum-descriptions": [
-              "Not activated",
-              "Activated",
-              "Pending",
-              "Auto generated"
             ]
           }
         ],
@@ -17796,13 +17827,6 @@
               "Pending",
               "Default",
               "All"
-            ],
-            "x-enum-descriptions": [
-              "Active",
-              "Terminated",
-              "Pending",
-              "Default",
-              "All"
             ]
           }
         ],
@@ -17938,6 +17962,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -17946,20 +17971,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -18005,11 +18035,6 @@
             "description": "[0 - Skip, 1 - Overwrite, 2 - Duplicate]",
             "example": 0,
             "x-enum-varnames": [
-              "Skip",
-              "Overwrite",
-              "Duplicate"
-            ],
-            "x-enum-descriptions": [
               "Skip",
               "Overwrite",
               "Duplicate"
@@ -18259,6 +18284,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -18267,20 +18293,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -18399,6 +18430,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -18407,20 +18439,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -19028,6 +19065,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -19036,20 +19074,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -19076,10 +19119,6 @@
             "x-enum-varnames": [
               "Folder",
               "File"
-            ],
-            "x-enum-descriptions": [
-              "Folder",
-              "File"
             ]
           }
         ],
@@ -19097,6 +19136,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -19105,20 +19145,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -19131,6 +19176,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -19139,20 +19185,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -19245,6 +19296,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -19253,20 +19305,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -19282,6 +19339,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -19290,20 +19348,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -19433,16 +19496,6 @@
               "Import",
               "Convert",
               "Duplicate"
-            ],
-            "x-enum-descriptions": [
-              "Move",
-              "Copy",
-              "Delete",
-              "Download",
-              "MarkAsRead",
-              "Import",
-              "Convert",
-              "Duplicate"
             ]
           }
         ],
@@ -19457,6 +19510,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -19465,20 +19519,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -19574,6 +19633,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -19582,20 +19642,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -19652,20 +19717,6 @@
               "RoomManager",
               "Editing",
               "ContentCreator"
-            ],
-            "x-enum-descriptions": [
-              "None",
-              "Read and write",
-              "Read",
-              "Restrict",
-              "Varies",
-              "Review",
-              "Comment",
-              "Fill forms",
-              "Custom filter",
-              "Room manager",
-              "Editing",
-              "Content creator"
             ]
           }
         ],
@@ -19683,6 +19734,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -19691,20 +19743,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -19892,6 +19949,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -19900,20 +19958,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -19964,18 +20027,6 @@
               "IsTemplate",
               "IsFillFormDraft",
               "IsCompletedForm"
-            ],
-            "x-enum-descriptions": [
-              "None",
-              "Is editing",
-              "Is new",
-              "Is converting",
-              "Is original",
-              "Is editing alone",
-              "Is favorite",
-              "Is template",
-              "Is fill form draft",
-              "Is completed form"
             ]
           }
         ],
@@ -20018,18 +20069,6 @@
             "description": "[0 - Unknown, 1 - Archive, 2 - Video, 3 - Audio, 4 - Image, 5 - Spreadsheet, 6 - Presentation, 7 - Document, 10 - Pdf, 11 - Diagram]",
             "example": 0,
             "x-enum-varnames": [
-              "Unknown",
-              "Archive",
-              "Video",
-              "Audio",
-              "Image",
-              "Spreadsheet",
-              "Presentation",
-              "Document",
-              "Pdf",
-              "Diagram"
-            ],
-            "x-enum-descriptions": [
               "Unknown",
               "Archive",
               "Video",
@@ -20552,20 +20591,6 @@
                     "RoomManager",
                     "Editing",
                     "ContentCreator"
-                  ],
-                  "x-enum-descriptions": [
-                    "None",
-                    "Read and write",
-                    "Read",
-                    "Restrict",
-                    "Varies",
-                    "Review",
-                    "Comment",
-                    "Fill forms",
-                    "Custom filter",
-                    "Room manager",
-                    "Editing",
-                    "Content creator"
                   ]
                 }
               ]
@@ -20624,6 +20649,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -20632,20 +20658,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -20699,6 +20730,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -20707,20 +20739,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -20770,6 +20807,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -20778,20 +20816,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -20875,29 +20918,6 @@
               "VirtualDataRooms",
               "DiagramsOnly",
               "AiRooms"
-            ],
-            "x-enum-descriptions": [
-              "None",
-              "Files  only",
-              "Folders only",
-              "Documents only",
-              "Presentations only",
-              "Spreadsheets only",
-              "Images only",
-              "By user",
-              "By department",
-              "Archive only",
-              "By extension",
-              "Media only",
-              "Filling forms rooms",
-              "Editing rooms",
-              "Custom rooms",
-              "Public rooms",
-              "Pdf",
-              "Pdf form",
-              "Virtual data rooms",
-              "Diagrams only",
-              "Ai rooms"
             ]
           }
         ],
@@ -20974,6 +20994,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -20982,20 +21003,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -21008,6 +21034,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -21016,20 +21043,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -21325,6 +21357,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -21333,20 +21366,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -21359,6 +21397,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -21367,20 +21406,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -21446,6 +21490,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -21454,20 +21499,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -21480,6 +21530,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -21488,20 +21539,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -21609,37 +21665,6 @@
               "ResultStorage",
               "AiAgents",
               "DefaultTemplates"
-            ],
-            "x-enum-descriptions": [
-              "Default",
-              "Coomon",
-              "Bunch",
-              "Trash",
-              "User",
-              "Share",
-              "Projects",
-              "Favourites",
-              "Recent",
-              "Templates",
-              "Privacy",
-              "Virtual rooms",
-              "Filling forms room",
-              "Editing room",
-              "Custom room",
-              "Archive",
-              "Thirdparty backup",
-              "Public room",
-              "Ready form folder",
-              "In process form folder",
-              "Form filling folder done",
-              "Form filling folder in progress",
-              "Virtual Data Room",
-              "Room templates folder",
-              "AI Room",
-              "Knowledge",
-              "Result storage",
-              "AI Agents",
-              "Default Templates"
             ]
           }
         ],
@@ -21666,10 +21691,6 @@
             "description": "[0 - Stop, 1 - Resume]",
             "example": 0,
             "x-enum-varnames": [
-              "Stop",
-              "Resume"
-            ],
-            "x-enum-descriptions": [
               "Stop",
               "Resume"
             ]
@@ -21712,14 +21733,6 @@
               "InProgress",
               "Complete",
               "Stoped"
-            ],
-            "x-enum-descriptions": [
-              "None",
-              "Draft",
-              "You turn",
-              "In progress",
-              "Complete",
-              "Stoped"
             ]
           }
         ],
@@ -21737,6 +21750,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -21745,20 +21759,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -21848,6 +21867,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -21856,20 +21876,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -21944,6 +21969,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -21952,20 +21978,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -22083,6 +22114,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -22091,20 +22123,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -22220,6 +22257,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -22228,20 +22266,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -22332,6 +22375,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -22340,20 +22384,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -22435,6 +22484,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -22443,20 +22493,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -22503,10 +22558,6 @@
             "x-enum-varnames": [
               "Invitation",
               "External"
-            ],
-            "x-enum-descriptions": [
-              "Invitation",
-              "External"
             ]
           }
         ],
@@ -22514,14 +22565,35 @@
         "x-enum-type": "integer"
       },
       "Location": {
-        "enum": [
-          1,
-          2,
-          3
+        "oneOf": [
+          {
+            "enum": [
+              "Room",
+              "Documents",
+              "Link"
+            ],
+            "type": "string",
+            "description": "[Room - Room, Documents - Documents, Link - Link]",
+            "example": "Room"
+          },
+          {
+            "enum": [
+              1,
+              2,
+              3
+            ],
+            "type": "integer",
+            "description": "[1 - Room, 2 - Documents, 3 - Link]",
+            "example": 1,
+            "x-enum-varnames": [
+              "Room",
+              "Documents",
+              "Link"
+            ]
+          }
         ],
-        "type": "integer",
         "description": "The location context of the request.",
-        "format": "int32"
+        "x-enum-type": "integer"
       },
       "LockFileParameters": {
         "type": "object",
@@ -22785,6 +22857,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -22793,20 +22866,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -23820,339 +23898,6 @@
               "GenerateAuthorizationCodeToken",
               "GeneratePersonalAccessToken",
               "None"
-            ],
-            "x-enum-descriptions": [
-              "Login success",
-              "Login success via social account",
-              "Login fail invalid combination",
-              "Login fail social account not found",
-              "Login fail disabled profile",
-              "Login fail",
-              "Logout",
-              "Login success via sms",
-              "Login fail via sms",
-              "Login fail ip security",
-              "Login success via api",
-              "Login success via social app",
-              "Login success via api sms",
-              "Login fail via api",
-              "Login fail via api sms",
-              "Login success via SSO",
-              "Session started",
-              "Session completed",
-              "Login fail via SSO",
-              "Login success via api social account",
-              "Login fail via api social account",
-              "Login succes via tfa app",
-              "Login fail via Tfa app",
-              "Login fail brute force",
-              "Login success via api tfa",
-              "Login fail via api tfa",
-              "Login fail recaptcha",
-              "Authorization link activated",
-              "Login success via OAuth 2.0",
-              "Login success via login and password",
-              "User created",
-              "Guest created",
-              "User created via invite",
-              "Guest created via invite",
-              "User activated",
-              "Guest activated",
-              "User updated",
-              "User updated language",
-              "User added avatar",
-              "User deleted avatar",
-              "User updated avatar thumbnails",
-              "User linked social account",
-              "User unlinked social account",
-              "User sent activation instructions",
-              "User sent email change instructions",
-              "User sent password change instructions",
-              "User sent delete instructions",
-              "User updated password",
-              "User deleted",
-              "Users updated type",
-              "Users updated status",
-              "Users sent activation instructions",
-              "Users deleted",
-              "Sent invite instructions",
-              "User imported",
-              "Guest imported",
-              "Group created",
-              "Group updated",
-              "Group deleted",
-              "User updated mobile number",
-              "User data reassigns",
-              "User data removing",
-              "User connected tfa app",
-              "User disconnected tfa app",
-              "User logout active connections",
-              "User logout active connection",
-              "User logout active connections for user",
-              "Send join invite",
-              "File created",
-              "File renamed",
-              "File updated",
-              "File created version",
-              "File deleted version",
-              "File updated revision comment",
-              "File locked",
-              "File unlocked",
-              "File updated access",
-              "File downloaded",
-              "File downloaded as",
-              "File uploaded",
-              "File imported",
-              "File copied",
-              "File copied with overwriting",
-              "File moved",
-              "File moved with overwriting",
-              "File moved to trash",
-              "File deleted",
-              "Folder created",
-              "Folder renamed",
-              "Folder updated access",
-              "Folder copied",
-              "Folder copied with overwriting",
-              "Folder moved",
-              "Folder moved with overwriting",
-              "Folder moved to trash",
-              "Folder deleted",
-              "ThirdParty created",
-              "ThirdParty updated",
-              "ThirdParty deleted",
-              "Documents ThirdParty settings updated",
-              "Documents overwriting settings updated",
-              "Documents uploading formats settings updated",
-              "User file updated",
-              "File converted",
-              "File send access link",
-              "Document service location setting",
-              "Authorization keys setting",
-              "Full text search setting",
-              "Start transfer setting",
-              "Backup started",
-              "License key uploaded",
-              "File change owner",
-              "File restore version",
-              "Document send to sign",
-              "Document sign complete",
-              "User updated email",
-              "Documents store forcesave",
-              "Documents forcesave",
-              "Start storage encryption",
-              "Privacy room enable",
-              "Privacy room disable",
-              "Start storage decryption",
-              "File opened for change",
-              "File marked as favorite",
-              "File removed from favorite",
-              "Folder downloaded",
-              "File removed from list",
-              "Folder removed from list",
-              "File external link access updated",
-              "Trash emptied",
-              "File revision downloaded",
-              "File marked as read",
-              "File readed",
-              "Folder marked as read",
-              "Folder updated access for",
-              "File updated access for",
-              "Documents external share settings updated",
-              "Room created",
-              "Room renamed",
-              "Room archived",
-              "Room unarchived",
-              "Room deleted",
-              "Room update access for user",
-              "Tag created",
-              "Tags deleted",
-              "Added room tags",
-              "Deleted room tags",
-              "Room logo created",
-              "Room logo deleted",
-              "Room invitation link updated",
-              "Documents keep new file name settings updated",
-              "Room remove user",
-              "Room create user",
-              "Room invitation link created",
-              "Room invitation link deleted",
-              "Room external link created",
-              "Room external link updated",
-              "Room external link deleted",
-              "File external link created",
-              "File external link updated",
-              "File external link deleted",
-              "Room group added",
-              "Room update access for group",
-              "Room group remove",
-              "Room external link revoked",
-              "Room external link renamed",
-              "File uploaded with overwriting",
-              "Room copied",
-              "Documents display file extension updated",
-              "Room color changed",
-              "Room cover changed",
-              "Room indexing changed",
-              "Room deny download changed",
-              "Room index export saved",
-              "Folder index changed",
-              "Folder index reordered",
-              "Room deny download enabled",
-              "Room deny download disabled",
-              "File index changed",
-              "Room watermark set",
-              "Room watermark disabled",
-              "Room index export saved",
-              "Room indexing disabled",
-              "Room life time set",
-              "Room life time disabled",
-              "Room invite resend",
-              "File version deleted",
-              "File custom filter enabled",
-              "File custom filter disabled",
-              "Folder external link created",
-              "Folder external link updated",
-              "Folder external link deleted",
-              "Backup completed",
-              "Backup failed",
-              "Scheduled backup started",
-              "Scheduled backup completed",
-              "Scheduled backup failed",
-              "Scheduled backup deleted",
-              "Backup cancelled",
-              "Restore started",
-              "Restore cancelled",
-              "Form started to fill",
-              "Form partially filled",
-              "Form completely filled",
-              "Form stopped",
-              "AI agent created",
-              "AI agent renamed",
-              "AI agent deleted",
-              "MCP server added to AI agent",
-              "MCP server deleted from AI agent",
-              "Room change owner",
-              "Documents default templates settings updated",
-              "File saved, user quota exceeded",
-              "File not saved due to user quota exceeded",
-              "File saved, room quota exceeded",
-              "File not saved due to room quota exceeded",
-              "Ldap enabled",
-              "Ldap disabled",
-              "LDAP synchronization completed",
-              "Language settings updated",
-              "Time zone settings updated",
-              "Dns settings updated",
-              "Trusted mail domain settings updated",
-              "Password strength settings updated",
-              "Two factor authentication settings updated",
-              "Administrator message settings updated",
-              "Default start page settings updated",
-              "Products list updated",
-              "Administrator added",
-              "Administrator opened full access",
-              "Administrator deleted",
-              "Users opened product access",
-              "Groups opened product access",
-              "Product access opened",
-              "Product access restricted",
-              "Product added administrator",
-              "Product deleted administrator",
-              "Greeting settings updated",
-              "Team template changed",
-              "Color theme changed",
-              "Owner sent change owner instructions",
-              "Owner updated",
-              "Owner sent portal deactivation instructions",
-              "Owner sent portal delete instructions",
-              "Portal deactivated",
-              "Portal deleted",
-              "Login history report downloaded",
-              "Audit trail report downloaded",
-              "SSO enabled",
-              "SSO disabled",
-              "Portal access settings updated",
-              "Cookie settings updated",
-              "Mail service settings updated",
-              "Custom navigation settings updated",
-              "Audit settings updated",
-              "Two factor authentication disabled",
-              "Two factor authentication enabled by sms",
-              "Two factor authentication enabled by tfa app",
-              "Portal renamed",
-              "Quota per room changed",
-              "Quota per room disabled",
-              "Quota per user changed",
-              "Quota per user disabled",
-              "Quota per portal changed",
-              "Quota per portal disabled",
-              "Form submit",
-              "Form opened for filling",
-              "Custom quota per room default",
-              "Custom quota per room changed",
-              "Custom quota per room disabled",
-              "Custom quota per user default",
-              "Custom quota per user changed",
-              "Custom quota per user disabled",
-              "DevTools access settings changed",
-              "Webhook created",
-              "Webhook updated",
-              "Webhook deleted",
-              "Created api key",
-              "Update api key",
-              "Deleted User api key",
-              "Customer wallet topped up",
-              "Customer operation performed",
-              "Customer operations report downloaded",
-              "Customer wallet top up settings updated",
-              "Customer subscription updated",
-              "Promotional banners visibility settings changed",
-              "Customer wallet services settings updated",
-              "Quota per AI agent changed",
-              "Quota per AI agent disabled",
-              "Custom quota per AI agent default",
-              "Custom quota per AI agent changed",
-              "Custom quota per AI agent disabled",
-              "AI provider created",
-              "AI provider updated",
-              "AI provider deleted",
-              "MCP server created",
-              "MCP server updated",
-              "MCP server enabled",
-              "MCP server disabled",
-              "MCP server deleted",
-              "WebSearch settings configured",
-              "WebSearch settings reset",
-              "Vectorization settings configured",
-              "Vectorization settings reset",
-              "Webplugin uploaded",
-              "Webplugin updated",
-              "Webplugin deleted",
-              "Whitelabel settings logo text updated",
-              "Whitelabel settings logos updated",
-              "Whitelabel company settings updated",
-              "Whitelabel additional settings updated",
-              "Whitelabel mail settings updated",
-              "Invitation settings updated",
-              "IP restrictions settings updated",
-              "Login settings updated",
-              "AI default provider set",
-              "Contact admin mail sent",
-              "Room invite link used",
-              "User created and added to room",
-              "Guest created and added to room",
-              "Contact sales mail sent",
-              "Create client",
-              "Update client",
-              "Regenerate secret",
-              "Delete client",
-              "Change client activation",
-              "Change client visibility",
-              "Revoke user client",
-              "Generate authorization code token",
-              "Generate personal access token",
-              "None"
             ]
           }
         ],
@@ -24180,10 +23925,6 @@
             "example": 0,
             "x-enum-varnames": [
               "NotActivated",
-              "Activated"
-            ],
-            "x-enum-descriptions": [
-              "Not activated",
               "Activated"
             ]
           }
@@ -24259,6 +24000,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -24267,20 +24009,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -24365,6 +24112,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -24373,20 +24121,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -24402,6 +24155,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -24410,20 +24164,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -24447,6 +24206,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -24455,20 +24215,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -24531,6 +24296,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -24539,20 +24305,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -24565,6 +24336,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -24573,20 +24345,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -24786,6 +24563,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -24794,20 +24572,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -24904,18 +24687,6 @@
               "WebDav",
               "Yandex",
               "Storage"
-            ],
-            "x-enum-descriptions": [
-              "None",
-              "Box",
-              "DropBox",
-              "GoogleDrive",
-              "kDrive",
-              "OneDrive",
-              "SharePoint",
-              "WebDav",
-              "Yandex",
-              "Storage"
             ]
           }
         ],
@@ -24946,11 +24717,6 @@
               "All",
               "Default",
               "Custom"
-            ],
-            "x-enum-descriptions": [
-              "All",
-              "Default",
-              "Custom"
             ]
           }
         ],
@@ -24958,14 +24724,35 @@
         "x-enum-type": "integer"
       },
       "QuotaScope": {
-        "enum": [
-          0,
-          1,
-          2
+        "oneOf": [
+          {
+            "enum": [
+              "User",
+              "Room",
+              "Tenant"
+            ],
+            "type": "string",
+            "description": "[User - User, Room - Room, Tenant - Tenant]",
+            "example": "User"
+          },
+          {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "[0 - User, 1 - Room, 2 - Tenant]",
+            "example": 0,
+            "x-enum-varnames": [
+              "User",
+              "Room",
+              "Tenant"
+            ]
+          }
         ],
-        "type": "integer",
         "description": "The quota scope.",
-        "format": "int32"
+        "x-enum-type": "integer"
       },
       "RecentConfig": {
         "type": "object",
@@ -25060,11 +24847,6 @@
               "Day",
               "Month",
               "Year"
-            ],
-            "x-enum-descriptions": [
-              "Day",
-              "Month",
-              "Year"
             ]
           }
         ],
@@ -25115,6 +24897,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -25123,20 +24906,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -25152,6 +24940,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -25160,20 +24949,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -25270,6 +25064,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -25278,20 +25073,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -25483,10 +25283,6 @@
             "x-enum-varnames": [
               "None",
               "FormRoleBlockingDeletion"
-            ],
-            "x-enum-descriptions": [
-              "None",
-              "Form role blocking deletion"
             ]
           }
         ],
@@ -25501,6 +25297,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -25509,20 +25306,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -25662,6 +25464,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -25670,20 +25473,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -25722,14 +25530,6 @@
               "PublicRoom",
               "VirtualDataRoom",
               "AiRoom"
-            ],
-            "x-enum-descriptions": [
-              "Form filling room",
-              "Collaboration room",
-              "Custom room",
-              "Public room",
-              "Virtual data room",
-              "AI Room"
             ]
           }
         ],
@@ -25778,6 +25578,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -25786,20 +25587,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -25891,16 +25697,6 @@
               "Templates",
               "Knowledge",
               "ResultStorage",
-              "AiAgents"
-            ],
-            "x-enum-descriptions": [
-              "Active",
-              "Archive",
-              "Any",
-              "Recent by links",
-              "Template",
-              "Knowledge",
-              "Result storage",
               "AiAgents"
             ]
           }
@@ -26081,6 +25877,7 @@
               "ExternalLink",
               "AdditionalExternalLink",
               "PrimaryExternalLink",
+              "Link",
               "User",
               "Group"
             ],
@@ -26095,6 +25892,7 @@
               2,
               4,
               8,
+              15,
               16,
               32
             ],
@@ -26107,15 +25905,7 @@
               "ExternalLink",
               "AdditionalExternalLink",
               "PrimaryExternalLink",
-              "User",
-              "Group"
-            ],
-            "x-enum-descriptions": [
-              "User or group",
-              "Invitation link",
-              "External link",
-              "Additional external link",
-              "Primary external link",
+              "Link",
               "User",
               "Group"
             ]
@@ -26158,10 +25948,6 @@
             "description": "[0 - Ascending, 1 - Descending]",
             "example": 0,
             "x-enum-varnames": [
-              "Ascending",
-              "Descending"
-            ],
-            "x-enum-descriptions": [
               "Ascending",
               "Descending"
             ]
@@ -26225,21 +26011,6 @@
               "CustomOrder",
               "LastOpened",
               "UsedSpace"
-            ],
-            "x-enum-descriptions": [
-              "Date and time",
-              "AZ",
-              "Size",
-              "Author",
-              "Type",
-              "New",
-              "Date and time creation",
-              "Room type",
-              "Tags",
-              "Room",
-              "Custom order",
-              "Last opened",
-              "Used space"
             ]
           }
         ],
@@ -26296,11 +26067,6 @@
               "None",
               "ShareToFillOut",
               "StartFilling"
-            ],
-            "x-enum-descriptions": [
-              "None",
-              "Share to fill out",
-              "Start filling"
             ]
           }
         ],
@@ -26341,14 +26107,6 @@
               "RequiredPassword",
               "InvalidPassword",
               "ExternalAccessDenied"
-            ],
-            "x-enum-descriptions": [
-              "Ok",
-              "Invalid",
-              "Expired",
-              "Required password",
-              "Invalid password",
-              "External access denied"
             ]
           }
         ],
@@ -26391,11 +26149,6 @@
               "None",
               "Internal",
               "ThirdParty"
-            ],
-            "x-enum-descriptions": [
-              "None",
-              "Internal",
-              "ThirdParty"
             ]
           }
         ],
@@ -26409,6 +26162,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -26417,20 +26171,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -26455,10 +26214,6 @@
             "description": "[0 - Owner, 1 - Member]",
             "example": 0,
             "x-enum-varnames": [
-              "Owner",
-              "Member"
-            ],
-            "x-enum-descriptions": [
               "Owner",
               "Member"
             ]
@@ -26497,13 +26252,6 @@
               "Group",
               "InvitationLink",
               "PrimaryExternalLink"
-            ],
-            "x-enum-descriptions": [
-              "User",
-              "External link",
-              "Group",
-              "Invitation link",
-              "Primary external link"
             ]
           }
         ],
@@ -26666,6 +26414,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -26674,20 +26423,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -26776,13 +26530,6 @@
               "Created",
               "Error",
               "NotRequired",
-              "Creating"
-            ],
-            "x-enum-descriptions": [
-              "Waiting",
-              "Created",
-              "Error",
-              "Not required",
               "Creating"
             ]
           }
@@ -27115,6 +26862,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -27123,20 +26871,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -27187,6 +26940,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -27195,20 +26949,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -27495,11 +27254,6 @@
               "InProgress",
               "Completed",
               "Failed"
-            ],
-            "x-enum-descriptions": [
-              "In Progress",
-              "Completed",
-              "Failed"
             ]
           }
         ],
@@ -27536,13 +27290,6 @@
               "UserIpAdress",
               "CurrentDate",
               "RoomName"
-            ],
-            "x-enum-descriptions": [
-              "User name",
-              "User email",
-              "User ip adress",
-              "Current date",
-              "Room name"
             ]
           }
         ],
@@ -27799,6 +27546,11 @@
       "name": "Rooms",
       "description": "Operations for working with rooms.",
       "x-displayName": "Rooms"
+    },
+    {
+      "name": "Rooms / Groups",
+      "description": "Operations for managing groups within rooms.",
+      "x-displayName": "Groups"
     }
   ],
   "x-tagGroups": [
@@ -27817,7 +27569,8 @@
     {
       "name": "Rooms",
       "tags": [
-        "Rooms"
+        "Rooms",
+        "Rooms / Groups"
       ]
     }
   ]

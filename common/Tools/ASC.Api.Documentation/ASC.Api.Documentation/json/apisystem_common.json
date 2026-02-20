@@ -1409,6 +1409,7 @@
           },
           "count": {
             "type": "integer",
+            "description": "The total number of items in the response",
             "format": "int32"
           },
           "links": {
@@ -1417,20 +1418,25 @@
               "type": "object",
               "properties": {
                 "href": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "URL of the link"
                 },
                 "action": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Action associated with the link"
                 }
               }
-            }
+            },
+            "description": "List of links related to the response"
           },
           "status": {
             "type": "integer",
+            "description": "HTTP status code of the response",
             "format": "int32"
           },
           "statusCode": {
             "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
         }
@@ -1459,12 +1465,6 @@
             "description": "[0 - Default, 1 - AndroidV2, 2 - iOSV2, 3 - hCaptcha]",
             "example": 0,
             "x-enum-varnames": [
-              "Default",
-              "AndroidV2",
-              "iOSV2",
-              "hCaptcha"
-            ],
-            "x-enum-descriptions": [
               "Default",
               "AndroidV2",
               "iOSV2",
@@ -1721,15 +1721,6 @@
               "Active",
               "Suspended",
               "RemovePending",
-              "Transfering",
-              "Restoring",
-              "Migrating",
-              "Encryption"
-            ],
-            "x-enum-descriptions": [
-              "Active",
-              "Suspended",
-              "Remove pending",
               "Transfering",
               "Restoring",
               "Migrating",
