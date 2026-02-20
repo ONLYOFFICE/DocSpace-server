@@ -82,4 +82,9 @@ public class TfaValidateRequestsDto
     /// The verification code provided by the user.
     /// </summary>
     public required string Code { get; set; }
+
+    /// <summary>
+    /// Specifies whether the authentication is session-based.
+    /// </summary>
+    public bool Session { get; set; }
 }

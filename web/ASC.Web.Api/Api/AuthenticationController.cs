@@ -103,10 +103,11 @@ public class AuthenticationController(
     [SwaggerResponse(429, "Too many login attempts. Please try again later")]
     [AllowNotPayment, AllowAnonymous]
     [HttpPost("{code}", Order = 1)]
-    public async Task<AuthenticationTokenDto> AuthenticateMeFromBodyWithCode(AuthRequestsDto inDto)
+    public async Task<AuthenticationTokenDto> AuthenticateMeFromBodyWithCode(AuthWithCodeRequestsDto inDto)
     {
         var tenantId = tenantManager.GetCurrentTenant().Id;
         var user = (await GetUserAsync(inDto)).UserInfo;
+        var session = inDto.Session;
 
         if (user == null || Equals(user, Constants.LostUser))
         {
@@ -126,7 +127,7 @@ public class AuthenticationController(
             if (await studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync() && await studioSmsNotificationSettingsHelper.TfaEnabledForUserAsync(user.Id))
             {
                 sms = true;
-                var (smsValidationResult, smsAuthToken) = await smsManager.ValidateSmsCodeAsync(user, inDto.Code, true);
+                var (smsValidationResult, smsAuthToken) = await smsManager.ValidateSmsCodeAsync(user, inDto.Code, true, session);
                 if (smsValidationResult)
                 {
                     token = smsAuthToken;
@@ -134,7 +135,7 @@ public class AuthenticationController(
             }
             else if (tfaAppAuthSettingsHelper.IsVisibleSettings && await tfaAppAuthSettingsHelper.TfaEnabledForUserAsync(user.Id))
             {
-                var (tfaValidationResult, tfaAuthToken) = await tfaManager.ValidateAuthCodeAsync(user, inDto.Code, true, true);
+                var (tfaValidationResult, tfaAuthToken) = await tfaManager.ValidateAuthCodeAsync(user, inDto.Code, true, true, session);
                 if (tfaValidationResult)
                 {
                     token = tfaAuthToken;
@@ -148,13 +149,23 @@ public class AuthenticationController(
             }
 
             token = string.IsNullOrEmpty(token) ? await cookiesManager.AuthenticateMeAndSetCookiesAsync(user.Id) : token;
-            var expires = await tenantCookieSettingsHelper.GetExpiresTimeAsync(tenantId);
+
+            if (!string.IsNullOrEmpty(inDto.Culture) && user.CultureName != inDto.Culture)
+            {
+                await userManager.ChangeUserCulture(user, inDto.Culture);
+                messageService.Send(MessageAction.UserUpdatedLanguage, MessageTarget.Create(user.Id), user.DisplayUserName(false, displayUserSettingsHelper));
+            }
 
             var result = new AuthenticationTokenDto
             {
-                Token = token,
-                Expires = new ApiDateTime(tenantManager, expires)
+                Token = token
             };
+
+            if (!session)
+            {
+                var expires = await tenantCookieSettingsHelper.GetExpiresTimeAsync(tenantId);
+                result.Expires = new ApiDateTime(tenantManager, expires);
+            }
 
             if (sms)
             {

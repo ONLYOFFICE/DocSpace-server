@@ -27,6 +27,17 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
+/// The parameters required for the user two-factor authentication requests.
+/// </summary>
+public class AuthWithCodeRequestsDto: AuthRequestsDto
+{
+    /// <summary>
+    /// The code for two-factor authentication.
+    /// </summary>
+    public string Code { get; set; }
+}
+
+/// <summary>
 /// The parameters required for the user authentication requests.
 /// </summary>
 public class AuthRequestsDto
@@ -60,11 +71,6 @@ public class AuthRequestsDto
     /// The serialized user profile data, if applicable.
     /// </summary>
     public string SerializedProfile { get; set; }
-
-    /// <summary>
-    /// The code for two-factor authentication.
-    /// </summary>
-    public string Code { get; set; }
 
     /// <summary>
     /// The authorization code used for obtaining OAuth tokens.
