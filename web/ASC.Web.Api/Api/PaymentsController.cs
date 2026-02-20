@@ -64,7 +64,8 @@ public class PaymentController(
     IEventBus eventBus,
     CommonLinkUtility commonLinkUtility,
     DocumentBuilderTaskManager<CustomerOperationsReportTask, int, CustomerOperationsReportTaskData> documentBuilderTaskManager,
-    IServiceProvider serviceProvider)
+    IServiceProvider serviceProvider,
+    WalletStaticStore walletStaticStore)
     : ControllerBase
 {
     private readonly int _maxCount = 10;
@@ -1210,7 +1211,7 @@ public class PaymentController(
     [SwaggerResponse(200, "Prices for AI models", typeof(AiPricesResponse))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("aiprices")]
-    public async Task<AiPricesResponse> GetAiPrices()
+    public async Task<AiPricesDto> GetAiPrices()
     {
         if (!tariffService.IsConfigured())
         {
@@ -1220,7 +1221,41 @@ public class PaymentController(
         await DemandAdminAsync();
 
         var aiPrices = await aiGateway.GetPricesAsync();
-        return aiPrices;
+
+        var providers = aiPrices.Chat.Select(m => m.OwnedBy ?? "openai").Distinct();
+        var icons = new Dictionary<string, string>();
+        foreach (var provider in providers)
+        {
+            icons[provider] = await walletStaticStore.GetAiIconUrl(provider);
+        }
+
+        var chat = aiPrices.Chat.Select(model => new AiChatModelPricingDto
+        {
+            Id = model.Id,
+            IconUrl = icons[model.OwnedBy ?? "openai"],
+            Price = new AiChatPriceDto
+            {
+                Prompt = model.Price.Prompt * 1_000_000,
+                Completion = model.Price.Completion * 1_000_000
+            }
+        }).ToList();
+
+        var embedding = aiPrices.Embedding.Select(e => new AiEmbeddingModelPricingDto
+        {
+            Id = e.Id,
+            Price = new AiEmbeddingPriceDto { Prompt = e.Price.Prompt * 1_000_000 }
+        }).ToList();
+
+        return new AiPricesDto
+        {
+            Chat = chat,
+            Embedding = embedding,
+            WebSearch = new AiWebSearchPricingDto
+            {
+                Search = aiPrices.WebSearch.Search,
+                Contents = aiPrices.WebSearch.Contents
+            }
+        };
     }
 
     /// <summary>

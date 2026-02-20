@@ -142,6 +142,7 @@ public record AiPricesResponse
 public record AiChatModelPricing
 {
     public required string Id { get; init; }
+    public string OwnedBy { get; init; }
     public required AiChatPrice Price { get; init; }
 }
 
