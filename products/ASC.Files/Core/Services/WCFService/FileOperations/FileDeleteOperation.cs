@@ -582,37 +582,6 @@ class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>, T>
             }
         }
     }
-
-    private async Task<(bool isError, string message)> WithErrorAsync(IServiceScope scope, IEnumerable<File<T>> files, bool folder, bool checkPermissions)
-    {
-        var lockerManager = scope.ServiceProvider.GetService<LockerManager>();
-        var fileTracker = scope.ServiceProvider.GetService<FileTrackerHelper>();
-
-        foreach (var file in files)
-        {
-            string error;
-            if (checkPermissions && !await FilesSecurity.CanDeleteAsync(file))
-            {
-                error = FilesCommonResource.ErrorMessage_SecurityException_DeleteFile;
-
-                return (true, error);
-            }
-            if (checkPermissions && await lockerManager.FileLockedForMeAsync(file.Id))
-            {
-                error = FilesCommonResource.ErrorMessage_LockedFile;
-
-                return (true, error);
-            }
-            if (await fileTracker.IsEditingAsync(file.Id, false))
-            {
-                error = folder ? FilesCommonResource.ErrorMessage_SecurityException_DeleteEditingFolder : FilesCommonResource.ErrorMessage_SecurityException_DeleteEditingFile;
-
-                return (true, error);
-            }
-        }
-
-        return (false, null);
-    }
 }
 
 [Scope]

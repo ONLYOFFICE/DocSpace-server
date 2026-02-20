@@ -132,27 +132,4 @@ public class FileDeleteTests(
 
         exception.ErrorCode.Should().Be(403);
     }
-
-    // [Fact]
-    // public async Task DeleteFile_WithoutPermission_ReturnsAccessDenied()
-    // {
-    //     // Arrange
-    //     await _filesClient.Authenticate(Initializer.Owner);
-    //     
-    //     // Create a file by owner
-    //     var file = await CreateFile("file_no_permissions.docx", FolderType.USER, Initializer.Owner);
-    //     
-    //     // Switch to another user who doesn't have permission
-    //     var user = await Initializer.InviteContact(EmployeeType.User);
-    //     await _filesClient.Authenticate(user);
-    //     
-    //     // Act & Assert
-    //     var exception = await Assert.ThrowsAsync<Docspace.Client.ApiException>(
-    //         async () => await _filesFilesApi.DeleteFileAsync(
-    //             file.Id, 
-    //             new Delete(false, true), 
-    //             TestContext.Current.CancellationToken));
-    //     
-    //     exception.ErrorCode.Should().Be(403);
-    // }
 }

@@ -535,7 +535,7 @@ public class CopyPermissionsCheck(FileSecurity security, LockerManager lockerMan
             errorMsg = FilesCommonResource.ErrorMessage_NotSupportedFormat;
             if (check)
             {
-                throw new InvalidOperationException(errorMsg);
+                throw new NotSupportedException(errorMsg);
             }
 
             return errorMsg;
@@ -545,7 +545,7 @@ public class CopyPermissionsCheck(FileSecurity security, LockerManager lockerMan
             errorMsg = FilesCommonResource.ErrorMessage_NotSupportedFormat;
             if (check)
             {
-                throw new InvalidOperationException(errorMsg);
+                throw new NotSupportedException(errorMsg);
             }
 
             return errorMsg;

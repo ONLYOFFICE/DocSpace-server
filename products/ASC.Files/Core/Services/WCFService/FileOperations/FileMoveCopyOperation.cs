@@ -334,7 +334,7 @@ class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationData<T>, T>
                 folderDao,
                 FolderDao);
 
-            if (Err != null)
+            if (Err == null)
             {
                 if (!Equals(folder.ParentId ?? default, toFolderId) || _resolveType == FileConflictResolveType.Duplicate)
                 {
