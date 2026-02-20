@@ -108,6 +108,7 @@ global using ASC.EventBus.Events;
 global using ASC.FederatedLogin;
 global using ASC.FederatedLogin.Helpers;
 global using ASC.FederatedLogin.LoginProviders;
+global using ASC.FederatedLogin.DatabaseProviders;
 global using ASC.Files.Core;
 global using ASC.Files.Core.ApiModels;
 global using ASC.Files.Core.ApiModels.RequestDto;

@@ -24,16 +24,14 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Threading.Tasks;
 
 using MySqlConnector;
 
 namespace ASC.FederatedLogin.DatabaseProviders;
 
+[Scope]
 public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IValidateKeysProvider
 {
     public string DatabaseType => this["databaseType"] ?? "mysql";
@@ -45,23 +43,21 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
     public string UseSsl => this["dbSsl"] ?? "false";
     public string SqliteFilePath => this["sqliteFilePath"];
 
-    public bool IsEnabled
+    public bool IsEnabled()
     {
-        get
+        if (string.IsNullOrWhiteSpace(DatabaseType))
         {
-            if (string.IsNullOrWhiteSpace(DatabaseType))
-                return false;
-
-            switch (DatabaseType.ToLowerInvariant())
-            {
-                case "mysql":
-                    return !string.IsNullOrWhiteSpace(Host) &&
-                           !string.IsNullOrWhiteSpace(Database) &&
-                           !string.IsNullOrWhiteSpace(User);
-                default:
-                    return false;
-            }
+            return false;
         }
+
+        return DatabaseType.ToLowerInvariant() switch
+        {
+            "mysql" => !string.IsNullOrWhiteSpace(Host) &&
+                       !string.IsNullOrWhiteSpace(Database) &&
+                       !string.IsNullOrWhiteSpace(User),
+            "sqlite" => !string.IsNullOrWhiteSpace(SqliteFilePath),
+            _ => false
+        };
     }
 
     public ExternalDatabaseProvider() { }
@@ -87,6 +83,11 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
 
     public async Task<bool> ValidateConnectionAsync()
     {
+        if (!IsEnabled())
+        {
+            return false;
+        }
+
         try
         {
             await using var connection = CreateConnection();
@@ -116,16 +117,16 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
         };
     }
 
-    private DbConnection CreateConnection()
+    public DbConnection CreateConnection()
     {
         switch (DatabaseType?.ToLowerInvariant())
         {
             case "mysql":
                 return CreateMySqlConnection();
-
+            case "sqlite":
+                throw new NotImplementedException("SQLite support will be added in the future.");
             default:
-                throw new NotSupportedException(
-                    $"Database type '{DatabaseType}' is not supported yet.");
+                throw new NotSupportedException($"Database type '{DatabaseType}' is not supported yet.");
         }
     }
 
