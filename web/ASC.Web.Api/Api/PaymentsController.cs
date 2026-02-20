@@ -1222,7 +1222,7 @@ public class PaymentController(
 
         var aiPrices = await aiGateway.GetPricesAsync();
 
-        var providers = aiPrices.Chat.Select(m => m.OwnedBy ?? "openai").Distinct();
+        var providers = aiPrices.Chat.Select(m => m.OwnedBy.ToLower()).Distinct();
         var icons = new Dictionary<string, string>();
         foreach (var provider in providers)
         {
@@ -1232,7 +1232,9 @@ public class PaymentController(
         var chat = aiPrices.Chat.Select(model => new AiChatModelPricingDto
         {
             Id = model.Id,
-            IconUrl = icons[model.OwnedBy ?? "openai"],
+            IconUrl = icons[model.OwnedBy.ToLower()],
+            Alias = model.Alias,
+            Provider = model.Provider,
             Price = new AiChatPriceDto
             {
                 Prompt = model.Price.Prompt * 1_000_000,
@@ -1243,6 +1245,8 @@ public class PaymentController(
         var embedding = aiPrices.Embedding.Select(e => new AiEmbeddingModelPricingDto
         {
             Id = e.Id,
+            Alias = e.Alias,
+            Provider = e.Provider,
             Price = new AiEmbeddingPriceDto { Prompt = e.Price.Prompt * 1_000_000 }
         }).ToList();
 
@@ -1252,9 +1256,11 @@ public class PaymentController(
             Embedding = embedding,
             WebSearch = new AiWebSearchPricingDto
             {
+                Provider = aiPrices.WebSearch.Provider,
                 Search = aiPrices.WebSearch.Search,
                 Contents = aiPrices.WebSearch.Contents
-            }
+            },
+            Currency = aiPrices.Currency
         };
     }
 
