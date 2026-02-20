@@ -47,6 +47,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     private IResourceBuilder<ContainerResource>? McpResource { get; set; }
     private IResourceBuilder<ContainerResource>? KeycloakResource { get; set; }
     private IResourceBuilder<ContainerResource>? OpenProjectResource { get; set; }
+    private IResourceBuilder<ContainerResource>? OpenLdapResource { get; set; }
 
 
     public ConnectionStringManager AddMySql(bool withDbGate = false)
@@ -317,6 +318,41 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
                 $"{oidcIssuerDockerHost}/protocol/openid-connect/certs")
             .WithHttpEndpoint(port: Constants.OpenProjectPort, targetPort: 80, name: "http")
             .WaitFor(KeycloakResource);
+
+        return this;
+    }
+
+    public ConnectionStringManager AddOpenLdap(bool withLdapAdmin = false)
+    {
+        // osixia/openldap runs as root → uses standard LDAP port 389 inside the container.
+        // Host port 10389 avoids conflicts with system LDAP (389) and Aspire proxy (1389).
+        // Seed LDIF files in the custom bootstrap directory are imported on the first run only.
+        // Plaintext userPassword values in LDIF are hashed by slapd on import.
+        OpenLdapResource = builder
+            .AddContainer(Constants.OpenLdapContainer, "osixia/openldap", "latest")
+            .WithLifetime(ContainerLifetime.Persistent)
+            .WithEnvironment("LDAP_ORGANISATION", "ONLYOFFICE DocSpace")
+            .WithEnvironment("LDAP_DOMAIN", Constants.OpenLdapDomain)
+            .WithEnvironment("LDAP_ADMIN_PASSWORD", Constants.OpenLdapAdminPassword)
+            .WithEnvironment("LDAP_TLS", "false")
+            .WithEnvironment("LDAP_REMOVE_CONFIG_AFTER_SETUP", "false")
+            .WithBindMount(
+                Path.Combine(basePath, "server", "common", "ASC.AppHost", "ldap", "seed"),
+                "/container/service/slapd/assets/config/bootstrap/ldif/custom")
+            .WithHttpEndpoint(port: Constants.OpenLdapPort, targetPort: Constants.OpenLdapContainerPort, name: "ldap");
+
+        if (withLdapAdmin)
+        {
+            // phpLDAPadmin connects to OpenLDAP on the standard port 389 within the Docker
+            // network using the resource name as the hostname (Aspire registers DNS aliases).
+            builder
+                .AddContainer("onlyoffice-ldap-admin", "osixia/phpldapadmin", "latest")
+                .WithLifetime(ContainerLifetime.Persistent)
+                .WithEnvironment("PHPLDAPADMIN_LDAP_HOSTS", Constants.OpenLdapContainer)
+                .WithEnvironment("PHPLDAPADMIN_HTTPS", "false")
+                .WithHttpEndpoint(port: Constants.LdapAdminPort, targetPort: 80, name: "http")
+                .WaitFor(OpenLdapResource);
+        }
 
         return this;
     }

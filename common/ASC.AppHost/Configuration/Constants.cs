@@ -74,4 +74,16 @@ public static class Constants
     public const string KeycloakRealm = "docspace";
     public const string KeycloakAdminUser = "admin";
     public const string KeycloakAdminPassword = "admin";
+
+    // osixia/openldap runs as root → uses standard port 389 inside the container.
+    // Host port 10389 avoids conflicts with system LDAP (389) and other services (1389).
+    public const int OpenLdapPort = 10389;          // host port
+    public const int OpenLdapContainerPort = 389;   // container port (osixia standard)
+    public const int LdapAdminPort = 8181;          // phpLDAPadmin host port
+
+    public const string OpenLdapContainer = "onlyoffice-openldap";
+    public const string OpenLdapBaseDn = "dc=example,dc=com";
+    public const string OpenLdapDomain = "example.com";
+    public const string OpenLdapAdminUser = "admin";
+    public const string OpenLdapAdminPassword = "admin";
 }

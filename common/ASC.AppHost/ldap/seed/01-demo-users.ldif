@@ -1,0 +1,65 @@
+# =============================================================================
+# DocSpace demo LDAP seed data
+#
+# Base DN  : dc=example,dc=com
+# Admin DN : cn=admin,dc=example,dc=com  (password: admin)
+#
+# Users (password for all: "password"):
+#   uid=john.doe,ou=users,dc=example,dc=com
+#   uid=jane.smith,ou=users,dc=example,dc=com
+#
+# DocSpace LDAP settings (admin panel → Settings → Integration → LDAP):
+#   Server          : localhost (or host.docker.internal from DocSpace container)
+#   Port            : 10389
+#   User DN         : ou=users,dc=example,dc=com
+#   Login attribute : uid
+#   User filter     : (uid=*)
+#   Bind DN         : cn=admin,dc=example,dc=com
+#   Bind password   : admin
+#   First name attr : givenName
+#   Last name attr  : sn
+#   Email attr      : mail
+# =============================================================================
+
+# Users organisational unit
+dn: ou=users,dc=example,dc=com
+objectClass: organizationalUnit
+ou: users
+
+# Groups organisational unit
+dn: ou=groups,dc=example,dc=com
+objectClass: organizationalUnit
+ou: groups
+
+# Demo user: John Doe
+dn: uid=john.doe,ou=users,dc=example,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: john.doe
+cn: John Doe
+givenName: John
+sn: Doe
+mail: john.doe@example.com
+userPassword: password
+
+# Demo user: Jane Smith
+dn: uid=jane.smith,ou=users,dc=example,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: jane.smith
+cn: Jane Smith
+givenName: Jane
+sn: Smith
+mail: jane.smith@example.com
+userPassword: password
+
+# Group: docspace-users (contains both demo users)
+dn: cn=docspace-users,ou=groups,dc=example,dc=com
+objectClass: groupOfNames
+cn: docspace-users
+member: uid=john.doe,ou=users,dc=example,dc=com
+member: uid=jane.smith,ou=users,dc=example,dc=com

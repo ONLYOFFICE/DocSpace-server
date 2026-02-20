@@ -82,7 +82,8 @@ switch (builder.Configuration["DOTNET_LAUNCH_PROFILE"])
             .AddOpensearch()
             .AddMailPit()
             .AddKeycloak()
-            .AddOpenProject();
+            .AddOpenProject()
+            .AddOpenLdap(withLdapAdmin: true);
         
         configurator
             .AddProject<ASC_Files>(Constants.FilesPort)
