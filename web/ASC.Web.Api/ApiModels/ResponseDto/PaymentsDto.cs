@@ -56,7 +56,7 @@ public class ReportDto
     /// </summary>
     public int CurrentPage { get; set; }
 
-    public ReportDto(Report report, ApiDateTimeHelper apiDateTimeHelper, Dictionary<string, string> participantDisplayNames)
+    public ReportDto(Report report, ApiDateTimeHelper apiDateTimeHelper, Dictionary<string, string> participantDisplayNames, string serviceName)
     {
         Offset = report.Offset;
         Limit = report.Limit;
@@ -70,7 +70,7 @@ public class ReportDto
         {
             foreach (var operation in report.Collection)
             {
-                Collection.Add(new OperationDto(operation, apiDateTimeHelper, participantDisplayNames));
+                Collection.Add(new OperationDto(operation, apiDateTimeHelper, participantDisplayNames, serviceName));
             }
         }
     }
@@ -126,9 +126,9 @@ public class OperationDto
     /// </summary>
     public string ParticipantDisplayName { get; set; }
 
-    public OperationDto(Operation operation, ApiDateTimeHelper apiDateTimeHelper, Dictionary<string, string> participantDisplayNames)
+    public OperationDto(Operation operation, ApiDateTimeHelper apiDateTimeHelper, Dictionary<string, string> participantDisplayNames, string serviceName)
     {
-        var (description, unitOfMeasurement) = GetServiceDescAndUOM(operation.Service);
+        var (description, unitOfMeasurement) = GetServiceDescAndUOM(operation.Service ?? serviceName);
 
         Date = apiDateTimeHelper.Get(operation.Date);
         Service = operation.Service;
@@ -168,8 +168,13 @@ public class OperationDto
         {
             return string.Empty;
         }
-        
-        return metadata.TryGetValue(BillingClient.MetadataDetails, out var details) ? details : string.Empty;
+
+        if (metadata.TryGetValue(BillingClient.MetadataDetails, out var details))
+        {
+            return details;
+        }
+
+        return metadata.TryGetValue(BillingClient.MetadataType, out var type) ? type : string.Empty;
     }
 }
 
