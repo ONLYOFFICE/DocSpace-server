@@ -341,6 +341,10 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
                 "/container/service/slapd/assets/config/bootstrap/ldif/custom")
             .WithHttpEndpoint(port: Constants.OpenLdapPort, targetPort: Constants.OpenLdapContainerPort, name: "ldap");
 
+        // Keycloak connects to OpenLDAP on startup to initialize the user federation.
+        // Make it wait so the first sync succeeds without LDAP connection errors in the log.
+        KeycloakResource?.WaitFor(OpenLdapResource);
+
         if (withLdapAdmin)
         {
             // phpLDAPadmin connects to OpenLDAP on the standard port 389 within the Docker
