@@ -31,7 +31,10 @@ namespace ASC.AI.Core.Retrieval.Web;
 [EnumExtensions]
 public enum EngineType
 {
+    [Description("None")]
     None,
+
+    [Description("Exa")]
     Exa
 }
 
