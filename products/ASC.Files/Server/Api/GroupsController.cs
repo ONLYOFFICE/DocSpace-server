@@ -41,6 +41,7 @@ public class GroupsController(
     /// </remarks>
     /// <summary>Add a new room group</summary>
     /// <path>api/2.0/files/group</path>
+    [Tags("Rooms / Groups")]
     [HttpPost("")]
     public async Task<RoomGroupDto> AddRoomGroup(RoomGroupRequestDto inDto)
     {
@@ -68,6 +69,7 @@ public class GroupsController(
     /// </remarks>
     /// <summary>Get room group info</summary>
     /// <path>api/2.0/files/group/{id}</path>
+    [Tags("Rooms / Groups")]
     [HttpGet("{id:int}")]
     public async Task<RoomGroupDto> GetRoomGroupInfo(RoomGroupIdRequestDto inDto)
     {
@@ -80,6 +82,7 @@ public class GroupsController(
     /// </remarks>
     /// <summary>Update room group</summary>
     /// <path>api/2.0/files/group/{id}</path>
+    [Tags("Rooms / Groups")]
     [HttpPut("{id:int}")]
     public async Task<RoomGroupDto> UpdateRoomGroup(UpdateRoomGroupRequestDto inDto)
     {
@@ -108,6 +111,7 @@ public class GroupsController(
     /// </remarks>
     /// <summary>Change group icon</summary>
     /// <path>api/2.0/files/group/{id}/icon</path>
+    [Tags("Rooms / Groups")]
     [HttpPost("{id:int}/icon")]
     public async Task<RoomGroupDto> ChangeRoomGroupIcon(RoomGroupIconRequestDto inDto)
     {
@@ -120,6 +124,7 @@ public class GroupsController(
     /// </remarks>
     /// <summary>List room groups</summary>
     /// <path>api/2.0/files/group</path>
+    [Tags("Rooms / Groups")]
     [HttpGet("")]
     public async IAsyncEnumerable<RoomGroupDto> GetRoomGroups(RoomGroupIdRequestDto inDto)
     {
@@ -134,6 +139,7 @@ public class GroupsController(
     /// </remarks>
     /// <summary>Delete group</summary>
     /// <path>api/2.0/files/group/{id}</path>
+    [Tags("Rooms / Groups")]
     [HttpDelete("{id:int}")]
     public async Task DeleteRoomGroup(RoomGroupIdRequestDto inDto)
     {
