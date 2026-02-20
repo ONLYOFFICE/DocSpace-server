@@ -45,7 +45,9 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     private IResourceBuilder<ContainerResource>? OpensearchResource { get; set; }
     
     private IResourceBuilder<ContainerResource>? McpResource { get; set; }
-    
+    private IResourceBuilder<ContainerResource>? KeycloakResource { get; set; }
+    private IResourceBuilder<ContainerResource>? OpenProjectResource { get; set; }
+
 
     public ConnectionStringManager AddMySql(bool withDbGate = false)
     {
@@ -232,7 +234,90 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     public ConnectionStringManager AddMailPit()
     {
         MailResource = builder.AddMailPit("mailpit");
-        
+
+        return this;
+    }
+
+    public ConnectionStringManager AddKeycloak()
+    {
+        // Keycloak listens on port 8080 inside the container by default.
+        // We map host port KeycloakPort (8180) → container port KeycloakContainerPort (8080)
+        // so it doesn't collide with the Identity Authorization service (also on 8080 host-side).
+        // KC_HOSTNAME forces Keycloak to embed the public URL in issued tokens (iss claim)
+        // and in OIDC discovery metadata. Without this, tokens contain the internal Docker
+        // address (onlyoffice-keycloak:8080) as issuer, which OpenProject cannot reach
+        // from the browser and which mismatches the configured issuer on validation.
+        // KC_HOSTNAME_STRICT=false + KC_HOSTNAME_BACKCHANNEL_DYNAMIC=true allow the server
+        // to still accept back-channel requests on its internal address.
+        KeycloakResource = builder
+            .AddContainer(Constants.KeycloakContainer, "quay.io/keycloak/keycloak", "26.1")
+            .WithLifetime(ContainerLifetime.Persistent)
+            .WithArgs("start-dev", "--import-realm")
+            .WithEnvironment("KEYCLOAK_ADMIN", Constants.KeycloakAdminUser)
+            .WithEnvironment("KEYCLOAK_ADMIN_PASSWORD", Constants.KeycloakAdminPassword)
+            .WithEnvironment("KC_HOSTNAME", $"http://localhost:{Constants.KeycloakPort.ToString()}")
+            .WithEnvironment("KC_HOSTNAME_STRICT", "false")
+            .WithEnvironment("KC_HOSTNAME_BACKCHANNEL_DYNAMIC", "true")
+            .WithBindMount(
+                Path.Combine(basePath, "server", "common", "ASC.AppHost", "keycloak", "realms"),
+                "/opt/keycloak/data/import")
+            // port: host-side port, targetPort: container-side port
+            .WithHttpEndpoint(port: Constants.KeycloakPort, targetPort: Constants.KeycloakContainerPort, name: "http");
+
+        return this;
+    }
+
+    public ConnectionStringManager AddOpenProject()
+    {
+        if (KeycloakResource == null)
+        {
+            throw new InvalidOperationException("Keycloak must be added before OpenProject.");
+        }
+
+        // With KC_HOSTNAME=localhost:8180, Keycloak embeds the public URL in all tokens
+        // and discovery metadata. All endpoints therefore use the public base URL.
+        // From inside the OpenProject container, localhost is unreachable — use
+        // host.docker.internal to reach Keycloak on the host's port 8180.
+        var oidcIssuerPublic   = $"http://localhost:{Constants.KeycloakPort}/realms/{Constants.KeycloakRealm}";
+        var oidcIssuerDockerHost = $"http://{KnownHostNames.DockerDesktopHostBridge}:{Constants.KeycloakPort}/realms/{Constants.KeycloakRealm}";
+
+        // OpenProject 15 ConfigurationMapper contains a bug: it maps attribute_map.email
+        // to the key "mapping_mail", but the Provider model column is "mapping_email".
+        // Passing any attribute_map via env crashes the seeder with
+        // "unknown attribute 'mapping_mail'". Workaround: omit attribute_map entirely.
+        // Keycloak sends standard OIDC claims (email, given_name, family_name,
+        // preferred_username) by default, which OpenProject picks up without explicit mapping.
+        OpenProjectResource = builder
+            .AddContainer(Constants.OpenProjectContainer, "openproject/openproject", "15")
+            .WithLifetime(ContainerLifetime.Persistent)
+            .WithEnvironment("OPENPROJECT_HOST__NAME", $"localhost:{Constants.OpenProjectPort.ToString()}")
+            .WithEnvironment("OPENPROJECT_HTTPS", "false")
+            .WithEnvironment("OPENPROJECT_DEFAULT__LANGUAGE", "en")
+            // Disable EE banners so OIDC SSO button is shown on the login page in Community Edition.
+            // Without this, EnterpriseToken.show_banners? returns true and filtered_strategy?
+            // blocks all providers except "developer".
+            .WithEnvironment("OPENPROJECT_EE__MANAGER__VISIBLE", "false")
+            .WithEnvironment("OPENPROJECT_OPENID__CONNECT_DOCSPACE_DISPLAY__NAME", "DocSpace (Keycloak)")
+            .WithEnvironment("OPENPROJECT_OPENID__CONNECT_DOCSPACE_IDENTIFIER", "openproject")
+            .WithEnvironment("OPENPROJECT_OPENID__CONNECT_DOCSPACE_SECRET", "openproject-secret")
+            // issuer must match the public URL embedded in tokens by KC_HOSTNAME
+            .WithEnvironment("OPENPROJECT_OPENID__CONNECT_DOCSPACE_ISSUER", oidcIssuerPublic)
+            // Browser-facing endpoints → public URL (localhost:8180)
+            .WithEnvironment("OPENPROJECT_OPENID__CONNECT_DOCSPACE_AUTHORIZATION__ENDPOINT",
+                $"{oidcIssuerPublic}/protocol/openid-connect/auth")
+            .WithEnvironment("OPENPROJECT_OPENID__CONNECT_DOCSPACE_END__SESSION__ENDPOINT",
+                $"{oidcIssuerPublic}/protocol/openid-connect/logout")
+            // Server-to-server endpoints → host.docker.internal:8180
+            // (container→host→Keycloak; issuer in responses will be localhost:8180 which matches)
+            .WithEnvironment("OPENPROJECT_OPENID__CONNECT_DOCSPACE_TOKEN__ENDPOINT",
+                $"{oidcIssuerDockerHost}/protocol/openid-connect/token")
+            .WithEnvironment("OPENPROJECT_OPENID__CONNECT_DOCSPACE_USERINFO__ENDPOINT",
+                $"{oidcIssuerDockerHost}/protocol/openid-connect/userinfo")
+            .WithEnvironment("OPENPROJECT_OPENID__CONNECT_DOCSPACE_JWKS__URI",
+                $"{oidcIssuerDockerHost}/protocol/openid-connect/certs")
+            .WithHttpEndpoint(port: Constants.OpenProjectPort, targetPort: 80, name: "http")
+            .WaitFor(KeycloakResource);
+
         return this;
     }
 
@@ -333,6 +418,20 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
                 .WithEnvironment("elastic:Host", () => (isDocker ? Constants.OpensearchContainer : "localhost"))
                 .WithEnvironment("elastic:Port", () => Constants.OpensearchPort.ToString())
                 .WithEnvironment("elastic:Threads", () => "1");
+        }
+
+        if (KeycloakResource != null)
+        {
+            // KC_HOSTNAME makes Keycloak use localhost:8180 as its public URL in all tokens.
+            // DocSpace services reach Keycloak via host.docker.internal:8180 (Docker) or
+            // localhost:8180 (local dev). The issuer in tokens is always localhost:8180.
+            var keycloakUrl = isDocker
+                ? $"http://{KnownHostNames.DockerDesktopHostBridge}:{Constants.KeycloakPort}"
+                : $"http://localhost:{Constants.KeycloakPort}";
+            resourceBuilder
+                .WithEnvironment("sso:keycloak:url", keycloakUrl)
+                .WithEnvironment("sso:keycloak:realm", Constants.KeycloakRealm)
+                .WithEnvironment("sso:keycloak:clientId", "docspace");
         }
     }
     

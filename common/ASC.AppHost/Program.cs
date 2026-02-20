@@ -80,7 +80,9 @@ switch (builder.Configuration["DOTNET_LAUNCH_PROFILE"])
             .AddRedis(withRedisInsight: true)
             .AddMcpServer()
             .AddOpensearch()
-            .AddMailPit();
+            .AddMailPit()
+            .AddKeycloak()
+            .AddOpenProject();
         
         configurator
             .AddProject<ASC_Files>(Constants.FilesPort)

@@ -63,4 +63,15 @@ public static class Constants
 
     public const string IdentityRegistrationContainer = "onlyoffice-identity-registration";
     public const string IdentityAuthorizationContainer = "onlyoffice-identity-authorization";
+
+    public const int KeycloakPort = 8180;          // host port (exposed to localhost)
+    public const int KeycloakContainerPort = 8080;  // internal container port (Keycloak default)
+    public const int OpenProjectPort = 8083;
+
+    public const string KeycloakContainer = "onlyoffice-keycloak";
+    public const string OpenProjectContainer = "onlyoffice-openproject";
+
+    public const string KeycloakRealm = "docspace";
+    public const string KeycloakAdminUser = "admin";
+    public const string KeycloakAdminPassword = "admin";
 }
