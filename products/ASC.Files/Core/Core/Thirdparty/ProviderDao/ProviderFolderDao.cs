@@ -406,7 +406,7 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         return folderDao.CanMoveOrCopyAsync(matchedIds, to);
     }
 
-    public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark, string color, string cover, ChatSettings chatSettings = null)
+    public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark, string color, string cover, ChatSettings chatSettings = null, bool? sendFormToExternalDB = null, bool? saveFormAsXLSX = null)
     {
         var newId = await RenameFolderAsync(folder, newTitle);
 

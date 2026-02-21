@@ -1162,8 +1162,10 @@ public class FileStorageService //: IFileStorageService
         var colorChanged = updateData.Color != null && folder.SettingsColor != updateData.Color;
         var coverChanged = updateData.Cover != null && folder.SettingsCover != updateData.Cover;
         var chatSettingsChanged = updateData.ChatSettings != null;
+        var sendFormToExternalDBChanged = updateData.SendFormToExternalDB.HasValue && folder.SettingsSendFormToExternalDB != updateData.SendFormToExternalDB;
+        var saveFormAsXLSXChanged = updateData.SaveFormAsXLSX.HasValue && folder.SettingsSaveFormAsXLSX != updateData.SaveFormAsXLSX;
 
-        if (titleChanged || quotaChanged || indexingChanged || denyDownloadChanged || lifetimeChanged || watermarkChanged || colorChanged || coverChanged || chatSettingsChanged)
+        if (titleChanged || quotaChanged || indexingChanged || denyDownloadChanged || lifetimeChanged || watermarkChanged || colorChanged || coverChanged || chatSettingsChanged || sendFormToExternalDBChanged || saveFormAsXLSXChanged)
         {
             var oldTitle = folder.Title;
             WatermarkSettings watermark = null;
@@ -1203,7 +1205,9 @@ public class FileStorageService //: IFileStorageService
                 watermarkChanged ? updateData.Watermark.Enabled.HasValue && !updateData.Watermark.Enabled.Value ? null : watermark : folder.SettingsWatermark,
                 colorChanged ? updateData.Color : folder.SettingsColor,
                 coverChanged ? updateData.Cover : folder.SettingsCover,
-                chatSettingsChanged ? updateData.ChatSettings : null);
+                chatSettingsChanged ? updateData.ChatSettings : null,
+                sendFormToExternalDBChanged ? updateData.SendFormToExternalDB.Value : folder.SettingsSendFormToExternalDB,
+                saveFormAsXLSXChanged ? updateData.SaveFormAsXLSX.Value : folder.SettingsSaveFormAsXLSX);
 
             folder = await folderDao.GetFolderAsync(newFolderId);
 

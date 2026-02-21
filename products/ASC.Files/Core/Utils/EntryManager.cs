@@ -2047,12 +2047,15 @@ public class EntryManager(IDaoFactory daoFactory,
                 var readyFormFolder = await folderDao.GetFoldersAsync(room.Id, FolderType.ReadyFormFolder).FirstOrDefaultAsync();
                 var resultsFolderId = await CreateFormFillingFolder(title, readyFormFolder.Id, FolderType.FormFillingFolderDone, originalForm.CreateBy, folderDao);
 
-                origProperties.FormFilling.ResultsFileID = await CreateFillResultsFile(resultsFolderId, originalForm.CreateBy, title, fileDao);
+                if (room.SettingsSaveFormAsXLSX) 
+                {
+                    origProperties.FormFilling.ResultsFileID = await CreateFillResultsFile(resultsFolderId, originalForm.CreateBy, title, fileDao);
+                }
                 origProperties.FormFilling.ResultsFolderId = resultsFolderId;
 
                 await fileDao.SaveProperties(originalForm.Id, origProperties);
             }
-            else if (resultFile == null || !resultFile.ParentId.Equals(resultFolder.Id) || resultFileExtension == ".csv")
+            else if (room.SettingsSaveFormAsXLSX && (resultFile == null || !resultFile.ParentId.Equals(resultFolder.Id) || resultFileExtension == ".csv"))
             {
                 origProperties.FormFilling.ResultsFileID = await CreateFillResultsFile(resultFolder.Id, originalForm.CreateBy, Path.GetFileNameWithoutExtension(originalForm.Title), fileDao);
                 await fileDao.SaveProperties(originalForm.Id, origProperties);
@@ -2131,7 +2134,9 @@ public class EntryManager(IDaoFactory daoFactory,
                        rId,
                        resProp.FormFilling.ResultFormNumber,
                        formsDataUrl,
-                       result);
+                       result,
+                       room.SettingsSendFormToExternalDB, 
+                       room.SettingsSaveFormAsXLSX);
                 }
 
                 if (!securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))

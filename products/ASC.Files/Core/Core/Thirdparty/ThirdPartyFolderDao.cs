@@ -419,7 +419,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         return Task.FromResult<IDictionary<string, string>>(new Dictionary<string, string>());
     }
 
-    public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark, string color, string cover, ChatSettings chatSettings = null)
+    public async Task<string> UpdateFolderAsync(Folder<string> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark, string color, string cover, ChatSettings chatSettings = null, bool? sendFormToExternalDB = null, bool? saveFormAsXLSX = null)
     {
         return await RenameFolderAsync(folder, newTitle);
     }

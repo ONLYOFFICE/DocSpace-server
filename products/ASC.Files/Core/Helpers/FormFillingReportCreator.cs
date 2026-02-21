@@ -36,22 +36,24 @@ public class FormFillingReportCreator(
     FactoryIndexerForm factoryIndexerForm)
 {
 
-    public async Task UpdateFormFillingReport<T>(int originalFormId, int originalFormVersion, int roomId, int resultFormNumber, string formsDataUrl, File<T> formsDataFile)
+    public async Task UpdateFormFillingReport<T>(int originalFormId, int originalFormVersion, int roomId, int resultFormNumber, string formsDataUrl, File<T> formsDataFile, bool sendFormToExternalDB, bool settingsSaveFormAsXLSX)
     {
         var (formData, metaData) = await GetSubmitFormsData(formsDataFile, originalFormId, roomId, resultFormNumber, formsDataUrl);
 
-        if (!externalDatabaseClient.IsEnabled())
+        if (sendFormToExternalDB && externalDatabaseClient.IsEnabled())
         {
-            return;
+            var fileId = formsDataFile.Id is int id ? id : 0;
+            var tableName = $"form_{originalFormId}_v{originalFormVersion}";
+            var normalizedMeta = NormalizeMetadata(metaData);
+            await externalDatabaseClient.CreateTableIfNotExistsAsync(tableName, BuildColumnDefinitions(normalizedMeta));
+
+            var rowData = BuildRowData(formData, normalizedMeta, fileId);
+            await externalDatabaseClient.UpsertDataAsync(tableName, rowData, keyColumn: "form_id");
         }
-
-        var fileId = formsDataFile.Id is int id ? id : 0;
-        var tableName = $"form_{originalFormId}_v{originalFormVersion}";
-        var normalizedMeta = NormalizeMetadata(metaData);
-        await externalDatabaseClient.CreateTableIfNotExistsAsync(tableName, BuildColumnDefinitions(normalizedMeta));
-
-        var rowData = BuildRowData(formData, normalizedMeta, fileId);
-        await externalDatabaseClient.UpsertDataAsync(tableName, rowData, keyColumn: "form_id");
+        if (settingsSaveFormAsXLSX)
+        {
+            await exportToXLSX.UpdateXlsxReport(roomId, originalFormId);
+        }
     }
 
     public async Task<IEnumerable<FormsItemData>> GetFormsFields(int folderId)

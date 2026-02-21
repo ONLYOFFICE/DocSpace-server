@@ -85,6 +85,16 @@ public class UpdateRoomRequest
     public string Cover { get; set; }
     
     public ChatSettings ChatSettings { get; set; }
+
+    /// <summary>
+    /// Specifies whether to send form data to external database.
+    /// </summary>
+    public bool? SendFormToExternalDB { get; set; }
+
+    /// <summary>
+    /// Specifies whether to save form data as XLSX file.
+    /// </summary>
+    public bool? SaveFormAsXLSX { get; set; }
 }
 
 /// <summary>

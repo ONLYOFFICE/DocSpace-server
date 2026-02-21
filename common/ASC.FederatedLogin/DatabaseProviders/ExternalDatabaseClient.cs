@@ -33,7 +33,7 @@ public enum DbColumnType { Text, Integer, Boolean, Date, DateTime, Enum }
 public record DbColumnDefinition(string Name, DbColumnType Type, IReadOnlyList<string>? EnumValues = null, bool IsPrimaryKey = false);
 
 [Scope]
-public class ExternalDatabaseClient(ConsumerFactory consumerFactory)
+public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<ExternalDatabaseClient> logger)
 {
     private ExternalDatabaseProvider Provider => consumerFactory.Get<ExternalDatabaseProvider>();
 
@@ -87,25 +87,32 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory)
 
     private async Task ExecuteInsertAsync(string tableName, Dictionary<string, object> data, string? keyColumn)
     {
-        if (data == null || data.Count == 0)
+        try
         {
-            throw new ArgumentException("Data dictionary is empty.", nameof(data));
+            if (data == null || data.Count == 0)
+            {
+                throw new ArgumentException("Data dictionary is empty.", nameof(data));
+            }
+            await using var connection = Provider.CreateConnection();
+            await connection.OpenAsync();
+
+            await using var cmd = connection.CreateCommand();
+            cmd.CommandText = BuildInsertSql(tableName, data.Keys, keyColumn);
+
+            foreach (var kvp in data)
+            {
+                var param = cmd.CreateParameter();
+                param.ParameterName = "@" + kvp.Key;
+                param.Value = kvp.Value ?? DBNull.Value;
+                cmd.Parameters.Add(param);
+            }
+
+            await cmd.ExecuteNonQueryAsync();
         }
-        await using var connection = Provider.CreateConnection();
-        await connection.OpenAsync();
-
-        await using var cmd = connection.CreateCommand();
-        cmd.CommandText = BuildInsertSql(tableName, data.Keys, keyColumn);
-
-        foreach (var kvp in data)
+        catch (Exception ex) 
         {
-            var param = cmd.CreateParameter();
-            param.ParameterName = "@" + kvp.Key;
-            param.Value = kvp.Value ?? DBNull.Value;
-            cmd.Parameters.Add(param);
+            logger.Error(ex.Message);
         }
-
-        await cmd.ExecuteNonQueryAsync();
     }
 
     private string BuildInsertSql(string tableName, IEnumerable<string> keys, string? keyColumn)

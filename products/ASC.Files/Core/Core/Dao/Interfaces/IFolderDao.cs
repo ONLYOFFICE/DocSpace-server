@@ -198,7 +198,9 @@ public interface IFolderDao<T>
     /// <param name="color">color</param>
     /// <param name="cover">cover</param>
     /// <param name="chatSettings">chat settings</param>
-    Task<T> UpdateFolderAsync(Folder<T> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifetime, WatermarkSettings watermark, string color, string cover, ChatSettings chatSettings = null);
+    /// <param name="sendFormToExternalDB">send form to external DB</param>
+    /// <param name="saveFormAsXLSX">save form as XLSX</param>
+    Task<T> UpdateFolderAsync(Folder<T> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifetime, WatermarkSettings watermark, string color, string cover, ChatSettings chatSettings = null, bool? sendFormToExternalDB = null, bool? saveFormAsXLSX = null);
 
     /// <summary>
     ///    Change folder type

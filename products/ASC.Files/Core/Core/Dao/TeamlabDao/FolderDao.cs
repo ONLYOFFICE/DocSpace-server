@@ -1225,7 +1225,7 @@ internal class FolderDao(
         return folder.Id;
     }
 
-    public async Task<int> UpdateFolderAsync(Folder<int> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark, string color, string cover, ChatSettings chatSettings = null)
+    public async Task<int> UpdateFolderAsync(Folder<int> folder, string newTitle, long newQuota, bool indexing, bool denyDownload, RoomDataLifetime lifeTime, WatermarkSettings watermark, string color, string cover, ChatSettings chatSettings = null, bool? sendFormToExternalDB = null, bool? saveFormAsXLSX = null)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -1276,6 +1276,16 @@ internal class FolderDao(
             {
                 toUpdate.Settings.Cover = cover;
             }
+        }
+
+        if (sendFormToExternalDB.HasValue)
+        {
+            toUpdate.Settings.SendFormToExternalDB = sendFormToExternalDB.Value;
+        }
+
+        if (saveFormAsXLSX.HasValue)
+        {
+            toUpdate.Settings.SaveFormAsXLSX = saveFormAsXLSX.Value;
         }
 
         filesDbContext.Update(toUpdate);
