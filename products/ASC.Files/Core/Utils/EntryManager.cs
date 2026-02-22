@@ -1995,6 +1995,36 @@ public class EntryManager(IDaoFactory daoFactory,
         return file.Id;
     }
 
+    public async Task EnsureFormFillingOutputAsync(
+        File<int> form,
+        Folder<int> room,
+        File<int> resultsFile,
+        Folder<int> resultFolder,
+        EntryProperties<int> properties,
+        IFolderDao<int> folderDao,
+        IFileDao<int> fileDao)
+    {
+        var formFilling = properties.FormFilling;
+        var title = Path.GetFileNameWithoutExtension(form.Title);
+
+        if (resultFolder is not { FolderType: FolderType.FormFillingFolderDone })
+        {
+            var readyFormFolder = await folderDao.GetFoldersAsync(room.Id, FolderType.ReadyFormFolder)
+                .FirstOrDefaultAsync()
+                ?? throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
+
+            var resultsFolderId = await CreateFormFillingFolder(title, readyFormFolder.Id, FolderType.FormFillingFolderDone, form.CreateBy, folderDao);
+            formFilling.ResultsFileID = await CreateFillResultsFile(resultsFolderId, form.CreateBy, title, fileDao);
+            formFilling.ResultsFolderId = resultsFolderId;
+            await fileDao.SaveProperties(form.Id, properties);
+        }
+        else if (resultsFile == null || !resultsFile.ParentId.Equals(resultFolder.Id))
+        {
+            formFilling.ResultsFileID = await CreateFillResultsFile(resultFolder.Id, form.CreateBy, title, fileDao);
+            await fileDao.SaveProperties(form.Id, properties);
+        }
+    }
+
     private async Task<EntryProperties<T>> InitFormFillingProperties<T>(T roomId, string sourceTitle, T sourceFileId, T inProcessFormFolderId, T readyFormFolderId, Guid createBy, EntryProperties<T> properties, IFileDao<T> fileDao, IFolderDao<T> folderDao)
     {
         var templatesFolderTask = CreateFormFillingFolder(sourceTitle, inProcessFormFolderId, FolderType.FormFillingFolderInProgress, createBy, folderDao);
@@ -2044,12 +2074,13 @@ public class EntryManager(IDaoFactory daoFactory,
                 logger.LogDebug("Result folder: {Folder} not found.", origProperties.FormFilling.ResultsFolderId);
 
                 var title = Path.GetFileNameWithoutExtension(originalForm.Title);
-                var readyFormFolder = await folderDao.GetFoldersAsync(room.Id, FolderType.ReadyFormFolder).FirstOrDefaultAsync();
+                var readyFormFolder = await folderDao.GetFoldersAsync(room.Id, FolderType.ReadyFormFolder).FirstOrDefaultAsync()
+                    ?? throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
                 var resultsFolderId = await CreateFormFillingFolder(title, readyFormFolder.Id, FolderType.FormFillingFolderDone, originalForm.CreateBy, folderDao);
 
                 if (room.SettingsSaveFormAsXLSX) 
                 {
-                    origProperties.FormFilling.ResultsFileID = await CreateFillResultsFile(resultsFolderId, originalForm.CreateBy, title, fileDao);
+                origProperties.FormFilling.ResultsFileID = await CreateFillResultsFile(resultsFolderId, originalForm.CreateBy, title, fileDao);
                 }
                 origProperties.FormFilling.ResultsFolderId = resultsFolderId;
 
