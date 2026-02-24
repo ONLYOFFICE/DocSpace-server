@@ -128,12 +128,12 @@ public class OperationDto
 
     public OperationDto(Operation operation, ApiDateTimeHelper apiDateTimeHelper, Dictionary<string, string> participantDisplayNames, string serviceName)
     {
-        var (description, unitOfMeasurement) = GetServiceDescAndUOM(operation.Service ?? serviceName);
+        var (description, unitOfMeasurement) = WalletServiceDescriptionManager.GetServiceDescriptionAndUom(operation.Service ?? serviceName);
 
         Date = apiDateTimeHelper.Get(operation.Date);
         Service = operation.Service;
         Description = description;
-        Details = GetDetails(operation.Metadata);
+        Details = WalletServiceDescriptionManager.GetServiceDetails(operation.Metadata);
         ServiceUnit = unitOfMeasurement;
         Quantity = operation.Quantity;
         Currency = operation.Currency;
@@ -143,38 +143,6 @@ public class OperationDto
         ParticipantDisplayName = operation.ParticipantName != null && participantDisplayNames.TryGetValue(operation.ParticipantName, out var value)
             ? value
             : operation.ParticipantName;
-    }
-
-    private static (string, string) GetServiceDescAndUOM(string serviceName)
-    {
-        // for testing purposes
-        if (serviceName != null && serviceName.StartsWith("disk-storage"))
-        {
-            serviceName = "disk-storage";
-        }
-
-        if (string.IsNullOrEmpty(serviceName))
-        {
-            serviceName = "top-up";
-        }
-
-        return (Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{serviceName}"),
-            Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceUOM_{serviceName}"));
-    }
-
-    private static string GetDetails(Dictionary<string, string> metadata)
-    {
-        if (metadata == null)
-        {
-            return string.Empty;
-        }
-
-        if (metadata.TryGetValue(BillingClient.MetadataDetails, out var details))
-        {
-            return details;
-        }
-
-        return metadata.TryGetValue(BillingClient.MetadataType, out var type) ? type : string.Empty;
     }
 }
 

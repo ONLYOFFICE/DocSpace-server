@@ -209,10 +209,10 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
 
             foreach (var operation in report.Collection)
             {
-                var (description, unitOfMeasurement) = GetServiceDescAndUOM(operation.Service);
+                var (description, unitOfMeasurement) = WalletServiceDescriptionManager.GetServiceDescriptionAndUom(operation.Service ?? filter.ServiceName);
 
                 operation.Description = description;
-                operation.Details = operation.Metadata != null && operation.Metadata.TryGetValue(BillingClient.MetadataDetails, out var details) ? details : string.Empty;
+                operation.Details = WalletServiceDescriptionManager.GetServiceDetails(operation.Metadata);
                 operation.ServiceUnit = unitOfMeasurement;
                 operation.Date = tenantUtil.DateTimeFromUtc(operation.Date);
                 operation.ParticipantDisplayName = operation.ParticipantName != null && participantDisplayNames.TryGetValue(operation.ParticipantName, out var value)
@@ -259,23 +259,6 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
         }
 
         return sb.ToString();
-    }
-
-    private static (string, string) GetServiceDescAndUOM(string serviceName)
-    {
-        // for testing purposes
-        if (serviceName != null && serviceName.StartsWith("disk-storage"))
-        {
-            serviceName = "disk-storage";
-        }
-
-        if (string.IsNullOrEmpty(serviceName))
-        {
-            serviceName = "top-up";
-        }
-
-        return (Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{serviceName}"),
-            Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceUOM_{serviceName}"));
     }
 
     record PropertyValue(string Value, string Format, string Halign = null);
