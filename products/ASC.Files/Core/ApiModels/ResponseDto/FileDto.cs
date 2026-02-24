@@ -467,9 +467,21 @@ public class FileDtoHelper(
                 currentRoom = currentFolder;
             }
 
-            if (currentRoom is { FolderType: FolderType.FillingFormsRoom } && properties != null && properties.FormFilling.StartFilling)
+            if (currentRoom is { FolderType: FolderType.FillingFormsRoom } && properties != null && properties.FormFilling != null)
             {
-                result.Security[FileSecurity.FilesSecurityActions.Lock] = false;
+                if (properties.FormFilling.StartFilling)
+                {
+                    result.Security[FileSecurity.FilesSecurityActions.FillForms] = true;
+                    result.Security[FileSecurity.FilesSecurityActions.StopFilling] = true;
+                    result.Security[FileSecurity.FilesSecurityActions.StartFilling] = false;
+                    result.Security[FileSecurity.FilesSecurityActions.Lock] = false;
+                }
+                else
+                {
+                    result.Security[FileSecurity.FilesSecurityActions.StartFilling] = true;
+                    result.Security[FileSecurity.FilesSecurityActions.FillForms] = false;
+                    result.Security[FileSecurity.FilesSecurityActions.StopFilling] = false;
+                }
             }
 
             if (currentRoom.Security == null)
