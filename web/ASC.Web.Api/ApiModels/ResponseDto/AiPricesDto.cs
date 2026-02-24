@@ -28,33 +28,25 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class AiPricesDto
 {
-    public required List<AiChatModelPricingDto> Chat { get; init; }
-    public required List<AiEmbeddingModelPricingDto> Embedding { get; init; }
+    public required List<AiEntryPricingDto<AiChatPriceDto>> Chat { get; init; }
+    public required List<AiEntryPricingDto<AiEmbeddingPriceDto>> Embedding { get; init; }
     public required AiWebSearchPricingDto WebSearch { get; init; }
     public required string Currency { get; init; }
 }
 
-public class AiChatModelPricingDto
+public class AiEntryPricingDto<T>
 {
     public required string Id { get; init; }
     public required string Alias { get; init; }
     public required string Provider { get; init; }
     public required string IconUrl { get; init; }
-    public required AiChatPriceDto Price { get; init; }
+    public required T Price { get; init; }
 }
 
 public class AiChatPriceDto
 {
     public decimal Prompt { get; init; }
     public decimal Completion { get; init; }
-}
-
-public class AiEmbeddingModelPricingDto
-{
-    public required string Id { get; init; }
-    public required string Alias { get; init; }
-    public required string Provider { get; init; }
-    public required AiEmbeddingPriceDto Price { get; init; }
 }
 
 public class AiEmbeddingPriceDto
@@ -65,6 +57,8 @@ public class AiEmbeddingPriceDto
 public class AiWebSearchPricingDto
 {
     public required string Provider { get; init; }
+    public required string SearchIconUrl { get; init; }
+    public required string CrawlingIconUrl { get; init; }
     public decimal Search { get; init; }
     public decimal Contents { get; init; }
 }

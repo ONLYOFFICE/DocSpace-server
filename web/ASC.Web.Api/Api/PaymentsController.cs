@@ -1229,7 +1229,7 @@ public class PaymentController(
             icons[provider] = await walletStaticStore.GetAiIconUrl(provider);
         }
 
-        var chat = aiPrices.Chat.Select(model => new AiChatModelPricingDto
+        var chat = aiPrices.Chat.Select(model => new AiEntryPricingDto<AiChatPriceDto>
         {
             Id = model.Id,
             IconUrl = icons[model.OwnedBy.ToLower()],
@@ -1242,13 +1242,19 @@ public class PaymentController(
             }
         }).ToList();
 
-        var embedding = aiPrices.Embedding.Select(e => new AiEmbeddingModelPricingDto
+        var embeddingIcon = await walletStaticStore.GetAiIconUrl("embedding");
+
+        var embedding = aiPrices.Embedding.Select(e => new AiEntryPricingDto<AiEmbeddingPriceDto>
         {
             Id = e.Id,
             Alias = e.Alias,
             Provider = e.Provider,
+            IconUrl = embeddingIcon,
             Price = new AiEmbeddingPriceDto { Prompt = e.Price.Prompt * 1_000_000 }
         }).ToList();
+
+        var webSearchIcon = await walletStaticStore.GetAiIconUrl("search");
+        var crawlingIcon = await walletStaticStore.GetAiIconUrl("crawling");
 
         return new AiPricesDto
         {
@@ -1256,6 +1262,8 @@ public class PaymentController(
             Embedding = embedding,
             WebSearch = new AiWebSearchPricingDto
             {
+                SearchIconUrl = webSearchIcon,
+                CrawlingIconUrl = crawlingIcon,
                 Provider = aiPrices.WebSearch.Provider,
                 Search = aiPrices.WebSearch.Search,
                 Contents = aiPrices.WebSearch.Contents

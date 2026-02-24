@@ -137,15 +137,15 @@ public record AiPricesResponse
     public required List<AiChatModelPricing> Chat { get; init; }
     public required List<AiEmbeddingModelPricing> Embedding { get; init; }
     public required AiWebSearchPricing WebSearch { get; init; }
-    public required string Currency { get; init; }
+    public string Currency { get; init; } = "USD";
 }
 
 public record AiChatModelPricing
 {
     public required string Id { get; init; }
-    public required string Alias { get; init; }
-    public required string OwnedBy { get; init; }
-    public required string Provider { get; init; }
+    public string Alias { get; init; } = "GPT-5.2";
+    public string OwnedBy { get; init; } = "openai";
+    public string Provider { get; init; } = "OpenRouter";
     public required AiChatPrice Price { get; init; }
 }
 
@@ -158,9 +158,9 @@ public record AiChatPrice
 public record AiEmbeddingModelPricing
 {
     public required string Id { get; init; }
-    public required string Alias { get; init; }
-    public required string Provider { get; init; }
-    public required string OwnedBy { get; init; }
+    public string Alias { get; init; } = "GPT-5.2";
+    public string OwnedBy { get; init; } = "openai";
+    public string Provider { get; init; } = "OpenRouter";
     public required AiEmbeddingPrice Price { get; init; }
 }
 
@@ -171,7 +171,7 @@ public record AiEmbeddingPrice
 
 public record AiWebSearchPricing
 {
-    public required string Provider { get; init; }
+    public string Provider { get; init; } = "Exa";
     public decimal Search { get; init; }
     public decimal Contents { get; init; }
 }
