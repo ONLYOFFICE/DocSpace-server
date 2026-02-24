@@ -139,7 +139,7 @@ public enum WebhookTrigger
     RoomRestored = 67108864,
 
     [Description("room.copied")]
-    RoomCopied = 134217728,
+    RoomCopied = 134217728
 
     #endregion
 
