@@ -354,7 +354,8 @@
             "required": true,
             "schema": {
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "example": "00000000-0000-0000-0000-000000000000"
             }
           }
         ],
@@ -7200,7 +7201,7 @@
             "description": "The time in UTC format.",
             "format": "date-time",
             "readOnly": true,
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2018-01-01T00:00:00.0000000Z"
           },
           "timeZoneOffset": {
             "type": "string",
@@ -7560,7 +7561,7 @@
             "type": "string",
             "description": "The last modified date.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2020-01-15T00:00:00Z"
           }
         },
         "additionalProperties": false,
@@ -7958,7 +7959,13 @@
                   "$ref": "#/components/schemas/Contact"
                 },
                 "description": "The list of user contacts.",
-                "nullable": true
+                "nullable": true,
+                "example": [
+                  {
+                    "type": "email",
+                    "value": "user@example.com"
+                  }
+                ]
               },
               "birthday": {
                 "$ref": "#/components/schemas/ApiDateTime"
@@ -7993,7 +8000,13 @@
                   "$ref": "#/components/schemas/GroupSummaryDto"
                 },
                 "description": "The list of user groups.",
-                "nullable": true
+                "nullable": true,
+                "example": [
+                  {
+                    "id": "00000000-0000-0000-0000-000000000000",
+                    "name": "Marketing"
+                  }
+                ]
               },
               "location": {
                 "type": "string",
@@ -8015,7 +8028,7 @@
               "isRoomAdmin": {
                 "type": "boolean",
                 "description": "Specifies if the user is a room administrator or not.",
-                "example": true
+                "example": false
               },
               "isLDAP": {
                 "type": "boolean",
@@ -8029,22 +8042,25 @@
                 },
                 "description": "The list of the administrator modules.",
                 "nullable": true,
-                "example": "[\"projects\", \"crm\"]"
+                "example": [
+                  "projects",
+                  "crm"
+                ]
               },
               "isOwner": {
                 "type": "boolean",
                 "description": "Specifies if the user is a portal owner or not.",
-                "example": true
+                "example": false
               },
               "isVisitor": {
                 "type": "boolean",
                 "description": "Specifies if the user is a portal visitor or not.",
-                "example": true
+                "example": false
               },
               "isCollaborator": {
                 "type": "boolean",
                 "description": "Specifies if the user is a portal collaborator or not.",
-                "example": true
+                "example": false
               },
               "cultureName": {
                 "type": "string",
@@ -8056,7 +8072,7 @@
                 "type": "string",
                 "description": "The user mobile phone number.",
                 "nullable": true,
-                "example": "some text"
+                "example": "+1 (555) 123-4567"
               },
               "mobilePhoneActivationStatus": {
                 "$ref": "#/components/schemas/MobilePhoneActivationStatus"
@@ -8074,7 +8090,7 @@
                 "description": "The user quota limit.",
                 "format": "int64",
                 "nullable": true,
-                "example": 1234
+                "example": 1073741824
               },
               "usedSpace": {
                 "type": "number",
@@ -8087,27 +8103,27 @@
                 "type": "boolean",
                 "description": "Specifies if the user has access rights.",
                 "nullable": true,
-                "example": true
+                "example": false
               },
               "isCustomQuota": {
                 "type": "boolean",
                 "description": "Specifies if the user has a custom quota or not.",
                 "nullable": true,
-                "example": true
+                "example": false
               },
               "loginEventId": {
                 "type": "integer",
                 "description": "The current login event ID.",
                 "format": "int32",
                 "nullable": true,
-                "example": 1234
+                "example": 123
               },
               "authCookieLifetime": {
                 "type": "number",
                 "description": "The auth cookie lifetime in seconds.",
                 "format": "double",
                 "nullable": true,
-                "example": -8.5
+                "example": 3600
               },
               "createdBy": {
                 "$ref": "#/components/schemas/EmployeeDto"
@@ -8125,7 +8141,7 @@
                 "type": "boolean",
                 "description": "Indicates whether the user has enabled two-factor authentication (TFA) using an authentication app.",
                 "nullable": true,
-                "example": true
+                "example": false
               }
             }
           }
@@ -8409,20 +8425,20 @@
             "type": "string",
             "description": "The group name.",
             "nullable": true,
-            "example": "John Doe"
+            "example": "Marketing Team"
           },
           "parent": {
             "type": "string",
             "description": "The parent group ID.",
             "format": "uuid",
             "nullable": true,
-            "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "category": {
             "type": "string",
             "description": "The group category ID.",
             "format": "uuid",
-            "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "id": {
             "type": "string",
@@ -8433,13 +8449,13 @@
           "isLDAP": {
             "type": "boolean",
             "description": "Specifies if the LDAP settings are enabled for the group or not.",
-            "example": true
+            "example": false
           },
           "isSystem": {
             "type": "boolean",
             "description": "Indicates whether the group is a system group.",
             "nullable": true,
-            "example": true
+            "example": false
           },
           "manager": {
             "$ref": "#/components/schemas/EmployeeFullDto"
@@ -8450,19 +8466,24 @@
               "$ref": "#/components/schemas/EmployeeFullDto"
             },
             "description": "The list of group members.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              {
+                "displayName": "John Doe"
+              }
+            ]
           },
           "shared": {
             "type": "boolean",
             "description": "Specifies whether the group can be shared or not.",
             "nullable": true,
-            "example": true
+            "example": false
           },
           "membersCount": {
             "type": "integer",
             "description": "The number of group members.",
             "format": "int32",
-            "example": 1234
+            "example": 0
           }
         },
         "additionalProperties": false,
@@ -8559,7 +8580,7 @@
             "type": "string",
             "description": "The group ID.",
             "format": "uuid",
-            "example": "{00000000-0000-0000-0000-000000000000}"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "name": {
             "type": "string",
@@ -8577,7 +8598,7 @@
             "type": "boolean",
             "description": "Indicates whether the group is a system group.",
             "nullable": true,
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,

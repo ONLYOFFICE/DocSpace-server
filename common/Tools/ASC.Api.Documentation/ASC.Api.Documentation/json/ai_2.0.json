@@ -341,7 +341,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1
+              "example": "file-id"
             }
           }
         ],
@@ -417,7 +417,7 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "example": 1
+              "example": 10
             }
           }
         ],
@@ -3941,7 +3941,7 @@
             "description": "The time in UTC format.",
             "format": "date-time",
             "readOnly": true,
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2018-01-01T00:00:00.0000000Z"
           },
           "timeZoneOffset": {
             "type": "string",
@@ -4818,11 +4818,7 @@
                 "additionalProperties": false,
                 "description": "A dictionary representing the sharing settings for the file entry.",
                 "nullable": true,
-                "example": [
-                  {
-                    "value": 1234
-                  }
-                ]
+                "example": [ ]
               },
               "security": {
                 "type": "object",
@@ -4960,11 +4956,11 @@
                 "additionalProperties": false,
                 "description": "The actions that can be performed with the file entry.",
                 "nullable": true,
-                "example": [
-                  {
-                    "value": true
-                  }
-                ]
+                "example": {
+                  "Read": true,
+                  "Edit": false,
+                  "Delete": false
+                }
               },
               "availableShareRights": {
                 "type": "object",
@@ -5003,13 +4999,7 @@
                 "additionalProperties": false,
                 "description": "The available external rights of the file entry.",
                 "nullable": true,
-                "example": [
-                  {
-                    "value": [
-                      "some text"
-                    ]
-                  }
-                ]
+                "example": [ ]
               },
               "requestToken": {
                 "type": "string",
@@ -5122,7 +5112,8 @@
               "$ref": "#/components/schemas/FileEntryBaseDto"
             },
             "description": "The list of files of the file operation.",
-            "nullable": true
+            "nullable": true,
+            "example": [ ]
           },
           "folders": {
             "type": "array",
@@ -5130,7 +5121,8 @@
               "$ref": "#/components/schemas/FileEntryBaseDto"
             },
             "description": "The list of folders of the file operation.",
-            "nullable": true
+            "nullable": true,
+            "example": [ ]
           },
           "status": {
             "$ref": "#/components/schemas/DistributedTaskStatus"
@@ -5319,7 +5311,8 @@
               "$ref": "#/components/schemas/FileEntryBaseDto"
             },
             "description": "The list of files in the folder.",
-            "nullable": true
+            "nullable": true,
+            "example": [ ]
           },
           "folders": {
             "type": "array",
@@ -5327,7 +5320,8 @@
               "$ref": "#/components/schemas/FileEntryBaseDto"
             },
             "description": "The list of folders in the folder.",
-            "nullable": true
+            "nullable": true,
+            "example": [ ]
           },
           "current": {
             "$ref": "#/components/schemas/FolderDtoInteger"
@@ -5455,9 +5449,7 @@
                 },
                 "description": "The list of tags of the folder.",
                 "nullable": true,
-                "example": [
-                  "some text"
-                ]
+                "example": [ ]
               },
               "logo": {
                 "$ref": "#/components/schemas/Logo"
@@ -7239,9 +7231,7 @@
             },
             "description": "The list of tags.",
             "nullable": true,
-            "example": [
-              "some text"
-            ]
+            "example": [ ]
           },
           "color": {
             "maxLength": 6,
@@ -7249,7 +7239,7 @@
             "type": "string",
             "description": "The room color.",
             "nullable": true,
-            "example": "some text"
+            "example": "FF5733"
           },
           "cover": {
             "maxLength": 50,
@@ -7257,7 +7247,7 @@
             "type": "string",
             "description": "The room cover.",
             "nullable": true,
-            "example": "some text"
+            "example": "cover1"
           },
           "chatSettings": {
             "$ref": "#/components/schemas/ChatSettings"

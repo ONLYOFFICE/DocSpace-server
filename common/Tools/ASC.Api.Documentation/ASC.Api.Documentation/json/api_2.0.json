@@ -1,5 +1,5 @@
 {
-  "openapi": "3.1.0",
+  "openapi": "3.0.4",
   "info": {
     "title": "Api",
     "contact": {
@@ -13185,7 +13185,7 @@
             "description": "The time in UTC format.",
             "format": "date-time",
             "readOnly": true,
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2018-01-01T00:00:00.0000000Z"
           },
           "timeZoneOffset": {
             "type": "string",
@@ -13653,7 +13653,7 @@
             "type": "integer",
             "description": "The account number.",
             "format": "int32",
-            "example": 1234
+            "example": 12345
           },
           "subAccounts": {
             "type": "array",
@@ -13661,7 +13661,8 @@
               "$ref": "#/components/schemas/SubAccount"
             },
             "description": "A list of sub-accounts.",
-            "nullable": true
+            "nullable": true,
+            "example": [ ]
           }
         },
         "additionalProperties": false,
@@ -13984,7 +13985,7 @@
             "type": "string",
             "description": "The company name.",
             "nullable": true,
-            "example": "some text"
+            "example": "ONLYOFFICE"
           },
           "site": {
             "maxLength": 255,
@@ -13993,7 +13994,7 @@
             "description": "The company site.",
             "format": "uri",
             "nullable": true,
-            "example": "some text"
+            "example": "https://www.onlyoffice.com"
           },
           "email": {
             "maxLength": 255,
@@ -14002,7 +14003,7 @@
             "description": "The company email address.",
             "format": "email",
             "nullable": true,
-            "example": "example@onlyoffice.com"
+            "example": "support@onlyoffice.com"
           },
           "address": {
             "maxLength": 255,
@@ -14010,7 +14011,7 @@
             "type": "string",
             "description": "The company address.",
             "nullable": true,
-            "example": "some text"
+            "example": "Lubanas st. 125a-25"
           },
           "phone": {
             "maxLength": 255,
@@ -14019,7 +14020,7 @@
             "description": "The company phone number.",
             "format": "tel",
             "nullable": true,
-            "example": "some text"
+            "example": "+7 843 2271372"
           },
           "IsLicensor": {
             "type": "boolean",
@@ -14029,7 +14030,7 @@
           "hideAbout": {
             "type": "boolean",
             "description": "Specifies if the About page is visible or not",
-            "example": true
+            "example": false
           },
           "lastModified": {
             "type": "string",
@@ -15492,7 +15493,7 @@
             "type": "string",
             "description": "The email validation key.",
             "nullable": true,
-            "example": "some text"
+            "example": "abcdef123456"
           },
           "emplType": {
             "$ref": "#/components/schemas/EmployeeType"
@@ -15502,20 +15503,20 @@
             "description": "The email address.",
             "format": "email",
             "nullable": true,
-            "example": "example@onlyoffice.com"
+            "example": "user@example.com"
           },
           "encEmail": {
             "type": "string",
             "description": "The encrypted email address.",
             "nullable": true,
-            "example": "some text"
+            "example": "user%40example.com"
           },
           "uiD": {
             "type": "string",
             "description": "The user ID.",
             "format": "uuid",
             "nullable": true,
-            "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "type": {
             "$ref": "#/components/schemas/ConfirmType"
@@ -15524,13 +15525,13 @@
             "type": "string",
             "description": "Specifies whether it is the first time account access or not.",
             "nullable": true,
-            "example": "some text"
+            "example": false
           },
           "roomId": {
             "type": "string",
             "description": "The room ID.",
             "nullable": true,
-            "example": "1"
+            "example": 1
           }
         },
         "additionalProperties": false,
@@ -15798,7 +15799,7 @@
             "type": "string",
             "description": "The encryption password.",
             "nullable": true,
-            "example": "P@ssw0rd123"
+            "example": "password"
           },
           "status": {
             "$ref": "#/components/schemas/EncryprtionStatus"
@@ -15951,21 +15952,21 @@
             "type": "integer",
             "description": "The tenant ID.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           },
           "firebaseDeviceToken": {
             "maxLength": 255,
             "type": "string",
             "description": "The Firebase device token.",
             "nullable": true,
-            "example": "some text"
+            "example": "token123"
           },
           "application": {
             "maxLength": 20,
             "type": "string",
             "description": "The Firebase application.",
             "nullable": true,
-            "example": "some text"
+            "example": "web"
           },
           "isSubscribed": {
             "type": "boolean",
@@ -16299,7 +16300,7 @@
             "type": "string",
             "description": "The group ID.",
             "format": "uuid",
-            "example": "{00000000-0000-0000-0000-000000000000}"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "name": {
             "type": "string",
@@ -16317,7 +16318,7 @@
             "type": "boolean",
             "description": "Indicates whether the group is a system group.",
             "nullable": true,
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -19243,24 +19244,25 @@
             "type": "integer",
             "description": "The operation unique identifier.",
             "format": "int64",
-            "example": 1234
+            "example": "op-id-123"
           },
           "amount": {
             "type": "number",
             "description": "The calculated payment amount.",
-            "format": "double"
+            "format": "double",
+            "example": 10.0
           },
           "currency": {
             "type": "string",
             "description": "The three-character ISO 4217 currency symbol used for the payment calculation.",
             "nullable": true,
-            "example": "some text"
+            "example": "USD"
           },
           "quantity": {
             "type": "integer",
             "description": "The quantity associated with the payment calculation.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           }
         },
         "additionalProperties": false,
@@ -21045,7 +21047,7 @@
             "type": "boolean",
             "description": "Specifies if the SSO settings are enabled or not.",
             "nullable": true,
-            "example": true
+            "example": false
           },
           "idpSettings": {
             "$ref": "#/components/schemas/SsoIdpSettings"
@@ -21056,7 +21058,8 @@
               "$ref": "#/components/schemas/SsoCertificate"
             },
             "description": "The list of the IdP certificates.",
-            "nullable": true
+            "nullable": true,
+            "example": [ ]
           },
           "idpCertificateAdvanced": {
             "$ref": "#/components/schemas/SsoIdpCertificateAdvanced"
@@ -21065,7 +21068,7 @@
             "type": "string",
             "description": "The SP login label.",
             "nullable": true,
-            "example": "some text"
+            "example": "Single Sign-on"
           },
           "spCertificates": {
             "type": "array",
@@ -21073,7 +21076,8 @@
               "$ref": "#/components/schemas/SsoCertificate"
             },
             "description": "The list of the SP certificates.",
-            "nullable": true
+            "nullable": true,
+            "example": [ ]
           },
           "spCertificateAdvanced": {
             "$ref": "#/components/schemas/SsoSpCertificateAdvanced"
@@ -21084,18 +21088,18 @@
           "hideAuthPage": {
             "type": "boolean",
             "description": "Specifies if the authentication page will be hidden or not.",
-            "example": true
+            "example": false
           },
           "usersType": {
             "type": "integer",
             "description": "The user type.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           },
           "disableEmailVerification": {
             "type": "boolean",
             "description": "Specifies if the email verification is disabled or not.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -21737,13 +21741,13 @@
             "type": "integer",
             "description": "The login history lifetime.",
             "format": "int32",
-            "example": 1234
+            "example": 180
           },
           "auditTrailLifeTime": {
             "type": "integer",
             "description": "The audit trail lifetime.",
             "format": "int32",
-            "example": 1234
+            "example": 180
           },
           "lastModified": {
             "type": "string",
@@ -21771,7 +21775,7 @@
           "hidden": {
             "type": "boolean",
             "description": "The banners visibility flag.",
-            "example": true
+            "example": false
           },
           "lastModified": {
             "type": "string",
@@ -21897,7 +21901,7 @@
           "limitedAccessForUsers": {
             "type": "boolean",
             "description": "Specifies if the Developer Tools access are limited for users or not.",
-            "example": true
+            "example": false
           },
           "lastModified": {
             "type": "string",
@@ -21969,14 +21973,14 @@
             "description": "The regex string to validate a domain.",
             "nullable": true,
             "readOnly": true,
-            "example": "some text"
+            "example": "^[a-z0-9]([a-z0-9-]){1,61}[a-z0-9]$"
           },
           "minLength": {
             "type": "integer",
             "description": "The minimum length of the valid domain.",
             "format": "int32",
             "readOnly": true,
-            "example": 1234
+            "example": 6
           },
           "maxLength": {
             "type": "integer",
@@ -22243,7 +22247,7 @@
             "type": "integer",
             "description": "The tenant ID.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           },
           "name": {
             "type": "string",
@@ -22255,37 +22259,37 @@
             "type": "number",
             "description": "The tenant price.",
             "format": "double",
-            "example": 10
+            "example": 10.0
           },
           "priceCurrencySymbol": {
             "type": "string",
             "description": "The tenant price currency symbol.",
             "nullable": true,
-            "example": "some text"
+            "example": "$"
           },
           "priceISOCurrencySymbol": {
             "type": "string",
             "description": "The tenant price three-character ISO 4217 currency symbol.",
             "nullable": true,
-            "example": "some text"
+            "example": "USD"
           },
           "productId": {
             "type": "string",
             "description": "The tenant product ID.",
             "nullable": true,
-            "example": "1"
+            "example": 64
           },
           "serviceName": {
             "type": "string",
             "description": "The service name.",
             "nullable": true,
-            "example": "some text"
+            "example": "space"
           },
           "serviceGroup": {
             "type": "string",
             "description": "The service group.",
             "nullable": true,
-            "example": "some text"
+            "example": "ai"
           },
           "visible": {
             "type": "boolean",
@@ -22302,69 +22306,69 @@
             "description": "The quota due date.",
             "format": "date-time",
             "nullable": true,
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2021-01-01T00:00:00"
           },
           "features": {
             "type": "string",
             "description": "The tenant quota features.",
             "nullable": true,
-            "example": "some text"
+            "example": "audit,ldap,sso"
           },
           "maxFileSize": {
             "type": "integer",
             "description": "The tenant maximum file size.",
             "format": "int64",
-            "example": 26214400
+            "example": 25000000
           },
           "maxTotalSize": {
             "type": "integer",
             "description": "The tenant maximum total size.",
             "format": "int64",
-            "example": 9223372036854775807
+            "example": 25000000000
           },
           "countUser": {
             "type": "integer",
             "description": "The number of portal users.",
             "format": "int32",
-            "example": 1234
+            "example": 100
           },
           "countRoomAdmin": {
             "type": "integer",
             "description": "The number of portal room administrators.",
             "format": "int32",
-            "example": 1234
+            "example": 10
           },
           "usersInRoom": {
             "type": "integer",
             "description": "The number of room users.",
             "format": "int32",
-            "example": 1234
+            "example": 50
           },
           "countRoom": {
             "type": "integer",
             "description": "The number of rooms.",
             "format": "int32",
-            "example": 1234
+            "example": 500
           },
           "nonProfit": {
             "type": "boolean",
             "description": "Specifies if the tenant quota is nonprofit or not.",
-            "example": true
+            "example": false
           },
           "trial": {
             "type": "boolean",
             "description": "Specifies if the tenant quota is trial or not.",
-            "example": true
+            "example": false
           },
           "free": {
             "type": "boolean",
             "description": "Specifies if the tenant quota is free or not.",
-            "example": true
+            "example": false
           },
           "update": {
             "type": "boolean",
             "description": "Specifies if the tenant quota is updated or not.",
-            "example": true
+            "example": false
           },
           "audit": {
             "type": "boolean",
@@ -22404,7 +22408,7 @@
           "lifetime": {
             "type": "boolean",
             "description": "Specifies if the license has the lifetime settings or not.",
-            "example": true
+            "example": false
           },
           "automationApi": {
             "type": "boolean",
@@ -22414,7 +22418,7 @@
           "custom": {
             "type": "boolean",
             "description": "Specifies if the custom domain URL is available or not.",
-            "example": true
+            "example": false
           },
           "restore": {
             "type": "boolean",
@@ -22445,7 +22449,7 @@
             "type": "integer",
             "description": "The number of free backups within a month.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           },
           "backup": {
             "type": "boolean",
@@ -22456,7 +22460,7 @@
             "type": "integer",
             "description": "The number of AI agents.",
             "format": "int32",
-            "example": 1234
+            "example": 5
           },
           "aiTools": {
             "type": "boolean",
@@ -22608,7 +22612,7 @@
             "type": "integer",
             "description": "The tenant quota.",
             "format": "int64",
-            "example": 1234
+            "example": 10737418240
           },
           "lastRecalculateDate": {
             "type": "string",
@@ -23073,13 +23077,14 @@
               ]
             },
             "description": "The list of the enabled wallet services.",
-            "nullable": true
+            "nullable": true,
+            "example": [ ]
           },
           "lastModified": {
             "type": "string",
             "description": "The date and time when the wallet services settings were last modified.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "1990-01-01T00:00:00Z"
           }
         },
         "additionalProperties": false,
@@ -23139,7 +23144,7 @@
             "type": "integer",
             "description": "The minimum wallet balance at which automatic top-up will be triggered. Must be between 5 and 1000.",
             "format": "int32",
-            "example": 1234
+            "example": 10
           },
           "upToBalance": {
             "maximum": 5000,
@@ -23147,19 +23152,19 @@
             "type": "integer",
             "description": "The maximum wallet balance at which automatic top-up will be triggered. Must be between 6 and 5000.",
             "format": "int32",
-            "example": 1234
+            "example": 100
           },
           "currency": {
             "type": "string",
             "description": "The three-character ISO 4217 currency symbol.",
             "nullable": true,
-            "example": "some text"
+            "example": "USD"
           },
           "lastModified": {
             "type": "string",
             "description": "The date and time when the tenant wallet settings were last modified.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "1990-01-01T00:00:00Z"
           }
         },
         "additionalProperties": false,
