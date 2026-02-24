@@ -20,7 +20,10 @@ public class CreateFolderWithFilesDepthCommand : AsyncCommand<CreateFolderWithFi
         public int Depth { get; set; } = 5;
 
         [CommandOption("--files-count")]
-        public int FilesCount { get; set; } = 200;
+        public int FilesCount { get; set; } = 10;
+
+        [CommandOption("--folders-count")]
+        public int FoldersCount { get; set; } = 5;
 
         [CommandOption("--email")]
         public required string Email { get; set; }
@@ -60,13 +63,13 @@ public class CreateFolderWithFilesDepthCommand : AsyncCommand<CreateFolderWithFi
             settings.FolderId = rootFolder.FirstOrDefault(r => r.Current.RootFolderType is FolderType.USER)!.Current.Id;
         }
 
-        await CreateFolderWithFilesDepth(filesApi, foldersApi, system, settings.FolderId, settings.Depth, settings.FilesCount, token);
+        await CreateFolderWithFilesDepth(filesApi, foldersApi, system, settings.FolderId, settings.Depth, settings.FoldersCount, settings.FilesCount, token);
         return 0;
     }
 
-    private static async Task CreateFolderWithFilesDepth(FilesApi filesApi, FoldersApi foldersApi, Bogus.DataSets.System system, int folderId, int depth, int filesCount, CancellationToken token)
+    private static async Task CreateFolderWithFilesDepth(FilesApi filesApi, FoldersApi foldersApi, Bogus.DataSets.System system, int folderId, int depth, int foldersCount, int filesCount, CancellationToken token)
     {
-        for (var i = 0; i < depth; i++)
+        for (var i = 0; i < foldersCount; i++)
         {
             var newFolder = (await foldersApi.CreateFolderAsync(folderId, new CreateFolder(system.FileName()), token)).Response;
             List<Task> tasks = [];
@@ -77,16 +80,17 @@ public class CreateFolderWithFilesDepthCommand : AsyncCommand<CreateFolderWithFi
                 k++;
                 if (k == 100)
                 {
-                    await Task.WhenAll(tasks);
+                    await  Task.WhenAll(tasks);
                     tasks.Clear();
                     k = 0;
                 }
             }
-
+            
+            await Task.WhenAll(tasks);
             var newDepth = depth - 1;
             if (newDepth > 0)
             {
-                await CreateFolderWithFilesDepth(filesApi, foldersApi, system, newFolder.Id, newDepth, filesCount, token);
+                await CreateFolderWithFilesDepth(filesApi, foldersApi, system, newFolder.Id, newDepth, foldersCount, filesCount, token);
             }
 
             AnsiConsole.MarkupLine($"[green]Folder {folderId} created. Depth: {depth}[/]");
