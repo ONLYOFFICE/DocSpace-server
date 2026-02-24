@@ -680,11 +680,6 @@ internal class FileDao(
                                     properties.FormFilling.OriginalFormId = file.Id;
                                     await fileDao.SaveProperties(file.Id, properties);
 
-                                    var count = await fileStorageService.GetPureSharesCountAsync(currentRoom.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
-                                    if (file.IsForm)
-                                    {
-                                        await socketManager.CreateFormAsync(file, securityContext.CurrentAccount.ID, count <= 1);
-                                    }
                                 }
                             }
                             else

@@ -1903,8 +1903,6 @@ public class FileStorageService //: IFileStorageService
 
             await fileDao.SaveProperties(fileId, properties);
 
-            var count = await GetPureSharesCountAsync(folder.Id, FileEntryType.Folder, ShareFilterType.UserOrGroup, "");
-            await socketManager.CreateFormAsync(file, securityContext.CurrentAccount.ID, count <= 1);
             await socketManager.CreateFileAsync(file);
         }
 
