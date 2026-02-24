@@ -191,6 +191,11 @@ public abstract class EditorController<T>(
             };
 
             formOpenSetup.RootFolder = rootFolder;
+
+            if (inDto.Edit && rootFolder.FolderType == FolderType.FillingFormsRoom)
+            {
+                await fileStorageService.ManageFormFilling(file.Id, FormFillingManageAction.Edit);
+            }
         }
         var quotaExceededScope = await documentServiceHelper.CheckCustomQuotaAsync(rootFolder);
 

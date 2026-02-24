@@ -5174,11 +5174,11 @@ public class FileStorageService //: IFileStorageService
     public async Task ManageFormFilling<T>(T formId, FormFillingManageAction action)
     {
         var fileDao = daoFactory.GetFileDao<T>();
-        var folderDao = daoFactory.GetFolderDao<T>();
         var form = await fileDao.GetFileAsync(formId);
         await ValidateChangeRolesPermission(form);
 
         var properties = await daoFactory.GetFileDao<T>().GetProperties(formId);
+        var room = await DocSpaceHelper.GetParentRoom(form, daoFactory.GetFolderDao<T>());
         switch (action)
         {
             case FormFillingManageAction.Stop:
@@ -5186,7 +5186,6 @@ public class FileStorageService //: IFileStorageService
                 {
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
                 }
-                var room = await DocSpaceHelper.GetParentRoom(form, folderDao);
                 if (room.FolderType == FolderType.VirtualDataRoom)
                 {
                     var role = await fileDao.GetFormRoles(formId).Where(r => !r.Submitted).FirstOrDefaultAsync();
@@ -5222,10 +5221,17 @@ public class FileStorageService //: IFileStorageService
                 {
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
                 }
-                var currentRoom = await DocSpaceHelper.GetParentRoom(form, folderDao);
-                if (currentRoom.FolderType == FolderType.FillingFormsRoom)
+                if (room.FolderType == FolderType.FillingFormsRoom)
                 {
                     properties.FormFilling.StartFilling = true;
+                }
+
+                break;
+
+            case FormFillingManageAction.Edit:
+                if (room.FolderType == FolderType.FillingFormsRoom)
+                {
+                    properties.FormFilling.StartFilling = false;
                 }
 
                 break;
@@ -5235,7 +5241,7 @@ public class FileStorageService //: IFileStorageService
         }
 
         await fileDao.SaveProperties(formId, properties);
-        await socketManager.UpdateFileAsync(form);
+        await socketManager.CreateFileAsync(form);
     }
 
     public async IAsyncEnumerable<FormResultsDto> GetSubmissionsByFormId(int formId)
