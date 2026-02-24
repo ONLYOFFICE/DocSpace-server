@@ -24,36 +24,50 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-namespace ASC.Web.Core;
+namespace ASC.Web.Api.Core;
 
 [Singleton]
-public class WalletStaticStore(StorageFactory storageFactory)
+public class WalletStaticProvider
 {
-    private const string ModuleName = "ai_images";
+    private readonly ConcurrentDictionary<string, string> _cache = new();
 
-    private IDataStore _store;
-    
-    private async ValueTask<IDataStore> GetStoreAsync()
+    private static readonly Assembly _assembly = typeof(WalletStaticProvider).Assembly;
+    private static readonly string _assemblyName = _assembly.GetName().Name;
+
+    private const string DefaultKey = "default";
+
+    public async ValueTask<string> GetImageAsync(string key)
     {
-        if (_store != null)
+        if (_cache.TryGetValue(key, out var img))
         {
-            return _store;
+            return img;
         }
-        
-        _store = await storageFactory.GetStorageAsync(Tenant.DefaultTenant, ModuleName);
-        return _store;
+
+        img = await ReadSvgResourceAsync(key);
+        if (img == null && key != DefaultKey)
+        {
+            img = await GetImageAsync(DefaultKey);
+        }
+
+        if (img != null)
+        {
+            _cache.TryAdd(key, img);
+        }
+
+        return img;
     }
 
-    public async Task<string> GetAiIconUrl(string key)
+    private static async Task<string> ReadSvgResourceAsync(string key)
     {
-        var store = await GetStoreAsync();
+        await using var stream = _assembly.GetManifestResourceStream($"{_assemblyName}.img.{key}.svg");
 
-        var uri = await store.GetPreSignedUriAsync(
-            string.Empty, 
-            $"{key}.svg", 
-            TimeSpan.MaxValue, 
-            null);
-        
-        return uri.ToString();
+        if (stream == null)
+        {
+            return null;
+        }
+
+        using var reader = new StreamReader(stream);
+
+        return await reader.ReadToEndAsync();
     }
 }

@@ -39,7 +39,7 @@ public class AiEntryPricingDto<T>
     public required string Id { get; init; }
     public required string Alias { get; init; }
     public required string Provider { get; init; }
-    public required string IconUrl { get; init; }
+    public required string Image { get; init; }
     public required T Price { get; init; }
 }
 
@@ -57,8 +57,8 @@ public class AiEmbeddingPriceDto
 public class AiWebSearchPricingDto
 {
     public required string Provider { get; init; }
-    public required string SearchIconUrl { get; init; }
-    public required string CrawlingIconUrl { get; init; }
+    public required string SearchImage { get; init; }
+    public required string CrawlingImage { get; init; }
     public decimal Search { get; init; }
     public decimal Contents { get; init; }
 }

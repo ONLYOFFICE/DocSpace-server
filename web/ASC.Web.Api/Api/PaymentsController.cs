@@ -65,7 +65,7 @@ public class PaymentController(
     CommonLinkUtility commonLinkUtility,
     DocumentBuilderTaskManager<CustomerOperationsReportTask, int, CustomerOperationsReportTaskData> documentBuilderTaskManager,
     IServiceProvider serviceProvider,
-    WalletStaticStore walletStaticStore)
+    WalletStaticProvider walletStaticProvider)
     : ControllerBase
 {
     private readonly int _maxCount = 10;
@@ -1226,13 +1226,13 @@ public class PaymentController(
         var icons = new Dictionary<string, string>();
         foreach (var provider in providers)
         {
-            icons[provider] = await walletStaticStore.GetAiIconUrl(provider);
+            icons[provider] = await walletStaticProvider.GetImageAsync(provider);
         }
 
         var chat = aiPrices.Chat.Select(model => new AiEntryPricingDto<AiChatPriceDto>
         {
             Id = model.Id,
-            IconUrl = icons[model.OwnedBy.ToLower()],
+            Image = icons[model.OwnedBy.ToLower()],
             Alias = model.Alias,
             Provider = model.Provider,
             Price = new AiChatPriceDto
@@ -1242,19 +1242,16 @@ public class PaymentController(
             }
         }).ToList();
 
-        var embeddingIcon = await walletStaticStore.GetAiIconUrl("embedding");
+        var embeddingImage = await walletStaticProvider.GetImageAsync("embedding");
 
         var embedding = aiPrices.Embedding.Select(e => new AiEntryPricingDto<AiEmbeddingPriceDto>
         {
             Id = e.Id,
             Alias = e.Alias,
             Provider = e.Provider,
-            IconUrl = embeddingIcon,
+            Image = embeddingImage,
             Price = new AiEmbeddingPriceDto { Prompt = e.Price.Prompt * 1_000_000 }
         }).ToList();
-
-        var webSearchIcon = await walletStaticStore.GetAiIconUrl("search");
-        var crawlingIcon = await walletStaticStore.GetAiIconUrl("crawling");
 
         return new AiPricesDto
         {
@@ -1262,8 +1259,8 @@ public class PaymentController(
             Embedding = embedding,
             WebSearch = new AiWebSearchPricingDto
             {
-                SearchIconUrl = webSearchIcon,
-                CrawlingIconUrl = crawlingIcon,
+                SearchImage = await walletStaticProvider.GetImageAsync("search"),
+                CrawlingImage = await walletStaticProvider.GetImageAsync("crawling"),
                 Provider = aiPrices.WebSearch.Provider,
                 Search = aiPrices.WebSearch.Search,
                 Contents = aiPrices.WebSearch.Contents
