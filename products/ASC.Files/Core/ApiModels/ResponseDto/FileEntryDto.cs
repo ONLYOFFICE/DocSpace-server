@@ -59,13 +59,13 @@ public abstract class FileEntryBaseDto
     /// <summary>
     /// Provides information about the employee who shared the file or folder.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"displayName": "John Doe"}</example>
     public EmployeeDto SharedBy { get; set; }
 
     /// <summary>
     /// The information about the employee who owns the file entry.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"displayName": "John Doe"}</example>
     public EmployeeDto OwnedBy { get; set; }
 
     /// <summary>
@@ -102,7 +102,7 @@ public abstract class FileEntryBaseDto
     /// <summary>
     /// The file entry author.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"displayName": "John Doe"}</example>
     public EmployeeDto CreatedBy { get; set; }
 
     /// <summary>
@@ -136,7 +136,7 @@ public abstract class FileEntryBaseDto
     /// <summary>
     /// The user who updated the file entry.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"displayName": "John Doe"}</example>
     public EmployeeDto UpdatedBy { get; set; }
 
     /// <summary>
@@ -249,7 +249,7 @@ public abstract class FileEntryDto<T> : FileEntryBaseDto
     /// <summary>
     /// The actions that can be performed with the file entry.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"Read": true, "Edit": false, "Delete": false}</example>
     public IDictionary<FilesSecurityActions, bool> Security { get; set; }
 
     /// <summary>

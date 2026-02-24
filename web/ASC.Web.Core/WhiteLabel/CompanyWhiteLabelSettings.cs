@@ -34,7 +34,7 @@ public class CompanyWhiteLabelSettingsWrapper
     /// <summary>
     /// The company white label settings.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"companyName": "ONLYOFFICE", "site": "https://www.onlyoffice.com", "email": "support@onlyoffice.com", "address": "Lubanas st. 125a-25", "phone": "+7 843 2271372", "isLicensor": true}</example>
     public CompanyWhiteLabelSettings Settings { get; set; }
 }
 

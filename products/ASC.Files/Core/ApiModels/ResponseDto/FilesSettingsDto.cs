@@ -100,7 +100,7 @@ public class FilesSettingsDto
     /// <summary>
     /// The list of the convertible extensions.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{".doc": [".docx", ".pdf"], ".xls": [".xlsx", ".pdf"]}</example>
     public IDictionary<string, List<string>> ExtsConvertible { get; set; }
 
     /// <summary>
@@ -160,7 +160,7 @@ public class FilesSettingsDto
     /// <summary>
     /// The internal file formats.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"Document": ".docx", "Spreadsheet": ".xlsx", "Presentation": ".pptx"}</example>
     public Dictionary<FileType, string> InternalFormats { get; set; }
 
     /// <summary>
@@ -305,7 +305,7 @@ public class FilesSettingsDto
     /// <summary>
     /// The default order of files.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"sortedBy": "DateAndTime", "isAsc": false}</example>
     public OrderBy DefaultOrder { get; set; }
 
     /// <summary>
@@ -347,7 +347,7 @@ public class FilesSettingsDto
     /// <summary>
     /// The auto-clearing setting parameters.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"isAutoCleanUp": true, "gap": 3}</example>
     public AutoCleanUpData AutomaticallyCleanUp { get; set; }
 
     /// <summary>

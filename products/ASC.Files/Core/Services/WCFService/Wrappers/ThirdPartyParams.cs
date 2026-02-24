@@ -34,7 +34,7 @@ public class ThirdPartyParams
     /// <summary>
     /// The authentication data.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"url": "https://storage.example.com", "login": "user", "password": "pass", "token": "token123"}</example>
     [JsonPropertyName("auth_data")]
     public AuthData AuthData { get; init; }
 

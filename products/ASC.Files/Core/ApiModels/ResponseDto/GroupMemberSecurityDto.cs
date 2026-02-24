@@ -34,7 +34,7 @@ public class GroupMemberSecurityRequestDto
     /// <summary>
     /// The group member parameters.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"displayName": "John Doe"}</example>
     public required EmployeeFullDto User { get; init; }
 
     /// <summary>

@@ -34,7 +34,7 @@ public class TenantWalletSettingsWrapper
     /// <summary>
     /// The tenant wallet settings.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"enabled": true, "minBalance": 10, "upToBalance": 100, "currency": "USD"}</example>
     public TenantWalletSettings Settings { get; set; }
 }
 

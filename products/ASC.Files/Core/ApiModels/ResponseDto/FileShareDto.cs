@@ -41,26 +41,26 @@ public class FileShareDto
     /// <summary>
     /// The user who has the access to the specified file.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"displayName": "John Doe"}</example>
     [Obsolete]
     public object SharedTo { get; set; }
 
     /// <summary>
     /// The user who has the access to the specified file.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"displayName": "John Doe"}</example>
     public EmployeeFullDto SharedToUser { get; set; }
 
     /// <summary>
     /// The user who has the access to the specified file.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"id": "00000000-0000-0000-0000-000000000000", "name": "Marketing"}</example>
     public GroupSummaryDto SharedToGroup { get; set; }
 
     /// <summary>
     /// The user who has the access to the specified file.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"id": "00000000-0000-0000-0000-000000000000", "title": "Shared Document", "shareLink": "http://localhost/share/abc123"}</example>
     public FileShareLink SharedLink { get; set; }
 
     /// <summary>

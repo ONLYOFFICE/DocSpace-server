@@ -71,6 +71,6 @@ public class TenantAuditSettingsWrapper
     /// <summary>
     /// The tenant audit settings parameters.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"loginHistoryLifeTime": 180, "auditTrailLifeTime": 180}</example>
     public TenantAuditSettings Settings { get; set; }
 }

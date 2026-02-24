@@ -195,13 +195,13 @@ public class FileDto<T> : FileEntryDto<T>
     /// <summary>
     /// The file draft information with its location.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"folderId": 10, "folderTitle": "In Process", "fileId": 123, "fileTitle": "Draft.pdf"}</example>
     public DraftLocation<T> DraftLocation { get; set; }
 
     /// <summary>
     /// The file accessibility.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"ImageView": true, "MediaView": true, "WebView": true}</example>
     public IDictionary<Accessibility, bool> ViewAccessibility { get; set; }
 
     /// <summary>

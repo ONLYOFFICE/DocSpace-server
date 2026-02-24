@@ -46,7 +46,7 @@ public record HistoryDto
     /// <summary>
     /// The action initiator.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"displayName": "John Doe"}</example>
     public required EmployeeDto Initiator { get; init; }
 
     /// <summary>
@@ -58,7 +58,7 @@ public record HistoryDto
     /// <summary>
     /// The history data.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"fileId": 123, "title": "document.docx"}</example>
     public required HistoryData Data { get; init; }
 
     /// <summary>

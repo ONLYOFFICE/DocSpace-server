@@ -34,7 +34,7 @@ public class MailWhiteLabelSettingsWrapper
     /// <summary>
     /// The mail white label settings.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"footerEnabled": true, "footerSocialEnabled": true}</example>
     public MailWhiteLabelSettings Settings { get; set; }
 }
 

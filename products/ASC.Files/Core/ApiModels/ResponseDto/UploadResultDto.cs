@@ -40,7 +40,7 @@ public class UploadResultDto
     /// <summary>
     /// The uploaded data.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"id": 10, "title": "document.docx"}</example>
     public object Data { get; set; }
 
     /// <summary>

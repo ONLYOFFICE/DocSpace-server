@@ -34,7 +34,7 @@ public class AdditionalWhiteLabelSettingsWrapper
     /// <summary>
     /// The additional white label settings.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"startDocsEnabled": true, "helpCenterEnabled": true, "feedbackAndSupportEnabled": true, "userForumEnabled": true, "videoGuidesEnabled": true, "licenseAgreementsEnabled": true}</example>
     public AdditionalWhiteLabelSettings Settings { get; set; }
 }
 

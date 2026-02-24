@@ -229,7 +229,7 @@ public class EmailValidationKeyModel
     /// <summary>
     /// The room ID.
     /// </summary>
-    /// <example>null</example>
+    /// <example>1</example>
     public string RoomId { get; init; }
 
     public void Deconstruct(out string key, out EmployeeType? emplType, out string email, out Guid? uiD, out ConfirmType? type, out string first, out string encEmail)

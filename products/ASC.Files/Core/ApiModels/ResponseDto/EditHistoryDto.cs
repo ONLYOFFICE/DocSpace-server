@@ -58,13 +58,13 @@ public class EditHistoryDto
     /// <summary>
     /// The user who updated a file.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"id": "00000000-0000-0000-0000-000000000000", "name": "John Doe"}</example>
     public EditHistoryAuthor User { get; set; }
 
     /// <summary>
     /// The document version creation date.
     /// </summary>
-    /// <example>null</example>
+    /// <example>2021-01-01T00:00:00.0000000Z</example>
     public ApiDateTime Created { get; set; }
 
     /// <summary>

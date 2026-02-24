@@ -61,13 +61,13 @@ public class EmployeeFullDto : EmployeeDto
     /// <summary>
     /// The list of user contacts.
     /// </summary>
-    /// <example>null</example>
+    /// <example>[{"type": "email", "value": "user@example.com"}]</example>
     public List<Contact> Contacts { get; set; }
 
     /// <summary>
     /// The user birthday.
     /// </summary>
-    /// <example>null</example>
+    /// <example>1990-06-07T00:00:00.0000000Z</example>
     public ApiDateTime Birthday { get; set; }
 
     /// <summary>
@@ -91,7 +91,7 @@ public class EmployeeFullDto : EmployeeDto
     /// <summary>
     /// The date when the user account was terminated.
     /// </summary>
-    /// <example>null</example>
+    /// <example>2025-06-01T00:00:00.0000000Z</example>
     public ApiDateTime Terminated { get; set; }
 
     /// <summary>
@@ -103,13 +103,13 @@ public class EmployeeFullDto : EmployeeDto
     /// <summary>
     /// The user registration date.
     /// </summary>
-    /// <example>null</example>
+    /// <example>2020-01-01T00:00:00.0000000Z</example>
     public ApiDateTime WorkFrom { get; set; }
 
     /// <summary>
     /// The list of user groups.
     /// </summary>
-    /// <example>null</example>
+    /// <example>[{"id": "00000000-0000-0000-0000-000000000000", "name": "Marketing"}]</example>
     public List<GroupSummaryDto> Groups { get; set; }
 
     /// <summary>
@@ -175,7 +175,7 @@ public class EmployeeFullDto : EmployeeDto
     /// <summary>
     /// The user mobile phone number.
     /// </summary>
-    /// <example>null</example>
+    /// <example>+1 (555) 123-4567</example>
     public string MobilePhone { get; set; }
 
     /// <summary>
@@ -193,13 +193,13 @@ public class EmployeeFullDto : EmployeeDto
     /// <summary>
     /// The user theme settings.
     /// </summary>
-    /// <example>null</example>
+    /// <example>0</example>
     public DarkThemeSettingsType? Theme { get; set; }
 
     /// <summary>
     /// The user quota limit.
     /// </summary>
-    /// <example>null</example>
+    /// <example>1073741824</example>
     public long? QuotaLimit { get; set; }
 
     /// <summary>
@@ -211,49 +211,49 @@ public class EmployeeFullDto : EmployeeDto
     /// <summary>
     /// Specifies if the user has access rights.
     /// </summary>
-    /// <example>null</example>
+    /// <example>false</example>
     public bool? Shared { get; set; }
 
     /// <summary>
     /// Specifies if the user has a custom quota or not.
     /// </summary>
-    /// <example>null</example>
+    /// <example>false</example>
     public bool? IsCustomQuota { get; set; }
 
     /// <summary>
     /// The current login event ID.
     /// </summary>
-    /// <example>null</example>
+    /// <example>123</example>
     public int? LoginEventId { get; set; }
 
     /// <summary>
     /// The auth cookie lifetime in seconds.
     /// </summary>
-    /// <example>null</example>
+    /// <example>3600</example>
     public double? AuthCookieLifetime { get; set; }
 
     /// <summary>
     /// The user who created the current user.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"displayName": "John Doe"}</example>
     public EmployeeDto CreatedBy { get; set; }
 
     /// <summary>
     /// The user registration date.
     /// </summary>
-    /// <example>null</example>
+    /// <example>2020-01-01T00:00:00.0000000Z</example>
     public ApiDateTime RegistrationDate { get; set; }
 
     /// <summary>
     /// Specifies if the user has a personal folder or not.
     /// </summary>
-    /// <example>null</example>
+    /// <example>true</example>
     public bool? HasPersonalFolder { get; set; }
 
     /// <summary>
     /// Indicates whether the user has enabled two-factor authentication (TFA) using an authentication app.
     /// </summary>
-    /// <example>null</example>
+    /// <example>false</example>
     public bool? TfaAppEnabled { get; set; }
 }
 [Scope]

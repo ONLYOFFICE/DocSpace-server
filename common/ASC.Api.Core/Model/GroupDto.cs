@@ -72,13 +72,13 @@ public class GroupDto
     /// <summary>
     /// The group manager full information.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"displayName": "John Doe"}</example>
     public EmployeeFullDto Manager { get; set; }
 
     /// <summary>
     /// The list of group members.
     /// </summary>
-    /// <example>null</example>
+    /// <example>[{"displayName": "John Doe"}]</example>
     public List<EmployeeFullDto> Members { get; set; }
 
     /// <summary>

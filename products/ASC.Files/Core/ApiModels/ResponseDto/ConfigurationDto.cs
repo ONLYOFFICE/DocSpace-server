@@ -34,19 +34,19 @@ public class ConfigurationDto<T>
     /// <summary>
     /// The document configuration.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"fileType": "docx", "key": "doc-key-123", "title": "Document Title"}</example>
     public required DocumentConfigDto Document { get; set; }
 
     /// <summary>
     /// The document type.
     /// </summary>
-    /// <example>null</example>
+    /// <example>word</example>
     public required string DocumentType { get; set; }
 
     /// <summary>
     /// The editor configuration.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"lang": "en-US", "mode": "edit"}</example>
     public required EditorConfigurationDto EditorConfig { get; set; }
 
     /// <summary>
@@ -77,7 +77,7 @@ public class ConfigurationDto<T>
     /// <summary>
     /// The file parameters.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"id": 10, "title": "document.docx"}</example>
     public required FileDto<T> File { get; set; }
 
     /// <summary>
@@ -119,7 +119,7 @@ public class ConfigurationDto<T>
     /// <summary>
     /// The generation tool call state. Used to run the agent flow in the editor.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"toolName": "generate_docx", "parameters": {"description": "Create a report"}}</example>
     public EditorToolCallStateDto GenerationToolCallState { get; set; }
 }
 

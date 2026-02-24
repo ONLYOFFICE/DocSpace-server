@@ -40,19 +40,19 @@ public class FillingFormResultDto<T>
     /// <summary>
     /// The file with the completed forms.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"id": 10, "title": "completed_form.pdf"}</example>
     public FileDto<T> CompletedForm { get; set; }
 
     /// <summary>
     /// The file with the original forms.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"id": 5, "title": "form_template.pdf"}</example>
     public FileDto<T> OriginalForm { get; set; }
 
     /// <summary>
     /// The manager who is filling the form.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"displayName": "John Doe"}</example>
     public EmployeeFullDto Manager { get; set; }
 
     /// <summary>

@@ -46,7 +46,7 @@ public class FolderContentDto<T>
     /// <summary>
     /// The current folder information.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"id": 10, "title": "My Documents"}</example>
     public FolderDto<T> Current { get; set; }
 
     /// <summary>

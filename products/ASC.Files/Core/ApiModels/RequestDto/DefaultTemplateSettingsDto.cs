@@ -57,7 +57,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto
         /// <summary>
         /// File to replace template with
         /// </summary>
-        /// <example>null</example>
+        /// <example>binary file data</example>
         public required IFormFile File { get; set; }
     }
 }

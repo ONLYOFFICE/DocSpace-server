@@ -276,7 +276,7 @@ public class EditHistoryDataDto
     /// <summary>
     /// The object of the previous version of the document.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"url": "https://example.com/prev.docx", "key": "prev-doc-key"}</example>
     public EditHistoryUrl Previous { get; set; }
 
     /// <summary>

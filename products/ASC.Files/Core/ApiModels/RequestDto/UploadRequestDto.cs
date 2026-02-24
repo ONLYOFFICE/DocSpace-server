@@ -34,7 +34,7 @@ public class UploadRequestDto : IModelWithFile, IDisposable
     /// <summary>
     /// The file to be uploaded.
     /// </summary>
-    /// <example>null</example>
+    /// <example>binary file data</example>
     public IFormFile File { get; set; }
 
     /// <summary>
@@ -79,7 +79,7 @@ public class UploadRequestDto : IModelWithFile, IDisposable
     /// <summary>
     /// The request input stream.
     /// </summary>
-    /// <example>null</example>
+    /// <example>binary stream data</example>
     public Stream Stream
     {
         get => File?.OpenReadStream() ?? _stream;

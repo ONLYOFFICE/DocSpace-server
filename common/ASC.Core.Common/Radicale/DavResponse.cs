@@ -46,13 +46,13 @@ public class DavResponse
     /// <summary>
     /// The link to the CardDav address book.
     /// </summary>
-    /// <example>null</example>
+    /// <example>https://dav.example.com/addressbooks/user1/</example>
     public string Data { get; set; }
 
     /// <summary>
     /// The error message of creating a CardDav address book.
     /// </summary>
-    /// <example>null</example>
+    /// <example>Error message</example>
     public string Error { get; set; }
 
     public override string ToString()

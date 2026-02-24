@@ -105,7 +105,7 @@ public class SsoSettingsV2 : ISettings<SsoSettingsV2>
     /// <summary>
     /// The SSO IdP settings.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"entityId": "", "ssoUrl": "", "ssoBinding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST", "sloUrl": "", "sloBinding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST", "nameIdFormat": "urn:oasis:names:tc:SAML:2.0:nameid-format:transient"}</example>
     public SsoIdpSettings IdpSettings { get; set; }
 
     /// <summary>
@@ -117,7 +117,7 @@ public class SsoSettingsV2 : ISettings<SsoSettingsV2>
     /// <summary>
     /// The IdP advanced certificate.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"verifyAlgorithm": "RSA_SHA1", "verifyAuthResponsesSign": false, "verifyLogoutRequestsSign": false, "verifyLogoutResponsesSign": false, "decryptAlgorithm": "AES_128", "decryptAssertions": false}</example>
     public SsoIdpCertificateAdvanced IdpCertificateAdvanced { get; set; }
 
     /// <summary>
@@ -135,13 +135,13 @@ public class SsoSettingsV2 : ISettings<SsoSettingsV2>
     /// <summary>
     /// The SP advanced certificate.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"signingAlgorithm": "RSA_SHA1", "signAuthRequests": false, "signLogoutRequests": false, "signLogoutResponses": false, "encryptAlgorithm": "AES_128", "encryptAssertions": false, "decryptAlgorithm": "AES_128"}</example>
     public SsoSpCertificateAdvanced SpCertificateAdvanced { get; set; }
 
     /// <summary>
     /// The SSO field mapping.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"firstName": "givenName", "lastName": "sn", "email": "mail", "title": "title", "location": "l", "phone": "mobile"}</example>
     public SsoFieldMapping FieldMapping { get; set; }
 
     /// <summary>

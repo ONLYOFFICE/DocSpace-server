@@ -46,7 +46,7 @@ public class RoomTemplateDto
     /// <summary>
     /// The room template logo.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"tmpFile": "temp_logo.png", "x": 0, "y": 0, "width": 100, "height": 100}</example>
     public LogoRequest Logo { get; set; }
 
     /// <summary>

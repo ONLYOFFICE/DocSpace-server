@@ -76,7 +76,7 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <summary>
     /// The folder logo.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"original": "", "large": "", "medium": "", "small": ""}</example>
     public Logo Logo { get; set; }
 
     /// <summary>
@@ -112,13 +112,13 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <summary>
     /// The room data lifetime settings of the folder.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"value": 12, "deletePermanently": false}</example>
     public RoomDataLifetimeDto Lifetime { get; set; }
 
     /// <summary>
     /// The watermark settings of the folder.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"enabled": false}</example>
     public WatermarkDto Watermark { get; set; }
 
     /// <summary>

@@ -59,19 +59,19 @@ public class UpdateRoomRequest
     /// <summary>
     /// The room data lifetime information.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"value": 12, "deletePermanently": false}</example>
     public RoomDataLifetimeDto Lifetime { get; set; }
 
     /// <summary>
     /// The watermark settings.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"enabled": false}</example>
     public WatermarkRequestDto Watermark { get; set; }
 
     /// <summary>
     /// The room logo.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"tmpFile": "temp_logo.png", "x": 0, "y": 0, "width": 100, "height": 100}</example>
     public LogoRequest Logo { get; set; }
 
     /// <summary>
@@ -83,21 +83,21 @@ public class UpdateRoomRequest
     /// <summary>
     /// The room color.
     /// </summary>
-    /// <example>null</example>
+    /// <example>FF5733</example>
     [StringLength(6)]
     public string Color { get; set; }
 
     /// <summary>
     /// The room cover.
     /// </summary>
-    /// <example>null</example>
+    /// <example>cover1</example>
     [StringLength(50)]
     public string Cover { get; set; }
     
     /// <summary>
     /// The chat settings.
     /// </summary>
-    /// <example>null</example>
+    /// <example>{"providerId": 1, "modelId": "gpt-4", "prompt": "You are a helpful assistant."}</example>
     public ChatSettings ChatSettings { get; set; }
 }
 
