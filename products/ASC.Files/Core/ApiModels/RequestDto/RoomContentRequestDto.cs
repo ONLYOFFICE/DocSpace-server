@@ -140,6 +140,7 @@ public class RoomContentRequestDto
     /// <summary>
     /// The group ID
     /// </summary>
+    /// <example>1</example>
     [FromQuery(Name = "groupId")]
     public int? GroupId { get; set; }
 }

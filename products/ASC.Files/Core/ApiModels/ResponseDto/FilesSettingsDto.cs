@@ -383,6 +383,7 @@ public class FilesSettingsDto
     /// <summary>
     /// Specifies whether the grouping of rooms is enabled or not.
     /// </summary>
+    /// <example>true</example>
     public bool OrganizeRoomsGrouping { get; set; }
     
     /// <summary>
