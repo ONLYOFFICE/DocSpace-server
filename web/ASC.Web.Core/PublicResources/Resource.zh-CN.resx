@@ -156,9 +156,6 @@
   <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
     <value>计量单位</value>
   </data>
-  <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
-    <value>Tokens</value>
-  </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
     <value>备份</value>
   </data>

@@ -156,14 +156,17 @@
   <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
     <value>Мерна единица</value>
   </data>
-  <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
-    <value>Токени</value>
-  </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
     <value>Резервно копие</value>
   </data>
+  <data name="AccountingCustomerOperationServiceUOM_chat" xml:space="preserve">
+    <value>Токени</value>
+  </data>
   <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
     <value>ГБ</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_embedding" xml:space="preserve">
+    <value>Токени</value>
   </data>
   <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
     <value>Отчет за потребителски операции ({0}-{1})</value>

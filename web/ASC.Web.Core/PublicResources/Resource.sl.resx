@@ -156,14 +156,17 @@
   <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
     <value>Merska enota</value>
   </data>
-  <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
-    <value>Žetoni</value>
-  </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
     <value>Varnostno kopiraj</value>
   </data>
+  <data name="AccountingCustomerOperationServiceUOM_chat" xml:space="preserve">
+    <value>Žetoni</value>
+  </data>
   <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
     <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_embedding" xml:space="preserve">
+    <value>Žetoni</value>
   </data>
   <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
     <value>Poročilo o poslovanju stranke ({0}-{1})</value>

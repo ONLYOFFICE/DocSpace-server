@@ -28,8 +28,23 @@ namespace ASC.Web.Core;
 
 public class WalletServiceDescriptionManager()
 {
-    public static (string, string) GetServiceDescriptionAndUom(string serviceName)
+    private static readonly Dictionary<string, string> _mapping = new()
     {
+        { "chat", "total_tokens" },
+        { "embedding", "prompt_tokens" },
+        { "search", "num_results" },
+    };
+
+    public static (string, string, int) GetServiceDescriptionAndUom(Operation operation, string filterServiceName, Dictionary<string, string> metadata)
+    {
+        if (operation == null)
+        {
+            return (string.Empty, string.Empty, 0);
+        }
+
+        var serviceName = operation.Service;
+        var quantity = operation.Quantity;
+
         // for testing purposes
         if (serviceName != null && serviceName.StartsWith("disk-storage"))
         {
@@ -38,11 +53,33 @@ public class WalletServiceDescriptionManager()
 
         if (string.IsNullOrEmpty(serviceName))
         {
+            if (!string.IsNullOrEmpty(filterServiceName))
+            {
+                serviceName = filterServiceName;
+            }
+
+            if (metadata != null && metadata.TryGetValue(BillingClient.MetadataType, out var type))
+            {
+                serviceName = type;
+
+                if (_mapping.TryGetValue(type, out var quantityField) &&
+                    metadata.TryGetValue(quantityField, out var quantityStr) &&
+                    int.TryParse(quantityStr, out var quantityValue))
+                {
+                    quantity = quantityValue;
+                }
+            }
+        }
+
+        if (string.IsNullOrEmpty(serviceName))
+        {
             serviceName = "top-up";
+            quantity = 0;
         }
 
         return (Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{serviceName}"),
-            Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceUOM_{serviceName}"));
+            Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceUOM_{serviceName}"),
+            quantity);
     }
 
     public static string GetServiceDetails(Dictionary<string, string> metadata)
@@ -57,6 +94,6 @@ public class WalletServiceDescriptionManager()
             return details;
         }
 
-        return metadata.TryGetValue(BillingClient.MetadataType, out var type) ? type : string.Empty;
+        return metadata.TryGetValue(BillingClient.MetadataModel, out var model) ? model : string.Empty;
     }
 }

@@ -156,14 +156,17 @@
   <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
     <value>Đơn vị đo</value>
   </data>
-  <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
-    <value>Token</value>
-  </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
     <value>Sao lưu</value>
   </data>
+  <data name="AccountingCustomerOperationServiceUOM_chat" xml:space="preserve">
+    <value>Token</value>
+  </data>
   <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
     <value>GB</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_embedding" xml:space="preserve">
+    <value>Token</value>
   </data>
   <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
     <value>Báo cáo hoạt động khách hàng ({0}-{1})</value>

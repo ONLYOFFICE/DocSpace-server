@@ -156,14 +156,17 @@
   <data name="AccountingCustomerOperationServiceUnit" xml:space="preserve">
     <value>Unité de mesure</value>
   </data>
-  <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
-    <value>Jetons</value>
-  </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
     <value>Sauvegarde</value>
   </data>
+  <data name="AccountingCustomerOperationServiceUOM_chat" xml:space="preserve">
+    <value>Jetons</value>
+  </data>
   <data name="AccountingCustomerOperationServiceUOM_disk-storage" xml:space="preserve">
     <value>Go</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_embedding" xml:space="preserve">
+    <value>Jetons</value>
   </data>
   <data name="AccountingCustomerOperationsReportName" xml:space="preserve">
     <value>Rapport sur les opérations clients ({0}-{1})</value>

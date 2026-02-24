@@ -56,7 +56,7 @@ public class ReportDto
     /// </summary>
     public int CurrentPage { get; set; }
 
-    public ReportDto(Report report, ApiDateTimeHelper apiDateTimeHelper, Dictionary<string, string> participantDisplayNames, string serviceName)
+    public ReportDto(Report report, ApiDateTimeHelper apiDateTimeHelper, Dictionary<string, string> participantDisplayNames, string filterServiceName)
     {
         Offset = report.Offset;
         Limit = report.Limit;
@@ -70,7 +70,7 @@ public class ReportDto
         {
             foreach (var operation in report.Collection)
             {
-                Collection.Add(new OperationDto(operation, apiDateTimeHelper, participantDisplayNames, serviceName));
+                Collection.Add(new OperationDto(operation, apiDateTimeHelper, participantDisplayNames, filterServiceName));
             }
         }
     }
@@ -126,16 +126,16 @@ public class OperationDto
     /// </summary>
     public string ParticipantDisplayName { get; set; }
 
-    public OperationDto(Operation operation, ApiDateTimeHelper apiDateTimeHelper, Dictionary<string, string> participantDisplayNames, string serviceName)
+    public OperationDto(Operation operation, ApiDateTimeHelper apiDateTimeHelper, Dictionary<string, string> participantDisplayNames, string filterServiceName)
     {
-        var (description, unitOfMeasurement) = WalletServiceDescriptionManager.GetServiceDescriptionAndUom(operation.Service ?? serviceName);
+        var (description, unitOfMeasurement, quantity) = WalletServiceDescriptionManager.GetServiceDescriptionAndUom(operation, filterServiceName, operation.Metadata);
 
         Date = apiDateTimeHelper.Get(operation.Date);
         Service = operation.Service;
         Description = description;
         Details = WalletServiceDescriptionManager.GetServiceDetails(operation.Metadata);
         ServiceUnit = unitOfMeasurement;
-        Quantity = operation.Quantity;
+        Quantity = quantity;
         Currency = operation.Currency;
         Credit = operation.Credit;
         Debit = operation.Debit;

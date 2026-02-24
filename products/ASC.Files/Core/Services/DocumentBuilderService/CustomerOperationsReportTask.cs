@@ -209,20 +209,16 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
 
             foreach (var operation in report.Collection)
             {
-                var (description, unitOfMeasurement) = WalletServiceDescriptionManager.GetServiceDescriptionAndUom(operation.Service ?? filter.ServiceName);
+                var (description, unitOfMeasurement, quantity) = WalletServiceDescriptionManager.GetServiceDescriptionAndUom(operation, filter.ServiceName, operation.Metadata);
 
                 operation.Description = description;
                 operation.Details = WalletServiceDescriptionManager.GetServiceDetails(operation.Metadata);
                 operation.ServiceUnit = unitOfMeasurement;
+                operation.Quantity = quantity;
                 operation.Date = tenantUtil.DateTimeFromUtc(operation.Date);
                 operation.ParticipantDisplayName = operation.ParticipantName != null && participantDisplayNames.TryGetValue(operation.ParticipantName, out var value)
                     ? value
                     : operation.ParticipantName;
-
-                if (string.IsNullOrEmpty(operation.Service))
-                {
-                    operation.Quantity = 0;
-                }
             }
 
             yield return report.Collection;
