@@ -204,7 +204,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Units.
+        ///   Looks up a localized string similar to AI Credits.
         /// </summary>
         public static string AccountingCustomerOperationServiceUOM_ai_tools {
             get {

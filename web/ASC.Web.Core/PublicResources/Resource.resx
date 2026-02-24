@@ -166,7 +166,7 @@
     <value>Unit of Measurement</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
-    <value>Units</value>
+    <value>AI Credits</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
     <value>Backup</value>
