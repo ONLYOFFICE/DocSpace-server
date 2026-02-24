@@ -136,4 +136,10 @@ public class RoomContentRequestDto
     /// <example>My Document</example>
     [FromQuery(Name = "filterValue")]
     public string Text { get; set; }
+
+    /// <summary>
+    /// The group ID
+    /// </summary>
+    [FromQuery(Name = "groupId")]
+    public int? GroupId { get; set; }
 }

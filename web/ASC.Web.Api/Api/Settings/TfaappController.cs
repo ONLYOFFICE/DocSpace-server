@@ -112,7 +112,7 @@ public class TfaappController(
     [SwaggerResponse(200, "True if the code is valid", typeof(bool))]
     [HttpPost("tfaapp/validate")]
     [AllowNotPayment]
-    [Authorize(AuthenticationSchemes = "confirm", Roles = "TfaActivation,TfaAuth,Everyone")]
+    [Authorize(AuthenticationSchemes = "confirm", Roles = "TfaActivation,TfaAuth")]
     public async Task<bool> TfaValidateAuthCode(TfaValidateRequestsDto inDto)
     {
         await securityContext.AuthByClaimAsync();

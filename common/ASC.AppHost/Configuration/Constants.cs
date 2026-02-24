@@ -50,6 +50,8 @@ public static class Constants
     public const int NotifyPort = 5005;
     public const int StudioNotifyPort = 5006;
     public const int OpensearchPort = 9200;
+    public const int DocSpaceMcpPort = 8000;
+
     public const int TelegramPort = 5050;
     
     public const string HostDockerInternal = "host.docker.internal";
@@ -57,6 +59,8 @@ public static class Constants
     public const string EditorsContainer = "onlyoffice-editors";
     public const string OpensearchContainer = "opensearch";
     public const string SocketIoContainer = "onlyoffice-socketIO";
+    public const string DocSpaceMcpContainer = "onlyoffice-docspace-mcp";
+
     public const string IdentityRegistrationContainer = "onlyoffice-identity-registration";
     public const string IdentityAuthorizationContainer = "onlyoffice-identity-authorization";
 }

@@ -231,12 +231,15 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
             {
                 var value = checkType.GetMember(enumValue.ToString())[0];
                 var enumAttribute = value.GetCustomAttributes<DescriptionAttribute>().FirstOrDefault();
+
+                enumVarNames.Add(enumValue.ToString());
+
+                enumDataString.Add(enumValue.ToString());
+                enumDataInt.Add(Convert.ToInt32(enumValue));
+
                 if (enumAttribute != null)
                 {
-                    enumDataString.Add(enumValue.ToString());
-                    enumVarNames.Add(enumValue.ToString());
                     enumDescriptionDataString.Add(enumAttribute.Description);
-                    enumDataInt.Add(Convert.ToInt32(enumValue));
                     enumDescriptionString.Add($"{enumValue} - {enumAttribute.Description}");
                     enumDescriptionInt.Add($"{Convert.ToInt32(enumValue)} - {enumAttribute.Description}");
                 }
@@ -261,8 +264,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                         Example = enumDataInt[0],
                         Extensions = new Dictionary<string, IOpenApiExtension>
                         {
-                            ["x-enum-varnames"] = new JsonNodeExtension(enumVarNames),
-                            ["x-enum-descriptions"] = new JsonNodeExtension(enumDescriptionDataString)
+                            ["x-enum-varnames"] = new JsonNodeExtension(enumVarNames)
                         }
                     }
                 };

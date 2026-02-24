@@ -517,7 +517,7 @@ public class UserController(
     [AllowNotPayment]
     [HttpPut("{userid:guid}/password")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
-    [Authorize(AuthenticationSchemes = "confirm", Roles = "PasswordChange")]
+    [Authorize(AuthenticationSchemes = "confirm", Roles = "PasswordChange,Activation")]
     public async Task<EmployeeFullDto> ChangeUserPassword(ChangePasswordByIdRequestDto inDto)
     {
         await securityContext.AuthByClaimAsync();
@@ -1683,10 +1683,29 @@ public class UserController(
     {
         if (authContext.IsAuthenticated)
         {
-            var currentUser = await _userManager.GetUserByEmailAsync(inDto.Email);
-            if (currentUser.Id != authContext.CurrentAccount.ID && !await _userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
+            var targetUser = await _userManager.GetUserByEmailAsync(inDto.Email);
+            var self = securityContext.CurrentAccount.ID.Equals(targetUser.Id);
+            if (!self)
             {
-                throw new InvalidOperationException(Resource.ErrorAccessDenied);
+                var currentUserIsDocSpaceAdmin = await _userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID);
+                if (!currentUserIsDocSpaceAdmin)
+                {
+                    throw new SecurityException(Resource.ErrorAccessDenied);
+                }
+
+                var tenant = tenantManager.GetCurrentTenant();
+                var targetUserIsOwner = targetUser.IsOwner(tenant);
+                if (targetUserIsOwner)
+                {
+                    throw new SecurityException(Resource.ErrorAccessDenied);
+                }
+
+                var targetUserIsDocSpaceAdmin = await _userManager.IsDocSpaceAdminAsync(targetUser.Id);
+                var currentUserIsOwner = securityContext.CurrentAccount.ID.IsOwner(tenant);
+                if (targetUserIsDocSpaceAdmin && !currentUserIsOwner)
+                {
+                    throw new SecurityException(Resource.ErrorAccessDenied);
+                }
             }
         }
         else if (!string.IsNullOrEmpty(setupInfo.HcaptchaPublicKey) || !string.IsNullOrEmpty(setupInfo.RecaptchaPublicKey))

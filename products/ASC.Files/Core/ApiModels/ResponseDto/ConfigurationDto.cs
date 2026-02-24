@@ -131,16 +131,19 @@ public enum QuotaScope
     /// <summary>
     /// The user-level quota.
     /// </summary>
+    [Description("User")]
     User,
 
     /// <summary>
     /// The room-level quota.
     /// </summary>
+    [Description("Room")]
     Room,
 
     /// <summary>
     /// The tenant-level quota.
     /// </summary>
+    [Description("Tenant")]
     Tenant
 }
 
