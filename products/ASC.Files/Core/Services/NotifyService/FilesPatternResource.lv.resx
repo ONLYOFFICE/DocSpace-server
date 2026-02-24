@@ -222,14 +222,14 @@ $__AuthorName izdzēsa telpu: $RoomTitle</value>
   <data name="pattern_ShareDocument" xml:space="preserve">
     <value>h1.Piekļuve piešķirta dokumentam: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" piešķir jums piekļuvi dokumentam "$DocumentTitle":"$DocumentURL" ar piekļuves tiesībām: "$AccessRights".
+$__DateTime $__AuthorName piešķir jums piekļuvi dokumentam "$DocumentTitle":"$DocumentURL" ar piekļuves tiesībām: "$AccessRights".
 
 $Message</value>
   </data>
   <data name="pattern_ShareFolder" xml:space="preserve">
     <value>h1.Piekļiuve piešķirta mapei: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" piešķir jums piekļuvi mapei "$DocumentTitle":"$DocumentURL" ar piekļuves tiesībām: "$AccessRights".
+$__DateTime $__AuthorName piešķir jums piekļuvi mapei "$DocumentTitle":"$DocumentURL" ar piekļuves tiesībām: "$AccessRights".
 
 $Message</value>
   </data>

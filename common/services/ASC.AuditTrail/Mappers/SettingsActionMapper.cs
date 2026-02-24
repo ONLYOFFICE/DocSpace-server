@@ -85,8 +85,9 @@ internal class ProductsActionMapper : ILocationActionMapper
                     MessageAction.LdapEnabled,MessageAction.LdapDisabled,MessageAction.LdapSync,
                     MessageAction.DocumentServiceLocationSetting, MessageAction.AuthorizationKeysSetting,
                     MessageAction.FullTextSearchSetting, MessageAction.StartTransferSetting,
-                    MessageAction.BackupStarted,MessageAction.BackupCompleted,MessageAction.BackupFailed,
+                    MessageAction.BackupStarted,MessageAction.BackupCompleted,MessageAction.BackupFailed,MessageAction.BackupCancelled,
                     MessageAction.ScheduledBackupStarted,MessageAction.ScheduledBackupCompleted,MessageAction.ScheduledBackupFailed,
+                    MessageAction.RestoreStarted,MessageAction.RestoreCancelled,
                     MessageAction.LicenseKeyUploaded, MessageAction.StartStorageEncryption,
                     MessageAction.StartStorageDecryption, MessageAction.CookieSettingsUpdated,  MessageAction.MailServiceSettingsUpdated,
                     MessageAction.CustomNavigationSettingsUpdated,MessageAction.AuditSettingsUpdated,MessageAction.PrivacyRoomEnable,
@@ -137,7 +138,8 @@ internal class ProductsActionMapper : ILocationActionMapper
                     MessageAction.ServerDeleted,
                     MessageAction.ResetWebSearchSettings,
                     MessageAction.ResetVectorizationSettings,
-                    MessageAction.WebpluginDeleted
+                    MessageAction.WebpluginDeleted,
+                    MessageAction.ScheduledBackupDeleted
                 ]
             },
             {

@@ -57,3 +57,6 @@ publish/
 common/*/docker-entrypoint.py
 /common/Tools/CustomGenerators/target
 /common/Tools/CustomGenerators/openapitools.json
+
+products/ASC.AI/Server/DocStore/
+products/ASC.Files/Server/DocStore/

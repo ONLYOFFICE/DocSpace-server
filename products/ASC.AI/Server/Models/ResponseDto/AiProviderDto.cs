@@ -26,16 +26,49 @@
 
 namespace ASC.AI.Models.ResponseDto;
 
+/// <summary>
+/// AI provider details.
+/// </summary>
 public class AiProviderDto
 {
+    /// <summary>
+    /// AI provider identifier.
+    /// </summary>
     public int Id { get; init; }
+
+    /// <summary>
+    /// AI provider display title.
+    /// </summary>
     public required string Title { get; init; }
+
+    /// <summary>
+    /// AI provider type (e.g., OpenAi, Anthropic, GoogleAi).
+    /// </summary>
     public ProviderType Type { get; init; }
+
+    /// <summary>
+    /// API endpoint URL for the AI provider.
+    /// </summary>
     public string? Url { get; init; }
+
+    /// <summary>
+    /// Date and time when the provider was created.
+    /// </summary>
     public required ApiDateTime CreatedOn { get; init; }
+
+    /// <summary>
+    /// Date and time when the provider was last modified.
+    /// </summary>
     public required ApiDateTime ModifiedOn { get; init; }
 
+    /// <summary>
+    /// Indicates whether the provider's API key needs to be reset.
+    /// </summary>
     public bool NeedReset { get; init; }
+
+    /// <summary>
+    /// Indicates whether this provider is the default provider for the tenant.
+    /// </summary>
     public bool IsDefault { get; init; }
 }
 

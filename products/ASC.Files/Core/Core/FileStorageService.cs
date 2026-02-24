@@ -238,7 +238,8 @@ public class FileStorageService //: IFileStorageService
         QuotaFilter quotaFilter = QuotaFilter.All,
         StorageFilter storageFilter = StorageFilter.None,
         FormsItemDto formsItemDto = null,
-        Location? location = null)
+        Location? location = null,
+        int? groupId = null)
     {
         var subjectId = string.IsNullOrEmpty(subject) ? Guid.Empty : new Guid(subject);
 
@@ -380,7 +381,8 @@ public class FileStorageService //: IFileStorageService
                 quotaFilter,
                 storageFilter,
                 formsItemDto,
-                location);
+                location,
+                groupId);
         }
         catch (Exception e)
         {
@@ -1134,7 +1136,7 @@ public class FileStorageService //: IFileStorageService
 
         if (!canEdit)
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_RenameFolder);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditRoom);
         }
 
         switch (folder.RootFolderType)
@@ -1641,7 +1643,7 @@ public class FileStorageService //: IFileStorageService
 
                 var counter = 0;
 
-                if (!string.IsNullOrWhiteSpace( docTemplate.ThumbnailPath))
+                if (!string.IsNullOrWhiteSpace(docTemplate.ThumbnailPath))
                 {
                     foreach (var size in thumbnailSettings.Sizes)
                     {
@@ -5292,6 +5294,71 @@ public class FileStorageService //: IFileStorageService
         }
     }
 
+    public async Task<RoomGroup> SaveRoomGroupAsync(RoomGroup roomGroup)
+    {
+        var roomGroupDao = daoFactory.GetRoomGroupDao<int>();
+        var group = await roomGroupDao.SaveRoomGroupAsync(roomGroup);
+        return group;
+    }
+
+    public async Task DeleteGroup(int groupId)
+    {
+        await daoFactory.GetRoomGroupDao<int>().DeleteGroup(groupId);
+    }
+
+    public async Task<RoomGroup> GetGroupInfoAsync(int roomGroupId)
+    {
+        var group = await daoFactory.GetRoomGroupDao<int>().GetGroupInfoAsync(roomGroupId);
+        return group;
+    }
+
+    public IAsyncEnumerable<RoomGroup> GetGroupsAsync()
+    {
+        return daoFactory.GetRoomGroupDao<int>().GetGroupsAsync();
+    }
+
+    public async Task AddRoomToGroupAsync<T>(T roomId, int groupId)
+    {
+        await CheckRoomAvailability(roomId);
+        await daoFactory.GetRoomGroupDao<T>().AddRoomToGroupAsync(roomId, groupId);
+    }
+
+    public async Task RemoveRoomFromGroupAsync<T>(T roomId, int groupId)
+    {
+        await CheckRoomAvailability(roomId);
+        await daoFactory.GetRoomGroupDao<T>().RemoveRoomFromGroupAsync(roomId, groupId);
+    }
+
+    public async Task<RoomGroup> ChangeGroupIconAsync(int groupId, string icon)
+    {
+        var group = await daoFactory.GetRoomGroupDao<int>().GetGroupInfoAsync(groupId);
+        if (icon != null)
+        {
+            var covers = await RoomLogoManager.GetCoversAsync();
+            if (icon != "" && !covers.ContainsKey(icon))
+            {
+                throw new ArgumentException(null, nameof(icon));
+            }
+
+            group.Icon = icon == "" ? null : icon;
+            return await SaveRoomGroupAsync(group);
+        }
+        return group;
+    }
+
+    private async Task CheckRoomAvailability<T>(T roomId)
+    {
+        var folderDao = daoFactory.GetFolderDao<T>();
+        var room = await folderDao.GetFolderAsync(roomId);
+        if (room == null)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+        if (!DocSpaceHelper.IsRoom(room.FolderType) || !await fileSecurity.CanReadAsync(room))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
+        }
+    }
     private async Task ValidateChangeRolesPermission<T>(File<T> form)
     {
         if (form == null)

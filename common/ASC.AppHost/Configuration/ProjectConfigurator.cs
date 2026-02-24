@@ -71,7 +71,11 @@ public class ProjectConfigurator(
         
         var isStandalone = String.Compare(builder.Configuration["APP_HOSTING_STANDALONE"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 
-        project.WithEnvironment("core:base-domain", isStandalone ? "localhost" : "");
+        project.WithEnvironment("core:base-domain", isStandalone ? "localhost" : "")
+            .WithEnvironment("ai:mcp:0:endpoint",
+                new UriBuilder(Uri.UriSchemeHttp, Constants.DocSpaceMcpContainer, Constants.DocSpaceMcpPort)
+                    .ToString() + "mcp");
+
                
         switch (builder.Configuration["APP_EDITION"])
         {
@@ -114,6 +118,7 @@ public class ProjectConfigurator(
             .WithEnvironment("web:hub:internal", new UriBuilder(Uri.UriSchemeHttp, Constants.SocketIoContainer, Constants.SocketIoPort).ToString())
             .WithEnvironment("core:hosting:singletonMode", true.ToString())
             .WithEnvironment("pathToConf", "/buildtools/config/")
+            .WithEnvironment("ai:mcp:0:endpoint",new UriBuilder(Uri.UriSchemeHttp, Constants.DocSpaceMcpContainer, Constants.DocSpaceMcpPort).ToString() + "mcp")
             .WithArgs($"{dllPath}{name.Replace('_', '.')}.dll")
             .WithEntrypoint("dotnet");
        

@@ -24,6 +24,9 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.EventBus.Abstractions;
+using ASC.Web.Core.RemovePortal;
+
 namespace ASC.Data.Backup.Services;
 
 [Transient]
@@ -32,6 +35,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
     private readonly IConfiguration _configuration;
     private readonly ILogger<RestoreProgressItem> _logger;
     private readonly ICache _cache;
+    private readonly IEventBus _eventBus;
     private TenantManager _tenantManager;
     private BackupStorageFactory _backupStorageFactory;
     private readonly NotifyHelper _notifyHelper;
@@ -52,6 +56,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
         IConfiguration configuration,
         ILogger<RestoreProgressItem> logger,
         ICache cache,
+        IEventBus eventBus,
         IServiceScopeFactory serviceScopeFactory,
         NotifyHelper notifyHelper,
         CoreBaseSettings coreBaseSettings)
@@ -60,6 +65,7 @@ public class RestoreProgressItem : BaseBackupProgressItem
         _configuration = configuration;
         _logger = logger;
         _cache = cache;
+        _eventBus = eventBus;
         _notifyHelper = notifyHelper;
         _coreBaseSettings = coreBaseSettings;
     }
@@ -95,18 +101,19 @@ public class RestoreProgressItem : BaseBackupProgressItem
         await using var scope = _serviceScopeProvider.CreateAsyncScope();
         _socketManager = scope.ServiceProvider.GetService<SocketManager>();
 
+        var columnMapper = new ColumnMapper();
+
         try
         {
             _tenantManager = scope.ServiceProvider.GetService<TenantManager>();
             _backupStorageFactory = scope.ServiceProvider.GetService<BackupStorageFactory>();
             _backupRepository = scope.ServiceProvider.GetService<BackupRepository>();
 
-
             tenant = await _tenantManager.GetTenantAsync(TenantId);
             _tenantManager.SetCurrentTenant(tenant);
             await _socketManager.RestoreProgressAsync(socketTenant, Dump, 0);
 
-            var restoreTask = scope.ServiceProvider.GetService<RestorePortalTask>();
+            using var restoreTask = scope.ServiceProvider.GetService<RestorePortalTask>();
 
             var storage = await _backupStorageFactory.GetBackupStorageAsync(StorageType, TenantId, StorageParams);
 
@@ -150,18 +157,23 @@ public class RestoreProgressItem : BaseBackupProgressItem
 
             Percentage = 10;
 
-            var columnMapper = new ColumnMapper();
             columnMapper.SetMapping("tenants_tenants", "alias", tenant.Alias, Guid.Parse(Id).ToString("N"));
             columnMapper.Commit();
 
-            restoreTask.Init(_region, tempFile, Dump, TenantId, columnMapper, _upgradesPath);
+            restoreTask.Init(_region, tempFile, Dump, TenantId, columnMapper, _upgradesPath, CancellationToken);
             restoreTask.ProgressChanged = async args =>
             {
-                Percentage = Percentage = 10d + 0.65 * args.Progress;
+                if (CancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+                Percentage = 10d + 0.65 * args.Progress;
                 await _socketManager.RestoreProgressAsync(socketTenant, Dump, (int)Percentage);
                 await PublishChanges();
             };
+
             await restoreTask.RunJob();
+
             NewTenantId = columnMapper.GetTenantMapping();
 
             await _socketManager.RestoreProgressAsync(socketTenant, Dump, (int)Percentage);
@@ -252,9 +264,27 @@ public class RestoreProgressItem : BaseBackupProgressItem
         }
         catch (Exception error)
         {
-            _logger.ErrorRestoreProgressItem(error);
-            Exception = error;
             IsCompleted = true;
+
+            if (CancellationToken.IsCancellationRequested)
+            {
+                Status = DistributedTaskStatus.Canceled;
+                Warning = ASC.AuditTrail.AuditReportResource.RestoreCancelled;
+                _logger.InfoRestoreCancelled();
+
+                if (!Dump)
+                {
+                    var restoredTenantId = columnMapper.GetTenantMapping();
+                    var restoredTenant = await _tenantManager.GetTenantAsync(restoredTenantId);
+                    await _tenantManager.RemoveTenantAsync(restoredTenant);
+                    await _eventBus.PublishAsync(new RemovePortalIntegrationEvent(restoredTenant.OwnerId, restoredTenant.Id));
+                }
+            }
+            else
+            {
+                Exception = error;
+                _logger.ErrorRestoreProgressItem(error);
+            }
 
             if (tenant != null)
             {

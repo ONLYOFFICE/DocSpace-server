@@ -344,10 +344,12 @@ public abstract class Migrator(
                 {
                     newFolder = await FileStorageService.CreateRoomAsync(folder.Title, folder.Private ? RoomType.EditingRoom : RoomType.CustomRoom, false, false, null, 0, null, false, null, null, null, null, null);
 
-                    var owner = MigrationInfo.Users[folder.Owner];
-                    if (owner.UserType is EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin && newFolder.CreateBy != owner.Info.Id)
+                    if (MigrationInfo.Users.TryGetValue(folder.Owner, out var owner))
                     {
-                        await FileStorageService.ChangeOwnerAsync([newFolder.Id], [], owner.Info.Id).ToListAsync();
+                        if (owner.UserType is EmployeeType.DocSpaceAdmin or EmployeeType.RoomAdmin && newFolder.CreateBy != owner.Info.Id)
+                        {
+                            await FileStorageService.ChangeOwnerAsync([newFolder.Id], [], owner.Info.Id).ToListAsync();
+                        }
                     }
 
                     Log(string.Format(MigrationResource.CreateShareRoom, newFolder.Title));

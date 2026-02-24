@@ -80,6 +80,11 @@ public record BackupProgress
     /// The backup progress type.
     /// </summary>
     public BackupProgressEnum BackupProgressEnum { get; set; }
+    
+    /// <summary>
+    /// The backup progress status.
+    /// </summary>
+    public DistributedTaskStatus Status { get; set; }
 
     /// <summary>
     /// The task ID.
