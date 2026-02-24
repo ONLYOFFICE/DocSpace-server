@@ -69,31 +69,44 @@ public class CreateFolderWithFilesDepthCommand : AsyncCommand<CreateFolderWithFi
 
     private static async Task CreateFolderWithFilesDepth(FilesApi filesApi, FoldersApi foldersApi, Bogus.DataSets.System system, int folderId, int depth, int foldersCount, int filesCount, CancellationToken token)
     {
+        var newFolders = new List<int>();
+        List<Task> tasks = [];
         for (var i = 0; i < foldersCount; i++)
         {
-            var newFolder = (await foldersApi.CreateFolderAsync(folderId, new CreateFolder(system.FileName()), token)).Response;
-            List<Task> tasks = [];
+            tasks.Add(foldersApi.CreateFolderAsync(folderId, new CreateFolder(system.FileName()), token).ContinueWith(r=> newFolders.Add(r.Result.Response.Id), token));
+        }
+        
+        await Task.WhenAll(tasks);
+        tasks.Clear();
+        
+        foreach (var newFolder in newFolders)
+        {
             var k = 0;
             for (var j = 0; j < filesCount; j++)
             {
-                tasks.Add(filesApi.CreateFileAsync(newFolder.Id, new CreateFileJsonElement(system.FileName("pdf")), cancellationToken: token));
+                tasks.Add(filesApi.CreateFileAsync(newFolder, new CreateFileJsonElement(system.FileName("pdf")), cancellationToken: token));
                 k++;
                 if (k == 100)
                 {
-                    await  Task.WhenAll(tasks);
+                    await Task.WhenAll(tasks);
                     tasks.Clear();
                     k = 0;
                 }
             }
-            
-            await Task.WhenAll(tasks);
+        }
+
+        await Task.WhenAll(tasks);
+        tasks.Clear();
+        
+        foreach (var newFolder in newFolders)
+        {
             var newDepth = depth - 1;
             if (newDepth > 0)
             {
-                await CreateFolderWithFilesDepth(filesApi, foldersApi, system, newFolder.Id, newDepth, foldersCount, filesCount, token);
+                await CreateFolderWithFilesDepth(filesApi, foldersApi, system, newFolder, newDepth, foldersCount, filesCount, token);
             }
-
-            AnsiConsole.MarkupLine($"[green]Folder {folderId} created. Depth: {depth}[/]");
         }
+
+        AnsiConsole.MarkupLine($"[green]Folder {folderId} created. Depth: {depth}[/]");
     }
 }
