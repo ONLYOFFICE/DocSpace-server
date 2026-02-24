@@ -153,6 +153,16 @@ public class FolderDto<T> : FileEntryDto<T>
     public ChatSettings ChatSettings { get; set; }
     
     public RoomType? RootRoomType { get; set; }
+
+    /// <summary>
+    /// Specifies whether to save form data as XLSX file.
+    /// </summary>
+    public bool? SaveFormAsXLSX {  get; set; }
+
+    /// <summary>
+    /// Specifies whether to send form data to external database.
+    /// </summary>
+    public bool? SendFormToExternalDB { get; set; }
 }
 
 [Scope]
@@ -462,6 +472,11 @@ public class FolderDtoHelper(
         {
             result.FilesCount = folder.FilesCount;
             result.FoldersCount = folder.FoldersCount;
+        }
+        if (folder.FolderType == FolderType.FillingFormsRoom)
+        {
+            result.SaveFormAsXLSX = folder.SettingsSaveFormAsXLSX;
+            result.SendFormToExternalDB = folder.SettingsSendFormToExternalDB;
         }
 
         await entryStatusManager.SetIsFavoriteFolderAsync(folder);
