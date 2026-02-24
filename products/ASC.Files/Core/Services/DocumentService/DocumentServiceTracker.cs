@@ -539,10 +539,7 @@ public class DocumentServiceTrackerHelper(
             file.Title
         );
 
-        await webhookManager.PublishAsync(
-            isFormSubmit ? WebhookTrigger.FormSubmit : WebhookTrigger.FileUpdated,
-            file
-        );
+        await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
 
         if (!forceSave)
         {

@@ -143,20 +143,7 @@ public enum WebhookTrigger
 
     #endregion
 
-    #region Forms
-
-    [Description("form.submit")]
-    FormSubmit = 268435456,
-
-    [Description("form.filled.out")]
-    FormFilledOut = 536870912,
-
-    [Description("form.stopped")]
-    FormStopped = 1073741824
-
-    #endregion
-
-    //remaining possible values: 2147483648, 4294967296, 8589934592
+    //remaining possible values: 268435456, 536870912, 1073741824
 }
 
 
