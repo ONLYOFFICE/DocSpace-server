@@ -28,7 +28,7 @@
 namespace ASC.ElasticSearch.VectorData;
 
 public class VectorStoreCollection<TRecord>(
-    OpenSearchClient openSearchClient,
+    OpenSearchClient? openSearchClient,
     VectorCollectionOptions options,
     TaskScheduler scheduler,
     ILogger<VectorStore> logger,
@@ -36,9 +36,11 @@ public class VectorStoreCollection<TRecord>(
 {
     // ReSharper disable once StaticMemberInGenericType
     private static readonly IndexSettings _settings = new(new Dictionary<string, object> { { "index.knn", true } });
-    
+
     public async Task EnsureCollectionExistsAsync(CancellationToken cancellationToken = default)
     {
+        EnsureClientConfigured();
+        
         if (await CollectionExistsAsync(cancellationToken))
         {
             return;
@@ -50,7 +52,7 @@ public class VectorStoreCollection<TRecord>(
         await OperationHandler.RunAsync<CreateIndexResponse, OpenSearchClientException>(
             name,
             "create_collection", 
-            async () => await openSearchClient.Indices
+            async () => await openSearchClient!.Indices
                 .CreateAsync(new CreateIndexRequest(name) 
                 {
                     Settings = _settings,
@@ -64,6 +66,8 @@ public class VectorStoreCollection<TRecord>(
 
     public async Task UpsertAsync(List<TRecord> records, CancellationToken cancellationToken = default)
     {
+        EnsureClientConfigured();
+
         if (records is { Count: <= 0 })
         {
             return;
@@ -82,6 +86,8 @@ public class VectorStoreCollection<TRecord>(
         VectorSearchOptions<TRecord>? searchOptions = null, 
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
+        EnsureClientConfigured();
+
         ArgumentNullException.ThrowIfNull(propertySelector);
         ArgumentNullException.ThrowIfNull(vector);
 
@@ -99,7 +105,7 @@ public class VectorStoreCollection<TRecord>(
         
         if (searchOptions is { Filter: not null })
         {
-            var translator = new OpenSearchFilterTranslator<TRecord>(openSearchClient.Infer);
+            var translator = new OpenSearchFilterTranslator<TRecord>(openSearchClient!.Infer);
             var filter = translator.Translate(searchOptions.Filter);
             query.Filter = filter;
         }
@@ -107,7 +113,7 @@ public class VectorStoreCollection<TRecord>(
         var response = await OperationHandler.RunAsync<ISearchResponse<TRecord>, OpenSearchClientException>(
             name,
             "semantic_search",
-            async () => await openSearchClient.SearchAsync<TRecord>(
+            async () => await openSearchClient!.SearchAsync<TRecord>(
                 new SearchRequest(name) { Query = query, Size = top }, 
                 cancellationToken));
 
@@ -120,6 +126,11 @@ public class VectorStoreCollection<TRecord>(
     public async Task DeleteAsync(VectorSearchOptions<TRecord>? searchOptions = null, bool immediate = false,
         CancellationToken cancellationToken = default)
     {
+        if (openSearchClient is null)
+        {
+            return;
+        }
+
         if (immediate)
         {
             await DeleteAsync(searchOptions, cancellationToken);
@@ -147,7 +158,7 @@ public class VectorStoreCollection<TRecord>(
         
         if (searchOptions is { Filter: not null })
         {
-            var translator = new OpenSearchFilterTranslator<TRecord>(openSearchClient.Infer);
+            var translator = new OpenSearchFilterTranslator<TRecord>(openSearchClient!.Infer);
             var filter = translator.Translate(searchOptions.Filter);
             request.Query = filter;
         }
@@ -155,7 +166,7 @@ public class VectorStoreCollection<TRecord>(
         await OperationHandler.RunAsync<DeleteByQueryResponse, OpenSearchClientException>(
             name,
             "bulk_delete",
-            async () => await openSearchClient.DeleteByQueryAsync(request, cancellationToken));
+            async () => await openSearchClient!.DeleteByQueryAsync(request, cancellationToken));
     }
     
     private async Task<bool> CollectionExistsAsync(CancellationToken cancellationToken = default)
@@ -163,8 +174,16 @@ public class VectorStoreCollection<TRecord>(
         var response = await OperationHandler.RunAsync<ExistsResponse, OpenSearchClientException>(
             name,
             "exists_check",
-            async () => await openSearchClient.Indices.ExistsAsync(name, ct: cancellationToken));
+            async () => await openSearchClient!.Indices.ExistsAsync(name, ct: cancellationToken));
 
         return response.ApiCall.HttpStatusCode != 404 && response.Exists;
+    }
+
+    private void EnsureClientConfigured()
+    {
+        if (openSearchClient is null)
+        {
+            throw new InvalidOperationException("OpenSearch is not configured. Check the OpenSearch connection settings.");
+        }
     }
 }
