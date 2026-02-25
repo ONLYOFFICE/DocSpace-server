@@ -1,0 +1,35 @@
+{{>partial_header}}
+
+namespace {{packageName}}.Client
+{
+    /// <summary>
+    /// Formatter for 'date' openapi formats ss defined by full-date - RFC3339
+    /// </summary>
+    public class OpenAPIDateConverter : JsonConverter<DateTime>
+    {
+        private const string DateFormat = "yyyy-MM-dd";
+
+        /// <summary>
+        /// Reads and converts the JSON to type DateTime.
+        /// </summary>
+        public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            if (reader.TokenType != JsonTokenType.String)
+                throw new JsonException();
+            
+            var dateString = reader.GetString();
+            if (DateTime.TryParseExact(dateString, DateFormat, null, System.Globalization.DateTimeStyles.None, out var date))
+                return date;
+                
+            throw new JsonException($"Unable to parse date. Expected format: {DateFormat}");
+        }
+
+        /// <summary>
+        /// Writes a DateTime value to JSON.
+        /// </summary>
+        public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
+        {
+            writer.WriteStringValue(value.ToString(DateFormat));
+        }
+    }
+}

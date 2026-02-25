@@ -1,0 +1,29 @@
+{{>licenseInfo}}
+
+{{^withSeparateModelsAndApi}}
+import http from "k6/http";
+import { check } from "k6";
+{{#withNodeImports}}
+// URLSearchParams not necessarily used
+// @ts-ignore
+{{#multipartFormData}}
+import FormData from 'form-data'
+{{/multipartFormData}}
+{{/withNodeImports}}
+// Some imports not used depending on template conditions
+// @ts-ignore
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from './common';
+import type { RequestArgs } from './base';
+// @ts-ignore
+import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError, operationServerMap } from './base';
+
+{{#models}}
+{{#model}}{{#isEnum}}{{>modelEnum}}{{/isEnum}}{{#oneOf}}{{#-first}}{{>modelOneOf}}{{/-first}}{{/oneOf}}{{^isEnum}}{{^oneOf}}{{>modelGeneric}}{{/oneOf}}{{/isEnum}}{{/model}}
+{{/models}}
+{{#apiInfo}}{{#apis}}
+{{>apiInner}}
+{{/apis}}{{/apiInfo}}
+{{/withSeparateModelsAndApi}}{{#withSeparateModelsAndApi}}
+{{#apiInfo}}{{#apis}}{{#operations}}export * from './{{tsApiPackage}}/{{x-folder}}/{{x-file}}';
+{{/operations}}{{/apis}}{{/apiInfo}}
+{{/withSeparateModelsAndApi}}
