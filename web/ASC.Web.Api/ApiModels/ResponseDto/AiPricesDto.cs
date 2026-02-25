@@ -32,7 +32,7 @@ public class AiPricesDto
 {
     public required List<AiEntryPricingDto<AiChatPriceDto>> Chat { get; init; }
     public required List<AiEntryPricingDto<AiEmbeddingPriceDto>> Embedding { get; init; }
-    public required AiWebSearchPricingDto WebSearch { get; init; }
+    public required List<AiEntryPricingDto<decimal>> WebSearch { get; init; }
     public required CurrencyInfo Currency { get; init; }
 }
 

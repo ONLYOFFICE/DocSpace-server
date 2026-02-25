@@ -1265,15 +1265,24 @@ public class PaymentController(
         {
             Chat = chat,
             Embedding = embedding,
-            WebSearch = new AiWebSearchPricingDto
-            {
-                Alias = aiPrices.WebSearch.Provider,
-                SearchImage = await walletStaticProvider.GetImageAsync("search"),
-                CrawlingImage = await walletStaticProvider.GetImageAsync("crawling"),
-                Provider = aiPrices.WebSearch.Provider,
-                Search = aiPrices.WebSearch.Search,
-                Contents = aiPrices.WebSearch.Contents
-            },
+            WebSearch = [
+                new AiEntryPricingDto<decimal>
+                {
+                    Id = "search",
+                    Alias = "Search",
+                    Image = await walletStaticProvider.GetImageAsync("search"),
+                    Provider = aiPrices.WebSearch.Provider,
+                    Price = aiPrices.WebSearch.Search
+                },
+                new AiEntryPricingDto<decimal>
+                {
+                    Id = "fetch",
+                    Alias = "Crawling",
+                    Image = await walletStaticProvider.GetImageAsync("crawling"),
+                    Provider = aiPrices.WebSearch.Provider,
+                    Price = aiPrices.WebSearch.Contents
+                }
+            ],
             Currency = aiPrices.Currency
         };
     }
