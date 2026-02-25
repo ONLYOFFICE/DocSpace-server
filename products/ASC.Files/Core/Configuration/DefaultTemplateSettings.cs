@@ -157,14 +157,21 @@ namespace ASC.Files.Core.Configuration
                     _ => throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound),
                 };
 
-                return Path.GetExtension(file.Title) != extension
-                    ? throw new InvalidOperationException(FilesCommonResource.ErrorMessage_NotSupportedFormat)
-                    : fileId.Value.ValueKind switch
-                    {
-                        JsonValueKind.String => await fileThirdPartyDao.CopyFileAsync(fileId.Value.GetString(), await folderDao.GetFolderIDDefaultTemplatesAsync(true)),
-                        JsonValueKind.Number => await fileDao.CopyFileAsync(fileId.Value.GetInt32(), await folderDao.GetFolderIDDefaultTemplatesAsync(true)),
-                        _ => throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound),
-                    };
+                if (file == null)
+                {
+                    throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+                }
+                else if (Path.GetExtension(file.Title) != extension)
+                {
+                    throw new InvalidOperationException(FilesCommonResource.ErrorMessage_NotSupportedFormat);
+                }
+
+                return fileId.Value.ValueKind switch
+                {
+                    JsonValueKind.String => await fileThirdPartyDao.CopyFileAsync(fileId.Value.GetString(), await folderDao.GetFolderIDDefaultTemplatesAsync(true)),
+                    JsonValueKind.Number => await fileDao.CopyFileAsync(fileId.Value.GetInt32(), await folderDao.GetFolderIDDefaultTemplatesAsync(true)),
+                    _ => throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound),
+                };
             }
         }
 
