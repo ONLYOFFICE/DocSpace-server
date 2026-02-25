@@ -272,7 +272,9 @@ public partial class SettingsController(
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Quota")]
     [SwaggerResponse(200, "Message about the result of saving the user quota settings", typeof(TenantUserQuotaSettings))]
+    [SwaggerResponse(400, "The entered quota value is invalid or greater than the total storage size")]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("userquotasettings")]
     public async Task<TenantUserQuotaSettings> SaveUserQuotaSettings(QuotaSettingsRequestsDto inDto)
     {
@@ -280,7 +282,7 @@ public partial class SettingsController(
 
         if (!inDto.DefaultQuota.TryGetInt64(out var quota))
         {
-            throw new Exception(Resource.UserQuotaGreaterPortalError);
+            throw new ArgumentException(Resource.UserQuotaGreaterPortalError);
         }
 
         var tenant = tenantManager.GetCurrentTenant();
@@ -289,7 +291,7 @@ public partial class SettingsController(
 
         if (maxTotalSize < quota)
         {
-            throw new Exception(Resource.UserQuotaGreaterPortalError);
+            throw new ArgumentException(Resource.UserQuotaGreaterPortalError);
         }
         var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
         if (coreBaseSettings.Standalone)
@@ -298,7 +300,7 @@ public partial class SettingsController(
             {
                 if (tenantQuotaSetting.Quota < quota)
                 {
-                    throw new Exception(Resource.UserQuotaGreaterPortalError);
+                    throw new ArgumentException(Resource.UserQuotaGreaterPortalError);
                 }
             }
         }
