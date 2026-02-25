@@ -129,12 +129,7 @@ namespace ASC.Files.Core.Configuration
 
             if (fileId != null)
             {
-                var template = fileId.Value.ValueKind switch
-                {
-                    JsonValueKind.String => await fileThirdPartyDao.CopyFileAsync(fileId.Value.GetString(), await folderDao.GetFolderIDDefaultTemplatesAsync(true)),
-                    JsonValueKind.Number => await fileDao.CopyFileAsync(fileId.Value.GetInt32(), await folderDao.GetFolderIDDefaultTemplatesAsync(true)),
-                    _ => throw new Exception("Wrong fileId type"),
-                };
+                var template = await checkAndCopyFile();
                 setting.SelectedFile = template.Id;
             }
             else
@@ -152,12 +147,36 @@ namespace ASC.Files.Core.Configuration
             fileMessageService.Send(MessageAction.DocumentsDefaultTemplatesSettingsUpdated, setting.FileExtension, fileId?.ToString());
 
             return settings;
+
+            async Task<File<int>> checkAndCopyFile()
+            {
+                FileEntry file = fileId.Value.ValueKind switch
+                {
+                    JsonValueKind.String => await fileThirdPartyDao.GetFileAsync(fileId.Value.GetString()),
+                    JsonValueKind.Number => await fileDao.GetFileAsync(fileId.Value.GetInt32()),
+                    _ => throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound),
+                };
+
+                return Path.GetExtension(file.Title) != extension
+                    ? throw new InvalidOperationException(FilesCommonResource.ErrorMessage_NotSupportedFormat)
+                    : fileId.Value.ValueKind switch
+                    {
+                        JsonValueKind.String => await fileThirdPartyDao.CopyFileAsync(fileId.Value.GetString(), await folderDao.GetFolderIDDefaultTemplatesAsync(true)),
+                        JsonValueKind.Number => await fileDao.CopyFileAsync(fileId.Value.GetInt32(), await folderDao.GetFolderIDDefaultTemplatesAsync(true)),
+                        _ => throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound),
+                    };
+            }
         }
 
         public async Task<DefaultTemplateSettings> SetTemplateAsync(string extension, string title, Stream stream)
         {
             try
             {
+                if (Path.GetExtension(title) != extension)
+                {
+                    throw new InvalidOperationException(FilesCommonResource.ErrorMessage_NotSupportedFormat);
+                }
+
                 var settings = await GetSettingsAsync();
                 var setting = settings.Items.FirstOrDefault(item => item.FileExtension.Equals(extension, StringComparison.OrdinalIgnoreCase));
                 if (setting == null)

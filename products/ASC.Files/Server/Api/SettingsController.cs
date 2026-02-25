@@ -413,6 +413,7 @@ public class SettingsController(
     /// <path>api/2.0/files/settings/defaulttemplate</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "New default template settings", typeof(DefaultTemplateSettingsDto))]
+    [SwaggerResponse(400, "Incorrect or missing file")]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpPut("settings/defaulttemplate")]
     public async Task<DefaultTemplateSettingsDto> SetDefaultTemplate(DefaultTemplateSettingsRequestDto inDto)
@@ -429,6 +430,7 @@ public class SettingsController(
     /// <path>api/2.0/files/settings/defaulttemplate</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "New default template settings", typeof(DefaultTemplateSettingsDto))]
+    [SwaggerResponse(400, "Incorrect or missing file")]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [HttpPost("settings/defaulttemplate")]
     public async Task<DefaultTemplateSettingsDto> UploadDefaultTemplate(DefaultTemplateSettingsUploadRequestDto inDto)
