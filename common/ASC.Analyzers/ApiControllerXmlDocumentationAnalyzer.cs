@@ -193,6 +193,7 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
     private static bool HasXmlDocumentation(SyntaxNode node)
     {
         var trivia = node.GetLeadingTrivia();
+        
         return trivia.Any(t => t.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia) ||
                                t.IsKind(SyntaxKind.MultiLineDocumentationCommentTrivia));
     }
@@ -282,7 +283,7 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
     }
 
     private static void ReportMissingXmlDocumentation(SyntaxNodeAnalysisContext context, MethodDeclarationSyntax methodDeclaration, ITypeSymbol returnTypeSymbol, ConcurrentDictionary<string, bool> reportedTypes)
-    {
+    {            
         var typeKey = returnTypeSymbol.ToDisplayString();
 
         // Skip if already reported
@@ -326,6 +327,37 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
                         modelDeclaration.Identifier.Text,
                         prop.Identifier.Text));
                 }
+                var xmlTrivia = prop.GetLeadingTrivia()
+                    .FirstOrDefault(t => t.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia) ||
+                                         t.IsKind(SyntaxKind.MultiLineDocumentationCommentTrivia));
+
+                if (xmlTrivia == default || xmlTrivia.GetStructure() is not DocumentationCommentTriviaSyntax xmlStructure)
+                {
+                    continue;
+                }
+
+                var xmlElementSyntaxes = xmlStructure.Content.OfType<XmlElementSyntax>().ToList();
+
+                var summaryExists = xmlElementSyntaxes.Any(e => e.StartTag.Name.ToString() == "summary");
+                if (!summaryExists)
+                {
+                    context.ReportDiagnostic(Diagnostic.Create(
+                        _modelDtoSummaryRule,
+                        prop.Identifier.GetLocation(),
+                        modelDeclaration.Identifier.Text,
+                        prop.Identifier.Text));
+                }
+
+                var exampleExists = xmlElementSyntaxes.Any(e => e.StartTag.Name.ToString() == "example");
+                if (!exampleExists)
+                {
+                    context.ReportDiagnostic(Diagnostic.Create(
+                        _modelDtoExampleRule,
+                        prop.Identifier.GetLocation(),
+                        modelDeclaration.Identifier.Text,
+                        prop.Identifier.Text));
+                }
+                
             }
         }
     }
@@ -337,6 +369,14 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
         var members = typeSymbol.GetMembers();
         foreach (var member in members)
         {
+            if (member.ContainingType.Name.Contains("GetChatModelsRequestDto") && member.Name == "ProviderId")
+            {
+                if (!System.Diagnostics.Debugger.IsAttached)
+                {
+                    System.Diagnostics.Debugger.Launch();
+                }    
+            }
+            
             if (member is not IPropertySymbol propertySymbol || 
                 propertySymbol.IsStatic || 
                 propertySymbol.GetAttributes().Any(attr => attr.AttributeClass?.Name is "JsonIgnoreAttribute") ||
