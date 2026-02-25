@@ -208,6 +208,7 @@ namespace ASC.Files.Core.Configuration
                 var file = serviceProvider.GetService<File<int>>();
                 file.ParentId = await folderDao.GetFolderIDDefaultTemplatesAsync(true);
                 file.Title = title;
+                file.ContentLength = stream.Length;
                 file = await fileDao.SaveFileAsync(file, stream);
 
                 var currentFileId = setting.SelectedFile;
