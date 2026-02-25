@@ -56,7 +56,8 @@ namespace ASC.Files.Core.Configuration
                                                ExternalShare externalShare,
                                                CommonLinkUtility commonLinkUtility,
                                                FilesLinkUtility filesLinkUtility,
-                                               FilesMessageService fileMessageService)
+                                               FilesMessageService fileMessageService,
+                                               FileChecker fileChecker)
     {
         public async Task<DefaultTemplateSettingsDto> ConvertToDtoAsync(DefaultTemplateSettings settings)
         {
@@ -189,6 +190,19 @@ namespace ASC.Files.Core.Configuration
                 if (setting == null)
                 {
                     return settings;
+                }
+
+                if (FileUtility.GetFileTypeByExtention(setting.FileExtension) == FileType.Pdf)
+                {
+                    using var checkStream = new MemoryStream();
+                    await stream.CopyToAsync(checkStream);
+                    stream.Seek(0, SeekOrigin.Begin);
+                    checkStream.Seek(0, SeekOrigin.Begin);
+                    var result = await fileChecker.CheckExtendedPDFstream(checkStream);
+                    if (!result)
+                    {
+                        throw new InvalidOperationException(FilesCommonResource.ErrorMessage_UploadToFormRoom);
+                    }
                 }
 
                 var file = serviceProvider.GetService<File<int>>();
