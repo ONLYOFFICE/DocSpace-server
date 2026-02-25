@@ -4023,7 +4023,10 @@ public class FileStorageService //: IFileStorageService
                                                 break;
                                             }
                                             await filesMessageService.SendAsync(MessageAction.RoomCreateUser, entry, user.Id, ace.Access, null, true, name);
-                                            await notifyClient.SendInvitedToRoom(folder, user);
+                                            if (notify)
+                                            {
+                                                await notifyClient.SendInvitedToRoom(folder, user);
+                                            }
                                             break;
                                         case EventType.Remove:
                                             if (beforeOwnerChange)
@@ -4034,11 +4037,14 @@ public class FileStorageService //: IFileStorageService
                                             break;
                                         case EventType.Update:
                                             await filesMessageService.SendAsync(MessageAction.RoomUpdateAccessForUser, entry, user.Id, ace.Access, pastRecord.Share, true, name);
-                                            await notifyClient.SendRoomUpdateAccessForUser(folder, user, ace.Access);
+                                            if (notify)
+                                            {
+                                                await notifyClient.SendRoomUpdateAccessForUser(folder, user, ace.Access);
 
-                                            var role = FileShareExtensions.GetAccessString(ace.Access, true, folder.FolderType == FolderType.AiRoom);
-                                            var url = commonLinkUtility.GetFullAbsolutePath($"rooms/shared/{folder.Id}");
-                                            await studioNotifyService.SendMsgUserRoleChangedAsync(user, folder.Title, url, role, folder.FolderType == FolderType.AiRoom);
+                                                var role = FileShareExtensions.GetAccessString(ace.Access, true, folder.FolderType == FolderType.AiRoom);
+                                                var url = commonLinkUtility.GetFullAbsolutePath($"rooms/shared/{folder.Id}");
+                                                await studioNotifyService.SendMsgUserRoleChangedAsync(user, folder.Title, url, role, folder.FolderType == FolderType.AiRoom);
+                                            }
                                             break;
                                     }
                                 }
