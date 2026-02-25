@@ -70,7 +70,7 @@ public class AiGateway(
 
     public async Task<AiPricesResponse> GetPricesAsync()
     {
-        return await SendAsync<AiPricesResponse>(HttpMethod.Get, "/prices");
+        return await SendAsync<AiPricesResponse>(HttpMethod.Get, "/prices", authorize: false);
     }
 
     public async Task<RestrictedModelsResponse> GetRestrictedModelsAsync()
@@ -109,12 +109,16 @@ public class AiGateway(
         return JsonWebToken.Encode(payload, Settings.Secret);
     }
     
-    private async Task<T> SendAsync<T>(HttpMethod method, string path, HttpContent content = null)
+    private async Task<T> SendAsync<T>(HttpMethod method, string path, HttpContent content = null, bool authorize = true)
     {
-        var key = await GenerateKeyAsync();
-
         using var request = new HttpRequestMessage(method, $"{Url}{path}");
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", key);
+
+        if (authorize)
+        {
+            var key = await GenerateKeyAsync();
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", key);
+        }
+
         request.Content = content;
 
         var httpClient = httpClientFactory.CreateClient();
