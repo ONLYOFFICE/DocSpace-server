@@ -577,11 +577,36 @@ public class Balance
     /// A list of sub-accounts.
     /// </summary>
     public List<SubAccount> SubAccounts { get; init; }
-
+    /// <summary>
+    /// The most recent credit transaction applied to the account.
+    /// </summary>
+    public TransactionInfo LastCredit { get; init; }
+    
     public bool IsDefault()
     {
         return AccountNumber == 0 && SubAccounts == null;
     }
+}
+
+/// <summary>
+/// Represents information about the transaction applied to an account.
+/// </summary>
+public class TransactionInfo
+{
+    /// <summary>
+    /// The date and time when the credit transaction occurred.
+    /// </summary>
+    public DateTime Date { get; init; }
+
+    /// <summary>
+    /// The three-character ISO 4217 currency symbol of the transaction.
+    /// </summary>
+    public string Currency { get; init; }
+
+    /// <summary>
+    /// Amount of the transaction.
+    /// </summary>
+    public decimal Amount { get; init; }
 }
 
 /// <summary>
@@ -593,6 +618,7 @@ public class SubAccount
     /// The three-character ISO 4217 currency symbol of the sub-account.
     /// </summary>
     public string Currency { get; init; }
+
     /// <summary>
     /// The balance of the sub-account in the specified currency.
     /// </summary>
