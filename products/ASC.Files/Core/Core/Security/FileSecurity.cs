@@ -1572,6 +1572,15 @@ public class FileSecurity(
                     }
                     if (fileFolder is { FolderType: FolderType.FillingFormsRoom } && !userId.Equals(ASC.Core.Configuration.Constants.Guest.ID))
                     {
+                        if (action is FilesSecurityActions.StartFilling or FilesSecurityActions.StopFilling)
+                        {
+                            var fileParentFolder = parentFolders.LastOrDefault();
+                            if (fileParentFolder?.FolderType is FolderType.FormFillingFolderInProgress or FolderType.FormFillingFolderDone)
+                            {
+                                return false;
+                            }
+                        }
+
                         var properties = await cacheFileDao.GetProperties(file.Id);
                         var formFilling = properties?.FormFilling;
 

@@ -5231,6 +5231,7 @@ public class FileStorageService //: IFileStorageService
                 if (room.FolderType == FolderType.FillingFormsRoom)
                 {
                     properties.FormFilling.StartFilling = false;
+                    properties.FormFilling.OriginalFormVersion = form.Version;
                 }
 
                 break;

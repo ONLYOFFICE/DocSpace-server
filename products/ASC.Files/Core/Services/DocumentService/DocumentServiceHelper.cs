@@ -567,19 +567,6 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         result.CanStartFilling = false;
 
-        if (!edit && properties?.FormFilling?.OriginalFormVersion == 0 )
-        {
-            properties.FormFilling.OriginalFormVersion = file.Version;
-            await fileDao.SaveProperties(file.Id, properties);
-        }
-        if (!edit && properties?.FormFilling?.OriginalFormVersion != file.Version)
-        {
-            await linkDao.DeleteAllLinkAsync(file.Id);
-            properties.FormFilling.OriginalFormVersion = file.Version;
-            properties.FormFilling.IsVersionChanged = true;
-            await fileDao.SaveProperties(file.Id, properties);
-        }
-
         if (securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
         {
             result.CanFill = true;

@@ -467,7 +467,9 @@ public class FileDtoHelper(
                 currentRoom = currentFolder;
             }
 
-            if (currentRoom is { FolderType: FolderType.FillingFormsRoom } && properties != null && properties.FormFilling != null)
+            if (currentRoom is { FolderType: FolderType.FillingFormsRoom }
+                && properties != null && properties.FormFilling != null
+                && currentFolder.FolderType is not (FolderType.FormFillingFolderInProgress or FolderType.FormFillingFolderDone))
             {
                 if (properties.FormFilling.StartFilling)
                 {
