@@ -220,6 +220,16 @@ namespace ASC.Files.Core.Configuration
             }
         }
 
+        public async Task<DefaultTemplateSettings> RestoreSettingsAsync()
+        {
+            var parentId = await folderDao.GetFolderIDDefaultTemplatesAsync(true);
+            var defaultTemplates = await fileDao.GetFilesAsync(parentId).ToListAsync();
+            var templates = await fileDao.GetFilesAsync(defaultTemplates).ToListAsync();
+            return new DefaultTemplateSettings() {
+                Items = [.. templates.Select(f => new DefaultTempalteItem() { FileExtension = Path.GetExtension(f.Title), SelectedFile = f.Id })]
+            };
+        }
+
         private async Task<IEnumerable<string>> GetSampleDocumentsExtensionsListAsync()
         {
             var storeTemplate = await globalStore.GetStoreTemplateAsync();
