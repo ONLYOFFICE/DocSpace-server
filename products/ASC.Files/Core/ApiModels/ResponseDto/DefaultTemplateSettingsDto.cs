@@ -34,7 +34,7 @@ namespace ASC.Files.Core.ApiModels.ResponseDto
         /// <summary>
         /// Default templates list.
         /// </summary>
-        /// <example>[]</example>
+        /// <example>[{"extension": ".docx", "title": "Blank Document"}]</example>
         public required IEnumerable<DefaultTemplateItemDto> Items { get; set; }
     }
 

@@ -79,7 +79,7 @@ public class MentionMessageWrapper
     /// <summary>
     /// A list of emails that will receive the mention message.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>["user1@example.com", "user2@example.com"]</example>
     public List<string> Emails { get; set; }
 
     /// <summary>

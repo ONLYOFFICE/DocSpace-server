@@ -111,7 +111,7 @@ public class SsoSettingsV2 : ISettings<SsoSettingsV2>
     /// <summary>
     /// The list of the IdP certificates.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>[{"crt": "base64-cert-data", "key": "base64-key-data"}]</example>
     public List<SsoCertificate> IdpCertificates { get; set; }
 
     /// <summary>
@@ -129,7 +129,7 @@ public class SsoSettingsV2 : ISettings<SsoSettingsV2>
     /// <summary>
     /// The list of the SP certificates.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>[{"crt": "base64-cert-data", "key": "base64-key-data"}]</example>
     public List<SsoCertificate> SpCertificates { get; set; }
 
     /// <summary>

@@ -31,7 +31,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// </summary>
 /// <example>
 /// {
-///   "themes": [],
+///   "themes": [{"id": 1, "name": "Custom Theme"}],
 ///   "selected": 1,
 ///   "limit": 1
 /// }
@@ -41,7 +41,7 @@ public class CustomColorThemesSettingsDto
     /// <summary>
     /// The list of the custom color themes.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>[{"id": 1, "name": "Custom Theme"}]</example>
     public IEnumerable<CustomColorThemesSettingsItem> Themes { get; set; }
 
     /// <summary>

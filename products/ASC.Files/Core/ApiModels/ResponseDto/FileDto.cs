@@ -72,7 +72,7 @@ public class FileDto<T> : FileEntryDto<T>
     /// <summary>
     /// The list of users editing the file.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>{"00000000-0000-0000-0000-000000000000": "John Doe"}</example>
     public Dictionary<Guid, string> EditingBy { get; set; }
 
     /// <summary>

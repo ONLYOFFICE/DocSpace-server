@@ -81,7 +81,7 @@ public class AuthServiceRequestsDto
     /// <summary>
     /// The collection of authorization keys associated with the authorization service.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>[{"name": "key", "value": "value"}]</example>
     public List<AuthKey> Props { get; set; }
 
     public static async Task<AuthServiceRequestsDto> From(Consumer consumer, string logoText)

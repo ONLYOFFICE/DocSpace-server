@@ -32,7 +32,7 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 /// <example>
 /// {
 ///   "webItemId": "{00000000-0000-0000-0000-000000000000}",
-///   "users": [],
+///   "users": [{"displayName": "John Doe"}],
 ///   "groups": true,
 ///   "isSubItem": true
 /// }
@@ -48,7 +48,7 @@ public class SecurityDto
     /// <summary>
     /// The list of users with the access to the module.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>[{"displayName": "John Doe"}]</example>
     public List<EmployeeDto> Users { get; set; }
 
     /// <summary>

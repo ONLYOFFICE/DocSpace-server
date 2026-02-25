@@ -40,7 +40,7 @@ public class ActiveConnectionsDto
     /// <summary>
     /// The list of active connection items.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>[{"id": "conn1", "ip": "192.168.1.1"}]</example>
     public List<ActiveConnectionsItemDto> Items { get; set; }
 }
 

@@ -77,7 +77,7 @@ public class UpdateRoomRequest
     /// <summary>
     /// The list of tags.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>["tag1", "tag2"]</example>
     public IEnumerable<string> Tags { get; set; }
 
     /// <summary>

@@ -46,7 +46,7 @@ public class SecurityInfoRequestDto
     /// <summary>
     /// The collection of sharing parameters.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>[{"access": 1, "shareTo": "00000000-0000-0000-0000-000000000000"}]</example>
     [MaxEmailInvitations]
     public List<FileShareParams> Share { get; set; }
 
@@ -72,7 +72,7 @@ public class SecurityInfoSimpleRequestDto
     /// <summary>
     /// The collection of sharing parameters.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>[{"access": 1, "shareTo": "00000000-0000-0000-0000-000000000000"}]</example>
     [MaxEmailInvitations]
     public List<FileShareParams> Share { get; set; }
 

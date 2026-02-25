@@ -36,7 +36,7 @@ public class TenantWalletServiceSettings : ISettings<TenantWalletServiceSettings
     /// <summary>
     /// The list of the enabled wallet services.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>[{"id": "service1", "name": "Storage"}]</example>
     public List<TenantWalletService> EnabledServices { get; set; }
 
     public static Guid ID => new("{1285F7B0-9927-4911-9DA1-4F5D1F90FE73}");

@@ -40,6 +40,6 @@ public class SaveFormRoleMappingDto<T>
     /// <summary>
     /// The collection of roles.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>[{"roleName": "Approver", "userId": "00000000-0000-0000-0000-000000000000"}]</example>
     public required IEnumerable<FormRole> Roles { get; set; }
 }

@@ -39,6 +39,6 @@ public class WebhookRetryRequestsDto
     /// <summary>
     /// The list of webhook delivery IDs to retry.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>[1, 2, 3]</example>
     public List<int> Ids { get; set; }
 }

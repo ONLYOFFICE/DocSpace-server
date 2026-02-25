@@ -70,7 +70,7 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <summary>
     /// The list of tags of the folder.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>["tag1", "tag2"]</example>
     public IEnumerable<string> Tags { get; set; }
 
     /// <summary>

@@ -71,7 +71,7 @@ public class FormRoleDto
     /// <summary>
     /// The role history.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>{"0": "2025-01-15T10:30:00Z"}</example>
     public Dictionary<int, DateTime> History { get; set; }
 
     /// <summary>

@@ -40,7 +40,7 @@ public class CheckDestFolderDto
     /// <summary>
     /// The list of files in the destination folder.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>[{"id": 10, "title": "document.docx"}]</example>
     public List<FileEntryBaseDto> Files { get; set; }
 }
 

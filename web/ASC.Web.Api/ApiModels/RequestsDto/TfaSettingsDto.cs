@@ -67,12 +67,12 @@ public class TfaSettingsDto
     /// <summary>
     /// The list of user IDs that are required to use TFA.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>["00000000-0000-0000-0000-000000000000"]</example>
     public List<Guid> MandatoryUsers { get; set; }
 
     /// <summary>
     /// The list of group IDs whose members are required to use TFA.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>["00000000-0000-0000-0000-000000000000"]</example>
     public List<Guid> MandatoryGroups { get; set; }
 }

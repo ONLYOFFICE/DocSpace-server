@@ -359,7 +359,7 @@ public class FilesSettingsDto
     /// <summary>
     /// The default access rights in sharing settings.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>[1, 2]</example>
     public List<FileShare> DefaultSharingAccessRights { get; set; }
 
     /// <summary>

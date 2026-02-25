@@ -74,7 +74,7 @@ public class OrdersRequestDto<T>
     /// <summary>
     /// The list of items with their ordering information.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>[{"entryId": 1, "order": 1}]</example>
     public required List<OrdersItemRequestDto<T>> Items { get; set; }
 }
 

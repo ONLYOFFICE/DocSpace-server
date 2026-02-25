@@ -31,7 +31,7 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 /// </summary>
 /// <example>
 /// {
-///   "properties": []
+///   "properties": [{"name": "key1", "value": "value1"}]
 /// }
 /// </example>
 public class StorageDto
@@ -49,7 +49,7 @@ public class StorageDto
     /// <summary>
     /// The list of storage authentication keys.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>[{"name": "key1", "value": "value1"}]</example>
     public List<AuthKey> Properties { get; set; }
 
     /// <summary>

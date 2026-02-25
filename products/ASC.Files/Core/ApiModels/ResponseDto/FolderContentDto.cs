@@ -34,13 +34,13 @@ public class FolderContentDto<T>
     /// <summary>
     /// The list of files in the folder.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>[{"id": 10, "title": "document.docx"}]</example>
     public List<FileEntryBaseDto> Files { get; set; }
 
     /// <summary>
     /// The list of folders in the folder.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>[{"id": 20, "title": "My Folder"}]</example>
     public List<FileEntryBaseDto> Folders { get; set; }
 
     /// <summary>

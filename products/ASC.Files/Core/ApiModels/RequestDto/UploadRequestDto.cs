@@ -52,7 +52,7 @@ public class UploadRequestDto : IModelWithFile, IDisposable
     /// <summary>
     /// The list of files when specified as multipart/form-data.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>["file1.docx", "file2.xlsx"]</example>
     public IEnumerable<IFormFile> Files { get; set; }
 
     /// <summary>

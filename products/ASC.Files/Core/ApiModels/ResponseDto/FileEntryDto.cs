@@ -243,7 +243,7 @@ public abstract class FileEntryDto<T> : FileEntryBaseDto
     /// <summary>
     /// A dictionary representing the sharing settings for the file entry.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>{"ExternalLink": 1, "InvitationLink": 2}</example>
     public IDictionary<SubjectType, int> ShareSettings { get; set; }
 
     /// <summary>
@@ -255,7 +255,7 @@ public abstract class FileEntryDto<T> : FileEntryBaseDto
     /// <summary>
     /// The available external rights of the file entry.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>{"ExternalLink": ["Read", "Edit"]}</example>
     public IDictionary<SubjectType, IEnumerable<string>> AvailableShareRights { get; set; }
 
     /// <summary>

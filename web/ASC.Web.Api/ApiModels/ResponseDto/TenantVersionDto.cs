@@ -32,7 +32,7 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 /// <example>
 /// {
 ///   "current": 1,
-///   "versions": []
+///   "versions": [{"id": 1, "version": "2.0"}]
 /// }
 /// </example>
 public class TenantVersionDto(int version, IEnumerable<TenantVersion> tenantVersions)
@@ -46,6 +46,6 @@ public class TenantVersionDto(int version, IEnumerable<TenantVersion> tenantVers
     /// <summary>
     /// The list of available portal versions.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>[{"id": 1, "version": "2.0"}]</example>
     public IEnumerable<TenantVersion> Versions { get; set; } = tenantVersions;
 }

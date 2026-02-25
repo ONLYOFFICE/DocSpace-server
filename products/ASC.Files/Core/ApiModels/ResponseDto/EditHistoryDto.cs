@@ -76,7 +76,7 @@ public class EditHistoryDto
     /// <summary>
     /// The list of file history changes.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>[{"user": {"id": "123", "name": "John Doe"}, "created": "2021-01-01T00:00:00Z"}]</example>
     public List<EditHistoryChangesWrapper> Changes { get; set; }
 
     /// <summary>

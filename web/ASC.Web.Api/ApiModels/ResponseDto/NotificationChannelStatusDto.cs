@@ -31,7 +31,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// </summary>
 /// <example>
 /// {
-///   "channels": []
+///   "channels": [{"name": "email", "isActive": true}]
 /// }
 /// </example>
 public class NotificationChannelStatusDto
@@ -39,7 +39,7 @@ public class NotificationChannelStatusDto
     /// <summary>
     /// The list of notification channels.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>[{"name": "email", "isActive": true}]</example>
     public List<NotificationChannelDto> Channels { get; set; } = [];
 }
 

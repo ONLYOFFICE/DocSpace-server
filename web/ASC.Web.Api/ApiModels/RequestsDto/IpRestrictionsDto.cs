@@ -39,7 +39,7 @@ public class IpRestrictionsBaseRequestsDto
     /// <summary>
     /// The list of IP restriction addresses.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>[{"ip": "192.168.1.0/24"}]</example>
     public IEnumerable<IpRestrictionBase> IpRestrictions { get; set; }
 }
 

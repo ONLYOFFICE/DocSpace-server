@@ -64,7 +64,7 @@ public record HistoryDto
     /// <summary>
     /// The list of related history.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>[{"id": 124, "action": 0}]</example>
     public List<HistoryDto> Related { get; set; }
 }
 

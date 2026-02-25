@@ -372,7 +372,7 @@ public class Balance
     /// <summary>
     /// A list of sub-accounts.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>[{"id": "sub1", "name": "Sub Account"}]</example>
     public List<SubAccount> SubAccounts { get; init; }
 
     public bool IsDefault()

@@ -78,13 +78,13 @@ public class FileOperationDto
     /// <summary>
     /// The list of files of the file operation.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>[{"id": 10, "title": "document.docx"}]</example>
     public List<FileEntryBaseDto> Files { get; set; }
 
     /// <summary>
     /// The list of folders of the file operation.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>[{"id": 20, "title": "My Folder"}]</example>
     public List<FileEntryBaseDto> Folders { get; set; }
 
     /// <summary>

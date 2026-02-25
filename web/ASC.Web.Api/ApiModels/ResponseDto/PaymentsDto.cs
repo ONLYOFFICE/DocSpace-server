@@ -31,7 +31,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// </summary>
 /// <example>
 /// {
-///   "collection": [],
+///   "collection": [{"id": "op1", "type": "payment"}],
 ///   "offset": 1,
 ///   "limit": 1,
 ///   "totalQuantity": 1,
@@ -44,7 +44,7 @@ public class ReportDto
     /// <summary>
     /// A collection of operations.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>[{"id": "op1", "type": "payment"}]</example>
     public List<OperationDto> Collection { get; set; }
     /// <summary>
     /// The report data offset.

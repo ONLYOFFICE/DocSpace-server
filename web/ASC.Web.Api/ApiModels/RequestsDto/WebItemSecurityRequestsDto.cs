@@ -51,7 +51,7 @@ public class WebItemSecurityRequestsDto
     /// <summary>
     /// The collection of user and group identifiers granted access to the module.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>["00000000-0000-0000-0000-000000000000"]</example>
     public IEnumerable<Guid> Subjects { get; set; }
 }
 

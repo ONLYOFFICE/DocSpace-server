@@ -40,7 +40,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 ///   "delayDueDate": "2024-01-15T10:30:00Z",
 ///   "licenseDate": "2024-01-15T10:30:00Z",
 ///   "customerId": "example value",
-///   "quotas": []
+///   "quotas": [{"id": 1, "title": "Basic Plan"}]
 /// }
 /// </example>
 public class TariffDto
@@ -102,6 +102,6 @@ public class TariffDto
     /// <summary>
     /// The list of quotas.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>[{"id": 1, "title": "Basic Plan"}]</example>
     public List<Quota> Quotas { get; set; }
 }

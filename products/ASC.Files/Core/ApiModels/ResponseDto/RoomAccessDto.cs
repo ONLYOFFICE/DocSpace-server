@@ -34,7 +34,7 @@ public class RoomSecurityDto
     /// <summary>
     /// The list of room members.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>[{"access": 1, "isOwner": false}]</example>
     public IEnumerable<FileShareDto> Members { get; set; }
 
     /// <summary>

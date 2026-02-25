@@ -31,7 +31,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// </summary>
 /// <example>
 /// {
-///   "disabledRooms": []
+///   "disabledRooms": [1, 2, 3]
 /// }
 /// </example>
 public class RoomsNotificationSettingsDto
@@ -39,7 +39,7 @@ public class RoomsNotificationSettingsDto
     /// <summary>
     /// The list of rooms with the disabled notifications.
     /// </summary>
-    /// <example>[]</example>
+    /// <example>[1, 2, 3]</example>
     public List<object> DisabledRooms { get; set; }
 }
 
