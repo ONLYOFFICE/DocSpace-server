@@ -1,3 +1,19 @@
+/*
+ * (c) Copyright Ascensio System SIA 2026
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.example.codegen;
 
 import java.io.File;
@@ -10,19 +26,21 @@ import org.openapitools.codegen.languages.TypeScriptAxiosClientCodegen;
 import static org.openapitools.codegen.utils.StringUtils.camelize;
 import org.openapitools.codegen.*;
 import org.openapitools.codegen.utils.ModelUtils;
+
 import io.swagger.v3.oas.models.servers.*;
 import io.swagger.v3.oas.models.media.Schema;
 
-public class MyTypeScriptAxiosCodegen extends TypeScriptAxiosClientCodegen {
+public class MyTypeScriptK6ClientCodegen extends TypeScriptAxiosClientCodegen {
 
     protected String apiDocPath = "docs/";
     protected String modelDocPath = "docs/";
     public static final String BASE_URL = "baseURL";
 
-    public MyTypeScriptAxiosCodegen() {
+    public MyTypeScriptK6ClientCodegen() {
         super();
-        this.templateDir = "templates/typescript-axios";
-        this.embeddedTemplateDir = "typescript-axios";
+        this.outputFolder = "generated-code/my-typescript-k6";
+        this.templateDir = "templates/typescript-k6";
+        this.embeddedTemplateDir = "typescript-k6";
 
         additionalProperties.put("apiDocPath", apiDocPath);
         additionalProperties.put("modelDocPath", modelDocPath);
@@ -45,7 +63,8 @@ public class MyTypeScriptAxiosCodegen extends TypeScriptAxiosClientCodegen {
     @Override
     public void processOpts() {
         super.processOpts();
-        this.outputFolder = "../../../sdk/docspace-api-sdk-typescript";
+
+        this.outputFolder = "generated-code/my-typescript-k6";
 
         if (openAPI.getServers() != null && !openAPI.getServers().isEmpty()) {
             Server server = openAPI.getServers().get(0);
@@ -114,18 +133,16 @@ public class MyTypeScriptAxiosCodegen extends TypeScriptAxiosClientCodegen {
     @Override
     public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List<ModelMap> allModels) {
         objs = super.postProcessOperationsWithModels(objs, allModels);
-        OperationMap operationMap = objs.getOperations();
-        List<CodegenOperation> operations = operationMap.getOperation();
-        String className = operationMap.getClassname();
+        OperationMap vals = objs.getOperations();
+        List<CodegenOperation> operations = vals.getOperation();
+        String className = vals.getClassname();
         if (className != null && className.endsWith(apiNameSuffix)) {
             className = className.substring(0, className.length() - 3);
         }
         TagParts tagParts = tagMap.get(className);
-        operationMap.put("x-folder", (tagParts.folderPart).replaceAll("([a-z0-9])([A-Z])", "$1-$2").toLowerCase(Locale.ROOT));
-        operationMap.put("x-file", (tagParts.classPart + apiNameSuffix).replaceAll("([a-z0-9])([A-Z])", "$1-$2").toLowerCase(Locale.ROOT));
-        operationMap.put("x-classname", tagParts.classPart + apiNameSuffix);
-        boolean shouldSupportFields = false;
-        boolean supportUseAt = false;
+        vals.put("x-folder", (tagParts.folderPart).replaceAll("([a-z0-9])([A-Z])", "$1-$2").toLowerCase(Locale.ROOT));
+        vals.put("x-file", (tagParts.classPart + apiNameSuffix).replaceAll("([a-z0-9])([A-Z])", "$1-$2").toLowerCase(Locale.ROOT));
+        vals.put("x-classname", tagParts.classPart + apiNameSuffix);
         if (operations != null) {
             for (CodegenOperation op : operations) {
                 if (op.operationId != null) {
@@ -142,20 +159,23 @@ public class MyTypeScriptAxiosCodegen extends TypeScriptAxiosClientCodegen {
                         .anyMatch(p -> "count".equals(p.baseName));
 
                     if (allAreQueryParams && hasCountParam) {
-                        op.vendorExtensions.put("x-hasFieldsParam", true);
-                        shouldSupportFields = true;
+                        CodegenParameter fieldsParam = new CodegenParameter();
+                        fieldsParam.baseName = "fields";
+                        fieldsParam.paramName = "fields";
+                        fieldsParam.dataType = "string";
+                        fieldsParam.description = "Comma-separated list of fields to include in the response";
+                        fieldsParam.required = false;
+                        fieldsParam.isQueryParam = true;
+                        fieldsParam.isPrimitiveType = true;
+                        fieldsParam.isNullable = true;
+                        fieldsParam.collectionFormat = "csv";
+
+                        op.allParams.add(fieldsParam);
+                        op.queryParams.add(fieldsParam);
                     }
                 }
-                if ("GET".equalsIgnoreCase(op.httpMethod)
-                        && "/api/2.0/files/recent".equals(op.path)) {
-
-                        op.vendorExtensions.put("x-supportsUseAtMethod", true);
-                        supportUseAt = true;
-                    }
             }
         }
-        operationMap.put("x-supportsFields", shouldSupportFields);
-        operationMap.put("x-supportsUseAt", supportUseAt);
 
         return objs;
     }
@@ -217,7 +237,7 @@ public class MyTypeScriptAxiosCodegen extends TypeScriptAxiosClientCodegen {
 
     @Override
     public String getName() {
-        return "my-typescript-axios";
+        return "my-typescript-k6";
     }
 
     @Override
