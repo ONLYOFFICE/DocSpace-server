@@ -424,6 +424,22 @@ public class SettingsController(
     }
 
     /// <remarks>
+    /// Resets the default template setting.
+    /// </remarks>
+    /// <summary>Reset the default template setting</summary>
+    /// <path>api/2.0/files/settings/defaulttemplate</path>
+    [Tags("Files / Settings")]
+    [SwaggerResponse(200, "New default template settings", typeof(DefaultTemplateSettingsDto))]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
+    [HttpDelete("settings/defaulttemplate")]
+    public async Task<DefaultTemplateSettingsDto> ResetDefaultTemplate(DefaultTemplateSettingsResetRequestDto inDto)
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        var settings = await defaultTemplateSettingsHelper.SetTemplateAsync(inDto.FileExtension, null);
+        return await defaultTemplateSettingsHelper.ConvertToDtoAsync(settings);
+    }
+
+    /// <remarks>
     /// Uploads a file to use as the default template setting.
     /// </remarks>
     /// <summary>Upload a file as the default template setting</summary>
