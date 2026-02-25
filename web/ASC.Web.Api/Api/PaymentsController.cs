@@ -984,14 +984,13 @@ public class PaymentController(
         await eventBus.PublishAsync(evt);
     }
 
-    /// <remarks>
-    /// Returns the list of available currencies from the accounting service.
-    /// </remarks>
     /// <summary>
     /// Get currencies from the accounting service
     /// </summary>
+    /// <remarks>
+    /// Returns the list of available currencies from the accounting service.
+    /// </remarks>
     /// <path>api/2.0/portal/payment/accounting/currencies</path>
-    /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The list of currencies", typeof(List<Currency>))]
@@ -1013,12 +1012,12 @@ public class PaymentController(
         return allCurrencies.Where(x => supportedCurrencies.Contains(x.Code)).ToList();
     }
 
-    /// <remarks>
-    /// Returns the wallet auto top-up settings.
-    /// </remarks>
     /// <summary>
-    /// Get wallet auto top-up settings
+    /// Gets the tenant wallet auto top up settings
     /// </summary>
+    /// <remarks>
+    /// Returns the wallet auto top up settings for the current tenant.
+    /// </remarks>
     /// <path>api/2.0/portal/payment/topupsettings</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The wallet auto top up settings", typeof(TenantWalletSettings))]
@@ -1032,12 +1031,14 @@ public class PaymentController(
         return result;
     }
 
-    /// <remarks>
-    /// Sets the wallet auto top-up settings.
-    /// </remarks>
     /// <summary>
-    /// Set wallet auto top-up settings
+    /// Set the wallet auto top up settings
     /// </summary>
+    /// <remarks>
+    /// Updates the wallet auto top up settings for the current tenant.
+    /// Requires the tariff service to be configured and the user to be authorized as a payer.
+    /// Returns null if the tariff service is not configured or customer information/balance cannot be retrieved.
+    /// </remarks>
     /// <path>api/2.0/portal/payment/topupsettings</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The wallet auto top up settings", typeof(TenantWalletSettings))]
@@ -1075,15 +1076,16 @@ public class PaymentController(
         return settings;
     }
 
-    /// <remarks>
-    /// Returns the wallet services settings.
-    /// </remarks>
+
     /// <summary>
-    /// Get wallet services settings
+    /// Gets the wallet service settings for the tenant.
     /// </summary>
+    /// <remarks>
+    /// Retrieves configuration settings related to the wallet service associated with the current tenant.
+    /// </remarks>
     /// <path>api/2.0/portal/payment/servicessettings</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The wallet services settings", typeof(TenantWalletServiceSettings))]
+    [SwaggerResponse(200, "The wallet service settings for the tenant", typeof(TenantWalletServiceSettings))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("servicessettings")]
     public async Task<TenantWalletServiceSettings> GetTenantWalletServiceSettings()
@@ -1100,15 +1102,17 @@ public class PaymentController(
         return settings;
     }
 
-    /// <remarks>
-    /// Changes the wallet service state.
-    /// </remarks>
     /// <summary>
-    /// Change wallet service state
+    /// Change tenant wallet service state
     /// </summary>
+    /// <remarks>
+    /// Changes the state of a wallet service for the current tenant.
+    /// Requires permission to edit portal settings and a configured tariff service.
+    /// Adds or removes the specified service from the enabled services list based on the enabled flag.
+    /// </remarks>
     /// <path>api/2.0/portal/payment/servicestate</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The wallet service settings", typeof(TenantWalletServiceSettings))]
+    [SwaggerResponse(200, "The updated tenant wallet service settings", typeof(TenantWalletServiceSettings))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("servicestate")]
     public async Task<TenantWalletServiceSettings> ChangeTenantWalletServiceState(ChangeWalletServiceStateRequestDto inDto)
@@ -1156,12 +1160,14 @@ public class PaymentController(
         return settings;
     }
 
-    /// <remarks>
-    /// The request for buying wallet service.
-    /// </remarks>
     /// <summary>
-    /// Buy wallet service
+    /// Purchases a wallet service with the specified quantity.
     /// </summary>
+    /// <remarks>
+    /// This method processes a payment for a wallet service using the configured payment method.
+    /// Requires the tariff service to be configured and a valid payment method to be set for the customer.
+    /// Rate limiting is applied according to the payments API policy.
+    /// </remarks>
     /// <path>api/2.0/portal/payment/buywalletservice</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The service payment information", typeof(ServicePayment))]
@@ -1200,12 +1206,14 @@ public class PaymentController(
         return result;
     }
 
-    /// <remarks>
-    /// Returns prices for AI models available for use.
-    /// </remarks>
     /// <summary>
-    /// Get prices for AI models
+    /// Get AI model prices
     /// </summary>
+    /// <remarks>
+    /// Retrieves the pricing information for AI models including chat, embedding, and web search services.
+    /// The prices are returned in the configured currency and normalized per million tokens.
+    /// Requires administrator permissions to access.
+    /// </remarks>
     /// <path>api/2.0/portal/payment/aiprices</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Prices for AI models", typeof(AiPricesResponse))]
