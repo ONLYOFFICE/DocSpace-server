@@ -3417,8 +3417,11 @@
               }
             }
           },
-          "402": {
-            "description": "Failed to set quota per user. The entered value is greater than the total DocSpace storage"
+          "400": {
+            "description": "The entered quota value is invalid or greater than the total storage size"
+          },
+          "403": {
+            "description": "No permissions to perform this action"
           },
           "401": {
             "description": "Unauthorized"
