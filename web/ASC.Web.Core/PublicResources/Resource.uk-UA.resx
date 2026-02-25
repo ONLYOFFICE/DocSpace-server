@@ -142,7 +142,7 @@
     <value>Кількість</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-service" xml:space="preserve">
-    <value>Інструменти ШІ</value>
+    <value>Інструменти AІ</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Резервна копія</value>
@@ -190,10 +190,10 @@
     <value>Повідомлення було успішно надіслано. Адміністратор порталу зв'яжеться з вами.</value>
   </data>
   <data name="AiAgentFreeSpaceException" xml:space="preserve">
-    <value>Перевищено квоту простору для агента ШІ</value>
+    <value>Перевищено квоту простору для агента AІ</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Не вдалося задати квоту для агента ШІ. Введене значення більше загального сховища DocSpace.</value>
+    <value>Не вдалося задати квоту для агента AІ. Введене значення більше загального сховища DocSpace.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>Автоматичне поновлення</value>
@@ -1147,13 +1147,13 @@
     <value>Інструкції з видалення профілю були відправлені на вашу адресу електронної пошти {0}</value>
   </data>
   <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
-    <value>Кількість агентів ШІ не повинна перевищувати {0}</value>
+    <value>Кількість агентів AІ не повинна перевищувати {0}</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>Інструменти ШІ</value>
+    <value>Інструменти AІ</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Увімкніть функції ШІ у вашому просторі DocSpace, щоб збільшити продуктивність.</value>
+    <value>Увімкніть функції AІ у вашому просторі DocSpace, щоб збільшити продуктивність.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Відстеження входів та дій</value>
@@ -1249,10 +1249,10 @@
     <value>Кількість користувачів не повинна перевищувати {0}</value>
   </data>
   <data name="TariffsFeature_websearch_wallet" xml:space="preserve">
-    <value>Вебпошук на основі ШІ</value>
+    <value>Вебпошук на основі AІ</value>
   </data>
   <data name="TariffsFeature_websearch_wallet_price_count" xml:space="preserve">
-    <value>Поповніть гаманець, щоб розблокувати вебпошук на основі ШІ.</value>
+    <value>Поповніть гаманець, щоб розблокувати вебпошук на основі AІ.</value>
   </data>
   <data name="Tariffs_admin" xml:space="preserve">
     <value>Business</value>

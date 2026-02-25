@@ -79,7 +79,7 @@ public class WorkspaceMigrator : Migrator
         }
         try
         {
-            _dataReader = DataOperatorFactory.GetReadOperator(_backup, reportProgress ? _cancellationToken : CancellationToken.None, false);
+            _dataReader = DataOperatorFactory.GetReadOperator(_backup, false, reportProgress ? _cancellationToken : CancellationToken.None);
 
             if (_cancellationToken.IsCancellationRequested && reportProgress)
             {

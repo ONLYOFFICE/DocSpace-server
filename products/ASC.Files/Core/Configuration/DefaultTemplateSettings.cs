@@ -54,7 +54,8 @@ namespace ASC.Files.Core.Configuration
                                                IFolderDao<int> folderDao,
                                                ExternalShare externalShare,
                                                CommonLinkUtility commonLinkUtility,
-                                               FilesLinkUtility filesLinkUtility)
+                                               FilesLinkUtility filesLinkUtility,
+                                               FilesMessageService fileMessageService)
     {
         public async Task<DefaultTemplateSettingsDto> ConvertToDtoAsync(DefaultTemplateSettings settings)
         {
@@ -98,18 +99,19 @@ namespace ASC.Files.Core.Configuration
             var settings = await settingsManager.LoadAsync<DefaultTemplateSettings>();
             var templatesExtensions = await GetSampleDocumentsExtensionsListAsync();
 
-            _ = settings.Items.RemoveAll(item => !templatesExtensions.Contains(item.FileExtension));
-            var existingExtensions = new HashSet<string>(settings.Items.Select(item => item.FileExtension));
+            var result = new DefaultTemplateSettings { LastModified = settings.LastModified, Items = settings.Items.ToList() };
+            _ = result.Items.RemoveAll(item => !templatesExtensions.Contains(item.FileExtension));
+            var existingExtensions = new HashSet<string>(result.Items.Select(item => item.FileExtension));
 
             foreach (var key in templatesExtensions)
             {
                 if (!existingExtensions.Contains(key))
                 {
-                    settings.Items.Add(new DefaultTempalteItem() { FileExtension = key, SelectedFile = null });
+                    result.Items.Add(new DefaultTempalteItem() { FileExtension = key, SelectedFile = null });
                 }
             }
 
-            return settings;
+            return result;
         }
 
         public async Task<DefaultTemplateSettings> SetTemplateAsync(string extension, int? fileId)
@@ -139,6 +141,9 @@ namespace ASC.Files.Core.Configuration
             }
 
             _ = await settingsManager.SaveAsync(settings);
+
+            fileMessageService.Send(MessageAction.DocumentsDefaultTemplatesSettingsUpdated, setting.FileExtension, fileId?.ToString());
+
             return settings;
         }
 
@@ -167,6 +172,9 @@ namespace ASC.Files.Core.Configuration
                 }
 
                 _ = await settingsManager.SaveAsync(settings);
+
+                fileMessageService.Send(MessageAction.DocumentsDefaultTemplatesSettingsUpdated, setting.FileExtension, file.Id.ToString());
+
                 return settings;
             }
             catch

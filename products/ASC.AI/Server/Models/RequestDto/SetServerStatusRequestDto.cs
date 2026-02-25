@@ -26,16 +26,31 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Request to change the enabled/disabled state of an MCP server.
+/// </summary>
 public class SetServerStatusRequestDto
 {
-    [FromRoute]
+    /// <summary>
+    /// Unique identifier of the MCP server whose status is being changed.
+    /// </summary>
+    [FromRoute(Name = "id")]
     public Guid Id { get; set; }
-    
+
+    /// <summary>
+    /// New status value.
+    /// </summary>
     [FromBody]
     public required SetServerStatusRequestBody Body { get; set; }
 }
 
+/// <summary>
+/// Parameters for toggling the MCP server status.
+/// </summary>
 public class SetServerStatusRequestBody
 {
+    /// <summary>
+    /// Set to true to enable the server (making it available for room assignment), or false to disable it.
+    /// </summary>
     public bool Enabled { get; set; }
 }

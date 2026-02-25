@@ -626,6 +626,9 @@ public enum MessageAction
     [Description("Room change owner")]
     RoomChangeOwner = 5159,
 
+    [Description("Documents default templates settings updated")]
+    DocumentsDefaultTemplatesSettingsUpdated = 5160,
+    
     [Description("File saved, user quota exceeded")]
     FileSavedButUserQuotaExceeded = 5201,
 
@@ -848,6 +851,18 @@ public enum MessageAction
 
     [Description("Scheduled backup failed")]
     ScheduledBackupFailed = 5129,
+
+    [Description("Scheduled backup deleted")]
+    ScheduledBackupDeleted = 5130,
+
+    [Description("Backup cancelled")]
+    BackupCancelled = 5131,
+
+    [Description("Restore started")]
+    RestoreStarted = 5132,
+
+    [Description("Restore cancelled")]
+    RestoreCancelled = 5133,
 
     [Description("License key uploaded")]
     LicenseKeyUploaded = 5042,

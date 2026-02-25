@@ -120,6 +120,14 @@
   <data name="button_CheckReadyForms" xml:space="preserve">
     <value>Hazır formları kontrol et</value>
   </data>
+  <data name="pattern_AgentRemoved" xml:space="preserve">
+    <value>h1. $__AuthorName bir Yapay Zekâ Ajanını sildi
+
+$__AuthorName, $RoomTitle adlı Yapay Zekâ Ajanını sildi</value>
+  </data>
+  <data name="pattern_AgentUpdateAccessForUser_push" xml:space="preserve">
+    <value>"$RoomTitle" Yapay Zekâ Ajanındaki rolünüz "$RoomRole" olarak değiştirildi</value>
+  </data>
   <data name="pattern_DocumentCreatedInRoom_push" xml:space="preserve">
     <value>"$RoomTitle" odasında "$DocumentTitle" adlı yeni bir belge oluşturuldu</value>
   </data>
@@ -187,6 +195,9 @@ $OrangeButton
       Etkinlik bildirimi. "$RoomTitle":"$RoomURL" odasında "$DocumentTitle":"$DocumentURL" formu tamamen dolduruldu — $__DateTime.
     </value>
   </data>
+  <data name="pattern_InvitedToAgent_push" xml:space="preserve">
+    <value>"$RoomTitle" Yapay Zekâ Ajanına davet edildiniz</value>
+  </data>
   <data name="pattern_InvitedToRoom_push" xml:space="preserve">
     <value>"$RoomTitle" odasına davet edildiniz</value>
   </data>
@@ -209,16 +220,16 @@ $__AuthorName şu odayı sildi: $RoomTitle</value>
     <value>"$RoomTitle" odasındaki rolünüz "$RoomRole" olarak değiştirildi</value>
   </data>
   <data name="pattern_ShareDocument" xml:space="preserve">
-    <value>h1. $__DateTime, "$__AuthorName":"$__AuthorUrl" kullanıcısı "$DocumentTitle":"$DocumentURL" dosyasına erişiminize şu erişim haklarıyla: "$AccessRights" izin verdi.
+    <value>h1. Belgeler. Şu belgeye erişim izni verildi: $DocumentTitle
 
-Portal adresiniz: "$__VirtualRootPath":"$__VirtualRootPath"
+$__DateTime, $__AuthorName kullanıcısı "$DocumentTitle":"$DocumentURL" dosyasına erişiminize şu erişim haklarıyla izin verdi: "$AccessRights".
 
 $Message</value>
   </data>
   <data name="pattern_ShareFolder" xml:space="preserve">
-    <value>h1. $__DateTime, "$__AuthorName":"$__AuthorUrl" kullanıcısı
+    <value>h1. Belgeler. Şu klasöre erişim izni verildi: $DocumentTitle
 
-"$DocumentTitle":"$DocumentURL" klasörüne erişiminize şu erişim haklarıyla izin verdi: "$AccessRights".
+$__DateTime, $__AuthorName kullanıcısı "$DocumentTitle":"$DocumentURL" klasörüne erişiminize şu erişim haklarıyla izin verdi: "$AccessRights".
 
 $Message</value>
   </data>
@@ -231,6 +242,9 @@ $Message</value>
     <value>
       Etkinlik bildirimi. Sıra sizde! Form doldurmanız gerekiyor: "$DocumentTitle":"$DocumentURL", oda: "$RoomTitle":"$RoomURL" — $__DateTime.
     </value>
+  </data>
+  <data name="subject_AgentRemoved" xml:space="preserve">
+    <value>DocSpace bildirimi. Yapay Zekâ Ajanı silindi</value>
   </data>
   <data name="subject_DocuSignComplete" xml:space="preserve">
     <value>Belgeler. Tüm imzalayanlar $DocumentTitle tamamladı</value>

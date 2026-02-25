@@ -253,7 +253,7 @@ internal class SettingsActionMapper : ILocationActionMapper
                 ActionType.Update, [
                     MessageAction.DocumentsThirdPartySettingsUpdated, MessageAction.DocumentsOverwritingSettingsUpdated,
                     MessageAction.DocumentsForcesave, MessageAction.DocumentsStoreForcesave, MessageAction.DocumentsUploadingFormatsSettingsUpdated,
-                    MessageAction.DocumentsExternalShareSettingsUpdated
+                    MessageAction.DocumentsExternalShareSettingsUpdated, MessageAction.DocumentsDefaultTemplatesSettingsUpdated
                 ]
             }
         };

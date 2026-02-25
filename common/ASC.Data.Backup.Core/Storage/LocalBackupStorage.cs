@@ -29,7 +29,7 @@ namespace ASC.Data.Backup.Storage;
 [Scope]
 public class LocalBackupStorage : IBackupStorage, IGetterWriteOperator
 {
-    public Task<string> UploadAsync(string storageBasePath, string localPath, Guid userId)
+    public async Task<string> UploadAsync(string storageBasePath, string localPath, Guid userId, CancellationToken token)
     {
         if (!Directory.Exists(storageBasePath))
         {
@@ -39,10 +39,16 @@ public class LocalBackupStorage : IBackupStorage, IGetterWriteOperator
         var storagePath = CrossPlatform.PathCombine(storageBasePath, Path.GetFileName(localPath));
         if (localPath != storagePath)
         {
-            File.Copy(localPath, storagePath, true);
+            using (var source = File.Open(localPath, FileMode.Open))
+            {
+                using (var destination = File.Create(storagePath))
+                {
+                    await source.CopyToAsync(destination, token);
+                }
+            }
         }
 
-        return Task.FromResult(storagePath);
+        return storagePath;
     }
 
     public Task<string> DownloadAsync(string storagePath, string targetLocalPath)

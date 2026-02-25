@@ -20,7 +20,6 @@ public class MyPostmanCollectionCodegen extends PostmanCollectionCodegen {
         super.processOpts();
         this.outputFolder = "../../../sdk/docspace-api-postman-collections";
 
-        String baseURL = openAPI.getServers().get(0).getUrl();
         if (openAPI.getServers() != null && !openAPI.getServers().isEmpty()) {
             Server server = openAPI.getServers().get(0);
             ServerVariables serverVars = server.getVariables();

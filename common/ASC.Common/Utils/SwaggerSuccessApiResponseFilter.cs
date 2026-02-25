@@ -218,22 +218,23 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
             Properties = new Dictionary<string, IOpenApiSchema>
             {
                 { "response", responseProperty },
-                { "count", new OpenApiSchema { Type = JsonSchemaType.Integer, Format = "int32" } },
+                { "count", new OpenApiSchema { Type = JsonSchemaType.Integer, Format = "int32", Description = "The total number of items in the response"  } },
                 { "links", new OpenApiSchema
                     {
                         Type = JsonSchemaType.Array,
+                        Description = "List of links related to the response",
                         Items = new OpenApiSchema
                         {
                             Type = JsonSchemaType.Object,
                             Properties = new Dictionary<string, IOpenApiSchema>
                             {
-                                { "href", new OpenApiSchema { Type = JsonSchemaType.String } },
-                                { "action", new OpenApiSchema { Type = JsonSchemaType.String } }
+                                { "href", new OpenApiSchema { Type = JsonSchemaType.String, Description = "URL of the link" } },
+                                { "action", new OpenApiSchema { Type = JsonSchemaType.String, Description = "Action associated with the link" } }
                             }
                         }
                     } },
-                { "status", new OpenApiSchema { Type = JsonSchemaType.Integer, Format = "int32" } },
-                { "statusCode", new OpenApiSchema { Type = JsonSchemaType.Integer, Format = "int32" } }
+                { "status", new OpenApiSchema { Type = JsonSchemaType.Integer, Format = "int32", Description = "HTTP status code of the response"  } },
+                { "statusCode", new OpenApiSchema { Type = JsonSchemaType.Integer, Format = "int32", Description = "HTTP status code of the response (duplicate of status)"  } }
             }
         };
     }

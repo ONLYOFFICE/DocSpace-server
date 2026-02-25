@@ -211,14 +211,14 @@ $__AuthorName a șters sala: $RoomTitle</value>
   <data name="pattern_ShareDocument" xml:space="preserve">
     <value>h1. Acces acordat la documentul: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" v-a acordat accesul la documentulȘ "$DocumentTitle":"$DocumentURL" cu următoarele drepturi de acces: "$AccessRights".
+$__DateTime $__AuthorName v-a acordat accesul la documentulȘ "$DocumentTitle":"$DocumentURL" cu următoarele drepturi de acces: "$AccessRights".
 
 $Message</value>
   </data>
   <data name="pattern_ShareFolder" xml:space="preserve">
     <value>h1. S-au acordat permisiuni de acces la folderul: "$DocumentTitle":"$DocumentURL"
 
-$__DateTime "$__AuthorName":"$__AuthorUrl" v-a acordat privilegii următoare de acces la folderul "$DocumentTitle":"$DocumentURL": "$AccessRights". 
+$__DateTime $__AuthorName v-a acordat privilegii următoare de acces la folderul "$DocumentTitle":"$DocumentURL": "$AccessRights". 
 
 $Message</value>
   </data>

@@ -26,11 +26,20 @@
 
 namespace ASC.AI.Models.RequestDto;
 
+/// <summary>
+/// Pagination parameters for list endpoints. Supports offset-based pagination via startIndex and count.
+/// </summary>
 public class PaginatedRequestDto
 {
+    /// <summary>
+    /// The number of items to skip before returning results (zero-based offset). Defaults to 0.
+    /// </summary>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; } = 0;
 
-    [FromQuery(Name = "count")] 
+    /// <summary>
+    /// The maximum number of items to return per page. Defaults to 100.
+    /// </summary>
+    [FromQuery(Name = "count")]
     public int Count { get; set; } = 100;
 }

@@ -24,8 +24,6 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-using Microsoft.Extensions.Hosting;
-
 var builder = DistributedApplication.CreateBuilder(args);
 
 var basePath = Path.GetFullPath(Path.Combine("..", "..", ".."));
@@ -38,40 +36,40 @@ var connectionManager = new ConnectionStringManager(builder, basePath)
 
 var configurator = new ProjectConfigurator(builder, connectionManager, basePath, isDocker);
 
-switch (builder.Configuration["APP_LAUNCH_PROFILE"])
+switch (builder.Configuration["DOTNET_LAUNCH_PROFILE"])
 {
-    case "Preview":
+    case "preview":
         connectionManager.AddMySql()
                          .AddRedis();
         configurator
             .AddProject<ASC_Files>(Constants.FilesPort)
-            .AddProject<ASC_Files_Service>(Constants.FilesServicePort)
+            .AddProject<ASC_Files_Worker>(Constants.FilesWorkerPort)
             .AddProject<ASC_People>(Constants.PeoplePort)
             .AddProject<ASC_Web_Api>(Constants.WebApiPort)
             .AddProject<ASC_Web_Studio>(Constants.WebstudioPort)
             .AddProject<ASC_AI>(Constants.AiPort)
-            .AddProject<ASC_AI_Service>(Constants.AiServicePort)
+            .AddProject<ASC_AI_Worker>(Constants.AiWorkerPort)
             .AddSocketIO();
 
         break;
-    case "FrontendDev":
+    case "frontend-dev":
         connectionManager.AddMySql(withDbGate: true)
             .AddRedis()
             .AddMailPit();
         
         configurator
             .AddProject<ASC_Files>(Constants.FilesPort)
-            .AddProject<ASC_Files_Service>(Constants.FilesServicePort)
+            .AddProject<ASC_Files_Worker>(Constants.FilesWorkerPort)
             .AddProject<ASC_People>(Constants.PeoplePort)
             .AddProject<ASC_Web_Api>(Constants.WebApiPort)
             .AddProject<ASC_ApiSystem>(Constants.ApiSystemPort)
             .AddProject<ASC_Data_Backup>(Constants.BackupPort)
-            .AddProject<ASC_Data_Backup_BackgroundTasks>(Constants.BackupBackgroundTasksPort)
+            .AddProject<ASC_Data_Backup_Worker>(Constants.BackupWorkerPort)
             .AddProject<ASC_Notify>(Constants.NotifyPort)
             .AddProject<ASC_Studio_Notify>(Constants.StudioNotifyPort)
             .AddProject<ASC_Web_Studio>(Constants.WebstudioPort)
             .AddProject<ASC_AI>(Constants.AiPort)
-            .AddProject<ASC_AI_Service>(Constants.AiServicePort)
+            .AddProject<ASC_AI_Worker>(Constants.AiWorkerPort)
             .AddProject<ASC_TelegramService>(Constants.TelegramPort)
             .AddSocketIO()
             .AddSsoAuth();
@@ -80,23 +78,24 @@ switch (builder.Configuration["APP_LAUNCH_PROFILE"])
     default:
         connectionManager.AddMySql(withDbGate: true)
             .AddRedis(withRedisInsight: true)
+            .AddMcpServer()
             .AddOpensearch()
             .AddMailPit();
         
         configurator
             .AddProject<ASC_Files>(Constants.FilesPort)
-            .AddProject<ASC_Files_Service>(Constants.FilesServicePort)
+            .AddProject<ASC_Files_Worker>(Constants.FilesWorkerPort)
             .AddProject<ASC_People>(Constants.PeoplePort)
             .AddProject<ASC_Web_Api>(Constants.WebApiPort)
             .AddProject<ASC_ApiSystem>(Constants.ApiSystemPort)
             .AddProject<ASC_ClearEvents>(Constants.ClearEventsPort)
             .AddProject<ASC_Data_Backup>(Constants.BackupPort)
-            .AddProject<ASC_Data_Backup_BackgroundTasks>(Constants.BackupBackgroundTasksPort)
+            .AddProject<ASC_Data_Backup_Worker>(Constants.BackupWorkerPort)
             .AddProject<ASC_Notify>(Constants.NotifyPort)
             .AddProject<ASC_Studio_Notify>(Constants.StudioNotifyPort)
             .AddProject<ASC_Web_Studio>(Constants.WebstudioPort)
             .AddProject<ASC_AI>(Constants.AiPort)
-            .AddProject<ASC_AI_Service>(Constants.AiServicePort)
+            .AddProject<ASC_AI_Worker>(Constants.AiWorkerPort)
             .AddProject<ASC_TelegramService>(Constants.TelegramPort)
             .AddSocketIO()
             .AddSsoAuth()
@@ -111,10 +110,10 @@ var clientBasePath = Path.Combine(basePath, "client");
 
 if (!skipClient)
 {
-    var installPackages = builder.AddExecutable("asc-install-packages", "pnpm", clientBasePath, "install");
-    var buildPackages = builder.AddExecutable("asc-build-packages", "pnpm", clientBasePath, "build").WaitForCompletion(installPackages);
+    var installPackages = builder.AddExecutable("onlyoffice-install-packages", "pnpm", clientBasePath, "install");
+    var buildPackages = builder.AddExecutable("onlyoffice-build-packages", "pnpm", clientBasePath, "build").WaitForCompletion(installPackages);
 
-    startPackages = builder.AddExecutable("asc-start-packages", "pnpm", clientBasePath, "start").WaitForCompletion(buildPackages);
+    startPackages = builder.AddExecutable("onlyoffice-start-packages", "pnpm", clientBasePath, "start").WaitForCompletion(buildPackages);
     installPackages.WithChildRelationship(buildPackages);
     buildPackages.WithChildRelationship(startPackages);
 }
