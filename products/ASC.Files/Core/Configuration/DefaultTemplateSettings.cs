@@ -89,6 +89,7 @@ namespace ASC.Files.Core.Configuration
                     result.FileTitle = file.Title;
                     result.LastModified = file.ModifiedOn;
                     result.ViewUrl = externalShare.GetUrlWithShare(commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileDownloadUrl(file.Id)));
+                    result.FileSize = file.ContentLength;
                 }
 
                 return result;
