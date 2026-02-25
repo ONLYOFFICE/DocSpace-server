@@ -1269,7 +1269,7 @@ public class PaymentController(
                 new AiEntryPricingDto<decimal>
                 {
                     Id = "search",
-                    Alias = "Search",
+                    Alias = "Web Search",
                     Image = await walletStaticProvider.GetImageAsync("search"),
                     Provider = aiPrices.WebSearch.Provider,
                     Price = aiPrices.WebSearch.Search
@@ -1277,7 +1277,7 @@ public class PaymentController(
                 new AiEntryPricingDto<decimal>
                 {
                     Id = "fetch",
-                    Alias = "Crawling",
+                    Alias = "Web crawling",
                     Image = await walletStaticProvider.GetImageAsync("crawling"),
                     Provider = aiPrices.WebSearch.Provider,
                     Price = aiPrices.WebSearch.Contents
