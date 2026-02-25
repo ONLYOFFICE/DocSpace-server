@@ -132,12 +132,18 @@ public class AiGatewaySettings
     public TimeSpan TokenExpiration { get; init; }
 }
 
+public record CurrencyInfo
+{
+    public required string Code { get; init; }
+    public required string Symbol { get; init; }
+}
+
 public record AiPricesResponse
 {
     public required List<AiChatModelPricing> Chat { get; init; }
     public required List<AiEmbeddingModelPricing> Embedding { get; init; }
     public required AiWebSearchPricing WebSearch { get; init; }
-    public string Currency { get; init; } = "USD";
+    public required CurrencyInfo Currency { get; init; } = new() { Code = "USD", Symbol = "$" };
 }
 
 public record AiChatModelPricing

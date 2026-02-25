@@ -24,6 +24,8 @@
 // content are licensed under the terms of the Creative Commons Attribution-ShareAlike 4.0
 // International. See the License terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
 
+using ASC.Core.Common.AI;
+
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 public class AiPricesDto
@@ -31,7 +33,7 @@ public class AiPricesDto
     public required List<AiEntryPricingDto<AiChatPriceDto>> Chat { get; init; }
     public required List<AiEntryPricingDto<AiEmbeddingPriceDto>> Embedding { get; init; }
     public required AiWebSearchPricingDto WebSearch { get; init; }
-    public required string Currency { get; init; }
+    public required CurrencyInfo Currency { get; init; }
 }
 
 public class AiEntryPricingDto<T>
@@ -56,6 +58,7 @@ public class AiEmbeddingPriceDto
 
 public class AiWebSearchPricingDto
 {
+    public required string Alias { get; init; }
     public required string Provider { get; init; }
     public required string SearchImage { get; init; }
     public required string CrawlingImage { get; init; }

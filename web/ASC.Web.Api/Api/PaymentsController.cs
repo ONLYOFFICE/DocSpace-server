@@ -1218,7 +1218,7 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Prices for AI models", typeof(AiPricesResponse))]
     [SwaggerResponse(403, "No permissions to perform this action")]
-    [HttpGet("aiprices")]
+    [HttpGet("ai-prices")]
     public async Task<AiPricesDto> GetAiPrices()
     {
         if (!tariffService.IsConfigured())
@@ -1267,6 +1267,7 @@ public class PaymentController(
             Embedding = embedding,
             WebSearch = new AiWebSearchPricingDto
             {
+                Alias = aiPrices.WebSearch.Provider,
                 SearchImage = await walletStaticProvider.GetImageAsync("search"),
                 CrawlingImage = await walletStaticProvider.GetImageAsync("crawling"),
                 Provider = aiPrices.WebSearch.Provider,
