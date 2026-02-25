@@ -517,7 +517,7 @@ public class UserController(
     [AllowNotPayment]
     [HttpPut("{userid:guid}/password")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
-    [Authorize(AuthenticationSchemes = "confirm", Roles = "PasswordChange")]
+    [Authorize(AuthenticationSchemes = "confirm", Roles = "PasswordChange,Activation")]
     public async Task<EmployeeFullDto> ChangeUserPassword(ChangePasswordByIdRequestDto inDto)
     {
         await securityContext.AuthByClaimAsync();
@@ -2331,13 +2331,14 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / Quota")]
     [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(402, "Failed to set quota per user. The entered value is greater than the total DocSpace storage")]
+    [SwaggerResponse(400, "The entered quota value is invalid or greater than the total storage size")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("userquota")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserQuota(UpdateMembersQuotaRequestDto inDto)
     {
         if (!inDto.Quota.TryGetInt64(out var quota))
         {
-            throw new Exception(Resource.UserQuotaGreaterPortalError);
+            throw new ArgumentException(Resource.UserQuotaGreaterPortalError);
         }
 
         await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
@@ -2353,7 +2354,7 @@ public class UserController(
 
         if (maxTotalSize < quota)
         {
-            throw new Exception(Resource.UserQuotaGreaterPortalError);
+            throw new ArgumentException(Resource.UserQuotaGreaterPortalError);
         }
         if (coreBaseSettings.Standalone)
         {
@@ -2362,7 +2363,7 @@ public class UserController(
             {
                 if (tenantQuotaSetting.Quota < quota)
                 {
-                    throw new Exception(Resource.UserQuotaGreaterPortalError);
+                    throw new ArgumentException(Resource.UserQuotaGreaterPortalError);
                 }
             }
         }

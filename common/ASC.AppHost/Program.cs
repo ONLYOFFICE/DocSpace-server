@@ -78,6 +78,7 @@ switch (builder.Configuration["DOTNET_LAUNCH_PROFILE"])
     default:
         connectionManager.AddMySql(withDbGate: true)
             .AddRedis(withRedisInsight: true)
+            .AddMcpServer()
             .AddOpensearch()
             .AddMailPit();
         
