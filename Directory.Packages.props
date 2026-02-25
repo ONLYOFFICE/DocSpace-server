@@ -100,6 +100,7 @@
     <!-- Additional packages centralized from various projects -->
     <PackageVersion Include="Amazon.Extensions.S3.Encryption" Version="4.0.0" />
     <PackageVersion Include="Anthropic.SDK" Version="5.8.0" />
+    <PackageVersion Include="AnyAscii" Version="0.3.3" />
     <PackageVersion Include="Apache.NMS.AMQP" Version="2.4.0" />
     <PackageVersion Include="Aspire.Hosting.MySql" Version="13.1.1" />
     <PackageVersion Include="Aspire.Hosting.NodeJs" Version="9.5.2" />

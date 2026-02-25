@@ -315,7 +315,32 @@ public class FormFillingReportCreator(
 
     private static string NormalizeColumnName(string key)
     {
-        var name = Regex.Replace(key ?? "", @"[^a-zA-Z0-9_]", "_");
+        if (string.IsNullOrEmpty(key))
+        {
+            return "field";
+        }
+
+        // Transliterate any Unicode script to ASCII (Cyrillic, Chinese, Japanese, Korean, Arabic, etc.)
+        var transliterated = AnyAscii.Transliteration.Transliterate(key);
+
+        // Replace any character that is not alphanumeric or underscore with underscore
+        var name = Regex.Replace(transliterated, @"[^a-zA-Z0-9_]", "_");
+
+        // Collapse consecutive underscores and strip leading/trailing ones
+        name = Regex.Replace(name, @"_+", "_").Trim('_');
+
+        // If empty after cleanup or starts with a digit — prefix to produce a valid identifier
+        if (name.Length == 0 || char.IsDigit(name[0]))
+        {
+            name = "f_" + name;
+        }
+
+        // Truncate to 64 characters (MySQL/PostgreSQL identifier limit)
+        if (name.Length > 64)
+        {
+            name = name[..64].TrimEnd('_');
+        }
+
         return name.ToLower();
     }
 
