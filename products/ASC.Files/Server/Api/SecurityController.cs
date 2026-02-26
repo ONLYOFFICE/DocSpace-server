@@ -181,10 +181,15 @@ public abstract class SecurityController<T>(
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "List of access rights information", typeof(List<AceShortWrapper>))]
+    [SwaggerResponse(400, "The list of email addresses is empty")]
+    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
+    [SwaggerResponse(404, "The required file was not found")]
     [HttpPost("file/{fileId}/sendeditornotify")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task<List<AceShortWrapper>> SendEditorNotify(MentionMessageWrapperRequestDto<T> inDto)
     {
+        ArgumentNullException.ThrowIfNull(inDto);
+
         return await fileStorageService.SendEditorNotifyAsync(inDto.FileId, inDto.MentionMessage);
     }
 
