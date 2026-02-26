@@ -5584,40 +5584,32 @@
                     "example": false
                   },
                   "InsertFile.Stream.CanRead": {
-                    "type": "boolean",
-                    "example": true
+                    "type": "boolean"
                   },
                   "InsertFile.Stream.CanWrite": {
-                    "type": "boolean",
-                    "example": true
+                    "type": "boolean"
                   },
                   "InsertFile.Stream.CanSeek": {
-                    "type": "boolean",
-                    "example": true
+                    "type": "boolean"
                   },
                   "InsertFile.Stream.CanTimeout": {
-                    "type": "boolean",
-                    "example": true
+                    "type": "boolean"
                   },
                   "InsertFile.Stream.Length": {
                     "type": "integer",
-                    "format": "int64",
-                    "example": 1234
+                    "format": "int64"
                   },
                   "InsertFile.Stream.Position": {
                     "type": "integer",
-                    "format": "int64",
-                    "example": 1234
+                    "format": "int64"
                   },
                   "InsertFile.Stream.ReadTimeout": {
                     "type": "integer",
-                    "format": "int32",
-                    "example": 1234
+                    "format": "int32"
                   },
                   "InsertFile.Stream.WriteTimeout": {
                     "type": "integer",
-                    "format": "int32",
-                    "example": 1234
+                    "format": "int32"
                   }
                 }
               },
@@ -5833,40 +5825,32 @@
                     "example": false
                   },
                   "Stream.CanRead": {
-                    "type": "boolean",
-                    "example": true
+                    "type": "boolean"
                   },
                   "Stream.CanWrite": {
-                    "type": "boolean",
-                    "example": true
+                    "type": "boolean"
                   },
                   "Stream.CanSeek": {
-                    "type": "boolean",
-                    "example": true
+                    "type": "boolean"
                   },
                   "Stream.CanTimeout": {
-                    "type": "boolean",
-                    "example": true
+                    "type": "boolean"
                   },
                   "Stream.Length": {
                     "type": "integer",
-                    "format": "int64",
-                    "example": 1234
+                    "format": "int64"
                   },
                   "Stream.Position": {
                     "type": "integer",
-                    "format": "int64",
-                    "example": 1234
+                    "format": "int64"
                   },
                   "Stream.ReadTimeout": {
                     "type": "integer",
-                    "format": "int32",
-                    "example": 1234
+                    "format": "int32"
                   },
                   "Stream.WriteTimeout": {
                     "type": "integer",
-                    "format": "int32",
-                    "example": 1234
+                    "format": "int32"
                   }
                 }
               },
@@ -14335,18 +14319,18 @@
             "type": "string",
             "description": "The name of the user the document will be shared with.",
             "nullable": true,
-            "example": "some text"
+            "example": "John Doe"
           },
           "permissions": {
             "type": "string",
             "description": "The access rights for the user with the name above.\r\nCan be \"Full Access\", \"Read Only\", or \"Deny Access\".",
             "nullable": true,
-            "example": "some text"
+            "example": "Full Access"
           },
           "isLink": {
             "type": "boolean",
             "description": "Specifies whether to change the user icon to the link icon.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -14402,13 +14386,13 @@
             "type": "string",
             "description": "The action data that will be scrolled to.",
             "nullable": true,
-            "example": "some text"
+            "example": "section"
           },
           "type": {
             "type": "string",
             "description": "The action type.",
             "nullable": true,
-            "example": "some text"
+            "example": "scroll"
           }
         },
         "additionalProperties": false,
@@ -14556,32 +14540,35 @@
             "type": "string",
             "description": "The authentication login.",
             "nullable": true,
-            "example": "some text"
+            "example": "user@example.com"
           },
           "password": {
             "type": "string",
             "description": "The authentication password.",
             "nullable": true,
-            "example": "P@ssw0rd123"
+            "example": "p@ssw0rd!"
           },
           "rawToken": {
             "type": "string",
             "description": "The authentication raw token.",
             "nullable": true,
-            "example": "some text"
+            "example": {
+              "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+              "expires_in": 3600
+            }
           },
           "url": {
             "type": "string",
             "description": "The authentication URL.",
             "format": "uri",
             "nullable": true,
-            "example": "some text"
+            "example": "https://auth.example.com"
           },
           "provider": {
             "type": "string",
             "description": "The authentication provider.",
             "nullable": true,
-            "example": "some text"
+            "example": "OAuth2"
           },
           "token": {
             "$ref": "#/components/schemas/OAuth20Token"
@@ -15039,7 +15026,12 @@
             },
             "description": "The list of files in the destination folder.",
             "nullable": true,
-            "example": [ ]
+            "example": [
+              {
+                "id": 10,
+                "title": "document.docx"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -15373,7 +15365,7 @@
           "fast": {
             "type": "boolean",
             "description": "Specifies if the co-editing mode is fast.",
-            "example": true
+            "example": false
           },
           "mode": {
             "$ref": "#/components/schemas/CoEditingConfigMode"
@@ -15559,8 +15551,7 @@
         "properties": {
           "dispositionType": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "parameters": {
             "type": "array",
@@ -15570,32 +15561,26 @@
           },
           "fileName": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "creationDate": {
             "type": "string",
-            "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "format": "date-time"
           },
           "modificationDate": {
             "type": "string",
-            "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "format": "date-time"
           },
           "inline": {
-            "type": "boolean",
-            "example": true
+            "type": "boolean"
           },
           "readDate": {
             "type": "string",
-            "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "format": "date-time"
           },
           "size": {
             "type": "integer",
-            "format": "int64",
-            "example": 1234
+            "format": "int64"
           }
         },
         "additionalProperties": false
@@ -15605,23 +15590,19 @@
         "properties": {
           "boundary": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "charSet": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "mediaType": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "name": {
             "type": "string",
-            "nullable": true,
-            "example": "John Doe"
+            "nullable": true
           },
           "parameters": {
             "type": "array",
@@ -15967,7 +15948,7 @@
             "type": "string",
             "description": "The color of the room to be created.",
             "nullable": true,
-            "example": "FF0000"
+            "example": "#FF0000"
           },
           "cover": {
             "maxLength": 50,
@@ -16074,7 +16055,7 @@
             "type": "string",
             "description": "The room color.",
             "nullable": true,
-            "example": "FF0000"
+            "example": "#FF0000"
           },
           "cover": {
             "maxLength": 50,
@@ -16200,7 +16181,7 @@
             "type": "string",
             "description": "The color of the third-party room.",
             "nullable": true,
-            "example": "FF0000"
+            "example": "#FF0000"
           },
           "cover": {
             "type": "string",
@@ -16456,7 +16437,12 @@
             },
             "description": "Default templates list.",
             "nullable": true,
-            "example": [ ]
+            "example": [
+              {
+                "extension": ".docx",
+                "title": "Blank Document"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -17193,7 +17179,11 @@
                 },
                 "description": "The list of file IDs.",
                 "nullable": true,
-                "example": [ ]
+                "example": [
+                  1,
+                  2,
+                  3
+                ]
               }
             }
           }
@@ -17254,7 +17244,7 @@
             "type": "string",
             "description": "The author ID.",
             "nullable": true,
-            "example": "1"
+            "example": "author_123"
           },
           "name": {
             "type": "string",
@@ -17425,7 +17415,15 @@
             },
             "description": "The list of file history changes.",
             "nullable": true,
-            "example": [ ]
+            "example": [
+              {
+                "user": {
+                  "id": "123",
+                  "name": "John Doe"
+                },
+                "created": "2021-01-01T00:00:00Z"
+              }
+            ]
           },
           "serverVersion": {
             "type": "string",
@@ -17444,20 +17442,20 @@
             "type": "string",
             "description": "The document identifier of the previous version of the document.",
             "nullable": true,
-            "example": "some text"
+            "example": "doc_v2_20260101"
           },
           "url": {
             "type": "string",
             "description": "The url address of the previous version of the document.",
             "format": "uri",
             "nullable": true,
-            "example": "some text"
+            "example": "https://files.example.com/history/doc_v2_20260101.docx"
           },
           "fileType": {
             "type": "string",
             "description": "The document extension.",
             "nullable": true,
-            "example": "some text"
+            "example": ".docx"
           }
         },
         "additionalProperties": false,
@@ -17561,7 +17559,7 @@
             "type": "string",
             "description": "The tool name.",
             "nullable": true,
-            "example": "some text"
+            "example": "GenerateDocx"
           },
           "parameters": {
             "$ref": "#/components/schemas/EditorToolCallParametersDto"
@@ -17610,7 +17608,7 @@
             "description": "The email address.",
             "format": "email",
             "nullable": true,
-            "example": "example@onlyoffice.com"
+            "example": "user@example.com"
           }
         },
         "additionalProperties": false,
@@ -17623,33 +17621,33 @@
             "type": "string",
             "description": "The absolute URL to the document serving as a source file for the document embedded into the web page.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://portal.example.com/files/editor?action=embedded&share=abc123"
           },
           "saveUrl": {
             "type": "string",
             "description": "The absolute URL that will allow the document to be saved onto the user personal computer.",
             "nullable": true,
             "readOnly": true,
-            "example": "some text"
+            "example": "https://portal.example.com/files/filehandler?action=download&share=abc123"
           },
           "shareLinkParam": {
             "type": "string",
             "description": "The shared URL parameter.",
             "nullable": true,
-            "example": "some text"
+            "example": "&share=abc123"
           },
           "shareUrl": {
             "type": "string",
             "description": "The absolute URL that will allow other users to share this document.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://portal.example.com/files/editor?action=view&share=abc123"
           },
           "toolbarDocked": {
             "type": "string",
             "description": "The place for the embedded viewer toolbar, can be either \"top\" or \"bottom\".",
             "nullable": true,
             "readOnly": true,
-            "example": "some text"
+            "example": "top"
           }
         },
         "additionalProperties": false,
@@ -18034,19 +18032,19 @@
             "description": "The crypto engine ID of the encryption key.",
             "nullable": true,
             "readOnly": true,
-            "example": "some text"
+            "example": "{FFF0E1EB-13DB-4678-B67D-FF0A41DBBCEF}"
           },
           "privateKeyEnc": {
             "type": "string",
             "description": "The private key.",
             "nullable": true,
-            "example": "some text"
+            "example": "MIIEvQIBADANBgkqhkiG9w0BAQEFAASC..."
           },
           "publicKey": {
             "type": "string",
             "description": "The public key.",
             "nullable": true,
-            "example": "some text"
+            "example": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A..."
           }
         },
         "additionalProperties": false,
@@ -18194,7 +18192,7 @@
             "type": "string",
             "description": "The absolute URL to the website address which will be opened when clicking the \"Feedback & Support\" menu button.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://portal.example.com/support"
           },
           "visible": {
             "type": "boolean",
@@ -18287,7 +18285,9 @@
                 },
                 "description": "The list of users editing the file.",
                 "nullable": true,
-                "example": [ ]
+                "example": {
+                  "00000000-0000-0000-0000-000000000000": "John Doe"
+                }
               },
               "mute": {
                 "type": "boolean",
@@ -18674,13 +18674,13 @@
                 "type": "integer",
                 "description": "The origin ID of the file entry.",
                 "format": "int32",
-                "example": 1234
+                "example": 12
               },
               "originRoomId": {
                 "type": "integer",
                 "description": "The origin room ID of the file entry.",
                 "format": "int32",
-                "example": 1234
+                "example": 22
               },
               "originTitle": {
                 "type": "string",
@@ -18726,7 +18726,10 @@
                 "additionalProperties": false,
                 "description": "A dictionary representing the sharing settings for the file entry.",
                 "nullable": true,
-                "example": [ ]
+                "example": {
+                  "ExternalLink": 1,
+                  "InvitationLink": 2
+                }
               },
               "security": {
                 "type": "object",
@@ -18907,7 +18910,12 @@
                 "additionalProperties": false,
                 "description": "The available external rights of the file entry.",
                 "nullable": true,
-                "example": [ ]
+                "example": {
+                  "ExternalLink": [
+                    "Read",
+                    "Edit"
+                  ]
+                }
               },
               "requestToken": {
                 "type": "string",
@@ -18960,13 +18968,13 @@
                 "type": "string",
                 "description": "The origin ID of the file entry.",
                 "nullable": true,
-                "example": "some text"
+                "example": 12
               },
               "originRoomId": {
                 "type": "string",
                 "description": "The origin room ID of the file entry.",
                 "nullable": true,
-                "example": "some text"
+                "example": 22
               },
               "originTitle": {
                 "type": "string",
@@ -19012,7 +19020,10 @@
                 "additionalProperties": false,
                 "description": "A dictionary representing the sharing settings for the file entry.",
                 "nullable": true,
-                "example": [ ]
+                "example": {
+                  "ExternalLink": 1,
+                  "InvitationLink": 2
+                }
               },
               "security": {
                 "type": "object",
@@ -19193,7 +19204,12 @@
                 "additionalProperties": false,
                 "description": "The available external rights of the file entry.",
                 "nullable": true,
-                "example": [ ]
+                "example": {
+                  "ExternalLink": [
+                    "Read",
+                    "Edit"
+                  ]
+                }
               },
               "requestToken": {
                 "type": "string",
@@ -19569,7 +19585,7 @@
             "type": "string",
             "description": "The file operation error message.",
             "nullable": true,
-            "example": ""
+            "example": "File not found."
           },
           "processed": {
             "type": "string",
@@ -19596,7 +19612,12 @@
             },
             "description": "The list of files of the file operation.",
             "nullable": true,
-            "example": [ ]
+            "example": [
+              {
+                "id": 10,
+                "title": "document.docx"
+              }
+            ]
           },
           "folders": {
             "type": "array",
@@ -19605,7 +19626,12 @@
             },
             "description": "The list of folders of the file operation.",
             "nullable": true,
-            "example": [ ]
+            "example": [
+              {
+                "id": 20,
+                "title": "My Folder"
+              }
+            ]
           },
           "status": {
             "$ref": "#/components/schemas/DistributedTaskStatus"
@@ -19772,19 +19798,19 @@
             "type": "string",
             "description": "The unique document identifier used by the service to get a link to the file.",
             "nullable": true,
-            "example": "some text"
+            "example": "doc_2026_02_001"
           },
           "instanceId": {
             "type": "string",
             "description": "The unique system identifier.",
             "nullable": true,
-            "example": "1"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "roomId": {
             "type": "string",
             "description": "Room ID",
             "nullable": true,
-            "example": "1"
+            "example": 1
           },
           "canEditRoom": {
             "type": "boolean",
@@ -20103,7 +20129,7 @@
                 "type": "string",
                 "description": "The ID of the user to whom the file will be shared.",
                 "format": "uuid",
-                "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+                "example": "00000000-0000-0000-0000-000000000000"
               },
               "access": {
                 "$ref": "#/components/schemas/FileShare"
@@ -20807,7 +20833,10 @@
             },
             "description": "The default access rights in sharing settings.",
             "nullable": true,
-            "example": [ ]
+            "example": [
+              1,
+              2
+            ]
           },
           "maxUploadThreadCount": {
             "type": "integer",
@@ -21151,7 +21180,12 @@
             },
             "description": "The list of files in the folder.",
             "nullable": true,
-            "example": [ ]
+            "example": [
+              {
+                "id": 10,
+                "title": "document.docx"
+              }
+            ]
           },
           "folders": {
             "type": "array",
@@ -21160,7 +21194,12 @@
             },
             "description": "The list of folders in the folder.",
             "nullable": true,
-            "example": [ ]
+            "example": [
+              {
+                "id": 20,
+                "title": "My Folder"
+              }
+            ]
           },
           "current": {
             "$ref": "#/components/schemas/FolderDtoInteger"
@@ -21331,7 +21370,10 @@
                 },
                 "description": "The list of tags of the folder.",
                 "nullable": true,
-                "example": [ ]
+                "example": [
+                  "tag1",
+                  "tag2"
+                ]
               },
               "logo": {
                 "$ref": "#/components/schemas/Logo"
@@ -21469,7 +21511,10 @@
                 },
                 "description": "The list of tags of the folder.",
                 "nullable": true,
-                "example": [ ]
+                "example": [
+                  "tag1",
+                  "tag2"
+                ]
               },
               "logo": {
                 "$ref": "#/components/schemas/Logo"
@@ -22009,7 +22054,12 @@
             },
             "description": "The list of forms data.",
             "nullable": true,
-            "example": [ ]
+            "example": [
+              {
+                "key": "field1",
+                "value": "Answer"
+              }
+            ]
           }
         },
         "additionalProperties": false
@@ -22027,13 +22077,13 @@
             "type": "string",
             "description": "The role name.",
             "nullable": true,
-            "example": "some text"
+            "example": "Manager"
           },
           "roleColor": {
             "type": "string",
             "description": "The role color.",
             "nullable": true,
-            "example": "some text"
+            "example": "#4781D1"
           },
           "userId": {
             "type": "string",
@@ -22045,24 +22095,24 @@
             "type": "integer",
             "description": "The role sequence.",
             "format": "int32",
-            "example": 1234
+            "example": 12
           },
           "submitted": {
             "type": "boolean",
             "description": "Specifies if the role was submitted or not.",
-            "example": true
+            "example": false
           },
           "openedAt": {
             "type": "string",
             "description": "The date and time when the role was opened.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2026-01-01T10:00:00Z"
           },
           "submissionDate": {
             "type": "string",
             "description": "The date and time when the role was submitted.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2026-01-01T10:00:00Z"
           }
         },
         "additionalProperties": false,
@@ -22156,7 +22206,9 @@
             },
             "description": "The role history.",
             "nullable": true,
-            "example": [ ]
+            "example": {
+              "0": "2025-01-15T10:30:00Z"
+            }
           },
           "roleStatus": {
             "$ref": "#/components/schemas/FormFillingStatus"
@@ -22215,25 +22267,25 @@
             "type": "string",
             "description": "The form data key.",
             "nullable": true,
-            "example": "some text"
+            "example": "first_name"
           },
           "tag": {
             "type": "string",
             "description": "The form data tag.",
             "nullable": true,
-            "example": "some text"
+            "example": "personal_info"
           },
           "value": {
             "type": "string",
             "description": "The form data value.",
             "nullable": true,
-            "example": "some text"
+            "example": "John"
           },
           "type": {
             "type": "string",
             "description": "The form data type.",
             "nullable": true,
-            "example": "some text"
+            "example": "text"
           }
         },
         "additionalProperties": false,
@@ -22245,14 +22297,12 @@
           "key": {
             "type": "string",
             "description": "The form item key.\r\n            <example>field_name</example>",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "type": {
             "type": "string",
             "description": "The form item type.\r\n            <example>text</example>",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           }
         },
         "additionalProperties": false,
@@ -22306,7 +22356,7 @@
             "type": "string",
             "description": "The absolute URL to the website address which will be opened when clicking the \"Open file location\" menu button.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://portal.example.com/files/location"
           }
         },
         "additionalProperties": false,
@@ -22448,8 +22498,7 @@
           },
           "key": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           }
         },
         "additionalProperties": false,
@@ -22506,7 +22555,7 @@
             "description": "The name of the action initiator.",
             "nullable": true,
             "readOnly": true,
-            "example": "some text"
+            "example": "John Doe"
           }
         },
         "additionalProperties": false,
@@ -22566,7 +22615,12 @@
             },
             "description": "The list of related history.",
             "nullable": true,
-            "example": [ ]
+            "example": [
+              {
+                "id": 124,
+                "action": 0
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -22675,13 +22729,11 @@
         "type": "object",
         "properties": {
           "key": {
-            "type": "boolean",
-            "example": true
+            "type": "boolean"
           },
           "value": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -22731,17 +22783,13 @@
         "properties": {
           "key": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "value": {
             "type": "array",
             "items": {
               "type": "string"
-            },
-            "example": [
-              "some text"
-            ]
+            }
           }
         },
         "additionalProperties": false
@@ -22830,31 +22878,31 @@
             "type": "string",
             "description": "The original logo.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://portal.example.com/logo/original.png"
           },
           "large": {
             "type": "string",
             "description": "The large logo.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://portal.example.com/logo/large.png"
           },
           "medium": {
             "type": "string",
             "description": "The medium logo.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://portal.example.com/logo/medium.png"
           },
           "small": {
             "type": "string",
             "description": "The small logo.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://portal.example.com/logo/small.png"
           },
           "color": {
             "type": "string",
             "description": "The logo color.",
             "nullable": true,
-            "example": "some text"
+            "example": "#4781D1"
           },
           "cover": {
             "$ref": "#/components/schemas/LogoCover"
@@ -22916,13 +22964,13 @@
             "type": "string",
             "description": "The logo cover ID.",
             "nullable": true,
-            "example": "1"
+            "example": "default_cover"
           },
           "data": {
             "type": "string",
             "description": "The logo cover data.",
             "nullable": true,
-            "example": "some text"
+            "example": "base64-image-data..."
           }
         },
         "additionalProperties": false,
@@ -22997,7 +23045,10 @@
             },
             "description": "A list of emails that will receive the mention message.",
             "nullable": true,
-            "example": [ ]
+            "example": [
+              "user1@example.com",
+              "user2@example.com"
+            ]
           },
           "message": {
             "maxLength": 255,
@@ -23023,21 +23074,21 @@
             "format": "email",
             "nullable": true,
             "readOnly": true,
-            "example": "example@onlyoffice.com"
+            "example": "user@example.com"
           },
           "id": {
             "type": "string",
             "description": "The user unique identification.",
             "nullable": true,
             "readOnly": true,
-            "example": "1"
+            "example": "user_0001"
           },
           "image": {
             "type": "string",
             "description": "The path to the user's avatar.",
             "nullable": true,
             "readOnly": true,
-            "example": "some text"
+            "example": "https://portal.example.com/avatar/user_0001.png"
           },
           "hasAccess": {
             "type": "boolean",
@@ -24153,7 +24204,7 @@
             "type": "string",
             "description": "The logo cover ID.",
             "nullable": true,
-            "example": "1"
+            "example": "default_cover"
           },
           "data": {
             "type": "object",
@@ -24162,7 +24213,12 @@
               "nullable": true
             },
             "description": "The logo cover data.",
-            "nullable": true
+            "nullable": true,
+            "example": {
+              "small": "base64...",
+              "medium": "base64...",
+              "large": "base64..."
+            }
           }
         },
         "additionalProperties": false
@@ -24353,44 +24409,36 @@
         "properties": {
           "access_token": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "refresh_token": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "expires_in": {
             "type": "integer",
-            "format": "int64",
-            "example": 1234
+            "format": "int64"
           },
           "client_id": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "client_secret": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "redirect_uri": {
             "type": "string",
             "format": "uri",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "timestamp": {
             "type": "string",
-            "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "format": "date-time"
           },
           "isExpired": {
             "type": "boolean",
-            "readOnly": true,
-            "example": true
+            "readOnly": true
           }
         },
         "additionalProperties": false
@@ -24493,8 +24541,7 @@
         "properties": {
           "is_asc": {
             "type": "boolean",
-            "description": "Specifies if the order is ascending.",
-            "example": true
+            "description": "Specifies if the order is ascending."
           },
           "property": {
             "$ref": "#/components/schemas/SortedByType"
@@ -24560,7 +24607,12 @@
             },
             "description": "The list of items with their ordering information.",
             "nullable": true,
-            "example": [ ]
+            "example": [
+              {
+                "entryId": 1,
+                "order": 1
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -24573,7 +24625,7 @@
             "type": "integer",
             "description": "The paragraph align.",
             "format": "int32",
-            "example": 1234
+            "example": 2
           },
           "runs": {
             "type": "array",
@@ -24581,7 +24633,18 @@
               "$ref": "#/components/schemas/Run"
             },
             "description": "The list of text runs from the paragraph.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              {
+                "fill": [
+                  124,
+                  124,
+                  124
+                ],
+                "text": "CONFIDENTIAL",
+                "fontSize": 26
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -24592,53 +24655,43 @@
         "properties": {
           "comment": {
             "type": "boolean",
-            "description": "Defines if the document can be commented or not.",
-            "example": true
+            "description": "Defines if the document can be commented or not."
           },
           "chat": {
             "type": "boolean",
-            "description": "Defines if the chat functionality is enabled in the document or not.",
-            "example": true
+            "description": "Defines if the chat functionality is enabled in the document or not."
           },
           "download": {
             "type": "boolean",
-            "description": "Defines if the document can be downloaded or only viewed or edited online.",
-            "example": true
+            "description": "Defines if the document can be downloaded or only viewed or edited online."
           },
           "edit": {
             "type": "boolean",
-            "description": "Defines if the document can be edited or only viewed.",
-            "example": true
+            "description": "Defines if the document can be edited or only viewed."
           },
           "fillForms": {
             "type": "boolean",
-            "description": "Defines if the forms can be filled.",
-            "example": true
+            "description": "Defines if the forms can be filled."
           },
           "modifyFilter": {
             "type": "boolean",
-            "description": "Defines if the filter can be applied globally (true) affecting all the other users,\r\nor locally (false), i.e. for the current user only.",
-            "example": true
+            "description": "Defines if the filter can be applied globally (true) affecting all the other users,\r\nor locally (false), i.e. for the current user only."
           },
           "protect": {
             "type": "boolean",
-            "description": "Defines if the \"Protection\" tab on the toolbar and the \"Protect\" button in the left menu are displayedor hidden.",
-            "example": true
+            "description": "Defines if the \"Protection\" tab on the toolbar and the \"Protect\" button in the left menu are displayedor hidden."
           },
           "print": {
             "type": "boolean",
-            "description": "Defines if the document can be printed or not.",
-            "example": true
+            "description": "Defines if the document can be printed or not."
           },
           "review": {
             "type": "boolean",
-            "description": "Defines if the document can be reviewed or not.",
-            "example": true
+            "description": "Defines if the document can be reviewed or not."
           },
           "copy": {
             "type": "boolean",
-            "description": "Defines if the content can be copied to the clipboard or not.",
-            "example": true
+            "description": "Defines if the content can be copied to the clipboard or not."
           }
         },
         "additionalProperties": false,
@@ -24656,7 +24709,8 @@
             "nullable": true,
             "readOnly": true,
             "example": [
-              "some text"
+              "https://portal.example.com/ThirdParty/plugin/easybib/config.json",
+              "https://portal.example.com/ThirdParty/plugin/wordpress/config.json"
             ]
           }
         },
@@ -24872,20 +24926,20 @@
             "type": "string",
             "description": "The folder where the document is stored.",
             "nullable": true,
-            "example": "some text"
+            "example": "folder_123"
           },
           "title": {
             "type": "string",
             "description": "The document title that will be displayed in the Open Recent... menu option.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "Report 2026"
           },
           "url": {
             "type": "string",
             "description": "The absolute URL to the document where it is stored.",
             "format": "uri",
             "nullable": true,
-            "example": "some text"
+            "example": "https://portal.example.com/files/recent/report2026.docx"
           }
         },
         "additionalProperties": false,
@@ -24896,12 +24950,14 @@
         "properties": {
           "reviewDisplay": {
             "type": "string",
+            "description": "The review display string representation.",
             "nullable": true,
             "readOnly": true,
-            "example": "some text"
+            "example": "full"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Configuration for review display settings."
       },
       "RoomDataLifetimeDto": {
         "type": "object",
@@ -24921,7 +24977,7 @@
             "description": "Specifies the time period value of the room data lifetime.",
             "format": "int32",
             "nullable": true,
-            "example": 1234
+            "example": 33
           },
           "enabled": {
             "type": "boolean",
@@ -25255,7 +25311,12 @@
             },
             "description": "The collection of invitation parameters.",
             "nullable": true,
-            "example": [ ]
+            "example": [
+              {
+                "id": "00000000-0000-0000-0000-000000000000",
+                "access": 1
+              }
+            ]
           },
           "notify": {
             "type": "boolean",
@@ -25374,7 +25435,12 @@
             },
             "description": "The list of room members.",
             "nullable": true,
-            "example": [ ]
+            "example": [
+              {
+                "access": 1,
+                "isOwner": false
+              }
+            ]
           },
           "warning": {
             "type": "string",
@@ -25530,7 +25596,7 @@
             "type": "string",
             "description": "The color of the room template.",
             "nullable": true,
-            "example": "FF0000"
+            "example": "#FF0000"
           },
           "cover": {
             "maxLength": 50,
@@ -25678,20 +25744,22 @@
             "description": "The fill color of the text run in RGB format.",
             "nullable": true,
             "example": [
-              1234
+              124,
+              124,
+              124
             ]
           },
           "text": {
             "type": "string",
             "description": "The run text.",
             "nullable": true,
-            "example": "some text"
+            "example": "CONFIDENTIAL"
           },
           "font-size": {
             "type": "string",
             "description": "The font size of the text run in points.",
             "nullable": true,
-            "example": "some text"
+            "example": 26
           }
         },
         "additionalProperties": false,
@@ -25783,7 +25851,12 @@
             },
             "description": "The collection of roles.",
             "nullable": true,
-            "example": [ ]
+            "example": [
+              {
+                "roleName": "Approver",
+                "userId": "00000000-0000-0000-0000-000000000000"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -25889,7 +25962,12 @@
             },
             "description": "The collection of sharing parameters.",
             "nullable": true,
-            "example": [ ]
+            "example": [
+              {
+                "access": 1,
+                "shareTo": "00000000-0000-0000-0000-000000000000"
+              }
+            ]
           },
           "notify": {
             "type": "boolean",
@@ -25918,7 +25996,12 @@
             },
             "description": "The collection of sharing parameters.",
             "nullable": true,
-            "example": [ ]
+            "example": [
+              {
+                "access": 1,
+                "shareTo": "00000000-0000-0000-0000-000000000000"
+              }
+            ]
           },
           "notify": {
             "type": "boolean",
@@ -26261,8 +26344,7 @@
         "properties": {
           "statusCode": {
             "type": "integer",
-            "format": "int32",
-            "example": 1234
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -26426,20 +26508,20 @@
             "type": "string",
             "description": "The absolute URL to the image for template.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://portal.example.com/templates/template1.png"
           },
           "title": {
             "type": "string",
             "description": "The template title that will be displayed in the \"Create New...\" menu option.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "Blank Document"
           },
           "url": {
             "type": "string",
             "description": "The absolute URL to the document where it will be created and available after creation.",
             "format": "uri",
             "nullable": true,
-            "example": "some text"
+            "example": "https://portal.example.com/editor/new?template=blank"
           }
         },
         "additionalProperties": false,
@@ -26829,7 +26911,10 @@
             },
             "description": "The list of tags.",
             "nullable": true,
-            "example": [ ]
+            "example": [
+              "tag1",
+              "tag2"
+            ]
           },
           "color": {
             "maxLength": 6,
@@ -26837,7 +26922,7 @@
             "type": "string",
             "description": "The room color.",
             "nullable": true,
-            "example": "FF5733"
+            "example": "#FF5733"
           },
           "cover": {
             "maxLength": 50,
@@ -26969,7 +27054,10 @@
             },
             "description": "The list of files when specified as multipart/form-data.",
             "nullable": true,
-            "example": [ ]
+            "example": [
+              "file1.docx",
+              "file2.xlsx"
+            ]
           },
           "createNewIfExist": {
             "type": "boolean",
@@ -27156,7 +27244,7 @@
             "type": "string",
             "description": "The user ID.",
             "nullable": true,
-            "example": "1"
+            "example": "user_0001"
           },
           "name": {
             "type": "string",
@@ -27168,7 +27256,7 @@
             "type": "string",
             "description": "The path to the user's avatar.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://portal.example.com/avatar/user_0001.png"
           },
           "roles": {
             "type": "array",
@@ -27178,13 +27266,15 @@
             "description": "Roles",
             "nullable": true,
             "example": [
-              "some text"
+              "admin",
+              "editor"
             ]
           },
           "customerId": {
             "type": "string",
+            "description": "Customer identifier associated with the user.",
             "nullable": true,
-            "example": "some text"
+            "example": "cust_001"
           }
         },
         "additionalProperties": false,
@@ -27333,7 +27423,7 @@
           },
           "sid": {
             "type": "string",
-            "description": "The LDAP user identificator.",
+            "description": "The LDAP user identifier.",
             "nullable": true,
             "example": "S-1-5-21-3623811015-3361044348-30300820-1013"
           },
@@ -27345,13 +27435,13 @@
           },
           "ssoNameId": {
             "type": "string",
-            "description": "The SSO SAML user identificator.",
+            "description": "The SSO SAML user identifier.",
             "nullable": true,
             "example": "johndoe@example.com"
           },
           "ssoSessionId": {
             "type": "string",
-            "description": "The SSO SAML user session identificator.",
+            "description": "The SSO SAML user session identifier.",
             "nullable": true,
             "example": "_1a2b3c4d5e6f7g8h9i0j"
           },
@@ -27535,13 +27625,13 @@
             "type": "number",
             "description": "Defines the watermark width measured in millimeters.",
             "format": "double",
-            "example": -8.5
+            "example": 150
           },
           "height": {
             "type": "number",
             "description": "Defines the watermark height measured in millimeters.",
             "format": "double",
-            "example": -8.5
+            "example": 100
           },
           "margins": {
             "type": "array",
@@ -27552,26 +27642,29 @@
             "description": "Defines the watermark margins measured in millimeters.",
             "nullable": true,
             "example": [
-              1234
+              10,
+              10,
+              10,
+              10
             ]
           },
           "fill": {
             "type": "string",
             "description": "Defines the watermark fill color.",
             "nullable": true,
-            "example": "some text"
+            "example": "#FF0000"
           },
           "rotate": {
             "type": "integer",
             "description": "Defines the watermark rotation angle.",
             "format": "int32",
-            "example": 1234
+            "example": 45
           },
           "transparent": {
             "type": "number",
             "description": "Defines the watermark transparency percentage.",
             "format": "double",
-            "example": -8.5
+            "example": 0.4
           },
           "paragraphs": {
             "type": "array",
@@ -27579,7 +27672,23 @@
               "$ref": "#/components/schemas/Paragraph"
             },
             "description": "The list of paragraphs of the watermark.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              {
+                "align": 2,
+                "runs": [
+                  {
+                    "fill": [
+                      124,
+                      124,
+                      124
+                    ],
+                    "text": "CONFIDENTIAL",
+                    "fontSize": 26
+                  }
+                ]
+              }
+            ]
           }
         },
         "additionalProperties": false,

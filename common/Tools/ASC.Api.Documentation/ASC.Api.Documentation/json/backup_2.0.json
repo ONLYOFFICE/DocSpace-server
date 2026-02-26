@@ -921,7 +921,13 @@
               "$ref": "#/components/schemas/ItemKeyValuePairObjectObject"
             },
             "description": "The backup storage parameters.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              {
+                "key": "path",
+                "value": "/backup"
+              }
+            ]
           },
           "dump": {
             "type": "boolean",
@@ -952,7 +958,7 @@
             "type": "string",
             "description": "The backup file name.",
             "nullable": true,
-            "example": "some text"
+            "example": "tenant-backup"
           },
           "storageType": {
             "$ref": "#/components/schemas/BackupStorageType"
@@ -961,13 +967,13 @@
             "type": "string",
             "description": "The backup creation date.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2026-03-01T02:15:00Z"
           },
           "expiresOn": {
             "type": "string",
             "description": "The backup expiration date.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2026-03-31T02:15:00Z"
           }
         },
         "additionalProperties": false,
@@ -1053,37 +1059,35 @@
           "isCompleted": {
             "type": "boolean",
             "description": "Specifies if the backup is completed or not.",
-            "example": true
+            "example": false
           },
           "progress": {
             "type": "integer",
             "description": "The backup progress in percentage.",
             "format": "int32",
-            "example": 1234
+            "example": 50
           },
           "error": {
             "type": "string",
             "description": "The backup error message.",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "warning": {
             "type": "string",
             "description": "The backup warning message.",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "link": {
             "type": "string",
             "description": "The backup link.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/backup/task_123"
           },
           "tenantId": {
             "type": "integer",
             "description": "The tenant ID.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           },
           "backupProgressEnum": {
             "$ref": "#/components/schemas/BackupProgressEnum"
@@ -1095,7 +1099,7 @@
             "type": "string",
             "description": "The task ID.",
             "nullable": true,
-            "example": "some text"
+            "example": "task_123"
           }
         },
         "additionalProperties": false,
@@ -1193,7 +1197,13 @@
               "$ref": "#/components/schemas/ItemKeyValuePairObjectObject"
             },
             "description": "The backup storage parameters.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              {
+                "key": "path",
+                "value": "/backup"
+              }
+            ]
           },
           "notify": {
             "type": "boolean",
@@ -1221,7 +1231,13 @@
               "$ref": "#/components/schemas/ItemKeyValuePairObjectObject"
             },
             "description": "The backup storage parameters.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              {
+                "key": "path",
+                "value": "/backup"
+              }
+            ]
           },
           "backupsStored": {
             "type": "integer",
@@ -1407,13 +1423,13 @@
             "type": "integer",
             "description": "The time of the day to start the backup process.",
             "format": "int32",
-            "example": 1234
+            "example": 0
           },
           "day": {
             "type": "integer",
             "description": "The day of the week to start the backup process.",
             "format": "int32",
-            "example": 1234
+            "example": 0
           }
         },
         "additionalProperties": false,
@@ -1527,13 +1543,7 @@
               "nullable": true
             },
             "description": "The backup storage parameters.",
-            "nullable": true,
-            "example": [
-              {
-                "key": "some text",
-                "value": "some text"
-              }
-            ]
+            "nullable": true
           },
           "cronParams": {
             "$ref": "#/components/schemas/CronParams"
@@ -1543,13 +1553,13 @@
             "description": "The maximum number of the stored backup copies.",
             "format": "int32",
             "nullable": true,
-            "example": 1234
+            "example": 5
           },
           "lastBackupTime": {
             "type": "string",
             "description": "The date and time when the last backup was reated.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2026-01-01T00:00:00Z"
           },
           "dump": {
             "type": "boolean",

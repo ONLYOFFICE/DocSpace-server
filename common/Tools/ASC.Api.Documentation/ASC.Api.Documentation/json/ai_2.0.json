@@ -3875,19 +3875,19 @@
             "type": "string",
             "description": "The tool name used by the AI to launch docx creation in the editor.",
             "nullable": true,
-            "example": "some text"
+            "example": "generate_docx"
           },
           "generateFormToolName": {
             "type": "string",
             "description": "The tool name used by the AI assistant to launch form creation in the editor.",
             "nullable": true,
-            "example": "some text"
+            "example": "generate_form"
           },
           "generatePresentationToolName": {
             "type": "string",
             "description": "The tool name used by the AI assistant to launch presentation creation in the editor.",
             "nullable": true,
-            "example": "some text"
+            "example": "generate_presentation"
           }
         },
         "additionalProperties": false,
@@ -4239,7 +4239,13 @@
               "$ref": "#/components/schemas/FileShareParams"
             },
             "description": "The collection of sharing parameters.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              {
+                "shareId": "user@example.com",
+                "access": 1
+              }
+            ]
           },
           "chatSettings": {
             "$ref": "#/components/schemas/ChatSettings"
@@ -4456,7 +4462,7 @@
             "description": "The email address.",
             "format": "email",
             "nullable": true,
-            "example": "example@onlyoffice.com"
+            "example": "user@example.com"
           }
         },
         "additionalProperties": false,
@@ -4766,13 +4772,13 @@
                 "type": "integer",
                 "description": "The origin ID of the file entry.",
                 "format": "int32",
-                "example": 1234
+                "example": 12
               },
               "originRoomId": {
                 "type": "integer",
                 "description": "The origin room ID of the file entry.",
                 "format": "int32",
-                "example": 1234
+                "example": 22
               },
               "originTitle": {
                 "type": "string",
@@ -4818,7 +4824,10 @@
                 "additionalProperties": false,
                 "description": "A dictionary representing the sharing settings for the file entry.",
                 "nullable": true,
-                "example": [ ]
+                "example": {
+                  "ExternalLink": 1,
+                  "InvitationLink": 2
+                }
               },
               "security": {
                 "type": "object",
@@ -4999,7 +5008,12 @@
                 "additionalProperties": false,
                 "description": "The available external rights of the file entry.",
                 "nullable": true,
-                "example": [ ]
+                "example": {
+                  "ExternalLink": [
+                    "Read",
+                    "Edit"
+                  ]
+                }
               },
               "requestToken": {
                 "type": "string",
@@ -5086,7 +5100,7 @@
             "type": "string",
             "description": "The file operation error message.",
             "nullable": true,
-            "example": ""
+            "example": "File not found."
           },
           "processed": {
             "type": "string",
@@ -5113,7 +5127,12 @@
             },
             "description": "The list of files of the file operation.",
             "nullable": true,
-            "example": [ ]
+            "example": [
+              {
+                "id": 10,
+                "title": "document.docx"
+              }
+            ]
           },
           "folders": {
             "type": "array",
@@ -5122,7 +5141,12 @@
             },
             "description": "The list of folders of the file operation.",
             "nullable": true,
-            "example": [ ]
+            "example": [
+              {
+                "id": 20,
+                "title": "My Folder"
+              }
+            ]
           },
           "status": {
             "$ref": "#/components/schemas/DistributedTaskStatus"
@@ -5287,7 +5311,7 @@
                 "type": "string",
                 "description": "The ID of the user to whom the file will be shared.",
                 "format": "uuid",
-                "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+                "example": "00000000-0000-0000-0000-000000000000"
               },
               "access": {
                 "$ref": "#/components/schemas/FileShare"
@@ -5312,7 +5336,12 @@
             },
             "description": "The list of files in the folder.",
             "nullable": true,
-            "example": [ ]
+            "example": [
+              {
+                "id": 10,
+                "title": "document.docx"
+              }
+            ]
           },
           "folders": {
             "type": "array",
@@ -5321,7 +5350,12 @@
             },
             "description": "The list of folders in the folder.",
             "nullable": true,
-            "example": [ ]
+            "example": [
+              {
+                "id": 20,
+                "title": "My Folder"
+              }
+            ]
           },
           "current": {
             "$ref": "#/components/schemas/FolderDtoInteger"
@@ -5449,7 +5483,10 @@
                 },
                 "description": "The list of tags of the folder.",
                 "nullable": true,
-                "example": [ ]
+                "example": [
+                  "tag1",
+                  "tag2"
+                ]
               },
               "logo": {
                 "$ref": "#/components/schemas/Logo"
@@ -5740,23 +5777,19 @@
         "properties": {
           "icon48": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "icon32": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "icon24": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "icon16": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -5774,31 +5807,31 @@
             "type": "string",
             "description": "The original logo.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://portal.example.com/logo/original.png"
           },
           "large": {
             "type": "string",
             "description": "The large logo.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://portal.example.com/logo/large.png"
           },
           "medium": {
             "type": "string",
             "description": "The medium logo.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://portal.example.com/logo/medium.png"
           },
           "small": {
             "type": "string",
             "description": "The small logo.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://portal.example.com/logo/small.png"
           },
           "color": {
             "type": "string",
             "description": "The logo color.",
             "nullable": true,
-            "example": "some text"
+            "example": "#4781D1"
           },
           "cover": {
             "$ref": "#/components/schemas/LogoCover"
@@ -5818,13 +5851,13 @@
             "type": "string",
             "description": "The logo cover ID.",
             "nullable": true,
-            "example": "1"
+            "example": "default_cover"
           },
           "data": {
             "type": "string",
             "description": "The logo cover data.",
             "nullable": true,
-            "example": "some text"
+            "example": "base64-image-data..."
           }
         },
         "additionalProperties": false,
@@ -5947,12 +5980,9 @@
             },
             "description": "HTTP headers sent with every request to the server (e.g., authentication tokens).",
             "nullable": true,
-            "example": [
-              {
-                "key": "some text",
-                "value": "some text"
-              }
-            ]
+            "example": {
+              "Authorization": "Bearer token123"
+            }
           },
           "enabled": {
             "type": "boolean",
@@ -6382,7 +6412,7 @@
               "Attachment"
             ],
             "type": "string",
-            "description": "[]",
+            "description": "[Text - Text, Tool - Tool, Attachment - Attachment]",
             "example": "Text"
           },
           {
@@ -6392,7 +6422,7 @@
               2
             ],
             "type": "integer",
-            "description": "[]",
+            "description": "[0 - Text, 1 - Tool, 2 - Attachment]",
             "example": 0,
             "x-enum-varnames": [
               "Text",
@@ -6796,7 +6826,7 @@
             "description": "Specifies the time period value of the room data lifetime.",
             "format": "int32",
             "nullable": true,
-            "example": 1234
+            "example": 33
           },
           "enabled": {
             "type": "boolean",
@@ -7231,7 +7261,10 @@
             },
             "description": "The list of tags.",
             "nullable": true,
-            "example": [ ]
+            "example": [
+              "tag1",
+              "tag2"
+            ]
           },
           "color": {
             "maxLength": 6,
@@ -7239,7 +7272,7 @@
             "type": "string",
             "description": "The room color.",
             "nullable": true,
-            "example": "FF5733"
+            "example": "#FF5733"
           },
           "cover": {
             "maxLength": 50,
@@ -7425,10 +7458,13 @@
       "VectorizationSettingsDto": {
         "type": "object",
         "properties": {
+          "type": {
+            "$ref": "#/components/schemas/EmbeddingProviderType"
+          },
           "needReset": {
             "type": "boolean",
-            "description": "The type of embedding provider configured for document vectorization.",
-            "example": 0
+            "description": "Indicates whether the embedding provider API key needs to be reconfigured.",
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -7651,10 +7687,13 @@
             "description": "Indicates whether web search is currently enabled.",
             "example": true
           },
+          "type": {
+            "$ref": "#/components/schemas/EngineType"
+          },
           "needReset": {
             "type": "boolean",
-            "description": "The type of web search engine configured.",
-            "example": 0
+            "description": "Indicates whether the web search API key needs to be reconfigured.",
+            "example": false
           }
         },
         "additionalProperties": false,

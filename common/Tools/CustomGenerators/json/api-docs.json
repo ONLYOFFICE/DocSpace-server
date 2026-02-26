@@ -9984,40 +9984,32 @@
                     "example": false
                   },
                   "InsertFile.Stream.CanRead": {
-                    "type": "boolean",
-                    "example": true
+                    "type": "boolean"
                   },
                   "InsertFile.Stream.CanWrite": {
-                    "type": "boolean",
-                    "example": true
+                    "type": "boolean"
                   },
                   "InsertFile.Stream.CanSeek": {
-                    "type": "boolean",
-                    "example": true
+                    "type": "boolean"
                   },
                   "InsertFile.Stream.CanTimeout": {
-                    "type": "boolean",
-                    "example": true
+                    "type": "boolean"
                   },
                   "InsertFile.Stream.Length": {
                     "type": "integer",
-                    "format": "int64",
-                    "example": 1234
+                    "format": "int64"
                   },
                   "InsertFile.Stream.Position": {
                     "type": "integer",
-                    "format": "int64",
-                    "example": 1234
+                    "format": "int64"
                   },
                   "InsertFile.Stream.ReadTimeout": {
                     "type": "integer",
-                    "format": "int32",
-                    "example": 1234
+                    "format": "int32"
                   },
                   "InsertFile.Stream.WriteTimeout": {
                     "type": "integer",
-                    "format": "int32",
-                    "example": 1234
+                    "format": "int32"
                   }
                 }
               },
@@ -10233,40 +10225,32 @@
                     "example": false
                   },
                   "Stream.CanRead": {
-                    "type": "boolean",
-                    "example": true
+                    "type": "boolean"
                   },
                   "Stream.CanWrite": {
-                    "type": "boolean",
-                    "example": true
+                    "type": "boolean"
                   },
                   "Stream.CanSeek": {
-                    "type": "boolean",
-                    "example": true
+                    "type": "boolean"
                   },
                   "Stream.CanTimeout": {
-                    "type": "boolean",
-                    "example": true
+                    "type": "boolean"
                   },
                   "Stream.Length": {
                     "type": "integer",
-                    "format": "int64",
-                    "example": 1234
+                    "format": "int64"
                   },
                   "Stream.Position": {
                     "type": "integer",
-                    "format": "int64",
-                    "example": 1234
+                    "format": "int64"
                   },
                   "Stream.ReadTimeout": {
                     "type": "integer",
-                    "format": "int32",
-                    "example": 1234
+                    "format": "int32"
                   },
                   "Stream.WriteTimeout": {
                     "type": "integer",
-                    "format": "int32",
-                    "example": 1234
+                    "format": "int32"
                   }
                 }
               },
@@ -34870,7 +34854,8 @@
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/NotificationType"
-            }
+            },
+            "example": 0
           }
         ],
         "responses": {
@@ -39226,7 +39211,7 @@
             "schema": {
               "$ref": "#/components/schemas/WebhookGroupStatus"
             },
-            "example": "EnumValue"
+            "example": "NotSent"
           },
           {
             "name": "userId",
@@ -39244,7 +39229,8 @@
             "description": "The type of event that triggered the webhook.",
             "schema": {
               "$ref": "#/components/schemas/WebhookTrigger"
-            }
+            },
+            "example": 0
           },
           {
             "name": "count",
@@ -40255,19 +40241,19 @@
             "type": "string",
             "description": "The tool name used by the AI to launch docx creation in the editor.",
             "nullable": true,
-            "example": "some text"
+            "example": "generate_docx"
           },
           "generateFormToolName": {
             "type": "string",
             "description": "The tool name used by the AI assistant to launch form creation in the editor.",
             "nullable": true,
-            "example": "some text"
+            "example": "generate_form"
           },
           "generatePresentationToolName": {
             "type": "string",
             "description": "The tool name used by the AI assistant to launch presentation creation in the editor.",
             "nullable": true,
-            "example": "some text"
+            "example": "generate_presentation"
           }
         },
         "additionalProperties": false,
@@ -40619,7 +40605,13 @@
               "$ref": "#/components/schemas/FileShareParams"
             },
             "description": "The collection of sharing parameters.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              {
+                "shareId": "user@example.com",
+                "access": 1
+              }
+            ]
           },
           "chatSettings": {
             "$ref": "#/components/schemas/ChatSettings"
@@ -40819,7 +40811,7 @@
             "description": "The email address.",
             "format": "email",
             "nullable": true,
-            "example": "example@onlyoffice.com"
+            "example": "user@example.com"
           }
         },
         "additionalProperties": false,
@@ -41100,13 +41092,13 @@
                 "type": "integer",
                 "description": "The origin ID of the file entry.",
                 "format": "int32",
-                "example": 1234
+                "example": 12
               },
               "originRoomId": {
                 "type": "integer",
                 "description": "The origin room ID of the file entry.",
                 "format": "int32",
-                "example": 1234
+                "example": 22
               },
               "originTitle": {
                 "type": "string",
@@ -41152,7 +41144,10 @@
                 "additionalProperties": false,
                 "description": "A dictionary representing the sharing settings for the file entry.",
                 "nullable": true,
-                "example": []
+                "example": {
+                  "ExternalLink": 1,
+                  "InvitationLink": 2
+                }
               },
               "security": {
                 "type": "object",
@@ -41333,7 +41328,12 @@
                 "additionalProperties": false,
                 "description": "The available external rights of the file entry.",
                 "nullable": true,
-                "example": []
+                "example": {
+                  "ExternalLink": [
+                    "Read",
+                    "Edit"
+                  ]
+                }
               },
               "requestToken": {
                 "type": "string",
@@ -41405,7 +41405,7 @@
             "type": "string",
             "description": "The file operation error message.",
             "nullable": true,
-            "example": ""
+            "example": "File not found."
           },
           "processed": {
             "type": "string",
@@ -41432,7 +41432,12 @@
             },
             "description": "The list of files of the file operation.",
             "nullable": true,
-            "example": []
+            "example": [
+              {
+                "id": 10,
+                "title": "document.docx"
+              }
+            ]
           },
           "folders": {
             "type": "array",
@@ -41441,7 +41446,12 @@
             },
             "description": "The list of folders of the file operation.",
             "nullable": true,
-            "example": []
+            "example": [
+              {
+                "id": 20,
+                "title": "My Folder"
+              }
+            ]
           },
           "status": {
             "$ref": "#/components/schemas/DistributedTaskStatus"
@@ -41560,7 +41570,7 @@
                 "type": "string",
                 "description": "The ID of the user to whom the file will be shared.",
                 "format": "uuid",
-                "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+                "example": "00000000-0000-0000-0000-000000000000"
               },
               "access": {
                 "$ref": "#/components/schemas/FileShare"
@@ -41585,7 +41595,12 @@
             },
             "description": "The list of files in the folder.",
             "nullable": true,
-            "example": []
+            "example": [
+              {
+                "id": 10,
+                "title": "document.docx"
+              }
+            ]
           },
           "folders": {
             "type": "array",
@@ -41594,7 +41609,12 @@
             },
             "description": "The list of folders in the folder.",
             "nullable": true,
-            "example": []
+            "example": [
+              {
+                "id": 20,
+                "title": "My Folder"
+              }
+            ]
           },
           "current": {
             "$ref": "#/components/schemas/FolderDtoInteger"
@@ -41722,7 +41742,10 @@
                 },
                 "description": "The list of tags of the folder.",
                 "nullable": true,
-                "example": []
+                "example": [
+                  "tag1",
+                  "tag2"
+                ]
               },
               "logo": {
                 "$ref": "#/components/schemas/Logo"
@@ -41971,23 +41994,19 @@
         "properties": {
           "icon48": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "icon32": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "icon24": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "icon16": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -42005,31 +42024,31 @@
             "type": "string",
             "description": "The original logo.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://portal.example.com/logo/original.png"
           },
           "large": {
             "type": "string",
             "description": "The large logo.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://portal.example.com/logo/large.png"
           },
           "medium": {
             "type": "string",
             "description": "The medium logo.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://portal.example.com/logo/medium.png"
           },
           "small": {
             "type": "string",
             "description": "The small logo.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://portal.example.com/logo/small.png"
           },
           "color": {
             "type": "string",
             "description": "The logo color.",
             "nullable": true,
-            "example": "some text"
+            "example": "#4781D1"
           },
           "cover": {
             "$ref": "#/components/schemas/LogoCover"
@@ -42049,13 +42068,13 @@
             "type": "string",
             "description": "The logo cover ID.",
             "nullable": true,
-            "example": "1"
+            "example": "default_cover"
           },
           "data": {
             "type": "string",
             "description": "The logo cover data.",
             "nullable": true,
-            "example": "some text"
+            "example": "base64-image-data..."
           }
         },
         "additionalProperties": false,
@@ -42178,12 +42197,9 @@
             },
             "description": "HTTP headers sent with every request to the server (e.g., authentication tokens).",
             "nullable": true,
-            "example": [
-              {
-                "key": "some text",
-                "value": "some text"
-              }
-            ]
+            "example": {
+              "Authorization": "Bearer token123"
+            }
           },
           "enabled": {
             "type": "boolean",
@@ -42605,7 +42621,7 @@
         ]
       },
       "MessageContentType": {
-        "description": "[]",
+        "description": "[0 - Text, 1 - Tool, 2 - Attachment]",
         "enum": [
           0,
           1,
@@ -42960,7 +42976,7 @@
             "description": "Specifies the time period value of the room data lifetime.",
             "format": "int32",
             "nullable": true,
-            "example": 1234
+            "example": 33
           },
           "enabled": {
             "type": "boolean",
@@ -43300,7 +43316,10 @@
             },
             "description": "The list of tags.",
             "nullable": true,
-            "example": []
+            "example": [
+              "tag1",
+              "tag2"
+            ]
           },
           "color": {
             "maxLength": 6,
@@ -43308,7 +43327,7 @@
             "type": "string",
             "description": "The room color.",
             "nullable": true,
-            "example": "FF5733"
+            "example": "#FF5733"
           },
           "cover": {
             "maxLength": 50,
@@ -43494,10 +43513,13 @@
       "VectorizationSettingsDto": {
         "type": "object",
         "properties": {
+          "type": {
+            "$ref": "#/components/schemas/EmbeddingProviderType"
+          },
           "needReset": {
             "type": "boolean",
-            "description": "The type of embedding provider configured for document vectorization.",
-            "example": 0
+            "description": "Indicates whether the embedding provider API key needs to be reconfigured.",
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -43702,10 +43724,13 @@
             "description": "Indicates whether web search is currently enabled.",
             "example": true
           },
+          "type": {
+            "$ref": "#/components/schemas/EngineType"
+          },
           "needReset": {
             "type": "boolean",
-            "description": "The type of web search engine configured.",
-            "example": 0
+            "description": "Indicates whether the web search API key needs to be reconfigured.",
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -43763,7 +43788,13 @@
               "$ref": "#/components/schemas/ItemKeyValuePairObjectObject"
             },
             "description": "The backup storage parameters.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              {
+                "key": "path",
+                "value": "/backup"
+              }
+            ]
           },
           "dump": {
             "type": "boolean",
@@ -43794,7 +43825,7 @@
             "type": "string",
             "description": "The backup file name.",
             "nullable": true,
-            "example": "some text"
+            "example": "tenant-backup"
           },
           "storageType": {
             "$ref": "#/components/schemas/BackupStorageType"
@@ -43803,13 +43834,13 @@
             "type": "string",
             "description": "The backup creation date.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2026-03-01T02:15:00Z"
           },
           "expiresOn": {
             "type": "string",
             "description": "The backup expiration date.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2026-03-31T02:15:00Z"
           }
         },
         "additionalProperties": false,
@@ -43879,37 +43910,35 @@
           "isCompleted": {
             "type": "boolean",
             "description": "Specifies if the backup is completed or not.",
-            "example": true
+            "example": false
           },
           "progress": {
             "type": "integer",
             "description": "The backup progress in percentage.",
             "format": "int32",
-            "example": 1234
+            "example": 50
           },
           "error": {
             "type": "string",
             "description": "The backup error message.",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "warning": {
             "type": "string",
             "description": "The backup warning message.",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "link": {
             "type": "string",
             "description": "The backup link.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/backup/task_123"
           },
           "tenantId": {
             "type": "integer",
             "description": "The tenant ID.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           },
           "backupProgressEnum": {
             "$ref": "#/components/schemas/BackupProgressEnum"
@@ -43921,7 +43950,7 @@
             "type": "string",
             "description": "The task ID.",
             "nullable": true,
-            "example": "some text"
+            "example": "task_123"
           }
         },
         "additionalProperties": false,
@@ -44003,7 +44032,13 @@
               "$ref": "#/components/schemas/ItemKeyValuePairObjectObject"
             },
             "description": "The backup storage parameters.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              {
+                "key": "path",
+                "value": "/backup"
+              }
+            ]
           },
           "notify": {
             "type": "boolean",
@@ -44031,7 +44066,13 @@
               "$ref": "#/components/schemas/ItemKeyValuePairObjectObject"
             },
             "description": "The backup storage parameters.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              {
+                "key": "path",
+                "value": "/backup"
+              }
+            ]
           },
           "backupsStored": {
             "type": "integer",
@@ -44198,13 +44239,13 @@
             "type": "integer",
             "description": "The time of the day to start the backup process.",
             "format": "int32",
-            "example": 1234
+            "example": 0
           },
           "day": {
             "type": "integer",
             "description": "The day of the week to start the backup process.",
             "format": "int32",
-            "example": 1234
+            "example": 0
           }
         },
         "additionalProperties": false,
@@ -44282,13 +44323,7 @@
               "nullable": true
             },
             "description": "The backup storage parameters.",
-            "nullable": true,
-            "example": [
-              {
-                "key": "some text",
-                "value": "some text"
-              }
-            ]
+            "nullable": true
           },
           "cronParams": {
             "$ref": "#/components/schemas/CronParams"
@@ -44298,13 +44333,13 @@
             "description": "The maximum number of the stored backup copies.",
             "format": "int32",
             "nullable": true,
-            "example": 1234
+            "example": 5
           },
           "lastBackupTime": {
             "type": "string",
             "description": "The date and time when the last backup was reated.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2026-01-01T00:00:00Z"
           },
           "dump": {
             "type": "boolean",
@@ -44362,18 +44397,18 @@
             "type": "string",
             "description": "The name of the user the document will be shared with.",
             "nullable": true,
-            "example": "some text"
+            "example": "John Doe"
           },
           "permissions": {
             "type": "string",
             "description": "The access rights for the user with the name above.\r\nCan be Full Access, Read Only, or Deny Access.",
             "nullable": true,
-            "example": "some text"
+            "example": "Full Access"
           },
           "isLink": {
             "type": "boolean",
             "description": "Specifies whether to change the user icon to the link icon.",
-            "example": true
+            "example": false
           }
         },
         "additionalProperties": false,
@@ -44429,13 +44464,13 @@
             "type": "string",
             "description": "The action data that will be scrolled to.",
             "nullable": true,
-            "example": "some text"
+            "example": "section"
           },
           "type": {
             "type": "string",
             "description": "The action type.",
             "nullable": true,
-            "example": "some text"
+            "example": "scroll"
           }
         },
         "additionalProperties": false,
@@ -44546,32 +44581,35 @@
             "type": "string",
             "description": "The authentication login.",
             "nullable": true,
-            "example": "some text"
+            "example": "user@example.com"
           },
           "password": {
             "type": "string",
             "description": "The authentication password.",
             "nullable": true,
-            "example": "P@ssw0rd123"
+            "example": "p@ssw0rd!"
           },
           "rawToken": {
             "type": "string",
             "description": "The authentication raw token.",
             "nullable": true,
-            "example": "some text"
+            "example": {
+              "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+              "expires_in": 3600
+            }
           },
           "url": {
             "type": "string",
             "description": "The authentication URL.",
             "format": "uri",
             "nullable": true,
-            "example": "some text"
+            "example": "https://auth.example.com"
           },
           "provider": {
             "type": "string",
             "description": "The authentication provider.",
             "nullable": true,
-            "example": "some text"
+            "example": "OAuth2"
           },
           "token": {
             "$ref": "#/components/schemas/OAuth20Token"
@@ -44958,7 +44996,12 @@
             },
             "description": "The list of files in the destination folder.",
             "nullable": true,
-            "example": []
+            "example": [
+              {
+                "id": 10,
+                "title": "document.docx"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -45276,7 +45319,7 @@
           "fast": {
             "type": "boolean",
             "description": "Specifies if the co-editing mode is fast.",
-            "example": true
+            "example": false
           },
           "mode": {
             "$ref": "#/components/schemas/CoEditingConfigMode"
@@ -45447,8 +45490,7 @@
         "properties": {
           "dispositionType": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "parameters": {
             "type": "array",
@@ -45458,32 +45500,26 @@
           },
           "fileName": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "creationDate": {
             "type": "string",
-            "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "format": "date-time"
           },
           "modificationDate": {
             "type": "string",
-            "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "format": "date-time"
           },
           "inline": {
-            "type": "boolean",
-            "example": true
+            "type": "boolean"
           },
           "readDate": {
             "type": "string",
-            "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "format": "date-time"
           },
           "size": {
             "type": "integer",
-            "format": "int64",
-            "example": 1234
+            "format": "int64"
           }
         },
         "additionalProperties": false
@@ -45493,23 +45529,19 @@
         "properties": {
           "boundary": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "charSet": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "mediaType": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "name": {
             "type": "string",
-            "nullable": true,
-            "example": "John Doe"
+            "nullable": true
           },
           "parameters": {
             "type": "array",
@@ -45855,7 +45887,7 @@
             "type": "string",
             "description": "The color of the room to be created.",
             "nullable": true,
-            "example": "FF0000"
+            "example": "#FF0000"
           },
           "cover": {
             "maxLength": 50,
@@ -45962,7 +45994,7 @@
             "type": "string",
             "description": "The room color.",
             "nullable": true,
-            "example": "FF0000"
+            "example": "#FF0000"
           },
           "cover": {
             "maxLength": 50,
@@ -46088,7 +46120,7 @@
             "type": "string",
             "description": "The color of the third-party room.",
             "nullable": true,
-            "example": "FF0000"
+            "example": "#FF0000"
           },
           "cover": {
             "type": "string",
@@ -46304,7 +46336,12 @@
             },
             "description": "Default templates list.",
             "nullable": true,
-            "example": []
+            "example": [
+              {
+                "extension": ".docx",
+                "title": "Blank Document"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -46993,7 +47030,11 @@
                 },
                 "description": "The list of file IDs.",
                 "nullable": true,
-                "example": []
+                "example": [
+                  1,
+                  2,
+                  3
+                ]
               }
             }
           }
@@ -47054,7 +47095,7 @@
             "type": "string",
             "description": "The author ID.",
             "nullable": true,
-            "example": "1"
+            "example": "author_123"
           },
           "name": {
             "type": "string",
@@ -47225,7 +47266,15 @@
             },
             "description": "The list of file history changes.",
             "nullable": true,
-            "example": []
+            "example": [
+              {
+                "user": {
+                  "id": "123",
+                  "name": "John Doe"
+                },
+                "created": "2021-01-01T00:00:00Z"
+              }
+            ]
           },
           "serverVersion": {
             "type": "string",
@@ -47244,20 +47293,20 @@
             "type": "string",
             "description": "The document identifier of the previous version of the document.",
             "nullable": true,
-            "example": "some text"
+            "example": "doc_v2_20260101"
           },
           "url": {
             "type": "string",
             "description": "The url address of the previous version of the document.",
             "format": "uri",
             "nullable": true,
-            "example": "some text"
+            "example": "https://files.example.com/history/doc_v2_20260101.docx"
           },
           "fileType": {
             "type": "string",
             "description": "The document extension.",
             "nullable": true,
-            "example": "some text"
+            "example": ".docx"
           }
         },
         "additionalProperties": false,
@@ -47361,7 +47410,7 @@
             "type": "string",
             "description": "The tool name.",
             "nullable": true,
-            "example": "some text"
+            "example": "GenerateDocx"
           },
           "parameters": {
             "$ref": "#/components/schemas/EditorToolCallParametersDto"
@@ -47392,33 +47441,33 @@
             "type": "string",
             "description": "The absolute URL to the document serving as a source file for the document embedded into the web page.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://portal.example.com/files/editor?action=embedded&share=abc123"
           },
           "saveUrl": {
             "type": "string",
             "description": "The absolute URL that will allow the document to be saved onto the user personal computer.",
             "nullable": true,
             "readOnly": true,
-            "example": "some text"
+            "example": "https://portal.example.com/files/filehandler?action=download&share=abc123"
           },
           "shareLinkParam": {
             "type": "string",
             "description": "The shared URL parameter.",
             "nullable": true,
-            "example": "some text"
+            "example": "&share=abc123"
           },
           "shareUrl": {
             "type": "string",
             "description": "The absolute URL that will allow other users to share this document.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://portal.example.com/files/editor?action=view&share=abc123"
           },
           "toolbarDocked": {
             "type": "string",
             "description": "The place for the embedded viewer toolbar, can be either top or bottom.",
             "nullable": true,
             "readOnly": true,
-            "example": "some text"
+            "example": "top"
           }
         },
         "additionalProperties": false,
@@ -47697,19 +47746,19 @@
             "description": "The crypto engine ID of the encryption key.",
             "nullable": true,
             "readOnly": true,
-            "example": "some text"
+            "example": "{FFF0E1EB-13DB-4678-B67D-FF0A41DBBCEF}"
           },
           "privateKeyEnc": {
             "type": "string",
             "description": "The private key.",
             "nullable": true,
-            "example": "some text"
+            "example": "MIIEvQIBADANBgkqhkiG9w0BAQEFAASC..."
           },
           "publicKey": {
             "type": "string",
             "description": "The public key.",
             "nullable": true,
-            "example": "some text"
+            "example": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A..."
           }
         },
         "additionalProperties": false,
@@ -47857,7 +47906,7 @@
             "type": "string",
             "description": "The absolute URL to the website address which will be opened when clicking the Feedback & Support menu button.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://portal.example.com/support"
           },
           "visible": {
             "type": "boolean",
@@ -47929,7 +47978,9 @@
                 },
                 "description": "The list of users editing the file.",
                 "nullable": true,
-                "example": []
+                "example": {
+                  "00000000-0000-0000-0000-000000000000": "John Doe"
+                }
               },
               "mute": {
                 "type": "boolean",
@@ -48210,13 +48261,13 @@
                 "type": "string",
                 "description": "The origin ID of the file entry.",
                 "nullable": true,
-                "example": "some text"
+                "example": 12
               },
               "originRoomId": {
                 "type": "string",
                 "description": "The origin room ID of the file entry.",
                 "nullable": true,
-                "example": "some text"
+                "example": 22
               },
               "originTitle": {
                 "type": "string",
@@ -48262,7 +48313,10 @@
                 "additionalProperties": false,
                 "description": "A dictionary representing the sharing settings for the file entry.",
                 "nullable": true,
-                "example": []
+                "example": {
+                  "ExternalLink": 1,
+                  "InvitationLink": 2
+                }
               },
               "security": {
                 "type": "object",
@@ -48443,7 +48497,12 @@
                 "additionalProperties": false,
                 "description": "The available external rights of the file entry.",
                 "nullable": true,
-                "example": []
+                "example": {
+                  "ExternalLink": [
+                    "Read",
+                    "Edit"
+                  ]
+                }
               },
               "requestToken": {
                 "type": "string",
@@ -48833,19 +48892,19 @@
             "type": "string",
             "description": "The unique document identifier used by the service to get a link to the file.",
             "nullable": true,
-            "example": "some text"
+            "example": "doc_2026_02_001"
           },
           "instanceId": {
             "type": "string",
             "description": "The unique system identifier.",
             "nullable": true,
-            "example": "1"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "roomId": {
             "type": "string",
             "description": "Room ID",
             "nullable": true,
-            "example": "1"
+            "example": 1
           },
           "canEditRoom": {
             "type": "boolean",
@@ -49718,7 +49777,10 @@
             },
             "description": "The default access rights in sharing settings.",
             "nullable": true,
-            "example": []
+            "example": [
+              1,
+              2
+            ]
           },
           "maxUploadThreadCount": {
             "type": "integer",
@@ -50107,7 +50169,10 @@
                 },
                 "description": "The list of tags of the folder.",
                 "nullable": true,
-                "example": []
+                "example": [
+                  "tag1",
+                  "tag2"
+                ]
               },
               "logo": {
                 "$ref": "#/components/schemas/Logo"
@@ -50421,7 +50486,12 @@
             },
             "description": "The list of forms data.",
             "nullable": true,
-            "example": []
+            "example": [
+              {
+                "key": "field1",
+                "value": "Answer"
+              }
+            ]
           }
         },
         "additionalProperties": false
@@ -50439,13 +50509,13 @@
             "type": "string",
             "description": "The role name.",
             "nullable": true,
-            "example": "some text"
+            "example": "Manager"
           },
           "roleColor": {
             "type": "string",
             "description": "The role color.",
             "nullable": true,
-            "example": "some text"
+            "example": "#4781D1"
           },
           "userId": {
             "type": "string",
@@ -50457,24 +50527,24 @@
             "type": "integer",
             "description": "The role sequence.",
             "format": "int32",
-            "example": 1234
+            "example": 12
           },
           "submitted": {
             "type": "boolean",
             "description": "Specifies if the role was submitted or not.",
-            "example": true
+            "example": false
           },
           "openedAt": {
             "type": "string",
             "description": "The date and time when the role was opened.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2026-01-01T10:00:00Z"
           },
           "submissionDate": {
             "type": "string",
             "description": "The date and time when the role was submitted.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2026-01-01T10:00:00Z"
           }
         },
         "additionalProperties": false,
@@ -50568,7 +50638,9 @@
             },
             "description": "The role history.",
             "nullable": true,
-            "example": []
+            "example": {
+              "0": "2025-01-15T10:30:00Z"
+            }
           },
           "roleStatus": {
             "$ref": "#/components/schemas/FormFillingStatus"
@@ -50627,25 +50699,25 @@
             "type": "string",
             "description": "The form data key.",
             "nullable": true,
-            "example": "some text"
+            "example": "first_name"
           },
           "tag": {
             "type": "string",
             "description": "The form data tag.",
             "nullable": true,
-            "example": "some text"
+            "example": "personal_info"
           },
           "value": {
             "type": "string",
             "description": "The form data value.",
             "nullable": true,
-            "example": "some text"
+            "example": "John"
           },
           "type": {
             "type": "string",
             "description": "The form data type.",
             "nullable": true,
-            "example": "some text"
+            "example": "text"
           }
         },
         "additionalProperties": false,
@@ -50657,14 +50729,12 @@
           "key": {
             "type": "string",
             "description": "The form item key.\r\n            <example>field_name</example>",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "type": {
             "type": "string",
             "description": "The form item type.\r\n            <example>text</example>",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           }
         },
         "additionalProperties": false,
@@ -50718,7 +50788,7 @@
             "type": "string",
             "description": "The absolute URL to the website address which will be opened when clicking the Open file location menu button.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://portal.example.com/files/location"
           }
         },
         "additionalProperties": false,
@@ -50860,8 +50930,7 @@
           },
           "key": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           }
         },
         "additionalProperties": false,
@@ -50918,7 +50987,7 @@
             "description": "The name of the action initiator.",
             "nullable": true,
             "readOnly": true,
-            "example": "some text"
+            "example": "John Doe"
           }
         },
         "additionalProperties": false,
@@ -50978,7 +51047,12 @@
             },
             "description": "The list of related history.",
             "nullable": true,
-            "example": []
+            "example": [
+              {
+                "id": 124,
+                "action": 0
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -51087,13 +51161,11 @@
         "type": "object",
         "properties": {
           "key": {
-            "type": "boolean",
-            "example": true
+            "type": "boolean"
           },
           "value": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -51143,17 +51215,13 @@
         "properties": {
           "key": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "value": {
             "type": "array",
             "items": {
               "type": "string"
-            },
-            "example": [
-              "some text"
-            ]
+            }
           }
         },
         "additionalProperties": false
@@ -51272,7 +51340,10 @@
             },
             "description": "A list of emails that will receive the mention message.",
             "nullable": true,
-            "example": []
+            "example": [
+              "user1@example.com",
+              "user2@example.com"
+            ]
           },
           "message": {
             "maxLength": 255,
@@ -51298,21 +51369,21 @@
             "format": "email",
             "nullable": true,
             "readOnly": true,
-            "example": "example@onlyoffice.com"
+            "example": "user@example.com"
           },
           "id": {
             "type": "string",
             "description": "The user unique identification.",
             "nullable": true,
             "readOnly": true,
-            "example": "1"
+            "example": "user_0001"
           },
           "image": {
             "type": "string",
             "description": "The path to the user's avatar.",
             "nullable": true,
             "readOnly": true,
-            "example": "some text"
+            "example": "https://portal.example.com/avatar/user_0001.png"
           },
           "hasAccess": {
             "type": "boolean",
@@ -52069,7 +52140,7 @@
             "type": "string",
             "description": "The logo cover ID.",
             "nullable": true,
-            "example": "1"
+            "example": "default_cover"
           },
           "data": {
             "type": "object",
@@ -52078,7 +52149,12 @@
               "nullable": true
             },
             "description": "The logo cover data.",
-            "nullable": true
+            "nullable": true,
+            "example": {
+              "small": "base64...",
+              "medium": "base64...",
+              "large": "base64..."
+            }
           }
         },
         "additionalProperties": false
@@ -52269,44 +52345,36 @@
         "properties": {
           "access_token": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "refresh_token": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "expires_in": {
             "type": "integer",
-            "format": "int64",
-            "example": 1234
+            "format": "int64"
           },
           "client_id": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "client_secret": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "redirect_uri": {
             "type": "string",
             "format": "uri",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "timestamp": {
             "type": "string",
-            "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "format": "date-time"
           },
           "isExpired": {
             "type": "boolean",
-            "readOnly": true,
-            "example": true
+            "readOnly": true
           }
         },
         "additionalProperties": false
@@ -52409,8 +52477,7 @@
         "properties": {
           "is_asc": {
             "type": "boolean",
-            "description": "Specifies if the order is ascending.",
-            "example": true
+            "description": "Specifies if the order is ascending."
           },
           "property": {
             "$ref": "#/components/schemas/SortedByType"
@@ -52476,7 +52543,12 @@
             },
             "description": "The list of items with their ordering information.",
             "nullable": true,
-            "example": []
+            "example": [
+              {
+                "entryId": 1,
+                "order": 1
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -52489,7 +52561,7 @@
             "type": "integer",
             "description": "The paragraph align.",
             "format": "int32",
-            "example": 1234
+            "example": 2
           },
           "runs": {
             "type": "array",
@@ -52497,7 +52569,18 @@
               "$ref": "#/components/schemas/Run"
             },
             "description": "The list of text runs from the paragraph.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              {
+                "fill": [
+                  124,
+                  124,
+                  124
+                ],
+                "text": "CONFIDENTIAL",
+                "fontSize": 26
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -52508,53 +52591,43 @@
         "properties": {
           "comment": {
             "type": "boolean",
-            "description": "Defines if the document can be commented or not.",
-            "example": true
+            "description": "Defines if the document can be commented or not."
           },
           "chat": {
             "type": "boolean",
-            "description": "Defines if the chat functionality is enabled in the document or not.",
-            "example": true
+            "description": "Defines if the chat functionality is enabled in the document or not."
           },
           "download": {
             "type": "boolean",
-            "description": "Defines if the document can be downloaded or only viewed or edited online.",
-            "example": true
+            "description": "Defines if the document can be downloaded or only viewed or edited online."
           },
           "edit": {
             "type": "boolean",
-            "description": "Defines if the document can be edited or only viewed.",
-            "example": true
+            "description": "Defines if the document can be edited or only viewed."
           },
           "fillForms": {
             "type": "boolean",
-            "description": "Defines if the forms can be filled.",
-            "example": true
+            "description": "Defines if the forms can be filled."
           },
           "modifyFilter": {
             "type": "boolean",
-            "description": "Defines if the filter can be applied globally (true) affecting all the other users,\r\nor locally (false), i.e. for the current user only.",
-            "example": true
+            "description": "Defines if the filter can be applied globally (true) affecting all the other users,\r\nor locally (false), i.e. for the current user only."
           },
           "protect": {
             "type": "boolean",
-            "description": "Defines if the Protection tab on the toolbar and the Protect button in the left menu are displayedor hidden.",
-            "example": true
+            "description": "Defines if the Protection tab on the toolbar and the Protect button in the left menu are displayedor hidden."
           },
           "print": {
             "type": "boolean",
-            "description": "Defines if the document can be printed or not.",
-            "example": true
+            "description": "Defines if the document can be printed or not."
           },
           "review": {
             "type": "boolean",
-            "description": "Defines if the document can be reviewed or not.",
-            "example": true
+            "description": "Defines if the document can be reviewed or not."
           },
           "copy": {
             "type": "boolean",
-            "description": "Defines if the content can be copied to the clipboard or not.",
-            "example": true
+            "description": "Defines if the content can be copied to the clipboard or not."
           }
         },
         "additionalProperties": false,
@@ -52572,7 +52645,8 @@
             "nullable": true,
             "readOnly": true,
             "example": [
-              "some text"
+              "https://portal.example.com/ThirdParty/plugin/easybib/config.json",
+              "https://portal.example.com/ThirdParty/plugin/wordpress/config.json"
             ]
           }
         },
@@ -52719,20 +52793,20 @@
             "type": "string",
             "description": "The folder where the document is stored.",
             "nullable": true,
-            "example": "some text"
+            "example": "folder_123"
           },
           "title": {
             "type": "string",
             "description": "The document title that will be displayed in the Open Recent... menu option.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "Report 2026"
           },
           "url": {
             "type": "string",
             "description": "The absolute URL to the document where it is stored.",
             "format": "uri",
             "nullable": true,
-            "example": "some text"
+            "example": "https://portal.example.com/files/recent/report2026.docx"
           }
         },
         "additionalProperties": false,
@@ -52743,12 +52817,14 @@
         "properties": {
           "reviewDisplay": {
             "type": "string",
+            "description": "The review display string representation.",
             "nullable": true,
             "readOnly": true,
-            "example": "some text"
+            "example": "full"
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Configuration for review display settings."
       },
       "RoomFromTemplateStatusDto": {
         "required": [
@@ -53041,7 +53117,12 @@
             },
             "description": "The collection of invitation parameters.",
             "nullable": true,
-            "example": []
+            "example": [
+              {
+                "id": "00000000-0000-0000-0000-000000000000",
+                "access": 1
+              }
+            ]
           },
           "notify": {
             "type": "boolean",
@@ -53160,7 +53241,12 @@
             },
             "description": "The list of room members.",
             "nullable": true,
-            "example": []
+            "example": [
+              {
+                "access": 1,
+                "isOwner": false
+              }
+            ]
           },
           "warning": {
             "type": "string",
@@ -53301,7 +53387,7 @@
             "type": "string",
             "description": "The color of the room template.",
             "nullable": true,
-            "example": "FF0000"
+            "example": "#FF0000"
           },
           "cover": {
             "maxLength": 50,
@@ -53409,20 +53495,22 @@
             "description": "The fill color of the text run in RGB format.",
             "nullable": true,
             "example": [
-              1234
+              124,
+              124,
+              124
             ]
           },
           "text": {
             "type": "string",
             "description": "The run text.",
             "nullable": true,
-            "example": "some text"
+            "example": "CONFIDENTIAL"
           },
           "font-size": {
             "type": "string",
             "description": "The font size of the text run in points.",
             "nullable": true,
-            "example": "some text"
+            "example": 26
           }
         },
         "additionalProperties": false,
@@ -53514,7 +53602,12 @@
             },
             "description": "The collection of roles.",
             "nullable": true,
-            "example": []
+            "example": [
+              {
+                "roleName": "Approver",
+                "userId": "00000000-0000-0000-0000-000000000000"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -53599,7 +53692,12 @@
             },
             "description": "The collection of sharing parameters.",
             "nullable": true,
-            "example": []
+            "example": [
+              {
+                "access": 1,
+                "shareTo": "00000000-0000-0000-0000-000000000000"
+              }
+            ]
           },
           "notify": {
             "type": "boolean",
@@ -53628,7 +53726,12 @@
             },
             "description": "The collection of sharing parameters.",
             "nullable": true,
-            "example": []
+            "example": [
+              {
+                "access": 1,
+                "shareTo": "00000000-0000-0000-0000-000000000000"
+              }
+            ]
           },
           "notify": {
             "type": "boolean",
@@ -53861,8 +53964,7 @@
         "properties": {
           "statusCode": {
             "type": "integer",
-            "format": "int32",
-            "example": 1234
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -53966,20 +54068,20 @@
             "type": "string",
             "description": "The absolute URL to the image for template.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://portal.example.com/templates/template1.png"
           },
           "title": {
             "type": "string",
             "description": "The template title that will be displayed in the Create New... menu option.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "Blank Document"
           },
           "url": {
             "type": "string",
             "description": "The absolute URL to the document where it will be created and available after creation.",
             "format": "uri",
             "nullable": true,
-            "example": "some text"
+            "example": "https://portal.example.com/editor/new?template=blank"
           }
         },
         "additionalProperties": false,
@@ -54356,7 +54458,10 @@
             },
             "description": "The list of files when specified as multipart/form-data.",
             "nullable": true,
-            "example": []
+            "example": [
+              "file1.docx",
+              "file2.xlsx"
+            ]
           },
           "createNewIfExist": {
             "type": "boolean",
@@ -54543,7 +54648,7 @@
             "type": "string",
             "description": "The user ID.",
             "nullable": true,
-            "example": "1"
+            "example": "user_0001"
           },
           "name": {
             "type": "string",
@@ -54555,7 +54660,7 @@
             "type": "string",
             "description": "The path to the user's avatar.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://portal.example.com/avatar/user_0001.png"
           },
           "roles": {
             "type": "array",
@@ -54565,13 +54670,15 @@
             "description": "Roles",
             "nullable": true,
             "example": [
-              "some text"
+              "admin",
+              "editor"
             ]
           },
           "customerId": {
             "type": "string",
+            "description": "Customer identifier associated with the user.",
             "nullable": true,
-            "example": "some text"
+            "example": "cust_001"
           }
         },
         "additionalProperties": false,
@@ -54720,7 +54827,7 @@
           },
           "sid": {
             "type": "string",
-            "description": "The LDAP user identificator.",
+            "description": "The LDAP user identifier.",
             "nullable": true,
             "example": "S-1-5-21-3623811015-3361044348-30300820-1013"
           },
@@ -54732,13 +54839,13 @@
           },
           "ssoNameId": {
             "type": "string",
-            "description": "The SSO SAML user identificator.",
+            "description": "The SSO SAML user identifier.",
             "nullable": true,
             "example": "johndoe@example.com"
           },
           "ssoSessionId": {
             "type": "string",
-            "description": "The SSO SAML user session identificator.",
+            "description": "The SSO SAML user session identifier.",
             "nullable": true,
             "example": "_1a2b3c4d5e6f7g8h9i0j"
           },
@@ -54817,13 +54924,13 @@
             "type": "number",
             "description": "Defines the watermark width measured in millimeters.",
             "format": "double",
-            "example": -8.5
+            "example": 150
           },
           "height": {
             "type": "number",
             "description": "Defines the watermark height measured in millimeters.",
             "format": "double",
-            "example": -8.5
+            "example": 100
           },
           "margins": {
             "type": "array",
@@ -54834,26 +54941,29 @@
             "description": "Defines the watermark margins measured in millimeters.",
             "nullable": true,
             "example": [
-              1234
+              10,
+              10,
+              10,
+              10
             ]
           },
           "fill": {
             "type": "string",
             "description": "Defines the watermark fill color.",
             "nullable": true,
-            "example": "some text"
+            "example": "#FF0000"
           },
           "rotate": {
             "type": "integer",
             "description": "Defines the watermark rotation angle.",
             "format": "int32",
-            "example": 1234
+            "example": 45
           },
           "transparent": {
             "type": "number",
             "description": "Defines the watermark transparency percentage.",
             "format": "double",
-            "example": -8.5
+            "example": 0.4
           },
           "paragraphs": {
             "type": "array",
@@ -54861,7 +54971,23 @@
               "$ref": "#/components/schemas/Paragraph"
             },
             "description": "The list of paragraphs of the watermark.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              {
+                "align": 2,
+                "runs": [
+                  {
+                    "fill": [
+                      124,
+                      124,
+                      124
+                    ],
+                    "text": "CONFIDENTIAL",
+                    "fontSize": 26
+                  }
+                ]
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -57195,7 +57321,7 @@
             "type": "integer",
             "description": "The login event.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           },
           "items": {
             "type": "array",
@@ -57204,7 +57330,12 @@
             },
             "description": "The list of active connection items.",
             "nullable": true,
-            "example": []
+            "example": [
+              {
+                "id": "conn1",
+                "ip": "192.168.1.1"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -57228,7 +57359,7 @@
             "type": "integer",
             "description": "The tenant ID.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           },
           "userId": {
             "type": "string",
@@ -57662,7 +57793,7 @@
             "type": "string",
             "description": "The authorization key name.",
             "nullable": true,
-            "example": "John Doe"
+            "example": "Auth-Key"
           },
           "value": {
             "maxLength": 255,
@@ -57670,13 +57801,13 @@
             "type": "string",
             "description": "The authorization key value.",
             "nullable": true,
-            "example": "some text"
+            "example": "abc123xyz456"
           },
           "title": {
             "type": "string",
             "description": "The authorization key title.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "API key"
           }
         },
         "additionalProperties": false,
@@ -57850,7 +57981,12 @@
             },
             "description": "The collection of authorization keys associated with the authorization service.",
             "nullable": true,
-            "example": []
+            "example": [
+              {
+                "name": "key",
+                "value": "value"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -57960,7 +58096,12 @@
             },
             "description": "A list of sub-accounts.",
             "nullable": true,
-            "example": []
+            "example": [
+              {
+                "currency": "USD",
+                "amount": 1500.75
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -58011,8 +58152,7 @@
         "properties": {
           "module": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "props": {
             "type": "object",
@@ -58020,18 +58160,11 @@
               "type": "string",
               "nullable": true
             },
-            "nullable": true,
-            "example": [
-              {
-                "key": "some text",
-                "value": "some text"
-              }
-            ]
+            "nullable": true
           },
           "lastModified": {
             "type": "string",
-            "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "format": "date-time"
           }
         },
         "additionalProperties": false
@@ -58041,8 +58174,7 @@
         "properties": {
           "module": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "props": {
             "type": "object",
@@ -58050,18 +58182,11 @@
               "type": "string",
               "nullable": true
             },
-            "nullable": true,
-            "example": [
-              {
-                "key": "some text",
-                "value": "some text"
-              }
-            ]
+            "nullable": true
           },
           "lastModified": {
             "type": "string",
-            "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "format": "date-time"
           }
         },
         "additionalProperties": false
@@ -58770,7 +58895,7 @@
             "type": "string",
             "description": "The external resource domain.",
             "nullable": true,
-            "example": "some text"
+            "example": "example.com"
           },
           "entries": {
             "type": "object",
@@ -58780,12 +58905,10 @@
             },
             "description": "The external resource entries.",
             "nullable": true,
-            "example": [
-              {
-                "key": "some text",
-                "value": "some text"
-              }
-            ]
+            "example": {
+              "welcomeMessage": "Welcome",
+              "logoutButton": "Log out"
+            }
           }
         },
         "additionalProperties": false,
@@ -58903,13 +59026,13 @@
           "trial": {
             "type": "boolean",
             "description": "Specifies whether the license is trial or not.",
-            "example": true
+            "example": false
           },
           "dueDate": {
             "type": "string",
             "description": "The date when the license expires.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2025-06-15T10:30:00.0000000Z"
           }
         },
         "additionalProperties": false,
@@ -58944,7 +59067,12 @@
             },
             "description": "The list of the custom color themes.",
             "nullable": true,
-            "example": []
+            "example": [
+              {
+                "id": 1,
+                "name": "Custom Theme"
+              }
+            ]
           },
           "selected": {
             "type": "integer",
@@ -59052,7 +59180,7 @@
             "description": "The portal ID.",
             "nullable": true,
             "readOnly": true,
-            "example": "some text"
+            "example": "portal-001"
           },
           "paymentMethodStatus": {
             "$ref": "#/components/schemas/PaymentMethodStatus"
@@ -59062,7 +59190,7 @@
             "description": "The customer email address.",
             "nullable": true,
             "readOnly": true,
-            "example": "example@onlyoffice.com"
+            "example": "user@example.com"
           },
           "payer": {
             "$ref": "#/components/schemas/EmployeeDto"
@@ -59164,61 +59292,61 @@
             "type": "string",
             "description": "The tenant name.",
             "nullable": true,
-            "example": "John Doe"
+            "example": "Tenant"
           },
           "alias": {
             "maxLength": 100,
             "type": "string",
             "description": "The tenant alias.",
             "nullable": true,
-            "example": "some text"
+            "example": "tenant"
           },
           "mappedDomain": {
             "maxLength": 100,
             "type": "string",
             "description": "Mapped domain",
             "nullable": true,
-            "example": "some text"
+            "example": "tenant.example.com"
           },
           "version": {
             "type": "integer",
             "description": "The tenant version.",
             "format": "int32",
-            "example": 1234
+            "example": 5
           },
           "version_Changed": {
             "type": "string",
             "description": "The Version_changed field.",
             "format": "date-time",
             "nullable": true,
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2025-01-01T10:00:00Z"
           },
           "versionChanged": {
             "type": "string",
             "description": "The date and time when the version was changed.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2025-01-01T10:00:00Z"
           },
           "language": {
             "maxLength": 10,
             "type": "string",
             "description": "The tenant language.",
             "nullable": true,
-            "example": "some text"
+            "example": "en-US"
           },
           "timeZone": {
             "maxLength": 50,
             "type": "string",
             "description": "The tenant time zone.",
             "nullable": true,
-            "example": "some text"
+            "example": "UTC"
           },
           "trustedDomainsRaw": {
             "maxLength": 1024,
             "type": "string",
             "description": "The tenant trusted domains raw.",
             "nullable": true,
-            "example": "some text"
+            "example": "tenant.exapmle.com, example.com"
           },
           "trustedDomainsEnabled": {
             "$ref": "#/components/schemas/TenantTrustedDomainsType"
@@ -59231,33 +59359,33 @@
             "description": "The date and time when the tenant status was changed.",
             "format": "date-time",
             "nullable": true,
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2025-01-01T12:00:00Z"
           },
           "statusChangedHack": {
             "type": "string",
             "description": "The hacked date and time when the tenant status was changed.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2025-01-01T12:00:00Z"
           },
           "creationDateTime": {
             "type": "string",
             "description": "The tenant creation date.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2025-01-01T12:00:00Z"
           },
           "ownerId": {
             "type": "string",
             "description": "The tenant owner ID.",
             "format": "uuid",
             "nullable": true,
-            "example": "75a5f745-f697-4418-b38d-0fe0d277e258"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "paymentId": {
             "maxLength": 38,
             "type": "string",
             "description": "The tenant payment ID.",
             "nullable": true,
-            "example": "some text"
+            "example": "pay_1234567890"
           },
           "industry": {
             "$ref": "#/components/schemas/TenantIndustry"
@@ -59266,7 +59394,7 @@
             "type": "string",
             "description": "The date and time when the tenant was last modified.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2025-02-01T08:30:00Z"
           },
           "calls": {
             "type": "boolean",
@@ -59287,28 +59415,28 @@
             "type": "integer",
             "description": "The tenant ID.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           },
           "partnerId": {
             "maxLength": 36,
             "type": "string",
             "description": "The partner ID.",
             "nullable": true,
-            "example": "some text"
+            "example": "partner_123"
           },
           "affiliateId": {
             "maxLength": 50,
             "type": "string",
             "description": "The affiliate ID.",
             "nullable": true,
-            "example": "some text"
+            "example": "artifact_123"
           },
           "campaign": {
             "maxLength": 50,
             "type": "string",
             "description": "The tenant partner campaign.",
             "nullable": true,
-            "example": "some text"
+            "example": "campaigh"
           }
         },
         "additionalProperties": false,
@@ -59980,36 +60108,29 @@
         "properties": {
           "aspectRatio": {
             "type": "boolean",
-            "readOnly": true,
-            "example": true
+            "readOnly": true
           },
           "fillArea": {
-            "type": "boolean",
-            "example": true
+            "type": "boolean"
           },
           "greater": {
-            "type": "boolean",
-            "example": true
+            "type": "boolean"
           },
           "height": {
             "type": "integer",
             "format": "int32"
           },
           "ignoreAspectRatio": {
-            "type": "boolean",
-            "example": true
+            "type": "boolean"
           },
           "isPercentage": {
-            "type": "boolean",
-            "example": true
+            "type": "boolean"
           },
           "less": {
-            "type": "boolean",
-            "example": true
+            "type": "boolean"
           },
           "limitPixels": {
-            "type": "boolean",
-            "example": true
+            "type": "boolean"
           },
           "width": {
             "type": "integer",
@@ -60017,13 +60138,11 @@
           },
           "x": {
             "type": "integer",
-            "format": "int32",
-            "example": 1234
+            "format": "int32"
           },
           "y": {
             "type": "integer",
-            "format": "int32",
-            "example": 1234
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -60038,13 +60157,11 @@
             "properties": {
               "id": {
                 "type": "integer",
-                "format": "int32",
-                "example": 1
+                "format": "int32"
               },
               "tenantId": {
                 "type": "integer",
-                "format": "int32",
-                "example": 1234
+                "format": "int32"
               }
             }
           }
@@ -60098,13 +60215,11 @@
         "type": "object",
         "properties": {
           "enable": {
-            "type": "boolean",
-            "example": true
+            "type": "boolean"
           },
           "lastModified": {
             "type": "string",
-            "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "format": "date-time"
           }
         },
         "additionalProperties": false
@@ -60153,8 +60268,7 @@
         "type": "object",
         "properties": {
           "shouldImport": {
-            "type": "boolean",
-            "example": true
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -60213,7 +60327,7 @@
             "description": "The expiration date of the invitation link.",
             "format": "date-time",
             "nullable": true,
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2025-06-15T10:30:00.0000000Z"
           },
           "maxUseCount": {
             "maximum": 1000,
@@ -60370,12 +60484,10 @@
         "properties": {
           "ip": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "forAdmin": {
-            "type": "boolean",
-            "example": true
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -60560,12 +60672,10 @@
         "properties": {
           "key": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "value": {
-            "type": "boolean",
-            "example": true
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -60575,8 +60685,7 @@
         "properties": {
           "key": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "value": {
             "$ref": "#/components/schemas/LogoRequestsDto"
@@ -60589,13 +60698,11 @@
         "properties": {
           "key": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "value": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -60947,18 +61054,15 @@
         "properties": {
           "foldersCount": {
             "type": "integer",
-            "format": "int32",
-            "example": 1234
+            "format": "int32"
           },
           "filesCount": {
             "type": "integer",
-            "format": "int32",
-            "example": 1234
+            "format": "int32"
           },
           "bytesTotal": {
             "type": "integer",
-            "format": "int64",
-            "example": 1234
+            "format": "int64"
           }
         },
         "additionalProperties": false
@@ -60973,23 +61077,18 @@
             "properties": {
               "groupName": {
                 "type": "string",
-                "nullable": true,
-                "example": "some text"
+                "nullable": true
               },
               "moduleName": {
                 "type": "string",
-                "nullable": true,
-                "example": "some text"
+                "nullable": true
               },
               "userUidList": {
                 "type": "array",
                 "items": {
                   "type": "string"
                 },
-                "nullable": true,
-                "example": [
-                  "some text"
-                ]
+                "nullable": true
               }
             }
           }
@@ -61006,29 +61105,24 @@
             "properties": {
               "key": {
                 "type": "string",
-                "nullable": true,
-                "example": "some text"
+                "nullable": true
               },
               "email": {
                 "type": "string",
                 "format": "email",
-                "nullable": true,
-                "example": "example@onlyoffice.com"
+                "nullable": true
               },
               "displayName": {
                 "type": "string",
-                "nullable": true,
-                "example": "some text"
+                "nullable": true
               },
               "firstName": {
                 "type": "string",
-                "nullable": true,
-                "example": "John"
+                "nullable": true
               },
               "lastName": {
                 "type": "string",
-                "nullable": true,
-                "example": "Doe"
+                "nullable": true
               },
               "userType": {
                 "$ref": "#/components/schemas/EmployeeType"
@@ -61046,23 +61140,18 @@
         "properties": {
           "migratorName": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "operation": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "failedArchives": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "nullable": true,
-            "example": [
-              "some text"
-            ]
+            "nullable": true
           },
           "users": {
             "type": "array",
@@ -61093,58 +61182,44 @@
             "nullable": true
           },
           "importPersonalFiles": {
-            "type": "boolean",
-            "example": true
+            "type": "boolean"
           },
           "importSharedFiles": {
-            "type": "boolean",
-            "example": true
+            "type": "boolean"
           },
           "importSharedFolders": {
-            "type": "boolean",
-            "example": true
+            "type": "boolean"
           },
           "importCommonFiles": {
-            "type": "boolean",
-            "example": true
+            "type": "boolean"
           },
           "importProjectFiles": {
-            "type": "boolean",
-            "example": true
+            "type": "boolean"
           },
           "importGroups": {
-            "type": "boolean",
-            "example": true
+            "type": "boolean"
           },
           "successedUsers": {
             "type": "integer",
-            "format": "int32",
-            "example": 1234
+            "format": "int32"
           },
           "failedUsers": {
             "type": "integer",
-            "format": "int32",
-            "example": 1234
+            "format": "int32"
           },
           "files": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "nullable": true,
-            "example": [
-              "some text"
-            ]
+            "nullable": true
           },
           "errors": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "nullable": true,
-            "example": [
-              "some text"
-            ]
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -61261,7 +61336,12 @@
             },
             "description": "The list of notification channels.",
             "nullable": true,
-            "example": []
+            "example": [
+              {
+                "name": "email",
+                "isActive": true
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -61548,20 +61628,17 @@
           "size": {
             "type": "integer",
             "format": "int32",
-            "readOnly": true,
-            "example": 1234
+            "readOnly": true
           },
           "iterations": {
             "type": "integer",
             "format": "int32",
-            "readOnly": true,
-            "example": 1234
+            "readOnly": true
           },
           "salt": {
             "type": "string",
             "nullable": true,
-            "readOnly": true,
-            "example": "some text"
+            "readOnly": true
           }
         },
         "additionalProperties": false
@@ -61638,7 +61715,7 @@
             "type": "integer",
             "description": "The minimum number of characters required for valid passwords.",
             "format": "int32",
-            "example": 1234
+            "example": 8
           },
           "upperCase": {
             "type": "boolean",
@@ -61706,7 +61783,7 @@
             "type": "integer",
             "description": "The operation unique identifier.",
             "format": "int64",
-            "example": "op-id-123"
+            "example": 123456789
           },
           "amount": {
             "type": "number",
@@ -61799,7 +61876,7 @@
             "type": "string",
             "description": "The email address for sales inquiries and support.",
             "nullable": true,
-            "example": "some text"
+            "example": "sales@example.com"
           },
           "feedbackAndSupportUrl": {
             "type": "string",
@@ -61811,12 +61888,12 @@
             "type": "string",
             "description": "The URL for purchasing or upgrading the product.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://example.com/buy"
           },
           "standalone": {
             "type": "boolean",
             "description": "Indicates whether the system is running in standalone mode.",
-            "example": true
+            "example": false
           },
           "currentLicense": {
             "$ref": "#/components/schemas/CurrentLicenseInfo"
@@ -61825,7 +61902,7 @@
             "type": "integer",
             "description": "The maximum quota quantity.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           }
         },
         "additionalProperties": false,
@@ -62067,39 +62144,39 @@
             "type": "integer",
             "description": "The quota ID.",
             "format": "int32",
-            "example": 1
+            "example": ""
           },
           "quantity": {
             "type": "integer",
             "description": "The quota quantity.",
             "format": "int32",
-            "example": 1234
+            "example": 50
           },
           "wallet": {
             "type": "boolean",
             "description": "The quota applies to the wallet or not",
-            "example": true
+            "example": false
           },
           "dueDate": {
             "type": "string",
             "description": "The quota due date.",
             "format": "date-time",
             "nullable": true,
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2026-03-31T00:00:00Z"
           },
           "nextQuantity": {
             "type": "integer",
             "description": "The quota next quantity.",
             "format": "int32",
             "nullable": true,
-            "example": 1234
+            "example": 100
           },
           "state": {
             "$ref": "#/components/schemas/QuotaState"
           }
         },
         "additionalProperties": false,
-        "description": "The quota parameters."
+        "description": "The quota parameters.\r\n<example>\r\n{\r\n  id: 1,\r\n  quantity: 50,\r\n  wallet: false,\r\n  dueDate: 2026-03-31T00:00:00Z,\r\n  nextQuantity: 100,\r\n  state: Active\r\n}\r\n</example>"
       },
       "QuotaArrayWrapper": {
         "type": "object",
@@ -62166,7 +62243,7 @@
             "type": "string",
             "description": "The quota title.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "Basic Plan"
           },
           "price": {
             "$ref": "#/components/schemas/PriceDto"
@@ -62174,7 +62251,7 @@
           "nonProfit": {
             "type": "boolean",
             "description": "Specifies if the quota is nonprofit or not.",
-            "example": true
+            "example": false
           },
           "free": {
             "type": "boolean",
@@ -62184,7 +62261,7 @@
           "trial": {
             "type": "boolean",
             "description": "Specifies if the quota is trial or not.",
-            "example": true
+            "example": false
           },
           "features": {
             "type": "array",
@@ -62192,7 +62269,13 @@
               "$ref": "#/components/schemas/TenantQuotaFeatureDto"
             },
             "description": "The list of tenant quota features.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              {
+                "id": "00000000-0000-0000-0000-000000000001",
+                "title": "Premium Storage"
+              }
+            ]
           },
           "usersQuota": {
             "$ref": "#/components/schemas/TenantEntityQuotaSettings"
@@ -62239,7 +62322,8 @@
                 "example": "some text"
               }
             ],
-            "description": "The default storage quota value applied to new users."
+            "description": "The default storage quota value applied to new users.",
+            "example": 1073741824
           }
         },
         "additionalProperties": false,
@@ -62323,7 +62407,12 @@
             },
             "description": "A collection of operations.",
             "nullable": true,
-            "example": []
+            "example": [
+              {
+                "id": "op1",
+                "type": "payment"
+              }
+            ]
           },
           "offset": {
             "type": "integer",
@@ -62409,7 +62498,11 @@
             },
             "description": "The list of rooms with the disabled notifications.",
             "nullable": true,
-            "example": []
+            "example": [
+              1,
+              2,
+              3
+            ]
           }
         },
         "additionalProperties": false,
@@ -62490,14 +62583,14 @@
             "type": "string",
             "description": "The contact email address for the sales inquiry.",
             "nullable": true,
-            "example": "example@onlyoffice.com"
+            "example": "user@example.com"
           },
           "message": {
             "maxLength": 255,
             "type": "string",
             "description": "The details of the sales inquiry or payment request.",
             "nullable": true,
-            "example": "some text"
+            "example": "I would like to inquire about pricing"
           }
         },
         "additionalProperties": false,
@@ -62562,7 +62655,11 @@
             },
             "description": "The list of users with the access to the module.",
             "nullable": true,
-            "example": []
+            "example": [
+              {
+                "displayName": "John Doe"
+              }
+            ]
           },
           "groups": {
             "type": "array",
@@ -62570,7 +62667,13 @@
               "$ref": "#/components/schemas/GroupSummaryDto"
             },
             "description": "The list of groups with the access to the module.",
-            "nullable": true
+            "nullable": true,
+            "example": [
+              {
+                "id": "00000000-0000-0000-0000-000000000000",
+                "name": "Administrators"
+              }
+            ]
           },
           "enabled": {
             "type": "boolean",
@@ -62896,20 +62999,17 @@
           "account": {
             "type": "string",
             "nullable": true,
-            "readOnly": true,
-            "example": "some text"
+            "readOnly": true
           },
           "manualEntryKey": {
             "type": "string",
             "nullable": true,
-            "readOnly": true,
-            "example": "some text"
+            "readOnly": true
           },
           "qrCodeSetupImageUrl": {
             "type": "string",
             "nullable": true,
-            "readOnly": true,
-            "example": "some text"
+            "readOnly": true
           }
         },
         "additionalProperties": false
@@ -62966,19 +63066,19 @@
             "type": "string",
             "description": "The unique identifier for tracking the SMTP operation.",
             "nullable": true,
-            "example": "example value"
+            "example": "smtp-op-123"
           },
           "error": {
             "type": "string",
             "description": "The error message if the SMTP operation encountered issues.",
             "nullable": true,
-            "example": "example value"
+            "example": "SMTP connection failed."
           },
           "status": {
             "type": "string",
             "description": "The current state of the SMTP operation.",
             "nullable": true,
-            "example": "example value"
+            "example": "Completed"
           },
           "percents": {
             "type": "integer",
@@ -63150,43 +63250,43 @@
           "selfSigned": {
             "type": "boolean",
             "description": "Specifies if a certificate is self-signed or not.",
-            "example": true
+            "example": false
           },
           "crt": {
             "type": "string",
             "description": "The CRT certificate file.",
             "nullable": true,
-            "example": "some text"
+            "example": "crt file"
           },
           "key": {
             "type": "string",
             "description": "The certificate key.",
             "nullable": true,
-            "example": "some text"
+            "example": "key"
           },
           "action": {
             "type": "string",
             "description": "The certificate action.",
             "nullable": true,
-            "example": "some text"
+            "example": "validate"
           },
           "domainName": {
             "type": "string",
             "description": "The certificate domain name.",
             "nullable": true,
-            "example": "some text"
+            "example": "example.com"
           },
           "startDate": {
             "type": "string",
             "description": "The certificate start date.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2024-01-01T00:00:00Z"
           },
           "expiredDate": {
             "type": "string",
             "description": "The certificate expiration date.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2024-01-01T00:00:00Z"
           }
         },
         "additionalProperties": false,
@@ -63199,38 +63299,38 @@
             "type": "string",
             "description": "The first name.",
             "nullable": true,
-            "example": "John"
+            "example": "givenName"
           },
           "lastName": {
             "type": "string",
             "description": "The last name.",
             "nullable": true,
-            "example": "Doe"
+            "example": "sn"
           },
           "email": {
             "type": "string",
             "description": "The email address.",
             "format": "email",
             "nullable": true,
-            "example": "example@onlyoffice.com"
+            "example": "sn@example.com"
           },
           "title": {
             "type": "string",
             "description": "The title.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "SN"
           },
           "location": {
             "type": "string",
             "description": "The location.",
             "nullable": true,
-            "example": "001 Schroeder Run, New Tabithaport, Colombia"
+            "example": "Location"
           },
           "phone": {
             "type": "string",
             "description": "The phone number.",
             "nullable": true,
-            "example": "some text"
+            "example": "+14155552671"
           }
         },
         "additionalProperties": false,
@@ -63243,7 +63343,7 @@
             "type": "string",
             "description": "The certificate verification algorithm.",
             "nullable": true,
-            "example": "some text"
+            "example": "rsa-sha256"
           },
           "verifyAuthResponsesSign": {
             "type": "boolean",
@@ -63264,7 +63364,7 @@
             "type": "string",
             "description": "The certificate decryption algorithm.",
             "nullable": true,
-            "example": "some text"
+            "example": "aes256-cbc"
           },
           "decryptAssertions": {
             "type": "boolean",
@@ -63282,37 +63382,37 @@
             "type": "string",
             "description": "The entity ID.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://idp.company.com/saml"
           },
           "ssoUrl": {
             "type": "string",
             "description": "The SSO URL.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://idp.example.com/sso"
           },
           "ssoBinding": {
             "type": "string",
             "description": "The SSO binding.",
             "nullable": true,
-            "example": "some text"
+            "example": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
           },
           "sloUrl": {
             "type": "string",
             "description": "The SLO URL.",
             "nullable": true,
-            "example": "some text"
+            "example": "https://idp.example.com/slo"
           },
           "sloBinding": {
             "type": "string",
             "description": "The SLO binding.",
             "nullable": true,
-            "example": "some text"
+            "example": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
           },
           "nameIdFormat": {
             "type": "string",
             "description": "The name ID format.",
             "nullable": true,
-            "example": "some text"
+            "example": "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"
           }
         },
         "additionalProperties": false,
@@ -63364,7 +63464,12 @@
             },
             "description": "The list of the IdP certificates.",
             "nullable": true,
-            "example": []
+            "example": [
+              {
+                "crt": "base64-cert-data",
+                "key": "base64-key-data"
+              }
+            ]
           },
           "idpCertificateAdvanced": {
             "$ref": "#/components/schemas/SsoIdpCertificateAdvanced"
@@ -63382,7 +63487,12 @@
             },
             "description": "The list of the SP certificates.",
             "nullable": true,
-            "example": []
+            "example": [
+              {
+                "crt": "base64-cert-data",
+                "key": "base64-key-data"
+              }
+            ]
           },
           "spCertificateAdvanced": {
             "$ref": "#/components/schemas/SsoSpCertificateAdvanced"
@@ -63457,7 +63567,7 @@
             "type": "string",
             "description": "The certificate signing algorithm.",
             "nullable": true,
-            "example": "some text"
+            "example": "rsa-sha256"
           },
           "signAuthRequests": {
             "type": "boolean",
@@ -63478,13 +63588,13 @@
             "type": "string",
             "description": "The certificate encryption algorithm.",
             "nullable": true,
-            "example": "some text"
+            "example": "aes256-cbc"
           },
           "decryptAlgorithm": {
             "type": "string",
             "description": "The certificate decryption algorithm.",
             "nullable": true,
-            "example": "some text"
+            "example": "aes256-cbc"
           },
           "encryptAssertions": {
             "type": "boolean",
@@ -63551,13 +63661,13 @@
             "type": "string",
             "description": "The storage ID.",
             "nullable": true,
-            "example": "1"
+            "example": "storage_001"
           },
           "title": {
             "type": "string",
             "description": "The storage title.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "Main Storage"
           },
           "properties": {
             "type": "array",
@@ -63566,7 +63676,12 @@
             },
             "description": "The list of storage authentication keys.",
             "nullable": true,
-            "example": []
+            "example": [
+              {
+                "name": "ApiKey",
+                "value": "12345"
+              }
+            ]
           },
           "current": {
             "type": "boolean",
@@ -63604,7 +63719,7 @@
             "type": "string",
             "description": "The name for the storage module to be configured.",
             "nullable": true,
-            "example": "some text"
+            "example": "default"
           },
           "props": {
             "type": "array",
@@ -63734,8 +63849,7 @@
           "currency": {
             "type": "string",
             "description": "The three-character ISO 4217 currency symbol of the sub-account.",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "amount": {
             "type": "number",
@@ -63766,25 +63880,25 @@
             "type": "string",
             "description": "The tariff due date.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2026-03-31T00:00:00Z"
           },
           "delayDueDate": {
             "type": "string",
             "description": "The tariff delay due date.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2026-04-07T00:00:00Z"
           },
           "licenseDate": {
             "type": "string",
             "description": "The tariff license date.",
             "format": "date-time",
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2026-03-01T00:00:00Z"
           },
           "customerId": {
             "type": "string",
             "description": "The tariff customer ID.",
             "nullable": true,
-            "example": "some text"
+            "example": "cus_123"
           },
           "quotas": {
             "type": "array",
@@ -63792,7 +63906,16 @@
               "$ref": "#/components/schemas/Quota"
             },
             "description": "The list of tariff quotas.",
-            "nullable": true
+            "nullable": true,
+            "example": {
+              "quotas": [
+                {
+                  "id": 1,
+                  "quantity": 50,
+                  "wallet": false
+                }
+              ]
+            }
           },
           "overdueQuotas": {
             "type": "array",
@@ -63800,7 +63923,8 @@
               "$ref": "#/components/schemas/Quota"
             },
             "description": "The list of overdue tariff quotas.",
-            "nullable": true
+            "nullable": true,
+            "example": []
           }
         },
         "additionalProperties": false,
@@ -64402,14 +64526,14 @@
             "type": "integer",
             "description": "The default quota of the tenant entity.",
             "format": "int64",
-            "example": 1234
+            "example": 1000
           },
           "lastRecalculateDate": {
             "type": "string",
             "description": "The date of the last quota recalculation.",
             "format": "date-time",
             "nullable": true,
-            "example": "2008-04-10T06:30:00.0000000+04:00"
+            "example": "2024-01-01T00:00:00Z"
           }
         },
         "additionalProperties": false,
@@ -64859,13 +64983,13 @@
             "type": "integer",
             "description": "The ID of the tenant whose quota is being configured.",
             "format": "int32",
-            "example": 1234
+            "example": 1
           },
           "quota": {
             "type": "integer",
             "description": "The storage quota limit in bytes allocated to the tenant.",
             "format": "int64",
-            "example": 1
+            "example": 1048576
           }
         },
         "additionalProperties": false,
@@ -65228,7 +65352,10 @@
             },
             "description": "The list of the enabled wallet services.",
             "nullable": true,
-            "example": []
+            "example": [
+              -11,
+              -12
+            ]
           },
           "lastModified": {
             "type": "string",
@@ -65402,7 +65529,9 @@
             },
             "description": "The list of user IDs for whom TFA is mandatory.",
             "nullable": true,
-            "example": []
+            "example": [
+              "00000000-0000-0000-0000-000000000000"
+            ]
           },
           "mandatoryGroups": {
             "type": "array",
@@ -65412,7 +65541,9 @@
             },
             "description": "The list group IDs whose members must use TFA.",
             "nullable": true,
-            "example": []
+            "example": [
+              "00000000-0000-0000-0000-000000000000"
+            ]
           }
         },
         "additionalProperties": false,
@@ -65489,13 +65620,13 @@
             "type": "string",
             "description": "The ID of the TFA configuration.",
             "nullable": true,
-            "example": "1"
+            "example": "tfa-default"
           },
           "title": {
             "type": "string",
             "description": "The display name or description of the TFA configuration.",
             "nullable": true,
-            "example": "SampleFile"
+            "example": "Default TFA policy"
           },
           "enabled": {
             "type": "boolean",
@@ -65527,7 +65658,9 @@
             },
             "description": "The list of user IDs that are required to use TFA.",
             "nullable": true,
-            "example": []
+            "example": [
+              "00000000-0000-0000-0000-000000000000"
+            ]
           },
           "mandatoryGroups": {
             "type": "array",
@@ -65537,7 +65670,9 @@
             },
             "description": "The list of group IDs whose members are required to use TFA.",
             "nullable": true,
-            "example": []
+            "example": [
+              "00000000-0000-0000-0000-000000000000"
+            ]
           }
         },
         "additionalProperties": false,
@@ -65553,7 +65688,7 @@
             "type": "string",
             "description": "The verification code provided by the user.",
             "nullable": true,
-            "example": "some text"
+            "example": 123456
           }
         },
         "additionalProperties": false,
@@ -65901,7 +66036,12 @@
                 },
                 "description": "The list of inner services.",
                 "nullable": true,
-                "example": []
+                "example": [
+                  {
+                    "title": "File Storage",
+                    "size": 1073741824
+                  }
+                ]
               }
             }
           }
@@ -65919,7 +66059,7 @@
             "type": "string",
             "description": "The module ID.",
             "nullable": true,
-            "example": "1"
+            "example": "00000000-0000-0000-0000-000000000000"
           },
           "enabled": {
             "type": "boolean",
@@ -65934,7 +66074,9 @@
             },
             "description": "The collection of user and group identifiers granted access to the module.",
             "nullable": true,
-            "example": []
+            "example": [
+              "00000000-0000-0000-0000-000000000000"
+            ]
           }
         },
         "additionalProperties": false,
@@ -66239,7 +66381,11 @@
             },
             "description": "The list of webhook delivery IDs to retry.",
             "nullable": true,
-            "example": []
+            "example": [
+              1,
+              2,
+              3
+            ]
           }
         },
         "additionalProperties": false,
@@ -66328,7 +66474,7 @@
             "type": "string",
             "description": "The webhook name.",
             "nullable": true,
-            "example": "Example Name"
+            "example": "John"
           },
           "uri": {
             "type": "string",
@@ -66825,13 +66971,13 @@
             "description": "The user's email address for authentication and communication.",
             "format": "email",
             "nullable": true,
-            "example": "example@onlyoffice.com"
+            "example": "user@example.com"
           },
           "passwordHash": {
             "type": "string",
             "description": "The hashed representation of the user's password.",
             "nullable": true,
-            "example": "some text"
+            "example": "2DYmIoA/aYKEksFocEf6uw=="
           },
           "lng": {
             "type": "string",

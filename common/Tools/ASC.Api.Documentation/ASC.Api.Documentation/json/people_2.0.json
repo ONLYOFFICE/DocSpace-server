@@ -7699,7 +7699,7 @@
             "description": "The email address.",
             "format": "email",
             "nullable": true,
-            "example": "example@onlyoffice.com"
+            "example": "user@example.com"
           }
         },
         "additionalProperties": false,
@@ -8681,17 +8681,13 @@
         "properties": {
           "key": {
             "type": "string",
-            "nullable": true,
-            "example": "some text"
+            "nullable": true
           },
           "value": {
             "type": "array",
             "items": {
               "type": "string"
-            },
-            "example": [
-              "some text"
-            ]
+            }
           }
         },
         "additionalProperties": false
@@ -9361,8 +9357,7 @@
         "properties": {
           "statusCode": {
             "type": "integer",
-            "format": "int32",
-            "example": 1234
+            "format": "int32"
           }
         },
         "additionalProperties": false
